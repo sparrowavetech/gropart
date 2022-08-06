@@ -17,7 +17,7 @@ use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Faq\Forms\FaqForm;
 use Botble\Base\Forms\FormBuilder;
-use Illuminate\View\View;
+use Illuminate\Contracts\View\View;
 use Throwable;
 
 class FaqController extends BaseController

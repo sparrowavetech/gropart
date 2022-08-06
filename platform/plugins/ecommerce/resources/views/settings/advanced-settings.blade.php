@@ -521,6 +521,27 @@
                 </div>
             </div>
 
+            <div class="flexbox-annotated-section">
+                <div class="flexbox-annotated-section-annotation">
+                    <div class="annotated-section-title pd-all-20">
+                        <h2>{{ trans('plugins/ecommerce::ecommerce.setting.webhook') }}</h2>
+                    </div>
+                    <div class="annotated-section-description pd-all-20 p-none-t">
+                        <p class="color-note">{{ trans('plugins/ecommerce::ecommerce.setting.webhook_description') }}</p>
+                    </div>
+                </div>
+                <div class="flexbox-annotated-section-content">
+                    <div class="wrapper-content pd-all-20">
+                        <div class="form-group mb-3">
+                            <label class="text-title-field"
+                                   for="order_placed_webhook_url">{{ trans('plugins/ecommerce::ecommerce.setting.order_placed_webhook_url') }}
+                            </label>
+                            <input type="text" name="order_placed_webhook_url" class="next-input"  value="{{ get_ecommerce_setting('order_placed_webhook_url') }}" placeholder="https://...">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="flexbox-annotated-section" style="border: none">
                 <div class="flexbox-annotated-section-annotation">
                     &nbsp;

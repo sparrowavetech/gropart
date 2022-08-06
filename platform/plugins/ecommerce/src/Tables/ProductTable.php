@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Tables;
 
 use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Ecommerce\Enums\StockStatusEnum;
 use Botble\Ecommerce\Repositories\Interfaces\ProductCategoryInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Table\Abstracts\TableAbstract;
@@ -279,6 +280,13 @@ class ProductTable extends TableAbstract
             'class' => 'select-search-ajax',
         ]);
 
+        $data['stock_status'] = [
+            'title'    => trans('plugins/ecommerce::products.form.stock_status'),
+            'type'     => 'select',
+            'choices'  => StockStatusEnum::labels(),
+            'validate' => 'required|in:' . implode(',', StockStatusEnum::values()),
+        ];
+
         return $data;
     }
 
@@ -354,6 +362,54 @@ class ProductTable extends TableAbstract
                 }
 
                 return $query->where('ec_product_category_product.category_id', $value);
+
+            case 'stock_status':
+                if (!$value) {
+                    break;
+                }
+
+                if ($value == StockStatusEnum::ON_BACKORDER) {
+                    return parent::applyFilterCondition($query, $key, $operator, $value);
+                }
+
+                if ($value == StockStatusEnum::OUT_OF_STOCK) {
+                    return $query
+                        ->where(function ($query) {
+                            $query
+                                ->where(function ($subQuery) {
+                                    $subQuery
+                                        ->where('with_storehouse_management', 0)
+                                        ->where('stock_status', StockStatusEnum::OUT_OF_STOCK);
+                                })
+                                ->orWhere(function ($subQuery) {
+                                    $subQuery
+                                        ->where('with_storehouse_management', 1)
+                                        ->where('allow_checkout_when_out_of_stock', 0)
+                                        ->where('quantity', '<=', 0);
+                                });
+                        });
+                }
+
+                if ($value == StockStatusEnum::IN_STOCK) {
+                    return $query
+                        ->where(function ($query) {
+                            return $query
+                                ->where(function ($subQuery) {
+                                    $subQuery
+                                        ->where('with_storehouse_management', 0)
+                                        ->where('stock_status', StockStatusEnum::IN_STOCK);
+                                })
+                                ->orWhere(function ($subQuery) {
+                                    $subQuery
+                                        ->where('with_storehouse_management', 1)
+                                        ->where(function ($sub) {
+                                            $sub
+                                                ->where('allow_checkout_when_out_of_stock', 1)
+                                                ->orWhere('quantity', '>', 0);
+                                        });
+                                });
+                        });
+                }
         }
 
         return parent::applyFilterCondition($query, $key, $operator, $value);

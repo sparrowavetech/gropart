@@ -17,7 +17,7 @@ use Botble\Base\Supports\Helper;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
+use Illuminate\Contracts\View\View;
 use Throwable;
 
 class RoleController extends BaseController

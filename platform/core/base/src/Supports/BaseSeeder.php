@@ -41,18 +41,21 @@ class BaseSeeder extends Seeder
 
     /**
      * @return array
-     * @throws Exception
      */
     public function activateAllPlugins(): array
     {
-        $plugins = array_values(BaseHelper::scanFolder(plugin_path()));
+        try {
+            $plugins = array_values(BaseHelper::scanFolder(plugin_path()));
 
-        $pluginService = app(PluginService::class);
+            $pluginService = app(PluginService::class);
 
-        foreach ($plugins as $plugin) {
-            $pluginService->activate($plugin);
+            foreach ($plugins as $plugin) {
+                $pluginService->activate($plugin);
+            }
+
+            return $plugins;
+        } catch (Exception $exception) {
+            return [];
         }
-
-        return $plugins;
     }
 }

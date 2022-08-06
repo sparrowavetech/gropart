@@ -74,7 +74,7 @@ class DropZoneUploadHandler extends AbstractHandler
      */
     public function isLastChunk()
     {
-        // the bytes starts from zero, remove 1 byte from total
+        // the bytes start from zero, remove 1 byte from total
         return $this->currentChunk == $this->chunksTotal;
     }
 
@@ -91,6 +91,10 @@ class DropZoneUploadHandler extends AbstractHandler
      */
     public function getPercentageDone()
     {
+        if (!$this->chunksTotal) {
+            return 100;
+        }
+
         return ceil($this->currentChunk / $this->chunksTotal * 100);
     }
 }

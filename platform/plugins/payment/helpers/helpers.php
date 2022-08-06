@@ -1,15 +1,16 @@
 <?php
 
-use Botble\Payment\Supports\StripeHelper;
+use Botble\Ecommerce\Models\Currency;
 use Botble\Payment\Models\Payment;
+use Botble\Stripe\Supports\StripeHelper;
 
 if (!function_exists('convert_stripe_amount_from_api')) {
     /**
      * @param int|float $amount
-     * @param \Illuminate\Database\Eloquent\Model $currency
+     * @param Currency|null $currency
      * @return float|int
      */
-    function convert_stripe_amount_from_api($amount, $currency)
+    function convert_stripe_amount_from_api($amount, ?Currency $currency)
     {
         return $amount / StripeHelper::getStripeCurrencyMultiplier($currency);
     }
@@ -22,7 +23,7 @@ if (!function_exists('get_payment_setting')) {
      * @param null $default
      * @return string|null
      */
-    function get_payment_setting($key, $type = null, $default = null)
+    function get_payment_setting(string $key, $type = null, $default = null): ?string
     {
         if (!empty($type)) {
             $key = 'payment_' . $type . '_' . $key;
@@ -37,7 +38,7 @@ if (!function_exists('get_payment_setting')) {
 if (!function_exists('get_payment_is_support_refund_online')) {
     /**
      * @param Payment $payment
-     * @return mixed|bool
+     * @return false|string
      */
     function get_payment_is_support_refund_online(Payment $payment)
     {

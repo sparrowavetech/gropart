@@ -32,7 +32,7 @@ class PaypalController extends Controller
                 ->setMessage(__('Payment failed!'));
         }
 
-        $payPalPaymentService->afterMakePayment($request);
+        $payPalPaymentService->afterMakePayment($request->input());
 
         return $response
             ->setNextUrl(PaymentHelper::getRedirectURL())

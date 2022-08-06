@@ -270,7 +270,7 @@ class BaseHelper
     {
         $value = str_replace('<span class="style-scope yt-formatted-string" dir="auto">', '', $value);
 
-        return htmlentities(clean($value));
+        return htmlentities($this->clean($value));
     }
 
     /**

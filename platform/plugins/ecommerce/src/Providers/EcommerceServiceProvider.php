@@ -5,6 +5,7 @@ namespace Botble\Ecommerce\Providers;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Ecommerce\Commands\SendAbandonedCartsEmailCommand;
 use Botble\Ecommerce\Facades\CartFacade;
+use Botble\Ecommerce\Facades\CurrencyFacade;
 use Botble\Ecommerce\Facades\EcommerceHelperFacade;
 use Botble\Ecommerce\Facades\OrderHelperFacade;
 use Botble\Ecommerce\Facades\ProductCategoryHelperFacade;
@@ -383,6 +384,7 @@ class EcommerceServiceProvider extends ServiceProvider
         $loader->alias('OrderHelper', OrderHelperFacade::class);
         $loader->alias('EcommerceHelper', EcommerceHelperFacade::class);
         $loader->alias('ProductCategoryHelper', ProductCategoryHelperFacade::class);
+        $loader->alias('CurrencyHelper', CurrencyFacade::class);
     }
 
     public function boot()

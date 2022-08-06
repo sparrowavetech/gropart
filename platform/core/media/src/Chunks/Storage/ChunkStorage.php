@@ -50,18 +50,32 @@ class ChunkStorage
         // Cache the storage path
         $this->disk = Storage::disk($this->config['storage']['disk']);
 
-        $driver = $this->driver();
+        if (class_exists(LocalFilesystemAdapter::class)) {
 
-        // Try to get the adapter
-        if (!method_exists($driver, 'getAdapter')) {
-            throw new RuntimeException('FileSystem driver must have an adapter implemented');
+            // try to get the adapter
+            if (!method_exists($this->disk, 'getAdapter')) {
+                throw new RuntimeException('FileSystem driver must have an adapter implemented');
+            }
+
+            // get the disk adapter
+            $this->diskAdapter = $this->disk->getAdapter();
+
+            // check if its local adapter
+            $this->isLocalDisk = $this->diskAdapter instanceof LocalFilesystemAdapter;
+        } else {
+            $driver = $this->driver();
+
+            // try to get the adapter
+            if (!method_exists($driver, 'getAdapter')) {
+                throw new RuntimeException('FileSystem driver must have an adapter implemented');
+            }
+
+            // get the disk adapter
+            $this->diskAdapter = $driver->getAdapter();
+
+            // check if its local adapter
+            $this->isLocalDisk = $this->diskAdapter instanceof Local;
         }
-
-        // Get the disk adapter
-        $this->diskAdapter = $driver->getAdapter();
-
-        // Check if its local adapter
-        $this->isLocalDisk = $this->diskAdapter instanceof Local;
     }
 
     /**
@@ -77,7 +91,7 @@ class ChunkStorage
     /**
      * @return FilesystemAdapter
      */
-    public function disk()
+    public function disk(): FilesystemAdapter
     {
         return $this->disk;
     }
@@ -87,7 +101,7 @@ class ChunkStorage
      *
      * @return ChunkStorage
      */
-    public static function storage()
+    public static function storage(): ChunkStorage
     {
         return app(self::class);
     }
@@ -99,9 +113,9 @@ class ChunkStorage
      *
      * @throws RuntimeException when the adapter is not local
      */
-    public function getDiskPathPrefix()
+    public function getDiskPathPrefix(): string
     {
-        if ($this->isLocalDisk) {
+        if (!class_exists(LocalFilesystemAdapter::class) && $this->isLocalDisk) {
             return $this->diskAdapter->getPathPrefix();
         }
 
@@ -113,7 +127,7 @@ class ChunkStorage
      *
      * @return Collection<ChunkFile> collection of a ChunkFile objects
      */
-    public function oldChunkFiles()
+    public function oldChunkFiles(): Collection
     {
         $files = $this->files();
         // If there are no files, lets return the empty collection
@@ -147,7 +161,7 @@ class ChunkStorage
      * @return Collection
      * @see FilesystemAdapter::files()
      */
-    public function files($rejectClosure = null)
+    public function files(?Closure $rejectClosure = null): Collection
     {
         // We need to filter files we don't support, lets use the collection
         $filesCollection = new Collection($this->disk->files($this->directory(), false));
@@ -172,7 +186,7 @@ class ChunkStorage
      *
      * @return string
      */
-    public function directory()
+    public function directory(): string
     {
         return $this->config['storage']['chunks'] . '/';
     }

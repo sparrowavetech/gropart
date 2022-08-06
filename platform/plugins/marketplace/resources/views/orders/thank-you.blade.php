@@ -29,9 +29,14 @@
 
                 @foreach ($orders as $order)
                     @include('plugins/ecommerce::orders.thank-you.order-info', ['isShowTotalInfo' => true])
+
+                    @if (!$loop->last)
+                        <hr>
+                    @endif
                 @endforeach
 
                 @if (count($orders) > 1)
+                    <hr>
 
                     <!-- total info -->
                     <div class="bg-light p-3">

@@ -2,6 +2,7 @@
 
 namespace Botble\Ecommerce\Imports;
 
+use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Ecommerce\Enums\StockStatusEnum;
@@ -313,6 +314,14 @@ class ProductImport implements
 
         $this->request->merge(['images' => $this->getImageURLs((array)$this->request->input('images', []))]);
 
+        if ($description = $this->request->input('description')) {
+            $this->request->merge(['description' => BaseHelper::clean($description)]);
+        }
+
+        if ($content = $this->request->input('content')) {
+            $this->request->merge(['content' => BaseHelper::clean($content)]);
+        }
+
         $product = (new StoreProductService($this->productRepository))->execute($this->request, $product);
 
         $tagsInput = (array) $this->request->input('tags', []);
@@ -449,6 +458,14 @@ class ProductImport implements
         $version['variation_default_id'] = Arr::get($version, 'is_variation_default') ? $version['id'] : null;
         $version['attribute_sets'] = $addedAttributes;
 
+        if ($version['description']) {
+            $version['description'] = BaseHelper::clean($version['description']);
+        }
+
+        if ($version['content']) {
+            $version['content'] = BaseHelper::clean($version['content']);
+        }
+
         $productRelatedToVariation = $this->productRepository->getModel();
         $productRelatedToVariation->fill($version);
 
@@ -473,7 +490,14 @@ class ProductImport implements
 
         $productRelatedToVariation->price = Arr::get($version, 'price', $product->price);
         $productRelatedToVariation->sale_price = Arr::get($version, 'sale_price', $product->sale_price);
-        $productRelatedToVariation->description = Arr::get($version, 'description');
+
+        if (Arr::get($version, 'description')) {
+            $productRelatedToVariation->description = BaseHelper::clean($version['description']);
+        }
+
+        if (Arr::get($version, 'content')) {
+            $productRelatedToVariation->content = BaseHelper::clean($version['content']);
+        }
 
         $productRelatedToVariation->length = Arr::get($version, 'length', $product->length);
         $productRelatedToVariation->wide = Arr::get($version, 'wide', $product->wide);

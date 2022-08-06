@@ -11,7 +11,7 @@ use Botble\Slug\Repositories\Interfaces\SlugInterface;
 use Botble\Slug\Services\SlugService;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Support\Str;
-use Illuminate\View\View;
+use Illuminate\Contracts\View\View;
 use Menu;
 
 class SlugController extends BaseController

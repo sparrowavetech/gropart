@@ -21,7 +21,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Illuminate\View\View;
+use Illuminate\Contracts\View\View;
 use Theme;
 use ThemeOption;
 

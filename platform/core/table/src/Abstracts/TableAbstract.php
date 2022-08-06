@@ -7,10 +7,12 @@ use BaseHelper;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Support\Repositories\Interfaces\RepositoryInterface;
 use Botble\Table\Supports\TableExportHandler;
+use Exception;
 use Form;
 use Html;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\JsonResponse;
@@ -18,11 +20,13 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
-use Illuminate\View\View;
+use Illuminate\Contracts\View\View;
 use Request;
 use RvMedia;
 use Throwable;
+use Yajra\DataTables\CollectionDataTable;
 use Yajra\DataTables\DataTables;
+use Yajra\DataTables\Html\Builder as HtmlBuilder;
 use Yajra\DataTables\QueryDataTable;
 use Yajra\DataTables\Services\DataTable;
 
@@ -250,7 +254,7 @@ abstract class TableAbstract extends DataTable
     /**
      * Optional method if you want to use html builder.
      *
-     * @return \Yajra\DataTables\Html\Builder
+     * @return HtmlBuilder
      *
      * @throws Throwable
      * @since 2.1
@@ -415,7 +419,7 @@ abstract class TableAbstract extends DataTable
      * @return string
      * @throws Throwable
      */
-    protected function getCheckbox($id): string
+    protected function getCheckbox(int $id): string
     {
         return table_checkbox($id);
     }
@@ -671,7 +675,7 @@ abstract class TableAbstract extends DataTable
      * @throws Throwable
      * @since 2.4
      */
-    public function renderTable($data = [], $mergeData = [])
+    public function renderTable(array $data = [], array $mergeData = [])
     {
         return $this->render($this->view, $data, $mergeData);
     }
@@ -736,7 +740,7 @@ abstract class TableAbstract extends DataTable
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Builder|Builder $query
+     * @param EloquentBuilder|Builder $query
      * @return mixed
      */
     public function applyScopes($query)
@@ -778,7 +782,7 @@ abstract class TableAbstract extends DataTable
     }
 
     /**
-     * @param Builder $query
+     * @param Builder|EloquentBuilder $query
      * @param string $key
      * @param string $operator
      * @param string|null $value
@@ -909,7 +913,7 @@ abstract class TableAbstract extends DataTable
      * @param string|null $inputValue
      * @return false|Model
      */
-    public function saveBulkChangeItem($item, string $inputKey, ?string $inputValue)
+    public function saveBulkChangeItem(Model $item, string $inputKey, ?string $inputValue)
     {
         $item->{$inputKey} = $this->prepareBulkChangeValue($inputKey, $inputValue);
 
@@ -1030,13 +1034,13 @@ abstract class TableAbstract extends DataTable
     }
 
     /**
-     * @param QueryDataTable $data
+     * @param QueryDataTable | CollectionDataTable $data
      * @param array $escapeColumn
      * @param bool $mDataSupport
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
-    public function toJson($data, $escapeColumn = [], $mDataSupport = true)
+    public function toJson($data, array $escapeColumn = [], bool $mDataSupport = true)
     {
         if ($this->repository && $this->repository->getModel()) {
             $data = apply_filters(BASE_FILTER_GET_LIST_DATA, $data, $this->repository->getModel());

@@ -4,7 +4,10 @@ namespace Botble\Ecommerce\Services;
 
 use Botble\Ecommerce\Repositories\Eloquent\CurrencyRepository;
 use Botble\Ecommerce\Repositories\Interfaces\CurrencyInterface;
+use CurrencyHelper;
 use Exception;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class StoreCurrenciesService
 {
@@ -25,10 +28,35 @@ class StoreCurrenciesService
     /**
      * @param array $currencies
      * @param array $deletedCurrencies
+     * @return array
      * @throws Exception
      */
-    public function execute(array $currencies, array $deletedCurrencies)
+    public function execute(array $currencies, array $deletedCurrencies): array
     {
+        $validated = Validator::make(
+            $currencies,
+            [
+                '*.title'  => 'required|string|' . Rule::in(CurrencyHelper::currencyCodes()),
+                '*.symbol' => 'required|string',
+            ],
+            [
+                '*.title.in' => trans('plugins/ecommerce::currency.invalid_currency_name', [
+                    'currencies' => implode(', ', CurrencyHelper::currencyCodes())
+                ]),
+            ],
+            [
+                '*.title'  => trans('plugins/ecommerce::currency.invalid_currency_name'),
+                '*.symbol' => trans('plugins/ecommerce::currency.symbol'),
+            ]
+        );
+
+        if ($validated->fails()) {
+            return [
+                'error'   => true,
+                'message' => $validated->getMessageBag()->first(),
+            ];
+        }
+
         if ($deletedCurrencies) {
             $this->currencyRepository->deleteBy([
                 ['id', 'IN', $deletedCurrencies],
@@ -41,7 +69,6 @@ class StoreCurrenciesService
             }
 
             $item['title'] = substr(strtoupper($item['title']), 0, 3);
-            $item['symbol'] = substr($item['symbol'], 0, 3);
             $item['decimals'] = (int)$item['decimals'];
             $item['decimals'] = $item['decimals'] < 10 ? $item['decimals'] : 2;
 
@@ -58,5 +85,9 @@ class StoreCurrenciesService
                 $this->currencyRepository->createOrUpdate($currency);
             }
         }
+
+        return [
+            'error' => false,
+        ];
     }
 }

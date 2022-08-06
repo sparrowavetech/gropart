@@ -245,7 +245,7 @@ class PublicCartController extends Controller
     /**
      * @param string $id
      * @param BaseHttpResponse $response
-     * @return array|BaseHttpResponse|RedirectResponse
+     * @return BaseHttpResponse
      */
     public function getRemove($id, BaseHttpResponse $response)
     {
@@ -270,7 +270,7 @@ class PublicCartController extends Controller
 
     /**
      * @param BaseHttpResponse $response
-     * @return array|BaseHttpResponse|RedirectResponse
+     * @return BaseHttpResponse
      */
     public function getDestroy(BaseHttpResponse $response)
     {

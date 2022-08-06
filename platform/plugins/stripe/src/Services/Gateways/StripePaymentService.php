@@ -2,13 +2,11 @@
 
 namespace Botble\Stripe\Services\Gateways;
 
-use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Supports\PaymentHelper;
 use Botble\Stripe\Services\Abstracts\StripePaymentAbstract;
 use Botble\Stripe\Supports\StripeHelper;
 use Exception;
-use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Stripe\Charge;
@@ -20,16 +18,15 @@ class StripePaymentService extends StripePaymentAbstract
     /**
      * Make a payment
      *
-     * @param Request $request
-     *
+     * @param array $data
      * @return mixed
      * @throws ApiErrorException
      */
-    public function makePayment(Request $request)
+    public function makePayment(array $data)
     {
-        $this->amount = $request->input('amount');
-        $this->currency = $request->input('currency', config('plugins.payment.payment.currency'));
-        $this->currency = strtoupper($this->currency);
+        $request = request();
+        $this->amount = $data['amount'];
+        $this->currency = strtoupper($data['currency']);
 
         $this->setClient();
 
@@ -63,48 +60,39 @@ class StripePaymentService extends StripePaymentAbstract
                 'currency'    => $this->currency,
                 'source'      => $this->token,
                 'description' => trans('plugins/payment::payment.payment_description', [
-                    'order_id' => Arr::first((array)$request->input('order_id')),
+                    'order_id' => Arr::first($data['order_id']),
                     'site_url' => $request->getHost(),
                 ]),
-                'metadata'    => ['order_id' => json_encode((array)$request->input('order_id'))],
+                'metadata'    => ['order_id' => json_encode($data['order_id'])],
             ]);
 
             $this->chargeId = $charge['id'];
 
             if ($this->chargeId) {
                 // Hook after made payment
-                $this->afterMakePayment($this->chargeId, $request);
+                $this->afterMakePayment($this->chargeId, $data);
             }
 
             return $this->chargeId;
         }
 
-        $orders = app(OrderInterface::class)->advancedGet([
-            'condition' => [
-                ['id', 'IN', (array)$request->input('order_id')],
-                'is_finished' => false,
-            ],
-        ]);
-
         $lineItems = [];
 
-        foreach ($orders as $order) {
-            foreach ($order->products as $product) {
-                $lineItems[] = [
-                    'price_data'  => [
-                        'product_data' => [
-                            'name'     => $product->product_name,
-                            'metadata' => [
-                                'pro_id' => $product->product_id,
-                            ],
+        foreach ($data['products'] as $product) {
+            $lineItems[] = [
+                'price_data'  => [
+                    'product_data' => [
+                        'name'     => $product['name'],
+                        'metadata' => [
+                            'pro_id' => $product['id'],
                         ],
-                        'unit_amount'  => $this->convertAmount(($product->price * $product->qty + $order->tax_amount / $order->products->count() + $order->shipping_amount / $order->products->count() - $order->discount_amount / $order->products->count()) * get_current_exchange_rate()),
-                        'currency'     => $this->currency,
                     ],
-                    'quantity'    => $product->qty,
-                    'description' => $product->product_name,
-                ];
-            }
+                    'unit_amount'  => $this->convertAmount($product['price_per_order'] * get_current_exchange_rate()),
+                    'currency'     => $this->currency,
+                ],
+                'quantity'    => $product['qty'],
+                'description' => $product['name'],
+            ];
         }
 
         $checkoutSession = StripeCheckoutSession::create([
@@ -113,13 +101,13 @@ class StripePaymentService extends StripePaymentAbstract
             'success_url' => route('payments.stripe.success') . '?session_id={CHECKOUT_SESSION_ID}',
             'cancel_url'  => route('payments.stripe.error'),
             'metadata'    => [
-                'order_id'      => json_encode((array)$request->input('order_id', [])),
+                'order_id'      => json_encode($data['order_id']),
                 'amount'        => $this->amount,
                 'currency'      => $this->currency,
-                'customer_id'   => $request->input('customer_id'),
-                'customer_type' => $request->input('customer_type'),
-                'return_url'    => $request->input('return_url'),
-                'callback_url'  => $request->input('callback_url'),
+                'customer_id'   => $data['customer_id'],
+                'customer_type' => $data['customer_type'],
+                'return_url'    => $data['return_url'],
+                'callback_url'  => $data['callback_url'],
             ],
         ]);
 
@@ -147,11 +135,10 @@ class StripePaymentService extends StripePaymentAbstract
      * Use this function to perform more logic after user has made a payment
      *
      * @param string $chargeId
-     * @param Request $request
-     *
+     * @param array $data
      * @return string
      */
-    public function afterMakePayment($chargeId, Request $request)
+    public function afterMakePayment($chargeId, array $data)
     {
         try {
             $payment = $this->getPaymentDetails($chargeId);
@@ -164,15 +151,15 @@ class StripePaymentService extends StripePaymentAbstract
             $paymentStatus = PaymentStatusEnum::FAILED;
         }
 
-        $orderIds = (array)$request->input('order_id', []);
+        $orderIds = (array)$data['order_id'];
 
         do_action(PAYMENT_ACTION_PAYMENT_PROCESSED, [
-            'amount'          => $request->input('amount'),
-            'currency'        => $request->input('currency'),
+            'amount'          => $data['amount'],
+            'currency'        => $data['currency'],
             'charge_id'       => $chargeId,
             'order_id'        => $orderIds,
-            'customer_id'     => $request->input('customer_id'),
-            'customer_type'   => $request->input('customer_type'),
+            'customer_id'     => $data['customer_id'],
+            'customer_type'   => $data['customer_type'],
             'payment_channel' => STRIPE_PAYMENT_METHOD_NAME,
             'status'          => $paymentStatus,
         ]);

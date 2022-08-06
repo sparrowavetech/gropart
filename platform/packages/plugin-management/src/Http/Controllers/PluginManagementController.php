@@ -14,7 +14,7 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
-use Illuminate\View\View;
+use Illuminate\Contracts\View\View;
 
 class PluginManagementController extends Controller
 {

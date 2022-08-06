@@ -28,6 +28,8 @@
 
                 @include('plugins/ecommerce::orders.thank-you.order-info')
 
+                <hr>
+
                 <!-- total info -->
                 @include('plugins/ecommerce::orders.thank-you.total-info', ['order' => $order])
             </div>

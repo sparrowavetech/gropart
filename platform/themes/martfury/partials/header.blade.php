@@ -48,8 +48,8 @@
                 <div class="loader-section section-right"></div>
             </div>
         @endif
-		
-		<div class="topHeaderArea">
+
+        <div class="topHeaderArea">
             <div class="ps-container">
                 <div class="row">
                     <div class="col-sm-6 col-12">

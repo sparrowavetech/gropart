@@ -843,12 +843,8 @@ class PublicCheckoutController
 
         $order = $this->orderRepository->getFirstBy(['token' => $token, 'is_finished' => false], [], ['address', 'products']);
 
-        if (!$order) {
+        if (!$order || $token !== session('tracked_start_checkout')) {
             abort(404);
-        }
-
-        if ($token !== session('tracked_start_checkout') || !$order) {
-            return $response->setNextUrl(route('public.index'));
         }
 
         if (!$order->payment_id) {

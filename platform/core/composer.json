@@ -36,6 +36,7 @@
             "Botble\\Support\\": "support/src",
             "Botble\\ACL\\": "acl/src",
             "Botble\\Base\\": "base/src",
+            "Botble\\Base\\Tests\\": "base/tests",
             "Botble\\Dashboard\\": "dashboard/src",
             "Botble\\Media\\": "media/src",
             "Botble\\Setting\\": "setting/src",

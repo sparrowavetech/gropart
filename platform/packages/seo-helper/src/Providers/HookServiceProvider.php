@@ -8,7 +8,7 @@ use Botble\Base\Models\BaseModel;
 use Botble\Page\Models\Page;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\View\View;
+use Illuminate\Contracts\View\View;
 use MetaBox;
 use SeoHelper;
 

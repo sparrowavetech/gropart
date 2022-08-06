@@ -4,9 +4,7 @@ namespace Botble\Stripe\Services\Abstracts;
 
 use Botble\Payment\Services\Traits\PaymentErrorTrait;
 use Botble\Stripe\Supports\StripeHelper;
-use Botble\Support\Services\ProduceServiceInterface;
 use Exception;
-use Illuminate\Http\Request;
 use Stripe\Charge;
 use Stripe\Exception\ApiConnectionException;
 use Stripe\Exception\ApiErrorException;
@@ -17,7 +15,7 @@ use Stripe\Exception\RateLimitException;
 use Stripe\Refund;
 use Stripe\Stripe;
 
-abstract class StripePaymentAbstract implements ProduceServiceInterface
+abstract class StripePaymentAbstract
 {
     use PaymentErrorTrait;
 
@@ -66,18 +64,17 @@ abstract class StripePaymentAbstract implements ProduceServiceInterface
     /**
      * Execute main service
      *
-     * @param Request $request
-     *
+     * @param array $data
      * @return mixed
      */
-    public function execute(Request $request)
+    public function execute(array $data)
     {
-        $this->token = $request->input('stripeToken');
+        $this->token = request()->input('stripeToken');
 
         $chargeId = null;
 
         try {
-            $chargeId = $this->makePayment($request);
+            $chargeId = $this->makePayment($data);
         } catch (CardException $exception) {
             $this->setErrorMessageAndLogging($exception, 1); // Since it's a decline, \Stripe\Error\Card will be caught
         } catch (RateLimitException $exception) {
@@ -100,21 +97,19 @@ abstract class StripePaymentAbstract implements ProduceServiceInterface
     /**
      * Make a payment
      *
-     * @param Request $request
-     *
+     * @param array $data
      * @return mixed
      */
-    abstract public function makePayment(Request $request);
+    abstract public function makePayment(array $data);
 
     /**
      * Use this function to perform more logic after user has made a payment
      *
      * @param string $chargeId
-     * @param Request $request
-     *
+     * @param array $data
      * @return mixed
      */
-    abstract public function afterMakePayment($chargeId, Request $request);
+    abstract public function afterMakePayment($chargeId, array $data);
 
     /**
      * Get payment details

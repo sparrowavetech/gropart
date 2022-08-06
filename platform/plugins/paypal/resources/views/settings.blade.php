@@ -42,7 +42,7 @@
                             <p>{{ trans('plugins/payment::payment.configuration_requirement', ['name' => 'PayPal']) }}:</p>
                             <ul class="m-md-l" style="list-style-type:decimal">
                                 <li style="list-style-type:decimal">
-                                    <a href="//www.paypal.com/vn/merchantsignup/applicationChecklist?signupType=CREATE_NEW_ACCOUNT&amp;productIntentId=email_payments" target="_blank">
+                                    <a href="https://www.paypal.com/vn/merchantsignup/applicationChecklist?signupType=CREATE_NEW_ACCOUNT&amp;productIntentId=email_payments" target="_blank">
                                         {{ trans('plugins/payment::payment.service_registration', ['name' => 'PayPal']) }}
                                     </a>
                                 </li>
@@ -64,7 +64,7 @@
                         </div>
                         <div class="form-group mb-3">
                             <label class="text-title-field" for="payment_paypal_description">{{ trans('core/base::forms.description') }}</label>
-                            <textarea class="next-input" name="payment_paypal_description" id="payment_paypal_description">{{ get_payment_setting('description', 'paypal', __('Payment with PayPal')) }}</textarea>
+                            <textarea class="next-input" name="payment_paypal_description" id="payment_paypal_description">{{ get_payment_setting('description', 'paypal', __('You will be redirected to PayPal to complete the payment.')) }}</textarea>
                         </div>
                         <p class="payment-note">
                             {{ trans('plugins/payment::payment.please_provide_information') }} <a target="_blank" href="//www.paypal.com">PayPal</a>:

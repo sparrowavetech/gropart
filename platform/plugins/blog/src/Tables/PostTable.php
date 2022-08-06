@@ -10,6 +10,7 @@ use Botble\Blog\Repositories\Interfaces\PostInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\DataTables;
 
@@ -257,7 +258,7 @@ class PostTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function saveBulkChangeItem($item, string $inputKey, ?string $inputValue)
+    public function saveBulkChangeItem(Model $item, string $inputKey, ?string $inputValue)
     {
         if ($inputKey === 'category') {
             $item->categories()->sync([$inputValue]);

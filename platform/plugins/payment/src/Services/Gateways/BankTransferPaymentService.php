@@ -4,29 +4,28 @@ namespace Botble\Payment\Services\Gateways;
 
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Payment\Enums\PaymentStatusEnum;
-use Botble\Support\Services\ProduceServiceInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
-class BankTransferPaymentService implements ProduceServiceInterface
+class BankTransferPaymentService
 {
     /**
-     * @param Request $request
+     * @param array $data
      * @return string
      */
-    public function execute(Request $request)
+    public function execute(array $data)
     {
         $chargeId = Str::upper(Str::random(10));
 
-        $orderIds = (array)$request->input('order_id', []);
+        $orderIds = $data['order_id'];
 
         do_action(PAYMENT_ACTION_PAYMENT_PROCESSED, [
-            'amount'          => $request->input('amount'),
-            'currency'        => $request->input('currency'),
+            'amount'          => $data['amount'],
+            'currency'        => $data['currency'],
             'charge_id'       => $chargeId,
             'order_id'        => $orderIds,
-            'customer_id'     => $request->input('customer_id'),
-            'customer_type'   => $request->input('customer_type'),
+            'customer_id'     => $data['customer_id'],
+            'customer_type'   => $data['customer_type'],
             'payment_channel' => PaymentMethodEnum::BANK_TRANSFER,
             'status'          => PaymentStatusEnum::PENDING,
         ]);

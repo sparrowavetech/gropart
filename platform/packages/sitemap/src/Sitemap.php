@@ -58,6 +58,11 @@ class Sitemap
      * Using constructor we populate our model from configuration file and loading dependencies.
      *
      * @param array $config
+     * @param CacheRepository $cache
+     * @param ConfigRepository $configRepository
+     * @param Filesystem $file
+     * @param ResponseFactory $response
+     * @param ViewFactory $view
      */
     public function __construct(
         array $config,
@@ -265,8 +270,7 @@ class Sitemap
     /**
      * Add new sitemap to $sitemaps array.
      *
-     * @param string $loc
-     * @param string $lastmod
+     * @param array $sitemaps
      * @return void
      */
     public function resetSitemaps($sitemaps = [])
@@ -377,7 +381,7 @@ class Sitemap
         // use correct file extension
         in_array($format, ['txt', 'html'], true) ? $fe = $format : $fe = 'xml';
 
-        if (true == $this->model->getUseGzip()) {
+        if ($this->model->getUseGzip()) {
             $fe = $fe . '.gz';
         }
 
@@ -455,7 +459,7 @@ class Sitemap
             $file = $path . DIRECTORY_SEPARATOR . $filename . '.' . $fe;
         }
 
-        if (true == $this->model->getUseGzip()) {
+        if ($this->model->getUseGzip()) {
             // write file (gzip compressed)
             $this->file->put($file, gzencode($data['content'], 9));
         } else {

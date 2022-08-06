@@ -40,7 +40,9 @@ class CompareController extends Controller
 
         SeoHelper::setTitle(__('Compare'));
 
-        Theme::breadcrumb()->add(__('Home'), route('public.index'))->add(__('Compare'), route('public.compare'));
+        Theme::breadcrumb()
+            ->add(__('Home'), route('public.index'))
+            ->add(__('Compare'), route('public.compare'));
 
         $itemIds = collect(Cart::instance('compare')->content())
             ->sortBy([['updated_at', 'desc']])

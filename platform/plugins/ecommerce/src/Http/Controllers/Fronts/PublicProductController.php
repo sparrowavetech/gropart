@@ -33,6 +33,7 @@ use RvMedia;
 use SeoHelper;
 use SlugHelper;
 use Theme;
+use Throwable;
 
 class PublicProductController
 {
@@ -347,7 +348,7 @@ class PublicProductController
      * @param GetProductService $getProductService
      * @param BaseHttpResponse $response
      * @return BaseHttpResponse|RedirectResponse|Response
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function getProductCategory(
         $slug,
@@ -685,7 +686,8 @@ class PublicProductController
      * @param mixed $products
      * @param Request $request
      * @param BaseHttpResponse $response
-     * @return mixed
+     * @return BaseHttpResponse
+     * @throws Throwable
      */
     protected function ajaxFilterProductsResponse($products, Request $request, BaseHttpResponse $response)
     {

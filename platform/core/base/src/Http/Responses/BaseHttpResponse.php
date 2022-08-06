@@ -18,7 +18,7 @@ class BaseHttpResponse implements Responsable
     protected $error = false;
 
     /**
-     * @var array
+     * @var array|string|JsonResource
      */
     protected $data;
 
@@ -53,8 +53,8 @@ class BaseHttpResponse implements Responsable
     protected $code = 200;
 
     /**
-     * @param mixed $data
-     * @return BaseHttpResponse
+     * @param array|string|JsonResource
+     * @return $this
      */
     public function setData($data): self
     {
@@ -67,7 +67,7 @@ class BaseHttpResponse implements Responsable
      * @param string $previousUrl
      * @return BaseHttpResponse
      */
-    public function setPreviousUrl($previousUrl): self
+    public function setPreviousUrl(string $previousUrl): self
     {
         $this->previousUrl = $previousUrl;
 
@@ -78,7 +78,7 @@ class BaseHttpResponse implements Responsable
      * @param string $nextUrl
      * @return BaseHttpResponse
      */
-    public function setNextUrl($nextUrl): self
+    public function setNextUrl(string $nextUrl): self
     {
         $this->nextUrl = $nextUrl;
 
@@ -177,7 +177,7 @@ class BaseHttpResponse implements Responsable
 
     /**
      * @param Request $request
-     * @return BaseHttpResponse|JsonResponse|RedirectResponse
+     * @return JsonResponse|RedirectResponse
      */
     public function toResponse($request)
     {
@@ -209,7 +209,7 @@ class BaseHttpResponse implements Responsable
      * @param string $url
      * @return RedirectResponse
      */
-    protected function responseRedirect($url)
+    protected function responseRedirect(string $url): RedirectResponse
     {
         if ($this->withInput) {
             return redirect()

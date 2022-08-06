@@ -172,7 +172,6 @@ class MediaServiceProvider extends ServiceProvider
         $this->commands([
             GenerateThumbnailCommand::class,
             DeleteThumbnailCommand::class,
-            ClearChunksCommand::class,
             InsertWatermarkCommand::class,
         ]);
 
@@ -184,8 +183,15 @@ class MediaServiceProvider extends ServiceProvider
             }
         });
 
-        $this->app->singleton(ChunkStorage::class, function () {
-            return new ChunkStorage();
-        });
+        if (RvMedia::getConfig('chunk.clear.schedule.enabled')) {
+
+            $this->commands([
+                ClearChunksCommand::class,
+            ]);
+
+            $this->app->singleton(ChunkStorage::class, function () {
+                return new ChunkStorage();
+            });
+        }
     }
 }

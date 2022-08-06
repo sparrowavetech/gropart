@@ -53,9 +53,10 @@ class ReviewController extends Controller
             $images = (array)$request->file('images', []);
             foreach ($images as $image) {
                 $result = RvMedia::handleUpload($image, 0, 'reviews');
-                if ($result['error'] != false) {
+                if ($result['error']) {
                     return $response->setError()->setMessage($result['message']);
                 }
+
                 $results[] = $result;
             }
         }
