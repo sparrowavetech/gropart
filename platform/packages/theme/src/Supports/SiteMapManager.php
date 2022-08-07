@@ -26,10 +26,10 @@ class SiteMapManager
 
         // set cache (key (string), duration in minutes (Carbon|Datetime|int), turn on/off (boolean))
         // by default cache is disabled
-        $this->siteMap->setCache('public.sitemap', config('core.base.general.cache_site_map'));
+        $this->siteMap->setCache('cache_site_map_key', setting('cache_time_site_map', 60), setting('enable_cache_site_map', true));
 
         if (!BaseHelper::getHomepageId()) {
-            $this->siteMap->add(route('public.index'), '2022-05-05 10:00', '1.0', 'daily');
+            $this->siteMap->add(route('public.index'), '2022-07-25 10:00', '1.0', 'daily');
         }
 
         AdminBar::setIsDisplay(false);

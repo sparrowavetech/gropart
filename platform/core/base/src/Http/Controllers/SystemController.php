@@ -16,14 +16,14 @@ use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Filesystem\Filesystem;
-use Illuminate\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
 use Menu;
 use Throwable;
 
@@ -73,7 +73,7 @@ class SystemController extends Controller
     }
 
     /**
-     * @return Factory|View
+     * @return Factory|Application|View
      */
     public function getCacheManagement()
     {
@@ -188,7 +188,7 @@ class SystemController extends Controller
     }
 
     /**
-     * @return \Illuminate\Contracts\Foundation\Application|Factory|\Illuminate\Contracts\View\View
+     * @return Application|Factory|View
      */
     public function getUpdater()
     {

@@ -18,9 +18,22 @@
             </div>
             <div class="form-group mb-3">
                 <label class="text-title-field"
+                       for="enable_cache_site_map">{{ trans('core/setting::setting.general.enable_cache_site_map') }}
+                </label>
+                <label class="me-2">
+                    <input type="radio" name="enable_cache_site_map" value="1" @if (setting('enable_cache_site_map', true)) checked @endif>
+                    {{ trans('core/setting::setting.general.yes') }}
+                </label>
+                <label>
+                    <input type="radio" name="enable_cache_site_map" value="0" @if (!setting('enable_cache_site_map', true)) checked @endif>
+                    {{ trans('core/setting::setting.general.no') }}
+                </label>
+            </div>
+            <div class="form-group mb-3">
+                <label class="text-title-field"
                        for="cache_time_site_map">{{ trans('core/setting::setting.general.cache_time_site_map') }}</label>
                 <input type="number" class="next-input" name="cache_time_site_map" id="cache_time_site_map"
-                       value="{{ setting('cache_time_site_map', 3600) }}">
+                       value="{{ setting('cache_time_site_map', 60) }}">
             </div>
             <div class="form-group mb-3">
                 <div class="mt5">

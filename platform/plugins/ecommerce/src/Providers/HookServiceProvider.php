@@ -20,7 +20,6 @@ use Botble\Ecommerce\Repositories\Interfaces\ReviewInterface;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Payment\Services\Gateways\BankTransferPaymentService;
 use Botble\Payment\Services\Gateways\CodPaymentService;
-use Botble\Payment\Services\Gateways\PayPalPaymentService;
 use Botble\Payment\Supports\PaymentHelper;
 use Botble\Theme\Supports\ThemeSupport;
 use Cart;
@@ -227,9 +226,9 @@ class HookServiceProvider extends ServiceProvider
             }, 15);
 
             if (defined('FAQ_MODULE_SCREEN_NAME') && config(
-                'plugins.ecommerce.general.enable_faq_in_product_details',
-                false
-            )) {
+                    'plugins.ecommerce.general.enable_faq_in_product_details',
+                    false
+                )) {
                 add_action(BASE_ACTION_META_BOXES, function ($context, $object) {
                     if (!$object || $context != 'advanced') {
                         return false;
@@ -345,10 +344,10 @@ class HookServiceProvider extends ServiceProvider
                         ],
                     ];
 
-                    if (EcommerceHelper::isReviewEnabled()) {
+                    if (EcommerceHelper::isReviewEnabled() && $object->reviews_count > 0) {
                         $schema['aggregateRating'] = [
                             '@type'       => 'AggregateRating',
-                            'ratingValue' => number_format($object->reviews_avg, 2) ?: '5.00',
+                            'ratingValue' => $object->reviews_avg ? number_format($object->reviews_avg, 2) : '5.00',
                             'reviewCount' => $object->reviews_count,
                         ];
 
@@ -362,7 +361,7 @@ class HookServiceProvider extends ServiceProvider
                                     'ratingValue' => number_format($object->reviews_avg, 2) ?: '5.00',
                                     'bestRating'  => $bestRating->star,
                                 ],
-                                'author' => [
+                                'author'       => [
                                     '@type' => 'Person',
                                     'name'  => $bestRating->user_name,
                                 ],
@@ -430,7 +429,7 @@ class HookServiceProvider extends ServiceProvider
                 $queryParams = [
                     'paginate'  => [
                         'per_page'      => 12,
-                        'current_paged' => (int) request()->input('page'),
+                        'current_paged' => (int)request()->input('page'),
                     ],
                     'with'      => ['slugable'],
                     'withCount' => EcommerceHelper::withReviewsCount(),
@@ -466,13 +465,15 @@ class HookServiceProvider extends ServiceProvider
                 });
             }
 
-            add_filter(FILTER_ECOMMERCE_PROCESS_PAYMENT, function (array $paymentData, Request $request) {
-                session()->put('selected_payment_method', $paymentData['type']);
+            add_filter(FILTER_ECOMMERCE_PROCESS_PAYMENT, function (array $data, Request $request) {
+                session()->put('selected_payment_method', $data['type']);
 
                 $request->merge([
                     'name'   => __('Pay for your order at :site_title', ['site_title' => theme_option('site_title')]),
-                    'amount' => $paymentData['amount'],
+                    'amount' => $data['amount'],
                 ]);
+
+                $paymentData = apply_filters(PAYMENT_FILTER_PAYMENT_DATA, [], $request);
 
                 switch ($request->input('payment_method')) {
                     case PaymentMethodEnum::COD:
@@ -480,23 +481,77 @@ class HookServiceProvider extends ServiceProvider
                         $minimumOrderAmount = setting('payment_cod_minimum_amount', 0);
 
                         if ($minimumOrderAmount > Cart::instance('cart')->rawSubTotal()) {
-                            $paymentData['error'] = true;
-                            $paymentData['message'] = __('Minimum order amount to use COD (Cash On Delivery) payment method is :amount, you need to buy more :more to place an order!', ['amount' => format_price($minimumOrderAmount), 'more' => format_price($minimumOrderAmount - Cart::instance('cart')->rawSubTotal())]);
+                            $data['error'] = true;
+                            $data['message'] = __('Minimum order amount to use COD (Cash On Delivery) payment method is :amount, you need to buy more :more to place an order!', ['amount' => format_price($minimumOrderAmount), 'more' => format_price($minimumOrderAmount - Cart::instance('cart')->rawSubTotal())]);
                             break;
                         }
 
-                        $paymentData['charge_id'] = $this->app->make(CodPaymentService::class)->execute($request);
+                        $data['charge_id'] = $this->app->make(CodPaymentService::class)->execute($paymentData);
                         break;
 
                     case PaymentMethodEnum::BANK_TRANSFER:
-                        $paymentData['charge_id'] = $this->app->make(BankTransferPaymentService::class)->execute($request);
+
+                        $data['charge_id'] = $this->app->make(BankTransferPaymentService::class)->execute($paymentData);
                         break;
                     default:
-                        $paymentData = apply_filters(PAYMENT_FILTER_AFTER_POST_CHECKOUT, $paymentData, $request);
+                        $data = apply_filters(PAYMENT_FILTER_AFTER_POST_CHECKOUT, $data, $request);
                         break;
                 }
 
-                return $paymentData;
+                return $data;
+            }, 120, 2);
+        }
+
+        if (defined('PAYMENT_FILTER_PAYMENT_DATA')) {
+            add_filter(PAYMENT_FILTER_PAYMENT_DATA, function (array $data, Request $request) {
+
+                $orderIds = (array)$request->input('order_id', []);
+
+                $orders = $this->app->make(OrderInterface::class)
+                    ->getModel()
+                    ->whereIn('id', $orderIds)
+                    ->with(['address', 'products'])
+                    ->get();
+
+                $products = [];
+
+                foreach ($orders as $order) {
+                    foreach ($order->products as $product) {
+                        $products[] = [
+                            'id'              => $product->product_id,
+                            'name'            => $product->product_name,
+                            'price'           => $product->price,
+                            'price_per_order' => ($product->price * $product->qty + $order->tax_amount / $order->products->count() + $order->shipping_amount / $order->products->count() - $order->discount_amount) / $order->products->count(),
+                            'qty'             => $product->qty,
+                        ];
+                    }
+                }
+
+                $address = $orders->first()->address;
+
+                return [
+                    'amount'         => (float)$orders->sum('amount'),
+                    'currency'       => strtoupper(get_application_currency()->title),
+                    'order_id'       => $orderIds,
+                    'description'    => trans('plugins/payment::payment.payment_description', ['order_id' => Arr::first($orderIds), 'site_url' => request()->getHost()]),
+                    'customer_id'    => auth('customer')->check() ? auth('customer')->id() : null,
+                    'customer_type'  => Customer::class,
+                    'return_url'     => PaymentHelper::getCancelURL(),
+                    'callback_url'   => PaymentHelper::getRedirectURL(),
+                    'products'       => $products,
+                    'orders'         => $orders,
+                    'address'        => [
+                        'name'     => $address->name,
+                        'email'    => $address->email,
+                        'phone'    => $address->phone,
+                        'country'  => $address->country_name,
+                        'state'    => $address->state_name,
+                        'city'     => $address->city_name,
+                        'address'  => $address->address,
+                        'zip_code' => $address->zip_code,
+                    ],
+                    'checkout_token' => OrderHelper::getOrderSessionToken(),
+                ];
             }, 120, 2);
         }
     }

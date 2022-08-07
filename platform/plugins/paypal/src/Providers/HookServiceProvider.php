@@ -102,17 +102,22 @@ class HookServiceProvider extends ServiceProvider
 
             $supportedCurrencies = $payPalService->supportedCurrencyCodes();
 
-            if (!in_array($data['currency'], $supportedCurrencies)) {
+            $currency = strtoupper(get_application_currency()->title);
+
+            if (!in_array($currency, $supportedCurrencies)) {
                 $data['error'] = true;
-                $data['message'] = __(":name doesn't support :currency. List of currencies supported by :name: :currencies.", ['name' => 'PayPal', 'currency' => $data['currency'], 'currencies' => implode(', ', $supportedCurrencies)]);
+                $data['message'] = __(":name doesn't support :currency. List of currencies supported by :name: :currencies.", ['name' => 'PayPal', 'currency' => $currency, 'currencies' => implode(', ', $supportedCurrencies)]);
+
                 return $data;
             }
 
+            $paymentData = apply_filters(PAYMENT_FILTER_PAYMENT_DATA, [], $request);
+
             if (!$request->input('callback_url')) {
-                $request->merge(['callback_url' => route('payments.paypal.status')]);
+                $paymentData['callback_url'] = route('payments.paypal.status');
             }
 
-            $checkoutUrl = $payPalService->execute($request);
+            $checkoutUrl = $payPalService->execute($paymentData);
 
             if ($checkoutUrl) {
                 $data['checkoutUrl'] = $checkoutUrl;

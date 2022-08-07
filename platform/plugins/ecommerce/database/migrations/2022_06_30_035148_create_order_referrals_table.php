@@ -13,6 +13,8 @@ class CreateOrderReferralsTable extends Migration
      */
     public function up()
     {
+        Schema::dropIfExists('ec_order_referrals');
+
         Schema::create('ec_order_referrals', function (Blueprint $table) {
             $table->id();
             $table->string('ip', 39)->nullable();

@@ -1,10 +1,10 @@
 class SimpleSliderManagement {
     static setAnimation(_elem, _InOut) {
-        var animationEndEvent =
+        let animationEndEvent =
             'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
         _elem.each(function () {
-            var $elem = $(this);
-            var $animationType = 'animated ' + $elem.data('animation-' + _InOut);
+            let $elem = $(this);
+            let $animationType = 'animated ' + $elem.data('animation-' + _InOut);
 
             $elem.addClass($animationType).one(animationEndEvent, function () {
                 $elem.removeClass($animationType);
@@ -44,9 +44,10 @@ class SimpleSliderManagement {
                     duration = el.data('owl-duration'),
                     dataMouseDrag = el.data('owl-mousedrag') === 'on',
                     center = el.data('owl-center');
+
                 if (
                     target.children('div, span, a, img, h1, h2, h3, h4, h5, h5').length >=
-                    2
+                    1
                 ) {
                     el.owlCarousel({
                         rtl: $('body').prop('dir') === 'rtl',
@@ -91,14 +92,16 @@ class SimpleSliderManagement {
                     });
 
                     el.on('change.owl.carousel', function (event) {
-                        var $currentItem = $('.owl-item', el).eq(event.item.index);
-                        var $elementsToAnimation = $currentItem.find('[data-animation-out]');
+                        let $currentItem = $('.owl-item', el).eq(event.item.index);
+                        let $elementsToAnimation = $currentItem.find('[data-animation-out]');
+
                         SimpleSliderManagement.setAnimation($elementsToAnimation, 'out');
                     });
 
                     el.on('changed.owl.carousel', function (event) {
-                        var $currentItem = $('.owl-item', el).eq(event.item.index);
-                        var $elementsToAnimation = $currentItem.find('[data-animation-in]');
+                        let $currentItem = $('.owl-item', el).eq(event.item.index);
+                        let $elementsToAnimation = $currentItem.find('[data-animation-in]');
+
                         SimpleSliderManagement.setAnimation($elementsToAnimation, 'in');
                     });
                 }

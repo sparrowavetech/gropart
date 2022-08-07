@@ -169,10 +169,18 @@ class EcommerceController extends BaseController
 
         $deletedCurrencies = json_decode($request->input('deleted_currencies', []), true) ?: [];
 
-        $service->execute($currencies, $deletedCurrencies);
+        $response
+            ->setNextUrl(route('ecommerce.settings'));
+
+        $storedCurrencies = $service->execute($currencies, $deletedCurrencies);
+
+        if ($storedCurrencies['error']) {
+            return $response
+                ->setError()
+                ->setMessage($storedCurrencies['message']);
+        }
 
         return $response
-            ->setNextUrl(route('ecommerce.settings'))
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 

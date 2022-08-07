@@ -61,6 +61,7 @@ class OrderHelper
         if (!$orders->count()) {
             return false;
         }
+
         foreach ($orders as $order) {
             if ($order->histories()->where('action', 'create_order')->count()) {
                 return false;

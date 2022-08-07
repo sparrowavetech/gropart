@@ -41,7 +41,6 @@ return [
             'date_time' => env('CMS_JS_DATE_TIME_FORMAT', 'yyyy-mm-dd H:i:s'),
         ],
     ],
-    'cache_site_map'            => env('ENABLE_CACHE_SITE_MAP', false),
     'public_single_ending_url'  => env('PUBLIC_SINGLE_ENDING_URL'),
     'send_mail_using_job_queue' => env('SEND_MAIL_USING_JOB_QUEUE', false),
     'locale'                    => env('APP_LOCALE', 'en'),

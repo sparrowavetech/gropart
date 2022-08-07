@@ -34,10 +34,12 @@ class StripeController extends Controller
 
                 $charge = PaymentIntent::retrieve($session->payment_intent);
 
+                $chargeId = $charge->charges->first()->id;
+
                 do_action(PAYMENT_ACTION_PAYMENT_PROCESSED, [
                     'amount'          => $metadata['amount'],
                     'currency'        => strtoupper($session->currency),
-                    'charge_id'       => $charge->charges->first()->id,
+                    'charge_id'       => $chargeId,
                     'order_id'        => $orderIds,
                     'customer_id'     => $metadata['customer_id'],
                     'customer_type'   => $metadata['customer_type'],
@@ -46,7 +48,7 @@ class StripeController extends Controller
                 ]);
 
                 return $response
-                    ->setNextUrl(PaymentHelper::getRedirectURL())
+                    ->setNextUrl(PaymentHelper::getRedirectURL() . '?charge_id=' . $chargeId)
                     ->setMessage(__('Checkout successfully!'));
             }
 

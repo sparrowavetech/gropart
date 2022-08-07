@@ -3,9 +3,9 @@
 namespace Botble\Paypal\Services\Gateways;
 
 use Botble\Payment\Enums\PaymentStatusEnum;
+use Botble\Payment\Supports\PaymentHelper;
 use Botble\Paypal\Services\Abstracts\PayPalPaymentAbstract;
 use Exception;
-use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 
 class PayPalPaymentService extends PayPalPaymentAbstract
@@ -13,67 +13,65 @@ class PayPalPaymentService extends PayPalPaymentAbstract
     /**
      * Make a payment
      *
-     * @param Request $request
-     *
+     * @param array $data
      * @return mixed
      * @throws Exception
      */
-    public function makePayment(Request $request)
+    public function makePayment(array $data)
     {
-        $amount = round((float) $request->input('amount'), $this->isSupportedDecimals() ? 2 : 0);
+        $amount = round((float)$data['amount'], $this->isSupportedDecimals() ? 2 : 0);
 
-        $data = [
-            'name'     => $request->input('name'),
-            'quantity' => 1,
-            'price'    => $amount,
-            'sku'      => null,
-            'type'     => PAYPAL_PAYMENT_METHOD_NAME,
-        ];
-
-        $currency = $request->input('currency', config('plugins.payment.payment.currency'));
+        $currency = $data['currency'];
         $currency = strtoupper($currency);
 
         $queryParams = [
-            'type'     => PAYPAL_PAYMENT_METHOD_NAME,
-            'amount'   => $amount,
-            'currency' => $currency,
-            'order_id' => $request->input('order_id'),
+            'type'          => PAYPAL_PAYMENT_METHOD_NAME,
+            'amount'        => $amount,
+            'currency'      => $currency,
+            'order_id'      => $data['order_id'],
+            'customer_id'   => $data['customer_id'],
+            'customer_type' => $data['customer_type'],
         ];
 
-        if ($cancelUrl = $request->input('return_url')) {
+        if ($cancelUrl = $data['return_url'] ?: PaymentHelper::getCancelURL()) {
             $this->setCancelUrl($cancelUrl);
         }
 
         return $this
-            ->setReturnUrl($request->input('callback_url') . '?' . http_build_query($queryParams))
+            ->setReturnUrl($data['callback_url'] . '?' . http_build_query($queryParams))
             ->setCurrency($currency)
-            ->setCustomer($request->input('address.email'))
-            ->setItem($data)
-            ->createPayment(trans('plugins/payment::payment.payment_description', ['order_id' => Arr::first((array) $queryParams['order_id']), 'site_url' => $request->getHost()]));
+            ->setCustomer(Arr::get($data, 'address.email'))
+            ->setItem([
+                'name'     => $data['description'],
+                'quantity' => 1,
+                'price'    => $amount,
+                'sku'      => null,
+                'type'     => PAYPAL_PAYMENT_METHOD_NAME,
+            ])
+            ->createPayment($data['description']);
     }
 
     /**
      * Use this function to perform more logic after user has made a payment
      *
-     * @param Request $request
-     *
+     * @param array $data
      * @return mixed
      */
-    public function afterMakePayment(Request $request)
+    public function afterMakePayment(array $data)
     {
         $status = PaymentStatusEnum::COMPLETED;
 
         $chargeId = session('paypal_payment_id');
 
-        $orderIds = (array)$request->input('order_id', []);
+        $orderIds = (array)Arr::get($data, 'order_id', []);
 
         do_action(PAYMENT_ACTION_PAYMENT_PROCESSED, [
-            'amount'          => $request->input('amount'),
-            'currency'        => $request->input('currency'),
+            'amount'          => $data['amount'],
+            'currency'        => $data['currency'],
             'charge_id'       => $chargeId,
             'order_id'        => $orderIds,
-            'customer_id'     => $request->input('customer_id'),
-            'customer_type'   => $request->input('customer_type'),
+            'customer_id'     => $data['customer_id'],
+            'customer_type'   => $data['customer_type'],
             'payment_channel' => PAYPAL_PAYMENT_METHOD_NAME,
             'status'          => $status,
         ]);

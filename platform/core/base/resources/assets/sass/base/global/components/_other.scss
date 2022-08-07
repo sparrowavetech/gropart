@@ -53,10 +53,19 @@
     float: none;
 }
 
-.page-logo .logo-default {
-    height: 35px;
-    width: auto;
-    margin: 7px 0 0 !important;
+.page-header.navbar {
+    .page-logo {
+        > a {
+            max-width: 180px;
+
+            .logo-default {
+                height: 35px;
+                width: auto;
+                margin: 7px 0 0 !important;
+                max-width: 100%;
+            }
+        }
+    }
 }
 
 .mCSB_container {

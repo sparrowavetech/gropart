@@ -447,7 +447,7 @@ class LanguageServiceProvider extends ServiceProvider
         $code = null;
         if ($request->has('ref_lang')) {
             $code = $request->input('ref_lang');
-        } elseif (!empty($data) && $data->id) {
+        } elseif (!empty($data) && is_object($data) && $data->id) {
             $meta = $this->app->make(LanguageMetaInterface::class)->getFirstBy([
                 'reference_id'   => $data->id,
                 'reference_type' => get_class($data),
@@ -635,7 +635,6 @@ class LanguageServiceProvider extends ServiceProvider
 
     /**
      * @param Builder|EloquentBuilder $data
-     * @param Model $model
      * @return mixed
      */
     public function checkItemLanguageBeforeGetAdminListItem($data)

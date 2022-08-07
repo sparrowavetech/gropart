@@ -21,11 +21,12 @@ use Botble\Marketplace\Repositories\Interfaces\RevenueInterface;
 use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
 use Botble\Marketplace\Repositories\Interfaces\VendorInfoInterface;
 use Botble\Payment\Enums\PaymentStatusEnum;
-use Botble\Payment\Services\Gateways\PayPalPaymentService;
+use Botble\PayPal\Services\Gateways\PayPalPaymentService;
 use Cart;
 use EmailHandler;
 use Exception;
 use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
@@ -392,6 +393,7 @@ class OrderSupportServiceProvider extends ServiceProvider
      * @param HandleShippingFeeService $shippingFeeService
      * @param HandleApplyCouponService $applyCouponService
      * @return mixed
+     * @throws BindingResolutionException
      */
     public function handleCheckoutOrderByStore(
         $sessionCheckoutData,
@@ -493,7 +495,7 @@ class OrderSupportServiceProvider extends ServiceProvider
             'order_id'   => $order->id,
             'user_id'    => 0,
             'weight'     => $weight,
-            'cod_amount' => $order->payment->status != PaymentStatusEnum::COMPLETED ? $order->amount : 0,
+            'cod_amount' => ($order->payment->id && $order->payment->status != PaymentStatusEnum::COMPLETED) ? $order->amount : 0,
             'cod_status' => ShippingCodStatusEnum::PENDING,
             'type'       => $order->shipping_method,
             'status'     => ShippingStatusEnum::PENDING,
@@ -515,15 +517,6 @@ class OrderSupportServiceProvider extends ServiceProvider
         ]);
 
         OrderHelper::processOrderProductData($products, $sessionStoreData);
-
-        foreach ($cartItems as $cartItem) {
-            $productByCartItem = $products['products']->firstWhere('id', $cartItem->id);
-
-            $ids = [$productByCartItem->id];
-            if ($productByCartItem->is_variation && $productByCartItem->original_product) {
-                $ids[] = $productByCartItem->original_product->id;
-            }
-        }
 
         $request->merge([
             'order_id' => array_merge($request->input('order_id', []), [$order->id]),
@@ -607,7 +600,7 @@ class OrderSupportServiceProvider extends ServiceProvider
      * @param Collection $orders
      * @return Collection
      * @throws Throwable
-     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
+     * @throws FileNotFoundException
      */
     public function sendMailAfterProcessOrder($orders)
     {
@@ -1158,9 +1151,9 @@ class OrderSupportServiceProvider extends ServiceProvider
     /**
      * Get all stores in cart, including products without stores
      *
-     * @return array|Collection
+     * @return Collection
      */
-    protected function getStoresInCart()
+    protected function getStoresInCart(): Collection
     {
         $originalProducts = Cart::instance('cart')->products()->pluck('original_product');
         $storeIdsInCart = $originalProducts->pluck('store_id');
@@ -1183,7 +1176,7 @@ class OrderSupportServiceProvider extends ServiceProvider
      * @param array $messages
      * @return array
      */
-    public function processCheckoutMessagesRequest($messages)
+    public function processCheckoutMessagesRequest(array $messages): array
     {
         $stores = $this->getStoresInCart();
         foreach ($stores as $storeId => $storeName) {
@@ -1206,15 +1199,11 @@ class OrderSupportServiceProvider extends ServiceProvider
 
     /**
      * @param OrderModel $order
-     * @return OrderModel
+     * @return BaseHttpResponse|OrderModel
      * @throws Throwable
      */
     public function afterOrderStatusCompleted(OrderModel $order)
     {
-        if (!$order) {
-            return $order;
-        }
-
         $order->loadMissing(['store', 'store.customer']);
 
         if ($order->store->id && $order->store->customer->id) {
@@ -1273,7 +1262,7 @@ class OrderSupportServiceProvider extends ServiceProvider
                 } catch (Throwable | Exception $th) {
                     DB::rollBack();
 
-                    return $response
+                    return (new BaseHttpResponse())
                         ->setError()
                         ->setMessage($th->getMessage());
                 }

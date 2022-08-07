@@ -32,7 +32,7 @@ use Botble\Media\Repositories\Interfaces\MediaFileInterface;
 use Botble\ACL\Http\Requests\AvatarRequest;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
+use Illuminate\Contracts\View\View;
 use RvMedia;
 use Throwable;
 
@@ -189,7 +189,7 @@ class UserController extends BaseController
      * @param int $id
      * @param Request $request
      * @param FormBuilder $formBuilder
-     * @return Factory|Application|\Illuminate\Contracts\View\View
+     * @return Factory|Application|View
      */
     public function getUserProfile($id, Request $request, FormBuilder $formBuilder)
     {
@@ -283,6 +283,7 @@ class UserController extends BaseController
      * @param ChangePasswordService $service
      * @param BaseHttpResponse $response
      * @return BaseHttpResponse
+     * @throws \Illuminate\Auth\AuthenticationException
      */
     public function postChangePassword(
         $id,

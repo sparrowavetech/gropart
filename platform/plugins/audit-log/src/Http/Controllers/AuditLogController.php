@@ -11,7 +11,7 @@ use Botble\Base\Traits\HasDeleteManyItemsTrait;
 use Exception;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
+use Illuminate\Contracts\View\View;
 use Throwable;
 
 class AuditLogController extends BaseController

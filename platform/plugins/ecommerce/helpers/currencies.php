@@ -8,13 +8,13 @@ use Illuminate\Support\Collection;
 
 if (!function_exists('format_price')) {
     /**
-     * @param int $price
-     * @param Currency|null $currency
+     * @param float|int|null $price
+     * @param Currency|null|string $currency
      * @param bool $withoutCurrency
      * @param bool $useSymbol
      * @return string
      */
-    function format_price($price, $currency = null, $withoutCurrency = false, $useSymbol = true): string
+    function format_price($price, $currency = null, bool $withoutCurrency = false, bool $useSymbol = true): string
     {
         if ($currency) {
             if (!$currency instanceof Currency) {
@@ -64,12 +64,12 @@ if (!function_exists('format_price')) {
 
 if (!function_exists('human_price_text')) {
     /**
-     * @param int $price
-     * @param Currency|null $currency
+     * @param float|null|mixed $price
+     * @param Currency|null|string $currency
      * @param string $priceUnit
      * @return string
      */
-    function human_price_text($price, $currency, $priceUnit = ''): string
+    function human_price_text($price, $currency, string $priceUnit = ''): string
     {
         $numberAfterDot = ($currency instanceof Currency) ? $currency->decimals : 0;
 
@@ -138,7 +138,7 @@ if (!function_exists('cms_currency')) {
     /**
      * @return CurrencySupport
      */
-    function cms_currency()
+    function cms_currency(): CurrencySupport
     {
         return CurrencyFacade::getFacadeRoot();
     }
@@ -148,7 +148,7 @@ if (!function_exists('get_all_currencies')) {
     /**
      * @return Collection
      */
-    function get_all_currencies()
+    function get_all_currencies(): Collection
     {
         return cms_currency()->currencies();
     }
@@ -158,7 +158,7 @@ if (!function_exists('get_application_currency')) {
     /**
      * @return Currency|null
      */
-    function get_application_currency()
+    function get_application_currency(): ?Currency
     {
         $currency = cms_currency()->getApplicationCurrency();
 
@@ -174,7 +174,7 @@ if (!function_exists('get_application_currency_id')) {
     /**
      * @return int|null
      */
-    function get_application_currency_id()
+    function get_application_currency_id(): ?int
     {
         return get_application_currency()->id;
     }

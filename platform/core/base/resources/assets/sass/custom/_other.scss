@@ -66,6 +66,7 @@
     border: 1px solid rgba(195, 207, 216, 0.3);
     vertical-align: middle;
     background: #fafbfc;
+    overflow: hidden;
 
     img {
         height: 150px;
@@ -73,8 +74,9 @@
     }
 
     &.preview-image-wrapper-not-allow-thumb {
-        min-height: auto;
-        min-width: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         max-height: 1000px;
         height: auto;
         width: auto;
@@ -82,6 +84,7 @@
         img {
             height: auto;
             max-width: 150px;
+            object-fit: contain;
         }
     }
 }
@@ -595,6 +598,7 @@ h4.modal-title {
                 position: relative;
                 cursor: pointer;
                 vertical-align: middle;
+                overflow: hidden;
             }
         }
     }

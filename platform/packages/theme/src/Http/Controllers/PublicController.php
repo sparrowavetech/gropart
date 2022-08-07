@@ -8,7 +8,7 @@ use Botble\Page\Services\PageService;
 use Botble\Theme\Events\RenderingHomePageEvent;
 use Botble\Theme\Events\RenderingSingleEvent;
 use Botble\Theme\Events\RenderingSiteMapEvent;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
 use Response;
@@ -20,11 +20,10 @@ use Theme;
 class PublicController extends Controller
 {
     /**
-     * @param string $key
-     * @return \Illuminate\Http\RedirectResponse|Response
-     * @throws FileNotFoundException
+     * @param string|null $key
+     * @return RedirectResponse|Response
      */
-    public function getView($key = null)
+    public function getView(?string $key = null)
     {
         if (empty($key)) {
             return $this->getIndex();
@@ -87,7 +86,7 @@ class PublicController extends Controller
     }
 
     /**
-     * @return string
+     * @return Response|string
      */
     public function getSiteMap()
     {

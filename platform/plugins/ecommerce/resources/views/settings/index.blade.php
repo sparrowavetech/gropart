@@ -229,7 +229,7 @@
                         <div class="swatches-container">
                             <div class="header clearfix">
                                 <div class="swatch-item">
-                                    {{ trans('plugins/ecommerce::currency.name') }}
+                                    {{ trans('plugins/ecommerce::currency.code') }}
                                 </div>
                                 <div class="swatch-item">
                                     {{ trans('plugins/ecommerce::currency.symbol') }}
@@ -251,6 +251,8 @@
                             <ul class="swatches-list">
 
                             </ul>
+                            <div class="clearfix"></div>
+                            {!! Form::helper(trans('plugins/ecommerce::currency.instruction')) !!}
                             <a href="#" class="js-add-new-attribute">
                                 {{ trans('plugins/ecommerce::currency.new_currency') }}
                             </a>

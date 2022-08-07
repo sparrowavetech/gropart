@@ -485,7 +485,7 @@ class RvMedia
         $request = request();
 
         if ($request->input('path')) {
-            $folderId = $this->handleTargetFolder($folderId, $request->input('path'));
+            $folderId = $this->handleTargetFolder($folderId, $request->input('path', ''));
         }
 
         if (!$fileUpload) {
@@ -558,7 +558,7 @@ class RvMedia
             $fileName = $this->fileRepository->createSlug(
                 $file->name,
                 $fileExtension,
-                Storage::path($folderPath)
+                Storage::path($folderPath ?: '')
             );
 
             $filePath = $fileName;

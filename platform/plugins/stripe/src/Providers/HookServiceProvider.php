@@ -110,7 +110,10 @@ class HookServiceProvider extends ServiceProvider
     {
         if ($request->input('payment_method') == STRIPE_PAYMENT_METHOD_NAME) {
             $stripePaymentService = $this->app->make(StripePaymentService::class);
-            $result = $stripePaymentService->execute($request);
+
+            $paymentData = apply_filters(PAYMENT_FILTER_PAYMENT_DATA, [], $request);
+
+            $result = $stripePaymentService->execute($paymentData);
 
             if ($stripePaymentService->getErrorMessage()) {
                 $data['error'] = true;

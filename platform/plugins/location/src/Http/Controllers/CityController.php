@@ -18,7 +18,7 @@ use Botble\Location\Repositories\Interfaces\CityInterface;
 use Botble\Location\Tables\CityTable;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
+use Illuminate\Contracts\View\View;
 use Throwable;
 
 class CityController extends BaseController

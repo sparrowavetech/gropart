@@ -3,7 +3,6 @@
 namespace Botble\Paypal\Services\Abstracts;
 
 use Botble\Payment\Services\Traits\PaymentErrorTrait;
-use Botble\Support\Services\ProduceServiceInterface;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -15,7 +14,7 @@ use PayPalCheckoutSdk\Orders\OrdersCreateRequest;
 use PayPalCheckoutSdk\Orders\OrdersGetRequest;
 use PayPalCheckoutSdk\Payments\CapturesRefundRequest;
 
-abstract class PayPalPaymentAbstract implements ProduceServiceInterface
+abstract class PayPalPaymentAbstract
 {
     use PaymentErrorTrait;
 
@@ -91,7 +90,7 @@ abstract class PayPalPaymentAbstract implements ProduceServiceInterface
      * credentials context. This can be used invoke PayPal API's provided the
      * credentials have the access to do so.
      */
-    public function setClient()
+    public function setClient(): self
     {
         $this->client = new PayPalHttpClient($this->environment());
 
@@ -464,14 +463,13 @@ abstract class PayPalPaymentAbstract implements ProduceServiceInterface
     /**
      * Execute main service
      *
-     * @param Request $request
-     *
+     * @param array $data
      * @return mixed
      */
-    public function execute(Request $request)
+    public function execute(array $data)
     {
         try {
-            return $this->makePayment($request);
+            return $this->makePayment($data);
         } catch (Exception $exception) {
             $this->setErrorMessageAndLogging($exception, 1);
             return false;
@@ -540,18 +538,17 @@ abstract class PayPalPaymentAbstract implements ProduceServiceInterface
     /**
      * Make a payment
      *
-     * @param Request $request
-     *
+     * @param array $data
      * @return mixed
      */
-    abstract public function makePayment(Request $request);
+    abstract public function makePayment(array $data);
 
     /**
      * Use this function to perform more logic after user has made a payment
      *
-     * @param Request $request
+     * @param array $data
      *
      * @return mixed
      */
-    abstract public function afterMakePayment(Request $request);
+    abstract public function afterMakePayment(array $data);
 }
