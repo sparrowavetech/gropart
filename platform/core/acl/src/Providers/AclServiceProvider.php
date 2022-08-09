@@ -29,14 +29,6 @@ class AclServiceProvider extends ServiceProvider
 
     public function register()
     {
-        /**
-         * @var Router $router
-         */
-        $router = $this->app['router'];
-
-        $router->aliasMiddleware('auth', Authenticate::class);
-        $router->aliasMiddleware('guest', RedirectIfAuthenticated::class);
-
         $this->app->bind(UserInterface::class, function () {
             return new UserRepository(new User());
         });
@@ -89,6 +81,14 @@ class AclServiceProvider extends ServiceProvider
                     'url'         => route('users.index'),
                     'permissions' => ['users.index'],
                 ]);
+
+            /**
+             * @var Router $router
+             */
+            $router = $this->app['router'];
+
+            $router->aliasMiddleware('auth', Authenticate::class);
+            $router->aliasMiddleware('guest', RedirectIfAuthenticated::class);
         });
 
         $this->app->booted(function () {

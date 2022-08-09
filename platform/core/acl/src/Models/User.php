@@ -8,11 +8,13 @@ use Botble\Base\Supports\Avatar;
 use Botble\Media\Models\MediaFile;
 use Eloquent;
 use Exception;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 use RvMedia;
 
 /**
@@ -20,6 +22,8 @@ use RvMedia;
  */
 class User extends Authenticatable
 {
+    use HasApiTokens;
+    use HasFactory;
     use PermissionTrait;
     use Notifiable;
 

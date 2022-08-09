@@ -139,7 +139,7 @@ class RoleForm extends FormAbstract
                 $newFlagArray[] = $flagDetails['flag'];
             }
         }
-        
+
         return $newFlagArray;
     }
 }

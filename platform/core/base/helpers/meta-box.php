@@ -20,9 +20,8 @@ if (!function_exists('add_meta_box')) {
         ?string  $screen = null,
         string   $context = 'advanced',
         string   $priority = 'default',
-                 $callbackArgs = null
-    )
-    {
+        $callbackArgs = null
+    ) {
         MetaBox::addMetaBox($id, $title, $callback, $screen, $context, $priority, $callbackArgs);
     }
 }

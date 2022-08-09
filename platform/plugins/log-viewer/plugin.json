@@ -1,9 +1,0 @@
-{
-    "name": "Log Viewer",
-    "namespace": "Botble\\LogViewer\\",
-    "provider": "Botble\\LogViewer\\Providers\\LogViewerServiceProvider",
-    "author": "Botble Technologies",
-    "url": "https://botble.com",
-    "version": "1.1",
-    "description": "Provides a log viewer for Botble CMS"
-}
