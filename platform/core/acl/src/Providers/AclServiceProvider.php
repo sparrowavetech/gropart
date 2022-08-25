@@ -91,8 +91,9 @@ class AclServiceProvider extends ServiceProvider
             $router->aliasMiddleware('guest', RedirectIfAuthenticated::class);
         });
 
+        config()->set(['auth.providers.users.model' => User::class]);
+
         $this->app->booted(function () {
-            config()->set(['auth.providers.users.model' => User::class]);
 
             EmailHandler::addTemplateSettings('acl', config('core.acl.email', []), 'core');
 
