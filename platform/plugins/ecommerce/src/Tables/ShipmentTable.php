@@ -55,7 +55,7 @@ class ShipmentTable extends TableAbstract
                     return get_order_code($item->order_id);
                 }
 
-                return Html::link(route('orders.edit', $item->id), get_order_code($item->order_id) . ' <i class="fa fa-external-link-alt"></i>', ['target' => '_blank'], null, false);
+                return Html::link(route('orders.edit', $item->order_id), get_order_code($item->order_id) . ' <i class="fa fa-external-link-alt"></i>', ['target' => '_blank'], null, false);
             })
             ->editColumn('user_id', function ($item) {
                 return BaseHelper::clean($item->order->user->name ?: $item->order->address->name);
@@ -78,6 +78,9 @@ class ShipmentTable extends TableAbstract
                 return BaseHelper::clean($item->cod_status->toHtml());
             })
             ->addColumn('operations', function ($item) {
+                if (!Auth::user()->hasPermission('ecommerce.shipments.edit')) {
+                    return getOperations('ecommerce.shipments.edit', null, $item);
+                }
                 return $this->getOperations('ecommerce.shipments.edit', null, $item);
             })
             ->filter(function ($query) {

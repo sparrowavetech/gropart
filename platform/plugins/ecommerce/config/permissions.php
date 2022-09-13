@@ -226,16 +226,23 @@ return [
         'flag'        => 'shipping_methods.index',
         'parent_flag' => 'plugins.ecommerce',
     ],
+
     [
         'name'        => 'Shipments',
         'flag'        => 'ecommerce.shipments.index',
         'parent_flag' => 'plugins.ecommerce',
     ],
     [
+        'name'        => 'Create',
+        'flag'        => 'ecommerce.shipments.create',
+        'parent_flag' => 'ecommerce.shipments.index',
+    ],
+    [
         'name'        => 'Edit',
         'flag'        => 'ecommerce.shipments.edit',
         'parent_flag' => 'ecommerce.shipments.index',
     ],
+
     [
         'name'        => 'Orders',
         'flag'        => 'orders.index',

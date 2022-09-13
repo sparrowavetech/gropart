@@ -3,22 +3,22 @@
 namespace Botble\Location\Http\Controllers;
 
 use Assets;
-use BaseHelper;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Base\Supports\Helper;
 use Botble\Location\Exports\TemplateLocationExport;
 use Botble\Location\Http\Requests\BulkImportRequest;
 use Botble\Location\Http\Requests\LocationImportRequest;
 use Botble\Location\Imports\LocationImport;
 use Botble\Location\Imports\ValidateLocationImport;
-use Botble\Location\Models\City;
-use Botble\Location\Models\Country;
-use Botble\Location\Models\State;
+use Botble\Location\Location;
+use Botble\Location\Repositories\Interfaces\CountryInterface;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\File;
-use Illuminate\View\View;
 use Maatwebsite\Excel\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class BulkImportController extends BaseController
 {
@@ -35,6 +35,7 @@ class BulkImportController extends BaseController
     /**
      * BulkImportController constructor.
      * @param LocationImport $locationImport
+     * @param ValidateLocationImport $validateLocationImport
      */
     public function __construct(LocationImport $locationImport, ValidateLocationImport $validateLocationImport)
     {
@@ -43,7 +44,7 @@ class BulkImportController extends BaseController
     }
 
     /**
-     * @return Factory|View
+     * @return Application|Factory|View
      */
     public function index()
     {
@@ -51,21 +52,7 @@ class BulkImportController extends BaseController
 
         Assets::addScriptsDirectly(['vendor/core/plugins/location/js/bulk-import.js']);
 
-        $availableCountries = [];
-
-        $dataPath = plugin_path('location/database/files');
-
-        foreach (BaseHelper::scanFolder($dataPath) as $countryCode) {
-
-            $country = file_get_contents($dataPath . '/' . $countryCode . '/country.json');
-            $country = json_decode($country, true);
-
-            if ($country) {
-                $availableCountries[$countryCode] = $country['name'];
-            }
-        }
-
-        return view('plugins/location::bulk-import.index', compact('availableCountries'));
+        return view('plugins/location::bulk-import.index');
     }
 
     /**
@@ -81,7 +68,7 @@ class BulkImportController extends BaseController
         $file = $request->file('file');
 
         $this->validateLocationImport
-            ->setValidatorClass(new LocationImportRequest)
+            ->setValidatorClass(new LocationImportRequest())
             ->setImportType($request->input('type'))
             ->import($file);
 
@@ -101,7 +88,7 @@ class BulkImportController extends BaseController
         }
 
         $this->locationImport
-            ->setValidatorClass(new LocationImportRequest)
+            ->setValidatorClass(new LocationImportRequest())
             ->setImportType($request->input('type'))
             ->import($file);
 
@@ -125,7 +112,7 @@ class BulkImportController extends BaseController
 
     /**
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     * @return BinaryFileResponse
      */
     public function downloadTemplate(Request $request)
     {
@@ -136,51 +123,53 @@ class BulkImportController extends BaseController
     }
 
     /**
-     * @param string $countryCode
+     * @param Location $location
      * @param BaseHttpResponse $response
+     * @param CountryInterface $countryRepository
      * @return BaseHttpResponse
      */
-    public function importLocationData($countryCode, BaseHttpResponse $response)
+    public function ajaxGetAvailableRemoteLocations(Location $location, BaseHttpResponse $response, CountryInterface $countryRepository)
     {
-        $dataPath = plugin_path('location/database/files/' . $countryCode);
+        $remoteLocations = $location->getRemoteAvailableLocations();
 
-        if (!File::isDirectory($dataPath)) {
-            abort(404);
-        }
+        $availableLocations = $countryRepository->pluck('code');
 
-        $country = file_get_contents($dataPath . '/country.json');
-        $country = json_decode($country, true);
+        $listCountries = Helper::countries();
 
-        $country = Country::create($country);
+        $locations = [];
 
-        $states = file_get_contents($dataPath . '/states.json');
-        $states = json_decode($states, true);
-        foreach ($states as $state) {
-            $state['country_id'] = $country->id;
+        foreach ($remoteLocations as $location) {
+            $location = strtoupper($location);
 
-            State::create($state);
-        }
-
-        $cities = file_get_contents($dataPath . '/cities.json');
-        $cities = json_decode($cities, true);
-        foreach ($cities as $item) {
-
-            $state = State::where('name', $item['name'])->first();
-            if (!$state) {
+            if (in_array($location, $availableLocations)) {
                 continue;
             }
 
-            foreach ($item['cities'] as $cityName) {
-                $city = [
-                    'name'       => $cityName,
-                    'state_id'   => $state->id,
-                    'country_id' => $country->id,
-                ];
-
-                City::create($city);
+            foreach ($listCountries as $key => $country) {
+                if ($location === strtoupper($key)) {
+                    $locations[$location] = $country;
+                }
             }
         }
 
-        return $response->setMessage(trans('plugins/location::bulk-import.imported_successfully'));
+        $locations = array_unique($locations);
+
+        return $response
+            ->setData(view('plugins/location::partials.available-remote-locations', compact('locations'))->render());
+    }
+
+    /**
+     * @param string $countryCode
+     * @param Location $location
+     * @param BaseHttpResponse $response
+     * @return BaseHttpResponse
+     */
+    public function importLocationData(string $countryCode, Location $location, BaseHttpResponse $response)
+    {
+        $result = $location->downloadRemoteLocation($countryCode);
+
+        return $response
+            ->setError($result['error'])
+            ->setMessage($result['message']);
     }
 }

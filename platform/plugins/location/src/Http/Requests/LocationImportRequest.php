@@ -8,7 +8,6 @@ use Illuminate\Validation\Rule;
 
 class LocationImportRequest extends Request
 {
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -18,12 +17,13 @@ class LocationImportRequest extends Request
     {
         return [
             'name'         => 'required|max:120',
-            'import_type'  => 'required|in:country,state,city',
+            'import_type'  => 'required|in:country,state,city,pincode',
             'order'        => 'nullable|integer|min:0|max:127',
             'abbreviation' => 'max:2',
             'status'       => 'required|' . Rule::in(BaseStatusEnum::values()),
             'country'      => 'required_if:import_type,state,city',
             'state'        => 'required_if:import_type,city',
+            'city'        => 'required_if:import_type,pincode',
             'nationality'  => 'required_if:import_type,country|max:120',
         ];
     }
@@ -39,6 +39,7 @@ class LocationImportRequest extends Request
             'country.required_if'     => trans('plugins/location::bulk-import.import_type_required_if'),
             'nationality.required_if' => trans('plugins/location::bulk-import.import_type_required_if'),
             'state.required_if'       => trans('plugins/location::bulk-import.import_type_required_if'),
+            'city.required_if'       => trans('plugins/location::bulk-import.import_type_required_if'),
         ];
     }
 }

@@ -8,7 +8,6 @@ use Botble\ACL\Traits\RegistersUsers;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Models\Customer;
 use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
-use Botble\Marketplace\Models\Store;
 use EcommerceHelper;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Contracts\Auth\StatefulGuard;
@@ -18,7 +17,6 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 use Response;
 use SeoHelper;
-use SlugHelper;
 use Theme;
 use URL;
 
@@ -92,20 +90,7 @@ class RegisterController extends Controller
     {
         $this->validator($request->input())->validate();
 
-        if (is_plugin_active('marketplace') && $request->input('is_vendor') == 1) {
-            $existing = SlugHelper::getSlug(
-                $request->input('shop_url'),
-                SlugHelper::getPrefix(Store::class),
-                Store::class
-            );
-
-            if ($existing) {
-                return $response
-                    ->setError()
-                    ->withInput(true)
-                    ->setMessage(__('Shop URL is existing. Please choose another one!'));
-            }
-        }
+        do_action('customer_register_validation', $request);
 
         $customer = $this->create($request->input());
 
@@ -132,12 +117,6 @@ class RegisterController extends Controller
      */
     protected function validator(array $data)
     {
-        //r@gmail.com
-        $arr = explode('@',$data['email']);
-        $emaillen = strlen($arr[0]);
-        if($emaillen < 4){
-            //echo  setMessage(__('Registered successfully!'));
-        }
         $rules = [
             'name'     => 'required|min:3|max:255',
             'email'    => 'required|email|max:255|unique:ec_customers|regex:/^(?=[^@]{4,}@)\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/',
@@ -145,15 +124,11 @@ class RegisterController extends Controller
             'password' => 'required|min:6|confirmed',
         ];
 
-        if (is_plugin_active('captcha') && setting('enable_captcha') && get_ecommerce_setting('enable_recaptcha_in_register_page',
-                0)) {
+        if (is_plugin_active('captcha') && setting('enable_captcha') && get_ecommerce_setting(
+            'enable_recaptcha_in_register_page',
+            0
+        )) {
             $rules += ['g-recaptcha-response' => 'required|captcha'];
-        }
-
-        if (is_plugin_active('marketplace') && request()->input('is_vendor') == 1) {
-            $rules['shop_name'] = 'required|min:2';
-            $rules['shop_phone'] = 'required|' . BaseHelper::getPhoneValidationRule();
-            $rules['shop_url'] = 'required';
         }
 
         if (request()->has('agree_terms_and_policy')) {
@@ -166,9 +141,6 @@ class RegisterController extends Controller
             'Phone'                  => __('Phone'),
             'password'               => __('Password'),
             'g-recaptcha-response'   => __('Captcha'),
-            'shop_name'              => __('Shop Name'),
-            'shop_phone'             => __('Shop Phone'),
-            'shop_url'               => __('Shop URL'),
             'agree_terms_and_policy' => __('Term and Policy'),
         ];
 
@@ -187,9 +159,9 @@ class RegisterController extends Controller
     protected function create(array $data)
     {
         return $this->customerRepository->create([
-            'name'     => clean($data['name']),
-            'email'    => clean($data['email']),
-            'phone'    => clean($data['phone']),
+            'name'     => BaseHelper::clean($data['name']),
+            'email'    => BaseHelper::clean($data['email']),
+            'phone'    => BaseHelper::clean($data['phone']),
             'password' => bcrypt($data['password']),
         ]);
     }

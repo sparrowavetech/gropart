@@ -55,20 +55,20 @@ class CustomerTable extends TableAbstract
                     return $item->avatar_url;
                 }
 
-                return Html::tag('img', '', ['src' => $item->avatar_url, 'alt' => clean($item->name), 'width' => 50]);
+                return Html::tag('img', '', ['src' => $item->avatar_url, 'alt' => BaseHelper::clean($item->name), 'width' => 50]);
             })
             ->editColumn('name', function ($item) {
                 if (!Auth::user()->hasPermission('customers.edit')) {
-                    return clean($item->name);
+                    return BaseHelper::clean($item->name);
                 }
 
-                return Html::link(route('customers.edit', $item->id), clean($item->name));
+                return Html::link(route('customers.edit', $item->id), BaseHelper::clean($item->name));
             })
             ->editColumn('email', function ($item) {
-                return clean($item->email);
+                return BaseHelper::clean($item->email);
             })
             ->editColumn('phone', function ($item) {
-                return clean($item->phone);
+                return BaseHelper::clean($item->phone);
             })
             ->editColumn('checkbox', function ($item) {
                 return $this->getCheckbox($item->id);
@@ -77,14 +77,17 @@ class CustomerTable extends TableAbstract
                 return BaseHelper::formatDate($item->created_at);
             })
             ->editColumn('status', function ($item) {
-                return clean($item->status->toHtml());
+                return BaseHelper::clean($item->status->toHtml());
             });
 
         if (EcommerceHelper::isEnableEmailVerification()) {
             $data = $data
                 ->addColumn('confirmed_at', function ($item) {
-                    return $item->confirmed_at ? Html::tag('span', trans('core/base::base.yes'),
-                        ['class' => 'text-success']) : trans('core/base::base.no');
+                    return $item->confirmed_at ? Html::tag(
+                        'span',
+                        trans('core/base::base.yes'),
+                        ['class' => 'text-success']
+                    ) : trans('core/base::base.no');
                 });
         }
 

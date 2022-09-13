@@ -2,6 +2,7 @@
 
 namespace Botble\Optimize\Http\Middleware;
 
+use Botble\Setting\Supports\SettingStore;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -47,7 +48,7 @@ abstract class PageSpeed
      * @param string $buffer
      * @return string
      */
-    protected function replace(array $replace, $buffer)
+    protected function replace(array $replace, $buffer): string
     {
         return preg_replace(array_keys($replace), array_values($replace), $buffer);
     }
@@ -55,7 +56,7 @@ abstract class PageSpeed
     /**
      * Check Laravel Page Speed is enabled or not
      *
-     * @return bool
+     * @return array|SettingStore|string|null
      */
     protected function isEnable()
     {
@@ -68,7 +69,7 @@ abstract class PageSpeed
      * @param Request $request
      * @return bool
      */
-    protected function shouldProcessPageSpeed($request)
+    protected function shouldProcessPageSpeed($request): bool
     {
         $patterns = config('packages.optimize.general.skip', []);
         $patterns = empty($patterns) ? [] : $patterns;

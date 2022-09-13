@@ -53,13 +53,13 @@ Route::group(['namespace' => 'Botble\Location\Http\Controllers', 'middleware' =>
             Route::delete('items/destroy', [
                 'as'         => 'deletes',
                 'uses'       => 'PincodeController@deletes',
-                // 'permission' => 'city.destroy',
+                'permission' => 'pincode.destroy',
             ]);
 
             Route::get('list', [
                 'as'         => 'list',
                 'uses'       => 'PincodeController@getList',
-                // 'permission' => 'city.index',
+                'permission' => 'pincode.index',
             ]);
         });
 
@@ -81,6 +81,12 @@ Route::group(['namespace' => 'Botble\Location\Http\Controllers', 'middleware' =>
                 'permission' => 'location.bulk-import.index',
             ]);
 
+            Route::get('ajax/available-remote-locations', [
+                'as'         => 'available-remote-locations',
+                'uses'       => 'BulkImportController@ajaxGetAvailableRemoteLocations',
+                'permission' => 'location.bulk-import.index',
+            ]);
+
             Route::post('/import-location-data/{country}', [
                 'as'         => 'import-location-data',
                 'uses'       => 'BulkImportController@importLocationData',
@@ -93,7 +99,6 @@ Route::group(['namespace' => 'Botble\Location\Http\Controllers', 'middleware' =>
         ->name('ajax.states-by-country');
     Route::get('ajax/cities-by-state', 'CityController@ajaxGetCities')
         ->name('ajax.cities-by-state');
-
     Route::get('ajax/check-pincode', 'PincodeController@ajaxCheckPincode')
         ->name('ajax.check-pincode');
 

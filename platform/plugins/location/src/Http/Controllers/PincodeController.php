@@ -50,7 +50,7 @@ class PincodeController extends BaseController
     {
 
         page_title()->setTitle(trans('Pincodes'));
-        
+
         return $table->renderTable();
     }
 

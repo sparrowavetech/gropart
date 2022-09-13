@@ -53,24 +53,5 @@
     </div>
 
     {!! apply_filters(BASE_FILTER_FOOTER_LAYOUT_TEMPLATE, null) !!}
-    <script>
-    $(function() {
-        var header = $(".page-header.navbar.navbar-static-top");
-        $(window).scroll(function() {
-            var scroll = $(window).scrollTop();
-            if (scroll >= 50) {
-                //header.removeClass('clearHeader').addClass("darkHeader");
-                header.addClass("stickHeader");
-                if (scroll <= 50) {
-                    $(".page-sidebar.collapse").css("top","50px");
-                }
-            } else {
-                header.removeClass("stickHeader");
-                $(".page-sidebar.collapse").css("top","");
-                //header.removeClass("darkHeader").addClass('clearHeader');
-            }
-        });
-    });
-    </script>
 </body>
 </html>

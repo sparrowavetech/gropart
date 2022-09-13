@@ -52,9 +52,7 @@ class CheckoutRequest extends Request
             $rules['address.name'] = 'required|min:3|max:120';
         }
 
-        $rules = apply_filters(PROCESS_CHECOUT_RULES_REQUEST_ECOMMERCE, $rules);
-
-        return $rules;
+        return apply_filters(PROCESS_CHECKOUT_RULES_REQUEST_ECOMMERCE, $rules);
     }
 
     /**

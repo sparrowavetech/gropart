@@ -184,7 +184,7 @@ class PincodeTable extends TableAbstract
     public function getBulkChanges(): array
     {
         return [
-       
+
             'status'     => [
                 'title'    => trans('core/base::tables.status'),
                 'type'     => 'customSelect',

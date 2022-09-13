@@ -2,15 +2,11 @@
 
 namespace Botble\Ecommerce\Http\Requests;
 
+use BaseHelper;
 use Botble\Support\Http\Requests\Request;
 
 class EditAccountRequest extends Request
 {
-
-    protected function guard()
-    {
-        //dd(auth('customer'));
-    }
     /**
      * Get the validation rules that apply to the request.
      *
@@ -18,13 +14,9 @@ class EditAccountRequest extends Request
      */
     public function rules()
     {
-       // $session = $this->session;
-       // dd($session['attributes']);
-
-        //$customer = $this->guard()->getLastAttempted();
         return [
             'name'  => 'required|max:255',
-            'phone' => 'required|min:10|max:10',
+            'phone' => 'sometimes|min:10|max:10' . BaseHelper::getPhoneValidationRule(),
             'dob'   => 'max:20|sometimes',
         ];
     }

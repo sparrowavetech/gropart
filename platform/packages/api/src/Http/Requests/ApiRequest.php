@@ -42,7 +42,7 @@ abstract class ApiRequest extends FormRequest
             ];
         }
 
-        $response = (new BaseHttpResponse)
+        $response = (new BaseHttpResponse())
             ->setError(true)
             ->setMessage('The given data is invalid')
             ->setData($errors)
