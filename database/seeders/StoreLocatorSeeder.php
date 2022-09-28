@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Botble\Ecommerce\Models\StoreLocator;
-use Botble\Setting\Models\Setting as SettingModel;
+use Botble\Setting\Models\Setting;
 use Illuminate\Database\Seeder;
 
 class StoreLocatorSeeder extends Seeder
@@ -18,7 +18,7 @@ class StoreLocatorSeeder extends Seeder
         StoreLocator::truncate();
 
         $storeLocator = StoreLocator::create([
-            'name'                 => 'Martfury',
+            'name'                 => 'Farmart',
             'email'                => 'sales@botble.com',
             'phone'                => '1800979769',
             'address'              => '502 New Street',
@@ -29,7 +29,7 @@ class StoreLocatorSeeder extends Seeder
             'is_shipping_location' => 1,
         ]);
 
-        SettingModel::whereIn('key', [
+        Setting::whereIn('key', [
             'ecommerce_store_name',
             'ecommerce_store_phone',
             'ecommerce_store_address',
@@ -38,7 +38,7 @@ class StoreLocatorSeeder extends Seeder
             'ecommerce_store_country',
         ])->delete();
 
-        SettingModel::insertOrIgnore([
+        Setting::insertOrIgnore([
             [
                 'key'   => 'ecommerce_store_name',
                 'value' => $storeLocator->name,

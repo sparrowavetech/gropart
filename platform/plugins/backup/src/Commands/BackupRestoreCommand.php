@@ -5,7 +5,7 @@ namespace Botble\Backup\Commands;
 use BaseHelper;
 use Botble\Backup\Supports\Backup;
 use Exception;
-use File;
+use Illuminate\Support\Facades\File;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;

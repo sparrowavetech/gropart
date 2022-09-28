@@ -131,4 +131,5 @@ return [
             ],
         ],
     ],
+    'default_upload_url' => env('RV_MEDIA_DEFAULT_UPLOAD_URL', url('storage')),
 ];

@@ -31,6 +31,9 @@ if (!function_exists('get_products')) {
             'condition' => [
                 'ec_products.status'       => BaseStatusEnum::PUBLISHED,
                 'ec_products.is_variation' => 0,
+                function ($query) {
+                    return $query->notOutOfStock();
+                },
             ],
             'order_by'  => [
                 'ec_products.order'      => 'ASC',
@@ -64,6 +67,9 @@ if (!function_exists('get_products_on_sale')) {
             'condition' => [
                 'ec_products.status'       => BaseStatusEnum::PUBLISHED,
                 'ec_products.is_variation' => 0,
+                function ($query) {
+                    return $query->notOutOfStock();
+                },
             ],
             'order_by'  => [
                 'ec_products.order'      => 'ASC',
@@ -97,6 +103,9 @@ if (!function_exists('get_featured_products')) {
                 'ec_products.is_featured'  => 1,
                 'ec_products.is_variation' => 0,
                 'ec_products.status'       => BaseStatusEnum::PUBLISHED,
+                function ($query) {
+                    return $query->notOutOfStock();
+                },
             ],
             'take'      => null,
             'order_by'  => [
@@ -127,6 +136,9 @@ if (!function_exists('get_top_rated_products')) {
                 'ec_products.status'       => BaseStatusEnum::PUBLISHED,
                 'ec_products.is_variation' => 0,
                 ['ec_products.id', 'IN', $topProductIds],
+                function ($query) {
+                    return $query->notOutOfStock();
+                },
             ],
             'order_by'  => [
                 'reviews_avg_star'       => 'DESC',
@@ -179,6 +191,9 @@ if (!function_exists('get_trending_products')) {
             'condition' => [
                 'ec_products.status'       => BaseStatusEnum::PUBLISHED,
                 'ec_products.is_variation' => 0,
+                function ($query) {
+                    return $query->notOutOfStock();
+                },
             ],
             'take'      => 10,
             'order_by'  => [
@@ -230,8 +245,7 @@ if (!function_exists('get_product_collections')) {
         array $condition = ['status' => BaseStatusEnum::PUBLISHED],
         array $with = [],
         array $select = ['*']
-    ): Collection
-    {
+    ): Collection {
         return app(ProductCollectionInterface::class)->allBy($condition, $with, $select);
     }
 }
@@ -316,6 +330,9 @@ if (!function_exists('get_related_products')) {
             'condition' => [
                 'ec_products.status'       => BaseStatusEnum::PUBLISHED,
                 'ec_products.is_variation' => 0,
+                function ($query) {
+                    return $query->notOutOfStock();
+                },
             ],
             'order_by'  => [
                 'ec_products.order'      => 'ASC',
@@ -367,6 +384,7 @@ if (!function_exists('get_cross_sale_products')) {
             ->crossSales()
             ->limit($limit)
             ->with($with)
+            ->notOutOfStock()
             ->withCount(EcommerceHelper::withReviewsCount())
             ->get();
     }
@@ -392,6 +410,7 @@ if (!function_exists('get_up_sale_products')) {
             ->upSales()
             ->limit($limit)
             ->with($with)
+            ->notOutOfStock()
             ->withCount(EcommerceHelper::withReviewsCount())
             ->get();
     }
@@ -416,6 +435,9 @@ if (!function_exists('get_cart_cross_sale_products')) {
                 'ec_products.status'       => BaseStatusEnum::PUBLISHED,
                 'ec_products.is_variation' => 0,
                 ['ec_products.id', 'IN', $crossSaleIds],
+                function ($query) {
+                    return $query->notOutOfStock();
+                },
             ],
             'order_by'  => [
                 'ec_products.order'      => 'ASC',
@@ -483,8 +505,7 @@ if (!function_exists('handle_next_attributes_in_product')) {
         $variationNextIds,
         $variationInfo = null,
         array $unavailableAttributeIds = []
-    ): array
-    {
+    ): array {
         foreach ($productAttributes as $attribute) {
             if ($variationInfo != null && !$variationInfo->where('id', $attribute->id)->count()) {
                 $unavailableAttributeIds[] = $attribute->id;

@@ -9,12 +9,6 @@ use Botble\Location\Models\City;
 use Botble\Location\Repositories\Caches\CityCacheDecorator;
 use Botble\Location\Repositories\Eloquent\CityRepository;
 use Botble\Location\Repositories\Interfaces\CityInterface;
-
-use Botble\Location\Models\Pincode;
-use Botble\Location\Repositories\Interfaces\PincodeInterface;
-use Botble\Location\Repositories\Caches\PincodeCacheDecorator;
-use Botble\Location\Repositories\Eloquent\PincodeRepository;
-
 use Botble\Location\Models\Country;
 use Botble\Location\Repositories\Caches\CountryCacheDecorator;
 use Botble\Location\Repositories\Eloquent\CountryRepository;
@@ -50,10 +44,6 @@ class LocationServiceProvider extends ServiceProvider
 
         $this->app->bind(CityInterface::class, function () {
             return new CityCacheDecorator(new CityRepository(new City()));
-        });
-
-        $this->app->bind(PincodeInterface::class, function () {
-            return new PincodeRepository(new Pincode);
         });
 
         AliasLoader::getInstance()->alias('Location', LocationFacade::class);
@@ -123,15 +113,6 @@ class LocationServiceProvider extends ServiceProvider
                     'icon'        => null,
                     'url'         => route('city.index'),
                     'permissions' => ['city.index'],
-                ])
-                ->registerItem([
-                    'id'          => 'cms-plugins-pincode',
-                    'priority'    => 3,
-                    'parent_id'   => 'cms-plugins-location',
-                    'name'        => 'Pincode',
-                    'icon'        => null,
-                    'url'         => route('pincode.index'),
-                    'permissions' => ['city.index'],
                 ]);
 
             if (!dashboard_menu()->hasItem('cms-core-tools')) {
@@ -146,15 +127,25 @@ class LocationServiceProvider extends ServiceProvider
                 ]);
             }
 
-            dashboard_menu()->registerItem([
-                'id'          => 'cms-core-tools-location-bulk-import',
-                'priority'    => 1,
-                'parent_id'   => 'cms-core-tools',
-                'name'        => 'plugins/location::bulk-import.menu',
-                'icon'        => 'fas fa-file-import',
-                'url'         => route('location.bulk-import.index'),
-                'permissions' => ['location.bulk-import.index'],
-            ]);
+            dashboard_menu()
+                ->registerItem([
+                    'id'          => 'cms-core-tools-location-bulk-import',
+                    'priority'    => 1,
+                    'parent_id'   => 'cms-core-tools',
+                    'name'        => 'plugins/location::bulk-import.menu',
+                    'icon'        => 'fas fa-file-import',
+                    'url'         => route('location.bulk-import.index'),
+                    'permissions' => ['location.bulk-import.index'],
+                ])
+                ->registerItem([
+                    'id'          => 'cms-core-tools-location-export',
+                    'priority'    => 2,
+                    'parent_id'   => 'cms-core-tools',
+                    'name'        => 'plugins/location::location.export_location',
+                    'icon'        => 'fas fa-file-import',
+                    'url'         => route('location.export.index'),
+                    'permissions' => ['location.export.index'],
+                ]);
         });
 
         $this->app->booted(function () {

@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use Botble\Ads\Models\Ads;
 use Botble\Base\Supports\BaseSeeder;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class AdsSeeder extends BaseSeeder
@@ -24,44 +26,33 @@ class AdsSeeder extends BaseSeeder
                 'name'     => 'Top Slider Image 1',
                 'location' => 'not_set',
                 'key'      => 'VC2C8Q1UGCBG',
-            ],
-            [
-                'name'     => 'Top Slider Image 2',
-                'location' => 'not_set',
-                'key'      => 'NBDWRXTSVZ8N',
+                'image'    => 'promotion/1.jpg',
             ],
             [
                 'name'     => 'Homepage middle 1',
                 'location' => 'not_set',
                 'key'      => 'IZ6WU8KUALYD',
+                'image'    => 'promotion/2.png',
             ],
             [
                 'name'     => 'Homepage middle 2',
                 'location' => 'not_set',
                 'key'      => 'ILSFJVYFGCPZ',
+                'image'    => 'promotion/3.png',
+
             ],
             [
                 'name'     => 'Homepage middle 3',
                 'location' => 'not_set',
                 'key'      => 'ZDOZUZZIU7FT',
+                'image'    => 'promotion/4.png',
             ],
             [
-                'name'     => 'Homepage big 1',
+                'name'     => 'Products list 1',
                 'location' => 'not_set',
-                'key'      => 'Q9YDUIC9HSWS',
-            ],
-            [
-                'name'     => 'Homepage bottom small',
-                'location' => 'not_set',
-            ],
-            [
-                'name'     => 'Product sidebar',
-                'location' => 'product-sidebar',
-            ],
-            [
-                'name'     => 'Homepage big 2',
-                'location' => 'not_set',
-                'key'      => 'IZ6WU8KUALYE',
+                'key'      => 'ZDOZUZZIU7FZ',
+                'image'    => 'promotion/5.png',
+                'url'      => '/products/beat-headphone',
             ],
         ];
 
@@ -71,10 +62,43 @@ class AdsSeeder extends BaseSeeder
                 $item['key'] = strtoupper(Str::random(12));
             }
             $item['expired_at'] = now()->addYears(5)->toDateString();
-            $item['image'] = 'promotion/' . ($index + 1) . '.jpg';
-            $item['url'] = '/products';
+            $item['url'] = Arr::get($item, 'url', '/products');
 
             Ads::create($item);
+        }
+
+        DB::table('ads_translations')->truncate();
+
+        $translations = [
+            [
+                'name'     => 'Top Slider Image 1',
+                'image'    => 'promotion/1.jpg',
+            ],
+            [
+                'name'     => 'Homepage middle 1',
+                'image'    => 'promotion/2.png',
+            ],
+            [
+                'name'     => 'Homepage middle 2',
+                'image'    => 'promotion/3.png',
+
+            ],
+            [
+                'name'     => 'Homepage middle 3',
+                'image'    => 'promotion/4.png',
+            ],
+            [
+                'name'     => 'Products list 1',
+                'image'    => 'promotion/5.png',
+            ],
+        ];
+
+        foreach ($translations as $index => $item) {
+            $item['lang_code'] = 'vi';
+            $item['ads_id'] = $index + 1;
+            $item['url'] = '/vi/products';
+
+            DB::table('ads_translations')->insert($item);
         }
     }
 }

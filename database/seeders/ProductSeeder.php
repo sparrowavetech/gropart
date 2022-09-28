@@ -5,19 +5,23 @@ namespace Database\Seeders;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\MetaBox as MetaBoxModel;
 use Botble\Base\Supports\BaseSeeder;
+use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\OrderAddress;
 use Botble\Ecommerce\Models\OrderHistory;
 use Botble\Ecommerce\Models\OrderProduct;
 use Botble\Ecommerce\Models\Product;
+use Botble\Ecommerce\Models\ProductFile;
 use Botble\Ecommerce\Models\ProductVariation;
 use Botble\Ecommerce\Models\ProductVariationItem;
 use Botble\Ecommerce\Models\Shipment;
 use Botble\Ecommerce\Models\ShipmentHistory;
 use Botble\Ecommerce\Models\Wishlist;
+use Botble\Ecommerce\Services\Products\StoreProductService;
 use Botble\Slug\Models\Slug;
 use Faker\Factory;
 use File;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -149,11 +153,178 @@ class ProductSeeder extends BaseSeeder
                 'price'      => $faker->numberBetween(500, 1300),
                 'sale_price' => $faker->numberBetween(200, 400),
             ],
+            [
+                'name'  => 'Vimto Squash Remix Apple 1.5 Litres',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Crock Pot Slow Cooker',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Taylors of Harrogate Yorkshire Coffee',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Soft Mochi & Galeto Ice Cream',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Naked Noodle Egg Noodles Singapore',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Saute Pan Silver',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Bar S – Classic Bun Length Franks',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Broccoli Crowns',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Slimming World Vegan Mac Greens',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Häagen-Dazs Salted Caramel',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Iceland 3 Solo Exotic Burst',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Extreme Budweiser Light Can',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Iceland Macaroni Cheese Traybake',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Dolmio Bolognese Pasta Sauce',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Sitema BakeIT Plastic Box',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Wayfair Basics Dinner Plate Storage',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Miko The Panda Water Bottle',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Sesame Seed Bread',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Morrisons The Best Beef',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Avocado, Hass Large',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Italia Beef Lasagne',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Maxwell House Classic Roast Mocha',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Bottled Pure Water 500ml',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Famart Farmhouse Soft White',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Coca-Cola Original Taste',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Casillero Diablo Cabernet Sauvignon',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Arla Organic Free Range Milk',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Aptamil Follow On Baby Milk',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Cuisinart Chef’S Classic Hard-Anodized',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Corn, Yellow Sweet',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Hobnobs The Nobbly Biscuit',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Honest Organic Still Lemonade',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Ice Beck’s Beer 350ml x 24 Pieces',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Iceland 6 Hot Cross Buns',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Iceland Luxury 4 Panini Rolls',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Iceland Soft Scoop Vanilla',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Iceland Spaghetti Bolognese',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Kellogg’s Coco Pops Cereal',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Kit Kat Chunky Milk Chocolate',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Large Green Bell Pepper',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Pice 94w Beasley Journal',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
+            [
+                'name'  => 'Province Piece Glass Drinking Glass',
+                'price' => $faker->numberBetween(500, 1300),
+            ],
         ];
 
         Product::truncate();
         DB::table('ec_product_with_attribute_set')->truncate();
-        DB::table('ec_product_with_attribute')->truncate();
         DB::table('ec_product_variations')->truncate();
         DB::table('ec_product_variation_items')->truncate();
         DB::table('ec_product_collection_products')->truncate();
@@ -169,6 +340,9 @@ class ProductSeeder extends BaseSeeder
         Shipment::truncate();
         ShipmentHistory::truncate();
         MetaBoxModel::where('reference_type', Product::class)->delete();
+
+        ProductFile::truncate();
+        File::deleteDirectory(config('filesystems.disks.public.root') . '/product-files');
 
         foreach ($products as $key => $item) {
             $item['description'] = '<ul><li> Unrestrained and portable active stereo speaker</li>
@@ -204,7 +378,7 @@ class ProductSeeder extends BaseSeeder
                                 <p>This is a unisex item, please check our clothing &amp; footwear sizing guide for specific Rains jacket sizing information. RAINS comes from the rainy nation of Denmark at the edge of the European continent, close to the ocean and with prevailing westerly winds; all factors that contribute to an average of 121 rain days each year. Arising from these rainy weather conditions comes the attitude that a quick rain shower may be beautiful, as well as moody- but first and foremost requires the right outfit. Rains focus on the whole experience of going outside on rainy days, issuing an invitation to explore even in the most mercurial weather.</p>';
             $item['status'] = BaseStatusEnum::PUBLISHED;
             $item['sku'] = 'SW-' . $faker->numberBetween(100, 200);
-            $item['brand_id'] = $faker->numberBetween(1, 7);
+            $item['brand_id'] = $faker->numberBetween(1, 5);
             $item['tax_id'] = 1;
             $item['views'] = $faker->numberBetween(1000, 200000);
             $item['quantity'] = $faker->numberBetween(10, 20);
@@ -213,6 +387,13 @@ class ProductSeeder extends BaseSeeder
             $item['height'] = $faker->numberBetween(10, 20);
             $item['weight'] = $faker->numberBetween(500, 900);
             $item['with_storehouse_management'] = true;
+
+            // Support Digital Product
+            $productName = $item['name'];
+            if ($key % 4 == 0) {
+                $item['product_type'] = ProductTypeEnum::DIGITAL;
+                $item['name'] .= ' (' . ProductTypeEnum::DIGITAL()->label() . ')';
+            }
 
             $images = [
                 'products/' . ($key + 1) . '.jpg',
@@ -250,17 +431,23 @@ class ProductSeeder extends BaseSeeder
             Slug::create([
                 'reference_type' => Product::class,
                 'reference_id'   => $product->id,
-                'key'            => Str::slug($product->name),
+                'key'            => Str::slug($productName),
                 'prefix'         => SlugHelper::getPrefix(Product::class),
             ]);
 
-            MetaBox::saveMetaBoxData($product, 'faq_schema_config', json_decode('[[{"key":"question","value":"What Shipping Methods Are Available?"},{"key":"answer","value":"Ex Portland Pitchfork irure mustache. Eutra fap before they sold out literally. Aliquip ugh bicycle rights actually mlkshk, seitan squid craft beer tempor."}],[{"key":"question","value":"Do You Ship Internationally?"},{"key":"answer","value":"Hoodie tote bag mixtape tofu. Typewriter jean shorts wolf quinoa, messenger bag organic freegan cray."}],[{"key":"question","value":"How Long Will It Take To Get My Package?"},{"key":"answer","value":"Swag slow-carb quinoa VHS typewriter pork belly brunch, paleo single-origin coffee Wes Anderson. Flexitarian Pitchfork forage, literally paleo fap pour-over. Wes Anderson Pinterest YOLO fanny pack meggings, deep v XOXO chambray sustainable slow-carb raw denim church-key fap chillwave Etsy. +1 typewriter kitsch, American Apparel tofu Banksy Vice."}],[{"key":"question","value":"What Payment Methods Are Accepted?"},{"key":"answer","value":"Fashion axe DIY jean shorts, swag kale chips meh polaroid kogi butcher Wes Anderson chambray next level semiotics gentrify yr. Voluptate photo booth fugiat Vice. Austin sed Williamsburg, ea labore raw denim voluptate cred proident mixtape excepteur mustache. Twee chia photo booth readymade food truck, hoodie roof party swag keytar PBR DIY."}],[{"key":"question","value":"Is Buying On-Line Safe?"},{"key":"answer","value":"Art party authentic freegan semiotics jean shorts chia cred. Neutra Austin roof party Brooklyn, synth Thundercats swag 8-bit photo booth. Plaid letterpress leggings craft beer meh ethical Pinterest."}]]', true));
+            MetaBox::saveMetaBoxData(
+                $product,
+                'faq_schema_config',
+                json_decode(
+                    '[[{"key":"question","value":"What Shipping Methods Are Available?"},{"key":"answer","value":"Ex Portland Pitchfork irure mustache. Eutra fap before they sold out literally. Aliquip ugh bicycle rights actually mlkshk, seitan squid craft beer tempor."}],[{"key":"question","value":"Do You Ship Internationally?"},{"key":"answer","value":"Hoodie tote bag mixtape tofu. Typewriter jean shorts wolf quinoa, messenger bag organic freegan cray."}],[{"key":"question","value":"How Long Will It Take To Get My Package?"},{"key":"answer","value":"Swag slow-carb quinoa VHS typewriter pork belly brunch, paleo single-origin coffee Wes Anderson. Flexitarian Pitchfork forage, literally paleo fap pour-over. Wes Anderson Pinterest YOLO fanny pack meggings, deep v XOXO chambray sustainable slow-carb raw denim church-key fap chillwave Etsy. +1 typewriter kitsch, American Apparel tofu Banksy Vice."}],[{"key":"question","value":"What Payment Methods Are Accepted?"},{"key":"answer","value":"Fashion axe DIY jean shorts, swag kale chips meh polaroid kogi butcher Wes Anderson chambray next level semiotics gentrify yr. Voluptate photo booth fugiat Vice. Austin sed Williamsburg, ea labore raw denim voluptate cred proident mixtape excepteur mustache. Twee chia photo booth readymade food truck, hoodie roof party swag keytar PBR DIY."}],[{"key":"question","value":"Is Buying On-Line Safe?"},{"key":"answer","value":"Art party authentic freegan semiotics jean shorts chia cred. Neutra Austin roof party Brooklyn, synth Thundercats swag 8-bit photo booth. Plaid letterpress leggings craft beer meh ethical Pinterest."}]]',
+                    true
+                )
+            );
         }
 
         foreach ($products as $key => $item) {
             $product = Product::find($key + 1);
-            $product->productAttributeSets()->sync([1, 2]);
-            $product->productAttributes()->sync([$faker->numberBetween(1, 5), $faker->numberBetween(6, 10)]);
+            $product->productAttributeSets()->sync($product->id >= 24 ? [3, 4] : [1, 2]);
 
             $product->crossSales()->sync([
                 $this->random(1, 20, [$product->id]),
@@ -273,7 +460,6 @@ class ProductSeeder extends BaseSeeder
             ]);
 
             for ($j = 0; $j < $faker->numberBetween(1, 5); $j++) {
-
                 $variation = Product::create([
                     'name'                       => $product->name,
                     'status'                     => BaseStatusEnum::PUBLISHED,
@@ -284,12 +470,15 @@ class ProductSeeder extends BaseSeeder
                     'wide'                       => $product->wide,
                     'length'                     => $product->length,
                     'price'                      => $product->price,
-                    'sale_price'                 => $product->id % 4 == 0 ? ($product->price - $product->price * $faker->numberBetween(10,
-                            30) / 100) : null,
+                    'sale_price'                 => $product->id % 4 == 0 ? ($product->price - $product->price * $faker->numberBetween(
+                        10,
+                        30
+                    ) / 100) : null,
                     'brand_id'                   => $product->brand_id,
                     'with_storehouse_management' => $product->with_storehouse_management,
                     'is_variation'               => true,
-                    'images'                     => json_encode([isset($product->images[$j]) ? $product->images[$j] : Arr::first($product->images)]),
+                    'images'                     => json_encode([$product->images[$j] ?? Arr::first($product->images)]),
+                    'product_type'               => $product->product_type,
                 ]);
 
                 $productVariation = ProductVariation::create([
@@ -306,14 +495,184 @@ class ProductSeeder extends BaseSeeder
                 }
 
                 ProductVariationItem::create([
-                    'attribute_id' => $faker->numberBetween(1, 5),
+                    'attribute_id' => $faker->numberBetween($product->id >= 24 ? 11 : 1, $product->id >= 24 ? 15 : 5),
                     'variation_id' => $productVariation->id,
                 ]);
 
                 ProductVariationItem::create([
-                    'attribute_id' => $faker->numberBetween(6, 10),
+                    'attribute_id' => $faker->numberBetween($product->id >= 24 ? 16 : 6, $product->id >= 24 ? 20 : 10),
                     'variation_id' => $productVariation->id,
                 ]);
+
+                if ($product->isTypeDigital()) {
+                    foreach($product->images as $img) {
+                        $fileUpload = new UploadedFile(database_path('seeders/files/' . $img), Str::replace('products/', '', $img), 'image/jpeg', null, true);
+                        $productFileData = app(StoreProductService::class)->saveProductFile($fileUpload);
+                        $variation->productFiles()->create($productFileData);
+                    }
+                }
+            }
+        }
+
+        DB::table('ec_products_translations')->truncate();
+
+        $translations = [
+            [
+                'name' => 'Dual Camera 20MP',
+            ],
+            [
+                'name' => 'Smart Watches',
+            ],
+            [
+                'name' => 'Beat Headphone',
+            ],
+            [
+                'name' => 'Red & Black Headphone',
+            ],
+            [
+                'name' => 'Smart Watch External',
+            ],
+            [
+                'name' => 'Nikon HD camera',
+            ],
+            [
+                'name' => 'Audio Equipment',
+            ],
+            [
+                'name' => 'Smart Televisions',
+            ],
+            [
+                'name' => 'Samsung Smart Phone',
+            ],
+            [
+                'name' => 'Herschel Leather Duffle Bag In Brown Color',
+            ],
+            [
+                'name' => 'Xbox One Wireless Controller Black Color',
+            ],
+            [
+                'name' => 'EPSION Plaster Printer',
+            ],
+            [
+                'name' => 'Sound Intone I65 Earphone White Version',
+            ],
+            [
+                'name' => 'B&O Play Mini Bluetooth Speaker',
+            ],
+            [
+                'name' => 'Apple MacBook Air Retina 13.3-Inch Laptop',
+            ],
+            [
+                'name' => 'Apple MacBook Air Retina 12-Inch Laptop',
+            ],
+            [
+                'name' => 'Samsung Gear VR Virtual Reality Headset',
+            ],
+            [
+                'name' => 'Aveeno Moisturizing Body Shower 450ml',
+            ],
+            [
+                'name' => 'NYX Beauty Couton Pallete Makeup 12',
+            ],
+            [
+                'name' => 'NYX Beauty Couton Pallete Makeup 12',
+            ],
+            [
+                'name' => 'MVMTH Classical Leather Watch In Black',
+            ],
+            [
+                'name' => 'Baxter Care Hair Kit For Bearded Mens',
+            ],
+            [
+                'name' => 'Ciate Palemore Lipstick Bold Red Color',
+            ],
+            [
+                'name' => 'Vimto Squash Remix Apple 1.5 Litres',
+            ],
+            [
+                'name' => 'Crock Pot Slow Cooker',
+            ],
+            [
+                'name' => 'Taylors of Harrogate Yorkshire Coffee',
+            ],
+            [
+                'name' => 'Soft Mochi & Galeto Ice Cream',
+            ],
+            [
+                'name' => 'Naked Noodle Egg Noodles Singapore',
+            ],
+            [
+                'name' => 'Saute Pan Silver',
+            ],
+            [
+                'name' => 'Bar S – Classic Bun Length Franks',
+            ],
+            [
+                'name' => 'Broccoli Crowns',
+            ],
+            [
+                'name' => 'Slimming World Vegan Mac Greens',
+            ],
+            [
+                'name' => 'Häagen-Dazs Salted Caramel',
+            ],
+            [
+                'name' => 'Iceland 3 Solo Exotic Burst',
+            ],
+            [
+                'name' => 'Extreme Budweiser Light Can',
+            ],
+            [
+                'name' => 'Iceland Macaroni Cheese Traybake',
+            ],
+            [
+                'name' => 'Dolmio Bolognese Pasta Sauce',
+            ],
+            [
+                'name' => 'Sitema BakeIT Plastic Box',
+            ],
+            [
+                'name' => 'Wayfair Basics Dinner Plate Storage',
+            ],
+            [
+                'name' => 'Miko The Panda Water Bottle',
+            ],
+            [
+                'name' => 'Sesame Seed Bread',
+            ],
+            [
+                'name' => 'Morrisons The Best Beef',
+            ],
+            [
+                'name' => 'Avocado, Hass Large',
+            ],
+            [
+                'name' => 'Italia Beef Lasagne',
+            ],
+            [
+                'name' => 'Maxwell House Classic Roast Mocha',
+            ],
+            [
+                'name' => 'Bottled Pure Water 500ml',
+            ],
+        ];
+
+        foreach ($translations as $index => $item) {
+            $item['lang_code'] = 'vi';
+            $item['ec_products_id'] = $index + 1;
+
+            DB::table('ec_products_translations')->insert($item);
+
+            $product = Product::find($index + 1);
+            if ($product) {
+                $variations = $product->variations()->get();
+
+                foreach ($variations as $variation) {
+                    $item['lang_code'] = 'vi';
+                    $item['ec_products_id'] = $variation->product->id;
+
+                    DB::table('ec_products_translations')->insert($item);
+                }
             }
         }
     }
@@ -324,7 +683,7 @@ class ProductSeeder extends BaseSeeder
      * @param array $exceptions
      * @return int
      */
-    protected function random(int $from, int $to, array $exceptions = [])
+    protected function random(int $from, int $to, array $exceptions = []): int
     {
         sort($exceptions); // lets us use break; in the foreach reliably
         $number = rand($from, $to - count($exceptions)); // or mt_rand()

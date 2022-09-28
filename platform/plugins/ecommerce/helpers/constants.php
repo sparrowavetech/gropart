@@ -72,6 +72,10 @@ if (!defined('ORDER_MODULE_SCREEN_NAME')) {
     define('ORDER_MODULE_SCREEN_NAME', 'plugin-order');
 }
 
+if (!defined('ORDER_RETURN_MODULE_SCREEN_NAME')) {
+    define('ORDER_RETURN_MODULE_SCREEN_NAME', 'plugin-order-return');
+}
+
 if (!defined('ORDER_INCOMPLETE_MODULE_SCREEN_NAME')) {
     define('ORDER_INCOMPLETE_MODULE_SCREEN_NAME', 'plugin-order-incomplete');
 }

@@ -29,6 +29,7 @@ use Botble\Marketplace\Repositories\Interfaces\WithdrawalInterface;
 use Botble\Slug\Models\Slug;
 use Exception;
 use Html;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
@@ -258,7 +259,7 @@ class HookServiceProvider extends ServiceProvider
     /**
      * @param FormAbstract $form
      * @param BaseModel $data
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     public function registerAdditionalData($form, $data)
     {
@@ -298,7 +299,7 @@ class HookServiceProvider extends ServiceProvider
      * @param Request $request
      * @param BaseModel $object
      * @return bool
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     public function saveAdditionalData($type, $request, $object)
     {
@@ -417,7 +418,10 @@ class HookServiceProvider extends ServiceProvider
 
                             if (get_class($model) == Order::class) {
                                 $query = $query
-                                    ->orWhereHas('address', function ($subQuery) use ($keyword) {
+                                    ->whereHas('address', function ($subQuery) use ($keyword) {
+                                        return $subQuery->where('name', 'LIKE', '%' . $keyword . '%');
+                                    })
+                                    ->orWhereHas('user', function ($subQuery) use ($keyword) {
                                         return $subQuery->where('name', 'LIKE', '%' . $keyword . '%');
                                     });
                             }

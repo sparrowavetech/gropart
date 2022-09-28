@@ -4,7 +4,7 @@
         $attributes = $attributes ?? [];
         $allowThumb = Arr::get($attributes, 'allow_thumb', true);
     @endphp
-    @php $images = array_filter((array) old($name, !is_array($values) ? json_decode($values, true) : $values)); @endphp
+    @php $images = array_filter((array) old($name, !is_array($values) ? json_decode($values ?: '', true) : $values)); @endphp
     <div class="images-wrapper">
         <div data-name="{{ $name }}"
              class="text-center cursor-pointer js-btn-trigger-add-image default-placeholder-gallery-image @if (is_array($images) && !empty($images)) hidden @endif">

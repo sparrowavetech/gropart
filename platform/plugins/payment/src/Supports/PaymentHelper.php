@@ -41,15 +41,18 @@ class PaymentHelper
             'user_id' => Auth::check() ? Auth::id() : 0,
         ], $args);
 
-        $payment = app(PaymentInterface::class)->getFirstBy(['charge_id' => $data['charge_id']]);
+        $orderIds = (array)$data['order_id'];
+
+        $payment = app(PaymentInterface::class)->getFirstBy([
+            'charge_id' => $data['charge_id'],
+            ['order_id', 'IN', $orderIds],
+        ]);
 
         if ($payment) {
             return false;
         }
 
         $paymentChannel = Arr::get($data, 'payment_channel', PaymentMethodEnum::COD);
-
-        $orderIds = (array) $data['order_id'];
 
         return app(PaymentInterface::class)->create([
             'account_id'      => Arr::get($data, 'account_id'),

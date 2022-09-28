@@ -55,7 +55,6 @@
                                     @php
                                         $product = get_products([
                                             'condition' => [
-                                                'ec_products.status' => \Botble\Base\Enums\BaseStatusEnum::PUBLISHED,
                                                 'ec_products.id' => $orderProduct->product_id,
                                             ],
                                             'take' => 1,
@@ -503,8 +502,9 @@
                             </div>
                         @endif
                         <ul class="ws-nm text-infor-subdued">
-                            <li class="overflow-ellipsis"><a class="hover-underline"
-                                                             href="mailto:{{ $order->user->email ?: $order->address->email }}">{{ $order->user->email ?: $order->address->email }}</a>
+                            <li class="overflow-ellipsis">
+                                <a class="hover-underline"
+                                   href="mailto:{{ $order->user->email ?: $order->address->email }}">{{ $order->user->email ?: $order->address->email }}</a>
                             </li>
                             @if ($order->user->id)
                                 <li>
@@ -518,31 +518,81 @@
                         </ul>
                     </div>
                     <div class="next-card-section">
-                        <div class="flexbox-grid-default flexbox-align-items-center">
-                            <div class="flexbox-auto-content-left">
-                                <label
-                                    class="title-text-second"><strong>{{ trans('plugins/ecommerce::order.shipping_address') }}</strong></label>
-                            </div>
-                            @if ($order->status != \Botble\Ecommerce\Enums\OrderStatusEnum::CANCELED)
-                                <div class="flexbox-auto-content-right text-end">
-                                    <a href="#" class="btn-trigger-update-shipping-address">
-                                    <span data-placement="top" data-bs-toggle="tooltip"
-                                          data-bs-original-title="{{ trans('plugins/ecommerce::order.update_address') }}">
-                                        <svg class="svg-next-icon svg-next-icon-size-12">
-                                            <use xmlns:xlink="http://www.w3.org/1999/xlink"
-                                                 xlink:href="#next-edit"></use>
-                                        </svg>
-                                    </span>
-                                    </a>
+                        @if (!EcommerceHelper::countDigitalProducts($order->products))
+                            <div class="flexbox-grid-default flexbox-align-items-center">
+                                <div class="flexbox-auto-content-left">
+                                    <label
+                                        class="title-text-second"><strong>{{ trans('plugins/ecommerce::order.shipping_address') }}</strong></label>
                                 </div>
-                            @endif
-                        </div>
-                        <div>
-                            <ul class="ws-nm text-infor-subdued shipping-address-info">
-                                @include('plugins/ecommerce::orders.shipping-address.detail', ['address' => $order->address])
-                            </ul>
-                        </div>
+                                @if ($order->status != \Botble\Ecommerce\Enums\OrderStatusEnum::CANCELED)
+                                    <div class="flexbox-auto-content-right text-end">
+                                        <a href="#" class="btn-trigger-update-shipping-address">
+                                        <span data-placement="top" data-bs-toggle="tooltip"
+                                              data-bs-original-title="{{ trans('plugins/ecommerce::order.update_address') }}">
+                                            <svg class="svg-next-icon svg-next-icon-size-12">
+                                                <use xmlns:xlink="http://www.w3.org/1999/xlink"
+                                                     xlink:href="#next-edit"></use>
+                                            </svg>
+                                        </span>
+                                        </a>
+                                    </div>
+                                @endif
+                            </div>
+                            <div>
+                                <ul class="ws-nm text-infor-subdued shipping-address-info">
+                                    @include('plugins/ecommerce::orders.shipping-address.detail', ['address' => $order->address])
+                                </ul>
+                            </div>
+                        @endif
+
+                        @if (EcommerceHelper::isBillingAddressEnabled() && $order->billingAddress->id && $order->billingAddress->id != $order->shippingAddress->id)
+                            <div class="flexbox-grid-default flexbox-align-items-center">
+                                <div class="flexbox-auto-content-left">
+                                    <label
+                                        class="title-text-second"><strong>{{ trans('plugins/ecommerce::order.billing_address') }}</strong></label>
+                                </div>
+                            </div>
+                            <div>
+                                <ul class="ws-nm text-infor-subdued shipping-address-info">
+                                    @include('plugins/ecommerce::orders.shipping-address.detail', ['address' => $order->billingAddress])
+                                </ul>
+                            </div>
+                        @endif
                     </div>
+                    @if ($order->referral()->count())
+                        <div class="next-card-section">
+                            <div class="flexbox-grid-default flexbox-align-items-center mb-2">
+                                <div class="flexbox-auto-content-left">
+                                    <label
+                                        class="title-text-second"><strong>{{ trans('plugins/ecommerce::order.referral') }}</strong></label>
+                                </div>
+                            </div>
+                            <div>
+                                <ul class="ws-nm text-infor-subdued">
+                                    @foreach (['ip',
+                                        'landing_domain',
+                                        'landing_page',
+                                        'landing_params',
+                                        'referral',
+                                        'gclid',
+                                        'fclid',
+                                        'utm_source',
+                                        'utm_campaign',
+                                        'utm_medium',
+                                        'utm_term',
+                                        'utm_content',
+                                        'referrer_url',
+                                        'referrer_domain'] as $field)
+                                        @if ($order->referral->{$field})
+                                            <li>{{ trans('plugins/ecommerce::order.referral_data.' . $field) }}: <strong
+                                                    style="word-break: break-all">{{ $order->referral->{$field} }}</strong>
+                                            </li>
+                                        @endif
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
+                    @endif
                 </div>
 
                 @if ($order->canBeCanceledByAdmin())

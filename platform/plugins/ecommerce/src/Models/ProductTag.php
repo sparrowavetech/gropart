@@ -37,7 +37,7 @@ class ProductTag extends BaseModel
     /**
      * @return BelongsToMany
      */
-    public function products()
+    public function products(): BelongsToMany
     {
         return $this
             ->belongsToMany(Product::class, 'ec_product_tag_product', 'tag_id', 'product_id')

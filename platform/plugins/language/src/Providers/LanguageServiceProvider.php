@@ -361,16 +361,15 @@ class LanguageServiceProvider extends ServiceProvider
         $request = $this->app->make('request');
         $currentLanguage = null;
         foreach ($languages as $language) {
-            if ($value) {
-                if ($language->lang_code == $value) {
-                    $currentLanguage = $language;
-                }
-            } elseif ($request->input('ref_lang')) {
-                if ($language->lang_code == $request->input('ref_lang')) {
-                    $currentLanguage = $language;
-                }
+            if ($value && $language->lang_code == $value) {
+                $currentLanguage = $language;
+                break;
+            } elseif ($request->input('ref_lang') && $language->lang_code == $request->input('ref_lang')) {
+                $currentLanguage = $language;
+                break;
             } elseif ($language->lang_is_default) {
                 $currentLanguage = $language;
+                break;
             }
         }
 
@@ -378,6 +377,7 @@ class LanguageServiceProvider extends ServiceProvider
             foreach ($languages as $language) {
                 if ($language->lang_is_default) {
                     $currentLanguage = $language;
+                    break;
                 }
             }
         }
@@ -669,10 +669,10 @@ class LanguageServiceProvider extends ServiceProvider
                 if ($current) {
                     Language::setCurrentAdminLocale($current->lang_meta_code);
                     if ($current->lang_meta_code != Language::getCurrentLocaleCode()) {
-                        if (setting(
+                        if (!setting(
                             'language_show_default_item_if_current_version_not_existed',
                             true
-                        ) == false && get_class($model) != Menu::class) {
+                        ) && get_class($model) != Menu::class) {
                             return $data;
                         }
                         $meta = $this->app->make(LanguageMetaInterface::class)->getModel()
@@ -701,7 +701,7 @@ class LanguageServiceProvider extends ServiceProvider
      */
     public function addLanguageMiddlewareToPublicRoute($data)
     {
-        return array_merge_recursive($data, [
+        return array_merge_recursive(array_filter($data), [
             'prefix'     => Language::setLocale(),
             'middleware' => [
                 'localeSessionRedirect',

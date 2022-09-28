@@ -3,8 +3,9 @@
 namespace Database\Seeders;
 
 use Botble\Base\Supports\BaseSeeder;
-use Botble\Setting\Models\Setting as SettingModel;
-use Theme;
+use Botble\Setting\Models\Setting;
+use EcommerceHelper;
+use Illuminate\Support\Arr;
 
 class ThemeOptionSeeder extends BaseSeeder
 {
@@ -17,13 +18,18 @@ class ThemeOptionSeeder extends BaseSeeder
     {
         $this->uploadFiles('general');
 
-        $theme = Theme::getThemeName();
-        SettingModel::where('key', 'LIKE', 'theme-' . $theme . '-%')->delete();
+        $theme = Arr::first(scan_folder(theme_path()));
+        Setting::where('key', 'LIKE', 'theme-' . $theme . '-%')->delete();
+        Setting::whereIn('key', ['admin_logo', 'admin_favicon'])->delete();
 
-        SettingModel::insertOrIgnore([
+        Setting::insertOrIgnore([
             [
                 'key'   => 'theme',
                 'value' => $theme,
+            ],
+            [
+                'key'   => 'admin_favicon',
+                'value' => 'general/favicon.png',
             ],
             [
                 'key'   => 'admin_logo',
@@ -31,11 +37,11 @@ class ThemeOptionSeeder extends BaseSeeder
             ],
             [
                 'key'   => 'theme-' . $theme . '-site_title',
-                'value' => 'Martfury - Laravel Ecommerce system',
+                'value' => 'Farmart - Laravel Ecommerce system',
             ],
             [
                 'key'   => 'theme-' . $theme . '-copyright',
-                'value' => '© ' . now()->format('Y') . ' Martfury. All Rights Reserved.',
+                'value' => '© ' . now()->format('Y') . ' Farmart. All Rights Reserved.',
             ],
             [
                 'key'   => 'theme-' . $theme . '-favicon',
@@ -46,8 +52,12 @@ class ThemeOptionSeeder extends BaseSeeder
                 'value' => 'general/logo.png',
             ],
             [
-                'key'   => 'theme-' . $theme . '-welcome_message',
-                'value' => 'Welcome to Martfury Online Shopping Store!',
+                'key'   => 'theme-' . $theme . '-seo_og_image',
+                'value' => 'general/open-graph-image.png',
+            ],
+            [
+                'key'   => 'theme-' . $theme . '-image-placeholder',
+                'value' => 'general/placeholder.png',
             ],
             [
                 'key'   => 'theme-' . $theme . '-address',
@@ -55,25 +65,19 @@ class ThemeOptionSeeder extends BaseSeeder
             ],
             [
                 'key'   => 'theme-' . $theme . '-hotline',
-                'value' => '1800 97 97 69',
+                'value' => '8 800 332 65-66',
             ],
             [
                 'key'   => 'theme-' . $theme . '-email',
-                'value' => 'contact@martfury.co',
+                'value' => 'contact@fartmart.co',
             ],
             [
-                'key'   => 'theme-' . $theme . '-payment_methods',
-                'value' => json_encode([
-                    'general/payment-method-1.jpg',
-                    'general/payment-method-2.jpg',
-                    'general/payment-method-3.jpg',
-                    'general/payment-method-4.jpg',
-                    'general/payment-method-5.jpg',
-                ]),
+                'key'   => 'theme-' . $theme . '-working_time',
+                'value' => 'Mon - Fri: 07AM - 06PM',
             ],
             [
-                'key'   => 'theme-' . $theme . '-newsletter_image',
-                'value' => 'general/newsletter.jpg',
+                'key'   => 'theme-' . $theme . '-payment_methods_image',
+                'value' => 'general/footer-payments.png',
             ],
             [
                 'key'   => 'theme-' . $theme . '-homepage_id',
@@ -100,185 +104,117 @@ class ThemeOptionSeeder extends BaseSeeder
                 'value' => 40,
             ],
             [
-                'key'   => 'theme-' . $theme . '-product_feature_1_title',
-                'value' => 'Shipping worldwide',
-            ],
-            [
-                'key'   => 'theme-' . $theme . '-product_feature_1_icon',
-                'value' => 'icon-network',
-            ],
-            [
-                'key'   => 'theme-' . $theme . '-product_feature_2_title',
-                'value' => 'Free 7-day return if eligible, so easy',
-            ],
-            [
-                'key'   => 'theme-' . $theme . '-product_feature_2_icon',
-                'value' => 'icon-3d-rotate',
-            ],
-            [
-                'key'   => 'theme-' . $theme . '-product_feature_3_title',
-                'value' => 'Supplier give bills for this product.',
-            ],
-            [
-                'key'   => 'theme-' . $theme . '-product_feature_3_icon',
-                'value' => 'icon-receipt',
-            ],
-            [
-                'key'   => 'theme-' . $theme . '-product_feature_4_title',
-                'value' => 'Pay online or when receiving goods',
-            ],
-            [
-                'key'   => 'theme-' . $theme . '-product_feature_4_icon',
-                'value' => 'icon-credit-card',
-            ],
-
-            [
-                'key'   => 'theme-' . $theme . '-contact_info_box_1_title',
-                'value' => 'Contact Directly',
-            ],
-            [
-                'key'   => 'theme-' . $theme . '-contact_info_box_1_subtitle',
-                'value' => 'contact@martfury.com',
-            ],
-            [
-                'key'   => 'theme-' . $theme . '-contact_info_box_1_details',
-                'value' => '(+004) 912-3548-07',
-            ],
-
-            [
-                'key'   => 'theme-' . $theme . '-contact_info_box_2_title',
-                'value' => 'Headquarters',
-            ],
-            [
-                'key'   => 'theme-' . $theme . '-contact_info_box_2_subtitle',
-                'value' => '17 Queen St, Southbank, Melbourne 10560, Australia',
-            ],
-            [
-                'key'   => 'theme-' . $theme . '-contact_info_box_2_details',
-                'value' => '',
-            ],
-
-            [
-                'key'   => 'theme-' . $theme . '-contact_info_box_3_title',
-                'value' => 'Work With Us',
-            ],
-            [
-                'key'   => 'theme-' . $theme . '-contact_info_box_3_subtitle',
-                'value' => 'Send your CV to our email:',
-            ],
-            [
-                'key'   => 'theme-' . $theme . '-contact_info_box_3_details',
-                'value' => 'career@martfury.com',
-            ],
-
-            [
-                'key'   => 'theme-' . $theme . '-contact_info_box_4_title',
-                'value' => 'Customer Service',
-            ],
-            [
-                'key'   => 'theme-' . $theme . '-contact_info_box_4_subtitle',
-                'value' => 'customercare@martfury.com',
-            ],
-            [
-                'key'   => 'theme-' . $theme . '-contact_info_box_4_details',
-                'value' => '(800) 843-2446',
-            ],
-
-            [
-                'key'   => 'theme-' . $theme . '-contact_info_box_5_title',
-                'value' => 'Media Relations',
-            ],
-            [
-                'key'   => 'theme-' . $theme . '-contact_info_box_5_subtitle',
-                'value' => 'media@martfury.com',
-            ],
-            [
-                'key'   => 'theme-' . $theme . '-contact_info_box_5_details',
-                'value' => '(801) 947-3564',
-            ],
-
-            [
-                'key'   => 'theme-' . $theme . '-contact_info_box_6_title',
-                'value' => 'Vendor Support',
-            ],
-            [
-                'key'   => 'theme-' . $theme . '-contact_info_box_6_subtitle',
-                'value' => 'vendorsupport@martfury.com',
-            ],
-            [
-                'key'   => 'theme-' . $theme . '-contact_info_box_6_details',
-                'value' => '(801) 947-3100',
-            ],
-            [
-                'key'   => 'theme-' . $theme . '-number_of_cross_sale_products_in_cart_page',
-                'value' => 7,
+                'key'   => 'theme-' . $theme . '-number_of_cross_sale_product',
+                'value' => 6,
             ],
             [
                 'key'   => 'theme-' . $theme . '-logo_in_the_checkout_page',
-                'value' => 'general/logo-dark.png',
+                'value' => 'general/logo.png',
             ],
             [
                 'key'   => 'theme-' . $theme . '-logo_in_invoices',
-                'value' => 'general/logo-dark.png',
+                'value' => 'general/logo.png',
             ],
             [
                 'key'   => 'theme-' . $theme . '-logo_vendor_dashboard',
-                'value' => 'general/logo-dark.png',
+                'value' => 'general/logo.png',
+            ],
+            [
+                'key'   => 'theme-' . $theme . '-404_page_image',
+                'value' => 'general/404.png',
             ],
         ]);
 
-        $socials = [
+        $socialLinks = [
             [
-                'name' => 'Facebook',
-                'url'  => 'https://www.facebook.com/',
-                'icon' => 'fa-facebook',
-                'color' => '#3b5999',
+                [
+                    'key'   => 'social-name',
+                    'value' => 'Facebook',
+                ],
+                [
+                    'key'   => 'social-icon',
+                    'value' => 'general/facebook.png',
+                ],
+                [
+                    'key'   => 'social-url',
+                    'value' => 'https://www.facebook.com/',
+                ],
             ],
             [
-                'name' => 'Twitter',
-                'url'  => 'https://www.twitter.com/',
-                'icon' => 'fa-twitter',
-                'color' => '#55ACF9',
+                [
+                    'key'   => 'social-name',
+                    'value' => 'Twitter',
+                ],
+                [
+                    'key'   => 'social-icon',
+                    'value' => 'general/twitter.png',
+                ],
+                [
+                    'key'   => 'social-url',
+                    'value' => 'https://www.twitter.com/',
+                ],
             ],
             [
-                'name' => 'Instagram',
-                'url'  => 'https://www.instagram.com/',
-                'icon' => 'fa-instagram',
-                'color' => '#E1306C',
+                [
+                    'key'   => 'social-name',
+                    'value' => 'Instagram',
+                ],
+                [
+                    'key'   => 'social-icon',
+                    'value' => 'general/instagram.png',
+                ],
+                [
+                    'key'   => 'social-url',
+                    'value' => 'https://www.instagram.com/',
+                ],
             ],
             [
-                'name' => 'Youtube',
-                'url'  => 'https://www.youtube.com/',
-                'icon' => 'fa-youtube',
-                'color' => '#FF0000',
+                [
+                    'key'   => 'social-name',
+                    'value' => 'Pinterest',
+                ],
+                [
+                    'key'   => 'social-icon',
+                    'value' => 'general/pinterest.png',
+                ],
+                [
+                    'key'   => 'social-url',
+                    'value' => 'https://www.pinterest.com/',
+                ],
+            ],
+            [
+                [
+                    'key'   => 'social-name',
+                    'value' => 'Youtube',
+                ],
+                [
+                    'key'   => 'social-icon',
+                    'value' => 'general/youtube.png',
+                ],
+                [
+                    'key'   => 'social-url',
+                    'value' => 'https://www.youtube.com/',
+                ],
             ],
         ];
 
-        foreach ($socials as $index => $social) {
-            foreach ($social as $key => $value) {
-                $item['key'] = 'theme-' . $theme . '-social-' . $key . '-' . ($index + 1);
-                $item['value'] = $value;
+        Setting::insertOrIgnore([
+            'key'   => 'theme-' . $theme . '-social_links',
+            'value' => json_encode($socialLinks),
+        ]);
 
-                SettingModel::create($item);
-            }
-        }
-
-        SettingModel::insertOrIgnore([
+        Setting::insertOrIgnore([
             [
                 'key'   => 'theme-' . $theme . '-vi-copyright',
-                'value' => '© ' . now()->format('Y') . ' Martfury. Tất cả quyền đã được bảo hộ.',
-            ],
-            [
-                'key'   => 'theme-' . $theme . '-vi-welcome_message',
-                'value' => 'Chào mừng đến với Martfury - Cửa Hàng Mua Sắm Online!',
+                'value' => '© ' . now()->format('Y') . ' Farmart. Tất cả quyền đã được bảo hộ.',
             ],
             [
                 'key'   => 'theme-' . $theme . '-vi-homepage_id',
-                'value' => '13',
+                'value' => '1',
             ],
             [
                 'key'   => 'theme-' . $theme . '-vi-blog_page_id',
-                'value' => '18',
+                'value' => '6',
             ],
             [
                 'key'   => 'theme-' . $theme . '-vi-cookie_consent_message',
@@ -293,20 +229,8 @@ class ThemeOptionSeeder extends BaseSeeder
                 'value' => 'Chính sách cookie',
             ],
             [
-                'key'   => 'theme-' . $theme . '-vi-product_feature_1_title',
-                'value' => 'Vận chuyển toàn cầu',
-            ],
-            [
-                'key'   => 'theme-' . $theme . '-vi-product_feature_2_title',
-                'value' => 'Miễn phí hoàn hàng 7 ngày',
-            ],
-            [
-                'key'   => 'theme-' . $theme . '-vi-product_feature_3_title',
-                'value' => 'Nhà cung cấp sẽ cấp hóa đơn cho sản phẩm này',
-            ],
-            [
-                'key'   => 'theme-' . $theme . '-vi-product_feature_4_title',
-                'value' => 'Thanh toán online hoặc trực tiếp',
+                'key'   => EcommerceHelper::getSettingPrefix() . 'is_enabled_support_digital_products',
+                'value' => '1',
             ],
         ]);
     }

@@ -4,7 +4,7 @@ namespace Botble\Translation\Console;
 
 use Botble\Translation\Manager;
 use Botble\Translation\Models\Translation;
-use File;
+use Illuminate\Support\Facades\File;
 use Illuminate\Console\Command;
 use Symfony\Component\VarExporter\Exception\ExceptionInterface;
 

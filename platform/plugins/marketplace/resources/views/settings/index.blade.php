@@ -81,6 +81,21 @@
                                        @if (!MarketplaceHelper::hideStorePhoneNumber()) checked @endif>{{ trans('core/setting::setting.general.no') }}
                             </label>
                         </div>
+                        <div class="form-group mb-3">
+                            <label class="text-title-field"
+                                   for="allow_vendor_manage_shipping">{{ trans('plugins/marketplace::marketplace.settings.allow_vendor_manage_shipping') }}
+                            </label>
+                            <label class="me-2">
+                                <input type="radio" name="{{ MarketplaceHelper::getSettingKey('allow_vendor_manage_shipping') }}"
+                                       value="1"
+                                       @if (MarketplaceHelper::allowVendorManageShipping()) checked @endif>{{ trans('core/setting::setting.general.yes') }}
+                            </label>
+                            <label>
+                                <input type="radio" name="{{ MarketplaceHelper::getSettingKey('allow_vendor_manage_shipping') }}"
+                                       value="0"
+                                       @if (!MarketplaceHelper::allowVendorManageShipping()) checked @endif>{{ trans('core/setting::setting.general.no') }}
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>

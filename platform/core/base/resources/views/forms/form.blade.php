@@ -42,14 +42,18 @@
 
             @foreach ($fields as $field)
                 @if (!in_array($field->getName(), $exclude))
-                    <div class="widget meta-boxes">
-                        <div class="widget-title">
-                            <h4>{!! Form::customLabel($field->getName(), $field->getOption('label'), $field->getOption('label_attr')) !!}</h4>
+                    @if ($field->getType() == 'hidden')
+                        {!! $field->render() !!}
+                    @else
+                        <div class="widget meta-boxes">
+                            <div class="widget-title">
+                                <h4>{!! Form::customLabel($field->getName(), $field->getOption('label'), $field->getOption('label_attr')) !!}</h4>
+                            </div>
+                            <div class="widget-body">
+                                {!! $field->render([], in_array($field->getType(), ['radio', 'checkbox'])) !!}
+                            </div>
                         </div>
-                        <div class="widget-body">
-                            {!! $field->render([], in_array($field->getType(), ['radio', 'checkbox'])) !!}
-                        </div>
-                    </div>
+                    @endif
                 @endif
             @endforeach
 

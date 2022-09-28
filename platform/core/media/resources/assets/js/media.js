@@ -220,6 +220,10 @@ class MediaManagement {
 
                 MediaConfig.request_params[data.type] = data.value;
 
+                if (window.rvMedia.options) {
+                    window.rvMedia.options.view_in = data.value;
+                }
+
                 if (data.type === 'view_in') {
                     MediaConfig.request_params.folder_id = 0;
                     if (data.value === 'trash') {

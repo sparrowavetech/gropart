@@ -19,7 +19,6 @@
                         @php
                             $product = get_products([
                                 'condition' => [
-                                    'ec_products.status' => \Botble\Base\Enums\BaseStatusEnum::PUBLISHED,
                                     'ec_products.id'     => $orderProduct->product_id,
                                 ],
                                 'take'   => 1,

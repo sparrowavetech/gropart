@@ -2,8 +2,10 @@
 
 namespace Botble\Marketplace\Forms;
 
+use Assets;
 use Botble\Base\Forms\Fields\MultiCheckListField;
 use Botble\Base\Forms\Fields\TagField;
+use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Forms\Fields\CategoryMultiField;
 use Botble\Ecommerce\Forms\ProductForm as BaseProductForm;
 use Botble\Ecommerce\Models\Product;
@@ -30,6 +32,19 @@ class ProductForm extends BaseProductForm
      */
     public function buildForm()
     {
+        Assets::addStyles(['datetimepicker'])
+            ->addScripts([
+                'moment',
+                'datetimepicker',
+                'jquery-ui',
+                'input-mask',
+                'blockui',
+            ])
+            ->addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
+            ->addScriptsDirectly([
+                'vendor/core/plugins/ecommerce/js/edit-product.js',
+            ]);
+
         $selectedCategories = [];
         if ($this->getModel()) {
             $selectedCategories = $this->getModel()->categories()->pluck('category_id')->all();
@@ -83,7 +98,7 @@ class ProductForm extends BaseProductForm
                 'label_attr' => ['class' => 'text-title-field required'],
                 'attr'       => [
                     'placeholder'  => trans('core/base::forms.name_placeholder'),
-                    'data-counter' => 120,
+                    'data-counter' => 150,
                 ],
             ])
             ->add('description', 'customEditor', [
@@ -117,6 +132,9 @@ class ProductForm extends BaseProductForm
                     'wrap'     => false,
                     'priority' => 9999,
                 ],
+            ])
+            ->add('product_type', 'hidden', [
+                'value' => request()->input('product_type') ?: ProductTypeEnum::PHYSICAL,
             ])
             ->add('categories[]', 'categoryMulti', [
                 'label'      => trans('plugins/ecommerce::products.form.categories'),
@@ -170,11 +188,11 @@ class ProductForm extends BaseProductForm
                         'content'        => view(
                             'plugins/ecommerce::products.partials.general',
                             [
-                                'product' => $productId ? $this->getModel() : null,
-                                'isVariation' => false,
+                                'product'         => $productId ? $this->getModel() : null,
+                                'isVariation'     => false,
+                                'originalProduct' => null,
                             ]
-                        )
-                            ->render(),
+                        )->render(),
                         'before_wrapper' => '<div id="main-manage-product-type">',
                         'priority'       => 2,
                     ],
@@ -222,9 +240,10 @@ class ProductForm extends BaseProductForm
     }
 
     /**
+     * @param int $attributeSetId
      * @return Collection
      */
-    public function getProductAttributes($attributeSetId)
+    public function getProductAttributes($attributeSetId): Collection
     {
         $params = ['order_by' => ['ec_product_attributes.order' => 'ASC']];
 

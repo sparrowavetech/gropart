@@ -2,11 +2,13 @@
 
 namespace Database\Seeders;
 
+use Botble\Base\Models\MetaBox as MetaBoxModel;
 use Botble\Base\Supports\BaseSeeder;
 use Botble\Language\Models\LanguageMeta;
 use Botble\Setting\Models\Setting;
 use Botble\SimpleSlider\Models\SimpleSlider;
 use Botble\SimpleSlider\Models\SimpleSliderItem;
+use MetaBox;
 
 class SimpleSliderSeeder extends BaseSeeder
 {
@@ -22,6 +24,7 @@ class SimpleSliderSeeder extends BaseSeeder
         SimpleSlider::truncate();
         SimpleSliderItem::truncate();
         LanguageMeta::where('reference_type', SimpleSlider::class)->delete();
+        MetaBoxModel::where('reference_type', SimpleSlider::class)->delete();
 
         $sliders = [
             'en_US' => [
@@ -48,9 +51,6 @@ class SimpleSliderSeeder extends BaseSeeder
                 [
                     'title' => 'Slider 2',
                 ],
-                [
-                    'title' => 'Slider 3',
-                ],
             ],
             'vi'    => [
                 [
@@ -59,15 +59,11 @@ class SimpleSliderSeeder extends BaseSeeder
                 [
                     'title' => 'Slider 2',
                 ],
-                [
-                    'title' => 'Slider 3',
-                ],
             ],
         ];
 
         foreach ($sliders as $locale => $sliderItem) {
             foreach ($sliderItem as $index => $value) {
-
                 $slider = SimpleSlider::create($value);
 
                 $originValue = null;
@@ -83,11 +79,14 @@ class SimpleSliderSeeder extends BaseSeeder
 
                 foreach ($sliderItems[$locale] as $key => $item) {
                     $item['link'] = '/products';
-                    $item['image'] = 'sliders/' . ($key + 1) . '.jpg';
+                    $item['image'] = 'sliders/0' . ($key + 1) . '.jpg';
                     $item['order'] = $key + 1;
                     $item['simple_slider_id'] = $slider->id;
 
-                    SimpleSliderItem::create($item);
+                    $ssItem = SimpleSliderItem::create($item);
+
+                    MetaBox::saveMetaBoxData($ssItem, 'tablet_image', 'sliders/0' . ($key + 1) . '.jpg');
+                    MetaBox::saveMetaBoxData($ssItem, 'mobile_image', 'sliders/0' . ($key + 1) . '-sm.jpg');
                 }
             }
         }
@@ -100,4 +99,3 @@ class SimpleSliderSeeder extends BaseSeeder
         ]);
     }
 }
-

@@ -2,6 +2,7 @@
 
 namespace Botble\Ecommerce\Http\Controllers\Fronts;
 
+use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Supports\Helper;
@@ -77,12 +78,12 @@ class PublicProductController
      * @param SlugInterface $slugRepository
      */
     public function __construct(
-        ProductInterface $productRepository,
-        ProductCategoryInterface $productCategoryRepository,
+        ProductInterface             $productRepository,
+        ProductCategoryInterface     $productCategoryRepository,
         ProductAttributeSetInterface $productAttributeSet,
-        BrandInterface $brandRepository,
-        ProductVariationInterface $productVariationRepository,
-        SlugInterface $slugRepository
+        BrandInterface               $brandRepository,
+        ProductVariationInterface    $productVariationRepository,
+        SlugInterface                $slugRepository
     ) {
         $this->productRepository = $productRepository;
         $this->productCategoryRepository = $productCategoryRepository;
@@ -97,9 +98,14 @@ class PublicProductController
      * @param GetProductService $productService
      * @param BaseHttpResponse $response
      * @return BaseHttpResponse|Response
+     * @throws Throwable
      */
     public function getProducts(Request $request, GetProductService $productService, BaseHttpResponse $response)
     {
+        if (!EcommerceHelper::productFilterParamsValidated($request)) {
+            return $response->setNextUrl(route('public.products'));
+        }
+
         $query = $request->input('q');
 
         $with = [
@@ -156,7 +162,7 @@ class PublicProductController
     /**
      * @param string $slug
      * @param Request $request
-     * @return Response|RedirectResponse|Response
+     * @return Response|RedirectResponse
      */
     public function getProduct($slug, Request $request)
     {
@@ -257,6 +263,7 @@ class PublicProductController
      * @param ProductTagInterface $tagRepository
      * @param BaseHttpResponse $response
      * @return BaseHttpResponse|RedirectResponse|Response
+     * @throws Throwable
      */
     public function getProductTag(
         $slug,
@@ -291,6 +298,10 @@ class PublicProductController
 
         if ($tag->slugable->key !== $slug->key) {
             return redirect()->to($tag->url);
+        }
+
+        if (!EcommerceHelper::productFilterParamsValidated($request)) {
+            return $response->setNextUrl($tag->url);
         }
 
         $withCount = EcommerceHelper::withReviewsCount();
@@ -384,6 +395,10 @@ class PublicProductController
 
         if ($category->slugable->key !== $slug->key) {
             return redirect()->to($category->url);
+        }
+
+        if (!EcommerceHelper::productFilterParamsValidated($request)) {
+            return $response->setNextUrl($category->url);
         }
 
         $with = [
@@ -620,7 +635,8 @@ class PublicProductController
      * @param Request $request
      * @param GetProductService $getProductService
      * @param BaseHttpResponse $response
-     * @return BaseHttpResponse|RedirectResponse|\Illuminate\Http\Response|Response
+     * @return BaseHttpResponse|RedirectResponse|Response
+     * @throws Throwable
      */
     public function getBrand($slug, Request $request, GetProductService $getProductService, BaseHttpResponse $response)
     {
@@ -642,6 +658,10 @@ class PublicProductController
 
         if ($brand->slugable->key !== $slug->key) {
             return redirect()->to($brand->url);
+        }
+
+        if (!EcommerceHelper::productFilterParamsValidated($request)) {
+            return $response->setNextUrl($brand->url);
         }
 
         $products = $getProductService->getProduct(
@@ -753,7 +773,7 @@ class PublicProductController
             abort(404);
         }
 
-        $code = str_replace('#', '', $request->input('order_id'));
+        $code = BaseHelper::removeSpecialCharacters(str_replace('#', '', $request->input('order_id')));
 
         SeoHelper::setTitle(__('Order tracking :code', ['code' => $code ? ' #' . $code : '']));
 

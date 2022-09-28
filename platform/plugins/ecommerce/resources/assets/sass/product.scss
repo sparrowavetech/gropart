@@ -76,3 +76,17 @@
     background-color: #f9fafb;
     padding: 15px;
 }
+
+.product-type-digital-management {
+    .digital_attachments_input {
+        display: none;
+    }
+    table {
+        tbody {
+            tr.detach {
+                text-decoration: line-through;
+                opacity: 0.5;
+            }
+        }
+    }
+}

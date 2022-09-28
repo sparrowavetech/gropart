@@ -2,10 +2,12 @@
 
 namespace Botble\Ecommerce\Forms;
 
+use Assets;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Forms\Fields\MultiCheckListField;
 use Botble\Base\Forms\Fields\TagField;
 use Botble\Base\Forms\FormAbstract;
+use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Forms\Fields\CategoryMultiField;
 use Botble\Ecommerce\Http\Requests\ProductRequest;
 use Botble\Ecommerce\Models\Product;
@@ -19,6 +21,7 @@ use Botble\Ecommerce\Repositories\Interfaces\ProductVariationInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductVariationItemInterface;
 use Botble\Ecommerce\Repositories\Interfaces\TaxInterface;
 use EcommerceHelper;
+use Html;
 use Illuminate\Support\Collection;
 use ProductCategoryHelper;
 
@@ -29,49 +32,46 @@ class ProductForm extends FormAbstract
      */
     public function buildForm()
     {
-        $selectedCategories = [];
-        if ($this->getModel()) {
-            $selectedCategories = $this->getModel()->categories()->pluck('category_id')->all();
-        }
+        Assets::addStyles(['datetimepicker'])
+            ->addScripts([
+                'moment',
+                'datetimepicker',
+                'jquery-ui',
+                'input-mask',
+                'blockui',
+            ])
+            ->addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
+            ->addScriptsDirectly([
+                'vendor/core/plugins/ecommerce/js/edit-product.js',
+            ]);
 
         $brands = app(BrandInterface::class)->pluck('name', 'id');
-
         $brands = [0 => trans('plugins/ecommerce::brands.no_brand')] + $brands;
 
         $productCollections = app(ProductCollectionInterface::class)->pluck('name', 'id');
 
-        $selectedProductCollections = [];
-        if ($this->getModel()) {
-            $selectedProductCollections = $this->getModel()->productCollections()->pluck('product_collection_id')
-                ->all();
-        }
-
         $productLabels = app(ProductLabelInterface::class)->pluck('name', 'id');
 
+        $productId = null;
+        $selectedCategories = [];
+        $selectedProductCollections = [];
         $selectedProductLabels = [];
-        if ($this->getModel()) {
-            $selectedProductLabels = $this->getModel()->productLabels()->pluck('product_label_id')
-                ->all();
-        }
-
-        $productId = $this->getModel() ? $this->getModel()->id : null;
-
-        $productAttributeSets = app(ProductAttributeSetInterface::class)->getAllWithSelected($productId);
-
         $productVariations = [];
-
-        if ($this->getModel()) {
-            $productVariations = app(ProductVariationInterface::class)->allBy([
-                'configurable_product_id' => $this->getModel()->id,
-            ]);
-        }
-
         $tags = null;
 
         if ($this->getModel()) {
-            $tags = $this->getModel()->tags()->pluck('name')->all();
-            $tags = implode(',', $tags);
+            $productId = $this->getModel()->id;
+
+            $selectedCategories = $this->getModel()->categories()->pluck('category_id')->all();
+            $selectedProductCollections = $this->getModel()->productCollections()->pluck('product_collection_id')->all();
+            $selectedProductLabels = $this->getModel()->productLabels()->pluck('product_label_id')->all();
+            $productVariations = app(ProductVariationInterface::class)->allBy([
+                'configurable_product_id' => $productId,
+            ]);
+            $tags = $this->getModel()->tags()->pluck('name')->implode(',');
         }
+
+        $productAttributeSets = app(ProductAttributeSetInterface::class)->getAllWithSelected($productId);
 
         $this
             ->setupModel(new Product())
@@ -80,12 +80,13 @@ class ProductForm extends FormAbstract
             ->addCustomField('categoryMulti', CategoryMultiField::class)
             ->addCustomField('multiCheckList', MultiCheckListField::class)
             ->addCustomField('tags', TagField::class)
+            ->setFormOption('files', true)
             ->add('name', 'text', [
                 'label'      => trans('plugins/ecommerce::products.form.name'),
                 'label_attr' => ['class' => 'text-title-field required'],
                 'attr'       => [
                     'placeholder'  => trans('core/base::forms.name_placeholder'),
-                    'data-counter' => 120,
+                    'data-counter' => 150,
                 ],
             ])
             ->add('description', 'editor', [
@@ -113,13 +114,16 @@ class ProductForm extends FormAbstract
             ->addMetaBoxes([
                 'with_related' => [
                     'title'    => null,
-                    'content'  => '<div class="wrap-relation-product" data-target="' . route(
-                        'products.get-relations-boxes',
-                        $productId ?: 0
-                    ) . '"></div>',
+                    'content'  => Html::tag('div', '', [
+                        'class'       => 'wrap-relation-product',
+                        'data-target' => route('products.get-relations-boxes', $productId ?: 0),
+                    ]),
                     'wrap'     => false,
                     'priority' => 9999,
                 ],
+            ])
+            ->add('product_type', 'hidden', [
+                'value' => request()->input('product_type') ?: ProductTypeEnum::PHYSICAL,
             ])
             ->add('status', 'customSelect', [
                 'label'      => trans('core/base::tables.status'),
@@ -193,11 +197,11 @@ class ProductForm extends FormAbstract
                         'content'        => view(
                             'plugins/ecommerce::products.partials.general',
                             [
-                                'product'     => $productId ? $this->getModel() : null,
-                                'isVariation' => false,
+                                'product'         => $productId ? $this->getModel() : null,
+                                'isVariation'     => false,
+                                'originalProduct' => null,
                             ]
-                        )
-                            ->render(),
+                        )->render(),
                         'before_wrapper' => '<div id="main-manage-product-type">',
                         'priority'       => 2,
                     ],

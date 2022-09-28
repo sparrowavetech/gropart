@@ -22,6 +22,7 @@
             $isFreeShipping = Arr::get($sessionData, 'is_free_shipping', 0);
             $rawTotal = Cart::rawTotalByItems($cartItems);
             $shippingCurrent = Arr::get($shipping, $defaultShippingMethod . '.' . $defaultShippingOption, []);
+            $isAvailableShipping = Arr::get($sessionData, 'is_available_shipping', true);
         @endphp
         <div class="mt-3 bg-light mb-3">
             <div class="p-2" style="background: antiquewhite;">
@@ -57,21 +58,23 @@
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-6">
-                            <p>{{ __('Shipping fee') }}:</p>
+                    @if ($isAvailableShipping)
+                        <div class="row">
+                            <div class="col-6">
+                                <p>{{ __('Shipping fee') }}:</p>
+                            </div>
+                            <div class="col-6 text-end">
+                                <p class="price-text">
+                                    @if (Arr::get($shippingCurrent, 'price') && $isFreeShipping)
+                                        <span class="font-italic" style="text-decoration-line: line-through;">{{ format_price(Arr::get($shippingCurrent, 'price')) }}</span>
+                                        <span class="font-weight-bold">{{ __('Free shipping') }}</span>
+                                    @else
+                                        <span class="font-weight-bold">{{ format_price(Arr::get($shippingCurrent, 'price')) }}</span>
+                                    @endif
+                                </p>
+                            </div>
                         </div>
-                        <div class="col-6 text-end">
-                            <p class="price-text">
-                                @if (Arr::get($shippingCurrent, 'price') && $isFreeShipping)
-                                    <span class="font-italic" style="text-decoration-line: line-through;">{{ format_price(Arr::get($shippingCurrent, 'price')) }}</span>
-                                    <span class="font-weight-bold">{{ __('Free shipping') }}</span>
-                                @else
-                                    <span class="font-weight-bold">{{ format_price(Arr::get($shippingCurrent, 'price')) }}</span>
-                                @endif
-                            </p>
-                        </div>
-                    </div>
+                    @endif
 
                     @if (EcommerceHelper::isTaxEnabled())
                         <div class="row">
@@ -109,35 +112,38 @@
                 </div>
             @endif
 
-            <div class="shipping-method-wrapper p-3">
+            @if ($isAvailableShipping)
+                <div class="shipping-method-wrapper p-3">
+                    @if (!empty($shipping))
+                        <div class="payment-checkout-form">
+                            <div class="mx-0">
+                                <h6>{{ __('Shipping method') }}:</h6>
+                            </div>
 
-                @if (!empty($shipping))
-                    <div class="payment-checkout-form">
-                        <div class="mx-0">
-                            <h6>{{ __('Shipping method') }}:</h6>
-                        </div>
-
-                        <input type="hidden" name="shipping_option[{{ $storeId }}]" value="{{ old("shipping_option.$storeId", $defaultShippingOption) }}">
-                        <div id="shipping-method-{{ $storeId }}">
-                            <ul class="list-group list_payment_method">
-                                @foreach ($shipping as $shippingKey => $shippingItem)
-                                    @foreach($shippingItem as $subShippingKey => $subShippingItem)
-                                        @include('plugins/marketplace::orders.partials.shipping-option', [
-                                            'defaultShippingMethod' => $defaultShippingMethod,
-                                            'defaultShippingOption' => $defaultShippingOption,
-                                            'shippingOption'        => $subShippingKey,
-                                            'shippingItem'          => $subShippingItem,
-                                            'storeId'               => $storeId
-                                        ])
+                            <input type="hidden" name="shipping_option[{{ $storeId }}]" value="{{ old("shipping_option.$storeId", $defaultShippingOption) }}">
+                            <div id="shipping-method-{{ $storeId }}">
+                                <ul class="list-group list_payment_method">
+                                    @foreach ($shipping as $shippingKey => $shippingItem)
+                                        @foreach($shippingItem as $subShippingKey => $subShippingItem)
+                                            @include('plugins/marketplace::orders.partials.shipping-option', [
+                                                'defaultShippingMethod' => $defaultShippingMethod,
+                                                'defaultShippingOption' => $defaultShippingOption,
+                                                'shippingOption'        => $subShippingKey,
+                                                'shippingItem'          => $subShippingItem,
+                                                'storeId'               => $storeId
+                                            ])
+                                        @endforeach
                                     @endforeach
-                                @endforeach
-                            </ul>
+                                </ul>
+                            </div>
                         </div>
-                    </div>
-                @else
-                    <p>{{ __('No shipping methods available!') }}</p>
-                @endif
-            </div>
+                    @else
+                        <p>{{ __('No shipping methods available!') }}</p>
+                    @endif
+                </div>
+            @else
+                {{-- Can render text to show for customer --}}
+            @endif
         </div>
     @endforeach
 </div>

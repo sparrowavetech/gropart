@@ -23,6 +23,7 @@ use Botble\Marketplace\Models\Withdrawal;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Models\Payment;
+use Carbon\Carbon;
 use DB;
 use EcommerceHelper;
 use Illuminate\Support\Arr;
@@ -55,11 +56,11 @@ class OrderEcommerceSeeder extends BaseSeeder
         $shippingFeeService = app(HandleShippingFeeService::class);
 
         $products = Product::where('is_variation', 1)
-                ->with([
-                    'variationInfo',
-                    'variationInfo.configurableProduct',
-                ])
-                ->get();
+            ->with([
+                'variationInfo',
+                'variationInfo.configurableProduct',
+            ])
+            ->get();
 
         if ($isMarketplace) {
             $customers = Customer::where('is_vendor', 0)->with(['addresses'])->get();
@@ -72,6 +73,10 @@ class OrderEcommerceSeeder extends BaseSeeder
         for ($i = 0; $i < $total; $i++) {
             $customer = $customers->random();
             $address = $customer->addresses->first();
+
+            if (!$address) {
+                continue;
+            }
 
             $orderProducts = $products->random(rand(2, 4));
 
@@ -99,16 +104,22 @@ class OrderEcommerceSeeder extends BaseSeeder
                     'order_total' => $subTotal,
                 ];
 
+                $isAvailableShipping = EcommerceHelper::isAvailableShipping($grouped['products']);
+
                 $shippingMethod = $shippingFeeService->execute($shippingData, ShippingMethodEnum::DEFAULT);
 
                 $shippingAmount = Arr::get(Arr::first($shippingMethod), 'price', 0);
+                if (!$isAvailableShipping) {
+                    $shippingAmount = 0;
+                }
+
                 $time = now()->subMinutes(($total - $i) * 120 * rand(1, 10));
 
                 $order = [
                     'amount'          => $subTotal + $taxAmount + $shippingAmount,
                     'user_id'         => $customer->id,
-                    'shipping_method' => ShippingMethodEnum::DEFAULT,
-                    'shipping_option' => 1,
+                    'shipping_method' => $isAvailableShipping ? ShippingMethodEnum::DEFAULT : '',
+                    'shipping_option' => $isAvailableShipping ? 1 : null,
                     'shipping_amount' => $shippingAmount,
                     'tax_amount'      => $taxAmount,
                     'sub_total'       => $subTotal,
@@ -129,14 +140,16 @@ class OrderEcommerceSeeder extends BaseSeeder
 
                 foreach ($grouped['products'] as $product) {
                     $data = [
-                        'order_id'     => $order->id,
-                        'product_id'   => $product->id,
-                        'product_name' => $product->name,
-                        'qty'          => $product->qty,
-                        'weight'       => $product->weight * $product->qty,
-                        'price'        => $product->price ?: 1,
-                        'tax_amount'   => $product->tax_amount,
-                        'options'      => [],
+                        'order_id'         => $order->id,
+                        'product_id'       => $product->id,
+                        'product_name'     => $product->name,
+                        'qty'              => $product->qty,
+                        'weight'           => $product->weight * $product->qty,
+                        'price'            => $product->price ?: 1,
+                        'tax_amount'       => $product->tax_amount,
+                        'options'          => [],
+                        'product_type'     => $product->product_type,
+                        'times_downloaded' => $product->isTypeDigital() ? rand(0, 10) : 0,
                     ];
                     OrderProduct::create($data);
                 }
@@ -158,7 +171,7 @@ class OrderEcommerceSeeder extends BaseSeeder
                     'description' => __('Order is created from the checkout page'),
                     'order_id'    => $order->id,
                     'created_at'  => $time,
-                    'updated_at'  => $time
+                    'updated_at'  => $time,
                 ]);
 
                 OrderHistory::create([
@@ -167,7 +180,7 @@ class OrderEcommerceSeeder extends BaseSeeder
                     'order_id'    => $order->id,
                     'user_id'     => 0,
                     'created_at'  => $time,
-                    'updated_at'  => $time
+                    'updated_at'  => $time,
                 ]);
 
                 $paymentStatus = PaymentStatusEnum::COMPLETED;
@@ -207,85 +220,92 @@ class OrderEcommerceSeeder extends BaseSeeder
                 $shipmentStatus = Arr::random([ShippingStatusEnum::APPROVED, ShippingStatusEnum::DELIVERED]);
                 $codAmount = 0;
                 $codStatus = ShippingCodStatusEnum::COMPLETED;
+
                 if ($paymentMethod == PaymentMethodEnum::COD) {
                     $codAmount = $order->amount;
                 }
+
                 if ($codAmount) {
                     $codStatus = ShippingCodStatusEnum::PENDING;
                 }
-                $shipment = Shipment::create([
-                    'status'     => $shipmentStatus,
-                    'order_id'   => $order->id,
-                    'weight'     => $weight,
-                    'note'       => '',
-                    'cod_amount' => $codAmount,
-                    'cod_status' => $codStatus,
-                    'price'      => $order->shipping_amount,
-                    'store_id'   => $storeLocators->count() > 1 ? $storeLocators->random(1)->id : 0,
-                ]);
 
-                OrderHistory::create([
-                    'action'      => 'create_shipment',
-                    'description' => __('Created shipment for order'),
-                    'order_id'    => $order->id,
-                    'user_id'     => 0,
-                ]);
+                if ($isAvailableShipping) {
+                    $shipment = Shipment::create([
+                        'status'                => $shipmentStatus,
+                        'order_id'              => $order->id,
+                        'weight'                => $weight,
+                        'note'                  => '',
+                        'cod_amount'            => $codAmount,
+                        'cod_status'            => $codStatus,
+                        'price'                 => $order->shipping_amount,
+                        'store_id'              => $storeLocators->count() > 1 ? $storeLocators->random(1)->id : 0,
+                        'tracking_id'           => 'JJD00' . rand(1111111, 99999999),
+                        'shipping_company_name' => Arr::random(['DHL', 'AliExpress', 'GHN', 'FastShipping']),
+                        'tracking_link'         => 'https://mydhl.express.dhl/us/en/tracking.html#/track-by-reference',
+                        'estimate_date_shipped' => now()->addDays(rand(1, 10)),
+                        'date_shipped'          => $shipmentStatus == ShippingStatusEnum::DELIVERED ? now() : null,
+                    ]);
 
-                ShipmentHistory::create([
-                    'action'      => 'create_from_order',
-                    'description' => trans('plugins/ecommerce::order.shipping_was_created_from'),
-                    'shipment_id' => $shipment->id,
-                    'order_id'    => $order->id,
-                    'user_id'     => 0,
-                    'created_at'  => $time,
-                    'updated_at'  => $time
-                ]);
-
-                ShipmentHistory::create([
-                    'action'      => 'update_status',
-                    'description' => trans('plugins/ecommerce::shipping.changed_shipping_status', [
-                        'status' => ShippingStatusEnum::getLabel(ShippingStatusEnum::APPROVED),
-                    ]),
-                    'shipment_id' => $shipment->id,
-                    'order_id'    => $order->id,
-                    'user_id'     => 0,
-                    'created_at'  => now()->subMinutes(($total - $i) * 120),
-                ]);
-
-                if ($shipmentStatus == ShippingStatusEnum::DELIVERED) {
                     OrderHistory::create([
-                        'action'      => 'update_status',
-                        'description' => trans('plugins/ecommerce::shipping.changed_shipping_status', [
-                            'status' => ShippingStatusEnum::getLabel($shipmentStatus),
-                        ]),
+                        'action'      => 'create_shipment',
+                        'description' => __('Created shipment for order'),
                         'order_id'    => $order->id,
                         'user_id'     => 0,
                     ]);
 
-                    if ($payment->status !== PaymentStatusEnum::COMPLETED && $paymentMethod == PaymentMethodEnum::COD) {
-                        $shipment->cod_status = ShippingCodStatusEnum::COMPLETED;
-                        $shipment->save();
+                    ShipmentHistory::create([
+                        'action'      => 'create_from_order',
+                        'description' => trans('plugins/ecommerce::order.shipping_was_created_from'),
+                        'shipment_id' => $shipment->id,
+                        'order_id'    => $order->id,
+                        'user_id'     => 0,
+                        'created_at'  => $time,
+                        'updated_at'  => $time,
+                    ]);
+
+                    ShipmentHistory::create([
+                        'action'      => 'update_status',
+                        'description' => trans('plugins/ecommerce::shipping.changed_shipping_status', [
+                            'status' => ShippingStatusEnum::getLabel(ShippingStatusEnum::APPROVED),
+                        ]),
+                        'shipment_id' => $shipment->id,
+                        'order_id'    => $order->id,
+                        'user_id'     => 0,
+                        'created_at'  => now()->subMinutes(($total - $i) * 120),
+                    ]);
+
+                    if ($shipmentStatus == ShippingStatusEnum::DELIVERED) {
+                        $order = $this->setOrderCompleted($order, $shipmentStatus);
+
+                        if ($payment->status !== PaymentStatusEnum::COMPLETED && $paymentMethod == PaymentMethodEnum::COD) {
+                            $shipment->cod_status = ShippingCodStatusEnum::COMPLETED;
+                            $shipment->save();
+
+                            ShipmentHistory::create([
+                                'action'      => 'update_cod_status',
+                                'description' => trans('plugins/ecommerce::shipping.updated_cod_status_by', [
+                                    'status' => ShippingCodStatusEnum::getLabel(ShippingCodStatusEnum::COMPLETED),
+                                ]),
+                                'shipment_id' => $shipment->id,
+                                'order_id'    => $order->id,
+                                'user_id'     => 0,
+                            ]);
+                        }
 
                         ShipmentHistory::create([
-                            'action'      => 'update_cod_status',
-                            'description' => trans('plugins/ecommerce::shipping.updated_cod_status_by', [
-                                'status' => ShippingCodStatusEnum::getLabel(ShippingCodStatusEnum::COMPLETED),
+                            'action'      => 'update_status',
+                            'description' => trans('plugins/ecommerce::shipping.changed_shipping_status', [
+                                'status' => ShippingStatusEnum::getLabel($shipmentStatus),
                             ]),
                             'shipment_id' => $shipment->id,
                             'order_id'    => $order->id,
                             'user_id'     => 0,
                         ]);
                     }
-
-                    ShipmentHistory::create([
-                        'action'      => 'update_status',
-                        'description' => trans('plugins/ecommerce::shipping.changed_shipping_status', [
-                            'status' => ShippingStatusEnum::getLabel($shipmentStatus),
-                        ]),
-                        'shipment_id' => $shipment->id,
-                        'order_id'    => $order->id,
-                        'user_id'     => 0,
-                    ]);
+                } else {
+                    if ($paymentStatus == PaymentStatusEnum::COMPLETED) {
+                        $order = $this->setOrderCompleted($order, '');
+                    }
                 }
             }
         }
@@ -298,6 +318,7 @@ class OrderEcommerceSeeder extends BaseSeeder
         foreach ($orders as $order) {
             if ($order->payment->status == PaymentStatusEnum::COMPLETED && $order->shipment->status == ShippingStatusEnum::DELIVERED) {
                 $order->status = OrderStatusEnum::COMPLETED;
+                $order->completed_at = Carbon::now();
                 $order->save();
 
                 OrderHistory::create([
@@ -363,7 +384,7 @@ class OrderEcommerceSeeder extends BaseSeeder
             $vendorInfo = $vendor->vendorInfo;
             $rand = rand(1, 3);
             for ($i = 0; $i <= $rand; $i++) {
-                $amount = rand(1, ($vendorInfo->balance / 3) - 10);
+                $amount = rand(1, (int)($vendorInfo->balance / 3) - 10);
 
                 if ($amount - $fee > 0) {
                     Withdrawal::create([
@@ -418,12 +439,36 @@ class OrderEcommerceSeeder extends BaseSeeder
      * @param Product $product
      * @return int
      */
-    public function getTax($product)
+    public function getTax(Product $product)
     {
         if (!EcommerceHelper::isTaxEnabled()) {
             return 0;
         }
 
         return $product->price * $product->tax->percentage / 100;
+    }
+
+    /**
+     *
+     * @param Order $order
+     * @param string $shipmentStatus
+     * @return Order
+     */
+    public function setOrderCompleted($order, $shipmentStatus = '')
+    {
+        $order->status = OrderStatusEnum::COMPLETED;
+        $order->completed_at = Carbon::now();
+        $order->save();
+
+        OrderHistory::create([
+            'action'      => 'update_status',
+            'description' => trans('plugins/ecommerce::shipping.changed_shipping_status', [
+                'status' => ShippingStatusEnum::getLabel($shipmentStatus),
+            ]),
+            'order_id'    => $order->id,
+            'user_id'     => 0,
+        ]);
+
+        return $order;
     }
 }

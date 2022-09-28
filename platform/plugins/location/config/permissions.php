@@ -67,30 +67,15 @@ return [
         'flag'        => 'city.destroy',
         'parent_flag' => 'city.index',
     ],
-
     [
-        'name'        => 'Pincodes',
-        'flag'        => 'pincode.index',
+        'name'        => 'Import',
+        'flag'        => 'bulk-import.index',
         'parent_flag' => 'plugin.location',
     ],
+
     [
-        'name'        => 'Create',
-        'flag'        => 'pincode.create',
-        'parent_flag' => 'pincode.index',
-    ],
-    [
-        'name'        => 'Edit',
-        'flag'        => 'pincode.edit',
-        'parent_flag' => 'pincode.index',
-    ],
-    [
-        'name'        => 'Delete',
-        'flag'        => 'pincode.destroy',
-        'parent_flag' => 'pincode.index',
-    ],
-    [
-        'name'        => 'Bulk Import Location',
-        'flag'        => 'location.bulk-import.index',
+        'name'        => 'Export',
+        'flag'        => 'export.index',
         'parent_flag' => 'plugin.location',
     ],
 ];

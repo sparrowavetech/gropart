@@ -196,6 +196,7 @@ class EcommerceProduct {
             $group.find('.detect-schedule').val(1);
             $group.find('.scheduled-time').removeClass('hidden');
         });
+
         _self.$body.on('click', '.turn-off-schedule', event => {
             event.preventDefault();
             let $current = $(event.currentTarget);
@@ -204,7 +205,7 @@ class EcommerceProduct {
             $group.find('.turn-on-schedule').removeClass('hidden');
             $group.find('.detect-schedule').val(0);
             $group.find('.scheduled-time').addClass('hidden');
-        })
+        });
     }
 
     handleStorehouse() {
@@ -219,7 +220,7 @@ class EcommerceProduct {
                 $storehouseInfo.addClass('hidden');
                 $('.stock-status-wrapper').removeClass('hidden');
             }
-        })
+        });
     }
 
     handleShipping() {
@@ -232,7 +233,7 @@ class EcommerceProduct {
             let $input = $parent.find('input[type=hidden]');
             $input.val($current.attr('data-alias'));
             $parent.find('.dropdown-toggle .alias').html($current.attr('data-alias'));
-        })
+        });
     }
 
     handleModifyAttributeSets() {
@@ -270,6 +271,7 @@ class EcommerceProduct {
 
                         $('#select-attribute-sets-modal').modal('hide');
                     }
+
                     $current.removeClass('button-loading');
                 },
                 complete: () => {
@@ -279,20 +281,31 @@ class EcommerceProduct {
                     Botble.handleError(data);
                     $current.removeClass('button-loading');
                 },
-            })
-        })
+            });
+        });
     }
 
     handleAddVariations() {
         let _self = this;
 
         let createOrUpdateVariation = $current => {
-            let formData = $current.closest('.modal-content').find('.variation-form-wrapper').find('select,textarea,input').serialize();
+            let $form = $current.closest('.modal-content').find('.variation-form-wrapper form');
+            let formData = new FormData($form[0]);
+            if (jQuery().inputmask) {
+                $form.find('input.input-mask-number').map(function (i, e) {
+                    const $input = $(e);
+                    if ($input.inputmask) {
+                        formData.append($input.attr('name'), $input.inputmask('unmaskedvalue'));
+                    }
+                });
+            }
 
             $.ajax({
                 url: $current.data('target'),
                 type: 'POST',
                 data: formData,
+                processData: false,
+                contentType: false,
                 beforeSend: () => {
                     $current.addClass('button-loading');
                 },
@@ -319,7 +332,7 @@ class EcommerceProduct {
                     Botble.handleError(data);
                     $current.removeClass('button-loading');
                 },
-            })
+            });
         };
 
         _self.$body.on('click', '#store-product-variation-button', event => {
@@ -407,7 +420,7 @@ class EcommerceProduct {
                 error: data => {
                     Botble.handleError(data);
                 },
-            })
+            });
         });
 
         $(document).on('click', '.btn-trigger-edit-product-version', event => {
@@ -442,7 +455,7 @@ class EcommerceProduct {
                 error: data => {
                     Botble.handleError(data);
                 },
-            })
+            });
         });
 
         _self.$body.on('click', '.btn-trigger-add-attribute-to-simple-product', event => {
@@ -885,5 +898,83 @@ $(window).on('load', () => {
     $(document).ready(function () {
         loadRelationBoxes();
     });
+
+    $(document).on('click', '.digital_attachments_btn', function (e) {
+        e.preventDefault();
+        const $this = $(e.currentTarget);
+        const $box = $this.closest('.product-type-digital-management');
+        const $inputFile = $box.find('input[type=file]').last();
+        $inputFile.trigger('click');
+    });
+
+    $(document).on('change', 'input[name^=product_files_input]', function (e) {
+        const $this = $(e.currentTarget);
+        const file = $this[0].files[0]
+        if (file) {
+            const $box = $this.closest('.product-type-digital-management');
+            let id = $this.data('id');
+            let $template = $('#digital_attachment_template').html();
+            $template = $template
+                .replace(/__id__/gi, id)
+                .replace(/__file_name__/gi, file.name)
+                .replace(/__file_size__/gi, humanFileSize(file.size));
+
+            let newId = Math.floor(Math.random() * 26) + Date.now();
+
+            $box.find('table tbody').append($template);
+            $box.find('.digital_attachments_input').append(`<input type="file" name="product_files_input[]" data-id="${newId}">`);
+        }
+    });
+
+    $(document).on('change', 'input.digital-attachment-checkbox', function (e) {
+        const $this = $(e.currentTarget);
+        const $tr = $this.closest('tr');
+        if ($this.is(':checked')) {
+            $tr.removeClass('detach');
+        } else {
+            $tr.addClass('detach');
+        }
+    });
+
+    $(document).on('click', '.remove-attachment-input', function (e) {
+        const $this = $(e.currentTarget);
+        const $tr = $this.closest('tr');
+        let id = $tr.data('id');
+        $('input[data-id=' + id + ']').remove();
+        $tr.fadeOut(300, function () {
+            $(this).remove();
+        });
+    });
+
+    /**
+     * Format bytes as human-readable text.
+     *
+     * @param bytes Number of bytes.
+     * @param si True to use metric (SI) units, aka powers of 1000. False to use
+     *           binary (IEC), aka powers of 1024.
+     * @param dp Number of decimal places to display.
+     *
+     * @return Formatted string.
+     */
+    function humanFileSize(bytes, si = true, dp = 2) {
+        const thresh = si ? 1000 : 1024;
+
+        if (Math.abs(bytes) < thresh) {
+            return bytes + ' B';
+        }
+
+        const units = si
+            ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+            : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+        let u = -1;
+        const r = 10 ** dp;
+
+        do {
+            bytes /= thresh;
+            ++u;
+        } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
+
+        return Botble.numberFormat(bytes, dp, ',', '.') + ' ' + units[u];
+    }
 });
 

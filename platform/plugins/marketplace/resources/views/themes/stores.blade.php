@@ -10,7 +10,7 @@
                         <form action="{{ route('public.stores') }}" method="get">
                             <div class="form-group mb-3">
                                 <button><i class="icon-magnifier"></i></button>
-                                <input class="form-control" name="q" value="{{ request()->input('q') }}" type="text" placeholder="{{ __('Search vendor...') }}">
+                                <input class="form-control" name="q" value="{{ is_string(request()->input('q')) ? request()->input('q') : '' }}" type="text" placeholder="{{ __('Search vendor...') }}">
                             </div>
                         </form>
                     </div>

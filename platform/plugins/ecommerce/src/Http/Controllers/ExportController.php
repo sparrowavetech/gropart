@@ -3,12 +3,15 @@
 namespace Botble\Ecommerce\Http\Controllers;
 
 use Assets;
+use BaseHelper;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Ecommerce\Exports\CsvProductExport;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductVariationInterface;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
-use Illuminate\View\View;
+use Illuminate\Contracts\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ExportController extends BaseController
 {
@@ -35,7 +38,7 @@ class ExportController extends BaseController
     }
 
     /**
-     * @return Factory|View
+     * @return Factory|Application|View
      */
     public function products()
     {
@@ -56,12 +59,11 @@ class ExportController extends BaseController
     }
 
     /**
-     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     * @return BinaryFileResponse
      */
     public function exportProducts()
     {
-        @ini_set('max_execution_time', -1);
-        @ini_set('memory_limit', -1);
+        BaseHelper::maximumExecutionTimeAndMemoryLimit();
 
         return (new CsvProductExport())->download('export_products.csv');
     }

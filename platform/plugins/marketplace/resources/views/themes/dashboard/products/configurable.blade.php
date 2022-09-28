@@ -16,6 +16,9 @@
                 @endforeach
                 <th>{{ trans('plugins/ecommerce::products.form.price') }}</th>
                 <th>{{ trans('plugins/ecommerce::products.form.is_default') }}</th>
+                @if (EcommerceHelper::isEnabledSupportDigitalProducts() &&  $product->isTypeDigital())
+                    <th>{{ $product->product_type->label() }}</th>
+                @endif
                 <th class="text-center">{{ trans('plugins/ecommerce::products.form.action') }}</th>
             </tr>
             </thead>
@@ -57,6 +60,12 @@
                                    value="{{ $variation->id }}">
                         </label>
                     </td>
+                    @if (EcommerceHelper::isEnabledSupportDigitalProducts() && $currentRelatedProduct->isTypeDigital())
+                        <td>
+                            <span>{{ $currentRelatedProduct->productFiles->count() }}</span>
+                            <span><i class="fas fa-paperclip"></i></span>
+                        </td>
+                    @endif
                     <td style="width: 180px;" class="text-center">
                         <a href="#" class="btn btn-info btn-trigger-edit-product-version"
                                 data-target="{{ route('marketplace.vendor.products.update-version', [$variation->id]) }}"

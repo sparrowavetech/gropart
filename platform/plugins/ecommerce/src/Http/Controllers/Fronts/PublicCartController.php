@@ -198,15 +198,18 @@ class PublicCartController extends Controller
         $outOfQuantity = false;
         foreach ($data as $item) {
             $cartItem = Cart::instance('cart')->get($item['rowId']);
+
+            if (!$cartItem) {
+                continue;
+            }
+
             $product = null;
 
-            if ($cartItem) {
-                $product = $this->productRepository->findById($cartItem->id);
-            }
+            $product = $this->productRepository->findById($cartItem->id);
 
             if ($product) {
                 $originalQuantity = $product->quantity;
-                $product->quantity = (int)$product->quantity - Arr::get($item, 'values.qty', 0) + 1;
+                $product->quantity = (int)$product->quantity - (int)Arr::get($item, 'values.qty', 0) + 1;
 
                 if ($product->quantity < 0) {
                     $product->quantity = 0;

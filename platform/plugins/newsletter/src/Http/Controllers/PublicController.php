@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Newsletter;
 use SendGrid;
-use URL;
+use Illuminate\Support\Facades\URL;
 
 class PublicController extends Controller
 {

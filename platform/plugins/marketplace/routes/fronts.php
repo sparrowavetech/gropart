@@ -213,6 +213,15 @@ Route::group([
                 ]);
             });
 
+            Route::group(['prefix' => 'order-returns', 'as' => 'order-returns.'], function () {
+                Route::resource('', 'OrderReturnController')->parameters(['' => 'order'])->except(['create', 'store']);
+
+                Route::delete('items/destroy', [
+                    'as'   => 'deletes',
+                    'uses' => 'OrderReturnController@deletes',
+                ]);
+            });
+
             Route::group(['prefix' => 'coupons', 'as' => 'discounts.'], function () {
                 Route::resource('', 'DiscountController')->parameters(['' => 'coupon'])->except(['edit', 'update']);
 

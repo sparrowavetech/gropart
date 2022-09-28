@@ -3,11 +3,11 @@
 namespace Botble\Ecommerce\Repositories\Eloquent;
 
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Ecommerce\Enums\StockStatusEnum;
 use Botble\Ecommerce\Models\ProductAttribute;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 use EcommerceHelper;
+use Eloquent;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
@@ -33,34 +33,11 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
     }
 
     /**
-     * @return \Eloquent|\Illuminate\Database\Eloquent\Builder|Model
+     * @return Eloquent|\Illuminate\Database\Eloquent\Builder|Model
      */
     protected function exceptOutOfStockProducts()
     {
-        if (EcommerceHelper::showOutOfStockProducts() || is_in_admin()) {
-            return $this->model;
-        }
-
-        $this->model = $this->model->where(function ($query) {
-            $query
-                ->where(function ($subQuery) {
-                    $subQuery
-                        ->where('with_storehouse_management', 0)
-                        ->where('stock_status', '!=', StockStatusEnum::OUT_OF_STOCK);
-                })
-                ->orWhere(function ($subQuery) {
-                    $subQuery
-                        ->where('with_storehouse_management', 1)
-                        ->where('quantity', '>', 0);
-                })
-                ->orWhere(function ($subQuery) {
-                    $subQuery
-                        ->where('with_storehouse_management', 1)
-                        ->where('allow_checkout_when_out_of_stock', 1);
-                });
-        });
-
-        return $this->model;
+        return $this->model->notOutOfStock();
     }
 
     /**
@@ -504,7 +481,7 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
             });
 
         $keyword = $filters['keyword'];
-        if ($keyword) {
+        if ($keyword && is_string($keyword)) {
             $searchProductsBy = EcommerceHelper::getProductsSearchBy();
             $isPartial = get_ecommerce_setting('search_products_exactly_by_name', 0) != 1;
 

@@ -37,6 +37,8 @@
         </div>
     </div>
 
+    @stack('footer')
+
     {!! Html::script('vendor/core/plugins/ecommerce/js/utilities.js') !!}
     {!! Html::script('vendor/core/core/base/libraries/toastr/toastr.min.js') !!}
 

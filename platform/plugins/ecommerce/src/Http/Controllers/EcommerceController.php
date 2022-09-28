@@ -104,11 +104,20 @@ class EcommerceController extends BaseController
     {
         page_title()->setTitle(trans('plugins/ecommerce::ecommerce.setting.tracking_settings'));
 
-        Assets::addScriptsDirectly([
+        Assets::addStylesDirectly([
+            'vendor/core/plugins/ecommerce/css/ecommerce.css',
+            'vendor/core/core/base/libraries/codemirror/lib/codemirror.css',
+            'vendor/core/core/base/libraries/codemirror/addon/hint/show-hint.css',
+            'vendor/core/packages/theme/css/custom-css.css',
+        ])
+            ->addScriptsDirectly([
                 'vendor/core/plugins/ecommerce/js/setting.js',
-            ])
-            ->addStylesDirectly([
-                'vendor/core/plugins/ecommerce/css/ecommerce.css',
+                'vendor/core/core/base/libraries/codemirror/lib/codemirror.js',
+                'vendor/core/core/base/libraries/codemirror/lib/javascript.js',
+                'vendor/core/core/base/libraries/codemirror/addon/hint/show-hint.js',
+                'vendor/core/core/base/libraries/codemirror/addon/hint/anyword-hint.js',
+                'vendor/core/core/base/libraries/codemirror/addon/hint/javascript-hint.js',
+                'vendor/core/packages/theme/js/custom-js.js',
             ]);
 
         return view('plugins/ecommerce::settings.tracking-settings');
@@ -123,10 +132,10 @@ class EcommerceController extends BaseController
      * @throws Exception
      */
     public function postSettings(
-        UpdateSettingsRequest $request,
-        BaseHttpResponse $response,
+        UpdateSettingsRequest  $request,
+        BaseHttpResponse       $response,
         StoreCurrenciesService $service,
-        SettingStore $settingStore
+        SettingStore           $settingStore
     ) {
         foreach ($request->except([
             '_token',
@@ -191,9 +200,9 @@ class EcommerceController extends BaseController
      * @return BaseHttpResponse
      */
     public function postAdvancedSettings(
-        Request $request,
+        Request          $request,
         BaseHttpResponse $response,
-        SettingStore $settingStore
+        SettingStore     $settingStore
     ) {
         foreach ($request->except([
             '_token',
@@ -221,9 +230,9 @@ class EcommerceController extends BaseController
      * @return BaseHttpResponse
      */
     public function postTrackingSettings(
-        Request $request,
+        Request          $request,
         BaseHttpResponse $response,
-        SettingStore $settingStore
+        SettingStore     $settingStore
     ) {
         foreach ($request->except([
             '_token',
@@ -311,6 +320,7 @@ class EcommerceController extends BaseController
      * @param int $id
      * @param BaseHttpResponse $response
      * @return BaseHttpResponse
+     * @throws Exception
      */
     public function postDeleteStoreLocator($id, BaseHttpResponse $response)
     {

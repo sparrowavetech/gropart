@@ -67,8 +67,7 @@ class ReportController extends BaseController
         TopSellingProductsTable $topSellingProductsTable,
         RecentOrdersTable $recentOrdersTable,
         BaseHttpResponse $response
-    )
-    {
+    ) {
         page_title()->setTitle(trans('plugins/ecommerce::reports.name'));
 
         Assets::addScriptsDirectly([

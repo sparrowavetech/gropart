@@ -5,8 +5,7 @@ namespace Database\Seeders;
 use Botble\Base\Supports\BaseSeeder;
 use Botble\Language\Models\Language as LanguageModel;
 use Botble\Language\Models\LanguageMeta;
-use Botble\Setting\Models\Setting as SettingModel;
-use Language;
+use Botble\Setting\Models\Setting;
 
 class LanguageSeeder extends BaseSeeder
 {
@@ -45,7 +44,7 @@ class LanguageSeeder extends BaseSeeder
             LanguageModel::create($item);
         }
 
-        SettingModel::whereIn('key', [
+        Setting::whereIn('key', [
             'language_hide_default',
             'language_switcher_display',
             'language_display',
@@ -53,7 +52,7 @@ class LanguageSeeder extends BaseSeeder
         ])
             ->delete();
 
-        SettingModel::insertOrIgnore([
+        Setting::insertOrIgnore([
             [
                 'key'   => 'language_hide_default',
                 'value' => '1',

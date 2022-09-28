@@ -5,8 +5,9 @@ namespace Botble\Backup\Supports;
 use BaseHelper;
 use Botble\Backup\Supports\MySql\MySqlDump;
 use Botble\Base\Supports\PclZip as Zip;
+use Carbon\Carbon;
 use Exception;
-use File;
+use Illuminate\Support\Facades\File;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -44,7 +45,7 @@ class Backup
     public function createBackupFolder(string $name, ?string $description = null): array
     {
         $backupFolder = $this->createFolder($this->getBackupPath());
-        $now = now()->format('Y-m-d-H-i-s');
+        $now = Carbon::now()->format('Y-m-d-H-i-s');
         $this->folder = $this->createFolder($backupFolder . DIRECTORY_SEPARATOR . $now);
 
         $file = $this->getBackupPath('backup.json');
@@ -57,7 +58,7 @@ class Backup
         $data[$now] = [
             'name'        => $name,
             'description' => $description,
-            'date'        => now()->toDateTimeString(),
+            'date'        => Carbon::now()->toDateTimeString(),
         ];
 
         BaseHelper::saveFileData($file, $data);
@@ -130,7 +131,7 @@ class Backup
      */
     public function backupDb(): bool
     {
-        $file = 'database-' . now()->format('Y-m-d-H-i-s');
+        $file = 'database-' . Carbon::now()->format('Y-m-d-H-i-s');
         $path = $this->folder . DIRECTORY_SEPARATOR . $file;
 
         $mysqlPath = rtrim(config('plugins.backup.general.backup_mysql_execute_path'), '/');
@@ -145,7 +146,7 @@ class Backup
             return false;
         }
 
-        $sql = $mysqlPath . 'mysqldump --user=' . $config['username'] . ' --password=' . $config['password'];
+        $sql = $mysqlPath . 'mysqldump --user="' . $config['username'] . '" --password="' . $config['password'] . '"';
 
         if (!in_array($config['host'], ['localhost', '127.0.0.1'])) {
             $sql .= ' --host=' . $config['host'];
@@ -230,9 +231,9 @@ class Backup
      */
     public function backupFolder(string $source): bool
     {
-        $file = $this->folder . DIRECTORY_SEPARATOR . 'storage-' . now()->format('Y-m-d-H-i-s') . '.zip';
+        $file = $this->folder . DIRECTORY_SEPARATOR . 'storage-' . Carbon::now()->format('Y-m-d-H-i-s') . '.zip';
 
-        @ini_set('max_execution_time', -1);
+        BaseHelper::maximumExecutionTimeAndMemoryLimit();
 
         if (class_exists('ZipArchive', false)) {
             $zip = new ZipArchive();

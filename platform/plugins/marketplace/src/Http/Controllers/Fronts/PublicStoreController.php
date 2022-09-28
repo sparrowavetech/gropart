@@ -2,6 +2,7 @@
 
 namespace Botble\Marketplace\Http\Controllers\Fronts;
 
+use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Services\Products\GetProductService;
@@ -58,7 +59,7 @@ class PublicStoreController
 
         $condition = ['status' => BaseStatusEnum::PUBLISHED];
 
-        $search = clean($request->input('q'));
+        $search = BaseHelper::clean($request->input('q'));
         if ($search) {
             $condition[] = ['name', 'LIKE', '%' . $search . '%'];
         }

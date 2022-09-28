@@ -75,7 +75,7 @@ class MenuNestable {
             let params = {};
 
             if (parent.attr('id') === 'external_link') {
-                $('#menu-node-create-form').find('input, textarea, select').serializeArray().map(function(x) {
+                $('#menu-node-create-form').find('input, textarea, select').serializeArray().map(function (x) {
                     params[x.name] = sanitizeHTML(x.value);
                 });
 
@@ -196,6 +196,6 @@ class MenuNestable {
     }
 }
 
-$(window).on('load', () => {
+$(document).ready(() => {
     new MenuNestable().init();
 });

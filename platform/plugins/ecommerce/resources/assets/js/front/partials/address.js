@@ -2,27 +2,27 @@ export class CheckoutAddress {
     init() {
         $(document).on('change', '#address_id', event => {
             if ($(event.currentTarget).val() !== 'new') {
-                $('.address-item-selected').show().html($('.list-available-address .address-item-wrapper[data-id=' + $(event.currentTarget).val() + ']').html());
-                $('.address-form-wrapper').hide();
+                $('.address-item-selected').removeClass('d-none').html($('.list-available-address .address-item-wrapper[data-id=' + $(event.currentTarget).val() + ']').html());
+                $('.address-form-wrapper').addClass('d-none');
             } else {
-                $('.address-item-selected').hide();
-                $('.address-form-wrapper').show();
+                $('.address-item-selected').addClass('d-none');
+                $('.address-form-wrapper').removeClass('d-none');
             }
         });
 
         $(document).on('click', '#create_account', event => {
             if ($(event.currentTarget).is(':checked')) {
-                $('.password-group').fadeIn();
+                $('.password-group').removeClass('d-none').fadeIn();
             } else {
-                $('.password-group').fadeOut();
+                $('.password-group').addClass('d-none').fadeOut();
             }
         });
 
         $(document).on('click', '#billing_address_same_as_shipping_address', event => {
             if ($(event.currentTarget).is(':checked')) {
-                $('.billing-address-form-wrapper').fadeOut();
+                $('.billing-address-form-wrapper').addClass('d-none').fadeOut();
             } else {
-                $('.billing-address-form-wrapper').fadeIn();
+                $('.billing-address-form-wrapper').removeClass('d-none').fadeIn();
             }
         });
     }

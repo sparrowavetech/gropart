@@ -3,6 +3,7 @@
 namespace Botble\Ecommerce\Http\Controllers;
 
 use Assets;
+use BaseHelper;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Exports\TemplateProductExport;
@@ -63,8 +64,7 @@ class BulkImportController extends BaseController
      */
     public function postImport(BulkImportRequest $request, BaseHttpResponse $response)
     {
-        @ini_set('max_execution_time', -1);
-        @ini_set('memory_limit', -1);
+        BaseHelper::maximumExecutionTimeAndMemoryLimit();
 
         $file = $request->file('file');
 
@@ -74,9 +74,9 @@ class BulkImportController extends BaseController
 
         if ($this->validateProductImport->failures()->count()) {
             $data = [
-                'total_failed'  => $this->validateProductImport->failures()->count(),
-                'total_error'   => $this->validateProductImport->errors()->count(),
-                'failures'      => $this->validateProductImport->failures(),
+                'total_failed' => $this->validateProductImport->failures()->count(),
+                'total_error'  => $this->validateProductImport->errors()->count(),
+                'failures'     => $this->validateProductImport->failures(),
             ];
 
             $message = trans('plugins/ecommerce::bulk-import.import_failed_description');

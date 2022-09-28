@@ -4,9 +4,11 @@ namespace Botble\Marketplace\Tables;
 
 use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Marketplace\Exports\ProductExport;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Table\Abstracts\TableAbstract;
+use EcommerceHelper;
 use Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use MarketplaceHelper;
@@ -55,7 +57,7 @@ class ProductTable extends TableAbstract
         $data = $this->table
             ->eloquent($this->query())
             ->editColumn('name', function ($item) {
-                return Html::link(route('marketplace.vendor.products.edit', $item->id), clean($item->name));
+                return Html::link(route('marketplace.vendor.products.edit', $item->id), BaseHelper::clean($item->name));
             })
             ->editColumn('image', function ($item) {
                 if ($this->request()->input('action') == 'csv') {
@@ -78,7 +80,7 @@ class ProductTable extends TableAbstract
                 return $item->with_storehouse_management ? $item->quantity : '&#8734;';
             })
             ->editColumn('sku', function ($item) {
-                return clean($item->sku ?: '&mdash;');
+                return BaseHelper::clean($item->sku ?: '&mdash;');
             })
             ->editColumn('order', function ($item) {
                 return (string) $item->order;
@@ -87,7 +89,7 @@ class ProductTable extends TableAbstract
                 return BaseHelper::formatDate($item->created_at);
             })
             ->editColumn('status', function ($item) {
-                return clean($item->status->toHtml());
+                return BaseHelper::clean($item->status->toHtml());
             })
             ->addColumn('operations', function ($item) {
                 return view(MarketplaceHelper::viewPath('dashboard.table.actions'), [
@@ -121,6 +123,7 @@ class ProductTable extends TableAbstract
                 'end_date',
                 'quantity',
                 'with_storehouse_management',
+                'product_type',
             ])
             ->where('is_variation', 0)
             ->where('store_id', auth('customer')->user()->store->id);
@@ -183,7 +186,34 @@ class ProductTable extends TableAbstract
      */
     public function buttons()
     {
-        return $this->addCreateButton(route('marketplace.vendor.products.create'));
+        if (EcommerceHelper::isEnabledSupportDigitalProducts()) {
+            $buttons['create'] = [
+                'extend'  => 'collection',
+                'text'    => view('core/table::partials.create')->render(),
+                'buttons' => [
+                    [
+                        'className' => 'action-item',
+                        'text'      => ProductTypeEnum::PHYSICAL()->toIcon() . ' ' . Html::tag('span', ProductTypeEnum::PHYSICAL()->label(), [
+                            'data-action' => 'physical-product',
+                            'data-href'   => route('marketplace.vendor.products.create'),
+                            'class'       => 'ms-1',
+                        ])->toHtml(),
+                    ],
+                    [
+                        'className' => 'action-item',
+                        'text'      => ProductTypeEnum::DIGITAL()->toIcon() . ' ' . Html::tag('span', ProductTypeEnum::DIGITAL()->label(), [
+                            'data-action' => 'digital-product',
+                            'data-href'   => route('marketplace.vendor.products.create', ['product_type' => 'digital']),
+                            'class'       => 'ms-1',
+                        ])->toHtml(),
+                    ],
+                ],
+            ];
+        } else {
+            $buttons = $this->addCreateButton(route('marketplace.vendor.products.create'));
+        }
+
+        return $buttons;
     }
 
     /**

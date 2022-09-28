@@ -48,6 +48,7 @@ class OrderHelper
     /**
      * @param string|array $orderIds
      * @param string|null $chargeId
+     *
      * @return BaseModel|bool
      * @throws FileNotFoundException
      * @throws Throwable
@@ -96,7 +97,7 @@ class OrderHelper
             $mailer = EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME);
             if ($mailer->templateEnabled('admin_new_order')) {
                 $this->setEmailVariables($orders->first());
-                $mailer->sendUsingTemplate('admin_new_order', get_admin_email()->first());
+                $mailer->sendUsingTemplate('admin_new_order', get_admin_email()->toArray());
             }
 
             // Temporarily only send emails with the first order
@@ -141,6 +142,7 @@ class OrderHelper
 
     /**
      * @param Order $order
+     *
      * @return EmailHandlerSupport
      * @throws Throwable
      */
@@ -171,6 +173,7 @@ class OrderHelper
     /**
      * @param Order $order
      * @param bool $saveHistory
+     *
      * @return boolean
      * @throws Throwable
      */
@@ -206,6 +209,7 @@ class OrderHelper
 
     /**
      * @param Order $order
+     *
      * @return PDFHelper
      */
     public function makeInvoicePDF(Order $order): PDFHelper
@@ -239,15 +243,14 @@ class OrderHelper
         return $pdf
             ->setPaper('a4')
             ->setWarnings(false)
-            ->setOptions([
-                'tempDir'         => storage_path('app'),
-                'logOutputFile'   => storage_path('logs/pdf.log'),
-                'isRemoteEnabled' => true,
-            ]);
+            ->setOption('tempDir', storage_path('app'))
+            ->setOption('logOutputFile', storage_path('logs/pdf.log'))
+            ->setOption('isRemoteEnabled', true);
     }
 
     /**
      * @param Order $order
+     *
      * @return string
      */
     public function generateInvoice(Order $order): string
@@ -270,6 +273,7 @@ class OrderHelper
 
     /**
      * @param Order $order
+     *
      * @return Response
      */
     public function downloadInvoice(Order $order): Response
@@ -279,6 +283,7 @@ class OrderHelper
 
     /**
      * @param Order $order
+     *
      * @return Response
      */
     public function streamInvoice(Order $order): Response
@@ -289,6 +294,7 @@ class OrderHelper
     /**
      * @param string $method
      * @param null $option
+     *
      * @return array|null|string
      */
     public function getShippingMethod(string $method, $option = null)
@@ -316,6 +322,7 @@ class OrderHelper
 
     /**
      * @param OrderHistory|ShipmentHistory $history
+     *
      * @return mixed
      */
     public function processHistoryVariables($history)
@@ -335,8 +342,8 @@ class OrderHelper
                 ->toHtml(),
             'user_name' => $history->user_id === 0 ? trans('plugins/ecommerce::order.system') :
                 BaseHelper::clean($history->user ? $history->user->name : (
-                $history->order->user->name ?:
-                    $history->order->address->name
+                    $history->order->user->name ?:
+                        $history->order->address->name
                 )),
         ];
 
@@ -355,6 +362,7 @@ class OrderHelper
     /**
      * @param string|null $token
      * @param string|array $data
+     *
      * @return array
      */
     public function setOrderSessionData(?string $token, $data): array
@@ -389,6 +397,7 @@ class OrderHelper
 
     /**
      * @param string|null $token
+     *
      * @return array
      */
     public function getOrderSessionData(?string $token = null): array
@@ -408,6 +417,7 @@ class OrderHelper
 
     /**
      * @param array $data
+     *
      * @return array
      */
     protected function cleanData(array $data): array
@@ -426,6 +436,7 @@ class OrderHelper
     /**
      * @param string|null $token
      * @param string|array $data
+     *
      * @return array
      */
     public function mergeOrderSessionData(?string $token, $data): array
@@ -456,6 +467,7 @@ class OrderHelper
     /**
      * @param Product $product
      * @param Request $request
+     *
      * @return array
      */
     public function handleAddCart(Product $product, Request $request): array
@@ -496,6 +508,7 @@ class OrderHelper
      * @param int $currentUserId
      * @param array $sessionData
      * @param Request $request
+     *
      * @return array
      */
     public function processAddressOrder(int $currentUserId, array $sessionData, Request $request): array
@@ -578,6 +591,7 @@ class OrderHelper
     /**
      * @param array $data
      * @param int|null $orderAddressId
+     *
      * @return false|mixed
      */
     protected function createOrderAddress(array $data, ?int $orderAddressId = null)
@@ -611,6 +625,7 @@ class OrderHelper
     /**
      * @param array $products
      * @param array $sessionData
+     *
      * @return array
      */
     public function processOrderProductData($products, array $sessionData): array
@@ -636,6 +651,7 @@ class OrderHelper
                     'price'        => $cartItem->price,
                     'tax_amount'   => $cartItem->tax,
                     'options'      => [],
+                    'product_type' => $productByCartItem->product_type,
                 ];
 
                 if ($cartItem->options->extras) {
@@ -668,11 +684,12 @@ class OrderHelper
     }
 
     /**
-     * @param $sessionData
-     * @param $request
-     * @param $cartItems
-     * @param $order
+     * @param       $sessionData
+     * @param       $request
+     * @param       $cartItems
+     * @param       $order
      * @param array $generalData
+     *
      * @return array
      */
     public function processOrderInCheckout(
@@ -681,8 +698,7 @@ class OrderHelper
         $cartItems,
         $order,
         array $generalData
-    ): array
-    {
+    ): array {
         $createdOrder = Arr::get($sessionData, 'created_order');
         $createdOrderId = Arr::get($sessionData, 'created_order_id');
 
@@ -724,6 +740,7 @@ class OrderHelper
      * @param int $currentUserId
      * @param string $token
      * @param CartItem[] $cartItems
+     *
      * @return mixed
      */
     public function createOrder(Request $request, int $currentUserId, string $token, array $cartItems)
@@ -748,6 +765,7 @@ class OrderHelper
 
     /**
      * @param Order $order
+     *
      * @return bool
      * @throws FileNotFoundException
      * @throws Throwable
@@ -791,6 +809,7 @@ class OrderHelper
 
     /**
      * @param Order $order
+     *
      * @return Order
      * @throws FileNotFoundException
      * @throws Throwable
@@ -832,6 +851,7 @@ class OrderHelper
 
     /**
      * @param Order $order
+     *
      * @return bool
      */
     public function decreaseProductQuantity(Order $order): bool

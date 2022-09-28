@@ -30,11 +30,12 @@ class CustomerSeeder extends BaseSeeder
 
         foreach ($customers as $item) {
             $customer = Customer::create([
-                'name'     => $faker->name,
+                'name'     => $faker->name(),
                 'email'    => $item,
                 'password' => bcrypt('12345678'),
-                'phone'    => $faker->e164PhoneNumber,
+                'phone'    => $faker->e164PhoneNumber(),
                 'avatar'   => 'customers/' . $faker->numberBetween(1, 10) . '.jpg',
+                'dob'      => now()->subYears(rand(20, 50))->subDays(rand(1, 30)),
             ]);
 
             $customer->confirmed_at = now();
@@ -42,26 +43,26 @@ class CustomerSeeder extends BaseSeeder
 
             Address::create([
                 'name'        => $customer->name,
-                'phone'       => $faker->e164PhoneNumber,
+                'phone'       => $faker->e164PhoneNumber(),
                 'email'       => $customer->email,
-                'country'     => $faker->countryCode,
-                'state'       => $faker->state,
-                'city'        => $faker->city,
-                'address'     => $faker->streetAddress,
-                'zip_code'    => $faker->postcode,
+                'country'     => $faker->countryCode(),
+                'state'       => $faker->state(),
+                'city'        => $faker->city(),
+                'address'     => $faker->streetAddress(),
+                'zip_code'    => $faker->postcode(),
                 'customer_id' => $customer->id,
                 'is_default'  => true,
             ]);
 
             Address::create([
                 'name'        => $customer->name,
-                'phone'       => $faker->e164PhoneNumber,
+                'phone'       => $faker->e164PhoneNumber(),
                 'email'       => $customer->email,
-                'country'     => $faker->countryCode,
-                'state'       => $faker->state,
-                'city'        => $faker->city,
-                'address'     => $faker->streetAddress,
-                'zip_code'    => $faker->postcode,
+                'country'     => $faker->countryCode(),
+                'state'       => $faker->state(),
+                'city'        => $faker->city(),
+                'address'     => $faker->streetAddress(),
+                'zip_code'    => $faker->postcode(),
                 'customer_id' => $customer->id,
                 'is_default'  => false,
             ]);
@@ -69,11 +70,12 @@ class CustomerSeeder extends BaseSeeder
 
         for ($i = 0; $i < 8; $i++) {
             $customer = Customer::create([
-                'name'     => $faker->name,
-                'email'    => $faker->unique()->safeEmail,
+                'name'     => $faker->name(),
+                'email'    => $faker->unique()->safeEmail(),
                 'password' => bcrypt('12345678'),
-                'phone'    => $faker->e164PhoneNumber,
+                'phone'    => $faker->e164PhoneNumber(),
                 'avatar'   => 'customers/' . ($i + 1) . '.jpg',
+                'dob'      => now()->subYears(rand(20, 50))->subDays(rand(1, 30)),
             ]);
 
             $customer->confirmed_at = now();
@@ -81,13 +83,13 @@ class CustomerSeeder extends BaseSeeder
 
             Address::create([
                 'name'        => $customer->name,
-                'phone'       => $faker->e164PhoneNumber,
+                'phone'       => $faker->e164PhoneNumber(),
                 'email'       => $customer->email,
-                'country'     => $faker->countryCode,
-                'state'       => $faker->state,
-                'city'        => $faker->city,
-                'address'     => $faker->streetAddress,
-                'zip_code'    => $faker->postcode,
+                'country'     => $faker->countryCode(),
+                'state'       => $faker->state(),
+                'city'        => $faker->city(),
+                'address'     => $faker->streetAddress(),
+                'zip_code'    => $faker->postcode(),
                 'customer_id' => $customer->id,
                 'is_default'  => true,
             ]);

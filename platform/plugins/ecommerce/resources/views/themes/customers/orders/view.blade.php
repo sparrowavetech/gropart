@@ -1,4 +1,4 @@
-@extends('plugins/ecommerce::themes.customers.master')
+@extends(EcommerceHelper::viewPath('customers.master'))
 @section('content')
     <h2 class="customer-page-title">{{ __('Order information') }}</h2>
     <div class="clearfix"></div>
@@ -108,7 +108,6 @@
                             @php
                                 $product = get_products([
                                     'condition' => [
-                                        'ec_products.status' => \Botble\Base\Enums\BaseStatusEnum::PUBLISHED,
                                         'ec_products.id' => $orderProduct->product_id,
                                     ],
                                     'take' => 1,
@@ -201,6 +200,11 @@
                     <a href="{{ route('customer.orders.cancel', $order->id) }}"
                        class="btn-print">{{ __('Cancel order') }}</a>
                 @endif
+                @if ($order->canBeReturned())
+                    <a href="{{ route('customer.orders.return', $order->id) }}"
+                       class="btn-print">{{ __('Return Product(s)') }}</a>
+                @endif
             </div>
         </div>
+
 @endsection

@@ -22,25 +22,29 @@ class BrandSeeder extends BaseSeeder
 
         $brands = [
             [
-                'name' => 'Fashion live',
+                'logo'        => 'brands/1.png',
+                'name'        => 'FoodPound',
+                'description' => 'New Snacks Release',
             ],
             [
-                'name' => 'Hand crafted',
+                'logo'        => 'brands/2.png',
+                'name'        => 'iTea JSC',
+                'description' => 'Happy Tea 100% Organic. From $29.9',
             ],
             [
-                'name' => 'Mestonix',
+                'logo'        => 'brands/3.png',
+                'name'        => 'Soda Brand',
+                'description' => 'Fresh Meat Sausage. BUY 2 GET 1!',
             ],
             [
-                'name' => 'Sunshine',
+                'logo'        => 'brands/4.png',
+                'name'        => 'Farmart',
+                'description' => 'Fresh Meat Sausage. BUY 2 GET 1!',
             ],
             [
-                'name' => 'Pure',
-            ],
-            [
-                'name' => 'Anfold',
-            ],
-            [
-                'name' => 'Automotive',
+                'logo'        => 'brands/3.png',
+                'name'        => 'Soda Brand',
+                'description' => 'Fresh Meat Sausage. BUY 2 GET 1!',
             ],
         ];
 
@@ -50,7 +54,6 @@ class BrandSeeder extends BaseSeeder
         foreach ($brands as $key => $item) {
             $item['order'] = $key;
             $item['is_featured'] = true;
-            $item['logo'] = 'brands/' . ($key + 1) . '.jpg';
             $brand = Brand::create($item);
 
             Slug::create([
@@ -65,25 +68,24 @@ class BrandSeeder extends BaseSeeder
 
         $translations = [
             [
-                'name' => 'Fashion live',
+                'name'        => 'FoodPound',
+                'description' => 'New Snacks Release',
             ],
             [
-                'name' => 'Hand crafted',
+                'name'        => 'iTea JSC',
+                'description' => 'Happy Tea 100% Organic. From $29.9',
             ],
             [
-                'name' => 'Mestonix',
+                'name'        => 'Soda Brand',
+                'description' => 'Fresh Meat Sausage. BUY 2 GET 1!',
             ],
             [
-                'name' => 'Sunshine',
+                'name'        => 'Farmart',
+                'description' => 'Fresh Meat Sausage. BUY 2 GET 1!',
             ],
             [
-                'name' => 'Pure',
-            ],
-            [
-                'name' => 'Anfold',
-            ],
-            [
-                'name' => 'Automotive',
+                'name'        => 'Soda Brand',
+                'description' => 'Fresh Meat Sausage. BUY 2 GET 1!',
             ],
         ];
 

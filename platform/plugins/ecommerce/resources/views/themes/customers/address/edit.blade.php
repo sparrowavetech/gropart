@@ -1,4 +1,4 @@
-@extends('plugins/ecommerce::themes.customers.master')
+@extends(EcommerceHelper::viewPath('customers.master'))
 
 @section('content')
    <h2 class="customer-page-title">{{ __('Address books') }}</h2>

@@ -3,6 +3,7 @@
 namespace Botble\Ecommerce\Exports;
 
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Enums\StockStatusEnum;
 use Botble\Ecommerce\Repositories\Interfaces\BrandInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeSetInterface;
@@ -10,6 +11,7 @@ use Botble\Ecommerce\Repositories\Interfaces\ProductCategoryInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductTagInterface;
 use Botble\Ecommerce\Repositories\Interfaces\TaxInterface;
 use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
+use EcommerceHelper;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -61,6 +63,11 @@ class TemplateProductExport implements
     protected $brands;
 
     /**
+     * @var bool
+     */
+    protected $enabledDigital;
+
+    /**
      * @param string $exportType
      */
     public function __construct(string $exportType = Excel::XLSX)
@@ -94,6 +101,8 @@ class TemplateProductExport implements
 
         $attributeSets = $productAttributeSets->sortByDesc('order');
 
+        $this->enabledDigital = EcommerceHelper::isEnabledSupportDigitalProducts();
+
         $product = [
             'name'                             => $productName,
             'description'                      => $descriptions->random(),
@@ -126,6 +135,10 @@ class TemplateProductExport implements
             'content'                          => '',
             'tags'                             => $productTags->pluck('name')->implode(','),
         ];
+
+        if ($this->enabledDigital) {
+            $product['product_type'] = ProductTypeEnum::PHYSICAL;
+        }
 
         if (is_plugin_active('marketplace')) {
             $stores = app(StoreInterface::class)->pluck('name', 'id');
@@ -271,6 +284,10 @@ class TemplateProductExport implements
             'tags'                             => 'Tags',
         ];
 
+        if ($this->enabledDigital) {
+            $headings['product_type'] = 'Product type';
+        }
+
         if (is_plugin_active('marketplace')) {
             $headings['vendor'] = 'Vendor';
         }
@@ -304,6 +321,7 @@ class TemplateProductExport implements
                 $lengthColumn = 'Z';
                 $wideColumn = 'AA';
                 $heightColumn = 'AB';
+                $productTypeColumn = 'AE';
 
                 // set dropdown list for first data row
                 $statusValidation = $this->getStatusValidation();
@@ -314,6 +332,8 @@ class TemplateProductExport implements
                 $decimalValidation = $this->getDecimalValidation();
                 $taxValidation = $this->getTaxValidation();
                 $brandValidation = $this->getBrandValidation();
+
+                $productTypeValidation = $this->getProductTypeValidation();
 
                 // clone validation to remaining rows
                 for ($index = 2; $index <= $this->totalRow; $index++) {
@@ -339,6 +359,10 @@ class TemplateProductExport implements
                     $event->sheet->getCell($heightColumn . $index)->setDataValidation($decimalValidation);
                     $event->sheet->getCell($saleColumn . $index)->setDataValidation($decimalValidation);
                     $event->sheet->getCell($priceColumn . $index)->setDataValidation($decimalValidation);
+
+                    if ($this->enabledDigital) {
+                        $event->sheet->getCell($productTypeColumn . $index)->setDataValidation($productTypeValidation);
+                    }
                 }
 
                 $delegate = $event->sheet->getDelegate();
@@ -360,6 +384,14 @@ class TemplateProductExport implements
     protected function getStatusValidation()
     {
         return $this->getDropDownListValidation(BaseStatusEnum::values());
+    }
+
+    /**
+     * @return DataValidation
+     */
+    protected function getProductTypeValidation()
+    {
+        return $this->getDropDownListValidation(ProductTypeEnum::values());
     }
 
     /**
@@ -556,6 +588,10 @@ class TemplateProductExport implements
             'content'                          => 'nullable',
             'tags'                             => 'nullable|[Product tag name]|multiple',
         ];
+
+        if ($this->enabledDigital) {
+            $rules['product_type'] = 'nullable|enum:' . implode(',', ProductTypeEnum::values()) .'|default:' . ProductTypeEnum::PHYSICAL;
+        }
 
         if (is_plugin_active('marketplace')) {
             $rules['vendor'] = 'nullable|[Vendor name | Vendor ID]';

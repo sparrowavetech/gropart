@@ -3,7 +3,7 @@
 namespace Botble\Backup;
 
 use Botble\PluginManagement\Abstracts\PluginOperationAbstract;
-use File;
+use Illuminate\Support\Facades\File;
 
 class Plugin extends PluginOperationAbstract
 {

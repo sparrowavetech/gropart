@@ -54,11 +54,11 @@ class ReviewSeeder extends BaseSeeder
             'Solution is too robust for our purpose so we didn\'t use it at the end. But I appreciate customer support during initial configuration.',
         ];
 
-        for ($i = 0; $i < 100; $i++) {
+        for ($i = 0; $i < 1000; $i++) {
             $images = [
-                'products/' . rand(1, 4) . '.jpg',
-                'products/' . rand(5, 7) . '.jpg',
-                'products/' . rand(8, $totalProducts) . '.jpg',
+                'products/' . rand(1, 30) . '.jpg',
+                'products/' . rand(31, 50) . '.jpg',
+                'products/' . rand(51, $totalProducts) . '.jpg',
             ];
 
             Review::create([
@@ -71,6 +71,7 @@ class ReviewSeeder extends BaseSeeder
                     ->filter(function ($item, $key) {
                         return $key <= rand(0, 2);
                     })
+                    ->values()
                     ->toArray(),
             ]);
         }

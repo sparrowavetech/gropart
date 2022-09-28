@@ -11,10 +11,11 @@ use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
 use EcommerceHelper;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Contracts\Auth\StatefulGuard;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\View\View;
 use Response;
 use SeoHelper;
 use Theme;
@@ -118,9 +119,8 @@ class RegisterController extends Controller
     protected function validator(array $data)
     {
         $rules = [
-            'name'     => 'required|min:3|max:255',
-            'email'    => 'required|email|max:255|unique:ec_customers|regex:/^(?=[^@]{4,}@)\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/',
-            'phone'    => 'required|numeric|unique:ec_customers|regex:/^.{10,10}$/',
+            'name'     => 'required|max:255',
+            'email'    => 'required|email|max:255|unique:ec_customers',
             'password' => 'required|min:6|confirmed',
         ];
 
@@ -138,7 +138,6 @@ class RegisterController extends Controller
         $attributes = [
             'name'                   => __('Name'),
             'email'                  => __('Email'),
-            'Phone'                  => __('Phone'),
             'password'               => __('Password'),
             'g-recaptcha-response'   => __('Captcha'),
             'agree_terms_and_policy' => __('Term and Policy'),
@@ -161,7 +160,6 @@ class RegisterController extends Controller
         return $this->customerRepository->create([
             'name'     => BaseHelper::clean($data['name']),
             'email'    => BaseHelper::clean($data['email']),
-            'phone'    => BaseHelper::clean($data['phone']),
             'password' => bcrypt($data['password']),
         ]);
     }
@@ -246,7 +244,7 @@ class RegisterController extends Controller
     }
 
     /**
-     * @return Factory|View
+     * @return Factory|Application|View
      */
     public function getVerify()
     {

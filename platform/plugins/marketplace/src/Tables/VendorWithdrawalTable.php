@@ -54,7 +54,7 @@ class VendorWithdrawalTable extends TableAbstract
                 return format_price($item->amount);
             })
             ->editColumn('status', function ($item) {
-                return clean($item->status->toHtml());
+                return BaseHelper::clean($item->status->toHtml());
             })
             ->addColumn('operations', function ($item) {
                 return view('plugins/marketplace::withdrawals.tables.actions', compact('item'))->render();

@@ -59,10 +59,10 @@ class StoreTable extends TableAbstract
             ->eloquent($this->query())
             ->editColumn('name', function ($item) {
                 if (!Auth::user()->hasPermission('marketplace.store.edit')) {
-                    return clean($item->name);
+                    return BaseHelper::clean($item->name);
                 }
 
-                return Html::link(route('marketplace.store.edit', $item->id), clean($item->name));
+                return Html::link(route('marketplace.store.edit', $item->id), BaseHelper::clean($item->name));
             })
             ->editColumn('logo', function ($item) {
                 return Html::image(
@@ -84,7 +84,7 @@ class StoreTable extends TableAbstract
                 return $item->products_count;
             })
             ->editColumn('status', function ($item) {
-                return clean($item->status->toHtml());
+                return BaseHelper::clean($item->status->toHtml());
             })
             ->addColumn('operations', function ($item) {
                 $viewBtn = '';

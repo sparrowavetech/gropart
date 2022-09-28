@@ -15,6 +15,5 @@ class Plugin extends PluginOperationAbstract
         Schema::dropIfExists('countries_translations');
         Schema::dropIfExists('states_translations');
         Schema::dropIfExists('cities_translations');
-        Schema::dropIfExists('pincode_translations');
     }
 }

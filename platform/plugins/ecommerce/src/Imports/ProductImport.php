@@ -5,6 +5,7 @@ namespace Botble\Ecommerce\Imports;
 use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Events\CreatedContentEvent;
+use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Enums\StockStatusEnum;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductVariation;
@@ -46,12 +47,12 @@ use RvMedia;
 
 class ProductImport implements
     ToModel,
-                               WithHeadingRow,
-                               WithMapping,
-                               WithValidation,
-                               SkipsOnFailure,
-                               SkipsOnError,
-                               WithChunkReading
+    WithHeadingRow,
+    WithMapping,
+    WithValidation,
+    SkipsOnFailure,
+    SkipsOnError,
+    WithChunkReading
 {
     use Importable;
     use SkipsFailures;
@@ -535,6 +536,8 @@ class ProductImport implements
 
         $productRelatedToVariation->status = Arr::get($version, 'status', $product->status);
 
+        $productRelatedToVariation->product_type = $product->product_type;
+
         $productRelatedToVariation = $this->productRepository->createOrUpdate($productRelatedToVariation);
 
         event(new CreatedContentEvent(PRODUCT_MODULE_SCREEN_NAME, $this->request, $productRelatedToVariation));
@@ -807,6 +810,11 @@ class ProductImport implements
         $row['status'] = Arr::get($row, 'status');
         if (!in_array($row['status'], BaseStatusEnum::values())) {
             $row['status'] = BaseStatusEnum::PENDING;
+        }
+
+        $row['product_type'] = Arr::get($row, 'product_type');
+        if (!in_array($row['product_type'], ProductTypeEnum::values())) {
+            $row['product_type'] = ProductTypeEnum::PHYSICAL;
         }
 
         $row['import_type'] = Arr::get($row, 'import_type');

@@ -10,6 +10,8 @@ use Html;
  * @method static OrderStatusEnum PROCESSING()
  * @method static OrderStatusEnum COMPLETED()
  * @method static OrderStatusEnum CANCELED()
+ * @method static OrderStatusEnum PARTIAL_RETURNED()
+ * @method static OrderStatusEnum RETURNED()
  */
 class OrderStatusEnum extends Enum
 {
@@ -17,6 +19,8 @@ class OrderStatusEnum extends Enum
     public const PROCESSING = 'processing';
     public const COMPLETED = 'completed';
     public const CANCELED = 'canceled';
+    public const PARTIAL_RETURNED = 'partial returned';
+    public const RETURNED = 'returned';
 
     /**
      * @var string
@@ -40,6 +44,12 @@ class OrderStatusEnum extends Enum
                     ->toHtml();
             case self::CANCELED:
                 return Html::tag('span', self::CANCELED()->label(), ['class' => 'label-danger status-label'])
+                    ->toHtml();
+            case self::PARTIAL_RETURNED:
+                return Html::tag('span', self::PARTIAL_RETURNED()->label(), ['class' => 'label-danger status-label'])
+                    ->toHtml();
+            case self::RETURNED:
+                return Html::tag('span', self::RETURNED()->label(), ['class' => 'label-danger status-label'])
                     ->toHtml();
             default:
                 return parent::toHtml();

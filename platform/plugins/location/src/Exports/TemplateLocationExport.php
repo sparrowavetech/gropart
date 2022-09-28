@@ -3,7 +3,6 @@
 namespace Botble\Location\Exports;
 
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Location\Repositories\Interfaces\CountryInterface;
 use Illuminate\Support\Collection;
 use Language;
 use Maatwebsite\Excel\Concerns\Exportable;
@@ -50,9 +49,6 @@ class TemplateLocationExport implements
     public function __construct(string $exportType = Excel::XLSX)
     {
         $this->exportType = $exportType;
-
-        $countries = app(CountryInterface::class)->all();
-        $this->countries = collect($countries);
 
         $locations = [
             [
@@ -113,11 +109,11 @@ class TemplateLocationExport implements
         ];
 
         if (defined('LANGUAGE_MODULE_SCREEN_NAME')) {
-            $this->defaultLanguage = Language::getDefaultLanguage(['lang_code'])->lang_code;
+            $defaultLanguage = Language::getDefaultLanguage(['lang_code'])->lang_code;
 
             $supportedLocales = Language::getSupportedLocales();
             foreach ($supportedLocales as $properties) {
-                if ($properties['lang_code'] != $this->defaultLanguage && $properties['lang_code'] == 'vi') {
+                if ($properties['lang_code'] != $defaultLanguage && $properties['lang_code'] == 'vi') {
                     $locations[1]['name_vi'] = 'Bang Texas';
                     $locations[2]['name_vi'] = 'Bang Washington';
                     $locations[3]['name_vi'] = 'Thành phố Houston';
@@ -155,11 +151,11 @@ class TemplateLocationExport implements
             'nationality'  => 'Nationality', // 9 => I
         ];
         if (defined('LANGUAGE_MODULE_SCREEN_NAME')) {
-            $this->defaultLanguage = Language::getDefaultLanguage(['lang_code'])->lang_code;
+            $defaultLanguage = Language::getDefaultLanguage(['lang_code'])->lang_code;
 
             $supportedLocales = Language::getSupportedLocales();
             foreach ($supportedLocales as $properties) {
-                if ($properties['lang_code'] != $this->defaultLanguage && $properties['lang_code'] == 'vi') {
+                if ($properties['lang_code'] != $defaultLanguage && $properties['lang_code'] == 'vi') {
                     $headings['name_vi'] = 'Name VI';
                 }
             }

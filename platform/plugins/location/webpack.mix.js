@@ -9,4 +9,5 @@ const dist = 'public/vendor/core/plugins/' + directory;
 mix
     .js(source + '/resources/assets/js/location.js', dist + '/js')
     .js(source + '/resources/assets/js/bulk-import.js', dist + '/js')
+    .js(source + '/resources/assets/js/export.js', dist + '/js')
     .copyDirectory(dist + '/js', source + '/public/js');

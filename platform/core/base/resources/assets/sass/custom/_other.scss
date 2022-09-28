@@ -782,3 +782,13 @@ h4.modal-title {
         opacity: 0.8;
     }
 }
+
+.short-code-admin-config {
+    .colorpicker-popup.colorpicker-bs-popover-content {
+        display: block;
+        width: 100%;
+        &.colorpicker-hidden {
+            display: none;
+        }
+    }
+}

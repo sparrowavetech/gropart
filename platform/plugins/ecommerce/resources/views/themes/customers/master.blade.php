@@ -44,6 +44,12 @@
                                     <a href="{{ route('customer.orders') }}" class="collection-item @if (Route::currentRouteName() == 'customer.orders') active @endif">{{ __('Orders') }}</a>
                                     <i class="fa fa-first-order" aria-hidden="true"></i>
                                 </li>
+                                @if (EcommerceHelper::isEnabledSupportDigitalProducts())
+                                    <li class="list-group-item">
+                                        <a href="{{ route('customer.downloads') }}" class="collection-item @if (Route::currentRouteName() == 'customer.downloads') active @endif">{{ __('Downloads') }}</a>
+                                        <i class="fa-solid fa-download" aria-hidden="true"></i>
+                                    </li>
+                                @endif
                                 <li class="list-group-item">
                                     <a href="{{ route('customer.address') }}" class="collection-item @if (Route::currentRouteName() == 'customer.address') active @endif">{{ __('Address books') }}</a>
                                     <i class="fa fa-book" aria-hidden="true"></i>

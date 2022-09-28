@@ -13,7 +13,7 @@ class DatabaseSeeder extends BaseSeeder
      */
     public function run()
     {
-        $this->activateAllPlugins();
+        $this->prepareRun();
 
         $this->call(LanguageSeeder::class);
         $this->call(BrandSeeder::class);

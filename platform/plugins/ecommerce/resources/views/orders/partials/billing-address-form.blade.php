@@ -26,7 +26,7 @@
             </div>
             <div class="col-lg-4 col-12">
                 <div class="form-group  @if ($errors->has('billing_address.phone')) has-error @endif">
-                    <input type="text" name="billing_address[phone]" id="billing-address-phone" placeholder="{{ __('Phone') }} {{ EcommerceHelper::isPhoneFieldOptionalAtCheckout() ? __('(optional)') : '' }}" class="form-control checkout-input address-control-item {{ !EcommerceHelper::isPhoneFieldOptionalAtCheckout() ? 'address-control-item-required' : '' }} checkout-input" value="{{ old('billing_address.phone', Arr::get($sessionCheckoutData, 'billing_address.phone')) }}">
+                    <input type="text" name="billing_address[phone]" id="billing-address-phone" placeholder="{{ __('Phone') }} {{ EcommerceHelper::isPhoneFieldOptionalAtCheckout() ? __('(optional)') : '' }}" class="form-control checkout-input checkout-input" value="{{ old('billing_address.phone', Arr::get($sessionCheckoutData, 'billing_address.phone')) }}">
                     {!! Form::error('billing_address.phone', $errors) !!}
                 </div>
             </div>

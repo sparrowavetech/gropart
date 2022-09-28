@@ -18,7 +18,7 @@
     <table>
         <tr>
             <th style="text-align: left">
-                {{ trans('plugins/ecommerce::products.form.product_image') }}
+                {{ trans('plugins/ecommerce::products.product_image') }}
             </th>
             <th style="text-align: left">
                 {{ trans('plugins/ecommerce::products.form.product') }}
@@ -34,11 +34,10 @@
             </th>
         </tr>
 
-        @foreach ($order->products as $orderProduct)
+        @foreach (($products ?? $order->products) as $orderProduct)
             @php
                 $product = get_products([
                     'condition' => [
-                        'ec_products.status' => \Botble\Base\Enums\BaseStatusEnum::PUBLISHED,
                         'ec_products.id'     => $orderProduct->product_id,
                     ],
                     'take'      => 1,
@@ -91,58 +90,61 @@
                 </td>
             </tr>
         @endforeach
-        <tr>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>
-                {{ trans('plugins/ecommerce::products.form.sub_total') }}
-            </td>
-            <td>
-                {{ format_price($order->sub_total) }}
-            </td>
-        </tr>
 
-        @if (EcommerceHelper::isTaxEnabled())
+        @if (!$order->dont_show_order_info_in_product_list)
             <tr>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
-                <td>{{ trans('plugins/ecommerce::products.form.tax') }}
+                <td>
+                    {{ trans('plugins/ecommerce::products.form.sub_total') }}
                 </td>
                 <td>
-                    {{ format_price($order->tax_amount) }}
+                    {{ format_price($order->sub_total) }}
+                </td>
+            </tr>
+
+            @if (EcommerceHelper::isTaxEnabled())
+                <tr>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>{{ trans('plugins/ecommerce::products.form.tax') }}
+                    </td>
+                    <td>
+                        {{ format_price($order->tax_amount) }}
+                    </td>
+                </tr>
+            @endif
+
+            <tr>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>{{ trans('plugins/ecommerce::products.form.shipping_fee') }}
+                </td>
+                <td>
+                    {{ format_price($order->shipping_amount) }}
+                </td>
+            </tr>
+
+            <tr>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>{{ trans('plugins/ecommerce::products.form.discount') }}
+                </td>
+                <td>
+                    {{ format_price($order->discount_amount) }}
+                </td>
+            </tr>
+
+            <tr>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+
+                <td><h3>{{ trans('plugins/ecommerce::products.form.total') }}</h3></td>
+                <td>
+                    <h3>{{ format_price($order->amount) }}</h3>
                 </td>
             </tr>
         @endif
-
-        <tr>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>{{ trans('plugins/ecommerce::products.form.shipping_fee') }}
-            </td>
-            <td>
-                {{ format_price($order->shipping_amount) }}
-            </td>
-        </tr>
-
-        <tr>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>{{ trans('plugins/ecommerce::products.form.discount') }}
-            </td>
-            <td>
-                {{ format_price($order->discount_amount) }}
-            </td>
-        </tr>
-
-        <tr>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-
-            <td><h3>{{ trans('plugins/ecommerce::products.form.total') }}</h3></td>
-            <td>
-                <h3>{{ format_price($order->amount) }}</h3>
-            </td>
-        </tr>
     </table><br>
 </div>
 

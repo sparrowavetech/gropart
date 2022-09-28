@@ -153,10 +153,24 @@ $general-img-path: '/vendor/core/core/base/images/' !default;
                     background: #1dc3d2;
                     border-color: #1dc3d2;
                 }
-
+            }
+            > .btn {
                 &:last-child {
                     margin-right: 0;
                 }
+            }
+
+            .dropdown-menu {
+                --bs-dropdown-font-size: 1em;
+                .dropdown-item {
+                    &:not(:first-child) {
+                        border-top: 1px dotted var(--bs-gray);
+                    }
+                }
+            }
+
+            .dt-button-background {
+                background: radial-gradient(ellipse farthest-corner at center, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.7) 100%);
             }
         }
 

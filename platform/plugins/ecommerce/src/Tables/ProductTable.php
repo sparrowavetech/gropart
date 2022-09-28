@@ -4,11 +4,13 @@ namespace Botble\Ecommerce\Tables;
 
 use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Enums\StockStatusEnum;
 use Botble\Ecommerce\Repositories\Interfaces\ProductCategoryInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Carbon\Carbon;
+use EcommerceHelper;
 use Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Support\Facades\Auth;
@@ -123,6 +125,7 @@ class ProductTable extends TableAbstract
                 'quantity',
                 'with_storehouse_management',
                 'stock_status',
+                'product_type',
             ])
             ->where('is_variation', 0);
 
@@ -163,7 +166,7 @@ class ProductTable extends TableAbstract
             ],
             'stock_status' => [
                 'title' => trans('plugins/ecommerce::products.stock_status'),
-                'class' => 'text-start',
+                'class' => 'text-center',
             ],
             'quantity'     => [
                 'title' => trans('plugins/ecommerce::products.quantity'),
@@ -196,7 +199,33 @@ class ProductTable extends TableAbstract
      */
     public function buttons()
     {
-        $buttons = $this->addCreateButton(route('products.create'), 'products.create');
+        $buttons = [];
+        if (EcommerceHelper::isEnabledSupportDigitalProducts() && Auth::user()->hasPermission('products.create')) {
+            $buttons['create'] = [
+                'extend' => 'collection',
+                'text' => view('core/table::partials.create')->render(),
+                'buttons' => [
+                    [
+                        'className' => 'action-item',
+                        'text'      => ProductTypeEnum::PHYSICAL()->toIcon() . ' '. Html::tag('span', ProductTypeEnum::PHYSICAL()->label(), [
+                            'data-action' => 'physical-product',
+                            'data-href'   => route('products.create'),
+                            'class'       => 'ms-1',
+                        ])->toHtml(),
+                    ],
+                    [
+                        'className' => 'action-item',
+                        'text'      => ProductTypeEnum::DIGITAL()->toIcon() . ' ' . Html::tag('span', ProductTypeEnum::DIGITAL()->label(), [
+                            'data-action' => 'digital-product',
+                            'data-href'   => route('products.create', ['product_type' => 'digital']),
+                            'class'       => 'ms-1',
+                        ])->toHtml(),
+                    ],
+                ],
+            ];
+        } else {
+            $buttons = $this->addCreateButton(route('products.create'), 'products.create');
+        }
 
         if (Auth::user()->hasPermission('ecommerce.bulk-import.index')) {
             $buttons['import'] = [
@@ -285,6 +314,13 @@ class ProductTable extends TableAbstract
             'type'     => 'select',
             'choices'  => StockStatusEnum::labels(),
             'validate' => 'required|in:' . implode(',', StockStatusEnum::values()),
+        ];
+
+        $data['product_type'] = [
+            'title'    => trans('plugins/ecommerce::products.form.product_type.title'),
+            'type'     => 'select',
+            'choices'  => ProductTypeEnum::labels(),
+            'validate' => 'required|in:' . implode(',', ProductTypeEnum::values()),
         ];
 
         return $data;

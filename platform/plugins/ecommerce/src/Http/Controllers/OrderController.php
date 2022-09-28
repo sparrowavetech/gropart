@@ -42,11 +42,11 @@ use Exception;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-use Illuminate\View\View;
 use MarketplaceHelper;
 use OrderHelper;
 use RvMedia;
@@ -127,8 +127,7 @@ class OrderController extends BaseController
         StoreLocatorInterface $storeLocatorRepository,
         OrderProductInterface $orderProductRepository,
         AddressInterface      $addressRepository
-    )
-    {
+    ) {
         $this->orderRepository = $orderRepository;
         $this->customerRepository = $customerRepository;
         $this->orderHistoryRepository = $orderHistoryRepository;
@@ -154,7 +153,7 @@ class OrderController extends BaseController
     }
 
     /**
-     * @return Factory|View
+     * @return Application|Factory|View
      */
     public function create()
     {
@@ -194,6 +193,7 @@ class OrderController extends BaseController
             'discount_description' => $request->input('discount_description'),
             'description'          => $request->input('note'),
             'is_confirmed'         => 1,
+            'is_finished'          => 1,
             'status'               => OrderStatusEnum::PROCESSING,
         ]);
 
@@ -309,6 +309,7 @@ class OrderController extends BaseController
                     'price'        => $product->front_sale_price,
                     'tax_amount'   => 0,
                     'options'      => [],
+                    'product_type' => $product->product_type,
                 ];
 
                 $this->orderProductRepository->create($data);
@@ -540,8 +541,7 @@ class OrderController extends BaseController
         HandleShippingFeeService $shippingFeeService,
         Request $request,
         BaseHttpResponse $response
-    )
-    {
+    ) {
         $order = $this->orderRepository->findOrFail($orderId);
 
         $weight = 0;
@@ -593,8 +593,7 @@ class OrderController extends BaseController
         CreateShipmentRequest $request,
         BaseHttpResponse $response,
         ShipmentHistoryInterface $shipmentHistoryRepository
-    )
-    {
+    ) {
         $order = $this->orderRepository->findOrFail($id);
         $result = $response;
 
@@ -912,8 +911,7 @@ class OrderController extends BaseController
         Request                  $request,
         BaseHttpResponse         $response,
         HandleShippingFeeService $shippingFeeService
-    )
-    {
+    ) {
         $weight = 0;
         $orderAmount = 0;
 
@@ -962,8 +960,7 @@ class OrderController extends BaseController
         ApplyCouponRequest       $request,
         HandleApplyCouponService $handleApplyCouponService,
         BaseHttpResponse         $response
-    )
-    {
+    ) {
         $result = $handleApplyCouponService->applyCouponWhenCreatingOrderFromAdmin($request);
 
         if ($result['error']) {
@@ -984,7 +981,7 @@ class OrderController extends BaseController
     /**
      * @param Request $request
      * @param BaseHttpResponse $response
-     * @return Application|BaseHttpResponse|Factory|\Illuminate\Contracts\View\View
+     * @return Application|BaseHttpResponse|Factory|View
      */
     public function getReorder(Request $request, BaseHttpResponse $response)
     {
@@ -1097,7 +1094,7 @@ class OrderController extends BaseController
 
     /**
      * @param int $id
-     * @return Factory|Application|\Illuminate\Contracts\View\View
+     * @return Factory|Application|View
      */
     public function getViewIncompleteOrder($id)
     {

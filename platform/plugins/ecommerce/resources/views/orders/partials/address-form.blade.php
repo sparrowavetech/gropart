@@ -18,7 +18,7 @@
                 <label class="control-label mb-2" for="address_id">{{ __('Select available addresses') }}:</label>
             @endif
 
-            <div class="list-customer-address" @if (!$isAvailableAddress) style="display: none;" @endif>
+            <div class="list-customer-address @if (!$isAvailableAddress) d-none @endif">
                 <div class="select--arrow">
                     <select name="address[address_id]" class="form-control address-control-item" id="address_id">
                         <option value="new" @if (old('address.address_id', $sessionAddressId) == 'new') selected @endif>{{ __('Add new address...') }}</option>
@@ -41,7 +41,7 @@
                     <i class="fas fa-angle-down"></i>
                 </div>
                 <br>
-                <div class="address-item-selected" @if ($sessionAddressId == 'new') style="display: none;" @endif>
+                <div class="address-item-selected @if ($sessionAddressId == 'new') d-none @endif">
                     @if ($isAvailableAddress)
                         @if ($sessionAddressId && $addresses->contains('id', $sessionAddressId))
                             @include('plugins/ecommerce::orders.partials.address-item', ['address' => $addresses->firstWhere('id', $sessionAddressId)])
@@ -52,7 +52,7 @@
                         @endif
                     @endif
                 </div>
-                <div class="list-available-address" style="display: none;">
+                <div class="list-available-address d-none">
                     @if ($isAvailableAddress)
                         @foreach($addresses as $address)
                             <div class="address-item-wrapper" data-id="{{ $address->id }}">
@@ -65,7 +65,7 @@
         </div>
     @endif
 
-    <div class="address-form-wrapper" @if (auth('customer')->check() && $isAvailableAddress && (!empty($sessionAddressId) && $sessionAddressId !== 'new' || empty(Arr::get($sessionCheckoutData, 'state')))) style="display: none;" @endif>
+    <div class="address-form-wrapper @if (auth('customer')->check() && $isAvailableAddress && (!empty($sessionAddressId) && $sessionAddressId !== 'new' || empty(Arr::get($sessionCheckoutData, 'state')))) d-none @endif">
         <div class="row">
             <div class="col-12">
                 <div class="form-group mb-3 @if ($errors->has('address.name')) has-error @endif">
@@ -176,7 +176,7 @@
             <label for="create_account" class="control-label" style="padding-left: 5px">{{ __('Register an account with above information?') }}</label>
         </div>
 
-        <div class="password-group" @if (!$errors->has('password') && !$errors->has('password_confirmation')) style="display: none;" @endif>
+        <div class="password-group @if (!$errors->has('password') && !$errors->has('password_confirmation')) d-none @endif">
             <div class="row">
                 <div class="col-md-6 col-12">
                     <div class="form-group{{ $errors->has('password') ? ' has-error' : '' }}">

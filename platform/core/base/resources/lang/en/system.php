@@ -78,4 +78,6 @@ return [
     'zip' => 'Zip Ext',
     'memory_limit' => 'Memory limit',
     'max_execution_time' => 'Max execution time (s)',
+    'php_version_warning' => 'You are using an out of date PHP version (:version). Please upgrade PHP version on your server to >= 8.0.2 for better security and performance!',
+    'upgrade_php_version_required' => 'You are using an unsupported PHP version (:version). You need to upgrade PHP version on your server to greater than or equal to 8.0.2 before upgrading to this version!',
 ];

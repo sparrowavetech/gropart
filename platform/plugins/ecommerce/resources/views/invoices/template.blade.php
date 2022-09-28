@@ -227,8 +227,7 @@
             @php
                 $product = get_products([
                     'condition' => [
-                        'ec_products.status' => \Botble\Base\Enums\BaseStatusEnum::PUBLISHED,
-                        'ec_products.id'     => $orderProduct->product_id,
+                        'ec_products.id' => $orderProduct->product_id,
                     ],
                     'take'   => 1,
                     'select' => [
@@ -336,7 +335,7 @@
 
             @if ($order->payment->payment_channel == \Botble\Payment\Enums\PaymentMethodEnum::BANK_TRANSFER && $order->payment->status == \Botble\Payment\Enums\PaymentStatusEnum::PENDING)
                 <div>
-                    {{ trans('plugins/ecommerce::order.payment_info') }}: <strong>{{ get_payment_setting('description', $order->payment->payment_channel) }}</strong>
+                    {{ trans('plugins/ecommerce::order.payment_info') }}: <strong>{!! BaseHelper::clean(get_payment_setting('description', $order->payment->payment_channel)) !!}</strong>
                 </div>
             @endif
         </td>

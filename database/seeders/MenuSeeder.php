@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use Botble\Base\Models\MetaBox as MetaBoxModel;
 use Botble\Base\Supports\BaseSeeder;
 use Botble\Ecommerce\Models\ProductCategory;
 use Botble\Language\Models\LanguageMeta;
@@ -29,8 +30,9 @@ class MenuSeeder extends BaseSeeder
                     'location' => 'main-menu',
                     'items'    => [
                         [
-                            'title' => 'Home',
-                            'url'   => '/',
+                            'title'     => 'Special Prices',
+                            'url'       => '/products/smart-watches',
+                            'icon_font' => 'icon icon-tag',
                         ],
                         [
                             'title'    => 'Pages',
@@ -104,8 +106,28 @@ class MenuSeeder extends BaseSeeder
                     ],
                 ],
                 [
-                    'name'  => 'Quick links',
-                    'slug'  => 'quick-links',
+                    'name'     => 'Header menu',
+                    'slug'     => 'header-menu',
+                    'location' => 'header-navigation',
+                    'items'    => [
+                        [
+                            'title'          => 'About Us',
+                            'reference_id'   => 2,
+                            'reference_type' => Page::class,
+                        ],
+                        [
+                            'title' => 'Wishlist',
+                            'url'   => 'wishlist',
+                        ],
+                        [
+                            'title' => 'Order Tracking',
+                            'url'   => 'orders/tracking',
+                        ],
+                    ],
+                ],
+                [
+                    'name'  => 'Useful Links',
+                    'slug'  => 'useful-links',
                     'items' => [
                         [
                             'title'          => 'Terms Of Use',
@@ -134,8 +156,8 @@ class MenuSeeder extends BaseSeeder
                     ],
                 ],
                 [
-                    'name'  => 'Company',
-                    'slug'  => 'company',
+                    'name'  => 'Help Center',
+                    'slug'  => 'help-center',
                     'items' => [
                         [
                             'title'          => 'About us',
@@ -183,8 +205,7 @@ class MenuSeeder extends BaseSeeder
                     ],
                 ],
             ],
-
-            'vi' => [
+            'vi'    => [
                 [
                     'name'     => 'Menu chính',
                     'slug'     => 'menu-chinh',
@@ -200,27 +221,27 @@ class MenuSeeder extends BaseSeeder
                             'children' => [
                                 [
                                     'title'          => 'Về chúng tôi',
-                                    'reference_id'   => 14,
+                                    'reference_id'   => 2,
                                     'reference_type' => Page::class,
                                 ],
                                 [
                                     'title'          => 'Điều khoản sử dụng',
-                                    'reference_id'   => 15,
+                                    'reference_id'   => 3,
                                     'reference_type' => Page::class,
                                 ],
                                 [
                                     'title'          => 'Điều khoản và quy định',
-                                    'reference_id'   => 16,
+                                    'reference_id'   => 4,
                                     'reference_type' => Page::class,
                                 ],
                                 [
                                     'title'          => 'Chính sách hoàn hàng',
-                                    'reference_id'   => 17,
+                                    'reference_id'   => 5,
                                     'reference_type' => Page::class,
                                 ],
                                 [
                                     'title'          => 'Sắp ra mắt',
-                                    'reference_id'   => 24,
+                                    'reference_id'   => 12,
                                     'reference_type' => Page::class,
                                 ],
                             ],
@@ -250,43 +271,43 @@ class MenuSeeder extends BaseSeeder
                         ],
                         [
                             'title'          => 'Tin tức',
-                            'reference_id'   => 18,
+                            'reference_id'   => 6,
                             'reference_type' => Page::class,
                         ],
                         [
                             'title'          => 'FAQs',
-                            'reference_id'   => 19,
+                            'reference_id'   => 7,
                             'reference_type' => Page::class,
                         ],
                         [
                             'title'          => 'Liên hệ',
-                            'reference_id'   => 20,
+                            'reference_id'   => 8,
                             'reference_type' => Page::class,
                         ],
                     ],
                 ],
                 [
-                    'name'  => 'Liên kết nhanh',
-                    'slug'  => 'lien-ket-nhanh',
+                    'name'  => 'Liên kết hữu ích',
+                    'slug'  => 'lien-ket-huu-ich',
                     'items' => [
                         [
                             'title'          => 'Điều khoản sử dụng',
-                            'reference_id'   => 15,
+                            'reference_id'   => 3,
                             'reference_type' => Page::class,
                         ],
                         [
                             'title'          => 'Điều khoản và quy định',
-                            'reference_id'   => 16,
+                            'reference_id'   => 4,
                             'reference_type' => Page::class,
                         ],
                         [
                             'title'          => 'Chính sách hoàn hàng',
-                            'reference_id'   => 17,
+                            'reference_id'   => 5,
                             'reference_type' => Page::class,
                         ],
                         [
                             'title'          => 'FAQs',
-                            'reference_id'   => 19,
+                            'reference_id'   => 6,
                             'reference_type' => Page::class,
                         ],
                         [
@@ -296,27 +317,47 @@ class MenuSeeder extends BaseSeeder
                     ],
                 ],
                 [
-                    'name'  => 'Công ty',
-                    'slug'  => 'cong-ty',
+                    'name'     => 'Menu trên cùng',
+                    'slug'     => 'menu-tren-cung',
+                    'location' => 'header-navigation',
+                    'items'    => [
+                        [
+                            'title'          => 'Về chúng tôi',
+                            'reference_id'   => 2,
+                            'reference_type' => Page::class,
+                        ],
+                        [
+                            'title' => 'Danh sách ưa thích',
+                            'url'   => 'wishlist',
+                        ],
+                        [
+                            'title' => 'Theo dõi đơn hàng',
+                            'url'   => 'orders/tracking',
+                        ],
+                    ],
+                ],
+                [
+                    'name'  => 'Trung tâm trợ giúp',
+                    'slug'  => 'trung-tam-tro-giup',
                     'items' => [
                         [
                             'title'          => 'Về chúng tôi',
-                            'reference_id'   => 14,
+                            'reference_id'   => 2,
                             'reference_type' => Page::class,
                         ],
                         [
                             'title'          => 'Tiếp thị liên kết',
-                            'reference_id'   => 22,
+                            'reference_id'   => 10,
                             'reference_type' => Page::class,
                         ],
                         [
                             'title'          => 'Tuyển dụng',
-                            'reference_id'   => 23,
+                            'reference_id'   => 11,
                             'reference_type' => Page::class,
                         ],
                         [
                             'title'          => 'Liên hệ',
-                            'reference_id'   => 20,
+                            'reference_id'   => 8,
                             'reference_type' => Page::class,
                         ],
                     ],
@@ -327,7 +368,7 @@ class MenuSeeder extends BaseSeeder
                     'items' => [
                         [
                             'title'          => 'Tin tức',
-                            'reference_id'   => 18,
+                            'reference_id'   => 6,
                             'reference_type' => Page::class,
                         ],
                         [
@@ -350,6 +391,7 @@ class MenuSeeder extends BaseSeeder
         MenuModel::truncate();
         MenuLocation::truncate();
         MenuNode::truncate();
+        MetaBoxModel::where('reference_type', MenuNode::class)->delete();
         LanguageMeta::where('reference_type', MenuModel::class)->delete();
         LanguageMeta::where('reference_type', MenuLocation::class)->delete();
 
@@ -402,6 +444,10 @@ class MenuSeeder extends BaseSeeder
     {
         $menuNode['menu_id'] = $menuId;
         $menuNode['parent_id'] = $parentId;
+
+        if (isset($menuNode['url'])) {
+            $menuNode['url'] = str_replace(url(''), '', $menuNode['url']);
+        }
 
         if (Arr::has($menuNode, 'children')) {
             $children = $menuNode['children'];

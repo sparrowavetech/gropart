@@ -5,7 +5,6 @@ namespace Botble\Ecommerce\Cart;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Ecommerce\Cart\Contracts\Buyable;
 use Botble\Ecommerce\Cart\Exceptions\CartAlreadyStoredException;
-use Botble\Ecommerce\Cart\Exceptions\InvalidRowIDException;
 use Botble\Ecommerce\Cart\Exceptions\UnknownModelException;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Carbon\Carbon;
@@ -181,11 +180,9 @@ class Cart
      */
     protected function getContent()
     {
-        $content = $this->session->has($this->instance)
+        return $this->session->has($this->instance)
             ? $this->session->get($this->instance)
             : new Collection();
-
-        return $content;
     }
 
     /**
@@ -237,7 +234,7 @@ class Cart
 
             if ($content->has($cartItem->rowId)) {
                 $existingCartItem = $this->get($cartItem->rowId);
-                $cartItem->setQuantity($existingCartItem->qty + $cartItem->qty);
+                $cartItem->setQuantity((int)$existingCartItem->qty + (int)$cartItem->qty);
             }
         }
 
@@ -268,7 +265,7 @@ class Cart
         $content = $this->getContent();
 
         if (!$content->has($rowId)) {
-            throw new InvalidRowIDException('The cart does not contain rowId ' . $rowId);
+            return null;
         }
 
         return $content->get($rowId);
@@ -332,15 +329,13 @@ class Cart
     {
         $content = $this->getContent();
 
-        $total = $content->reduce(function ($total, CartItem $cartItem) {
+        return $content->reduce(function ($total, CartItem $cartItem) {
             if (!EcommerceHelper::isTaxEnabled()) {
                 return $total + $cartItem->qty * $cartItem->price;
             }
 
             return $total + ($cartItem->qty * ($cartItem->priceTax == 0 ? $cartItem->price : $cartItem->priceTax));
         }, 0);
-
-        return $total;
     }
 
     /**
@@ -348,15 +343,13 @@ class Cart
      */
     public function rawTotalByItems($content)
     {
-        $total = $content->reduce(function ($total, CartItem $cartItem) {
+        return $content->reduce(function ($total, CartItem $cartItem) {
             if (!EcommerceHelper::isTaxEnabled()) {
                 return $total + $cartItem->qty * $cartItem->price;
             }
 
             return $total + ($cartItem->qty * ($cartItem->priceTax == 0 ? $cartItem->price : $cartItem->priceTax));
         }, 0);
-
-        return $total;
     }
 
     /**
@@ -370,11 +363,9 @@ class Cart
             return 0;
         }
 
-        $tax = $content->reduce(function ($tax, CartItem $cartItem) {
+        return $content->reduce(function ($tax, CartItem $cartItem) {
             return $tax + ($cartItem->qty * $cartItem->tax);
         }, 0);
-
-        return $tax;
     }
 
     /**
@@ -384,11 +375,9 @@ class Cart
     {
         $content = $this->getContent();
 
-        $subTotal = $content->reduce(function ($subTotal, CartItem $cartItem) {
+        return $content->reduce(function ($subTotal, CartItem $cartItem) {
             return $subTotal + ($cartItem->qty * $cartItem->price);
         }, 0);
-
-        return $subTotal;
     }
 
     /**
@@ -396,11 +385,9 @@ class Cart
      */
     public function rawSubTotalByItems($content)
     {
-        $subTotal = $content->reduce(function ($subTotal, CartItem $cartItem) {
+        return $content->reduce(function ($subTotal, CartItem $cartItem) {
             return $subTotal + ($cartItem->qty * $cartItem->price);
         }, 0);
-
-        return $subTotal;
     }
 
     /**
@@ -641,11 +628,9 @@ class Cart
 
         $content = $this->getContent();
 
-        $tax = $content->reduce(function ($tax, CartItem $cartItem) {
+        return $content->reduce(function ($tax, CartItem $cartItem) {
             return $tax + ($cartItem->qty * $cartItem->tax);
         }, 0);
-
-        return $tax;
     }
 
     /**

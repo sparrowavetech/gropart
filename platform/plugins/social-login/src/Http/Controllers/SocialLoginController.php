@@ -7,7 +7,11 @@ use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Setting\Supports\SettingStore;
 use Botble\SocialLogin\Http\Requests\SocialLoginRequest;
+use Carbon\Carbon;
 use Exception;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
@@ -111,10 +115,10 @@ class SocialLoginController extends BaseController
              * @var AbstractUser $oAuth
              */
             $oAuth = Socialite::driver($provider)->user();
-        } catch (Exception $ex) {
-            $message = $ex->getMessage();
+        } catch (Exception $exception) {
+            $message = $exception->getMessage();
 
-            if ($provider == 'github') {
+            if (in_array($provider, ['github', 'facebook'])) {
                 $message = json_encode($message);
             }
 
@@ -163,7 +167,7 @@ class SocialLoginController extends BaseController
 
             $account = new $providerData['model']();
             $account->fill($data);
-            $account->confirmed_at = now();
+            $account->confirmed_at = Carbon::now();
             $account->save();
         }
 
@@ -175,7 +179,7 @@ class SocialLoginController extends BaseController
     }
 
     /**
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return Application|Factory|View
      */
     public function getSettings()
     {

@@ -1,4 +1,4 @@
-@extends('plugins/ecommerce::themes.customers.master')
+@extends(EcommerceHelper::viewPath('customers.master'))
 
 @section('content')
     <div class="panel panel-default">

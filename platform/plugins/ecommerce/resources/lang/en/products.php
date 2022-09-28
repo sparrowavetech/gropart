@@ -3,6 +3,10 @@
 return [
     'name'                                           => 'Products',
     'create'                                         => 'New product',
+    'create_product_type'                            => [
+        'physical' => 'New physical product',
+        'digital'  => 'New digital product',
+    ],
     'edit'                                           => 'Edit product - :name',
     'form'                                           => [
         'name'                               => 'Name',
@@ -147,4 +151,15 @@ return [
     'product_price_discount_warning'                 => 'This product is in discount <strong>:name</strong> so its price is <strong>:price</strong>.',
     'product_image'                                  => 'Product image',
     'product_name'                                   => 'Product name',
+    'types'                                          => [
+        'physical' => 'Physical',
+        'digital'  => 'Digital',
+    ],
+    'digital_attachments'                            => [
+        'title'     => 'Digital attachments',
+        'add'       => 'Add Attachment',
+        'file_name' => 'File name',
+        'file_size' => 'File size',
+        'unsaved'   => 'Unsaved',
+    ],
 ];

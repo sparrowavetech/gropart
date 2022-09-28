@@ -25,157 +25,163 @@ class ProductCategorySeeder extends BaseSeeder
 
         $categories = [
             [
-                'name' => 'Hot Promotions',
-                'icon' => 'icon-star',
-            ],
-            [
-                'name'        => 'Electronics',
-                'icon'        => 'icon-laundry',
-                'image'       => 'product-categories/1.jpg',
+                'name'        => 'Fruits & Vegetables',
                 'is_featured' => true,
+                'image'       => 'product-categories/1.png',
+                'icon'        => 'icon-star',
                 'children'    => [
                     [
-                        'name'     => 'Consumer Electronic',
+                        'name'     => 'Fruits',
                         'children' => [
-                            [
-                                'name' => 'Home Audio & Theaters',
-                            ],
-                            [
-                                'name' => 'TV & Videos',
-                            ],
-                            [
-                                'name' => 'Camera, Photos & Videos',
-                            ],
-                            [
-                                'name' => 'Cellphones & Accessories',
-                            ],
-                            [
-                                'name' => 'Headphones',
-                            ],
-                            [
-                                'name' => 'Videos games',
-                            ],
-                            [
-                                'name' => 'Wireless Speakers',
-                            ],
-                            [
-                                'name' => 'Office Electronic',
-                            ],
+                            ['name' => 'Apples'],
+                            ['name' => 'Bananas'],
+                            ['name' => 'Berries'],
+                            ['name' => 'Oranges & Easy Peelers'],
+                            ['name' => 'Grapes'],
+                            ['name' => 'Lemons & Limes'],
+                            ['name' => 'Peaches & Nectarines'],
+                            ['name' => 'Pears'],
+                            ['name' => 'Melon'],
+                            ['name' => 'Avocados'],
+                            ['name' => 'Plums & Apricots'],
                         ],
                     ],
                     [
-                        'name'     => 'Accessories & Parts',
+                        'name'     => 'Vegetables',
                         'children' => [
-                            [
-                                'name' => 'Digital Cables',
-                            ],
-                            [
-                                'name' => 'Audio & Video Cables',
-                            ],
-                            [
-                                'name' => 'Batteries',
-                            ],
+                            ['name' => 'Potatoes'],
+                            ['name' => 'Carrots & Root Vegetables'],
+                            ['name' => 'Broccoli & Cauliflower'],
+                            ['name' => 'Cabbage, Spinach & Greens'],
+                            ['name' => 'Onions, Leeks & Garlic'],
+                            ['name' => 'Mushrooms'],
+                            ['name' => 'Tomatoes'],
+                            ['name' => 'Beans, Peas & Sweetcorn'],
+                            ['name' => 'Freshly Drink Orange Juice'],
                         ],
                     ],
                 ],
             ],
             [
-                'name'        => 'Clothing',
-                'icon'        => 'icon-shirt',
-                'image'       => 'product-categories/2.jpg',
+                'name'        => 'Breads Sweets',
                 'is_featured' => true,
-            ],
-            [
-                'name'        => 'Computers',
-                'icon'        => 'icon-desktop',
-                'image'       => 'product-categories/3.jpg',
-                'is_featured' => true,
+                'image'       => 'product-categories/2.png',
+                'icon'        => 'icon-bread',
                 'children'    => [
                     [
-                        'name'     => 'Computer & Technologies',
+                        'name'     => 'Crisps, Snacks & Nuts',
                         'children' => [
-                            [
-                                'name' => 'Computer & Tablets',
-                            ],
-                            [
-                                'name' => 'Laptop',
-                            ],
-                            [
-                                'name' => 'Monitors',
-                            ],
-                            [
-                                'name' => 'Computer Components',
-                            ],
+                            ['name' => 'Crisps & Popcorn'],
+                            ['name' => 'Nuts & Seeds'],
+                            ['name' => 'Lighter Options'],
+                            ['name' => 'Cereal Bars'],
+                            ['name' => 'Breadsticks & Pretzels'],
+                            ['name' => 'Fruit Snacking'],
+                            ['name' => 'Rice & Corn Cakes'],
+                            ['name' => 'Protein & Energy Snacks'],
+                            ['name' => 'Toddler Snacks'],
+                            ['name' => 'Meat Snacks'],
+                            ['name' => 'Beans'],
+                            ['name' => 'Lentils'],
+                            ['name' => 'Chickpeas'],
                         ],
                     ],
                     [
-                        'name'     => 'Networking',
+                        'name'     => 'Tins & Cans',
                         'children' => [
-                            [
-                                'name' => 'Drive & Storages',
-                            ],
-                            [
-                                'name' => 'Gaming Laptop',
-                            ],
-                            [
-                                'name' => 'Security & Protection',
-                            ],
-                            [
-                                'name' => 'Accessories',
-                            ],
+                            ['name' => 'Tomatoes'],
+                            ['name' => 'Baked Beans, Spaghetti'],
+                            ['name' => 'Fish'],
+                            ['name' => 'Beans & Pulses'],
+                            ['name' => 'Fruit'],
+                            ['name' => 'Coconut Milk & Cream'],
+                            ['name' => 'Lighter Options'],
+                            ['name' => 'Olives'],
+                            ['name' => 'Sweetcorn'],
+                            ['name' => 'Carrots'],
+                            ['name' => 'Peas'],
+                            ['name' => 'Mixed Vegetables'],
                         ],
                     ],
                 ],
             ],
             [
-                'name'        => 'Home & Kitchen',
-                'icon'        => 'icon-lampshade',
-                'image'       => 'product-categories/4.jpg',
+                'name'        => 'Frozen Seafoods',
                 'is_featured' => true,
+                'image'       => 'product-categories/3.png',
+                'icon'        => 'icon-hamburger',
             ],
             [
-                'name'        => 'Health & Beauty',
-                'icon'        => 'icon-heart-pulse',
-                'image'       => 'product-categories/5.jpg',
+                'name'        => 'Raw Meats',
                 'is_featured' => true,
+                'image'       => 'product-categories/4.png',
+                'icon'        => 'icon-steak',
             ],
             [
-                'name'        => 'Jewelry & Watch',
-                'icon'        => 'icon-diamond2',
-                'image'       => 'product-categories/6.jpg',
+                'name'        => 'Wines & Alcohol Drinks',
                 'is_featured' => true,
+                'image'       => 'product-categories/5.png',
+                'icon'        => 'icon-glass',
+                'children'    => [
+                    [
+                        'name'     => 'Ready Meals',
+                        'children' => [
+                            ['name' => 'Meals for 1'],
+                            ['name' => 'Meals for 2'],
+                            ['name' => 'Indian'],
+                            ['name' => 'Italian'],
+                            ['name' => 'Chinese'],
+                            ['name' => 'Traditional British'],
+                            ['name' => 'Thai & Oriental'],
+                            ['name' => 'Mediterranean & Moroccan'],
+                            ['name' => 'Mexican & Caribbean'],
+                            ['name' => 'Lighter Meals'],
+                            ['name' => 'Lunch & Veg Pots'],
+                        ],
+                    ],
+                    [
+                        'name'     => 'Salad & Herbs',
+                        'children' => [
+                            ['name' => 'Salad Bags'],
+                            ['name' => 'Cucumber'],
+                            ['name' => 'Tomatoes'],
+                            ['name' => 'Lettuce'],
+                            ['name' => 'Lunch Salad Bowls'],
+                            ['name' => 'Lunch Salad Bowls'],
+                            ['name' => 'Fresh Herbs'],
+                            ['name' => 'Avocados'],
+                            ['name' => 'Peppers'],
+                            ['name' => 'Coleslaw & Potato Salad'],
+                            ['name' => 'Spring Onions'],
+                            ['name' => 'Chilli, Ginger & Garlic'],
+                        ],
+                    ],
+                ],
             ],
             [
-                'name'        => 'Technology Toys',
-                'icon'        => 'icon-desktop',
-                'image'       => 'product-categories/7.jpg',
+                'name'        => 'Tea & Coffee',
                 'is_featured' => true,
+                'image'       => 'product-categories/6.png',
+                'icon'        => 'icon-teacup',
             ],
             [
-                'name'        => 'Phones',
-                'icon'        => 'icon-smartphone',
-                'image'       => 'product-categories/8.jpg',
+                'name'        => 'Milks and Dairies',
                 'is_featured' => true,
+                'image'       => 'product-categories/7.png',
+                'icon'        => 'icon-coffee-cup',
             ],
             [
-                'name' => 'Babies & Moms',
-                'icon' => 'icon-baby-bottle',
+                'name'        => 'Pet Foods',
+                'is_featured' => true,
+                'image'       => 'product-categories/8.png',
+                'icon'        => 'icon-hotdog',
             ],
             [
-                'name' => 'Sport & Outdoor',
-                'icon' => 'icon-baseball',
-            ],
-            [
-                'name' => 'Books & Office',
-                'icon' => 'icon-book2',
-            ],
-            [
-                'name' => 'Cars & Motorcycles',
-                'icon' => 'icon-car-siren',
-            ],
-            [
-                'name' => 'Home Improvements',
-                'icon' => 'icon-wrench',
+                'name'        => 'Food Cupboard',
+                'is_featured' => true,
+                'image'       => 'product-categories/1.png',
+                'icon'        => 'icon-cheese',
+
             ],
         ];
 
@@ -192,163 +198,128 @@ class ProductCategorySeeder extends BaseSeeder
 
         $translations = [
             [
-                'name' => 'Khuyến mãi hấp dẫn',
-            ],
-            [
-                'name' => 'Điện tử',
+                'name'     => 'Rau củ quả',
                 'children' => [
                     [
-                        'name' => 'Điện tử tiêu dùng',
+                        'name'     => 'Trái cây',
                         'children' => [
-                            [
-                                'name' => 'Thiết bị nghe nhìn',
-                            ],
-                            [
-                                'name' => 'TV & Videos',
-                            ],
-                            [
-                                'name' => 'Camera, Photos & Videos',
-                            ],
-                            [
-                                'name' => 'Điện thoại di động & Phụ kiện',
-                            ],
-                            [
-                                'name' => 'Tai nghe',
-                            ],
-                            [
-                                'name' => 'Trò chơi video',
-                            ],
-                            [
-                                'name' => 'Loa không dây',
-                            ],
-                            [
-                                'name' => 'Điện tử văn phòng',
-                            ],
+                            ['name' => 'Táo'],
+                            ['name' => 'Chuối'],
+                            ['name' => 'Quả Mọng'],
+                            ['name' => 'Cam'],
+                            ['name' => 'Nho'],
+                            ['name' => 'Chanh'],
+                            ['name' => 'Quả Đào'],
+                            ['name' => 'Lê'],
+                            ['name' => 'Dưa Gang'],
+                            ['name' => 'Bơ'],
+                            ['name' => 'Mận & Mơ'],
                         ],
                     ],
                     [
-                        'name' => 'Phụ kiện & Phụ tùng',
+                        'name'     => 'Rau',
                         'children' => [
-                            [
-                                'name' => 'Digital Cables',
-                            ],
-                            [
-                                'name' => 'Audio & Video Cables',
-                            ],
-                            [
-                                'name' => 'Pin',
-                            ],
+                            ['name' => 'Khoai Tây'],
+                            ['name' => 'Cà rốt'],
+                            ['name' => 'Bông cải xanh & súp lơ trắng'],
+                            ['name' => 'Bắp cải, rau bina & rau xanh'],
+                            ['name' => 'Hành tây, tỏi tây'],
+                            ['name' => 'Nấm'],
+                            ['name' => 'Cà chua'],
+                            ['name' => 'Đậu, Đậu Hà Lan & Bắp rang bơ'],
+                            ['name' => 'Nước uống tươi'],
                         ],
                     ],
                 ],
             ],
             [
-                'name' => 'Quần áo',
-            ],
-            [
-                'name' => 'Máy tính',
+                'name'     => 'Bánh mì kẹo',
                 'children' => [
                     [
-                        'name' => 'Máy tính & Công nghệ',
+                        'name'     => 'Crisps, Snack & Nuts',
                         'children' => [
-                            [
-                                'name' => 'Máy tính & Máy tính bảng',
-                            ],
-                            [
-                                'name' => 'Máy tính xách tay',
-                            ],
-                            [
-                                'name' => 'Màn hình',
-                            ],
-                            [
-                                'name' => 'Linh kiện Máy tính',
-                            ],
+                            ['name' => 'Khoai tây chiên giòn & bỏng ngô'],
+                            ['name' => 'Nuts & Seeds'],
+                            ['name' => 'Lighter Options'],
+                            ['name' => 'Cereal Bars'],
+                            ['name' => 'Bánh mì que & Pretzels'],
+                            ['name' => 'Fruit Snacking'],
+                            ['name' => 'Bánh gạo'],
+                            ['name' => 'Protein & Energy Snacks'],
+                            ['name' => 'Toddler Snacks'],
+                            ['name' => 'Meat Snacks'],
+                            ['name' => 'Đậu'],
+                            ['name' => 'Lentils'],
+                            ['name' => 'Chickpeas'],
                         ],
                     ],
                     [
-                        'name' => 'Mạng máy tính',
+                        'name'     => 'Tins & Cans',
                         'children' => [
-                            [
-                                'name' => 'Thiết bị lưu trữ',
-                            ],
-                            [
-                                'name' => 'Máy tính xách tay chơi game',
-                            ],
-                            [
-                                'name' => 'Thiết bị bảo mật',
-                            ],
-                            [
-                                'name' => 'Phụ kiện',
-                            ],
+                            ['name' => 'Khoai tây'],
+                            ['name' => 'Baked Beans, Spaghetti'],
+                            ['name' => 'Cá'],
+                            ['name' => 'Đậu & Pulses'],
+                            ['name' => 'Trái cây'],
+                            ['name' => 'Coconut Milk & Cream'],
+                            ['name' => 'Lighter Options'],
+                            ['name' => 'Olives'],
+                            ['name' => 'Sweetcorn'],
+                            ['name' => 'Cà rốt'],
+                            ['name' => 'Đậu Hà Lan'],
+                            ['name' => 'Mixed Vegetables'],
                         ],
                     ],
                 ],
             ],
+            ['name' => 'Hải sản đông lạnh'],
+            ['name' => 'Thịt sống'],
             [
-                'name' => 'Đồ dùng làm bếp',
+                'name'     => 'Rượu & Đồ uống có cồn',
+                'children' => [
+                    [
+                        'name'     => 'Ready Meals',
+                        'children' => [
+                            ['name' => 'Meals for 1'],
+                            ['name' => 'Meals for 2'],
+                            ['name' => 'Indian'],
+                            ['name' => 'Italian'],
+                            ['name' => 'Chinese'],
+                            ['name' => 'Traditional British'],
+                            ['name' => 'Thai & Oriental'],
+                            ['name' => 'Mediterranean & Moroccan'],
+                            ['name' => 'Mexican & Caribbean'],
+                            ['name' => 'Lighter Meals'],
+                            ['name' => 'Lunch & Veg Pots'],
+                        ],
+                    ],
+                    [
+                        'name'     => 'Salad & thảo mộc',
+                        'children' => [
+                            ['name' => 'Túi đựng salad'],
+                            ['name' => 'Quả dưa chuột'],
+                            ['name' => 'Cà chua'],
+                            ['name' => 'Rau xà lách'],
+                            ['name' => 'Lunch Salad Bowls'],
+                            ['name' => 'Fresh Herbs'],
+                            ['name' => 'Avocados'],
+                            ['name' => 'Peppers'],
+                            ['name' => 'Coleslaw & Potato Salad'],
+                            ['name' => 'Spring Onions'],
+                            ['name' => 'Chilli, Ginger & Garlic'],
+                        ],
+                    ],
+                ],
             ],
-            [
-                'name' => 'Sức khỏe & làm đẹp',
-            ],
-            [
-                'name' => 'Trang sức & Đồng hồ',
-            ],
-            [
-                'name' => 'Đồ chơi công nghệ',
-            ],
-            [
-                'name' => 'Điện thoại',
-            ],
-            [
-                'name' => 'Mẹ và bé',
-            ],
-            [
-                'name' => 'Thể thao & ngoài trời',
-            ],
-            [
-                'name' => 'Sách & Văn phòng',
-            ],
-            [
-                'name' => 'Ô tô & Xe máy',
-            ],
-            [
-                'name' => 'Cải tiến nhà cửa',
-            ],
+            ['name' => 'Trà & Cà phê'],
+            ['name' => 'Sữa và các loại sữa'],
+            ['name' => 'Thức ăn cho thú cưng'],
+            ['name' => 'Tủ đựng thức ăn'],
         ];
 
         $count = 1;
         foreach ($translations as $translation) {
-
-            $translation['lang_code'] = 'vi';
-            $translation['ec_product_categories_id'] = $count;
-
-            DB::table('ec_product_categories_translations')->insert(Arr::except($translation, ['children']));
-
-            $count++;
-
-            if (isset($translation['children'])) {
-                foreach ($translation['children'] as $child) {
-
-                    $child['lang_code'] = 'vi';
-                    $child['ec_product_categories_id'] = $count;
-
-                    DB::table('ec_product_categories_translations')->insert(Arr::except($child, ['children']));
-
-                    $count++;
-
-                    if (isset($child['children'])) {
-                        foreach ($child['children'] as $item) {
-
-                            $item['lang_code'] = 'vi';
-                            $item['ec_product_categories_id'] = $count;
-
-                            DB::table('ec_product_categories_translations')->insert(Arr::except($item, ['children']));
-
-                            $count++;
-                        }
-                    }
-                }
-            }
+            $this->createCategoryItemTrans($count, $translation);
         }
     }
 
@@ -385,6 +356,27 @@ class ProductCategorySeeder extends BaseSeeder
         if ($children) {
             foreach ($children as $childIndex => $child) {
                 $this->createCategoryItem($childIndex, $child, $createdCategory->id);
+            }
+        }
+    }
+
+    /**
+     * @param int $count
+     * @param array $translation
+     * @return void
+     */
+    protected function createCategoryItemTrans(int &$count, array $translation): void
+    {
+        $translation['lang_code'] = 'vi';
+        $translation['ec_product_categories_id'] = $count;
+
+        DB::table('ec_product_categories_translations')->insert(Arr::except($translation, ['children']));
+
+        $count++;
+
+        if (Arr::get($translation, 'children')) {
+            foreach ($translation['children'] as $child) {
+                $this->createCategoryItemTrans($count, $child);
             }
         }
     }

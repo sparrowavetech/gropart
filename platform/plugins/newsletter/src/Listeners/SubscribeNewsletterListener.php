@@ -7,7 +7,7 @@ use EmailHandler;
 use Html;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Throwable;
-use URL;
+use Illuminate\Support\Facades\URL;
 
 class SubscribeNewsletterListener implements ShouldQueue
 {

@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class OrderProduct extends BaseModel
 {
@@ -25,6 +26,7 @@ class OrderProduct extends BaseModel
         'tax_amount',
         'options',
         'restock_quantity',
+        'product_type',
     ];
 
     /**
@@ -72,5 +74,13 @@ class OrderProduct extends BaseModel
     public function getTotalFormatAttribute(): string
     {
         return format_price($this->price * $this->qty);
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function productFiles(): HasMany
+    {
+        return $this->hasMany(ProductFile::class, 'product_id');
     }
 }

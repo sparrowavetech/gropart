@@ -79,22 +79,22 @@ class StripePaymentService extends StripePaymentAbstract
 
         foreach ($data['products'] as $product) {
             $lineItems[] = [
-                'price_data'  => [
+                'price_data' => [
                     'product_data' => [
-                        'name'     => $product['name'],
-                        'metadata' => [
+                        'name'        => $product['name'],
+                        'metadata'    => [
                             'pro_id' => $product['id'],
                         ],
+                        'description' => $product['name'],
                     ],
                     'unit_amount'  => $this->convertAmount($product['price_per_order'] * get_current_exchange_rate()),
                     'currency'     => $this->currency,
                 ],
-                'quantity'    => $product['qty'],
-                'description' => $product['name'],
+                'quantity'   => $product['qty'],
             ];
         }
 
-        $checkoutSession = StripeCheckoutSession::create([
+        $requestData = [
             'line_items'  => $lineItems,
             'mode'        => 'payment',
             'success_url' => route('payments.stripe.success') . '?session_id={CHECKOUT_SESSION_ID}',
@@ -108,7 +108,24 @@ class StripePaymentService extends StripePaymentAbstract
                 'return_url'    => Arr::get($data, 'return_url'),
                 'callback_url'  => Arr::get($data, 'callback_url'),
             ],
-        ]);
+        ];
+
+        if (!empty($data['shipping_method'])) {
+            $requestData['shipping_options'] = [
+                [
+                    'shipping_rate_data' => [
+                        'type'         => 'fixed_amount',
+                        'fixed_amount' => [
+                            'amount'   => $this->convertAmount($data['shipping_amount'] * get_current_exchange_rate()),
+                            'currency' => $this->currency,
+                        ],
+                        'display_name' => $data['shipping_method'],
+                    ],
+                ],
+            ];
+        }
+
+        $checkoutSession = StripeCheckoutSession::create($requestData);
 
         return $checkoutSession->url;
     }

@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use Botble\Base\Supports\BaseSeeder;
 use Botble\Blog\Models\Category;
 use Botble\Blog\Models\Post;
-use Botble\Setting\Models\Setting as SettingModel;
+use Botble\Setting\Models\Setting;
 use Botble\Slug\Models\Slug;
 use SlugHelper;
 
@@ -18,16 +18,11 @@ class SettingSeeder extends BaseSeeder
      */
     public function run()
     {
-        SettingModel::whereIn('key', ['media_random_hash'])->delete();
-
-        SettingModel::insertOrIgnore([
+        $settings = [
             [
                 'key'   => 'media_random_hash',
                 'value' => md5(time()),
             ],
-        ]);
-
-        SettingModel::insertOrIgnore([
             [
                 'key'   => SlugHelper::getPermalinkSettingKey(Post::class),
                 'value' => 'blog',
@@ -50,7 +45,7 @@ class SettingSeeder extends BaseSeeder
             ],
             [
                 'key'   => 'payment_bank_transfer_description',
-                'value' => 'Please send money to our bank account: ACB - 1990 404 19.',
+                'value' => 'Please send money to our bank account: ACB - 69270 213 19.',
             ],
             [
                 'key'   => 'plugins_ecommerce_customer_new_order_status',
@@ -60,7 +55,19 @@ class SettingSeeder extends BaseSeeder
                 'key'   => 'plugins_ecommerce_admin_new_order_status',
                 'value' => '0',
             ],
-        ]);
+            [
+                'key'   => 'ecommerce_load_countries_states_cities_from_location_plugin',
+                'value' => '0',
+            ],
+            [
+                'key'   => 'payment_stripe_payment_type',
+                'value' => 'stripe_checkout',
+            ],
+        ];
+
+        Setting::whereIn('key', collect($settings)->pluck('key')->all())->delete();
+
+        Setting::insert($settings);
 
         Slug::where('reference_type', Post::class)->update(['prefix' => 'blog']);
         Slug::where('reference_type', Category::class)->update(['prefix' => 'blog']);

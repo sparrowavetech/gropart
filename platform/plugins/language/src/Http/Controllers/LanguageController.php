@@ -23,7 +23,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
 use Exception;
-use File;
+use Illuminate\Support\Facades\File;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

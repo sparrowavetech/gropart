@@ -2,9 +2,12 @@
 
 namespace Botble\Ecommerce\Supports;
 
+use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Supports\SortItemsWithChildrenHelper;
+use Botble\Ecommerce\Models\ProductCategory;
 use Botble\Ecommerce\Repositories\Interfaces\ProductCategoryInterface;
 use Illuminate\Support\Collection;
+use Language;
 
 class ProductCategoryHelper
 {
@@ -12,6 +15,11 @@ class ProductCategoryHelper
      * @var Collection
      */
     protected $allCategories = [];
+
+    /**
+     * @var Collection
+     */
+    protected $treeCategories = [];
 
     /**
      * @return Collection
@@ -23,7 +31,11 @@ class ProductCategoryHelper
         }
 
         if ($this->allCategories->count() == 0) {
-            $this->allCategories = app(ProductCategoryInterface::class)->getProductCategories();
+            $with = ['slugable', 'metadata'];
+            if (is_plugin_active('language-advanced') && Language::getCurrentLocaleCode() != Language::getDefaultLocaleCode()) {
+                $with[] = 'translations';
+            }
+            $this->allCategories = app(ProductCategoryInterface::class)->getProductCategories([], $with);
         }
 
         return $this->allCategories;
@@ -126,8 +138,7 @@ class ProductCategoryHelper
         int        $depth = 0,
         array      &$results = [],
         string     $indent = '&nbsp;&nbsp;'
-    ): bool
-    {
+    ): bool {
         foreach ($categories as $category) {
             $results[$category->id] = str_repeat($indent, $depth) . $category->name;
 
@@ -137,5 +148,49 @@ class ProductCategoryHelper
         }
 
         return true;
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getActiveTreeCategories(): Collection
+    {
+        if (!$this->treeCategories instanceof Collection) {
+            $this->treeCategories = collect([]);
+        }
+
+        if ($this->treeCategories->count() == 0) {
+            $allCategories = $this->getAllProductCategories()->where('status', BaseStatusEnum::PUBLISHED);
+
+            $this->treeCategories = $allCategories->whereIn('parent_id', [0, null]);
+            $this->treeCategories->map(function ($category) use ($allCategories) {
+                return $this->setItemTreeCategories($allCategories, $category);
+            });
+        }
+
+        return $this->treeCategories;
+    }
+
+    /**
+     * @param  Collection  $allCategories
+     * @param  ProductCategory  $category
+     * @return ProductCategory
+     */
+    public function setItemTreeCategories(Collection $allCategories, ProductCategory $category)
+    {
+        $categories = $allCategories->where('parent_id', $category->id);
+        $category->setRelation('activeChildren', $categories);
+        if ($allCategories->whereIn('parent_id', $categories->pluck('id')->toArray())->count()) {
+            $category->activeChildren->map(function ($item) use ($allCategories) {
+                return $this->setItemTreeCategories($allCategories, $item);
+            });
+        } else {
+            $category->activeChildren->map(function ($item) {
+                $item->setRelation('activeChildren', collect([]));
+                return $item;
+            });
+        }
+
+        return $category;
     }
 }

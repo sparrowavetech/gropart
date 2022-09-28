@@ -164,7 +164,7 @@ class HookServiceProvider extends ServiceProvider
 
                 $order = $order->toArray();
 
-                if (in_array($order['status'], ['paid', 'attempted'])) {
+                if (in_array($order['status'], ['created', 'paid', 'attempted'])) {
                     $amount = $order['amount_paid'] / 100;
 
                     $status = PaymentStatusEnum::COMPLETED;

@@ -53,10 +53,10 @@ class OrderTable extends TableAbstract
                 return $item->status->toHtml();
             })
             ->editColumn('payment_status', function ($item) {
-                return $item->payment->status->label() ? clean($item->payment->status->toHtml()) : '&mdash;';
+                return $item->payment->status->label() ? BaseHelper::clean($item->payment->status->toHtml()) : '&mdash;';
             })
             ->editColumn('payment_method', function ($item) {
-                return clean($item->payment->payment_channel->label() ?: '&mdash;');
+                return BaseHelper::clean($item->payment->payment_channel->label() ?: '&mdash;');
             })
             ->editColumn('amount', function ($item) {
                 return format_price($item->amount);
@@ -65,7 +65,7 @@ class OrderTable extends TableAbstract
                 return format_price($item->shipping_amount);
             })
             ->editColumn('user_id', function ($item) {
-                return clean($item->user->name ?: $item->address->name);
+                return BaseHelper::clean($item->user->name ?: $item->address->name);
             })
             ->editColumn('created_at', function ($item) {
                 return BaseHelper::formatDate($item->created_at);

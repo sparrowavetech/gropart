@@ -34,7 +34,7 @@
         @endif
     </div>
 
-    @if (in_array($shipment->status, [\Botble\Ecommerce\Enums\ShippingStatusEnum::PENDING,
+    @if (MarketplaceHelper::allowVendorManageShipping() || in_array($shipment->status, [\Botble\Ecommerce\Enums\ShippingStatusEnum::PENDING,
  \Botble\Ecommerce\Enums\ShippingStatusEnum::APPROVED,
  \Botble\Ecommerce\Enums\ShippingStatusEnum::ARRANGE_SHIPMENT,
  \Botble\Ecommerce\Enums\ShippingStatusEnum::READY_TO_BE_SHIPPED_OUT]))

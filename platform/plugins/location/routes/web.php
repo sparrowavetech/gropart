@@ -1,7 +1,6 @@
 <?php
 
 Route::group(['namespace' => 'Botble\Location\Http\Controllers', 'middleware' => ['web', 'core']], function () {
-
     Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {
         Route::group(['prefix' => 'countries', 'as' => 'country.'], function () {
             Route::resource('', 'CountryController')->parameters(['' => 'country']);
@@ -48,25 +47,10 @@ Route::group(['namespace' => 'Botble\Location\Http\Controllers', 'middleware' =>
             ]);
         });
 
-        Route::group(['prefix' => 'pincodes', 'as' => 'pincode.'], function () {
-            Route::resource('', 'PincodeController')->parameters(['' => 'pincode']);
-            Route::delete('items/destroy', [
-                'as'         => 'deletes',
-                'uses'       => 'PincodeController@deletes',
-                'permission' => 'pincode.destroy',
-            ]);
-
-            Route::get('list', [
-                'as'         => 'list',
-                'uses'       => 'PincodeController@getList',
-                'permission' => 'pincode.index',
-            ]);
-        });
-
         Route::group(['prefix' => 'locations/bulk-import', 'as' => 'location.bulk-import.'], function () {
             Route::get('/', [
-                'as'         => 'index',
-                'uses'       => 'BulkImportController@index',
+                'as'   => 'index',
+                'uses' => 'BulkImportController@index',
             ]);
 
             Route::post('/', [
@@ -93,22 +77,23 @@ Route::group(['namespace' => 'Botble\Location\Http\Controllers', 'middleware' =>
                 'permission' => 'location.bulk-import.index',
             ]);
         });
+
+        Route::group(['prefix' => 'locations/export', 'as' => 'location.export.'], function () {
+            Route::get('/', [
+                'as'   => 'index',
+                'uses' => 'ExportController@index',
+            ]);
+
+            Route::post('/', [
+                'as'         => 'process',
+                'uses'       => 'ExportController@export',
+                'permission' => 'location.export.index',
+            ]);
+        });
     });
 
     Route::get('ajax/states-by-country', 'StateController@ajaxGetStates')
         ->name('ajax.states-by-country');
     Route::get('ajax/cities-by-state', 'CityController@ajaxGetCities')
         ->name('ajax.cities-by-state');
-    Route::get('ajax/check-pincode', 'PincodeController@ajaxCheckPincode')
-        ->name('ajax.check-pincode');
-
-    Route::get('com/clear-cache', function() {
-        $exitCode = Artisan::call('cache:clear');
-        Artisan::call('view:clear');
-        Artisan::call('route:clear');
-        Artisan::call('clear-compiled');
-        Artisan::call('config:cache');
-        // return what you want
-    });
-
 });

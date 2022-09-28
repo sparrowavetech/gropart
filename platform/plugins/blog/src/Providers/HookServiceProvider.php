@@ -233,7 +233,7 @@ class HookServiceProvider extends ServiceProvider
      */
     public function renderBlogPosts($shortcode)
     {
-        $posts = get_all_posts(true, $shortcode->paginate, ['slugable', 'categories', 'categories.slugable', 'author']);
+        $posts = get_all_posts(true, (int)$shortcode->paginate, ['slugable', 'categories', 'categories.slugable', 'author']);
 
         $view = 'plugins/blog::themes.templates.posts';
         $themeView = Theme::getThemeNamespace() . '::views.templates.posts';
@@ -261,7 +261,7 @@ class HookServiceProvider extends ServiceProvider
             return view($view, [
                 'posts' => get_all_posts(
                     true,
-                    theme_option('number_of_posts_in_a_category', 12),
+                    (int)theme_option('number_of_posts_in_a_category', 12),
                     ['slugable', 'categories', 'categories.slugable', 'author']
                 ),
             ])

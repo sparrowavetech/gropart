@@ -6,6 +6,7 @@ use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Supports\Helper;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
+use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Models\Customer;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
@@ -20,7 +21,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Theme;
 
 class EcommerceHelper
 {
@@ -819,5 +822,100 @@ class EcommerceHelper
     public function isFacebookPixelEnabled(): bool
     {
         return get_ecommerce_setting('facebook_pixel_enabled', 0) == 1;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isGoogleTagManagerEnabled(): bool
+    {
+        return get_ecommerce_setting('google_tag_manager_enabled', 0) == 1;
+    }
+
+    /**
+     * @return int
+     */
+    public function getReturnableDays(): int
+    {
+        return (int)get_ecommerce_setting('returnable_days', 30);
+    }
+
+    /**
+     * @return int
+     */
+    public static function canCustomReturnProductQty(): int
+    {
+        return get_ecommerce_setting('can_custom_return_product_quantity', 0);
+    }
+
+    /**
+     * @param Collection $products
+     * @return bool
+     */
+    public function isAvailableShipping(Collection $products): bool
+    {
+        if (!$this->isEnabledSupportDigitalProducts()) {
+            return true;
+        }
+
+        $count = $this->countDigitalProducts($products);
+
+        return !$count || $products->count() != $count;
+    }
+
+    /**
+     * @param Collection $products
+     * @return int
+     */
+    public function countDigitalProducts(Collection $products): int
+    {
+        if (!$this->isEnabledSupportDigitalProducts()) {
+            return 0;
+        }
+
+        return $products->where('product_type', ProductTypeEnum::DIGITAL)->count();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isEnabledSupportDigitalProducts(): bool
+    {
+        return !!get_ecommerce_setting('is_enabled_support_digital_products', 0);
+    }
+
+    /**
+     * @param $request
+     * @return bool
+     */
+    public function productFilterParamsValidated($request): bool
+    {
+        $validator = Validator::make($request->input(), [
+            'q'          => 'nullable|string|max:255',
+            'max_price'  => 'nullable|numeric',
+            'min_price'  => 'nullable|numeric',
+            'attributes' => 'nullable|array',
+            'categories' => 'nullable|array',
+            'tags'       => 'nullable|array',
+            'brands'     => 'nullable|array',
+            'sort-by'    => 'nullable|string',
+        ]);
+
+        return !$validator->fails();
+    }
+
+    /**
+     * @param string $view
+     * @return string
+     */
+    public function viewPath(string $view): string
+    {
+        $themeView = Theme::getThemeNamespace() . '::views.ecommerce.' . $view;
+
+        if (view()->exists($themeView)) {
+            return $themeView;
+        }
+
+        return 'plugins/ecommerce::themes.' . $view;
     }
 }

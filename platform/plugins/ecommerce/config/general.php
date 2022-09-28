@@ -19,4 +19,11 @@ return [
     ],
 
     'enable_faq_in_product_details' => true,
+
+    'digital_products' => [
+        'allowed_mime_types' => env(
+            'DIGITAL_PRODUCT_ALLOWED_MIME_TYPES',
+            RvMedia::getConfig('allowed_mime_types')
+        ),
+    ],
 ];

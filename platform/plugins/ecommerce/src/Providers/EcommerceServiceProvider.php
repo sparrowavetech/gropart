@@ -9,6 +9,7 @@ use Botble\Ecommerce\Facades\CartFacade;
 use Botble\Ecommerce\Facades\CurrencyFacade;
 use Botble\Ecommerce\Facades\EcommerceHelperFacade;
 use Botble\Ecommerce\Facades\OrderHelperFacade;
+use Botble\Ecommerce\Facades\OrderReturnHelperFacade;
 use Botble\Ecommerce\Facades\ProductCategoryHelperFacade;
 use Botble\Ecommerce\Http\Middleware\CaptureFootprintsMiddleware;
 use Botble\Ecommerce\Http\Middleware\RedirectIfCustomer;
@@ -24,6 +25,8 @@ use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\OrderAddress;
 use Botble\Ecommerce\Models\OrderHistory;
 use Botble\Ecommerce\Models\OrderProduct;
+use Botble\Ecommerce\Models\OrderReturn;
+use Botble\Ecommerce\Models\OrderReturnItem;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductAttribute;
 use Botble\Ecommerce\Models\ProductAttributeSet;
@@ -53,6 +56,8 @@ use Botble\Ecommerce\Repositories\Caches\OrderAddressCacheDecorator;
 use Botble\Ecommerce\Repositories\Caches\OrderCacheDecorator;
 use Botble\Ecommerce\Repositories\Caches\OrderHistoryCacheDecorator;
 use Botble\Ecommerce\Repositories\Caches\OrderProductCacheDecorator;
+use Botble\Ecommerce\Repositories\Caches\OrderReturnCacheDecorator;
+use Botble\Ecommerce\Repositories\Caches\OrderReturnItemCacheDecorator;
 use Botble\Ecommerce\Repositories\Caches\ProductAttributeCacheDecorator;
 use Botble\Ecommerce\Repositories\Caches\ProductAttributeSetCacheDecorator;
 use Botble\Ecommerce\Repositories\Caches\ProductCacheDecorator;
@@ -82,6 +87,8 @@ use Botble\Ecommerce\Repositories\Eloquent\OrderAddressRepository;
 use Botble\Ecommerce\Repositories\Eloquent\OrderHistoryRepository;
 use Botble\Ecommerce\Repositories\Eloquent\OrderProductRepository;
 use Botble\Ecommerce\Repositories\Eloquent\OrderRepository;
+use Botble\Ecommerce\Repositories\Eloquent\OrderReturnItemRepository;
+use Botble\Ecommerce\Repositories\Eloquent\OrderReturnRepository;
 use Botble\Ecommerce\Repositories\Eloquent\ProductAttributeRepository;
 use Botble\Ecommerce\Repositories\Eloquent\ProductAttributeSetRepository;
 use Botble\Ecommerce\Repositories\Eloquent\ProductCategoryRepository;
@@ -111,6 +118,8 @@ use Botble\Ecommerce\Repositories\Interfaces\OrderAddressInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderHistoryInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderProductInterface;
+use Botble\Ecommerce\Repositories\Interfaces\OrderReturnInterface;
+use Botble\Ecommerce\Repositories\Interfaces\OrderReturnItemInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeSetInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductCategoryInterface;
@@ -316,6 +325,18 @@ class EcommerceServiceProvider extends ServiceProvider
             );
         });
 
+        $this->app->bind(OrderReturnInterface::class, function () {
+            return new OrderReturnCacheDecorator(
+                new OrderReturnRepository(new OrderReturn())
+            );
+        });
+
+        $this->app->bind(OrderReturnItemInterface::class, function () {
+            return new OrderReturnItemCacheDecorator(
+                new OrderReturnItemRepository(new OrderReturnItem())
+            );
+        });
+
         $this->app->bind(DiscountInterface::class, function () {
             return new DiscountCacheDecorator(
                 new DiscountRepository(new Discount())
@@ -384,6 +405,7 @@ class EcommerceServiceProvider extends ServiceProvider
         $loader = AliasLoader::getInstance();
         $loader->alias('Cart', CartFacade::class);
         $loader->alias('OrderHelper', OrderHelperFacade::class);
+        $loader->alias('OrderReturnHelper', OrderReturnHelperFacade::class);
         $loader->alias('EcommerceHelper', EcommerceHelperFacade::class);
         $loader->alias('ProductCategoryHelper', ProductCategoryHelperFacade::class);
         $loader->alias('CurrencyHelper', CurrencyFacade::class);
@@ -595,6 +617,15 @@ class EcommerceServiceProvider extends ServiceProvider
                     'icon'        => 'fas fa-shopping-basket',
                     'url'         => route('orders.incomplete-list'),
                     'permissions' => ['orders.index'],
+                ])
+                ->registerItem([
+                    'id'          => 'cms-plugins-ecommerce-order-return',
+                    'priority'    => 3,
+                    'parent_id'   => 'cms-plugins-ecommerce',
+                    'name'        => 'plugins/ecommerce::order.order_return',
+                    'icon'        => 'fa fa-cart-arrow-down',
+                    'url'         => route('order_returns.index'),
+                    'permissions' => ['orders.edit'],
                 ])
                 ->registerItem([
                     'id'          => 'cms-plugins-ecommerce.product',

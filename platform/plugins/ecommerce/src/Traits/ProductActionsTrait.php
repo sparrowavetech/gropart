@@ -23,6 +23,8 @@ use Botble\Ecommerce\Repositories\Interfaces\ProductVariationInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductVariationItemInterface;
 use Botble\Ecommerce\Services\Products\CreateProductVariationsService;
 use Botble\Ecommerce\Services\Products\StoreAttributesOfProductService;
+use Botble\Ecommerce\Services\Products\StoreProductService;
+use EcommerceHelper;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -68,11 +70,11 @@ trait ProductActionsTrait
      * @param ProductAttributeInterface $productAttributeRepository
      */
     public function __construct(
-        ProductInterface $productRepository,
-        ProductCategoryInterface $productCategoryRepository,
+        ProductInterface           $productRepository,
+        ProductCategoryInterface   $productCategoryRepository,
         ProductCollectionInterface $productCollectionRepository,
-        BrandInterface $brandRepository,
-        ProductAttributeInterface $productAttributeRepository
+        BrandInterface             $brandRepository,
+        ProductAttributeInterface  $productAttributeRepository
     ) {
         $this->productRepository = $productRepository;
         $this->productCategoryRepository = $productCategoryRepository;
@@ -172,10 +174,21 @@ trait ProductActionsTrait
                 }
 
                 if ($isNew) {
+                    $productRelatedToVariation->product_type = Arr::get($version, 'product_type', $product->product_type);
                     $productRelatedToVariation->images = json_encode($version['images']);
                 }
 
                 $productRelatedToVariation = $this->productRepository->createOrUpdate($productRelatedToVariation);
+
+                if (EcommerceHelper::isEnabledSupportDigitalProducts()) {
+                    if ($isNew && $product->productFiles->count()) {
+                        foreach ($product->productFiles as $productFile) {
+                            $productRelatedToVariation->productFiles()->create($productFile->toArray());
+                        }
+                    } else {
+                        app(StoreProductService::class)->saveProductFiles(request(), $productRelatedToVariation);
+                    }
+                }
 
                 if (!$productRelatedToVariation->is_variation) {
                     if ($isNew) {
@@ -303,10 +316,10 @@ trait ProductActionsTrait
      * @throws Exception
      */
     public function deleteVersion(
-        ProductVariationInterface $productVariation,
+        ProductVariationInterface     $productVariation,
         ProductVariationItemInterface $productVariationItem,
         $variationId,
-        BaseHttpResponse $response
+        BaseHttpResponse              $response
     ) {
         $result = $this->deleteVersionItem($productVariation, $productVariationItem, $variationId);
 
@@ -328,10 +341,10 @@ trait ProductActionsTrait
      * @throws Exception
      */
     public function deleteVersions(
-        Request $request,
-        ProductVariationInterface $productVariation,
+        Request                       $request,
+        ProductVariationInterface     $productVariation,
         ProductVariationItemInterface $productVariationItem,
-        BaseHttpResponse $response
+        BaseHttpResponse              $response
     ) {
         $ids = (array)$request->input('ids');
 
@@ -356,7 +369,7 @@ trait ProductActionsTrait
      * @throws Exception
      */
     protected function deleteVersionItem(
-        ProductVariationInterface $productVariation,
+        ProductVariationInterface     $productVariation,
         ProductVariationItemInterface $productVariationItem,
         $variationId
     ) {
@@ -412,10 +425,10 @@ trait ProductActionsTrait
      * @return BaseHttpResponse
      */
     public function postAddVersion(
-        ProductVersionRequest $request,
+        ProductVersionRequest     $request,
         ProductVariationInterface $productVariation,
         $id,
-        BaseHttpResponse $response
+        BaseHttpResponse          $response
     ) {
         $addedAttributes = $request->input('attribute_sets', []);
 
@@ -467,6 +480,9 @@ trait ProductActionsTrait
             $variation = $productVariation->findOrFail($id);
             $product = $this->productRepository->findOrFail($variation->product_id);
             $productVariationsInfo = $productVariationItemRepository->getVariationsInfo([$id]);
+            $originalProduct = $product;
+        } else {
+            $originalProduct = $this->productRepository->findOrFail($request->input('product_id'));
         }
 
         $productId = $variation ? $variation->configurable_product_id : $request->input('product_id');
@@ -477,7 +493,6 @@ trait ProductActionsTrait
             $productAttributeSets = $productAttributeSetRepository->getAllWithSelected($productId);
         }
 
-        $originalProduct = $product;
 
         return $response
             ->setData(
@@ -499,10 +514,10 @@ trait ProductActionsTrait
      * @throws Exception
      */
     public function postUpdateVersion(
-        ProductVersionRequest $request,
+        ProductVersionRequest     $request,
         ProductVariationInterface $productVariation,
         $id,
-        BaseHttpResponse $response
+        BaseHttpResponse          $response
     ) {
         $variation = $productVariation->findOrFail($id);
 
@@ -552,9 +567,9 @@ trait ProductActionsTrait
      */
     public function postGenerateAllVersions(
         CreateProductVariationsService $service,
-        ProductVariationInterface $productVariation,
+        ProductVariationInterface      $productVariation,
         $id,
-        BaseHttpResponse $response
+        BaseHttpResponse               $response
     ) {
         $product = $this->productRepository->findOrFail($id);
 
@@ -588,10 +603,10 @@ trait ProductActionsTrait
      * @throws Exception
      */
     public function postStoreRelatedAttributes(
-        Request $request,
+        Request                         $request,
         StoreAttributesOfProductService $service,
         $id,
-        BaseHttpResponse $response
+        BaseHttpResponse                $response
     ) {
         $product = $this->productRepository->findOrFail($id);
 
@@ -720,7 +735,7 @@ trait ProductActionsTrait
      */
     public function postCreateProductWhenCreatingOrder(
         CreateProductWhenCreatingOrderRequest $request,
-        BaseHttpResponse $response
+        BaseHttpResponse                      $response
     ) {
         $product = $this->productRepository->createOrUpdate($request->input());
 

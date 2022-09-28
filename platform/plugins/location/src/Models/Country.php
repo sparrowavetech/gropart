@@ -5,6 +5,7 @@ namespace Botble\Location\Models;
 use Botble\Base\Traits\EnumCastable;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Country extends BaseModel
 {
@@ -36,15 +37,19 @@ class Country extends BaseModel
         'status' => BaseStatusEnum::class,
     ];
 
+    /**
+     * @return HasMany
+     */
+    public function states(): HasMany
+    {
+        return $this->hasMany(State::class);
+    }
+
     protected static function boot()
     {
         parent::boot();
         static::deleting(function (Country $country) {
-            $states = State::get();
-            foreach ($states as $state) {
-                State::where('id', $state->id)->delete();
-            }
-
+            State::where('country_id', $country->id)->delete();
             City::where('country_id', $country->id)->delete();
         });
     }

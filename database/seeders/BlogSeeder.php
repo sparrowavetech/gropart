@@ -6,8 +6,11 @@ use Botble\ACL\Models\User;
 use Botble\Base\Models\MetaBox as MetaBoxModel;
 use Botble\Base\Supports\BaseSeeder;
 use Botble\Blog\Models\Category;
+use Botble\Blog\Models\CategoryTranslation;
 use Botble\Blog\Models\Post;
+use Botble\Blog\Models\PostTranslation;
 use Botble\Blog\Models\Tag;
+use Botble\Blog\Models\TagTranslation;
 use Botble\Language\Models\LanguageMeta;
 use Botble\Slug\Models\Slug;
 use Faker\Factory;
@@ -30,6 +33,9 @@ class BlogSeeder extends BaseSeeder
         Post::truncate();
         Category::truncate();
         Tag::truncate();
+        PostTranslation::truncate();
+        CategoryTranslation::truncate();
+        TagTranslation::truncate();
         Slug::where('reference_type', Post::class)->delete();
         Slug::where('reference_type', Tag::class)->delete();
         Slug::where('reference_type', Category::class)->delete();
@@ -42,191 +48,101 @@ class BlogSeeder extends BaseSeeder
 
         $faker = Factory::create();
 
-        $data = [
-            'en_US' => [
-                [
-                    'name'       => 'Ecommerce',
-                    'is_default' => true,
-                ],
-                [
-                    'name' => 'Fashion',
-                ],
-                [
-                    'name' => 'Electronic',
-                ],
-                [
-                    'name' => 'Commercial',
-                ],
+        $categories = [
+            [
+                'name'       => 'Ecommerce',
+                'is_default' => true,
             ],
-            'vi'    => [
-                [
-                    'name'       => 'Thương mại điện tử',
-                    'is_default' => true,
-                ],
-                [
-                    'name' => 'Fashion',
-                ],
-                [
-                    'name' => 'Electronic',
-                ],
-                [
-                    'name' => 'Thương mại',
-                ],
+            [
+                'name' => 'Fashion',
+            ],
+            [
+                'name' => 'Electronic',
+            ],
+            [
+                'name' => 'Commercial',
             ],
         ];
 
-        foreach ($data as $locale => $categories) {
-            foreach ($categories as $index => $item) {
-                $category = $this->createCategory(Arr::except($item, 'children'), $locale, $index, 0, $index != 0);
+        foreach ($categories as $index => $item) {
+            $category = $this->createCategory(Arr::except($item, 'children'), 0, $index != 0);
 
-                if (isset($item['children']) && !empty($item['children'])) {
-                    foreach ($item['children'] as $childIndex => $child) {
-                        $this->createCategory($child, $locale, $index + $childIndex, $category->id);
-                    }
+            if (isset($item['children']) && !empty($item['children'])) {
+                foreach ($item['children'] as $child) {
+                    $this->createCategory($child, $category->id);
                 }
             }
         }
 
-        $data = [
-            'en_US' => [
-                [
-                    'name' => 'General',
-                ],
-                [
-                    'name' => 'Design',
-                ],
-                [
-                    'name' => 'Fashion',
-                ],
-                [
-                    'name' => 'Branding',
-                ],
-                [
-                    'name' => 'Modern',
-                ],
+        $tags = [
+            [
+                'name' => 'General',
             ],
-            'vi'    => [
-                [
-                    'name' => 'Chung',
-                ],
-                [
-                    'name' => 'Thiết kế',
-                ],
-                [
-                    'name' => 'Thời trang',
-                ],
-                [
-                    'name' => 'Thương hiệu',
-                ],
-                [
-                    'name' => 'Hiện đại',
-                ],
+            [
+                'name' => 'Design',
+            ],
+            [
+                'name' => 'Fashion',
+            ],
+            [
+                'name' => 'Branding',
+            ],
+            [
+                'name' => 'Modern',
             ],
         ];
 
-        foreach ($data as $locale => $tags) {
-            foreach ($tags as $index => $item) {
-                $item['author_id'] = 1;
-                $item['author_type'] = User::class;
-                $tag = Tag::create($item);
+        foreach ($tags as $item) {
+            $item['author_id'] = 1;
+            $item['author_type'] = User::class;
+            $tag = Tag::create($item);
 
-                Slug::create([
-                    'reference_type' => Tag::class,
-                    'reference_id'   => $tag->id,
-                    'key'            => Str::slug($tag->name),
-                    'prefix'         => SlugHelper::getPrefix(Tag::class),
-                ]);
-
-                $originValue = null;
-
-                if ($locale !== 'en_US') {
-                    $originValue = LanguageMeta::where([
-                        'reference_id'   => $index + 1,
-                        'reference_type' => Tag::class,
-                    ])->value('lang_meta_origin');
-                }
-
-                LanguageMeta::saveMetaData($tag, $locale, $originValue);
-            }
+            Slug::create([
+                'reference_type' => Tag::class,
+                'reference_id'   => $tag->id,
+                'key'            => Str::slug($tag->name),
+                'prefix'         => SlugHelper::getPrefix(Tag::class),
+            ]);
         }
 
-        $data = [
-            'en_US' => [
-                [
-                    'name' => '4 Expert Tips On How To Choose The Right Men’s Wallet',
-                ],
-                [
-                    'name' => 'Sexy Clutches: How to Buy & Wear a Designer Clutch Bag',
-                ],
-                [
-                    'name' => 'The Top 2020 Handbag Trends to Know',
-                ],
-                [
-                    'name' => 'How to Match the Color of Your Handbag With an Outfit',
-                ],
-                [
-                    'name' => 'How to Care for Leather Bags',
-                ],
-                [
-                    'name' => "We're Crushing Hard on Summer's 10 Biggest Bag Trends",
-                ],
-                [
-                    'name' => 'Essential Qualities of Highly Successful Music',
-                ],
-                [
-                    'name' => '9 Things I Love About Shaving My Head',
-                ],
-                [
-                    'name' => 'Why Teamwork Really Makes The Dream Work',
-                ],
-                [
-                    'name' => 'The World Caters to Average People',
-                ],
-                [
-                    'name' => 'The litigants on the screen are not actors',
-                ],
+        $posts = [
+            [
+                'name'   => '4 Expert Tips On How To Choose The Right Men’s Wallet',
             ],
-            'vi'    => [
-                [
-                    'name' => '4 Lời khuyên của Chuyên gia về Cách Chọn Ví Nam Phù hợp',
-                ],
-                [
-                    'name' => 'Sexy Clutches: Cách Mua & Đeo Túi Clutch Thiết kế',
-                ],
-                [
-                    'name' => 'Xu hướng túi xách hàng đầu năm 2020 cần biết',
-                ],
-                [
-                    'name' => 'Cách Phối Màu Túi Xách Của Bạn Với Trang Phục',
-                ],
-                [
-                    'name' => 'Cách Chăm sóc Túi Da',
-                ],
-                [
-                    'name' => 'Chúng tôi đang nghiền ngẫm 10 xu hướng túi lớn nhất của mùa hè',
-                ],
-                [
-                    'name' => 'Những phẩm chất cần thiết của âm nhạc thành công cao',
-                ],
-                [
-                    'name' => '9 điều tôi thích khi cạo đầu',
-                ],
-                [
-                    'name' => 'Tại sao làm việc theo nhóm thực sự biến giấc mơ thành công',
-                ],
-                [
-                    'name' => 'Thế giới phục vụ cho những người trung bình',
-                ],
-                [
-                    'name' => 'Các đương sự trên màn hình không phải là diễn viên',
-                ],
+            [
+                'name'   => 'Sexy Clutches: How to Buy & Wear a Designer Clutch Bag',
+            ],
+            [
+                'name'   => 'The Top 2020 Handbag Trends to Know',
+            ],
+            [
+                'name'   => 'How to Match the Color of Your Handbag With an Outfit',
+            ],
+            [
+                'name' => 'How to Care for Leather Bags',
+            ],
+            [
+                'name' => "We're Crushing Hard on Summer's 10 Biggest Bag Trends",
+            ],
+            [
+                'name' => 'Essential Qualities of Highly Successful Music',
+            ],
+            [
+                'name' => '9 Things I Love About Shaving My Head',
+            ],
+            [
+                'name' => 'Why Teamwork Really Makes The Dream Work',
+            ],
+            [
+                'name' => 'The World Caters to Average People',
+            ],
+            [
+                'name' => 'The litigants on the screen are not actors',
             ],
         ];
 
-        foreach ($data as $locale => $posts) {
-
-            foreach ($posts as $index => $item) {
-                $item['content'] = '<p>I have seen many people underestimating the power of their wallets. To them, they are just a functional item they use to carry. As a result, they often end up with the wallets which are not really suitable for them.</p>
+        foreach ($posts as $index => $item) {
+            $item['content'] = '<p>I have seen many people underestimating the power of their wallets. To them, they are just a functional item they use to carry. As a result, they often end up with the wallets which are not really suitable for them.</p>
 
 <p>You should pay more attention when you choose your wallets. There are a lot of them on the market with the different designs and styles. When you choose carefully, you would be able to buy a wallet that is catered to your needs. Not to mention that it will help to enhance your style significantly.</p>
 
@@ -252,7 +168,7 @@ class BlogSeeder extends BaseSeeder
 
 <p>You should avoid having an over-sized wallet. Don&rsquo;t think that you need to buy a big wallet because you have a lot to carry with you. In addition, a fat wallet is very ugly. It will make it harder for you to slide the wallet into your trousers&rsquo; pocket. In addition, it will create a bulge and ruin your look.</p>
 
-<p>Before you go on to buy a new wallet, clean out your wallet and place all of the items from your wallet on a table. Throw away things that you would never need any more such as the old bills or the expired gift cards. Remember to check your wallet on a frequent basis to get rid of all of the old stuff that you don&rsquo;t need anymore.</p>
+<p>Before you go on to buy a new wallet, clean out your wallet and place all the items from your wallet on a table. Throw away things that you would never need any more such as the old bills or the expired gift cards. Remember to check your wallet on a frequent basis to get rid of all of the old stuff that you don&rsquo;t need anymore.</p>
 
 <p style="text-align:center"><img alt="f1" src="/storage/news/3.jpg" /></p>
 
@@ -266,7 +182,7 @@ class BlogSeeder extends BaseSeeder
 
 <p>You can experiment with other available options such as cotton, polyester and canvas. They all have their own pros and cons. As a result, they will be suitable for different needs and requirements. You should think about them all in order to choose the material which you would like the most.</p>
 
-<p style="text-align:center"><img alt="f6" height="375" src="/storage/news/4.jpg" /></p>
+<p style="text-align:center"><img alt="f6" src="/storage/news/4.jpg" /></p>
 
 <p><br />
 &nbsp;</p>
@@ -278,69 +194,142 @@ class BlogSeeder extends BaseSeeder
 
 <p>In case you need a wallet to use for a long time, it is a good idea that you should invest a decent amount of money on a wallet. A high quality wallet from a reputational brand with the premium quality such as cowhide leather will last for a long time. In addition, it is an accessory to show off your fashion sense and your social status.</p>
 
-<p style="text-align:center"><img alt="f2" height="400" src="/storage/news/5.jpg" /></p>
+<p style="text-align:center"><img alt="f2" src="/storage/news/5.jpg" /></p>
 
 <p>&nbsp;</p>
 ';
 
-                $item['author_id'] = 1;
-                $item['author_type'] = User::class;
-                $item['views'] = $faker->numberBetween(100, 2500);
-                $item['is_featured'] = $index < 10;
-                $item['image'] = 'news/' . ($index + 1) . '.jpg';
-                $item['description'] = 'You should pay more attention when you choose your wallets. There are a lot of them on the market with the different designs and styles. When you choose carefully, you would be able to buy a wallet that is catered to your needs. Not to mention that it will help to enhance your style significantly.';
+            $item['author_id'] = 1;
+            $item['author_type'] = User::class;
+            $item['views'] = $faker->numberBetween(100, 2500);
+            $item['is_featured'] = $index < 10;
+            $item['image'] = 'news/' . ($index + 1) . '.jpg';
+            $item['description'] = 'You should pay more attention when you choose your wallets. There are a lot of them on the market with the different designs and styles. When you choose carefully, you would be able to buy a wallet that is catered to your needs. Not to mention that it will help to enhance your style significantly.';
+            $item['content'] = str_replace(url(''), '', $item['content']);
+ 
+            $post = Post::create(Arr::except($item, ['layout']));
 
-                if ($locale == 'vi') {
-                    $item['description'] = 'Bạn nên chú ý hơn khi chọn ví. Có rất nhiều trong số chúng trên thị trường với các mẫu mã và phong cách khác nhau. Khi bạn lựa chọn cẩn thận, bạn sẽ có thể mua một chiếc ví phù hợp với nhu cầu của bạn. Chưa kể nó sẽ giúp nâng tầm phong cách của bạn một cách đáng kể.';
-                }
-
-                $post = Post::create(Arr::except($item, ['layout']));
-
-                $layout = isset($item['layout']) ? $item['layout'] : null;
-                if ($layout) {
-                    MetaBox::saveMetaBoxData($post, 'layout', $layout);
-                }
-
-                $post->categories()->sync($locale == 'en_US' ? [
-                    $faker->numberBetween(1, 2),
-                    $faker->numberBetween(3, 4),
-                ] : [$faker->numberBetween(5, 6), $faker->numberBetween(7, 8)]);
-
-                $post->tags()->sync($locale == 'en_US' ? [1, 2, 3, 4, 5] : [6, 7, 8, 9, 10]);
-
-                Slug::create([
-                    'reference_type' => Post::class,
-                    'reference_id'   => $post->id,
-                    'key'            => Str::slug($post->name),
-                    'prefix'         => SlugHelper::getPrefix(Post::class),
-                ]);
-
-                $originValue = null;
-
-                if ($locale !== 'en_US') {
-                    $originValue = LanguageMeta::where([
-                        'reference_id'   => $index + 1,
-                        'reference_type' => Post::class,
-                    ])->value('lang_meta_origin');
-                }
-
-                LanguageMeta::saveMetaData($post, $locale, $originValue);
+            $layout = $item['layout'] ?? null;
+            if ($layout) {
+                MetaBox::saveMetaBoxData($post, 'layout', $layout);
             }
+
+            $post->categories()->sync([
+                $faker->numberBetween(1, 2),
+                $faker->numberBetween(3, 4),
+            ]);
+
+            $post->tags()->sync([1, 2, 3, 4, 5]);
+
+            Slug::create([
+                'reference_type' => Post::class,
+                'reference_id'   => $post->id,
+                'key'            => Str::slug($post->name),
+                'prefix'         => SlugHelper::getPrefix(Post::class),
+            ]);
+        }
+
+        $translations = [
+            [
+                'name' => 'Thương mại điện tử',
+            ],
+            [
+                'name' => 'Thời trang',
+            ],
+            [
+                'name' => 'Điện tử',
+            ],
+            [
+                'name' => 'Thương mại',
+            ],
+        ];
+
+        foreach ($translations as $index => $item) {
+            $item['lang_code'] = 'vi';
+            $item['categories_id'] = $index + 1;
+
+            CategoryTranslation::insert($item);
+        }
+
+        $translations = [
+            [
+                'name' => 'Chung',
+            ],
+            [
+                'name' => 'Thiết kế',
+            ],
+            [
+                'name' => 'Thời trang',
+            ],
+            [
+                'name' => 'Thương hiệu',
+            ],
+            [
+                'name' => 'Hiện đại',
+            ],
+        ];
+
+        foreach ($translations as $index => $item) {
+            $item['lang_code'] = 'vi';
+            $item['tags_id'] = $index + 1;
+
+            TagTranslation::insert($item);
+        }
+
+        $translations = [
+            [
+                'name' => '4 Lời khuyên của Chuyên gia về Cách Chọn Ví Nam Phù hợp',
+            ],
+            [
+                'name' => 'Sexy Clutches: Cách Mua & Đeo Túi Clutch Thiết kế',
+            ],
+            [
+                'name' => 'Xu hướng túi xách hàng đầu năm 2020 cần biết',
+            ],
+            [
+                'name' => 'Cách Phối Màu Túi Xách Của Bạn Với Trang Phục',
+            ],
+            [
+                'name' => 'Cách Chăm sóc Túi Da',
+            ],
+            [
+                'name' => 'Chúng tôi đang nghiền ngẫm 10 xu hướng túi lớn nhất của mùa hè',
+            ],
+            [
+                'name' => 'Những phẩm chất cần thiết của âm nhạc thành công cao',
+            ],
+            [
+                'name' => '9 điều tôi thích khi cạo đầu',
+            ],
+            [
+                'name' => 'Tại sao làm việc theo nhóm thực sự biến giấc mơ thành công',
+            ],
+            [
+                'name' => 'Thế giới phục vụ cho những người trung bình',
+            ],
+            [
+                'name' => 'Các đương sự trên màn hình không phải là diễn viên',
+            ],
+        ];
+
+        foreach ($translations as $index => $item) {
+            $item['lang_code'] = 'vi';
+            $item['posts_id'] = $index + 1;
+            $item['description'] = 'Bạn nên chú ý hơn khi chọn ví. Có rất nhiều trong số chúng trên thị trường với các mẫu mã và phong cách khác nhau. Khi bạn lựa chọn cẩn thận, bạn sẽ có thể mua một chiếc ví phù hợp với nhu cầu của bạn. Chưa kể nó sẽ giúp nâng tầm phong cách của bạn một cách đáng kể.';
+            $item['content'] = Post::find($index + 1)->value('content');
+
+            PostTranslation::insert($item);
         }
     }
 
     /**
      * @param array $item
-     * @param string $locale
-     * @param int $index
      * @param int $parentId
      * @param bool $isFeatured
      * @return Category|\Illuminate\Database\Eloquent\Model
      */
     protected function createCategory(
         array $item,
-        string $locale,
-        int $index,
         int $parentId = 0,
         bool $isFeatured = false
     ) {
@@ -359,17 +348,6 @@ class BlogSeeder extends BaseSeeder
             'key'            => Str::slug($category->name),
             'prefix'         => SlugHelper::getPrefix(Category::class),
         ]);
-
-        $originValue = null;
-
-        if ($locale !== 'en_US') {
-            $originValue = LanguageMeta::where([
-                'reference_id'   => $index + 1,
-                'reference_type' => Category::class,
-            ])->value('lang_meta_origin');
-        }
-
-        LanguageMeta::saveMetaData($category, $locale, $originValue);
 
         return $category;
     }

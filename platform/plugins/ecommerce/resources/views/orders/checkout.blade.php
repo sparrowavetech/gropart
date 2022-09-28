@@ -69,7 +69,7 @@
                                     </div>
                                 </div>
                             @endif
-                            @if (!empty($shipping))
+                            @if (!empty($shipping) && Arr::get($sessionCheckoutData, 'is_available_shipping', true))
                                 <div class="row">
                                     <div class="col-6">
                                         <p>{{ __('Shipping fee') }}:</p>
@@ -130,34 +130,38 @@
                         @endif
 
                         @if (!is_plugin_active('marketplace'))
-                            <div id="shipping-method-wrapper">
-                                <h5 class="checkout-payment-title">{{ __('Shipping method') }}</h5>
-                                <div class="shipping-info-loading" style="display: none;">
-                                    <div class="shipping-info-loading-content">
-                                        <i class="fas fa-spinner fa-spin"></i>
+                            @if (Arr::get($sessionCheckoutData, 'is_available_shipping', true))
+                                <div id="shipping-method-wrapper">
+                                    <h5 class="checkout-payment-title">{{ __('Shipping method') }}</h5>
+                                    <div class="shipping-info-loading" style="display: none;">
+                                        <div class="shipping-info-loading-content">
+                                            <i class="fas fa-spinner fa-spin"></i>
+                                        </div>
                                     </div>
-                                </div>
-                                @if (!empty($shipping))
-                                    <div class="payment-checkout-form">
-                                        <input type="hidden" name="shipping_option" value="{{ old('shipping_option', $defaultShippingOption) }}">
-                                        <ul class="list-group list_payment_method">
-                                            @foreach ($shipping as $shippingKey => $shippingItem)
-                                                @foreach($shippingItem as $subShippingKey => $subShippingItem)
-                                                    @include('plugins/ecommerce::orders.partials.shipping-option', [
-                                                        'defaultShippingMethod' => $defaultShippingMethod,
-                                                        'defaultShippingOption' => $defaultShippingOption,
-                                                        'shippingOption'        => $subShippingKey,
-                                                        'shippingItem'          => $subShippingItem,
-                                                    ])
+                                    @if (!empty($shipping))
+                                        <div class="payment-checkout-form">
+                                            <input type="hidden" name="shipping_option" value="{{ old('shipping_option', $defaultShippingOption) }}">
+                                            <ul class="list-group list_payment_method">
+                                                @foreach ($shipping as $shippingKey => $shippingItem)
+                                                    @foreach($shippingItem as $subShippingKey => $subShippingItem)
+                                                        @include('plugins/ecommerce::orders.partials.shipping-option', [
+                                                            'defaultShippingMethod' => $defaultShippingMethod,
+                                                            'defaultShippingOption' => $defaultShippingOption,
+                                                            'shippingOption'        => $subShippingKey,
+                                                            'shippingItem'          => $subShippingItem,
+                                                        ])
+                                                    @endforeach
                                                 @endforeach
-                                            @endforeach
-                                        </ul>
-                                    </div>
-                                @else
-                                    <p>{{ __('No shipping methods available!') }}</p>
-                                @endif
-                            </div>
-                            <br>
+                                            </ul>
+                                        </div>
+                                    @else
+                                        <p>{{ __('No shipping methods available!') }}</p>
+                                    @endif
+                                </div>
+                                <br>
+                            @else
+                                {{-- Can render text to show for customer --}}
+                            @endif
                         @endif
 
                         <div class="position-relative">
@@ -255,33 +259,4 @@
             </div>
         </div>
     @endif
-    <script defer>
-        $(document).ready(function () {
-            $(document).on("keyup","#address_zip_code",function(){
-                var pincode = $(this).val();
-                if(pincode.length > 5){
-                    $("#address_zip_code").css({"border-bottom": ""});
-                   
-                    $.ajax({
-                        type:"GET",
-                        url:"{{ url('ajax/check-pincode') }}",
-                        data:{
-                            pincode
-                        },
-                        success:function(res){
-                            $(".error-msg").remove();
-                            if(res.length > 0){
-                                $(".payment-checkout-btn").css({"pointer-events":"","opacity":""});
-                            }else{
-                                $(".payment-checkout-btn").css({"pointer-events":"none","opacity":"0.5"});
-                                $("#address_zip_code").css({"border-bottom": "1px solid red;"}).after(`<p class="error-msg" style="color: red;">Delivery is not available on this location, Please <a target="_blank" href="{{ url('contact') }}"> contact us </a></p>`);
-                            }
-                        }
-                    });
-                }else{
-                    $(".payment-checkout-btn").css({"pointer-events":"none","opacity":"0.5"});
-                }
-            });
-        });
-    </script>
 @stop

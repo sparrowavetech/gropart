@@ -67,6 +67,12 @@ return [
             'subject'     => 'Incomplete order',
             'can_off'     => true,
         ],
+        'order-return-request'    => [
+            'title'       => 'plugins/ecommerce::email.order_return_request_title',
+            'description' => 'plugins/ecommerce::email.order_return_request_description',
+            'subject'     => 'Order return request',
+            'can_off'     => true,
+        ],
     ],
     'variables'   => [
         'store_address'        => 'plugins/ecommerce::ecommerce.store_address',
@@ -84,5 +90,7 @@ return [
         'verify_link'          => 'Verify email link',
         'reset_link'           => 'Reset password link',
         'order_delivery_notes' => 'Order delivery notes',
+        'list_order_products'  => 'List of order products',
+        'return_reason'        => 'Return reason',
     ],
 ];

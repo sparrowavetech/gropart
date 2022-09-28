@@ -206,16 +206,6 @@ return [
         'parent_flag' => 'plugins.ecommerce',
     ],
     [
-        'name'        => 'Create',
-        'flag'        => 'reviews.create',
-        'parent_flag' => 'reviews.index',
-    ],
-    [
-        'name'        => 'Edit',
-        'flag'        => 'reviews.edit',
-        'parent_flag' => 'reviews.index',
-    ],
-    [
         'name'        => 'Delete',
         'flag'        => 'reviews.destroy',
         'parent_flag' => 'reviews.index',
@@ -356,5 +346,21 @@ return [
         'name'        => 'Export Products',
         'flag'        => 'ecommerce.export.products.index',
         'parent_flag' => 'plugins.ecommerce',
+    ],
+
+    [
+        'name'        => 'Order Returns',
+        'flag'        => 'order_returns.index',
+        'parent_flag' => 'plugins.ecommerce',
+    ],
+    [
+        'name'        => 'Edit',
+        'flag'        => 'order_returns.edit',
+        'parent_flag' => 'order_returns.index',
+    ],
+    [
+        'name'        => 'Delete',
+        'flag'        => 'order_returns.destroy',
+        'parent_flag' => 'order_returns.index',
     ],
 ];

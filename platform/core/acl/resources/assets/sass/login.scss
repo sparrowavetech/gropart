@@ -128,8 +128,9 @@ body {
             background: #02192d;
 
             &:hover {
-                color: #FFF;
+                color: #fff;
                 opacity: 1;
+                background-color: #010f1a;
             }
         }
 
@@ -145,6 +146,7 @@ body {
             &.has-error {
                 margin-bottom: 30px;
                 border-color: #ed6b75;
+
                 .help-block {
                     position: absolute;
                     top: 45px;

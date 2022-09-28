@@ -106,7 +106,7 @@ $(document).ready(function () {
             });
 
             $.ajax({
-                url: $searchBox.data('target') + '&keyword=' + $searchBox.val(),
+                url: $(event.currentTarget).prop('href') + '&keyword=' + $searchBox.val(),
                 type: 'GET',
                 success: res => {
                     if (res.error) {

@@ -186,9 +186,12 @@ if (!function_exists('mapped_implode')) {
      */
     function mapped_implode(string $glue, array $array, string $symbol = '='): string
     {
-        return implode($glue, array_map(function ($k, $v) use ($symbol) {
-            return $k . $symbol . $v;
-        }, array_keys($array), array_values($array)
+        return implode($glue, array_map(
+            function ($k, $v) use ($symbol) {
+                return $k . $symbol . $v;
+            },
+            array_keys($array),
+            array_values($array)
         ));
     }
 }

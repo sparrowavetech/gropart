@@ -466,40 +466,42 @@ class Botble {
         }
 
         if (jQuery().colorpicker) {
-            $('.color-picker').colorpicker({
-                inline: false,
-                container: true,
-                format: 'hex',
-                extensions: [
-                    {
-                        name: 'swatches',
-                        options: {
-                            colors: {
-                                'tetrad1': '#000000',
-                                'tetrad2': '#000000',
-                                'tetrad3': '#000000',
-                                'tetrad4': '#000000'
-                            },
-                            namesAsValues: false
+            $.each($(document).find('.color-picker'), function (index, element) {
+                $(element).colorpicker({
+                    inline: false,
+                    container: true,
+                    format: 'hex',
+                    extensions: [
+                        {
+                            name: 'swatches',
+                            options: {
+                                colors: {
+                                    'tetrad1': '#000000',
+                                    'tetrad2': '#000000',
+                                    'tetrad3': '#000000',
+                                    'tetrad4': '#000000'
+                                },
+                                namesAsValues: false
+                            }
                         }
-                    }
-                ]
-            })
-                .on('colorpickerChange colorpickerCreate', function (e) {
-                    let colors = e.color.generate('tetrad');
+                    ]
+                })
+                    .on('colorpickerChange colorpickerCreate', function (e) {
+                        let colors = e.color.generate('tetrad');
 
-                    colors.forEach(function (color, i) {
-                        let colorStr = color.string(),
-                            swatch = e.colorpicker.picker
-                                .find('.colorpicker-swatch[data-name="tetrad' + (i + 1) + '"]');
+                        colors.forEach(function (color, i) {
+                            let colorStr = color.string(),
+                                swatch = e.colorpicker.picker
+                                    .find('.colorpicker-swatch[data-name="tetrad' + (i + 1) + '"]');
 
-                        swatch
-                            .attr('data-value', colorStr)
-                            .attr('title', colorStr)
-                            .find('> i')
-                            .css('background-color', colorStr);
+                            swatch
+                                .attr('data-value', colorStr)
+                                .attr('title', colorStr)
+                                .find('> i')
+                                .css('background-color', colorStr);
+                        });
                     });
-                });
+            });
         }
 
         if (jQuery().fancybox) {

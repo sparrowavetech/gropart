@@ -295,7 +295,7 @@ return [
 
     'custom_google_fonts' => env('CMS_CUSTOM_GOOGLE_FONTS', ''),
 
-    'countries'                 => [
+    'countries'                    => [
         'AF' => 'Afghanistan',
         'AX' => 'Åland Islands',
         'AL' => 'Albania',
@@ -547,7 +547,7 @@ return [
         'ZM' => 'Zambia',
         'ZW' => 'Zimbabwe',
     ],
-    'purifier'                  => [
+    'purifier'                     => [
         'default'           => [
             'HTML.Doctype'             => 'HTML 4.01 Transitional',
             'HTML.Allowed'             => 'div,b,strong,i,em,u,a[href|title|rel|style|target],ul,ol,li,p[style],br,span[style],img[width|height|alt|src|style],button,ins[style|data-ad-client|data-ad-slot|data-ad-format|data-full-width-responsive],video[src|type|width|height|preload|controls|autoplay|autostart|poster|id|class,muted],meta[name|content|property],link[media|type|rel|href]',
@@ -649,6 +649,8 @@ return [
         ],
         'custom_attributes' => [
             ['a', 'rel', 'Text'],
+            ['span', 'data-period', 'Text'],
+            ['span', 'data-type', 'Text'],
             ['ins', 'data-ad-client', 'Text'],
             ['ins', 'data-ad-slot', 'Text'],
             ['ins', 'data-ad-format', 'Text'],
@@ -665,9 +667,11 @@ return [
             ['link', 'color', 'Text'],
         ],
     ],
-    'enable_system_updater'     => env('CMS_ENABLE_SYSTEM_UPDATER', true),
-    'phone_validation_rule'     => env('CMS_PHONE_VALIDATION_RULE', 'min:8|max:15|regex:/^([0-9\s\-\+\(\)]*)$/'),
-    'disable_verify_csrf_token' => env('CMS_DISABLE_VERIFY_CSRF_TOKEN', false),
-    'enable_less_secure_web'    => env('CMS_ENABLE_LESS_SECURE_WEB', false),
-    'db_strict_mode'            => env('DB_STRICT', true),
+    'enable_system_updater'        => env('CMS_ENABLE_SYSTEM_UPDATER', true),
+    'phone_validation_rule'        => env('CMS_PHONE_VALIDATION_RULE', 'min:8|max:15|regex:/^([0-9\s\-\+\(\)]*)$/'),
+    'disable_verify_csrf_token'    => env('CMS_DISABLE_VERIFY_CSRF_TOKEN', false),
+    'enable_less_secure_web'       => env('CMS_ENABLE_LESS_SECURE_WEB', false),
+    'db_strict_mode'               => env('DB_STRICT', true),
+    'enable_ini_set'               => env('CMS_ENABLE_INI_SET', true),
+    'upgrade_php_require_disabled' => env('CMS_UPGRADE_PHP_REQUIRE_DISABLED', true),
 ];

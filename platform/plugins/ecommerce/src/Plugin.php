@@ -91,5 +91,7 @@ class Plugin extends PluginOperationAbstract
         Schema::dropIfExists('ec_product_collections_translations');
         Schema::dropIfExists('ec_product_labels_translations');
         Schema::dropIfExists('ec_product_tags_translations');
+        Schema::dropIfExists('ec_order_returns');
+        Schema::dropIfExists('ec_order_return_items');
     }
 }

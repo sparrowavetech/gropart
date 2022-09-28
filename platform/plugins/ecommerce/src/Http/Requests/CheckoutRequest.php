@@ -5,6 +5,7 @@ namespace Botble\Ecommerce\Http\Requests;
 use Botble\Ecommerce\Enums\ShippingMethodEnum;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Support\Http\Requests\Request;
+use Cart;
 use EcommerceHelper;
 use Illuminate\Validation\Rule;
 
@@ -26,19 +27,6 @@ class CheckoutRequest extends Request
 
         $rules['address.address_id'] = 'required_without:address.name';
         if (!$this->has('address.address_id') || $this->input('address.address_id') === 'new') {
-            $rules['address.name'] = 'required|min:3|max:120';
-
-            $rules['address.phone'] = EcommerceHelper::getPhoneValidationRule();
-
-            $rules['address.email'] = 'required|email|max:60|min:6|regex:/^(?=[^@]{4,}@)\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/';
-            $rules['address.state'] = 'required|max:120';
-            $rules['address.city'] = 'required|max:120';
-            $rules['address.address'] = 'required|string';
-
-            if (count(EcommerceHelper::getAvailableCountries()) > 1) {
-                $rules['address.country'] = 'required|' . Rule::in(array_keys(EcommerceHelper::getAvailableCountries()));
-            }
-
             foreach (EcommerceHelper::getCustomerAddressValidationRules() as $key => $item) {
                 $rules['address.' . $key] = $item;
             }
@@ -47,9 +35,13 @@ class CheckoutRequest extends Request
         if ($this->input('create_account') == 1) {
             $rules['password'] = 'required|min:6';
             $rules['password_confirmation'] = 'required|same:password';
-            $rules['address.phone'] = 'required|max:10|min:10|regex:/^.{10,10}$/|unique:ec_customers,phone';
             $rules['address.email'] = 'required|max:60|min:6|email|unique:ec_customers,email';
             $rules['address.name'] = 'required|min:3|max:120';
+        }
+
+        $products = Cart::instance('cart')->products();
+        if (!EcommerceHelper::isAvailableShipping($products)) {
+            unset($rules['shipping_method']);
         }
 
         return apply_filters(PROCESS_CHECKOUT_RULES_REQUEST_ECOMMERCE, $rules);

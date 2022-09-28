@@ -187,9 +187,9 @@ class Manager
                         $translations = $groups[$group];
                         $file = $locale . '/' . $group;
 
-                        if (!$this->files->isDirectory($this->app->langPath() . '/' . $locale)) {
-                            $this->files->makeDirectory($this->app->langPath() . '/' . $locale, 755, true);
-                            system('find ' . $this->app->langPath() . '/' . $locale . ' -type d -exec chmod 755 {} \;');
+                        if (!$this->files->isDirectory(lang_path($locale))) {
+                            $this->files->makeDirectory(lang_path($locale), 755, true);
+                            system('find ' . lang_path($locale) . ' -type d -exec chmod 755 {} \;');
                         }
 
                         $groups = explode('/', $group);
@@ -198,13 +198,14 @@ class Manager
                             Arr::forget($groups, count($groups) - 1);
 
                             $dir = 'vendor/' . implode('/', $groups) . '/' . $locale;
-                            if (!$this->files->isDirectory($this->app->langPath() . '/' . $dir)) {
-                                $this->files->makeDirectory($this->app->langPath() . '/' . $dir, 755, true);
-                                system('find ' . $this->app->langPath() . '/' . $dir . ' -type d -exec chmod 755 {} \;');
+                            if (!$this->files->isDirectory(lang_path($dir))) {
+                                $this->files->makeDirectory(lang_path($dir), 755, true);
+                                system('find ' . lang_path($dir) . ' -type d -exec chmod 755 {} \;');
                             }
+
                             $file = $dir . '/' . $folderName;
                         }
-                        $path = $this->app['path.lang'] . '/' . $file . '.php';
+                        $path = lang_path($file . '.php');
                         $output = "<?php\n\nreturn " . VarExporter::export($translations) . ";\n";
                         $this->files->put($path, $output);
                     }

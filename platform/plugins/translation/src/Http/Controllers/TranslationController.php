@@ -12,7 +12,7 @@ use Botble\Translation\Http\Requests\LocaleRequest;
 use Botble\Translation\Http\Requests\TranslationRequest;
 use Botble\Translation\Manager;
 use Botble\Translation\Models\Translation;
-use File;
+use Illuminate\Support\Facades\File;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -90,7 +90,7 @@ class TranslationController extends BaseController
     /**
      * @return array
      */
-    protected function loadLocales()
+    protected function loadLocales(): array
     {
         // Set the default locale as the first one.
         $locales = Translation::groupBy('locale')
@@ -155,7 +155,7 @@ class TranslationController extends BaseController
     {
         if (!File::isWritable(lang_path()) || !File::isWritable(lang_path('vendor'))) {
             return $response
-                ->setError(true)
+                ->setError()
                 ->setMessage(trans('plugins/translation::translation.folder_is_not_writeable', ['lang_path' => lang_path()]));
         }
 
@@ -193,7 +193,7 @@ class TranslationController extends BaseController
     {
         if (!File::isWritable(lang_path()) || !File::isWritable(lang_path('vendor'))) {
             return $response
-                ->setError(true)
+                ->setError()
                 ->setMessage(trans('plugins/translation::translation.folder_is_not_writeable', ['lang_path' => lang_path()]));
         }
 
@@ -249,7 +249,7 @@ class TranslationController extends BaseController
         if ($locale !== 'en') {
             if (!File::isWritable(lang_path()) || !File::isWritable(lang_path('vendor'))) {
                 return $response
-                    ->setError(true)
+                    ->setError()
                     ->setMessage(trans('plugins/translation::translation.folder_is_not_writeable', ['lang_path' => lang_path()]));
             }
 
@@ -370,7 +370,7 @@ class TranslationController extends BaseController
     {
         if (!File::isWritable(lang_path())) {
             return $response
-                ->setError(true)
+                ->setError()
                 ->setMessage(trans('plugins/translation::translation.folder_is_not_writeable', ['lang_path' => lang_path()]));
         }
 
@@ -428,7 +428,7 @@ class TranslationController extends BaseController
     {
         $file = RvMedia::getUploadPath() . '/locale-' . $locale . '.zip';
 
-        @ini_set('max_execution_time', -1);
+        BaseHelper::maximumExecutionTimeAndMemoryLimit();
 
         if (class_exists('ZipArchive', false)) {
             $zip = new ZipArchive();

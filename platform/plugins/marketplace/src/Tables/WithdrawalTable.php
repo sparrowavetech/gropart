@@ -54,14 +54,14 @@ class WithdrawalTable extends TableAbstract
             ->eloquent($this->query())
             ->editColumn('customer_id', function ($item) {
                 if (!Auth::user()->hasPermission('customers.edit')) {
-                    return clean($item->customer->name);
+                    return BaseHelper::clean($item->customer->name);
                 }
 
                 if (!$item->customer->id) {
                     return '&mdash;';
                 }
 
-                return Html::link(route('customers.edit', $item->customer->id), clean($item->customer->name));
+                return Html::link(route('customers.edit', $item->customer->id), BaseHelper::clean($item->customer->name));
             })
             ->editColumn('fee', function ($item) {
                 return format_price($item->fee);
@@ -76,7 +76,7 @@ class WithdrawalTable extends TableAbstract
                 return BaseHelper::formatDate($item->created_at);
             })
             ->editColumn('status', function ($item) {
-                return clean($item->status->toHtml());
+                return BaseHelper::clean($item->status->toHtml());
             })
             ->addColumn('operations', function ($item) {
                 return $this->getOperations('marketplace.withdrawal.edit', null, $item);

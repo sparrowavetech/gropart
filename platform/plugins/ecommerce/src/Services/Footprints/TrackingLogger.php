@@ -3,7 +3,6 @@
 namespace Botble\Ecommerce\Services\Footprints;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cookie;
 
 class TrackingLogger implements TrackingLoggerInterface

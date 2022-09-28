@@ -52,6 +52,7 @@ class EditorManagement {
                                 code: shortcode,
                             },
                             description: description,
+                            preview_image: '',
                             update: true
                         })
                     },
@@ -59,7 +60,8 @@ class EditorManagement {
                     onCallback: (shortcode, options) => {
                         this.shortcodeCallback({
                             key: shortcode,
-                            href: options.url
+                            href: options.url,
+                            preview_image: ''
                         });
                     }
                 },
@@ -346,6 +348,7 @@ class EditorManagement {
             description = null,
             data = {},
             update = false,
+            preview_image = null
         } = params;
         $('.short-code-admin-config').html('');
 
@@ -359,6 +362,12 @@ class EditorManagement {
 
         if (description !== '' && description != null) {
             $('.short_code_modal .modal-title strong').text(description);
+        }
+
+        if (preview_image !== '' && preview_image != null) {
+            $('.short_code_modal .shortcode-preview-image-link').attr('href', preview_image).show();
+        } else {
+            $('.short_code_modal .shortcode-preview-image-link').hide();
         }
 
         $('.short_code_modal').modal('show');
@@ -398,6 +407,7 @@ class EditorManagement {
                     href: $(this).prop('href'),
                     key: $(this).data('key'),
                     description: $(this).data('description'),
+                    preview_image: $(this).data('preview-image'),
                 });
 
             } else {

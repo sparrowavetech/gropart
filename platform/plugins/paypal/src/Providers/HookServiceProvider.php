@@ -98,7 +98,6 @@ class HookServiceProvider extends ServiceProvider
     public function checkoutWithPaypal(array $data, Request $request): array
     {
         if ($request->input('payment_method') == PAYPAL_PAYMENT_METHOD_NAME) {
-
             $currentCurrency = get_application_currency();
 
             $currencyModel = $currentCurrency->replicate();
@@ -129,7 +128,6 @@ class HookServiceProvider extends ServiceProvider
             $paymentData = apply_filters(PAYMENT_FILTER_PAYMENT_DATA, [], $request);
 
             if ($notSupportCurrency) {
-
                 $usdCurrency = $currencyModel->where('title', 'USD')->first();
 
                 $paymentData['currency'] = 'USD';

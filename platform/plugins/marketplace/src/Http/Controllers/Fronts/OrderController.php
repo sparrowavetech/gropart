@@ -9,6 +9,7 @@ use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Enums\ShippingStatusEnum;
+use Botble\Ecommerce\Events\OrderCompletedEvent;
 use Botble\Ecommerce\Http\Requests\AddressRequest;
 use Botble\Ecommerce\Http\Requests\UpdateOrderRequest;
 use Botble\Ecommerce\Repositories\Interfaces\OrderAddressInterface;
@@ -19,13 +20,14 @@ use Botble\Ecommerce\Repositories\Interfaces\ShipmentInterface;
 use Botble\Marketplace\Http\Requests\UpdateShippingStatusRequest;
 use Botble\Marketplace\Tables\OrderTable;
 use Botble\Payment\Repositories\Interfaces\PaymentInterface;
+use Carbon\Carbon;
 use EmailHandler;
 use Exception;
 use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
 use MarketplaceHelper;
 use OrderHelper;
 use Response;
@@ -60,10 +62,10 @@ class OrderController extends BaseController
      * @param PaymentInterface $paymentRepository
      */
     public function __construct(
-        OrderInterface $orderRepository,
+        OrderInterface        $orderRepository,
         OrderHistoryInterface $orderHistoryRepository,
         OrderAddressInterface $orderAddressRepository,
-        PaymentInterface $paymentRepository
+        PaymentInterface      $paymentRepository
     ) {
         $this->orderRepository = $orderRepository;
         $this->orderHistoryRepository = $orderHistoryRepository;
@@ -348,21 +350,58 @@ class OrderController extends BaseController
         BaseHttpResponse $response,
         ShipmentInterface $shipmentRepository,
         ShipmentHistoryInterface $shipmentHistoryRepository
-    )
-    {
+    ) {
         $shipment = $shipmentRepository->findOrFail($id);
 
-        $shipmentRepository->createOrUpdate(['status' => $request->input('status')], compact('id'));
+        $status = $request->input('status');
+
+        $shipmentRepository->createOrUpdate(['status' => $status], compact('id'));
 
         $shipmentHistoryRepository->createOrUpdate([
             'action'      => 'update_status',
             'description' => trans('plugins/ecommerce::shipping.changed_shipping_status', [
-                'status' => ShippingStatusEnum::getLabel($request->input('status')),
+                'status' => ShippingStatusEnum::getLabel($status),
             ]),
             'shipment_id' => $id,
             'order_id'    => $shipment->order_id,
             'user_id'     => Auth::id() ?? 0,
         ]);
+
+        switch ($status) {
+            case ShippingStatusEnum::DELIVERED:
+                $shipment->date_shipped = now();
+                $shipment->save();
+
+                // Update status and time order complete
+                $order = $this->orderRepository->createOrUpdate(
+                    [
+                        'status'       => OrderStatusEnum::COMPLETED,
+                        'completed_at' => Carbon::now(),
+                    ],
+                    ['id' => $shipment->order_id]
+                );
+
+                event(new OrderCompletedEvent($order));
+
+                do_action(ACTION_AFTER_ORDER_STATUS_COMPLETED_ECOMMERCE, $order, $request);
+
+                $this->orderHistoryRepository->createOrUpdate([
+                    'action'      => 'update_status',
+                    'description' => trans('plugins/ecommerce::shipping.order_confirmed_by'),
+                    'order_id'    => $shipment->order_id,
+                    'user_id'     => Auth::id() ?? 0,
+                ]);
+                break;
+
+            case ShippingStatusEnum::CANCELED:
+                $this->orderHistoryRepository->createOrUpdate([
+                    'action'      => 'cancel_shipment',
+                    'description' => trans('plugins/ecommerce::shipping.shipping_canceled_by'),
+                    'order_id'    => $shipment->order_id,
+                    'user_id'     => Auth::id(),
+                ]);
+                break;
+        }
 
         return $response->setMessage(trans('plugins/ecommerce::shipping.update_shipping_status_success'));
     }

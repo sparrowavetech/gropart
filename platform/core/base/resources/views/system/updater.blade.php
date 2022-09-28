@@ -21,8 +21,8 @@
                     <br>
                     @if (request()->input('update_id'))
                         @php
-                            $updateId = strip_tags(trim(request()->input('update_id')));
-                            $version = strip_tags(trim(request()->input('version')));
+                            $updateId = strip_tags((string)trim(request()->input('update_id')));
+                            $version = strip_tags((string)trim(request()->input('version')));
                             echo '<progress id="prog" value="0" max="100.0" class="progress is-success" style="margin-bottom: 10px;"></progress>';
                             $api->downloadUpdate($updateId, $version);
                         @endphp

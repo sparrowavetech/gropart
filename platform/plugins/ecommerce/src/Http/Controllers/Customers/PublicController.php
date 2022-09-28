@@ -2,17 +2,25 @@
 
 namespace Botble\Ecommerce\Http\Controllers\Customers;
 
+use Arr;
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Ecommerce\Enums\OrderStatusEnum;
+use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Http\Requests\AddressRequest;
 use Botble\Ecommerce\Http\Requests\AvatarRequest;
 use Botble\Ecommerce\Http\Requests\EditAccountRequest;
+use Botble\Ecommerce\Http\Requests\OrderReturnRequest;
 use Botble\Ecommerce\Http\Requests\UpdatePasswordRequest;
 use Botble\Ecommerce\Repositories\Interfaces\AddressInterface;
 use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderHistoryInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
+use Botble\Ecommerce\Repositories\Interfaces\OrderProductInterface;
+use Botble\Ecommerce\Repositories\Interfaces\OrderReturnInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Media\Services\ThumbnailService;
+use Botble\Media\Supports\Zipper;
+use Botble\Payment\Enums\PaymentStatusEnum;
 use EcommerceHelper;
 use Exception;
 use File;
@@ -20,7 +28,9 @@ use Hash;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Str;
 use OrderHelper;
+use OrderReturnHelper;
 use Response;
 use RvMedia;
 use SeoHelper;
@@ -55,25 +65,42 @@ class PublicController extends Controller
     protected $orderHistoryRepository;
 
     /**
+     * @var OrderReturnInterface
+     */
+    protected $orderReturnRepository;
+
+    /**
+     * @var OrderProductInterface
+     */
+    protected $orderProductRepository;
+
+    /**
      * PublicController constructor.
+     *
      * @param CustomerInterface $customerRepository
      * @param ProductInterface $productRepository
      * @param AddressInterface $addressRepository
      * @param OrderInterface $orderRepository
      * @param OrderHistoryInterface $orderHistoryRepository
+     * @param OrderReturnInterface $orderReturnRepository
+     * @param OrderProductInterface $orderProductRepository
      */
     public function __construct(
-        CustomerInterface $customerRepository,
-        ProductInterface $productRepository,
-        AddressInterface $addressRepository,
-        OrderInterface $orderRepository,
-        OrderHistoryInterface $orderHistoryRepository
+        CustomerInterface     $customerRepository,
+        ProductInterface      $productRepository,
+        AddressInterface      $addressRepository,
+        OrderInterface        $orderRepository,
+        OrderHistoryInterface $orderHistoryRepository,
+        OrderReturnInterface  $orderReturnRepository,
+        OrderProductInterface $orderProductRepository
     ) {
         $this->customerRepository = $customerRepository;
         $this->productRepository = $productRepository;
         $this->addressRepository = $addressRepository;
         $this->orderRepository = $orderRepository;
         $this->orderHistoryRepository = $orderHistoryRepository;
+        $this->orderReturnRepository = $orderReturnRepository;
+        $this->orderProductRepository = $orderProductRepository;
 
         Theme::asset()
             ->add('customer-style', 'vendor/core/plugins/ecommerce/css/customer.css');
@@ -268,7 +295,7 @@ class PublicController extends Controller
      * @throws FileNotFoundException
      * @throws Throwable
      */
-    public function getCancelOder($id, BaseHttpResponse $response)
+    public function getCancelOrder($id, BaseHttpResponse $response)
     {
         $order = $this->orderRepository->getFirstBy([
             'id'      => $id,
@@ -309,11 +336,11 @@ class PublicController extends Controller
             ],
             'order_by'  => [
                 'is_default' => 'DESC',
-                'created_at' => 'DESC'
+                'created_at' => 'DESC',
             ],
             'paginate'  => [
                 'per_page'      => 10,
-                'current_paged' => (int)$request->input('page'),
+                'current_paged' => (int)$request->input('page', 1),
             ],
         ]);
 
@@ -466,7 +493,7 @@ class PublicController extends Controller
             'user_id' => auth('customer')->id(),
         ]);
 
-        if (!$order) {
+        if (!$order || !$order->isInvoiceAvailable()) {
             abort(404);
         }
 
@@ -518,5 +545,258 @@ class PublicController extends Controller
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
+    }
+
+
+    /**
+     * @param int $orderId
+     * @return Response
+     */
+    public function getReturnOrder($orderId)
+    {
+        SeoHelper::setTitle(__('Request Return Product(s) In Order :id', ['id' => get_order_code($orderId)]));
+
+        $order = $this->orderRepository->getFirstBy(
+            [
+                'id'      => $orderId,
+                'user_id' => auth('customer')->id(),
+                'status'  => OrderStatusEnum::COMPLETED,
+            ],
+            ['ec_orders.*'],
+            ['products']
+        );
+
+        if (!$order || !$order->canBeReturned()) {
+            abort(404);
+        }
+
+        Theme::breadcrumb()->add(__('Home'), route('public.index'))
+            ->add(
+                __('Request Return Product(s) In Order :id', ['id' => get_order_code($orderId)]),
+                route('customer.order_returns.request_view', $orderId)
+            );
+
+        return Theme::scope(
+            'ecommerce.customers.order-returns.view',
+            compact('order'),
+            'plugins/ecommerce::themes.customers.order-returns.view'
+        )->render();
+    }
+
+    /**
+     * @param OrderReturnRequest $request
+     * @param BaseHttpResponse $response
+     * @return BaseHttpResponse
+     */
+    public function postReturnOrder(OrderReturnRequest $request, BaseHttpResponse $response)
+    {
+        $order = $this->orderRepository->getFirstBy([
+            'id'      => $request->input('order_id'),
+            'user_id' => auth('customer')->id(),
+        ]);
+
+        if (!$order) {
+            abort(404);
+        }
+
+        if (!$order->canBeReturned()) {
+            return $response
+                ->setError()
+                ->withInput()
+                ->setMessage(trans('plugins/ecommerce::order.return_error'));
+        }
+
+        $orderReturnData['reason'] = $request->input('reason');
+
+        $orderReturnData['items'] = Arr::where($request->input(['return_items']), function ($value) {
+            return isset($value['is_return']);
+        });
+
+        [$status, $data, $message] = OrderReturnHelper::returnOrder($order, $orderReturnData);
+
+        if (!$status) {
+            return $response
+                ->setError()
+                ->withInput()
+                ->setMessage($message ?: trans('plugins/ecommerce::order.return_error'));
+        }
+
+        $this->orderHistoryRepository->createOrUpdate([
+            'action'      => 'return_order',
+            'description' => __(':customer has requested return product(s)', ['customer' => $order->address->name]),
+            'order_id'    => $order->id,
+        ]);
+
+        return $response
+            ->setMessage(trans('plugins/ecommerce::order.return_success'))
+            ->setNextUrl(route('customer.order_returns.detail', ['id' => $data->id]));
+    }
+
+    /**
+     * @param Request $request
+     * @return Response
+     */
+    public function getListReturnOrders(Request $request)
+    {
+        SeoHelper::setTitle(__('Order Return Requests'));
+
+        $requests = $this->orderReturnRepository->advancedGet([
+            'condition' => [
+                'user_id' => auth('customer')->id(),
+            ],
+            'paginate'  => [
+                'per_page'      => 10,
+                'current_paged' => (int)$request->input('page'),
+            ],
+            'withCount' => ['items'],
+            'order_by'  => ['created_at' => 'DESC'],
+        ]);
+
+        Theme::breadcrumb()
+            ->add(__('Home'), route('public.index'))
+            ->add(__('Order Return Requests'), route('customer.order_returns'));
+
+        return Theme::scope(
+            'ecommerce.customers.order-returns.list',
+            compact('requests'),
+            'plugins/ecommerce::themes.customers.orders.returns.list'
+        )->render();
+    }
+
+    /**
+     * @param $id
+     * @return Response
+     */
+    public function getDetailReturnOrder($id)
+    {
+        SeoHelper::setTitle(__('Order Return Requests'));
+
+        $orderReturn = $this->orderReturnRepository->getFirstBy([
+            'id'      => $id,
+            'user_id' => auth('customer')->id(),
+        ]);
+
+        if (!$orderReturn) {
+            abort(404);
+        }
+
+        Theme::breadcrumb()
+            ->add(__('Home'), route('public.index'))
+            ->add(__('Order Return Requests'), route('customer.order_returns'))
+            ->add(__('Order Return Requests :id', ['id' => $orderReturn->id]), route('customer.order_returns.detail', $orderReturn->id));
+
+        return Theme::scope(
+            'ecommerce.customers.order-returns.detail',
+            compact('orderReturn'),
+            'plugins/ecommerce::themes.customers.order-returns.detail'
+        )->render();
+    }
+
+    /**
+     * @param Request $request
+     * @return Response
+     */
+    public function getDownloads(Request $request)
+    {
+        if (!EcommerceHelper::isEnabledSupportDigitalProducts()) {
+            abort(404);
+        }
+
+        SeoHelper::setTitle(__('Downloads'));
+
+        $orderProducts = $this->orderProductRepository->getModel()
+            ->whereHas('order', function ($query) {
+                $query->where([
+                    'user_id'     => auth('customer')->id(),
+                    'is_finished' => 1,
+                ]);
+            })
+            ->whereHas('order.payment', function ($query) {
+                $query->where(['status' => PaymentStatusEnum::COMPLETED]);
+            })
+            ->where('product_type', ProductTypeEnum::DIGITAL)
+            ->orderBy('created_at', 'desc')
+            ->with(['order', 'product'])
+            ->paginate(10);
+
+        Theme::breadcrumb()
+            ->add(__('Home'), route('public.index'))
+            ->add(__('Downloads'), route('customer.downloads'));
+
+        return Theme::scope(
+            'ecommerce.customers.orders.downloads',
+            compact('orderProducts'),
+            'plugins/ecommerce::themes.customers.orders.downloads'
+        )->render();
+    }
+
+    /**
+     * @param int $id
+     * @param BaseHttpResponse $response
+     * @return Response|BaseHttpResponse
+     */
+    public function getDownload($id, BaseHttpResponse $response)
+    {
+        if (!EcommerceHelper::isEnabledSupportDigitalProducts()) {
+            abort(404);
+        }
+
+        $orderProduct = $this->orderProductRepository->getModel()
+            ->where([
+                'id'           => $id,
+                'product_type' => ProductTypeEnum::DIGITAL
+            ])
+            ->whereHas('order', function ($query) {
+                $query->where([
+                    'user_id'     => auth('customer')->id(),
+                    'is_finished' => 1,
+                ]);
+            })
+            ->whereHas('order.payment', function ($query) {
+                $query->where(['status' => PaymentStatusEnum::COMPLETED]);
+            })
+            ->with(['order', 'product'])
+            ->first();
+
+        if (!$orderProduct) {
+            abort(404);
+        }
+
+        $zipName = 'digital-product-' . Str::slug($orderProduct->product_name) . Str::random(5) . '-' . now()->format('Y-m-d-h-i-s') . '.zip';
+        $fileName = RvMedia::getRealPath($zipName);
+        $zip = new Zipper();
+        $zip->make($fileName);
+        $product = $orderProduct->product;
+        $productFiles = $product->id ? $product->productFiles : $orderProduct->productFiles;
+
+        if (!$productFiles->count()) {
+            return $response->setError()->setMessage(__('Cannot found files'));
+        }
+        foreach ($productFiles as $file) {
+            $filePath = RvMedia::getRealPath($file->url);
+            if (!RvMedia::isUsingCloud()) {
+                if (File::exists($filePath)) {
+                    $zip->add($filePath);
+                }
+            } else {
+                $zip->addString(
+                    $file->file_name,
+                    file_get_contents(str_replace('https://', 'http://', $filePath))
+                );
+            }
+        }
+
+        if (version_compare(phpversion(), '8.0') >= 0) {
+            $zip = null;
+        } else {
+            $zip->close();
+        }
+
+        if (File::exists($fileName)) {
+            $orderProduct->increment('times_downloaded');
+            return response()->download($fileName)->deleteFileAfterSend();
+        }
+
+        return $response->setError()->setMessage(__('Cannot download files'));
     }
 }

@@ -67,9 +67,6 @@ class CustomerTable extends TableAbstract
             ->editColumn('email', function ($item) {
                 return BaseHelper::clean($item->email);
             })
-            ->editColumn('phone', function ($item) {
-                return BaseHelper::clean($item->phone);
-            })
             ->editColumn('checkbox', function ($item) {
                 return $this->getCheckbox($item->id);
             })
@@ -108,7 +105,6 @@ class CustomerTable extends TableAbstract
             'id',
             'name',
             'email',
-            'phone',
             'avatar',
             'created_at',
             'status',
@@ -139,10 +135,6 @@ class CustomerTable extends TableAbstract
             ],
             'email'      => [
                 'title' => trans('plugins/ecommerce::customer.name'),
-                'class' => 'text-start',
-            ],
-            'phone'      => [
-                'title' => trans('plugins/ecommerce::customer.phone'),
                 'class' => 'text-start',
             ],
             'created_at' => [
@@ -199,11 +191,6 @@ class CustomerTable extends TableAbstract
                 'title'    => trans('core/base::tables.email'),
                 'type'     => 'text',
                 'validate' => 'required|max:120',
-            ],
-            'phone'      => [
-                'title'    => trans('core/base::tables.phone'),
-                'type'     => 'text',
-                'validate' => 'required|max:20',
             ],
             'status'     => [
                 'title'    => trans('core/base::tables.status'),

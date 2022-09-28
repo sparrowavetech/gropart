@@ -91,6 +91,9 @@ class OrderTable extends TableAbstract
                     return $query
                         ->whereHas('address', function ($subQuery) use ($keyword) {
                             return $subQuery->where('name', 'LIKE', '%' . $keyword . '%');
+                        })
+                        ->orWhereHas('user', function ($subQuery) use ($keyword) {
+                            return $subQuery->where('name', 'LIKE', '%' . $keyword . '%');
                         });
                 }
 

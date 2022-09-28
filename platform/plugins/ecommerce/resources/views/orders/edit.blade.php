@@ -59,7 +59,6 @@
                                             @php
                                                 $product = get_products([
                                                     'condition' => [
-                                                        'ec_products.status' => \Botble\Base\Enums\BaseStatusEnum::PUBLISHED,
                                                         'ec_products.id' => $orderProduct->product_id,
                                                     ],
                                                     'take' => 1,
@@ -379,20 +378,10 @@
                                     @endif
                                 </div>
                             </div>
-                            <div class="pd-all-20 border-top-title-main">
-                                <div class="flexbox-grid-default flexbox-flex-wrap flexbox-align-items-center">
-                                    @if ($order->status == \Botble\Ecommerce\Enums\OrderStatusEnum::CANCELED && !$order->shipment->id)
-                                        <div class="flexbox-auto-left">
-                                            <svg class="svg-next-icon svg-next-icon-size-20 svg-next-icon-green">
-                                                <use xmlns:xlink="http://www.w3.org/1999/xlink"
-                                                     xlink:href="#next-checkmark"></use>
-                                            </svg>
-                                        </div>
-                                        <div class="flexbox-auto-content ml15 mr15 text-upper">
-                                            <span>{{ trans('plugins/ecommerce::order.all_products_are_not_delivered') }}</span>
-                                        </div>
-                                    @else
-                                        @if ($order->shipment->id)
+                            @if (!EcommerceHelper::countDigitalProducts($order->products))
+                                <div class="pd-all-20 border-top-title-main">
+                                    <div class="flexbox-grid-default flexbox-flex-wrap flexbox-align-items-center">
+                                        @if ($order->status == \Botble\Ecommerce\Enums\OrderStatusEnum::CANCELED && !$order->shipment->id)
                                             <div class="flexbox-auto-left">
                                                 <svg class="svg-next-icon svg-next-icon-size-20 svg-next-icon-green">
                                                     <use xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -400,32 +389,44 @@
                                                 </svg>
                                             </div>
                                             <div class="flexbox-auto-content ml15 mr15 text-upper">
-                                                <span>{{ trans('plugins/ecommerce::order.delivery') }}</span>
+                                                <span>{{ trans('plugins/ecommerce::order.all_products_are_not_delivered') }}</span>
                                             </div>
                                         @else
-                                            <div class="flexbox-auto-left">
-                                                <svg class="svg-next-icon svg-next-icon-size-24 svg-next-icon-gray">
-                                                    <use xmlns:xlink="http://www.w3.org/1999/xlink"
-                                                         xlink:href="#next-shipping"></use>
-                                                </svg>
-                                            </div>
-                                            <div class="flexbox-auto-content ml15 mr15 text-upper">
-                                                <span>{{ trans('plugins/ecommerce::order.delivery') }}</span>
-                                            </div>
-                                            <div class="flexbox-auto-left">
-                                                <div class="item">
-                                                    <button class="btn btn-primary btn-trigger-shipment"
-                                                            data-target="{{ route('orders.get-shipment-form', $order->id) }}">{{ trans('plugins/ecommerce::order.delivery') }}</button>
+                                            @if ($order->shipment->id)
+                                                <div class="flexbox-auto-left">
+                                                    <svg class="svg-next-icon svg-next-icon-size-20 svg-next-icon-green">
+                                                        <use xmlns:xlink="http://www.w3.org/1999/xlink"
+                                                             xlink:href="#next-checkmark"></use>
+                                                    </svg>
                                                 </div>
-                                            </div>
+                                                <div class="flexbox-auto-content ml15 mr15 text-upper">
+                                                    <span>{{ trans('plugins/ecommerce::order.delivery') }}</span>
+                                                </div>
+                                            @else
+                                                <div class="flexbox-auto-left">
+                                                    <svg class="svg-next-icon svg-next-icon-size-24 svg-next-icon-gray">
+                                                        <use xmlns:xlink="http://www.w3.org/1999/xlink"
+                                                             xlink:href="#next-shipping"></use>
+                                                    </svg>
+                                                </div>
+                                                <div class="flexbox-auto-content ml15 mr15 text-upper">
+                                                    <span>{{ trans('plugins/ecommerce::order.delivery') }}</span>
+                                                </div>
+                                                <div class="flexbox-auto-left">
+                                                    <div class="item">
+                                                        <button class="btn btn-primary btn-trigger-shipment"
+                                                                data-target="{{ route('orders.get-shipment-form', $order->id) }}">{{ trans('plugins/ecommerce::order.delivery') }}</button>
+                                                    </div>
+                                                </div>
+                                            @endif
                                         @endif
-                                    @endif
+                                    </div>
                                 </div>
-                            </div>
-                            @if (!$order->shipment->id)
-                                <div class="shipment-create-wrap hidden"></div>
-                            @else
-                                @include('plugins/ecommerce::orders.shipment-detail', ['shipment' => $order->shipment])
+                                @if (!$order->shipment->id)
+                                    <div class="shipment-create-wrap hidden"></div>
+                                @else
+                                    @include('plugins/ecommerce::orders.shipment-detail', ['shipment' => $order->shipment])
+                                @endif
                             @endif
                         </div>
                         <div class="mt20 mb20">
@@ -616,30 +617,32 @@
                                 </ul>
                             </div>
                             <div class="next-card-section">
-                                <div class="flexbox-grid-default flexbox-align-items-center">
-                                    <div class="flexbox-auto-content-left">
-                                        <label
-                                            class="title-text-second"><strong>{{ trans('plugins/ecommerce::order.shipping_address') }}</strong></label>
-                                    </div>
-                                    @if ($order->status != \Botble\Ecommerce\Enums\OrderStatusEnum::CANCELED)
-                                        <div class="flexbox-auto-content-right text-end">
-                                            <a href="#" class="btn-trigger-update-shipping-address">
-                                            <span data-placement="top" data-bs-toggle="tooltip"
-                                                  data-bs-original-title="{{ trans('plugins/ecommerce::order.update_address') }}">
-                                                <svg class="svg-next-icon svg-next-icon-size-12">
-                                                    <use xmlns:xlink="http://www.w3.org/1999/xlink"
-                                                         xlink:href="#next-edit"></use>
-                                                </svg>
-                                            </span>
-                                            </a>
+                                @if (!EcommerceHelper::countDigitalProducts($order->products))
+                                    <div class="flexbox-grid-default flexbox-align-items-center">
+                                        <div class="flexbox-auto-content-left">
+                                            <label
+                                                class="title-text-second"><strong>{{ trans('plugins/ecommerce::order.shipping_address') }}</strong></label>
                                         </div>
-                                    @endif
-                                </div>
-                                <div>
-                                    <ul class="ws-nm text-infor-subdued shipping-address-info">
-                                        @include('plugins/ecommerce::orders.shipping-address.detail', ['address' => $order->shippingAddress])
-                                    </ul>
-                                </div>
+                                        @if ($order->status != \Botble\Ecommerce\Enums\OrderStatusEnum::CANCELED)
+                                            <div class="flexbox-auto-content-right text-end">
+                                                <a href="#" class="btn-trigger-update-shipping-address">
+                                                <span data-placement="top" data-bs-toggle="tooltip"
+                                                      data-bs-original-title="{{ trans('plugins/ecommerce::order.update_address') }}">
+                                                    <svg class="svg-next-icon svg-next-icon-size-12">
+                                                        <use xmlns:xlink="http://www.w3.org/1999/xlink"
+                                                             xlink:href="#next-edit"></use>
+                                                    </svg>
+                                                </span>
+                                                </a>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <div>
+                                        <ul class="ws-nm text-infor-subdued shipping-address-info">
+                                            @include('plugins/ecommerce::orders.shipping-address.detail', ['address' => $order->shippingAddress])
+                                        </ul>
+                                    </div>
+                                @endif
 
                                 @if (EcommerceHelper::isBillingAddressEnabled() && $order->billingAddress->id && $order->billingAddress->id != $order->shippingAddress->id)
                                     <div class="flexbox-grid-default flexbox-align-items-center">

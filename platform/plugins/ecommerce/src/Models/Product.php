@@ -7,12 +7,14 @@ use Botble\ACL\Models\User;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Traits\EnumCastable;
+use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Enums\StockStatusEnum;
 use Botble\Ecommerce\Facades\DiscountFacade;
 use Botble\Ecommerce\Facades\FlashSaleFacade;
 use Botble\Ecommerce\Services\Products\UpdateDefaultProductService;
 use EcommerceHelper;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -76,6 +78,7 @@ class Product extends BaseModel
     protected $casts = [
         'status'       => BaseStatusEnum::class,
         'stock_status' => StockStatusEnum::class,
+        'product_type' => ProductTypeEnum::class,
     ];
 
     protected static function boot()
@@ -356,7 +359,7 @@ class Product extends BaseModel
      * @param string $value
      * @return array
      */
-    public function getOptionsAttribute($value)
+    public function getOptionsAttribute($value): array
     {
         try {
             return json_decode($value, true) ?: [];
@@ -581,13 +584,13 @@ class Product extends BaseModel
     /**
      * @return HasMany
      */
-    public function reviews()
+    public function reviews(): HasMany
     {
         return $this->hasMany(Review::class, 'product_id')->where('status', BaseStatusEnum::PUBLISHED);
     }
 
     /**
-     * @return $this
+     * @return mixed
      */
     public function latestFlashSales()
     {
@@ -719,5 +722,60 @@ class Product extends BaseModel
         return $this->reviews->sortByDesc('created_at')->reduce(function ($carry, $item) {
             return array_merge($carry, (array)$item->images);
         }, []);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isTypePhysical()
+    {
+        return !isset($this->attributes['product_type']) || $this->attributes['product_type'] == ProductTypeEnum::PHYSICAL;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isTypeDigital()
+    {
+        return isset($this->attributes['product_type']) && $this->attributes['product_type'] == ProductTypeEnum::DIGITAL;
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function productFiles(): HasMany
+    {
+        return $this->hasMany(ProductFile::class, 'product_id');
+    }
+
+    /**
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopeNotOutOfStock($query)
+    {
+        if (EcommerceHelper::showOutOfStockProducts() || is_in_admin()) {
+            return $query;
+        }
+
+        return $query
+            ->where(function ($query) {
+                $query
+                    ->where(function ($subQuery) {
+                        $subQuery
+                            ->where('with_storehouse_management', 0)
+                            ->where('stock_status', '!=', StockStatusEnum::OUT_OF_STOCK);
+                    })
+                    ->orWhere(function ($subQuery) {
+                        $subQuery
+                            ->where('with_storehouse_management', 1)
+                            ->where('quantity', '>', 0);
+                    })
+                    ->orWhere(function ($subQuery) {
+                        $subQuery
+                            ->where('with_storehouse_management', 1)
+                            ->where('allow_checkout_when_out_of_stock', 1);
+                    });
+            });
     }
 }

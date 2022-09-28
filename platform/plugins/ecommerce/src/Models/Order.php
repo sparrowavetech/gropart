@@ -11,6 +11,7 @@ use Botble\Ecommerce\Enums\ShippingStatusEnum;
 use Botble\Ecommerce\Repositories\Interfaces\ShipmentInterface;
 use Botble\Payment\Models\Payment;
 use Botble\Payment\Repositories\Interfaces\PaymentInterface;
+use Carbon\Carbon;
 use EcommerceHelper;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -45,6 +46,7 @@ class Order extends BaseModel
         'discount_description',
         'is_finished',
         'token',
+        'completed_at',
     ];
 
     /**
@@ -61,6 +63,7 @@ class Order extends BaseModel
     protected $dates = [
         'created_at',
         'updated_at',
+        'completed_at',
     ];
 
     protected static function boot()
@@ -202,7 +205,21 @@ class Order extends BaseModel
             return false;
         }
 
-        return !in_array($this->status, [OrderStatusEnum::COMPLETED, OrderStatusEnum::CANCELED]);
+        if (in_array($this->status, [OrderStatusEnum::COMPLETED, OrderStatusEnum::CANCELED])) {
+            return false;
+        }
+
+        if ($this->shipment && in_array($this->shipment->status, [
+            ShippingStatusEnum::PENDING,
+            ShippingStatusEnum::APPROVED,
+            ShippingStatusEnum::NOT_APPROVED,
+            ShippingStatusEnum::ARRANGE_SHIPMENT,
+            ShippingStatusEnum::READY_TO_BE_SHIPPED_OUT,
+        ])) {
+            return true;
+        }
+
+        return true;
     }
 
     /**
@@ -251,5 +268,37 @@ class Order extends BaseModel
         }
 
         return EcommerceHelper::validateOrderWeight($weight);
+    }
+
+    /**
+     * @return HasOne
+     */
+    public function returnRequest(): HasOne
+    {
+        return $this->hasOne(OrderReturn::class, 'order_id')->withDefault();
+    }
+
+    /**
+     * @return bool
+     */
+    public function canBeReturned(): bool
+    {
+        if ($this->status != OrderStatusEnum::COMPLETED || !$this->completed_at) {
+            return false;
+        }
+
+        $shipmentDayCount = Carbon::now()->diffInDays($this->completed_at);
+
+        if ($shipmentDayCount > EcommerceHelper::getReturnableDays()) {
+            return false;
+        }
+
+        if (EcommerceHelper::isEnabledSupportDigitalProducts()) {
+            if ($this->products->where('times_downloaded')->count()) {
+                return false;
+            }
+        }
+
+        return !$this->returnRequest()->exists();
     }
 }

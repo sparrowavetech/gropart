@@ -558,6 +558,74 @@
                 </div>
             </div>
 
+            <div class="flexbox-annotated-section">
+                <div class="flexbox-annotated-section-annotation">
+                    <div class="annotated-section-title pd-all-20">
+                        <h2>{{ trans('plugins/ecommerce::ecommerce.setting.return_request') }}</h2>
+                    </div>
+                    <div class="annotated-section-description pd-all-20 p-none-t">
+                        <p class="color-note">{{ trans('plugins/ecommerce::ecommerce.setting.return_request_description') }}</p>
+                    </div>
+                </div>
+                <div class="flexbox-annotated-section-content">
+                    <div class="wrapper-content pd-all-20">
+                        <div class="form-group mb-3">
+                            <label class="text-title-field"
+                                   for="search_for_an_exact_phrase">{{ trans('plugins/ecommerce::ecommerce.setting.activate_custom_return_product_quantity') }}
+                            </label>
+                            <label class="me-2">
+                                <input type="radio" name="can_custom_return_product_quantity"
+                                       value="1"
+                                       @if (get_ecommerce_setting('can_custom_return_product_quantity', 0) == 1) checked @endif>{{ trans('core/setting::setting.general.yes') }}
+                            </label>
+                            <label>
+                                <input type="radio" name="can_custom_return_product_quantity"
+                                       value="0"
+                                       @if (get_ecommerce_setting('can_custom_return_product_quantity', 0) == 0) checked @endif>{{ trans('core/setting::setting.general.no') }}
+                            </label>
+                            <span class="help-ts">{{ trans('plugins/ecommerce::ecommerce.setting.activate_custom_return_product_quantity_description') }}</span>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="text-title-field"
+                                   for="order_placed_webhook_url">{{ trans('plugins/ecommerce::ecommerce.setting.returnable_days') }}
+                            </label>
+                            <input type="number" min="0" name="returnable_days" class="next-input"  value="{{ get_ecommerce_setting
+                            ('returnable_days') }}" placeholder="{{ trans('plugins/ecommerce::ecommerce.setting.returnable_days') }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flexbox-annotated-section">
+                <div class="flexbox-annotated-section-annotation">
+                    <div class="annotated-section-title pd-all-20">
+                        <h2>{{ trans('plugins/ecommerce::ecommerce.setting.digital_product') }}</h2>
+                    </div>
+                    <div class="annotated-section-description pd-all-20 p-none-t">
+                        <p class="color-note"></p>
+                    </div>
+                </div>
+                <div class="flexbox-annotated-section-content">
+                    <div class="wrapper-content pd-all-20">
+                        <div class="form-group mb-3">
+                            <label class="text-title-field"
+                                   for="is_enabled_support_digital_products">{{ trans('plugins/ecommerce::ecommerce.setting.digital_product_title') }}
+                            </label>
+                            <label class="me-2">
+                                <input type="radio" name="is_enabled_support_digital_products"
+                                       value="1"
+                                       @if (EcommerceHelper::isEnabledSupportDigitalProducts()) checked @endif>{{ trans('core/setting::setting.general.yes') }}
+                            </label>
+                            <label>
+                                <input type="radio" name="is_enabled_support_digital_products"
+                                       value="0"
+                                       @if (!EcommerceHelper::isEnabledSupportDigitalProducts()) checked @endif>{{ trans('core/setting::setting.general.no') }}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="flexbox-annotated-section" style="border: none">
                 <div class="flexbox-annotated-section-annotation">
                     &nbsp;

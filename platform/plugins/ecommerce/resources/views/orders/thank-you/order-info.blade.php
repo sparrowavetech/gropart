@@ -44,7 +44,7 @@
                     ]);
                 @endphp
 
-                @if ($product && $product->original_product->status == \Botble\Base\Enums\BaseStatusEnum::PUBLISHED)
+                @if ($product)
                     <div class="row cart-item">
                     <div class="col-lg-3 col-md-3">
                         <div class="checkout-product-img-wrapper">

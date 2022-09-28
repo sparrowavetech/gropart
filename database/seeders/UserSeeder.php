@@ -20,7 +20,7 @@ class UserSeeder extends BaseSeeder
 
         User::truncate();
 
-        $user = new User;
+        $user = new User();
         $user->first_name = 'System';
         $user->last_name = 'Admin';
         $user->email = 'admin@botble.com';

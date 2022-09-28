@@ -26,6 +26,15 @@
             'order' => 3,
         ],
         [
+            'key'    => 'marketplace.vendor.order-returns.index',
+            'icon'   => 'icon material-icons md-shopping_cart',
+            'name'   => __('Order Returns'),
+            'routes' => [
+                'marketplace.vendor.order-returns.edit',
+            ],
+            'order' => 3,
+        ],
+        [
             'key'    => 'marketplace.vendor.discounts.index',
             'icon'   => 'icon material-icons md-card_giftcard',
             'name'   => __('Coupons'),

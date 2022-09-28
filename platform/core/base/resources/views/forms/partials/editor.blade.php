@@ -21,7 +21,9 @@
                         @foreach (shortcode()->getAll() as $key => $item)
                             @if ($item['name'])
                                 <li>
-                                    <a href="{{ route('short-codes.ajax-get-admin-config', $key) }}" data-has-admin-config="{{ Arr::has($item, 'admin_config') }}" data-key="{{ $key }}" data-description="{{ $item['description'] }}">{{ $item['name'] }}</a>
+                                    <a href="{{ route('short-codes.ajax-get-admin-config', $key) }}" data-has-admin-config="{{ Arr::has($item, 'admin_config') }}"
+                                       data-key="{{ $key }}" data-description="{{ $item['description'] }}" data-preview-image="{{ Arr::get($item, 'previewImage') }}"
+                                    >{{ $item['name'] }}</a>
                                 </li>
                             @endif
                         @endforeach
@@ -35,7 +37,10 @@
                             <div class="modal-content">
                                 <div class="modal-header bg-primary">
                                     <h4 class="modal-title"><i class="til_img"></i><strong>{{ trans('core/base::forms.add_short_code') }}</strong></h4>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+                                    <div class="float-end">
+                                        <a class="shortcode-preview-image-link bold color-white" style="color: #fff" target="_blank" href="">{{ trans('core/base::forms.view_preview_image') }}</a>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+                                    </div>
                                 </div>
 
                                 <div class="modal-body with-padding">

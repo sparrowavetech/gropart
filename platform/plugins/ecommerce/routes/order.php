@@ -115,6 +115,16 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
                 'permission' => 'orders.index',
             ]);
         });
+
+        Route::group(['prefix' => 'order-returns', 'as' => 'order_returns.'], function () {
+            Route::resource('', 'OrderReturnController')->parameters(['' => 'order_returns'])->except(['create', 'store']);
+
+            Route::delete('items/destroy', [
+                'as'         => 'deletes',
+                'uses'       => 'OrderReturnController@deletes',
+                'permission' => 'order_returns.destroy',
+            ]);
+        });
     });
 });
 

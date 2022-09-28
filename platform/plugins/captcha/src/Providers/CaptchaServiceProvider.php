@@ -108,7 +108,7 @@ class CaptchaServiceProvider extends ServiceProvider
         }
 
         $validator->extend('math_captcha', function ($attribute, $value) {
-            return $this->app['math-captcha']->verify($value);
+            return $this->app['math-captcha']->verify((string)$value);
         });
     }
 

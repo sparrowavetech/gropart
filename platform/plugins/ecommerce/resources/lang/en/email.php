@@ -25,4 +25,8 @@ return [
     'link_go_to_our_shop'       => 'or <a href=":link">Go to our shop</a>',
     'order_number'              => 'Order number: <strong>:order_id</strong>',
     'order_information'         => 'Order information:',
+
+    'order_return_request_title'       => 'Order return request',
+    'order_return_request_description' => 'Send to customer when they return order',
+
 ];

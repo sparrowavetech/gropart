@@ -3,6 +3,7 @@
 namespace Botble\Location\Http\Controllers;
 
 use Assets;
+use BaseHelper;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Supports\Helper;
@@ -62,8 +63,7 @@ class BulkImportController extends BaseController
      */
     public function postImport(BulkImportRequest $request, BaseHttpResponse $response)
     {
-        @ini_set('max_execution_time', -1);
-        @ini_set('memory_limit', -1);
+        BaseHelper::maximumExecutionTimeAndMemoryLimit();
 
         $file = $request->file('file');
 

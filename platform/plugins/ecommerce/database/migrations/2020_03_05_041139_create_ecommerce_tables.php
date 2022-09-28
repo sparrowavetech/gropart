@@ -439,7 +439,6 @@ return new class () extends Migration {
     public function down()
     {
         Schema::disableForeignKeyConstraints();
-        Schema::dropIfExists('ec_product_tag_product');
         Schema::dropIfExists('ec_product_collection_products');
         Schema::dropIfExists('ec_product_category_product');
         Schema::dropIfExists('ec_prices');

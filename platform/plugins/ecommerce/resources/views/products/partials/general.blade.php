@@ -108,7 +108,10 @@
 
 <hr/>
 
-<div class="shipping-management">
+@if (!EcommerceHelper::isEnabledSupportDigitalProducts() ||
+    (!$product && !$originalProduct && request()->input('product_type') != Botble\Ecommerce\Enums\ProductTypeEnum::DIGITAL) ||
+    ($originalProduct && $originalProduct->isTypePhysical()) || ($product && $product->isTypePhysical()))
+<div class="shipping-management ">
     <label class="text-title-field">{{ trans('plugins/ecommerce::products.form.shipping.title') }}</label>
     <div class="row">
         <div class="col-md-3 col-md-6">
@@ -149,3 +152,67 @@
         </div>
     </div>
 </div>
+@endif
+
+@if (EcommerceHelper::isEnabledSupportDigitalProducts() &&
+    ((!$product && !$originalProduct && request()->input('product_type') == Botble\Ecommerce\Enums\ProductTypeEnum::DIGITAL) ||
+        ($originalProduct && $originalProduct->isTypeDigital()) ||
+        ($product && $product->isTypeDigital())))
+    <div class="mb-3 product-type-digital-management">
+        <label for="product_file">{{ trans('plugins/ecommerce::products.digital_attachments.title') }}</label>
+        <table class="table border">
+            <thead>
+                <tr>
+                    <th width="40"></th>
+                    <th>{{ trans('plugins/ecommerce::products.digital_attachments.file_name') }}</th>
+                    <th width="100">{{ trans('plugins/ecommerce::products.digital_attachments.file_size') }}</th>
+                    <th width="100">{{ trans('core/base::tables.created_at') }}</th>
+                    <th class="text-end" width="100"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if ($product)
+                    @foreach ($product->productFiles as $file)
+                        <tr>
+                            <td>
+                                {!! Form::checkbox('product_files[' . $file->id . ']', 0, true, ['class' => 'd-none']) !!}
+                                {!! Form::checkbox('product_files[' . $file->id . ']', $file->id, true, ['class' => 'digital-attachment-checkbox']) !!}
+                            </td>
+                            <td>
+                                <div>
+                                    <i class="fas fa-paperclip"></i>
+                                    <span>{{ $file->basename }}</span>
+                                </div>
+                            </td>
+                            <td>{{ BaseHelper::humanFileSize($file->file_size) }}</td>
+                            <td>{{ BaseHelper::formatDate($file->created_at) }}</td>
+                            <td class="text-end"></td>
+                        </tr>
+                    @endforeach
+                @endif
+            </tbody>
+        </table>
+        <div class="digital_attachments_input">
+            <input type="file" name="product_files_input[]" data-id="{{ Str::random(10) }}">
+        </div>
+        <div class="mt-2">
+            <a href="" class="digital_attachments_btn">{{ trans('plugins/ecommerce::products.digital_attachments.add') }}</a>
+        </div>
+    </div>
+    <script type="text/x-custom-template" id="digital_attachment_template">
+        <tr data-id="__id__">
+            <td>
+                <a class="text-danger remove-attachment-input"><i class="fas fa-minus-circle"></i></a>
+            </td>
+            <td>
+                <i class="fas fa-paperclip"></i>
+                <span>__file_name__</span>
+            </td>
+            <td>__file_size__</td>
+            <td>-</td>
+            <td class="text-end">
+                <span class="text-warning">{{ trans('plugins/ecommerce::products.digital_attachments.unsaved') }}</span>
+            </td>
+        </tr>
+    </script>
+@endif

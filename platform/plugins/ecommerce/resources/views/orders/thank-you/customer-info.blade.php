@@ -18,10 +18,12 @@
         <span class="d-inline-block">{{ __('Address') }}:</span>
         <span class="order-customer-info-meta">{{ $order->full_address }}</span>
     </p>
-    <p>
-        <span class="d-inline-block">{{ __('Shipping method') }}:</span>
-        <span class="order-customer-info-meta">{{ $order->shipping_method_name }} - {{ format_price($order->shipping_amount) }}</span>
-    </p>
+    @if (!empty($isShowShipping))
+        <p>
+            <span class="d-inline-block">{{ __('Shipping method') }}:</span>
+            <span class="order-customer-info-meta">{{ $order->shipping_method_name }} - {{ format_price($order->shipping_amount) }}</span>
+        </p>
+    @endif
     <p>
         <span class="d-inline-block">{{ __('Payment method') }}:</span>
         <span class="order-customer-info-meta">{{ $order->payment->payment_channel->label() }}</span>

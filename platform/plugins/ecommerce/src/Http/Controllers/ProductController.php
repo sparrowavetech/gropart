@@ -7,6 +7,7 @@ use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Forms\ProductForm;
 use Botble\Ecommerce\Http\Requests\ProductRequest;
 use Botble\Ecommerce\Repositories\Interfaces\GroupedProductInterface;
@@ -17,6 +18,7 @@ use Botble\Ecommerce\Services\Products\StoreProductService;
 use Botble\Ecommerce\Services\StoreProductTagService;
 use Botble\Ecommerce\Tables\ProductTable;
 use Botble\Ecommerce\Traits\ProductActionsTrait;
+use EcommerceHelper;
 use Exception;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\JsonResponse;
@@ -47,24 +49,20 @@ class ProductController extends BaseController
 
     /**
      * @param FormBuilder $formBuilder
+     * @param Request $request
      * @return string
      */
-    public function create(FormBuilder $formBuilder)
+    public function create(FormBuilder $formBuilder, Request $request)
     {
-        page_title()->setTitle(trans('plugins/ecommerce::products.create'));
-
-        Assets::addStyles(['datetimepicker'])
-            ->addScripts([
-                'moment',
-                'datetimepicker',
-                'jquery-ui',
-                'input-mask',
-                'blockui',
-            ])
-            ->addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
-            ->addScriptsDirectly([
-                'vendor/core/plugins/ecommerce/js/edit-product.js',
-            ]);
+        if (EcommerceHelper::isEnabledSupportDigitalProducts()) {
+            if ($request->input('product_type') == ProductTypeEnum::DIGITAL) {
+                page_title()->setTitle(trans('plugins/ecommerce::products.create_product_type.digital'));
+            } else {
+                page_title()->setTitle(trans('plugins/ecommerce::products.create_product_type.physical'));
+            }
+        } else {
+            page_title()->setTitle(trans('plugins/ecommerce::products.create'));
+        }
 
         return $formBuilder->create(ProductForm::class)->renderForm();
     }
@@ -84,19 +82,6 @@ class ProductController extends BaseController
         }
 
         page_title()->setTitle(trans('plugins/ecommerce::products.edit', ['name' => $product->name]));
-
-        Assets::addStyles(['datetimepicker'])
-            ->addScripts([
-                'moment',
-                'datetimepicker',
-                'jquery-ui',
-                'input-mask',
-                'blockui',
-            ])
-            ->addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
-            ->addScriptsDirectly([
-                'vendor/core/plugins/ecommerce/js/edit-product.js',
-            ]);
 
         event(new BeforeEditContentEvent($request, $product));
 
@@ -130,6 +115,9 @@ class ProductController extends BaseController
         $product = $this->productRepository->getModel();
 
         $product->status = $request->input('status');
+        if (EcommerceHelper::isEnabledSupportDigitalProducts() && $request->input('product_type')) {
+            $product->product_type = $request->input('product_type');
+        }
 
         $product = $service->execute($request, $product);
         $storeProductTagService->execute($request, $product);

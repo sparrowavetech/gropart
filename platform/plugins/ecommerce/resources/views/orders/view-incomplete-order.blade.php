@@ -1,32 +1,34 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
 @section('content')
     <div class="max-width-1036">
-        <div class="ui-layout__item mb20">
-            <div class="ui-banner ui-banner--status-info">
-                <div class="ui-banner__ribbon">
-                    <svg class="svg-next-icon svg-next-icon-size-20">
-                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#next-cart"></use>
-                    </svg>
-                </div>
-                <div class="ui-banner__content ws-nm">
-                    <h2 class="ui-banner__title">
-                        {{ trans('plugins/ecommerce::order.incomplete_order_description_1') }}
-                    </h2>
-                    <h2 class="ui-banner__title">
-                        {{ trans('plugins/ecommerce::order.incomplete_order_description_2') }}
-                    </h2>
-                    <div class="ws-nm">
-                        <input type="text" class="next-input" onclick="this.focus(); this.select();" value="{{ route('public.checkout.recover', $order->token) }}">
-                        <br>
-                        @if ($order->user->email ?: $order->address->email)
-                            <button class="btn btn-secondary btn-trigger-send-order-recover-modal" data-action="{{ route('orders.send-order-recover-email', $order->id) }}">{{ trans('plugins/ecommerce::order.send_an_email_to_recover_this_order') }}</button>
-                        @else
-                            <strong><i>{{ trans('plugins/ecommerce::order.cannot_send_order_recover_to_mail') }}</i></strong>
-                        @endif
+        @if ($order->token)
+            <div class="ui-layout__item mb20">
+                <div class="ui-banner ui-banner--status-info">
+                    <div class="ui-banner__ribbon">
+                        <svg class="svg-next-icon svg-next-icon-size-20">
+                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#next-cart"></use>
+                        </svg>
+                    </div>
+                    <div class="ui-banner__content ws-nm">
+                        <h2 class="ui-banner__title">
+                            {{ trans('plugins/ecommerce::order.incomplete_order_description_1') }}
+                        </h2>
+                        <h2 class="ui-banner__title">
+                            {{ trans('plugins/ecommerce::order.incomplete_order_description_2') }}
+                        </h2>
+                        <div class="ws-nm">
+                            <input type="text" class="next-input" onclick="this.focus(); this.select();" value="{{ route('public.checkout.recover', $order->token) }}">
+                            <br>
+                            @if ($order->user->email ?: $order->address->email)
+                                <button class="btn btn-secondary btn-trigger-send-order-recover-modal" data-action="{{ route('orders.send-order-recover-email', $order->id) }}">{{ trans('plugins/ecommerce::order.send_an_email_to_recover_this_order') }}</button>
+                            @else
+                                <strong><i>{{ trans('plugins/ecommerce::order.cannot_send_order_recover_to_mail') }}</i></strong>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        @endif
         <div class="flexbox-grid">
             <div class="flexbox-content">
                 <div class="wrapper-content mb20">
@@ -182,6 +184,37 @@
                             </li>
                         </ul>
                     </div>
+                    @if ($order->referral()->count())
+                        <div class="next-card-section">
+                            <div class="flexbox-grid-default flexbox-align-items-center mb-2">
+                                <div class="flexbox-auto-content-left">
+                                    <label class="title-text-second"><strong>{{ trans('plugins/ecommerce::order.referral') }}</strong></label>
+                                </div>
+                            </div>
+                            <div>
+                                <ul class="ws-nm text-infor-subdued">
+                                    @foreach (['ip',
+                                        'landing_domain',
+                                        'landing_page',
+                                        'landing_params',
+                                        'referral',
+                                        'gclid',
+                                        'fclid',
+                                        'utm_source',
+                                        'utm_campaign',
+                                        'utm_medium',
+                                        'utm_term',
+                                        'utm_content',
+                                        'referrer_url',
+                                        'referrer_domain'] as $field)
+                                        @if ($order->referral->{$field})
+                                            <li>{{ trans('plugins/ecommerce::order.referral_data.' . $field) }}: <strong style="word-break: break-all">{{ $order->referral->{$field} }}</strong></li>
+                                        @endif
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

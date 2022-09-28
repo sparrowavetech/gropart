@@ -172,7 +172,7 @@ class GetProductService
             $params,
         );
 
-        if ($queryVar['keyword']) {
+        if ($queryVar['keyword'] && is_string($queryVar['keyword'])) {
             $products->setCollection(BaseHelper::sortSearchResults($products->getCollection(), $queryVar['keyword'], 'name'));
         }
 

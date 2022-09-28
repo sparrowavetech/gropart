@@ -41,7 +41,7 @@ class City extends BaseModel
     /**
      * @return BelongsTo
      */
-    public function state()
+    public function state(): BelongsTo
     {
         return $this->belongsTo(State::class)->withDefault();
     }
@@ -49,7 +49,7 @@ class City extends BaseModel
     /**
      * @return BelongsTo
      */
-    public function country()
+    public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class)->withDefault();
     }

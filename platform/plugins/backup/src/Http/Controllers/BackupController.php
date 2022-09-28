@@ -12,6 +12,7 @@ use Botble\Base\Supports\Helper;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Throwable;
 
 class BackupController extends BaseController
 {
@@ -50,13 +51,12 @@ class BackupController extends BaseController
      * @param BackupRequest $request
      * @param BaseHttpResponse $response
      * @return BaseHttpResponse
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function store(BackupRequest $request, BaseHttpResponse $response)
     {
         try {
-            @ini_set('max_execution_time', -1);
-            @ini_set('memory_limit', -1);
+            BaseHelper::maximumExecutionTimeAndMemoryLimit();
 
             $data = $this->backup->createBackupFolder($request->input('name'), $request->input('description'));
             $this->backup->backupDb();

@@ -48,10 +48,10 @@ class UnverifiedVendorTable extends TableAbstract
             ->eloquent($this->query())
             ->editColumn('name', function ($item) {
                 if (!Auth::user()->hasPermission('marketplace.unverified-vendors.edit')) {
-                    return clean($item->name);
+                    return BaseHelper::clean($item->name);
                 }
 
-                return Html::link(route('marketplace.unverified-vendors.view', $item->id), clean($item->name));
+                return Html::link(route('marketplace.unverified-vendors.view', $item->id), BaseHelper::clean($item->name));
             })
             ->editColumn('avatar', function ($item) {
                 if ($this->request()->input('action') == 'excel' ||
@@ -59,7 +59,7 @@ class UnverifiedVendorTable extends TableAbstract
                     return $item->avatar_url;
                 }
 
-                return Html::tag('img', '', ['src' => $item->avatar_url, 'alt' => clean($item->name), 'width' => 50]);
+                return Html::tag('img', '', ['src' => $item->avatar_url, 'alt' => BaseHelper::clean($item->name), 'width' => 50]);
             })
             ->editColumn('checkbox', function ($item) {
                 return $this->getCheckbox($item->id);
@@ -68,10 +68,10 @@ class UnverifiedVendorTable extends TableAbstract
                 return BaseHelper::formatDate($item->created_at);
             })
             ->editColumn('store_name', function ($item) {
-                return clean($item->store->name);
+                return BaseHelper::clean($item->store->name);
             })
             ->editColumn('store_phone', function ($item) {
-                return clean($item->store->phone);
+                return BaseHelper::clean($item->store->phone);
             })
             ->addColumn('operations', function ($item) {
                 return Html::link(

@@ -3,15 +3,17 @@
     'value' => format_price($order->sub_total)
 ])
 
-@include('plugins/ecommerce::orders.thank-you.total-row', [
-        'label' =>  __('Shipping fee') . ($order->is_free_shipping ? ' (' . __('Using coupon code') . '<strong>' . $order->coupon_code . '</strong>)' : ''),
-        'value' => format_price($order->shipping_amount)
-    ])
+@if ($order->shipping_method->getValue())
+    @include('plugins/ecommerce::orders.thank-you.total-row', [
+            'label' =>  __('Shipping fee') . ($order->is_free_shipping ? ' <small>(' . __('Using coupon code') . ': <strong>' . $order->coupon_code . '</strong>)</small>' : ''),
+            'value' => $order->shipping_method_name . ' - ' . format_price($order->shipping_amount)
+        ])
+@endif
 
 @if ($order->discount_amount !== null)
     @include('plugins/ecommerce::orders.thank-you.total-row', [
         'label' => __('Discount'),
-        'value' => format_price($order->discount_amount)
+        'value' => format_price($order->discount_amount) . ($order->coupon_code ? ' <small>(' . __('Using coupon code') . ': <strong>' . $order->coupon_code . '</strong>)</small>' : ''),
     ])
 @endif
 
