@@ -36,6 +36,7 @@ use Botble\Ecommerce\Tables\OrderTable;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Repositories\Interfaces\PaymentInterface;
+use Carbon\Carbon;
 use EcommerceHelper;
 use EmailHandler;
 use Exception;
@@ -47,6 +48,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use InvoiceHelper;
 use MarketplaceHelper;
 use OrderHelper;
 use RvMedia;
@@ -235,7 +237,7 @@ class OrderController extends BaseController
                 'action'      => 'create_order',
                 'description' => trans(
                     'plugins/ecommerce::order.new_order',
-                    ['order_id' => get_order_code($order->id)]
+                    ['order_id' => $order->code]
                 ),
                 'order_id'    => $order->id,
             ]);
@@ -371,7 +373,7 @@ class OrderController extends BaseController
 
         $order = $this->orderRepository->findOrFail($id, ['products', 'user']);
 
-        page_title()->setTitle(trans('plugins/ecommerce::order.edit_order', ['code' => get_order_code($id)]));
+        page_title()->setTitle(trans('plugins/ecommerce::order.edit_order', ['code' => $order->code]));
 
         $weight = $order->products_weight;
 
@@ -458,10 +460,10 @@ class OrderController extends BaseController
         }
 
         if ($request->input('type') == 'print') {
-            return OrderHelper::streamInvoice($order);
+            return InvoiceHelper::streamInvoice($order->invoice);
         }
 
-        return OrderHelper::downloadInvoice($order);
+        return InvoiceHelper::downloadInvoice($order->invoice);
     }
 
     /**
@@ -843,7 +845,7 @@ class OrderController extends BaseController
 
             $refundData['_data_request'] = $request->except(['_token']) + [
                     'currency'   => $payment->currency,
-                    'created_at' => now(),
+                    'created_at' => Carbon::now(),
                 ];
             $metadata = $payment->metadata;
             $refunds = Arr::get($metadata, 'refunds', []);
@@ -1011,8 +1013,9 @@ class OrderController extends BaseController
             ->get();
 
         foreach ($products as &$availableProduct) {
+            $availableProduct->product_name = $availableProduct->original_product->name;
             $availableProduct->image_url = RvMedia::getImageUrl(
-                Arr::first($availableProduct->images) ?? null,
+                Arr::first($availableProduct->images ?: $availableProduct->original_product->images) ?? null,
                 'thumb',
                 false,
                 RvMedia::getDefaultImage()
@@ -1023,7 +1026,7 @@ class OrderController extends BaseController
             $availableProduct->product_id = $availableProduct->id;
 
             if (is_plugin_active('marketplace') && $availableProduct->original_product->store_id && $availableProduct->original_product->store->name) {
-                $availableProduct->product_name = $availableProduct->name . ' (' . $availableProduct->original_product->store->name . ')';
+                $availableProduct->product_name = $availableProduct->product_name . ' (' . $availableProduct->original_product->store->name . ')';
             }
 
             $orderProduct = $order->products->where('product_id', $availableProduct->id)->first();

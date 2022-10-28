@@ -3,6 +3,7 @@
 namespace Botble\Captcha\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Throwable;
 
 class HookServiceProvider extends ServiceProvider
 {
@@ -12,11 +13,10 @@ class HookServiceProvider extends ServiceProvider
     }
 
     /**
-     * @param null $data
+     * @param string|null $data
      * @return string
-     * @throws \Throwable
      */
-    public function addSettings($data = null)
+    public function addSettings(?string $data = null): string
     {
         return $data . view('plugins/captcha::setting')->render();
     }

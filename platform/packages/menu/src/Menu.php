@@ -109,6 +109,11 @@ class Menu
         try {
             foreach ($menuNodes as &$row) {
                 $child = Arr::get($row, 'children', []);
+
+                foreach ($child as $index => $item) {
+                    $child[$index]['menuItem']['position'] = $index;
+                }
+
                 $hasChild = !empty($child);
 
                 $row['menuItem'] = $this->saveMenuNode($row['menuItem'], $menuId, $parentId, $hasChild);

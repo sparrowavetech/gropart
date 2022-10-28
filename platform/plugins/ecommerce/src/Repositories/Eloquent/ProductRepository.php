@@ -3,9 +3,13 @@
 namespace Botble\Ecommerce\Repositories\Eloquent;
 
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Ecommerce\Models\Option;
+use Botble\Ecommerce\Models\OptionValue;
+use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductAttribute;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
+use Carbon\Carbon;
 use EcommerceHelper;
 use Eloquent;
 use Exception;
@@ -185,8 +189,8 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
                                     ->where('sale_type', 1)
                                     ->where('start_date', '<>', null)
                                     ->where('end_date', '<>', null)
-                                    ->where('start_date', '<=', now())
-                                    ->where('end_date', '>=', today());
+                                    ->where('start_date', '<=', Carbon::now())
+                                    ->where('end_date', '>=', Carbon::today());
                             })
                             ->orWhere(function ($sub) {
                                 /**
@@ -195,7 +199,7 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
                                 return $sub
                                     ->where('sale_type', 1)
                                     ->where('start_date', '<>', null)
-                                    ->where('start_date', '<=', now())
+                                    ->where('start_date', '<=', Carbon::now())
                                     ->whereNull('end_date');
                             });
                     });
@@ -433,7 +437,7 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
 
         $this->model = $this->originalModel;
 
-        $now = now();
+        $now = Carbon::now();
 
         $this->model = $this->model
             ->distinct()
@@ -681,7 +685,7 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
         $filters['attributes'] = array_filter($filters['attributes']);
         if ($filters['attributes']) {
             foreach ($filters['attributes'] as &$attributeId) {
-                $attributeId = (int) $attributeId;
+                $attributeId = (int)$attributeId;
             }
 
             $this->model = $this->model
@@ -733,11 +737,11 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
         $this->model = $this->originalModel;
 
         $params = array_merge([
-            'condition'  => [
+            'condition' => [
                 'ec_products.status'       => BaseStatusEnum::PUBLISHED,
                 'ec_products.is_variation' => 0,
             ],
-            'paginate'   => [
+            'paginate'  => [
                 'per_page'      => null,
                 'current_paged' => 1,
             ],
@@ -774,7 +778,7 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
             ],
             'with'      => ['slugable'],
             'order_by'  => ['ec_wish_lists.updated_at' => 'desc'],
-            'select'    => ['ec_products.*']
+            'select'    => ['ec_products.*'],
         ], $params);
 
         $this->model = $this->model
@@ -802,7 +806,7 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
             ],
             'with'      => ['slugable'],
             'order_by'  => ['ec_customer_recently_viewed_products.id' => 'desc'],
-            'select'    => ['ec_products.*']
+            'select'    => ['ec_products.*'],
         ], $params);
 
         $this->model = $this->model
@@ -810,5 +814,72 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
             ->where('ec_customer_recently_viewed_products.customer_id', $customerId);
 
         return $this->advancedGet($params);
+    }
+
+    /**
+     * @param array $options
+     * @param Product $product
+     * @throws Exception
+     */
+    public function saveProductOptions(array $options, Product $product)
+    {
+        try {
+            $existsOptionIds = [];
+            foreach ($options as $opt) {
+                if (isset($opt['id']) && intval($opt['id']) > 0) {
+                    $option = Option::find($opt['id']);
+
+                    if (!$option) {
+                        $option = new Option();
+                    }
+
+                    $existsOptionIds[] = $opt['id'];
+                } else {
+                    $option = new Option();
+                }
+
+                $option->product_id = $product->id;
+                $opt['required'] = isset($opt['required']) && $opt['required'] === 'on';
+                $option->fill($opt);
+                $option->product_id = $product->id;
+                $option->save();
+                $option->values()->delete();
+                if (!empty($opt['values'])) {
+                    $optionValues = $this->formatOptionValue($opt['values']);
+                    $option->values()->saveMany($optionValues);
+                }
+                $existsOptionIds[] = $option->id;
+            }
+
+            if (!empty($existsOptionIds)) {
+                Option::whereNotIn('id', $existsOptionIds)->delete();
+                OptionValue::whereNotIn('option_id', $existsOptionIds)->delete();
+            } else {
+                foreach ($product->options()->get() as $option) {
+                    $option->delete();
+                }
+            }
+        } catch (Exception $exception) {
+            throw new Exception($exception->getMessage());
+        }
+    }
+
+    /**
+     * @param array $options
+     * @return array
+     */
+    protected function formatOptionValue(array $options): array
+    {
+        $values = [];
+        foreach ($options as $value) {
+            $optionValue = new OptionValue();
+            if (!isset($value['option_value'])) {
+                $value['option_value'] = '';
+            }
+            $optionValue->fill($value);
+            $values[] = $optionValue;
+        }
+
+        return $values;
     }
 }

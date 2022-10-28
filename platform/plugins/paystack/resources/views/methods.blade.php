@@ -4,10 +4,10 @@
                value="{{ PAYSTACK_PAYMENT_METHOD_NAME }}" data-bs-toggle="collapse" data-bs-target=".payment_{{ PAYSTACK_PAYMENT_METHOD_NAME }}_wrap"
                data-toggle="collapse" data-target=".payment_{{ PAYSTACK_PAYMENT_METHOD_NAME }}_wrap"
                data-parent=".list_payment_method"
-               @if ((session('selected_payment_method') ?: setting('default_payment_method')) == PAYSTACK_PAYMENT_METHOD_NAME) checked @endif
+               @if ($selecting == PAYSTACK_PAYMENT_METHOD_NAME) checked @endif
         >
         <label for="payment_{{ PAYSTACK_PAYMENT_METHOD_NAME }}">{{ get_payment_setting('name', PAYSTACK_PAYMENT_METHOD_NAME) }}</label>
-        <div class="payment_{{ PAYSTACK_PAYMENT_METHOD_NAME }}_wrap payment_collapse_wrap collapse @if ((session('selected_payment_method') ?: setting('default_payment_method')) == PAYSTACK_PAYMENT_METHOD_NAME) show @endif">
+        <div class="payment_{{ PAYSTACK_PAYMENT_METHOD_NAME }}_wrap payment_collapse_wrap collapse @if ($selecting == PAYSTACK_PAYMENT_METHOD_NAME) show @endif">
             <p>{!! BaseHelper::clean(get_payment_setting('description', PAYSTACK_PAYMENT_METHOD_NAME, __('Payment with Paystack'))) !!}</p>
 
             @php $supportedCurrencies = (new \Botble\Paystack\Services\Gateways\PaystackPaymentService)->supportedCurrencyCodes(); @endphp

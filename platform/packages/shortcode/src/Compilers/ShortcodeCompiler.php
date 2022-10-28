@@ -369,11 +369,11 @@ class ShortcodeCompiler
     /**
      * Remove shortcode tag
      *
-     * @param string $match
+     * @param string|array $match
      * @return string Content without shortcode tag.
      * @since 2.1
      */
-    protected function stripTag(string $match): ?string
+    protected function stripTag($match): ?string
     {
         if ($match[1] == '[' && $match[6] == ']') {
             return substr($match[0], 1, -1);

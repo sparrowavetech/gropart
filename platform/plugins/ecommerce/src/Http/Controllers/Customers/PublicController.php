@@ -21,14 +21,16 @@ use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Media\Services\ThumbnailService;
 use Botble\Media\Supports\Zipper;
 use Botble\Payment\Enums\PaymentStatusEnum;
+use Carbon\Carbon;
 use EcommerceHelper;
 use Exception;
-use File;
+use Illuminate\Support\Facades\File;
 use Hash;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;
+use InvoiceHelper;
 use OrderHelper;
 use OrderReturnHelper;
 use Response;
@@ -260,8 +262,6 @@ class PublicController extends Controller
      */
     public function getViewOrder($id)
     {
-        SeoHelper::setTitle(__('Order detail :id', ['id' => get_order_code($id)]));
-
         $order = $this->orderRepository->getFirstBy(
             [
                 'id'      => $id,
@@ -275,9 +275,11 @@ class PublicController extends Controller
             abort(404);
         }
 
+        SeoHelper::setTitle(__('Order detail :id', ['id' => $order->code]));
+
         Theme::breadcrumb()->add(__('Home'), route('public.index'))
             ->add(
-                __('Order detail :id', ['id' => get_order_code($id)]),
+                __('Order detail :id', ['id' => $order->code]),
                 route('customer.orders.view', $id)
             );
 
@@ -498,10 +500,10 @@ class PublicController extends Controller
         }
 
         if ($request->input('type') == 'print') {
-            return OrderHelper::streamInvoice($order);
+            return InvoiceHelper::streamInvoice($order->invoice);
         }
 
-        return OrderHelper::downloadInvoice($order);
+        return InvoiceHelper::downloadInvoice($order->invoice);
     }
 
     /**
@@ -554,8 +556,6 @@ class PublicController extends Controller
      */
     public function getReturnOrder($orderId)
     {
-        SeoHelper::setTitle(__('Request Return Product(s) In Order :id', ['id' => get_order_code($orderId)]));
-
         $order = $this->orderRepository->getFirstBy(
             [
                 'id'      => $orderId,
@@ -570,9 +570,11 @@ class PublicController extends Controller
             abort(404);
         }
 
+        SeoHelper::setTitle(__('Request Return Product(s) In Order :id', ['id' => $order->code]));
+
         Theme::breadcrumb()->add(__('Home'), route('public.index'))
             ->add(
-                __('Request Return Product(s) In Order :id', ['id' => get_order_code($orderId)]),
+                __('Request Return Product(s) In Order :id', ['id' => $order->code]),
                 route('customer.order_returns.request_view', $orderId)
             );
 
@@ -762,7 +764,7 @@ class PublicController extends Controller
             abort(404);
         }
 
-        $zipName = 'digital-product-' . Str::slug($orderProduct->product_name) . Str::random(5) . '-' . now()->format('Y-m-d-h-i-s') . '.zip';
+        $zipName = 'digital-product-' . Str::slug($orderProduct->product_name) . Str::random(5) . '-' . Carbon::now()->format('Y-m-d-h-i-s') . '.zip';
         $fileName = RvMedia::getRealPath($zipName);
         $zip = new Zipper();
         $zip->make($fileName);

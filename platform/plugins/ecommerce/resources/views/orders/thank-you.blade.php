@@ -1,6 +1,6 @@
 @extends('plugins/ecommerce::orders.master')
 @section('title')
-    {{ __('Order successfully. Order number :id', ['id' => get_order_code($order->id)]) }}
+    {{ __('Order successfully. Order number :id', ['id' => $order->code]) }}
 @stop
 @section('content')
 

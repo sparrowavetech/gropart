@@ -269,7 +269,7 @@
 
         window.trans = {
             "View All": "{{ __('View All') }}",
-            "No reviews!": "{{ __('No reviews!') }}",
+            "No reviews!": "{{ __('No reviews!') }}"
         };
 
         window.siteConfig = {
@@ -293,7 +293,7 @@
 
      @if (session()->has('success_msg') || session()->has('error_msg') || (isset($errors) && $errors->count() > 0) || isset($error_msg))
          <script type="text/javascript">
-             $(document).ready(function () {
+             window.onload = function () {
                  @if (session()->has('success_msg'))
                     MartApp.showSuccess('{{ session('success_msg') }}');
                  @endif
@@ -311,7 +311,7 @@
                         MartApp.showError('{!! BaseHelper::clean($error) !!}');
                      @endforeach
                  @endif
-             });
+             };
          </script>
      @endif
     </body>

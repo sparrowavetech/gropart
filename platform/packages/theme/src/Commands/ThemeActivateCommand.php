@@ -46,8 +46,7 @@ class ThemeActivateCommand extends Command
     /**
      * Execute the console command.
      *
-     * @return bool
-     * @throws FileNotFoundException
+     * @return int
      */
     public function handle()
     {

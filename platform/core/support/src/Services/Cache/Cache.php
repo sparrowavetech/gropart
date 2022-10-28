@@ -3,10 +3,10 @@
 namespace Botble\Support\Services\Cache;
 
 use BaseHelper;
-use Illuminate\Support\Facades\File;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Cache\Repository;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\File;
 use Psr\SimpleCache\InvalidArgumentException;
 
 class Cache implements CacheInterface
@@ -37,7 +37,7 @@ class Cache implements CacheInterface
         $this->cache = $cache;
         $this->cacheGroup = $cacheGroup;
         $this->config = !empty($config) ? $config : [
-            'cache_time'  => setting('cache_time', 10),
+            'cache_time'  => setting('cache_time', 10) * 60,
             'stored_keys' => storage_path('cache_keys.json'),
         ];
     }
@@ -48,7 +48,7 @@ class Cache implements CacheInterface
      * @param string $key Cache item key
      * @return mixed
      */
-    public function get($key)
+    public function get(string $key)
     {
         if (!file_exists($this->config['stored_keys'])) {
             return null;
@@ -74,7 +74,7 @@ class Cache implements CacheInterface
      * @param boolean $minutes The number of minutes to store the item
      * @return bool
      */
-    public function put($key, $value, $minutes = false): bool
+    public function put(string $key, $value, $minutes = false): bool
     {
         if (!$minutes) {
             $minutes = $this->config['cache_time'];
@@ -121,7 +121,7 @@ class Cache implements CacheInterface
      *
      * @throws InvalidArgumentException
      */
-    public function has($key): bool
+    public function has(string $key): bool
     {
         if (!file_exists($this->config['stored_keys'])) {
             return false;
@@ -137,21 +137,19 @@ class Cache implements CacheInterface
      *
      * @return bool
      */
-    public function flush()
+    public function flush(): bool
     {
         $cacheKeys = [];
         if (file_exists($this->config['stored_keys'])) {
             $cacheKeys = BaseHelper::getFileData($this->config['stored_keys']);
         }
 
-        if (!empty($cacheKeys)) {
-            $caches = Arr::get($cacheKeys, $this->cacheGroup);
-            if ($caches) {
-                foreach ($caches as $cache) {
-                    $this->cache->forget($cache);
-                }
-                unset($cacheKeys[$this->cacheGroup]);
+        if (!empty($cacheKeys) && $caches = Arr::get($cacheKeys, $this->cacheGroup)) {
+            foreach ($caches as $cache) {
+                $this->cache->forget($cache);
             }
+
+            unset($cacheKeys[$this->cacheGroup]);
         }
 
         if (!empty($cacheKeys)) {

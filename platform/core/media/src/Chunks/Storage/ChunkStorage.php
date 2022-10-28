@@ -141,7 +141,7 @@ class ChunkStorage
     }
 
     /**
-     * Returns an array of files in the chunks directory.
+     * Returns an array of files in the chunk's directory.
      *
      * @param Closure|null $rejectClosure
      * @return Collection
@@ -168,7 +168,7 @@ class ChunkStorage
     }
 
     /**
-     * The current chunks directory.
+     * The current chunk's directory.
      *
      * @return string
      */

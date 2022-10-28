@@ -45,6 +45,84 @@ class MainCheckout {
         toastr[messageType](message, messageHeader);
     }
 
+    static handleError(data, $container) {
+        if (typeof (data.errors) !== 'undefined' && !_.isArray(data.errors)) {
+            MainCheckout.handleValidationError(data.errors, $container);
+        } else {
+            if (typeof (data.responseJSON) !== 'undefined') {
+                if (typeof (data.responseJSON.errors) !== 'undefined') {
+                    if (data.status === 422) {
+                        MainCheckout.handleValidationError(data.responseJSON.errors, $container);
+                    }
+                } else if (typeof (data.responseJSON.message) !== 'undefined') {
+                    MainCheckout.showError(data.responseJSON.message);
+                } else {
+                    $.each(data.responseJSON, (index, el) => {
+                        $.each(el, (key, item) => {
+                            MainCheckout.showError(item);
+                        });
+                    });
+                }
+            } else {
+                MainCheckout.showError(data.statusText);
+            }
+        }
+    }
+
+    static dotArrayToJs(str){
+        let splittedStr = str.split('.');
+      
+        return splittedStr.length == 1 ? str : (splittedStr[0] + '[' + splittedStr.splice(1).join('][') + ']');
+    }
+
+    static clearInValidInputs($container){
+        if (!$container) {
+            $container = $(document);
+        }
+        $container.find('.field-is-invalid').find('.invalid-feedback').remove();
+        $container.find('.field-is-invalid').find('.is-invalid').removeClass('is-invalid');
+        $container.find('.field-is-invalid').removeClass('field-is-invalid is-invalid');
+    }
+
+    static handleValidationError(errors, $container) {
+        let message = '';
+        $.each(errors, (index, item) => {
+            message += item + '<br />';
+
+            // can show message to input in here
+            return;
+            let inputName = MainCheckout.dotArrayToJs(index);
+            let $input = $('*[name="' + inputName + '"]');
+            if ($container) {
+                $input = $container.find('[name="' + inputName + '"]')
+            }
+            if ($input.closest('.form-group').length) {
+                $input.closest('.form-group').addClass('field-is-invalid');
+            } else {
+                $input.addClass('field-is-invalid');
+            }
+
+            if ($input.hasClass('form-control')) {
+                $input.addClass('is-invalid');
+                if ($input.is('select') && $input.closest('.select--arrow').length) {
+                    $input.closest('.select--arrow').addClass('is-invalid');
+                    $input.closest('.select--arrow').after('<div class="invalid-feedback">' + item + '</div>');
+                } else {
+                    $input.after('<div class="invalid-feedback">' + item + '</div>');
+                }
+            }
+        });
+        MainCheckout.showError(message);
+    }
+
+    static showError(message, messageHeader = '') {
+        this.showNotice('error', message, messageHeader);
+    }
+
+    static showSuccess(message, messageHeader = '') {
+        this.showNotice('success', message, messageHeader);
+    }
+
     init() {
         let shippingForm = '#main-checkout-product-info';
         let customerShippingAddressForm = '.customer-address-payment-form';
@@ -115,20 +193,26 @@ class MainCheckout {
         let loadShippingFeeAtTheFirstTime = () => {
             let shippingMethod = $(document).find('input[name=shipping_method]:checked').first();
             if (!shippingMethod.length) {
-                shippingMethod = $(document).find('input[name=shipping_method]').first()
+                shippingMethod = $(document).find('input[name=shipping_method]').first();
+                shippingMethod.prop('checked', 'checked');
             }
 
             if (shippingMethod.length) {
-                shippingMethod.trigger('click');
-
                 disablePaymentMethodsForm();
 
                 $('.mobile-total').text('...');
 
-                reloadAddressForm(window.location.href
-                    + '?shipping_method=' + shippingMethod.val()
-                    + '&shipping_option=' + shippingMethod.data('option')
-                    + ' ' + shippingForm + ' > *');
+                let params = {
+                    shipping_method: shippingMethod.val(),
+                    shipping_option: shippingMethod.data('option'),
+                    payment_method: '',
+                }
+                let paymentMethod = $(document).find('input[name=payment_method]:checked').first();
+                if (paymentMethod) {
+                    params.payment_method = paymentMethod.val();
+                }
+
+                reloadAddressForm(window.location.href + '?' + $.param(params) + ' ' + shippingForm + ' > *');
             }
         }
 
@@ -143,8 +227,9 @@ class MainCheckout {
 
             let shippingMethods = $(shippingForm).find('input.shipping_method_input');
             let methods = {
-                'shipping_method': {},
-                'shipping_option': {}
+                shipping_method: {},
+                shipping_option: {},
+                payment_method: '',
             };
 
             if (shippingMethods.length) {
@@ -176,6 +261,10 @@ class MainCheckout {
                 }
             }
 
+            let paymentMethod = $(document).find('input[name=payment_method]:checked').first();
+            if (paymentMethod.length) {
+                methods.payment_method = paymentMethod.val();
+            }
             disablePaymentMethodsForm();
 
             reloadAddressForm(window.location.href + '?' + $.param(methods) + ' ' + shippingForm + ' > *');
@@ -196,10 +285,32 @@ class MainCheckout {
 
             $('.mobile-total').text('...');
 
-            reloadAddressForm(window.location.href
-                + '?shipping_method=' + $this.val()
-                + '&shipping_option=' + $this.data('option')
-                + ' ' + shippingForm + ' > *');
+            let params = {
+                shipping_method: $this.val(),
+                shipping_option: $this.data('option'),
+                payment_method: '',
+            }
+
+            let paymentMethod = $(document).find('input[name=payment_method]:checked').first();
+            if (paymentMethod.length) {
+                params.payment_method = paymentMethod.val();
+            }
+
+            reloadAddressForm(window.location.href + '?' + $.param(params) + ' ' + shippingForm + ' > *');
+        });
+
+        $(document).on('change', 'input[name=payment_method]', event => {
+            const $this = $(event.currentTarget);
+
+            disablePaymentMethodsForm();
+
+            $('.mobile-total').text('...');
+
+            let params = {
+                payment_method: $this.val(),
+            }
+
+            reloadAddressForm(window.location.href + '?' + $.param(params) + ' ' + shippingForm + ' > *');
         });
 
         let validatedFormFields = () => {
@@ -221,12 +332,13 @@ class MainCheckout {
         $(document).on('change', customerShippingAddressForm + ' .address-control-item', event => {
             let _self = $(event.currentTarget);
             _self.closest('.form-group').find('.text-danger').remove();
+            let $form = _self.closest('form');
             if (validatedFormFields()) {
                 $.ajax({
                     type: 'POST',
                     cache: false,
                     url: $('#save-shipping-information-url').val(),
-                    data: new FormData(_self.closest('form')[0]),
+                    data: new FormData($form[0]),
                     contentType: false,
                     processData: false,
                     success: res => {
@@ -250,8 +362,9 @@ class MainCheckout {
                         }
                     },
                     error: res => {
+                        MainCheckout.handleError(res, $form);
                         console.log(res);
-                    }
+                    },
                 });
             }
         });

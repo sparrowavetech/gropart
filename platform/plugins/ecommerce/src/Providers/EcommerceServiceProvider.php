@@ -8,6 +8,7 @@ use Botble\Ecommerce\Commands\SendAbandonedCartsEmailCommand;
 use Botble\Ecommerce\Facades\CartFacade;
 use Botble\Ecommerce\Facades\CurrencyFacade;
 use Botble\Ecommerce\Facades\EcommerceHelperFacade;
+use Botble\Ecommerce\Facades\InvoiceHelperFacade;
 use Botble\Ecommerce\Facades\OrderHelperFacade;
 use Botble\Ecommerce\Facades\OrderReturnHelperFacade;
 use Botble\Ecommerce\Facades\ProductCategoryHelperFacade;
@@ -20,7 +21,9 @@ use Botble\Ecommerce\Models\Currency;
 use Botble\Ecommerce\Models\Customer;
 use Botble\Ecommerce\Models\Discount;
 use Botble\Ecommerce\Models\FlashSale;
+use Botble\Ecommerce\Models\GlobalOption;
 use Botble\Ecommerce\Models\GroupedProduct;
+use Botble\Ecommerce\Models\Invoice;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\OrderAddress;
 use Botble\Ecommerce\Models\OrderHistory;
@@ -51,7 +54,9 @@ use Botble\Ecommerce\Repositories\Caches\CurrencyCacheDecorator;
 use Botble\Ecommerce\Repositories\Caches\CustomerCacheDecorator;
 use Botble\Ecommerce\Repositories\Caches\DiscountCacheDecorator;
 use Botble\Ecommerce\Repositories\Caches\FlashSaleCacheDecorator;
+use Botble\Ecommerce\Repositories\Caches\GlobalOptionCacheDecorator;
 use Botble\Ecommerce\Repositories\Caches\GroupedProductCacheDecorator;
+use Botble\Ecommerce\Repositories\Caches\InvoiceCacheDecorator;
 use Botble\Ecommerce\Repositories\Caches\OrderAddressCacheDecorator;
 use Botble\Ecommerce\Repositories\Caches\OrderCacheDecorator;
 use Botble\Ecommerce\Repositories\Caches\OrderHistoryCacheDecorator;
@@ -82,7 +87,9 @@ use Botble\Ecommerce\Repositories\Eloquent\CurrencyRepository;
 use Botble\Ecommerce\Repositories\Eloquent\CustomerRepository;
 use Botble\Ecommerce\Repositories\Eloquent\DiscountRepository;
 use Botble\Ecommerce\Repositories\Eloquent\FlashSaleRepository;
+use Botble\Ecommerce\Repositories\Eloquent\GlobalOptionRepository;
 use Botble\Ecommerce\Repositories\Eloquent\GroupedProductRepository;
+use Botble\Ecommerce\Repositories\Eloquent\InvoiceRepository;
 use Botble\Ecommerce\Repositories\Eloquent\OrderAddressRepository;
 use Botble\Ecommerce\Repositories\Eloquent\OrderHistoryRepository;
 use Botble\Ecommerce\Repositories\Eloquent\OrderProductRepository;
@@ -113,7 +120,9 @@ use Botble\Ecommerce\Repositories\Interfaces\CurrencyInterface;
 use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
 use Botble\Ecommerce\Repositories\Interfaces\DiscountInterface;
 use Botble\Ecommerce\Repositories\Interfaces\FlashSaleInterface;
+use Botble\Ecommerce\Repositories\Interfaces\GlobalOptionInterface;
 use Botble\Ecommerce\Repositories\Interfaces\GroupedProductInterface;
+use Botble\Ecommerce\Repositories\Interfaces\InvoiceInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderAddressInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderHistoryInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
@@ -210,6 +219,12 @@ class EcommerceServiceProvider extends ServiceProvider
         $this->app->bind(ProductTagInterface::class, function () {
             return new ProductTagCacheDecorator(
                 new ProductTagRepository(new ProductTag())
+            );
+        });
+
+        $this->app->bind(GlobalOptionInterface::class, function () {
+            return new GlobalOptionCacheDecorator(
+                new GlobalOptionRepository(new GlobalOption())
             );
         });
 
@@ -384,6 +399,10 @@ class EcommerceServiceProvider extends ServiceProvider
             );
         });
 
+        $this->app->bind(InvoiceInterface::class, function () {
+            return new InvoiceCacheDecorator(new InvoiceRepository(new Invoice()));
+        });
+
         $this->app->bind(TrackingFilterInterface::class, function ($app) {
             return $app->make(TrackingFilter::class);
         });
@@ -409,6 +428,7 @@ class EcommerceServiceProvider extends ServiceProvider
         $loader->alias('EcommerceHelper', EcommerceHelperFacade::class);
         $loader->alias('ProductCategoryHelper', ProductCategoryHelperFacade::class);
         $loader->alias('CurrencyHelper', CurrencyFacade::class);
+        $loader->alias('InvoiceHelper', InvoiceHelperFacade::class);
     }
 
     public function boot()
@@ -438,6 +458,7 @@ class EcommerceServiceProvider extends ServiceProvider
                 'shipment',
                 'wishlist',
                 'compare',
+                'invoice',
             ])
             ->loadAndPublishConfigurations([
                 'general',
@@ -610,6 +631,15 @@ class EcommerceServiceProvider extends ServiceProvider
                     'permissions' => ['orders.index'],
                 ])
                 ->registerItem([
+                    'id'          => 'cms-plugins-ecommerce-invoice',
+                    'priority'    => 2,
+                    'parent_id'   => 'cms-plugins-ecommerce',
+                    'name'        => 'plugins/ecommerce::invoice.name',
+                    'icon'        => 'fas fa-book',
+                    'url'         => route('ecommerce.invoice.index'),
+                    'permissions' => ['ecommerce.invoice.index'],
+                ])
+                ->registerItem([
                     'id'          => 'cms-plugins-ecommerce-incomplete-order',
                     'priority'    => 2,
                     'parent_id'   => 'cms-plugins-ecommerce',
@@ -662,6 +692,15 @@ class EcommerceServiceProvider extends ServiceProvider
                     'icon'        => 'fas fa-glass-martini',
                     'url'         => route('product-attribute-sets.index'),
                     'permissions' => ['product-attribute-sets.index'],
+                ])
+                ->registerItem([
+                    'id'          => 'cms-plugins-ecommerce-global-options',
+                    'priority'    => 3,
+                    'parent_id'   => 'cms-plugins-ecommerce',
+                    'name'        => 'plugins/ecommerce::product-option.name',
+                    'icon'        => 'fa fa-database',
+                    'url'         => route('global-option.index'),
+                    'permissions' => ['global-option.index'],
                 ])
                 ->registerItem([
                     'id'          => 'cms-plugins-brands',

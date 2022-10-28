@@ -52,10 +52,10 @@ class ShipmentTable extends TableAbstract
             })
             ->editColumn('order_id', function ($item) {
                 if (!Auth::user()->hasPermission('orders.edit')) {
-                    return get_order_code($item->order_id);
+                    return $item->order->code;
                 }
 
-                return Html::link(route('orders.edit', $item->id), get_order_code($item->order_id) . ' <i class="fa fa-external-link-alt"></i>', ['target' => '_blank'], null, false);
+                return Html::link(route('orders.edit', $item->id), $item->order->code . ' <i class="fa fa-external-link-alt"></i>', ['target' => '_blank'], null, false);
             })
             ->editColumn('user_id', function ($item) {
                 return BaseHelper::clean($item->order->user->name ?: $item->order->address->name);

@@ -16,7 +16,7 @@ if (!function_exists('setting')) {
     {
         if (!empty($key)) {
             try {
-                return Setting::get($key, $default);
+                return app(SettingStore::class)->get($key, $default);
             } catch (Exception $exception) {
                 return $default;
             }

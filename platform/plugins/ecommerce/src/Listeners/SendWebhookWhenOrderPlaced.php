@@ -15,7 +15,7 @@ class SendWebhookWhenOrderPlaced
      * Handle the event.
      *
      * @param OrderPlacedEvent $event
-     * @return false
+     * @return void
      * @throws Throwable
      */
     public function handle(OrderPlacedEvent $event)
@@ -23,7 +23,7 @@ class SendWebhookWhenOrderPlaced
         $webhookURL = get_ecommerce_setting('order_placed_webhook_url');
 
         if (!$webhookURL || !URL::isValidUrl($webhookURL) || app()->environment('demo')) {
-            return false;
+            return;
         }
 
         try {
@@ -66,17 +66,15 @@ class SendWebhookWhenOrderPlaced
 
             $client = new Client(['verify' => false]);
 
-            $result = $client->post($webhookURL, [
+            $client->post($webhookURL, [
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Accept'       => 'application/json',
                 ],
                 'json'    => $data,
             ]);
-
-            return $result->getStatusCode() == 200;
         } catch (Exception|GuzzleException $exception) {
-            return false;
+            info($exception->getMessage());
         }
     }
 }

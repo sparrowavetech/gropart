@@ -175,16 +175,28 @@
                             <input type="hidden" name="currency" value="{{ strtoupper(get_application_currency()->title) }}">
                             {!! apply_filters(PAYMENT_FILTER_PAYMENT_PARAMETERS, null) !!}
                             <ul class="list-group list_payment_method">
+                                @php
+                                    $selected = session('selected_payment_method');
+                                    $default = setting('default_payment_method');
+                                    $selecting = $selected ?: $default;
+                                @endphp
 
-                                {!! apply_filters(PAYMENT_FILTER_ADDITIONAL_PAYMENT_METHODS, null, ['amount' => ($promotionDiscountAmount + $couponDiscountAmount - $shippingAmount) > Cart::instance('cart')->rawTotal() ? 0 : format_price(Cart::instance('cart')->rawTotal() - $promotionDiscountAmount - $couponDiscountAmount + $shippingAmount, null, true), 'currency' => strtoupper(get_application_currency()->title), 'name' => null]) !!}
+                                {!! apply_filters(PAYMENT_FILTER_ADDITIONAL_PAYMENT_METHODS, null, [
+                                        'amount'    => ($promotionDiscountAmount + $couponDiscountAmount - $shippingAmount) > Cart::instance('cart')->rawTotal() ? 0 : format_price(Cart::instance('cart')->rawTotal() - $promotionDiscountAmount - $couponDiscountAmount + $shippingAmount, null, true),
+                                        'currency'  => strtoupper(get_application_currency()->title),
+                                        'name'      => null,
+                                        'selected'  => $selected,
+                                        'default'   => $default,
+                                        'selecting' => $selecting
+                                    ]) !!}
 
-                                @if (setting('payment_cod_status') == 1)
+                                @if (get_payment_setting('status', 'cod') == 1)
                                     <li class="list-group-item">
                                         <input class="magic-radio js_payment_method" type="radio" name="payment_method" id="payment_cod"
-                                               @if ((session('selected_payment_method') ?: setting('default_payment_method')) == \Botble\Payment\Enums\PaymentMethodEnum::COD) checked @endif
-                                               value="cod" data-bs-toggle="collapse" data-bs-target=".payment_cod_wrap" data-parent=".list_payment_method">
+                                            @if ($selecting == \Botble\Payment\Enums\PaymentMethodEnum::COD) checked @endif
+                                            value="cod" data-bs-toggle="collapse" data-bs-target=".payment_cod_wrap" data-parent=".list_payment_method">
                                         <label for="payment_cod" class="text-start">{{ setting('payment_cod_name', trans('plugins/payment::payment.payment_via_cod')) }}</label>
-                                        <div class="payment_cod_wrap payment_collapse_wrap collapse @if ((session('selected_payment_method') ?: setting('default_payment_method')) == \Botble\Payment\Enums\PaymentMethodEnum::COD) show @endif" style="padding: 15px 0;">
+                                        <div class="payment_cod_wrap payment_collapse_wrap collapse @if ($selecting == \Botble\Payment\Enums\PaymentMethodEnum::COD) show @endif" style="padding: 15px 0;">
                                             {!! BaseHelper::clean(setting('payment_cod_description')) !!}
 
                                             @php $minimumOrderAmount = setting('payment_cod_minimum_amount', 0); @endphp
@@ -197,13 +209,13 @@
                                     </li>
                                 @endif
 
-                                @if (setting('payment_bank_transfer_status') == 1)
+                                @if (get_payment_setting('status', 'bank_transfer') == 1)
                                     <li class="list-group-item">
                                         <input class="magic-radio js_payment_method" type="radio" name="payment_method" id="payment_bank_transfer"
-                                               @if ((session('selected_payment_method') ?: setting('default_payment_method')) == \Botble\Payment\Enums\PaymentMethodEnum::BANK_TRANSFER) checked @endif
-                                               value="bank_transfer" data-bs-toggle="collapse" data-bs-target=".payment_bank_transfer_wrap" data-parent=".list_payment_method">
+                                            @if ($selecting == \Botble\Payment\Enums\PaymentMethodEnum::BANK_TRANSFER) checked @endif
+                                            value="bank_transfer" data-bs-toggle="collapse" data-bs-target=".payment_bank_transfer_wrap" data-parent=".list_payment_method">
                                         <label for="payment_bank_transfer" class="text-start">{{ setting('payment_bank_transfer_name', trans('plugins/payment::payment.payment_via_bank_transfer')) }}</label>
-                                        <div class="payment_bank_transfer_wrap payment_collapse_wrap collapse @if ((session('selected_payment_method') ?: setting('default_payment_method')) == \Botble\Payment\Enums\PaymentMethodEnum::BANK_TRANSFER) show @endif" style="padding: 15px 0;">
+                                        <div class="payment_bank_transfer_wrap payment_collapse_wrap collapse @if ($selecting == \Botble\Payment\Enums\PaymentMethodEnum::BANK_TRANSFER) show @endif" style="padding: 15px 0;">
                                             {!! BaseHelper::clean(setting('payment_bank_transfer_description')) !!}
                                         </div>
                                     </li>

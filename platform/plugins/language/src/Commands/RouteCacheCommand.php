@@ -13,6 +13,7 @@ class RouteCacheCommand extends BaseRouteCacheCommand
      * Execute the console command.
      *
      * @return int
+     * @throws FileNotFoundException
      */
     public function handle()
     {
@@ -41,8 +42,9 @@ class RouteCacheCommand extends BaseRouteCacheCommand
 
     /**
      * Cache the routes separately for each locale.
+     * @throws FileNotFoundException
      */
-    protected function cacheRoutesPerLocale()
+    protected function cacheRoutesPerLocale(): int
     {
         // Store the default routes cache,
         // this way the Application will detect that routes are cached.
@@ -82,7 +84,7 @@ class RouteCacheCommand extends BaseRouteCacheCommand
      * @param string|null $locale
      * @return RouteCollection
      */
-    protected function getFreshApplicationRoutesForLocale(?string $locale = null)
+    protected function getFreshApplicationRoutesForLocale(?string $locale = null): RouteCollection
     {
         if ($locale === null) {
             return $this->getFreshApplicationRoutes();
@@ -119,17 +121,6 @@ class RouteCacheCommand extends BaseRouteCacheCommand
             ],
             $stub
         );
-    }
-
-    /**
-     * Returns whether a given locale is supported.
-     *
-     * @param string $locale
-     * @return bool
-     */
-    protected function isSupportedLocale($locale): bool
-    {
-        return in_array($locale, Language::getSupportedLanguagesKeys());
     }
 
     /**

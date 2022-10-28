@@ -27,12 +27,6 @@ class HookServiceProvider extends ServiceProvider
 {
     public function boot()
     {
-        $defaultLanguage = Language::getDefaultLanguage(['lang_id']);
-
-        if (empty($defaultLanguage)) {
-            return false;
-        }
-
         add_action(BASE_ACTION_META_BOXES, [$this, 'addLanguageBox'], 1134, 2);
         add_action(BASE_ACTION_TOP_FORM_CONTENT_NOTIFICATION, [$this, 'addCurrentLanguageEditingAlert'], 1134, 3);
         add_action(BASE_ACTION_BEFORE_EDIT_CONTENT, [$this, 'getCurrentAdminLanguage'], 1134, 2);
@@ -40,81 +34,10 @@ class HookServiceProvider extends ServiceProvider
         add_filter(BASE_FILTER_TABLE_HEADINGS, [$this, 'addLanguageTableHeading'], 1134, 2);
         add_filter(BASE_FILTER_GET_LIST_DATA, [$this, 'addLanguageColumn'], 1134, 2);
         add_filter(BASE_FILTER_BEFORE_GET_FRONT_PAGE_ITEM, [$this, 'checkItemLanguageBeforeGetListItem'], 1134, 2);
-
-        add_filter(BASE_FILTER_BEFORE_RENDER_FORM, function ($form, $data) {
-            if (is_in_admin() && request()->input('ref_lang') && Language::getCurrentAdminLocaleCode() != Language::getDefaultLocaleCode() && $data && $data->id && LanguageAdvancedManager::isSupported($data)) {
-                foreach ($form->getMetaBoxes() as $key => $metaBox) {
-                    if (LanguageAdvancedManager::isTranslatableMetaBox($key)) {
-                        continue;
-                    }
-
-                    $form->removeMetaBox($key);
-                }
-
-                $columns = LanguageAdvancedManager::getTranslatableColumns($data);
-                foreach ($form->getFields() as $key => $field) {
-                    if (!in_array($key, $columns)) {
-                        $form->remove($key);
-                    }
-                }
-
-                $refLang = null;
-
-                if (Language::getCurrentAdminLocaleCode() != Language::getDefaultLocaleCode()) {
-                    $refLang = '?ref_lang=' . Language::getCurrentAdminLocaleCode();
-                }
-
-                $form
-                    ->setFormOption('url', route('language-advanced.save', $data->id) . $refLang)
-                    ->add('model', 'hidden', ['value' => get_class($data)]);
-            }
-
-            return $form;
-        }, 1134, 2);
-
-        add_action(BASE_ACTION_META_BOXES, function ($context, $object) {
-            if (is_in_admin() && request()->input('ref_lang') && Language::getCurrentAdminLocaleCode() != Language::getDefaultLocaleCode() && LanguageAdvancedManager::isSupported($object)) {
-                foreach (MetaBox::getMetaBoxes() as $reference => $metaBox) {
-                    foreach ($metaBox as $context => $position) {
-                        foreach ($position as $item) {
-                            foreach (array_keys($item) as $key) {
-                                if (LanguageAdvancedManager::isTranslatableMetaBox($key)) {
-                                    continue;
-                                }
-
-                                MetaBox::removeMetaBox($key, $reference, $context);
-                            }
-                        }
-                    }
-                }
-            }
-        }, 10, 2);
-
-        add_filter(BASE_FILTER_SLUG_AREA, function ($html = null, $object = null) {
-            if (is_in_admin() && request()->input('ref_lang') && Language::getCurrentAdminLocaleCode() != Language::getDefaultLocaleCode() && LanguageAdvancedManager::isSupported($object) && SlugHelper::isSupportedModel(get_class($object))) {
-                Assets::addStylesDirectly('vendor/core/packages/slug/css/slug.css');
-
-                $prefix = SlugHelper::getPrefix(get_class($object));
-
-                return view('plugins/language-advanced::slug', compact('object', 'prefix'))->render();
-            }
-
-            return $html;
-        }, 25, 2);
-
-        add_filter('stored_meta_box_key', function (string $key, $object) {
-            $locale = is_in_admin() ? Language::getCurrentAdminLocaleCode() : Language::getCurrentLocaleCode();
-
-            $translatableColumns = LanguageAdvancedManager::getTranslatableColumns($object);
-
-            $translatableColumns[] = 'seo_meta';
-
-            if (is_plugin_active('language') && $locale != Language::getDefaultLocaleCode() && in_array($key, $translatableColumns)) {
-                $key = $locale . '_' . $key;
-            }
-
-            return $key;
-        }, 1134, 2);
+        add_filter(BASE_FILTER_BEFORE_RENDER_FORM, [$this, 'changeFormDataBeforeRendering'], 1134, 2);
+        add_action(BASE_ACTION_META_BOXES, [$this, 'customizeMetaBoxes'], 10, 2);
+        add_filter(BASE_FILTER_SLUG_AREA, [$this, 'changeSlugField'], 25, 2);
+        add_filter('stored_meta_box_key', [$this, 'storeMetaBoxKey'], 1134, 2);
     }
 
     /**
@@ -141,7 +64,7 @@ class HookServiceProvider extends ServiceProvider
     /**
      * @throws Throwable
      */
-    public function languageMetaField()
+    public function languageMetaField(): ?string
     {
         $languages = Language::getActiveLanguage([
             'lang_code',
@@ -281,7 +204,7 @@ class HookServiceProvider extends ServiceProvider
      * @return string
      * @throws Throwable
      */
-    public function languageSwitcher(array $options = [])
+    public function languageSwitcher(array $options = []): string
     {
         return view('plugins/language::partials.switcher', compact('options'))->render();
     }
@@ -357,7 +280,7 @@ class HookServiceProvider extends ServiceProvider
      * @param string|Model $model
      * @return array
      */
-    public function addLanguageTableHeading($headings, $model)
+    public function addLanguageTableHeading(array $headings, $model): array
     {
         if (!LanguageAdvancedManager::isSupported($model)) {
             return $headings;
@@ -415,5 +338,104 @@ class HookServiceProvider extends ServiceProvider
                 $query->where($translationTable . '.lang_code', $currentLocale);
             },
         ]);
+    }
+
+    /**
+     * @param $form
+     * @param $data
+     * @return mixed
+     */
+    public function changeFormDataBeforeRendering($form, $data)
+    {
+        if (is_in_admin() && request()->input('ref_lang') && Language::getCurrentAdminLocaleCode() != Language::getDefaultLocaleCode() && $data && $data->id && LanguageAdvancedManager::isSupported($data)) {
+            foreach ($form->getMetaBoxes() as $key => $metaBox) {
+                if (LanguageAdvancedManager::isTranslatableMetaBox($key)) {
+                    continue;
+                }
+
+                $form->removeMetaBox($key);
+            }
+
+            $columns = LanguageAdvancedManager::getTranslatableColumns($data);
+            foreach ($form->getFields() as $key => $field) {
+                if (!in_array($key, $columns)) {
+                    $form->remove($key);
+                }
+            }
+
+            $refLang = null;
+
+            if (Language::getCurrentAdminLocaleCode() != Language::getDefaultLocaleCode()) {
+                $refLang = '?ref_lang=' . Language::getCurrentAdminLocaleCode();
+            }
+
+            $form
+                ->setFormOption('url', route('language-advanced.save', $data->id) . $refLang)
+                ->add('model', 'hidden', ['value' => get_class($data)]);
+        }
+
+        return $form;
+    }
+
+    /**
+     * @param string $context
+     * @param $object
+     * @return void
+     */
+    public function customizeMetaBoxes(string $context, $object)
+    {
+        if (is_in_admin() && request()->input('ref_lang') && Language::getCurrentAdminLocaleCode() != Language::getDefaultLocaleCode() && LanguageAdvancedManager::isSupported($object)) {
+            foreach (MetaBox::getMetaBoxes() as $reference => $metaBox) {
+                foreach ($metaBox as $context => $position) {
+                    foreach ($position as $item) {
+                        foreach (array_keys($item) as $key) {
+                            if (LanguageAdvancedManager::isTranslatableMetaBox($key)) {
+                                continue;
+                            }
+
+                            MetaBox::removeMetaBox($key, $reference, $context);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * @param string|null $html
+     * @param null $object
+     * @return string|null
+     */
+    public function changeSlugField(?string $html = null, $object = null): ?string
+    {
+        if (is_in_admin() && request()->input('ref_lang') && Language::getCurrentAdminLocaleCode() != Language::getDefaultLocaleCode() && LanguageAdvancedManager::isSupported($object) && SlugHelper::isSupportedModel(get_class($object))) {
+            Assets::addStylesDirectly('vendor/core/packages/slug/css/slug.css');
+
+            $prefix = SlugHelper::getPrefix(get_class($object));
+
+            return view('plugins/language-advanced::slug', compact('object', 'prefix'))->render();
+        }
+
+        return $html;
+    }
+
+    /**
+     * @param string $key
+     * @param $object
+     * @return string
+     */
+    public function storeMetaBoxKey(string $key, $object): string
+    {
+        $locale = is_in_admin() ? Language::getCurrentAdminLocaleCode() : Language::getCurrentLocaleCode();
+
+        $translatableColumns = LanguageAdvancedManager::getTranslatableColumns($object);
+
+        $translatableColumns[] = 'seo_meta';
+
+        if (is_plugin_active('language') && $locale != Language::getDefaultLocaleCode() && in_array($key, $translatableColumns)) {
+            $key = $locale . '_' . $key;
+        }
+
+        return $key;
     }
 }

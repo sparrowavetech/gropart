@@ -9,6 +9,8 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Botble\ACL\Traits\SendsPasswordResetEmails;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class ForgotPasswordController extends BaseController
@@ -75,7 +77,7 @@ class ForgotPasswordController extends BaseController
      *
      * @param Request $request
      * @param string $response
-     * @return BaseHttpResponse
+     * @return JsonResponse|RedirectResponse
      */
     protected function sendResetLinkResponse(Request $request, $response)
     {

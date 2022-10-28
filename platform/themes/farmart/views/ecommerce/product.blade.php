@@ -12,7 +12,7 @@
                     {!! Theme::partial('ecommerce.product-gallery', compact('product', 'productImages')) !!}
                 </div>
                 <div class="col-lg-4 col-md-8 ps-4 product-details-content">
-                    <div class="product-details">
+                    <div class="product-details js-product-content">
                         <div class="entry-product-header">
                             <div class="product-header-left">
                                 <h1 class="fs-5 fw-normal product_title entry-title">{{ $product->name }}</h1>
@@ -440,77 +440,69 @@
 
 <!-- add-to-cart sticky bar -->
 <div id="sticky-add-to-cart">
-    <form class="cart-form footer-cart-form" method="POST" action="{{ route('public.cart.add-to-cart') }}">
-        @csrf
-        <input type="hidden"
-               name="id" class="hidden-product-id"
-               value="{{ ($product->is_variation || !$product->defaultVariation->product_id) ? $product->id : $product->defaultVariation->product_id }}"/>
-
-        <header class="header--product">
-            <nav class="navigation">
-                <div class="container">
-                    <article class="ps-product--header-sticky">
-                        <div class="ps-product__thumbnail">
-                            <img src="{{ RvMedia::getImageUrl($product->image, 'small', false, RvMedia::getDefaultImage()) }}" alt="{{ $product->name }}">
-                        </div>
-                        <div class="ps-product__wrapper">
-                            <div class="ps-product__content"><a class="ps-product__title" href="{{ $product->url }}">{{ $product->name }}</a>
-                                <ul>
-                                    <li class="active"><a href="#product-description-tab">{{ __('Description') }}</a></li>
-                                    @if (EcommerceHelper::isReviewEnabled())
-                                        <li><a href="#product-reviews-tab">{{ __('Reviews') }} ({{ $product->reviews_count }})</a></li>
-                                    @endif
-                                </ul>
-                            </div>
-                            <div class="ps-product__shopping">
-                                {!! Theme::partial('ecommerce.product-price', compact('product')) !!}
-                                @if (EcommerceHelper::isCartEnabled())
-                                    <button type="submit" class="btn btn-primary ms-2 add-to-cart-button @if ($product->isOutOfStock()) disabled @endif" @if ($product->isOutOfStock()) disabled @endif title="{{ __('Add to cart') }}">
-                                        <span class="svg-icon">
-                                            <svg>
-                                                <use href="#svg-icon-cart" xlink:href="#svg-icon-cart"></use>
-                                            </svg>
-                                        </span>
-                                        <span class="add-to-cart-text ms-1">{{ __('Add to cart') }}</span>
-                                    </button>
-                                    @if (EcommerceHelper::isQuickBuyButtonEnabled())
-                                        <button type="submit" name="checkout" class="btn btn-primary btn-black ms-2 add-to-cart-button @if ($product->isOutOfStock()) disabled @endif" @if ($product->isOutOfStock()) disabled @endif title="{{ __('Buy Now') }}">
-                                            <span class="add-to-cart-text">{{ __('Buy Now') }}</span>
-                                        </button>
-                                    @endif
-                                @endif
-                            </div>
-                        </div>
-                    </article>
-                </div>
-            </nav>
-        </header>
-
-        <div class="sticky-atc-wrap sticky-atc-shown">
+    <header class="header--product js-product-content">
+        <nav class="navigation">
             <div class="container">
-                <div class="row">
-                    <div class="sticky-atc-btn product-button">
-                        {!! Theme::partial('ecommerce.product-quantity', compact('product')) !!}
-
-                        @if (EcommerceHelper::isCartEnabled())
-                            <button type="submit" class="btn btn-primary mb-2 add-to-cart-button @if ($product->isOutOfStock()) disabled @endif" @if ($product->isOutOfStock()) disabled @endif title="{{ __('Add to cart') }}">
-                                <span class="svg-icon">
-                                    <svg>
-                                        <use href="#svg-icon-cart" xlink:href="#svg-icon-cart"></use>
-                                    </svg>
-                                </span>
-                                <span class="add-to-cart-text ms-1">{{ __('Add to cart') }}</span>
-                            </button>
-                            @if (EcommerceHelper::isQuickBuyButtonEnabled())
-                                <button type="submit" name="checkout" class="btn btn-primary btn-black mb-2 ms-2 add-to-cart-button @if ($product->isOutOfStock()) disabled @endif" @if ($product->isOutOfStock()) disabled @endif title="{{ __('Buy Now') }}">
-                                    <span class="add-to-cart-text ms-2">{{ __('Buy Now') }}</span>
-                                </button>
-                            @endif
-                        @endif
+                <article class="ps-product--header-sticky">
+                    <div class="ps-product__thumbnail">
+                        <img src="{{ RvMedia::getImageUrl($product->image, 'small', false, RvMedia::getDefaultImage()) }}" alt="{{ $product->name }}">
                     </div>
+                    <div class="ps-product__wrapper">
+                        <div class="ps-product__content"><a class="ps-product__title" href="{{ $product->url }}">{{ $product->name }}</a>
+                            <ul>
+                                <li class="active"><a href="#product-description-tab">{{ __('Description') }}</a></li>
+                                @if (EcommerceHelper::isReviewEnabled())
+                                    <li><a href="#product-reviews-tab">{{ __('Reviews') }} ({{ $product->reviews_count }})</a></li>
+                                @endif
+                            </ul>
+                        </div>
+                        <div class="ps-product__shopping">
+                            {!! Theme::partial('ecommerce.product-price', compact('product')) !!}
+                            @if (EcommerceHelper::isCartEnabled())
+                                <button type="button" name="add_to_cart" value="1" class="btn btn-primary ms-2 add-to-cart-button @if ($product->isOutOfStock()) disabled @endif" @if ($product->isOutOfStock()) disabled @endif title="{{ __('Add to cart') }}">
+                                    <span class="svg-icon">
+                                        <svg>
+                                            <use href="#svg-icon-cart" xlink:href="#svg-icon-cart"></use>
+                                        </svg>
+                                    </span>
+                                    <span class="add-to-cart-text ms-1">{{ __('Add to cart') }}</span>
+                                </button>
+                                @if (EcommerceHelper::isQuickBuyButtonEnabled())
+                                    <button type="button" name="checkout" value="1" class="btn btn-primary btn-black ms-2 add-to-cart-button @if ($product->isOutOfStock()) disabled @endif" @if ($product->isOutOfStock()) disabled @endif title="{{ __('Buy Now') }}">
+                                        <span class="add-to-cart-text">{{ __('Buy Now') }}</span>
+                                    </button>
+                                @endif
+                            @endif
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </nav>
+    </header>
+
+    <div class="sticky-atc-wrap sticky-atc-shown">
+        <div class="container">
+            <div class="row">
+                <div class="sticky-atc-btn product-button">
+                    @if (EcommerceHelper::isCartEnabled())
+                        <button type="button" name="add_to_cart" value="1" class="btn btn-primary mb-2 add-to-cart-button @if ($product->isOutOfStock()) disabled @endif" @if ($product->isOutOfStock()) disabled @endif title="{{ __('Add to cart') }}">
+                            <span class="svg-icon">
+                                <svg>
+                                    <use href="#svg-icon-cart" xlink:href="#svg-icon-cart"></use>
+                                </svg>
+                            </span>
+                            <span class="add-to-cart-text ms-1">{{ __('Add to cart') }}</span>
+                        </button>
+
+                        @if (EcommerceHelper::isQuickBuyButtonEnabled())
+                            <button type="button" name="checkout" value="1" class="btn btn-primary btn-black mb-2 ms-2 add-to-cart-button @if ($product->isOutOfStock()) disabled @endif" @if ($product->isOutOfStock()) disabled @endif title="{{ __('Buy Now') }}">
+                                <span class="add-to-cart-text ms-2">{{ __('Buy Now') }}</span>
+                            </button>
+                        @endif
+                    @endif
                 </div>
             </div>
         </div>
-    </form>
+    </div>
 </div>
 <!-- end add-to-cart sticky bar -->

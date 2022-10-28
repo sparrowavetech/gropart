@@ -38,7 +38,7 @@
     $routeName = Route::currentRouteName();
 
     if (!EcommerceHelper::isEnabledSupportDigitalProducts()) {
-        unset($menus['customer.downloads']);
+        unset($menus[3]);
     }
 @endphp
 <div class="container-xxxl">

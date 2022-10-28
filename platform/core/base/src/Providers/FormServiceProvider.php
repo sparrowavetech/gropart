@@ -145,5 +145,11 @@ class FormServiceProvider extends ServiceProvider
             'fields'     => [],
             'attributes' => [],
         ]);
+
+        Form::component('phoneNumber', 'core/base::forms.partials.phone-number', [
+            'name',
+            'value'      => null,
+            'attributes' => [],
+        ]);
     }
 }

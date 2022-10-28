@@ -5,6 +5,7 @@ namespace Botble\Analytics;
 use Botble\Dashboard\Models\DashboardWidget;
 use Botble\Dashboard\Repositories\Interfaces\DashboardWidgetInterface;
 use Botble\PluginManagement\Abstracts\PluginOperationAbstract;
+use Botble\Setting\Models\Setting;
 use Exception;
 
 class Plugin extends PluginOperationAbstract
@@ -36,5 +37,13 @@ class Plugin extends PluginOperationAbstract
              */
             $widget->delete();
         }
+
+        Setting::query()
+            ->whereIn('key', [
+                'google_analytics',
+                'analytics_view_id',
+                'analytics_service_account_credentials',
+            ])
+            ->delete();
     }
 }

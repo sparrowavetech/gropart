@@ -67,14 +67,10 @@ class Page extends BaseModel
         'image',
         'template',
         'description',
-        'is_featured',
         'status',
         'user_id',
     ];
 
-    /**
-     * @return BelongsTo
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class)->withDefault();

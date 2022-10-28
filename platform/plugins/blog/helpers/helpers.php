@@ -187,9 +187,9 @@ if (!function_exists('get_popular_categories')) {
 if (!function_exists('get_category_by_id')) {
     /**
      * @param integer $id
-     * @return BaseModel
+     * @return BaseModel|null
      */
-    function get_category_by_id(int $id): BaseModel
+    function get_category_by_id(int $id): ?BaseModel
     {
         return app(CategoryInterface::class)->getCategoryById($id);
     }

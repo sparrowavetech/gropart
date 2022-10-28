@@ -111,6 +111,19 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
             ]);
         });
 
+        Route::group(['prefix' => 'options', 'as' => 'global-option.'], function () {
+            Route::resource('', 'ProductOptionController')->parameters(['' => 'option']);
+            Route::delete('items/destroy', [
+                'as'         => 'deletes',
+                'uses'       => 'ProductOptionController@deletes',
+                'permission' => 'global-options.destroy',
+            ]);
+            Route::get('ajax/{id}', [
+                'as'         => 'ajaxInfo',
+                'uses'       => 'ProductOptionController@ajaxInfo',
+                'permission' => 'products.edit',
+            ]);
+        });
 
         Route::group(['prefix' => 'brands', 'as' => 'brands.'], function () {
             Route::resource('', 'BrandController')

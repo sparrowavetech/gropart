@@ -7,6 +7,7 @@ use Botble\PluginManagement\Commands\PluginActivateCommand;
 use Botble\PluginManagement\Commands\PluginAssetsPublishCommand;
 use Botble\PluginManagement\Commands\PluginDeactivateAllCommand;
 use Botble\PluginManagement\Commands\PluginDeactivateCommand;
+use Botble\PluginManagement\Commands\PluginRemoveAllCommand;
 use Botble\PluginManagement\Commands\PluginRemoveCommand;
 use Illuminate\Support\ServiceProvider;
 
@@ -22,10 +23,11 @@ class CommandServiceProvider extends ServiceProvider
 
         $this->commands([
             PluginActivateCommand::class,
-            PluginDeactivateCommand::class,
-            PluginRemoveCommand::class,
             PluginActivateAllCommand::class,
+            PluginDeactivateCommand::class,
             PluginDeactivateAllCommand::class,
+            PluginRemoveCommand::class,
+            PluginRemoveAllCommand::class,
         ]);
     }
 }

@@ -10,7 +10,7 @@
                 'character_remain': '{{ trans('core/base::forms.character_remain') }}'
             },
         };
-        BotbleVariables.authorized = "{{ setting('membership_authorization_at') && now()->diffInDays(Carbon\Carbon::createFromFormat('Y-m-d H:i:s', setting('membership_authorization_at'))) <= 7 ? 1 : 0 }}";
+        BotbleVariables.authorized = "{{ setting('membership_authorization_at') &&Carbon\Carbon::now()->diffInDays(Carbon\Carbon::createFromFormat('Y-m-d H:i:s', setting('membership_authorization_at'))) <= 7 ? 1 : 0 }}";
     @else
         BotbleVariables.languages = {
             notices_msg: {!! json_encode(trans('core/base::notices'), JSON_HEX_APOS) !!},

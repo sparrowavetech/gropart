@@ -8,19 +8,19 @@
         {!! Form::open(['route' => ['customer.address.edit', $address->id]]) !!}
         <div class="input-group">
             <span class="input-group-prepend">{{ __('Full Name') }}:</span>
-            <input id="name" type="text" class="form-control" name="name" value="{{ $address->name }}">
+            <input id="name" type="text" class="form-control" name="name" value="{{ old('name', $address->name) }}">
             {!! Form::error('name', $errors) !!}
         </div>
 
         <div class="input-group">
             <span class="input-group-prepend">{{ __('Email') }}:</span>
-            <input id="email" type="text" class="form-control" name="email" value="{{ $address->email }}">
+            <input id="email" type="text" class="form-control" name="email" value="{{ old('email', $address->email) }}">
             {!! Form::error('email', $errors) !!}
         </div>
 
        <div class="input-group">
             <span class="input-group-prepend">{{ __('Phone') }}:</span>
-            <input id="phone" type="text" class="form-control" name="phone" value="{{ $address->phone }}">
+           {!! Form::phoneNumber('phone', old('phone', $address->phone), ['id' => 'phone']) !!}
             {!! Form::error('phone', $errors) !!}
         </div>
 

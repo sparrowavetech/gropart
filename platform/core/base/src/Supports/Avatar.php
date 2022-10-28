@@ -186,7 +186,7 @@ class Avatar
      */
     public function __toString()
     {
-        return (string)$this->toBase64();
+        return $this->toBase64();
     }
 
     /**
@@ -343,7 +343,7 @@ class Avatar
     }
 
     /**
-     * @param string $name
+     * @param string|null $name
      * @return $this
      */
     public function create(?string $name): self

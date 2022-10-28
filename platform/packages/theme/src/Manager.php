@@ -50,6 +50,10 @@ class Manager
                 $jsonFile = $publicJsonFile;
             }
 
+            if (!File::exists($jsonFile)) {
+                continue;
+            }
+
             $theme = BaseHelper::getFileData($jsonFile);
             if (!empty($theme)) {
                 $themes[$folder] = $theme;

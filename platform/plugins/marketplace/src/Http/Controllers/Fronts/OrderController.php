@@ -112,7 +112,7 @@ class OrderController extends BaseController
             abort(404);
         }
 
-        page_title()->setTitle(trans('plugins/ecommerce::order.edit_order', ['code' => get_order_code($id)]));
+        page_title()->setTitle(trans('plugins/ecommerce::order.edit_order', ['code' => $order->code]));
 
         $weight = $order->products_weight;
 
@@ -369,7 +369,7 @@ class OrderController extends BaseController
 
         switch ($status) {
             case ShippingStatusEnum::DELIVERED:
-                $shipment->date_shipped = now();
+                $shipment->date_shipped = Carbon::now();
                 $shipment->save();
 
                 // Update status and time order complete

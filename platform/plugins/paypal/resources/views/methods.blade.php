@@ -1,10 +1,10 @@
 @if (setting('payment_paypal_status') == 1)
     <li class="list-group-item">
         <input class="magic-radio js_payment_method" type="radio" name="payment_method" id="payment_paypal"
-               @if ((session('selected_payment_method') ?: setting('default_payment_method')) == PAYPAL_PAYMENT_METHOD_NAME) checked @endif
+               @if ($selecting == PAYPAL_PAYMENT_METHOD_NAME) checked @endif
                value="paypal" data-bs-toggle="collapse" data-bs-target=".payment_paypal_wrap" data-toggle="collapse" data-target=".payment_paypal_wrap" data-parent=".list_payment_method">
         <label for="payment_paypal" class="text-start">{{ setting('payment_paypal_name', trans('plugins/payment::payment.payment_via_paypal')) }}</label>
-        <div class="payment_paypal_wrap payment_collapse_wrap collapse @if ((session('selected_payment_method') ?: setting('default_payment_method')) == PAYPAL_PAYMENT_METHOD_NAME) show @endif" style="padding: 15px 0;">
+        <div class="payment_paypal_wrap payment_collapse_wrap collapse @if ($selecting == PAYPAL_PAYMENT_METHOD_NAME) show @endif" style="padding: 15px 0;">
             <p>{!! BaseHelper::clean(setting('payment_paypal_description')) !!}</p>
 
             @php $supportedCurrencies = (new \Botble\Paypal\Services\Gateways\PayPalPaymentService)->supportedCurrencyCodes(); @endphp

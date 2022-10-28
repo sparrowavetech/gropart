@@ -124,7 +124,7 @@ class SslCommerzPaymentController extends BaseController
                 /*
                 That means IPN worked. Here you need to update order status
                 in order table as Processing or Complete.
-                Here you can also sent sms or email for successful transaction to customer
+                Here you can also send sms or email for successful transaction to customer
                 */
                 Payment::where('charge_id', $transactionId)
                     ->update(['status' => PaymentStatusEnum::COMPLETED]);

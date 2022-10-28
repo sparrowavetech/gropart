@@ -12,7 +12,7 @@ use Botble\Media\Repositories\Interfaces\MediaFileInterface;
 use Botble\Media\Services\UploadsManager;
 use EcommerceHelper;
 use Exception;
-use File;
+use Illuminate\Support\Facades\File;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Http\Request;
 use Storage;
@@ -128,6 +128,10 @@ class StoreProductService
 
             if (EcommerceHelper::isEnabledSupportDigitalProducts() && $product->isTypeDigital()) {
                 $this->saveProductFiles($request, $product);
+            }
+
+            if ($request->input('has_product_options')) {
+                $this->productRepository->saveProductOptions((array)$request->input('options', []), $product);
             }
         }
 

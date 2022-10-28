@@ -3,9 +3,7 @@
         <div class="modal-content">
             <div class="modal-header bg-{{ $type }}">
                 <h4 class="modal-title"><i class="til_img"></i><strong>{{ $title }}</strong></h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true">
-
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
             </div>
 
             <div class="modal-body with-padding">

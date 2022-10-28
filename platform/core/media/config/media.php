@@ -108,10 +108,10 @@ return [
         ],
     ],
 
-    'preview' => [
+    'preview'                     => [
         'document' => [
-            'enabled'   => env('RV_MEDIA_DOCUMENT_PREVIEW_ENABLED', true),
-            'providers' => [
+            'enabled'    => env('RV_MEDIA_DOCUMENT_PREVIEW_ENABLED', true),
+            'providers'  => [
                 'google'    => 'https://docs.google.com/gview?embedded=true&url={url}',
                 'microsoft' => 'https://view.officeapps.live.com/op/view.aspx?src={url}',
             ],
@@ -131,5 +131,6 @@ return [
             ],
         ],
     ],
-    'default_upload_url' => env('RV_MEDIA_DEFAULT_UPLOAD_URL', url('storage')),
+    'default_upload_url'          => env('RV_MEDIA_DEFAULT_UPLOAD_URL', url('storage')),
+    'generate_thumbnails_enabled' => env('RV_MEDIA_GENERATE_THUMBNAILS_ENABLED', true),
 ];

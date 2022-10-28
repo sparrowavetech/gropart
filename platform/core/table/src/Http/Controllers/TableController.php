@@ -37,7 +37,7 @@ class TableController extends Controller
      * @return array
      * @throws Throwable
      */
-    public function getDataForBulkChanges(BulkChangeRequest $request)
+    public function getDataForBulkChanges(BulkChangeRequest $request): array
     {
         $class = $request->input('class');
 

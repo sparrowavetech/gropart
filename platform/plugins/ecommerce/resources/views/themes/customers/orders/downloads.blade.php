@@ -44,7 +44,7 @@
                         @endphp
                         <tr>
                             <td>
-                                <img src="{{ RvMedia::getImageUrl($product->id ? $product->image : null, 'thumb', false, RvMedia::getDefaultImage()) }}" width="50" alt="{{ $orderProduct->product_name }}">
+                                <img src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}" width="50" alt="{{ $orderProduct->product_name }}">
                             </td>
                             <td>
                                 @if ($product)

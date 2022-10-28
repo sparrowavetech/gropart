@@ -50,8 +50,8 @@ class SettingController extends BaseController
     {
         page_title()->setTitle(trans('core/setting::setting.title'));
 
-        Assets::addScriptsDirectly('vendor/core/core/setting/js/setting.js');
-        Assets::addStylesDirectly('vendor/core/core/setting/css/setting.css');
+        Assets::addScriptsDirectly('vendor/core/core/setting/js/setting.js')
+            ->addStylesDirectly('vendor/core/core/setting/css/setting.css');
 
         return view('core/setting::index');
     }
@@ -124,8 +124,9 @@ class SettingController extends BaseController
     public function getEmailConfig()
     {
         page_title()->setTitle(trans('core/base::layouts.setting_email'));
-        Assets::addScriptsDirectly('vendor/core/core/setting/js/setting.js');
-        Assets::addStylesDirectly('vendor/core/core/setting/css/setting.css');
+
+        Assets::addScriptsDirectly('vendor/core/core/setting/js/setting.js')
+            ->addStylesDirectly('vendor/core/core/setting/css/setting.css');
 
         return view('core/setting::email');
     }
@@ -262,8 +263,8 @@ class SettingController extends BaseController
     {
         page_title()->setTitle(trans('core/setting::setting.media.title'));
 
-        Assets::addScriptsDirectly('vendor/core/core/setting/js/setting.js');
-        Assets::addStylesDirectly('vendor/core/core/setting/css/setting.css');
+        Assets::addScriptsDirectly('vendor/core/core/setting/js/setting.js')
+            ->addStylesDirectly('vendor/core/core/setting/css/setting.css');
 
         return view('core/setting::media');
     }

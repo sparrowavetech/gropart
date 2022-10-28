@@ -8,7 +8,7 @@
 }
 
 .checkout-wrapper {
-    width: 500px;
+    max-width: 500px;
     margin: 0 auto;
 }
 
@@ -153,8 +153,8 @@
     transition: 0.25s;
 
     > p {
-       padding-left: 30px;
-       margin-bottom: 0;
+        padding-left: 30px;
+        margin-bottom: 0;
     }
 }
 
@@ -167,14 +167,15 @@
 }
 
 .list-group {
-    .list-group-item+.list-group-item {
+    .list-group-item + .list-group-item {
         border-top-width: 1px;
     }
 
     .list-group-item {
         border-bottom: none;
+
         &:last-child {
-            border-bottom: 1px solid rgba(0,0,0,.125);
+            border-bottom: 1px solid rgba(0, 0, 0, .125);
         }
     }
 }
@@ -184,6 +185,18 @@
         .form-group {
             .col-sm-9 {
                 margin-bottom: 10px;
+            }
+
+            &.mb-3 {
+                margin-bottom: 0 !important;
+
+                &:first-child {
+                    margin-bottom: 1rem !important;
+                }
+
+                .form-control {
+                    margin-bottom: 15px;
+                }
             }
         }
     }
@@ -195,9 +208,11 @@
         width: 100%;
         margin: 20px auto;
         overflow-x: hidden;
+
         & > .jp-card-container {
             transform: scale(0.625);
             transform-origin: left center;
+
             .jp-card {
                 min-width: 100%;
             }

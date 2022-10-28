@@ -20,6 +20,7 @@ use Exception;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\Router;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
@@ -110,7 +111,7 @@ class AclServiceProvider extends ServiceProvider
     {
         $config = $this->app->make('config')->get('core.acl.general');
 
-        $this->sweep($this->app->make(ActivationInterface::class), $config['activations']['lottery']);
+        $this->sweep($this->app->make(ActivationInterface::class), Arr::get($config, 'activations.lottery', [2, 100]));
     }
 
     /**

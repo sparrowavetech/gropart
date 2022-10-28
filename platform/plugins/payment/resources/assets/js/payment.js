@@ -4,12 +4,13 @@ var BPayment = BPayment || {};
 
 BPayment.initResources = function () {
     let paymentMethod = $(document).find('input[name=payment_method]:checked').first();
+
     if (!paymentMethod.length) {
         paymentMethod = $(document).find('input[name=payment_method]').first();
+        paymentMethod.trigger('click').trigger('change');
     }
 
     if (paymentMethod.length) {
-        paymentMethod.trigger('click').trigger('change');
         paymentMethod.closest('.list-group-item').find('.payment_collapse_wrap').addClass('show');
     }
 

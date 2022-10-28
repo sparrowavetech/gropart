@@ -77,6 +77,12 @@ class Handler extends ExceptionHandler
                             ->setMessage(trans('core/base::errors.not_found'))
                             ->setCode(404)
                             ->toResponse($request);
+                    default:
+                        return $response
+                            ->setError()
+                            ->setMessage($exception->getMessage())
+                            ->setCode($code)
+                            ->toResponse($request);
                 }
             }
 

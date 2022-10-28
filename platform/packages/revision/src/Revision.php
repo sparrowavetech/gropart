@@ -55,9 +55,9 @@ class Revision extends BaseModel
      * Allow overrides for field names.
      *
      * @param string $key
-     * @return bool
+     * @return bool|string
      */
-    protected function formatFieldName(string $key): bool
+    protected function formatFieldName(string $key)
     {
         $relatedModel = $this->revisionable_type;
         $relatedModel = new $relatedModel();

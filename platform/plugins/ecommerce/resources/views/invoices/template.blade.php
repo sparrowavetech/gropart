@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>{{ trans('plugins/ecommerce::order.invoice_for_order') }} {{ get_order_code($order->id) }}</title>
+    <title>{{ trans('plugins/ecommerce::order.invoice_for_order') }} {{ $invoice->code }}</title>
 
     @if (get_ecommerce_setting('using_custom_font_for_invoice', 0) == 1 && get_ecommerce_setting('invoice_font_family'))
         <link href="https://fonts.googleapis.com/css?family={{ urlencode(get_ecommerce_setting('invoice_font_family')) }}:400,500,600,700,900&display=swap" rel="stylesheet">
@@ -140,20 +140,20 @@
 <body>
 
 @if (get_ecommerce_setting('enable_invoice_stamp', 1) == 1)
-    @if ($order->status == \Botble\Ecommerce\Enums\OrderStatusEnum::CANCELED && trim($order->status->label()))
+    @if ($invoice->status == \Botble\Ecommerce\Enums\OrderStatusEnum::CANCELED && trim($invoice->status->label()))
         <span class="stamp is-failed">
-            {{ $order->status->label() }}
+            {{ $invoice->status->label() }}
         </span>
 
-    @elseif (trim($order->payment->status->label()))
-        <span class="stamp @if ($order->payment->status == \Botble\Payment\Enums\PaymentStatusEnum::COMPLETED) is-completed @else is-failed @endif">
-            {{ $order->payment->status->label() }}
+    @elseif (trim($invoice->payment->status->label()))
+        <span class="stamp @if ($invoice->payment->status == \Botble\Payment\Enums\PaymentStatusEnum::COMPLETED) is-completed @else is-failed @endif">
+            {{ $invoice->payment->status->label() }}
         </span>
     @endif
 @endif
 
 @php
-    $logo = theme_option('logo_in_invoices') ?: theme_option('logo');
+    $logo = get_ecommerce_setting('company_logo_for_invoicing') ?: (theme_option('logo_in_invoices') ?: theme_option('logo'));
 @endphp
 
 <table class="invoice-info-container">
@@ -161,14 +161,16 @@
         <td>
             <div class="logo-container">
                 @if ($logo)
-                    <img src="{{ RvMedia::getImageUrl($logo) }}"
-                         style="width:100%; max-width:150px;" alt="{{ theme_option('site_title') }}">
+                    <img src="{{ RvMedia::getRealPath($logo) }}"
+                         style="width:100%; max-width:150px;" alt="{{ get_ecommerce_setting('company_name_for_invoicing') ?: theme_option('site_title') }}">
                 @endif
             </div>
         </td>
         <td>
-            <p><strong>{{ $order->created_at->format('F d, Y') }}</strong></p>
-            <p><strong>{{ trans('plugins/ecommerce::order.invoice') }}</strong> {{ get_order_code($order->id) }}</p>
+            @if ($invoice->created_at)
+                <p><strong>{{ $invoice->created_at->format('F d, Y') }}</strong></p>
+            @endif
+            <p><strong>{{ trans('plugins/ecommerce::order.invoice') }}</strong> {{ $invoice->code }}</p>
         </td>
     </tr>
 </table>
@@ -176,36 +178,46 @@
 <table class="invoice-info-container">
     <tr>
         <td>
-            <p>{{ get_ecommerce_setting('store_name') }}</p>
-            <p>{{ get_ecommerce_setting('store_address') }}, {{ get_ecommerce_setting('store_city') }}, {{ get_ecommerce_setting('store_state') }}, {{ EcommerceHelper::getCountryNameById(get_ecommerce_setting('store_country')) }}</p>
-            <p>{{ get_ecommerce_setting('store_phone') }}</p>
-            @if (get_ecommerce_setting('store_vat_number'))
-                <p>{{ trans('plugins/ecommerce::ecommerce.setting.vat_number') }}: {{ get_ecommerce_setting('store_vat_number') }}</p>
+            @if (get_ecommerce_setting('company_name_for_invoicing') || get_ecommerce_setting('store_name'))
+                <p>{{ get_ecommerce_setting('company_name_for_invoicing') ?: get_ecommerce_setting('store_name') }}</p>
+            @endif
+
+            @if (get_ecommerce_setting('company_address_for_invoicing'))
+                <p>{{ get_ecommerce_setting('company_address_for_invoicing') }}</p>
+            @else
+                <p>{{ get_ecommerce_setting('store_address') }}, {{ get_ecommerce_setting('store_city') }}, {{ get_ecommerce_setting('store_state') }}, {{ EcommerceHelper::getCountryNameById(get_ecommerce_setting('store_country')) }}</p>
+            @endif
+            @if (get_ecommerce_setting('company_phone_for_invoicing') || get_ecommerce_setting('store_phone'))
+                <p>{{ get_ecommerce_setting('company_phone_for_invoicing') ?: get_ecommerce_setting('store_phone') }}</p>
+            @endif
+            @if (get_ecommerce_setting('company_email_for_invoicing') || get_ecommerce_setting('store_email'))
+                <p>{{ get_ecommerce_setting('company_email_for_invoicing') ?: get_ecommerce_setting('store_email') }}</p>
+            @endif
+
+            @if (get_ecommerce_setting('company_tax_id_for_invoicing') || get_ecommerce_setting('store_vat_number'))
+                <p>{{ trans('plugins/ecommerce::ecommerce.setting.vat_number') }}: {{ get_ecommerce_setting('company_tax_id_for_invoicing') ?: get_ecommerce_setting('store_vat_number') }}</p>
             @endif
         </td>
         <td>
-            @php
-                $address = $order->shippingAddress;
+            @if ($invoice->customer_name)
+                <p>{{ $invoice->customer_name }}</p>
+            @endif
+            @if ($invoice->customer_address )
+                <p>{{ $invoice->customer_address }}</p>
+            @endif
 
-                if (EcommerceHelper::isBillingAddressEnabled() && $order->billingAddress->id) {
-                    $address = $order->billingAddress;
-                }
-            @endphp
-
-            <p>{{ $address->name }}</p>
-            <p>{{ $address->full_address }}</p>
-            @if ($address->phone)
-                <p>{{ $address->phone }}</p>
+            @if ($invoice->customer_phone)
+                <p>{{ $invoice->customer_phone }}</p>
             @endif
         </td>
     </tr>
 </table>
 
-@if ($order->description)
+@if ($invoice->description)
     <table class="invoice-info-container">
         <tr style="text-align: left">
             <td style="text-align: left">
-                <p>{{ trans('plugins/ecommerce::order.note') }}: {{ $order->description }}</p>
+                <p>{{ trans('plugins/ecommerce::order.note') }}: {{ $invoice->description }}</p>
             </td>
         </tr>
     </table>
@@ -223,11 +235,11 @@
     </thead>
     <tbody>
 
-        @foreach ($order->products as $orderProduct)
+        @foreach ($invoice->items as $invoiceItem)
             @php
                 $product = get_products([
                     'condition' => [
-                        'ec_products.id' => $orderProduct->product_id,
+                        'ec_products.id' => $invoiceItem->reference_id,
                     ],
                     'take'   => 1,
                     'select' => [
@@ -250,13 +262,13 @@
             @if (!empty($product))
                 <tr>
                     <td>
-                        {{ $product->original_product->name ?: $orderProduct->product_name }}
+                        {{ $product->original_product->name ?: $invoiceItem->name }}
                     </td>
                     <td>
                         <small>{{ $product->variation_attributes }}</small>
 
-                        @if (!empty($orderProduct->options) && is_array($orderProduct->options))
-                            @foreach($orderProduct->options as $option)
+                        @if (!empty($invoiceItem->options) && is_array($invoiceItem->options))
+                            @foreach($invoiceItem->options as $option)
                                 @if (!empty($option['key']) && !empty($option['value']))
                                     <p class="mb-0">
                                         <small>{{ $option['key'] }}:
@@ -267,13 +279,13 @@
                         @endif
                     </td>
                     <td>
-                        {{ $orderProduct->qty }}
+                        {{ $invoiceItem->qty }}
                     </td>
                     <td class="right">
-                        {!! htmlentities(format_price($orderProduct->price)) !!}
+                        {!! htmlentities(format_price($invoiceItem->sub_total)) !!}
                     </td>
                     <td class="bold">
-                        {!! htmlentities(format_price($orderProduct->price * $orderProduct->qty)) !!}
+                        {!! htmlentities(format_price($invoiceItem->amount)) !!}
                     </td>
                 </tr>
             @endif
@@ -284,7 +296,7 @@
                 {{ trans('plugins/ecommerce::products.form.sub_total') }}
             </td>
             <td class="bold">
-                {!! htmlentities(format_price($order->sub_total)) !!}
+                {!! htmlentities(format_price($invoice->sub_total)) !!}
             </td>
         </tr>
         @if (EcommerceHelper::isTaxEnabled())
@@ -293,7 +305,7 @@
                     {{ trans('plugins/ecommerce::products.form.tax') }}
                 </td>
                 <td class="bold">
-                    {!! htmlentities(format_price($order->tax_amount)) !!}
+                    {!! htmlentities(format_price($invoice->tax_amount)) !!}
                 </td>
             </tr>
         @endif
@@ -302,7 +314,7 @@
                 {{ trans('plugins/ecommerce::products.form.shipping_fee') }}
             </td>
             <td class="bold">
-                {!! htmlentities(format_price($order->shipping_amount)) !!}
+                {!! htmlentities(format_price($invoice->shipping_amount)) !!}
             </td>
         </tr>
         <tr>
@@ -310,7 +322,7 @@
                 {{ trans('plugins/ecommerce::products.form.discount') }}
             </td>
             <td class="bold">
-                {!! htmlentities(format_price($order->discount_amount)) !!}
+                {!! htmlentities(format_price($invoice->discount_amount)) !!}
             </td>
         </tr>
     </tbody>
@@ -318,29 +330,35 @@
 
 <table class="line-items-container">
     <thead>
-    <tr>
-        <th>{{ trans('plugins/ecommerce::order.payment_info') }}</th>
-        <th>{{ trans('plugins/ecommerce::order.total_amount') }}</th>
-    </tr>
+        <tr>
+            <th>{{ trans('plugins/ecommerce::order.payment_info') }}</th>
+            <th>{{ trans('plugins/ecommerce::order.total_amount') }}</th>
+        </tr>
     </thead>
     <tbody>
-    <tr>
-        <td class="payment-info">
-            <div>
-                {{ trans('plugins/ecommerce::order.payment_method') }}: <strong>{{ $order->payment->payment_channel->label() }}</strong>
-            </div>
-            <div>
-                {{ trans('plugins/ecommerce::order.payment_status_label') }}: <strong>{{ $order->payment->status->label() }}</strong>
-            </div>
+        <tr>
+            <td class="payment-info">
 
-            @if ($order->payment->payment_channel == \Botble\Payment\Enums\PaymentMethodEnum::BANK_TRANSFER && $order->payment->status == \Botble\Payment\Enums\PaymentStatusEnum::PENDING)
-                <div>
-                    {{ trans('plugins/ecommerce::order.payment_info') }}: <strong>{!! BaseHelper::clean(get_payment_setting('description', $order->payment->payment_channel)) !!}</strong>
-                </div>
-            @endif
-        </td>
-        <td class="large total">{!! htmlentities(format_price($order->amount)) !!}</td>
-    </tr>
+                @if ($invoice->payment->payment_channel->label())
+                    <div>
+                        {{ trans('plugins/ecommerce::order.payment_method') }}: <strong>{{ $invoice->payment->payment_channel->label() }}</strong>
+                    </div>
+                @endif
+
+                @if ($invoice->payment->status->label())
+                    <div>
+                        {{ trans('plugins/ecommerce::order.payment_status_label') }}: <strong>{{ $invoice->payment->status->label() }}</strong>
+                    </div>
+                @endif
+
+                @if ($invoice->payment->payment_channel == \Botble\Payment\Enums\PaymentMethodEnum::BANK_TRANSFER && $invoice->payment->status == \Botble\Payment\Enums\PaymentStatusEnum::PENDING)
+                    <div>
+                        {{ trans('plugins/ecommerce::order.payment_info') }}: <strong>{!! BaseHelper::clean(get_payment_setting('description', $invoice->payment->payment_channel)) !!}</strong>
+                    </div>
+                @endif
+            </td>
+            <td class="large total">{!! htmlentities(format_price($invoice->amount)) !!}</td>
+        </tr>
     </tbody>
 </table>
 </body>

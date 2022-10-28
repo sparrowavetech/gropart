@@ -1,6 +1,7 @@
 <?php
 
 use Botble\Ecommerce\Enums\OrderStatusEnum;
+use Carbon\Carbon;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -19,7 +20,7 @@ return new class () extends Migration {
             });
         }
 
-        DB::table('ec_orders')->where('status', OrderStatusEnum::COMPLETED)->update(['completed_at' => now()]);
+        DB::table('ec_orders')->where('status', OrderStatusEnum::COMPLETED)->update(['completed_at' => Carbon::now()]);
     }
 
     /**

@@ -7,7 +7,7 @@
     <div class="widget-body">
         <div class="btn-set">
             @if ($role && $role->id)
-                <a href="{{ route('roles.duplicate', [$role->id]) }}" class="btn btn-warning"><i class="fa fa-copy"></i> {{ trans('core/acl::permissions.duplicate') }}</a>
+                <a href="{{ route('roles.duplicate', $role->id) }}" class="btn btn-warning"><i class="fa fa-copy"></i> {{ trans('core/acl::permissions.duplicate') }}</a>
             @endif
             <button type="submit" name="submit" value="save" class="btn btn-info">
                 <i class="fa fa-save"></i> {{ trans('core/base::forms.save') }}
@@ -23,7 +23,7 @@
     {!! Breadcrumbs::render('main', page_title()->getTitle(false)) !!}
     <div class="btn-set">
         @if ($role && $role->id)
-            <a href="{{ route('roles.duplicate', [$role->id]) }}" class="btn btn-warning"><i class="fa fa-copy"></i> {{ trans('core/acl::permissions.duplicate') }}</a>
+            <a href="{{ route('roles.duplicate', $role->id) }}" class="btn btn-warning"><i class="fa fa-copy"></i> {{ trans('core/acl::permissions.duplicate') }}</a>
         @endif
         <button type="submit" name="submit" value="save" class="btn btn-info">
             <i class="fa fa-save"></i> {{ trans('core/base::forms.save') }}

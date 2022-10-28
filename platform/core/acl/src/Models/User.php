@@ -70,31 +70,20 @@ class User extends Authenticatable
         'permissions' => 'json',
     ];
 
-    /**
-     * Always capitalize the first name when we retrieve it
-     * @param string $value
-     * @return string
-     */
-    public function getFirstNameAttribute($value)
+    public function getFirstNameAttribute(?string $value): string
     {
-        return ucfirst($value);
+        return ucfirst((string)$value);
+    }
+
+    public function getLastNameAttribute(?string $value): string
+    {
+        return ucfirst((string)$value);
     }
 
     /**
-     * Always capitalize the last name when we retrieve it
-     * @param string $value
-     * @return string
-     */
-    public function getLastNameAttribute($value)
-    {
-        return ucfirst($value);
-    }
-
-    /**
-     * @return string
      * @deprecated since v5.15
      */
-    public function getFullName()
+    public function getFullName(): string
     {
         return $this->name;
     }
@@ -104,7 +93,7 @@ class User extends Authenticatable
      */
     public function getNameAttribute(): string
     {
-        return ucfirst($this->first_name) . ' ' . ucfirst($this->last_name);
+        return ucfirst((string)$this->first_name) . ' ' . ucfirst((string)$this->last_name);
     }
 
     /**
@@ -115,10 +104,7 @@ class User extends Authenticatable
         return $this->belongsTo(MediaFile::class)->withDefault();
     }
 
-    /**
-     * @return string
-     */
-    public function getAvatarUrlAttribute()
+    public function getAvatarUrlAttribute(): string
     {
         if ($this->avatar->url) {
             return RvMedia::url($this->avatar->url);
@@ -131,11 +117,7 @@ class User extends Authenticatable
         }
     }
 
-    /**
-     * @param string $value
-     * @return array
-     */
-    public function getPermissionsAttribute($value): array
+    public function getPermissionsAttribute(?string $value): array
     {
         try {
             return json_decode($value ?: '', true) ?: [];
@@ -144,20 +126,11 @@ class User extends Authenticatable
         }
     }
 
-    /**
-     * Set mutator for the "permissions" attribute.
-     *
-     * @param array $permissions
-     * @return void
-     */
     public function setPermissionsAttribute(array $permissions)
     {
         $this->attributes['permissions'] = $permissions ? json_encode($permissions) : '';
     }
 
-    /**
-     * @return BelongsToMany
-     */
     public function roles(): BelongsToMany
     {
         return $this
@@ -165,18 +138,11 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
-    /**
-     * @return bool
-     */
     public function isSuperUser(): bool
     {
         return $this->super_user || $this->hasAccess(ACL_ROLE_SUPER_USER);
     }
 
-    /**
-     * @param string $permission
-     * @return bool
-     */
     public function hasPermission(string $permission): bool
     {
         if ($this->isSuperUser()) {
@@ -186,10 +152,6 @@ class User extends Authenticatable
         return $this->hasAccess($permission);
     }
 
-    /**
-     * @param array $permissions
-     * @return bool
-     */
     public function hasAnyPermission(array $permissions): bool
     {
         if ($this->isSuperUser()) {
@@ -210,17 +172,11 @@ class User extends Authenticatable
         $this->notify(new ResetPasswordNotification($token));
     }
 
-    /**
-     * @return HasMany
-     */
     public function activations(): HasMany
     {
         return $this->hasMany(Activation::class, 'user_id');
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function inRole($role): bool
     {
         $roleId = null;
@@ -244,10 +200,7 @@ class User extends Authenticatable
         return false;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function delete()
+    public function delete(): ?bool
     {
         if ($this->exists) {
             $this->activations()->delete();

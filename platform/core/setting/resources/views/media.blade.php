@@ -213,6 +213,14 @@
 
                     <div class="form-group mb-3">
                         <label class="text-title-field"
+                               for="max_upload_filesize">{{ trans('core/setting::setting.media.max_upload_filesize') }}</label>
+                        <input type="number" class="next-input" name="max_upload_filesize" id="max_upload_filesize" step="0.01"
+                               value="{{ setting('max_upload_filesize') }}" placeholder="{{ trans('core/setting::setting.media.max_upload_filesize_placeholder', ['size' => $maxSize = BaseHelper::humanFilesize(RvMedia::getServerConfigMaxUploadFileSize())]) }}">
+                        {{ Form::helper(trans('core/setting::setting.media.max_upload_filesize_helper', ['size' => $maxSize])) }}
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="text-title-field"
                                for="media_chunk_enabled">{{ trans('core/setting::setting.media.enable_chunk') }}
                         </label>
                         <label class="me-2">

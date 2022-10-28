@@ -69,7 +69,7 @@ class RevenueTable extends TableAbstract
 
                 return Html::link(
                     route('marketplace.vendor.orders.edit', $item->order->id),
-                    get_order_code($item->order->id),
+                    $item->order->code,
                     ['target' => '_blank']
                 );
             })

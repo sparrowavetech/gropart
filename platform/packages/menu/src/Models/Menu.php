@@ -43,17 +43,11 @@ class Menu extends BaseModel
         });
     }
 
-    /**
-     * @return HasMany
-     */
     public function menuNodes(): HasMany
     {
         return $this->hasMany(MenuNode::class, 'menu_id');
     }
 
-    /**
-     * @return HasMany
-     */
     public function locations(): HasMany
     {
         return $this->hasMany(MenuLocation::class, 'menu_id');

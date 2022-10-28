@@ -104,7 +104,7 @@ class RoleTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function columns()
+    public function columns(): array
     {
         return [
             'id'          => [
@@ -132,7 +132,7 @@ class RoleTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function buttons()
+    public function buttons(): array
     {
         return $this->addCreateButton(route('roles.create'), 'roles.create');
     }

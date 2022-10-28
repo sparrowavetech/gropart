@@ -523,7 +523,7 @@ trait ProductActionsTrait
 
         $addedAttributes = $request->input('attribute_sets', []);
 
-        if ($addedAttributes && !empty($addedAttributes) && is_array($addedAttributes)) {
+        if (!empty($addedAttributes) && is_array($addedAttributes)) {
             $result = $productVariation->getVariationByAttributesOrCreate(
                 $variation->configurable_product_id,
                 $addedAttributes

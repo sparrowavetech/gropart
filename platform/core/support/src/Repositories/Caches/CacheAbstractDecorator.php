@@ -5,7 +5,6 @@ namespace Botble\Support\Repositories\Caches;
 use Botble\Support\Repositories\Interfaces\RepositoryInterface;
 use Botble\Support\Services\Cache\Cache;
 use Exception;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Database\Eloquent\Model;
 use Psr\SimpleCache\InvalidArgumentException;
 
@@ -33,19 +32,11 @@ abstract class CacheAbstractDecorator implements RepositoryInterface
     }
 
     /**
-     * @return Cache
-     */
-    public function getCacheInstance()
-    {
-        return $this->cache;
-    }
-
-    /**
      * @param string $function
      * @param array $args
      * @return mixed
      */
-    public function getDataIfExistCache($function, array $args)
+    public function getDataIfExistCache(string $function, array $args)
     {
         if (!setting('enable_cache', false)) {
             return call_user_func_array([$this->repository, $function], $args);
@@ -65,7 +56,6 @@ abstract class CacheAbstractDecorator implements RepositoryInterface
 
             $cacheData = call_user_func_array([$this->repository, $function], $args);
 
-            // Store in cache for next request
             $this->cache->put($cacheKey, $cacheData);
 
             return $cacheData;
@@ -80,7 +70,7 @@ abstract class CacheAbstractDecorator implements RepositoryInterface
      * @param array $args
      * @return mixed
      */
-    public function getDataWithoutCache($function, array $args)
+    public function getDataWithoutCache(string $function, array $args)
     {
         return call_user_func_array([$this->repository, $function], $args);
     }
@@ -91,14 +81,10 @@ abstract class CacheAbstractDecorator implements RepositoryInterface
      * @param boolean $flushCache
      * @return mixed
      */
-    public function flushCacheAndUpdateData($function, $args, $flushCache = true)
+    public function flushCacheAndUpdateData(string $function, array $args, bool $flushCache = true)
     {
         if ($flushCache) {
-            try {
-                $this->cache->flush();
-            } catch (FileNotFoundException $exception) {
-                info($exception->getMessage());
-            }
+            $this->cache->flush();
         }
 
         return call_user_func_array([$this->repository, $function], $args);
@@ -115,7 +101,7 @@ abstract class CacheAbstractDecorator implements RepositoryInterface
     /**
      * {@inheritDoc}
      */
-    public function setModel($model)
+    public function setModel(string $model)
     {
         return $this->repository->setModel($model);
     }
@@ -123,7 +109,7 @@ abstract class CacheAbstractDecorator implements RepositoryInterface
     /**
      * {@inheritDoc}
      */
-    public function getTable()
+    public function getTable(): string
     {
         return $this->repository->getTable();
     }
@@ -131,7 +117,7 @@ abstract class CacheAbstractDecorator implements RepositoryInterface
     /**
      * {@inheritDoc}
      */
-    public function applyBeforeExecuteQuery($data, $isSingle = false)
+    public function applyBeforeExecuteQuery($data, bool $isSingle = false)
     {
         return $this->repository->applyBeforeExecuteQuery($data, $isSingle);
     }
@@ -171,7 +157,7 @@ abstract class CacheAbstractDecorator implements RepositoryInterface
     /**
      * {@inheritDoc}
      */
-    public function pluck($column, $key = null, array $condition = [])
+    public function pluck(string $column, $key = null, array $condition = []): array
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }
@@ -211,7 +197,7 @@ abstract class CacheAbstractDecorator implements RepositoryInterface
     /**
      * {@inheritDoc}
      */
-    public function delete(Model $model)
+    public function delete(Model $model): bool
     {
         return $this->flushCacheAndUpdateData(__FUNCTION__, func_get_args());
     }
@@ -251,7 +237,7 @@ abstract class CacheAbstractDecorator implements RepositoryInterface
     /**
      * {@inheritDoc}
      */
-    public function count(array $condition = [])
+    public function count(array $condition = []): int
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }
@@ -299,7 +285,7 @@ abstract class CacheAbstractDecorator implements RepositoryInterface
     /**
      * {@inheritDoc}
      */
-    public function insert(array $data)
+    public function insert(array $data): bool
     {
         return $this->flushCacheAndUpdateData(__FUNCTION__, func_get_args());
     }

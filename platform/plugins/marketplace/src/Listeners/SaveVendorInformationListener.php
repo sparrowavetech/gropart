@@ -8,6 +8,7 @@ use Botble\Marketplace\Models\Store;
 use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
 use Botble\Marketplace\Repositories\Interfaces\VendorInfoInterface;
 use Botble\Slug\Models\Slug;
+use Carbon\Carbon;
 use EmailHandler;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
@@ -99,7 +100,7 @@ class SaveVendorInformationListener
                     $mailer->sendUsingTemplate('verify_vendor', get_admin_email()->first());
                 }
             } else {
-                $customer->vendor_verified_at = now();
+                $customer->vendor_verified_at = Carbon::now();
             }
 
             if (!$customer->vendorInfo->id) {

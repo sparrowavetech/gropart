@@ -5,7 +5,7 @@
                 <h5>{{ __('Order information') }}</h5>
                 <p>
                     <span>{{ __('Order number') }}: </span>
-                    <strong>{{ get_order_code($order->id) }}</strong>
+                    <strong>{{ $order->code }}</strong>
                 </p>
                 <p>
                     <span>{{ __('Time') }}: </span>
@@ -85,10 +85,10 @@
                                     <td class="text-center">
                                         {!! Form::checkbox('return_items[' . $key . '][is_return]', 'checked', true) !!}
                                         <input hidden name="return_items[{{ $key }}][order_item_id]"
-                                               value="{{$orderProduct->id}}"></td>
+                                               value="{{ $orderProduct->id }}"></td>
                                     <td class="text-center">
                                         <img
-                                            src="{{ RvMedia::getImageUrl($product ? $product->image : null, 'thumb', false, RvMedia::getDefaultImage()) }}"
+                                            src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}"
                                             alt="{{ $orderProduct->product_name }}" width="50">
                                     </td>
                                     <td>

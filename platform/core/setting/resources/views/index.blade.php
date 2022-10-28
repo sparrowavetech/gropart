@@ -222,20 +222,22 @@
                                    for="enable_cache">{{ trans('core/setting::setting.general.enable_cache') }}
                             </label>
                             <label class="me-2">
-                                <input type="radio" name="enable_cache" value="1" @if (setting('enable_cache')) checked @endif>
+                                <input type="radio" name="enable_cache" value="1" @if (setting('enable_cache')) checked @endif class="setting-selection-option" data-target="#cache-settings">
                                 {{ trans('core/setting::setting.general.yes') }}
                             </label>
                             <label>
-                                <input type="radio" name="enable_cache" value="0" @if (!setting('enable_cache')) checked @endif>
+                                <input type="radio" name="enable_cache" value="0" @if (!setting('enable_cache')) checked @endif class="setting-selection-option" data-target="#cache-settings">
                                 {{ trans('core/setting::setting.general.no') }}
                             </label>
                         </div>
 
-                        <div class="form-group mb-3">
-                            <label class="text-title-field"
-                                   for="cache_time">{{ trans('core/setting::setting.general.cache_time') }}</label>
-                            <input type="number" class="next-input" name="cache_time" id="cache_time"
-                                   value="{{ setting('cache_time', 10) }}">
+                        <div id="cache-settings" class="mb-4 border rounded-top rounded-bottom p-3 bg-light @if (!setting('enable_cache')) d-none @endif">
+                            <div class="form-group mb-3">
+                                <label class="text-title-field"
+                                       for="cache_time">{{ trans('core/setting::setting.general.cache_time') }}</label>
+                                <input type="number" class="next-input" name="cache_time" id="cache_time"
+                                       value="{{ setting('cache_time', 10) }}">
+                            </div>
                         </div>
 
                         <div class="form-group mb-3">

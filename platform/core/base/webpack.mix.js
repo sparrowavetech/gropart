@@ -24,6 +24,7 @@ mix
     .js(source + '/resources/assets/js/editor.js', dist + '/js')
     .js(source + '/resources/assets/js/cache.js', dist + '/js')
     .js(source + '/resources/assets/js/tags.js', dist + '/js')
+    .js(source + '/resources/assets/js/form/phone-number-field.js', dist + '/js')
     .js(source + '/resources/assets/js/system-info.js', dist + '/js')
     .js(source + '/resources/assets/js/repeater-field.js', dist + '/js')
     .js(source + '/resources/assets/js/tree-category.js', dist + '/js')

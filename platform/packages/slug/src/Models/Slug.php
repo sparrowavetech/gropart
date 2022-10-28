@@ -24,9 +24,6 @@ class Slug extends BaseModel
         'prefix',
     ];
 
-    /**
-     * @return BelongsTo
-     */
     public function reference(): BelongsTo
     {
         return $this->morphTo();

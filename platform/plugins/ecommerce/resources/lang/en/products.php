@@ -22,8 +22,8 @@ return [
         'height'                             => 'Height',
         'weight'                             => 'Weight',
         'date'                               => [
-            'end'   => 'From date',
-            'start' => 'To date',
+            'start' => 'From date',
+            'end'   => 'To date',
         ],
         'image'                              => 'Images',
         'collections'                        => 'Product collections',

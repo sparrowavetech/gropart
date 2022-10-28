@@ -5,6 +5,7 @@ namespace Botble\Base\Providers;
 use App\Http\Middleware\VerifyCsrfToken;
 use BaseHelper;
 use Botble\Base\Exceptions\Handler;
+use Botble\Base\Hooks\EmailSettingHooks;
 use Botble\Base\Http\Middleware\CoreMiddleware;
 use Botble\Base\Http\Middleware\DisableInDemoModeMiddleware;
 use Botble\Base\Http\Middleware\HttpsProtocolMiddleware;
@@ -128,6 +129,7 @@ class BaseServiceProvider extends ServiceProvider
         $this->app->booted(function () use ($config) {
             do_action(BASE_ACTION_INIT);
             add_action(BASE_ACTION_META_BOXES, [MetaBox::class, 'doMetaBoxes'], 8, 2);
+            add_filter(BASE_FILTER_AFTER_SETTING_EMAIL_CONTENT, [EmailSettingHooks::class, 'addEmailTemplateSettings'], 99);
 
             $setting = $this->app[SettingStore::class];
             $timezone = $setting->get('time_zone', $config->get('app.timezone'));
@@ -177,8 +179,8 @@ class BaseServiceProvider extends ServiceProvider
 
         $config->set([
             'purifier.settings'                           => array_merge(
-                $config->get('purifier.settings'),
-                $config->get('core.base.general.purifier')
+                $config->get('purifier.settings', []),
+                $config->get('core.base.general.purifier', [])
             ),
             'laravel-form-builder.defaults.wrapper_class' => 'form-group mb-3',
             'database.connections.mysql.strict'           => $config->get('core.base.general.db_strict_mode'),
@@ -191,7 +193,7 @@ class BaseServiceProvider extends ServiceProvider
                     'path'   => storage_path('logs/php-deprecation-warnings.log'),
                 ],
             ]);
-        };
+        }
     }
 
     /**

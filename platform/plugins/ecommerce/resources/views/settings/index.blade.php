@@ -18,8 +18,16 @@
                             <input type="text" class="next-input" name="store_name" id="store_name" value="{{ get_ecommerce_setting('store_name') }}">
                         </div>
                         <div class="form-group mb-3">
+                            <label class="text-title-field" for="store_company">{{ trans('plugins/ecommerce::store-locator.company') }}</label>
+                            <input type="text" class="next-input" name="store_company" id="store_company" value="{{ get_ecommerce_setting('store_company') }}">
+                        </div>
+                        <div class="form-group mb-3">
                             <label class="text-title-field" for="store_phone">{{ trans('plugins/ecommerce::store-locator.phone') }}</label>
                             <input type="text" class="next-input" name="store_phone" id="store_phone" value="{{ get_ecommerce_setting('store_phone') }}">
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="text-title-field" for="store_email">{{ trans('plugins/ecommerce::store-locator.email') }}</label>
+                            <input type="email" class="next-input" name="store_email" id="store_email" value="{{ get_ecommerce_setting('store_email') }}">
                         </div>
                         <div class="form-group mb-3">
                             <label class="text-title-field" for="store_address">{{ trans('plugins/ecommerce::store-locator.address') }}</label>
@@ -80,6 +88,12 @@
                                 @endif
                             </div>
                         </div>
+                        @if (EcommerceHelper::isZipCodeEnabled())
+                            <div class="form-group mb-3">
+                                <label class="text-title-field" for="store_zip_code">{{ trans('plugins/ecommerce::store-locator.zip_code') }}</label>
+                                <input type="text" class="next-input" name="store_zip_code" id="store_zip_code" value="{{ get_ecommerce_setting('store_zip_code') }}">
+                            </div>
+                        @endif
                         <div class="form-group mb0">
                             <label class="text-title-field" for="store_vat_number">{{ trans('plugins/ecommerce::ecommerce.setting.vat_number') }}</label>
                             <input type="text" class="next-input" name="store_vat_number" id="store_vat_number" value="{{ get_ecommerce_setting('store_vat_number') }}">

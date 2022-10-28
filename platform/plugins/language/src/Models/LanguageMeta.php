@@ -3,7 +3,7 @@
 namespace Botble\Language\Models;
 
 use Botble\Base\Models\BaseModel;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Language as LanguageFacade;
 
 class LanguageMeta extends BaseModel
@@ -36,9 +36,9 @@ class LanguageMeta extends BaseModel
     ];
 
     /**
-     * @return BelongsTo
+     * @return MorphTo
      */
-    public function reference()
+    public function reference(): MorphTo
     {
         return $this->morphTo()->withDefault();
     }

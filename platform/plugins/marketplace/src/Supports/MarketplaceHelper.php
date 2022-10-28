@@ -137,4 +137,9 @@ class MarketplaceHelper
                 'store_name'       => $order->store->name,
             ]);
     }
+
+    public function isCommissionCategoryFeeBasedEnabled(): bool
+    {
+        return MarketplaceHelper::getSetting('enable_commission_fee_for_each_category') == 1;
+    }
 }

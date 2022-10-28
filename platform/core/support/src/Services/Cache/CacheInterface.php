@@ -10,17 +10,17 @@ interface CacheInterface
      * @param string $key
      * @return mixed PHP data result of cache
      */
-    public function get($key);
+    public function get(string $key);
 
     /**
      * Add data to the cache.
      *
      * @param string $key
      * @param $value
-     * @param bool $minutes
+     * @param int|bool $minutes
      * @return mixed $value variable returned for convenience
      */
-    public function put($key, $value, $minutes = false);
+    public function put(string $key, $value, $minutes = false);
 
     /**
      * Test if item exists in cache
@@ -29,12 +29,12 @@ interface CacheInterface
      * @param string $key
      * @return bool If cache item exists
      */
-    public function has($key);
+    public function has(string $key): bool;
 
     /**
      * Flush cache
      *
      * @return bool If cache is flushed
      */
-    public function flush();
+    public function flush(): bool;
 }

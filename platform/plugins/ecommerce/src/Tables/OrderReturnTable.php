@@ -66,7 +66,7 @@ class OrderReturnTable extends TableAbstract
                 return BaseHelper::clean($item->reason->toHtml());
             })
             ->editColumn('order_id', function ($item) {
-                return BaseHelper::clean(get_order_code($item->order_id));
+                return BaseHelper::clean($item->order->code);
             })
             ->editColumn('user_id', function ($item) {
                 if (!$item->customer->name) {

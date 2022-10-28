@@ -9,6 +9,7 @@ use Botble\Media\Chunks\FileMerger;
 use Botble\Media\Chunks\Handler\AbstractHandler;
 use Botble\Media\Chunks\Storage\ChunkStorage;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 class ParallelSave extends ChunkSave
@@ -35,7 +36,7 @@ class ParallelSave extends ChunkSave
     /**
      * {@inheritDoc}
      */
-    public function isValid()
+    public function isValid(): bool
     {
         return $this->isFileValid;
     }
@@ -43,7 +44,7 @@ class ParallelSave extends ChunkSave
     /**
      * {@inheritDoc}
      */
-    protected function handleChunkFile($file)
+    protected function handleChunkFile($file): ChunkSave
     {
         // Move the uploaded file to chunk folder
         $this->file->move($this->getChunkDirectory(true), $this->chunkFileName);
@@ -54,15 +55,15 @@ class ParallelSave extends ChunkSave
     /**
      * {@inheritDoc}
      */
-    protected function tryToBuildFullFileFromChunks()
+    protected function tryToBuildFullFileFromChunks(): ChunkSave
     {
         return parent::tryToBuildFullFileFromChunks();
     }
 
     /**
-     * {@inheritDoc}
+     * @return Collection
      */
-    protected function getSavedChunksFiles()
+    protected function getSavedChunksFiles(): Collection
     {
         $chunkFileName = preg_replace(
             '/\\.[\\d]+\\.' . ChunkStorage::CHUNK_EXTENSION . '$/',
@@ -103,7 +104,7 @@ class ParallelSave extends ChunkSave
         // Append each chunk file
         foreach ($chunkFiles as $filePath) {
             // Build the chunk file
-            $chunkFile = new ChunkFile($filePath, null, $this->chunkStorage());
+            $chunkFile = new ChunkFile($filePath, 0, $this->chunkStorage());
 
             // Append the data
             $fileMerger->appendFile($chunkFile->getAbsolutePath());

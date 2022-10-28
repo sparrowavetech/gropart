@@ -7,6 +7,7 @@ use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Support\Http\Requests\Request;
 use Cart;
 use EcommerceHelper;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 
 class CheckoutRequest extends Request
@@ -19,17 +20,19 @@ class CheckoutRequest extends Request
      */
     public function rules()
     {
+        $paymentMethods = Arr::where(PaymentMethodEnum::values(), function ($value) {
+            return get_payment_setting('status', $value) == 1;
+        });
+
         $rules = [
-            'payment_method'  => 'required|' . Rule::in(PaymentMethodEnum::values()),
+            'payment_method'  => 'required|' . Rule::in($paymentMethods),
             'shipping_method' => 'required|' . Rule::in(ShippingMethodEnum::values()),
             'amount'          => 'required|min:0',
         ];
 
         $rules['address.address_id'] = 'required_without:address.name';
         if (!$this->has('address.address_id') || $this->input('address.address_id') === 'new') {
-            foreach (EcommerceHelper::getCustomerAddressValidationRules() as $key => $item) {
-                $rules['address.' . $key] = $item;
-            }
+            $rules = array_merge($rules, EcommerceHelper::getCustomerAddressValidationRules('address.'));
         }
 
         if ($this->input('create_account') == 1) {

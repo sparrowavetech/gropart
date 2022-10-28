@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Services;
 
 use Botble\Ecommerce\Repositories\Interfaces\DiscountInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
+use Carbon\Carbon;
 use Cart;
 use Eloquent;
 use Illuminate\Database\Eloquent\Builder;
@@ -237,7 +238,7 @@ class HandleApplyCouponService
             ->getModel()
             ->where('code', $couponCode)
             ->where('type', 'coupon')
-            ->where('start_date', '<=', now())
+            ->where('start_date', '<=', Carbon::now())
             ->where(function ($query) use ($sessionData) {
                 /**
                  * @var Builder $query
@@ -255,7 +256,7 @@ class HandleApplyCouponService
                                  */
                                 return $subSub
                                     ->whereNull('end_date')
-                                    ->orWhere('end_date', '>=', now());
+                                    ->orWhere('end_date', '>=', Carbon::now());
                             });
                     })
                     ->orWhere(function ($sub) use ($sessionData) {

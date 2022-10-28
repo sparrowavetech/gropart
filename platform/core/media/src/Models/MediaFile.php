@@ -60,17 +60,11 @@ class MediaFile extends BaseModel
         });
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function folder(): BelongsTo
     {
         return $this->belongsTo(MediaFolder::class, 'id', 'folder_id');
     }
 
-    /**
-     * @return string
-     */
     public function getTypeAttribute(): string
     {
         $type = 'document';
@@ -85,17 +79,11 @@ class MediaFile extends BaseModel
         return $type;
     }
 
-    /**
-     * @return string
-     */
     public function getHumanSizeAttribute(): string
     {
         return BaseHelper::humanFilesize($this->attributes['size']);
     }
 
-    /**
-     * @return string
-     */
     public function getIconAttribute(): string
     {
         switch ($this->type) {
@@ -119,18 +107,12 @@ class MediaFile extends BaseModel
         return $icon;
     }
 
-    /**
-     * @return bool
-     */
     public function canGenerateThumbnails(): bool
     {
         return RvMedia::canGenerateThumbnails($this->mime_type);
     }
 
-    /**
-     * @return string|null
-     */
-    public function getPreviewUrlAttribute()
+    public function getPreviewUrlAttribute(): ?string
     {
         $preview = null;
         switch ($this->type) {
@@ -155,10 +137,7 @@ class MediaFile extends BaseModel
         return $preview;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getPreviewTypeAttribute()
+    public function getPreviewTypeAttribute(): ?string
     {
         return Arr::get(config('core.media.media.preview', []), $this->type . '.type');
     }

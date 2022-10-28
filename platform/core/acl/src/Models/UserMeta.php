@@ -8,14 +8,12 @@ use Botble\Base\Models\BaseModel;
 class UserMeta extends BaseModel
 {
     /**
-     * The database table used by the model.
-     *
-     * @var string
+     * {@inheritdoc}
      */
     protected $table = 'user_meta';
 
     /**
-     * @var array
+     * {@inheritdoc}
      */
     protected $fillable = [
         'key',
@@ -24,7 +22,7 @@ class UserMeta extends BaseModel
     ];
 
     /**
-     * @var array
+     * {@inheritdoc}
      */
     protected $dates = [
         'created_at',

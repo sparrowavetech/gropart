@@ -111,8 +111,9 @@ class HookServiceProvider extends ServiceProvider
                         'type'       => 'mediaImage',
                         'label'      => trans('packages/theme::theme.theme_option_favicon'),
                         'attributes' => [
-                            'name'  => 'favicon',
-                            'value' => null,
+                            'name'       => 'favicon',
+                            'value'      => null,
+                            'attributes' => ['allow_thumb' => false],
                         ],
                     ],
                     [
@@ -120,8 +121,9 @@ class HookServiceProvider extends ServiceProvider
                         'type'       => 'mediaImage',
                         'label'      => trans('packages/theme::theme.theme_option_logo'),
                         'attributes' => [
-                            'name'  => 'logo',
-                            'value' => null,
+                            'name'       => 'logo',
+                            'value'      => null,
+                            'attributes' => ['allow_thumb' => false],
                         ],
                     ],
                 ],
@@ -151,11 +153,11 @@ class HookServiceProvider extends ServiceProvider
                 $videoId = Vimeo::getVimeoID($url);
                 if ($videoId) {
                     $iframe = Html::tag('iframe', '', [
-                        'class'           => 'embed-responsive-item',
-                        'height'          => 315,
-                        'width'           => 420,
-                        'allow'           => 'autoplay; fullscreen; picture-in-picture',
-                        'src'             => 'https://player.vimeo.com/video/' . $videoId,
+                        'class'  => 'embed-responsive-item',
+                        'height' => 315,
+                        'width'  => 420,
+                        'allow'  => 'autoplay; fullscreen; picture-in-picture',
+                        'src'    => 'https://player.vimeo.com/video/' . $videoId,
                     ])->toHtml();
                 }
             }

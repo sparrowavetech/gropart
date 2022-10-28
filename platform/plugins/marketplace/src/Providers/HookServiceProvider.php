@@ -199,7 +199,7 @@ class HookServiceProvider extends ServiceProvider
                             'user_id'         => Auth::id(),
                             'type'            => RevenueTypeEnum::SUBTRACT_AMOUNT,
                             'description'     => trans('plugins/marketplace::order.refund.description', [
-                                'order' => get_order_code($order->id),
+                                'order' => $order->code,
                             ]),
                             'amount'          => $refundAmount,
                             'sub_amount'      => $refundAmount,

@@ -118,7 +118,10 @@ class BulkImportController extends BaseController
     {
         $extension = $request->input('extension');
         $extension = $extension == 'csv' ? $extension : Excel::XLSX;
+        $writeType = $extension == 'csv' ? Excel::CSV : Excel::XLSX;
+        $contentType = $extension == 'csv' ? ['Content-Type' => 'text/csv'] : ['Content-Type' => 'text/xlsx'];
+        $fileName = 'template_products_import.' . $extension;
 
-        return (new TemplateProductExport($extension))->download('template_products_import.' . $extension);
+        return (new TemplateProductExport($extension))->download($fileName, $writeType, $contentType);
     }
 }

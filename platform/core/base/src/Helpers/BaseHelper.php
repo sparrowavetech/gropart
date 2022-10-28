@@ -4,6 +4,7 @@ namespace Botble\Base\Helpers;
 
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
@@ -85,6 +86,7 @@ class BaseHelper
      * @param string $file
      * @param bool $convertToArray
      * @return array|bool|mixed|null
+     * @throws FileNotFoundException
      */
     public function getFileData(string $file, bool $convertToArray = true)
     {
@@ -439,5 +441,22 @@ class BaseHelper
         }
 
         return $value;
+    }
+
+    /**
+     * @param string|null $content
+     * @return string|null
+     */
+    public function cleanShortcodes(?string $content): ?string
+    {
+        if (!$content) {
+            return $content;
+        }
+
+        $content = $this->clean($content);
+
+        $shortcodeCompiler = shortcode()->getCompiler();
+
+        return $shortcodeCompiler->strip($content, []);
     }
 }

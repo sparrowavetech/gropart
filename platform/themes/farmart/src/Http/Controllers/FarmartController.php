@@ -297,6 +297,9 @@ class FarmartController extends PublicController
                     'slugable',
                     'tags',
                     'tags.slugable',
+                    'options' => function($query) {
+                        return $query->with('values');
+                    }
                 ],
                 'withCount' => EcommerceHelper::withReviewsCount(),
             ]);

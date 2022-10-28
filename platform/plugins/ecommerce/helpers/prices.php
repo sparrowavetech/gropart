@@ -98,7 +98,7 @@ if (!function_exists('is_product_on_sale')) {
             return true;
         }
 
-        $now = now();
+        $now = Carbon::now();
 
         $startDate = Carbon::parse($startDate);
         $endDate = Carbon::parse($endDate);

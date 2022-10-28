@@ -2,15 +2,18 @@
 
 namespace Botble\Marketplace\Http\Controllers;
 
+use Assets;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Supports\Helper;
+use Botble\Ecommerce\Repositories\Interfaces\ProductCategoryInterface;
+use Botble\Marketplace\Http\Requests\MarketPlaceSettingFormRequest;
+use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
 use Botble\Setting\Supports\SettingStore;
-use Exception;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
-use Illuminate\Http\Request;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
-use Illuminate\View\View;
 use MarketplaceHelper;
 
 class MarketplaceController extends BaseController
@@ -19,55 +22,75 @@ class MarketplaceController extends BaseController
      * @var SettingStore
      */
     protected $settingStore;
+    /**
+     * @var StoreInterface
+     */
+    private $storeRepository;
 
     /**
      * MarketplaceController constructor.
-     * @param SettingStore $storeLocatorRepository
+     * @param SettingStore $settingStore
+     * @param StoreInterface $storeRepository
      */
-    public function __construct(SettingStore $settingStore)
+    public function __construct(SettingStore $settingStore, StoreInterface $storeRepository)
     {
         $this->settingStore = $settingStore;
+        $this->storeRepository = $storeRepository;
     }
 
     /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @param SettingStore $settingStore
-     * @return BaseHttpResponse|Factory|View
-     * @throws Exception
+     * @param ProductCategoryInterface $productCategoryRepository
+     * @return BaseHttpResponse|Factory|Application|View
      */
-    public function settings(Request $request, BaseHttpResponse $response)
+    public function getSettings(ProductCategoryInterface $productCategoryRepository)
     {
-        if ($request->method() == 'POST') {
-            return $this->postSettings($request, $response);
-        }
+        Assets::addScriptsDirectly('vendor/core/core/setting/js/setting.js')
+            ->addStylesDirectly('vendor/core/core/setting/css/setting.css');
+
+        Assets::addStylesDirectly('vendor/core/core/base/libraries/tagify/tagify.css')
+            ->addScriptsDirectly([
+                'vendor/core/core/base/libraries/tagify/tagify.js',
+                'vendor/core/core/base/js/tags.js',
+                'vendor/core/plugins/marketplace/js/marketplace-setting.js',
+            ]);
 
         page_title()->setTitle(trans('plugins/marketplace::marketplace.settings.name'));
 
-        return view('plugins/marketplace::settings.index');
+        $productCategories = $productCategoryRepository->all();
+        $commissionEachCategory = [];
+
+        if (MarketplaceHelper::isCommissionCategoryFeeBasedEnabled()) {
+            $commissionEachCategory = $this->storeRepository->getCommissionEachCategory();
+        }
+
+        return view('plugins/marketplace::settings.index', compact('productCategories', 'commissionEachCategory'));
     }
 
     /**
-     * @param Request $request
+     * @param MarketPlaceSettingFormRequest $request
      * @param BaseHttpResponse $response
      * @return BaseHttpResponse
-     * @throws Exception
      */
-    private function postSettings($request, $response)
+    public function postSettings(MarketPlaceSettingFormRequest $request, BaseHttpResponse $response)
     {
         $settingKey = MarketplaceHelper::getSettingKey();
         $filtered = collect($request->all())->filter(function ($value, $key) use ($settingKey) {
             return Str::startsWith($key, $settingKey);
         });
 
+
+        if ($request->input('marketplace_enable_commission_fee_for_each_category')) {
+            $commissionByCategories = $request->input('commission_by_category');
+            $this->storeRepository->handleCommissionEachCategory($commissionByCategories);
+        }
+
         $preVerifyVendor = MarketplaceHelper::getSetting('verify_vendor', 1);
 
         foreach ($filtered as $key => $settingValue) {
-            switch ($key) {
-                case $settingKey . 'fee_per_order':
-                    $settingValue = $settingValue < 0 ? 0 : ($settingValue > 100 ? 100 : $settingValue);
-                    break;
+            if ($key == $settingKey . 'fee_per_order') {
+                $settingValue = $settingValue < 0 ? 0 : min($settingValue, 100);
             }
+
             $this->settingStore->set($key, $settingValue);
         }
 

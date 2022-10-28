@@ -31,7 +31,6 @@ class SendMailsAfterCustomerRegistered
                 ->sendUsingTemplate('welcome', $customer->email);
 
             if (EcommerceHelper::isEnableEmailVerification()) {
-                // Notify the user
                 $customer->sendEmailVerificationNotification();
             }
         }

@@ -42,12 +42,12 @@ Route::group(['namespace' => 'Botble\Marketplace\Http\Controllers', 'middleware'
 
             Route::get('settings', [
                 'as'   => 'settings',
-                'uses' => 'MarketplaceController@settings',
+                'uses' => 'MarketplaceController@getSettings',
             ]);
 
             Route::post('settings', [
                 'as'         => 'settings.post',
-                'uses'       => 'MarketplaceController@settings',
+                'uses'       => 'MarketplaceController@postSettings',
                 'permission' => 'marketplace.settings',
             ]);
 

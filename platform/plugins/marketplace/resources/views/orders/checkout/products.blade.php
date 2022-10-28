@@ -46,6 +46,39 @@
                 @endforeach
             </div>
 
+            @if ($isAvailableShipping)
+                <div class="shipping-method-wrapper p-3">
+                    @if (!empty($shipping))
+                        <div class="payment-checkout-form">
+                            <div class="mx-0">
+                                <h6>{{ __('Shipping method') }}:</h6>
+                            </div>
+
+                            <input type="hidden" name="shipping_option[{{ $storeId }}]" value="{{ old("shipping_option.$storeId", $defaultShippingOption) }}">
+                            <div id="shipping-method-{{ $storeId }}">
+                                <ul class="list-group list_payment_method">
+                                    @foreach ($shipping as $shippingKey => $shippingItem)
+                                        @foreach($shippingItem as $subShippingKey => $subShippingItem)
+                                            @include('plugins/marketplace::orders.partials.shipping-option', [
+                                                'defaultShippingMethod' => $defaultShippingMethod,
+                                                'defaultShippingOption' => $defaultShippingOption,
+                                                'shippingOption'        => $subShippingKey,
+                                                'shippingItem'          => $subShippingItem,
+                                                'storeId'               => $storeId
+                                            ])
+                                        @endforeach
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
+                    @else
+                        <p>{{ __('No shipping methods available!') }}</p>
+                    @endif
+                </div>
+            @else
+                {{-- Can render text to show for customer --}}
+            @endif
+
             <hr>
             @if (count($groupedProducts) > 1)
                 <div class="p-3">
@@ -110,39 +143,6 @@
                         </div>
                     </div>
                 </div>
-            @endif
-
-            @if ($isAvailableShipping)
-                <div class="shipping-method-wrapper p-3">
-                    @if (!empty($shipping))
-                        <div class="payment-checkout-form">
-                            <div class="mx-0">
-                                <h6>{{ __('Shipping method') }}:</h6>
-                            </div>
-
-                            <input type="hidden" name="shipping_option[{{ $storeId }}]" value="{{ old("shipping_option.$storeId", $defaultShippingOption) }}">
-                            <div id="shipping-method-{{ $storeId }}">
-                                <ul class="list-group list_payment_method">
-                                    @foreach ($shipping as $shippingKey => $shippingItem)
-                                        @foreach($shippingItem as $subShippingKey => $subShippingItem)
-                                            @include('plugins/marketplace::orders.partials.shipping-option', [
-                                                'defaultShippingMethod' => $defaultShippingMethod,
-                                                'defaultShippingOption' => $defaultShippingOption,
-                                                'shippingOption'        => $subShippingKey,
-                                                'shippingItem'          => $subShippingItem,
-                                                'storeId'               => $storeId
-                                            ])
-                                        @endforeach
-                                    @endforeach
-                                </ul>
-                            </div>
-                        </div>
-                    @else
-                        <p>{{ __('No shipping methods available!') }}</p>
-                    @endif
-                </div>
-            @else
-                {{-- Can render text to show for customer --}}
             @endif
         </div>
     @endforeach

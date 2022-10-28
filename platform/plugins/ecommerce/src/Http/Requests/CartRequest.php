@@ -6,6 +6,7 @@ use Botble\Support\Http\Requests\Request;
 
 class CartRequest extends Request
 {
+
     /**
      * Get the validation rules that apply to the request.
      *

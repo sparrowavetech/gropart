@@ -4,9 +4,9 @@ namespace Botble\Ecommerce\Commands;
 
 use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
 use EmailHandler;
-use Exception;
 use Illuminate\Console\Command;
 use OrderHelper;
+use Throwable;
 
 class SendAbandonedCartsEmailCommand extends Command
 {
@@ -65,7 +65,7 @@ class SendAbandonedCartsEmailCommand extends Command
                 $mailer->sendUsingTemplate('order_recover', $email);
 
                 $count++;
-            } catch (Exception $exception) {
+            } catch (Throwable $exception) {
                 info($exception->getMessage());
             }
         }

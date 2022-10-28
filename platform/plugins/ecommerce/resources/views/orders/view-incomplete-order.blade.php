@@ -50,7 +50,7 @@
                                             @if ($product && $product->original_product)
                                                 <tr>
                                                     <td class="width-60-px min-width-60-px">
-                                                        <div class="wrap-img"><img class="thumb-image thumb-image-cartorderlist" src="{{ RvMedia::getImageUrl($product->image ?: $product->original_product->image, 'thumb', false, RvMedia::getDefaultImage()) }}" alt="{{ $product->name }}"></div>
+                                                        <div class="wrap-img"><img class="thumb-image thumb-image-cartorderlist" src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}" alt="{{ $product->name }}"></div>
                                                     </td>
                                                     <td class="pl5 p-r5">
                                                         @if ($product->original_product->id)

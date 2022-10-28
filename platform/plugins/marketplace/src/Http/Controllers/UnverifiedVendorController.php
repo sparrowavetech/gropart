@@ -8,6 +8,7 @@ use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
 use Botble\Marketplace\Tables\UnverifiedVendorTable;
+use Carbon\Carbon;
 use EmailHandler;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
@@ -84,7 +85,7 @@ class UnverifiedVendorController extends BaseController
             abort(404);
         }
 
-        $vendor->vendor_verified_at = now();
+        $vendor->vendor_verified_at = Carbon::now();
         $vendor->save();
 
         event(new UpdatedContentEvent(CUSTOMER_MODULE_SCREEN_NAME, $request, $vendor));

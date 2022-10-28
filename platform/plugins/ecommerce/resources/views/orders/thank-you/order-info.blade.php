@@ -1,6 +1,6 @@
 <div class="pt-3 mb-4">
     <div class="align-items-center">
-        <h6 class="d-inline-block">{{ __('Order number') }}: {{ get_order_code($order->id) }}</h6>
+        <h6 class="d-inline-block">{{ __('Order number') }}: {{ $order->code }}</h6>
     </div>
 
     <div class="checkout-success-products">
@@ -10,7 +10,7 @@
                    href="javascript:void(0);"
                    data-bs-toggle="collapse"
                    data-bs-target="{{ '#cart-item-' . $order->id }}">
-                    {{ __('Order information :order_id', ['order_id' => get_order_code($order->id)]) }} <i class="fa fa-angle-down" aria-hidden="true"></i>
+                    {{ __('Order information :order_id', ['order_id' => $order->code]) }} <i class="fa fa-angle-down" aria-hidden="true"></i>
                 </a>
             </div>
             <div class="col-3">
@@ -49,7 +49,7 @@
                     <div class="col-lg-3 col-md-3">
                         <div class="checkout-product-img-wrapper">
                             <img class="item-thumb img-thumbnail img-rounded"
-                                 src="{{ RvMedia::getImageUrl($product->image ?: $product->original_product->image, 'thumb', false, RvMedia::getDefaultImage()) }}"
+                                 src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}"
                                  alt="{{ $product->name . '(' . $product->sku . ')'}}">
                             <span class="checkout-quantity">{{ $orderProduct->qty }}</span>
                         </div>
@@ -59,7 +59,9 @@
                         <p class="mb-0">
                             <small>{{ $product->variation_attributes }}</small>
                         </p>
-
+                        @if (!empty($orderProduct->product_options) && is_array($orderProduct->product_options))
+                            {!! render_product_options_info($orderProduct->product_options, $product, true) !!}
+                        @endif
                         @if (!empty($orderProduct->options) && is_array($orderProduct->options))
                             @foreach($orderProduct->options as $option)
                                 @if (!empty($option['key']) && !empty($option['value']))

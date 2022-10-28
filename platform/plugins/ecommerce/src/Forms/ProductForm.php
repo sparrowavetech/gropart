@@ -7,11 +7,13 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Forms\Fields\MultiCheckListField;
 use Botble\Base\Forms\Fields\TagField;
 use Botble\Base\Forms\FormAbstract;
+use Botble\Ecommerce\Enums\GlobalOptionEnum;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Forms\Fields\CategoryMultiField;
 use Botble\Ecommerce\Http\Requests\ProductRequest;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Repositories\Interfaces\BrandInterface;
+use Botble\Ecommerce\Repositories\Interfaces\GlobalOptionInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeSetInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductCollectionInterface;
@@ -43,6 +45,7 @@ class ProductForm extends FormAbstract
             ->addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
             ->addScriptsDirectly([
                 'vendor/core/plugins/ecommerce/js/edit-product.js',
+                'vendor/core/plugins/ecommerce/js/product-option.js',
             ]);
 
         $brands = app(BrandInterface::class)->pluck('name', 'id');
@@ -186,6 +189,21 @@ class ProductForm extends FormAbstract
                 ],
             ])
             ->setBreakFieldPoint('status');
+
+        /**
+         * Product option
+         */
+        $this->addMetaBoxes([
+            'options' => [
+                'title'    => trans('plugins/ecommerce::product-option.name'),
+                'content'  => view('plugins/ecommerce::products.partials.product-option-form', [
+                    'options'       => GlobalOptionEnum::options(),
+                    'globalOptions' => app(GlobalOptionInterface::class)->pluck('name', 'id'),
+                    'product'       => $this->getModel()->toArray(),
+                ]),
+                'priority' => 4,
+            ],
+        ]);
 
         if (empty($productVariations) || $productVariations->isEmpty()) {
             $attributeSetId = $productAttributeSets->first() ? $productAttributeSets->first()->id : 0;

@@ -3,6 +3,7 @@
 namespace Botble\SeoHelper;
 
 use Arr;
+use BaseHelper;
 use Botble\Base\Models\BaseModel;
 use Botble\SeoHelper\Contracts\SeoHelperContract;
 use Botble\SeoHelper\Contracts\SeoMetaContract;
@@ -155,6 +156,14 @@ class SeoHelper implements SeoHelperContract
     }
 
     /**
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->meta()->getDescription();
+    }
+
+    /**
      * Set description.
      *
      * @param string $description
@@ -163,6 +172,8 @@ class SeoHelper implements SeoHelperContract
      */
     public function setDescription($description)
     {
+        $description = BaseHelper::cleanShortcodes($description);
+
         $this->meta()->setDescription($description);
         $this->openGraph()->setDescription($description);
         $this->twitter()->setDescription($description);

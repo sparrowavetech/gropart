@@ -12,6 +12,7 @@ use Form;
 use Html;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
@@ -20,10 +21,8 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
-use Illuminate\Contracts\View\View;
 use Request;
 use RvMedia;
-use Throwable;
 use Yajra\DataTables\CollectionDataTable;
 use Yajra\DataTables\DataTables;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
@@ -256,7 +255,6 @@ abstract class TableAbstract extends DataTable
      *
      * @return HtmlBuilder
      *
-     * @throws Throwable
      * @since 2.1
      */
     public function html()
@@ -386,7 +384,6 @@ abstract class TableAbstract extends DataTable
      * @param mixed $item
      * @param string|null $extra
      * @return string
-     * @throws Throwable
      */
     protected function getOperations(?string $edit, ?string $delete, $item, ?string $extra = null): string
     {
@@ -417,7 +414,6 @@ abstract class TableAbstract extends DataTable
     /**
      * @param int $id
      * @return string
-     * @throws Throwable
      */
     protected function getCheckbox(int $id): string
     {
@@ -464,7 +460,6 @@ abstract class TableAbstract extends DataTable
 
     /**
      * @return array
-     * @throws Throwable
      * @since 2.1
      */
     public function getBuilderParameters(): array
@@ -529,7 +524,6 @@ abstract class TableAbstract extends DataTable
 
     /**
      * @return array
-     * @throws Throwable
      */
     public function getActionsButton(): array
     {
@@ -548,7 +542,6 @@ abstract class TableAbstract extends DataTable
 
     /**
      * @return array
-     * @throws Throwable
      * @since 2.1
      */
     public function getActions(): array
@@ -565,6 +558,7 @@ abstract class TableAbstract extends DataTable
                 'text'      => '<span data-action="' . $key . '" data-href="' . $action['link'] . '"> ' . $action['text'] . '</span>',
             ];
         }
+
         return $actions;
     }
 
@@ -579,7 +573,6 @@ abstract class TableAbstract extends DataTable
 
     /**
      * @return array
-     * @throws Throwable
      */
     public function getDefaultButtons(): array
     {
@@ -672,7 +665,6 @@ abstract class TableAbstract extends DataTable
      * @param array $data
      * @param array $mergeData
      * @return JsonResponse|View
-     * @throws Throwable
      * @since 2.4
      */
     public function renderTable(array $data = [], array $mergeData = [])
@@ -685,7 +677,6 @@ abstract class TableAbstract extends DataTable
      * @param array $data
      * @param array $mergeData
      * @return mixed
-     * @throws Throwable
      */
     public function render($view, $data = [], $mergeData = [])
     {
@@ -714,7 +705,6 @@ abstract class TableAbstract extends DataTable
 
     /**
      * @return array
-     * @throws Throwable
      */
     public function bulkActions(): array
     {
@@ -827,11 +817,10 @@ abstract class TableAbstract extends DataTable
      * @param string|null $title
      * @param string|null $value
      * @param string| null $type
-     * @param null $data
+     * @param array $data
      * @return array
-     * @throws Throwable
      */
-    public function getValueInput(?string $title, ?string $value, ?string $type, $data = null): array
+    public function getValueInput(?string $title, ?string $value, ?string $type, array $data = []): array
     {
         $inputName = 'value';
 
@@ -943,7 +932,6 @@ abstract class TableAbstract extends DataTable
 
     /**
      * @return string
-     * @throws Throwable
      */
     public function renderFilter(): string
     {
@@ -995,7 +983,6 @@ abstract class TableAbstract extends DataTable
      * @param string $url
      * @param null|string $permission
      * @return array
-     * @throws Throwable
      */
     protected function addCreateButton(string $url, ?string $permission = null, array $buttons = []): array
     {

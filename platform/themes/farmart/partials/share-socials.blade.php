@@ -10,7 +10,7 @@
         </a>
     </li>
     <li>
-        <a class="share-twitter" href="https://twitter.com/intent/tweet?url={{ urlencode($product->url) }}&text={{ strip_tags($product->description) }}" title="Twitter" target="_blank">
+        <a class="share-twitter" href="https://twitter.com/intent/tweet?url={{ urlencode($product->url) }}&text={{ strip_tags(SeoHelper::getDescription()) }}" title="Twitter" target="_blank">
             <span class="svg-icon">
                 <svg>
                     <use href="#svg-icon-twitter" xlink:href="#svg-icon-twitter"></use>
@@ -20,7 +20,8 @@
         </a>
     </li>
     <li>
-        <a class="share-pinterest" href="https://pinterest.com/pin/create/button?media={{ urlencode(RvMedia::getImageUrl($product->image, null, false, RvMedia::getDefaultImage())) }}&url={{ urlencode($product->url) }}&description={{ strip_tags($product->description) }}" title="Pinterest" target="_blank">
+        <a class="share-pinterest" href="https://pinterest.com/pin/create/button?media={{ urlencode(RvMedia::getImageUrl($product->image, null, false, RvMedia::getDefaultImage())) }}&url={{ urlencode($product->url) }}&description={{ 
+strip_tags(SeoHelper::getDescription()) }}" title="Pinterest" target="_blank">
             <span class="svg-icon">
                 <svg>
                     <use href="#svg-icon-pinterest" xlink:href="#svg-icon-pinterest"></use>
@@ -30,7 +31,7 @@
         </a>
     </li>
     <li>
-        <a class="share-linkedin" href="https://www.linkedin.com/shareArticle?mini=true&url={{ urlencode($product->url) }}&summary={{ rawurldecode(strip_tags($product->description)) }}" title="Linkedin" target="_blank">
+        <a class="share-linkedin" href="https://www.linkedin.com/shareArticle?mini=true&url={{ urlencode($product->url) }}&summary={{ rawurldecode(strip_tags(SeoHelper::getDescription())) }}" title="Linkedin" target="_blank">
             <span class="svg-icon">
                 <svg>
                     <use href="#svg-icon-linkedin" xlink:href="#svg-icon-linkedin"></use>

@@ -3,7 +3,7 @@
         @auth
             @if (BaseHelper::getAdminPrefix() != '')
                 <li class="dropdown">
-                    <a class="dropdown-toggle dropdown-header-name pe-2" href="{{ url('/') }}" target="_blank">
+                    <a class="dropdown-toggle dropdown-header-name pe-2" href="{{ route('public.index') }}" target="_blank">
                         <i class="fa fa-globe"></i>
                         <span class="d-none d-sm-inline">
                             {{ trans('core/base::layouts.view_website') }}

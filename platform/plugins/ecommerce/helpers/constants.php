@@ -40,6 +40,10 @@ if (!defined('PRODUCT_TAG_MODULE_SCREEN_NAME')) {
     define('PRODUCT_TAG_MODULE_SCREEN_NAME', 'product-tag');
 }
 
+if (!defined('GLOBAL_OPTION_MODULE_SCREEN_NAME')) {
+    define('GLOBAL_OPTION_MODULE_SCREEN_NAME', 'global-option');
+}
+
 if (!defined('PRODUCT_ATTRIBUTE_SETS_MODULE_SCREEN_NAME')) {
     define('PRODUCT_ATTRIBUTE_SETS_MODULE_SCREEN_NAME', 'product-attribute-sets');
 }
@@ -66,6 +70,10 @@ if (!defined('SHIPPING_MODULE_SCREEN_NAME')) {
 
 if (!defined('SHIPPING_METHOD_MODULE_SCREEN_NAME')) {
     define('SHIPPING_METHOD_MODULE_SCREEN_NAME', 'plugin-shipping-methods');
+}
+
+if (!defined('SHIPPING_METHODS_SETTINGS_PAGE')) {
+    define('SHIPPING_METHODS_SETTINGS_PAGE', 'shipping-methods-settings');
 }
 
 if (!defined('ORDER_MODULE_SCREEN_NAME')) {
@@ -184,4 +192,12 @@ if (!defined('ACTION_AFTER_POST_ORDER_REFUNDED_ECOMMERCE')) {
 
 if (!defined('FILTER_ECOMMERCE_PROCESS_PAYMENT')) {
     define('FILTER_ECOMMERCE_PROCESS_PAYMENT', 'filter_ecommerce_process_payment');
+}
+
+if (!defined('INVOICE_MODULE_SCREEN_NAME')) {
+    define('INVOICE_MODULE_SCREEN_NAME', 'invoice');
+}
+
+if (!defined('INVOICE_PAYMENT_CREATED')) {
+    define('INVOICE_PAYMENT_CREATED', 'invoice_payment_created');
 }

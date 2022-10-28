@@ -1053,20 +1053,10 @@ input[type="radio"]:checked:after {
     background-color: #ffffff;
 }
 
-@media (min-width: 1600px) {
-    .app-grid--blank-slate {
-        max-width: 1325px;
-    }
-}
-
 @media (max-width: 1599px) {
     .app-card-item {
         width: calc(100% / 3);
         max-width: calc(100% / 3);
-    }
-
-    .app-grid--blank-slate {
-        max-width: 1000px;
     }
 }
 
@@ -1075,20 +1065,12 @@ input[type="radio"]:checked:after {
         width: 50%;
         max-width: 50%;
     }
-
-    .app-grid--blank-slate {
-        max-width: 750px;
-    }
 }
 
 @media (max-width: 670px) {
     .app-card-item {
         width: 100%;
         max-width: 100%;
-    }
-
-    .app-grid--blank-slate {
-        max-width: 310px;
     }
 }
 

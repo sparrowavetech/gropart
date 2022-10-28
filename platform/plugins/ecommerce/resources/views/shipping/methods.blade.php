@@ -29,6 +29,8 @@
                             @endforeach
                         </div>
                     </div>
+
+                    {!! apply_filters(SHIPPING_METHODS_SETTINGS_PAGE, null) !!}
                 </div>
             </div>
         </div>

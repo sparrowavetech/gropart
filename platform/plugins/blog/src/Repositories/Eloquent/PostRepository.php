@@ -244,23 +244,23 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
             $categories = array_filter((array)$filters['categories']);
 
             $data = $data->whereHas('categories', function ($query) use ($categories) {
-                $query->whereIn('id', $categories);
+                $query->whereIn('categories.id', $categories);
             });
         }
 
         if ($filters['categories_exclude'] !== null) {
             $data = $data
                 ->whereHas('categories', function ($query) use ($filters) {
-                    $query->whereNotIn('id', array_filter((array)$filters['categories_exclude']));
+                    $query->whereNotIn('categories.id', array_filter((array)$filters['categories_exclude']));
                 });
         }
 
         if ($filters['exclude'] !== null) {
-            $data = $data->whereNotIn('id', array_filter((array)$filters['exclude']));
+            $data = $data->whereNotIn('posts.id', array_filter((array)$filters['exclude']));
         }
 
         if ($filters['include'] !== null) {
-            $data = $data->whereNotIn('id', array_filter((array)$filters['include']));
+            $data = $data->whereNotIn('posts.id', array_filter((array)$filters['include']));
         }
 
         if ($filters['author'] !== null) {
@@ -272,15 +272,15 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         }
 
         if ($filters['featured'] !== null) {
-            $data = $data->where('is_featured', $filters['featured']);
+            $data = $data->where('posts.is_featured', $filters['featured']);
         }
 
         if ($filters['search'] !== null) {
             $data = $data
                 ->where(function ($query) use ($filters) {
                     $query
-                        ->addSearch('name', $filters['search'])
-                        ->addSearch('description', $filters['search']);
+                        ->addSearch('posts.name', $filters['search'])
+                        ->addSearch('posts.description', $filters['search']);
                 });
         }
 
@@ -288,7 +288,7 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         $order = Arr::get($filters, 'order', 'desc');
 
         $data = $data
-            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->where('posts.status', BaseStatusEnum::PUBLISHED)
             ->orderBy($orderBy, $order);
 
         return $this->applyBeforeExecuteQuery($data)->paginate((int)$filters['per_page']);

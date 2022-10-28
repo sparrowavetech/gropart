@@ -31,7 +31,7 @@
                                 <div class="flexbox-grid-default">
                                     <div class="flexbox-auto-right mr5">
                                         <label
-                                            class="title-product-main text-no-bold">{{ trans('plugins/ecommerce::order.order_information') }} {{ get_order_code($order->id) }}</label>
+                                            class="title-product-main text-no-bold">{{ trans('plugins/ecommerce::order.order_information') }} {{ $order->code }}</label>
                                     </div>
                                 </div>
                                 <div class="mt20">
@@ -86,7 +86,7 @@
                                                     <td class="width-60-px min-width-60-px vertical-align-t">
                                                         <div class="wrap-img"><img
                                                                 class="thumb-image thumb-image-cartorderlist"
-                                                                src="{{ RvMedia::getImageUrl($product->image ?: $product->original_product->image, 'thumb', false, RvMedia::getDefaultImage()) }}"
+                                                                src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}"
                                                                 alt="{{ $orderProduct->product_name }}"></div>
                                                     </td>
                                                 @endif
@@ -108,7 +108,9 @@
                                                             </p>
                                                         @endif
                                                     @endif
-
+                                                    @if (!empty($orderProduct->product_options) && is_array($orderProduct->product_options))
+                                                        {!! render_product_options_info($orderProduct->product_options, $product, true) !!}
+                                                    @endif
                                                     @if (!empty($orderProduct->options) && is_array($orderProduct->options))
                                                         @foreach($orderProduct->options as $option)
                                                             @if (!empty($option['key']) && !empty($option['value']))
@@ -474,7 +476,7 @@
                                                                             <th>{{ trans('plugins/ecommerce::order.order_number') }}</th>
                                                                             <td>
                                                                                 <a href="{{ route('orders.edit', $order->id) }}"
-                                                                                   title="{{ get_order_code($order->id) }}">{{ get_order_code($order->id) }}</a>
+                                                                                   title="{{ $order->code }}">{{ $order->code }}</a>
                                                                             </td>
                                                                         </tr>
                                                                         <tr>
@@ -516,7 +518,7 @@
                                                                             <th>{{ trans('plugins/ecommerce::order.order_number') }}</th>
                                                                             <td>
                                                                                 <a href="{{ route('orders.edit', $order->id) }}"
-                                                                                   title="{{ get_order_code($order->id) }}">{{ get_order_code($order->id) }}</a>
+                                                                                   title="{{ $order->code }}">{{ $order->code }}</a>
                                                                             </td>
                                                                         </tr>
                                                                         <tr>

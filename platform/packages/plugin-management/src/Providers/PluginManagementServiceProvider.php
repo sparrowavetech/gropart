@@ -44,7 +44,7 @@ class PluginManagementServiceProvider extends ServiceProvider
 
                 $namespaces = cache('plugin_namespaces');
 
-                if (!is_array($namespaces) || empty($namespaces) || count($namespaces) != count($namespaces)) {
+                if (!is_array($namespaces) || empty($namespaces) || count($providers) != count($namespaces)) {
                     $namespaces = [];
                 }
             }
@@ -70,7 +70,7 @@ class PluginManagementServiceProvider extends ServiceProvider
                     }
                 }
 
-                if (count($providers) == count($plugins) && count($namespaces) == count($namespaces)) {
+                if (count($providers) == count($plugins) && count($providers) == count($namespaces)) {
                     cache()->forever('plugin_namespaces', $namespaces);
                     cache()->forever('plugin_providers', $providers);
                 }

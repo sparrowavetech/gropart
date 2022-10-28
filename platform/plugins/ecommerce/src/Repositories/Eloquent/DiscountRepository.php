@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Repositories\Eloquent;
 
 use Botble\Ecommerce\Repositories\Interfaces\DiscountInterface;
 use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
+use Carbon\Carbon;
 use Illuminate\Database\Query\Builder;
 
 class DiscountRepository extends RepositoriesAbstract implements DiscountInterface
@@ -15,14 +16,14 @@ class DiscountRepository extends RepositoriesAbstract implements DiscountInterfa
     {
         $data = $this->model
             ->where('type', 'promotion')
-            ->where('start_date', '<=', now())
+            ->where('start_date', '<=', Carbon::now())
             ->where(function ($query) {
                 /**
                  * @var Builder $query
                  */
                 return $query
                     ->whereNull('end_date')
-                    ->orWhere('end_date', '>=', now());
+                    ->orWhere('end_date', '>=', Carbon::now());
             })
             ->where(function ($query) use ($forProductSingle) {
                 /**
@@ -60,7 +61,7 @@ class DiscountRepository extends RepositoriesAbstract implements DiscountInterfa
     {
         $data = $this->model
             ->where('type', 'promotion')
-            ->where('start_date', '<=', now())
+            ->where('start_date', '<=', Carbon::now())
             ->where(function ($query) use ($productIds, $productCollectionIds) {
                 /**
                  * @var Builder $query
@@ -105,7 +106,7 @@ class DiscountRepository extends RepositoriesAbstract implements DiscountInterfa
                  */
                 return $query
                     ->whereNull('end_date')
-                    ->orWhere('end_date', '>=', now());
+                    ->orWhere('end_date', '>=', Carbon::now());
             })
             ->where('product_quantity', 1)
             ->select('ec_discounts.*');

@@ -3,7 +3,6 @@
 namespace Botble\PluginManagement\Commands;
 
 use Botble\PluginManagement\Services\PluginService;
-use Exception;
 use Illuminate\Console\Command;
 
 class PluginDeactivateCommand extends Command
@@ -38,8 +37,7 @@ class PluginDeactivateCommand extends Command
     }
 
     /**
-     * @return boolean
-     * @throws Exception
+     * @return int
      */
     public function handle()
     {

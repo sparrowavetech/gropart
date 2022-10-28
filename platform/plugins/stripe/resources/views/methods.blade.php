@@ -1,11 +1,11 @@
 @if (setting('payment_stripe_status') == 1)
     <li class="list-group-item">
         <input class="magic-radio js_payment_method" type="radio" name="payment_method" id="payment_stripe"
-               value="stripe" @if ((session('selected_payment_method') ?: setting('default_payment_method')) == STRIPE_PAYMENT_METHOD_NAME) checked @endif data-bs-toggle="collapse" data-bs-target=".payment_stripe_wrap" data-toggle="collapse" data-target=".payment_stripe_wrap" data-parent=".list_payment_method">
+               value="stripe" @if ($selecting == STRIPE_PAYMENT_METHOD_NAME) checked @endif data-bs-toggle="collapse" data-bs-target=".payment_stripe_wrap" data-toggle="collapse" data-target=".payment_stripe_wrap" data-parent=".list_payment_method">
         <label for="payment_stripe" class="text-start">
             {{ setting('payment_stripe_name', trans('plugins/payment::payment.payment_via_card')) }}
         </label>
-        <div class="payment_stripe_wrap payment_collapse_wrap collapse @if ((session('selected_payment_method') ?: setting('default_payment_method')) == STRIPE_PAYMENT_METHOD_NAME) show @endif" style="padding: 15px 0;">
+        <div class="payment_stripe_wrap payment_collapse_wrap collapse @if ($selecting == STRIPE_PAYMENT_METHOD_NAME) show @endif" style="padding: 15px 0;">
             <p>{!! BaseHelper::clean(get_payment_setting('description', STRIPE_PAYMENT_METHOD_NAME)) !!}</p>
             @if (get_payment_setting('payment_type', STRIPE_PAYMENT_METHOD_NAME, 'stripe_api_charge') == 'stripe_api_charge')
                 <div class="card-checkout" style="max-width: 350px">

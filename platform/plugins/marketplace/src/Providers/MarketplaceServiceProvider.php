@@ -246,7 +246,7 @@ class MarketplaceServiceProvider extends ServiceProvider
      * @param bool $isInAdmin
      * @return bool
      */
-    public function setInAdmin($isInAdmin): bool
+    public function setInAdmin(bool $isInAdmin): bool
     {
         return request()->segment(1) === 'vendor' || $isInAdmin;
     }

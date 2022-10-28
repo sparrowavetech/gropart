@@ -7,6 +7,7 @@ class TagsManager {
                 enforceWhitelist: $(element).data('enforce-whitelist') !== undefined ? $(element).data('enforce-whitelist') : false,
                 delimiters: $(element).data('delimiters') !== undefined ? $(element).data('delimiters') : ',',
                 whitelist: element.value.trim().split(/\s*,\s*/),
+                userInput: $(element).data('user-input') !== undefined ? $(element).data('user-input') : true,
             });
 
             if ($(element).data('url')) {

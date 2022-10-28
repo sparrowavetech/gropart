@@ -20,11 +20,13 @@ class OrderProduct extends BaseModel
         'order_id',
         'product_id',
         'product_name',
+        'product_image',
         'qty',
         'weight',
         'price',
         'tax_amount',
         'options',
+        'product_options',
         'restock_quantity',
         'product_type',
     ];
@@ -41,7 +43,8 @@ class OrderProduct extends BaseModel
      * @var array
      */
     protected $casts = [
-        'options' => 'json',
+        'options'         => 'json',
+        'product_options' => 'json',
     ];
 
     /**

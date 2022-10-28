@@ -24,6 +24,7 @@ use Botble\Ecommerce\Services\StoreProductTagService;
 use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -44,6 +45,7 @@ use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Validators\Failure;
 use Mimey\MimeTypes;
 use RvMedia;
+use SlugHelper;
 
 class ProductImport implements
     ToModel,
@@ -262,45 +264,68 @@ class ProductImport implements
         $importType = $this->getImportType();
 
         $name = $this->request->input('name');
+        $slug = $this->request->input('slug');
 
         if ($importType == 'products' && $row['import_type'] == 'product') {
-            return $this->storeProduction();
+            return $this->storeProduct();
         }
 
         if ($importType == 'variations' && $row['import_type'] == 'variation') {
-            $product = $this->getProductByName($name);
+            $product = $this->getProduct($name, $slug);
 
             return $this->storeVariant($product);
         }
 
         if ($row['import_type'] == 'variation') {
-            $collection = $this->successes()
-                ->where('import_type', 'product')
-                ->where('name', $name)
-                ->last();
+            if ($slug) {
+                $collection = $this->successes()
+                    ->where('import_type', 'product')
+                    ->where('slug', $slug)
+                    ->last();
+            } else {
+                $collection = $this->successes()
+                    ->where('import_type', 'product')
+                    ->where('name', $name)
+                    ->last();
+            }
 
             if ($collection) {
                 $product = $collection['model'];
             } else {
-                $product = $this->getProductByName($name);
+                $product = $this->getProduct($name, $slug);
             }
 
             return $this->storeVariant($product);
         }
 
-        return $this->storeProduction();
+        return $this->storeProduct();
     }
 
     /**
      * @param string $name
-     * @return \Eloquent|\Illuminate\Database\Eloquent\Builder|Model|object|null
+     * @param string|null $slug
+     * @return \Eloquent|Builder|Model|object|null
      */
-    protected function getProductByName(string $name)
+    protected function getProduct(string $name, ?string $slug)
     {
+        if ($slug) {
+            $slug = SlugHelper::getSlug($slug, SlugHelper::getPrefix(Product::class), Product::class);
+
+            if ($slug) {
+                return $this->productRepository->getFirstBy([
+                    'id'           => $slug->reference_id,
+                    'is_variation' => 0,
+                ]);
+            }
+        }
+
         return $this->productRepository
             ->getModel()
-            ->where('name', $name)
-            ->orWhere('id', $name)
+            ->where(function ($query) use ($name) {
+                $query
+                    ->where('name', $name)
+                    ->orWhere('id', $name);
+            })
             ->where('is_variation', 0)
             ->first();
     }
@@ -309,7 +334,7 @@ class ProductImport implements
      * @return Product|null
      * @throws Exception
      */
-    public function storeProduction()
+    public function storeProduct(): ?Product
     {
         $product = $this->productRepository->getModel();
 
@@ -341,6 +366,7 @@ class ProductImport implements
 
         $collect = collect([
             'name'           => $product->name,
+            'slug'           => $this->request->input('slug'),
             'import_type'    => 'product',
             'attribute_sets' => $attributeSets,
             'model'          => $product,
@@ -551,8 +577,6 @@ class ProductImport implements
         if ($version['attribute_sets']) {
             $variation->productAttributes()->sync($version['attribute_sets']);
         }
-
-        $this->onSuccess($variation);
 
         return $variation;
     }
@@ -878,12 +902,12 @@ class ProductImport implements
                 $valueX = Arr::get($attrSet, 1);
 
                 $attribute = $this->productAttributeSets->filter(function ($value) use ($title) {
-                    return $value['title'] == $title || $value['id'] == $title;
+                    return $value['title'] == $title;
                 })->first();
 
                 if ($attribute) {
                     $attr = $attribute->attributes->filter(function ($value) use ($valueX) {
-                        return $value['title'] == $valueX || $value['id'] == $valueX;
+                        return $value['title'] == $valueX;
                     })->first();
 
                     if ($attr) {
@@ -896,7 +920,7 @@ class ProductImport implements
         if ($row['import_type'] == 'product') {
             foreach ($attributeSets as $attrSet) {
                 $attribute = $this->productAttributeSets->filter(function ($value) use ($attrSet) {
-                    return $value['title'] == $attrSet || $value['id'] == $attrSet;
+                    return $value['title'] == $attrSet;
                 })->first();
 
                 if ($attribute) {

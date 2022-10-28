@@ -11,6 +11,7 @@ use Botble\Ecommerce\Repositories\Interfaces\ProductVariationInterface;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Maatwebsite\Excel\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ExportController extends BaseController
@@ -65,6 +66,6 @@ class ExportController extends BaseController
     {
         BaseHelper::maximumExecutionTimeAndMemoryLimit();
 
-        return (new CsvProductExport())->download('export_products.csv');
+        return (new CsvProductExport())->download('export_products.csv', Excel::CSV, ['Content-Type' => 'text/csv']);
     }
 }

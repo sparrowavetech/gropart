@@ -6,11 +6,12 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Traits\EnumCastable;
 use Botble\Ecommerce\Tables\ProductTable;
+use Html;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Html;
 use Illuminate\Support\Collection;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
 class ProductCategory extends BaseModel
@@ -44,19 +45,18 @@ class ProductCategory extends BaseModel
         'status' => BaseStatusEnum::class,
     ];
 
-    /**
-     * @return BelongsToMany
-     */
     public function products(): BelongsToMany
     {
         return $this
-            ->belongsToMany(Product::class, 'ec_product_category_product', 'category_id', 'product_id')
+            ->belongsToMany(
+                Product::class,
+                'ec_product_category_product',
+                'category_id',
+                'product_id'
+            )
             ->where('is_variation', 0);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function parent(): BelongsTo
     {
         return $this->belongsTo(ProductCategory::class, 'parent_id')->withDefault();
@@ -79,20 +79,17 @@ class ProductCategory extends BaseModel
         return $parents;
     }
 
-    /**
-     * @return HasMany
-     */
     public function children(): HasMany
     {
         return $this->hasMany(ProductCategory::class, 'parent_id');
     }
 
-    /**
-     * @return HasMany
-     */
     public function activeChildren(): HasMany
     {
-        return $this->children()->where('status', BaseStatusEnum::PUBLISHED);
+        return $this
+            ->children()
+            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->with(['slugable', 'activeChildren']);
     }
 
     /**
@@ -113,10 +110,7 @@ class ProductCategory extends BaseModel
         return array_unique($childrenIds);
     }
 
-    /**
-     * @return \Illuminate\Support\HtmlString|string
-     */
-    public function getBadgeWithCountAttribute()
+    public function getBadgeWithCountAttribute(): HtmlString
     {
         switch ($this->status->getValue()) {
             case BaseStatusEnum::DRAFT:
@@ -140,8 +134,8 @@ class ProductCategory extends BaseModel
             'filter_values'    => [$this->id],
         ]);
 
-        return Html::link($link, (string) $this->products_count, [
-            'class'               => 'badge font-weight-bold ' . $badge,
+        return Html::link($link, (string)$this->products_count, [
+            'class'                  => 'badge font-weight-bold ' . $badge,
             'data-bs-toggle'         => 'tooltip',
             'data-bs-original-title' => trans('plugins/ecommerce::product-categories.total_products', ['total' => $this->products_count]),
         ]);

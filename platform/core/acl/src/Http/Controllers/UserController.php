@@ -6,6 +6,7 @@ use Assets;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Media\Services\ThumbnailService;
 use Carbon\Carbon;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Support\Facades\File;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -204,6 +205,7 @@ class UserController extends BaseController
         $form = $formBuilder
             ->create(ProfileForm::class, ['model' => $user])
             ->setUrl(route('users.update-profile', $user->id));
+
         $passwordForm = $formBuilder
             ->create(PasswordForm::class)
             ->setUrl(route('users.change-password', $user->id));
@@ -243,10 +245,12 @@ class UserController extends BaseController
             $currentUser->isSuperUser()
         ) {
             if ($user->email !== $request->input('email')) {
-                $users = $this->userRepository->getModel()
+                $users = $this->userRepository
+                    ->getModel()
                     ->where('email', $request->input('email'))
                     ->where('id', '<>', $user->id)
-                    ->count();
+                    ->exists();
+
                 if ($users) {
                     return $response
                         ->setError()
@@ -256,10 +260,12 @@ class UserController extends BaseController
             }
 
             if ($user->username !== $request->input('username')) {
-                $users = $this->userRepository->getModel()
+                $users = $this->userRepository
+                    ->getModel()
                     ->where('username', $request->input('username'))
                     ->where('id', '<>', $user->id)
-                    ->count();
+                    ->exists();
+
                 if ($users) {
                     return $response
                         ->setError()
@@ -284,7 +290,7 @@ class UserController extends BaseController
      * @param ChangePasswordService $service
      * @param BaseHttpResponse $response
      * @return BaseHttpResponse
-     * @throws \Illuminate\Auth\AuthenticationException
+     * @throws AuthenticationException
      */
     public function postChangePassword(
         $id,

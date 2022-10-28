@@ -44,6 +44,8 @@ class Store extends BaseModel
         'description',
         'content',
         'status',
+        'company',
+        'zip_code',
     ];
 
     /**

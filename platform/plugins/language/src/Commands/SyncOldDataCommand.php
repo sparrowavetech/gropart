@@ -36,6 +36,7 @@ class SyncOldDataCommand extends Command
 
         $class = $this->argument('class');
         $table = (new $class())->getTable();
+
         if (!Schema::hasTable($table)) {
             $this->error('That table is not existed!');
             return 1;

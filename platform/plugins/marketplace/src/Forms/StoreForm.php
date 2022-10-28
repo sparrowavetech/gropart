@@ -55,6 +55,14 @@ class StoreForm extends FormAbstract
                     'data-counter' => 120,
                 ],
             ])
+            ->add('company', 'text', [
+                'label'      => trans('plugins/marketplace::store.forms.company'),
+                'label_attr' => ['class' => 'control-label'],
+                'attr'       => [
+                    'placeholder'  => trans('plugins/marketplace::store.forms.company_placeholder'),
+                    'data-counter' => 255,
+                ],
+            ])
             ->add('rowOpen1', 'html', [
                 'html' => '<div class="row">',
             ])
@@ -148,7 +156,6 @@ class StoreForm extends FormAbstract
                     ],
                 ]);
         }
-
         $this
             ->add('rowClose1', 'html', [
                 'html' => '</div>',
@@ -159,11 +166,19 @@ class StoreForm extends FormAbstract
             ->add('address', 'text', [
                 'label'      => trans('plugins/marketplace::store.forms.address'),
                 'label_attr' => ['class' => 'control-label'],
+                'attr'       => [
+                    'placeholder'  => trans('plugins/marketplace::store.forms.address_placeholder'),
+                    'data-counter' => 120,
+                ],
+            ])
+            ->add('zip_code', 'text', [
+                'label'      => trans('plugins/marketplace::store.forms.zip_code'),
+                'label_attr' => ['class' => 'control-label'],
                 'wrapper'    => [
                     'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ' col-md-4',
                 ],
                 'attr'       => [
-                    'placeholder'  => trans('plugins/marketplace::store.forms.address_placeholder'),
+                    'placeholder'  => trans('plugins/marketplace::store.forms.zip_code_placeholder'),
                     'data-counter' => 120,
                 ],
             ])

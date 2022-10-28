@@ -158,9 +158,7 @@ class Theme implements ThemeContract
 
         self::uses($this->getThemeName())->layout(setting('layout', 'default'));
 
-        SeoHelper::meta()
-            ->setGoogle(setting('google_analytics'))
-            ->addWebmaster('google', setting('google_site_verification'));
+        SeoHelper::meta()->setGoogle(setting('google_analytics'));
     }
 
     /**
@@ -565,7 +563,7 @@ class Theme implements ThemeContract
      * Check having binded data.
      *
      * @param string $variable
-     * @return boolean
+     * @return bool
      */
     public function binded(string $variable): bool
     {
@@ -918,7 +916,7 @@ class Theme implements ThemeContract
      * @return Theme
      * @throws FileNotFoundException
      */
-    public function load(string $view, array $args = [])
+    public function load(string $view, array $args = []): self
     {
         $view = ltrim($view, '/');
 
@@ -1020,7 +1018,7 @@ class Theme implements ThemeContract
         }
 
         $content->withHeaders([
-            'CMS-Version'       => '5.30.0',
+            'CMS-Version'       => '5.30.3',
             'Authorization-At'  => setting('membership_authorization_at'),
             'Activated-License' => !empty(setting('licensed_to')) ? 'Yes' : 'No',
         ]);
@@ -1107,5 +1105,25 @@ class Theme implements ThemeContract
         $this->fire('beforeRenderLayout.' . $this->layout, $this);
 
         return $this;
+    }
+
+    /**
+     * @param string $theme
+     * @return string
+     * @throws FileNotFoundException
+     */
+    public function getThemeScreenshot(string $theme): string
+    {
+        $publicThemeName = Theme::getPublicThemeName();
+
+        $themeName = Theme::getThemeName() == $theme && $publicThemeName ? $publicThemeName : $theme;
+
+        $screenshot = public_path(config('packages.theme.general.themeDir') . '/' . $themeName . '/screenshot.png');
+
+        if (!File::exists($screenshot)) {
+            $screenshot = theme_path($theme . '/screenshot.png');
+        }
+
+        return 'data:image/png;base64,' . base64_encode(File::get($screenshot));
     }
 }

@@ -118,4 +118,12 @@ class ProductCacheDecorator extends CacheAbstractDecorator implements ProductInt
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }
+
+    /**
+     * @return mixed
+     */
+    public function saveProductOptions()
+    {
+        return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
+    }
 }

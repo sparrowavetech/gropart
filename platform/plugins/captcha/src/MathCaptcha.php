@@ -4,6 +4,7 @@ namespace Botble\Captcha;
 
 use Exception;
 use Illuminate\Session\SessionManager;
+use Illuminate\Support\Facades\Cache;
 
 class MathCaptcha
 {
@@ -13,7 +14,7 @@ class MathCaptcha
     protected $session;
 
     /**
-     * @param SessionManager|null $session
+     * @param SessionManager|null|Cache $session
      */
     public function __construct(SessionManager $session = null)
     {

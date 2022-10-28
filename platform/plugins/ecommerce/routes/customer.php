@@ -210,6 +210,17 @@ if (defined('THEME_MODULE_SCREEN_NAME')) {
                 'as'   => 'downloads.product',
                 'uses' => 'PublicController@getDownload',
             ]);
+
+            Route::group([
+                'prefix' => 'invoices',
+                'as'     => 'invoices.',
+            ], function () {
+                Route::resource('', 'InvoiceController')
+                    ->only('index')
+                    ->parameters('invoices');
+                Route::get('{id}', 'InvoiceController@show')->name('show');
+                Route::get('{id}/generate-invoice', 'InvoiceController@getGenerateInvoice')->name('generate_invoice');
+            });
         });
     });
 }

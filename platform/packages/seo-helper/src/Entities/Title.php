@@ -47,7 +47,6 @@ class Title implements TitleContract
     /**
      * Make the Title instance.
      *
-     * @param array $configs
      * @throws InvalidArgumentException
      */
     public function __construct()
@@ -225,7 +224,6 @@ class Title implements TitleContract
      * @param string $separator
      *
      * @return Title
-     * @throws InvalidArgumentException
      */
     public static function make($title, $siteName = '', $separator = '-')
     {

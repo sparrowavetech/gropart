@@ -30,13 +30,12 @@
 }
 
 .app-grid--blank-slate {
-    margin: auto;
 
     .app-card-item {
         margin-bottom: 20px;
     }
 
-    .app-card-item:nth-child(2n+1), .haravan-apps .app-card-item:nth-child(3n+1), .haravan-apps .app-card-item:nth-child(4n+1) {
+    .app-card-item:nth-child(2n+1) {
         clear: none;
     }
 
@@ -47,8 +46,6 @@
         overflow: hidden;
         border-radius: 3px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, .1);
-        max-height: 270px;
-        width: 310px;
         background: #ffffff;
 
         .app-icon {
@@ -56,8 +53,7 @@
             justify-content: center;
             align-items: center;
             margin: 0 auto;
-            max-width: 310px;
-            height: 100px;
+            height: 120px;
             background-color: #fdcd09;
             border-radius: 3px 3px 0 0;
             overflow: hidden;

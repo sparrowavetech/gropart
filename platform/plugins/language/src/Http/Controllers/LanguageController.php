@@ -437,9 +437,9 @@ class LanguageController extends BaseController
     /**
      * @param string $path
      * @param string $locale
-     * @return int|void
+     * @return int
      */
-    protected function createLocaleInPath(string $path, $locale)
+    protected function createLocaleInPath(string $path, string $locale): int
     {
         $folders = File::directories($path);
 
@@ -457,7 +457,7 @@ class LanguageController extends BaseController
     /**
      * @return bool
      */
-    public function clearRoutesCache()
+    public function clearRoutesCache(): bool
     {
         foreach (LanguageFacade::getSupportedLanguagesKeys() as $locale) {
             $path = app()->getCachedRoutesPath();

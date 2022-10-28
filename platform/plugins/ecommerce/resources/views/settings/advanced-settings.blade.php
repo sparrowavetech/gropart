@@ -325,59 +325,6 @@
 
                         <div class="form-group mb-3">
                             <label class="text-title-field"
-                                   for="using_custom_font_for_invoice">{{ trans('plugins/ecommerce::ecommerce.setting.using_custom_font_for_invoice') }}
-                            </label>
-                            <label class="me-2">
-                                <input type="radio" name="using_custom_font_for_invoice"
-                                       value="1"
-                                       @if (get_ecommerce_setting('using_custom_font_for_invoice', 0) == 1) checked @endif>{{ trans('core/setting::setting.general.yes') }}
-                            </label>
-                            <label>
-                                <input type="radio" name="using_custom_font_for_invoice"
-                                       value="0"
-                                       @if (get_ecommerce_setting('using_custom_font_for_invoice', 0) == 0) checked @endif>{{ trans('core/setting::setting.general.no') }}
-                            </label>
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label class="text-title-field" for="invoice_font_family">{{ trans('plugins/ecommerce::ecommerce.setting.invoice_font_family') }}</label>
-                            {!! Form::googleFonts('invoice_font_family', get_ecommerce_setting('invoice_font_family')) !!}
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label class="text-title-field"
-                                   for="invoice_support_arabic_language">{{ trans('plugins/ecommerce::ecommerce.setting.invoice_support_arabic_language') }}
-                            </label>
-                            <label class="me-2">
-                                <input type="radio" name="invoice_support_arabic_language"
-                                       value="1"
-                                       @if (get_ecommerce_setting('invoice_support_arabic_language', 0) == 1) checked @endif>{{ trans('core/setting::setting.general.yes') }}
-                            </label>
-                            <label>
-                                <input type="radio" name="invoice_support_arabic_language"
-                                       value="0"
-                                       @if (get_ecommerce_setting('invoice_support_arabic_language', 0) == 0) checked @endif>{{ trans('core/setting::setting.general.no') }}
-                            </label>
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label class="text-title-field"
-                                   for="enable_invoice_stamp">{{ trans('plugins/ecommerce::ecommerce.setting.enable_invoice_stamp') }}
-                            </label>
-                            <label class="me-2">
-                                <input type="radio" name="enable_invoice_stamp"
-                                       value="1"
-                                       @if (get_ecommerce_setting('enable_invoice_stamp', 1) == 1) checked @endif>{{ trans('core/setting::setting.general.yes') }}
-                            </label>
-                            <label>
-                                <input type="radio" name="enable_invoice_stamp"
-                                       value="0"
-                                       @if (get_ecommerce_setting('enable_invoice_stamp', 1) == 0) checked @endif>{{ trans('core/setting::setting.general.no') }}
-                            </label>
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label class="text-title-field"
                                    for="make_phone_field_at_the_checkout_optional">{{ trans('plugins/ecommerce::ecommerce.setting.make_phone_field_at_the_checkout_optional') }}
                             </label>
                             <label class="me-2">
@@ -389,22 +336,6 @@
                                 <input type="radio" name="make_phone_field_at_the_checkout_optional"
                                        value="0"
                                        @if (!EcommerceHelper::isPhoneFieldOptionalAtCheckout()) checked @endif>{{ trans('core/setting::setting.general.no') }}
-                            </label>
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label class="text-title-field"
-                                   for="disable_order_invoice_until_order_confirmed">{{ trans('plugins/ecommerce::ecommerce.setting.disable_order_invoice_until_order_confirmed') }}
-                            </label>
-                            <label class="me-2">
-                                <input type="radio" name="disable_order_invoice_until_order_confirmed"
-                                       value="1"
-                                       @if (EcommerceHelper::disableOrderInvoiceUntilOrderConfirmed()) checked @endif>{{ trans('core/setting::setting.general.yes') }}
-                            </label>
-                            <label>
-                                <input type="radio" name="disable_order_invoice_until_order_confirmed"
-                                       value="0"
-                                       @if (!EcommerceHelper::disableOrderInvoiceUntilOrderConfirmed()) checked @endif>{{ trans('core/setting::setting.general.no') }}
                             </label>
                         </div>
 
@@ -474,6 +405,118 @@
                             </div>
                         </div>
 
+                    </div>
+                </div>
+            </div>
+
+            <div class="flexbox-annotated-section">
+                <div class="flexbox-annotated-section-annotation">
+                    <div class="annotated-section-title pd-all-20">
+                        <h2>{{ trans('plugins/ecommerce::ecommerce.setting.company_settings') }}</h2>
+                    </div>
+                    <div class="annotated-section-description pd-all-20 p-none-t">
+                        <p class="color-note">{{ trans('plugins/ecommerce::ecommerce.setting.company_settings_description') }}</p>
+                    </div>
+                </div>
+                <div class="flexbox-annotated-section-content">
+                    <div class="wrapper-content pd-all-20">
+                        <div class="form-group mb-3">
+                            <label class="text-title-field" for="company_name_for_invoicing">{{ trans('plugins/ecommerce::ecommerce.setting.company_name') }}</label>
+                            <input type="text" class="form-control" name="company_name_for_invoicing" value="{{ get_ecommerce_setting('company_name_for_invoicing') ?: get_ecommerce_setting('store_name')  }}">
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="text-title-field" for="company_address_for_invoicing">{{ trans('plugins/ecommerce::ecommerce.setting.company_address') }}</label>
+                            <input type="text" class="form-control" name="company_address_for_invoicing" value="{{ get_ecommerce_setting('company_address_for_invoicing') ?: (get_ecommerce_setting('store_address') . ', ' . get_ecommerce_setting('store_city') . ', ' . get_ecommerce_setting('store_state') . ', ' . EcommerceHelper::getCountryNameById(get_ecommerce_setting('store_country'))) }}">
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="text-title-field" for="company_email_for_invoicing">{{ trans('plugins/ecommerce::ecommerce.setting.company_email') }}</label>
+                            <input type="text" class="form-control" name="company_email_for_invoicing" value="{{ get_ecommerce_setting('company_email_for_invoicing') ?: get_ecommerce_setting('store_email') }}">
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="text-title-field" for="company_phone_for_invoicing">{{ trans('plugins/ecommerce::ecommerce.setting.company_phone') }}</label>
+                            <input type="text" class="form-control" name="company_phone_for_invoicing" value="{{ get_ecommerce_setting('company_phone_for_invoicing') ?: get_ecommerce_setting('store_phone') }}">
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="text-title-field" for="company_tax_id_for_invoicing">{{ trans('plugins/ecommerce::ecommerce.setting.company_tax_id') }}</label>
+                            <input type="text" class="form-control" name="company_tax_id_for_invoicing" value="{{ get_ecommerce_setting('company_tax_id_for_invoicing') ?: get_ecommerce_setting('store_vat_number') }}">
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="text-title-field" for="company_logo_for_invoicing">{{ trans('plugins/ecommerce::ecommerce.setting.company_logo') }}</label>
+                            {!! Form::mediaImage('company_logo_for_invoicing', get_ecommerce_setting('company_logo_for_invoicing') ?: (theme_option('logo_in_invoices') ?: theme_option('logo')), ['allow_thumb' => false]) !!}
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="text-title-field"
+                                   for="using_custom_font_for_invoice">{{ trans('plugins/ecommerce::ecommerce.setting.using_custom_font_for_invoice') }}
+                            </label>
+                            <label class="me-2">
+                                <input type="radio" name="using_custom_font_for_invoice"
+                                       value="1"
+                                       @if (get_ecommerce_setting('using_custom_font_for_invoice', 0) == 1) checked @endif>{{ trans('core/setting::setting.general.yes') }}
+                            </label>
+                            <label>
+                                <input type="radio" name="using_custom_font_for_invoice"
+                                       value="0"
+                                       @if (get_ecommerce_setting('using_custom_font_for_invoice', 0) == 0) checked @endif>{{ trans('core/setting::setting.general.no') }}
+                            </label>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="text-title-field" for="invoice_font_family">{{ trans('plugins/ecommerce::ecommerce.setting.invoice_font_family') }}</label>
+                            {!! Form::googleFonts('invoice_font_family', get_ecommerce_setting('invoice_font_family')) !!}
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="text-title-field"
+                                   for="invoice_support_arabic_language">{{ trans('plugins/ecommerce::ecommerce.setting.invoice_support_arabic_language') }}
+                            </label>
+                            <label class="me-2">
+                                <input type="radio" name="invoice_support_arabic_language"
+                                       value="1"
+                                       @if (get_ecommerce_setting('invoice_support_arabic_language', 0) == 1) checked @endif>{{ trans('core/setting::setting.general.yes') }}
+                            </label>
+                            <label>
+                                <input type="radio" name="invoice_support_arabic_language"
+                                       value="0"
+                                       @if (get_ecommerce_setting('invoice_support_arabic_language', 0) == 0) checked @endif>{{ trans('core/setting::setting.general.no') }}
+                            </label>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="text-title-field"
+                                   for="enable_invoice_stamp">{{ trans('plugins/ecommerce::ecommerce.setting.enable_invoice_stamp') }}
+                            </label>
+                            <label class="me-2">
+                                <input type="radio" name="enable_invoice_stamp"
+                                       value="1"
+                                       @if (get_ecommerce_setting('enable_invoice_stamp', 1) == 1) checked @endif>{{ trans('core/setting::setting.general.yes') }}
+                            </label>
+                            <label>
+                                <input type="radio" name="enable_invoice_stamp"
+                                       value="0"
+                                       @if (get_ecommerce_setting('enable_invoice_stamp', 1) == 0) checked @endif>{{ trans('core/setting::setting.general.no') }}
+                            </label>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="text-title-field" for="invoice_code_prefix">{{ trans('plugins/ecommerce::ecommerce.setting.invoice_code_prefix') }}</label>
+                            <input type="text" class="form-control" name="invoice_code_prefix" value="{{ get_ecommerce_setting('invoice_code_prefix', 'INV-') }}">
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="text-title-field"
+                                   for="disable_order_invoice_until_order_confirmed">{{ trans('plugins/ecommerce::ecommerce.setting.disable_order_invoice_until_order_confirmed') }}
+                            </label>
+                            <label class="me-2">
+                                <input type="radio" name="disable_order_invoice_until_order_confirmed"
+                                       value="1"
+                                       @if (EcommerceHelper::disableOrderInvoiceUntilOrderConfirmed()) checked @endif>{{ trans('core/setting::setting.general.yes') }}
+                            </label>
+                            <label>
+                                <input type="radio" name="disable_order_invoice_until_order_confirmed"
+                                       value="0"
+                                       @if (!EcommerceHelper::disableOrderInvoiceUntilOrderConfirmed()) checked @endif>{{ trans('core/setting::setting.general.no') }}
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>

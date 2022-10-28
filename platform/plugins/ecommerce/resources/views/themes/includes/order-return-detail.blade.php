@@ -5,11 +5,11 @@
                 <h5>{{ __('Return Product(s) Information') }}</h5>
                 <p>
                     <span>{{ __('Request number') }}: </span>
-                    <strong>{{ get_order_code($orderReturn->id) }}</strong>
+                    <strong>{{ $orderReturn->code }}</strong>
                 </p>
                 <p>
                     <span>{{ __('Order Id') }}: </span>
-                    <strong>{{ get_order_code($orderReturn->order->id) }}</strong>
+                    <strong>{{ $orderReturn->order->code }}</strong>
                 </p>
             </div>
             <div class="col-md-6">
@@ -75,7 +75,7 @@
                             <tr>
                                 <td class="text-center">{{ $key + 1 }}</td>
                                 <td class="text-center">
-                                    <img src="{{ RvMedia::getImageUrl($product ? $product->image : null, 'thumb', false, RvMedia::getDefaultImage()) }}"
+                                    <img src="{{ RvMedia::getImageUrl($item->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}"
                                          alt="{{ $item->product_name }}" width="50">
                                 </td>
                                 <td>

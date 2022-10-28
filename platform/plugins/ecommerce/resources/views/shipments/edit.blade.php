@@ -59,7 +59,7 @@
                                                 <td class="order-border p-small">
                                                     <div class="flexbox-grid-default pl5 p-r5" style="align-items: center">
                                                         <div class="flexbox-auto-50">
-                                                            <div class="wrap-img"><img class="thumb-image thumb-image-cartorderlist" src="{{ RvMedia::getImageUrl($product->original_product->image, 'thumb', false, RvMedia::getDefaultImage()) }}" alt="{{ $product->name }}" /></div>
+                                                            <div class="wrap-img"><img class="thumb-image thumb-image-cartorderlist" src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}" alt="{{ $product->name }}" /></div>
                                                         </div>
                                                         <div class="flexbox-content">
                                                             <div>
@@ -91,7 +91,7 @@
                                             <tbody>
                                                 <tr>
                                                     <td colspan="4" class="text-center p-sm-r border-none">
-                                                        <a href="{{ route('orders.edit', $shipment->order_id) }}" target="_blank" class="d-inline-block mt-2">{{ trans('plugins/ecommerce::shipping.view_order', ['order_id' => get_order_code($shipment->order_id)]) }} <i class="fa fa-external-link-alt"></i></a>
+                                                        <a href="{{ route('orders.edit', $shipment->order_id) }}" target="_blank" class="d-inline-block mt-2">{{ trans('plugins/ecommerce::shipping.view_order', ['order_id' => $shipment->order->code]) }} <i class="fa fa-external-link-alt"></i></a>
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -209,7 +209,7 @@
                                 {{ trans('plugins/ecommerce::shipping.order_number') }}
                             </div>
                             <div class="flexbox-grid-form-item text-end">
-                                <a target="_blank" href="{{ route('orders.edit', $shipment->order->id) }}" class="hover-underline">{{ get_order_code($shipment->order->id) }} <i class="fa fa-external-link-alt"></i></a>
+                                <a target="_blank" href="{{ route('orders.edit', $shipment->order->id) }}" class="hover-underline">{{ $shipment->order->code }} <i class="fa fa-external-link-alt"></i></a>
                             </div>
                         </div>
                         <div class="flexbox-grid-form flexbox-grid-form-no-outside-padding mb10">

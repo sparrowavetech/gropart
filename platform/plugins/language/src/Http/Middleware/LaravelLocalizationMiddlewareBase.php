@@ -19,7 +19,7 @@ class LaravelLocalizationMiddlewareBase
      * @param Request $request
      * @return bool
      */
-    protected function shouldIgnore($request)
+    protected function shouldIgnore($request): bool
     {
         foreach ($this->except as $except) {
             if ($except !== '/') {

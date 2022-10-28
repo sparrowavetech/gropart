@@ -148,11 +148,7 @@ class Backup
 
         $sql = $mysqlPath . 'mysqldump --user="' . $config['username'] . '" --password="' . $config['password'] . '"';
 
-        if (!in_array($config['host'], ['localhost', '127.0.0.1'])) {
-            $sql .= ' --host=' . $config['host'];
-        }
-
-        $sql .= ' --port=' . $config['port'] . ' ' . $config['database'] . ' > ' . $path . '.sql';
+        $sql .= ' --host=' . $config['host'] . ' --port=' . $config['port'] . ' ' . $config['database'] . ' > ' . $path . '.sql';
 
         try {
             Process::fromShellCommandline($sql)->mustRun();

@@ -10,6 +10,7 @@ use Botble\Ecommerce\Notifications\ResetPasswordNotification;
 use Botble\Marketplace\Models\Revenue;
 use Botble\Marketplace\Models\VendorInfo;
 use Botble\Marketplace\Models\Withdrawal;
+use Carbon\Carbon;
 use Eloquent;
 use Exception;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -185,12 +186,12 @@ class Customer extends Authenticatable
         return $this
             ->belongsToMany(Discount::class, 'ec_discount_customers', 'customer_id')
             ->where('type', 'promotion')
-            ->where('start_date', '<=', now())
+            ->where('start_date', '<=', Carbon::now())
             ->where('target', 'customer')
             ->where(function ($query) {
                 return $query
                     ->whereNull('end_date')
-                    ->orWhere('end_date', '>=', now());
+                    ->orWhere('end_date', '>=', Carbon::now());
             })
             ->where('product_quantity', 1);
     }

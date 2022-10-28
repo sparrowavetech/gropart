@@ -77,15 +77,24 @@ class Location
     }
 
     /**
+     * @param int|string $cityId
+     * @return City
+     */
+    public function getCityById($cityId): ?City
+    {
+        return $this->cityRepository->getFirstBy([
+            'id'     => $cityId,
+            'status' => BaseStatusEnum::PUBLISHED,
+        ]);
+    }
+
+    /**
      * @param $cityId
      * @return string
      */
     public function getCityNameById($cityId): ?string
     {
-        $city = $this->cityRepository->getFirstBy([
-            'id'     => $cityId,
-            'status' => BaseStatusEnum::PUBLISHED,
-        ]);
+        $city = $this->getCityById($cityId);
 
         return $city ? $city->name : null;
     }

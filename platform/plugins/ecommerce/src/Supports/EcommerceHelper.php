@@ -15,6 +15,10 @@ use Botble\Ecommerce\Repositories\Interfaces\ReviewInterface;
 use Botble\Location\Repositories\Interfaces\CityInterface;
 use Botble\Location\Repositories\Interfaces\CountryInterface;
 use Botble\Location\Repositories\Interfaces\StateInterface;
+use Botble\Location\Rules\CityRule;
+use Botble\Location\Rules\StateRule;
+use Botble\Payment\Enums\PaymentMethodEnum;
+use Carbon\Carbon;
 use Cart;
 use Exception;
 use Illuminate\Http\Request;
@@ -349,37 +353,37 @@ class EcommerceHelper
      */
     public function getDateRangeInReport(Request $request): array
     {
-        $startDate = now()->subDays(29);
-        $endDate = now();
+        $startDate = Carbon::now()->subDays(29);
+        $endDate = Carbon::now();
 
         if ($request->input('date_from')) {
             try {
-                $startDate = now()->createFromFormat('Y-m-d', $request->input('date_from'));
-            } catch (Exception $ex) {
+                $startDate = Carbon::now()->createFromFormat('Y-m-d', $request->input('date_from'));
+            } catch (Exception $exception) {
             }
 
             if (!$startDate) {
-                $startDate = now()->subDays(29);
+                $startDate = Carbon::now()->subDays(29);
             }
         }
 
         if ($request->input('date_to')) {
             try {
-                $endDate = now()->createFromFormat('Y-m-d', $request->input('date_to'));
+                $endDate = Carbon::now()->createFromFormat('Y-m-d', $request->input('date_to'));
             } catch (Exception $ex) {
             }
 
             if (!$endDate) {
-                $endDate = now();
+                $endDate = Carbon::now();
             }
         }
 
-        if ($endDate->gt(now())) {
-            $endDate = now();
+        if ($endDate->gt(Carbon::now())) {
+            $endDate = Carbon::now();
         }
 
         if ($startDate->gt($endDate)) {
-            $startDate = now()->subDays(29);
+            $startDate = Carbon::now()->subDays(29);
         }
 
         $predefinedRange = $request->input('predefined_range', trans('plugins/ecommerce::reports.ranges.last_30_days'));
@@ -617,23 +621,37 @@ class EcommerceHelper
     /**
      * @return array
      */
-    public function getCustomerAddressValidationRules(): array
+    public function getCustomerAddressValidationRules(?string $prefix = ''): array
     {
         $rules = [
-            'name'    => 'required|min:3|max:120',
-            'email'   => 'email|nullable|max:60|min:6',
-            'state'   => 'required|max:120',
-            'city'    => 'required|max:120',
-            'address' => 'required|max:120',
-            'phone'   => $this->getPhoneValidationRule(),
+            $prefix . 'name'    => 'required|min:3|max:120',
+            $prefix . 'email'   => 'email|nullable|max:60|min:6',
+            $prefix . 'state'   => 'required|max:120',
+            $prefix . 'city'    => 'required|max:120',
+            $prefix . 'address' => 'required|max:120',
+            $prefix . 'phone'   => $this->getPhoneValidationRule(),
         ];
 
         if ($this->isUsingInMultipleCountries()) {
-            $rules['country'] = 'required|' . Rule::in(array_keys($this->getAvailableCountries()));
+            $rules[$prefix . 'country'] = 'required|' . Rule::in(array_keys($this->getAvailableCountries()));
+        }
+
+        if ($this->loadCountriesStatesCitiesFromPluginLocation()) {
+            $rules[$prefix . 'state'] = [
+                'required',
+                'numeric',
+                new StateRule($prefix . 'country'),
+            ];
+
+            $rules[$prefix . 'city'] = [
+                'required',
+                'numeric',
+                new CityRule($prefix . 'state'),
+            ];
         }
 
         if ($this->isZipCodeEnabled()) {
-            $rules['zip_code'] = 'required|max:20';
+            $rules[$prefix . 'zip_code'] = 'required|max:20';
         }
 
         return $rules;
@@ -917,5 +935,82 @@ class EcommerceHelper
         }
 
         return 'plugins/ecommerce::themes.' . $view;
+    }
+
+    /**
+     * @return array
+     */
+    public function getOriginAddress(): array
+    {
+        return [
+			'name'      => get_ecommerce_setting('store_name'),
+			'company'   => get_ecommerce_setting('store_company'),
+			'email'     => get_ecommerce_setting('store_email'),
+			'phone'     => get_ecommerce_setting('store_phone'),
+			'country'   => get_ecommerce_setting('store_country'),
+			'state'     => get_ecommerce_setting('store_state'),
+			'city'      => get_ecommerce_setting('store_city'),
+			'address'   => get_ecommerce_setting('store_address'),
+			'address_2' => '',
+			'zip_code'  => get_ecommerce_setting('store_zip_code'),
+		];
+    }
+
+    /**
+     * @param array|Collection $products
+     * @param array $session
+     * @param array $origin
+     * @param float $orderTotal
+     * @param string $paymentMethod
+     * @return array
+     */
+    public function getShippingData($products, $session, $origin, $orderTotal, ?string $paymentMethod = null): array
+    {
+        $weight = 0;
+        $parcels = [];
+        foreach ($products as $product) {
+            $cartItem = $product->cartItem;
+            $weight += $product->weight * $cartItem->qty;
+            $parcels[$cartItem->id] = [
+                'weight'      => $product->weight,
+                'length'      => $product->length,
+                'wide'        => $product->wide,
+                'height'      => $product->height,
+                'name'        => $product->name,
+                'description' => $product->description,
+                'qty'         => $cartItem->qty,
+            ];
+        }
+
+        $keys = ['name', 'company', 'address', 'country', 'state', 'city', 'zip_code', 'email', 'phone'];
+
+        if (EcommerceHelper::isUsingInMultipleCountries()) {
+            $country = Arr::get($session, 'country');
+        } else {
+            $country = EcommerceHelper::getFirstCountryId();
+        }
+
+        $data = [
+            'address'     => Arr::get($session, 'address'),
+            'country'     => $country,
+            'state'       => Arr::get($session, 'state'),
+            'city'        => Arr::get($session, 'city'),
+            'weight'      => EcommerceHelper::validateOrderWeight($weight),
+            'order_total' => max($orderTotal, 0),
+            'address_to'  => Arr::only($session, $keys),
+            'origin'      => $origin,
+            'parcels'     => $parcels,
+        ];
+
+        if ($paymentMethod == PaymentMethodEnum::COD) {
+            $data['extra'] = [
+                'COD' => [
+                    'amount'   => max($orderTotal, 0),
+                    'currency' => get_application_currency()->title,
+                ],
+            ];
+        }
+
+        return $data;
     }
 }

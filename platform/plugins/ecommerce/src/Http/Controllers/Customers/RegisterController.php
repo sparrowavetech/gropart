@@ -8,6 +8,7 @@ use Botble\ACL\Traits\RegistersUsers;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Models\Customer;
 use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
+use Carbon\Carbon;
 use EcommerceHelper;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Contracts\Auth\StatefulGuard;
@@ -99,11 +100,12 @@ class RegisterController extends Controller
 
         if (EcommerceHelper::isEnableEmailVerification()) {
             return $this->registered($request, $customer)
-                ?: $response->setNextUrl(route('customer.login'))
-                    ->setMessage(__('Please confirm your email address.'));
+                ?: $response
+                    ->setNextUrl(route('customer.login'))
+                    ->setMessage(__('We have sent you an email to verify your email. Please check and confirm your email address!'));
         }
 
-        $customer->confirmed_at = now();
+        $customer->confirmed_at = Carbon::now();
         $this->customerRepository->createOrUpdate($customer);
         $this->guard()->login($customer);
 
@@ -206,7 +208,7 @@ class RegisterController extends Controller
 
         $customer = $customerRepository->findOrFail($id);
 
-        $customer->confirmed_at = now();
+        $customer->confirmed_at = Carbon::now();
         $this->customerRepository->createOrUpdate($customer);
 
         $this->guard()->login($customer);

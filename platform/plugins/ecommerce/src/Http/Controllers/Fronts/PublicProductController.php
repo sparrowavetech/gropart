@@ -194,6 +194,9 @@ class PublicProductController
                 'tags.slugable',
                 'categories',
                 'categories.slugable',
+                'options' => function($query) {
+                    return $query->with('values');
+                }
             ],
             'withCount' => EcommerceHelper::withReviewsCount(),
         ]);

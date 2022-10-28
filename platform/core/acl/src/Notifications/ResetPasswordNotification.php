@@ -22,7 +22,7 @@ class ResetPasswordNotification extends Notification
      *
      * @param string $token
      */
-    public function __construct($token)
+    public function __construct(string $token)
     {
         $this->token = $token;
     }

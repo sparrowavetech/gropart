@@ -49,7 +49,7 @@ class PublicController extends Controller
             }
         }
 
-        $blacklistWords = trim(setting('blacklist_keywords'));
+        $blacklistWords = trim(setting('blacklist_keywords', ''));
 
         if ($blacklistWords) {
             $content = strtolower($request->input('content'));

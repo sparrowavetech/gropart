@@ -2,7 +2,7 @@
 
 namespace Botble\Ecommerce\Models;
 
-use Auth;
+use Illuminate\Support\Facades\Auth;
 use Botble\ACL\Models\User;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
@@ -12,6 +12,7 @@ use Botble\Ecommerce\Enums\StockStatusEnum;
 use Botble\Ecommerce\Facades\DiscountFacade;
 use Botble\Ecommerce\Facades\FlashSaleFacade;
 use Botble\Ecommerce\Services\Products\UpdateDefaultProductService;
+use Carbon\Carbon;
 use EcommerceHelper;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
@@ -470,8 +471,8 @@ class Product extends BaseModel
                 return $salePrice;
             }
 
-            if ((!empty($this->start_date) && $this->start_date > now()) ||
-                (!empty($this->end_date && $this->end_date < now()))) {
+            if ((!empty($this->start_date) && $this->start_date > Carbon::now()) ||
+                (!empty($this->end_date && $this->end_date < Carbon::now()))) {
                 return $price;
             }
 
@@ -547,12 +548,12 @@ class Product extends BaseModel
         return $this
             ->belongsToMany(Discount::class, 'ec_discount_products', 'product_id')
             ->where('type', 'promotion')
-            ->where('start_date', '<=', now())
+            ->where('start_date', '<=', Carbon::now())
             ->whereIn('target', ['specific-product', 'product-variant'])
             ->where(function ($query) {
                 return $query
                     ->whereNull('end_date')
-                    ->orWhere('end_date', '>=', now());
+                    ->orWhere('end_date', '>=', Carbon::now());
             })
             ->where('product_quantity', 1);
     }
@@ -631,7 +632,7 @@ class Product extends BaseModel
     /**
      * @return HasMany
      */
-    public function variationProductAttributes()
+    public function variationProductAttributes(): HasMany
     {
         return $this
             ->hasMany(ProductVariation::class, 'product_id')
@@ -662,7 +663,7 @@ class Product extends BaseModel
     /**
      * @return string
      */
-    public function getVariationAttributesAttribute()
+    public function getVariationAttributesAttribute(): string
     {
         if (!$this->variationProductAttributes->count()) {
             return '';
@@ -676,7 +677,7 @@ class Product extends BaseModel
     /**
      * @return string
      */
-    public function getPriceInTableAttribute()
+    public function getPriceInTableAttribute(): string
     {
         $price = format_price($this->front_sale_price);
 
@@ -727,7 +728,7 @@ class Product extends BaseModel
     /**
      * @return bool
      */
-    public function isTypePhysical()
+    public function isTypePhysical(): bool
     {
         return !isset($this->attributes['product_type']) || $this->attributes['product_type'] == ProductTypeEnum::PHYSICAL;
     }
@@ -735,7 +736,7 @@ class Product extends BaseModel
     /**
      * @return bool
      */
-    public function isTypeDigital()
+    public function isTypeDigital(): bool
     {
         return isset($this->attributes['product_type']) && $this->attributes['product_type'] == ProductTypeEnum::DIGITAL;
     }
@@ -777,5 +778,10 @@ class Product extends BaseModel
                             ->where('allow_checkout_when_out_of_stock', 1);
                     });
             });
+    }
+
+    public function options(): HasMany
+    {
+       return $this->hasMany(Option::class)->orderBy('order');
     }
 }

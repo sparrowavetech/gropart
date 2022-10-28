@@ -1,6 +1,7 @@
 <?php
 
 use Botble\Ecommerce\Models\Customer;
+use Carbon\Carbon;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -18,7 +19,7 @@ return new class () extends Migration {
             $table->string('email_verify_token', 120)->nullable();
         });
 
-        Customer::whereNull('confirmed_at')->update(['confirmed_at' => now()]);
+        Customer::whereNull('confirmed_at')->update(['confirmed_at' => Carbon::now()]);
     }
 
     /**

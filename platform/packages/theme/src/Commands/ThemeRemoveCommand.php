@@ -48,7 +48,8 @@ class ThemeRemoveCommand extends Command
     /**
      * Execute the console command.
      *
-     * @return bool
+     * @return int
+     * @throws \Exception
      */
     public function handle()
     {

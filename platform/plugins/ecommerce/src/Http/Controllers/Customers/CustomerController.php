@@ -83,7 +83,7 @@ class CustomerController extends BaseController
     {
         $customer = $this->customerRepository->getModel();
         $customer->fill($request->input());
-        $customer->confirmed_at = now();
+        $customer->confirmed_at = Carbon::now();
         $customer->password = bcrypt($request->input('password'));
         $customer->dob = Carbon::parse($request->input('dob'))->toDateString();
         $customer = $this->customerRepository->createOrUpdate($customer);

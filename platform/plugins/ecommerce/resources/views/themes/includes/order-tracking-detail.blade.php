@@ -5,7 +5,7 @@
                 <h5>{{ __('Order information') }}</h5>
                 <p>
                     <span>{{ __('Order number') }}: </span>
-                    <strong>{{ get_order_code($order->id) }}</strong>
+                    <strong>{{ $order->code }}</strong>
                 </p>
                 <p>
                     <span>{{ __('Time') }}: </span>
@@ -110,7 +110,7 @@
                             <td class="text-center">{{ $key + 1 }}</td>
                             <td class="text-center">
                                 <img
-                                    src="{{ RvMedia::getImageUrl($product ? $product->image : null, 'thumb', false, RvMedia::getDefaultImage()) }}"
+                                    src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}"
                                     width="50" alt="{{ $orderProduct->product_name }}">
                             </td>
                             <td>
@@ -144,6 +144,9 @@
                                                     <strong> {{ $option['value'] }}</strong></small></p>
                                         @endif
                                     @endforeach
+                                @endif
+                                @if (!empty($orderProduct->product_options) && is_array($orderProduct->product_options))
+                                    {!! render_product_options_info($orderProduct->product_options, $product, true) !!}
                                 @endif
                             </td>
                             <td>{{ format_price($orderProduct->price) }}</td>

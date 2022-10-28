@@ -12,6 +12,7 @@ use Botble\Location\Repositories\Interfaces\StateInterface;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Maatwebsite\Excel\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ExportController extends BaseController
@@ -42,6 +43,6 @@ class ExportController extends BaseController
     {
         BaseHelper::maximumExecutionTimeAndMemoryLimit();
 
-        return (new CsvLocationExport())->download('exported_location.csv');
+        return (new CsvLocationExport())->download('exported_location.csv', Excel::CSV, ['Content-Type' => 'text/csv']);
     }
 }

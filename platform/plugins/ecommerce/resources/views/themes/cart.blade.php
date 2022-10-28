@@ -70,6 +70,11 @@
                                                                 <p style="margin-bottom: 0">
                                                                     <span style="display: block;font-style: italic;color:#555555; font-size: .9em;">{{ $cartItem->options['attributes'] ?? '' }}</span>
                                                                 </p>
+
+                                                                @if (!empty($cartItem->options['options']))
+                                                                    {!! render_product_options_info($cartItem->options['options'], $product, true) !!}
+                                                                @endif
+
                                                                 @if (!empty($cartItem->options['extras']) && is_array($cartItem->options['extras']))
                                                                     @foreach($cartItem->options['extras'] as $option)
                                                                         @if (!empty($option['key']) && !empty($option['value']))

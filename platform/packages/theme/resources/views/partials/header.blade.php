@@ -9,3 +9,7 @@
 {!! Theme::asset()->container('header')->scripts() !!}
 
 {!! apply_filters(THEME_FRONT_HEADER, null) !!}
+
+<script>
+    window.siteUrl = "{{ route('public.index') }}";
+</script>

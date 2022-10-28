@@ -71,6 +71,7 @@ abstract class ActionHookEvent
         if (is_string($callback)) {
             if (strpos($callback, '@')) {
                 $callback = explode('@', $callback);
+
                 return [app('\\' . $callback[0]), $callback[1]];
             }
 

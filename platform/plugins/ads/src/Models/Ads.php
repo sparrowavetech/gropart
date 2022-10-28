@@ -55,7 +55,7 @@ class Ads extends BaseModel
     public function scopeNotExpired($query)
     {
         return $query->where(function ($query) {
-            $query->whereDate('expired_at', '>=', now()->toDateString());
+            $query->whereDate('expired_at', '>=', Carbon::now()->toDateString());
         });
     }
 

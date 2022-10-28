@@ -2,6 +2,7 @@
 
 namespace Botble\Translation;
 
+use ArrayAccess;
 use BaseHelper;
 use Botble\Base\Supports\MountManager;
 use Botble\Base\Supports\PclZip as Zip;
@@ -36,7 +37,7 @@ class Manager
     protected $files;
 
     /**
-     * @var array|\ArrayAccess
+     * @var array|ArrayAccess
      */
     protected $config;
 

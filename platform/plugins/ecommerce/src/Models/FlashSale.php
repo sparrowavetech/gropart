@@ -74,7 +74,7 @@ class FlashSale extends BaseModel
      */
     public function scopeNotExpired($query)
     {
-        return $query->whereDate('end_date', '>', now()->toDateString());
+        return $query->whereDate('end_date', '>', Carbon::now()->toDateString());
     }
 
     /**
@@ -83,7 +83,7 @@ class FlashSale extends BaseModel
      */
     public function scopeExpired($query)
     {
-        return $query->whereDate('end_date', '=<', now()->toDateString());
+        return $query->whereDate('end_date', '=<', Carbon::now()->toDateString());
     }
 
     protected static function boot()

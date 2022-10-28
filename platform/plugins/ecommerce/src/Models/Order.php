@@ -77,6 +77,10 @@ class Order extends BaseModel
             OrderAddress::where('order_id', $order->id)->delete();
             app(PaymentInterface::class)->deleteBy(['order_id' => $order->id]);
         });
+
+        static::creating(function (Order $order) {
+            $order->code = static::generateUniqueCode();
+        });
     }
 
     /**
@@ -185,6 +189,14 @@ class Order extends BaseModel
     }
 
     /**
+     * @return HasOne
+     */
+    public function invoice(): HasOne
+    {
+        return $this->hasOne(Invoice::class, 'reference_id')->withDefault();
+    }
+
+    /**
      * @return bool
      */
     public function canBeCanceled(): bool
@@ -251,7 +263,7 @@ class Order extends BaseModel
      */
     public function isInvoiceAvailable(): bool
     {
-        return !EcommerceHelper::disableOrderInvoiceUntilOrderConfirmed() || $this->is_confirmed;
+        return $this->invoice()->exists() && !EcommerceHelper::disableOrderInvoiceUntilOrderConfirmed() || $this->is_confirmed;
     }
 
     /**
@@ -300,5 +312,17 @@ class Order extends BaseModel
         }
 
         return !$this->returnRequest()->exists();
+    }
+
+    public static function generateUniqueCode(): string
+    {
+        $nextInsertId = static::query()->max('id') + 1;
+
+        do {
+            $code = get_order_code($nextInsertId);
+            $nextInsertId++;
+        } while (static::query()->where('code', $code)->exists());
+
+        return $code;
     }
 }

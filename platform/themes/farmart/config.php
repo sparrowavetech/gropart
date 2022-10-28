@@ -56,6 +56,10 @@ return [
                 $theme->partialComposer('footer', function ($view) use ($categories) {
                     $view->with('categories', $categories);
                 });
+
+                $theme->composer('ecommerce.includes.filters', function ($view) use ($categories) {
+                    $view->with(['categories' => $categories]);
+                });
             }
 
             // You may use this event to set up your assets.
@@ -234,7 +238,7 @@ return [
                     'local'     => [
                         'source'       => 'js/main.js',
                         'dependencies' => ['jquery'],
-                        'version'      => $version,
+                        'version'      => $version . '.1',
                     ],
                     'container' => 'footer',
                 ],
@@ -279,18 +283,6 @@ return [
                 ];
             }
 
-            if (is_plugin_active('ecommerce')) {
-                $assets['change-product-swatches'] = [
-                    'local'     => [
-                        'source'       => 'vendor/core/plugins/ecommerce/js/change-product-swatches.js',
-                        'dependencies' => ['jquery'],
-                        'version'      => $version,
-                        'use_path'     => false,
-                    ],
-                    'container' => 'footer',
-                ];
-            }
-
             foreach ($assets as $key => $asset) {
                 $assetContainer = $theme->asset()->container(Arr::get($asset, 'container', 'default'));
 
@@ -305,7 +297,17 @@ return [
             }
 
             if (function_exists('shortcode')) {
-                $theme->composer(['page', 'post'], function (\Botble\Shortcode\View\View $view) {
+                $theme->composer([
+                    'page',
+                    'post',
+                    'ecommerce.product',
+                    'ecommerce.products',
+                    'ecommerce.product-category',
+                    'ecommerce.product-tag',
+                    'ecommerce.brand',
+                    'ecommerce.search',
+                    'ecommerce.cart',
+                ], function (\Botble\Shortcode\View\View $view) use ($theme, $version) {
                     $view->withShortcodes();
                 });
             }

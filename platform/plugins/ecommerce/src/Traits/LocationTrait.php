@@ -30,10 +30,14 @@ trait LocationTrait
             return $value;
         }
 
-        $stateName = app(StateInterface::class)->getModel()->where('id', $value)->value('name');
+        if (is_numeric($value)) {
+            $stateName = app(StateInterface::class)->getModel()
+                ->where('id', $value)
+                ->value('name');
 
-        if ($stateName) {
-            return $stateName;
+            if ($stateName) {
+                return $stateName;
+            }
         }
 
         return $value;
@@ -50,10 +54,12 @@ trait LocationTrait
             return $value;
         }
 
-        $cityName = app(CityInterface::class)->getModel()->where('id', $value)->value('name');
+        if (is_numeric($value)) {
+            $cityName = app(CityInterface::class)->getModel()->where('id', $value)->value('name');
 
-        if ($cityName) {
-            return $cityName;
+            if ($cityName) {
+                return $cityName;
+            }
         }
 
         return $value;

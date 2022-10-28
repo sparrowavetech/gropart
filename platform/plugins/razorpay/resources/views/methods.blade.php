@@ -4,10 +4,10 @@
                value="{{ RAZORPAY_PAYMENT_METHOD_NAME }}" data-bs-toggle="collapse" data-bs-target=".payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}_wrap"
                data-toggle="collapse" data-target=".payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}_wrap"
                data-parent=".list_payment_method"
-               @if ((session('selected_payment_method') ?: setting('default_payment_method')) == RAZORPAY_PAYMENT_METHOD_NAME) checked @endif
+               @if ($selecting == RAZORPAY_PAYMENT_METHOD_NAME) checked @endif
         >
         <label for="payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}">{{ get_payment_setting('name', RAZORPAY_PAYMENT_METHOD_NAME) }}</label>
-        <div class="payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}_wrap payment_collapse_wrap collapse @if ((session('selected_payment_method') ?: setting('default_payment_method')) == RAZORPAY_PAYMENT_METHOD_NAME) show @endif">
+        <div class="payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}_wrap payment_collapse_wrap collapse @if ($selecting == RAZORPAY_PAYMENT_METHOD_NAME) show @endif">
             @if ($errorMessage)
                 <div class="text-danger my-2">
                     {!! BaseHelper::clean($errorMessage) !!}

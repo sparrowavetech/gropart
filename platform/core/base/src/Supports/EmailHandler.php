@@ -2,6 +2,7 @@
 
 namespace Botble\Base\Supports;
 
+use ArrayAccess;
 use Botble\Base\Events\SendMailEvent;
 use Botble\Base\Jobs\SendMailJob;
 use Botble\Setting\Supports\SettingStore;
@@ -9,34 +10,39 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\URL;
 use RvMedia;
 use Swift_TransportException;
 use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
 use Throwable;
-use Illuminate\Support\Facades\URL;
 
 class EmailHandler
 {
     /**
-     * @var array
+     * @var string
      */
-    protected $variables = [];
-
-    /**
-     * @var array
-     */
-    protected $variableValues = [];
+    protected $type = 'plugins';
 
     /**
      * @var string
      */
-    protected $module = 'core';
+    protected $module = null;
+
+    /**
+     * @var string
+     */
+    protected $template = null;
 
     /**
      * @var array
      */
     protected $templates = [];
+
+    /**
+     * @var array
+     */
+    protected $variableValues = [];
 
     /**
      * @param string $module
@@ -45,47 +51,54 @@ class EmailHandler
     public function setModule(string $module): self
     {
         $this->module = $module;
+
         return $this;
     }
 
     /**
-     * @param string $name
-     * @param string|null $description
-     * @param string|null $module
-     * @return $this
+     * @return string
      */
-    public function addVariable(string $name, ?string $description = null, ?string $module = null): self
+    public function getType(): string
     {
-        if (!$module) {
-            $module = $this->module;
-        }
+        return $this->type;
+    }
 
-        $this->variables[$module][$name] = $description;
+    /**
+     * @param string $type
+     * @return EmailHandler
+     */
+    public function setType(string $type): self
+    {
+        $this->type = $type;
 
         return $this;
     }
 
     /**
-     * @param string|null $module
+     * @return string|null
+     */
+    public function getTemplate(): ?string
+    {
+        return $this->template;
+    }
+
+    /**
+     * @param string|null $template
+     * @return EmailHandler
+     */
+    public function setTemplate(?string $template): self
+    {
+        $this->template = $template;
+
+        return $this;
+    }
+
+    /**
      * @return array
      */
-    public function getVariables(?string $module = null): array
+    public function getCoreVariables(): array
     {
-        $this->initVariable();
-
-        if (!$module) {
-            return $this->variables;
-        }
-
-        return Arr::get($this->variables, $module, []);
-    }
-
-    /**
-     * @return $this
-     */
-    public function initVariable(): self
-    {
-        $this->variables['core'] = [
+        return [
             'header'           => trans('core/base::base.email_template.header'),
             'footer'           => trans('core/base::base.email_template.footer'),
             'site_title'       => trans('core/base::base.email_template.site_title'),
@@ -95,8 +108,6 @@ class EmailHandler
             'date_year'        => trans('core/base::base.email_template.date_year'),
             'site_admin_email' => trans('core/base::base.email_template.site_admin_email'),
         ];
-
-        return $this;
     }
 
     /**
@@ -107,7 +118,7 @@ class EmailHandler
      */
     public function setVariableValue(string $variable, string $value, string $module = null): self
     {
-        $this->variableValues[$module ?: $this->module][$variable] = $value;
+        Arr::set($this->variableValues, ($module ?: $this->module) . '.' . $variable, $value);
 
         return $this;
     }
@@ -151,35 +162,51 @@ class EmailHandler
             return $this;
         }
 
-        $this->templates = $data['templates'];
+        $this->module = $module;
 
-        if (Arr::get($data, 'variables')) {
-            $this->addVariables($data['variables'], $module);
+        Arr::set($this->templates, $type . '.' . $module, $data);
+
+        foreach ($data['templates'] as $key => &$template) {
+            if (!isset($template['variables'])) {
+                $this->templates[$type][$module]['templates'][$key]['variables'] = Arr::get($data, 'variables', []);
+            }
+
+            $this->templates[$type][$module]['templates'][$key]['path'] = platform_path($type . '/' . $module . '/resources/email-templates/' . $key . '.tpl');
         }
-
-        add_filter(BASE_FILTER_AFTER_SETTING_EMAIL_CONTENT, function ($html) use ($module, $data, $type) {
-            return $html . view('core/setting::template-line', compact('module', 'data', 'type'))->render();
-        }, 99);
 
         return $this;
     }
 
     /**
-     * @param array $variables
-     * @param string|null $module
-     * @return $this
+     * @return array
      */
-    public function addVariables(array $variables, ?string $module = null): self
+    public function getTemplates(): array
     {
-        if (!$module) {
-            $module = $this->module;
-        }
+        return $this->templates;
+    }
 
-        foreach ($variables as $name => $description) {
-            $this->variables[$module][$name] = $description;
-        }
+    /**
+     * @param string $type
+     * @param string $module
+     * @param string $name
+     * @return array|ArrayAccess|mixed
+     */
+    public function getTemplateData(string $type, string $module, string $name)
+    {
+        return Arr::get($this->templates, $type . '.' . $module . '.templates.' . $name);
+    }
 
-        return $this;
+    /**
+     * @param string $type
+     * @param string $module
+     * @param string $name
+     * @return array|ArrayAccess|mixed
+     */
+    public function getVariables(string $type, string $module, string $name)
+    {
+        $this->template = $name;
+
+        return $this->getCoreVariables() + Arr::get($this->getTemplateData($type, $module, $name), 'variables', []);
     }
 
     /**
@@ -199,11 +226,14 @@ class EmailHandler
             return false;
         }
 
+        $this->type = $type;
+        $this->template = $template;
+
         if (!$subject) {
-            $subject = $this->getTemplateSubject($template, $type);
+            $subject = $this->getSubject();
         }
 
-        $this->send($this->getTemplateContent($template, $type), $subject, $email, $args, $debug);
+        $this->send($this->getContent(), $subject, $email, $args, $debug);
 
         return true;
     }
@@ -260,21 +290,17 @@ class EmailHandler
 
     /**
      * @param string $content
-     * @param array $variables
      * @return string
      */
-    public function prepareData(string $content, array $variables = []): string
+    public function prepareData(string $content): string
     {
-        $this->initVariable();
         $this->initVariableValues();
 
         if (!empty($content)) {
-            $content = $this->replaceVariableValue(array_keys($this->variables['core']), 'core', $content);
+            $content = $this->replaceVariableValue(array_keys($this->getCoreVariables()), 'core', $content);
 
-            if ($this->module !== 'core') {
-                if (empty($variables)) {
-                    $variables = Arr::get($this->variables, $this->module, []);
-                }
+            if ($this->module && $this->template) {
+                $variables = $this->getVariables($this->type ?: 'plugins', $this->module, $this->template);
 
                 $content = $this->replaceVariableValue(
                     array_keys($variables),
@@ -401,6 +427,9 @@ class EmailHandler
      */
     public function getTemplateContent(string $template, string $type = 'plugins'): ?string
     {
+        $this->template = $template;
+        $this->type = $type;
+
         return get_setting_email_template_content($type, $this->module, $template);
     }
 
@@ -411,6 +440,28 @@ class EmailHandler
      */
     public function getTemplateSubject(string $template, string $type = 'plugins')
     {
-        return get_setting_email_subject($type, $this->module, $template);
+        return setting(
+            get_setting_email_subject_key($type, $this->module, $template),
+            trans(config(
+                $type . '.' . $this->module . '.email.templates.' . $template . '.subject',
+                ''
+            ))
+        );
+    }
+
+    /**
+     * @return string
+     */
+    public function getContent(): string
+    {
+        return $this->prepareData(get_setting_email_template_content($this->type, $this->module, $this->template));
+    }
+
+    /**
+     * @return string
+     */
+    public function getSubject(): string
+    {
+        return $this->prepareData($this->getTemplateSubject($this->template, $this->type));
     }
 }

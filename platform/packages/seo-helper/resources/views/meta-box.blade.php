@@ -11,7 +11,7 @@
         </div>
 
         <div class="ws-nm">
-            <span style="color: #70757a;">{{ !empty($object->id) && $object->created_at ? $object->created_at->format('M d, Y')  : now()->format('M d, Y') }} - </span>
+            <span style="color: #70757a;">{{ !empty($object->id) && $object->created_at ? $object->created_at->format('M d, Y')  :Carbon\Carbon::now()->format('M d, Y') }} - </span>
             <span class="page-description-seo">
                 {{ strip_tags((string)$meta['seo_description'] ?? (!empty($object->id) ? $object->description : (!empty($object->id) && $object->content ? Str::limit($object->content, 250) : old('seo_meta.seo_description')))) }}
             </span>

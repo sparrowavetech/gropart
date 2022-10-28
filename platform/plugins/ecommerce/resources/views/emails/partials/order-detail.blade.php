@@ -1,8 +1,5 @@
 @if (!$order->dont_show_order_info_in_product_list)
-    @php
-        $orderId = get_order_code($order->id);
-    @endphp
-    <a href="{{ route('public.orders.tracking', ['order_id' => str_replace('#', '', $orderId), 'email' => $order->user->email ?: $order->address->email]) }}"
+    <a href="{{ route('public.orders.tracking', ['order_id' => $order->code, 'email' => $order->user->email ?: $order->address->email]) }}"
         class="button button-blue">{{ trans('plugins/ecommerce::email.view_order') }}</a>
         {!! trans('plugins/ecommerce::email.link_go_to_our_shop', ['link' => route('public.index')]) !!}
 
@@ -12,7 +9,7 @@
 
     <br>
 
-    <p>{!! trans('plugins/ecommerce::email.order_number', ['order_id' => $orderId]) !!}</p>
+    <p>{!! trans('plugins/ecommerce::email.order_number', ['order_id' => $order->code]) !!}</p>
 @endif
 <div class="table">
     <table>
@@ -60,7 +57,7 @@
             @endphp
             <tr>
                 <td>
-                    <img src="{{ RvMedia::getImageUrl($product ? $product->image : null, 'thumb') }}" alt="{{ $orderProduct->product_name }}" width="50">
+                    <img src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb') }}" alt="{{ $orderProduct->product_name }}" width="50">
                 </td>
                 <td>
                     {{ $orderProduct->product_name }}

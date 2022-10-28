@@ -3,6 +3,7 @@
 namespace Botble\Ecommerce\Tables;
 
 use BaseHelper;
+use Html;
 
 class OrderIncompleteTable extends OrderTable
 {
@@ -39,7 +40,19 @@ class OrderIncompleteTable extends OrderTable
                 return BaseHelper::formatDate($item->created_at);
             })
             ->addColumn('operations', function ($item) {
-                return $this->getOperations('orders.view-incomplete-order', 'orders.destroy', $item);
+                $viewButton = Html::link(
+                    route('orders.view-incomplete-order', $item->id),
+                    Html::tag('i', '', ['class' => 'fa fa-eye'])->toHtml(),
+                    [
+                        'class'                  => 'btn btn-icon btn-sm btn-primary',
+                        'data-bs-toggle'         => 'tooltip',
+                        'data-bs-original-title' => trans('core/base::tables.edit'),
+                    ],
+                    null,
+                    false
+                )->toHtml();
+
+                return $this->getOperations(null, 'orders.destroy', $item, $viewButton);
             })
             ->filter(function ($query) {
                 $keyword = $this->request->input('search.value');

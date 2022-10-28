@@ -93,5 +93,11 @@ class Plugin extends PluginOperationAbstract
         Schema::dropIfExists('ec_product_tags_translations');
         Schema::dropIfExists('ec_order_returns');
         Schema::dropIfExists('ec_order_return_items');
+        Schema::dropIfExists('ec_global_options');
+        Schema::dropIfExists('ec_global_option_value');
+        Schema::dropIfExists('ec_options');
+        Schema::dropIfExists('ec_option_value');
+        Schema::dropIfExists('ec_invoice_items');
+        Schema::dropIfExists('ec_invoices');
     }
 }

@@ -9,9 +9,9 @@ return [
             'description' => 'Send email to user when requesting reset password',
             'subject'     => 'Reset Password',
             'can_off'     => false,
+            'variables'   => [
+                'reset_link' => 'Reset password link',
+            ],
         ],
-    ],
-    'variables'   => [
-        'reset_link' => 'Reset password link',
     ],
 ];

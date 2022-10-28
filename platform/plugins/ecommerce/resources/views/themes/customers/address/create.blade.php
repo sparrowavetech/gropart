@@ -20,8 +20,7 @@
 
             <div class="input-group">
                  <span class="input-group-prepend">{{ __('Phone') }}:</span>
-                <input id="phone" type="text" class="form-control" name="phone" value="{{ old('phone') }}">
-
+                {!! Form::phoneNumber('phone', old('phone'), ['id' => 'phone']) !!}
             </div>
              {!! Form::error('phone', $errors) !!}
 

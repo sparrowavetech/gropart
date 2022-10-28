@@ -114,7 +114,7 @@ class ShipmentController extends BaseController
 
         switch ($request->input('status')) {
             case ShippingStatusEnum::DELIVERED:
-                $shipment->date_shipped = now();
+                $shipment->date_shipped = Carbon::now();
                 $shipment->save();
 
                 // Update status and time order complete

@@ -3,6 +3,10 @@
 namespace Botble\Language\Models;
 
 use Botble\Base\Models\BaseModel;
+use Botble\Setting\Models\Setting;
+use Botble\Widget\Models\Widget;
+use Exception;
+use Theme;
 
 class Language extends BaseModel
 {
@@ -49,7 +53,22 @@ class Language extends BaseModel
                 $defaultLanguage->save();
             }
 
+            $meta = LanguageMeta::where('lang_meta_code', $language->lang_code)->get();
+
+            try {
+                foreach ($meta as $item) {
+                    $item->reference()->delete();
+                }
+            } catch (Exception $exception) {
+                info($exception->getMessage());
+            }
+
             LanguageMeta::where('lang_meta_code', $language->lang_code)->delete();
+
+            Setting::where('key', 'LIKE', 'theme-' . Theme::getThemeName() . '-' . $language->lang_code . '-%')
+                ->delete();
+            Widget::where('theme', 'LIKE', Theme::getThemeName() . '-' . $language->lang_code)
+                ->delete();
         });
     }
 }

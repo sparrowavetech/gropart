@@ -224,7 +224,10 @@ class ThemeService
         $this->removeAssets($theme);
 
         $this->files->deleteDirectory($this->getPath($theme));
-        $this->widgetRepository->deleteBy(['theme' => $theme]);
+        $this->widgetRepository->getModel()
+            ->where('theme', $theme)
+            ->orWhere('theme', 'like', $theme . '-%')
+            ->delete();
         $this->settingRepository->getModel()
             ->where('key', 'like', 'theme-' . $theme . '-%')
             ->delete();

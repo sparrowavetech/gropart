@@ -10,7 +10,6 @@ use Botble\Media\Repositories\Interfaces\MediaFolderInterface;
 use Botble\Media\Services\ThumbnailService;
 use Botble\Media\Services\UploadsManager;
 use Exception;
-use Illuminate\Support\Facades\File;
 use Illuminate\Config\Repository;
 use Illuminate\Contracts\Filesystem\FileExistsException;
 use Illuminate\Contracts\Foundation\Application;
@@ -23,6 +22,7 @@ use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Image;
 use League\Flysystem\FileNotFoundException;
@@ -512,12 +512,21 @@ class RvMedia
                 }
             }
 
+            $maxUploadFilesizeAllowed = setting('max_upload_filesize');
+
+            if ($maxUploadFilesizeAllowed && ($fileUpload->getSize() / 1024) / 1024 > (float)$maxUploadFilesizeAllowed) {
+                return [
+                    'error'   => true,
+                    'message' => trans('core/media::media.file_too_big_readable_size', ['size' => BaseHelper::humanFilesize($maxUploadFilesizeAllowed * 1024 * 1024)]),
+                ];
+            }
+
             $maxSize = $this->getServerConfigMaxUploadFileSize();
 
             if ($fileUpload->getSize() / 1024 > (int)$maxSize) {
                 return [
                     'error'   => true,
-                    'message' => trans('core/media::media.file_too_big', ['size' => BaseHelper::humanFilesize($maxSize)]),
+                    'message' => trans('core/media::media.file_too_big_readable_size', ['size' => BaseHelper::humanFilesize($maxSize)]),
                 ];
             }
         }
@@ -912,6 +921,10 @@ class RvMedia
      */
     public function canGenerateThumbnails(?string $mimeType): bool
     {
+        if (!$this->getConfig('generate_thumbnails_enabled')) {
+            return false;
+        }
+
         if (!$mimeType) {
             return false;
         }
@@ -990,7 +1003,7 @@ class RvMedia
      */
     public function imageValidationRule(): string
     {
-        return 'required|image|mimes:jpg,jpeg,png,webp';
+        return 'required|image|mimes:jpg,jpeg,png,webp,gif,bmp';
     }
 
     /**

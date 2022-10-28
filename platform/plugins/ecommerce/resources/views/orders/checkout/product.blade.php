@@ -21,7 +21,9 @@
                 @endforeach
             @endif
         @endif
-
+        @if (!empty($cartItem->options['options']))
+            {!! render_product_options_info($cartItem->options['options'], $product, true) !!}
+        @endif
     </div>
     <div class="col-4 text-end">
         <p>{{ format_price($cartItem->price) }}</p>

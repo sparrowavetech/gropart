@@ -5,6 +5,7 @@ namespace Botble\Ecommerce\Models;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Traits\EnumCastable;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class ProductCollection extends BaseModel
@@ -77,12 +78,12 @@ class ProductCollection extends BaseModel
         return $this
             ->belongsToMany(Discount::class, 'ec_discount_product_collections', 'product_collection_id')
             ->where('type', 'promotion')
-            ->where('start_date', '<=', now())
+            ->where('start_date', '<=', Carbon::now())
             ->where('target', 'group-products')
             ->where(function ($query) {
                 return $query
                     ->whereNull('end_date')
-                    ->orWhere('end_date', '>=', now());
+                    ->orWhere('end_date', '>=', Carbon::now());
             })
             ->where('product_quantity', 1);
     }

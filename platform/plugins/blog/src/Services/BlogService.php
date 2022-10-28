@@ -89,7 +89,7 @@ class BlogService
                     Theme::breadcrumb()->add($category->name, $category->url);
                 }
 
-                Theme::breadcrumb()->add(SeoHelper::getTitle(), $post->url);
+                Theme::breadcrumb()->add($post->name, $post->url);
 
                 do_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, POST_MODULE_SCREEN_NAME, $post);
 
@@ -142,7 +142,7 @@ class BlogService
                     }
                 }
 
-                Theme::breadcrumb()->add(SeoHelper::getTitle(), $category->url);
+                Theme::breadcrumb()->add($category->name, $category->url);
 
                 do_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, CATEGORY_MODULE_SCREEN_NAME, $category);
 
@@ -176,7 +176,7 @@ class BlogService
 
                 Theme::breadcrumb()
                     ->add(__('Home'), route('public.index'))
-                    ->add(SeoHelper::getTitle(), $tag->url);
+                    ->add($tag->name, $tag->url);
 
                 do_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, TAG_MODULE_SCREEN_NAME, $tag);
 

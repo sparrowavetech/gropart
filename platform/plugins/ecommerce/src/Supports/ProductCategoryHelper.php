@@ -4,8 +4,8 @@ namespace Botble\Ecommerce\Supports;
 
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Supports\SortItemsWithChildrenHelper;
-use Botble\Ecommerce\Models\ProductCategory;
 use Botble\Ecommerce\Repositories\Interfaces\ProductCategoryInterface;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Language;
 
@@ -22,20 +22,27 @@ class ProductCategoryHelper
     protected $treeCategories = [];
 
     /**
+     * @param array $params
+     * @param bool $onlyParent
      * @return Collection
      */
-    public function getAllProductCategories(): Collection
+    public function getAllProductCategories(array $params = [], bool $onlyParent = false): Collection
     {
         if (!$this->allCategories instanceof Collection) {
             $this->allCategories = collect([]);
         }
 
         if ($this->allCategories->count() == 0) {
-            $with = ['slugable', 'metadata'];
+            $with = array_merge(Arr::get($params, 'with', []), ['slugable', 'metadata']);
             if (is_plugin_active('language-advanced') && Language::getCurrentLocaleCode() != Language::getDefaultLocaleCode()) {
                 $with[] = 'translations';
             }
-            $this->allCategories = app(ProductCategoryInterface::class)->getProductCategories([], $with);
+
+            $this->allCategories = app(ProductCategoryInterface::class)->getProductCategories(
+                Arr::get($params, 'condition', []),
+                $with, Arr::get($params, 'withCount', []),
+                $onlyParent
+            );
         }
 
         return $this->allCategories;
@@ -93,7 +100,7 @@ class ProductCategoryHelper
      */
     public function getProductCategoriesWithIndent(string $indent = '&nbsp;&nbsp;', bool $sortChildren = true): Collection
     {
-        $categories = $this->getAllProductCategories();
+        $categories = $this->getAllProductCategoriesSortByChildren();
 
         foreach ($categories as $category) {
             $depth = (int)$category->depth;
@@ -118,7 +125,7 @@ class ProductCategoryHelper
     public function getProductCategoriesWithIndentName($categories = [], string $indent = '&nbsp;&nbsp;'): array
     {
         if (!$categories instanceof Collection) {
-            $categories = $this->getAllProductCategories()->whereIn('parent_id', [0, null]);
+            $categories = $this->getAllProductCategories([], true);
         }
         $results = [];
         $this->appendIndentTextToProductCategoryName($categories, 0, $results, $indent);
@@ -138,7 +145,8 @@ class ProductCategoryHelper
         int        $depth = 0,
         array      &$results = [],
         string     $indent = '&nbsp;&nbsp;'
-    ): bool {
+    ): bool
+    {
         foreach ($categories as $category) {
             $results[$category->id] = str_repeat($indent, $depth) . $category->name;
 
@@ -160,37 +168,16 @@ class ProductCategoryHelper
         }
 
         if ($this->treeCategories->count() == 0) {
-            $allCategories = $this->getAllProductCategories()->where('status', BaseStatusEnum::PUBLISHED);
 
-            $this->treeCategories = $allCategories->whereIn('parent_id', [0, null]);
-            $this->treeCategories->map(function ($category) use ($allCategories) {
-                return $this->setItemTreeCategories($allCategories, $category);
-            });
+            $this->treeCategories = $this->getAllProductCategories(
+                [
+                    'condition' => ['status' => BaseStatusEnum::PUBLISHED],
+                    'with'      => ['activeChildren'],
+                ],
+                true
+            );
         }
 
         return $this->treeCategories;
-    }
-
-    /**
-     * @param  Collection  $allCategories
-     * @param  ProductCategory  $category
-     * @return ProductCategory
-     */
-    public function setItemTreeCategories(Collection $allCategories, ProductCategory $category)
-    {
-        $categories = $allCategories->where('parent_id', $category->id);
-        $category->setRelation('activeChildren', $categories);
-        if ($allCategories->whereIn('parent_id', $categories->pluck('id')->toArray())->count()) {
-            $category->activeChildren->map(function ($item) use ($allCategories) {
-                return $this->setItemTreeCategories($allCategories, $item);
-            });
-        } else {
-            $category->activeChildren->map(function ($item) {
-                $item->setRelation('activeChildren', collect([]));
-                return $item;
-            });
-        }
-
-        return $category;
     }
 }

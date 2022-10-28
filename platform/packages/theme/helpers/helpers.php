@@ -92,6 +92,7 @@ if (!function_exists('theme_option')) {
                 return ThemeOption::getOption($key, $default);
             } catch (Exception $exception) {
                 info($exception->getMessage());
+                return $default;
             }
         }
 

@@ -27,8 +27,11 @@ mix
 
 const scripts = [
     'edit-product.js',
+    'global-option.js',
+    'product-option.js',
     'ecommerce-product-attributes.js',
     'change-product-swatches.js',
+    'change-product-options.js',
     'currencies.js',
     'review.js',
     'shipping.js',

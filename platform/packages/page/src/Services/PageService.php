@@ -87,7 +87,7 @@ class PageService
 
         Theme::breadcrumb()
             ->add(__('Home'), route('public.index'))
-            ->add(SeoHelper::getTitle(), $page->url);
+            ->add($page->name, $page->url);
 
         return [
             'view'         => 'page',

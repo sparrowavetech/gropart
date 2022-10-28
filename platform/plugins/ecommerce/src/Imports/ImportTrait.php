@@ -23,15 +23,15 @@ trait ImportTrait
     /**
      * @return int
      */
-    public function getTotalImported()
+    public function getTotalImported(): int
     {
         return $this->totalImported;
     }
 
     /**
-     * @return ProductImport
+     * @return ImportTrait
      */
-    public function setTotalImported()
+    public function setTotalImported(): ImportTrait
     {
         ++$this->totalImported;
 

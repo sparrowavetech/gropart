@@ -15,7 +15,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach(Cart::instance('cart')->content() as $key => $cartItem)
+                        @foreach (Cart::instance('cart')->content() as $key => $cartItem)
                             @php
                                 $product = $products->find($cartItem->id);
                             @endphp
@@ -44,6 +44,10 @@
                                         <p class="mb-0">
                                             <small>{{ $cartItem->options['attributes'] ?? '' }}</small>
                                         </p>
+                                        @if (!empty($cartItem->options['options']))
+                                            {!! render_product_options_info($cartItem->options['options'], $product, true) !!}
+                                        @endif
+
                                         @if (!empty($cartItem->options['extras']) && is_array($cartItem->options['extras']))
                                             @foreach($cartItem->options['extras'] as $option)
                                                 @if (!empty($option['key']) && !empty($option['value']))

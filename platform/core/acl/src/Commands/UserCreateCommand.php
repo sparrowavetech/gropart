@@ -83,7 +83,7 @@ class UserCreateCommand extends Command
      * @param bool $secret
      * @return string
      */
-    protected function askWithValidate(string $message, string $rules, $secret = false): string
+    protected function askWithValidate(string $message, string $rules, bool $secret = false): string
     {
         do {
             if ($secret) {
@@ -91,6 +91,7 @@ class UserCreateCommand extends Command
             } else {
                 $input = $this->ask($message);
             }
+
             $validate = $this->validate(compact('input'), ['input' => $rules]);
             if ($validate['error']) {
                 $this->error($validate['message']);

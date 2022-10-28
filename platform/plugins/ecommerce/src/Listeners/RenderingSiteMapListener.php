@@ -72,7 +72,7 @@ class RenderingSiteMapListener
                 continue;
             }
 
-            SiteMapManager::add($product->url, $product->updated_at, '0.8', 'daily');
+            SiteMapManager::add($product->url, $product->updated_at, '0.8');
         }
 
         $tags = $this->tagRepository->getModel()

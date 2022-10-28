@@ -36,6 +36,14 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
                 'as'   => 'region.rule.create',
                 'uses' => 'ShippingMethodController@postCreateRule',
             ]);
+
+            Route::group(['prefix' => 'settings', 'as' => 'settings.'], function () {
+                Route::post('update', [
+                    'as'         => 'update',
+                    'uses'       => 'ShippingMethodSettingController@update',
+                    'middleware' => 'preventDemo',
+                ]);
+            });
         });
     });
 });

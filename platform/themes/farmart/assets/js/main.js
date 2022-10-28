@@ -194,7 +194,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl';
                 $.ajax({
                     url: _self.data('url'),
                     type: 'GET',
-                    success: res =>  {
+                    success: res => {
                         if (!res.error) {
                             $modal
                                 .find('.product-modal-content')
@@ -204,7 +204,8 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl';
                             MartApp.lazyLoad($modal[0]);
                         }
                     },
-                    error: () => {},
+                    error: () => {
+                    },
                     complete: () => {
                         $modal.addClass('loaded').removeClass('loading');
                         _self.removeClass('loading');
@@ -431,7 +432,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl';
             $.ajax({
                 url: $btn.data('url'),
                 method: 'POST',
-                success: res =>  {
+                success: res => {
                     if (res.error) {
                         MartApp.showError(res.message);
                         return false;
@@ -451,7 +452,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl';
                         ).removeClass('added-to-wishlist');
                     }
                 },
-                error: res =>  {
+                error: res => {
                     MartApp.showError(res.message);
                 },
                 complete: () => {
@@ -470,7 +471,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl';
             $.ajax({
                 url: $btn.data('url'),
                 method: 'POST',
-                success: res =>  {
+                success: res => {
                     if (res.error) {
                         MartApp.showError(res.message);
                         return false;
@@ -478,7 +479,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl';
                     MartApp.showSuccess(res.message);
                     $('.btn-compare .header-item-counter').text(res.data.count);
                 },
-                error: res =>  {
+                error: res => {
                     MartApp.showError(res.message);
                 },
                 complete: () => {
@@ -495,26 +496,31 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl';
             const $btn = $(this);
             $btn.addClass('loading');
 
+            let data = $form.serializeArray();
+            data.push({name: 'checkout', value: $btn.prop('name') === 'checkout' ? 1 : 0});
+
             $.ajax({
                 type: 'POST',
                 url: $form.prop('action'),
-                data: $form.serialize(),
+                data: $.param(data),
                 success: res => {
+
                     if (res.error) {
                         MartApp.showError(res.message);
+                        if (res.data.next_url !== undefined) {
+                            window.location.href = res.data.next_url;
+                        }
+
+                        return false;
+                    }
+
+                    if (res.data.next_url !== undefined) {
+                        window.location.href = res.data.next_url;
                         return false;
                     }
 
                     MartApp.showSuccess(res.message);
-
-                    if (
-                        $btn.prop('name') === 'checkout' &&
-                        res.data.next_url !== undefined
-                    ) {
-                        window.location.href = res.data.next_url;
-                    } else {
-                        MartApp.loadAjaxCart();
-                    }
+                    MartApp.loadAjaxCart();
                 },
                 error: res => {
                     MartApp.handleError(res, $form);
@@ -741,7 +747,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl';
             // Paginate
             const $elPage = MartApp.$productListing.find('input[name=page]');
             if ($elPage.val()) {
-                data.push({ name: 'page', value: $elPage.val() });
+                data.push({name: 'page', value: $elPage.val()});
             }
 
             // Without "s" param
@@ -754,7 +760,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl';
                 (uriData && uriData.length ? '?' + uriData.join('&') : '');
 
             // add to params get to popstate not show json
-            data.push({ name: '_', value: +new Date() });
+            data.push({name: '_', value: +new Date()});
 
             $.ajax({
                 url: $form.attr('action'),
@@ -865,7 +871,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl';
     }
 
     MartApp.searchProducts = function () {
-        $('body').on('click', function(e) {
+        $('body').on('click', function (e) {
             if (!$(e.target).closest('.form--quick-search').length) {
                 $('.panel--search-result').removeClass('active');
             }
@@ -903,7 +909,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl';
                 type: 'GET',
                 url: url || $form.data('ajax-url'),
                 data: url ? [] : $form.serialize(),
-                beforeSend : function() {
+                beforeSend: function () {
                     if (currentRequest != null) {
                         currentRequest.abort();
                     }
@@ -973,7 +979,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl';
         });
     }
 
-    MartApp.ajaxUpdateCart = function(_self) {
+    MartApp.ajaxUpdateCart = function (_self) {
         $(document).on('click', '.cart-page-content .update_cart', function (e) {
             e.preventDefault();
             const $this = $(e.currentTarget);
@@ -1351,7 +1357,8 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl';
                             displayURL.html(displayURL.data('base-url') + '/<strong>' + res.data?.slug + '</strong>');
                         }
                     },
-                    error: () => {},
+                    error: () => {
+                    },
                     complete: () => {
                         $this.prop('disabled', false);
                     }
@@ -1501,11 +1508,11 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl';
         });
     }
 
-    MartApp.recentlyViewedProducts = function() {
-        MartApp.$body.find('.header-recently-viewed').each(function() {
+    MartApp.recentlyViewedProducts = function () {
+        MartApp.$body.find('.header-recently-viewed').each(function () {
             const $el = $(this);
             let loading;
-            $el.hover(function() {
+            $el.hover(function () {
                 const $recently = $el.find('.recently-viewed-products');
                 if ($el.data('loaded') || loading) {
                     return;
@@ -1640,10 +1647,10 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl';
         );
     };
 
-    MartApp.backToTop = function() {
+    MartApp.backToTop = function () {
         let scrollPos = 0;
         let element = $('#back2top');
-        $(window).scroll(function() {
+        $(window).scroll(function () {
             let scrollCur = $(window).scrollTop();
             if (scrollCur > scrollPos) {
                 // scroll down
@@ -1660,7 +1667,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl';
             scrollPos = scrollCur;
         });
 
-        element.on('click', function() {
+        element.on('click', function () {
             $('html, body').animate(
                 {
                     scrollTop: '0px',
@@ -1670,13 +1677,13 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl';
         });
     }
 
-    MartApp.stickyHeader = function() {
+    MartApp.stickyHeader = function () {
         let header = $('.header-js-handler');
         let checkpoint = header.height();
-        header.each(function() {
+        header.each(function () {
             if ($(this).data('sticky') === true) {
                 let el = $(this);
-                $(window).scroll(function() {
+                $(window).scroll(function () {
                     let currentPosition = $(this).scrollTop();
                     if (currentPosition > checkpoint) {
                         el.addClass('header--sticky');
@@ -1795,7 +1802,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl';
                     $footerCartForm.find('.hidden-product-id').val('');
                 } else {
                     const data = res.data;
-                    const $price = $product.find('.product-price');
+                    const $price = $(document).find('.js-product-content');
                     const $salePrice = $price.find('.product-price-sale');
                     const $originalPrice = $price.find('.product-price-original');
 
@@ -1896,7 +1903,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl';
             });
         }
 
-        $(document).on('click', '.toggle-show-more', function(event) {
+        $(document).on('click', '.toggle-show-more', function (event) {
             event.preventDefault();
 
             $('#store-short-description').fadeOut();
@@ -1908,7 +1915,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl';
             $('.toggle-show-less').show();
         });
 
-        $(document).on('click', '.toggle-show-less', function(event) {
+        $(document).on('click', '.toggle-show-less', function (event) {
             event.preventDefault();
 
             $(this).hide();
@@ -1927,7 +1934,8 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl';
                     if (!$this.is(':nth-child(3)')) {
                         $this.find('a').closest('li').hide();
                     } else {
-                        $this.find('a').replaceWith('...');
+                        $this.find('a span').hide();
+                        $this.find('a .extra-breadcrumb-name').text('...').show();
                     }
                 }
             });
@@ -1937,11 +1945,11 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl';
             collapseBreadcrumb();
         }
 
-        $(window).on('resize', function() {
+        $(window).on('resize', function () {
             collapseBreadcrumb();
         });
 
-        $('.product-entry-meta .anchor-link').on('click', function(e) {
+        $('.product-entry-meta .anchor-link').on('click', function (e) {
             e.preventDefault();
             let target = $(this).attr('href');
 
@@ -1957,6 +1965,17 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl';
                 },
                 0
             );
+        });
+
+        $(document).on('click', '#sticky-add-to-cart .add-to-cart-button', e => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const $this = $(e.currentTarget);
+
+            let target = '.js-product-content .cart-form button[name=' + $this.prop('name') + '].add-to-cart-button';
+
+            $(document).find(target).trigger('click');
         });
     });
 })(jQuery);

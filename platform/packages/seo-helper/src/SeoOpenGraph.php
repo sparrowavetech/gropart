@@ -2,6 +2,7 @@
 
 namespace Botble\SeoHelper;
 
+use BaseHelper;
 use Botble\SeoHelper\Contracts\Entities\OpenGraphContract;
 use Botble\SeoHelper\Contracts\SeoOpenGraphContract;
 use RvMedia;
@@ -90,6 +91,8 @@ class SeoOpenGraph implements SeoOpenGraphContract
      */
     public function setDescription($description)
     {
+        $description = BaseHelper::cleanShortcodes($description);
+
         $this->openGraph->setDescription($description);
 
         return $this;

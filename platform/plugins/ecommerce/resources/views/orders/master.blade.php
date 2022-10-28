@@ -26,6 +26,8 @@
     @endif
 
     {!! apply_filters('ecommerce_checkout_header', null) !!}
+
+    @stack('header')
 </head>
 <body class="checkout-page" @if (BaseHelper::siteLanguageDirection() == 'rtl') dir="rtl" @endif>
     {!! apply_filters('ecommerce_checkout_body', null) !!}
@@ -51,7 +53,7 @@
 
     @if (session()->has('success_msg') || session()->has('error_msg') || isset($errors))
         <script type="text/javascript">
-            $(document).ready(function () {
+            window.onload = function () {
                 @if (session()->has('success_msg'))
                     MainCheckout.showNotice('success', '{{ session('success_msg') }}');
                 @endif
@@ -63,7 +65,7 @@
                         MainCheckout.showNotice('error', '{{ $error }}');
                     @endforeach
                 @endif
-            });
+            };
         </script>
     @endif
 

@@ -5,7 +5,7 @@ namespace Botble\Payment\Services\Traits;
 use Botble\Payment\Supports\PaymentHelper;
 use Exception;
 use Illuminate\Support\Arr;
-use Log;
+use Illuminate\Support\Facades\Log;
 use Stripe\Exception\ApiErrorException;
 
 trait PaymentErrorTrait

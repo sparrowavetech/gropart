@@ -155,7 +155,7 @@
                             <tbody>
                                 @forelse ($data['orders'] as $order)
                                     <tr>
-                                        <td><a href="{{ route('marketplace.vendor.orders.edit', $order->id) }}">{{ get_order_code($order->id) }}</a></td>
+                                        <td><a href="{{ route('marketplace.vendor.orders.edit', $order->id) }}">{{ $order->code }}</a></td>
                                         <td><strong>{{ $order->created_at->format('M d, Y') }}</strong></td>
                                         <td><a href="{{ route('marketplace.vendor.orders.edit', $order->id) }}"><strong>{{ $order->user->name ?: $order->address->name }}</strong></a></td>
                                         <td>{!! $order->payment->status->toHtml() !!}</td>

@@ -20,6 +20,7 @@ class OrderReturnItem extends BaseModel
         'order_product_id',
         'product_id',
         'product_name',
+        'product_image',
         'qty',
         'price',
         'reason',

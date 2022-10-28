@@ -53,7 +53,6 @@ class SeoMeta implements SeoMetaContract
 
     /**
      * Make SeoMeta instance.
-     * @throws Exceptions\InvalidArgumentException
      */
     public function __construct()
     {
@@ -141,6 +140,7 @@ class SeoMeta implements SeoMetaContract
     public function setGoogle($code)
     {
         $this->analytics->setGoogle($code);
+
         return $this;
     }
 
@@ -198,6 +198,14 @@ class SeoMeta implements SeoMetaContract
         $this->description->set($content);
 
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description->getContent();
     }
 
     /**

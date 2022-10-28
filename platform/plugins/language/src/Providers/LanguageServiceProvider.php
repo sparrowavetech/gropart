@@ -3,6 +3,7 @@
 namespace Botble\Language\Providers;
 
 use Assets;
+use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Language\Facades\LanguageFacade;
 use Botble\Language\Http\Middleware\LocaleSessionRedirect;
@@ -80,9 +81,7 @@ class LanguageServiceProvider extends ServiceProvider
         $this->app->register(CommandServiceProvider::class);
         $this->app->register(EventServiceProvider::class);
 
-        if (!is_in_admin()) {
-            add_filter(BASE_FILTER_GROUP_PUBLIC_ROUTE, [$this, 'addLanguageMiddlewareToPublicRoute'], 958);
-        }
+        add_filter(BASE_FILTER_GROUP_PUBLIC_ROUTE, [$this, 'addLanguageMiddlewareToPublicRoute'], 958);
 
         Event::listen(RouteMatched::class, function () {
             dashboard_menu()
@@ -108,103 +107,64 @@ class LanguageServiceProvider extends ServiceProvider
             if (defined('WIDGET_MANAGER_MODULE_SCREEN_NAME')) {
                 Language::registerModule(WIDGET_MANAGER_MODULE_SCREEN_NAME);
             }
+
+            if (defined('THEME_OPTIONS_MODULE_SCREEN_NAME') && !$this->app->isDownForMaintenance()) {
+
+                Theme::asset()
+                    ->usePath(false)
+                    ->add(
+                        'language-css',
+                        asset('vendor/core/plugins/language/css/language-public.css'),
+                        [],
+                        [],
+                        '1.0.0'
+                    );
+
+                Theme::asset()
+                    ->container('footer')
+                    ->usePath(false)
+                    ->add(
+                        'language-public-js',
+                        asset('vendor/core/plugins/language/js/language-public.js'),
+                        ['jquery'],
+                        [],
+                        '1.0.0'
+                    );
+            }
         });
 
-        $defaultLanguage = Language::getDefaultLanguage(['lang_id']);
-        if (!empty($defaultLanguage)) {
-            add_action(BASE_ACTION_META_BOXES, [$this, 'addLanguageBox'], 50, 2);
-            add_filter(FILTER_SLUG_PREFIX, [$this, 'setSlugPrefix'], 500);
-            add_action(BASE_ACTION_TOP_FORM_CONTENT_NOTIFICATION, [$this, 'addCurrentLanguageEditingAlert'], 55, 2);
-            add_action(BASE_ACTION_BEFORE_EDIT_CONTENT, [$this, 'getCurrentAdminLanguage'], 55, 2);
-            if (defined('THEME_OPTIONS_MODULE_SCREEN_NAME')) {
-                if (!$this->app->isDownForMaintenance()) {
-                    $this->app->booted(function () {
-                        Theme::asset()
-                            ->usePath(false)
-                            ->add(
-                                'language-css',
-                                asset('vendor/core/plugins/language/css/language-public.css'),
-                                [],
-                                [],
-                                '1.0.0'
-                            );
+        add_action(BASE_ACTION_META_BOXES, [$this, 'addLanguageBox'], 50, 2);
+        add_filter(FILTER_SLUG_PREFIX, [$this, 'setSlugPrefix'], 500);
+        add_action(BASE_ACTION_TOP_FORM_CONTENT_NOTIFICATION, [$this, 'addCurrentLanguageEditingAlert'], 55, 2);
+        add_action(BASE_ACTION_BEFORE_EDIT_CONTENT, [$this, 'getCurrentAdminLanguage'], 55, 2);
+        add_filter(BASE_FILTER_GET_LIST_DATA, [$this, 'addLanguageColumn'], 50, 2);
+        add_filter(BASE_FILTER_TABLE_HEADINGS, [$this, 'addLanguageTableHeading'], 50, 2);
+        add_filter(LANGUAGE_FILTER_SWITCHER, [$this, 'languageSwitcher'], 50, 2);
+        add_filter(BASE_FILTER_BEFORE_GET_FRONT_PAGE_ITEM, [$this, 'checkItemLanguageBeforeShow'], 50, 2);
 
-                        Theme::asset()
-                            ->container('footer')
-                            ->usePath(false)
-                            ->add(
-                                'language-public-js',
-                                asset('vendor/core/plugins/language/js/language-public.js'),
-                                ['jquery'],
-                                [],
-                                '1.0.0'
-                            );
-                    });
-                }
-            }
-
-            add_filter(BASE_FILTER_GET_LIST_DATA, [$this, 'addLanguageColumn'], 50, 2);
-            add_filter(BASE_FILTER_TABLE_HEADINGS, [$this, 'addLanguageTableHeading'], 50, 2);
-            add_filter(LANGUAGE_FILTER_SWITCHER, [$this, 'languageSwitcher']);
-            add_filter(BASE_FILTER_BEFORE_GET_FRONT_PAGE_ITEM, [$this, 'checkItemLanguageBeforeShow'], 50, 2);
-            if (setting('language_show_default_item_if_current_version_not_existed', true) && !is_in_admin()) {
-                add_filter(BASE_FILTER_BEFORE_GET_SINGLE, [$this, 'getRelatedDataForOtherLanguage'], 50, 2);
-            }
-
-            add_filter(BASE_FILTER_TABLE_BUTTONS, [$this, 'addLanguageSwitcherToTable'], 247, 2);
-            add_filter(BASE_FILTER_TABLE_QUERY, [$this, 'getDataByCurrentLanguage'], 157);
-            add_filter(BASE_FILTER_BEFORE_GET_ADMIN_LIST_ITEM, [$this, 'checkItemLanguageBeforeGetAdminListItem'], 50);
-
-            if (defined('THEME_OPTIONS_ACTION_META_BOXES')) {
-                add_filter(
-                    THEME_OPTIONS_ACTION_META_BOXES,
-                    [$this, 'addLanguageMetaBoxForThemeOptionsAndWidgets'],
-                    55,
-                    2
-                );
-            }
-
-            if (defined('WIDGET_TOP_META_BOXES')) {
-                add_filter(WIDGET_TOP_META_BOXES, [$this, 'addLanguageMetaBoxForThemeOptionsAndWidgets'], 55, 2);
-            }
-
-            add_filter(BASE_FILTER_SITE_LANGUAGE_DIRECTION, function ($direction) {
-                if (Language::getCurrentLocaleRTL()) {
-                    return 'rtl';
-                }
-
-                return $direction;
-            }, 1);
-
-            add_filter(MENU_FILTER_NODE_URL, function ($value) {
-                if (is_in_admin()) {
-                    return $value;
-                }
-
-                if (in_array($value, ['#', 'javascript:void(0)'])) {
-                    return $value;
-                }
-
-                return filter_var($value, FILTER_VALIDATE_URL) ? $value : Language::localizeURL($value);
-            }, 1);
-
-            add_filter(BASE_FILTER_BEFORE_RENDER_FORM, function ($form, $data) {
-                if (is_in_admin() && Language::getCurrentAdminLocaleCode() != Language::getDefaultLocaleCode() && in_array(get_class($data), Language::supportedModels()) && $form) {
-                    $refLang = request()->input('ref_lang');
-                    $refFrom = request()->input('ref_from');
-
-                    if ($refLang && $refFrom) {
-                        $data = $data->getModel()->find($refFrom);
-
-                        if ($data) {
-                            $form->setModel($data->replicate());
-                        }
-                    }
-                }
-
-                return $form;
-            }, 1134, 2);
+        if (setting('language_show_default_item_if_current_version_not_existed', true) && !is_in_admin()) {
+            add_filter(BASE_FILTER_BEFORE_GET_SINGLE, [$this, 'getRelatedDataForOtherLanguage'], 50, 2);
         }
+
+        add_filter(BASE_FILTER_TABLE_BUTTONS, [$this, 'addLanguageSwitcherToTable'], 247, 2);
+        add_filter(BASE_FILTER_TABLE_QUERY, [$this, 'getDataByCurrentLanguage'], 157);
+        add_filter(BASE_FILTER_BEFORE_GET_ADMIN_LIST_ITEM, [$this, 'checkItemLanguageBeforeGetAdminListItem'], 50);
+
+        if (defined('THEME_OPTIONS_ACTION_META_BOXES')) {
+            add_filter(THEME_OPTIONS_ACTION_META_BOXES, [$this, 'addLanguageMetaBoxForThemeOptionsAndWidgets'], 55, 2);
+        }
+
+        if (defined('WIDGET_TOP_META_BOXES')) {
+            add_filter(WIDGET_TOP_META_BOXES, [$this, 'addLanguageMetaBoxForThemeOptionsAndWidgets'], 55, 2);
+        }
+
+        add_filter(BASE_FILTER_SITE_LANGUAGE_DIRECTION, function ($direction) {
+            return Language::getCurrentLocaleRTL() ? 'rtl' : $direction;
+        }, 1);
+
+        add_filter(MENU_FILTER_NODE_URL, [$this, 'updateMenuNodeUrl'], 1);
+
+        add_filter(BASE_FILTER_BEFORE_RENDER_FORM, [$this, 'changeDataBeforeRenderingForm'], 1134, 2);
 
         Language::setRoutesCachePath();
     }
@@ -255,7 +215,7 @@ class LanguageServiceProvider extends ServiceProvider
      * @param string $prefix
      * @return string
      */
-    public function setSlugPrefix(string $prefix)
+    public function setSlugPrefix(string $prefix): string
     {
         if (is_in_admin()) {
             $currentLocale = Language::getCurrentAdminLocale();
@@ -277,7 +237,7 @@ class LanguageServiceProvider extends ServiceProvider
     /**
      * @throws Throwable
      */
-    public function languageMetaField()
+    public function languageMetaField(): ?string
     {
         $languages = Language::getActiveLanguage([
             'lang_code',
@@ -471,7 +431,7 @@ class LanguageServiceProvider extends ServiceProvider
      * @param string|Model $model
      * @return array
      */
-    public function addLanguageTableHeading($headings, $model)
+    public function addLanguageTableHeading(array $headings, $model): array
     {
         if (in_array(get_class($model), Language::supportedModels())) {
             if (is_in_admin() && Auth::check() && !Auth::user()->hasAnyPermission($this->getRoutes())) {
@@ -533,6 +493,7 @@ class LanguageServiceProvider extends ServiceProvider
                     if ($item->lang_meta_origin) {
                         $relatedLanguages = Language::getRelatedLanguageItem($item->id, $item->lang_meta_origin);
                     }
+
                     $currentLanguage = $item->lang_meta_code;
                 }
 
@@ -572,12 +533,11 @@ class LanguageServiceProvider extends ServiceProvider
     }
 
     /**
+     * @param string $switcher
      * @param array $options
      * @return string
-     *
-     * @throws Throwable
      */
-    public function languageSwitcher($options = [])
+    public function languageSwitcher(string $switcher, array $options = []): string
     {
         return view('plugins/language::partials.switcher', compact('options'))->render();
     }
@@ -669,23 +629,21 @@ class LanguageServiceProvider extends ServiceProvider
                 if ($current) {
                     Language::setCurrentAdminLocale($current->lang_meta_code);
                     if ($current->lang_meta_code != Language::getCurrentLocaleCode()) {
-                        if (!setting(
-                            'language_show_default_item_if_current_version_not_existed',
-                            true
-                        ) && get_class($model) != Menu::class) {
+                        if (!setting('language_show_default_item_if_current_version_not_existed', true) &&
+                            get_class($model) != Menu::class
+                        ) {
                             return $data;
                         }
+
                         $meta = $this->app->make(LanguageMetaInterface::class)->getModel()
                             ->where('lang_meta_origin', $current->lang_meta_origin)
                             ->where('reference_id', '!=', $data->id)
                             ->where('reference_type', get_class($model))
                             ->where('lang_meta_code', Language::getCurrentLocaleCode())
                             ->first();
-                        if ($meta) {
-                            $result = $model->where('id', $meta->reference_id);
-                            if ($result) {
-                                return $result;
-                            }
+
+                        if ($meta && $result = $model->where('id', $meta->reference_id)) {
+                            return $result;
                         }
                     }
                 }
@@ -699,7 +657,7 @@ class LanguageServiceProvider extends ServiceProvider
      * @param array $data
      * @return array
      */
-    public function addLanguageMiddlewareToPublicRoute($data)
+    public function addLanguageMiddlewareToPublicRoute($data): array
     {
         return array_merge_recursive(array_filter($data), [
             'prefix'     => Language::setLocale(),
@@ -716,7 +674,7 @@ class LanguageServiceProvider extends ServiceProvider
      * @return array
      * @since 2.2
      */
-    public function addLanguageSwitcherToTable($buttons, $model)
+    public function addLanguageSwitcherToTable($buttons, $model): array
     {
         if (in_array($model, Language::supportedModels())) {
             $activeLanguages = Language::getActiveLanguage(['lang_code', 'lang_name', 'lang_flag']);
@@ -754,13 +712,13 @@ class LanguageServiceProvider extends ServiceProvider
                 'language' => [
                     'extend'  => 'collection',
                     'text'    => $flag . Html::tag(
-                        'span',
-                        ' ' . trans('plugins/language::language.change_language') . ' ' . Html::tag(
                             'span',
-                            '',
-                            ['class' => 'caret']
-                        )->toHtml()
-                    )->toHtml(),
+                            ' ' . trans('plugins/language::language.change_language') . ' ' . Html::tag(
+                                'span',
+                                '',
+                                ['class' => 'caret']
+                            )->toHtml()
+                        )->toHtml(),
                     'buttons' => $languageButtons,
                 ],
             ];
@@ -773,7 +731,7 @@ class LanguageServiceProvider extends ServiceProvider
 
     /**
      * @param Builder $query
-     * @return mixed
+     * @return Builder
      * @since 2.2
      */
     public function getDataByCurrentLanguage($query)
@@ -803,5 +761,37 @@ class LanguageServiceProvider extends ServiceProvider
         }
 
         return $query;
+    }
+
+    /**
+     * @param FormAbstract $form
+     * @param mixed $data
+     * @return FormAbstract
+     */
+    public function changeDataBeforeRenderingForm(FormAbstract $form, $data): FormAbstract
+    {
+        if (is_in_admin() && Language::getCurrentAdminLocaleCode() != Language::getDefaultLocaleCode() && in_array(get_class($data), Language::supportedModels()) && $form) {
+            $refLang = request()->input('ref_lang');
+            $refFrom = request()->input('ref_from');
+
+            if ($refLang && $refFrom) {
+                $data = $data->getModel()->find($refFrom);
+
+                if ($data) {
+                    $form->setModel($data->replicate());
+                }
+            }
+        }
+
+        return $form;
+    }
+
+    public function updateMenuNodeUrl($value): string
+    {
+        if (is_in_admin() || in_array($value, ['#', 'javascript:void(0)'])) {
+            return $value;
+        }
+
+        return filter_var($value, FILTER_VALIDATE_URL) ? $value : Language::localizeURL($value);
     }
 }

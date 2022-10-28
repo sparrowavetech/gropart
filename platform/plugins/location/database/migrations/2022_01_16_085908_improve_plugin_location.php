@@ -1,9 +1,9 @@
 <?php
 
 use Botble\Base\Supports\Helper;
-use Botble\Location\Models\Country;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB as DBFacade;
 use Illuminate\Support\Facades\Schema;
 
 return new class () extends Migration {
@@ -25,7 +25,7 @@ return new class () extends Migration {
             $table->string('code', 10)->nullable();
         });
 
-        foreach (Country::get() as $country) {
+        foreach (DBFacade::table('countries')->get() as $country) {
             $country->code = Helper::getCountryCodeByName($country->name);
             $country->save();
         }

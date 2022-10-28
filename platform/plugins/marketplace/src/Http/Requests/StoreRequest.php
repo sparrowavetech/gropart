@@ -24,6 +24,8 @@ class StoreRequest extends Request
             'bank_info.number'      => 'max:60',
             'bank_info.full_name'   => 'max:120',
             'bank_info.description' => 'max:500',
+            'company'               => 'max:255',
+            'zip_code'              => 'nullable|max:20',
         ];
     }
 }

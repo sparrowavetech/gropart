@@ -32,6 +32,10 @@ class BaseSeeder extends Seeder
 
         $folderPath = ($basePath ?: database_path('seeders/files')) . '/' . $folder;
 
+        if (!File::isDirectory($folderPath)) {
+            return [];
+        }
+
         foreach (File::allFiles($folderPath) as $file) {
             $type = $mimeType->getMimeType(File::extension($file));
             $files[] = RvMedia::uploadFromPath($file, 0, $folder, $type);
@@ -68,5 +72,27 @@ class BaseSeeder extends Seeder
         Setting::forgetAll();
 
         return $this->activateAllPlugins();
+    }
+
+    /**
+     * @param int $from
+     * @param int $to
+     * @param array $exceptions
+     * @return int
+     */
+    protected function random(int $from, int $to, array $exceptions = []): int
+    {
+        sort($exceptions); // lets us use break; in the foreach reliably
+        $number = rand($from, $to - count($exceptions)); // or mt_rand()
+
+        foreach ($exceptions as $exception) {
+            if ($number >= $exception) {
+                $number++; // make up for the gap
+            } else { /*if ($number < $exception)*/
+                break;
+            }
+        }
+
+        return $number;
     }
 }

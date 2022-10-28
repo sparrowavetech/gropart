@@ -14,14 +14,13 @@ if (!function_exists('table_checkbox')) {
 
 if (!function_exists('table_actions')) {
     /**
-     * @param string $edit
-     * @param string $delete
+     * @param string|null $edit
+     * @param string|null $delete
      * @param \Botble\Base\Models\BaseModel $item
-     * @param string $extra
+     * @param string|null $extra
      * @return string
-     * @throws Throwable
      */
-    function table_actions($edit, $delete, $item, $extra = null): string
+    function table_actions(?string $edit, ?string $delete, $item, ?string $extra = null): string
     {
         return view('core/table::partials.actions', compact('edit', 'delete', 'item', 'extra'))->render();
     }

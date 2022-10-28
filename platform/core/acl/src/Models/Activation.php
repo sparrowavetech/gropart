@@ -21,7 +21,7 @@ class Activation extends BaseModel
     ];
 
     /**
-     * @var array
+     * {@inheritDoc}
      */
     protected $casts = [
         'completed' => 'bool',

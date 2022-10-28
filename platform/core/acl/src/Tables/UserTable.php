@@ -123,9 +123,6 @@ class UserTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function query()
     {
         $query = $this->repository->getModel()
@@ -148,7 +145,7 @@ class UserTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function columns()
+    public function columns(): array
     {
         return [
             'username'   => [
@@ -182,7 +179,7 @@ class UserTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function buttons()
+    public function buttons(): array
     {
         return $this->addCreateButton(route('users.create'), 'users.create');
     }
@@ -246,7 +243,7 @@ class UserTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function getOperationsHeading()
+    public function getOperationsHeading(): array
     {
         return [
             'operations' => [
@@ -263,6 +260,7 @@ class UserTable extends TableAbstract
 
     /**
      * {@inheritDoc}
+     * @throws Exception
      */
     public function saveBulkChanges(array $ids, string $inputKey, ?string $inputValue): bool
     {

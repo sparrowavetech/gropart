@@ -17,7 +17,7 @@ class FileMerger
      * @param string $targetFile
      * @throws ChunkSaveException
      */
-    public function __construct($targetFile)
+    public function __construct(string $targetFile)
     {
         // Open the target file
         if (!$this->destinationFile = @fopen($targetFile, 'ab')) {
@@ -32,7 +32,7 @@ class FileMerger
      * @return $this
      * @throws ChunkSaveException
      */
-    public function appendFile($sourceFilePath)
+    public function appendFile(string $sourceFilePath): FileMerger
     {
         // Open the new uploaded chunk
         if (!$in = @fopen($sourceFilePath, 'rb')) {

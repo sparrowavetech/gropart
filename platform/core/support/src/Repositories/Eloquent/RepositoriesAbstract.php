@@ -44,7 +44,7 @@ abstract class RepositoriesAbstract implements RepositoryInterface
     /**
      * {@inheritDoc}
      */
-    public function setModel($model)
+    public function setModel(string $model): self
     {
         $this->model = $model;
 
@@ -54,7 +54,7 @@ abstract class RepositoriesAbstract implements RepositoryInterface
     /**
      * {@inheritDoc}
      */
-    public function getTable()
+    public function getTable(): string
     {
         return $this->model->getTable();
     }
@@ -84,7 +84,7 @@ abstract class RepositoriesAbstract implements RepositoryInterface
     /**
      * {@inheritDoc}
      */
-    public function applyBeforeExecuteQuery($data, $isSingle = false)
+    public function applyBeforeExecuteQuery($data, bool $isSingle = false)
     {
         $data = RepositoryHelper::applyBeforeExecuteQuery($data, $this->originalModel, $isSingle);
 
@@ -96,7 +96,7 @@ abstract class RepositoriesAbstract implements RepositoryInterface
     /**
      * @return $this
      */
-    public function resetModel()
+    public function resetModel(): self
     {
         $this->model = new $this->originalModel();
 
@@ -132,7 +132,7 @@ abstract class RepositoriesAbstract implements RepositoryInterface
     /**
      * {@inheritDoc}
      */
-    public function pluck($column, $key = null, array $condition = [])
+    public function pluck(string $column, $key = null, array $condition = []): array
     {
         $this->applyConditions($condition);
 
@@ -269,7 +269,7 @@ abstract class RepositoriesAbstract implements RepositoryInterface
     /**
      * {@inheritDoc}
      */
-    public function delete(Model $model)
+    public function delete(Model $model): bool
     {
         return $model->delete();
     }
@@ -337,7 +337,7 @@ abstract class RepositoriesAbstract implements RepositoryInterface
     /**
      * {@inheritDoc}
      */
-    public function count(array $condition = [])
+    public function count(array $condition = []): int
     {
         $this->applyConditions($condition);
 
@@ -489,7 +489,7 @@ abstract class RepositoriesAbstract implements RepositoryInterface
     /**
      * {@inheritDoc}
      */
-    public function insert(array $data)
+    public function insert(array $data): bool
     {
         return $this->model->insert($data);
     }

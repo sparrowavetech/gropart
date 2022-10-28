@@ -70,5 +70,21 @@ class OrderReturn extends BaseModel
         self::deleting(function (OrderReturn $orderReturn) {
             OrderReturnItem::where('order_return_id', $orderReturn->id)->delete();
         });
+
+        static::creating(function (OrderReturn $orderReturn) {
+            $orderReturn->code = static::generateUniqueCode();
+        });
+    }
+
+    public static function generateUniqueCode(): string
+    {
+        $nextInsertId = static::query()->max('id') + 1;
+
+        do {
+            $code = get_order_code($nextInsertId);
+            $nextInsertId++;
+        } while (static::query()->where('code', $code)->exists());
+
+        return $code;
     }
 }

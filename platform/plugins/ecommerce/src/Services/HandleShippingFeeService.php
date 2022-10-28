@@ -3,13 +3,17 @@
 namespace Botble\Ecommerce\Services;
 
 use Botble\Base\Models\BaseModel;
+use Botble\Ecommerce\Enums\ShippingMethodEnum;
+use Botble\Ecommerce\Models\Shipping;
 use Botble\Ecommerce\Models\ShippingRule;
 use Botble\Ecommerce\Repositories\Interfaces\AddressInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ShippingInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ShippingRuleInterface;
 use Botble\Ecommerce\Repositories\Interfaces\StoreLocatorInterface;
+use Botble\Support\Services\Cache\Cache;
 use EcommerceHelper;
+use Illuminate\Cache\CacheManager;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 
@@ -56,6 +60,16 @@ class HandleShippingFeeService
     protected $shippingRules;
 
     /**
+     * @var Cache
+     */
+    protected $cache;
+
+    /**
+     * @var bool
+     */
+    protected $useCache;
+
+    /**
      * HandleShippingFeeService constructor.
      * @param ShippingInterface $shippingRepository
      * @param AddressInterface $addressRepository
@@ -77,6 +91,9 @@ class HandleShippingFeeService
         $this->storeLocatorRepository = $storeLocatorRepository;
         $this->shipping = [];
         $this->shippingRules = [];
+
+        $this->cache = new Cache(app('cache'), self::class);
+        $this->useCache = true;
     }
 
     /**
@@ -87,16 +104,28 @@ class HandleShippingFeeService
      */
     public function execute(array $data, $method = null, $option = null): array
     {
-        if (!empty($method)) {
-            return $this->getShippingFee($data, $method, $option);
-        }
-
         $result = [];
 
-        $default = $this->getShippingFee($data, 'default', $option);
+        $cacheKey = $this->getCacheKey($data);
+        $cacheValue = $this->getCacheValue($cacheKey);
+        if ($cacheValue) {
+            $result = $cacheValue;
+        } else {
+            $default = $this->getShippingFee($data, ShippingMethodEnum::DEFAULT, $option);
 
-        if ($default) {
-            $result['default'] = $default;
+            if ($default) {
+                $result[ShippingMethodEnum::DEFAULT] = $default;
+            }
+
+            $result = apply_filters('handle_shipping_fee', $result, $data, $option);
+
+            $this->setCacheValue($cacheKey, $result);
+        }
+
+        if ($method) {
+            if ($response = Arr::get($result, $method . '.' . $option)) {
+                return [$response];
+            }
         }
 
         return $result;
@@ -127,10 +156,7 @@ class HandleShippingFeeService
                 if (Arr::has($this->shipping, $methodKey)) {
                     $shipping = Arr::get($this->shipping, $methodKey);
                 } else {
-                    $shipping = $this->shippingRepository
-                        ->getModel()
-                        ->where('country', $country)
-                        ->first();
+                    $shipping = $this->shippingRepository->getFirstBy(['country' => $country]);
                     Arr::set($this->shipping, $methodKey, $shipping);
                 }
 
@@ -174,18 +200,18 @@ class HandleShippingFeeService
     }
 
     /**
-     * @param string $address
+     * @param Shipping $shipping
      * @param int $weight
      * @param int $orderTotal
      * @param string $city
      * @param null $option
      * @return array
      */
-    protected function calculateDefaultFeeByAddress($address, $weight, $orderTotal, $city, $option = null): array
+    protected function calculateDefaultFeeByAddress($shipping, $weight, $orderTotal, $city, $option = null): array
     {
         $result = [];
 
-        if ($address) {
+        if ($shipping) {
             $ruleKey = 'rule-option-' . $option;
             if (Arr::has($this->shippingRules, $ruleKey)) {
                 $rule = Arr::get($this->shippingRules, $ruleKey);
@@ -201,12 +227,12 @@ class HandleShippingFeeService
                     ->where('is_enabled', 1)
                     ->first();
                 if ($ruleDetail) {
-                    $result[] = [
+                    $result[$rule->id] = [
                         'name'  => $rule->name,
                         'price' => $rule->price + $ruleDetail->adjustment_price,
                     ];
                 } else {
-                    $result[] = [
+                    $result[$rule->id] = [
                         'name'  => $rule->name,
                         'price' => $rule->price,
                     ];
@@ -214,9 +240,9 @@ class HandleShippingFeeService
             } else {
                 $rules = $this->shippingRuleRepository
                     ->getModel()
-                    ->where(function (Builder $query) use ($orderTotal, $address) {
+                    ->where(function (Builder $query) use ($orderTotal, $shipping) {
                         $query
-                            ->where('shipping_id', $address->id)
+                            ->where('shipping_id', $shipping->id)
                             ->where('type', 'base_on_price')
                             ->where('from', '<=', $orderTotal)
                             ->where(function (Builder $sub) use ($orderTotal) {
@@ -226,9 +252,9 @@ class HandleShippingFeeService
                                     ->orWhere('to', '>=', $orderTotal);
                             });
                     })
-                    ->orWhere(function (Builder $query) use ($weight, $address) {
+                    ->orWhere(function (Builder $query) use ($weight, $shipping) {
                         $query
-                            ->where('shipping_id', $address->id)
+                            ->where('shipping_id', $shipping->id)
                             ->where('type', 'base_on_weight')
                             ->where('from', '<=', $weight)
                             ->where(function (Builder $sub) use ($weight) {
@@ -267,4 +293,41 @@ class HandleShippingFeeService
 
         return $result;
     }
+
+    /**
+     * @param array $data
+     * @return string
+     */
+    protected function getCacheKey(array $data): string
+	{
+		$jsonData = json_encode(Arr::only($data, ['origin', 'address_to', 'parcels', 'extra']));
+
+		return md5($jsonData);
+	}
+
+    /**
+     * @param string $key
+     * @return mixed
+     */
+    protected function getCacheValue(string $key)
+	{
+		if ($this->useCache) {
+			return $this->cache->get($key);
+		}
+
+		return null;
+	}
+
+    /**
+     * @param string $key
+     * @param mixed $value
+     * @return bool
+     */
+    protected function setCacheValue(string $key, $value): bool
+	{
+		if ($key) {
+			return $this->cache->put($key, $value);
+		}
+		return true;
+	}
 }

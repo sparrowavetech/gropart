@@ -1,19 +1,5 @@
 @php
     $brands = get_all_brands(['status' => \Botble\Base\Enums\BaseStatusEnum::PUBLISHED], [], ['products']);
-    $categories = ProductCategoryHelper::getAllProductCategories()
-                        ->where('status', \Botble\Base\Enums\BaseStatusEnum::PUBLISHED)
-                        ->whereIn('parent_id', [0, null])
-                        ->loadMissing([
-                             'metadata',
-                             'slugable',
-                             'activeChildren:id,name,parent_id',
-                             'activeChildren.slugable',
-                             'activeChildren.activeChildren:id,name,parent_id',
-                             'activeChildren.activeChildren.slugable',
-                             'activeChildren.activeChildren.activeChildren:id,name,parent_id',
-                             'activeChildren.activeChildren.activeChildren.slugable',
-                             'activeChildren.activeChildren.activeChildren.activeChildren:id,name,parent_id',
-                        ]);
     $tags = app(\Botble\Ecommerce\Repositories\Interfaces\ProductTagInterface::class)->advancedGet([
         'condition' => ['status' => \Botble\Base\Enums\BaseStatusEnum::PUBLISHED],
         'with'      => [],

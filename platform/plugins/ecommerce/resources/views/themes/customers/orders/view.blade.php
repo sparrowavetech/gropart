@@ -18,7 +18,7 @@
             <div class="col-md-6">
                 <div class="order-meta">
                     <p><span>{{ __('Order number') }}:</span> <span
-                            class="order-detail-value">{{ get_order_code($order->id) }}</span></p>
+                            class="order-detail-value">{{ $order->code }}</span></p>
                     <span>{{ __('Time') }}:</span> <span
                         class="order-detail-value">{{ $order->created_at->format('h:m d/m/Y') }}</span>
                 </div>
@@ -132,7 +132,7 @@
                             <tr>
                                 <td class="text-center">{{ $key + 1 }}</td>
                                 <td class="text-center">
-                                    <img src="{{ RvMedia::getImageUrl($product ? $product->image : null, 'thumb', false, RvMedia::getDefaultImage()) }}" alt="{{ $orderProduct->product_name }}" width="50">
+                                    <img src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}" alt="{{ $orderProduct->product_name }}" width="50">
                                 </td>
                                 <td>
                                     {{ $orderProduct->product_name }} @if ($product && $product->sku) ({{ $product->sku }}) @endif

@@ -10,6 +10,12 @@
         <div class="number-items-available" style="display: none; margin-bottom: 10px;"></div>
     @endif
 
+    @if ($product->options()->count() > 0 && isset($product->toArray()['options']))
+        <div class="pr_switch_wrap" id="product-option">
+            {!! render_product_options($product, $product->toArray()['options']) !!}
+        </div>
+    @endif
+
     <input type="hidden"
         name="id" class="hidden-product-id"
         value="{{ ($product->is_variation || !$product->defaultVariation->product_id) ? $product->id : $product->defaultVariation->product_id }}"/>
@@ -19,7 +25,7 @@
         <div class="product-button">
             @if (EcommerceHelper::isCartEnabled())
                 {!! Theme::partial('ecommerce.product-quantity', compact('product')) !!}
-                <button type="submit" class="btn btn-primary mb-2 add-to-cart-button @if ($product->isOutOfStock()) disabled @endif" @if ($product->isOutOfStock()) disabled @endif title="{{ __('Add to cart') }}">
+                <button type="submit" name="add_to_cart" value="1" class="btn btn-primary mb-2 add-to-cart-button @if ($product->isOutOfStock()) disabled @endif" @if ($product->isOutOfStock()) disabled @endif title="{{ __('Add to cart') }}">
                     <span class="svg-icon">
                         <svg>
                             <use href="#svg-icon-cart" xlink:href="#svg-icon-cart"></use>
@@ -29,7 +35,7 @@
                 </button>
 
                 @if (EcommerceHelper::isQuickBuyButtonEnabled() && isset($withBuyNow) && $withBuyNow)
-                    <button type="submit" name="checkout" class="btn btn-primary btn-black mb-2 add-to-cart-button @if ($product->isOutOfStock()) disabled @endif" @if ($product->isOutOfStock()) disabled @endif title="{{ __('Buy Now') }}">
+                    <button type="submit" name="checkout" value="1" class="btn btn-primary btn-black mb-2 add-to-cart-button @if ($product->isOutOfStock()) disabled @endif" @if ($product->isOutOfStock()) disabled @endif title="{{ __('Buy Now') }}">
                         <span class="add-to-cart-text ms-2">{{ __('Buy Now') }}</span>
                     </button>
                 @endif

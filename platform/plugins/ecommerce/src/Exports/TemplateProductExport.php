@@ -11,6 +11,7 @@ use Botble\Ecommerce\Repositories\Interfaces\ProductCategoryInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductTagInterface;
 use Botble\Ecommerce\Repositories\Interfaces\TaxInterface;
 use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
+use Carbon\Carbon;
 use EcommerceHelper;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -68,6 +69,11 @@ class TemplateProductExport implements
     protected $enabledDigital;
 
     /**
+     * @var bool
+     */
+    protected $isMarketplaceActive;
+
+    /**
      * @param string $exportType
      */
     public function __construct(string $exportType = Excel::XLSX)
@@ -100,6 +106,8 @@ class TemplateProductExport implements
         $price = rand(20, 100);
 
         $attributeSets = $productAttributeSets->sortByDesc('order');
+
+        $this->isMarketplaceActive = is_plugin_active('marketplace');
 
         $this->enabledDigital = EcommerceHelper::isEnabledSupportDigitalProducts();
 
@@ -140,7 +148,7 @@ class TemplateProductExport implements
             $product['product_type'] = ProductTypeEnum::PHYSICAL;
         }
 
-        if (is_plugin_active('marketplace')) {
+        if ($this->isMarketplaceActive) {
             $stores = app(StoreInterface::class)->pluck('name', 'id');
             $stores = collect($stores);
 
@@ -175,8 +183,8 @@ class TemplateProductExport implements
             'quantity'                         => rand(20, 300),
             'allow_checkout_when_out_of_stock' => '',
             'sale_price'                       => $price - rand(2, 5),
-            'start_date_sale_price'            => now()->startOfDay()->format('Y-m-d H:i:s'),
-            'end_date_sale_price'              => now()->addDays(20)->endOfDay()->format('Y-m-d H:i:s'),
+            'start_date_sale_price'            => Carbon::now()->startOfDay()->format('Y-m-d H:i:s'),
+            'end_date_sale_price'              => Carbon::now()->addDays(20)->endOfDay()->format('Y-m-d H:i:s'),
             'weight'                           => rand(20, 300),
             'length'                           => rand(20, 300),
             'wide'                             => rand(20, 300),
@@ -288,7 +296,7 @@ class TemplateProductExport implements
             $headings['product_type'] = 'Product type';
         }
 
-        if (is_plugin_active('marketplace')) {
+        if ($this->isMarketplaceActive) {
             $headings['vendor'] = 'Vendor';
         }
 
@@ -593,7 +601,7 @@ class TemplateProductExport implements
             $rules['product_type'] = 'nullable|enum:' . implode(',', ProductTypeEnum::values()) .'|default:' . ProductTypeEnum::PHYSICAL;
         }
 
-        if (is_plugin_active('marketplace')) {
+        if ($this->isMarketplaceActive) {
             $rules['vendor'] = 'nullable|[Vendor name | Vendor ID]';
         }
 

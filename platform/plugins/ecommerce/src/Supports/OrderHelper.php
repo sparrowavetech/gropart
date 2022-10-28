@@ -2,7 +2,6 @@
 
 namespace Botble\Ecommerce\Supports;
 
-use ArPHP\I18N\Arabic;
 use Barryvdh\DomPDF\PDF as PDFHelper;
 use BaseHelper;
 use Botble\Base\Models\BaseModel;
@@ -12,6 +11,8 @@ use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Enums\ShippingMethodEnum;
 use Botble\Ecommerce\Events\OrderCancelledEvent;
 use Botble\Ecommerce\Events\OrderPaymentConfirmedEvent;
+use Botble\Ecommerce\Models\Option;
+use Botble\Ecommerce\Models\OptionValue;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\OrderHistory;
 use Botble\Ecommerce\Models\Product;
@@ -29,16 +30,15 @@ use Cart;
 use EcommerceHelper as EcommerceHelperFacade;
 use EmailHandler;
 use Exception;
-use File;
 use Html;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Log;
-use PDF;
+use InvoiceHelper as InvoiceHelperFacade;
 use RvMedia;
 use Throwable;
 use Validator;
@@ -110,7 +110,7 @@ class OrderHelper
             app(OrderHistoryInterface::class)->createOrUpdate([
                 'action'      => 'create_order',
                 'description' => trans('plugins/ecommerce::order.new_order_from', [
-                    'order_id' => get_order_code($order->id),
+                    'order_id' => $order->code,
                     'customer' => BaseHelper::clean($order->user->name ?: $order->address->name),
                 ]),
                 'order_id'    => $order->id,
@@ -152,7 +152,7 @@ class OrderHelper
             ->setVariableValues([
                 'store_address'        => get_ecommerce_setting('store_address'),
                 'store_phone'          => get_ecommerce_setting('store_phone'),
-                'order_id'             => str_replace('#', '', get_order_code($order->id)),
+                'order_id'             => $order->code,
                 'order_token'          => $order->token,
                 'customer_name'        => BaseHelper::clean($order->user->name ?: $order->address->name),
                 'customer_email'       => $order->user->email ?: $order->address->email,
@@ -211,84 +211,48 @@ class OrderHelper
      * @param Order $order
      *
      * @return PDFHelper
+     *
+     * @deprecated
      */
     public function makeInvoicePDF(Order $order): PDFHelper
     {
-        $fontsPath = storage_path('fonts');
-        if (!File::isDirectory($fontsPath)) {
-            File::makeDirectory($fontsPath);
-        }
-
-        $template = 'plugins/ecommerce::invoices.template';
-        if (view()->exists('plugins/ecommerce/invoice::template')) {
-            $template = 'plugins/ecommerce/invoice::template';
-        }
-
-        if (get_ecommerce_setting('invoice_support_arabic_language', 0) == 1) {
-            $templateHtml = view($template, compact('order'))->render();
-
-            $arabic = new Arabic();
-            $p = $arabic->arIdentify($templateHtml);
-
-            for ($i = count($p) - 1; $i >= 0; $i -= 2) {
-                $utf8ar = $arabic->utf8Glyphs(substr($templateHtml, $p[$i - 1], $p[$i] - $p[$i - 1]));
-                $templateHtml = substr_replace($templateHtml, $utf8ar, $p[$i - 1], $p[$i] - $p[$i - 1]);
-            }
-
-            $pdf = PDF::loadHTML($templateHtml, 'UTF-8');
-        } else {
-            $pdf = PDF::loadView($template, compact('order'), [], 'UTF-8');
-        }
-
-        return $pdf
-            ->setPaper('a4')
-            ->setWarnings(false)
-            ->setOption('tempDir', storage_path('app'))
-            ->setOption('logOutputFile', storage_path('logs/pdf.log'))
-            ->setOption('isRemoteEnabled', true);
+        return InvoiceHelperFacade::makeInvoicePDF($order);
     }
 
     /**
      * @param Order $order
      *
      * @return string
+     *
+     * @deprecated
      */
     public function generateInvoice(Order $order): string
     {
-        $folderPath = storage_path('app/public');
-        if (!File::isDirectory($folderPath)) {
-            File::makeDirectory($folderPath);
-        }
-
-        $invoice = $folderPath . '/invoice-order-' . get_order_code($order->id) . '.pdf';
-
-        if (File::exists($invoice)) {
-            return $invoice;
-        }
-
-        $this->makeInvoicePDF($order)->save($invoice);
-
-        return $invoice;
+        return InvoiceHelperFacade::generateInvoice($order->invoice);
     }
 
     /**
      * @param Order $order
      *
      * @return Response
+     *
+     * @deprecated
      */
     public function downloadInvoice(Order $order): Response
     {
-        return $this->makeInvoicePDF($order)->download('invoice-order-' . get_order_code($order->id) . '.pdf');
+        return InvoiceHelperFacade::downloadInvoice($order->invoice);
     }
 
     /**
      * @param Order $order
      *
      * @return Response
+     *
+     * @deprecated
      */
     public function streamInvoice(Order $order): Response
     {
-        return $this->makeInvoicePDF($order)->stream();
+        return InvoiceHelperFacade::streamInvoice($order->invoice);
     }
 
     /**
@@ -302,7 +266,7 @@ class OrderHelper
         $name = null;
 
         switch ($method) {
-            default:
+            case ShippingMethodEnum::DEFAULT:
                 if ($option) {
                     $rule = app(ShippingRuleInterface::class)->findById($option);
                     if ($rule) {
@@ -314,10 +278,14 @@ class OrderHelper
                     $name = trans('plugins/ecommerce::order.default');
                 }
 
-                break;
+                break;                
         }
 
-        return $name;
+        if (!$name && ShippingMethodEnum::search($method)) {
+            $name = ShippingMethodEnum::getLabel($method);
+        }
+
+        return $name ?: $method;
     }
 
     /**
@@ -334,7 +302,7 @@ class OrderHelper
         $variables = [
             'order_id'  => Html::link(
                 route('orders.edit', $history->order->id),
-                get_order_code($history->order->id) . ' <i class="fa fa-external-link-alt"></i>',
+                $history->order->code . ' <i class="fa fa-external-link-alt"></i>',
                 ['target' => '_blank'],
                 null,
                 false
@@ -342,8 +310,8 @@ class OrderHelper
                 ->toHtml(),
             'user_name' => $history->user_id === 0 ? trans('plugins/ecommerce::order.system') :
                 BaseHelper::clean($history->user ? $history->user->name : (
-                    $history->order->user->name ?:
-                        $history->order->address->name
+                $history->order->user->name ?:
+                    $history->order->address->name
                 )),
         ];
 
@@ -475,6 +443,10 @@ class OrderHelper
         $parentProduct = $product->original_product;
 
         $image = $product->image ?: $parentProduct->image;
+        $options = [];
+        if ($request->input('options')) {
+            $options = $this->getProductOptionData($request->input('options'));
+        }
 
         /**
          * Add cart to session
@@ -488,6 +460,7 @@ class OrderHelper
                 'image'      => RvMedia::getImageUrl($image, 'thumb', false, RvMedia::getDefaultImage()),
                 'attributes' => $product->is_variation ? $product->variation_attributes : '',
                 'taxRate'    => $parentProduct->tax->percentage,
+                'options'    => $options,
                 'extras'     => $request->input('extras', []),
             ]
         );
@@ -502,6 +475,41 @@ class OrderHelper
         }
 
         return $cartItems;
+    }
+
+    /**
+     * @param $data
+     * @return array
+     */
+    protected function getProductOptionData($data): array
+    {
+        $result = [];
+        if (!empty($data)) {
+            foreach ($data as $key => $option) {
+                if (empty($option)) {
+                    continue;
+                }
+
+                $optionValue = OptionValue::select(['option_value', 'affect_price', 'affect_type'])->where('option_id', $key);
+                if ($option['option_type'] != 'field' && isset($option['values'])) {
+                    if (is_array($option['values'])) {
+                        $optionValue->whereIn('option_value', $option['values']);
+                    } else {
+                        $optionValue->whereIn('option_value', [0 => $option['values']]);
+                    }
+                }
+
+                $result['optionCartValue'][$key] = $optionValue->get()->toArray();
+
+                if ($option['option_type'] == 'field' && isset($option['values']) && count($result['optionCartValue']) > 0) {
+                    $result['optionCartValue'][$key][0]['option_value'] = $option['values'];
+                }
+            }
+        }
+
+        $result['optionInfo'] = Option::whereIn('id', array_keys($data))->get()->pluck('name', 'id')->toArray();
+
+        return $result;
     }
 
     /**
@@ -642,20 +650,26 @@ class OrderHelper
             $productIds = [];
             foreach ($cartItems as $cartItem) {
                 $productByCartItem = $products['products']->firstWhere('id', $cartItem->id);
+
                 $data = [
-                    'order_id'     => $sessionData['created_order_id'],
-                    'product_id'   => $cartItem->id,
-                    'product_name' => $cartItem->name,
-                    'qty'          => $cartItem->qty,
-                    'weight'       => $productByCartItem->weight * $cartItem->qty,
-                    'price'        => $cartItem->price,
-                    'tax_amount'   => $cartItem->tax,
-                    'options'      => [],
-                    'product_type' => $productByCartItem->product_type,
+                    'order_id'      => $sessionData['created_order_id'],
+                    'product_id'    => $cartItem->id,
+                    'product_name'  => $cartItem->name,
+                    'product_image' => $productByCartItem->original_product->image,
+                    'qty'           => $cartItem->qty,
+                    'weight'        => $productByCartItem->weight * $cartItem->qty,
+                    'price'         => $cartItem->price,
+                    'tax_amount'    => $cartItem->tax,
+                    'options'       => [],
+                    'product_type'  => $productByCartItem->product_type,
                 ];
 
                 if ($cartItem->options->extras) {
                     $data['options'] = $cartItem->options->extras;
+                }
+
+                if (isset($cartItem->options['options'])) {
+                    $data['product_options'] = $cartItem->options['options'];
                 }
 
                 $orderProduct = $orderProducts->firstWhere('product_id', $cartItem->id);
@@ -698,7 +712,8 @@ class OrderHelper
         $cartItems,
         $order,
         array $generalData
-    ): array {
+    ): array
+    {
         $createdOrder = Arr::get($sessionData, 'created_order');
         $createdOrderId = Arr::get($sessionData, 'created_order_id');
 

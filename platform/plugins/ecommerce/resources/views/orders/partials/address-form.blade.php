@@ -85,7 +85,7 @@
             </div>
             <div class="col-lg-4 col-12">
                 <div class="form-group  @if ($errors->has('address.phone')) has-error @endif">
-                    <input type="text" name="address[phone]" id="address_phone" placeholder="{{ __('Phone') }} {{ EcommerceHelper::isPhoneFieldOptionalAtCheckout() ? __('(optional)') : '' }}" class="form-control address-control-item {{ !EcommerceHelper::isPhoneFieldOptionalAtCheckout() ? 'address-control-item-required' : '' }} checkout-input" value="{{ old('address.phone', Arr::get($sessionCheckoutData, 'phone')) }}">
+                    {!! Form::phoneNumber('address[phone]', old('address.phone', Arr::get($sessionCheckoutData, 'phone')), ['id' => 'address_phone', 'class' => 'form-control address-control-item ' . (!EcommerceHelper::isPhoneFieldOptionalAtCheckout() ? 'address-control-item-required' : '') . ' checkout-input']) !!}
                     {!! Form::error('address.phone', $errors) !!}
                 </div>
             </div>
@@ -195,3 +195,12 @@
         </div>
     @endif
 </div>
+
+@push('header')
+    <link rel="stylesheet" href="{{ asset('vendor/core/core/base/libraries/intl-tel-input/css/intlTelInput.min.css') }}">
+@endpush
+
+@push('footer')
+    <script src="{{ asset('vendor/core/core/base/libraries/intl-tel-input/js/intlTelInput.min.js') }}"></script>
+    <script src="{{ asset('vendor/core/core/base/js/phone-number-field.js') }}"></script>
+@endpush

@@ -71,7 +71,7 @@ class Shipment extends BaseModel
     /**
      * @return HasOne
      */
-    public function store()
+    public function store(): HasOne
     {
         return $this->hasOne(StoreLocator::class, 'id', 'store_id')->withDefault();
     }
@@ -79,7 +79,7 @@ class Shipment extends BaseModel
     /**
      * @return HasMany
      */
-    public function histories()
+    public function histories(): HasMany
     {
         return $this->hasMany(ShipmentHistory::class, 'shipment_id');
     }
@@ -87,7 +87,7 @@ class Shipment extends BaseModel
     /**
      * @return BelongsTo
      */
-    public function order()
+    public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class)->withDefault();
     }

@@ -50,7 +50,7 @@ class CaptchaV3
      * @return bool|mixed
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function verify($token, $clientIp, $parameters = [])
+    public function verify(string $token, string $clientIp, array $parameters = [])
     {
         $client = new Client();
 
@@ -75,7 +75,7 @@ class CaptchaV3
             return false;
         }
 
-        $score = isset($body['score']) ? $body['score'] : false;
+        $score = $body['score'] ?? false;
 
         return $score && $score >= $minScore;
     }
@@ -85,7 +85,7 @@ class CaptchaV3
      * @param array $options
      * @return string
      */
-    public function display($attributes = ['action' => 'form'], $options = ['name' => 'g-recaptcha-response'])
+    public function display(array $attributes = ['action' => 'form'], array $options = ['name' => 'g-recaptcha-response']): ?string
     {
         if (!$this->siteKey) {
             return null;

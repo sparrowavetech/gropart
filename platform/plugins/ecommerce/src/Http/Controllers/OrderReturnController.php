@@ -84,7 +84,7 @@ class OrderReturnController extends BaseController
 
         $returnRequest = $this->orderReturnRepository->findOrFail($id, ['items', 'customer', 'order']);
 
-        page_title()->setTitle(trans('plugins/ecommerce::order.edit_order', ['code' => get_order_code($id)]));
+        page_title()->setTitle(trans('plugins/ecommerce::order.edit_order', ['code' => $returnRequest->code]));
 
         $defaultStore = get_primary_store_locator();
 

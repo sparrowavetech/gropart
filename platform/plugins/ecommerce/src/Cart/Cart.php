@@ -156,6 +156,24 @@ class Cart
      */
     protected function createCartItem($id, $name, $qty, $price, array $options)
     {
+        $basePrice = $price;
+        if(!empty($options['options'])) {
+            foreach($options['options']['optionCartValue'] as $value) {
+                if(is_array($value)) {
+                    foreach($value as $_value) {
+                        if ($_value['affect_type'] == 1) {
+                            $_value['affect_price'] = ($basePrice * $_value['affect_price']) / 100;
+                        }
+                        $price = $price + $_value['affect_price'];
+                    }
+                } else {
+                    if ($_value['affect_type'] == 1) {
+                        $_value['affect_price'] = ($basePrice * $_value['affect_price']) / 100;
+                    }
+                    $price = $price + $value['affect_price'];
+                }
+            }
+        }
         if ($id instanceof Buyable) {
             $cartItem = CartItem::fromBuyable($id, $qty ?: []);
             $cartItem->setQuantity($name ?: 1);
@@ -199,13 +217,11 @@ class Cart
     }
 
     /**
-     * Set last updated at
-     *
-     * @return $this
+     * @return mixed
      */
     public function setLastUpdatedAt()
     {
-        return $this->session->put($this->instance . '_updated_at', now());
+        return $this->session->put($this->instance . '_updated_at', Carbon::now());
     }
 
     /**
@@ -245,7 +261,7 @@ class Cart
 
         $content->put($cartItem->rowId, $cartItem);
 
-        $cartItem->updated_at = now();
+        $cartItem->updated_at = Carbon::now();
 
         $this->events->dispatch('cart.updated', $cartItem);
 
@@ -440,7 +456,7 @@ class Cart
 
         $cartItem->setTaxRate($taxRate);
 
-        $cartItem->updated_at = now();
+        $cartItem->updated_at = Carbon::now();
 
         $content = $this->getContent();
 

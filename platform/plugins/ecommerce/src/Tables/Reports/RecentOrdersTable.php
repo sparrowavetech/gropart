@@ -53,10 +53,10 @@ class RecentOrdersTable extends TableAbstract
             })
             ->editColumn('id', function ($item) {
                 if (!Auth::user()->hasPermission('orders.edit')) {
-                    return get_order_code($item->id);
+                    return $item->code;
                 }
 
-                return Html::link(route('orders.edit', $item->id), get_order_code($item->id));
+                return Html::link(route('orders.edit', $item->id), $item->code);
             })
             ->editColumn('status', function ($item) {
                 return BaseHelper::clean($item->status->toHtml());

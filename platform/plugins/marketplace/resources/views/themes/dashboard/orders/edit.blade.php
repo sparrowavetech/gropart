@@ -29,7 +29,7 @@
                         <div class="flexbox-grid-default">
                             <div class="flexbox-auto-right mr5">
                                 <label
-                                    class="title-product-main text-no-bold">{{ trans('plugins/ecommerce::order.order_information') }} {{ get_order_code($order->id) }}</label>
+                                    class="title-product-main text-no-bold">{{ trans('plugins/ecommerce::order.order_information') }} {{ $order->code }}</label>
                             </div>
                         </div>
                         <div class="mt20">
@@ -81,16 +81,16 @@
                                         @if ($product)
                                             <td class="width-60-px min-width-60-px vertical-align-t">
                                                 <div class="wrap-img"><img class="thumb-image thumb-image-cartorderlist"
-                                                                           src="{{ RvMedia::getImageUrl($product->image ?: $product->original_product->image, 'thumb', false, RvMedia::getDefaultImage()) }}"
-                                                                           alt="{{ $product ? $product->original_product->name : $orderProduct->product_name }}">
+                                                                           src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}"
+                                                                           alt="{{ $orderProduct->product_name }}">
                                                 </div>
                                             </td>
                                         @endif
                                         <td class="pl5 p-r5 min-width-200-px">
                                             <a class="text-underline hover-underline pre-line" target="_blank"
                                                href="{{ $product && $product->original_product->id ? route('marketplace.vendor.products.edit', $product->original_product->id) : '#' }}"
-                                               title="{{ $product ? $product->original_product->name : $orderProduct->product_name }}">
-                                                {{ $product ? $product->original_product->name : $orderProduct->product_name }}
+                                               title="{{ $orderProduct->product_name }}">
+                                                {{ $orderProduct->product_name }}
                                             </a>
                                             @if ($product)
                                                 &nbsp;
@@ -375,7 +375,7 @@
                                                                     <th>{{ trans('plugins/ecommerce::order.order_number') }}</th>
                                                                     <td>
                                                                         <a href="{{ route('marketplace.vendor.orders.edit', $order->id) }}"
-                                                                           title="{{ get_order_code($order->id) }}">{{ get_order_code($order->id) }}</a>
+                                                                           title="{{ $order->code }}">{{ $order->code }}</a>
                                                                     </td>
                                                                 </tr>
                                                                 <tr>
@@ -417,7 +417,7 @@
                                                                     <th>{{ trans('plugins/ecommerce::order.order_number') }}</th>
                                                                     <td>
                                                                         <a href="{{ route('marketplace.vendor.orders.edit', $order->id) }}"
-                                                                           title="{{ get_order_code($order->id) }}">{{ get_order_code($order->id) }}</a>
+                                                                           title="{{ $order->code }}">{{ $order->code }}</a>
                                                                     </td>
                                                                 </tr>
                                                                 <tr>

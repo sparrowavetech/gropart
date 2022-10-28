@@ -11,7 +11,7 @@ use Botble\Ecommerce\Repositories\Interfaces\OrderReturnInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderReturnItemInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Carbon\Carbon;
-use DB;
+use Illuminate\Support\Facades\DB;
 use EmailHandler;
 use Illuminate\Support\Facades\Log;
 use OrderHelper as OrderHelperFacade;
