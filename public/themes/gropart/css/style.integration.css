@@ -3,6 +3,7 @@
 .header .header-top { padding: 5px 0; }
 .footer__links p a { font-size: .75rem; }
 .copyright { margin-top: 3px; }
+.widget-featured-banners .doubleColumn .featured-banner-item .img-fluid-eq__dummy { margin-top: 45%; }
 .widget-description { font-size: .85rem; text-align: justify; }
 #footer .widget.widget-custom-menu ul li, 
 #footer .widget.widget-custom-menu ul li a { font-size: .9rem; }
