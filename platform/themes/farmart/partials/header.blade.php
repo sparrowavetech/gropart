@@ -61,6 +61,21 @@
                         <div class="col-6">
                             <div class="header-info header-info-right">
                                 <ul>
+                                    @if (is_plugin_active('marketplace'))
+                                         @if (auth('customer')->check())
+                                            @if (auth('customer')->user()->is_vendor)
+                                                <li>
+                                                    <a class="become-vendor-link" href="{{ route('marketplace.vendor.dashboard') }}">{{ __('Vendor dashboard') }}</a>
+                                                </li>
+                                            @else
+                                                <li>
+                                                    <a class="become-vendor-link" href="{{ route('marketplace.vendor.become-vendor') }}"><i class="icon-user"></i> {{ __('Become a vendor') }}</a>
+                                                </li>
+                                            @endif
+                                        @else
+                                            <li><a class="become-vendor-link" href="{{ route('customer.register') }}"><i class="icon-user"></i> {{ __('Become Vendor') }}</a></li>
+                                        @endif
+                                    @endif
                                     @if (is_plugin_active('language'))
                                         {!! Theme::partial('language-switcher') !!}
                                     @endif
@@ -146,14 +161,14 @@
                             @endif
                         </div>
                         <div class="header-items header__right">
-                            @if (theme_option('hotline'))
+                            <!--@if (theme_option('hotline'))
                                 <div class="header__extra header-support">
                                     <div class="header-box-content">
                                         <span>{{ theme_option('hotline') }}</span>
                                         <p>{{ __('Support 24/7') }}</p>
                                     </div>
                                 </div>
-                            @endif
+                            @endif-->
 
                             @if (is_plugin_active('ecommerce'))
                                 @if (EcommerceHelper::isCompareEnabled())
@@ -306,3 +321,4 @@
                 </div>
             </div>
         </header>
+

@@ -1,6 +1,10 @@
 .container { max-width: 1650px; }
 .product-button { justify-content:center; }
 .header .header-top { padding: 5px 0; }
+.header .header-middle .header__right { width: 15%; padding-left: 0; }
+.header .header-middle .header__center { width: 60%; }
+.header .header-middle .header__left { width: 15%; }
+.header .header-middle .header__right .header__extra.header-compare { margin: 0 15px 0 0px; }
 .footer__links p a { font-size: .75rem; }
 .copyright { margin-top: 3px; }
 .widget-featured-banners .doubleColumn .featured-banner-item .img-fluid-eq__dummy { margin-top: 45%; }
@@ -21,8 +25,6 @@
 .rightFloatingBar a.langChange { background-color: #222026; }
 .rightFloatingBar a.supportWhatsApp { background-color: #28d33d; }
 .rightFloatingBar a.orderTrack { background-color: #ffc107; }
-.header .header-middle .header__center { width: 45%; }
-.header .header-middle .header__right { width: 35%; }
 .header .header-info.header-info-right .become-vendor-link { background: var(--primary-color); color: #fff; padding: 10px 20px; border-radius: 3px; font-weight: 700; }
 .header .header-info.header-info-right .become-vendor-link:hover, 
 .header .header-info.header-info-right .become-vendor-link:active,
@@ -43,6 +45,7 @@
 .product-inner .product__title a { font-size: 1.01rem; font-weight: 600; }
 .product-inner .product-details .sold-by-meta { font-style: italic; color: #808080; font-size: 0.65rem; }
 .widget-socials-share.widget-socials__text:before { content: "Share this product"; display: block; width: 100%; margin-bottom: 10px; font-weight: 800; }
+.customer-order-detail { padding: 25px 30px; background: #f8f9fa; border-radius: 5px; }
 .cart--mini .mini-cart-content .product-content { padding-right: 0px; }
 .product-price { font-size: 1.15rem; }
 .product-detail-container .product-details-content .product-details .product-price, .ps-product--header-sticky .product-price { font-size: 1.5rem; }
@@ -87,32 +90,31 @@
 @media screen and (min-width: 1460px) {
 	.product-button .quantity { flex: 0 1 65px; }
 }
-@media screen and (min-width: 1361px) and (max-width: 1460px) {
+@media screen and (min-width: 1361px) and (max-width: 1600px) {
 	.header .header-middle .header__center { width: 50%; }
-	.header .header-middle .header__right { width: 30%; }
-  .product-button .quantity { flex: 0 1 65px; }
+	.header .header-middle .header__right { width: 15%; }
+	.header .header-middle .header__left { width: 15%; }
+  	.product-button .quantity { flex: 0 1 65px; }
 }
 @media screen and (max-width: 1360px) {
-  .product-detail-container .fw-normal.fs-6 { padding:15px 10px; }
+  	.product-detail-container .fw-normal.fs-6 { padding:15px 10px; }
   	.slick-list.draggable .product-inner .product-button .add-to-cart-button, 
 	.shop-products-listing .product-inner .product-button .add-to-cart-button { font-size: .75rem; padding: 10px; }
-	.header .header-middle .header__center { width: 49%; }
-	.header .header-middle .header__right { width: 40%; }
-  .product-button .quantity { flex: 0 1 65px; }
+  	.product-button .quantity { flex: 0 1 65px; }
 }
 @media screen and (max-width: 767px) {
-  .product-inner.slick-slide .product-content-box .product-price { font-size: .85rem }
-  .header .header-mobile { padding: 0px 15px; }
-  .section-banner-wrapper .banner-medium .banner-item__image { height: auto; }
-  .header .header-middle .header-wrapper { padding: 0 !important; }
-  #whatsapp_chat_widget .wa-chat-box { margin-bottom: auto !important; }
-  #whatsapp_chat_widget #wa-widget-send-button { margin: 0 0 120px 0 !important; }
+  	.product-inner.slick-slide .product-content-box .product-price { font-size: .85rem }
+  	.header .header-mobile { padding: 0px 15px; }
+  	.section-banner-wrapper .banner-medium .banner-item__image { height: auto; }
+  	.header .header-middle .header-wrapper { padding: 0 !important; }
+  	#whatsapp_chat_widget .wa-chat-box { margin-bottom: auto !important; }
+  	#whatsapp_chat_widget #wa-widget-send-button { margin: 0 0 120px 0 !important; }
 }
 @media screen and (max-width: 425px) {
-  .rightFloatingBar a { padding: 8px; }
-  .product-price { font-size: 0.95rem; }
-  .rightFloatingBar .dockerTab { height: 25px; }
-  .rightFloatingBar.open { left: 25px; }
-  .rightFloatingBar .dockerTab .fa { bottom: 8px; }
-  .rightFloatingBar { left: -5px; font-size: 14px; }
+    .rightFloatingBar a { padding: 8px; }
+    .product-price { font-size: 0.95rem; }
+    .rightFloatingBar .dockerTab { height: 25px; }
+    .rightFloatingBar.open { left: 25px; }
+    .rightFloatingBar .dockerTab .fa { bottom: 8px; }
+    .rightFloatingBar { left: -5px; font-size: 14px; }
 }

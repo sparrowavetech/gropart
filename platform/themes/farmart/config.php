@@ -100,12 +100,7 @@ return [
                 ],
                 'nouislider-css'      => [
                     'cdn'   => [
-                        'source'     => '//cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.1/nouislider.min.css',
-                        'attributes' => [
-                            'integrity'      => 'sha512-qveKnGrvOChbSzAdtSs8p69eoLegyh+1hwOMbmpCViIwj7rn4oJjdmMvWOuyQlTOZgTlZA0N2PXA7iA8/2TUYA==',
-                            'crossorigin'    => 'anonymous',
-                            'referrerpolicy' => 'no-referrer',
-                        ],
+                        'source' => '//cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.0.3/nouislider.min.css',
                     ],
                     'local' => [
                         'source' => 'plugins/nouislider/nouislider.min.css',
@@ -181,12 +176,7 @@ return [
                 ],
                 'nouislider-js'       => [
                     'cdn'       => [
-                        'source'     => '//cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.1/nouislider.min.js',
-                        'attributes' => [
-                            'integrity'      => 'sha512-1mDhG//LAjM3pLXCJyaA+4c+h5qmMoTc7IuJyuNNPaakrWT9rVTxICK4tIizf7YwJsXgDC2JP74PGCc7qxLAHw==',
-                            'crossorigin'    => 'anonymous',
-                            'referrerpolicy' => 'no-referrer',
-                        ],
+                        'source' => '//cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.0.3/nouislider.min.js',
                     ],
                     'local'     => [
                         'source'       => 'plugins/nouislider/nouislider.min.js',
