@@ -119,6 +119,12 @@ app()->booted(function () {
     }
 
     if (is_plugin_active('ecommerce')) {
+        add_shortcode('all-brands', __('All Brands'), __('All Brands'), function($shortcode){
+            return Theme::partial('shortcodes.ecommerce.all-brands', compact('shortcode'));
+        });
+        shortcode()->setAdminConfig('all-brands', function ($attributes) {
+            return Theme::partial('shortcodes.ecommerce.all-brands-admin-config', compact('attributes'));
+        });
         add_shortcode(
             'featured-product-categories',
             __('Featured Product Categories'),
