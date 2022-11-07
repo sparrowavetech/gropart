@@ -86,6 +86,9 @@ class StoreTable extends TableAbstract
             ->editColumn('status', function ($item) {
                 return BaseHelper::clean($item->status->toHtml());
             })
+            ->editColumn('is_verified', function ($item) {
+                return BaseHelper::clean($item->is_verified->toHtml());
+            })
             ->addColumn('operations', function ($item) {
                 $viewBtn = '';
                 if ($this->canEditWalletBalance && $item->customer->id) {
@@ -120,6 +123,7 @@ class StoreTable extends TableAbstract
                 'name',
                 'created_at',
                 'status',
+                'is_verified',
                 'customer_id',
             ])
             ->with(['customer', 'customer.vendorInfo'])
@@ -164,6 +168,10 @@ class StoreTable extends TableAbstract
             ],
             'status'         => [
                 'title' => trans('core/base::tables.status'),
+                'width' => '100px',
+            ],
+            'is_verified'         => [
+                'title' => trans('plugins/marketplace::store.forms.is_verified'),
                 'width' => '100px',
             ],
         ];

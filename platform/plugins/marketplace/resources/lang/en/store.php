@@ -24,6 +24,7 @@ return [
         'store'                => 'Store',
         'select_store'         => 'Select a store...',
         'is_vendor'            => 'Is vendor?',
+        'is_verified'          => 'Is Verified',
         'company'              => 'Company',
         'company_placeholder'  => 'Company',
         'zip_code'             => 'Zip Code',

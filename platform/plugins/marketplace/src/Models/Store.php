@@ -46,6 +46,7 @@ class Store extends BaseModel
         'status',
         'company',
         'zip_code',
+        'is_verified'
     ];
 
     /**
@@ -53,6 +54,7 @@ class Store extends BaseModel
      */
     protected $casts = [
         'status' => BaseStatusEnum::class,
+        'is_verified' => BaseStatusEnum::class,
     ];
 
     protected static function boot()
