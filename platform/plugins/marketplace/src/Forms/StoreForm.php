@@ -239,6 +239,11 @@ class StoreForm extends FormAbstract
                     ]),
                 ],
             ])
+            ->add('is_verified', 'onOff', [
+                'label'         => trans('plugins/marketplace::store.forms.is_verified'),
+                'label_attr'    => ['class' => 'control-label'],
+                'default_value' => false,
+            ])
             ->add('customer_id', 'customSelect', [
                 'label'      => trans('plugins/marketplace::store.forms.store_owner'),
                 'label_attr' => ['class' => 'control-label required'],
