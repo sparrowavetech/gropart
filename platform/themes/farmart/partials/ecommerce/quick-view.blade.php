@@ -12,13 +12,13 @@
                         <h2 class="h3 product_title entry-title"><a href="{{ $product->url }}">{{ $product->name }}</a></h2>
                         <div class="product-entry-meta">
                             @if ($product->brand_id)
-                                <p class="mb-0 me-2 pe-2 text-secondary">{{ __('Brand') }}: <a href="{{ $product->brand->url }}">{{ $product->brand->name }}</a></p>
+                            <p class="mb-0 me-2 pe-2 text-secondary">{{ __('Brand') }}: <a href="{{ $product->brand->url }}">{{ $product->brand->name }}</a></p>
                             @endif
 
                             @if (EcommerceHelper::isReviewEnabled())
-                                <div class="col-auto">
-                                    {!! Theme::partial('star-rating', ['avg' => $product->reviews_avg, 'count' => $product->reviews_count]) !!}
-                                </div>
+                            <div class="col-auto">
+                                {!! Theme::partial('star-rating', ['avg' => $product->reviews_avg, 'count' => $product->reviews_count]) !!}
+                            </div>
                             @endif
                         </div>
                     </div>
@@ -26,12 +26,13 @@
                 {!! Theme::partial('ecommerce.product-price', compact('product')) !!}
 
                 @if (is_plugin_active('marketplace') && $product->store_id)
-                    <div class="product-meta-sold-by my-2">
-                        <span class="d-inline-block">{{ __('Sold By') }}: </span>
-                        <a href="{{ $product->store->url }}">
-                            {{ $product->store->name }}
-                        </a>
-                    </div>
+                <div class="product-meta-sold-by my-2">
+                    <span class="d-inline-block">{{ __('Sold By') }}: </span>
+                    <a href="{{ $product->store->url }}"> {{ $product->store->name }} </a>
+                    @if($product->store->is_verified)
+                    <img class="verified-store" src="{{ asset('/storage/stores/verified.png')}}" alt="Verified">
+                    @endif
+                </div>
                 @endif
 
                 {!! Theme::partial('ecommerce.product-availability', compact('product', 'productVariation')) !!}
@@ -48,27 +49,27 @@
                     <span class="meta-value">{{ $product->sku }}</span>
                 </div>
                 @if ($product->categories->count())
-                    <div class="meta-categories">
-                        <span class="meta-label d-inline-block">{{ __('Categories') }}:</span>
-                        @foreach($product->categories as $category)
-                            <a href="{{ $category->url }}">{{ $category->name }}</a>@if (!$loop->last), @endif
-                        @endforeach
-                    </div>
+                <div class="meta-categories">
+                    <span class="meta-label d-inline-block">{{ __('Categories') }}:</span>
+                    @foreach($product->categories as $category)
+                    <a href="{{ $category->url }}">{{ $category->name }}</a>@if (!$loop->last), @endif
+                    @endforeach
+                </div>
                 @endif
                 @if ($product->tags->count())
-                    <div class="meta-categories">
-                        <span class="meta-label d-inline-block">{{ __('Tags') }}:</span>
-                        @foreach($product->tags as $tag)
-                            <a href="{{ $tag->url }}">{{ $tag->name }}</a>@if (!$loop->last), @endif
-                        @endforeach
-                    </div>
+                <div class="meta-categories">
+                    <span class="meta-label d-inline-block">{{ __('Tags') }}:</span>
+                    @foreach($product->tags as $tag)
+                    <a href="{{ $tag->url }}">{{ $tag->name }}</a>@if (!$loop->last), @endif
+                    @endforeach
+                </div>
                 @endif
 
             </div>
             @if (theme_option('social_share_enabled', 'yes') == 'yes')
-                <div class="mt-5">
-                    {!! Theme::partial('share-socials', compact('product')) !!}
-                </div>
+            <div class="mt-5">
+                {!! Theme::partial('share-socials', compact('product')) !!}
+            </div>
             @endif
         </div>
     </div>

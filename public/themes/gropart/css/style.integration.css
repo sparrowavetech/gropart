@@ -118,3 +118,6 @@
     .rightFloatingBar .dockerTab .fa { bottom: 8px; }
     .rightFloatingBar { left: -5px; font-size: 14px; }
 }
+.verified-store{ max-width:15px }
+.verified-store-main{ max-width:20px; }
+.verified-store-info{ max-width:25px }

@@ -30,8 +30,12 @@
         @if (is_plugin_active('marketplace') && $product->store->id)
             <div class="sold-by-meta">
                 <a href="{{ $product->store->url }}" tabindex="0">{{ $product->store->name }}</a>
+                    @if($product->store->is_verified)
+                        <img class="verified-store" src="{{ asset('/storage/stores/verified.png')}}"alt="Verified">
+                    @endif
             </div>
         @endif
+        
         <h3 class="product__title">
             <a href="{{ $product->url }}" tabindex="0">{{ $product->name }}</a>
         </h3>

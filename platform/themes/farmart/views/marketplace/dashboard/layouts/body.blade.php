@@ -33,6 +33,10 @@
                     <div class="ps-block__right">
                         <p>{{ __('Hello') }}, {{ auth('customer')->user()->name }}</p>
                         <small>{{ __('Joined on :date', ['date' => auth('customer')->user()->created_at->translatedFormat('M d, Y')]) }}</small>
+                        <br>
+                        @if(auth('customer')->user()->store->is_verified)
+                         <small>{{ __('You are verified now') }}  <img class="verified-store-info" style="max-width: 15px;" src="{{ asset('/storage/stores/verified.png')}}"alt="Verified"></small>
+                        @endif
                     </div>
                     <div class="ps-block__action"><a href="{{ route('customer.logout') }}"><i class="icon-exit"></i></a></div>
                 </div>
@@ -60,6 +64,9 @@
         <header class="header--dashboard">
             <div class="header__left">
                 <h3>{{ page_title()->getTitle(false) }}</h3>
+                @if(auth('customer')->user()->store->is_verified)
+                <small>{{ __('You are not verified vendor') }} <a href="#">{{ __('Click') }}</a> {{ __('here to get verified') }}</small>
+                @endif
             </div>
             @if (auth('customer')->user()->store && auth('customer')->user()->store->id)
                 <div class="header__right">
