@@ -21,6 +21,7 @@ class BaseStatusEnum extends Enum
     public const IS_UNVERIFIED = 0;
     public const IS_VERIFIED_LABEL = 'verified';
     public const IS_UNVERIFIED_LABEL = 'un_verified';
+
     /**
      * @var string
      */

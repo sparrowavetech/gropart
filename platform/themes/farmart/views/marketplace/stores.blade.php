@@ -97,9 +97,6 @@
                                                 <div class="store-title d-flex align-items-center">
                                                     <h2 class="h5 mb-0">
                                                         <a href="{{ $store->url }}">{{ $store->name }}</a>
-                                                        @if($store->is_verified)
-                                                            <img class="verified-store-main" src="{{ asset('/storage/stores/verified.png')}}"alt="Verified">
-                                                        @endif
                                                     </h2>
                                                 </div>
                                                 @if (EcommerceHelper::isReviewEnabled())
