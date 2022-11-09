@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 07, 2022 at 07:43 PM
+-- Generation Time: Nov 09, 2022 at 07:55 PM
 -- Server version: 10.4.25-MariaDB
 -- PHP Version: 8.1.10
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `gropart`
+-- Database: `gropart_update`
 --
 
 -- --------------------------------------------------------
@@ -46,15 +46,16 @@ CREATE TABLE `mp_stores` (
   `updated_at` timestamp NULL DEFAULT NULL,
   `zip_code` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `company` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `is_verified` int(10) UNSIGNED NOT NULL DEFAULT 0
+  `is_verified` int(10) UNSIGNED NOT NULL DEFAULT 0,
+  `shop_category` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `mp_stores`
 --
 
-INSERT INTO `mp_stores` (`id`, `name`, `email`, `phone`, `address`, `country`, `state`, `city`, `customer_id`, `logo`, `description`, `content`, `status`, `vendor_verified_at`, `created_at`, `updated_at`, `zip_code`, `company`, `is_verified`) VALUES
-(12, 'SB Marketing', 'abhinoody@gmail.com', '7357845792', 'Gol Choraha, Jhala Manna Circle', '1', '30', '36', 37, 'stores/logo-400-400.jpg', 'Our business depends on the convenience of the farmers. We provide almost all the necessities which are related to agriculture. All the necessary items are available in our shop. We deal in all types of tractor company genuine spare parts and service as well as earthmover machines genuine spare parts and agriculture machine spare parts and service.', '<p>Our business depends on the convenience of the farmers. We provide almost all the necessities which are related to agriculture. All the necessary items are available in our shop. We deal in all types of tractor company genuine spare parts and service as well as earthmover machines genuine spare parts and agriculture machine spare parts and service.</p><ul><li>We Believe in the quality of resources.</li><li>All resources will be of high quality.</li><li>We are associated with the country\'s most trusted and well-known companies.</li></ul>', 'published', NULL, '2022-05-21 17:44:53', '2022-11-07 18:11:37', NULL, NULL, 1);
+INSERT INTO `mp_stores` (`id`, `name`, `email`, `phone`, `address`, `country`, `state`, `city`, `customer_id`, `logo`, `description`, `content`, `status`, `vendor_verified_at`, `created_at`, `updated_at`, `zip_code`, `company`, `is_verified`, `shop_category`) VALUES
+(12, 'SB Marketing', 'abhinoody@gmail.com', '7357845792', 'Gol Choraha, Jhala Manna Circle', '1', '30', '36', 37, 'stores/logo-400-400.jpg', 'Our business depends on the convenience of the farmers. We provide almost all the necessities which are related to agriculture. All the necessary items are available in our shop. We deal in all types of tractor company genuine spare parts and service as well as earthmover machines genuine spare parts and agriculture machine spare parts and service.', '<p>Our business depends on the convenience of the farmers. We provide almost all the necessities which are related to agriculture. All the necessary items are available in our shop. We deal in all types of tractor company genuine spare parts and service as well as earthmover machines genuine spare parts and agriculture machine spare parts and service.</p><ul><li>We Believe in the quality of resources.</li><li>All resources will be of high quality.</li><li>We are associated with the country\'s most trusted and well-known companies.</li></ul>', 'published', NULL, '2022-05-21 17:44:53', '2022-11-09 18:48:44', NULL, NULL, 1, 'wholesaler');
 
 --
 -- Indexes for dumped tables
