@@ -29,3 +29,16 @@
         <div class="invalid-feedback">{{ $errors->first('shop_phone') }}</div>
     @endif
 </div>
+<div class="mb-3">
+    <label class="form-label required" for="shop-phone-register">{{ __('Are You A ?') }}</label>
+    <select class="form-control @if ($errors->has('shop_catergory')) is-invalid @endif" id="shop_catergory" name="shop_catergory">
+        <option value="">Select Your Type</option>
+        <option value="manufacture">Manufacture</option>
+        <option value="wholesaler">Wholesaler</option>
+        <option value="retailer">Retailer</option>
+        <option value="farmer">Farmer</option>
+    </select>
+    @if ($errors->has('shop_catergory'))
+        <div class="invalid-feedback">{{ $errors->first('shop_catergory') }}</div>
+    @endif
+</div>

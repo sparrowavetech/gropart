@@ -3,6 +3,7 @@
 namespace Botble\Marketplace\Models;
 
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Marketplace\Enums\ShopTypeEnum;
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Supports\Avatar;
 use Botble\Base\Traits\EnumCastable;
@@ -46,7 +47,8 @@ class Store extends BaseModel
         'status',
         'company',
         'zip_code',
-        'is_verified'
+        'is_verified',
+        'shop_category'
     ];
 
     /**
@@ -54,7 +56,7 @@ class Store extends BaseModel
      */
     protected $casts = [
         'status' => BaseStatusEnum::class,
-        'is_verified' => BaseStatusEnum::class,
+        'shop_category' => ShopTypeEnum::class,
     ];
 
     protected static function boot()

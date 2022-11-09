@@ -25,6 +25,7 @@ return [
         'select_store'         => 'Select a store...',
         'is_vendor'            => 'Is vendor?',
         'is_verified'          => 'Is Verified',
+        'shop_category'        => 'Shop Type',
         'company'              => 'Company',
         'company_placeholder'  => 'Company',
         'zip_code'             => 'Zip Code',
@@ -33,6 +34,8 @@ return [
     'store'                                    => 'Store',
     'store_name'                               => 'Store name',
     'store_phone'                              => 'Store phone',
+    'verified'                                 => 'Verified',
+    'un_verified'                          => 'Un-Verified',
     'store_link'                               => 'Store link',
     'product_approval_notification'            => 'This product was created by :vendor. It needs to be approved to be shown on your website. :approve_link',
     'approve_here'                             => 'Approve it here.',
@@ -45,4 +48,9 @@ return [
     'vendor_information'                       => 'Vendor information',
     'vendor_name'                              => 'Name',
     'withdrawal_approval_notification'         => 'This withdrawal request has been created by :vendor. Their current balance is :balance.',
+    'types'         => [
+        'manufacture'   => 'Manufacture',
+        'wholesaler'    => 'Wholesaler',
+        'retailer'      => 'Retailer',
+    ],
 ];

@@ -29,7 +29,7 @@
     <div class="product-content-box">
         @if (is_plugin_active('marketplace') && $product->store->id)
             <div class="sold-by-meta">
-                <a href="{{ $product->store->url }}" tabindex="0">{{ $product->store->name }}</a>
+                <a href="{{ $product->store->url }}" tabindex="0">{{ $product->store->name }} <br><small>{{ $product->store->shop_category }}</small></a>
                     @if($product->store->is_verified)
                         <img class="verified-store" src="{{ asset('/storage/stores/verified.png')}}"alt="Verified">
                     @endif

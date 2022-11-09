@@ -29,7 +29,20 @@
                     <span class="text-danger">{{ $errors->first('shop_phone') }}</span>
                 @endif
             </div>
-
+            <div class="form-group">
+                <label for="shop-phone" class="required">{{ __('Are You A ?') }}</label>
+                
+                <select class="form-control " id="shop_catergory" name="shop_catergory">
+                        <option value="">Select Your Type</option>
+                        <option value="manufacture" {{ old('shop_phone') == 'manufacture'?'selected':''}}>Manufacture</option>
+                        <option value="wholesaler" {{ old('shop_phone') == 'wholesaler'?'selected':''}}>Wholesaler</option>
+                        <option value="retailer" {{ old('shop_phone') == 'retailer'?'selected':''}}>Retailer</option>
+                        <option value="farmer" {{ old('shop_phone') == 'farmer'?'selected':''}}>Farmer</option>
+                    </select>
+                @if ($errors->has('shop_catergory'))
+                    <span class="text-danger">{{ $errors->first('shop_catergory') }}</span>
+                @endif
+            </div>
             <div class="form-group text-center">
                 <div class="form-group submit">
                     <button class="submit submit-auto-width">{{ __('Register') }}</button>

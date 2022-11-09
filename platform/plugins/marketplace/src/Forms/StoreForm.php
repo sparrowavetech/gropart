@@ -6,9 +6,11 @@ use Assets;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Enums\CustomerStatusEnum;
+use Botble\Marketplace\Enums\ShopTypeEnum;
 use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
 use Botble\Marketplace\Http\Requests\StoreRequest;
 use Botble\Location\Repositories\Interfaces\StateInterface;
+
 use Botble\Marketplace\Models\Store;
 use EcommerceHelper;
 
@@ -244,6 +246,15 @@ class StoreForm extends FormAbstract
                 'label_attr'    => ['class' => 'control-label'],
                 'default_value' => false,
             ])
+            ->add('shop_category', 'customSelect', [
+                'label'      => trans('plugins/marketplace::store.forms.shop_category'),
+                'label_attr' => ['class' => 'control-label required'],
+                'attr'       => [
+                    'class' => 'form-control select-full',
+                ],
+                'choices'    => ShopTypeEnum::labels(),
+            ])
+            
             ->add('customer_id', 'customSelect', [
                 'label'      => trans('plugins/marketplace::store.forms.store_owner'),
                 'label_attr' => ['class' => 'control-label required'],

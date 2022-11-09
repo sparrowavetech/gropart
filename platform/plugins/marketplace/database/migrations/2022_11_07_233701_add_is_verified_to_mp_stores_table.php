@@ -26,7 +26,7 @@ class AddIsVerifiedToMpStoresTable extends Migration
     public function down()
     {
         Schema::table('mp_stores', function (Blueprint $table) {
-            $table->dropColumn('is_verified', 'type');
+            $table->dropColumn('is_verified');
         });
     }
 }

@@ -86,8 +86,14 @@ class StoreTable extends TableAbstract
             ->editColumn('status', function ($item) {
                 return BaseHelper::clean($item->status->toHtml());
             })
+            ->editColumn('shop_category', function ($item) {
+                return BaseHelper::clean($item->shop_category->toHtml());
+            })
             ->editColumn('is_verified', function ($item) {
-                return BaseHelper::clean($item->is_verified->toHtml());
+                $lable = $item->is_verified == 1 ?trans('plugins/marketplace::store.verified'):trans('plugins/marketplace::store.un_verified');
+                $class = $item->is_verified == 1 ?'success':'warning';
+                return Html::tag('span',$lable , ['class' => 'label-'.$class.' status-label'])
+                ->toHtml();
             })
             ->addColumn('operations', function ($item) {
                 $viewBtn = '';
@@ -124,6 +130,7 @@ class StoreTable extends TableAbstract
                 'created_at',
                 'status',
                 'is_verified',
+                'shop_category',
                 'customer_id',
             ])
             ->with(['customer', 'customer.vendorInfo'])
@@ -168,6 +175,10 @@ class StoreTable extends TableAbstract
             ],
             'status'         => [
                 'title' => trans('core/base::tables.status'),
+                'width' => '100px',
+            ],
+            'shop_category'         => [
+                'title' => trans('plugins/marketplace::store.forms.shop_category'),
                 'width' => '100px',
             ],
             'is_verified'         => [

@@ -17,10 +17,6 @@ class BaseStatusEnum extends Enum
     public const PUBLISHED = 'published';
     public const DRAFT = 'draft';
     public const PENDING = 'pending';
-    public const IS_VERIFIED = 1;
-    public const IS_UNVERIFIED = 0;
-    public const IS_VERIFIED_LABEL = 'verified';
-    public const IS_UNVERIFIED_LABEL = 'un_verified';
 
     /**
      * @var string
@@ -41,12 +37,6 @@ class BaseStatusEnum extends Enum
                     ->toHtml();
             case self::PUBLISHED:
                 return Html::tag('span', self::PUBLISHED()->label(), ['class' => 'label-success status-label'])
-                    ->toHtml();
-            case self::IS_VERIFIED:
-                return Html::tag('span', self::IS_VERIFIED_LABEL()->label(), ['class' => 'label-success status-label'])
-                    ->toHtml();
-            case self::IS_UNVERIFIED:
-                return Html::tag('span', self::IS_UNVERIFIED_LABEL()->label(), ['class' => 'label-warning status-label'])
                     ->toHtml();
             default:
                 return parent::toHtml();

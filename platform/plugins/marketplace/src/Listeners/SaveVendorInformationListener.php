@@ -70,6 +70,7 @@ class SaveVendorInformationListener
                 $store = $this->storeRepository->createOrUpdate([
                     'name'        => BaseHelper::clean($this->request->input('shop_name')),
                     'phone'       => BaseHelper::clean($this->request->input('shop_phone')),
+                    'catergory'       => BaseHelper::clean($this->request->input('shop_catergory')),
                     'customer_id' => $customer->getAuthIdentifier(),
                 ]);
             }
