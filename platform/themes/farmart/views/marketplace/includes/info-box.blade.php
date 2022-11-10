@@ -15,12 +15,12 @@
                                         <img class="rounded-circle" src="{{ $store->logo_url }}" alt="avatar">
                                     </div>
                                     <div class="vendor-store-info col">
-                                        <h4 class="vendor-name">{{ $store->name }}</h4>
+                                        <h4 class="vendor-name d-inline">{{ $store->name }}</h4>
                                         @if($store->is_verified)
                                             <img class="verified-store-info" src="{{ asset('/storage/stores/verified.png')}}"alt="Verified">
                                         @endif
-                                        
-                                    
+
+
                                         @if (EcommerceHelper::isReviewEnabled())
                                             <div class="vendor-store-rating">
                                                 {!! Theme::partial('star-rating', ['avg' => $store->reviews()->avg('star'), 'count' => $store->reviews()->count()]) !!}

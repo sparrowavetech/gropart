@@ -30,7 +30,7 @@
                     <span class="d-inline-block">{{ __('Sold By') }}: </span>
                     <a href="{{ $product->store->url }}"> {{ $product->store->name }} </a>
                     @if($product->store->is_verified)
-                    <img class="verified-store" src="{{ asset('/storage/stores/verified.png')}}" alt="Verified">
+                    <img class="verified-store-main" src="{{ asset('/storage/stores/verified.png')}}" alt="Verified">
                     @endif
                 </div>
                 @endif
