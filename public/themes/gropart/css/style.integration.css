@@ -93,6 +93,7 @@
 .verified-store { max-width:15px; }
 .verified-store-main { max-width:20px; vertical-align: text-bottom; }
 .verified-store-info { max-width:25px; vertical-align: text-bottom; }
+.slick-slide .sold-by-meta img.verified-store { display: inline-block; }
 @media screen and (min-width: 1441px) {
 	.product-button .quantity { flex: 0 1 65px; }
   	.all-brands .featured-brand-item .brand__thumb.img-fluid-eq { max-height:250px; }
