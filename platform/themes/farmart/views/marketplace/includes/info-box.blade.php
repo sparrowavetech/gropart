@@ -19,7 +19,7 @@
                                         @if($store->is_verified)
                                             <img class="verified-store-info" src="{{ asset('/storage/stores/verified.png')}}"alt="Verified">
                                         @endif
-
+                                        <small class="badge bg-warning text-dark">{{ $product->store->shop_category->label() }}</small>
 
                                         @if (EcommerceHelper::isReviewEnabled())
                                             <div class="vendor-store-rating">
