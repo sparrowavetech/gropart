@@ -37,6 +37,7 @@
                         @if(auth('customer')->user()->store->is_verified)
                             <span style="position: absolute;"><small class="badge bg-success">{{ __('You are verified now') }}</small></span>
                         @endif
+                        <small class="badge bg-warning text-dark">{{ $product->store->shop_category->label() }}</small>
                     </div>
                     <div class="ps-block__action"><a href="{{ route('customer.logout') }}"><i class="icon-exit"></i></a></div>
                 </div>
