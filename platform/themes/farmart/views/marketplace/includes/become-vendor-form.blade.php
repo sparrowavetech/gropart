@@ -31,14 +31,17 @@
 </div>
 <div class="mb-3">
     <label class="form-label required" for="shop-phone-register">{{ __('Are You A ?') }}</label>
-    <select class="form-control @if ($errors->has('shop_catergory')) is-invalid @endif" id="shop_catergory" name="shop_catergory">
+    @php
+     $shoptype = \Botble\Marketplace\Enums\ShopTypeEnum::labels();
+    @endphp
+    <select class="form-control @if ($errors->has('shop_category')) is-invalid @endif" id="shop_category" name="shop_category">
+       
         <option value="">Select Your Type</option>
-        <option value="manufacture">Manufacture</option>
-        <option value="wholesaler">Wholesaler</option>
-        <option value="retailer">Retailer</option>
-        <option value="farmer">Farmer</option>
+        @foreach($shoptype as $index => $type)
+            <option value="{{ $index }}">{{ $type }}</option>
+        @endforeach
     </select>
-    @if ($errors->has('shop_catergory'))
-        <div class="invalid-feedback">{{ $errors->first('shop_catergory') }}</div>
+    @if ($errors->has('shop_category'))
+        <div class="invalid-feedback">{{ $errors->first('shop_category') }}</div>
     @endif
 </div>

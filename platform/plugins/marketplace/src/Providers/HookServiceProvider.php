@@ -112,14 +112,14 @@ class HookServiceProvider extends ServiceProvider
                             'shop_name'  => 'required|min:2',
                             'shop_phone' => 'required|' . BaseHelper::getPhoneValidationRule(),
                             'shop_url'   => 'required',
-                            'shop_catergory'   => 'required',
+                            'shop_category'   => 'required',
                         ],
                         [],
                         [
                             'shop_name'  => __('Shop Name'),
                             'shop_phone' => __('Shop Phone'),
                             'shop_url'   => __('Shop URL'),
-                            'shop_catergory'   => __('Shop Type'),
+                            'shop_category'   => __('Shop Type'),
                         ]
                     )->validate();
 

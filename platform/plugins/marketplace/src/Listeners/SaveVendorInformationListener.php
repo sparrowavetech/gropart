@@ -7,6 +7,7 @@ use Botble\Ecommerce\Models\Customer;
 use Botble\Marketplace\Models\Store;
 use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
 use Botble\Marketplace\Repositories\Interfaces\VendorInfoInterface;
+use Botble\Marketplace\Enums\ShopTypeEnum;
 use Botble\Slug\Models\Slug;
 use Carbon\Carbon;
 use EmailHandler;
@@ -62,19 +63,29 @@ class SaveVendorInformationListener
     public function handle(Registered $event)
     {
         $customer = $event->user;
-        if (get_class($customer) == Customer::class &&
+        if (
+            get_class($customer) == Customer::class &&
             !$customer->is_vendor &&
-            $this->request->input('is_vendor') == 1) {
+            $this->request->input('is_vendor') == 1
+        ) {
             $store = $this->storeRepository->getFirstBy(['customer_id' => $customer->getAuthIdentifier()]);
+           
+            if ($this->request->input('shop_category') == ShopTypeEnum::MANUFACTURE) {
+                $shop_category = ShopTypeEnum::MANUFACTURE();
+            } elseif ($this->request->input('shop_category') == ShopTypeEnum::WHOLESALER) {
+                $shop_category = ShopTypeEnum::WHOLESALER();
+            } elseif ($this->request->input('shop_category') == ShopTypeEnum::RETAILER) {
+                $shop_category = ShopTypeEnum::RETAILER();
+            }
             if (!$store) {
+                
                 $store = $this->storeRepository->createOrUpdate([
                     'name'        => BaseHelper::clean($this->request->input('shop_name')),
                     'phone'       => BaseHelper::clean($this->request->input('shop_phone')),
-                    'shop_catergory' => BaseHelper::clean($this->request->input('shop_catergory')),
+                    'shop_category' => $shop_category,
                     'customer_id' => $customer->getAuthIdentifier(),
                 ]);
             }
-
             if (!$store->slug) {
                 Slug::create([
                     'reference_type' => Store::class,
