@@ -63,6 +63,7 @@ class Product extends BaseModel
         'tax_id',
         'views',
         'stock_status',
+        'is_enquiry'
     ];
 
     /**
@@ -108,6 +109,7 @@ class Product extends BaseModel
             $product->productCollections()->detach();
             $product->discounts()->detach();
             $product->crossSales()->detach();
+            $product->frequentlyBoughtTogether()->detach();
             $product->upSales()->detach();
             $product->groupedProduct()->detach();
 
@@ -186,6 +188,15 @@ class Product extends BaseModel
         return $this->belongsToMany(
             Product::class,
             'ec_product_cross_sale_relations',
+            'from_product_id',
+            'to_product_id'
+        );
+    }
+    public function frequentlyBoughtTogether(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Product::class,
+            'ec_product_frequently_bought_together',
             'from_product_id',
             'to_product_id'
         );

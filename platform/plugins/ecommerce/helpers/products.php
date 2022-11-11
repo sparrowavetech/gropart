@@ -390,6 +390,32 @@ if (!function_exists('get_cross_sale_products')) {
     }
 }
 
+if (!function_exists('get_frequently_bought_together')) {
+    /**
+     * @param Product $product
+     * @param int $limit
+     * @param array $with
+     * @return Collection|\Illuminate\Database\Eloquent\Collection
+     */
+    function get_frequently_bought_together(Product $product, int $limit = 4, array $with = [])
+    {
+        $with = array_merge([
+            'slugable',
+            'variations',
+            'productCollections',
+            'variationAttributeSwatchesForProductList',
+        ], $with);
+
+        return $product
+            ->frequentlyBoughtTogether()
+            ->limit($limit)
+            ->with($with)
+            ->notOutOfStock()
+            ->withCount(EcommerceHelper::withReviewsCount())
+            ->get();
+    }
+}
+
 if (!function_exists('get_up_sale_products')) {
     /**
      * @param Product $product

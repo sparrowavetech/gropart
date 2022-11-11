@@ -125,6 +125,7 @@ class ProductForm extends FormAbstract
                     'priority' => 9999,
                 ],
             ])
+            
             ->add('product_type', 'hidden', [
                 'value' => request()->input('product_type') ?: ProductTypeEnum::PHYSICAL,
             ])
@@ -135,6 +136,11 @@ class ProductForm extends FormAbstract
             ])
             ->add('is_featured', 'onOff', [
                 'label'         => trans('core/base::forms.is_featured'),
+                'label_attr'    => ['class' => 'control-label'],
+                'default_value' => false,
+            ])
+            ->add('is_enquiry', 'onOff', [
+                'label'         => trans('plugins/ecommerce::products.form.is_enquiry'),
                 'label_attr'    => ['class' => 'control-label'],
                 'default_value' => false,
             ])
