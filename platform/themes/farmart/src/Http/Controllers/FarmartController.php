@@ -83,7 +83,10 @@ class FarmartController extends PublicController
     {
         return parent::getSiteMap();
     }
-
+    public function enquiry (Request $request,Product $product)
+    {
+        echo $product;
+    }
     /**
      * @param array $productIds
      * @return array

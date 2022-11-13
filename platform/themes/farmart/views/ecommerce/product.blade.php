@@ -460,21 +460,28 @@
                         </div>
                         <div class="ps-product__shopping">
                             {!! Theme::partial('ecommerce.product-price', compact('product')) !!}
-                            @if (EcommerceHelper::isCartEnabled())
-                                <button type="button" name="add_to_cart" value="1" class="btn btn-primary ms-2 add-to-cart-button @if ($product->isOutOfStock()) disabled @endif" @if ($product->isOutOfStock()) disabled @endif title="{{ __('Add to cart') }}">
-                                    <span class="svg-icon">
-                                        <svg>
-                                            <use href="#svg-icon-cart" xlink:href="#svg-icon-cart"></use>
-                                        </svg>
-                                    </span>
-                                    <span class="add-to-cart-text ms-1">{{ __('Add to cart') }}</span>
-                                </button>
-                                @if (EcommerceHelper::isQuickBuyButtonEnabled())
-                                    <button type="button" name="checkout" value="1" class="btn btn-primary btn-black ms-2 add-to-cart-button @if ($product->isOutOfStock()) disabled @endif" @if ($product->isOutOfStock()) disabled @endif title="{{ __('Buy Now') }}">
-                                        <span class="add-to-cart-text">{{ __('Buy Now') }}</span>
+                            @if($product->is_enquiry == 1)
+                            <a href="{{ route('public.enquiry',$product->id) }}" class="btn btn-primary btn-black mb-2 " title="{{ __('Enquiry Now') }}">
+                                <span class="add-to-cart-text ms-2">{{ __('Enquiry Now') }}</span>
+                            </a>
+                            @else
+                                @if (EcommerceHelper::isCartEnabled() )
+                                    <button type="button" name="add_to_cart" value="1" class="btn btn-primary ms-2 add-to-cart-button @if ($product->isOutOfStock()) disabled @endif" @if ($product->isOutOfStock()) disabled @endif title="{{ __('Add to cart') }}">
+                                        <span class="svg-icon">
+                                            <svg>
+                                                <use href="#svg-icon-cart" xlink:href="#svg-icon-cart"></use>
+                                            </svg>
+                                        </span>
+                                        <span class="add-to-cart-text ms-1">{{ __('Add to cart') }}</span>
                                     </button>
+                                    @if (EcommerceHelper::isQuickBuyButtonEnabled())
+                                        <button type="button" name="checkout" value="1" class="btn btn-primary btn-black ms-2 add-to-cart-button @if ($product->isOutOfStock()) disabled @endif" @if ($product->isOutOfStock()) disabled @endif title="{{ __('Buy Now') }}">
+                                            <span class="add-to-cart-text">{{ __('Buy Now') }}</span>
+                                        </button>
+                                    @endif
                                 @endif
                             @endif
+                            
                         </div>
                     </div>
                 </article>
