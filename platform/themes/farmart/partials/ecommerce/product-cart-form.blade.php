@@ -23,7 +23,7 @@
         {!! apply_filters(ECOMMERCE_PRODUCT_DETAIL_EXTRA_HTML, null, $product) !!}
         <div class="product-button @if ($product->is_enquiry == 1) is_enquiry @endif">
             @if($product->is_enquiry == 1)
-                <a href="{{ route('public.enquiry',$product->id) }}" class="btn btn-primary btn-black mb-2 " title="{{ __('Enquiry Now') }}">
+                <a href="{{ route('public.enquiry.get',$product->id) }}" class="btn btn-primary btn-black mb-2 " title="{{ __('Enquiry Now') }}">
                     <span class="add-to-cart-text ms-2">{{ __('Enquiry Now') }}</span>
                 </a>
             @else

@@ -19,6 +19,7 @@ use Botble\Ecommerce\Models\Address;
 use Botble\Ecommerce\Models\Brand;
 use Botble\Ecommerce\Models\Currency;
 use Botble\Ecommerce\Models\Customer;
+use Botble\Ecommerce\Models\Enquiry;
 use Botble\Ecommerce\Models\Discount;
 use Botble\Ecommerce\Models\FlashSale;
 use Botble\Ecommerce\Models\GlobalOption;
@@ -52,6 +53,7 @@ use Botble\Ecommerce\Repositories\Caches\AddressCacheDecorator;
 use Botble\Ecommerce\Repositories\Caches\BrandCacheDecorator;
 use Botble\Ecommerce\Repositories\Caches\CurrencyCacheDecorator;
 use Botble\Ecommerce\Repositories\Caches\CustomerCacheDecorator;
+use Botble\Ecommerce\Repositories\Caches\EnquiryCacheDecorator;
 use Botble\Ecommerce\Repositories\Caches\DiscountCacheDecorator;
 use Botble\Ecommerce\Repositories\Caches\FlashSaleCacheDecorator;
 use Botble\Ecommerce\Repositories\Caches\GlobalOptionCacheDecorator;
@@ -85,6 +87,7 @@ use Botble\Ecommerce\Repositories\Eloquent\AddressRepository;
 use Botble\Ecommerce\Repositories\Eloquent\BrandRepository;
 use Botble\Ecommerce\Repositories\Eloquent\CurrencyRepository;
 use Botble\Ecommerce\Repositories\Eloquent\CustomerRepository;
+use Botble\Ecommerce\Repositories\Eloquent\EnquiryRepository;
 use Botble\Ecommerce\Repositories\Eloquent\DiscountRepository;
 use Botble\Ecommerce\Repositories\Eloquent\FlashSaleRepository;
 use Botble\Ecommerce\Repositories\Eloquent\GlobalOptionRepository;
@@ -118,6 +121,7 @@ use Botble\Ecommerce\Repositories\Interfaces\AddressInterface;
 use Botble\Ecommerce\Repositories\Interfaces\BrandInterface;
 use Botble\Ecommerce\Repositories\Interfaces\CurrencyInterface;
 use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
+use Botble\Ecommerce\Repositories\Interfaces\EnquiryInterface;
 use Botble\Ecommerce\Repositories\Interfaces\DiscountInterface;
 use Botble\Ecommerce\Repositories\Interfaces\FlashSaleInterface;
 use Botble\Ecommerce\Repositories\Interfaces\GlobalOptionInterface;
@@ -372,6 +376,11 @@ class EcommerceServiceProvider extends ServiceProvider
         $this->app->bind(CustomerInterface::class, function () {
             return new CustomerCacheDecorator(
                 new CustomerRepository(new Customer())
+            );
+        });
+        $this->app->bind(EnquiryInterface::class, function () {
+            return new EnquiryCacheDecorator(
+                new EnquiryRepository(new Enquiry())
             );
         });
 

@@ -290,5 +290,18 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Fronts', 'middle
             'as'   => 'public.orders.tracking',
             'uses' => 'PublicProductController@getOrderTracking',
         ]);
+        Route::get('enquiry-for-equipments', [
+            'as'   => 'public.product.enquiry',
+            'uses' => 'PublicProductController@getEnquiryProduct',
+        ]);
+        Route::get('product/enquiry/{product}', [
+            'as'   => 'public.enquiry.get',
+            'uses' => 'PublicProductController@EnquiryFrom',
+        ]);
+        Route::post('product/enquiry/', [
+            'as'   => 'public.enquiry.form',
+            'uses' => 'PublicProductController@EnquiryFromSubmit',
+        ]);
+       
     });
 });

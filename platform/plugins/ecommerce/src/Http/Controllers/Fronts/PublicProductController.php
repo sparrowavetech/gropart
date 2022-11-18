@@ -7,11 +7,14 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Supports\Helper;
 use Botble\Ecommerce\Http\Resources\ProductVariationResource;
+use Botble\Ecommerce\Http\Requests\EnquiryRequest;
+use Botble\Base\Events\CreatedContentEvent;
 use Botble\Ecommerce\Models\Brand;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductCategory;
 use Botble\Ecommerce\Models\ProductTag;
 use Botble\Ecommerce\Repositories\Interfaces\BrandInterface;
+use Botble\Ecommerce\Repositories\Interfaces\EnquiryInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeSetInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductCategoryInterface;
@@ -67,7 +70,10 @@ class PublicProductController
      * @var SlugInterface
      */
     protected $slugRepository;
-
+    /**
+     * @var EnquiryInterface 
+     */
+    protected $enquiryRepository;
     /**
      * PublicProductController constructor.
      * @param ProductInterface $productRepository
@@ -76,6 +82,7 @@ class PublicProductController
      * @param BrandInterface $brandRepository
      * @param ProductVariationInterface $productVariationRepository
      * @param SlugInterface $slugRepository
+     * @param EnquiryInterface $enquiryRepository
      */
     public function __construct(
         ProductInterface             $productRepository,
@@ -83,7 +90,8 @@ class PublicProductController
         ProductAttributeSetInterface $productAttributeSet,
         BrandInterface               $brandRepository,
         ProductVariationInterface    $productVariationRepository,
-        SlugInterface                $slugRepository
+        SlugInterface                $slugRepository,
+        EnquiryInterface             $enquiryRepository
     ) {
         $this->productRepository = $productRepository;
         $this->productCategoryRepository = $productCategoryRepository;
@@ -91,6 +99,7 @@ class PublicProductController
         $this->brandRepository = $brandRepository;
         $this->productVariationRepository = $productVariationRepository;
         $this->slugRepository = $slugRepository;
+        $this->enquiryRepository = $enquiryRepository;
     }
 
     /**
@@ -121,9 +130,9 @@ class PublicProductController
         }
 
         $withCount = EcommerceHelper::withReviewsCount();
-
+        $condition = ['is_enquiry' => 0];
         if ($query && !$request->ajax()) {
-            $products = $productService->getProduct($request, null, null, $with, $withCount);
+            $products = $productService->getProduct($request, null, null, $with, $withCount, $condition);
 
             SeoHelper::setTitle(__('Search result for ":query"', compact('query')));
 
@@ -138,10 +147,20 @@ class PublicProductController
             )->render();
         }
 
-        $products = $productService->getProduct($request, null, null, $with, $withCount);
+        $products = $productService->getProduct($request, null, null, $with, $withCount, $condition);
 
         if ($request->ajax()) {
             return $this->ajaxFilterProductsResponse($products, $request, $response);
+        }
+        Assets::addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
+            ->addScriptsDirectly([
+                'vendor/core/plugins/ecommerce/libraries/jquery.textarea_autosize.js',
+                'vendor/core/plugins/ecommerce/js/order-create.js',
+            ])
+            ->addScripts(['blockui', 'input-mask']);
+
+        if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
+            Assets::addScriptsDirectly('vendor/core/plugins/location/js/location.js');
         }
 
         Theme::breadcrumb()
@@ -154,9 +173,42 @@ class PublicProductController
 
         return Theme::scope(
             'ecommerce.products',
-            compact('products'),
+            compact('products', 'condition'),
             'plugins/ecommerce::themes.products'
         )->render();
+    }
+    function EnquiryFrom(Product $product)
+    {
+        SeoHelper::setTitle(__('Enquiry From'))->setDescription(__('Enquiry From'));
+        Theme::breadcrumb()
+            ->add(__('Home'), route('public.index'))
+            ->add(__($product->name), route('public.product', $product->slug))
+            ->add(__('From'));
+
+        return Theme::scope(
+            'ecommerce.enquiry_from',
+            compact('product'),
+            'plugins/ecommerce::themes.enquiry_from'
+        )->render();
+    }
+   
+    /**
+     * @param EnquiryRequest $request
+     * @param BaseHttpResponse $response
+     * @return BaseHttpResponse
+     */
+    public function EnquiryFromSubmit(EnquiryRequest $request, BaseHttpResponse $response)
+    {
+        $enquiry = $this->enquiryRepository->getModel();
+        $enquiry->fill($request->input());
+        $enquiry = $this->enquiryRepository->createOrUpdate($enquiry);
+       
+        event(new CreatedContentEvent(CUSTOMER_MODULE_SCREEN_NAME, $request, $enquiry));
+
+        return $response
+            ->setPreviousUrl(route('public.enquiry.get',$enquiry->product_id))
+            ->setNextUrl(route('public.enquiry.get', $enquiry->product_id))
+            ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
     /**
@@ -194,7 +246,7 @@ class PublicProductController
                 'tags.slugable',
                 'categories',
                 'categories.slugable',
-                'options' => function($query) {
+                'options' => function ($query) {
                     return $query->with('values');
                 }
             ],
@@ -259,7 +311,64 @@ class PublicProductController
         )
             ->render();
     }
+    public function getEnquiryProduct(Request $request, GetProductService $productService, BaseHttpResponse $response)
+    {
+        if (!EcommerceHelper::productFilterParamsValidated($request)) {
+            return $response->setNextUrl(route('public.products'));
+        }
 
+        $query = $request->input('q');
+
+        $with = [
+            'slugable',
+            'variations',
+            'productLabels',
+            'variationAttributeSwatchesForProductList',
+            'productCollections',
+        ];
+
+        if (is_plugin_active('marketplace')) {
+            $with = array_merge($with, ['store', 'store.slugable']);
+        }
+
+        $withCount = EcommerceHelper::withReviewsCount();
+        $condition = ['is_enquiry' => 1];
+        if ($query && !$request->ajax()) {
+            $products = $productService->getProduct($request, null, null, $with, $withCount, $condition);
+
+            SeoHelper::setTitle(__('Search result for ":query"', compact('query')));
+
+            Theme::breadcrumb()
+                ->add(__('Home'), route('public.index'))
+                ->add(__('Search'), route('public.products'));
+
+            return Theme::scope(
+                'ecommerce.search',
+                compact('products', 'query'),
+                'plugins/ecommerce::themes.search'
+            )->render();
+        }
+
+        $products = $productService->getProduct($request, null, null, $with, $withCount, $condition);
+
+        if ($request->ajax()) {
+            return $this->ajaxFilterProductsResponse($products, $request, $response);
+        }
+
+        Theme::breadcrumb()
+            ->add(__('Home'), route('public.index'))
+            ->add(__('Products'), route('public.products'));
+
+        SeoHelper::setTitle(__('Products'))->setDescription(__('Products'));
+
+        do_action(PRODUCT_MODULE_SCREEN_NAME);
+
+        return Theme::scope(
+            'ecommerce.products',
+            compact('products', 'condition'),
+            'plugins/ecommerce::themes.products'
+        )->render();
+    }
     /**
      * @param string $slug
      * @param Request $request

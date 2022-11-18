@@ -94,9 +94,6 @@ Route::group(['namespace' => 'Theme\Farmart\Http\Controllers', 'middleware' => [
 
         Route::get('sitemap.xml', 'FarmartController@getSiteMap')
             ->name('public.sitemap');
-        
-        Route::get('enquiry-for-equipments/{product}', 'FarmartController@enquiry')
-            ->name('public.enquiry');
 
         Route::get('{slug?}' . config('core.base.general.public_single_ending_url'), 'FarmartController@getView')
             ->name('public.single');

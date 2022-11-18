@@ -16,6 +16,7 @@ use Botble\Ecommerce\Models\Invoice;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductCategory;
 use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
+use Botble\Ecommerce\Repositories\Interfaces\EnquiryInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderReturnInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;

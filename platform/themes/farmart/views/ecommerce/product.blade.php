@@ -461,7 +461,7 @@
                         <div class="ps-product__shopping">
                             {!! Theme::partial('ecommerce.product-price', compact('product')) !!}
                             @if($product->is_enquiry == 1)
-                            <a href="{{ route('public.enquiry',$product->id) }}" class="btn btn-primary btn-black mb-2 " title="{{ __('Enquiry Now') }}">
+                            <a href="{{ route('public.enquiry.get',$product->id) }}" class="btn btn-primary btn-black mb-2 " title="{{ __('Enquiry Now') }}">
                                 <span class="add-to-cart-text ms-2">{{ __('Enquiry Now') }}</span>
                             </a>
                             @else

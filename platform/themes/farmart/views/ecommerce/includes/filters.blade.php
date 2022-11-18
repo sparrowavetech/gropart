@@ -1,9 +1,13 @@
 @php
-    $brands = get_all_brands(['status' => \Botble\Base\Enums\BaseStatusEnum::PUBLISHED], [], ['products']);
+    $brands = get_all_brands(['status' => \Botble\Base\Enums\BaseStatusEnum::PUBLISHED], [], ['products'=>function($query) use($condition){
+            return $query->where('is_enquiry',$condition['is_enquiry']);
+        }]);
     $tags = app(\Botble\Ecommerce\Repositories\Interfaces\ProductTagInterface::class)->advancedGet([
         'condition' => ['status' => \Botble\Base\Enums\BaseStatusEnum::PUBLISHED],
         'with'      => [],
-        'withCount' => ['products'],
+        'withCount' => ['products'=>function($query) use($condition){
+            return $query->where('is_enquiry',$condition['is_enquiry']);
+        }],
         'order_by'  => ['products_count' => 'desc'],
         'take'      => 10,
     ]);
@@ -35,12 +39,14 @@
             </a>
         </div>
         <div class="catalog-filter-sidebar-content px-3 px-md-0">
+            @if($condition['is_enquiry'] != 1 )
             <div class="widget-wrapper widget-product-categories">
                 <h4 class="widget-title">{{ __('Product Categories') }}</h4>
                 <div class="widget-layered-nav-list">
                     @include(Theme::getThemeNamespace() . '::views.ecommerce.includes.categories', compact('categories', 'categoriesRequest', 'urlCurrent'))
                 </div>
             </div>
+            @endif
             @if (count($brands) > 0)
                 <div class="widget-wrapper widget-product-brands">
                     <h4 class="widget-title">{{ __('Brands') }}</h4>
