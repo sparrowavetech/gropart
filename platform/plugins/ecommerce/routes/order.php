@@ -1,5 +1,4 @@
 <?php
-
 Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' => ['web', 'core']], function () {
     Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {
         Route::group(['prefix' => 'orders', 'as' => 'orders.'], function () {

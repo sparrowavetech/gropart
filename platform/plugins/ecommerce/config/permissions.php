@@ -363,7 +363,24 @@ return [
         'flag'        => 'order_returns.destroy',
         'parent_flag' => 'order_returns.index',
     ],
-
+     /**
+     * Enquiry option
+     */
+    [
+        'name'        => 'Enquiry',
+        'flag'        => 'enquires.index',
+        'parent_flag' => 'plugins.ecommerce',
+    ],
+    [
+        'name'        => 'Enquiry',
+        'flag'        => 'enquires.view',
+        'parent_flag' => 'plugins.ecommerce',
+    ],
+    [
+        'name'        => 'Global Option',
+        'flag'        => 'global-option.index',
+        'parent_flag' => 'plugins.ecommerce',
+    ],
     /**
      * Global option
      */

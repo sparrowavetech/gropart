@@ -640,6 +640,15 @@ class EcommerceServiceProvider extends ServiceProvider
                     'permissions' => ['orders.index'],
                 ])
                 ->registerItem([
+                    'id'          => 'cms-plugins-ecommerce-enquiry',
+                    'priority'    => 1,
+                    'parent_id'   => 'cms-plugins-ecommerce',
+                    'name'        => 'plugins/ecommerce::order.enquiry',
+                    'icon'        => 'fa fa-question-circle',
+                    'url'         => route('enquires.index'),
+                    'permissions' => ['enquires.index'],
+                ])
+                ->registerItem([
                     'id'          => 'cms-plugins-ecommerce-invoice',
                     'priority'    => 2,
                     'parent_id'   => 'cms-plugins-ecommerce',

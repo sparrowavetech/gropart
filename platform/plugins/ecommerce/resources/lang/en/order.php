@@ -8,6 +8,7 @@ return [
         'canceled'   => 'Canceled',
     ],
     'menu'                                                                                                                  => 'Orders',
+    'enquiry'                                                                                                                  => 'Enquiry',
     'create'                                                                                                                => 'Create an order',
     'cancel_error'                                                                                                          => 'The order is delivering or not completed',
     'cancel_success'                                                                                                        => 'You do cancel the order successful',
