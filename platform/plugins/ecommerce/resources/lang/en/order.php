@@ -255,4 +255,10 @@ return [
     ],
     'order_return'                                                                                                          => 'Order returns',
     'order_return_items_count'                                                                                              => 'Product item(s)',
+    'enquiry_index'   => [
+        'intro' => [
+            'title'       => 'Enquiry list',
+            'description' => 'Enquiry',
+        ]
+    ]
 ];
