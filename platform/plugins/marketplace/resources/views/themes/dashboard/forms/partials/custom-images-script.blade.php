@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/4.3.0/dropzone.css">
+<link rel="stylesheet" href="{{ asset('vendor/core/core/media/libraries/dropzone/dropzone.css') }}">
 <style>
     .dropzone {
         border-radius: 5px;

@@ -25,7 +25,7 @@ class EnquiryController extends BaseController
      */
     public function index(EnquiryTable $dataTable)
     {
-        page_title()->setTitle(trans('plugins/ecommerce::order.menu'));
+        page_title()->setTitle(trans('plugins/ecommerce::order.enquiry'));
 
         return $dataTable->renderTable();
     }

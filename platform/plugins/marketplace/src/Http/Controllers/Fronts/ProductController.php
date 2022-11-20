@@ -180,7 +180,7 @@ class ProductController extends BaseController
     public function edit($id, FormBuilder $formBuilder)
     {
         $product = $this->productRepository->findOrFail($id);
-
+       
         if ($product->is_variation || $product->store_id != auth('customer')->user()->store->id) {
             abort(404);
         }

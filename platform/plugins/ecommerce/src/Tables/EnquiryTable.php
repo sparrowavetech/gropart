@@ -46,7 +46,8 @@ class EnquiryTable extends TableAbstract
         $data = $this->table
             ->eloquent($this->query())
             ->editColumn('product', function ($item) {
-                return  BaseHelper::clean($item->product->name);
+                return Html::link(route('products.edit', $item->product_id), BaseHelper::clean($item->product->name));
+               
             })
             ->editColumn('name', function ($item) {
                 return  BaseHelper::clean($item->name);
