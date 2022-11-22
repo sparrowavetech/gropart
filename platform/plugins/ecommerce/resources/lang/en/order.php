@@ -260,5 +260,14 @@ return [
             'title'       => 'Enquiry list',
             'description' => 'Enquiry',
         ]
-    ]
+    ],
+    'statuses'              => [
+        'pending' => 'Pending',
+        'contacted'    => 'Enquiry Contacted',
+        'not_available' => 'Not Available',
+        'rejected' => 'Rejected'
+    ],
+    'edit_enquiry'                                                                                                            => 'Edit Enquiry :code',
+    'enquiry_reject'                                                                                                        => 'Enquiry Rejected',
+    'enquiry_information'                                                                                                     => 'Enquiry information',
 ];

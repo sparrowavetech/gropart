@@ -66,5 +66,6 @@ return [
     'address'=>'Address',
     'city'=>'City',
     'state'=>'State',
-    'zip_code' => 'Zip Code'
+    'zip_code' => 'Zip Code',
+    'store' => 'Store'
 ];

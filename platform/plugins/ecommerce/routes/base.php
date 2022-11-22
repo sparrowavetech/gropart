@@ -313,6 +313,11 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
                 'as'   => 'view',
                 'uses' => 'EnquiryController@show',
             ]);
+            Route::delete('items/destroy', [
+                'as'         => 'deletes',
+                'uses'       => 'EnquiryController@deletes',
+                'permission' => 'enquiry.destroy',
+            ]);
         });
     });
 });

@@ -4,6 +4,8 @@ namespace Botble\Ecommerce\Models;
 
 use Botble\Location\Models\City;
 use Botble\Base\Models\BaseModel;
+use Botble\Ecommerce\Enums\EnquiryStatusEnum;
+use Botble\Base\Traits\EnumCastable;
 use Botble\Location\Models\State;
 use Botble\Location\Models\Country;
 use Botble\Ecommerce\Models\Product;
@@ -11,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Enquiry extends BaseModel
 {
+    use EnumCastable;
     /**
      * The database table used by the model.
      *
@@ -32,6 +35,9 @@ class Enquiry extends BaseModel
         'address',
         'zip_code',
         'address',
+        'status',
+        'description',
+        'attachment'
     ];
     public function product(): BelongsTo
     {
@@ -44,6 +50,14 @@ class Enquiry extends BaseModel
     {
         return $this->belongsTo(City::class,'city')->withDefault();
     }
+    
+     /**
+     * @var array
+     */
+    protected $casts = [
+        'status' => EnquiryStatusEnum::class,
+    ];
+
     /**
      * @return BelongsTo
      */

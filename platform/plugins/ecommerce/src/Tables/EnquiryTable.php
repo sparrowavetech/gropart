@@ -3,6 +3,7 @@
 namespace Botble\Ecommerce\Tables;
 
 use BaseHelper;
+use Botble\Ecommerce\Enums\EnquiryStatusEnum;
 use Botble\Ecommerce\Repositories\Interfaces\EnquiryInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Html;
@@ -33,9 +34,10 @@ class EnquiryTable extends TableAbstract
         parent::__construct($table, $urlGenerator);
 
         $this->repository = $enquiryRepository;
-        $this->hasOperations = false;
-        $this->hasActions = false;
-        $this->hasCheckbox = false;
+        if (!Auth::user()->hasAnyPermission(['enquires.edit', 'enquires.destroy'])) {
+            $this->hasOperations = false;
+            $this->hasActions = false;
+        }
     }
 
     /**
@@ -49,6 +51,9 @@ class EnquiryTable extends TableAbstract
                 return Html::link(route('products.edit', $item->product_id), BaseHelper::clean($item->product->name));
                
             })
+            ->editColumn('checkbox', function ($item) {
+                return $this->getCheckbox($item->id);
+            })
             ->editColumn('name', function ($item) {
                 return  BaseHelper::clean($item->name);
             })
@@ -58,20 +63,16 @@ class EnquiryTable extends TableAbstract
             ->editColumn('phone', function ($item) {
                 return  BaseHelper::clean($item->phone);
             })
-            ->editColumn('address', function ($item) {
-                return  BaseHelper::clean($item->address);
+            ->editColumn('status', function ($item) {
+                return BaseHelper::clean($item->status->toHtml());
             })
-            ->editColumn('city', function ($item) {
-                return  BaseHelper::clean($item->cityName->name);
-            })
-            ->editColumn('state', function ($item) {
-                return  BaseHelper::clean($item->stateName->name);
-            })
-            ->editColumn('zip_code', function ($item) {
-                return  BaseHelper::clean($item->zip_code);
+            ->editColumn('store', function ($item) {
+                return BaseHelper::clean($item->product->store->name);
             })
             ->editColumn('created_at', function ($item) {
                 return BaseHelper::formatDate($item->created_at);
+            })->addColumn('operations', function ($item) {
+                return $this->getOperations('enquires.edit', 'enquires.destroy', $item);
             });
 
         return $this->toJson($data);
@@ -88,10 +89,7 @@ class EnquiryTable extends TableAbstract
             'name',
             'email',
             'phone',
-            'state',
-            'city',
-            'address',
-            'zip_code',
+            'status',
             'created_at'
         ]);
 
@@ -125,21 +123,12 @@ class EnquiryTable extends TableAbstract
                 'title' => trans('core/base::tables.phone'),
                 'class' => 'text-start',
             ],
-             'address'        => [
-                'title' => trans('core/base::tables.address'),
-                'width' => '100px',
+            'status'        => [
+                'title' => trans('core/base::tables.status'),
                 'class' => 'text-start',
             ],
-            'city'        => [
-                'title' => trans('core/base::tables.city'),
-                'class' => 'text-start',
-            ],
-            'state'        => [
-                'title' => trans('core/base::tables.state'),
-                'class' => 'text-start',
-            ],
-            'zip_code'        => [
-                'title' => trans('core/base::tables.zip_code'),
+            'store'        => [
+                'title' => trans('core/base::tables.store'),
                 'class' => 'text-start',
             ],
             'created_at'  => [
@@ -148,6 +137,43 @@ class EnquiryTable extends TableAbstract
                 'class' => 'text-start',
             ],
            
+        ];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function bulkActions(): array
+    {
+        return $this->addDeleteAction(
+            route('enquires.deletes'),
+            'enquires.destroy',
+            parent::bulkActions()
+        );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getBulkChanges(): array
+    {
+        return [
+            'name'       => [
+                'title'    => trans('core/base::tables.name'),
+                'type'     => 'text',
+                'validate' => 'required|max:120',
+            ],
+            'status'     => [
+                'title'    => trans('core/base::tables.status'),
+                'type'     => 'select',
+                'choices'  => EnquiryStatusEnum::labels(),
+                'validate' => 'required|in:' . implode(',', EnquiryStatusEnum::values()),
+            ],
+            
+            'created_at' => [
+                'title' => trans('core/base::tables.created_at'),
+                'type'  => 'date',
+            ],
         ];
     }
 
@@ -164,5 +190,15 @@ class EnquiryTable extends TableAbstract
         }
 
         return parent::renderTable($data, $mergeData);
+    }
+      /**
+     * {@inheritDoc}
+     */
+    public function getDefaultButtons(): array
+    {
+        return [
+            'export',
+            'reload',
+        ];
     }
 }
