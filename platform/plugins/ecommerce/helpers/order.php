@@ -44,3 +44,15 @@ if (!function_exists('get_order_id_from_order_code')) {
         return (int)$orderId - (int)config('plugins.ecommerce.order.default_order_start_number');
     }
 }
+
+if (!function_exists('get_enquiry_code')) {
+    /**
+     * @param int $enquiryId
+     * @return string
+     */
+    function get_enquiry_code(int $enquiryId): string
+    {
+        $prefix = get_ecommerce_setting('ecommerce_enquiry_code_prefix') ? get_ecommerce_setting('ecommerce_enquiry_code_prefix') . '-' : '';
+        return '#' . $prefix . ((int)config('plugins.ecommerce.order.default_order_start_number') + $enquiryId);
+    }
+}

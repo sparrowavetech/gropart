@@ -15,6 +15,7 @@ use ProductCategoryHelper;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use Botble\Base\Supports\Helper;
+use Illuminate\Http\JsonResponse;
 use Botble\Ecommerce\Models\Brand;
 use Botble\SeoHelper\SeoOpenGraph;
 use Illuminate\Support\Facades\URL;
@@ -25,6 +26,7 @@ use Illuminate\Http\RedirectResponse;
 use Botble\Ecommerce\Models\ProductTag;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Ecommerce\Models\ProductCategory;
+use Botble\Ecommerce\Enums\EnquiryStatusEnum;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Http\Requests\EnquiryRequest;
 use Botble\Slug\Repositories\Interfaces\SlugInterface;
@@ -192,7 +194,6 @@ class PublicProductController
             'plugins/ecommerce::themes.enquiry_from'
         )->render();
     }
-   
     /**
      * @param EnquiryRequest $request
      * @param BaseHttpResponse $response
@@ -201,16 +202,32 @@ class PublicProductController
     public function EnquiryFromSubmit(EnquiryRequest $request, BaseHttpResponse $response)
     {
         $enquiry = $this->enquiryRepository->getModel();
-        $enquiry->fill($request->input());
+        $input = $request->input();
+        $input['status'] = EnquiryStatusEnum::PENDING();
+        $result = RvMedia::handleUpload($request->file('attachment'), $request->input('folder_id', 0));
+        $input['attachment'] = $result['data']->url;
+        $enquiry->fill($input);
         $enquiry = $this->enquiryRepository->createOrUpdate($enquiry);
-       
-        event(new CreatedContentEvent(CUSTOMER_MODULE_SCREEN_NAME, $request, $enquiry));
 
+        event(new CreatedContentEvent(CUSTOMER_MODULE_SCREEN_NAME, $request, $enquiry));
+       // MarketplaceHelper::sendMailToVendorAfterProcessingOrder($enquiry);
         return $response
-            ->setPreviousUrl(route('public.enquiry.get',$enquiry->product_id))
-            ->setNextUrl(route('public.enquiry.get', $enquiry->product_id))
+            ->setPreviousUrl(route('public.enquiry.get', $enquiry->product_id))
+            ->setNextUrl(route('public.enquiry.success', base64_encode($enquiry->id)))
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
+    public function EnquirySuccess($enquiry_id)
+    {
+        SeoHelper::setTitle(__('Enquiry Success'))->setDescription(__('Enquiry Success'));
+        $enquiry_id = base64_decode($enquiry_id);
+        $enquiry = $this->enquiryRepository->findOrFail($enquiry_id, ['product']);
+        return Theme::scope(
+            'plugins/ecommerce::orders.thank-you.enquiry-info',
+            compact('enquiry'),
+            'plugins/ecommerce::orders.thank-you.enquiry-info'
+        )->render();
+    }
+
 
     /**
      * @param string $slug

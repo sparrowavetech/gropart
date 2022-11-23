@@ -4,7 +4,7 @@
 @if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation())
     <script src="{{ asset('vendor/core/plugins/location/js/location.js') }}?v=1.2.0"></script>
 @endif
-{!! Form::open(['url' =>route('public.enquiry.form'), 'method' => 'POST']) !!}
+{!! Form::open(['url' =>route('public.enquiry.form'), 'method' => 'POST','enctype'=>'multipart/form-data']) !!}
 <input type="hidden" name="product_id" value="{{ $product->id}}">
         
 <div class="card" style="width: 18rem;">
@@ -131,7 +131,14 @@
                 @endif
             </div>
         @endif
-       
+        <div class="mb-3">
+            <label for="description">{{ __('Description') }}:</label>
+            <textarea name="description" id="" cols="30" rows="10"  class="form-control" name="description"  placeholder="{{ __('Additional Requirement') }}"></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="attachment">{{ __('Attachment') }}:</label>
+            <input id="attachment" type="file" class="form-control" name="attachment" >
+        </div>
 
         <div class="mb-3">
             <button class="btn btn-primary" type="submit">{{ __('Submit') }}</button>

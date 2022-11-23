@@ -39,6 +39,13 @@ class Enquiry extends BaseModel
         'description',
         'attachment'
     ];
+    protected static function boot()
+    {
+        parent::boot();
+        static::creating(function (Enquiry $enquiry) {
+            $enquiry->code = static::generateUniqueCode();
+        });
+    }
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class,'product_id');
@@ -71,5 +78,16 @@ class Enquiry extends BaseModel
     public function countryName(): BelongsTo
     {
         return $this->belongsTo(Country::class,'country')->withDefault();
+    }
+    public static function generateUniqueCode(): string
+    {
+        $nextInsertId = static::query()->max('id') + 1;
+
+        do {
+            $code = get_order_code($nextInsertId);
+            $nextInsertId++;
+        } while (static::query()->where('code', $code)->exists());
+
+        return $code;
     }
 }

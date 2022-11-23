@@ -302,6 +302,10 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Fronts', 'middle
             'as'   => 'public.enquiry.form',
             'uses' => 'PublicProductController@EnquiryFromSubmit',
         ]);
+        Route::get('product/enquiry/success/{id}', [
+            'as'   => 'public.enquiry.success',
+            'uses' => 'PublicProductController@EnquirySuccess',
+        ]);
        
     });
 });
