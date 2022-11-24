@@ -696,9 +696,10 @@
                             <div class="wrapper-content bg-gray-white mb20">
                                 <div class="pd-all-20">
                                     <div class="p-b10">
-                                        <strong>{{ trans('plugins/marketplace::store.store') }}@if($enquiry->product->store->is_verified)
+                                        <strong>{{ trans('plugins/marketplace::store.store') }}@if($order->store->is_verified)
                                     <img class="verified-store-main" style="width: 20px;" src="{{ asset('/storage/stores/verified.png')}}"alt="Verified">
                                 @endif</strong>
+                                <small class="badge bg-warning text-dark">{{ $order->store->shop_category->label() }}</small>
                                         <ul class="p-sm-r mb-0">
                                             <li class="ws-nm">
                                                 <a href="{{ $order->store->url }}" class="ww-bw text-no-bold"

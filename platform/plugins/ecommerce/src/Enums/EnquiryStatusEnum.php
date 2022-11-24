@@ -21,7 +21,7 @@ class EnquiryStatusEnum extends Enum
     /**
      * @var string
      */
-    public static $langPath = 'plugins/ecommerce::order.statuses';
+    public static $langPath = 'plugins/ecommerce::enquiry.statuses';
 
     /**
      * @return string

@@ -312,15 +312,13 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Fronts', 'middle
 Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' => ['web', 'core']], function () {
     Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {
         Route::group(['prefix' => 'enquires', 'as' => 'enquires.'], function () {
-            Route::resource('', 'EnquiryController')->parameters(['' => 'EnquiryController']);
-            Route::get('/view/{enquiry}', [
-                'as'   => 'view',
-                'uses' => 'EnquiryController@show',
-            ]);
+            Route::resource('', 'EnquiryController')
+                ->parameters(['' => 'enquiry']);
+
             Route::delete('items/destroy', [
                 'as'         => 'deletes',
                 'uses'       => 'EnquiryController@deletes',
-                'permission' => 'enquiry.destroy',
+                'permission' => 'enquires.destroy',
             ]);
         });
     });

@@ -643,7 +643,7 @@ class EcommerceServiceProvider extends ServiceProvider
                     'id'          => 'cms-plugins-ecommerce-enquiry',
                     'priority'    => 1,
                     'parent_id'   => 'cms-plugins-ecommerce',
-                    'name'        => 'plugins/ecommerce::order.enquiry',
+                    'name'        => 'plugins/ecommerce::enquiry.name',
                     'icon'        => 'fa fa-question-circle',
                     'url'         => route('enquires.index'),
                     'permissions' => ['enquires.index'],

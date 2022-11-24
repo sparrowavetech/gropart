@@ -13,7 +13,7 @@
                             </svg>
                         </div>
                         <div class="ui-banner__content">
-                            <h2 class="ui-banner__title">{{ trans('plugins/ecommerce::order.enquiry_canceled') }}</h2>
+                            <h2 class="ui-banner__title">{{ trans('_canceled') }}</h2>
                         </div>
                     </div>
                 </div>
@@ -26,7 +26,7 @@
                     <div class="next-card-section p-none-b">
                         <div class="flexbox-grid-default flexbox-align-items-center">
                             <div class="flexbox-auto-content-left">
-                                <label class="title-product-main text-no-bold">{{ trans('plugins/ecommerce::order.enquiry_information') }}</label>
+                                <label class="title-product-main text-no-bold">{{ trans('plugins/ecommerce::enquiry.information') }}</label>
                             </div>
                         </div>
                     </div>
@@ -35,9 +35,9 @@
                             <strong class="text-capitalize">{{ $enquiry->name }}</strong>
                         </div>
                         <ul class="ws-nm text-infor-subdued">
-                            <li class="overflow-ellipsis"><a class="hover-underline" href="mailto:{{ $enquiry->email  }}">{{ $enquiry->email  }}</a>
+                            <li class="overflow-ellipsis"><span><i class="fa fa-envelope cursor-pointer mr5"></i></span><a class="hover-underline" href="mailto:{{ $enquiry->email  }}">{{ $enquiry->email  }}</a>
                             </li>
-                            <li class="overflow-ellipsis"><a class="hover-underline" href="tel:{{ $enquiry->phone  }}">{{ $enquiry->phone  }}</a></li>
+                            <li class="overflow-ellipsis"><span><i class="fa fa-phone-square cursor-pointer mr5"></i></span><a class="hover-underline" href="tel:{{ $enquiry->phone  }}">{{ $enquiry->phone  }}</a></li>
                             <li class="overflow-ellipsis">{{ $enquiry->address  }}</li>
                             <li class="overflow-ellipsis">{{ $enquiry->cityName->name  }}</li>
                             <li class="overflow-ellipsis">{{ $enquiry->stateName->name  }}</li>

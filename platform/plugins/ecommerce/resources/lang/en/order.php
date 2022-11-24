@@ -8,7 +8,6 @@ return [
         'canceled'   => 'Canceled',
     ],
     'menu'                                                                                                                  => 'Orders',
-    'enquiry'                                                                                                                  => 'Enquiry',
     'create'                                                                                                                => 'Create an order',
     'cancel_error'                                                                                                          => 'The order is delivering or not completed',
     'cancel_success'                                                                                                        => 'You do cancel the order successful',
@@ -255,19 +254,4 @@ return [
     ],
     'order_return'                                                                                                          => 'Order returns',
     'order_return_items_count'                                                                                              => 'Product item(s)',
-    'enquiry_index'   => [
-        'intro' => [
-            'title'       => 'Enquiry list',
-            'description' => 'Enquiry',
-        ]
-    ],
-    'statuses'              => [
-        'pending' => 'Pending',
-        'contacted'    => 'Enquiry Contacted',
-        'not_available' => 'Not Available',
-        'rejected' => 'Rejected'
-    ],
-    'edit_enquiry'                                                                                                            => 'Edit Enquiry :code',
-    'enquiry_reject'                                                                                                        => 'Enquiry Rejected',
-    'enquiry_information'                                                                                                     => 'Enquiry information',
-];
+   ];

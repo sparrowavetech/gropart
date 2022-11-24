@@ -544,8 +544,8 @@ class PublicProductController
         }
 
         $request->merge(['categories' => $category->getChildrenIds($category, [$category->id])]);
-
-        $products = $getProductService->getProduct($request, null, null, $with, EcommerceHelper::withReviewsCount());
+        $condition = ['is_enquiry' => 0];
+        $products = $getProductService->getProduct($request, null, null, $with, EcommerceHelper::withReviewsCount(),$condition);
 
         SeoHelper::setTitle($category->name)->setDescription($category->description);
 
@@ -576,10 +576,10 @@ class PublicProductController
         if ($request->ajax()) {
             return $this->ajaxFilterProductsResponse($products, $request, $response);
         }
-
+        
         return Theme::scope(
             'ecommerce.product-category',
-            compact('category', 'products'),
+            compact('category', 'products','condition'),
             'plugins/ecommerce::themes.product-category'
         )->render();
     }
