@@ -235,11 +235,13 @@ class PublicProductController
         SeoHelper::setTitle(__('Enquiry Success'))->setDescription(__('Enquiry Success'));
         $enquiry_id = base64_decode($enquiry_id);
         $enquiry = $this->enquiryRepository->findOrFail($enquiry_id, ['product']);
-        return Theme::scope(
-            'plugins/ecommerce::orders.thank-you.enquiry-info',
-            compact('enquiry'),
-            'plugins/ecommerce::orders.thank-you.enquiry-info'
-        )->render();
+        
+        return view('plugins/ecommerce::enquires.enquiry-thank-you', compact('enquiry'));
+        // return Theme::scope(
+        //     'plugins/ecommerce::orders.thank-you.enquiry-info',
+        //     compact('enquiry'),
+        //     'plugins/ecommerce::orders.thank-you.enquiry-info'
+        // )->render();
     }
 
 
