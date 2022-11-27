@@ -3,6 +3,7 @@
 namespace Botble\Ecommerce\Http\Requests;
 
 use Botble\Support\Http\Requests\Request;
+use Botble\Ecommerce\Facades\EcommerceHelperFacade;
 
 class EnquiryRequest extends Request
 {
@@ -16,7 +17,7 @@ class EnquiryRequest extends Request
         return [
             'name'                  => 'required|max:120|min:2',
             'email'                 => 'required|max:60|min:6|email',
-            'phone'                 => 'required|min:10|numeric',
+            'phone'                 => EcommerceHelperFacade::getPhoneValidationRule(),
             'state'                 => 'required',
             'city'                  => 'required',
             'address'               => 'required',

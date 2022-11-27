@@ -52,7 +52,7 @@ if (!function_exists('get_enquiry_code')) {
      */
     function get_enquiry_code(int $enquiryId): string
     {
-        $prefix = get_ecommerce_setting('ecommerce_enquiry_code_prefix') ? get_ecommerce_setting('ecommerce_enquiry_code_prefix') . '-' : '';
-        return '#' . $prefix . ((int)config('plugins.ecommerce.order.default_order_start_number') + $enquiryId);
+        $prefix = get_ecommerce_setting('enquiry_code_prefix') ? get_ecommerce_setting('enquiry_code_prefix') . '-' : '';
+        return '#' . $prefix . ((int)config('plugins.ecommerce.order.default_enquiry_start_number') + $enquiryId);
     }
 }

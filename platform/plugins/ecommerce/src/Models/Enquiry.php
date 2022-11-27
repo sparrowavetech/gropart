@@ -84,7 +84,7 @@ class Enquiry extends BaseModel
         $nextInsertId = static::query()->max('id') + 1;
 
         do {
-            $code = get_order_code($nextInsertId);
+            $code = get_enquiry_code($nextInsertId);
             $nextInsertId++;
         } while (static::query()->where('code', $code)->exists());
 

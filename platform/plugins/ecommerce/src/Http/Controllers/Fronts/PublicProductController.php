@@ -15,7 +15,6 @@ use ProductCategoryHelper;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use Botble\Base\Supports\Helper;
-use Illuminate\Http\JsonResponse;
 use Botble\Ecommerce\Models\Brand;
 use Botble\SeoHelper\SeoOpenGraph;
 use Illuminate\Support\Facades\URL;
@@ -24,11 +23,13 @@ use Illuminate\Support\Facades\Auth;
 use Botble\Base\Enums\BaseStatusEnum;
 use Illuminate\Http\RedirectResponse;
 use Botble\Ecommerce\Models\ProductTag;
+use Botble\Ecommerce\Supports\OrderHelper;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Ecommerce\Models\ProductCategory;
 use Botble\Ecommerce\Enums\EnquiryStatusEnum;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Http\Requests\EnquiryRequest;
+use Botble\Marketplace\Supports\MarketplaceHelper;
 use Botble\Slug\Repositories\Interfaces\SlugInterface;
 use Botble\Ecommerce\Services\Products\GetProductService;
 use Botble\Ecommerce\Repositories\Interfaces\BrandInterface;
@@ -202,15 +203,28 @@ class PublicProductController
     public function EnquiryFromSubmit(EnquiryRequest $request, BaseHttpResponse $response)
     {
         $enquiry = $this->enquiryRepository->getModel();
-        $input = $request->input();
-        $input['status'] = EnquiryStatusEnum::PENDING();
-        $result = RvMedia::handleUpload($request->file('attachment'), $request->input('folder_id', 0));
-        $input['attachment'] = $result['data']->url;
-        $enquiry->fill($input);
-        $enquiry = $this->enquiryRepository->createOrUpdate($enquiry);
-
+        $request->merge([
+            'status' =>EnquiryStatusEnum::PENDING(),
+        ]);
+        if ($request->hasFile('attachment')) {
+            $result = RvMedia::handleUpload($request->file('attachment'), 0, 'enquiry');
+            if ($result['error']) {
+                return $response->setError()->setMessage($result['message']);
+            }
+            $request->merge([
+                'attachment'      => $result['data']->url,
+            ]);
+        }
+       
+        $enquiry = $this->enquiryRepository->createOrUpdate($request->input());
         event(new CreatedContentEvent(CUSTOMER_MODULE_SCREEN_NAME, $request, $enquiry));
-       // MarketplaceHelper::sendMailToVendorAfterProcessingOrder($enquiry);
+       
+        if (is_plugin_active('marketplace')) {
+            MarketplaceHelper::sendEnquiryMail($enquiry->id);
+        }
+       
+        OrderHelper::sendEnquiryMail($enquiry->id);
+
         return $response
             ->setPreviousUrl(route('public.enquiry.get', $enquiry->product_id))
             ->setNextUrl(route('public.enquiry.success', base64_encode($enquiry->id)))

@@ -28,5 +28,11 @@ return [
 
     'order_return_request_title'       => 'Order return request',
     'order_return_request_description' => 'Send to customer when they return order',
+    
+    'enquiry_customer_title'       => 'Enquiry confirmation',
+    'enquiry_customer_description' => 'Send email confirmation to customer when an enquiry placed',
+
+    'enquiry_title'       => 'Notice about new enquiry',
+    'enquiry_description' => 'Send to administrators when an enquiry placed',
 
 ];

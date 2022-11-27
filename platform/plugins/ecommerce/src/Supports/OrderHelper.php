@@ -14,6 +14,7 @@ use Botble\Ecommerce\Events\OrderPaymentConfirmedEvent;
 use Botble\Ecommerce\Models\Option;
 use Botble\Ecommerce\Models\OptionValue;
 use Botble\Ecommerce\Models\Order;
+use Botble\Ecommerce\Models\Enquiry;
 use Botble\Ecommerce\Models\OrderHistory;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ShipmentHistory;
@@ -36,6 +37,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use InvoiceHelper as InvoiceHelperFacade;
@@ -881,5 +883,46 @@ class OrderHelper
         }
 
         return true;
+    }
+    /**
+     * @param Enquiry $order
+     *
+     * @return Enquiry
+     */
+    public static function sendEnquiryMail(Enquiry $enquiry): Enquiry
+    {
+        $mailer = EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+        if ($mailer->templateEnabled('customer_new_enquiry')) {
+            $this->setEmailVendorVariablesForEnquiry($enquiry);
+            $mailer->sendUsingTemplate(
+                'customer_new_enquiry',
+                $enquiry->email
+            );
+        }
+        if ($mailer->templateEnabled('admin_new_enquiry')) {
+            $this->setEmailVendorVariablesForEnquiry($enquiry);
+            $mailer->sendUsingTemplate('admin_new_enquiry', get_admin_email()->toArray());
+        }
+        return $enquiry;
+    }
+     /**
+     * @param EnquiryrModel $order
+     * @return \Botble\Base\Supports\EmailHandler
+     * @throws Throwable
+     */
+    public function setEmailVendorVariablesForEnquiry(Enquiry $enquiry): EmailHandlerSupport
+    {
+        return EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME)
+            ->setVariableValues([
+                'customer_name'    => $enquiry->name,
+                'customer_email'   => $enquiry->email,
+                'customer_phone'   => $enquiry->phone,
+                'customer_address' => $enquiry->address.', '.$enquiry->cityName->name.', '.$enquiry->stateName->name.', '.$enquiry->zip_code,
+                'product_list'     => view('plugins/ecommerce::emails.partials.enquiry-detail', compact('enquiry'))
+                    ->render(),
+                'enquiry_id'    => $enquiry->code,
+                'enquiry_description'      => $enquiry->description,
+                'store_name'       => $enquiry->store->name,
+            ]);
     }
 }

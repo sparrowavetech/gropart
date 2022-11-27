@@ -159,4 +159,7 @@ return [
     ],
     'basic_settings'                  => 'Basic settings',
     'advanced_settings'               => 'Advanced settings',
+    'change_enquiry_format'           =>  'Edit Enquiry code format (optional)',
+    'enquiry_id'                      =>  'Enquiry ID',
+    'enquiry_description'             =>  'Addition Description',
 ];
