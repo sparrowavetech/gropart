@@ -38,12 +38,22 @@
                             <li class="overflow-ellipsis"><span><i class="fa fa-envelope cursor-pointer mr5"></i></span><a class="hover-underline" href="mailto:{{ $enquiry->email  }}">{{ $enquiry->email  }}</a>
                             </li>
                             <li class="overflow-ellipsis"><span><i class="fa fa-phone-square cursor-pointer mr5"></i></span><a class="hover-underline" href="tel:{{ $enquiry->phone  }}">{{ $enquiry->phone  }}</a></li>
-                            <li class="overflow-ellipsis">{{ $enquiry->address  }}</li>
-                            <li class="overflow-ellipsis">{{ $enquiry->cityName->name  }}</li>
-                            <li class="overflow-ellipsis">{{ $enquiry->stateName->name  }}</li>
-                            <li class="overflow-ellipsis">{{ $enquiry->zip_code  }}</li>
-
+                            <li class="overflow-ellipsis">Address : {{ $enquiry->address  }}</li>
+                            <li class="overflow-ellipsis">City : {{ $enquiry->cityName->name  }}</li>
+                            <li class="overflow-ellipsis">State : {{ $enquiry->stateName->name  }}</li>
+                            <li class="overflow-ellipsis">Zipcode : {{ $enquiry->zip_code  }}</li>
+                            <li class="overflow-ellipsis"><a href="{{ RvMedia::getImageUrl($enquiry->attachment, 'small', false, RvMedia::getDefaultImage()) }}" download=""><i class="fa fa-download"></i> Attechment</a></li>
                         </ul>
+                    </div>
+                </div>
+                
+                <div class="wrapper-content bg-gray-white mb20">
+                    <div class="pd-all-20">
+                        <div class="p-b10">
+                            <strong>{{ trans('plugins/ecommerce::enquiry.status') }} </strong>
+                        </div>
+                        <br>
+                        {!! $enquiry->status->toHtml() !!}
                     </div>
                 </div>
                 @if ($enquiry->product)

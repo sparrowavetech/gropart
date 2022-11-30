@@ -21,5 +21,6 @@ return [
     'edit'                                                                                                            => 'View Enquiry :code',
     'reject'                                                                                                        => 'Enquiry Rejected',
     'information'                                                                                                     => 'Enquiry information',
+    'status'                                                            => 'Enquiry Status'
 
 ];
