@@ -220,10 +220,10 @@ class PublicProductController
         event(new CreatedContentEvent(CUSTOMER_MODULE_SCREEN_NAME, $request, $enquiry));
        
         if (is_plugin_active('marketplace')) {
-            MarketplaceHelper::sendEnquiryMail($enquiry->id);
+            MarketplaceHelper::sendEnquiryMail($enquiry);
         }
        
-        OrderHelper::sendEnquiryMail($enquiry->id);
+        OrderHelper::sendEnquiryMail($enquiry);
 
         return $response
             ->setPreviousUrl(route('public.enquiry.get', $enquiry->product_id))

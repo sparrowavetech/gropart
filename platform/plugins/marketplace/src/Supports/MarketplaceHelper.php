@@ -152,10 +152,10 @@ class MarketplaceHelper
     public static function sendEnquiryMail($enquiry)
     {
         $mailer = EmailHandler::setModule(MARKETPLACE_MODULE_SCREEN_NAME);
-
+      
         if ($mailer->templateEnabled('store_new_enquiry')) {
             if ($enquiry->product->store->email) {
-                $this->setEmailVendorVariablesForEnquiry($enquiry);
+                self::setEmailVendorVariablesForEnquiry($enquiry);
                 $mailer->sendUsingTemplate('store_new_enquiry', $enquiry->product->store->email);
             }
         }
@@ -167,7 +167,7 @@ class MarketplaceHelper
      * @return \Botble\Base\Supports\EmailHandler
      * @throws Throwable
      */
-    public function setEmailVendorVariablesForEnquiry(Enquiry $enquiry): \Botble\Base\Supports\EmailHandler
+    public static function setEmailVendorVariablesForEnquiry(Enquiry $enquiry): \Botble\Base\Supports\EmailHandler
     {
         return EmailHandler::setModule(MARKETPLACE_MODULE_SCREEN_NAME)
             ->setVariableValues([
@@ -179,7 +179,7 @@ class MarketplaceHelper
                 'product_list'     => view('plugins/ecommerce::emails.partials.enquiry-detail', compact('enquiry'))
                     ->render(),
                 'enquiry_description'      => $enquiry->description,
-                'store_name'       => $enquiry->store->name,
+                'store_name'       => $enquiry->product->store->name,
             ]);
     }
 }

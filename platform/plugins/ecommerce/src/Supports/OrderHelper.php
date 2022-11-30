@@ -893,14 +893,14 @@ class OrderHelper
     {
         $mailer = EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME);
         if ($mailer->templateEnabled('customer_new_enquiry')) {
-            $this->setEmailVendorVariablesForEnquiry($enquiry);
+            self::setEmailVendorVariablesForEnquiry($enquiry);
             $mailer->sendUsingTemplate(
                 'customer_new_enquiry',
                 $enquiry->email
             );
         }
         if ($mailer->templateEnabled('admin_new_enquiry')) {
-            $this->setEmailVendorVariablesForEnquiry($enquiry);
+            self::setEmailVendorVariablesForEnquiry($enquiry);
             $mailer->sendUsingTemplate('admin_new_enquiry', get_admin_email()->toArray());
         }
         return $enquiry;
@@ -910,7 +910,7 @@ class OrderHelper
      * @return \Botble\Base\Supports\EmailHandler
      * @throws Throwable
      */
-    public function setEmailVendorVariablesForEnquiry(Enquiry $enquiry): EmailHandlerSupport
+    public static function setEmailVendorVariablesForEnquiry(Enquiry $enquiry): EmailHandlerSupport
     {
         return EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME)
             ->setVariableValues([
@@ -922,7 +922,7 @@ class OrderHelper
                     ->render(),
                 'enquiry_id'    => $enquiry->code,
                 'enquiry_description'      => $enquiry->description,
-                'store_name'       => $enquiry->store->name,
+                'store_name'       => $enquiry->product->store->name,
             ]);
     }
 }
