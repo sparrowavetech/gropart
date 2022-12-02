@@ -257,7 +257,7 @@ class PublicProductController
             'reference_type' => Product::class,
             'prefix'         => SlugHelper::getPrefix(Product::class),
         ]);
-
+       
         if (!$slug) {
             abort(404);
         }
@@ -795,7 +795,7 @@ class PublicProductController
         if (!$slug) {
             abort(404);
         }
-
+        
         $brand = $this->brandRepository->getFirstBy(['id' => $slug->reference_id], ['*'], ['slugable']);
 
         if (!$brand) {
@@ -809,7 +809,7 @@ class PublicProductController
         if (!EcommerceHelper::productFilterParamsValidated($request)) {
             return $response->setNextUrl($brand->url);
         }
-
+        $condition = ['is_enquiry' => 0];
         $products = $getProductService->getProduct(
             $request,
             null,
@@ -821,7 +821,8 @@ class PublicProductController
                 'variationAttributeSwatchesForProductList',
                 'productCollections',
             ],
-            EcommerceHelper::withReviewsCount()
+            EcommerceHelper::withReviewsCount(),
+            $condition
         );
 
         if ($request->ajax()) {
@@ -844,7 +845,7 @@ class PublicProductController
 
         do_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, BRAND_MODULE_SCREEN_NAME, $brand);
 
-        return Theme::scope('ecommerce.brand', compact('brand', 'products'), 'plugins/ecommerce::themes.brand')
+        return Theme::scope('ecommerce.brand', compact('brand', 'products','condition'), 'plugins/ecommerce::themes.brand')
             ->render();
     }
 
