@@ -80,6 +80,11 @@ Route::group(['namespace' => 'Theme\Farmart\Http\Controllers', 'middleware' => [
 
                 Route::post('ajax/contact-seller', 'ajaxContactSeller')
                     ->name('contact-seller');
+
+                Route::get('get-combo-price/{amt?}', [
+                    'uses' => 'ajaxGetComboPrice',
+                    'as'   => 'get-combo-price',
+                ]);
             });
         });
     });

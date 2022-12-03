@@ -10,6 +10,7 @@ use Botble\Base\Traits\EnumCastable;
 use Botble\Ecommerce\Models\Customer;
 use Botble\Ecommerce\Models\Discount;
 use Botble\Ecommerce\Models\Order;
+use Botble\Ecommerce\Models\Enquiry;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Traits\LocationTrait;
 use Exception;
@@ -117,5 +118,13 @@ class Store extends BaseModel
     {
         return $this->hasMany(Product::class)
             ->join('ec_reviews', 'ec_products.id', '=', 'ec_reviews.product_id');
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function enquires(): HasMany
+    {
+        return $this->hasMany(Enquiry::class);
     }
 }

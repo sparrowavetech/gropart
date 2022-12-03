@@ -44,7 +44,7 @@ class PublicCartController extends Controller
         if (!EcommerceHelper::isCartEnabled()) {
             abort(404);
         }
-
+     
         $product = $this->productRepository->findById($request->input('id'));
 
         if (!$product) {

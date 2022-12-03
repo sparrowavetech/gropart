@@ -21,7 +21,7 @@ Route::group([
             'as'   => 'public.ajax.check-store-url',
             'uses' => 'PublicStoreController@checkStoreUrl',
         ]);
-
+        
         Route::group([
             'prefix'     => 'vendor',
             'as'         => 'marketplace.vendor.',
@@ -234,6 +234,10 @@ Route::group([
                     'as'         => 'generate-coupon',
                     'uses'       => 'DiscountController@postGenerateCoupon',
                 ]);
+            });
+            Route::group(['prefix' => 'enquiries', 'as' => 'enquiries.'], function () {
+                Route::resource('', 'EnquiryController')
+                    ->parameters(['' => 'product']);
             });
         });
 

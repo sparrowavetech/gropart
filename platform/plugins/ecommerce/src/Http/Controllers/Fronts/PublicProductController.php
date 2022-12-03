@@ -280,6 +280,7 @@ class PublicProductController
                 'tags.slugable',
                 'categories',
                 'categories.slugable',
+                'frequentlyBoughtTogether',
                 'options' => function ($query) {
                     return $query->with('values');
                 }
@@ -945,4 +946,5 @@ class PublicProductController
         return Theme::scope('ecommerce.order-tracking', compact('order'), 'plugins/ecommerce::themes.order-tracking')
             ->render();
     }
+    
 }

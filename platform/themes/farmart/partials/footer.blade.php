@@ -314,5 +314,52 @@
              };
          </script>
      @endif
+     
+     <script>
+        $('.fqtcheckbox').change(function(){
+            calculate();
+        });
+        function calculate(){
+            var amt = 0;
+            $('.comboamount').html(`<img class="mx-auto" style="height:100px" src="{{ image_placeholder('images/placeholder.png') }}" />`);
+            
+            $('.fqtcheckbox:checked').each(function() {
+                var cuamt = $(this).attr('data-price');
+                    amt = amt + parseFloat(cuamt);
+               
+            });
+            $.ajax({
+                url: "{{ route('public.ajax.get-combo-price')}}/"+amt,
+                type:"GET",
+                success:function(res){
+                    $('.comboamount').html(res);
+                }
+            })
+        }
+        function addToCartAll(){
+            $('.fqtcheckbox:checked').each(function() {
+                var product_id = $(this).val();
+                var form = $('#combo_'+product_id);
+			    var url = form.attr('action');
+                data = form.serialize();
+                data += "&data=" + 1;
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: data,
+                    success: function(data) {
+                        if(data.error == false){
+                            MartApp.showSuccess(data.message);
+                        }else{
+                            MartApp.showSuccess(data.message);
+                        }
+                        
+                    },
+                    error: function(data) {
+                    }
+                });
+            });
+        }
+    </script>
     </body>
 </html>

@@ -1,4 +1,9 @@
+@if (isset($FormId))
+<form class="cart-form" action="{{ route('public.cart.add-to-cart') }}" method="POST" id="combo_{{ $FormId }}">
+@else
 <form class="cart-form" action="{{ route('public.cart.add-to-cart') }}" method="POST">
+@endif
+
 
         @csrf
         @if (!empty($withVariations) && $product->variations()->count() > 0)
@@ -18,6 +23,7 @@
         @endif
 
         <input type="hidden" name="id" class="hidden-product-id" value="{{ ($product->is_variation || !$product->defaultVariation->product_id) ? $product->id : $product->defaultVariation->product_id }}" />
+      
 
         @if (EcommerceHelper::isCartEnabled() || !empty($withButtons))
         {!! apply_filters(ECOMMERCE_PRODUCT_DETAIL_EXTRA_HTML, null, $product) !!}
@@ -28,6 +34,8 @@
                 </a>
             @else
                 @if (EcommerceHelper::isCartEnabled())
+                
+                @if (!isset($RemoveAddToCart))
                 {!! Theme::partial('ecommerce.product-quantity', compact('product')) !!}
                 <button type="submit" name="add_to_cart" value="1" class="btn btn-primary mb-2 add-to-cart-button @if ($product->isOutOfStock()) disabled @endif" @if ($product->isOutOfStock()) disabled @endif title="{{ __('Add to cart') }}">
                     <span class="svg-icon">
@@ -35,9 +43,9 @@
                             <use href="#svg-icon-cart" xlink:href="#svg-icon-cart"></use>
                         </svg>
                     </span>
-                    <span class="add-to-cart-text ms-2">{{ __('Add to cart') }}</span>
+                    <span class="add-to-cart-text ms-2" >{{ __('Add to cart') }}</span>
                 </button>
-
+                @endif
                 @if (EcommerceHelper::isQuickBuyButtonEnabled() && isset($withBuyNow) && $withBuyNow)
                 <button type="submit" name="checkout" value="1" class="btn btn-primary btn-black mb-2 add-to-cart-button @if ($product->isOutOfStock()) disabled @endif" @if ($product->isOutOfStock()) disabled @endif title="{{ __('Buy Now') }}">
                     <span class="add-to-cart-text ms-2">{{ __('Buy Now') }}</span>

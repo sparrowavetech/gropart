@@ -587,4 +587,8 @@ class FarmartController extends PublicController
 
         return $response->setMessage(__('Send message successfully!'));
     }
+    public function ajaxGetComboPrice($amt)
+    {
+        return format_price($amt);
+    }
 }

@@ -4,11 +4,12 @@ namespace Botble\Ecommerce\Models;
 
 use Botble\Location\Models\City;
 use Botble\Base\Models\BaseModel;
-use Botble\Ecommerce\Enums\EnquiryStatusEnum;
-use Botble\Base\Traits\EnumCastable;
 use Botble\Location\Models\State;
 use Botble\Location\Models\Country;
+use Botble\Base\Traits\EnumCastable;
 use Botble\Ecommerce\Models\Product;
+use Botble\Marketplace\Models\Store;
+use Botble\Ecommerce\Enums\EnquiryStatusEnum;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Enquiry extends BaseModel
@@ -46,9 +47,19 @@ class Enquiry extends BaseModel
             $enquiry->code = static::generateUniqueCode();
         });
     }
+     /**
+     * @return BelongsTo
+     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class,'product_id');
+    }
+     /**
+     * @return BelongsTo
+     */
+    public function store(): BelongsTo
+    {
+        return $this->belongsTo(Store::class,'store_id');
     }
     /**
      * @return BelongsTo
