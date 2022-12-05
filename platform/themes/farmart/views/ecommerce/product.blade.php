@@ -382,8 +382,9 @@
     </div>
 </div>
 
-
-@include(Theme::getThemeNamespace() . '::views.ecommerce.includes.frequently-bought-together', ['products' => $product->frequentlyBoughtTogether])
+@if($product->frequentlyBoughtTogether->count())
+    @include(Theme::getThemeNamespace() . '::views.ecommerce.includes.frequently-bought-together', ['products' => $product->frequentlyBoughtTogether,'product'=>$product])
+@endif
 <div class="widget-products-with-category py-5 bg-light">
     <div class="container-xxxl">
         <div class="row">

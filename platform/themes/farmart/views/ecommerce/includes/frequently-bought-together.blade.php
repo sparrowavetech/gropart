@@ -44,6 +44,32 @@ $slick = [
                         $front_sale_price_with_taxes = 0;
                         $front_sale_price_with_taxes = 0;
                         @endphp
+                        <div class="featured-brand-item">
+                            <div class="brand-item-body mx-2 py-4 px-2">
+                                <a class="py-3" href="{{ $product->url }}">
+                                    <div class="brand__thumb mb-3 img-fluid-eq">
+                                        <div class="img-fluid-eq__dummy"></div>
+                                        <div class="img-fluid-eq__wrap">
+                                            <img class="lazyload mx-auto" src="{{ image_placeholder($product->image) }}" data-src="{{ RvMedia::getImageUrl($product->image, null, false, RvMedia::getDefaultImage()) }}" alt="{{ $product->name }}" />
+                                        </div>
+                                    </div>
+                                    <div class="brand__text py-3">
+                                        <h4 class="h6 fw-bold text-secondary text-uppercase brand__name">
+                                            {{ $product->name }}
+                                        </h4>
+                                        <div class="h5 fw-bold brand__desc">
+                                            <input type="checkbox" checked class="fqtcheckbox" data-price="{{$product->front_sale_price_with_taxes}}" value="{{ $product->id }}" id="product_{{ $product->id }}">
+                                        </div>
+                                        {!! Theme::partial('ecommerce.product-price', compact('product')) !!}
+                                        @if (EcommerceHelper::isReviewEnabled())
+                                        {!! Theme::partial('star-rating', ['avg' => $product->reviews_avg, 'count' => $product->reviews_count]) !!}
+                                        @endif
+                                        {!! Theme::partial('ecommerce.product-cart-form',
+                            compact('product', 'selectedAttrs') + ['withButtons' => false, 'withVariations' => false, 'wishlistIds' => [], 'withBuyNow' => false,'RemoveAddToCart' => true,'FormId'=>$product->id]) !!}
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
                         @foreach ($products as $product)
                         <div class="featured-brand-item">
                             <div class="brand-item-body mx-2 py-4 px-2">

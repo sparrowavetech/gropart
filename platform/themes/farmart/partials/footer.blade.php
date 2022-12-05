@@ -337,6 +337,9 @@
             })
         }
         function addToCartAll(){
+            $("#preloader").show();
+            var maxCount =  $('.fqtcheckbox:checked').length;
+            var counter = 0;
             $('.fqtcheckbox:checked').each(function() {
                 var product_id = $(this).val();
                 var form = $('#combo_'+product_id);
@@ -353,12 +356,19 @@
                         }else{
                             MartApp.showSuccess(data.message);
                         }
-                        
+                        counter++;
+                        console.log(maxCount,counter)
+                        if(maxCount == counter){
+                            $("#preloader").hide();
+                            window.reload();
+                        }
                     },
                     error: function(data) {
                     }
                 });
+
             });
+            
         }
     </script>
     </body>
