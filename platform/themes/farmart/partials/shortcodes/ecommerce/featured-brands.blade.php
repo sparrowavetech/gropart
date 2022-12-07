@@ -5,7 +5,7 @@
         'arrows'         => true,
         'dots'           => false,
         'autoplay'       => $shortcode->is_autoplay == 'yes',
-        'infinite'       => $shortcode->is_autoplay == 'yes',
+        'infinite'       => $shortcode->is_infinite == 'yes',
         'autoplaySpeed'  => in_array($shortcode->autoplay_speed, theme_get_autoplay_speed_options()) ? $shortcode->autoplay_speed : 3000,
         'speed'          => 800,
         'slidesToShow'   => 4,
