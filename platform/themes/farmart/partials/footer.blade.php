@@ -360,7 +360,7 @@
                         console.log(maxCount,counter)
                         if(maxCount == counter){
                             $("#preloader").hide();
-                            window.reload();
+                            MartApp.loadAjaxCart();
                         }
                     },
                     error: function(data) {
