@@ -41,8 +41,7 @@ $slick = [
                         @php
                         $front_sale_price = 0;
                         $price_with_taxes = 0;
-                        $front_sale_price_with_taxes = 0;
-                        $front_sale_price_with_taxes = 0;
+                        $front_sale_price_with_taxes += $product->front_sale_price_with_taxes;
                         @endphp
                         <div class="featured-brand-item">
                             <div class="brand-item-body mx-2 py-4 px-2">
