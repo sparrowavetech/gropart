@@ -16,11 +16,11 @@ class CityRequest extends Request
     public function rules()
     {
         return [
-            'name'       => 'required',
-            'state_id'   => 'required',
+            'name' => 'required',
+            'state_id' => 'required',
             'country_id' => 'required',
-            'order'      => 'required|integer|min:0|max:127',
-            'status'     => Rule::in(BaseStatusEnum::values()),
+            'order' => 'required|integer|min:0|max:127',
+            'status' => Rule::in(BaseStatusEnum::values()),
         ];
     }
 }

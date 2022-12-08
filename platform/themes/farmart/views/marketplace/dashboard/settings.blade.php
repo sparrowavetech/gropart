@@ -8,7 +8,8 @@
                 <li class="nav-item">
                     <a href="#tab_information" class="nav-link active" data-bs-toggle="tab">{{ __('General Information') }}</a>
                 </li>
-                @include('plugins/marketplace::customers.bank-info-tab')
+                @include('plugins/marketplace::customers.tax-info-tab')
+                @include('plugins/marketplace::customers.payout-info-tab')
                 {!! apply_filters('marketplace_vendor_settings_register_content_tabs', null, $store) !!}
             </ul>
             <div class="tab-content">
@@ -58,21 +59,34 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-sm-6">
-                            <div class="form-group @if ($errors->has('country')) has-error @endif">
-                                <label for="country">{{ __('Country') }}</label>
-                                <select name="country" class="form-control" id="country">
-                                    @foreach(['' => __('Select country...')] + EcommerceHelper::getAvailableCountries() as $countryCode => $countryName)
-                                        <option value="{{ $countryCode }}" @if (old('country', $store->country) == $countryCode) selected @endif>{{ $countryName }}</option>
-                                    @endforeach
-                                </select>
+                        @if (EcommerceHelper::isUsingInMultipleCountries())
+                            <div class="col-sm-6">
+                                <div class="form-group @if ($errors->has('country')) has-error @endif">
+                                    <label for="country">{{ __('Country') }}</label>
+                                    <select name="country" class="form-control" id="country" data-type="country">
+                                        @foreach(EcommerceHelper::getAvailableCountries() as $countryCode => $countryName)
+                                            <option value="{{ $countryCode }}" @if (old('country', $store->country) == $countryCode) selected @endif>{{ $countryName }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                {!! Form::error('country', $errors) !!}
                             </div>
-                            {!! Form::error('country', $errors) !!}
-                        </div>
+                        @endif
                         <div class="col-sm-6">
                             <div class="form-group @if ($errors->has('state')) has-error @endif">
                                 <label for="state">{{ __('State') }}</label>
-                                <input id="state" type="text" class="form-control" name="state" value="{{ old('state', $store->state) }}">
+                                @if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation())
+                                    <select name="state" class="form-control" id="state" data-type="state" data-url="{{ route('ajax.states-by-country') }}">
+                                        <option value="">{{ __('Select state...') }}</option>
+                                        @if (old('country', $store->country) || !EcommerceHelper::isUsingInMultipleCountries())
+                                            @foreach(EcommerceHelper::getAvailableStatesByCountry(old('country', $store->country)) as $stateId => $stateName)
+                                                <option value="{{ $stateId }}" @if (old('state', $store->state) == $stateId) selected @endif>{{ $stateName }}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                @else
+                                    <input id="state" type="text" class="form-control" name="state" value="{{ old('state', $store->state) }}">
+                                @endif
                                 {!! Form::error('state', $errors) !!}
                             </div>
                         </div>
@@ -82,7 +96,18 @@
                         <div class="col-sm-6">
                             <div class="form-group @if ($errors->has('city')) has-error @endif">
                                 <label for="city">{{ __('City') }}</label>
-                                <input id="city" type="text" class="form-control" name="city" value="{{ old('city', $store->city) }}">
+                                @if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation())
+                                    <select name="city" class="form-control" id="city" data-type="city" data-url="{{ route('ajax.cities-by-state') }}">
+                                        <option value="">{{ __('Select city...') }}</option>
+                                        @if (old('state', $store->state))
+                                            @foreach(EcommerceHelper::getAvailableCitiesByState(old('state', $store->state)) as $cityId => $cityName)
+                                                <option value="{{ $cityId }}" @if (old('city', $store->city) == $cityId) selected @endif>{{ $cityName }}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                @else
+                                    <input id="city" type="text" class="form-control" name="city" value="{{ old('city', $store->city) }}">
+                                @endif
                                 {!! Form::error('city', $errors) !!}
                             </div>
                         </div>
@@ -105,6 +130,16 @@
                         </div>
                     </div>
 
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="logo">{{ __('Cover Image') }}</label>
+                                {!! Form::customImage('cover_image', old('cover_image', $store->getMetadata('cover_image', true))) !!}
+                                {!! Form::error('cover_image', $errors) !!}
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label for="description">{{ __('Description') }}</label>
                         <textarea id="description" class="form-control" name="description" rows="3">{{ old('description', $store->description) }}</textarea>
@@ -117,9 +152,11 @@
                         {!! Form::error('content', $errors) !!}
                     </div>
                 </div>
-                @include('plugins/marketplace::customers.bank-info-content', ['model' => $store->customer])
+                @include('plugins/marketplace::customers.tax-form', ['model' => $store->customer])
+                @include('plugins/marketplace::customers.payout-form', ['model' => $store->customer])
                 {!! apply_filters('marketplace_vendor_settings_register_content_tab_inside', null, $store) !!}
             </div>
+
 
             <div class="form-group text-center">
                 <div class="form-group submit">

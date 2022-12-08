@@ -94,7 +94,7 @@
                         </div>
                         @if ($product->categories->count())
                             <div class="meta-categories">
-                                <span class="meta-label d-inline-block">{{ __('Categories') }}:</span>
+                                <span class="meta-label d-inline-block">{{ __('Categories') }}: </span>
                                 @foreach($product->categories as $category)
                                     <a href="{{ $category->url }}">{{ $category->name }}</a>@if (!$loop->last), @endif
                                 @endforeach
@@ -102,14 +102,14 @@
                         @endif
                         @if ($product->tags->count())
                             <div class="meta-categories">
-                                <span class="meta-label d-inline-block">{{ __('Tags') }}:</span>
+                                <span class="meta-label d-inline-block">{{ __('Tags') }}: </span>
                                 @foreach($product->tags as $tag)
                                     <a href="{{ $tag->url }}">{{ $tag->name }}</a>@if (!$loop->last), @endif
                                 @endforeach
                             </div>
                         @endif
                         @if (theme_option('social_share_enabled', 'yes') == 'yes')
-                            <div class="my-5">
+                            <div class="my-4">
                                 {!! Theme::partial('share-socials', compact('product')) !!}
                             </div>
                         @endif
@@ -382,9 +382,8 @@
     </div>
 </div>
 
-@if($product->frequentlyBoughtTogether->count())
-    @include(Theme::getThemeNamespace() . '::views.ecommerce.includes.frequently-bought-together', ['products' => $product->frequentlyBoughtTogether,'product'=>$product])
-@endif
+
+@include(Theme::getThemeNamespace() . '::views.ecommerce.includes.frequently-bought-together', ['products' => $product->frequentlyBoughtTogether])
 <div class="widget-products-with-category py-5 bg-light">
     <div class="container-xxxl">
         <div class="row">
@@ -484,7 +483,7 @@
                                     @endif
                                 @endif
                             @endif
-                            
+
                         </div>
                     </div>
                 </article>

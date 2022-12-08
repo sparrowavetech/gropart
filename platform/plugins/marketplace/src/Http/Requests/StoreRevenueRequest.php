@@ -17,8 +17,8 @@ class StoreRevenueRequest extends Request
     public function rules()
     {
         $rules = [
-            'type'        => Rule::in(RevenueTypeEnum::values()),
-            'amount'      => 'required|numeric|min:0|not_in:0',
+            'type' => Rule::in(RevenueTypeEnum::values()),
+            'amount' => 'required|numeric|min:0|not_in:0',
             'description' => 'nullable|max:400',
         ];
 
@@ -29,6 +29,7 @@ class StoreRevenueRequest extends Request
                 $rules['amount'] = 'numeric|min:0|max:' . $customer->balance;
             }
         }
+
         return $rules;
     }
 }

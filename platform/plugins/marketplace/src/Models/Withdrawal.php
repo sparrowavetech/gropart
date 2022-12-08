@@ -43,8 +43,8 @@ class Withdrawal extends BaseModel
      * @var array
      */
     protected $casts = [
-        'status'    => WithdrawalStatusEnum::class,
-        'images'    => 'array',
+        'status' => WithdrawalStatusEnum::class,
+        'images' => 'array',
         'bank_info' => 'array',
     ];
 
@@ -66,6 +66,7 @@ class Withdrawal extends BaseModel
                 ])) {
                     $withdrawal->status = $statusOriginal;
                     $withdrawal->{$withdrawal->getTable() . '.status'} = $statusOriginal;
+
                     return $withdrawal;
                 }
 
@@ -80,25 +81,16 @@ class Withdrawal extends BaseModel
         });
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class)->withDefault();
     }
 
-    /**
-     * @return bool
-     */
     public function getVendorCanEditAttribute(): bool
     {
         return $this->status->getValue() === WithdrawalStatusEnum::PENDING;
     }
 
-    /**
-     * @return bool
-     */
     public function canEditStatus(): bool
     {
         return in_array($this->status->getValue(), [
@@ -107,30 +99,27 @@ class Withdrawal extends BaseModel
         ]);
     }
 
-    /**
-     * @return array
-     */
-    public function getNextStatuses()
+    public function getNextStatuses(): array
     {
         switch ($this->status->getValue()) {
             case WithdrawalStatusEnum::PENDING:
                 $labels = Arr::except(WithdrawalStatusEnum::labels(), WithdrawalStatusEnum::COMPLETED);
+
                 break;
             case WithdrawalStatusEnum::PROCESSING:
                 $labels = Arr::except(WithdrawalStatusEnum::labels(), WithdrawalStatusEnum::PENDING);
+
                 break;
             default:
                 $labels = [$this->status->getValue() => $this->status->label()];
+
                 break;
         }
 
         return $labels;
     }
 
-    /**
-     * @return string
-     */
-    public function getStatusHelper()
+    public function getStatusHelper(): ?string
     {
         $status = $this->status->getValue();
         $key = 'plugins/marketplace::withdrawal.forms.' . $status . '_status_helper';

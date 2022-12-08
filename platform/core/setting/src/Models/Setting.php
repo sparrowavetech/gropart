@@ -18,9 +18,4 @@ class Setting extends BaseModel
         'key',
         'value',
     ];
-
-    /**
-     * @var bool
-     */
-    public $timestamps = false;
 }

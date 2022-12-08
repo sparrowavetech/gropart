@@ -79,7 +79,6 @@ class OrderReturnTable extends TableAbstract
                 return BaseHelper::formatDate($item->created_at);
             });
 
-
         $data = $data
             ->addColumn('operations', function ($item) {
                 return $this->getOperations('order_returns.edit', 'order_returns.destroy', $item);
@@ -114,9 +113,9 @@ class OrderReturnTable extends TableAbstract
                 'reason',
                 'order_status',
                 'return_status',
-                'created_at'
+                'created_at',
             ])
-            ->with(['customer', 'order','items'])
+            ->with(['customer', 'order', 'items'])
             ->withCount('items')
             ->orderBy('id', 'desc');
 
@@ -129,7 +128,7 @@ class OrderReturnTable extends TableAbstract
     public function columns()
     {
         return [
-            'id'      => [
+            'id' => [
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
                 'class' => 'text-start',
@@ -142,15 +141,15 @@ class OrderReturnTable extends TableAbstract
                 'title' => trans('plugins/ecommerce::order.customer_label'),
                 'class' => 'text-start',
             ],
-            'items_count'  => [
+            'items_count' => [
                 'title' => trans('plugins/ecommerce::order.order_return_items_count'),
                 'class' => 'text-center',
             ],
-            'return_status'          => [
+            'return_status' => [
                 'title' => trans('core/base::tables.status'),
                 'class' => 'text-center',
             ],
-            'created_at'      => [
+            'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
                 'width' => '100px',
                 'class' => 'text-start',
@@ -164,15 +163,15 @@ class OrderReturnTable extends TableAbstract
     public function getBulkChanges(): array
     {
         return [
-            'return_status'     => [
-                'title'    => trans('core/base::tables.status'),
-                'type'     => 'select',
-                'choices'  => OrderReturnStatusEnum::labels(),
+            'return_status' => [
+                'title' => trans('core/base::tables.status'),
+                'type' => 'select',
+                'choices' => OrderReturnStatusEnum::labels(),
                 'validate' => 'required|in:' . implode(',', OrderReturnStatusEnum::values()),
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type'  => 'date',
+                'type' => 'date',
             ],
         ];
     }

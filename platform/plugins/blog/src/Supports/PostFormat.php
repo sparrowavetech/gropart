@@ -9,7 +9,7 @@ class PostFormat
      */
     protected static $formats = [
         '' => [
-            'key'  => '',
+            'key' => '',
             'icon' => null,
             'name' => 'Default',
         ],
@@ -42,6 +42,7 @@ class PostFormat
                     $item['name'],
                 ];
             }
+
             return $results;
         }
 

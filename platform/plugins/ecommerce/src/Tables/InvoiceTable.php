@@ -13,7 +13,6 @@ use Html;
 
 class InvoiceTable extends TableAbstract
 {
-
     /**
      * @var bool
      */
@@ -62,6 +61,7 @@ class InvoiceTable extends TableAbstract
                 if (!Auth::user()->hasPermission('ecommerce.invoice.edit')) {
                     return $item->code;
                 }
+
                 return Html::link(route('ecommerce.invoice.edit', $item->id), $item->code);
             })
             ->editColumn('created_at', function ($item) {
@@ -112,11 +112,11 @@ class InvoiceTable extends TableAbstract
             ],
             'code' => [
                 'title' => trans('plugins/ecommerce::invoice.table.code'),
-                'class' => 'text-start'
+                'class' => 'text-start',
             ],
             'amount' => [
                 'title' => trans('plugins/ecommerce::invoice.table.amount'),
-                'class' => 'text-start'
+                'class' => 'text-start',
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),

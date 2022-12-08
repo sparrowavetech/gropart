@@ -122,12 +122,14 @@ trait ImportTrait
         switch ($type) {
             case 'array':
                 $value = $value ? explode(',', $value) : [];
+
                 break;
             case 'bool':
                 if (Str::lower($value) == 'false' || $value == '0' || Str::lower($value) == 'no') {
                     $value = false;
                 }
                 $value = (bool) $value;
+
                 break;
             case 'datetime':
                 if ($value) {
@@ -137,9 +139,11 @@ trait ImportTrait
                         $value = $this->getDate($value);
                     }
                 }
+
                 break;
             case 'integer':
                 $value = (int) $value;
+
                 break;
         }
 

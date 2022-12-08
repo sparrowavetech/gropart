@@ -79,6 +79,7 @@ trait ImportTrait
     {
         try {
             $date = DateTime::createFromFormat('!' . $format, $value);
+
             return $date ? $date->format(config('core.base.general.date_format.date_time')) : $value;
         } catch (Exception $exception) {
             return $default;

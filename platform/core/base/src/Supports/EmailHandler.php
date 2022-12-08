@@ -99,13 +99,13 @@ class EmailHandler
     public function getCoreVariables(): array
     {
         return [
-            'header'           => trans('core/base::base.email_template.header'),
-            'footer'           => trans('core/base::base.email_template.footer'),
-            'site_title'       => trans('core/base::base.email_template.site_title'),
-            'site_url'         => trans('core/base::base.email_template.site_url'),
-            'site_logo'        => trans('core/base::base.email_template.site_logo'),
-            'date_time'        => trans('core/base::base.email_template.date_time'),
-            'date_year'        => trans('core/base::base.email_template.date_year'),
+            'header' => trans('core/base::base.email_template.header'),
+            'footer' => trans('core/base::base.email_template.footer'),
+            'site_title' => trans('core/base::base.email_template.site_title'),
+            'site_url' => trans('core/base::base.email_template.site_url'),
+            'site_logo' => trans('core/base::base.email_template.site_logo'),
+            'date_time' => trans('core/base::base.email_template.date_time'),
+            'date_year' => trans('core/base::base.email_template.date_year'),
             'site_admin_email' => trans('core/base::base.email_template.site_admin_email'),
         ];
     }
@@ -316,19 +316,19 @@ class EmailHandler
     public function initVariableValues()
     {
         $this->variableValues['core'] = [
-            'header'           => apply_filters(
+            'header' => apply_filters(
                 BASE_FILTER_EMAIL_TEMPLATE_HEADER,
                 get_setting_email_template_content('core', 'base', 'header')
             ),
-            'footer'           => apply_filters(
+            'footer' => apply_filters(
                 BASE_FILTER_EMAIL_TEMPLATE_FOOTER,
                 get_setting_email_template_content('core', 'base', 'footer')
             ),
-            'site_title'       => setting('admin_title') ?: config('app.name'),
-            'site_url'         => url(''),
-            'site_logo'        => setting('admin_logo') ? RvMedia::getImageUrl(setting('admin_logo')) : url(config('core.base.general.logo')),
-            'date_time'        => Carbon::now()->toDateTimeString(),
-            'date_year'        => Carbon::now()->format('Y'),
+            'site_title' => setting('admin_title') ?: config('app.name'),
+            'site_url' => url(''),
+            'site_logo' => setting('admin_logo') ? RvMedia::getImageUrl(setting('admin_logo')) : url(config('core.base.general.logo')),
+            'date_time' => Carbon::now()->toDateTimeString(),
+            'date_year' => Carbon::now()->format('Y'),
             'site_admin_email' => get_admin_email()->first(),
         ];
     }

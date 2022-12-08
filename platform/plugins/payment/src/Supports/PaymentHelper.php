@@ -55,15 +55,15 @@ class PaymentHelper
         $paymentChannel = Arr::get($data, 'payment_channel', PaymentMethodEnum::COD);
 
         return app(PaymentInterface::class)->create([
-            'account_id'      => Arr::get($data, 'account_id'),
-            'amount'          => $data['amount'],
-            'currency'        => $data['currency'],
-            'charge_id'       => $data['charge_id'],
-            'order_id'        => (int)Arr::first($orderIds),
-            'customer_id'     => Arr::get($data, 'customer_id'),
-            'customer_type'   => Arr::get($data, 'customer_type'),
+            'account_id' => Arr::get($data, 'account_id'),
+            'amount' => $data['amount'],
+            'currency' => $data['currency'],
+            'charge_id' => $data['charge_id'],
+            'order_id' => (int)Arr::first($orderIds),
+            'customer_id' => Arr::get($data, 'customer_id'),
+            'customer_type' => Arr::get($data, 'customer_type'),
             'payment_channel' => $paymentChannel,
-            'status'          => Arr::get($data, 'status', PaymentStatusEnum::PENDING),
+            'status' => Arr::get($data, 'status', PaymentStatusEnum::PENDING),
         ]);
     }
 
@@ -79,11 +79,11 @@ class PaymentHelper
     public static function formatLog(array $input, string $line = '', string $function = '', string $class = ''): array
     {
         return array_merge($input, [
-            'user_id'   => Auth::check() ? Auth::id() : 0,
-            'ip'        => Request::ip(),
-            'line'      => $line,
-            'function'  => $function,
-            'class'     => $class,
+            'user_id' => Auth::check() ? Auth::id() : 0,
+            'ip' => Request::ip(),
+            'line' => $line,
+            'function' => $function,
+            'class' => $class,
             'userAgent' => Request::header('User-Agent'),
         ]);
     }

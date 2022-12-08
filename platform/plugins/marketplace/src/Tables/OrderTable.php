@@ -80,18 +80,15 @@ class OrderTable extends TableAbstract
         $data = $data
             ->addColumn('operations', function ($item) {
                 return view(MarketplaceHelper::viewPath('dashboard.table.actions'), [
-                    'edit'   => 'marketplace.vendor.orders.edit',
+                    'edit' => 'marketplace.vendor.orders.edit',
                     'delete' => 'marketplace.vendor.orders.destroy',
-                    'item'   => $item,
+                    'item' => $item,
                 ])->render();
             });
 
         return $this->toJson($data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function query()
     {
         $query = $this->repository->getModel()
@@ -115,10 +112,10 @@ class OrderTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function columns()
+    public function columns(): array
     {
         $columns = [
-            'id'      => [
+            'id' => [
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
                 'class' => 'text-start',
@@ -127,7 +124,7 @@ class OrderTable extends TableAbstract
                 'title' => trans('plugins/ecommerce::order.customer_label'),
                 'class' => 'text-start',
             ],
-            'amount'  => [
+            'amount' => [
                 'title' => trans('plugins/ecommerce::order.amount'),
                 'class' => 'text-center',
             ],
@@ -145,21 +142,21 @@ class OrderTable extends TableAbstract
                 'title' => trans('plugins/ecommerce::order.shipping_amount'),
                 'class' => 'text-center',
             ],
-            'payment_method'  => [
-                'name'  => 'payment_id',
+            'payment_method' => [
+                'name' => 'payment_id',
                 'title' => trans('plugins/ecommerce::order.payment_method'),
                 'class' => 'text-center',
             ],
-            'payment_status'  => [
-                'name'  => 'payment_id',
+            'payment_status' => [
+                'name' => 'payment_id',
                 'title' => trans('plugins/ecommerce::order.payment_status_label'),
                 'class' => 'text-center',
             ],
-            'status'          => [
+            'status' => [
                 'title' => trans('core/base::tables.status'),
                 'class' => 'text-center',
             ],
-            'created_at'      => [
+            'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
                 'width' => '100px',
                 'class' => 'text-start',

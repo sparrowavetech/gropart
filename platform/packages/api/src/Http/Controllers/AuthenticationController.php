@@ -56,7 +56,7 @@ class AuthenticationController extends Controller
      */
     public function register(RegisterRequest $request, BaseHttpResponse $response)
     {
-        $request->merge(['password' => bcrypt($request->input('password'))]);
+        $request->merge(['password' => Hash::make($request->input('password'))]);
 
         $request->merge(['name' => $request->input('first_name') . ' ' . $request->input('last_name')]);
 
@@ -109,7 +109,7 @@ class AuthenticationController extends Controller
     public function login(LoginRequest $request, BaseHttpResponse $response)
     {
         if (Auth::guard(ApiHelper::guard())->attempt([
-            'email'    => $request->input('email'),
+            'email' => $request->input('email'),
             'password' => $request->input('password'),
         ])) {
             $token = $request->user(ApiHelper::guard())->createToken($request->input('token_name', 'Personal Access Token'));

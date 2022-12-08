@@ -56,7 +56,7 @@
         </div>
     </div>
 
-    <input type="hidden" id="lang_meta_created_from" name="ref_from" value="{{ Request::input('ref_from') }}">
+    <input type="hidden" id="lang_meta_created_from" name="ref_from" value="{{ BaseHelper::stringify(request()->input('ref_from')) }}">
     <input type="hidden" id="reference_id" value="{{ $args[0] && $args[0]->id ? $args[0]->id : 0 }}">
     <input type="hidden" id="reference_type" value="{{ $args[1] }}">
     <input type="hidden" id="route_create" value="{{ Route::has($route['create']) ? route($route['create']) : '#' }}">

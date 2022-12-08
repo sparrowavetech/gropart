@@ -14,16 +14,16 @@ class ValidateLocationImport extends LocationImport
         $country = collect($this->request->input());
 
         $collect = collect([
-            'name'        => $country['name'],
-            'country'     => $country['country_temp'],
+            'name' => $country['name'],
+            'country' => $country['country_temp'],
             'import_type' => 'country',
-            'model'       => $country,
+            'model' => $country,
         ]);
 
         $this->onSuccess($collect);
 
         $this->countries->push([
-            'keyword'    => $country['name'],
+            'keyword' => $country['name'],
             'country_id' => 1,
         ]);
 
@@ -38,10 +38,10 @@ class ValidateLocationImport extends LocationImport
         $state = collect($this->request->input());
 
         $collect = collect([
-            'name'        => $state['name'],
-            'country'     => $state['country_temp'],
+            'name' => $state['name'],
+            'country' => $state['country_temp'],
             'import_type' => 'state',
-            'model'       => $state,
+            'model' => $state,
         ]);
 
         $this->onSuccess($collect);
@@ -67,7 +67,7 @@ class ValidateLocationImport extends LocationImport
 
         if ($row['import_type'] == 'country') {
             $this->countries->push([
-                'keyword'    => $row['name'],
+                'keyword' => $row['name'],
                 'country_id' => 1,
             ]);
         }

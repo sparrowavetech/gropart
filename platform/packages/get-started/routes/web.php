@@ -4,8 +4,8 @@ Route::group(['namespace' => 'Botble\GetStarted\Http\Controllers', 'middleware' 
     Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {
         Route::group(['prefix' => 'get-started'], function () {
             Route::post('save', [
-                'as'         => 'get-started.save',
-                'uses'       => 'GetStartedController@save',
+                'as' => 'get-started.save',
+                'uses' => 'GetStartedController@save',
                 'permission' => false,
                 'middleware' => 'preventDemo',
             ]);

@@ -1,12 +1,12 @@
 <div class="form-group option-field product-option-{{ Str::slug($option['name']) }} product-option-{{ $option['id'] }}"
      style="margin-bottom: 10px">
-    <div class="row">
-        <div class="col-4">
-            <label class="{{ ($option['required']) ? 'required' : ''}}">
+    <div class="product-option-item-wrapper">
+        <div class="product-option-item-label">
+            <label class="{{ ($option['required']) ? 'required' : '' }}">
                 {{ $option['name'] }}
             </label>
         </div>
-        <div class="col-8">
+        <div class="product-option-item-values">
             <div class="form-radio">
                 @php
                     $price = 0;

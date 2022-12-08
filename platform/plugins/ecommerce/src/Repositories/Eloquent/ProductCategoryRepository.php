@@ -14,11 +14,11 @@ class ProductCategoryRepository extends RepositoriesAbstract implements ProductC
     public function getCategories(array $param)
     {
         $param = array_merge([
-            'active'      => true,
-            'order_by'    => 'desc',
-            'is_child'    => null,
+            'active' => true,
+            'order_by' => 'desc',
+            'is_child' => null,
             'is_featured' => null,
-            'num'         => null,
+            'num' => null,
         ], $param);
 
         $data = $this->model;
@@ -67,7 +67,7 @@ class ProductCategoryRepository extends RepositoriesAbstract implements ProductC
     {
         $data = $this->model
             ->where([
-                'status'      => BaseStatusEnum::PUBLISHED,
+                'status' => BaseStatusEnum::PUBLISHED,
                 'is_featured' => 1,
             ])
             ->select([

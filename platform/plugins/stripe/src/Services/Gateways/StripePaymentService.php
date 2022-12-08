@@ -38,12 +38,12 @@ class StripePaymentService extends StripePaymentAbstract
                     trans('plugins/payment::payment.could_not_get_stripe_token'),
                     PaymentHelper::formatLog(
                         [
-                            'error'         => 'missing Stripe token',
+                            'error' => 'missing Stripe token',
                             'last_4_digits' => $request->input('last4Digits'),
-                            'name'          => $request->input('name'),
-                            'client_IP'     => $request->input('clientIP'),
-                            'time_created'  => $request->input('timeCreated'),
-                            'live_mode'     => $request->input('liveMode'),
+                            'name' => $request->input('name'),
+                            'client_IP' => $request->input('clientIP'),
+                            'time_created' => $request->input('timeCreated'),
+                            'live_mode' => $request->input('liveMode'),
                         ],
                         __LINE__,
                         __FUNCTION__,
@@ -55,14 +55,14 @@ class StripePaymentService extends StripePaymentAbstract
             }
 
             $charge = Charge::create([
-                'amount'      => $this->convertAmount($this->amount),
-                'currency'    => $this->currency,
-                'source'      => $this->token,
+                'amount' => $this->convertAmount($this->amount),
+                'currency' => $this->currency,
+                'source' => $this->token,
                 'description' => trans('plugins/payment::payment.payment_description', [
                     'order_id' => Arr::first($data['order_id']),
                     'site_url' => $request->getHost(),
                 ]),
-                'metadata'    => ['order_id' => json_encode($data['order_id'])],
+                'metadata' => ['order_id' => json_encode($data['order_id'])],
             ]);
 
             $this->chargeId = $charge['id'];
@@ -81,32 +81,32 @@ class StripePaymentService extends StripePaymentAbstract
             $lineItems[] = [
                 'price_data' => [
                     'product_data' => [
-                        'name'        => $product['name'],
-                        'metadata'    => [
+                        'name' => $product['name'],
+                        'metadata' => [
                             'pro_id' => $product['id'],
                         ],
                         'description' => $product['name'],
                     ],
-                    'unit_amount'  => $this->convertAmount($product['price_per_order'] * get_current_exchange_rate()),
-                    'currency'     => $this->currency,
+                    'unit_amount' => $this->convertAmount($product['price_per_order'] * get_current_exchange_rate()),
+                    'currency' => $this->currency,
                 ],
-                'quantity'   => $product['qty'],
+                'quantity' => $product['qty'],
             ];
         }
 
         $requestData = [
-            'line_items'  => $lineItems,
-            'mode'        => 'payment',
+            'line_items' => $lineItems,
+            'mode' => 'payment',
             'success_url' => route('payments.stripe.success') . '?session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url'  => route('payments.stripe.error'),
-            'metadata'    => [
-                'order_id'      => json_encode($data['order_id']),
-                'amount'        => $this->amount,
-                'currency'      => $this->currency,
-                'customer_id'   => Arr::get($data, 'customer_id'),
+            'cancel_url' => route('payments.stripe.error'),
+            'metadata' => [
+                'order_id' => json_encode($data['order_id']),
+                'amount' => $this->amount,
+                'currency' => $this->currency,
+                'customer_id' => Arr::get($data, 'customer_id'),
                 'customer_type' => Arr::get($data, 'customer_type'),
-                'return_url'    => Arr::get($data, 'return_url'),
-                'callback_url'  => Arr::get($data, 'callback_url'),
+                'return_url' => Arr::get($data, 'return_url'),
+                'callback_url' => Arr::get($data, 'callback_url'),
             ],
         ];
 
@@ -114,9 +114,9 @@ class StripePaymentService extends StripePaymentAbstract
             $requestData['shipping_options'] = [
                 [
                     'shipping_rate_data' => [
-                        'type'         => 'fixed_amount',
+                        'type' => 'fixed_amount',
                         'fixed_amount' => [
-                            'amount'   => $this->convertAmount($data['shipping_amount'] * get_current_exchange_rate()),
+                            'amount' => $this->convertAmount($data['shipping_amount'] * get_current_exchange_rate()),
                             'currency' => $this->currency,
                         ],
                         'display_name' => $data['shipping_method'],
@@ -170,14 +170,14 @@ class StripePaymentService extends StripePaymentAbstract
         $orderIds = (array)$data['order_id'];
 
         do_action(PAYMENT_ACTION_PAYMENT_PROCESSED, [
-            'amount'          => $data['amount'],
-            'currency'        => $data['currency'],
-            'charge_id'       => $chargeId,
-            'order_id'        => $orderIds,
-            'customer_id'     => Arr::get($data, 'customer_id'),
-            'customer_type'   => Arr::get($data, 'customer_type'),
+            'amount' => $data['amount'],
+            'currency' => $data['currency'],
+            'charge_id' => $chargeId,
+            'order_id' => $orderIds,
+            'customer_id' => Arr::get($data, 'customer_id'),
+            'customer_type' => Arr::get($data, 'customer_type'),
             'payment_channel' => STRIPE_PAYMENT_METHOD_NAME,
-            'status'          => $paymentStatus,
+            'status' => $paymentStatus,
         ]);
 
         return $chargeId;

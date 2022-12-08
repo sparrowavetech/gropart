@@ -101,7 +101,7 @@ class PostController extends BaseController
          * @var Post $post
          */
         $post = $this->postRepository->createOrUpdate(array_merge($request->input(), [
-            'author_id'   => Auth::id(),
+            'author_id' => Auth::id(),
             'author_type' => User::class,
         ]));
 
@@ -211,10 +211,10 @@ class PostController extends BaseController
         $limit = $limit > 0 ? $limit : 10;
 
         $posts = $this->postRepository->advancedGet([
-            'with'     => ['slugable'],
+            'with' => ['slugable'],
             'order_by' => ['created_at' => 'desc'],
             'paginate' => [
-                'per_page'      => $limit,
+                'per_page' => $limit,
                 'current_paged' => (int)$request->input('page', 1),
             ],
         ]);

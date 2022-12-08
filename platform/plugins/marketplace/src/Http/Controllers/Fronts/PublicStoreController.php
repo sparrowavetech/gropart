@@ -12,6 +12,9 @@ use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
 use Botble\SeoHelper\SeoOpenGraph;
 use Botble\Slug\Repositories\Interfaces\SlugInterface;
 use EcommerceHelper;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -48,7 +51,7 @@ class PublicStoreController
 
     /**
      * @param Request $request
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|Response|Theme|void
+     * @return Application|Factory|View|Response|Theme|void
      */
     public function getStores(Request $request)
     {
@@ -69,19 +72,19 @@ class PublicStoreController
             $with['reviews'] = function ($query) {
                 $query->where([
                     'ec_products.status' => BaseStatusEnum::PUBLISHED,
-                    'ec_reviews.status'  => BaseStatusEnum::PUBLISHED,
+                    'ec_reviews.status' => BaseStatusEnum::PUBLISHED,
                 ]);
             };
         }
 
         $stores = $this->storeRepository->advancedGet([
             'condition' => $condition,
-            'order_by'  => ['created_at' => 'desc'],
-            'paginate'  => [
-                'per_page'      => 12,
+            'order_by' => ['created_at' => 'desc'],
+            'paginate' => [
+                'per_page' => 12,
                 'current_paged' => (int)$request->input('page'),
             ],
-            'with'      => $with,
+            'with' => $with,
             'withCount' => [
                 'products' => function ($query) {
                     $query->where(['status' => BaseStatusEnum::PUBLISHED]);
@@ -96,8 +99,8 @@ class PublicStoreController
      * @param string $slug
      * @param Request $request
      * @param GetProductService $productService
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|RedirectResponse|Response
-     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
+     * @param BaseHttpResponse $response
+     * @return BaseHttpResponse|Application|Factory|View|RedirectResponse|Response
      */
     public function getStore(
         $slug,
@@ -106,9 +109,9 @@ class PublicStoreController
         BaseHttpResponse $response
     ) {
         $slug = $this->slugRepository->getFirstBy([
-            'key'            => $slug,
+            'key' => $slug,
             'reference_type' => Store::class,
-            'prefix'         => SlugHelper::getPrefix(Store::class),
+            'prefix' => SlugHelper::getPrefix(Store::class),
         ]);
 
         if (!$slug) {
@@ -116,7 +119,7 @@ class PublicStoreController
         }
 
         $condition = [
-            'mp_stores.id'     => $slug->reference_id,
+            'mp_stores.id' => $slug->reference_id,
             'mp_stores.status' => BaseStatusEnum::PUBLISHED,
         ];
 
@@ -160,9 +163,7 @@ class PublicStoreController
             'store.slugable',
         ];
 
-        $withCount = EcommerceHelper::withReviewsCount();
-
-        $products = $productService->getProduct($request, null, null, $with, $withCount, ['store_id' => $store->id]);
+        $products = $productService->getProduct($request, null, null, $with, [], ['store_id' => $store->id]);
 
         if ($request->ajax()) {
             $total = $products->total();

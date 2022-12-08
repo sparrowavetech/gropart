@@ -25,12 +25,12 @@ class SocialLoginServiceProvider extends ServiceProvider
 
         Event::listen(RouteMatched::class, function () {
             dashboard_menu()->registerItem([
-                'id'          => 'cms-plugins-social-login',
-                'priority'    => 5,
-                'parent_id'   => 'cms-core-settings',
-                'name'        => 'plugins/social-login::social-login.menu',
-                'icon'        => null,
-                'url'         => route('social-login.settings'),
+                'id' => 'cms-plugins-social-login',
+                'priority' => 5,
+                'parent_id' => 'cms-core-settings',
+                'name' => 'plugins/social-login::social-login.menu',
+                'icon' => null,
+                'url' => route('social-login.settings'),
                 'permissions' => ['social-login.settings'],
             ]);
         });

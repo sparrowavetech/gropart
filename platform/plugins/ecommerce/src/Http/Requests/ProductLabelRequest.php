@@ -16,7 +16,7 @@ class ProductLabelRequest extends Request
     public function rules()
     {
         return [
-            'name'   => 'required',
+            'name' => 'required',
             'status' => Rule::in(BaseStatusEnum::values()),
         ];
     }

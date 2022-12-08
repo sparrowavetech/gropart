@@ -27,9 +27,9 @@ class CaptchaServiceProvider extends ServiceProvider
     public function register()
     {
         config([
-            'plugins.captcha.general.secret'     => setting('captcha_secret'),
-            'plugins.captcha.general.site_key'   => setting('captcha_site_key'),
-            'plugins.captcha.general.type'       => setting('captcha_type'),
+            'plugins.captcha.general.secret' => setting('captcha_secret'),
+            'plugins.captcha.general.site_key' => setting('captcha_site_key'),
+            'plugins.captcha.general.type' => setting('captcha_type'),
         ]);
 
         $this->app->singleton('captcha', function ($app) {

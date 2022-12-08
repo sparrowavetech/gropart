@@ -129,7 +129,7 @@ class Post extends BaseModel
      * @param string|null $ownerKey
      * @return MorphTo
      */
-    public function morphTo($name = null, $type = null, $id = null, $ownerKey = null)
+    public function morphTo($name = null, $type = null, $id = null, $ownerKey = null): MorphTo
     {
         // If no name is provided, we will use the backtrace to get the function name
         // since that is most likely the name of the polymorphic interface. We can

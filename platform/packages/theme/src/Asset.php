@@ -26,10 +26,9 @@ class Asset
      * @var array
      */
     protected $stacks = [
-        'cooks'  => [],
+        'cooks' => [],
         'serves' => [],
     ];
-
 
     /**
      * Add a path to theme.

@@ -64,12 +64,12 @@ class Sitemap
      * @param ViewFactory $view
      */
     public function __construct(
-        array            $config,
-        CacheRepository  $cache,
+        array $config,
+        CacheRepository $cache,
         ConfigRepository $configRepository,
-        Filesystem       $file,
-        ResponseFactory  $response,
-        ViewFactory      $view
+        Filesystem $file,
+        ResponseFactory $response,
+        ViewFactory $view
     ) {
         $this->cache = $cache;
         $this->configRepository = $configRepository;
@@ -129,16 +129,16 @@ class Sitemap
         array $alternates = []
     ) {
         $params = [
-            'loc'          => $loc,
-            'lastmod'      => $lastmod,
-            'priority'     => $priority,
-            'freq'         => $freq,
-            'images'       => $images,
-            'title'        => $title,
+            'loc' => $loc,
+            'lastmod' => $lastmod,
+            'priority' => $priority,
+            'freq' => $freq,
+            'images' => $images,
+            'title' => $title,
             'translations' => $translations,
-            'videos'       => $videos,
-            'googlenews'   => $googlenews,
-            'alternates'   => $alternates,
+            'videos' => $videos,
+            'googlenews' => $googlenews,
+            'alternates' => $alternates,
         ];
 
         $this->addItem($params);
@@ -253,16 +253,16 @@ class Sitemap
         $googlenews['publication_date'] = isset($googlenews['publication_date']) ? $googlenews['publication_date'] : date('Y-m-d H:i:s');
 
         $this->model->setItems([
-            'loc'          => $loc,
-            'lastmod'      => $lastmod,
-            'priority'     => $priority,
-            'freq'         => $freq,
-            'images'       => $images,
-            'title'        => $title,
+            'loc' => $loc,
+            'lastmod' => $lastmod,
+            'priority' => $priority,
+            'freq' => $freq,
+            'images' => $images,
+            'title' => $title,
             'translations' => $translations,
-            'videos'       => $videos,
-            'googlenews'   => $googlenews,
-            'alternates'   => $alternates,
+            'videos' => $videos,
+            'googlenews' => $googlenews,
+            'alternates' => $alternates,
         ]);
     }
 
@@ -332,7 +332,7 @@ class Sitemap
 
         $channel = [
             'title' => $this->model->getTitle(),
-            'link'  => $this->model->getLink(),
+            'link' => $this->model->getLink(),
         ];
 
         // check if styles are enabled
@@ -489,7 +489,7 @@ class Sitemap
     public function addSitemap(string $loc, ?string $lastmod = null)
     {
         $this->model->setSitemaps([
-            'loc'     => $loc,
+            'loc' => $loc,
             'lastmod' => $lastmod,
         ]);
     }

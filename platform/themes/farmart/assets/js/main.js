@@ -1973,9 +1973,15 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl';
 
             const $this = $(e.currentTarget);
 
-            let target = '.js-product-content .cart-form button[name=' + $this.prop('name') + '].add-to-cart-button';
+            $this.addClass('button-loading');
 
-            $(document).find(target).trigger('click');
+            setTimeout(function () {
+                let target = '.js-product-content .cart-form button[name=' + $this.prop('name') + '].add-to-cart-button';
+
+                $(document).find(target).trigger('click');
+
+                $this.removeClass('button-loading');
+            }, 200);
         });
     });
 })(jQuery);

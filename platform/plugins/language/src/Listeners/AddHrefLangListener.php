@@ -30,7 +30,7 @@ class AddHrefLangListener
                             foreach (Language::getSupportedLocales() as $localeCode => $properties) {
                                 if ($localeCode != Language::getCurrentLocale()) {
                                     $urls[] = [
-                                        'url'       => Language::getLocalizedURL($localeCode, url()->current(), [], false),
+                                        'url' => Language::getLocalizedURL($localeCode, url()->current(), [], false),
                                         'lang_code' => $localeCode,
                                     ];
                                 }
@@ -44,7 +44,7 @@ class AddHrefLangListener
                                 ->join('language_meta as meta', 'meta.lang_meta_origin', 'language_meta.lang_meta_origin')
                                 ->where([
                                     'meta.reference_type' => $event->slug->reference_type,
-                                    'meta.reference_id'   => $event->slug->reference_id,
+                                    'meta.reference_id' => $event->slug->reference_id,
                                 ])
                                 ->pluck('language_meta.lang_meta_code', 'language_meta.reference_id')->all();
 
@@ -62,7 +62,7 @@ class AddHrefLangListener
                                     }
 
                                     $urls[] = [
-                                        'url'       => url($locale . ($item->prefix ? '/' . $item->prefix : '') . '/' . $item->key),
+                                        'url' => url($locale . ($item->prefix ? '/' . $item->prefix : '') . '/' . $item->key),
                                         'lang_code' => $languageMeta[$item->reference_id],
                                     ];
                                 }

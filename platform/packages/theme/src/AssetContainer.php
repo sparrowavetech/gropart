@@ -191,6 +191,7 @@ class AssetContainer
                 foreach ($type as $assetKey => $asset) {
                     if ($assetKey == $item) {
                         Arr::forget($this->assets, $typeKey . '.' . $assetKey);
+
                         break;
                     }
                 }
@@ -245,9 +246,9 @@ class AssetContainer
     {
         $types = [
             'script' => 'script',
-            'style'  => 'style',
-            'js'     => 'script',
-            'css'    => 'style',
+            'style' => 'style',
+            'js' => 'script',
+            'css' => 'style',
         ];
 
         if (array_key_exists($type, $types)) {

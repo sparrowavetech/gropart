@@ -70,11 +70,11 @@ trait ProductActionsTrait
      * @param ProductAttributeInterface $productAttributeRepository
      */
     public function __construct(
-        ProductInterface           $productRepository,
-        ProductCategoryInterface   $productCategoryRepository,
+        ProductInterface $productRepository,
+        ProductCategoryInterface $productCategoryRepository,
         ProductCollectionInterface $productCollectionRepository,
-        BrandInterface             $brandRepository,
-        ProductAttributeInterface  $productAttributeRepository
+        BrandInterface $brandRepository,
+        ProductAttributeInterface $productAttributeRepository
     ) {
         $this->productRepository = $productRepository;
         $this->productCategoryRepository = $productCategoryRepository;
@@ -275,6 +275,7 @@ trait ProductActionsTrait
         try {
             $this->productRepository->deleteBy(['id' => $id]);
             event(new DeletedContentEvent(PRODUCT_MODULE_SCREEN_NAME, $request, $product));
+
             return $response->setMessage(trans('core/base::notices.delete_success_message'));
         } catch (Exception $exception) {
             return $response
@@ -316,10 +317,10 @@ trait ProductActionsTrait
      * @throws Exception
      */
     public function deleteVersion(
-        ProductVariationInterface     $productVariation,
+        ProductVariationInterface $productVariation,
         ProductVariationItemInterface $productVariationItem,
         $variationId,
-        BaseHttpResponse              $response
+        BaseHttpResponse $response
     ) {
         $result = $this->deleteVersionItem($productVariation, $productVariationItem, $variationId);
 
@@ -341,10 +342,10 @@ trait ProductActionsTrait
      * @throws Exception
      */
     public function deleteVersions(
-        Request                       $request,
-        ProductVariationInterface     $productVariation,
+        Request $request,
+        ProductVariationInterface $productVariation,
         ProductVariationItemInterface $productVariationItem,
-        BaseHttpResponse              $response
+        BaseHttpResponse $response
     ) {
         $ids = (array)$request->input('ids');
 
@@ -369,7 +370,7 @@ trait ProductActionsTrait
      * @throws Exception
      */
     protected function deleteVersionItem(
-        ProductVariationInterface     $productVariation,
+        ProductVariationInterface $productVariation,
         ProductVariationItemInterface $productVariationItem,
         $variationId
     ) {
@@ -425,10 +426,10 @@ trait ProductActionsTrait
      * @return BaseHttpResponse
      */
     public function postAddVersion(
-        ProductVersionRequest     $request,
+        ProductVersionRequest $request,
         ProductVariationInterface $productVariation,
         $id,
-        BaseHttpResponse          $response
+        BaseHttpResponse $response
     ) {
         $addedAttributes = $request->input('attribute_sets', []);
 
@@ -493,7 +494,6 @@ trait ProductActionsTrait
             $productAttributeSets = $productAttributeSetRepository->getAllWithSelected($productId);
         }
 
-
         return $response
             ->setData(
                 view('plugins/ecommerce::products.partials.product-variation-form', compact(
@@ -514,10 +514,10 @@ trait ProductActionsTrait
      * @throws Exception
      */
     public function postUpdateVersion(
-        ProductVersionRequest     $request,
+        ProductVersionRequest $request,
         ProductVariationInterface $productVariation,
         $id,
-        BaseHttpResponse          $response
+        BaseHttpResponse $response
     ) {
         $variation = $productVariation->findOrFail($id);
 
@@ -567,9 +567,9 @@ trait ProductActionsTrait
      */
     public function postGenerateAllVersions(
         CreateProductVariationsService $service,
-        ProductVariationInterface      $productVariation,
+        ProductVariationInterface $productVariation,
         $id,
-        BaseHttpResponse               $response
+        BaseHttpResponse $response
     ) {
         $product = $this->productRepository->findOrFail($id);
 
@@ -603,10 +603,10 @@ trait ProductActionsTrait
      * @throws Exception
      */
     public function postStoreRelatedAttributes(
-        Request                         $request,
+        Request $request,
         StoreAttributesOfProductService $service,
         $id,
-        BaseHttpResponse                $response
+        BaseHttpResponse $response
     ) {
         $product = $this->productRepository->findOrFail($id);
 
@@ -632,16 +632,16 @@ trait ProductActionsTrait
                     ['id', '<>', $request->input('product_id', 0)],
                     ['name', 'LIKE', '%' . $request->input('keyword') . '%'],
                 ],
-                'select'    => [
+                'select' => [
                     'id',
                     'name',
                     'images',
                     'image',
                     'price',
                 ],
-                'paginate'  => [
-                    'per_page'      => 5,
-                    'type'          => 'simplePaginate',
+                'paginate' => [
+                    'per_page' => 5,
+                    'type' => 'simplePaginate',
                     'current_paged' => (int)$request->input('page', 1),
                 ],
             ]);
@@ -735,7 +735,7 @@ trait ProductActionsTrait
      */
     public function postCreateProductWhenCreatingOrder(
         CreateProductWhenCreatingOrderRequest $request,
-        BaseHttpResponse                      $response
+        BaseHttpResponse $response
     ) {
         $product = $this->productRepository->createOrUpdate($request->input());
 

@@ -43,7 +43,7 @@ class UserMeta extends BaseModel
 
         $meta = self::firstOrCreate([
             'user_id' => $userId,
-            'key'     => $key,
+            'key' => $key,
         ]);
 
         return $meta->update(['value' => $value]);
@@ -63,7 +63,7 @@ class UserMeta extends BaseModel
 
         $meta = self::where([
             'user_id' => $userId,
-            'key'     => $key,
+            'key' => $key,
         ])->select('value')->first();
 
         if (!empty($meta)) {

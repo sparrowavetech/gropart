@@ -215,6 +215,7 @@ class ThumbnailService
                     $constraint->aspectRatio();
                     $constraint->upsize();
                 });
+
                 break;
 
             case 'height':
@@ -222,14 +223,17 @@ class ThumbnailService
                     $constraint->aspectRatio();
                     $constraint->upsize();
                 });
+
                 break;
 
             case 'resize':
                 $thumbImage->resize($this->thumbWidth, $this->thumbHeight);
+
                 break;
 
             case 'crop':
                 $thumbImage->crop($this->thumbWidth, $this->thumbHeight, $this->xCoordinate, $this->yCoordinate);
+
                 break;
 
             case 'fit':
@@ -239,6 +243,7 @@ class ThumbnailService
                 }
 
                 $thumbImage->fit($this->thumbWidth, $this->thumbHeight, null, $this->fitPosition);
+
                 break;
         }
 
@@ -246,6 +251,7 @@ class ThumbnailService
             $this->uploadManager->saveFile($destinationPath, $thumbImage->stream()->__toString());
         } catch (Exception $exception) {
             Log::error($exception->getMessage());
+
             return false;
         }
 

@@ -14,7 +14,7 @@ class AssignRoleRequest extends Request
     public function rules()
     {
         return [
-            'pk'    => 'required|integer|min:1',
+            'pk' => 'required|integer|min:1',
             'value' => 'required|integer|min:1',
         ];
     }

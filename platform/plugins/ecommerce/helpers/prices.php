@@ -23,8 +23,8 @@ if (!function_exists('get_product_price')) {
 
         $priceInfo = [
             'start_date' => null,
-            'end_date'   => null,
-            'old_price'  => null,
+            'end_date' => null,
+            'old_price' => null,
         ];
 
         if ($saleType == 'default') {
@@ -35,6 +35,7 @@ if (!function_exists('get_product_price')) {
 
         if ($saleType == 'none' || !$salePrice) {
             $priceInfo['price'] = $price;
+
             return $priceInfo;
         }
 

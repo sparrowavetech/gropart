@@ -36,11 +36,11 @@ class UploadsManager
     public function fileDetails(string $path): array
     {
         return [
-            'filename'  => File::basename($path),
-            'url'       => $path,
+            'filename' => File::basename($path),
+            'url' => $path,
             'mime_type' => $this->fileMimeType($path),
-            'size'      => $this->fileSize($path),
-            'modified'  => $this->fileModified($path),
+            'size' => $this->fileSize($path),
+            'modified' => $this->fileModified($path),
         ];
     }
 
@@ -139,10 +139,10 @@ class UploadsManager
      * @return bool
      */
     public function saveFile(
-        string       $path,
-        string       $content,
+        string $path,
+        string $content,
         UploadedFile $file = null,
-        array        $visibility = ['visibility' => 'public']
+        array $visibility = ['visibility' => 'public']
     ): bool {
         if (!RvMedia::isChunkUploadEnabled() || !$file) {
             return Storage::put($this->cleanFolder($path), $content, $visibility);

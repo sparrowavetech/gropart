@@ -48,6 +48,7 @@ class InsertWatermarkCommand extends Command
 
         if (!setting('media_watermark_enabled', RvMedia::getConfig('watermark.enabled'))) {
             $this->error('Watermark is not enabled!');
+
             return 1;
         }
 
@@ -55,6 +56,7 @@ class InsertWatermarkCommand extends Command
 
         if (!$watermarkImage) {
             $this->error('Path to watermark image is not correct!');
+
             return 1;
         }
 
@@ -62,6 +64,7 @@ class InsertWatermarkCommand extends Command
 
         if (!File::exists($watermarkPath)) {
             $this->error('Path to watermark image is not correct!');
+
             return 1;
         }
 

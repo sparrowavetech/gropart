@@ -42,9 +42,11 @@ class SortItemsWithChildrenHelper
     {
         if (is_array($items)) {
             $this->items = collect($items);
+
             return $this;
         } elseif ($items instanceof Collection) {
             $this->items = $items;
+
             return $this;
         }
 

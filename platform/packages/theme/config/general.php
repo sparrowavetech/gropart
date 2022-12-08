@@ -47,10 +47,10 @@ return [
     */
 
     'containerDir' => [
-        'layout'  => 'layouts',
-        'asset'   => '',
+        'layout' => 'layouts',
+        'asset' => '',
         'partial' => 'partials',
-        'view'    => 'views',
+        'view' => 'views',
     ],
 
     /*

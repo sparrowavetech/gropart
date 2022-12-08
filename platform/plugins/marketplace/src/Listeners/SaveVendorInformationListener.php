@@ -63,13 +63,11 @@ class SaveVendorInformationListener
     public function handle(Registered $event)
     {
         $customer = $event->user;
-        if (
-            get_class($customer) == Customer::class &&
+        if (get_class($customer) == Customer::class &&
             !$customer->is_vendor &&
-            $this->request->input('is_vendor') == 1
-        ) {
+            $this->request->input('is_vendor') == 1) {
             $store = $this->storeRepository->getFirstBy(['customer_id' => $customer->getAuthIdentifier()]);
-           
+
             if ($this->request->input('shop_category') == ShopTypeEnum::MANUFACTURE) {
                 $shop_category = ShopTypeEnum::MANUFACTURE();
             } elseif ($this->request->input('shop_category') == ShopTypeEnum::WHOLESALER) {
@@ -78,20 +76,20 @@ class SaveVendorInformationListener
                 $shop_category = ShopTypeEnum::RETAILER();
             }
             if (!$store) {
-                
                 $store = $this->storeRepository->createOrUpdate([
-                    'name'        => BaseHelper::clean($this->request->input('shop_name')),
-                    'phone'       => BaseHelper::clean($this->request->input('shop_phone')),
+                    'name' => BaseHelper::clean($this->request->input('shop_name')),
+                    'phone' => BaseHelper::clean($this->request->input('shop_phone')),
                     'shop_category' => $shop_category,
                     'customer_id' => $customer->getAuthIdentifier(),
                 ]);
             }
+
             if (!$store->slug) {
                 Slug::create([
                     'reference_type' => Store::class,
-                    'reference_id'   => $store->id,
-                    'key'            => Str::slug($this->request->input('shop_url')),
-                    'prefix'         => SlugHelper::getPrefix(Store::class),
+                    'reference_id' => $store->id,
+                    'key' => Str::slug($this->request->input('shop_url')),
+                    'prefix' => SlugHelper::getPrefix(Store::class),
                 ]);
             }
 
@@ -102,12 +100,12 @@ class SaveVendorInformationListener
                 if ($mailer->templateEnabled('verify_vendor')) {
                     EmailHandler::setModule(MARKETPLACE_MODULE_SCREEN_NAME)
                         ->setVariableValues([
-                            'customer_name'  => $customer->name,
+                            'customer_name' => $customer->name,
                             'customer_email' => $customer->email,
                             'customer_phone' => $customer->phone,
-                            'store_name'     => $store->name,
-                            'store_phone'    => $store->phone,
-                            'store_link'     => route('marketplace.unverified-vendors.view', $customer->id),
+                            'store_name' => $store->name,
+                            'store_phone' => $store->phone,
+                            'store_link' => route('marketplace.unverified-vendors.view', $customer->id),
                         ]);
                     $mailer->sendUsingTemplate('verify_vendor', get_admin_email()->first());
                 }

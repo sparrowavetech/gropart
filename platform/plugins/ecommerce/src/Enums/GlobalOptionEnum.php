@@ -20,13 +20,13 @@ class GlobalOptionEnum extends Enum
     public static function options(): array
     {
         return [
-            'N/A'    => trans('plugins/ecommerce::product-option.please_select_option'),
-            'Text'   => [
+            'N/A' => trans('plugins/ecommerce::product-option.please_select_option'),
+            'Text' => [
                 Field::class => 'Field',
             ],
             'Select' => [
-                Dropdown::class    => 'Dropdown',
-                Checkbox::class    => 'Checkbox',
+                Dropdown::class => 'Dropdown',
+                Checkbox::class => 'Checkbox',
                 RadioButton::class => 'RadioButton',
             ],
         ];

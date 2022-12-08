@@ -22,8 +22,8 @@ class ExportController extends BaseController
      */
     public function index(
         CountryInterface $countryRepository,
-        StateInterface   $stateRepository,
-        CityInterface    $cityRepository
+        StateInterface $stateRepository,
+        CityInterface $cityRepository
     ) {
         page_title()->setTitle(trans('plugins/location::location.export_location'));
 

@@ -11,7 +11,7 @@ class ElideAttributes extends PageSpeed
     public function apply($buffer)
     {
         $replace = [
-            '/ method=("get"|get)/'   => '',
+            '/ method=("get"|get)/' => '',
             '/ disabled=[^ >]*(.*?)/' => ' disabled',
             '/ selected=[^ >]*(.*?)/' => ' selected',
         ];

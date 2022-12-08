@@ -10,7 +10,6 @@ use Botble\Marketplace\Enums\ShopTypeEnum;
 use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
 use Botble\Marketplace\Http\Requests\StoreRequest;
 use Botble\Location\Repositories\Interfaces\StateInterface;
-
 use Botble\Marketplace\Models\Store;
 use EcommerceHelper;
 
@@ -50,18 +49,18 @@ class StoreForm extends FormAbstract
             ->setValidatorClass(StoreRequest::class)
             ->withCustomFields()
             ->add('name', 'text', [
-                'label'      => trans('core/base::forms.name'),
+                'label' => trans('core/base::forms.name'),
                 'label_attr' => ['class' => 'control-label required'],
-                'attr'       => [
-                    'placeholder'  => trans('core/base::forms.name_placeholder'),
+                'attr' => [
+                    'placeholder' => trans('core/base::forms.name_placeholder'),
                     'data-counter' => 120,
                 ],
             ])
             ->add('company', 'text', [
-                'label'      => trans('plugins/marketplace::store.forms.company'),
+                'label' => trans('plugins/marketplace::store.forms.company'),
                 'label_attr' => ['class' => 'control-label'],
-                'attr'       => [
-                    'placeholder'  => trans('plugins/marketplace::store.forms.company_placeholder'),
+                'attr' => [
+                    'placeholder' => trans('plugins/marketplace::store.forms.company_placeholder'),
                     'data-counter' => 255,
                 ],
             ])
@@ -69,17 +68,17 @@ class StoreForm extends FormAbstract
                 'html' => '<div class="row">',
             ])
             ->add('country', 'customSelect', [
-                'label'      => trans('plugins/marketplace::store.forms.country'),
+                'label' => trans('plugins/marketplace::store.forms.country'),
                 'label_attr' => ['class' => 'control-label'],
-                'attr'       => [
-                    'id'        => 'country_id',
-                    'class'     => 'form-control select-search-full',
+                'attr' => [
+                    'id' => 'country_id',
+                    'class' => 'form-control select-search-full',
                     'data-type' => 'country',
                 ],
-                'wrapper'    => [
+                'wrapper' => [
                     'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ' col-md-4',
                 ],
-                'choices'    => EcommerceHelper::getAvailableCountries(),
+                'choices' => EcommerceHelper::getAvailableCountries(),
             ]);
 
         if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
@@ -94,18 +93,18 @@ class StoreForm extends FormAbstract
 
             $this
                 ->add('state', 'customSelect', [
-                    'label'      => trans('plugins/location::city.state'),
+                    'label' => trans('plugins/location::city.state'),
                     'label_attr' => ['class' => 'control-label'],
-                    'wrapper'    => [
+                    'wrapper' => [
                         'class' => 'form-group col-md-4',
                     ],
-                    'attr'       => [
-                        'id'        => 'state_id',
-                        'data-url'  => route('ajax.states-by-country'),
-                        'class'     => 'form-control select-search-full',
+                    'attr' => [
+                        'id' => 'state_id',
+                        'data-url' => route('ajax.states-by-country'),
+                        'class' => 'form-control select-search-full',
                         'data-type' => 'state',
                     ],
-                    'choices'    => ($this->model->state ?
+                    'choices' => ($this->model->state ?
                             [
                                 $this->model->state => $this->model->state_name,
                             ]
@@ -113,20 +112,20 @@ class StoreForm extends FormAbstract
                             [0 => trans('plugins/location::city.select_state')]) + $states,
                 ])
                 ->add('city', 'customSelect', [
-                    'label'      => trans('plugins/location::city.city'),
+                    'label' => trans('plugins/location::city.city'),
                     'label_attr' => [
                         'class' => 'control-label',
                     ],
-                    'wrapper'    => [
+                    'wrapper' => [
                         'class' => 'form-group col-md-4',
                     ],
-                    'attr'       => [
-                        'id'        => 'city_id',
-                        'data-url'  => route('ajax.cities-by-state'),
-                        'class'     => 'form-control select-search-full',
+                    'attr' => [
+                        'id' => 'city_id',
+                        'data-url' => route('ajax.cities-by-state'),
+                        'class' => 'form-control select-search-full',
                         'data-type' => 'city',
                     ],
-                    'choices'    => $this->model->city ?
+                    'choices' => $this->model->city ?
                         [
                             $this->model->city => $this->model->city_name,
                         ]
@@ -136,24 +135,24 @@ class StoreForm extends FormAbstract
         } else {
             $this
                 ->add('state', 'text', [
-                    'label'      => trans('plugins/marketplace::store.forms.state'),
+                    'label' => trans('plugins/marketplace::store.forms.state'),
                     'label_attr' => ['class' => 'control-label'],
-                    'wrapper'    => [
+                    'wrapper' => [
                         'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ' col-md-4',
                     ],
-                    'attr'       => [
-                        'placeholder'  => trans('plugins/marketplace::store.forms.state_placeholder'),
+                    'attr' => [
+                        'placeholder' => trans('plugins/marketplace::store.forms.state_placeholder'),
                         'data-counter' => 120,
                     ],
                 ])
                 ->add('city', 'text', [
-                    'label'      => trans('plugins/marketplace::store.forms.city'),
+                    'label' => trans('plugins/marketplace::store.forms.city'),
                     'label_attr' => ['class' => 'control-label'],
-                    'wrapper'    => [
+                    'wrapper' => [
                         'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ' col-md-4',
                     ],
-                    'attr'       => [
-                        'placeholder'  => trans('plugins/marketplace::store.forms.city_placeholder'),
+                    'attr' => [
+                        'placeholder' => trans('plugins/marketplace::store.forms.city_placeholder'),
                         'data-counter' => 120,
                     ],
                 ]);
@@ -166,43 +165,43 @@ class StoreForm extends FormAbstract
                 'html' => '<div class="row">',
             ])
             ->add('address', 'text', [
-                'label'      => trans('plugins/marketplace::store.forms.address'),
+                'label' => trans('plugins/marketplace::store.forms.address'),
                 'label_attr' => ['class' => 'control-label'],
-                'attr'       => [
-                    'placeholder'  => trans('plugins/marketplace::store.forms.address_placeholder'),
+                'attr' => [
+                    'placeholder' => trans('plugins/marketplace::store.forms.address_placeholder'),
                     'data-counter' => 120,
                 ],
             ])
             ->add('zip_code', 'text', [
-                'label'      => trans('plugins/marketplace::store.forms.zip_code'),
+                'label' => trans('plugins/marketplace::store.forms.zip_code'),
                 'label_attr' => ['class' => 'control-label'],
-                'wrapper'    => [
+                'wrapper' => [
                     'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ' col-md-4',
                 ],
-                'attr'       => [
-                    'placeholder'  => trans('plugins/marketplace::store.forms.zip_code_placeholder'),
+                'attr' => [
+                    'placeholder' => trans('plugins/marketplace::store.forms.zip_code_placeholder'),
                     'data-counter' => 120,
                 ],
             ])
             ->add('email', 'email', [
-                'label'      => trans('plugins/marketplace::store.forms.email'),
+                'label' => trans('plugins/marketplace::store.forms.email'),
                 'label_attr' => ['class' => 'control-label'],
-                'wrapper'    => [
+                'wrapper' => [
                     'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ' col-md-4',
                 ],
-                'attr'       => [
-                    'placeholder'  => trans('plugins/marketplace::store.forms.email_placeholder'),
+                'attr' => [
+                    'placeholder' => trans('plugins/marketplace::store.forms.email_placeholder'),
                     'data-counter' => 60,
                 ],
             ])
             ->add('phone', 'text', [
-                'label'      => trans('plugins/marketplace::store.forms.phone'),
+                'label' => trans('plugins/marketplace::store.forms.phone'),
                 'label_attr' => ['class' => 'control-label'],
-                'wrapper'    => [
+                'wrapper' => [
                     'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ' col-md-4',
                 ],
-                'attr'       => [
-                    'placeholder'  => trans('plugins/marketplace::store.forms.phone_placeholder'),
+                'attr' => [
+                    'placeholder' => trans('plugins/marketplace::store.forms.phone_placeholder'),
                     'data-counter' => 15,
                 ],
             ])
@@ -210,34 +209,34 @@ class StoreForm extends FormAbstract
                 'html' => '</div>',
             ])
             ->add('description', 'textarea', [
-                'label'      => trans('core/base::forms.description'),
+                'label' => trans('core/base::forms.description'),
                 'label_attr' => ['class' => 'control-label'],
-                'attr'       => [
-                    'rows'         => 4,
-                    'placeholder'  => trans('core/base::forms.description_placeholder'),
+                'attr' => [
+                    'rows' => 4,
+                    'placeholder' => trans('core/base::forms.description_placeholder'),
                     'data-counter' => 400,
                 ],
             ])
             ->add('content', 'editor', [
-                'label'      => trans('core/base::forms.content'),
+                'label' => trans('core/base::forms.content'),
                 'label_attr' => ['class' => 'control-label'],
-                'attr'       => [
-                    'rows'            => 4,
-                    'placeholder'     => trans('core/base::forms.description_placeholder'),
+                'attr' => [
+                    'rows' => 4,
+                    'placeholder' => trans('core/base::forms.description_placeholder'),
                     'with-short-code' => false,
                 ],
             ])
             ->add('status', 'customSelect', [
-                'label'      => trans('core/base::tables.status'),
+                'label' => trans('core/base::tables.status'),
                 'label_attr' => ['class' => 'control-label required'],
-                'attr'       => [
-                    'class' => 'form-control select-full',
+                'attr' => [
+                    'class' => 'form-control',
                 ],
-                'choices'    => BaseStatusEnum::labels(),
+                'choices' => BaseStatusEnum::labels(),
                 'help_block' => [
                     'text' => trans('plugins/marketplace::marketplace.helpers.store_status', [
                         'customer' => CustomerStatusEnum::LOCKED()->label(),
-                        'status'   => BaseStatusEnum::PUBLISHED()->label(),
+                        'status' => BaseStatusEnum::PUBLISHED()->label(),
                     ]),
                 ],
             ])
@@ -250,21 +249,20 @@ class StoreForm extends FormAbstract
                 'label'      => trans('plugins/marketplace::store.forms.shop_category'),
                 'label_attr' => ['class' => 'control-label required'],
                 'attr'       => [
-                    'class' => 'form-control select-full',
+                    'class' => 'form-control',
                 ],
                 'choices'    => ShopTypeEnum::labels(),
             ])
-            
             ->add('customer_id', 'customSelect', [
-                'label'      => trans('plugins/marketplace::store.forms.store_owner'),
+                'label' => trans('plugins/marketplace::store.forms.store_owner'),
                 'label_attr' => ['class' => 'control-label required'],
-                'attr'       => [
-                    'class' => 'form-control select-full',
+                'attr' => [
+                    'class' => 'form-control',
                 ],
-                'choices'    => [0 => trans('plugins/marketplace::store.forms.select_store_owner')] + $customers,
+                'choices' => [0 => trans('plugins/marketplace::store.forms.select_store_owner')] + $customers,
             ])
             ->add('logo', 'mediaImage', [
-                'label'      => trans('plugins/marketplace::store.forms.logo'),
+                'label' => trans('plugins/marketplace::store.forms.logo'),
                 'label_attr' => ['class' => 'control-label'],
             ])
             ->setBreakFieldPoint('status');

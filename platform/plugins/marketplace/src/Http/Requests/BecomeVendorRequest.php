@@ -15,9 +15,9 @@ class BecomeVendorRequest extends Request
     public function rules()
     {
         return [
-            'shop_name'  => 'required|min:2',
+            'shop_name' => 'required|min:2',
             'shop_phone' => 'required|' . BaseHelper::getPhoneValidationRule(),
-            'shop_url'   => 'required|max:200',
+            'shop_url' => 'required|max:200',
             'shop_catergory'   => 'required',
         ];
     }

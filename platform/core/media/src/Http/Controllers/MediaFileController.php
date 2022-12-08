@@ -66,7 +66,7 @@ class MediaFileController extends Controller
             $handler = $save->handler();
 
             return response()->json([
-                'done'   => $handler->getPercentageDone(),
+                'done' => $handler->getPercentageDone(),
                 'status' => true,
             ]);
         } catch (Exception $exception) {
@@ -82,7 +82,7 @@ class MediaFileController extends Controller
     {
         if (!$result['error']) {
             return RvMedia::responseSuccess([
-                'id'  => $result['data']->id,
+                'id' => $result['data']->id,
                 'src' => RvMedia::url($result['data']->url),
             ]);
         }
@@ -117,10 +117,10 @@ class MediaFileController extends Controller
 
         if (!$result['error']) {
             return RvMedia::responseSuccess([
-                'id'        => $result['data']->id,
-                'src'       => Storage::url($result['data']->url),
-                'url'       => $result['data']->url,
-                'message'   => trans('core/media::media.javascript.message.success_header')
+                'id' => $result['data']->id,
+                'src' => Storage::url($result['data']->url),
+                'url' => $result['data']->url,
+                'message' => trans('core/media::media.javascript.message.success_header'),
             ]);
         }
 

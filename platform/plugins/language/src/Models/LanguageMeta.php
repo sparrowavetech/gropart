@@ -59,9 +59,9 @@ class LanguageMeta extends BaseModel
         }
 
         LanguageMeta::insert([
-            'reference_id'     => $model->id,
-            'reference_type'   => get_class($model),
-            'lang_meta_code'   => $locale,
+            'reference_id' => $model->id,
+            'reference_type' => get_class($model),
+            'lang_meta_code' => $locale,
             'lang_meta_origin' => $originValue,
         ]);
     }

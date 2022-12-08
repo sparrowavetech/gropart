@@ -65,10 +65,10 @@ class RvMedia
      * @param ThumbnailService $thumbnailService
      */
     public function __construct(
-        MediaFileInterface   $fileRepository,
+        MediaFileInterface $fileRepository,
         MediaFolderInterface $folderRepository,
-        UploadsManager       $uploadManager,
-        ThumbnailService     $thumbnailService
+        UploadsManager $uploadManager,
+        ThumbnailService $thumbnailService
     ) {
         $this->fileRepository = $fileRepository;
         $this->folderRepository = $folderRepository;
@@ -96,17 +96,17 @@ class RvMedia
     public function getUrls(): array
     {
         return [
-            'base_url'                 => url(''),
-            'base'                     => route('media.index'),
-            'get_media'                => route('media.list'),
-            'create_folder'            => route('media.folders.create'),
-            'popup'                    => route('media.popup'),
-            'download'                 => route('media.download'),
-            'upload_file'              => route('media.files.upload'),
-            'get_breadcrumbs'          => route('media.breadcrumbs'),
-            'global_actions'           => route('media.global_actions'),
+            'base_url' => url(''),
+            'base' => route('media.index'),
+            'get_media' => route('media.list'),
+            'create_folder' => route('media.folders.create'),
+            'popup' => route('media.popup'),
+            'download' => route('media.download'),
+            'upload_file' => route('media.files.upload'),
+            'get_breadcrumbs' => route('media.breadcrumbs'),
+            'global_actions' => route('media.global_actions'),
             'media_upload_from_editor' => route('media.files.upload.from.editor'),
-            'download_url'             => route('media.download_url'),
+            'download_url' => route('media.download_url'),
         ];
     }
 
@@ -136,8 +136,8 @@ class RvMedia
     public function responseSuccess($data, $message = null): JsonResponse
     {
         return response()->json([
-            'error'   => false,
-            'data'    => $data,
+            'error' => false,
+            'data' => $data,
             'message' => $message,
         ]);
     }
@@ -152,10 +152,10 @@ class RvMedia
     public function responseError(string $message, array $data = [], $code = null, int $status = 200): JsonResponse
     {
         return response()->json([
-            'error'   => true,
+            'error' => true,
             'message' => $message,
-            'data'    => $data,
-            'code'    => $code,
+            'data' => $data,
+            'code' => $code,
         ], $status);
     }
 
@@ -391,6 +391,7 @@ class RvMedia
         foreach ($permissions as $permission) {
             if (in_array($permission, $this->permissions)) {
                 $hasPermission = true;
+
                 break;
             }
         }
@@ -461,7 +462,7 @@ class RvMedia
                 return response()->json([
                     'fileName' => File::name($this->url($file->url)),
                     'uploaded' => 1,
-                    'url'      => $this->url($file->url),
+                    'url' => $this->url($file->url),
                 ]);
             }
 
@@ -491,7 +492,7 @@ class RvMedia
 
         if (!$fileUpload) {
             return [
-                'error'   => true,
+                'error' => true,
                 'message' => trans('core/media::media.can_not_detect_file_type'),
             ];
         }
@@ -506,7 +507,7 @@ class RvMedia
 
                 if ($validator->fails()) {
                     return [
-                        'error'   => true,
+                        'error' => true,
                         'message' => $validator->getMessageBag()->first(),
                     ];
                 }
@@ -516,7 +517,7 @@ class RvMedia
 
             if ($maxUploadFilesizeAllowed && ($fileUpload->getSize() / 1024) / 1024 > (float)$maxUploadFilesizeAllowed) {
                 return [
-                    'error'   => true,
+                    'error' => true,
                     'message' => trans('core/media::media.file_too_big_readable_size', ['size' => BaseHelper::humanFilesize($maxUploadFilesizeAllowed * 1024 * 1024)]),
                 ];
             }
@@ -525,7 +526,7 @@ class RvMedia
 
             if ($fileUpload->getSize() / 1024 > (int)$maxSize) {
                 return [
-                    'error'   => true,
+                    'error' => true,
                     'message' => trans('core/media::media.file_too_big_readable_size', ['size' => BaseHelper::humanFilesize($maxSize)]),
                 ];
             }
@@ -538,7 +539,7 @@ class RvMedia
 
             if (!$skipValidation && !in_array(strtolower($fileExtension), explode(',', $allowedMimeTypes))) {
                 return [
-                    'error'   => true,
+                    'error' => true,
                     'message' => trans('core/media::media.can_not_detect_file_type'),
                 ];
             }
@@ -548,9 +549,9 @@ class RvMedia
 
                 if (!$folder) {
                     $folder = $this->folderRepository->createOrUpdate([
-                        'user_id'   => Auth::check() ? Auth::id() : 0,
-                        'name'      => $this->folderRepository->createName($folderSlug, 0),
-                        'slug'      => $this->folderRepository->createSlug($folderSlug, 0),
+                        'user_id' => Auth::check() ? Auth::id() : 0,
+                        'name' => $this->folderRepository->createName($folderSlug, 0),
+                        'slug' => $this->folderRepository->createSlug($folderSlug, 0),
                         'parent_id' => 0,
                     ]);
                 }
@@ -585,7 +586,7 @@ class RvMedia
 
             if (!$skipValidation && empty($data['mime_type'])) {
                 return [
-                    'error'   => true,
+                    'error' => true,
                     'message' => trans('core/media::media.can_not_detect_file_type'),
                 ];
             }
@@ -602,11 +603,11 @@ class RvMedia
 
             return [
                 'error' => false,
-                'data'  => new FileResource($file),
+                'data' => new FileResource($file),
             ];
         } catch (Throwable $exception) {
             return [
-                'error'   => true,
+                'error' => true,
                 'message' => $exception->getMessage(),
             ];
         }
@@ -782,7 +783,7 @@ class RvMedia
     {
         if (empty($url)) {
             return [
-                'error'   => true,
+                'error' => true,
                 'message' => trans('core/media::media.url_invalid'),
             ];
         }
@@ -793,7 +794,7 @@ class RvMedia
             $contents = file_get_contents($url);
         } catch (Exception $exception) {
             return [
-                'error'   => true,
+                'error' => true,
                 'message' => $exception->getMessage(),
             ];
         }
@@ -809,7 +810,6 @@ class RvMedia
 
         $path = $path . '/' . $info['basename'];
         file_put_contents($path, $contents);
-
 
         $mimeType = $this->getMimeType($url);
 
@@ -845,7 +845,7 @@ class RvMedia
     {
         if (empty($path)) {
             return [
-                'error'   => true,
+                'error' => true,
                 'message' => trans('core/media::media.path_invalid'),
             ];
         }
@@ -893,7 +893,7 @@ class RvMedia
         add_action('init', function () {
             config([
                 'filesystems.disks.public.root' => $this->getUploadPath(),
-                'filesystems.disks.public.url'  => $this->getUploadURL(),
+                'filesystems.disks.public.url' => $this->getUploadURL(),
             ]);
         }, 124);
 
@@ -940,15 +940,15 @@ class RvMedia
     public function createFolder(string $folderSlug, ?int $parentId = 0)
     {
         $folder = $this->folderRepository->getFirstBy([
-            'slug'      => $folderSlug,
+            'slug' => $folderSlug,
             'parent_id' => $parentId,
         ]);
 
         if (!$folder) {
             $folder = $this->folderRepository->createOrUpdate([
-                'user_id'   => Auth::check() ? Auth::id() : 0,
-                'name'      => $this->folderRepository->createName($folderSlug, 0),
-                'slug'      => $this->folderRepository->createSlug($folderSlug, 0),
+                'user_id' => Auth::check() ? Auth::id() : 0,
+                'name' => $this->folderRepository->createName($folderSlug, 0),
+                'slug' => $this->folderRepository->createSlug($folderSlug, 0),
                 'parent_id' => $parentId,
             ]);
         }

@@ -116,19 +116,19 @@ class PaymentTable extends TableAbstract
     public function columns()
     {
         return [
-            'id'              => [
+            'id' => [
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
             ],
-            'charge_id'       => [
+            'charge_id' => [
                 'title' => trans('plugins/payment::payment.charge_id'),
                 'class' => 'text-start',
             ],
-            'customer_id'     => [
+            'customer_id' => [
                 'title' => trans('plugins/payment::payment.payer_name'),
                 'class' => 'text-start',
             ],
-            'amount'          => [
+            'amount' => [
                 'title' => trans('plugins/payment::payment.amount'),
                 'class' => 'text-start',
             ],
@@ -136,11 +136,11 @@ class PaymentTable extends TableAbstract
                 'title' => trans('plugins/payment::payment.payment_channel'),
                 'class' => 'text-start',
             ],
-            'created_at'      => [
+            'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
                 'width' => '100px',
             ],
-            'status'          => [
+            'status' => [
                 'title' => trans('core/base::tables.status'),
                 'width' => '100px',
             ],
@@ -161,20 +161,20 @@ class PaymentTable extends TableAbstract
     public function getBulkChanges(): array
     {
         return [
-            'status'     => [
-                'title'    => trans('core/base::tables.status'),
-                'type'     => 'customSelect',
-                'choices'  => PaymentStatusEnum::labels(),
+            'status' => [
+                'title' => trans('core/base::tables.status'),
+                'type' => 'customSelect',
+                'choices' => PaymentStatusEnum::labels(),
                 'validate' => 'required|in:' . implode(',', PaymentStatusEnum::values()),
             ],
-            'charge_id'  => [
-                'title'    => trans('plugins/payment::payment.charge_id'),
-                'type'     => 'text',
+            'charge_id' => [
+                'title' => trans('plugins/payment::payment.charge_id'),
+                'type' => 'text',
                 'validate' => 'required|max:120',
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type'  => 'date',
+                'type' => 'date',
             ],
         ];
     }

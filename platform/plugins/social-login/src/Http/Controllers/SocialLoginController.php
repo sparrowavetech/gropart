@@ -15,6 +15,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Laravel\Socialite\AbstractUser;
 use RvMedia;
@@ -80,9 +81,9 @@ class SocialLoginController extends BaseController
     {
         config()->set([
             'services.' . $provider => [
-                'client_id'     => SocialService::setting($provider . '_app_id'),
+                'client_id' => SocialService::setting($provider . '_app_id'),
                 'client_secret' => SocialService::setting($provider . '_app_secret'),
-                'redirect'      => route('auth.social.callback', $provider),
+                'redirect' => route('auth.social.callback', $provider),
             ],
         ]);
 
@@ -157,9 +158,9 @@ class SocialLoginController extends BaseController
             }
 
             $data = [
-                'name'      => $oAuth->getName() ?: $oAuth->getEmail(),
-                'email'     => $oAuth->getEmail(),
-                'password'  => bcrypt(Str::random(36)),
+                'name' => $oAuth->getName() ?: $oAuth->getEmail(),
+                'email' => $oAuth->getEmail(),
+                'password' => Hash::make(Str::random(36)),
                 'avatar_id' => $avatarId,
             ];
 

@@ -12,10 +12,10 @@ class CreateOrderRequest extends Request
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
-            'customer_id'            => 'required|exists:ec_customers,id',
+            'customer_id' => 'required|exists:ec_customers,id',
             'customer_address.phone' => BaseHelper::getPhoneValidationRule(),
         ];
     }
@@ -23,7 +23,7 @@ class CreateOrderRequest extends Request
     /**
      * @return array
      */
-    public function attributes()
+    public function attributes(): array
     {
         return [
             'customer_id' => trans('plugins/ecommerce::order.customer_label'),

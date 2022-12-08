@@ -104,7 +104,7 @@
         });
 
         if (window.noticeMessages && window.noticeMessages.length) {
-            noticeMessages.map((x, k) => {
+            noticeMessages.map(x => {
                 Botble.showNotice(x.type, x.message, '');
             });
         }

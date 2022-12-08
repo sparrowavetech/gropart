@@ -167,7 +167,7 @@ class BaseHttpResponse implements Responsable
     {
         if ($this->data instanceof JsonResource) {
             return $this->data->additional(array_merge([
-                'error'   => $this->error,
+                'error' => $this->error,
                 'message' => $this->message,
             ], $this->additional));
         }
@@ -183,8 +183,8 @@ class BaseHttpResponse implements Responsable
     {
         if ($request->expectsJson()) {
             $data = [
-                'error'   => $this->error,
-                'data'    => $this->data,
+                'error' => $this->error,
+                'data' => $this->data,
                 'message' => $this->message,
             ];
 

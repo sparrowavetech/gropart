@@ -130,8 +130,8 @@ class EcommerceHelper
             }
 
             $results[] = [
-                'star'    => $i,
-                'count'   => $starCount,
+                'star' => $i,
+                'count' => $starCount,
                 'percent' => ((int)($starCount * 100)) / 100,
             ];
         }
@@ -285,17 +285,17 @@ class EcommerceHelper
     {
         $sort = [
             'default_sorting' => __('Default'),
-            'date_asc'        => __('Oldest'),
-            'date_desc'       => __('Newest'),
-            'price_asc'       => __('Price: low to high'),
-            'price_desc'      => __('Price: high to low'),
-            'name_asc'        => __('Name: A-Z'),
-            'name_desc'       => __('Name : Z-A'),
+            'date_asc' => __('Oldest'),
+            'date_desc' => __('Newest'),
+            'price_asc' => __('Price: low to high'),
+            'price_desc' => __('Price: high to low'),
+            'name_asc' => __('Name: A-Z'),
+            'name_desc' => __('Name : Z-A'),
         ];
 
         if ($this->isReviewEnabled()) {
             $sort += [
-                'rating_asc'  => __('Rating: low to high'),
+                'rating_asc' => __('Rating: low to high'),
                 'rating_desc' => __('Rating: high to low'),
             ];
         }
@@ -508,6 +508,7 @@ class EcommerceHelper
 
     /**
      * @return array
+     * @deprecated since 11/2022
      */
     public function withReviewsCount(): array
     {
@@ -522,6 +523,21 @@ class EcommerceHelper
         }
 
         return $withCount;
+    }
+
+    public function withReviewsParams(): array
+    {
+        if (!$this->isReviewEnabled()) {
+            return [
+                'withCount' => [],
+                'withAvg' => [null, null],
+            ];
+        }
+
+        return [
+            'withCount' => ['reviews'],
+            'withAvg' => ['reviews as reviews_avg', 'star'],
+        ];
     }
 
     /**
@@ -624,12 +640,12 @@ class EcommerceHelper
     public function getCustomerAddressValidationRules(?string $prefix = ''): array
     {
         $rules = [
-            $prefix . 'name'    => 'required|min:3|max:120',
-            $prefix . 'email'   => 'email|nullable|max:60|min:6',
-            $prefix . 'state'   => 'required|max:120',
-            $prefix . 'city'    => 'required|max:120',
+            $prefix . 'name' => 'required|min:3|max:120',
+            $prefix . 'email' => 'email|nullable|max:60|min:6',
+            $prefix . 'state' => 'required|max:120',
+            $prefix . 'city' => 'required|max:120',
             $prefix . 'address' => 'required|max:120',
-            $prefix . 'phone'   => $this->getPhoneValidationRule(),
+            $prefix . 'phone' => $this->getPhoneValidationRule(),
         ];
 
         if ($this->isUsingInMultipleCountries()) {
@@ -785,7 +801,7 @@ class EcommerceHelper
                         'ec_product_variations.id' => $variationDefault->id,
                         'original_products.status' => BaseStatusEnum::PUBLISHED,
                     ],
-                    'select'    => [
+                    'select' => [
                         'ec_products.id',
                         'ec_products.name',
                         'ec_products.quantity',
@@ -799,7 +815,7 @@ class EcommerceHelper
                         'ec_products.description',
                         'ec_products.is_variation',
                     ],
-                    'take'      => 1,
+                    'take' => 1,
                 ]);
             }
         }
@@ -861,7 +877,15 @@ class EcommerceHelper
     /**
      * @return int
      */
-    public static function canCustomReturnProductQty(): int
+    public function canCustomReturnProductQty(): int
+    {
+        return $this->allowPartialReturn();
+    }
+
+    /**
+     * @return int
+     */
+    public function allowPartialReturn(): int
     {
         return get_ecommerce_setting('can_custom_return_product_quantity', 0);
     }
@@ -909,14 +933,14 @@ class EcommerceHelper
     public function productFilterParamsValidated($request): bool
     {
         $validator = Validator::make($request->input(), [
-            'q'          => 'nullable|string|max:255',
-            'max_price'  => 'nullable|numeric',
-            'min_price'  => 'nullable|numeric',
+            'q' => 'nullable|string|max:255',
+            'max_price' => 'nullable|numeric',
+            'min_price' => 'nullable|numeric',
             'attributes' => 'nullable|array',
             'categories' => 'nullable|array',
-            'tags'       => 'nullable|array',
-            'brands'     => 'nullable|array',
-            'sort-by'    => 'nullable|string',
+            'tags' => 'nullable|array',
+            'brands' => 'nullable|array',
+            'sort-by' => 'nullable|string',
         ]);
 
         return !$validator->fails();
@@ -943,17 +967,17 @@ class EcommerceHelper
     public function getOriginAddress(): array
     {
         return [
-			'name'      => get_ecommerce_setting('store_name'),
-			'company'   => get_ecommerce_setting('store_company'),
-			'email'     => get_ecommerce_setting('store_email'),
-			'phone'     => get_ecommerce_setting('store_phone'),
-			'country'   => get_ecommerce_setting('store_country'),
-			'state'     => get_ecommerce_setting('store_state'),
-			'city'      => get_ecommerce_setting('store_city'),
-			'address'   => get_ecommerce_setting('store_address'),
-			'address_2' => '',
-			'zip_code'  => get_ecommerce_setting('store_zip_code'),
-		];
+            'name' => get_ecommerce_setting('store_name'),
+            'company' => get_ecommerce_setting('store_company'),
+            'email' => get_ecommerce_setting('store_email'),
+            'phone' => get_ecommerce_setting('store_phone'),
+            'country' => get_ecommerce_setting('store_country'),
+            'state' => get_ecommerce_setting('store_state'),
+            'city' => get_ecommerce_setting('store_city'),
+            'address' => get_ecommerce_setting('store_address'),
+            'address_2' => '',
+            'zip_code' => get_ecommerce_setting('store_zip_code'),
+        ];
     }
 
     /**
@@ -961,7 +985,7 @@ class EcommerceHelper
      * @param array $session
      * @param array $origin
      * @param float $orderTotal
-     * @param string $paymentMethod
+     * @param string|null $paymentMethod
      * @return array
      */
     public function getShippingData($products, $session, $origin, $orderTotal, ?string $paymentMethod = null): array
@@ -972,13 +996,13 @@ class EcommerceHelper
             $cartItem = $product->cartItem;
             $weight += $product->weight * $cartItem->qty;
             $parcels[$cartItem->id] = [
-                'weight'      => $product->weight,
-                'length'      => $product->length,
-                'wide'        => $product->wide,
-                'height'      => $product->height,
-                'name'        => $product->name,
+                'weight' => $product->weight,
+                'length' => $product->length,
+                'wide' => $product->wide,
+                'height' => $product->height,
+                'name' => $product->name,
                 'description' => $product->description,
-                'qty'         => $cartItem->qty,
+                'qty' => $cartItem->qty,
             ];
         }
 
@@ -991,21 +1015,21 @@ class EcommerceHelper
         }
 
         $data = [
-            'address'     => Arr::get($session, 'address'),
-            'country'     => $country,
-            'state'       => Arr::get($session, 'state'),
-            'city'        => Arr::get($session, 'city'),
-            'weight'      => EcommerceHelper::validateOrderWeight($weight),
+            'address' => Arr::get($session, 'address'),
+            'country' => $country,
+            'state' => Arr::get($session, 'state'),
+            'city' => Arr::get($session, 'city'),
+            'weight' => EcommerceHelper::validateOrderWeight($weight),
             'order_total' => max($orderTotal, 0),
-            'address_to'  => Arr::only($session, $keys),
-            'origin'      => $origin,
-            'parcels'     => $parcels,
+            'address_to' => Arr::only($session, $keys),
+            'origin' => $origin,
+            'parcels' => $parcels,
         ];
 
         if ($paymentMethod == PaymentMethodEnum::COD) {
             $data['extra'] = [
                 'COD' => [
-                    'amount'   => max($orderTotal, 0),
+                    'amount' => max($orderTotal, 0),
                     'currency' => get_application_currency()->title,
                 ],
             ];

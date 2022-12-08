@@ -72,7 +72,6 @@ class OrderReturnTable extends TableAbstract
                 return BaseHelper::formatDate($item->created_at);
             });
 
-
         $data = $data
             ->filter(function ($query) {
                 $keyword = $this->request->input('search.value');
@@ -91,9 +90,9 @@ class OrderReturnTable extends TableAbstract
         $data = $data
             ->addColumn('operations', function ($item) {
                 return view(MarketplaceHelper::viewPath('dashboard.table.actions'), [
-                    'edit'   => 'marketplace.vendor.order-returns.edit',
+                    'edit' => 'marketplace.vendor.order-returns.edit',
                     'delete' => 'marketplace.vendor.order-returns.destroy',
-                    'item'   => $item,
+                    'item' => $item,
                 ])->render();
             });
 
@@ -113,9 +112,9 @@ class OrderReturnTable extends TableAbstract
                 'reason',
                 'order_status',
                 'return_status',
-                'created_at'
+                'created_at',
             ])
-            ->with(['customer', 'order','items'])
+            ->with(['customer', 'order', 'items'])
             ->withCount('items')
             ->orderBy('id', 'desc');
 
@@ -125,10 +124,10 @@ class OrderReturnTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function columns()
+    public function columns(): array
     {
         return [
-            'id'      => [
+            'id' => [
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
                 'class' => 'text-start',
@@ -141,15 +140,15 @@ class OrderReturnTable extends TableAbstract
                 'title' => trans('plugins/ecommerce::order.customer_label'),
                 'class' => 'text-start',
             ],
-            'items_count'  => [
+            'items_count' => [
                 'title' => trans('plugins/ecommerce::order.order_return_items_count'),
                 'class' => 'text-center',
             ],
-            'return_status'          => [
+            'return_status' => [
                 'title' => trans('core/base::tables.status'),
                 'class' => 'text-center',
             ],
-            'created_at'      => [
+            'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
                 'width' => '100px',
                 'class' => 'text-start',

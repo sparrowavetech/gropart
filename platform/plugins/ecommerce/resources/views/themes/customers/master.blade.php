@@ -12,7 +12,7 @@
                                     <div id="account-avatar">
                                         <div class="profile-image">
                                             <div class="avatar-view mt-card-avatar">
-                                                <img class="br2" src="{{ auth('customer')->user()->avatar_url }}">
+                                                <img class="br2" src="{{ auth('customer')->user()->avatar_url }}" alt="{{ auth('customer')->user()->name }}">
                                                 <div class="mt-overlay br2">
                                                     <span><i class="fa fa-edit"></i></span>
                                                 </div>
@@ -96,7 +96,7 @@
                             <div class="avatar-upload">
                                 <input class="avatar-src" name="avatar_src" type="hidden">
                                 <input class="avatar-data" name="avatar_data" type="hidden">
-                                {!! csrf_field() !!}
+                                @csrf
                                 <label for="avatarInput">{{ __('New image') }}</label>
                                 <input class="avatar-input" id="avatarInput" name="avatar_file" type="file">
                             </div>

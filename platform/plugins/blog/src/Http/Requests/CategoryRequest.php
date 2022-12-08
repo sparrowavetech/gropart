@@ -16,10 +16,10 @@ class CategoryRequest extends Request
     public function rules()
     {
         return [
-            'name'        => 'required|max:120',
+            'name' => 'required|max:120',
             'description' => 'max:400',
-            'order'       => 'required|integer|min:0|max:127',
-            'status'      => Rule::in(BaseStatusEnum::values()),
+            'order' => 'required|integer|min:0|max:127',
+            'status' => Rule::in(BaseStatusEnum::values()),
         ];
     }
 }

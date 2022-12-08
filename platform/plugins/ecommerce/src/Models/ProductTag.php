@@ -34,9 +34,6 @@ class ProductTag extends BaseModel
         'status' => BaseStatusEnum::class,
     ];
 
-    /**
-     * @return BelongsToMany
-     */
     public function products(): BelongsToMany
     {
         return $this

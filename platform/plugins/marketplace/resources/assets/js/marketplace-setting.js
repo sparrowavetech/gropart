@@ -4,11 +4,12 @@ class MarketplaceSetting {
     }
 
     eventListeners() {
-        $(document).on('click', '#add-new-commission-setting-category', e => {
-            e.preventDefault();
-            e.stopPropagation();
+        $(document).on('click', '#add-new-commission-setting-category', event => {
+            event.preventDefault();
+            event.stopPropagation();
 
-            this.addNewCommissionSetting(e.target);
+            this.addNewCommissionSetting(event.currentTarget);
+
             return false;
         });
 
@@ -21,8 +22,8 @@ class MarketplaceSetting {
 
         let input = document.querySelectorAll('.tagify-commission-setting')
         input.forEach(element => {
-            this.tagify(element)
-        })
+            this.tagify(element);
+        });
     }
 
     tagify(element) {
@@ -41,19 +42,19 @@ class MarketplaceSetting {
 
     formatWhitelist() {
         let data = [];
-        window.tagifyWhitelist.map((item) => {
+        window.tagifyWhitelist.map(item => {
             data.push({
                 value: item.name,
                 id: item.id
             })
-        })
+        });
 
         return data;
     }
 
     addNewCommissionSetting() {
-        const tpl = $('#commission-setting-item-template').html(),
-            index = $('.commission-setting-item').length;
+        const tpl = $('#commission-setting-item-template').html();
+        const index = $('.commission-setting-item').length;
         let html = tpl.replace(/__index__/g, index)
         $('.commission-setting-item-wrapper').append(html);
         const element = document.querySelector(`#commission-setting-item-${index} .tagify-commission-setting`);
@@ -61,4 +62,6 @@ class MarketplaceSetting {
     }
 }
 
-new MarketplaceSetting();
+$(document).ready(function () {
+    new MarketplaceSetting();
+});

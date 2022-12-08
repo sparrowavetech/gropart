@@ -128,7 +128,7 @@ class HookServiceProvider extends ServiceProvider
 
         return apply_filters(LANGUAGE_FILTER_ROUTE_ACTION, [
             'create' => $currentRoute . '.create',
-            'edit'   => $currentRoute . '.edit',
+            'edit' => $currentRoute . '.edit',
         ]);
     }
 
@@ -152,7 +152,7 @@ class HookServiceProvider extends ServiceProvider
             }
 
             $language = null;
-            if (!empty($code)) {
+            if (!empty($code) && is_string($code)) {
                 Language::setCurrentAdminLocale($code);
                 $language = $this->app->make(LanguageInterface::class)->getFirstBy(
                     ['lang_code' => $code],
@@ -181,7 +181,7 @@ class HookServiceProvider extends ServiceProvider
             $code = $request->input('ref_lang');
         } elseif (!empty($data) && $data->id) {
             $meta = $this->app->make(LanguageMetaInterface::class)->getFirstBy([
-                'reference_id'   => $data->id,
+                'reference_id' => $data->id,
                 'reference_type' => get_class($data),
             ], ['lang_meta_code']);
 
@@ -190,7 +190,7 @@ class HookServiceProvider extends ServiceProvider
             }
         }
 
-        if (empty($code)) {
+        if (empty($code) || !is_string($code)) {
             $code = Language::getDefaultLocaleCode();
         }
 
@@ -298,11 +298,11 @@ class HookServiceProvider extends ServiceProvider
 
         return array_merge($headings, [
             'language' => [
-                'name'       => 'language_meta.lang_meta_id',
-                'title'      => $heading,
-                'class'      => 'text-center language-header no-sort',
-                'width'      => (count($languages) * 40) . 'px',
-                'orderable'  => false,
+                'name' => 'language_meta.lang_meta_id',
+                'title' => $heading,
+                'class' => 'text-center language-header no-sort',
+                'width' => (count($languages) * 40) . 'px',
+                'orderable' => false,
                 'searchable' => false,
             ],
         ]);

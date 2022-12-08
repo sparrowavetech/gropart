@@ -75,7 +75,7 @@ class ProductController extends BaseController
      */
     public function edit($id, Request $request, FormBuilder $formBuilder)
     {
-        $product = $this->productRepository->findOrFail($id, ["options" => function($query) {
+        $product = $this->productRepository->findOrFail($id, ['options' => function ($query) {
             return $query->with(['values']);
         }]);
 
@@ -155,7 +155,7 @@ class ProductController extends BaseController
         if ($request->has('grouped_products')) {
             $groupedProductRepository->createGroupedProducts($product->id, array_map(function ($item) {
                 return [
-                    'id'  => $item,
+                    'id' => $item,
                     'qty' => 1,
                 ];
             }, array_filter(explode(',', $request->input('grouped_products', '')))));
@@ -239,7 +239,7 @@ class ProductController extends BaseController
         if ($request->has('grouped_products')) {
             $groupedProductRepository->createGroupedProducts($product->id, array_map(function ($item) {
                 return [
-                    'id'  => $item,
+                    'id' => $item,
                     'qty' => 1,
                 ];
             }, array_filter(explode(',', $request->input('grouped_products', '')))));

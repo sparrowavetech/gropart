@@ -6,6 +6,7 @@ use Assets;
 use BaseHelper;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Support\Repositories\Interfaces\RepositoryInterface;
+use Botble\Table\Supports\Builder;
 use Botble\Table\Supports\TableExportHandler;
 use Exception;
 use Form;
@@ -15,7 +16,6 @@ use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
@@ -267,59 +267,59 @@ abstract class TableAbstract extends DataTable
             ->columns($this->getColumns())
             ->ajax(['url' => $this->getAjaxUrl(), 'method' => 'POST'])
             ->parameters([
-                'dom'          => $this->getDom(),
-                'buttons'      => $this->getBuilderParameters(),
+                'dom' => $this->getDom(),
+                'buttons' => $this->getBuilderParameters(),
                 'initComplete' => $this->htmlInitComplete(),
                 'drawCallback' => $this->htmlDrawCallback(),
-                'paging'       => true,
-                'searching'    => true,
-                'info'         => true,
-                'searchDelay'  => 350,
-                'bStateSave'   => $this->bStateSave,
-                'lengthMenu'   => [
+                'paging' => true,
+                'searching' => true,
+                'info' => true,
+                'searchDelay' => 350,
+                'bStateSave' => $this->bStateSave,
+                'lengthMenu' => [
                     array_values(array_unique(array_merge(Arr::sortRecursive([10, 30, 50, 100, 500, $this->pageLength]), [-1]))),
                     array_values(array_unique(array_merge(
                         Arr::sortRecursive([10, 30, 50, 100, 500, $this->pageLength]),
                         [trans('core/base::tables.all')]
                     ))),
                 ],
-                'pageLength'   => $this->pageLength,
-                'processing'   => true,
-                'serverSide'   => true,
-                'bServerSide'  => true,
+                'pageLength' => $this->pageLength,
+                'processing' => true,
+                'serverSide' => true,
+                'bServerSide' => true,
                 'bDeferRender' => true,
-                'bProcessing'  => true,
-                'language'     => [
-                    'aria'              => [
-                        'sortAscending'  => 'orderby asc',
+                'bProcessing' => true,
+                'language' => [
+                    'aria' => [
+                        'sortAscending' => 'orderby asc',
                         'sortDescending' => 'orderby desc',
-                        'paginate'       => [
-                            'next'     => trans('pagination.next'),
+                        'paginate' => [
+                            'next' => trans('pagination.next'),
                             'previous' => trans('pagination.previous'),
                         ],
                     ],
-                    'emptyTable'        => trans('core/base::tables.no_data'),
-                    'info'              => view('core/table::table-info')->render(),
-                    'infoEmpty'         => trans('core/base::tables.no_record'),
-                    'lengthMenu'        => Html::tag('span', '_MENU_', ['class' => 'dt-length-style'])->toHtml(),
-                    'search'            => '',
+                    'emptyTable' => trans('core/base::tables.no_data'),
+                    'info' => view('core/table::table-info')->render(),
+                    'infoEmpty' => trans('core/base::tables.no_record'),
+                    'lengthMenu' => Html::tag('span', '_MENU_', ['class' => 'dt-length-style'])->toHtml(),
+                    'search' => '',
                     'searchPlaceholder' => trans('core/table::table.search'),
-                    'zeroRecords'       => trans('core/base::tables.no_record'),
-                    'processing'        => Html::image(url('vendor/core/core/base/images/loading-spinner-blue.gif')),
-                    'paginate'          => [
-                        'next'     => trans('pagination.next'),
+                    'zeroRecords' => trans('core/base::tables.no_record'),
+                    'processing' => Html::image(url('vendor/core/core/base/images/loading-spinner-blue.gif')),
+                    'paginate' => [
+                        'next' => trans('pagination.next'),
                         'previous' => trans('pagination.previous'),
                     ],
-                    'infoFiltered'      => trans('core/table::table.filtered'),
+                    'infoFiltered' => trans('core/table::table.filtered'),
                 ],
-                'aaSorting'    => $this->useDefaultSorting ? [
+                'aaSorting' => $this->useDefaultSorting ? [
                     [
                         ($this->hasCheckbox ? $this->defaultSortColumn : 0),
                         'desc',
                     ],
                 ] : [],
-                'responsive'   => true,
-                'autoWidth'    => false,
+                'responsive' => true,
+                'autoWidth' => false,
             ]);
     }
 
@@ -367,13 +367,13 @@ abstract class TableAbstract extends DataTable
     {
         return [
             'operations' => [
-                'title'      => trans('core/base::tables.operations'),
-                'width'      => '134px',
-                'class'      => 'text-center',
-                'orderable'  => false,
+                'title' => trans('core/base::tables.operations'),
+                'width' => '134px',
+                'class' => 'text-center',
+                'orderable' => false,
                 'searchable' => false,
                 'exportable' => false,
-                'printable'  => false,
+                'printable' => false,
             ],
         ];
     }
@@ -397,16 +397,16 @@ abstract class TableAbstract extends DataTable
     {
         return [
             'checkbox' => [
-                'width'      => '10px',
-                'class'      => 'text-start no-sort',
-                'title'      => Form::input('checkbox', null, null, [
-                    'class'    => 'table-check-all',
+                'width' => '10px',
+                'class' => 'text-start no-sort',
+                'title' => Form::input('checkbox', null, null, [
+                    'class' => 'table-check-all',
                     'data-set' => '.dataTable .checkboxes',
                 ])->toHtml(),
-                'orderable'  => false,
+                'orderable' => false,
                 'searchable' => false,
                 'exportable' => false,
-                'printable'  => false,
+                'printable' => false,
             ],
         ];
     }
@@ -449,9 +449,11 @@ abstract class TableAbstract extends DataTable
         switch ($this->type) {
             case self::TABLE_TYPE_ADVANCED:
                 $dom = "fBrt<'datatables__info_wrap'pli<'clearfix'>>";
+
                 break;
             case self::TABLE_TYPE_SIMPLE:
                 $dom = "t<'datatables__info_wrap'<'clearfix'>>";
+
                 break;
         }
 
@@ -502,9 +504,9 @@ abstract class TableAbstract extends DataTable
             } else {
                 $data[] = [
                     'className' => 'action-item',
-                    'text'      => Html::tag('span', $button['text'], [
+                    'text' => Html::tag('span', $button['text'], [
                         'data-action' => $key,
-                        'data-href'   => Arr::get($button, 'link'),
+                        'data-href' => Arr::get($button, 'link'),
                     ])->toHtml(),
                 ];
             }
@@ -533,8 +535,8 @@ abstract class TableAbstract extends DataTable
 
         return [
             [
-                'extend'  => 'collection',
-                'text'    => '<span>' . trans('core/base::forms.actions') . ' <span class="caret"></span></span>',
+                'extend' => 'collection',
+                'text' => '<span>' . trans('core/base::forms.actions') . ' <span class="caret"></span></span>',
                 'buttons' => $this->getActions(),
             ],
         ];
@@ -555,7 +557,7 @@ abstract class TableAbstract extends DataTable
         foreach ($this->actions() as $key => $action) {
             $actions[] = [
                 'className' => 'action-item',
-                'text'      => '<span data-action="' . $key . '" data-href="' . $action['link'] . '"> ' . $action['text'] . '</span>',
+                'text' => '<span data-action="' . $key . '" data-href="' . $action['link'] . '"> ' . $action['text'] . '</span>',
             ];
         }
 
@@ -713,8 +715,8 @@ abstract class TableAbstract extends DataTable
         if ($this->getBulkChanges()) {
             $actions['bulk-change'] = view('core/table::bulk-changes', [
                 'bulk_changes' => $this->getBulkChanges(),
-                'class'        => get_class($this),
-                'url'          => $this->bulkChangeUrl,
+                'class' => get_class($this),
+                'url' => $this->bulkChangeUrl,
             ])->render();
         }
 
@@ -730,7 +732,7 @@ abstract class TableAbstract extends DataTable
     }
 
     /**
-     * @param EloquentBuilder|Builder $query
+     * @param EloquentBuilder|\Illuminate\Database\Query\Builder $query
      * @return mixed
      */
     public function applyScopes($query)
@@ -750,9 +752,9 @@ abstract class TableAbstract extends DataTable
                 }
 
                 $requestFilters[] = [
-                    'column'   => $item,
+                    'column' => $item,
                     'operator' => $operator,
-                    'value'    => $value,
+                    'value' => $value,
                 ];
             }
         }
@@ -772,7 +774,7 @@ abstract class TableAbstract extends DataTable
     }
 
     /**
-     * @param Builder|EloquentBuilder $query
+     * @param \Illuminate\Database\Query\Builder|EloquentBuilder $query
      * @param string $key
      * @param string $operator
      * @param string|null $value
@@ -793,6 +795,7 @@ abstract class TableAbstract extends DataTable
 
                 $value = BaseHelper::formatDate($value);
                 $query = $query->whereDate($this->repository->getTable() . '.' . $key, $operator, $value);
+
                 break;
             default:
                 if (!$value) {
@@ -801,6 +804,7 @@ abstract class TableAbstract extends DataTable
 
                 if ($operator === 'like') {
                     $query = $query->where($this->repository->getTable() . '.' . $key, $operator, '%' . $value . '%');
+
                     break;
                 }
 
@@ -828,8 +832,8 @@ abstract class TableAbstract extends DataTable
             $inputName = 'filter_values[]';
         }
         $attributes = [
-            'class'        => 'form-control input-value filter-column-value',
-            'placeholder'  => trans('core/table::table.value'),
+            'class' => 'form-control input-value filter-column-value',
+            'placeholder' => trans('core/table::table.value'),
             'autocomplete' => 'off',
         ];
 
@@ -839,27 +843,31 @@ abstract class TableAbstract extends DataTable
                 $attributes['class'] = $attributes['class'] . ' select';
                 $attributes['placeholder'] = trans('core/table::table.select_option');
                 $html = Form::customSelect($inputName, $data, $value, $attributes)->toHtml();
+
                 break;
 
             case 'select-search':
                 $attributes['class'] = $attributes['class'] . ' select-search-full';
                 $attributes['placeholder'] = trans('core/table::table.select_option');
                 $html = Form::customSelect($inputName, $data, $value, $attributes)->toHtml();
+
                 break;
 
             case 'select-ajax':
                 $attributes = [
-                    'class'              => $attributes['class'] . ' select-search-ajax',
-                    'data-url'           => Arr::get($data, 'url'),
+                    'class' => $attributes['class'] . ' select-search-ajax',
+                    'data-url' => Arr::get($data, 'url'),
                     'data-minimum-input' => Arr::get($data, 'minimum-input', 2),
-                    'multiple'           => Arr::get($data, 'multiple', false),
-                    'data-placeholder'   => Arr::get($data, 'placeholder', $attributes['placeholder']),
+                    'multiple' => Arr::get($data, 'multiple', false),
+                    'data-placeholder' => Arr::get($data, 'placeholder', $attributes['placeholder']),
                 ];
                 $html = Form::customSelect($inputName, Arr::get($data, 'selected', []), $value, $attributes)->toHtml();
+
                 break;
 
             case 'number':
                 $html = Form::number($inputName, $value, $attributes)->toHtml();
+
                 break;
 
             case 'date':
@@ -867,10 +875,12 @@ abstract class TableAbstract extends DataTable
                 $attributes['data-date-format'] = config('core.base.general.date_format.js.date');
                 $content = Form::text($inputName, $value, $attributes)->toHtml();
                 $html = view('core/table::partials.date-field', compact('content'))->render();
+
                 break;
 
             default:
                 $html = Form::text($inputName, $value, $attributes)->toHtml();
+
                 break;
         }
 
@@ -924,6 +934,7 @@ abstract class TableAbstract extends DataTable
             case 'created_at':
             case 'updated_at':
                 $value = BaseHelper::formatDateTime($value);
+
                 break;
         }
 
@@ -942,9 +953,9 @@ abstract class TableAbstract extends DataTable
         $request = request();
         $requestFilters = [
             '-1' => [
-                'column'   => '',
+                'column' => '',
                 'operator' => '=',
-                'value'    => '',
+                'value' => '',
             ],
         ];
 
@@ -960,9 +971,9 @@ abstract class TableAbstract extends DataTable
                 }
 
                 $requestFilters[] = [
-                    'column'   => $item,
+                    'column' => $item,
                     'operator' => $operator,
-                    'value'    => $value,
+                    'value' => $value,
                 ];
             }
         }
@@ -1012,7 +1023,7 @@ abstract class TableAbstract extends DataTable
     {
         if (!$permission || Auth::user()->hasPermission($permission)) {
             $actions['delete-many'] = view('core/table::partials.delete', [
-                'href'       => $url,
+                'href' => $url,
                 'data_class' => get_called_class(),
             ]);
         }
@@ -1058,5 +1069,10 @@ abstract class TableAbstract extends DataTable
             trans('core/base::tables.image'),
             $attributes
         );
+    }
+
+    public function htmlBuilder(): Builder
+    {
+        return app(Builder::class);
     }
 }

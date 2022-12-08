@@ -18,11 +18,11 @@ class BrandResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id'          => $this->id,
-            'name'        => $this->name,
-            'url'         => $this->url,
+            'id' => $this->id,
+            'name' => $this->name,
+            'url' => $this->url,
             'description' => Str::limit($this->description, 150),
-            'logo'        => RvMedia::getImageUrl($this->logo, null, false, RvMedia::getDefaultImage()),
+            'logo' => RvMedia::getImageUrl($this->logo, null, false, RvMedia::getDefaultImage()),
         ];
     }
 }

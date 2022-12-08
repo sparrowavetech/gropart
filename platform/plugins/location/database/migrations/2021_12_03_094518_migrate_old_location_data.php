@@ -57,7 +57,7 @@ return new class () extends Migration {
                 CityTranslation::insertOrIgnore([
                     'cities_id' => $originalId,
                     'lang_code' => $item->lang_meta_code,
-                    'name'      => $originalItem->name,
+                    'name' => $originalItem->name,
                 ]);
 
                 if (is_plugin_active('real-estate')) {
@@ -88,9 +88,9 @@ return new class () extends Migration {
                 }
 
                 StateTranslation::insertOrIgnore([
-                    'states_id'    => $originalId,
-                    'lang_code'    => $item->lang_meta_code,
-                    'name'         => $originalItem->name,
+                    'states_id' => $originalId,
+                    'lang_code' => $item->lang_meta_code,
+                    'name' => $originalItem->name,
                     'abbreviation' => $originalItem->abbreviation,
                 ]);
 
@@ -121,9 +121,9 @@ return new class () extends Migration {
 
                 CountryTranslation::insertOrIgnore([
                     'countries_id' => $originalId,
-                    'lang_code'    => $item->lang_meta_code,
-                    'name'         => $originalItem->name,
-                    'nationality'  => $originalItem->nationality,
+                    'lang_code' => $item->lang_meta_code,
+                    'name' => $originalItem->name,
+                    'nationality' => $originalItem->nationality,
                 ]);
 
                 City::where('country_id', $originalItem->id)->update(['country_id' => $originalId]);

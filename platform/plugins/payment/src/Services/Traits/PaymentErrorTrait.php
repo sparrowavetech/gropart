@@ -57,11 +57,11 @@ trait PaymentErrorTrait
             Log::error(
                 'Failed to make a payment charge.',
                 PaymentHelper::formatLog([
-                    'catch_case'    => $case,
-                    'http_status'   => ($exception instanceof ApiErrorException) ? $exception->getHttpStatus() : 'not-have-http-status',
-                    'error_type'    => Arr::get($error, 'type', 'not-have-error-type'),
-                    'error_code'    => Arr::get($error, 'code', $exception->getCode()),
-                    'error_param'   => Arr::get($error, 'param', 'not-have-error-param'),
+                    'catch_case' => $case,
+                    'http_status' => ($exception instanceof ApiErrorException) ? $exception->getHttpStatus() : 'not-have-http-status',
+                    'error_type' => Arr::get($error, 'type', 'not-have-error-type'),
+                    'error_code' => Arr::get($error, 'code', $exception->getCode()),
+                    'error_param' => Arr::get($error, 'param', 'not-have-error-param'),
                     'error_message' => $this->errorMessage,
                 ], __LINE__, __FUNCTION__, __CLASS__)
             );
@@ -69,7 +69,7 @@ trait PaymentErrorTrait
             Log::error(
                 'Failed to make a payment charge.',
                 PaymentHelper::formatLog([
-                    'catch_case'    => $case,
+                    'catch_case' => $case,
                     'error_message' => $exception->getMessage(),
                 ], __LINE__, __FUNCTION__, __CLASS__)
             );

@@ -55,7 +55,7 @@ class InlineCss extends PageSpeed
             $this->inline[] = '.' . $class . '{' . $attributes . '}';
 
             $this->style[] = [
-                'class'      => $class,
+                'class' => $class,
                 'attributes' => preg_quote($attributes, '/'),
             ];
         });

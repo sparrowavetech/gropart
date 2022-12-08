@@ -96,13 +96,13 @@ class DiscountTable extends TableAbstract
     public function columns()
     {
         return [
-            'id'         => [
+            'id' => [
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
                 'class' => 'text-start',
             ],
-            'detail'     => [
-                'name'  => 'code',
+            'detail' => [
+                'name' => 'code',
                 'title' => trans('plugins/ecommerce::discount.detail'),
                 'class' => 'text-start',
             ],
@@ -114,7 +114,7 @@ class DiscountTable extends TableAbstract
                 'title' => trans('plugins/ecommerce::discount.start_date'),
                 'class' => 'text-center',
             ],
-            'end_date'   => [
+            'end_date' => [
                 'title' => trans('plugins/ecommerce::discount.end_date'),
                 'class' => 'text-center',
             ],

@@ -138,45 +138,45 @@ class MySqlDump
         $pdoSettings = []
     ) {
         $dumpSettingsDefault = [
-            'include-tables'             => [],
-            'exclude-tables'             => [],
-            'include-views'              => [],
-            'compress'                   => Mysqldump::NONE,
-            'init_commands'              => [],
-            'no-data'                    => [],
-            'if-not-exists'              => false,
-            'reset-auto-increment'       => false,
-            'add-drop-database'          => false,
-            'add-drop-table'             => false,
-            'add-drop-trigger'           => true,
-            'add-locks'                  => true,
-            'complete-insert'            => false,
-            'databases'                  => false,
-            'default-character-set'      => Mysqldump::UTF8,
-            'disable-keys'               => true,
-            'extended-insert'            => true,
-            'events'                     => false,
-            'hex-blob'                   => true, /* faster than escaped content */
-            'insert-ignore'              => false,
-            'net_buffer_length'          => self::MAXLINESIZE,
-            'no-autocommit'              => false,
-            'no-create-info'             => false,
-            'lock-tables'                => true,
-            'routines'                   => false,
-            'single-transaction'         => true,
-            'skip-triggers'              => false,
-            'skip-tz-utc'                => false,
-            'skip-comments'              => false,
-            'skip-dump-date'             => false,
-            'skip-definer'               => false,
-            'where'                      => '',
+            'include-tables' => [],
+            'exclude-tables' => [],
+            'include-views' => [],
+            'compress' => Mysqldump::NONE,
+            'init_commands' => [],
+            'no-data' => [],
+            'if-not-exists' => false,
+            'reset-auto-increment' => false,
+            'add-drop-database' => false,
+            'add-drop-table' => false,
+            'add-drop-trigger' => true,
+            'add-locks' => true,
+            'complete-insert' => false,
+            'databases' => false,
+            'default-character-set' => Mysqldump::UTF8,
+            'disable-keys' => true,
+            'extended-insert' => true,
+            'events' => false,
+            'hex-blob' => true, /* faster than escaped content */
+            'insert-ignore' => false,
+            'net_buffer_length' => self::MAXLINESIZE,
+            'no-autocommit' => false,
+            'no-create-info' => false,
+            'lock-tables' => true,
+            'routines' => false,
+            'single-transaction' => true,
+            'skip-triggers' => false,
+            'skip-tz-utc' => false,
+            'skip-comments' => false,
+            'skip-dump-date' => false,
+            'skip-definer' => false,
+            'where' => '',
             /* deprecated */
             'disable-foreign-keys-check' => true,
         ];
 
         $pdoSettingsDefault = [
             PDO::ATTR_PERSISTENT => true,
-            PDO::ATTR_ERRMODE    => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         ];
 
         $this->user = $user;
@@ -341,6 +341,7 @@ class MySqlDump
             switch ($this->dbType) {
                 case 'sqlite':
                     $this->dbHandler = @new PDO('sqlite:' . $this->dbName, null, null, $this->pdoSettings);
+
                     break;
                 case 'mysql':
                 case 'pgsql':
@@ -357,6 +358,7 @@ class MySqlDump
                     }
                     // Store server version
                     $this->version = $this->dbHandler->getAttribute(PDO::ATTR_SERVER_VERSION);
+
                     break;
                 default:
                     throw new Exception('Unsupported database type (' . $this->dbType . ')');
@@ -435,6 +437,7 @@ class MySqlDump
         // This check will be removed once include-tables supports regexps.
         if (0 < count($this->dumpSettings['include-tables'])) {
             $name = implode(',', $this->dumpSettings['include-tables']);
+
             throw new Exception('Table (' . $name . ') not found in database');
         }
 
@@ -791,6 +794,7 @@ class MySqlDump
                 $this->compressManager->write(
                     $this->typeAdapter->createTable($r)
                 );
+
                 break;
             }
         }
@@ -818,9 +822,9 @@ class MySqlDump
             $types = $this->typeAdapter->parseColumnType($col);
             $columnTypes[$col['Field']] = [
                 'is_numeric' => $types['is_numeric'],
-                'is_blob'    => $types['is_blob'],
-                'type'       => $types['type'],
-                'type_sql'   => $col['Type'],
+                'is_blob' => $types['is_blob'],
+                'type' => $types['type'],
+                'type_sql' => $col['Type'],
                 'is_virtual' => $types['is_virtual'],
             ];
         }
@@ -858,6 +862,7 @@ class MySqlDump
             $this->compressManager->write(
                 $this->createStandInTable($viewName)
             );
+
             break;
         }
     }
@@ -913,6 +918,7 @@ class MySqlDump
             $this->compressManager->write(
                 $this->typeAdapter->createView($r)
             );
+
             break;
         }
     }

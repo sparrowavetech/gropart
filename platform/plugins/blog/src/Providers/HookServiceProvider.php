@@ -19,7 +19,6 @@ use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Menu;
@@ -45,11 +44,7 @@ class HookServiceProvider extends ServiceProvider
 
         Event::listen(RouteMatched::class, function () {
             if (function_exists('admin_bar')) {
-                View::composer('*', function () {
-                    if (Auth::check() && Auth::user()->hasPermission('posts.create')) {
-                        admin_bar()->registerLink(trans('plugins/blog::posts.post'), route('posts.create'), 'add-new');
-                    }
-                });
+                admin_bar()->registerLink(trans('plugins/blog::posts.post'), route('posts.create'), 'add-new', 'posts.create');
             }
         });
 
@@ -88,33 +83,33 @@ class HookServiceProvider extends ServiceProvider
                     }
 
                     $schema = [
-                        '@context'         => 'https://schema.org',
-                        '@type'            => $schemaType,
+                        '@context' => 'https://schema.org',
+                        '@type' => $schemaType,
                         'mainEntityOfPage' => [
                             '@type' => 'WebPage',
-                            '@id'   => $post->url,
+                            '@id' => $post->url,
                         ],
-                        'headline'         => BaseHelper::clean($post->name),
-                        'description'      => BaseHelper::clean($post->description),
-                        'image'            => [
+                        'headline' => BaseHelper::clean($post->name),
+                        'description' => BaseHelper::clean($post->description),
+                        'image' => [
                             '@type' => 'ImageObject',
-                            'url'   => RvMedia::getImageUrl($post->image, null, false, RvMedia::getDefaultImage()),
+                            'url' => RvMedia::getImageUrl($post->image, null, false, RvMedia::getDefaultImage()),
                         ],
-                        'author'           => [
+                        'author' => [
                             '@type' => 'Person',
-                            'url'   => route('public.index'),
-                            'name'  => $post->author->name,
+                            'url' => route('public.index'),
+                            'name' => $post->author->name,
                         ],
-                        'publisher'        => [
+                        'publisher' => [
                             '@type' => 'Organization',
-                            'name'  => theme_option('site_title'),
-                            'logo'  => [
+                            'name' => theme_option('site_title'),
+                            'logo' => [
                                 '@type' => 'ImageObject',
-                                'url'   => RvMedia::getImageUrl(theme_option('logo')),
+                                'url' => RvMedia::getImageUrl(theme_option('logo')),
                             ],
                         ],
-                        'datePublished'    => $post->created_at->toDateString(),
-                        'dateModified'     => $post->updated_at->toDateString(),
+                        'datePublished' => $post->created_at->toDateString(),
+                        'dateModified' => $post->updated_at->toDateString(),
                     ];
 
                     return $html . Html::tag('script', json_encode($schema), ['type' => 'application/ld+json'])
@@ -132,44 +127,44 @@ class HookServiceProvider extends ServiceProvider
 
         theme_option()
             ->setSection([
-                'title'      => 'Blog',
-                'desc'       => 'Theme options for Blog',
-                'id'         => 'opt-text-subsection-blog',
+                'title' => 'Blog',
+                'desc' => 'Theme options for Blog',
+                'id' => 'opt-text-subsection-blog',
                 'subsection' => true,
-                'icon'       => 'fa fa-edit',
-                'fields'     => [
+                'icon' => 'fa fa-edit',
+                'fields' => [
                     [
-                        'id'         => 'blog_page_id',
-                        'type'       => 'customSelect',
-                        'label'      => trans('plugins/blog::base.blog_page_id'),
+                        'id' => 'blog_page_id',
+                        'type' => 'customSelect',
+                        'label' => trans('plugins/blog::base.blog_page_id'),
                         'attributes' => [
-                            'name'    => 'blog_page_id',
-                            'list'    => ['' => trans('plugins/blog::base.select')] + $pages,
-                            'value'   => '',
+                            'name' => 'blog_page_id',
+                            'list' => ['' => trans('plugins/blog::base.select')] + $pages,
+                            'value' => '',
                             'options' => [
                                 'class' => 'form-control',
                             ],
                         ],
                     ],
                     [
-                        'id'         => 'number_of_posts_in_a_category',
-                        'type'       => 'number',
-                        'label'      => trans('plugins/blog::base.number_posts_per_page_in_category'),
+                        'id' => 'number_of_posts_in_a_category',
+                        'type' => 'number',
+                        'label' => trans('plugins/blog::base.number_posts_per_page_in_category'),
                         'attributes' => [
-                            'name'    => 'number_of_posts_in_a_category',
-                            'value'   => 12,
+                            'name' => 'number_of_posts_in_a_category',
+                            'value' => 12,
                             'options' => [
                                 'class' => 'form-control',
                             ],
                         ],
                     ],
                     [
-                        'id'         => 'number_of_posts_in_a_tag',
-                        'type'       => 'number',
-                        'label'      => trans('plugins/blog::base.number_posts_per_page_in_tag'),
+                        'id' => 'number_of_posts_in_a_tag',
+                        'type' => 'number',
+                        'label' => trans('plugins/blog::base.number_posts_per_page_in_tag'),
                         'attributes' => [
-                            'name'    => 'number_of_posts_in_a_tag',
-                            'value'   => 12,
+                            'name' => 'number_of_posts_in_a_tag',
+                            'value' => 12,
                             'options' => [
                                 'class' => 'form-control',
                             ],

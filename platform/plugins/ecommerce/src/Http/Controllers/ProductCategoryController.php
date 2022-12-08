@@ -101,7 +101,7 @@ class ProductCategoryController extends BaseController
 
             $response->setData([
                 'model' => $productCategory,
-                'form'  => $form
+                'form' => $form,
             ]);
         }
 
@@ -153,7 +153,7 @@ class ProductCategoryController extends BaseController
             }
             $response->setData([
                 'model' => $productCategory,
-                'form'  => $form
+                'form' => $form,
             ]);
         }
 
@@ -175,6 +175,7 @@ class ProductCategoryController extends BaseController
 
             $this->productCategoryRepository->delete($productCategory);
             event(new DeletedContentEvent(PRODUCT_CATEGORY_MODULE_SCREEN_NAME, $request, $productCategory));
+
             return $response->setMessage(trans('core/base::notices.delete_success_message'));
         } catch (Exception $exception) {
             return $response
@@ -254,11 +255,11 @@ class ProductCategoryController extends BaseController
     private function getOptions($options = [])
     {
         return array_merge([
-            'canCreate'   => Auth::user()->hasPermission('product-categories.create'),
-            'canEdit'     => Auth::user()->hasPermission('product-categories.edit'),
-            'canDelete'   => Auth::user()->hasPermission('product-categories.destroy'),
+            'canCreate' => Auth::user()->hasPermission('product-categories.create'),
+            'canEdit' => Auth::user()->hasPermission('product-categories.edit'),
+            'canDelete' => Auth::user()->hasPermission('product-categories.destroy'),
             'createRoute' => 'product-categories.create',
-            'editRoute'   => 'product-categories.edit',
+            'editRoute' => 'product-categories.edit',
             'deleteRoute' => 'product-categories.destroy',
         ], $options);
     }

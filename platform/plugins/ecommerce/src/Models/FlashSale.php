@@ -45,9 +45,6 @@ class FlashSale extends BaseModel
         'end_date',
     ];
 
-    /**
-     * @return BelongsToMany
-     */
     public function products(): BelongsToMany
     {
         return $this
@@ -59,7 +56,7 @@ class FlashSale extends BaseModel
      * @param string $value
      * @return string|null
      */
-    public function getEndDateAttribute($value)
+    public function getEndDateAttribute($value): ?string
     {
         if (!$value) {
             return $value;

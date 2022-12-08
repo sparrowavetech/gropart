@@ -15,11 +15,11 @@ class StoreLocatorRequest extends Request
     public function rules()
     {
         return [
-            'name'    => 'required|max:255',
-            'email'   => 'email|nullable|max:60',
-            'phone'   => 'required|' . BaseHelper::getPhoneValidationRule(),
-            'state'   => 'required|max:120',
-            'city'    => 'required|max:120',
+            'name' => 'required|max:255',
+            'email' => 'email|nullable|max:60',
+            'phone' => 'required|' . BaseHelper::getPhoneValidationRule(),
+            'state' => 'required|max:120',
+            'city' => 'required|max:120',
             'address' => 'required|max:120',
         ];
     }

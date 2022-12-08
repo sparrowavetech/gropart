@@ -614,19 +614,19 @@
                     <div class="wrapper-content pd-all-20">
                         <div class="form-group mb-3">
                             <label class="text-title-field"
-                                   for="search_for_an_exact_phrase">{{ trans('plugins/ecommerce::ecommerce.setting.activate_custom_return_product_quantity') }}
+                                   for="can_custom_return_product_quantity">{{ trans('plugins/ecommerce::ecommerce.setting.allow_partial_return') }}
                             </label>
                             <label class="me-2">
                                 <input type="radio" name="can_custom_return_product_quantity"
                                        value="1"
-                                       @if (get_ecommerce_setting('can_custom_return_product_quantity', 0) == 1) checked @endif>{{ trans('core/setting::setting.general.yes') }}
+                                       @if (EcommerceHelper::allowPartialReturn()) checked @endif>{{ trans('core/setting::setting.general.yes') }}
                             </label>
                             <label>
                                 <input type="radio" name="can_custom_return_product_quantity"
                                        value="0"
-                                       @if (get_ecommerce_setting('can_custom_return_product_quantity', 0) == 0) checked @endif>{{ trans('core/setting::setting.general.no') }}
+                                       @if (!EcommerceHelper::allowPartialReturn()) checked @endif>{{ trans('core/setting::setting.general.no') }}
                             </label>
-                            <span class="help-ts">{{ trans('plugins/ecommerce::ecommerce.setting.activate_custom_return_product_quantity_description') }}</span>
+                            <span class="help-ts">{{ trans('plugins/ecommerce::ecommerce.setting.allow_partial_return_description') }}</span>
                         </div>
                         <div class="form-group mb-3">
                             <label class="text-title-field"

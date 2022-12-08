@@ -20,6 +20,5 @@ class Plugin extends PluginOperationAbstract
                 'enable_faq_schema',
             ])
             ->delete();
-
     }
 }

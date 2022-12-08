@@ -24,7 +24,7 @@ class TableExportHandler extends DataTablesExportHandler implements WithEvents
             BeforeSheet::class => function (BeforeSheet $event) {
                 $this->beforeSheet($event);
             },
-            AfterSheet::class  => function (AfterSheet $event) {
+            AfterSheet::class => function (AfterSheet $event) {
                 $this->afterSheet($event);
             },
         ];
@@ -65,12 +65,13 @@ class TableExportHandler extends DataTablesExportHandler implements WithEvents
         $delegate = $event->sheet->getDelegate();
         $totalColumns = count(array_filter($this->headings()));
         $lastColumnName = $this->getNameFromNumber($totalColumns);
+
         try {
             $dimensions = 'A1:' . $lastColumnName . '1';
             $delegate->getStyle($dimensions)->applyFromArray(
                 [
-                    'font'      => [
-                        'bold'  => true,
+                    'font' => [
+                        'bold' => true,
                         'color' => [
                             'argb' => 'ffffff',
                         ],
@@ -78,8 +79,8 @@ class TableExportHandler extends DataTablesExportHandler implements WithEvents
                     'alignment' => [
                         'horizontal' => Alignment::HORIZONTAL_CENTER,
                     ],
-                    'fill'      => [
-                        'fillType'   => Fill::FILL_SOLID,
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
                         'startColor' => [
                             'argb' => '1d9977',
                         ],
@@ -142,6 +143,7 @@ class TableExportHandler extends DataTablesExportHandler implements WithEvents
             if (!$content) {
                 return null;
             }
+
             return imagecreatefromstring($content);
         } catch (Exception $exception) {
             return null;

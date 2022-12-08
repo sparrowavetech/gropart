@@ -98,29 +98,29 @@ class ContactTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function columns()
+    public function columns(): array
     {
         return [
-            'id'         => [
+            'id' => [
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
             ],
-            'name'       => [
+            'name' => [
                 'title' => trans('core/base::tables.name'),
                 'class' => 'text-start',
             ],
-            'email'      => [
+            'email' => [
                 'title' => trans('plugins/contact::contact.tables.email'),
                 'class' => 'text-start',
             ],
-            'phone'      => [
+            'phone' => [
                 'title' => trans('plugins/contact::contact.tables.phone'),
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
                 'width' => '100px',
             ],
-            'status'    => [
+            'status' => [
                 'title' => trans('core/base::tables.status'),
                 'width' => '100px',
             ],
@@ -141,30 +141,30 @@ class ContactTable extends TableAbstract
     public function getBulkChanges(): array
     {
         return [
-            'name'       => [
-                'title'    => trans('core/base::tables.name'),
-                'type'     => 'text',
+            'name' => [
+                'title' => trans('core/base::tables.name'),
+                'type' => 'text',
                 'validate' => 'required|max:120',
             ],
-            'email'      => [
-                'title'    => trans('core/base::tables.email'),
-                'type'     => 'text',
+            'email' => [
+                'title' => trans('core/base::tables.email'),
+                'type' => 'text',
                 'validate' => 'required|max:120',
             ],
-            'phone'      => [
-                'title'    => trans('plugins/contact::contact.sender_phone'),
-                'type'     => 'text',
+            'phone' => [
+                'title' => trans('plugins/contact::contact.sender_phone'),
+                'type' => 'text',
                 'validate' => 'required|max:120',
             ],
-            'status'    => [
-                'title'    => trans('core/base::tables.status'),
-                'type'     => 'customSelect',
-                'choices'  => ContactStatusEnum::labels(),
+            'status' => [
+                'title' => trans('core/base::tables.status'),
+                'type' => 'customSelect',
+                'choices' => ContactStatusEnum::labels(),
                 'validate' => 'required|' . Rule::in(ContactStatusEnum::values()),
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type'  => 'date',
+                'type' => 'date',
             ],
         ];
     }

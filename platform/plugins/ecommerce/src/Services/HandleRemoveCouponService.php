@@ -31,7 +31,7 @@ class HandleRemoveCouponService
     {
         if (!session()->has('applied_coupon_code')) {
             return [
-                'error'   => true,
+                'error' => true,
                 'message' => trans('plugins/ecommerce::discount.not_used'),
             ];
         }

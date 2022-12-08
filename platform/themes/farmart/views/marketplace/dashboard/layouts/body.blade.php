@@ -65,7 +65,7 @@
         <header class="header--dashboard">
             <div class="header__left">
                 <h3>{{ page_title()->getTitle(false) }}</h3>
-                @if(auth('customer')->user()->store->is_verified)
+                @if(!auth('customer')->user()->store->is_verified)
                     <div class="alert alert-warning d-flex align-items-center mt-4" role="alert">
                         <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
                         <symbol id="check-circle-fill" fill="currentColor" viewBox="0 0 16 16">

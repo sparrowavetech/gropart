@@ -1,15 +1,1 @@
-@php
-    $categories = ProductCategoryHelper::getAllProductCategories()
-        ->where('status', \Botble\Base\Enums\BaseStatusEnum::PUBLISHED)
-        ->whereIn('id', $config['categories']);
-@endphp
-@if ($categories->count())
-    <div>
-        <p>
-            <strong>{{ $config['name'] }}:</strong>
-            @foreach ($categories as $category)
-                <a href="{{ $category->url }}" title="{{ $category->name }}">{{ $category->name }}</a>
-            @endforeach
-        </p>
-    </div>
-@endif
+<footer-product-categories-component name="{{ $config['name'] }}" url="{{ route('public.ajax.get-product-categories') }}?{{ http_build_query(['categories' => $config['categories']]) }}"></footer-product-categories-component>

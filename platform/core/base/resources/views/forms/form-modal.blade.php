@@ -29,7 +29,7 @@
         {!! $form->renderValidatorJs() !!}
         @include('core/media::partials.media')
         <script>
-            "use strict";
+            'use strict';
             Botble.initMediaIntegrate();
         </script>
     @else

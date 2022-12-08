@@ -52,6 +52,7 @@ class CountryTable extends TableAbstract
                 if (!Auth::user()->hasPermission('country.edit')) {
                     return $item->name;
                 }
+
                 return Html::link(route('country.edit', $item->id), $item->name);
             })
             ->editColumn('checkbox', function ($item) {
@@ -70,9 +71,6 @@ class CountryTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function query()
     {
         $query = $this->repository->getModel()->select([
@@ -89,14 +87,14 @@ class CountryTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function columns()
+    public function columns(): array
     {
         return [
-            'id'          => [
+            'id' => [
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
             ],
-            'name'        => [
+            'name' => [
                 'title' => trans('core/base::tables.name'),
                 'class' => 'text-start',
             ],
@@ -104,11 +102,11 @@ class CountryTable extends TableAbstract
                 'title' => trans('plugins/location::country.nationality'),
                 'class' => 'text-start',
             ],
-            'created_at'  => [
+            'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
                 'width' => '100px',
             ],
-            'status'      => [
+            'status' => [
                 'title' => trans('core/base::tables.status'),
                 'width' => '100px',
             ],
@@ -118,7 +116,7 @@ class CountryTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function buttons()
+    public function buttons(): array
     {
         return $this->addCreateButton(route('country.create'), 'country.create');
     }
@@ -137,25 +135,25 @@ class CountryTable extends TableAbstract
     public function getBulkChanges(): array
     {
         return [
-            'name'        => [
-                'title'    => trans('core/base::tables.name'),
-                'type'     => 'text',
+            'name' => [
+                'title' => trans('core/base::tables.name'),
+                'type' => 'text',
                 'validate' => 'required|max:120',
             ],
             'nationality' => [
-                'title'    => trans('plugins/location::country.nationality'),
-                'type'     => 'text',
+                'title' => trans('plugins/location::country.nationality'),
+                'type' => 'text',
                 'validate' => 'required|max:120',
             ],
-            'status'      => [
-                'title'    => trans('core/base::tables.status'),
-                'type'     => 'customSelect',
-                'choices'  => BaseStatusEnum::labels(),
+            'status' => [
+                'title' => trans('core/base::tables.status'),
+                'type' => 'customSelect',
+                'choices' => BaseStatusEnum::labels(),
                 'validate' => 'required|in:' . implode(',', BaseStatusEnum::values()),
             ],
-            'created_at'  => [
+            'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type'  => 'date',
+                'type' => 'date',
             ],
         ];
     }

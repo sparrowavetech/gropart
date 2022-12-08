@@ -14,7 +14,7 @@ class SlugRequest extends Request
     public function rules()
     {
         return [
-            'value'   => 'required',
+            'value' => 'required',
             'slug_id' => 'required',
         ];
     }

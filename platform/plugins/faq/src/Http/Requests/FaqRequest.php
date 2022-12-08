@@ -16,8 +16,8 @@ class FaqRequest extends Request
     {
         return [
             'category_id' => 'required',
-            'question'    => 'required',
-            'answer'      => 'required',
+            'question' => 'required',
+            'answer' => 'required',
         ];
     }
 }

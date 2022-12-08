@@ -7,5 +7,4 @@ use Botble\Ecommerce\Repositories\Interfaces\InvoiceInterface;
 
 class InvoiceCacheDecorator extends CacheAbstractDecorator implements InvoiceInterface
 {
-
 }

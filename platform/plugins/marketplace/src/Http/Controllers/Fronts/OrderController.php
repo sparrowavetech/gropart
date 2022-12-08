@@ -62,10 +62,10 @@ class OrderController extends BaseController
      * @param PaymentInterface $paymentRepository
      */
     public function __construct(
-        OrderInterface        $orderRepository,
+        OrderInterface $orderRepository,
         OrderHistoryInterface $orderHistoryRepository,
         OrderAddressInterface $orderAddressRepository,
-        PaymentInterface      $paymentRepository
+        PaymentInterface $paymentRepository
     ) {
         $this->orderRepository = $orderRepository;
         $this->orderHistoryRepository = $orderHistoryRepository;
@@ -155,6 +155,7 @@ class OrderController extends BaseController
         try {
             $this->orderRepository->deleteBy(['id' => $id]);
             event(new DeletedContentEvent(ORDER_MODULE_SCREEN_NAME, $request, $order));
+
             return $response->setMessage(trans('core/base::notices.delete_success_message'));
         } catch (Exception $exception) {
             return $response
@@ -229,10 +230,10 @@ class OrderController extends BaseController
         $this->orderRepository->createOrUpdate($order);
 
         $this->orderHistoryRepository->createOrUpdate([
-            'action'      => 'confirm_order',
+            'action' => 'confirm_order',
             'description' => trans('plugins/ecommerce::order.order_was_verified_by'),
-            'order_id'    => $order->id,
-            'user_id'     => 0,
+            'order_id' => $order->id,
+            'user_id' => 0,
         ]);
 
         $payment = $this->paymentRepository->getFirstBy(['order_id' => $order->id]);
@@ -300,7 +301,7 @@ class OrderController extends BaseController
 
         return $response
             ->setData([
-                'line'   => view('plugins/ecommerce::orders.shipping-address.line', compact('address'))->render(),
+                'line' => view('plugins/ecommerce::orders.shipping-address.line', compact('address'))->render(),
                 'detail' => view('plugins/ecommerce::orders.shipping-address.detail', compact('address'))->render(),
             ])
             ->setMessage(trans('plugins/ecommerce::order.update_shipping_address_success'));
@@ -327,10 +328,10 @@ class OrderController extends BaseController
         OrderHelper::cancelOrder($order);
 
         $this->orderHistoryRepository->createOrUpdate([
-            'action'      => 'cancel_order',
+            'action' => 'cancel_order',
             'description' => trans('plugins/ecommerce::order.order_was_canceled_by'),
-            'order_id'    => $order->id,
-            'user_id'     => 0,
+            'order_id' => $order->id,
+            'user_id' => 0,
         ]);
 
         return $response->setMessage(trans('plugins/ecommerce::order.customer.messages.cancel_success'));
@@ -358,13 +359,13 @@ class OrderController extends BaseController
         $shipmentRepository->createOrUpdate(['status' => $status], compact('id'));
 
         $shipmentHistoryRepository->createOrUpdate([
-            'action'      => 'update_status',
+            'action' => 'update_status',
             'description' => trans('plugins/ecommerce::shipping.changed_shipping_status', [
                 'status' => ShippingStatusEnum::getLabel($status),
             ]),
             'shipment_id' => $id,
-            'order_id'    => $shipment->order_id,
-            'user_id'     => Auth::id() ?? 0,
+            'order_id' => $shipment->order_id,
+            'user_id' => Auth::id() ?? 0,
         ]);
 
         switch ($status) {
@@ -375,7 +376,7 @@ class OrderController extends BaseController
                 // Update status and time order complete
                 $order = $this->orderRepository->createOrUpdate(
                     [
-                        'status'       => OrderStatusEnum::COMPLETED,
+                        'status' => OrderStatusEnum::COMPLETED,
                         'completed_at' => Carbon::now(),
                     ],
                     ['id' => $shipment->order_id]
@@ -386,20 +387,22 @@ class OrderController extends BaseController
                 do_action(ACTION_AFTER_ORDER_STATUS_COMPLETED_ECOMMERCE, $order, $request);
 
                 $this->orderHistoryRepository->createOrUpdate([
-                    'action'      => 'update_status',
+                    'action' => 'update_status',
                     'description' => trans('plugins/ecommerce::shipping.order_confirmed_by'),
-                    'order_id'    => $shipment->order_id,
-                    'user_id'     => Auth::id() ?? 0,
+                    'order_id' => $shipment->order_id,
+                    'user_id' => Auth::id() ?? 0,
                 ]);
+
                 break;
 
             case ShippingStatusEnum::CANCELED:
                 $this->orderHistoryRepository->createOrUpdate([
-                    'action'      => 'cancel_shipment',
+                    'action' => 'cancel_shipment',
                     'description' => trans('plugins/ecommerce::shipping.shipping_canceled_by'),
-                    'order_id'    => $shipment->order_id,
-                    'user_id'     => Auth::id(),
+                    'order_id' => $shipment->order_id,
+                    'user_id' => Auth::id(),
                 ]);
+
                 break;
         }
 

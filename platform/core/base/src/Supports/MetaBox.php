@@ -75,6 +75,7 @@ class MetaBox
                         $this->metaBoxes[$reference][$a_context]['core'][$id] = $this->metaBoxes[$reference][$a_context]['default'][$id];
                         unset($this->metaBoxes[$reference][$a_context]['default'][$id]);
                     }
+
                     return;
                 }
                 /* If no priority given and id already present, use existing priority.
@@ -105,10 +106,10 @@ class MetaBox
         }
 
         $this->metaBoxes[$reference][$context][$priority][$id] = [
-            'id'       => $id,
-            'title'    => $title,
+            'id' => $id,
+            'title' => $title,
             'callback' => $callback,
-            'args'     => $callbackArgs,
+            'args' => $callbackArgs,
         ];
     }
 
@@ -138,7 +139,7 @@ class MetaBox
                     }
                     $index++;
                     $data .= view('core/base::elements.meta-box-wrap', [
-                        'box'      => $box,
+                        'box' => $box,
                         'callback' => call_user_func_array($box['callback'], [$object, $reference, $box]),
                     ])->render();
                 }
@@ -186,8 +187,8 @@ class MetaBox
 
         try {
             $fieldMeta = $this->metaBoxRepository->getFirstBy([
-                'meta_key'       => $key,
-                'reference_id'   => $object->id,
+                'meta_key' => $key,
+                'reference_id' => $object->id,
                 'reference_type' => get_class($object),
             ]);
 
@@ -248,8 +249,8 @@ class MetaBox
         $key = apply_filters('stored_meta_box_key', $key, $object);
 
         return $this->metaBoxRepository->getFirstBy([
-            'meta_key'       => $key,
-            'reference_id'   => $object->id,
+            'meta_key' => $key,
+            'reference_id' => $object->id,
             'reference_type' => get_class($object),
         ], $select);
     }
@@ -265,8 +266,8 @@ class MetaBox
         $key = apply_filters('stored_meta_box_key', $key, $object);
 
         return $this->metaBoxRepository->deleteBy([
-            'meta_key'       => $key,
-            'reference_id'   => $object->id,
+            'meta_key' => $key,
+            'reference_id' => $object->id,
             'reference_type' => get_class($object),
         ]);
     }

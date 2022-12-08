@@ -24,7 +24,7 @@ return new class () extends Migration {
                     }
 
                     $condition = [
-                        'lang_code'      => $language->lang_code,
+                        'lang_code' => $language->lang_code,
                         'ec_products_id' => $product->id,
                     ];
 
@@ -35,7 +35,7 @@ return new class () extends Migration {
                     }
 
                     $parentTranslation = ProductTranslation::where([
-                        'lang_code'      => $language->lang_code,
+                        'lang_code' => $language->lang_code,
                         'ec_products_id' => $product->original_product->id,
                     ])->first();
 

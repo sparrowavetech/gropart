@@ -238,6 +238,19 @@
                                 <input type="number" class="next-input" name="cache_time" id="cache_time"
                                        value="{{ setting('cache_time', 10) }}">
                             </div>
+                            <div class="form-group mb-3">
+                                <label class="text-title-field"
+                                       for="disable_cache_in_the_admin_panel">{{ trans('core/setting::setting.general.disable_cache_in_the_admin_panel') }}
+                                </label>
+                                <label class="me-2">
+                                    <input type="radio" name="disable_cache_in_the_admin_panel" value="1" @if (setting('disable_cache_in_the_admin_panel')) checked @endif class="setting-selection-option" data-target="#cache-settings">
+                                    {{ trans('core/setting::setting.general.yes') }}
+                                </label>
+                                <label>
+                                    <input type="radio" name="disable_cache_in_the_admin_panel" value="0" @if (!setting('disable_cache_in_the_admin_panel')) checked @endif class="setting-selection-option" data-target="#cache-settings">
+                                    {{ trans('core/setting::setting.general.no') }}
+                                </label>
+                            </div>
                         </div>
 
                         <div class="form-group mb-3">

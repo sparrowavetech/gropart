@@ -43,45 +43,30 @@ class OrderProduct extends BaseModel
      * @var array
      */
     protected $casts = [
-        'options'         => 'json',
+        'options' => 'json',
         'product_options' => 'json',
     ];
 
-    /**
-     * @return BelongsTo
-     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class)->withDefault();
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class)->withDefault();
     }
 
-    /**
-     * @return string
-     */
     public function getAmountFormatAttribute(): string
     {
         return format_price($this->price);
     }
 
-    /**
-     * @return string
-     */
     public function getTotalFormatAttribute(): string
     {
         return format_price($this->price * $this->qty);
     }
 
-    /**
-     * @return HasMany
-     */
     public function productFiles(): HasMany
     {
         return $this->hasMany(ProductFile::class, 'product_id');

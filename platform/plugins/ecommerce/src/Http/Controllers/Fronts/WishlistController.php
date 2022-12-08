@@ -50,14 +50,13 @@ class WishlistController extends Controller
 
         SeoHelper::setTitle(__('Wishlist'));
 
-        $queryParams = [
-            'paginate'  => [
-                'per_page'      => 10,
+        $queryParams = array_merge([
+            'paginate' => [
+                'per_page' => 10,
                 'current_paged' => (int)$request->input('page'),
             ],
-            'with'      => ['slugable'],
-            'withCount' => EcommerceHelper::withReviewsCount(),
-        ];
+            'with' => ['slugable'],
+        ], EcommerceHelper::withReviewsParams());
 
         if (auth('customer')->check()) {
             $products = $this->productRepository->getProductsWishlist(auth('customer')->id(), $queryParams);
@@ -118,7 +117,7 @@ class WishlistController extends Controller
         }
 
         $this->wishlistRepository->createOrUpdate([
-            'product_id'  => $productId,
+            'product_id' => $productId,
             'customer_id' => auth('customer')->id(),
         ]);
 
@@ -144,6 +143,7 @@ class WishlistController extends Controller
             Cart::instance('wishlist')->search(function ($cartItem, $rowId) use ($productId) {
                 if ($cartItem->id == $productId) {
                     Cart::instance('wishlist')->remove($rowId);
+
                     return true;
                 }
 
@@ -156,7 +156,7 @@ class WishlistController extends Controller
         }
 
         $this->wishlistRepository->deleteBy([
-            'product_id'  => $productId,
+            'product_id' => $productId,
             'customer_id' => auth('customer')->id(),
         ]);
 

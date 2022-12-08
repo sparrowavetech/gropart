@@ -86,10 +86,10 @@ class PublicController extends Controller
 
             EmailHandler::setModule(CONTACT_MODULE_SCREEN_NAME)
                 ->setVariableValues([
-                    'contact_name'    => $contact->name ?? 'N/A',
+                    'contact_name' => $contact->name ?? 'N/A',
                     'contact_subject' => $contact->subject ?? 'N/A',
-                    'contact_email'   => $contact->email ?? 'N/A',
-                    'contact_phone'   => $contact->phone ?? 'N/A',
+                    'contact_email' => $contact->email ?? 'N/A',
+                    'contact_phone' => $contact->phone ?? 'N/A',
                     'contact_address' => $contact->address ?? 'N/A',
                     'contact_content' => $contact->content ?? 'N/A',
                 ])
@@ -98,6 +98,7 @@ class PublicController extends Controller
             return $response->setMessage(__('Send message successfully!'));
         } catch (Exception $exception) {
             info($exception->getMessage());
+
             return $response
                 ->setError()
                 ->setMessage(__("Can't send message on this time, please try again later!"));

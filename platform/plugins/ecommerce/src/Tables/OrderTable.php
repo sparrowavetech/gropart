@@ -131,7 +131,7 @@ class OrderTable extends TableAbstract
     public function columns()
     {
         $columns = [
-            'id'      => [
+            'id' => [
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
                 'class' => 'text-start',
@@ -140,7 +140,7 @@ class OrderTable extends TableAbstract
                 'title' => trans('plugins/ecommerce::order.customer_label'),
                 'class' => 'text-start',
             ],
-            'amount'  => [
+            'amount' => [
                 'title' => trans('plugins/ecommerce::order.amount'),
                 'class' => 'text-center',
             ],
@@ -158,21 +158,21 @@ class OrderTable extends TableAbstract
                 'title' => trans('plugins/ecommerce::order.shipping_amount'),
                 'class' => 'text-center',
             ],
-            'payment_method'  => [
-                'name'  => 'payment_id',
+            'payment_method' => [
+                'name' => 'payment_id',
                 'title' => trans('plugins/ecommerce::order.payment_method'),
                 'class' => 'text-start',
             ],
-            'payment_status'  => [
-                'name'  => 'payment_id',
+            'payment_status' => [
+                'name' => 'payment_id',
                 'title' => trans('plugins/ecommerce::order.payment_status_label'),
                 'class' => 'text-center',
             ],
-            'status'          => [
+            'status' => [
                 'title' => trans('core/base::tables.status'),
                 'class' => 'text-center',
             ],
-            'created_at'      => [
+            'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
                 'width' => '100px',
                 'class' => 'text-start',
@@ -204,15 +204,15 @@ class OrderTable extends TableAbstract
     public function getBulkChanges(): array
     {
         return [
-            'status'     => [
-                'title'    => trans('core/base::tables.status'),
-                'type'     => 'select',
-                'choices'  => OrderStatusEnum::labels(),
+            'status' => [
+                'title' => trans('core/base::tables.status'),
+                'type' => 'select',
+                'choices' => OrderStatusEnum::labels(),
                 'validate' => 'required|in:' . implode(',', OrderStatusEnum::values()),
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type'  => 'date',
+                'type' => 'date',
             ],
         ];
     }
@@ -256,10 +256,10 @@ class OrderTable extends TableAbstract
             OrderHelper::cancelOrder($item);
 
             app(OrderHistoryInterface::class)->createOrUpdate([
-                'action'      => 'cancel_order',
+                'action' => 'cancel_order',
                 'description' => trans('plugins/ecommerce::order.order_was_canceled_by'),
-                'order_id'    => $item->id,
-                'user_id'     => Auth::id(),
+                'order_id' => $item->id,
+                'user_id' => Auth::id(),
             ]);
 
             return $item;

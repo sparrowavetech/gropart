@@ -68,10 +68,10 @@ class BaseServiceProvider extends ServiceProvider
         });
 
         $this->app['config']->set([
-            'session.cookie'                   => 'botble_session',
-            'ziggy.except'                     => ['debugbar.*'],
-            'app.debug_blacklist'              => [
-                '_ENV'    => [
+            'session.cookie' => 'botble_session',
+            'ziggy.except' => ['debugbar.*'],
+            'app.debug_blacklist' => [
+                '_ENV' => [
                     'APP_KEY',
                     'ADMIN_DIR',
                     'DB_DATABASE',
@@ -93,14 +93,14 @@ class BaseServiceProvider extends ServiceProvider
                     'PUSHER_APP_KEY',
                     'PUSHER_APP_SECRET',
                 ],
-                '_POST'   => [
+                '_POST' => [
                     'password',
                 ],
             ],
             'datatables-buttons.pdf_generator' => 'excel',
-            'excel.exports.csv.use_bom'        => true,
-            'dompdf.public_path'               => public_path(),
-            'debugbar.enabled'                 => $this->app['config']->get('app.debug') && !$this->app->runningInConsole() && !$this->app->environment(['testing', 'production']),
+            'excel.exports.csv.use_bom' => true,
+            'dompdf.public_path' => public_path(),
+            'debugbar.enabled' => $this->app['config']->get('app.debug') && !$this->app->runningInConsole() && !$this->app->environment(['testing', 'production']),
         ]);
 
         $this->app->bind('path.lang', function () {
@@ -136,7 +136,7 @@ class BaseServiceProvider extends ServiceProvider
             $locale = $setting->get('locale', $config->get('core.base.general.locale', $config->get('app.locale')));
 
             $config->set([
-                'app.locale'   => $locale,
+                'app.locale' => $locale,
                 'app.timezone' => $timezone,
             ]);
 
@@ -178,19 +178,19 @@ class BaseServiceProvider extends ServiceProvider
         $this->configureIni();
 
         $config->set([
-            'purifier.settings'                           => array_merge(
+            'purifier.settings' => array_merge(
                 $config->get('purifier.settings', []),
                 $config->get('core.base.general.purifier', [])
             ),
             'laravel-form-builder.defaults.wrapper_class' => 'form-group mb-3',
-            'database.connections.mysql.strict'           => $config->get('core.base.general.db_strict_mode'),
+            'database.connections.mysql.strict' => $config->get('core.base.general.db_strict_mode'),
         ]);
 
         if (!$config->has('logging.channels.deprecations')) {
             $config->set([
                 'logging.channels.deprecations' => [
                     'driver' => 'single',
-                    'path'   => storage_path('logs/php-deprecation-warnings.log'),
+                    'path' => storage_path('logs/php-deprecation-warnings.log'),
                 ],
             ]);
         }
@@ -203,42 +203,42 @@ class BaseServiceProvider extends ServiceProvider
     {
         dashboard_menu()
             ->registerItem([
-                'id'          => 'cms-core-platform-administration',
-                'priority'    => 999,
-                'parent_id'   => null,
-                'name'        => 'core/base::layouts.platform_admin',
-                'icon'        => 'fa fa-user-shield',
-                'url'         => null,
+                'id' => 'cms-core-platform-administration',
+                'priority' => 999,
+                'parent_id' => null,
+                'name' => 'core/base::layouts.platform_admin',
+                'icon' => 'fa fa-user-shield',
+                'url' => null,
                 'permissions' => ['users.index'],
             ])
             ->registerItem([
-                'id'          => 'cms-core-system-information',
-                'priority'    => 5,
-                'parent_id'   => 'cms-core-platform-administration',
-                'name'        => 'core/base::system.info.title',
-                'icon'        => null,
-                'url'         => route('system.info'),
+                'id' => 'cms-core-system-information',
+                'priority' => 5,
+                'parent_id' => 'cms-core-platform-administration',
+                'name' => 'core/base::system.info.title',
+                'icon' => null,
+                'url' => route('system.info'),
                 'permissions' => [ACL_ROLE_SUPER_USER],
             ])
             ->registerItem([
-                'id'          => 'cms-core-system-cache',
-                'priority'    => 6,
-                'parent_id'   => 'cms-core-platform-administration',
-                'name'        => 'core/base::cache.cache_management',
-                'icon'        => null,
-                'url'         => route('system.cache'),
+                'id' => 'cms-core-system-cache',
+                'priority' => 6,
+                'parent_id' => 'cms-core-platform-administration',
+                'name' => 'core/base::cache.cache_management',
+                'icon' => null,
+                'url' => route('system.cache'),
                 'permissions' => [ACL_ROLE_SUPER_USER],
             ]);
 
         if (config('core.base.general.enable_system_updater')) {
             dashboard_menu()
                 ->registerItem([
-                    'id'          => 'cms-core-system-updater',
-                    'priority'    => 999,
-                    'parent_id'   => 'cms-core-platform-administration',
-                    'name'        => 'core/base::system.updater',
-                    'icon'        => null,
-                    'url'         => route('system.updater'),
+                    'id' => 'cms-core-system-updater',
+                    'priority' => 999,
+                    'parent_id' => 'cms-core-platform-administration',
+                    'name' => 'core/base::system.updater',
+                    'icon' => null,
+                    'url' => route('system.updater'),
                     'permissions' => [ACL_ROLE_SUPER_USER],
                 ]);
         }

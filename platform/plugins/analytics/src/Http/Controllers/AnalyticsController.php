@@ -50,8 +50,8 @@ class AnalyticsController extends BaseController
 
             foreach ($answer->rows as $dateRow) {
                 $visitorData[] = [
-                    'axis'      => $this->getAxisByDimensions($dateRow[0], $dimensions),
-                    'visitors'  => $dateRow[1],
+                    'axis' => $this->getAxisByDimensions($dateRow[0], $dimensions),
+                    'visitors' => $dateRow[1],
                     'pageViews' => $dateRow[2],
                 ];
             }
@@ -106,11 +106,11 @@ class AnalyticsController extends BaseController
     protected function getDimension($key): string
     {
         $data = [
-            'this_week'    => 'date',
-            'last_7_days'  => 'date',
-            'this_month'   => 'date',
+            'this_week' => 'date',
+            'last_7_days' => 'date',
+            'this_month' => 'date',
             'last_30_days' => 'date',
-            'this_year'    => 'yearMonth',
+            'this_year' => 'yearMonth',
         ];
 
         return Arr::get($data, $key, 'hour');

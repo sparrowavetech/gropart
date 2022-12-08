@@ -74,21 +74,21 @@ class AuditLogTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function columns()
+    public function columns(): array
     {
         return [
-            'id'         => [
-                'name'  => 'id',
+            'id' => [
+                'name' => 'id',
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
             ],
-            'action'     => [
-                'name'  => 'action',
+            'action' => [
+                'name' => 'action',
                 'title' => trans('plugins/audit-log::history.action'),
                 'class' => 'text-start',
             ],
             'user_agent' => [
-                'name'  => 'user_agent',
+                'name' => 'user_agent',
                 'title' => trans('plugins/audit-log::history.user_agent'),
                 'class' => 'text-start',
             ],
@@ -98,7 +98,7 @@ class AuditLogTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function buttons()
+    public function buttons(): array
     {
         return [
             'empty' => [

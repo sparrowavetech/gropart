@@ -132,10 +132,10 @@ class EcommerceController extends BaseController
      * @throws Exception
      */
     public function postSettings(
-        UpdateSettingsRequest  $request,
-        BaseHttpResponse       $response,
+        UpdateSettingsRequest $request,
+        BaseHttpResponse $response,
         StoreCurrenciesService $service,
-        SettingStore           $settingStore
+        SettingStore $settingStore
     ) {
         foreach ($request->except([
             '_token',
@@ -200,9 +200,9 @@ class EcommerceController extends BaseController
      * @return BaseHttpResponse
      */
     public function postAdvancedSettings(
-        Request          $request,
+        Request $request,
         BaseHttpResponse $response,
-        SettingStore     $settingStore
+        SettingStore $settingStore
     ) {
         foreach ($request->except([
             '_token',
@@ -230,9 +230,9 @@ class EcommerceController extends BaseController
      * @return BaseHttpResponse
      */
     public function postTrackingSettings(
-        Request          $request,
+        Request $request,
         BaseHttpResponse $response,
-        SettingStore     $settingStore
+        SettingStore $settingStore
     ) {
         foreach ($request->except([
             '_token',
@@ -287,11 +287,11 @@ class EcommerceController extends BaseController
 
             $settingStore
                 ->set([
-                    $prefix . 'store_phone'   => $locator->phone,
+                    $prefix . 'store_phone' => $locator->phone,
                     $prefix . 'store_address' => $locator->address,
                     $prefix . 'store_country' => $locator->country,
-                    $prefix . 'store_state'   => $locator->state,
-                    $prefix . 'store_city'    => $locator->city,
+                    $prefix . 'store_state' => $locator->state,
+                    $prefix . 'store_city' => $locator->city,
                 ])
                 ->save();
         }
@@ -307,7 +307,7 @@ class EcommerceController extends BaseController
     public function postCreateStoreLocator(StoreLocatorRequest $request, BaseHttpResponse $response)
     {
         $request->merge([
-            'is_primary'           => false,
+            'is_primary' => false,
             'is_shipping_location' => $request->has('is_shipping_location'),
         ]);
 

@@ -19,14 +19,14 @@ class BankTransferPaymentService
         $orderIds = $data['order_id'];
 
         do_action(PAYMENT_ACTION_PAYMENT_PROCESSED, [
-            'amount'          => $data['amount'],
-            'currency'        => $data['currency'],
-            'charge_id'       => $chargeId,
-            'order_id'        => $orderIds,
-            'customer_id'     => $data['customer_id'],
-            'customer_type'   => $data['customer_type'],
+            'amount' => $data['amount'],
+            'currency' => $data['currency'],
+            'charge_id' => $chargeId,
+            'order_id' => $orderIds,
+            'customer_id' => $data['customer_id'],
+            'customer_type' => $data['customer_type'],
             'payment_channel' => PaymentMethodEnum::BANK_TRANSFER,
-            'status'          => PaymentStatusEnum::PENDING,
+            'status' => PaymentStatusEnum::PENDING,
         ]);
 
         return $chargeId;

@@ -39,12 +39,12 @@ class ApiServiceProvider extends ServiceProvider
 
             dashboard_menu()
                 ->registerItem([
-                    'id'          => 'cms-packages-api',
-                    'priority'    => 9999,
-                    'parent_id'   => 'cms-core-settings',
-                    'name'        => 'packages/api::api.settings',
-                    'icon'        => null,
-                    'url'         => route('api.settings'),
+                    'id' => 'cms-packages-api',
+                    'priority' => 9999,
+                    'parent_id' => 'cms-core-settings',
+                    'name' => 'packages/api::api.settings',
+                    'icon' => null,
+                    'url' => route('api.settings'),
                     'permissions' => ['api.settings'],
                 ]);
         });
@@ -52,9 +52,9 @@ class ApiServiceProvider extends ServiceProvider
         $this->app->booted(function () {
             config([
                 'scribe.routes.0.match.prefixes' => ['api/*'],
-                'scribe.routes.0.apply.headers'  => [
+                'scribe.routes.0.apply.headers' => [
                     'Authorization' => 'Bearer {token}',
-                    'Api-Version'   => 'v1',
+                    'Api-Version' => 'v1',
                 ],
             ]);
         });

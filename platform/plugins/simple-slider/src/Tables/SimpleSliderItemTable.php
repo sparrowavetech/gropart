@@ -66,8 +66,8 @@ class SimpleSliderItemTable extends TableAbstract
 
                 return Html::link('#', $item->title, [
                     'data-fancybox' => true,
-                    'data-type'     => 'ajax',
-                    'data-src'      => route('simple-slider-item.edit', $item->id),
+                    'data-type' => 'ajax',
+                    'data-src' => route('simple-slider-item.edit', $item->id),
                 ]);
             })
             ->editColumn('checkbox', function ($item) {
@@ -105,22 +105,22 @@ class SimpleSliderItemTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function columns()
+    public function columns(): array
     {
         return [
-                'id'         => [
+                'id' => [
                     'title' => trans('core/base::tables.id'),
                     'width' => '20px',
                 ],
-                'image'      => [
+                'image' => [
                     'title' => trans('core/base::tables.image'),
                     'class' => 'text-center',
                 ],
-                'title'      => [
+                'title' => [
                     'title' => trans('core/base::tables.title'),
                     'class' => 'text-start',
                 ],
-                'order'      => [
+                'order' => [
                     'title' => trans('core/base::tables.order'),
                     'class' => 'text-start order-column',
                 ],
@@ -134,7 +134,7 @@ class SimpleSliderItemTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function getOperationsHeading()
+    public function getOperationsHeading(): array
     {
         return array_merge(parent::getOperationsHeading(), ['operations' => ['width' => '170px']]);
     }

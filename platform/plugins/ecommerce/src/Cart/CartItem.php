@@ -354,14 +354,14 @@ class CartItem implements Arrayable, Jsonable
     public function toArray()
     {
         return [
-            'rowId'      => $this->rowId,
-            'id'         => $this->id,
-            'name'       => $this->name,
-            'qty'        => $this->qty,
-            'price'      => $this->price,
-            'options'    => $this->options->toArray(),
-            'tax'        => $this->tax,
-            'subtotal'   => $this->subtotal,
+            'rowId' => $this->rowId,
+            'id' => $this->id,
+            'name' => $this->name,
+            'qty' => $this->qty,
+            'price' => $this->price,
+            'options' => $this->options->toArray(),
+            'tax' => $this->tax,
+            'subtotal' => $this->subtotal,
             'updated_at' => $this->updated_at,
         ];
     }

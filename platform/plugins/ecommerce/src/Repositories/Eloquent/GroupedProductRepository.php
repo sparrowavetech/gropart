@@ -33,8 +33,8 @@ class GroupedProductRepository extends RepositoriesAbstract implements GroupedPr
         foreach ($childItems as $item) {
             $this->model->create([
                 'parent_product_id' => $groupedProductId,
-                'product_id'        => $item['id'],
-                'fixed_qty'         => isset($item['qty']) & $item['qty'] ?: 1,
+                'product_id' => $item['id'],
+                'fixed_qty' => isset($item['qty']) & $item['qty'] ?: 1,
             ]);
         }
 

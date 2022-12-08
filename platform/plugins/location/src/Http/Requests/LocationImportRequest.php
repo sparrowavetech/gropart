@@ -16,14 +16,14 @@ class LocationImportRequest extends Request
     public function rules()
     {
         return [
-            'name'         => 'required|max:120',
-            'import_type'  => 'required|in:country,state,city',
-            'order'        => 'nullable|integer|min:0|max:127',
+            'name' => 'required|max:120',
+            'import_type' => 'required|in:country,state,city',
+            'order' => 'nullable|integer|min:0|max:127',
             'abbreviation' => 'max:2',
-            'status'       => 'required|' . Rule::in(BaseStatusEnum::values()),
-            'country'      => 'required_if:import_type,state,city',
-            'state'        => 'required_if:import_type,city',
-            'nationality'  => 'required_if:import_type,country|max:120',
+            'status' => 'required|' . Rule::in(BaseStatusEnum::values()),
+            'country' => 'required_if:import_type,state,city',
+            'state' => 'required_if:import_type,city',
+            'nationality' => 'required_if:import_type,country|max:120',
         ];
     }
 
@@ -35,9 +35,9 @@ class LocationImportRequest extends Request
     public function messages()
     {
         return [
-            'country.required_if'     => trans('plugins/location::bulk-import.import_type_required_if'),
+            'country.required_if' => trans('plugins/location::bulk-import.import_type_required_if'),
             'nationality.required_if' => trans('plugins/location::bulk-import.import_type_required_if'),
-            'state.required_if'       => trans('plugins/location::bulk-import.import_type_required_if'),
+            'state.required_if' => trans('plugins/location::bulk-import.import_type_required_if'),
         ];
     }
 }

@@ -51,12 +51,12 @@ class HookServiceProvider extends ServiceProvider
                     'condition' => [
                         'status' => ContactStatusEnum::UNREAD,
                     ],
-                    'paginate'  => [
-                        'per_page'      => 10,
+                    'paginate' => [
+                        'per_page' => 10,
                         'current_paged' => 1,
                     ],
-                    'select'    => ['id', 'name', 'email', 'phone', 'created_at'],
-                    'order_by'  => ['created_at' => 'DESC'],
+                    'select' => ['id', 'name', 'email', 'phone', 'created_at'],
+                    'order_by' => ['created_at' => 'DESC'],
                 ]);
 
             if ($contacts->count() == 0) {
@@ -78,8 +78,8 @@ class HookServiceProvider extends ServiceProvider
     {
         if ($menuId == 'cms-plugins-contact') {
             $attributes = [
-                'class'    => 'badge badge-success menu-item-count unread-contacts',
-                'style'    => 'display: none;',
+                'class' => 'badge badge-success menu-item-count unread-contacts',
+                'style' => 'display: none;',
             ];
 
             return Html::tag('span', '', $attributes)->toHtml();
@@ -96,7 +96,7 @@ class HookServiceProvider extends ServiceProvider
     {
         if (Auth::user()->hasPermission('contacts.index')) {
             $data[] = [
-                'key'   => 'unread-contacts',
+                'key' => 'unread-contacts',
                 'value' => app(ContactInterface::class)->countUnread(),
             ];
         }

@@ -92,16 +92,16 @@ class StoreRevenueController extends BaseController
         $revenue = $this->revenueRepository->getModel();
         $amount = $request->input('amount');
         $data = [
-            'fee'             => 0,
-            'currency'        => get_application_currency()->title,
+            'fee' => 0,
+            'currency' => get_application_currency()->title,
             'current_balance' => $customer->balance,
-            'customer_id'     => $customer->getKey(),
-            'order_id'        => 0,
-            'user_id'         => Auth::id(),
-            'type'            => $request->input('type'),
-            'description'     => $request->input('description'),
-            'amount'          => $amount,
-            'sub_amount'      => $amount,
+            'customer_id' => $customer->getKey(),
+            'order_id' => 0,
+            'user_id' => Auth::id(),
+            'type' => $request->input('type'),
+            'description' => $request->input('description'),
+            'amount' => $amount,
+            'sub_amount' => $amount,
         ];
 
         if ($request->input('type') == RevenueTypeEnum::ADD_AMOUNT) {
@@ -113,6 +113,7 @@ class StoreRevenueController extends BaseController
         }
 
         DB::beginTransaction();
+
         try {
             $revenue->fill($data);
             $revenue->save();

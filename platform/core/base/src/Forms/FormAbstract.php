@@ -115,6 +115,7 @@ abstract class FormAbstract extends Form
     public function setTitle(string $title): self
     {
         $this->title = $title;
+
         return $this;
     }
 
@@ -135,7 +136,6 @@ abstract class FormAbstract extends Form
 
         return $this->metaBoxes;
     }
-
 
     /**
      * @param string $name
@@ -174,6 +174,7 @@ abstract class FormAbstract extends Form
     public function removeMetaBox(string $name): self
     {
         Arr::forget($this->metaBoxes, $name);
+
         return $this;
     }
 
@@ -226,6 +227,7 @@ abstract class FormAbstract extends Form
     public function setBreakFieldPoint(string $breakFieldPoint): self
     {
         $this->breakFieldPoint = $breakFieldPoint;
+
         return $this;
     }
 
@@ -244,6 +246,7 @@ abstract class FormAbstract extends Form
     public function setUseInlineJs(bool $useInlineJs): self
     {
         $this->useInlineJs = $useInlineJs;
+
         return $this;
     }
 
@@ -262,6 +265,7 @@ abstract class FormAbstract extends Form
     public function setWrapperClass(string $wrapperClass): self
     {
         $this->wrapperClass = $wrapperClass;
+
         return $this;
     }
 
@@ -272,18 +276,18 @@ abstract class FormAbstract extends Form
     {
         $customFields = [
             'customSelect' => CustomSelectField::class,
-            'editor'       => EditorField::class,
-            'onOff'        => OnOffField::class,
-            'customRadio'  => CustomRadioField::class,
-            'mediaImage'   => MediaImageField::class,
-            'mediaImages'  => MediaImagesField::class,
-            'mediaFile'    => MediaFileField::class,
-            'customColor'  => ColorField::class,
-            'time'         => TimeField::class,
-            'date'         => DateField::class,
+            'editor' => EditorField::class,
+            'onOff' => OnOffField::class,
+            'customRadio' => CustomRadioField::class,
+            'mediaImage' => MediaImageField::class,
+            'mediaImages' => MediaImagesField::class,
+            'mediaFile' => MediaFileField::class,
+            'customColor' => ColorField::class,
+            'time' => TimeField::class,
+            'date' => DateField::class,
             'autocomplete' => AutocompleteField::class,
-            'html'         => HtmlField::class,
-            'repeater'     => RepeaterField::class,
+            'html' => HtmlField::class,
+            'repeater' => RepeaterField::class,
         ];
 
         foreach ($customFields as $key => $field) {

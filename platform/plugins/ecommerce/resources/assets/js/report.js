@@ -1,10 +1,10 @@
 import SalesReportsChart from './components/SalesReportsChart';
 import RevenueChart from './components/RevenueChart';
 
-import Vue from 'vue';
-
-Vue.component('sales-reports-chart', SalesReportsChart);
-Vue.component('revenue-chart', RevenueChart);
+vueApp.booting(vue => {
+    vue.component('sales-reports-chart', SalesReportsChart);
+    vue.component('revenue-chart', RevenueChart);
+});
 
 $(() => {
     if (!window.moment || !jQuery().daterangepicker) {
@@ -104,8 +104,4 @@ $(() => {
         $this.find('span').text(value);
     });
 
-});
-
-const app = new Vue({
-    el: '#report-chart'
 });

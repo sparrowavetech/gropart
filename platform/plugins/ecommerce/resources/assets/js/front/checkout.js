@@ -71,7 +71,7 @@ class MainCheckout {
 
     static dotArrayToJs(str){
         let splittedStr = str.split('.');
-      
+
         return splittedStr.length == 1 ? str : (splittedStr[0] + '[' + splittedStr.splice(1).join('][') + ']');
     }
 
@@ -296,7 +296,15 @@ class MainCheckout {
                 params.payment_method = paymentMethod.val();
             }
 
-            reloadAddressForm(window.location.href + '?' + $.param(params) + ' ' + shippingForm + ' > *');
+            let baseUrl = window.location.href;
+
+            if (!baseUrl.includes('?')) {
+                baseUrl = baseUrl + '?';
+            } else {
+                baseUrl = baseUrl + '&';
+            }
+
+            reloadAddressForm(baseUrl + $.param(params) + ' ' + shippingForm + ' > *');
         });
 
         $(document).on('change', 'input[name=payment_method]', event => {
@@ -310,7 +318,15 @@ class MainCheckout {
                 payment_method: $this.val(),
             }
 
-            reloadAddressForm(window.location.href + '?' + $.param(params) + ' ' + shippingForm + ' > *');
+            let baseUrl = window.location.href;
+
+            if (!baseUrl.includes('?')) {
+                baseUrl = baseUrl + '?';
+            } else {
+                baseUrl = baseUrl + '&';
+            }
+
+            reloadAddressForm(baseUrl + $.param(params) + ' ' + shippingForm + ' > *');
         });
 
         let validatedFormFields = () => {

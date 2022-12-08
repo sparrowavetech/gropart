@@ -40,12 +40,12 @@
         </div>
         <div class="catalog-filter-sidebar-content px-3 px-md-0">
             @if($condition['is_enquiry'] != 1 )
-            <div class="widget-wrapper widget-product-categories">
-                <h4 class="widget-title">{{ __('Product Categories') }}</h4>
-                <div class="widget-layered-nav-list">
-                    @include(Theme::getThemeNamespace() . '::views.ecommerce.includes.categories', compact('categories', 'categoriesRequest', 'urlCurrent'))
+                <div class="widget-wrapper widget-product-categories">
+                    <h4 class="widget-title">{{ __('Product Categories') }}</h4>
+                    <div class="widget-layered-nav-list">
+                        @include(Theme::getThemeNamespace() . '::views.ecommerce.includes.categories', compact('categories', 'categoriesRequest', 'urlCurrent'))
+                    </div>
                 </div>
-            </div>
             @endif
             @if (count($brands) > 0)
                 <div class="widget-wrapper widget-product-brands">

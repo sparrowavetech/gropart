@@ -122,6 +122,7 @@ class LoginController extends BaseController
             if (!session()->has('url.intended')) {
                 session()->flash('url.intended', url()->current());
             }
+
             return $this->sendLoginResponse($request);
         }
 

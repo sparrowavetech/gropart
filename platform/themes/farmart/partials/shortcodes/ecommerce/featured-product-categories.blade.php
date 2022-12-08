@@ -46,9 +46,8 @@
             ],
         ],
     ];
-    $categories = ProductCategoryHelper::getAllProductCategories()
-            ->where('is_featured', true)
-            ->where('status', \Botble\Base\Enums\BaseStatusEnum::PUBLISHED);
+
+    $categories = get_featured_product_categories();
 @endphp
 @if ($categories->count())
     <div class="widget-product-categories pt-5 pb-2">

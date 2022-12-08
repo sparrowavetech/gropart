@@ -15,7 +15,7 @@ class ShippingMethodRequest extends Request
     public function rules()
     {
         $rules = [
-            'name'  => 'required|max:120',
+            'name' => 'required|max:120',
             'order' => 'required|integer|min:0',
         ];
 
@@ -42,6 +42,7 @@ class ShippingMethodRequest extends Request
         ) as $key => $rule) {
             $attributes[$this->input('method_code') . '.' . $key] = $rule['name'];
         }
+
         return $attributes;
     }
 }

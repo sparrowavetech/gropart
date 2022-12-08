@@ -3,337 +3,337 @@
 app()->booted(function () {
     theme_option()
         ->setField([
-            'id'         => 'sticky_header_enabled',
+            'id' => 'sticky_header_enabled',
             'section_id' => 'opt-text-subsection-general',
-            'type'       => 'customSelect',
-            'label'      => 'Enable sticky header?',
+            'type' => 'customSelect',
+            'label' => 'Enable sticky header?',
             'attributes' => [
-                'name'    => 'sticky_header_enabled',
-                'list'    => [
+                'name' => 'sticky_header_enabled',
+                'list' => [
                     'yes' => trans('core/base::base.yes'),
-                    'no'  => trans('core/base::base.no'),
+                    'no' => trans('core/base::base.no'),
                 ],
-                'value'   => 'yes',
+                'value' => 'yes',
                 'options' => [
                     'class' => 'form-control',
                 ],
             ],
         ])
         ->setField([
-            'id'         => 'sticky_header_mobile_enabled',
+            'id' => 'sticky_header_mobile_enabled',
             'section_id' => 'opt-text-subsection-general',
-            'type'       => 'customSelect',
-            'label'      => 'Enable sticky header on mobile?',
+            'type' => 'customSelect',
+            'label' => 'Enable sticky header on mobile?',
             'attributes' => [
-                'name'    => 'sticky_header_mobile_enabled',
-                'list'    => [
+                'name' => 'sticky_header_mobile_enabled',
+                'list' => [
                     'yes' => trans('core/base::base.yes'),
-                    'no'  => trans('core/base::base.no'),
+                    'no' => trans('core/base::base.no'),
                 ],
-                'value'   => 'yes',
+                'value' => 'yes',
                 'options' => [
                     'class' => 'form-control',
                 ],
             ],
         ])
         ->setField([
-            'id'         => 'preloader_enabled',
+            'id' => 'preloader_enabled',
             'section_id' => 'opt-text-subsection-general',
-            'type'       => 'customSelect',
-            'label'      => __('Enable Preloader?'),
+            'type' => 'customSelect',
+            'label' => __('Enable Preloader?'),
             'attributes' => [
-                'name'    => 'preloader_enabled',
-                'list'    => [
+                'name' => 'preloader_enabled',
+                'list' => [
                     'yes' => trans('core/base::base.yes'),
-                    'no'  => trans('core/base::base.no'),
+                    'no' => trans('core/base::base.no'),
                 ],
-                'value'   => 'yes',
+                'value' => 'yes',
                 'options' => [
                     'class' => 'form-control',
                 ],
             ],
         ])
         ->setField([
-            'id'         => 'lazy_load_image_enabled',
+            'id' => 'lazy_load_image_enabled',
             'section_id' => 'opt-text-subsection-general',
-            'type'       => 'customSelect',
-            'label'      => __('Enable lazy load images?'),
+            'type' => 'customSelect',
+            'label' => __('Enable lazy load images?'),
             'attributes' => [
-                'name'    => 'lazy_load_image_enabled',
-                'list'    => [
+                'name' => 'lazy_load_image_enabled',
+                'list' => [
                     'yes' => trans('core/base::base.yes'),
-                    'no'  => trans('core/base::base.no'),
+                    'no' => trans('core/base::base.no'),
                 ],
-                'value'   => 'yes',
+                'value' => 'yes',
                 'options' => [
                     'class' => 'form-control',
                 ],
             ],
         ])
         ->setField([
-            'id'         => 'image-placeholder',
+            'id' => 'image-placeholder',
             'section_id' => 'opt-text-subsection-general',
-            'type'       => 'mediaImage',
-            'label'      => __('Image placeholder'),
+            'type' => 'mediaImage',
+            'label' => __('Image placeholder'),
             'attributes' => [
-                'name'  => 'image-placeholder',
+                'name' => 'image-placeholder',
                 'value' => null,
             ],
         ])
         ->setField([
-            'id'         => 'use_source_assets_from',
+            'id' => 'use_source_assets_from',
             'section_id' => 'opt-text-subsection-general',
-            'type'       => 'customSelect',
-            'label'      => __('Use source assets from?'),
+            'type' => 'customSelect',
+            'label' => __('Use source assets from?'),
             'attributes' => [
-                'name'    => 'use_source_assets_from',
-                'list'    => [
+                'name' => 'use_source_assets_from',
+                'list' => [
                     'local' => __('Local disk'),
-                    'cdn'   => __('Content delivery network (CDN)'),
+                    'cdn' => __('Content delivery network (CDN)'),
                 ],
-                'value'   => 'cdn',
+                'value' => 'cdn',
                 'options' => [
                     'class' => 'form-control',
                 ],
             ],
         ])
         ->setField([
-            'id'         => 'copyright',
+            'id' => 'copyright',
             'section_id' => 'opt-text-subsection-general',
-            'type'       => 'text',
-            'label'      => __('Copyright'),
+            'type' => 'text',
+            'label' => __('Copyright'),
             'attributes' => [
-                'name'    => 'copyright',
-                'value'   => __('© :year Your Company. All right reserved.', ['year' => now()->format('Y')]),
+                'name' => 'copyright',
+                'value' => __('© :year Your Company. All right reserved.', ['year' => now()->format('Y')]),
                 'options' => [
-                    'class'        => 'form-control',
-                    'placeholder'  => __('Change copyright'),
+                    'class' => 'form-control',
+                    'placeholder' => __('Change copyright'),
                     'data-counter' => 250,
                 ],
             ],
-            'helper'     => __('Copyright on footer of site'),
+            'helper' => __('Copyright on footer of site'),
         ])
         ->setField([
-            'id'         => 'hotline',
+            'id' => 'hotline',
             'section_id' => 'opt-text-subsection-general',
-            'type'       => 'text',
-            'label'      => __('Hotline'),
+            'type' => 'text',
+            'label' => __('Hotline'),
             'attributes' => [
-                'name'    => 'hotline',
-                'value'   => null,
+                'name' => 'hotline',
+                'value' => null,
                 'options' => [
-                    'class'        => 'form-control',
-                    'placeholder'  => __('Hotline'),
+                    'class' => 'form-control',
+                    'placeholder' => __('Hotline'),
                     'data-counter' => 30,
                 ],
             ],
         ])
         ->setField([
-            'id'         => 'address',
+            'id' => 'address',
             'section_id' => 'opt-text-subsection-general',
-            'type'       => 'text',
-            'label'      => __('Address'),
+            'type' => 'text',
+            'label' => __('Address'),
             'attributes' => [
-                'name'    => 'address',
-                'value'   => null,
+                'name' => 'address',
+                'value' => null,
                 'options' => [
-                    'class'        => 'form-control',
-                    'placeholder'  => __('Address'),
+                    'class' => 'form-control',
+                    'placeholder' => __('Address'),
                     'data-counter' => 120,
                 ],
             ],
         ])
         ->setSection([
-            'title'      => __('Style'),
-            'desc'       => __('Style of theme'),
-            'id'         => 'opt-text-subsection-style',
+            'title' => __('Style'),
+            'desc' => __('Style of theme'),
+            'id' => 'opt-text-subsection-style',
             'subsection' => true,
-            'icon'       => 'fa fa-bars',
+            'icon' => 'fa fa-bars',
         ])
         ->setField([
-            'id'         => 'primary_font',
+            'id' => 'primary_font',
             'section_id' => 'opt-text-subsection-style',
-            'type'       => 'googleFonts',
-            'label'      => __('Primary font'),
+            'type' => 'googleFonts',
+            'label' => __('Primary font'),
             'attributes' => [
-                'name'  => 'primary_font',
+                'name' => 'primary_font',
                 'value' => 'Muli',
             ],
         ])
         ->setField([
-            'id'         => 'primary_color',
+            'id' => 'primary_color',
             'section_id' => 'opt-text-subsection-style',
-            'type'       => 'customColor',
-            'label'      => __('Primary color'),
+            'type' => 'customColor',
+            'label' => __('Primary color'),
             'attributes' => [
-                'name'  => 'primary_color',
+                'name' => 'primary_color',
                 'value' => '#fab528',
             ],
         ])
         ->setField([
-            'id'         => 'heading_color',
+            'id' => 'heading_color',
             'section_id' => 'opt-text-subsection-style',
-            'type'       => 'customColor',
-            'label'      => __('Heading color'),
+            'type' => 'customColor',
+            'label' => __('Heading color'),
             'attributes' => [
-                'name'  => 'heading_color',
+                'name' => 'heading_color',
                 'value' => '#000',
             ],
         ])
         ->setField([
-            'id'         => 'text_color',
+            'id' => 'text_color',
             'section_id' => 'opt-text-subsection-style',
-            'type'       => 'customColor',
-            'label'      => __('Text color'),
+            'type' => 'customColor',
+            'label' => __('Text color'),
             'attributes' => [
-                'name'  => 'text_color',
+                'name' => 'text_color',
                 'value' => '#000',
             ],
         ])
         ->setField([
-            'id'         => 'primary_button_color',
+            'id' => 'primary_button_color',
             'section_id' => 'opt-text-subsection-style',
-            'type'       => 'customColor',
-            'label'      => __('Primary button color'),
+            'type' => 'customColor',
+            'label' => __('Primary button color'),
             'attributes' => [
-                'name'  => 'primary_button_color',
+                'name' => 'primary_button_color',
                 'value' => '#000',
             ],
         ])
         ->setField([
-            'id'         => 'top_header_background_color',
+            'id' => 'top_header_background_color',
             'section_id' => 'opt-text-subsection-style',
-            'type'       => 'customColor',
-            'label'      => __('Top header background color'),
+            'type' => 'customColor',
+            'label' => __('Top header background color'),
             'attributes' => [
-                'name'  => 'top_header_background_color',
+                'name' => 'top_header_background_color',
                 'value' => '#f7f7f7',
             ],
         ])
         ->setField([
-            'id'         => 'middle_header_background_color',
+            'id' => 'middle_header_background_color',
             'section_id' => 'opt-text-subsection-style',
-            'type'       => 'customColor',
-            'label'      => __('Middle header background color'),
+            'type' => 'customColor',
+            'label' => __('Middle header background color'),
             'attributes' => [
-                'name'  => 'middle_header_background_color',
+                'name' => 'middle_header_background_color',
                 'value' => '#fff',
             ],
         ])
         ->setField([
-            'id'         => 'bottom_header_background_color',
+            'id' => 'bottom_header_background_color',
             'section_id' => 'opt-text-subsection-style',
-            'type'       => 'customColor',
-            'label'      => __('Bottom header background color'),
+            'type' => 'customColor',
+            'label' => __('Bottom header background color'),
             'attributes' => [
-                'name'  => 'bottom_header_background_color',
+                'name' => 'bottom_header_background_color',
                 'value' => '#fff',
             ],
         ])
         ->setField([
-            'id'         => 'header_text_color',
+            'id' => 'header_text_color',
             'section_id' => 'opt-text-subsection-style',
-            'type'       => 'customColor',
-            'label'      => __('Header text color'),
+            'type' => 'customColor',
+            'label' => __('Header text color'),
             'attributes' => [
-                'name'  => 'header_text_color',
+                'name' => 'header_text_color',
                 'value' => '#000',
             ],
         ])
         ->setField([
-            'id'         => 'header_deliver_color',
+            'id' => 'header_deliver_color',
             'section_id' => 'opt-text-subsection-style',
-            'type'       => 'customColor',
-            'label'      => __('Header deliver color'),
+            'type' => 'customColor',
+            'label' => __('Header deliver color'),
             'attributes' => [
-                'name'  => 'header_deliver_color',
+                'name' => 'header_deliver_color',
                 'value' => '#000',
             ],
         ])
         ->setField([
-            'id'         => 'footer_text_color',
+            'id' => 'footer_text_color',
             'section_id' => 'opt-text-subsection-style',
-            'type'       => 'customColor',
-            'label'      => __('Footer text color'),
+            'type' => 'customColor',
+            'label' => __('Footer text color'),
             'attributes' => [
-                'name'  => 'footer_text_color',
+                'name' => 'footer_text_color',
                 'value' => '#555',
             ],
         ])
         ->setField([
-            'id'         => 'footer_heading_color',
+            'id' => 'footer_heading_color',
             'section_id' => 'opt-text-subsection-style',
-            'type'       => 'customColor',
-            'label'      => __('Footer heading color'),
+            'type' => 'customColor',
+            'label' => __('Footer heading color'),
             'attributes' => [
-                'name'  => 'footer_heading_color',
+                'name' => 'footer_heading_color',
                 'value' => '#555',
             ],
         ])
         ->setField([
-            'id'         => 'footer_hover_color',
+            'id' => 'footer_hover_color',
             'section_id' => 'opt-text-subsection-style',
-            'type'       => 'customColor',
-            'label'      => __('Footer hover color'),
+            'type' => 'customColor',
+            'label' => __('Footer hover color'),
             'attributes' => [
-                'name'  => 'footer_hover_color',
+                'name' => 'footer_hover_color',
                 'value' => '#fab528',
             ],
         ])
         ->setField([
-            'id'         => 'footer_border_color',
+            'id' => 'footer_border_color',
             'section_id' => 'opt-text-subsection-style',
-            'type'       => 'customColor',
-            'label'      => __('Footer border color'),
+            'type' => 'customColor',
+            'label' => __('Footer border color'),
             'attributes' => [
-                'name'  => 'footer_border_color',
+                'name' => 'footer_border_color',
                 'value' => '#ccc',
             ],
         ])
         ->setSection([
-            'title'      => __('Social links'),
-            'desc'       => __('Social links'),
-            'id'         => 'opt-text-subsection-social-links',
+            'title' => __('Social links'),
+            'desc' => __('Social links'),
+            'id' => 'opt-text-subsection-social-links',
             'subsection' => true,
-            'icon'       => 'fa fa-share-alt',
+            'icon' => 'fa fa-share-alt',
         ])
         ->setField([
-            'id'         => 'social_links',
+            'id' => 'social_links',
             'section_id' => 'opt-text-subsection-social-links',
-            'type'       => 'repeater',
-            'label'      => __('Social links'),
+            'type' => 'repeater',
+            'label' => __('Social links'),
             'attributes' => [
-                'name'   => 'social_links',
-                'value'  => null,
+                'name' => 'social_links',
+                'value' => null,
                 'fields' => [
                     [
-                        'type'       => 'text',
-                        'label'      => __('Name'),
+                        'type' => 'text',
+                        'label' => __('Name'),
                         'attributes' => [
-                            'name'    => 'social-name',
-                            'value'   => null,
+                            'name' => 'social-name',
+                            'value' => null,
                             'options' => [
                                 'class' => 'form-control',
                             ],
                         ],
                     ],
                     [
-                        'type'       => 'mediaImage',
-                        'label'      => __('Icon Image'),
+                        'type' => 'mediaImage',
+                        'label' => __('Icon Image'),
                         'attributes' => [
-                            'name'    => 'social-icon',
-                            'value'   => null,
+                            'name' => 'social-icon',
+                            'value' => null,
                             'options' => [
                                 'class' => 'form-control',
                             ],
                         ],
                     ],
                     [
-                        'type'       => 'text',
-                        'label'      => __('URL'),
+                        'type' => 'text',
+                        'label' => __('URL'),
                         'attributes' => [
-                            'name'    => 'social-url',
-                            'value'   => null,
+                            'name' => 'social-url',
+                            'value' => null,
                             'options' => [
                                 'class' => 'form-control',
                             ],
@@ -343,86 +343,85 @@ app()->booted(function () {
             ],
         ])
         ->setField([
-            'id'         => '404_page_image',
+            'id' => '404_page_image',
             'section_id' => 'opt-text-subsection-page',
-            'type'       => 'mediaImage',
-            'label'      => __('404 page image'),
+            'type' => 'mediaImage',
+            'label' => __('404 page image'),
             'attributes' => [
-                'name'  => '404_page_image',
+                'name' => '404_page_image',
                 'value' => '',
             ],
         ])
         ->setField([
-            'id'         => 'social_share_enabled',
+            'id' => 'social_share_enabled',
             'section_id' => 'opt-text-subsection-general',
-            'type'       => 'customSelect',
-            'label'      => __('Enable social sharing?'),
+            'type' => 'customSelect',
+            'label' => __('Enable social sharing?'),
             'attributes' => [
-                'name'    => 'social_share_enabled',
-                'list'    => [
+                'name' => 'social_share_enabled',
+                'list' => [
                     'yes' => trans('core/base::base.yes'),
-                    'no'  => trans('core/base::base.no'),
+                    'no' => trans('core/base::base.no'),
                 ],
-                'value'   => 'yes',
+                'value' => 'yes',
                 'options' => [
                     'class' => 'form-control',
                 ],
             ],
         ])
         ->setField([
-            'id'         => 'store_list_layout',
+            'id' => 'store_list_layout',
             'section_id' => 'opt-text-subsection-marketplace',
-            'type'       => 'customSelect',
-            'label'      => __('Stores List Layout'),
+            'type' => 'customSelect',
+            'label' => __('Stores List Layout'),
             'attributes' => [
-                'name'    => 'store_list_layout',
-                'list'    => get_store_list_layouts(),
-                'value'   => 'grid',
+                'name' => 'store_list_layout',
+                'list' => get_store_list_layouts(),
+                'value' => 'grid',
                 'options' => [
                     'class' => 'form-control',
                 ],
             ],
         ])
         ->setField([
-            'id'         => 'payment_methods_image',
+            'id' => 'payment_methods_image',
             'section_id' => 'opt-text-subsection-general',
-            'type'       => 'mediaImage',
-            'label'      => __('Accepted Payment methods'),
+            'type' => 'mediaImage',
+            'label' => __('Accepted Payment methods'),
             'attributes' => [
                 'name' => 'payment_methods_image',
             ],
         ])
         ->setField([
-            'id'         => 'payment_methods_link',
+            'id' => 'payment_methods_link',
             'section_id' => 'opt-text-subsection-general',
-            'type'       => 'text',
-            'label'      => __('Accepted Payment methods link (optional)'),
+            'type' => 'text',
+            'label' => __('Accepted Payment methods link (optional)'),
             'attributes' => [
-                'name'    => 'payment_methods_link',
-                'value'   => null,
+                'name' => 'payment_methods_link',
+                'value' => null,
                 'options' => [
-                    'class'        => 'form-control',
-                    'placeholder'  => 'https://...',
+                    'class' => 'form-control',
+                    'placeholder' => 'https://...',
                     'data-counter' => 255,
                 ],
             ],
         ]);
 
-
     // Facebook integration
     theme_option()
         ->setField([
-            'id'         => 'facebook_comment_enabled_in_product',
+            'id' => 'facebook_comment_enabled_in_product',
             'section_id' => 'opt-text-subsection-facebook-integration',
-            'type'       => 'customSelect',
-            'label'      => __('Enable Facebook comment in product detail page?'),
+            'type' => 'customSelect',
+            'label' => __('Enable Facebook comment in product detail page?'),
             'attributes' => [
-                'name'    => 'facebook_comment_enabled_in_product',
-                'list'    => [
-                    'no'  => trans('core/base::base.no'),
+                'name' => 'facebook_comment_enabled_in_product',
+                'list' => [
+                    'no' => trans('core/base::base.no'),
                     'yes' => trans('core/base::base.yes'),
                 ],
-                'value'   => 'no',
+                'value' => 'no',
                 'options' => [
                     'class' => 'form-control',
                 ],

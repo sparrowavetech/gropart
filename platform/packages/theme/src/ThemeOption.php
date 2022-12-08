@@ -314,6 +314,7 @@ class ThemeOption
                         $priority = $section['priority'];
                         $this->priority[$this->optName]['sections']--;
                         unset($this->sections[$this->optName][$id]);
+
                         continue;
                     }
 
@@ -402,6 +403,7 @@ class ThemeOption
                         $priority = $field['priority'];
                         $this->priority[$this->optName]['fields']--;
                         unset($this->fields[$this->optName][$id]);
+
                         continue;
                     }
 
@@ -531,6 +533,7 @@ class ThemeOption
             return call_user_func_array([Form::class, $field['type']], array_values($field['attributes']));
         } catch (Exception $exception) {
             info($exception->getMessage());
+
             return null;
         }
     }

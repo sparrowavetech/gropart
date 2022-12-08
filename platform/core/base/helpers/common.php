@@ -44,7 +44,7 @@ if (!function_exists('render_editor')) {
      */
     function render_editor(string $name, ?string $value = null, bool $withShortCode = false, array $attributes = []): string
     {
-        return (new Editor())->render($name, $value, $withShortCode, $attributes);
+        return (new Editor())->registerAssets()->render($name, $value, $withShortCode, $attributes);
     }
 }
 
@@ -97,6 +97,24 @@ if (!function_exists('get_cms_version')) {
             $core = BaseHelper::getFileData(core_path('core.json'));
 
             return Arr::get($core, 'version', $version);
+        } catch (Exception $exception) {
+            return $version;
+        }
+    }
+}
+
+if (!function_exists('get_core_version')) {
+    /**
+     * @return string
+     */
+    function get_core_version(): string
+    {
+        $version = '...';
+
+        try {
+            $core = BaseHelper::getFileData(core_path('core.json'));
+
+            return Arr::get($core, 'coreVersion', $version);
         } catch (Exception $exception) {
             return $version;
         }

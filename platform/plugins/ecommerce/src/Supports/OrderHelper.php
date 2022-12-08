@@ -37,7 +37,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
-
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use InvoiceHelper as InvoiceHelperFacade;
@@ -110,12 +109,12 @@ class OrderHelper
 
         foreach ($orders as $order) {
             app(OrderHistoryInterface::class)->createOrUpdate([
-                'action'      => 'create_order',
+                'action' => 'create_order',
                 'description' => trans('plugins/ecommerce::order.new_order_from', [
                     'order_id' => $order->code,
                     'customer' => BaseHelper::clean($order->user->name ?: $order->address->name),
                 ]),
-                'order_id'    => $order->id,
+                'order_id' => $order->id,
             ]);
         }
 
@@ -131,9 +130,9 @@ class OrderHelper
                 $flashSale->products()->detach([$product->id]);
                 $flashSale->products()->attach([
                     $product->id => [
-                        'price'    => $flashSale->pivot->price,
+                        'price' => $flashSale->pivot->price,
                         'quantity' => (int)$flashSale->pivot->quantity,
-                        'sold'     => (int)$flashSale->pivot->sold + $orderProduct->qty,
+                        'sold' => (int)$flashSale->pivot->sold + $orderProduct->qty,
                     ],
                 ]);
             }
@@ -152,18 +151,18 @@ class OrderHelper
     {
         return EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME)
             ->setVariableValues([
-                'store_address'        => get_ecommerce_setting('store_address'),
-                'store_phone'          => get_ecommerce_setting('store_phone'),
-                'order_id'             => $order->code,
-                'order_token'          => $order->token,
-                'customer_name'        => BaseHelper::clean($order->user->name ?: $order->address->name),
-                'customer_email'       => $order->user->email ?: $order->address->email,
-                'customer_phone'       => $order->user->phone ?: $order->address->phone,
-                'customer_address'     => $order->full_address,
-                'product_list'         => view('plugins/ecommerce::emails.partials.order-detail', compact('order'))
+                'store_address' => get_ecommerce_setting('store_address'),
+                'store_phone' => get_ecommerce_setting('store_phone'),
+                'order_id' => $order->code,
+                'order_token' => $order->token,
+                'customer_name' => BaseHelper::clean($order->user->name ?: $order->address->name),
+                'customer_email' => $order->user->email ?: $order->address->email,
+                'customer_phone' => $order->user->phone ?: $order->address->phone,
+                'customer_address' => $order->full_address,
+                'product_list' => view('plugins/ecommerce::emails.partials.order-detail', compact('order'))
                     ->render(),
-                'shipping_method'      => $order->shipping_method_name,
-                'payment_method'       => $order->payment->payment_channel->label(),
+                'shipping_method' => $order->shipping_method_name,
+                'payment_method' => $order->payment->payment_channel->label(),
                 'order_delivery_notes' => view(
                     'plugins/ecommerce::emails.partials.order-delivery-notes',
                     compact('order')
@@ -194,9 +193,9 @@ class OrderHelper
 
                 if ($saveHistory) {
                     app(OrderHistoryInterface::class)->createOrUpdate([
-                        'action'      => 'send_order_confirmation_email',
+                        'action' => 'send_order_confirmation_email',
                         'description' => trans('plugins/ecommerce::order.confirmation_email_was_sent_to_customer'),
-                        'order_id'    => $order->id,
+                        'order_id' => $order->id,
                     ]);
                 }
             }
@@ -280,7 +279,7 @@ class OrderHelper
                     $name = trans('plugins/ecommerce::order.default');
                 }
 
-                break;                
+                break;
         }
 
         if (!$name && ShippingMethodEnum::search($method)) {
@@ -302,7 +301,7 @@ class OrderHelper
         }
 
         $variables = [
-            'order_id'  => Html::link(
+            'order_id' => Html::link(
                 route('orders.edit', $history->order->id),
                 $history->order->code . ' <i class="fa fa-external-link-alt"></i>',
                 ['target' => '_blank'],
@@ -312,8 +311,8 @@ class OrderHelper
                 ->toHtml(),
             'user_name' => $history->user_id === 0 ? trans('plugins/ecommerce::order.system') :
                 BaseHelper::clean($history->user ? $history->user->name : (
-                $history->order->user->name ?:
-                    $history->order->address->name
+                    $history->order->user->name ?:
+                        $history->order->address->name
                 )),
         ];
 
@@ -459,11 +458,11 @@ class OrderHelper
             $request->input('qty', 1),
             $product->original_price,
             [
-                'image'      => RvMedia::getImageUrl($image, 'thumb', false, RvMedia::getDefaultImage()),
+                'image' => RvMedia::getImageUrl($image, 'thumb', false, RvMedia::getDefaultImage()),
                 'attributes' => $product->is_variation ? $product->variation_attributes : '',
-                'taxRate'    => $parentProduct->tax->percentage,
-                'options'    => $options,
-                'extras'     => $request->input('extras', []),
+                'taxRate' => $parentProduct->tax->percentage,
+                'options' => $options,
+                'extras' => $request->input('extras', []),
             ]
         );
 
@@ -528,7 +527,7 @@ class OrderHelper
         if ($currentUserId && !Arr::get($sessionData, 'address_id')) {
             $address = app(AddressInterface::class)->getFirstBy([
                 'customer_id' => auth('customer')->id(),
-                'is_default'  => true,
+                'is_default' => true,
             ]);
 
             if ($address) {
@@ -547,13 +546,13 @@ class OrderHelper
 
         if (!empty($address)) {
             $addressData = [
-                'name'     => $address->name,
-                'phone'    => $address->phone,
-                'email'    => $address->email,
-                'country'  => $address->country,
-                'state'    => $address->state,
-                'city'     => $address->city,
-                'address'  => $address->address,
+                'name' => $address->name,
+                'phone' => $address->phone,
+                'email' => $address->email,
+                'country' => $address->country,
+                'state' => $address->state,
+                'city' => $address->city,
+                'address' => $address->address,
                 'zip_code' => $address->zip_code,
                 'order_id' => Arr::get($sessionData, 'created_order_id', 0),
             ];
@@ -564,13 +563,13 @@ class OrderHelper
             );
         } else {
             $addressData = [
-                'name'     => Arr::get($sessionData, 'name'),
-                'phone'    => Arr::get($sessionData, 'phone'),
-                'email'    => Arr::get($sessionData, 'email'),
-                'country'  => Arr::get($sessionData, 'country'),
-                'state'    => Arr::get($sessionData, 'state'),
-                'city'     => Arr::get($sessionData, 'city'),
-                'address'  => Arr::get($sessionData, 'address'),
+                'name' => Arr::get($sessionData, 'name'),
+                'phone' => Arr::get($sessionData, 'phone'),
+                'email' => Arr::get($sessionData, 'email'),
+                'country' => Arr::get($sessionData, 'country'),
+                'state' => Arr::get($sessionData, 'state'),
+                'city' => Arr::get($sessionData, 'city'),
+                'address' => Arr::get($sessionData, 'address'),
                 'zip_code' => Arr::get($sessionData, 'zip_code'),
                 'order_id' => Arr::get($sessionData, 'created_order_id', 0),
             ];
@@ -611,11 +610,11 @@ class OrderHelper
         }
 
         $rules = [
-            'name'    => 'required|max:255',
-            'email'   => 'email|nullable|max:60',
-            'phone'   => EcommerceHelperFacade::getPhoneValidationRule(),
-            'state'   => 'required|max:120',
-            'city'    => 'required|max:120',
+            'name' => 'required|max:255',
+            'email' => 'email|nullable|max:60',
+            'phone' => EcommerceHelperFacade::getPhoneValidationRule(),
+            'state' => 'required|max:120',
+            'city' => 'required|max:120',
             'address' => 'required|max:120',
         ];
 
@@ -654,16 +653,16 @@ class OrderHelper
                 $productByCartItem = $products['products']->firstWhere('id', $cartItem->id);
 
                 $data = [
-                    'order_id'      => $sessionData['created_order_id'],
-                    'product_id'    => $cartItem->id,
-                    'product_name'  => $cartItem->name,
+                    'order_id' => $sessionData['created_order_id'],
+                    'product_id' => $cartItem->id,
+                    'product_name' => $cartItem->name,
                     'product_image' => $productByCartItem->original_product->image,
-                    'qty'           => $cartItem->qty,
-                    'weight'        => $productByCartItem->weight * $cartItem->qty,
-                    'price'         => $cartItem->price,
-                    'tax_amount'    => $cartItem->tax,
-                    'options'       => [],
-                    'product_type'  => $productByCartItem->product_type,
+                    'qty' => $cartItem->qty,
+                    'weight' => $productByCartItem->weight * $cartItem->qty,
+                    'price' => $cartItem->price,
+                    'tax_amount' => $cartItem->tax,
+                    'options' => [],
+                    'product_type' => $productByCartItem->product_type,
                 ];
 
                 if ($cartItem->options->extras) {
@@ -714,20 +713,19 @@ class OrderHelper
         $cartItems,
         $order,
         array $generalData
-    ): array
-    {
+    ): array {
         $createdOrder = Arr::get($sessionData, 'created_order');
         $createdOrderId = Arr::get($sessionData, 'created_order_id');
 
         $lastUpdatedAt = Cart::instance('cart')->getLastUpdatedAt();
 
         $data = array_merge([
-            'amount'          => Cart::instance('cart')->rawTotalByItems($cartItems),
+            'amount' => Cart::instance('cart')->rawTotalByItems($cartItems),
             'shipping_method' => $request->input('shipping_method', ShippingMethodEnum::DEFAULT),
             'shipping_option' => $request->input('shipping_option'),
-            'tax_amount'      => Cart::instance('cart')->rawTaxByItems($cartItems),
-            'sub_total'       => Cart::instance('cart')->rawSubTotalByItems($cartItems),
-            'coupon_code'     => session()->get('applied_coupon_code'),
+            'tax_amount' => Cart::instance('cart')->rawTaxByItems($cartItems),
+            'sub_total' => Cart::instance('cart')->rawSubTotalByItems($cartItems),
+            'coupon_code' => session()->get('applied_coupon_code'),
         ], $generalData);
 
         if ($createdOrder && $createdOrderId) {
@@ -740,8 +738,8 @@ class OrderHelper
             $data = array_merge($data, [
                 'shipping_amount' => 0,
                 'discount_amount' => 0,
-                'status'          => OrderStatusEnum::PENDING,
-                'is_finished'     => false,
+                'status' => OrderStatusEnum::PENDING,
+                'is_finished' => false,
             ]);
             $order = app(OrderInterface::class)->createOrUpdate($data);
         }
@@ -763,18 +761,18 @@ class OrderHelper
     public function createOrder(Request $request, int $currentUserId, string $token, array $cartItems)
     {
         $request->merge([
-            'amount'          => Cart::instance('cart')->rawTotalByItems($cartItems),
-            'user_id'         => $currentUserId,
+            'amount' => Cart::instance('cart')->rawTotalByItems($cartItems),
+            'user_id' => $currentUserId,
             'shipping_method' => $request->input('shipping_method', ShippingMethodEnum::DEFAULT),
             'shipping_option' => $request->input('shipping_option'),
             'shipping_amount' => 0,
-            'tax_amount'      => Cart::instance('cart')->rawTaxByItems($cartItems),
-            'sub_total'       => Cart::instance('cart')->rawSubTotalByItems($cartItems),
-            'coupon_code'     => session()->get('applied_coupon_code'),
+            'tax_amount' => Cart::instance('cart')->rawTaxByItems($cartItems),
+            'sub_total' => Cart::instance('cart')->rawSubTotalByItems($cartItems),
+            'coupon_code' => session()->get('applied_coupon_code'),
             'discount_amount' => 0,
-            'status'          => OrderStatusEnum::PENDING,
-            'is_finished'     => false,
-            'token'           => $token,
+            'status' => OrderStatusEnum::PENDING,
+            'is_finished' => false,
+            'token' => $token,
         ]);
 
         return app(OrderInterface::class)->createOrUpdate($request->input());
@@ -813,12 +811,12 @@ class OrderHelper
         }
 
         app(OrderHistoryInterface::class)->createOrUpdate([
-            'action'      => 'confirm_payment',
+            'action' => 'confirm_payment',
             'description' => trans('plugins/ecommerce::order.payment_was_confirmed_by', [
                 'money' => format_price($order->amount),
             ]),
-            'order_id'    => $order->id,
-            'user_id'     => Auth::id(),
+            'order_id' => $order->id,
+            'user_id' => Auth::id(),
         ]);
 
         return true;

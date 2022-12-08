@@ -18,8 +18,8 @@ class PaypalController extends Controller
      */
     public function getCallback(
         PayPalPaymentCallbackRequest $request,
-        PayPalPaymentService         $payPalPaymentService,
-        BaseHttpResponse             $response
+        PayPalPaymentService $payPalPaymentService,
+        BaseHttpResponse $response
     ) {
         $status = $payPalPaymentService->getPaymentStatus($request);
 

@@ -16,11 +16,11 @@ class FlashSaleRequest extends Request
     public function rules()
     {
         return [
-            'name'                      => 'required',
-            'end_date'                  => 'required',
-            'products_extra.*.price'    => 'required|numeric',
+            'name' => 'required',
+            'end_date' => 'required',
+            'products_extra.*.price' => 'required|numeric',
             'products_extra.*.quantity' => 'required|numeric',
-            'status'                    => Rule::in(BaseStatusEnum::values()),
+            'status' => Rule::in(BaseStatusEnum::values()),
         ];
     }
 
@@ -30,7 +30,7 @@ class FlashSaleRequest extends Request
     public function attributes()
     {
         return [
-            'products_extra.*.price'    => trans('plugins/ecommerce::products.price'),
+            'products_extra.*.price' => trans('plugins/ecommerce::products.price'),
             'products_extra.*.quantity' => trans('plugins/ecommerce::products.quantity'),
         ];
     }

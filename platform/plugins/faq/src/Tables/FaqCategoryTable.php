@@ -52,6 +52,7 @@ class FaqCategoryTable extends TableAbstract
                 if (!Auth::user()->hasPermission('faq_category.edit')) {
                     return $item->name;
                 }
+
                 return Html::link(route('faq_category.edit', $item->id), $item->name);
             })
             ->editColumn('checkbox', function ($item) {
@@ -88,7 +89,7 @@ class FaqCategoryTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function columns()
+    public function columns(): array
     {
         return [
             'id' => [
@@ -113,7 +114,7 @@ class FaqCategoryTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function buttons()
+    public function buttons(): array
     {
         return $this->addCreateButton(route('faq_category.create'), 'faq_category.create');
     }
@@ -133,19 +134,19 @@ class FaqCategoryTable extends TableAbstract
     {
         return [
             'name' => [
-                'title'    => trans('core/base::tables.name'),
-                'type'     => 'text',
+                'title' => trans('core/base::tables.name'),
+                'type' => 'text',
                 'validate' => 'required|max:120',
             ],
             'status' => [
-                'title'    => trans('core/base::tables.status'),
-                'type'     => 'customSelect',
-                'choices'  => BaseStatusEnum::labels(),
+                'title' => trans('core/base::tables.status'),
+                'type' => 'customSelect',
+                'choices' => BaseStatusEnum::labels(),
                 'validate' => 'required|in:' . implode(',', BaseStatusEnum::values()),
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type'  => 'date',
+                'type' => 'date',
             ],
         ];
     }

@@ -77,7 +77,7 @@ class ThemeService
 
         if (setting('theme') && $theme == Theme::getThemeName()) {
             return [
-                'error'   => true,
+                'error' => true,
                 'message' => trans('packages/theme::theme.theme_activated_already', ['name' => $theme]),
             ];
         }
@@ -95,7 +95,7 @@ class ThemeService
             }
         } catch (Exception $exception) {
             return [
-                'error'   => true,
+                'error' => true,
                 'message' => $exception->getMessage(),
             ];
         }
@@ -115,7 +115,7 @@ class ThemeService
         Helper::clearCache();
 
         return [
-            'error'   => false,
+            'error' => false,
             'message' => trans('packages/theme::theme.active_success', ['name' => $theme]),
         ];
     }
@@ -130,20 +130,20 @@ class ThemeService
 
         if (!$this->files->isDirectory($location)) {
             return [
-                'error'   => true,
+                'error' => true,
                 'message' => trans('packages/theme::theme.theme_is_not_existed'),
             ];
         }
 
         if (!$this->files->exists($location . '/theme.json')) {
             return [
-                'error'   => true,
+                'error' => true,
                 'message' => trans('packages/theme::theme.missing_json_file'),
             ];
         }
 
         return [
-            'error'   => false,
+            'error' => false,
             'message' => trans('packages/theme::theme.theme_invalid'),
         ];
     }
@@ -180,7 +180,7 @@ class ThemeService
                 $this->files->makeDirectory($themePath, 0755, true);
             } elseif (!$this->files->isWritable($themePath)) {
                 return [
-                    'error'   => true,
+                    'error' => true,
                     'message' => trans('packages/theme::theme.folder_is_not_writeable', ['name' => $themePath]),
                 ];
             }
@@ -196,7 +196,7 @@ class ThemeService
         }
 
         return [
-            'error'   => false,
+            'error' => false,
             'message' => trans('packages/theme::theme.published_assets_success', ['themes' => implode(', ', $themes)]),
         ];
     }
@@ -216,7 +216,7 @@ class ThemeService
 
         if (Theme::getThemeName() == $theme) {
             return [
-                'error'   => true,
+                'error' => true,
                 'message' => trans('packages/theme::theme.cannot_remove_theme', ['name' => $theme]),
             ];
         }
@@ -235,7 +235,7 @@ class ThemeService
         event(new ThemeRemoveEvent($theme));
 
         return [
-            'error'   => false,
+            'error' => false,
             'message' => trans('packages/theme::theme.theme_deleted', ['name' => $theme]),
         ];
     }
@@ -255,7 +255,7 @@ class ThemeService
         $this->files->deleteDirectory(public_path('themes/' . $theme));
 
         return [
-            'error'   => false,
+            'error' => false,
             'message' => trans('packages/theme::theme.removed_assets', ['name' => $theme]),
         ];
     }

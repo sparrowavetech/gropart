@@ -119,16 +119,16 @@ class OrderController extends BaseController
      * @param AddressInterface $addressRepository
      */
     public function __construct(
-        OrderInterface        $orderRepository,
-        CustomerInterface     $customerRepository,
+        OrderInterface $orderRepository,
+        CustomerInterface $customerRepository,
         OrderHistoryInterface $orderHistoryRepository,
-        ProductInterface      $productRepository,
-        ShipmentInterface     $shipmentRepository,
+        ProductInterface $productRepository,
+        ShipmentInterface $shipmentRepository,
         OrderAddressInterface $orderAddressRepository,
-        PaymentInterface      $paymentRepository,
+        PaymentInterface $paymentRepository,
         StoreLocatorInterface $storeLocatorRepository,
         OrderProductInterface $orderProductRepository,
-        AddressInterface      $addressRepository
+        AddressInterface $addressRepository
     ) {
         $this->orderRepository = $orderRepository;
         $this->customerRepository = $customerRepository;
@@ -183,20 +183,20 @@ class OrderController extends BaseController
     public function store(CreateOrderRequest $request, BaseHttpResponse $response)
     {
         $request->merge([
-            'amount'               => $request->input('amount') + $request->input('shipping_amount') - $request->input('discount_amount'),
-            'user_id'              => $request->input('customer_id') ?? 0,
-            'shipping_method'      => $request->input('shipping_method', ShippingMethodEnum::DEFAULT),
-            'shipping_option'      => $request->input('shipping_option'),
-            'shipping_amount'      => $request->input('shipping_amount'),
-            'tax_amount'           => session('tax_amount', 0),
-            'sub_total'            => $request->input('amount'),
-            'coupon_code'          => $request->input('coupon_code'),
-            'discount_amount'      => $request->input('discount_amount'),
+            'amount' => $request->input('amount') + $request->input('shipping_amount') - $request->input('discount_amount'),
+            'user_id' => $request->input('customer_id') ?? 0,
+            'shipping_method' => $request->input('shipping_method', ShippingMethodEnum::DEFAULT),
+            'shipping_option' => $request->input('shipping_option'),
+            'shipping_amount' => $request->input('shipping_amount'),
+            'tax_amount' => session('tax_amount', 0),
+            'sub_total' => $request->input('amount'),
+            'coupon_code' => $request->input('coupon_code'),
+            'discount_amount' => $request->input('discount_amount'),
             'discount_description' => $request->input('discount_description'),
-            'description'          => $request->input('note'),
-            'is_confirmed'         => 1,
-            'is_finished'          => 1,
-            'status'               => OrderStatusEnum::PROCESSING,
+            'description' => $request->input('note'),
+            'is_confirmed' => 1,
+            'is_finished' => 1,
+            'status' => OrderStatusEnum::PROCESSING,
         ]);
 
         $storeIds = [];
@@ -228,36 +228,36 @@ class OrderController extends BaseController
 
         if ($order) {
             $this->orderHistoryRepository->createOrUpdate([
-                'action'      => 'create_order_from_payment_page',
+                'action' => 'create_order_from_payment_page',
                 'description' => trans('plugins/ecommerce::order.create_order_from_payment_page'),
-                'order_id'    => $order->id,
+                'order_id' => $order->id,
             ]);
 
             $this->orderHistoryRepository->createOrUpdate([
-                'action'      => 'create_order',
+                'action' => 'create_order',
                 'description' => trans(
                     'plugins/ecommerce::order.new_order',
                     ['order_id' => $order->code]
                 ),
-                'order_id'    => $order->id,
+                'order_id' => $order->id,
             ]);
 
             $this->orderHistoryRepository->createOrUpdate([
-                'action'      => 'confirm_order',
+                'action' => 'confirm_order',
                 'description' => trans('plugins/ecommerce::order.order_was_verified_by'),
-                'order_id'    => $order->id,
-                'user_id'     => Auth::id(),
+                'order_id' => $order->id,
+                'user_id' => Auth::id(),
             ]);
 
             $payment = $this->paymentRepository->createOrUpdate([
-                'amount'          => $order->amount,
-                'currency'        => cms_currency()->getDefaultCurrency()->title,
+                'amount' => $order->amount,
+                'currency' => cms_currency()->getDefaultCurrency()->title,
                 'payment_channel' => $request->input('payment_method'),
-                'status'          => $request->input('payment_status', PaymentStatusEnum::PENDING),
-                'payment_type'    => 'confirm',
-                'order_id'        => $order->id,
-                'charge_id'       => Str::upper(Str::random(10)),
-                'user_id'         => Auth::id(),
+                'status' => $request->input('payment_status', PaymentStatusEnum::PENDING),
+                'payment_type' => 'confirm',
+                'order_id' => $order->id,
+                'charge_id' => Str::upper(Str::random(10)),
+                'user_id' => Auth::id(),
             ]);
 
             $order->payment_id = $payment->id;
@@ -265,33 +265,33 @@ class OrderController extends BaseController
 
             if ($request->input('payment_status') === PaymentStatusEnum::COMPLETED) {
                 $this->orderHistoryRepository->createOrUpdate([
-                    'action'      => 'confirm_payment',
+                    'action' => 'confirm_payment',
                     'description' => trans('plugins/ecommerce::order.payment_was_confirmed_by', [
                         'money' => format_price($order->amount),
                     ]),
-                    'order_id'    => $order->id,
-                    'user_id'     => Auth::id(),
+                    'order_id' => $order->id,
+                    'user_id' => Auth::id(),
                 ]);
             }
 
             if ($request->input('customer_address.name')) {
                 $this->orderAddressRepository->create([
-                    'name'     => $request->input('customer_address.name'),
-                    'phone'    => $request->input('customer_address.phone'),
-                    'email'    => $request->input('customer_address.email'),
-                    'state'    => $request->input('customer_address.state'),
-                    'city'     => $request->input('customer_address.city'),
+                    'name' => $request->input('customer_address.name'),
+                    'phone' => $request->input('customer_address.phone'),
+                    'email' => $request->input('customer_address.email'),
+                    'state' => $request->input('customer_address.state'),
+                    'city' => $request->input('customer_address.city'),
                     'zip_code' => $request->input('customer_address.zip_code'),
-                    'country'  => $request->input('customer_address.country'),
-                    'address'  => $request->input('customer_address.address'),
+                    'country' => $request->input('customer_address.country'),
+                    'address' => $request->input('customer_address.address'),
                     'order_id' => $order->id,
                 ]);
             } elseif ($request->input('customer_id')) {
                 $customer = $this->customerRepository->findById($request->input('customer_id'));
                 $this->orderAddressRepository->create([
-                    'name'     => $customer->name,
-                    'phone'    => $customer->phone,
-                    'email'    => $customer->email,
+                    'name' => $customer->name,
+                    'phone' => $customer->phone,
+                    'email' => $customer->email,
                     'order_id' => $order->id,
                 ]);
             }
@@ -303,14 +303,15 @@ class OrderController extends BaseController
                 }
 
                 $data = [
-                    'order_id'     => $order->id,
-                    'product_id'   => $product->id,
+                    'order_id' => $order->id,
+                    'product_id' => $product->id,
                     'product_name' => $product->original_product->name,
-                    'qty'          => Arr::get($productItem, 'quantity', 1),
-                    'weight'       => $product->weight * Arr::get($productItem, 'quantity', 1),
-                    'price'        => $product->front_sale_price,
-                    'tax_amount'   => 0,
-                    'options'      => [],
+                    'product_image' => $product->original_product->image,
+                    'qty' => Arr::get($productItem, 'quantity', 1),
+                    'weight' => $product->weight * Arr::get($productItem, 'quantity', 1),
+                    'price' => $product->front_sale_price,
+                    'tax_amount' => 0,
+                    'options' => [],
                     'product_type' => $product->product_type,
                 ];
 
@@ -334,15 +335,15 @@ class OrderController extends BaseController
                 $order->save();
 
                 $this->shipmentRepository->createOrUpdate([
-                    'order_id'   => $order->id,
-                    'user_id'    => 0,
-                    'weight'     => $order->products_weight,
+                    'order_id' => $order->id,
+                    'user_id' => 0,
+                    'weight' => $order->products_weight,
                     'cod_amount' => $order->payment->status != PaymentStatusEnum::COMPLETED ? $order->amount : 0,
                     'cod_status' => ShippingCodStatusEnum::PENDING,
-                    'type'       => $order->shipping_method,
-                    'status'     => ShippingStatusEnum::PENDING,
-                    'price'      => $order->shipping_amount,
-                    'store_id'   => $order->store_id,
+                    'type' => $order->shipping_method,
+                    'status' => ShippingStatusEnum::PENDING,
+                    'price' => $order->shipping_amount,
+                    'store_id' => $order->store_id,
                 ]);
 
                 MarketplaceHelper::sendMailToVendorAfterProcessingOrder($order);
@@ -415,6 +416,7 @@ class OrderController extends BaseController
         try {
             $this->orderRepository->deleteBy(['id' => $id]);
             event(new DeletedContentEvent(ORDER_MODULE_SCREEN_NAME, $request, $order));
+
             return $response->setMessage(trans('core/base::notices.delete_success_message'));
         } catch (Exception $exception) {
             return $response
@@ -483,10 +485,10 @@ class OrderController extends BaseController
         $this->orderRepository->createOrUpdate($order);
 
         $this->orderHistoryRepository->createOrUpdate([
-            'action'      => 'confirm_order',
+            'action' => 'confirm_order',
             'description' => trans('plugins/ecommerce::order.order_was_verified_by'),
-            'order_id'    => $order->id,
-            'user_id'     => Auth::id(),
+            'order_id' => $order->id,
+            'user_id' => Auth::id(),
         ]);
 
         $payment = $this->paymentRepository->getFirstBy(['order_id' => $order->id]);
@@ -554,11 +556,11 @@ class OrderController extends BaseController
         }
 
         $shippingData = [
-            'address'     => $order->address->address,
-            'country'     => $order->address->country,
-            'state'       => $order->address->state,
-            'city'        => $order->address->city,
-            'weight'      => $weight,
+            'address' => $order->address->address,
+            'country' => $order->address->country,
+            'state' => $order->address->state,
+            'city' => $order->address->city,
+            'weight' => $weight,
             'order_total' => $order->amount,
         ];
 
@@ -600,16 +602,16 @@ class OrderController extends BaseController
         $result = $response;
 
         $shipment = [
-            'order_id'   => $order->id,
-            'user_id'    => Auth::id(),
-            'weight'     => $order->products_weight,
-            'note'       => $request->input('note'),
+            'order_id' => $order->id,
+            'user_id' => Auth::id(),
+            'weight' => $order->products_weight,
+            'note' => $request->input('note'),
             'cod_amount' => $request->input('cod_amount') ?? ($order->payment->status != PaymentStatusEnum::COMPLETED ? $order->amount : 0),
             'cod_status' => 'pending',
-            'type'       => $request->input('method'),
-            'status'     => ShippingStatusEnum::DELIVERING,
-            'price'      => $order->shipping_amount,
-            'store_id'   => $request->input('store_id'),
+            'type' => $request->input('method'),
+            'status' => ShippingStatusEnum::DELIVERING,
+            'price' => $order->shipping_amount,
+            'store_id' => $request->input('store_id'),
         ];
 
         $store = $this->storeLocatorRepository->findById($request->input('store_id'));
@@ -622,12 +624,13 @@ class OrderController extends BaseController
         switch ($request->input('method')) {
             default:
                 $result = $result->setMessage(trans('plugins/ecommerce::order.order_was_sent_to_shipping_team'));
+
                 break;
         }
 
         if (!$result->isError()) {
             $this->orderRepository->createOrUpdate([
-                'status'          => OrderStatusEnum::PROCESSING,
+                'status' => OrderStatusEnum::PROCESSING,
                 'shipping_method' => $request->input('method'),
                 'shipping_option' => $request->input('option'),
             ], compact('id'));
@@ -644,18 +647,18 @@ class OrderController extends BaseController
             }
 
             $this->orderHistoryRepository->createOrUpdate([
-                'action'      => 'create_shipment',
+                'action' => 'create_shipment',
                 'description' => $result->getMessage() . ' ' . trans('plugins/ecommerce::order.by_username'),
-                'order_id'    => $id,
-                'user_id'     => Auth::id(),
+                'order_id' => $id,
+                'user_id' => Auth::id(),
             ]);
 
             $shipmentHistoryRepository->createOrUpdate([
-                'action'      => 'create_from_order',
+                'action' => 'create_from_order',
                 'description' => trans('plugins/ecommerce::order.shipping_was_created_from'),
                 'shipment_id' => $shipment->id,
-                'order_id'    => $id,
-                'user_id'     => Auth::id(),
+                'order_id' => $id,
+                'user_id' => Auth::id(),
             ]);
         }
 
@@ -675,15 +678,15 @@ class OrderController extends BaseController
         );
 
         $this->orderHistoryRepository->createOrUpdate([
-            'action'      => 'cancel_shipment',
+            'action' => 'cancel_shipment',
             'description' => trans('plugins/ecommerce::order.shipping_was_canceled_by'),
-            'order_id'    => $shipment->order_id,
-            'user_id'     => Auth::id(),
+            'order_id' => $shipment->order_id,
+            'user_id' => Auth::id(),
         ]);
 
         return $response
             ->setData([
-                'status'      => ShippingStatusEnum::CANCELED,
+                'status' => ShippingStatusEnum::CANCELED,
                 'status_text' => ShippingStatusEnum::CANCELED()->label(),
             ])
             ->setMessage(trans('plugins/ecommerce::order.shipping_was_canceled_success'));
@@ -710,7 +713,7 @@ class OrderController extends BaseController
 
         return $response
             ->setData([
-                'line'   => view('plugins/ecommerce::orders.shipping-address.line', compact('address'))->render(),
+                'line' => view('plugins/ecommerce::orders.shipping-address.line', compact('address'))->render(),
                 'detail' => view('plugins/ecommerce::orders.shipping-address.detail', compact('address'))->render(),
             ])
             ->setMessage(trans('plugins/ecommerce::order.update_shipping_address_success'));
@@ -733,10 +736,10 @@ class OrderController extends BaseController
         OrderHelper::cancelOrder($order);
 
         $this->orderHistoryRepository->createOrUpdate([
-            'action'      => 'cancel_order',
+            'action' => 'cancel_order',
             'description' => trans('plugins/ecommerce::order.order_was_canceled_by'),
-            'order_id'    => $order->id,
-            'user_id'     => Auth::id(),
+            'order_id' => $order->id,
+            'user_id' => Auth::id(),
         ]);
 
         return $response->setMessage(trans('plugins/ecommerce::order.cancel_success'));
@@ -787,13 +790,14 @@ class OrderController extends BaseController
         foreach ($request->input('products', []) as $productId => $quantity) {
             $orderProduct = $this->orderProductRepository->getFirstBy([
                 'product_id' => $productId,
-                'order_id'   => $id,
+                'order_id' => $id,
             ]);
 
             if ($quantity > ($orderProduct->qty - $orderProduct->restock_quantity)) {
                 $response
                     ->setError()
                     ->setMessage(trans('plugins/ecommerce::order.number_of_products_invalid'));
+
                 break;
             }
         }
@@ -821,7 +825,7 @@ class OrderController extends BaseController
 
             $optionRefunds = [
                 'refund_note' => $request->input('refund_note'),
-                'order_id'    => $order->id,
+                'order_id' => $order->id,
             ];
 
             $paymentResponse = $paymentResponse->refundOrder($payment->charge_id, $refundAmount, $optionRefunds);
@@ -844,7 +848,7 @@ class OrderController extends BaseController
             $response->setData($refundData);
 
             $refundData['_data_request'] = $request->except(['_token']) + [
-                    'currency'   => $payment->currency,
+                    'currency' => $payment->currency,
                     'created_at' => Carbon::now(),
                 ];
             $metadata = $payment->metadata;
@@ -874,7 +878,7 @@ class OrderController extends BaseController
 
             $orderProduct = $this->orderProductRepository->getFirstBy([
                 'product_id' => $productId,
-                'order_id'   => $id,
+                'order_id' => $id,
             ]);
 
             if ($orderProduct) {
@@ -885,13 +889,13 @@ class OrderController extends BaseController
 
         if ($refundAmount > 0) {
             $this->orderHistoryRepository->createOrUpdate([
-                'action'      => 'refund',
+                'action' => 'refund',
                 'description' => trans('plugins/ecommerce::order.refund_success_with_price', [
                     'price' => format_price($refundAmount),
                 ]),
-                'order_id'    => $order->id,
-                'user_id'     => Auth::id(),
-                'extras'      => json_encode([
+                'order_id' => $order->id,
+                'user_id' => Auth::id(),
+                'extras' => json_encode([
                     'amount' => $refundAmount,
                     'method' => $payment->payment_channel ?? PaymentMethodEnum::COD,
                 ]),
@@ -910,8 +914,8 @@ class OrderController extends BaseController
      * @return BaseHttpResponse
      */
     public function getAvailableShippingMethods(
-        Request                  $request,
-        BaseHttpResponse         $response,
+        Request $request,
+        BaseHttpResponse $response,
         HandleShippingFeeService $shippingFeeService
     ) {
         $weight = 0;
@@ -928,11 +932,11 @@ class OrderController extends BaseController
         $weight = EcommerceHelper::validateOrderWeight($weight);
 
         $shippingData = [
-            'address'     => $request->input('address'),
-            'country'     => $request->input('country'),
-            'state'       => $request->input('state'),
-            'city'        => $request->input('city'),
-            'weight'      => $weight,
+            'address' => $request->input('address'),
+            'country' => $request->input('country'),
+            'state' => $request->input('state'),
+            'city' => $request->input('city'),
+            'weight' => $weight,
             'order_total' => $orderAmount,
         ];
 
@@ -942,7 +946,7 @@ class OrderController extends BaseController
         foreach ($shipping as $key => $shippingItem) {
             foreach ($shippingItem as $subKey => $subShippingItem) {
                 $result[$key . ';' . $subKey . ';' . $subShippingItem['price']] = [
-                    'name'  => $subShippingItem['name'],
+                    'name' => $subShippingItem['name'],
                     'price' => format_price($subShippingItem['price'], null, true),
                 ];
             }
@@ -959,9 +963,9 @@ class OrderController extends BaseController
      * @throws Throwable
      */
     public function postApplyCoupon(
-        ApplyCouponRequest       $request,
+        ApplyCouponRequest $request,
         HandleApplyCouponService $handleApplyCouponService,
-        BaseHttpResponse         $response
+        BaseHttpResponse $response
     ) {
         $result = $handleApplyCouponService->applyCouponWhenCreatingOrderFromAdmin($request);
 

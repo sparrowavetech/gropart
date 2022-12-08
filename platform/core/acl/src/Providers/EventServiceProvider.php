@@ -18,13 +18,13 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
-        RoleUpdateEvent::class     => [
+        RoleUpdateEvent::class => [
             RoleUpdateListener::class,
         ],
         RoleAssignmentEvent::class => [
             RoleAssignmentListener::class,
         ],
-        Login::class               => [
+        Login::class => [
             LoginListener::class,
         ],
     ];

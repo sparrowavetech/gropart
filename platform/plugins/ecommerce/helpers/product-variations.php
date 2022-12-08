@@ -19,21 +19,26 @@ if (!function_exists('render_product_swatches')) {
      */
     function render_product_swatches(Product $product, array $params = []): string
     {
-        Theme::asset()->container('footer')
-            ->add('change-product-swatches', 'vendor/core/plugins/ecommerce/js/change-product-swatches.js', [
-                'jquery',
-            ]);
+        $script = 'vendor/core/plugins/ecommerce/js/change-product-swatches.js';
+
+        Theme::asset()->container('footer')->add('change-product-swatches', $script, ['jquery']);
 
         $selected = [];
 
         $params = array_merge([
             'selected' => $selected,
-            'view'     => 'plugins/ecommerce::themes.attributes.swatches-renderer',
+            'view' => 'plugins/ecommerce::themes.attributes.swatches-renderer',
         ], $params);
 
         $support = app(RenderProductSwatchesSupport::class);
 
-        return $support->setProduct($product)->render($params);
+        $html = $support->setProduct($product)->render($params);
+
+        if (!request()->ajax()) {
+            return $html;
+        }
+
+        return $html . Html::script($script)->toHtml();
     }
 }
 
@@ -58,13 +63,13 @@ if (!function_exists('get_ecommerce_attribute_set')) {
         return app(ProductAttributeSetInterface::class)
             ->advancedGet([
                 'condition' => [
-                    'status'        => BaseStatusEnum::PUBLISHED,
+                    'status' => BaseStatusEnum::PUBLISHED,
                     'is_searchable' => 1,
                 ],
-                'order_by'  => [
+                'order_by' => [
                     'order' => 'ASC',
                 ],
-                'with'      => [
+                'with' => [
                     'attributes',
                 ],
             ]);

@@ -17,7 +17,7 @@ class BulkImportRequest extends Request
 
         return [
             'file' => 'required|file|mimetypes:' . $mimeType,
-            'type' => 'required|in:all,products,variations'
+            'type' => 'required|in:all,products,variations',
         ];
     }
 }

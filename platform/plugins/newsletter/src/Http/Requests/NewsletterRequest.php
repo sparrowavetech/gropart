@@ -16,7 +16,7 @@ class NewsletterRequest extends Request
     public function rules()
     {
         $rules = [
-            'email'  => 'required|email|unique:newsletters',
+            'email' => 'required|email|unique:newsletters',
             'status' => Rule::in(NewsletterStatusEnum::values()),
         ];
 
@@ -34,7 +34,7 @@ class NewsletterRequest extends Request
     {
         return [
             'g-recaptcha-response.required' => __('Captcha Verification Failed!'),
-            'g-recaptcha-response.captcha'  => __('Captcha Verification Failed!'),
+            'g-recaptcha-response.captcha' => __('Captcha Verification Failed!'),
         ];
     }
 }

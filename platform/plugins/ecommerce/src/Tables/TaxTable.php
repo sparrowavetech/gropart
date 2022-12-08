@@ -97,12 +97,12 @@ class TaxTable extends TableAbstract
     public function columns()
     {
         return [
-            'id'         => [
+            'id' => [
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
                 'class' => 'text-start',
             ],
-            'title'      => [
+            'title' => [
                 'title' => trans('core/base::tables.name'),
                 'class' => 'text-start',
             ],
@@ -110,11 +110,11 @@ class TaxTable extends TableAbstract
                 'title' => trans('plugins/ecommerce::tax.percentage'),
                 'class' => 'text-center',
             ],
-            'priority'   => [
+            'priority' => [
                 'title' => trans('plugins/ecommerce::tax.priority'),
                 'class' => 'text-center',
             ],
-            'status'     => [
+            'status' => [
                 'title' => trans('core/base::tables.status'),
                 'class' => 'text-center',
             ],
@@ -148,20 +148,20 @@ class TaxTable extends TableAbstract
     public function getBulkChanges(): array
     {
         return [
-            'title'      => [
-                'title'    => trans('core/base::tables.name'),
-                'type'     => 'text',
+            'title' => [
+                'title' => trans('core/base::tables.name'),
+                'type' => 'text',
                 'validate' => 'required|max:120',
             ],
-            'status'     => [
-                'title'    => trans('core/base::tables.status'),
-                'type'     => 'select',
-                'choices'  => BaseStatusEnum::labels(),
+            'status' => [
+                'title' => trans('core/base::tables.status'),
+                'type' => 'select',
+                'choices' => BaseStatusEnum::labels(),
                 'validate' => 'required|in:' . implode(',', BaseStatusEnum::values()),
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type'  => 'date',
+                'type' => 'date',
             ],
         ];
     }

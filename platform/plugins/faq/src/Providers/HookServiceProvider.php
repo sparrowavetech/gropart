@@ -87,18 +87,18 @@ class HookServiceProvider extends ServiceProvider
                 }
 
                 $schema = [
-                    '@context'   => 'https://schema.org',
-                    '@type'      => 'FAQPage',
+                    '@context' => 'https://schema.org',
+                    '@type' => 'FAQPage',
                     'mainEntity' => [],
                 ];
 
                 foreach ($value as $item) {
                     $schema['mainEntity'][] = [
-                        '@type'          => 'Question',
-                        'name'           => BaseHelper::clean($item[0]['value']),
+                        '@type' => 'Question',
+                        'name' => BaseHelper::clean($item[0]['value']),
                         'acceptedAnswer' => [
                             '@type' => 'Answer',
-                            'text'  => BaseHelper::clean($item[1]['value']),
+                            'text' => BaseHelper::clean($item[1]['value']),
                         ],
                     ];
                 }

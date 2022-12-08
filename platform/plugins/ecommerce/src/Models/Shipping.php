@@ -38,10 +38,7 @@ class Shipping extends BaseModel
         });
     }
 
-    /**
-     * @return HasMany
-     */
-    public function rules()
+    public function rules(): HasMany
     {
         return $this->hasMany(ShippingRule::class, 'shipping_id');
     }

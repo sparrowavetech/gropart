@@ -153,7 +153,7 @@ class WidgetGroup
 
         $this->widgets[$this->position][$arguments[0]] = [
             'arguments' => $arguments,
-            'type'      => $type,
+            'type' => $type,
         ];
 
         $this->count++;
@@ -291,6 +291,7 @@ class WidgetGroup
                 $result[] = $obj;
             }
         }
+
         return $result;
     }
 }

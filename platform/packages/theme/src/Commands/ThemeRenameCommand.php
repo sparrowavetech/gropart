@@ -66,11 +66,13 @@ class ThemeRenameCommand extends Command
 
         if ($theme == $newName) {
             $this->error('Theme name are the same!');
+
             return 1;
         }
 
         if ($this->files->isDirectory(theme_path($newName))) {
             $this->error('Theme "' . $theme . '" is already exists.');
+
             return 1;
         }
 

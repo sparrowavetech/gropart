@@ -12,11 +12,9 @@ use Botble\Widget\Repositories\Eloquent\WidgetRepository;
 use Botble\Widget\Repositories\Interfaces\WidgetInterface;
 use Botble\Widget\WidgetGroupCollection;
 use Botble\Widget\Widgets\Text;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\File;
-use Illuminate\Routing\Events\RouteMatched;
-use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Theme;
 use WidgetGroup;
@@ -65,8 +63,8 @@ class WidgetServiceProvider extends ServiceProvider
 
         $this->app->booted(function () {
             WidgetGroup::setGroup([
-                'id'          => 'primary_sidebar',
-                'name'        => trans('packages/widget::widget.primary_sidebar_name'),
+                'id' => 'primary_sidebar',
+                'name' => trans('packages/widget::widget.primary_sidebar_name'),
                 'description' => trans('packages/widget::widget.primary_sidebar_description'),
             ]);
 
@@ -87,21 +85,17 @@ class WidgetServiceProvider extends ServiceProvider
         Event::listen(RouteMatched::class, function () {
             dashboard_menu()
                 ->registerItem([
-                    'id'          => 'cms-core-widget',
-                    'priority'    => 3,
-                    'parent_id'   => 'cms-core-appearance',
-                    'name'        => 'packages/widget::widget.name',
-                    'icon'        => null,
-                    'url'         => route('widgets.index'),
+                    'id' => 'cms-core-widget',
+                    'priority' => 3,
+                    'parent_id' => 'cms-core-appearance',
+                    'name' => 'packages/widget::widget.name',
+                    'icon' => null,
+                    'url' => route('widgets.index'),
                     'permissions' => ['widgets.index'],
                 ]);
 
             if (function_exists('admin_bar')) {
-                View::composer('*', function () {
-                    if (Auth::check() && Auth::user()->hasPermission('menus.index')) {
-                        admin_bar()->registerLink(trans('packages/widget::widget.name'), route('widgets.index'), 'appearance');
-                    }
-                });
+                admin_bar()->registerLink(trans('packages/widget::widget.name'), route('widgets.index'), 'appearance', 'menus.index');
             }
         });
     }

@@ -44,10 +44,10 @@ class PostController extends Controller
     {
         $data = $this->postRepository
             ->advancedGet([
-                'with'      => ['tags', 'categories', 'author', 'slugable'],
+                'with' => ['tags', 'categories', 'author', 'slugable'],
                 'condition' => ['status' => BaseStatusEnum::PUBLISHED],
-                'paginate'  => [
-                    'per_page'      => (int)$request->input('per_page', 10),
+                'paginate' => [
+                    'per_page' => (int)$request->input('per_page', 10),
                     'current_paged' => (int)$request->input('page', 1),
                 ],
             ]);
@@ -142,7 +142,7 @@ class PostController extends Controller
         }
 
         $post = $this->postRepository->getFirstBy([
-            'id'     => $slug->reference_id,
+            'id' => $slug->reference_id,
             'status' => BaseStatusEnum::PUBLISHED,
         ]);
 

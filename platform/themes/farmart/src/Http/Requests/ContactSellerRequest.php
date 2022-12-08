@@ -18,8 +18,8 @@ class ContactSellerRequest extends Request
 
         if (!auth('customer')->check()) {
             $rules += [
-                'name'    => 'required',
-                'email'   => 'required|email',
+                'name' => 'required',
+                'email' => 'required|email',
             ];
         }
 
@@ -45,9 +45,9 @@ class ContactSellerRequest extends Request
     {
         return [
             'g-recaptcha-response.required' => __('Captcha Verification Failed!'),
-            'g-recaptcha-response.captcha'  => __('Captcha Verification Failed!'),
-            'math-captcha.required'         => __('Math function Verification Failed!'),
-            'math_captcha'                  => __('Math function Verification Failed!'),
+            'g-recaptcha-response.captcha' => __('Captcha Verification Failed!'),
+            'math-captcha.required' => __('Math function Verification Failed!'),
+            'math_captcha' => __('Math function Verification Failed!'),
         ];
     }
 }

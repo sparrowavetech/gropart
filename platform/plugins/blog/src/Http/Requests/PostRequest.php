@@ -17,10 +17,10 @@ class PostRequest extends Request
     public function rules()
     {
         $rules = [
-            'name'        => 'required|max:255',
+            'name' => 'required|max:255',
             'description' => 'max:400',
-            'categories'  => 'required',
-            'status'      => Rule::in(BaseStatusEnum::values()),
+            'categories' => 'required',
+            'status' => Rule::in(BaseStatusEnum::values()),
         ];
 
         $postFormats = PostFormat::getPostFormats(true);

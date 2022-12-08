@@ -72,6 +72,7 @@ class MediaFile extends BaseModel
         foreach (RvMedia::getConfig('mime_types', []) as $key => $value) {
             if (in_array($this->attributes['mime_type'], $value)) {
                 $type = $key;
+
                 break;
             }
         }
@@ -89,18 +90,23 @@ class MediaFile extends BaseModel
         switch ($this->type) {
             case 'image':
                 $icon = 'far fa-file-image';
+
                 break;
             case 'video':
                 $icon = 'far fa-file-video';
+
                 break;
             case 'pdf':
                 $icon = 'far fa-file-pdf';
+
                 break;
             case 'excel':
                 $icon = 'far fa-file-excel';
+
                 break;
             default:
                 $icon = 'far fa-file-alt';
+
                 break;
         }
 
@@ -121,6 +127,7 @@ class MediaFile extends BaseModel
             case 'text':
             case 'video':
                 $preview = RvMedia::url($this->url);
+
                 break;
             case 'document':
                 $config = config('core.media.media.preview.document', []);
@@ -131,6 +138,7 @@ class MediaFile extends BaseModel
                 ) {
                     $preview = Str::replace('{url}', urlencode(RvMedia::url($this->url)), $url);
                 }
+
                 break;
         }
 

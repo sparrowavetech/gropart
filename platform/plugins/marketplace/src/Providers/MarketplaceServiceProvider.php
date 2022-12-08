@@ -102,50 +102,60 @@ class MarketplaceServiceProvider extends ServiceProvider
             Event::listen(RouteMatched::class, function () {
                 dashboard_menu()
                     ->registerItem([
-                        'id'          => 'cms-plugins-marketplace',
-                        'priority'    => 9,
-                        'parent_id'   => null,
-                        'name'        => 'plugins/marketplace::marketplace.name',
-                        'icon'        => 'fas fa-project-diagram',
-                        'url'         => '#',
+                        'id' => 'cms-plugins-marketplace',
+                        'priority' => 9,
+                        'parent_id' => null,
+                        'name' => 'plugins/marketplace::marketplace.name',
+                        'icon' => 'fas fa-project-diagram',
+                        'url' => '#',
                         'permissions' => ['marketplace.index'],
                     ])
                     ->registerItem([
-                        'id'          => 'cms-plugins-store',
-                        'priority'    => 1,
-                        'parent_id'   => 'cms-plugins-marketplace',
-                        'name'        => 'plugins/marketplace::store.name',
-                        'icon'        => null,
-                        'url'         => route('marketplace.store.index'),
+                        'id' => 'cms-plugins-store',
+                        'priority' => 1,
+                        'parent_id' => 'cms-plugins-marketplace',
+                        'name' => 'plugins/marketplace::store.name',
+                        'icon' => null,
+                        'url' => route('marketplace.store.index'),
                         'permissions' => ['marketplace.store.index'],
                     ])
                     ->registerItem([
-                        'id'          => 'cms-plugins-withdrawal',
-                        'priority'    => 2,
-                        'parent_id'   => 'cms-plugins-marketplace',
-                        'name'        => 'plugins/marketplace::withdrawal.name',
-                        'icon'        => null,
-                        'url'         => route('marketplace.withdrawal.index'),
+                        'id' => 'cms-plugins-withdrawal',
+                        'priority' => 2,
+                        'parent_id' => 'cms-plugins-marketplace',
+                        'name' => 'plugins/marketplace::withdrawal.name',
+                        'icon' => null,
+                        'url' => route('marketplace.withdrawal.index'),
                         'permissions' => ['marketplace.withdrawal.index'],
                     ])
                     ->registerItem([
-                        'id'          => 'cms-plugins-marketplace-settings',
-                        'priority'    => 3,
-                        'parent_id'   => 'cms-plugins-marketplace',
-                        'name'        => 'plugins/marketplace::marketplace.settings.name',
-                        'icon'        => null,
-                        'url'         => route('marketplace.settings'),
+                        'id' => 'cms-plugins-marketplace-settings',
+                        'priority' => 3,
+                        'parent_id' => 'cms-plugins-marketplace',
+                        'name' => 'plugins/marketplace::marketplace.settings.name',
+                        'icon' => null,
+                        'url' => route('marketplace.settings'),
                         'permissions' => ['marketplace.settings'],
+                    ])
+                    ->registerItem([
+                        'id' => 'cms-plugins-marketplace-vendors',
+                        'priority' => 4,
+                        'parent_id' => 'cms-plugins-marketplace',
+                        'name' => 'plugins/marketplace::marketplace.vendors',
+                        'icon' => null,
+                        'url' => route('marketplace.vendors.index'),
+                        'permissions' => ['marketplace.vendors.index'],
                     ]);
 
                 if (MarketplaceHelper::getSetting('verify_vendor', 1)) {
-                    dashboard_menu()->registerItem([
-                            'id'          => 'cms-plugins-marketplace-unverified-vendor',
-                            'priority'    => 4,
-                            'parent_id'   => 'cms-plugins-marketplace',
-                            'name'        => 'plugins/marketplace::unverified-vendor.name',
-                            'icon'        => null,
-                            'url'         => route('marketplace.unverified-vendors.index'),
+                    dashboard_menu()
+                        ->registerItem([
+                            'id' => 'cms-plugins-marketplace-unverified-vendor',
+                            'priority' => 5,
+                            'parent_id' => 'cms-plugins-marketplace',
+                            'name' => 'plugins/marketplace::unverified-vendor.name',
+                            'icon' => null,
+                            'url' => route('marketplace.unverified-vendors.index'),
                             'permissions' => ['marketplace.unverified-vendors.index'],
                         ]);
                 } else {
@@ -199,10 +209,18 @@ class MarketplaceServiceProvider extends ServiceProvider
 
                 MacroableModels::addMacro(Customer::class, 'getBankInfoAttribute', function () {
                     /**
-                     * @return float
+                     * @return array
                      * @var BaseModel $this
                      */
                     return $this->vendorInfo ? $this->vendorInfo->bank_info : [];
+                });
+
+                MacroableModels::addMacro(Customer::class, 'getTaxInfoAttribute', function () {
+                    /**
+                     * @return array
+                     * @var BaseModel $this
+                     */
+                    return $this->vendorInfo ? $this->vendorInfo->tax_info : [];
                 });
 
                 MacroableModels::addMacro(Customer::class, 'getTotalFeeAttribute', function () {
@@ -224,19 +242,19 @@ class MarketplaceServiceProvider extends ServiceProvider
 
             Form::component('customEditor', MarketplaceHelper::viewPath('dashboard.forms.partials.custom-editor'), [
                 'name',
-                'value'      => null,
+                'value' => null,
                 'attributes' => [],
             ]);
 
             Form::component('customImage', MarketplaceHelper::viewPath('dashboard.forms.partials.custom-image'), [
                 'name',
-                'value'      => null,
+                'value' => null,
                 'attributes' => [],
             ]);
 
             Form::component('customImages', MarketplaceHelper::viewPath('dashboard.forms.partials.custom-images'), [
                 'name',
-                'values'     => null,
+                'values' => null,
                 'attributes' => [],
             ]);
         }

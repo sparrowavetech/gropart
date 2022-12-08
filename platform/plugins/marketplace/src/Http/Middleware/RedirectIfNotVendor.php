@@ -2,7 +2,6 @@
 
 namespace Botble\Marketplace\Http\Middleware;
 
-use AdminBar;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -36,8 +35,6 @@ class RedirectIfNotVendor
 
             return redirect()->guest(route('marketplace.vendor.become-vendor'));
         }
-
-        AdminBar::setIsDisplay(false);
 
         return $next($request);
     }

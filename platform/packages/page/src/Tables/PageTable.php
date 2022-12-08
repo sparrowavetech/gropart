@@ -105,18 +105,18 @@ class PageTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function columns()
+    public function columns(): array
     {
         return [
-            'id'         => [
+            'id' => [
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
             ],
-            'name'       => [
+            'name' => [
                 'title' => trans('core/base::tables.name'),
                 'class' => 'text-start',
             ],
-            'template'   => [
+            'template' => [
                 'title' => trans('core/base::tables.template'),
                 'class' => 'text-start',
             ],
@@ -125,7 +125,7 @@ class PageTable extends TableAbstract
                 'width' => '100px',
                 'class' => 'text-center',
             ],
-            'status'     => [
+            'status' => [
                 'title' => trans('core/base::tables.status'),
                 'width' => '100px',
                 'class' => 'text-center',
@@ -136,7 +136,7 @@ class PageTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function buttons()
+    public function buttons(): array
     {
         return $this->addCreateButton(route('pages.create'), 'pages.create');
     }
@@ -155,26 +155,26 @@ class PageTable extends TableAbstract
     public function getBulkChanges(): array
     {
         return [
-            'name'       => [
-                'title'    => trans('core/base::tables.name'),
-                'type'     => 'text',
+            'name' => [
+                'title' => trans('core/base::tables.name'),
+                'type' => 'text',
                 'validate' => 'required|max:120',
             ],
-            'status'     => [
-                'title'    => trans('core/base::tables.status'),
-                'type'     => 'customSelect',
-                'choices'  => BaseStatusEnum::labels(),
+            'status' => [
+                'title' => trans('core/base::tables.status'),
+                'type' => 'customSelect',
+                'choices' => BaseStatusEnum::labels(),
                 'validate' => 'required|' . Rule::in(BaseStatusEnum::values()),
             ],
-            'template'   => [
-                'title'    => trans('core/base::tables.template'),
-                'type'     => 'customSelect',
-                'choices'  => get_page_templates(),
+            'template' => [
+                'title' => trans('core/base::tables.template'),
+                'type' => 'customSelect',
+                'choices' => get_page_templates(),
                 'validate' => 'required',
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type'  => 'date',
+                'type' => 'date',
             ],
         ];
     }

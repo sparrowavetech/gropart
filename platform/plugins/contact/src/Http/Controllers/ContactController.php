@@ -137,7 +137,7 @@ class ContactController extends BaseController
         EmailHandler::send($request->input('message'), 'Re: ' . $contact->subject, $contact->email);
 
         $contactReplyRepository->create([
-            'message'    => $request->input('message'),
+            'message' => $request->input('message'),
             'contact_id' => $id,
         ]);
 

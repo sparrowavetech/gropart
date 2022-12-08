@@ -90,7 +90,7 @@ class ActivationRepository extends RepositoriesAbstract implements ActivationInt
         }
 
         $activation->fill([
-            'completed'    => true,
+            'completed' => true,
             'completed_at' => Carbon::now(),
         ]);
 

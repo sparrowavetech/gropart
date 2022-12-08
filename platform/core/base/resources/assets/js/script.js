@@ -16,15 +16,15 @@ class Botble {
 
     static blockUI(options) {
         options = $.extend(true, {}, options);
-        let html = '';
+        let html;
         if (options.animate) {
             html = '<div class="loading-message ' + (options.boxed ? 'loading-message-boxed' : '') + '">' + '<div class="block-spinner-bar"><div class="bounce1"></div><div class="bounce2"></div><div class="bounce3"></div></div>' + '</div>';
         } else if (options.iconOnly) {
-            html = '<div class="loading-message ' + (options.boxed ? 'loading-message-boxed' : '') + '"><img src="/vendor/core/core/base/images/loading-spinner-blue.gif" alt="loading"></div>';
+            html = '<div class="loading-message ' + (options.boxed ? 'loading-message-boxed' : '') + '"><img src="' + window.siteUrl + '/vendor/core/core/base/images/loading-spinner-blue.gif" alt="loading"></div>';
         } else if (options.textOnly) {
             html = '<div class="loading-message ' + (options.boxed ? 'loading-message-boxed' : '') + '"><span>&nbsp;&nbsp;' + (options.message ? options.message : 'LOADING...') + '</span></div>';
         } else {
-            html = '<div class="loading-message ' + (options.boxed ? 'loading-message-boxed' : '') + '"><img src="/vendor/core/core/base/images/loading-spinner-blue.gif" alt="loading"><span>&nbsp;&nbsp;' + (options.message ? options.message : 'LOADING...') + '</span></div>';
+            html = '<div class="loading-message ' + (options.boxed ? 'loading-message-boxed' : '') + '"><img src="' + window.siteUrl + '/vendor/core/core/base/images/loading-spinner-blue.gif" alt="loading"><span>&nbsp;&nbsp;' + (options.message ? options.message : 'LOADING...') + '</span></div>';
         }
 
         if (options.target) { // element blocking
@@ -545,7 +545,7 @@ class Botble {
         }
 
         $('.select2_google_fonts_picker').each(function (i, obj) {
-            if (!$(obj).hasClass('select2-hidden-accessible')){
+            if (!$(obj).hasClass('select2-hidden-accessible')) {
                 $(obj).select2({
                     templateResult: function (opt) {
                         if (!opt.id) {

@@ -27,9 +27,13 @@ class VendorWithdrawalForm extends FormAbstract
             }
         }
 
-        $model = auth('customer')->user();
+        $user = auth('customer')->user();
+        $model = $user;
+        $balance = $model->balance;
+        $paymentChannel = $model->vendorInfo->payout_payment_method;
         if ($exists) {
             $model = $this->getModel();
+            $paymentChannel = $model->payment_channel;
         }
 
         $disabled = ['disabled' => 'disabled'];
@@ -40,12 +44,12 @@ class VendorWithdrawalForm extends FormAbstract
             ->setFormOption('template', MarketplaceHelper::viewPath('dashboard.forms.base'))
             ->withCustomFields()
             ->add('amount', 'number', [
-                'label'      => trans('plugins/marketplace::withdrawal.forms.amount_with_balance', ['balance' => $model->balance]),
+                'label' => trans('plugins/marketplace::withdrawal.forms.amount_with_balance', ['balance' => format_price($balance)]),
                 'label_attr' => ['class' => 'control-label required'],
-                'attr'       => array_merge([
-                    'placeholder'  => trans('plugins/marketplace::withdrawal.forms.amount_placeholder'),
+                'attr' => array_merge([
+                    'placeholder' => trans('plugins/marketplace::withdrawal.forms.amount_placeholder'),
                     'data-counter' => 120,
-                    'max'          => $model->balance,
+                    'max' => $balance,
                 ], $exists ? $disabled : []),
                 'help_block' => [
                     'text' => $fee ? trans(
@@ -57,37 +61,28 @@ class VendorWithdrawalForm extends FormAbstract
 
         if ($exists) {
             $this->add('fee', 'number', [
-                'label'      => trans('plugins/marketplace::withdrawal.forms.fee'),
+                'label' => trans('plugins/marketplace::withdrawal.forms.fee'),
                 'label_attr' => ['class' => 'control-label required'],
-                'attr'       => $disabled,
+                'attr' => $disabled,
             ]);
         }
 
         $this
-            ->add('payment_channel', 'text', [
-                'label'      => trans('plugins/marketplace::withdrawal.forms.payment_channel'),
-                'label_attr' => ['class' => 'control-label'],
-                'attr'       => $disabled,
-            ])->add('transaction_id', 'text', [
-                'label'      => trans('plugins/marketplace::withdrawal.forms.transaction_id'),
-                'label_attr' => ['class' => 'control-label'],
-                'attr'       => $disabled,
-            ]);
-
-        $this
             ->add('description', 'textarea', [
-                'label'      => trans('core/base::forms.description'),
+                'label' => trans('core/base::forms.description'),
                 'label_attr' => ['class' => 'control-label'],
-                'attr'       => array_merge([
-                    'rows'         => 3,
-                    'placeholder'  => trans('core/base::forms.description_placeholder'),
+                'attr' => array_merge([
+                    'rows' => 3,
+                    'placeholder' => trans('core/base::forms.description_placeholder'),
                     'data-counter' => 200,
                 ], $exists && !$this->getModel()->vendor_can_edit ? $disabled : []),
             ])
             ->add('bankInfo', 'html', [
-                'html' => view('plugins/marketplace::withdrawals.bank-info', [
+                'html' => view('plugins/marketplace::withdrawals.payout-info', [
                     'bankInfo' => $model->bank_info,
-                    'link'     => $exists ? null : route('marketplace.vendor.settings', ['#tab_bank_info']),
+                    'taxInfo' => $user->tax_info,
+                    'paymentChannel' => $paymentChannel,
+                    'link' => $exists ? null : route('marketplace.vendor.settings', ['#tab_payout_info']),
                 ])
                     ->render(),
             ]);
@@ -96,8 +91,8 @@ class VendorWithdrawalForm extends FormAbstract
             if ($model->images) {
                 $this->addMetaBoxes([
                     'images' => [
-                        'title'    => __('Withdrawal images'),
-                        'content'  => view('plugins/marketplace::withdrawals.forms.images', compact('model'))->render(),
+                        'title' => __('Withdrawal images'),
+                        'content' => view('plugins/marketplace::withdrawals.forms.images', compact('model'))->render(),
                         'priority' => 4,
                     ],
                 ]);
@@ -105,7 +100,7 @@ class VendorWithdrawalForm extends FormAbstract
 
             if ($this->getModel()->vendor_can_edit) {
                 $this->add('cancel', 'onOff', [
-                    'label'      => __('Do you want to cancel?'),
+                    'label' => __('Do you want to cancel?'),
                     'label_attr' => ['class' => 'control-label'],
                     'help_block' => [
                         'text' => __('After cancel amount and fee will be refunded back in your balance'),
@@ -114,7 +109,7 @@ class VendorWithdrawalForm extends FormAbstract
             } else {
                 $this->add('cancel', 'html', [
                     'label' => trans('core/base::tables.status'),
-                    'html'  => $model->status->toHtml(),
+                    'html' => $model->status->toHtml(),
                 ]);
             }
         }

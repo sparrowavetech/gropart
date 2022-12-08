@@ -56,7 +56,7 @@ class CaptchaV3
 
         $response = $client->request('POST', $this->origin . '/api/siteverify', [
             'form_params' => [
-                'secret'   => $this->secret,
+                'secret' => $this->secret,
                 'response' => $token,
                 'remoteip' => $clientIp,
             ],

@@ -59,12 +59,16 @@ return new class () extends Migration {
             $table->timestamps();
         });
 
-        foreach (Order::with('invoice')->get() as $order) {
-            if ($order->invoice->id) {
-                continue;
-            }
+        try {
+            foreach (Order::with('invoice')->get() as $order) {
+                if ($order->invoice->id) {
+                    continue;
+                }
 
-            InvoiceHelper::store($order);
+                InvoiceHelper::store($order);
+            }
+        } catch (Exception $exception) {
+            info($exception->getMessage());
         }
     }
 

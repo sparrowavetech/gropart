@@ -14,7 +14,7 @@ class PayPalPaymentCallbackRequest extends Request
     public function rules()
     {
         return [
-            'amount'   => 'required|numeric',
+            'amount' => 'required|numeric',
             'currency' => 'required',
         ];
     }

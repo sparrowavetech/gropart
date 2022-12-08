@@ -28,11 +28,11 @@ class OrderReturnHelper
     public function returnOrder(Order $order, array $data): array
     {
         $orderReturnData = [
-            'order_id'      => $order->id,
-            'store_id'      => $order->store_id,
-            'user_id'       => $order->user_id,
-            'reason'        => $data['reason'],
-            'order_status'  => $order->status,
+            'order_id' => $order->id,
+            'store_id' => $order->store_id,
+            'user_id' => $order->user_id,
+            'reason' => $data['reason'],
+            'order_status' => $order->status,
             'return_status' => OrderReturnStatusEnum::PENDING,
         ];
 
@@ -51,19 +51,20 @@ class OrderReturnHelper
                     continue;
                 }
 
-                if (!EcommerceHelper::canCustomReturnProductQty()) {
+                if (!EcommerceHelper::allowPartialReturn()) {
                     $returnItem['qty'] = $orderProduct->qty;
                 }
 
                 $orderReturnItemData[] = [
-                    'order_return_id'  => $orderReturn->id,
+                    'order_return_id' => $orderReturn->id,
                     'order_product_id' => $returnItem['order_item_id'],
-                    'product_id'       => $orderProduct->product_id,
-                    'product_name'     => $orderProduct->product_name,
-                    'price'            => $orderProduct->price,
-                    'qty'              => $returnItem['qty'],
-                    'reason'           => $returnItem['reason'] ?? null,
-                    'created_at'       => Carbon::now(),
+                    'product_id' => $orderProduct->product_id,
+                    'product_name' => $orderProduct->product_name,
+                    'product_image' => $orderProduct->product_image,
+                    'price' => $orderProduct->price,
+                    'qty' => $returnItem['qty'],
+                    'reason' => $returnItem['reason'] ?? null,
+                    'created_at' => Carbon::now(),
                 ];
 
                 $orderProductIds[] = $orderProduct->product_id;
@@ -88,7 +89,7 @@ class OrderReturnHelper
 
                 $mailer->setVariableValues([
                     'list_order_products' => view('plugins/ecommerce::emails.partials.order-detail', [
-                        'order'    => $order,
+                        'order' => $order,
                         'products' => $orderProducts,
                     ])
                         ->render(),
@@ -104,10 +105,10 @@ class OrderReturnHelper
         } catch (Throwable $exception) {
             DB::rollBack();
             Log::error($exception->getMessage(), [
-                'file'     => $exception->getFile(),
+                'file' => $exception->getFile(),
                 'function' => __FUNCTION__,
-                'line'     => $exception->getLine(),
-                'trace'    => $exception->getTraceAsString(),
+                'line' => $exception->getLine(),
+                'trace' => $exception->getTraceAsString(),
             ]);
 
             return [false, [], $exception->getMessage()];
@@ -135,6 +136,7 @@ class OrderReturnHelper
     public function updateReturnOrder(OrderReturn $orderReturn, array $data): array
     {
         DB::beginTransaction();
+
         try {
             $orderReturn->return_status = $data['return_status'];
             $orderReturn->save();
@@ -156,14 +158,15 @@ class OrderReturnHelper
                 }
             }
             DB::commit();
+
             return [true, $orderReturn];
         } catch (Throwable $exception) {
             DB::rollBack();
             Log::error($exception->getMessage(), [
-                'file'     => $exception->getFile(),
+                'file' => $exception->getFile(),
                 'function' => __FUNCTION__,
-                'line'     => $exception->getLine(),
-                'trace'    => $exception->getTraceAsString(),
+                'line' => $exception->getLine(),
+                'trace' => $exception->getTraceAsString(),
             ]);
 
             return [false, []];

@@ -20,7 +20,7 @@ class BrandTranslation extends BaseModel
         'lang_code',
         'ec_brands_id',
         'name',
-        'description'
+        'description',
     ];
 
     /**

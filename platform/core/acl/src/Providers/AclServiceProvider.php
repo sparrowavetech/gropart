@@ -65,21 +65,21 @@ class AclServiceProvider extends ServiceProvider
         Event::listen(RouteMatched::class, function () {
             dashboard_menu()
                 ->registerItem([
-                    'id'          => 'cms-core-role-permission',
-                    'priority'    => 2,
-                    'parent_id'   => 'cms-core-platform-administration',
-                    'name'        => 'core/acl::permissions.role_permission',
-                    'icon'        => null,
-                    'url'         => route('roles.index'),
+                    'id' => 'cms-core-role-permission',
+                    'priority' => 2,
+                    'parent_id' => 'cms-core-platform-administration',
+                    'name' => 'core/acl::permissions.role_permission',
+                    'icon' => null,
+                    'url' => route('roles.index'),
                     'permissions' => ['roles.index'],
                 ])
                 ->registerItem([
-                    'id'          => 'cms-core-user',
-                    'priority'    => 3,
-                    'parent_id'   => 'cms-core-platform-administration',
-                    'name'        => 'core/acl::users.users',
-                    'icon'        => null,
-                    'url'         => route('users.index'),
+                    'id' => 'cms-core-user',
+                    'priority' => 3,
+                    'parent_id' => 'cms-core-platform-administration',
+                    'name' => 'core/acl::users.users',
+                    'icon' => null,
+                    'url' => route('users.index'),
                     'permissions' => ['users.index'],
                 ]);
 

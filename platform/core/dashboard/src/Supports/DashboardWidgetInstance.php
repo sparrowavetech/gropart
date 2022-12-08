@@ -355,7 +355,7 @@ class DashboardWidgetInstance
             $predefinedRanges = $this->getPredefinedRanges();
 
             $data = [
-                'id'   => $widget->id,
+                'id' => $widget->id,
                 'type' => $this->type,
                 'view' => view(
                     'core/dashboard::widgets.base',
@@ -375,7 +375,7 @@ class DashboardWidgetInstance
         $widget->statsTotal = $this->statsTotal;
 
         $widgets[$this->key] = [
-            'id'   => $widget->id,
+            'id' => $widget->id,
             'type' => $this->type,
             'view' => view('core/dashboard::widgets.stats', compact('widget', 'widgetSetting'))->render(),
         ];
@@ -411,46 +411,46 @@ class DashboardWidgetInstance
 
         return [
             [
-                'key'       => 'today',
-                'label'     => trans('core/dashboard::dashboard.predefined_ranges.today'),
+                'key' => 'today',
+                'label' => trans('core/dashboard::dashboard.predefined_ranges.today'),
                 'startDate' => today()->startOfDay(),
-                'endDate'   => $endDate,
+                'endDate' => $endDate,
             ],
             [
-                'key'       => 'yesterday',
-                'label'     => trans('core/dashboard::dashboard.predefined_ranges.yesterday'),
+                'key' => 'yesterday',
+                'label' => trans('core/dashboard::dashboard.predefined_ranges.yesterday'),
                 'startDate' => Carbon::yesterday()->startOfDay(),
-                'endDate'   => Carbon::yesterday()->endOfDay(),
+                'endDate' => Carbon::yesterday()->endOfDay(),
             ],
             [
-                'key'       => 'this_week',
-                'label'     => trans('core/dashboard::dashboard.predefined_ranges.this_week'),
+                'key' => 'this_week',
+                'label' => trans('core/dashboard::dashboard.predefined_ranges.this_week'),
                 'startDate' => Carbon::now()->startOfWeek(),
-                'endDate'   => Carbon::now()->endOfWeek(),
+                'endDate' => Carbon::now()->endOfWeek(),
             ],
             [
-                'key'       => 'last_7_days',
-                'label'     => trans('core/dashboard::dashboard.predefined_ranges.last_7_days'),
+                'key' => 'last_7_days',
+                'label' => trans('core/dashboard::dashboard.predefined_ranges.last_7_days'),
                 'startDate' => Carbon::now()->subDays(7)->startOfDay(),
-                'endDate'   => $endDate,
+                'endDate' => $endDate,
             ],
             [
-                'key'       => 'this_month',
-                'label'     => trans('core/dashboard::dashboard.predefined_ranges.this_month'),
+                'key' => 'this_month',
+                'label' => trans('core/dashboard::dashboard.predefined_ranges.this_month'),
                 'startDate' => Carbon::now()->startOfMonth(),
-                'endDate'   => $endDate,
+                'endDate' => $endDate,
             ],
             [
-                'key'       => 'last_30_days',
-                'label'     => trans('core/dashboard::dashboard.predefined_ranges.last_30_days'),
+                'key' => 'last_30_days',
+                'label' => trans('core/dashboard::dashboard.predefined_ranges.last_30_days'),
                 'startDate' => Carbon::now()->subDays(29)->startOfDay(),
-                'endDate'   => $endDate,
+                'endDate' => $endDate,
             ],
             [
-                'key'       => 'this_year',
-                'label'     => trans('core/dashboard::dashboard.predefined_ranges.this_year'),
+                'key' => 'this_year',
+                'label' => trans('core/dashboard::dashboard.predefined_ranges.this_year'),
                 'startDate' => Carbon::now()->startOfYear(),
-                'endDate'   => $endDate,
+                'endDate' => $endDate,
             ],
         ];
     }
@@ -492,7 +492,7 @@ class DashboardWidgetInstance
 
         $widgetSetting = app(DashboardWidgetSettingInterface::class)->firstOrCreate([
             'widget_id' => $widget->id,
-            'user_id'   => Auth::user()->getKey(),
+            'user_id' => Auth::user()->getKey(),
         ]);
 
         $widgetSetting->settings = array_merge((array)$widgetSetting->settings, $settings);

@@ -52,7 +52,6 @@ class RoleTable extends TableAbstract
         }
     }
 
-
     /**
      * {@inheritDoc}
      */
@@ -107,22 +106,22 @@ class RoleTable extends TableAbstract
     public function columns(): array
     {
         return [
-            'id'          => [
+            'id' => [
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
             ],
-            'name'        => [
+            'name' => [
                 'title' => trans('core/base::tables.name'),
             ],
             'description' => [
                 'title' => trans('core/base::tables.description'),
                 'class' => 'text-start',
             ],
-            'created_at'  => [
+            'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
                 'width' => '100px',
             ],
-            'created_by'  => [
+            'created_by' => [
                 'title' => trans('core/acl::permissions.created_by'),
                 'width' => '100px',
             ],
@@ -152,8 +151,8 @@ class RoleTable extends TableAbstract
     {
         return [
             'name' => [
-                'title'    => trans('core/base::tables.name'),
-                'type'     => 'text',
+                'title' => trans('core/base::tables.name'),
+                'type' => 'text',
                 'validate' => 'required|max:120',
             ],
         ];

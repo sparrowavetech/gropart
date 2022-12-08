@@ -20,11 +20,11 @@ class ShippingRuleRequest extends Request
         }
 
         return [
-                'name'  => 'required|max:120',
-                'from'  => 'required|numeric',
-                'to'    => 'nullable|numeric|min:' . (float)$this->input('from'),
+                'name' => 'required|max:120',
+                'from' => 'required|numeric',
+                'to' => 'nullable|numeric|min:' . (float)$this->input('from'),
                 'price' => 'required',
-                'type'  => 'required',
+                'type' => 'required',
             ] + $ruleItems;
     }
 

@@ -76,39 +76,39 @@ class BlogServiceProvider extends ServiceProvider
         Event::listen(RouteMatched::class, function () {
             dashboard_menu()
                 ->registerItem([
-                    'id'          => 'cms-plugins-blog',
-                    'priority'    => 3,
-                    'parent_id'   => null,
-                    'name'        => 'plugins/blog::base.menu_name',
-                    'icon'        => 'fa fa-edit',
-                    'url'         => route('posts.index'),
+                    'id' => 'cms-plugins-blog',
+                    'priority' => 3,
+                    'parent_id' => null,
+                    'name' => 'plugins/blog::base.menu_name',
+                    'icon' => 'fa fa-edit',
+                    'url' => route('posts.index'),
                     'permissions' => ['posts.index'],
                 ])
                 ->registerItem([
-                    'id'          => 'cms-plugins-blog-post',
-                    'priority'    => 1,
-                    'parent_id'   => 'cms-plugins-blog',
-                    'name'        => 'plugins/blog::posts.menu_name',
-                    'icon'        => null,
-                    'url'         => route('posts.index'),
+                    'id' => 'cms-plugins-blog-post',
+                    'priority' => 1,
+                    'parent_id' => 'cms-plugins-blog',
+                    'name' => 'plugins/blog::posts.menu_name',
+                    'icon' => null,
+                    'url' => route('posts.index'),
                     'permissions' => ['posts.index'],
                 ])
                 ->registerItem([
-                    'id'          => 'cms-plugins-blog-categories',
-                    'priority'    => 2,
-                    'parent_id'   => 'cms-plugins-blog',
-                    'name'        => 'plugins/blog::categories.menu_name',
-                    'icon'        => null,
-                    'url'         => route('categories.index'),
+                    'id' => 'cms-plugins-blog-categories',
+                    'priority' => 2,
+                    'parent_id' => 'cms-plugins-blog',
+                    'name' => 'plugins/blog::categories.menu_name',
+                    'icon' => null,
+                    'url' => route('categories.index'),
                     'permissions' => ['categories.index'],
                 ])
                 ->registerItem([
-                    'id'          => 'cms-plugins-blog-tags',
-                    'priority'    => 3,
-                    'parent_id'   => 'cms-plugins-blog',
-                    'name'        => 'plugins/blog::tags.menu_name',
-                    'icon'        => null,
-                    'url'         => route('tags.index'),
+                    'id' => 'cms-plugins-blog-tags',
+                    'priority' => 3,
+                    'parent_id' => 'cms-plugins-blog',
+                    'name' => 'plugins/blog::tags.menu_name',
+                    'icon' => null,
+                    'url' => route('tags.index'),
                     'permissions' => ['tags.index'],
                 ]);
         });

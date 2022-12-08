@@ -6,8 +6,8 @@ Route::group(['namespace' => 'Botble\Newsletter\Http\Controllers', 'middleware' 
             Route::resource('', 'NewsletterController')->only(['index', 'destroy'])->parameters(['' => 'newsletter']);
 
             Route::delete('items/destroy', [
-                'as'         => 'deletes',
-                'uses'       => 'NewsletterController@deletes',
+                'as' => 'deletes',
+                'uses' => 'NewsletterController@deletes',
                 'permission' => 'newsletter.destroy',
             ]);
         });
@@ -15,12 +15,12 @@ Route::group(['namespace' => 'Botble\Newsletter\Http\Controllers', 'middleware' 
 
     Route::group(apply_filters(BASE_FILTER_GROUP_PUBLIC_ROUTE, []), function () {
         Route::post('newsletter/subscribe', [
-            'as'   => 'public.newsletter.subscribe',
+            'as' => 'public.newsletter.subscribe',
             'uses' => 'PublicController@postSubscribe',
         ]);
 
         Route::get('newsletter/unsubscribe/{user}', [
-            'as'   => 'public.newsletter.unsubscribe',
+            'as' => 'public.newsletter.unsubscribe',
             'uses' => 'PublicController@getUnsubscribe',
         ]);
     });

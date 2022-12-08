@@ -70,16 +70,20 @@ class HandleApplyPromotionsService
                             if ($promotion->min_order_price <= $rawTotal) {
                                 $promotionDiscountAmount += $promotion->value;
                             }
+
                             break;
                         case 'all-orders':
                             $promotionDiscountAmount += $promotion->value;
+
                             break;
                         default:
                             if ($countCart >= $promotion->product_quantity) {
                                 $promotionDiscountAmount += $promotion->value;
                             }
+
                             break;
                     }
+
                     break;
                 case 'percentage':
                     switch ($promotion->target) {
@@ -87,16 +91,20 @@ class HandleApplyPromotionsService
                             if ($promotion->min_order_price <= $rawTotal) {
                                 $promotionDiscountAmount += $rawTotal * $promotion->value / 100;
                             }
+
                             break;
                         case 'all-orders':
                             $promotionDiscountAmount += $rawTotal * $promotion->value / 100;
+
                             break;
                         default:
                             if ($countCart >= $promotion->product_quantity) {
                                 $promotionDiscountAmount += $rawTotal * $promotion->value / 100;
                             }
+
                             break;
                     }
+
                     break;
                 case 'same-price':
                     if ($promotion->product_quantity > 1 && $countCart >= $promotion->product_quantity) {

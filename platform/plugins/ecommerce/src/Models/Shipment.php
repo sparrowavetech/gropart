@@ -55,7 +55,7 @@ class Shipment extends BaseModel
      * @var array
      */
     protected $casts = [
-        'status'     => ShippingStatusEnum::class,
+        'status' => ShippingStatusEnum::class,
         'cod_status' => ShippingCodStatusEnum::class,
     ];
 
@@ -68,25 +68,16 @@ class Shipment extends BaseModel
         });
     }
 
-    /**
-     * @return HasOne
-     */
     public function store(): HasOne
     {
         return $this->hasOne(StoreLocator::class, 'id', 'store_id')->withDefault();
     }
 
-    /**
-     * @return HasMany
-     */
     public function histories(): HasMany
     {
         return $this->hasMany(ShipmentHistory::class, 'shipment_id');
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class)->withDefault();

@@ -84,7 +84,7 @@ class StoreAttributeSetService
         foreach ($attributeIds as $id) {
             $attribute = $this->productAttributeRepository
                 ->getFirstBy([
-                    'id'               => $id,
+                    'id' => $id,
                     'attribute_set_id' => $productAttributeSetId,
                 ]);
 

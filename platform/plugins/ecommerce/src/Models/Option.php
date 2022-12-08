@@ -27,17 +27,11 @@ class Option extends BaseModel
         'order',
     ];
 
-    /**
-     * @return HasMany
-     */
     public function values(): HasMany
     {
         return $this->hasMany(OptionValue::class, 'option_id')->orderBy('order', 'ASC');
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function products(): BelongsTo
     {
         return $this->belongsTo(Product::class);

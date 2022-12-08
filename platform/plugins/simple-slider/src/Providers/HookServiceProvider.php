@@ -40,7 +40,7 @@ class HookServiceProvider extends ServiceProvider
     public function render($shortcode)
     {
         $slider = $this->app->make(SimpleSliderInterface::class)->getFirstBy([
-            'key'    => $shortcode->key,
+            'key' => $shortcode->key,
             'status' => BaseStatusEnum::PUBLISHED,
         ]);
 
@@ -62,9 +62,9 @@ class HookServiceProvider extends ServiceProvider
         }
 
         return view(apply_filters(SIMPLE_SLIDER_VIEW_TEMPLATE, 'plugins/simple-slider::sliders'), [
-            'sliders'   => $slider->sliderItems,
+            'sliders' => $slider->sliderItems,
             'shortcode' => $shortcode,
-            'slider'    => $slider,
+            'slider' => $slider,
         ]);
     }
 

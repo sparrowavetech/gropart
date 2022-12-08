@@ -75,8 +75,8 @@ class BulkImportController extends BaseController
         if ($this->validateProductImport->failures()->count()) {
             $data = [
                 'total_failed' => $this->validateProductImport->failures()->count(),
-                'total_error'  => $this->validateProductImport->errors()->count(),
-                'failures'     => $this->validateProductImport->failures(),
+                'total_error' => $this->validateProductImport->errors()->count(),
+                'failures' => $this->validateProductImport->failures(),
             ];
 
             $message = trans('plugins/ecommerce::bulk-import.import_failed_description');
@@ -94,17 +94,17 @@ class BulkImportController extends BaseController
 
         $data = [
             'total_success' => $this->productImport->successes()->count(),
-            'total_failed'  => $this->productImport->failures()->count(),
-            'total_error'   => $this->productImport->errors()->count(),
-            'failures'      => $this->productImport->failures(),
-            'successes'     => $this->productImport->successes(),
+            'total_failed' => $this->productImport->failures()->count(),
+            'total_error' => $this->productImport->errors()->count(),
+            'failures' => $this->productImport->failures(),
+            'successes' => $this->productImport->successes(),
         ];
 
         $message = trans('plugins/ecommerce::bulk-import.imported_successfully');
 
         $result = trans('plugins/ecommerce::bulk-import.results', [
             'success' => $data['total_success'],
-            'failed'  => $data['total_failed'],
+            'failed' => $data['total_failed'],
         ]);
 
         return $response->setData($data)->setMessage($message . ' ' . $result);

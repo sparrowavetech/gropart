@@ -52,16 +52,15 @@ class CompareController extends Controller
         $attributeSets = collect();
         if ($itemIds->count()) {
             $products = $this->productRepository
-                ->getProductsByIds($itemIds->toArray(), [
-                    'take'      => 10,
-                    'with'      => [
+                ->getProductsByIds($itemIds->toArray(), array_merge([
+                    'take' => 10,
+                    'with' => [
                         'slugable',
                         'variations',
                         'productCollections',
                         'variationAttributeSwatchesForProductList',
                     ],
-                    'withCount' => EcommerceHelper::withReviewsCount(),
-                ]);
+                ], EcommerceHelper::withReviewsParams()));
 
             $attributeSets = app(ProductAttributeSetInterface::class)->getAllWithSelected($itemIds);
         }
@@ -120,8 +119,10 @@ class CompareController extends Controller
         Cart::instance('compare')->search(function ($cartItem, $rowId) use ($productId) {
             if ($cartItem->id == $productId) {
                 Cart::instance('compare')->remove($rowId);
+
                 return true;
             }
+
             return false;
         });
 

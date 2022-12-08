@@ -2,7 +2,7 @@
 
 <h2>New order return request!</h2>
 
-<p>Hi, {{ customer_name }} has just requested return product(s) on your site.</p>
+<p>{{ customer_name }} has just requested return product(s) on your site.</p>
 
 {{ list_order_products }}
 

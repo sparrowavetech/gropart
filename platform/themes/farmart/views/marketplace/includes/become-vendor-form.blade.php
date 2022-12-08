@@ -34,8 +34,7 @@
     @php
      $shoptype = \Botble\Marketplace\Enums\ShopTypeEnum::labels();
     @endphp
-    <select class="form-control @if ($errors->has('shop_category')) is-invalid @endif" id="shop_category" name="shop_category">
-       
+    <select class="form-control form-select @if ($errors->has('shop_category')) is-invalid @endif" id="shop_category" name="shop_category">
         <option value="">Select Your Type</option>
         @foreach($shoptype as $index => $type)
             <option value="{{ $index }}">{{ $type }}</option>

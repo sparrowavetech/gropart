@@ -11,11 +11,11 @@ class CustomHtmlRequest extends Request
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'header_html' => 'max:2500',
-            'body_html'   => 'max:2500',
+            'body_html' => 'max:2500',
             'footer_html' => 'max:2500',
         ];
     }

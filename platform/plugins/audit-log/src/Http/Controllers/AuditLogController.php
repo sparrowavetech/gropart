@@ -44,10 +44,10 @@ class AuditLogController extends BaseController
 
         $histories = $this->auditLogRepository
             ->advancedGet([
-                'with'     => ['user'],
+                'with' => ['user'],
                 'order_by' => ['created_at' => 'DESC'],
                 'paginate' => [
-                    'per_page'      => $limit,
+                    'per_page' => $limit,
                     'current_paged' => (int)$request->input('page', 1),
                 ],
             ]);

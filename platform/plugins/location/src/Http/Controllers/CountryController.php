@@ -179,9 +179,9 @@ class CountryController extends BaseController
             'condition' => [
                 ['countries.name', 'LIKE', '%' . $keyword . '%'],
             ],
-            'select'    => ['countries.id', 'countries.name'],
-            'take'      => 10,
-            'order_by'  => ['order' => 'ASC', 'name' => 'ASC'],
+            'select' => ['countries.id', 'countries.name'],
+            'take' => 10,
+            'order_by' => ['order' => 'ASC', 'name' => 'ASC'],
         ]);
 
         $data->prepend(new Country(['id' => 0, 'name' => trans('plugins/location::city.select_country')]));

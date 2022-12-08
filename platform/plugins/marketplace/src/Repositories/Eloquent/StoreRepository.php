@@ -17,11 +17,25 @@ class StoreRepository extends RepositoriesAbstract implements StoreInterface
         $commissions = [];
         CategoryCommission::truncate();
         foreach ($data as $datum) {
+            if (!$datum['categories']) {
+                continue;
+            }
+
             $categories = json_decode($datum['categories'], true);
+
+            if (!is_array($categories) || !count($categories)) {
+                continue;
+            }
+
             foreach ($categories as $category) {
                 $commission = CategoryCommission::firstOrNew([
                     'product_category_id' => $category['id'],
                 ]);
+
+                if (!$commission) {
+                    continue;
+                }
+
                 $commission->commission_percentage = $datum['commission_fee'];
                 $commission->save();
                 $commissions[] = $commission;
@@ -45,7 +59,7 @@ class StoreRepository extends RepositoriesAbstract implements StoreInterface
 
             $data[$commission->commission_percentage]['commission_fee'] = $commission->commission_percentage;
             $data[$commission->commission_percentage]['categories'][] = [
-                'id'    => $commission->product_category_id,
+                'id' => $commission->product_category_id,
                 'value' => $commission->category->name,
             ];
         }

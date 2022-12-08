@@ -36,7 +36,6 @@
                 <small class="badge bg-warning text-dark">{{ $product->store->shop_category->label() }}</small>
             </div>
         @endif
-
         <h3 class="product__title">
             <a href="{{ $product->url }}" tabindex="0">{{ $product->name }}</a>
         </h3>

@@ -169,12 +169,11 @@ class SettingController extends BaseController
                 'vendor/core/core/setting/js/setting.js',
             ]);
 
-
         $emailContent = get_setting_email_template_content($type, $module, $template);
         $emailSubject = get_setting_email_subject($type, $module, $template);
         $pluginData = [
-            'type'          => $type,
-            'name'          => $module,
+            'type' => $type,
+            'name' => $module,
             'template_file' => $template,
         ];
 
@@ -309,7 +308,7 @@ class SettingController extends BaseController
 
         $data = [
             'activated_at' => $activatedAt->format('M d Y'),
-            'licensed_to'  => setting('licensed_to'),
+            'licensed_to' => setting('licensed_to'),
         ];
 
         return $response->setMessage($result['message'])->setData($data);
@@ -323,8 +322,9 @@ class SettingController extends BaseController
      */
     public function activateLicense(LicenseSettingRequest $request, BaseHttpResponse $response, Core $coreApi)
     {
-        if (filter_var($request->input('buyer'), FILTER_VALIDATE_URL)) {
-            $buyer = explode('/', $request->input('buyer'));
+        $buyer = $request->input('buyer');
+        if (filter_var($buyer, FILTER_VALIDATE_URL)) {
+            $buyer = explode('/', $buyer);
             $username = end($buyer);
 
             return $response
@@ -333,10 +333,22 @@ class SettingController extends BaseController
         }
 
         try {
-            $result = $coreApi->activateLicense($request->input('purchase_code'), $request->input('buyer'));
+            $purchaseCode = $request->input('purchase_code');
+
+            $result = $coreApi->activateLicense($purchaseCode, $buyer);
 
             if (!$result['status']) {
-                return $response->setError()->setMessage($result['message']);
+                if (str_contains($result['message'], 'License is already active')) {
+                    $coreApi->deactivateLicense($purchaseCode, $buyer);
+
+                    $result = $coreApi->activateLicense($purchaseCode, $buyer);
+
+                    if (!$result['status']) {
+                        return $response->setError()->setMessage($result['message']);
+                    }
+                } else {
+                    return $response->setError()->setMessage($result['message']);
+                }
             }
 
             setting()
@@ -347,7 +359,7 @@ class SettingController extends BaseController
 
             $data = [
                 'activated_at' => $activatedAt->format('M d Y'),
-                'licensed_to'  => $request->input('buyer'),
+                'licensed_to' => $request->input('buyer'),
             ];
 
             return $response->setMessage($result['message'])->setData($data);

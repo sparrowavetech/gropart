@@ -47,18 +47,12 @@ class ProductCollection extends BaseModel
         });
     }
 
-    /**
-     * @return BelongsToMany
-     */
-    public function discounts()
+    public function discounts(): BelongsToMany
     {
         return $this->belongsToMany(Discount::class, 'ec_discount_customers', 'customer_id', 'id');
     }
 
-    /**
-     * @return BelongsToMany
-     */
-    public function products()
+    public function products(): BelongsToMany
     {
         return $this
             ->belongsToMany(
@@ -70,10 +64,7 @@ class ProductCollection extends BaseModel
             ->where('is_variation', 0);
     }
 
-    /**
-     * @return BelongsToMany
-     */
-    public function promotions()
+    public function promotions(): BelongsToMany
     {
         return $this
             ->belongsToMany(Discount::class, 'ec_discount_product_collections', 'product_collection_id')

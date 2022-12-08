@@ -24,6 +24,6 @@ class GlobalOption extends BaseModel
     public function values(): HasMany
     {
         return $this->hasMany(GlobalOptionValue::class, 'option_id')
-            ->orderBy('order','ASC');
+            ->orderBy('order', 'ASC');
     }
 }

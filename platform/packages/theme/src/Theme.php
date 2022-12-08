@@ -487,9 +487,11 @@ class Theme implements ThemeContract
             switch ($type) {
                 case 'prepend':
                     $this->regions[$region] = $value . $this->regions[$region];
+
                     break;
                 case 'append':
                     $this->regions[$region] .= $value;
+
                     break;
             }
         } else {
@@ -548,13 +550,14 @@ class Theme implements ThemeContract
         }
 
         // Passing variable to closure.
-        $events =& $this->events;
-        $bindings =& $this->bindings;
+        $events =&$this->events;
+        $bindings =&$this->bindings;
 
         // Buffer processes to save request.
         return Arr::get($this->bindings, $name, function () use (&$events, &$bindings, $name) {
             $response = current($events->dispatch($name));
             Arr::set($bindings, $name, $response);
+
             return $response;
         });
     }
@@ -1018,8 +1021,8 @@ class Theme implements ThemeContract
         }
 
         $content->withHeaders([
-            'CMS-Version'       => '5.30.3',
-            'Authorization-At'  => setting('membership_authorization_at'),
+            'CMS-Version' => '5.31.0',
+            'Authorization-At' => setting('membership_authorization_at'),
             'Activated-License' => !empty(setting('licensed_to')) ? 'Yes' : 'No',
         ]);
 

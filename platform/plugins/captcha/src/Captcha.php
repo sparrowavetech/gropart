@@ -179,7 +179,7 @@ class Captcha
             $renderHtml .= $this->widgetIdName . '["' . $captchaAttribute['id'] . '"]=' . $this->buildCaptchaHtml($captchaAttribute, $options);
         }
 
-        return '<script type="text/javascript">var ' .  $this->widgetIdName . '={};var ' . $this->callbackName . '=function(){' . $renderHtml . '};</script>';
+        return '<script type="text/javascript">var ' . $this->widgetIdName . '={};var ' . $this->callbackName . '=function(){' . $renderHtml . '};</script>';
     }
 
     /**

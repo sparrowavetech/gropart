@@ -14,7 +14,7 @@ return new class () extends Migration {
     {
         if (!Schema::hasColumn('ec_order_product', 'product_options')) {
             Schema::table('ec_order_product', function (Blueprint $table) {
-                $table->json('product_options')->after('options')->nullable()->comment('product option data');
+                $table->text('product_options')->after('options')->nullable()->comment('product option data');
             });
         }
     }

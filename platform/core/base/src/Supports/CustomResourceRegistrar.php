@@ -27,9 +27,11 @@ class CustomResourceRegistrar extends ResourceRegistrar
         switch ($method) {
             case 'store':
                 $method = 'create';
+
                 break;
             case 'update':
                 $method = 'edit';
+
                 break;
         }
 

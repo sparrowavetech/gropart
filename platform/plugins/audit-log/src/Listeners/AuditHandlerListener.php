@@ -40,15 +40,15 @@ class AuditHandlerListener
     {
         try {
             $data = [
-                'user_agent'     => $this->request->userAgent(),
-                'ip_address'     => $this->request->ip(),
-                'module'         => $event->module,
-                'action'         => $event->action,
-                'user_id'        => $this->request->user() ? $this->request->user()->getKey() : 0,
+                'user_agent' => $this->request->userAgent(),
+                'ip_address' => $this->request->ip(),
+                'module' => $event->module,
+                'action' => $event->action,
+                'user_id' => $this->request->user() ? $this->request->user()->getKey() : 0,
                 'reference_user' => $event->referenceUser,
-                'reference_id'   => $event->referenceId,
+                'reference_id' => $event->referenceId,
                 'reference_name' => $event->referenceName,
-                'type'           => $event->type,
+                'type' => $event->type,
             ];
 
             if (!in_array($event->action, ['loggedin', 'password'])) {

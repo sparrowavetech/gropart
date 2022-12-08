@@ -6,8 +6,8 @@ Route::group(['namespace' => 'Botble\Faq\Http\Controllers', 'middleware' => ['we
             Route::resource('', 'FaqCategoryController')->parameters(['' => 'faq_category']);
 
             Route::delete('items/destroy', [
-                'as'         => 'deletes',
-                'uses'       => 'FaqCategoryController@deletes',
+                'as' => 'deletes',
+                'uses' => 'FaqCategoryController@deletes',
                 'permission' => 'faq_category.destroy',
             ]);
         });
@@ -16,8 +16,8 @@ Route::group(['namespace' => 'Botble\Faq\Http\Controllers', 'middleware' => ['we
             Route::resource('', 'FaqController')->parameters(['' => 'faq']);
 
             Route::delete('items/destroy', [
-                'as'         => 'deletes',
-                'uses'       => 'FaqController@deletes',
+                'as' => 'deletes',
+                'uses' => 'FaqController@deletes',
                 'permission' => 'faq.destroy',
             ]);
         });

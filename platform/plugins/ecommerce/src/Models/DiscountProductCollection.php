@@ -20,10 +20,7 @@ class DiscountProductCollection extends BaseModel
         'product_collection_id',
     ];
 
-    /**
-     * @return BelongsTo
-     */
-    public function productCollections()
+    public function productCollections(): BelongsTo
     {
         return $this->belongsTo(ProductCollection::class, 'product_collection_id')->withDefault();
     }

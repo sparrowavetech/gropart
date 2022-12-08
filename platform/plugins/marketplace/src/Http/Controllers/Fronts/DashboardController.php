@@ -183,8 +183,8 @@ class DashboardController
             ->first();
 
         $revenues = collect([
-            'amount'     => $revenue ? $revenue->amount : 0,
-            'fee'        => ($revenue ? $revenue->fee : 0) + ($withdrawal ? $withdrawal->fee : 0),
+            'amount' => $revenue ? $revenue->amount : 0,
+            'fee' => ($revenue ? $revenue->fee : 0) + ($withdrawal ? $withdrawal->fee : 0),
             'sub_amount' => $revenue ? $revenue->sub_amount : 0,
             'withdrawal' => $withdrawal ? $withdrawal->amount : 0,
         ]);
@@ -206,7 +206,7 @@ class DashboardController
             ->with(['user', 'payment'])
             ->where([
                 'is_finished' => 1,
-                'store_id'    => $store->id,
+                'store_id' => $store->id,
             ])
             ->whereDate('created_at', '>=', $startDate)
             ->whereDate('created_at', '<=', $endDate)
@@ -235,9 +235,9 @@ class DashboardController
             ->whereDate('created_at', '>=', $startDate)
             ->whereDate('created_at', '<=', $endDate)
             ->where([
-                'status'       => BaseStatusEnum::PUBLISHED,
+                'status' => BaseStatusEnum::PUBLISHED,
                 'is_variation' => false,
-                'store_id'     => $store->id,
+                'store_id' => $store->id,
             ])
             ->limit(10)
             ->get();
@@ -251,6 +251,7 @@ class DashboardController
                     'html' => MarketplaceHelper::view('dashboard.partials.dashboard-content', $compact)->render(),
                 ]);
         }
+
         return MarketplaceHelper::view('dashboard.index', $compact);
     }
 
@@ -300,8 +301,9 @@ class DashboardController
             }
             // We are in chunk mode, lets send the current progress
             $handler = $save->handler();
+
             return response()->json([
-                'done'   => $handler->getPercentageDone(),
+                'done' => $handler->getPercentageDone(),
                 'status' => true,
             ]);
         } catch (Exception $exception) {

@@ -128,8 +128,8 @@ class SocialService
     {
         return [
             'facebook' => $this->getDataProviderDefault(),
-            'google'   => $this->getDataProviderDefault(),
-            'github'   => $this->getDataProviderDefault(),
+            'google' => $this->getDataProviderDefault(),
+            'github' => $this->getDataProviderDefault(),
             'linkedin' => $this->getDataProviderDefault(),
         ];
     }
@@ -140,7 +140,7 @@ class SocialService
     public function getDataProviderDefault(): array
     {
         return [
-            'data'    => [
+            'data' => [
                 'app_id',
                 'app_secret',
             ],

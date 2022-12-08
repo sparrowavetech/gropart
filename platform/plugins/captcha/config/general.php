@@ -1,12 +1,12 @@
 <?php
 
 return [
-    'type'           => 'v2',
+    'type' => 'v2',
 
     // Secret key and Site key get on https://www.google.com/recaptcha
-    'secret'         => env('CAPTCHA_SECRET', 'no-captcha-secret'),
-    'site_key'       => env('CAPTCHA_SITE_KEY', 'no-captcha-site-key'),
-    'hide_badge'     => env('CAPTCHA_HIDE_BADGE', false),
+    'secret' => env('CAPTCHA_SECRET', 'no-captcha-secret'),
+    'site_key' => env('CAPTCHA_SITE_KEY', 'no-captcha-site-key'),
+    'hide_badge' => env('CAPTCHA_HIDE_BADGE', false),
 
     /**
      * @var string|null Default ``null``.
@@ -14,14 +14,14 @@ return [
      * Function must be return instance, read more in repo ``https://github.com/thinhbuzz/laravel-google-captcha-examples``
      */
     'request_method' => null,
-    'options'        => [
+    'options' => [
         'multiple' => false,
-        'lang'     => app()->getLocale(),
+        'lang' => app()->getLocale(),
     ],
-    'attributes'     => [
+    'attributes' => [
         'theme' => 'light',
     ],
-    'math-captcha'   => [
+    'math-captcha' => [
         /*
     |--------------------------------------------------------------------------
     | Available math operands.

@@ -80,7 +80,7 @@ class WidgetController extends BaseController
             $sidebarId = $request->input('sidebar_id');
             $this->widgetRepository->deleteBy([
                 'sidebar_id' => $sidebarId,
-                'theme'      => $this->theme,
+                'theme' => $this->theme,
             ]);
             foreach ($request->input('items', []) as $key => $item) {
                 parse_str($item, $data);
@@ -90,16 +90,16 @@ class WidgetController extends BaseController
 
                 $this->widgetRepository->createOrUpdate([
                     'sidebar_id' => $sidebarId,
-                    'widget_id'  => $data['id'],
-                    'theme'      => $this->theme,
-                    'position'   => $key,
-                    'data'       => $data,
+                    'widget_id' => $data['id'],
+                    'theme' => $this->theme,
+                    'position' => $key,
+                    'data' => $data,
                 ]);
             }
 
             $widgetAreas = $this->widgetRepository->allBy([
                 'sidebar_id' => $sidebarId,
-                'theme'      => $this->theme,
+                'theme' => $this->theme,
             ]);
 
             return $response
@@ -121,10 +121,10 @@ class WidgetController extends BaseController
     {
         try {
             $this->widgetRepository->deleteBy([
-                'theme'      => $this->theme,
+                'theme' => $this->theme,
                 'sidebar_id' => $request->input('sidebar_id'),
-                'position'   => $request->input('position'),
-                'widget_id'  => $request->input('widget_id'),
+                'position' => $request->input('position'),
+                'widget_id' => $request->input('widget_id'),
             ]);
 
             return $response->setMessage(trans('packages/widget::widget.delete_success'));

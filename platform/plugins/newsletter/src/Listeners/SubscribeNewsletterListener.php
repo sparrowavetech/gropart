@@ -22,8 +22,8 @@ class SubscribeNewsletterListener implements ShouldQueue
     {
         $mailer = EmailHandler::setModule(NEWSLETTER_MODULE_SCREEN_NAME)
             ->setVariableValues([
-                'newsletter_name'             => $event->newsletter->name ?? 'N/A',
-                'newsletter_email'            => $event->newsletter->email,
+                'newsletter_name' => $event->newsletter->name ?? 'N/A',
+                'newsletter_email' => $event->newsletter->email,
                 'newsletter_unsubscribe_link' => Html::link(
                     URL::signedRoute(
                         'public.newsletter.unsubscribe',

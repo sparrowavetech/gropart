@@ -37,6 +37,7 @@
         <div class="col-md-3 right-sidebar">
             {!! $form->getActionButtons() !!}
             @php do_action(BASE_ACTION_META_BOXES, 'top', $form->getModel()) @endphp
+
             @foreach ($fields as $field)
                 @if (!in_array($field->getName(), $exclude))
                     @if ($field->getType() == 'hidden')

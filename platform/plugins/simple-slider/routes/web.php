@@ -6,14 +6,14 @@ Route::group(['namespace' => 'Botble\SimpleSlider\Http\Controllers', 'middleware
             Route::resource('', 'SimpleSliderController')->parameters(['' => 'simple-slider']);
 
             Route::delete('items/destroy', [
-                'as'         => 'deletes',
-                'uses'       => 'SimpleSliderController@deletes',
+                'as' => 'deletes',
+                'uses' => 'SimpleSliderController@deletes',
                 'permission' => 'simple-slider.destroy',
             ]);
 
             Route::post('sorting', [
-                'as'         => 'sorting',
-                'uses'       => 'SimpleSliderController@postSorting',
+                'as' => 'sorting',
+                'uses' => 'SimpleSliderController@postSorting',
                 'permission' => 'simple-slider.edit',
             ]);
         });
@@ -25,18 +25,18 @@ Route::group(['namespace' => 'Botble\SimpleSlider\Http\Controllers', 'middleware
             ])->parameters(['' => 'simple-slider-item']);
 
             Route::match(['GET', 'POST'], 'list/{id}', [
-                'as'   => 'index',
+                'as' => 'index',
                 'uses' => 'SimpleSliderItemController@index',
             ]);
 
             Route::get('delete/{id}', [
-                'as'   => 'destroy',
+                'as' => 'destroy',
                 'uses' => 'SimpleSliderItemController@destroy',
             ]);
 
             Route::delete('delete/{id}', [
-                'as'         => 'delete.post',
-                'uses'       => 'SimpleSliderItemController@postDelete',
+                'as' => 'delete.post',
+                'uses' => 'SimpleSliderItemController@postDelete',
                 'permission' => 'simple-slider-item.destroy',
             ]);
         });

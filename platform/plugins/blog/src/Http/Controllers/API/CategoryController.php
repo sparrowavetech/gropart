@@ -43,10 +43,10 @@ class CategoryController extends Controller
     {
         $data = $this->categoryRepository
             ->advancedGet([
-                'with'      => ['slugable'],
+                'with' => ['slugable'],
                 'condition' => ['status' => BaseStatusEnum::PUBLISHED],
-                'paginate'  => [
-                    'per_page'      => (int)$request->input('per_page', 10),
+                'paginate' => [
+                    'per_page' => (int)$request->input('per_page', 10),
                     'current_paged' => (int)$request->input('page', 1),
                 ],
             ]);

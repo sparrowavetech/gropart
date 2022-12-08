@@ -81,10 +81,12 @@ class HookServiceProvider extends ServiceProvider
                     $refunds = Arr::get($payment->metadata, 'refunds', []);
                     $refund = collect($refunds)->firstWhere('id', $refundId);
                     $refund = array_merge((array) $refund, Arr::get($refundDetail, 'data', []));
+
                     return array_merge($refundDetail, [
                         'view' => view('plugins/razorpay::refund-detail', ['refund' => $refund, 'paymentModel' => $payment])->render(),
                     ]);
                 }
+
                 return $refundDetail;
             }
 
@@ -127,8 +129,8 @@ class HookServiceProvider extends ServiceProvider
             $amount = $data['amount'] * 100;
 
             $order = $api->order->create([
-                'receipt'  => $receiptId,
-                'amount'   => (int)round($amount),
+                'receipt' => $receiptId,
+                'amount' => (int)round($amount),
                 'currency' => $data['currency'],
             ]);
 
@@ -155,9 +157,9 @@ class HookServiceProvider extends ServiceProvider
                 );
 
                 $api->utility->verifyPaymentSignature([
-                    'razorpay_signature'  => $request->input('razorpay_signature'),
+                    'razorpay_signature' => $request->input('razorpay_signature'),
                     'razorpay_payment_id' => $request->input('razorpay_payment_id'),
-                    'razorpay_order_id'   => $request->input('razorpay_order_id'),
+                    'razorpay_order_id' => $request->input('razorpay_order_id'),
                 ]);
 
                 $order = $api->order->fetch($request->input('razorpay_order_id'));
@@ -173,13 +175,13 @@ class HookServiceProvider extends ServiceProvider
 
                     if ($data['charge_id']) {
                         do_action(PAYMENT_ACTION_PAYMENT_PROCESSED, [
-                            'account_id'      => Arr::get($data, 'account_id'),
-                            'amount'          => $amount,
-                            'currency'        => $data['currency'],
-                            'charge_id'       => $data['charge_id'],
+                            'account_id' => Arr::get($data, 'account_id'),
+                            'amount' => $amount,
+                            'currency' => $data['currency'],
+                            'charge_id' => $data['charge_id'],
                             'payment_channel' => RAZORPAY_PAYMENT_METHOD_NAME,
-                            'status'          => $status,
-                            'order_id'        => (array) $request->input('order_id', []),
+                            'status' => $status,
+                            'order_id' => (array) $request->input('order_id', []),
                         ]);
                     } else {
                         $data['error'] = true;

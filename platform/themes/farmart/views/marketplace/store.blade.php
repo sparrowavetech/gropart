@@ -19,10 +19,7 @@
                         </a>
                     </div>
                     @php
-                        $categories = ProductCategoryHelper::getAllProductCategories()
-                                            ->where('status', \Botble\Base\Enums\BaseStatusEnum::PUBLISHED)
-                                            ->whereIn('parent_id', [0, null])
-                                            ->loadMissing(['slugable', 'activeChildren:id,name,parent_id', 'activeChildren.slugable']);
+                        $categories = ProductCategoryHelper::getActiveTreeCategories();
                         $categoriesRequest = (array)request()->input('categories', []);
                         $urlCurrent = URL::current();
                     @endphp
@@ -57,7 +54,7 @@
                             </span>
                         </a>
                     </div>
- 
+
                     <div class="catalog-filter-sidebar-content px-3 px-md-0">
                         <div class="widget-wrapper widget-contact-store">
                             <h4 class="widget-title">{{ __('Contact Vendor') }}</h4>

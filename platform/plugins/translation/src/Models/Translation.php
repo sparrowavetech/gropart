@@ -58,9 +58,11 @@ class Translation extends BaseModel
         switch (config('database.default')) {
             case 'mysql':
                 $select = 'DISTINCT `group`';
+
                 break;
             default:
                 $select = 'DISTINCT "group"';
+
                 break;
         }
 

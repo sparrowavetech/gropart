@@ -7,17 +7,17 @@
     @php $images = array_filter((array) old($name, !is_array($values) ? json_decode($values ?: '', true) : $values)); @endphp
     <div class="images-wrapper">
         <div data-name="{{ $name }}"
-             class="text-center cursor-pointer js-btn-trigger-add-image default-placeholder-gallery-image @if (is_array($images) && !empty($images)) hidden @endif">
-            <img src="{{ RvMedia::getDefaultImage(false) }}" alt="{{ trans('core/base::base.image') }}" width="120">
+             class="text-center cursor-pointer js-btn-trigger-add-image default-placeholder-gallery-image @if (!empty($images)) hidden @endif">
+            <img src="{{ RvMedia::getDefaultImage() }}" alt="{{ trans('core/base::base.image') }}" width="120">
             <br>
             <p style="color:#c3cfd8">{{ trans('core/base::base.using_button') }}
                 <strong>{{ trans('core/base::base.select_image') }}</strong> {{ trans('core/base::base.to_add_more_image') }}.</p>
         </div>
         <input type="hidden" name="{{ $name }}">
-        <ul class="list-unstyled list-gallery-media-images @if (!is_array($images) || empty($images)) hidden @endif"
+        <ul class="list-unstyled list-gallery-media-images @if (empty($images)) hidden @endif"
             data-name="{{ $name }}"
-            data-allow-thumb="{{ $allowThumb == true }}">
-            @if (is_array($images) && !empty($images))
+            data-allow-thumb="{{ $allowThumb }}">
+            @if (!empty($images))
                 @foreach($images as $image)
                     @if (!empty($image))
                         <li class="gallery-image-item-handler">
@@ -40,7 +40,7 @@
                             <div class="custom-image-box image-box">
                                 <input type="hidden" name="{{ $name }}" value="{{ $image }}" class="image-data">
                                 <div class="preview-image-wrapper @if (!$allowThumb) preview-image-wrapper-not-allow-thumb @endif">
-                                    <img src="{{ RvMedia::getImageUrl($image, $allowThumb == true ? 'thumb' : null) }}"
+                                    <img src="{{ RvMedia::getImageUrl($image, $allowThumb ? 'thumb' : null) }}"
                                         alt="{{ trans('core/base::base.preview_image') }}" class="preview_image">
                                 </div>
                             </div>

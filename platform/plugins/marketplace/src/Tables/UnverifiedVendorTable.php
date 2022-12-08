@@ -86,9 +86,6 @@ class UnverifiedVendorTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function query()
     {
         $query = $this->repository->getModel()
@@ -100,7 +97,7 @@ class UnverifiedVendorTable extends TableAbstract
                 'avatar',
             ])
             ->where([
-                'is_vendor'          => true,
+                'is_vendor' => true,
                 'vendor_verified_at' => null,
             ])
             ->with(['store']);
@@ -111,34 +108,34 @@ class UnverifiedVendorTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function columns()
+    public function columns(): array
     {
         return [
-            'id'          => [
+            'id' => [
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
             ],
-            'avatar'      => [
+            'avatar' => [
                 'title' => trans('plugins/ecommerce::customer.avatar'),
                 'class' => 'text-center',
             ],
-            'name'        => [
+            'name' => [
                 'title' => trans('core/base::tables.name'),
                 'class' => 'text-start',
             ],
-            'store_name'  => [
-                'title'      => trans('plugins/marketplace::unverified-vendor.forms.store_name'),
-                'class'      => 'text-start',
+            'store_name' => [
+                'title' => trans('plugins/marketplace::unverified-vendor.forms.store_name'),
+                'class' => 'text-start',
                 'searchable' => false,
-                'orderable'  => false,
+                'orderable' => false,
             ],
             'store_phone' => [
-                'title'      => trans('plugins/marketplace::unverified-vendor.forms.store_phone'),
-                'class'      => 'text-start',
+                'title' => trans('plugins/marketplace::unverified-vendor.forms.store_phone'),
+                'class' => 'text-start',
                 'searchable' => false,
-                'orderable'  => false,
+                'orderable' => false,
             ],
-            'created_at'  => [
+            'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
                 'width' => '100px',
             ],

@@ -69,6 +69,7 @@ class JsonSettingStore extends SettingStore
 
         if ($data === null) {
             info('Invalid JSON in ' . $this->path);
+
             return [];
         }
 

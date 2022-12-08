@@ -170,7 +170,7 @@ abstract class StripePaymentAbstract
     {
         if (!$this->setClient()) {
             return [
-                'error'   => true,
+                'error' => true,
                 'message' => trans('plugins/payment::payment.invalid_settings', ['name' => 'Stripe']),
             ];
         }
@@ -183,25 +183,26 @@ abstract class StripePaymentAbstract
 
         try {
             $response = Refund::create([
-                'charge'   => $paymentId,
-                'amount'   => $totalAmount,
+                'charge' => $paymentId,
+                'amount' => $totalAmount,
                 'metadata' => $options,
             ]);
 
             if ($response->status == 'succeeded') {
                 return [
-                    'error'   => false,
+                    'error' => false,
                     'message' => $response->status,
-                    'data'    => (array) $response,
+                    'data' => (array) $response,
                 ];
             }
+
             return [
-                'error'   => true,
+                'error' => true,
                 'message' => trans('plugins/payment::payment.status_is_not_completed'),
             ];
         } catch (Exception $exception) {
             return [
-                'error'   => true,
+                'error' => true,
                 'message' => $exception->getMessage(),
             ];
         }

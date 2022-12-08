@@ -18,19 +18,19 @@ class ReviewResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'user_name'     => $this->user->name,
-            'user_avatar'   => $this->user->avatar_url,
+            'user_name' => $this->user->name,
+            'user_avatar' => $this->user->avatar_url,
             'created_at_tz' => $this->created_at->translatedFormat('Y-m-d\TH:i:sP'),
-            'created_at'    => $this->created_at->diffForHumans(),
-            'comment'       => $this->comment,
-            'star'          => $this->star,
-            'images'        => collect($this->images)->map(function ($image) {
+            'created_at' => $this->created_at->diffForHumans(),
+            'comment' => $this->comment,
+            'star' => $this->star,
+            'images' => collect($this->images)->map(function ($image) {
                 return [
                     'thumbnail' => RvMedia::getImageUrl($image, 'thumb'),
-                    'full_url'  => RvMedia::getImageUrl($image),
+                    'full_url' => RvMedia::getImageUrl($image),
                 ];
             }),
-            'ordered_at'    => $this->order_created_at ? __('✅ Purchased :time', ['time' => Carbon::createFromDate($this->order_created_at)->diffForHumans()]) : null,
+            'ordered_at' => $this->order_created_at ? __('✅ Purchased :time', ['time' => Carbon::createFromDate($this->order_created_at)->diffForHumans()]) : null,
         ];
     }
 }

@@ -94,7 +94,7 @@ class LanguageAdvancedServiceProvider extends ServiceProvider
                     $model = LanguageAdvancedManager::getTranslationModel($model);
 
                     if (class_exists($model)) {
-                        (new $model)->where('lang_code', $language->lang_code)->delete();
+                        (new $model())->where('lang_code', $language->lang_code)->delete();
                     }
                 }
             });

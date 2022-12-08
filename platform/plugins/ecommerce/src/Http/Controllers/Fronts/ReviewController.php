@@ -39,7 +39,7 @@ class ReviewController extends Controller
         $customerId = auth('customer')->id();
         $exists = $this->reviewRepository->count([
             'customer_id' => $customerId,
-            'product_id'  => $request->input('product_id'),
+            'product_id' => $request->input('product_id'),
         ]);
 
         if ($exists > 0) {
@@ -63,7 +63,7 @@ class ReviewController extends Controller
 
         $request->merge([
             'customer_id' => $customerId,
-            'images'      => $results ? collect($results)->pluck('data.url')->values()->toArray() : null,
+            'images' => $results ? collect($results)->pluck('data.url')->values()->toArray() : null,
         ]);
 
         $this->reviewRepository->createOrUpdate($request->input());

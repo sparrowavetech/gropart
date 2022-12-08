@@ -60,6 +60,7 @@ class ReviewTable extends TableAbstract
                         ['target' => '_blank']
                     );
                 }
+
                 return null;
             })
             ->editColumn('customer_id', function ($item) {
@@ -85,9 +86,9 @@ class ReviewTable extends TableAbstract
                     RvMedia::getImageUrl($item->images[0], 'thumb'),
                     RvMedia::getImageUrl($item->images[0]),
                     [
-                        'width'         => 60,
-                        'class'         => 'fancybox m-1 rounded-top rounded-end rounded-bottom rounded-start border d-inline-block',
-                        'href'          => RvMedia::getImageUrl($item->images[0]),
+                        'width' => 60,
+                        'class' => 'fancybox m-1 rounded-top rounded-end rounded-bottom rounded-start border d-inline-block',
+                        'href' => RvMedia::getImageUrl($item->images[0]),
                         'data-fancybox' => $galleryID,
                     ]
                 );
@@ -98,9 +99,9 @@ class ReviewTable extends TableAbstract
                             RvMedia::getImageUrl($item->images[1], 'thumb'),
                             RvMedia::getImageUrl($item->images[1]),
                             [
-                                'width'         => 60,
-                                'class'         => 'fancybox m-1 rounded-top rounded-end rounded-bottom rounded-start border d-inline-block',
-                                'href'          => RvMedia::getImageUrl($item->images[1]),
+                                'width' => 60,
+                                'class' => 'fancybox m-1 rounded-top rounded-end rounded-bottom rounded-start border d-inline-block',
+                                'href' => RvMedia::getImageUrl($item->images[1]),
                                 'data-fancybox' => $galleryID,
                             ]
                         );
@@ -111,11 +112,11 @@ class ReviewTable extends TableAbstract
                             [
                                     'width' => 60,
                                     'class' => 'm-1 rounded-top rounded-end rounded-bottom rounded-start border',
-                                    'src'   => RvMedia::getImageUrl($item->images[1]),
+                                    'src' => RvMedia::getImageUrl($item->images[1]),
                                 ]
                         )->toHtml() . Html::tag('span', '+' . ($count - 2))->toHtml(), [
-                            'class'         => 'fancybox more-review-images',
-                            'href'          => RvMedia::getImageUrl($item->images[1]),
+                            'class' => 'fancybox more-review-images',
+                            'href' => RvMedia::getImageUrl($item->images[1]),
                             'data-fancybox' => $galleryID,
                         ]);
                     }
@@ -128,9 +129,9 @@ class ReviewTable extends TableAbstract
                                 RvMedia::getImageUrl($item->images[$index], 'thumb'),
                                 RvMedia::getImageUrl($item->images[$index]),
                                 [
-                                    'width'         => 60,
-                                    'class'         => 'fancybox d-none',
-                                    'href'          => RvMedia::getImageUrl($item->images[$index]),
+                                    'width' => 60,
+                                    'class' => 'fancybox d-none',
+                                    'href' => RvMedia::getImageUrl($item->images[$index]),
                                     'data-fancybox' => $galleryID,
                                 ]
                             );
@@ -147,9 +148,6 @@ class ReviewTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function query()
     {
         $query = $this->repository->getModel()
@@ -167,8 +165,8 @@ class ReviewTable extends TableAbstract
             ->join('ec_products', 'ec_products.id', 'ec_reviews.product_id')
             ->where([
                 'ec_products.store_id' => auth('customer')->user()->store->id,
-                'ec_reviews.status'    => BaseStatusEnum::PUBLISHED,
-                'ec_products.status'   => BaseStatusEnum::PUBLISHED,
+                'ec_reviews.status' => BaseStatusEnum::PUBLISHED,
+                'ec_products.status' => BaseStatusEnum::PUBLISHED,
             ]);
 
         return $this->applyScopes($query);
@@ -177,15 +175,15 @@ class ReviewTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function columns()
+    public function columns(): array
     {
         return [
-            'id'          => [
+            'id' => [
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
                 'class' => 'text-start',
             ],
-            'product_id'  => [
+            'product_id' => [
                 'title' => trans('plugins/ecommerce::review.product'),
                 'class' => 'text-start',
             ],
@@ -193,22 +191,22 @@ class ReviewTable extends TableAbstract
                 'title' => trans('plugins/ecommerce::review.user'),
                 'class' => 'text-start',
             ],
-            'star'        => [
+            'star' => [
                 'title' => trans('plugins/ecommerce::review.star'),
                 'class' => 'text-center',
             ],
-            'comment'     => [
+            'comment' => [
                 'title' => trans('plugins/ecommerce::review.comment'),
                 'class' => 'text-start',
             ],
-            'images'      => [
-                'title'      => trans('plugins/ecommerce::review.images'),
-                'width'      => '150px',
-                'class'      => 'text-start',
+            'images' => [
+                'title' => trans('plugins/ecommerce::review.images'),
+                'width' => '150px',
+                'class' => 'text-start',
                 'searchable' => false,
-                'orderable'  => false,
+                'orderable' => false,
             ],
-            'created_at'  => [
+            'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
                 'width' => '70px',
                 'class' => 'text-start',

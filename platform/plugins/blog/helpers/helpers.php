@@ -92,8 +92,8 @@ if (!function_exists('get_all_posts')) {
      * @return Collection
      */
     function get_all_posts(
-        bool  $active = true,
-        int   $perPage = 12,
+        bool $active = true,
+        int $perPage = 12,
         array $with = ['slugable', 'categories', 'categories.slugable', 'author']
     ) {
         return app(PostInterface::class)->getAllPosts($perPage, $active, $with);
@@ -209,7 +209,7 @@ if (!function_exists('get_categories')) {
         $categories = $repo->getCategories(Arr::get($args, 'select', ['*']), [
             'created_at' => 'DESC',
             'is_default' => 'DESC',
-            'order'      => 'ASC',
+            'order' => 'ASC',
         ]);
 
         $categories = sort_item_with_children($categories);

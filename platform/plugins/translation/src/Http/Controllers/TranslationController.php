@@ -122,8 +122,8 @@ class TranslationController extends BaseController
             [$locale, $key] = explode('|', $name, 2);
             $translation = Translation::firstOrNew([
                 'locale' => $locale,
-                'group'  => $group,
-                'key'    => $key,
+                'group' => $group,
+                'key' => $key,
             ]);
             $translation->value = (string)$value ?: null;
             $translation->status = Translation::STATUS_CHANGED;
@@ -545,8 +545,8 @@ class TranslationController extends BaseController
                 ) {
                     $locales[$locale] = [
                         'locale' => $locale,
-                        'name'   => $language[2],
-                        'flag'   => $language[4],
+                        'name' => $language[2],
+                        'flag' => $language[4],
                     ];
 
                     break;
@@ -556,8 +556,8 @@ class TranslationController extends BaseController
                     in_array($language[0], [$locale, str_replace('-', '_', $locale)])) {
                     $locales[$locale] = [
                         'locale' => $locale,
-                        'name'   => $language[2],
-                        'flag'   => $language[4],
+                        'name' => $language[2],
+                        'flag' => $language[4],
                     ];
                 }
             }

@@ -776,7 +776,10 @@ $(window).on('load', () => {
         }
     });
 
+    let ajaxRequest;
+    let hasAjaxSearchRequested = false;
     $(document).on('keyup', '.textbox-advancesearch', event => {
+        event.preventDefault();
         let _self = $(event.currentTarget);
         let $formBody = _self.closest('.box-search-advance').find('.panel');
         setTimeout(() => {
@@ -786,7 +789,13 @@ $(window).on('load', () => {
                 overlayColor: 'none'
             });
 
-            $.ajax({
+            if (hasAjaxSearchRequested) {
+                ajaxRequest.abort();
+            }
+
+            hasAjaxSearchRequested = true;
+
+            ajaxRequest = $.ajax({
                 url: _self.data('target') + '&keyword=' + _self.val(),
                 type: 'GET',
                 success: res => {
@@ -796,10 +805,13 @@ $(window).on('load', () => {
                         $formBody.html(res.data);
                         Botble.unblockUI($formBody);
                     }
+                    hasAjaxSearchRequested = false;
                 },
                 error: data => {
-                    Botble.handleError(data);
-                    Botble.unblockUI($formBody);
+                    if (data.statusText !== 'abort') {
+                        Botble.handleError(data);
+                        Botble.unblockUI($formBody);
+                    }
                 },
             });
         }, 500);
@@ -817,7 +829,7 @@ $(window).on('load', () => {
             });
 
             $.ajax({
-                url: $searchBox.data('target') + '&keyword=' + $searchBox.val(),
+                url: $(event.currentTarget).prop('href') + '&keyword=' + $searchBox.val(),
                 type: 'GET',
                 success: res => {
                     if (res.error) {
@@ -835,7 +847,7 @@ $(window).on('load', () => {
         }
     });
 
-    $(document).on('click', 'body', (e) => {
+    $(document).on('click', 'body', e => {
         let container = $('.box-search-advance');
 
         if (!container.is(e.target) && container.has(e.target).length === 0) {

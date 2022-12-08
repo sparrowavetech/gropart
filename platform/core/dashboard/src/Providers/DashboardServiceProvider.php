@@ -50,12 +50,12 @@ class DashboardServiceProvider extends ServiceProvider
         Event::listen(RouteMatched::class, function () {
             dashboard_menu()
                 ->registerItem([
-                    'id'          => 'cms-core-dashboard',
-                    'priority'    => 0,
-                    'parent_id'   => null,
-                    'name'        => 'core/base::layouts.dashboard',
-                    'icon'        => 'fa fa-home',
-                    'url'         => route('dashboard.index'),
+                    'id' => 'cms-core-dashboard',
+                    'priority' => 0,
+                    'parent_id' => null,
+                    'name' => 'core/base::layouts.dashboard',
+                    'icon' => 'fa fa-home',
+                    'url' => route('dashboard.index'),
                     'permissions' => [],
                 ]);
         });

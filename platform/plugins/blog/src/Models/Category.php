@@ -98,45 +98,38 @@ class Category extends BaseModel
         return $this->hasMany(Category::class, 'parent_id');
     }
 
-    /**
-     * @param Category $category
-     * @param array $childrenIds
-     * @return array
-     */
-    public function getChildrenIds($category, array $childrenIds = []): array
+    public function activeChildren(): HasMany
     {
-        $children = $category->children()->select('id')->get();
-
-        foreach ($children as $child) {
-            $childrenIds[] = $child->id;
-
-            $childrenIds = array_merge($childrenIds, $this->getChildrenIds($child, $childrenIds));
-        }
-
-        return array_unique($childrenIds);
+        return $this
+            ->children()
+            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->with(['slugable', 'activeChildren']);
     }
 
     /**
-     * @return string
+     * @return \Illuminate\Support\HtmlString
      */
     public function getBadgeWithCountAttribute()
     {
         switch ($this->status->getValue()) {
             case BaseStatusEnum::DRAFT:
                 $badge = 'bg-secondary';
+
                 break;
             case BaseStatusEnum::PENDING:
                 $badge = 'bg-warning';
+
                 break;
             default:
                 $badge = 'bg-success';
+
                 break;
         }
 
         return Html::tag('span', (string)$this->posts_count, [
-            'class'               => 'badge font-weight-bold ' . $badge,
-            'data-bs-toggle'         => 'tooltip',
-            'data-bs-original-title' => trans('plugins/blog::categories.total_posts', ['total' => $this->posts_count])
+            'class' => 'badge font-weight-bold ' . $badge,
+            'data-bs-toggle' => 'tooltip',
+            'data-bs-original-title' => trans('plugins/blog::categories.total_posts', ['total' => $this->posts_count]),
         ]);
     }
 

@@ -33,11 +33,7 @@ class ShippingRule extends BaseModel
         'updated_at',
     ];
 
-
-    /**
-     * @return HasMany
-     */
-    public function items()
+    public function items(): HasMany
     {
         return $this->hasMany(ShippingRuleItem::class);
     }

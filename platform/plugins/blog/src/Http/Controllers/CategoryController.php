@@ -49,7 +49,7 @@ class CategoryController extends BaseController
         $categories = $this->categoryRepository->getCategories(['*'], [
             'created_at' => 'DESC',
             'is_default' => 'DESC',
-            'order'      => 'ASC',
+            'order' => 'ASC',
         ]);
 
         $categories->load('slugable')->loadCount('posts');
@@ -96,7 +96,7 @@ class CategoryController extends BaseController
         }
 
         $category = $this->categoryRepository->createOrUpdate(array_merge($request->input(), [
-            'author_id'   => Auth::id(),
+            'author_id' => Auth::id(),
             'author_type' => User::class,
         ]));
 
@@ -113,7 +113,7 @@ class CategoryController extends BaseController
 
             $response->setData([
                 'model' => $category,
-                'form'  => $form,
+                'form' => $form,
             ]);
         }
 
@@ -174,7 +174,7 @@ class CategoryController extends BaseController
             }
             $response->setData([
                 'model' => $category,
-                'form'  => $form,
+                'form' => $form,
             ]);
         }
 
@@ -276,11 +276,11 @@ class CategoryController extends BaseController
     protected function getOptions($options = [])
     {
         return array_merge([
-            'canCreate'   => Auth::user()->hasPermission('categories.create'),
-            'canEdit'     => Auth::user()->hasPermission('categories.edit'),
-            'canDelete'   => Auth::user()->hasPermission('categories.destroy'),
+            'canCreate' => Auth::user()->hasPermission('categories.create'),
+            'canEdit' => Auth::user()->hasPermission('categories.edit'),
+            'canDelete' => Auth::user()->hasPermission('categories.destroy'),
             'createRoute' => 'categories.create',
-            'editRoute'   => 'categories.edit',
+            'editRoute' => 'categories.edit',
             'deleteRoute' => 'categories.destroy',
         ], $options);
     }

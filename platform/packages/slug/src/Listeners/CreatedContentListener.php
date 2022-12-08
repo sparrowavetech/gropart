@@ -57,10 +57,10 @@ class CreatedContentListener
                 $slugService = new SlugService($this->slugRepository);
 
                 $this->slugRepository->createOrUpdate([
-                    'key'            => $slugService->create($slug, (int)$event->data->slug_id, get_class($event->data)),
+                    'key' => $slugService->create($slug, (int)$event->data->slug_id, get_class($event->data)),
                     'reference_type' => get_class($event->data),
-                    'reference_id'   => $event->data->id,
-                    'prefix'         => SlugHelper::getPrefix(get_class($event->data)),
+                    'reference_id' => $event->data->id,
+                    'prefix' => SlugHelper::getPrefix(get_class($event->data)),
                 ]);
             } catch (Exception $exception) {
                 info($exception->getMessage());

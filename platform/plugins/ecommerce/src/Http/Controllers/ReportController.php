@@ -104,17 +104,17 @@ class ReportController extends BaseController
 
         $count['revenues'] = [
             [
-                'label'     => PaymentStatusEnum::COMPLETED()->label(),
-                'value'     => $revenueCompleted ? $revenueCompleted->revenue : 0,
-                'status'    => true,
-                'color'     => '#80bc00',
+                'label' => PaymentStatusEnum::COMPLETED()->label(),
+                'value' => $revenueCompleted ? $revenueCompleted->revenue : 0,
+                'status' => true,
+                'color' => '#80bc00',
             ],
             [
-                'label'     => PaymentStatusEnum::PENDING()->label(),
-                'value'     => $revenuePending ? $revenuePending->revenue : 0,
-                'status'    => false,
-                'color'     => '#E91E63',
-            ]
+                'label' => PaymentStatusEnum::PENDING()->label(),
+                'value' => $revenuePending ? $revenuePending->revenue : 0,
+                'status' => false,
+                'color' => '#E91E63',
+            ],
         ];
         $count['orders'] = $this->orderRepository
             ->getModel()
@@ -127,7 +127,7 @@ class ReportController extends BaseController
             ->whereDate('created_at', '>=', $startDate)
             ->whereDate('created_at', '<=', $endDate)
             ->where([
-                'status'       => BaseStatusEnum::PUBLISHED,
+                'status' => BaseStatusEnum::PUBLISHED,
                 'is_variation' => false,
             ])
             ->count();
@@ -140,7 +140,7 @@ class ReportController extends BaseController
 
         if ($request->ajax()) {
             return $response->setData([
-                'html' => view('plugins/ecommerce::reports.partials.content', compact('count'))->render()
+                'html' => view('plugins/ecommerce::reports.partials.content', compact('count'))->render(),
             ]);
         }
 
@@ -184,7 +184,7 @@ class ReportController extends BaseController
         }
 
         $earningSales[] = [
-            'text'  => trans('plugins/ecommerce::reports.items_earning_sales', [
+            'text' => trans('plugins/ecommerce::reports.items_earning_sales', [
                 'value' => format_price($data['data']->sum()),
             ]),
             'color' => Arr::get($colors, $earningSales->count(), Arr::first($colors)),

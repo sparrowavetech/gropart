@@ -14,7 +14,7 @@ class ThemeTranslationRequest extends Request
     public function rules()
     {
         return [
-            'locale'       => 'required',
+            'locale' => 'required',
             'translations' => 'required|array',
         ];
     }

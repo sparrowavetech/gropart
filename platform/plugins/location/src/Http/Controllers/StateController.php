@@ -180,9 +180,9 @@ class StateController extends BaseController
             'condition' => [
                 ['states.name', 'LIKE', '%' . $keyword . '%'],
             ],
-            'select'    => ['states.id', 'states.name'],
-            'take'      => 10,
-            'order_by'  => ['order' => 'ASC', 'name' => 'ASC'],
+            'select' => ['states.id', 'states.name'],
+            'take' => 10,
+            'order_by' => ['order' => 'ASC', 'name' => 'ASC'],
         ]);
 
         $data->prepend(new State(['id' => 0, 'name' => trans('plugins/location::city.select_state')]));
@@ -198,11 +198,11 @@ class StateController extends BaseController
     public function ajaxGetStates(Request $request, BaseHttpResponse $response)
     {
         $params = [
-            'select'    => ['states.id', 'states.name'],
+            'select' => ['states.id', 'states.name'],
             'condition' => [
                 'states.status' => BaseStatusEnum::PUBLISHED,
             ],
-            'order_by'  => ['order' => 'ASC', 'name' => 'ASC'],
+            'order_by' => ['order' => 'ASC', 'name' => 'ASC'],
         ];
 
         if ($request->input('country_id') && $request->input('country_id') != 'null') {

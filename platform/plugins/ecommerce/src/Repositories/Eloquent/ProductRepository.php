@@ -28,9 +28,9 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
     public function getSearch($keyword, $paginate = 10)
     {
         return $this->filterProducts([
-            'keyword'  => $keyword,
+            'keyword' => $keyword,
             'paginate' => [
-                'per_page'      => $paginate,
+                'per_page' => $paginate,
                 'current_paged' => 1,
             ],
         ]);
@@ -80,21 +80,21 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
     {
         $params = array_merge([
             'condition' => [
-                'status'       => BaseStatusEnum::PUBLISHED,
+                'status' => BaseStatusEnum::PUBLISHED,
                 'is_variation' => 0,
             ],
-            'order_by'  => [
-                'order'      => 'ASC',
+            'order_by' => [
+                'order' => 'ASC',
                 'created_at' => 'DESC',
             ],
-            'take'      => null,
-            'paginate'  => [
-                'per_page'      => null,
+            'take' => null,
+            'paginate' => [
+                'per_page' => null,
                 'current_paged' => 1,
             ],
-            'with'      => [],
+            'with' => [],
             'withCount' => [],
-            'withAvg'   => [],
+            'withAvg' => [],
         ], $params);
 
         return $this->filterProducts([], $params);
@@ -107,28 +107,28 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
     {
         $params = array_merge([
             'categories' => [
-                'by'       => 'id',
+                'by' => 'id',
                 'value_in' => [],
             ],
-            'condition'  => [
-                'ec_products.status'       => BaseStatusEnum::PUBLISHED,
+            'condition' => [
+                'ec_products.status' => BaseStatusEnum::PUBLISHED,
                 'ec_products.is_variation' => 0,
             ],
-            'order_by'   => [
-                'ec_products.order'      => 'ASC',
+            'order_by' => [
+                'ec_products.order' => 'ASC',
                 'ec_products.created_at' => 'DESC',
             ],
-            'take'       => null,
-            'paginate'   => [
-                'per_page'      => null,
+            'take' => null,
+            'paginate' => [
+                'per_page' => null,
                 'current_paged' => 1,
             ],
-            'select'     => [
+            'select' => [
                 'ec_products.*',
                 'base_category.id as category_id',
                 'base_category.name as category_name',
             ],
-            'with'       => [],
+            'with' => [],
         ], $params);
 
         $filters = ['categories' => $params['categories']['value_in']];
@@ -147,19 +147,19 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
 
         $params = array_merge([
             'condition' => [
-                'status'       => BaseStatusEnum::PUBLISHED,
+                'status' => BaseStatusEnum::PUBLISHED,
                 'is_variation' => 0,
             ],
-            'order_by'  => [
-                'order'      => 'ASC',
+            'order_by' => [
+                'order' => 'ASC',
                 'created_at' => 'DESC',
             ],
-            'take'      => null,
-            'paginate'  => [
-                'per_page'      => null,
+            'take' => null,
+            'paginate' => [
+                'per_page' => null,
                 'current_paged' => 1,
             ],
-            'with'      => [],
+            'with' => [],
         ], $params);
 
         $this->model = $this->model
@@ -250,27 +250,27 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
     {
         $params = array_merge([
             'collections' => [
-                'by'       => 'id',
+                'by' => 'id',
                 'value_in' => [],
             ],
-            'condition'   => [
-                'ec_products.status'       => BaseStatusEnum::PUBLISHED,
+            'condition' => [
+                'ec_products.status' => BaseStatusEnum::PUBLISHED,
                 'ec_products.is_variation' => 0,
             ],
-            'order_by'    => [
-                'ec_products.order'      => 'ASC',
+            'order_by' => [
+                'ec_products.order' => 'ASC',
                 'ec_products.created_at' => 'DESC',
             ],
-            'take'        => null,
-            'paginate'    => [
-                'per_page'      => null,
+            'take' => null,
+            'paginate' => [
+                'per_page' => null,
                 'current_paged' => 1,
             ],
-            'select'      => [
+            'select' => [
                 'ec_products.*',
             ],
-            'with'        => [],
-            'withCount'   => [],
+            'with' => [],
+            'withCount' => [],
         ], $params);
 
         $filters = ['collections' => $params['collections']['value_in']];
@@ -286,24 +286,24 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
     public function getProductByBrands(array $params)
     {
         $params = array_merge([
-            'brand_id'  => null,
+            'brand_id' => null,
             'condition' => [
-                'status'       => BaseStatusEnum::PUBLISHED,
+                'status' => BaseStatusEnum::PUBLISHED,
                 'is_variation' => 0,
             ],
-            'order_by'  => [
-                'order'      => 'ASC',
+            'order_by' => [
+                'order' => 'ASC',
                 'created_at' => 'DESC',
             ],
-            'take'      => null,
-            'paginate'  => [
-                'per_page'      => null,
+            'take' => null,
+            'paginate' => [
+                'per_page' => null,
                 'current_paged' => 1,
             ],
-            'select'    => [
+            'select' => [
                 '*',
             ],
-            'with'      => [
+            'with' => [
 
             ],
         ], $params);
@@ -322,27 +322,27 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
     {
         $params = array_merge([
             'categories' => [
-                'by'       => 'id',
+                'by' => 'id',
                 'value_in' => [],
             ],
-            'condition'  => [
-                'ec_products.status'       => BaseStatusEnum::PUBLISHED,
+            'condition' => [
+                'ec_products.status' => BaseStatusEnum::PUBLISHED,
                 'ec_products.is_variation' => 0,
             ],
-            'order_by'   => [
-                'ec_products.order'      => 'ASC',
+            'order_by' => [
+                'ec_products.order' => 'ASC',
                 'ec_products.created_at' => 'DESC',
             ],
-            'take'       => null,
-            'paginate'   => [
-                'per_page'      => null,
+            'take' => null,
+            'paginate' => [
+                'per_page' => null,
                 'current_paged' => 1,
             ],
-            'select'     => [
+            'select' => [
                 'ec_products.*',
             ],
-            'with'       => [],
-            'withCount'  => [],
+            'with' => [],
+            'withCount' => [],
         ], $params);
 
         $filters = ['categories' => $params['categories']['value_in']];
@@ -359,27 +359,27 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
     {
         $params = array_merge([
             'product_tag' => [
-                'by'       => 'id',
+                'by' => 'id',
                 'value_in' => [],
             ],
-            'condition'   => [
-                'ec_products.status'       => BaseStatusEnum::PUBLISHED,
+            'condition' => [
+                'ec_products.status' => BaseStatusEnum::PUBLISHED,
                 'ec_products.is_variation' => 0,
             ],
-            'order_by'    => [
-                'ec_products.order'      => 'ASC',
+            'order_by' => [
+                'ec_products.order' => 'ASC',
                 'ec_products.created_at' => 'DESC',
             ],
-            'take'        => null,
-            'paginate'    => [
-                'per_page'      => null,
+            'take' => null,
+            'paginate' => [
+                'per_page' => null,
                 'current_paged' => 1,
             ],
-            'select'      => [
+            'select' => [
                 'ec_products.*',
             ],
-            'with'        => [],
-            'withCount'   => [],
+            'with' => [],
+            'withCount' => [],
         ], $params);
 
         $filters = ['tags' => $params['product_tag']['value_in']];
@@ -395,14 +395,14 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
     public function filterProducts(array $filters, array $params = [])
     {
         $filters = array_merge([
-            'keyword'                => null,
-            'min_price'              => null,
-            'max_price'              => null,
-            'categories'             => [],
-            'tags'                   => [],
-            'brands'                 => [],
-            'attributes'             => [],
-            'collections'            => [],
+            'keyword' => null,
+            'min_price' => null,
+            'max_price' => null,
+            'categories' => [],
+            'tags' => [],
+            'brands' => [],
+            'attributes' => [],
+            'collections' => [],
             'count_attribute_groups' => null,
         ], $filters);
 
@@ -418,20 +418,20 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
 
         $params = array_merge([
             'condition' => [
-                'ec_products.status'       => BaseStatusEnum::PUBLISHED,
+                'ec_products.status' => BaseStatusEnum::PUBLISHED,
                 'ec_products.is_variation' => 0,
             ],
-            'order_by'  => Arr::get($filters, 'order_by'),
-            'take'      => null,
-            'paginate'  => [
-                'per_page'      => null,
+            'order_by' => Arr::get($filters, 'order_by'),
+            'take' => null,
+            'paginate' => [
+                'per_page' => null,
                 'current_paged' => 1,
             ],
-            'select'    => [
+            'select' => [
                 'ec_products.*',
                 'products_with_final_price.final_price',
             ],
-            'with'      => [],
+            'with' => [],
             'withCount' => [],
         ], $params);
 
@@ -487,7 +487,7 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
         $keyword = $filters['keyword'];
         if ($keyword && is_string($keyword)) {
             $searchProductsBy = EcommerceHelper::getProductsSearchBy();
-            $isPartial = get_ecommerce_setting('search_products_exactly_by_name', 0) != 1;
+            $isPartial = get_ecommerce_setting('search_for_an_exact_phrase', 0) != 1;
 
             if (is_plugin_active('language') && is_plugin_active('language-advanced') && Language::getCurrentLocale() != Language::getDefaultLocale()) {
                 $this->model = $this->model
@@ -502,7 +502,6 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
 
                             $hasWhere = true;
                         }
-
 
                         if (in_array('name', $searchProductsBy) || in_array('description', $searchProductsBy)) {
                             $function = $hasWhere ? 'orWhereHas' : 'whereHas';
@@ -738,11 +737,11 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
 
         $params = array_merge([
             'condition' => [
-                'ec_products.status'       => BaseStatusEnum::PUBLISHED,
+                'ec_products.status' => BaseStatusEnum::PUBLISHED,
                 'ec_products.is_variation' => 0,
             ],
-            'paginate'  => [
-                'per_page'      => null,
+            'paginate' => [
+                'per_page' => null,
                 'current_paged' => 1,
             ],
         ], $params);
@@ -769,16 +768,16 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
 
         $params = array_merge([
             'condition' => [
-                'ec_products.status'       => BaseStatusEnum::PUBLISHED,
+                'ec_products.status' => BaseStatusEnum::PUBLISHED,
                 'ec_products.is_variation' => 0,
             ],
-            'paginate'  => [
-                'per_page'      => null,
+            'paginate' => [
+                'per_page' => null,
                 'current_paged' => 1,
             ],
-            'with'      => ['slugable'],
-            'order_by'  => ['ec_wish_lists.updated_at' => 'desc'],
-            'select'    => ['ec_products.*'],
+            'with' => ['slugable'],
+            'order_by' => ['ec_wish_lists.updated_at' => 'desc'],
+            'select' => ['ec_products.*'],
         ], $params);
 
         $this->model = $this->model
@@ -797,16 +796,16 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
 
         $params = array_merge([
             'condition' => [
-                'ec_products.status'       => BaseStatusEnum::PUBLISHED,
+                'ec_products.status' => BaseStatusEnum::PUBLISHED,
                 'ec_products.is_variation' => 0,
             ],
-            'paginate'  => [
-                'per_page'      => null,
+            'paginate' => [
+                'per_page' => null,
                 'current_paged' => 1,
             ],
-            'with'      => ['slugable'],
-            'order_by'  => ['ec_customer_recently_viewed_products.id' => 'desc'],
-            'select'    => ['ec_products.*'],
+            'with' => ['slugable'],
+            'order_by' => ['ec_customer_recently_viewed_products.id' => 'desc'],
+            'select' => ['ec_products.*'],
         ], $params);
 
         $this->model = $this->model

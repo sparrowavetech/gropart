@@ -4,7 +4,7 @@
         <div class="widget-title">
             <h4>&nbsp; {{ trans('plugins/translation::translation.translations') }}</h4>
         </div>
-        <div class="widget-body box-translation">
+        <div class="widget-body box-translation" v-pre>
             @if (empty($group))
                 {!! Form::open(['route' => 'translations.import', 'class' => 'form-inline', 'role' => 'form']) !!}
                     <div class="ui-select-wrapper d-inline-block">
@@ -56,7 +56,7 @@
                         @foreach ($translations as $key => $translation)
                             <tr id="{{ $key }}">
                                 @foreach($locales as $locale)
-                                    @php $item = isset($translation[$locale]) ? $translation[$locale] : null @endphp
+                                    @php $item = $translation[$locale] ?? null @endphp
                                     <td class="text-start">
                                         <a href="#edit" class="editable status-{{ $item ? $item->status : 0 }} locale-{{ $locale }}"
                                            data-locale="{{ $locale }}" data-name="{{ $locale . '|' . $key }}"

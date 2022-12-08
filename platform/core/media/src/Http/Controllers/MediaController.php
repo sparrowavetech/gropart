@@ -115,16 +115,16 @@ class MediaController extends Controller
         $paramsFolder = [];
 
         $paramsFile = [
-            'order_by'         => [
+            'order_by' => [
                 'is_folder' => 'DESC',
             ],
-            'paginate'         => [
-                'per_page'      => (int)$request->input('posts_per_page', 30),
+            'paginate' => [
+                'per_page' => (int)$request->input('posts_per_page', 30),
                 'current_paged' => (int)$request->input('paged', 1),
             ],
             'selected_file_id' => $request->input('selected_file_id'),
-            'is_popup'         => $request->input('is_popup'),
-            'filter'           => $request->input('filter'),
+            'is_popup' => $request->input('is_popup'),
+            'filter' => $request->input('filter'),
         ];
 
         $orderBy = $this->transformOrderBy($request->input('sort_by'));
@@ -137,11 +137,11 @@ class MediaController extends Controller
 
         if ($search) {
             $paramsFolder['condition'] = [
-                ['media_folders.name', 'LIKE', '%' . $search . '%',],
+                ['media_folders.name', 'LIKE', '%' . $search . '%', ],
             ];
 
             $paramsFile['condition'] = [
-                ['media_files.name', 'LIKE', '%' . $search . '%',],
+                ['media_files.name', 'LIKE', '%' . $search . '%', ],
             ];
         }
 
@@ -151,7 +151,7 @@ class MediaController extends Controller
             case 'all_media':
                 $breadcrumbs = [
                     [
-                        'id'   => 0,
+                        'id' => 0,
                         'name' => trans('core/media::media.all_media'),
                         'icon' => 'fa fa-user-secret',
                     ],
@@ -168,7 +168,7 @@ class MediaController extends Controller
             case 'trash':
                 $breadcrumbs = [
                     [
-                        'id'   => 0,
+                        'id' => 0,
                         'name' => trans('core/media::media.trash'),
                         'icon' => 'fa fa-trash',
                     ],
@@ -190,7 +190,7 @@ class MediaController extends Controller
             case 'recent':
                 $breadcrumbs = [
                     [
-                        'id'   => 0,
+                        'id' => 0,
                         'name' => trans('core/media::media.recent'),
                         'icon' => 'fa fa-clock',
                     ],
@@ -210,7 +210,7 @@ class MediaController extends Controller
             case 'favorites':
                 $breadcrumbs = [
                     [
-                        'id'   => 0,
+                        'id' => 0,
                         'name' => trans('core/media::media.favorites'),
                         'icon' => 'fa fa-star',
                     ],
@@ -218,7 +218,7 @@ class MediaController extends Controller
 
                 $favoriteItems = $this->mediaSettingRepository
                     ->getFirstBy([
-                        'key'     => 'favorites',
+                        'key' => 'favorites',
                         'user_id' => Auth::id(),
                     ]);
 
@@ -264,9 +264,9 @@ class MediaController extends Controller
         $selectedFileId = $request->input('selected_file_id');
 
         return RvMedia::responseSuccess([
-            'files'            => $files,
-            'folders'          => $folders,
-            'breadcrumbs'      => $breadcrumbs,
+            'files' => $files,
+            'folders' => $folders,
+            'breadcrumbs' => $breadcrumbs,
             'selected_file_id' => $selectedFileId,
         ]);
     }
@@ -311,7 +311,7 @@ class MediaController extends Controller
             $breadcrumbs = [
                 [
                     'name' => $folder->name,
-                    'id'   => $folder->id,
+                    'id' => $folder->id,
                 ],
             ];
         }
@@ -352,10 +352,12 @@ class MediaController extends Controller
 
                 if ($error) {
                     $response = RvMedia::responseError(trans('core/media::media.trash_error'));
+
                     break;
                 }
 
                 $response = RvMedia::responseSuccess([], trans('core/media::media.trash_success'));
+
                 break;
 
             case 'restore':
@@ -376,10 +378,12 @@ class MediaController extends Controller
 
                 if ($error) {
                     $response = RvMedia::responseError(trans('core/media::media.restore_error'));
+
                     break;
                 }
 
                 $response = RvMedia::responseSuccess([], trans('core/media::media.restore_success'));
+
                 break;
 
             case 'make_copy':
@@ -471,6 +475,7 @@ class MediaController extends Controller
                 }
 
                 $response = RvMedia::responseSuccess([], trans('core/media::media.copy_success'));
+
                 break;
 
             case 'delete':
@@ -488,11 +493,12 @@ class MediaController extends Controller
                 }
 
                 $response = RvMedia::responseSuccess([], trans('core/media::media.delete_success'));
+
                 break;
 
             case 'favorite':
                 $meta = $this->mediaSettingRepository->firstOrCreate([
-                    'key'     => 'favorites',
+                    'key' => 'favorites',
                     'user_id' => Auth::id(),
                 ]);
 
@@ -505,11 +511,12 @@ class MediaController extends Controller
                 $this->mediaSettingRepository->createOrUpdate($meta);
 
                 $response = RvMedia::responseSuccess([], trans('core/media::media.favorite_success'));
+
                 break;
 
             case 'remove_favorite':
                 $meta = $this->mediaSettingRepository->firstOrCreate([
-                    'key'     => 'favorites',
+                    'key' => 'favorites',
                     'user_id' => Auth::id(),
                 ]);
 
@@ -530,6 +537,7 @@ class MediaController extends Controller
                 }
 
                 $response = RvMedia::responseSuccess([], trans('core/media::media.remove_favorite_success'));
+
                 break;
 
             case 'rename':
@@ -558,6 +566,7 @@ class MediaController extends Controller
                 }
 
                 $response = RvMedia::responseSuccess([], trans('core/media::media.rename_success'));
+
                 break;
 
             case 'empty_trash':
@@ -565,6 +574,7 @@ class MediaController extends Controller
                 $this->fileRepository->emptyTrash();
 
                 $response = RvMedia::responseSuccess([], trans('core/media::media.empty_trash_success'));
+
                 break;
         }
 
@@ -642,7 +652,7 @@ class MediaController extends Controller
                 }
 
                 return response()->make(file_get_contents(str_replace('https://', 'http://', $filePath)), 200, [
-                    'Content-type'        => $file->mime_type,
+                    'Content-type' => $file->mime_type,
                     'Content-Disposition' => 'attachment; filename="' . $file->name . '.' . File::extension($file->url) . '"',
                 ]);
             }

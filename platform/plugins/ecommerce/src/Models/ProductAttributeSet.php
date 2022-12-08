@@ -40,10 +40,7 @@ class ProductAttributeSet extends BaseModel
         'status' => BaseStatusEnum::class,
     ];
 
-    /**
-     * @return HasMany
-     */
-    public function attributes()
+    public function attributes(): HasMany
     {
         return $this->hasMany(ProductAttribute::class, 'attribute_set_id')->orderBy('order', 'ASC');
     }

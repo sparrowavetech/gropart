@@ -37,6 +37,7 @@ class FileMerger
         // Open the new uploaded chunk
         if (!$in = @fopen($sourceFilePath, 'rb')) {
             @fclose($this->destinationFile);
+
             throw new ChunkSaveException('Failed to open input stream', 101);
         }
 

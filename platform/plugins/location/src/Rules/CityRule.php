@@ -1,17 +1,17 @@
 <?php
- 
+
 namespace Botble\Location\Rules;
 
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Location\Repositories\Interfaces\CityInterface;
-use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Contracts\Validation\DataAwareRule;
+use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Arr;
 
 class CityRule implements DataAwareRule, Rule
 {
     /**
-     * All of the data under validation.
+     * All the data under validation.
      *
      * @var array
      */
@@ -22,7 +22,7 @@ class CityRule implements DataAwareRule, Rule
      * @var string|null
      */
     protected $stateKey;
- 
+
     /**
      * Create a new rule instance.
      *
@@ -32,31 +32,31 @@ class CityRule implements DataAwareRule, Rule
     {
         $this->stateKey = $stateKey;
     }
- 
+
     /**
      * Set the data under validation.
      *
-     * @param  array  $data
+     * @param array $data
      * @return $this
      */
     public function setData($data)
     {
         $this->data = $data;
- 
+
         return $this;
     }
 
     /**
      * Determine if the validation rule passes.
      *
-     * @param  string  $attribute
-     * @param  mixed  $value
+     * @param string $attribute
+     * @param mixed $value
      * @return bool
      */
     public function passes($attribute, $value)
     {
         $condition = [
-            'id'     => $value,
+            'id' => $value,
             'status' => BaseStatusEnum::PUBLISHED,
         ];
 
@@ -70,7 +70,7 @@ class CityRule implements DataAwareRule, Rule
 
         return app(CityInterface::class)->count($condition);
     }
- 
+
     /**
      * Get the validation error message.
      *
@@ -78,6 +78,6 @@ class CityRule implements DataAwareRule, Rule
      */
     public function message()
     {
-        return trans('validation.exists');;
+        return trans('validation.exists');
     }
 }

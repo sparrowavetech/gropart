@@ -57,7 +57,7 @@
                                         </div>
                                     @endforeach
                                 @else
-                                    <div class="row commission-setting-item" id="commission-setting-item-0">
+                                    <div class="row commission-setting-item mb-4" id="commission-setting-item-0">
                                         <div class="col-3">
                                             <label class="text-title-field" for="commission_fee_for_each_category">{{ trans('plugins/marketplace::marketplace.settings.commission_fee') }}</label>
                                             <input type="number" min="1" max="100" name="commission_by_category[0][commission_fee]" class="form-control" />
@@ -77,10 +77,6 @@
                                 <button type="button" class="btn btn-primary" id="add-new-commission-setting-category">{{ trans('plugins/marketplace::marketplace.settings.add_new') }}</button>
                             </div>
                         </div>
-
-                        <script>
-                            window.tagifyWhitelist = {!! Js::from($productCategories) !!}
-                        </script>
 
                         <script type="text/x-custom-template" id="commission-setting-item-template">
                             <div class="row commission-setting-item mb-4" id="commission-setting-item-__index__">
@@ -194,3 +190,9 @@
         </div>
     {!! Form::close() !!}
 @endsection
+
+@push('footer')
+    <script>
+        window.tagifyWhitelist = {!! Js::from($productCategories) !!}
+    </script>
+@endpush

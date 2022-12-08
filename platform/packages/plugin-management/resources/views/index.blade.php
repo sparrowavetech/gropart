@@ -14,7 +14,9 @@
                     </div>
                     <div class="app-footer">
                         <div class="app-description" title="{{ $plugin->description }}">{{ $plugin->description }}</div>
-                        <div class="app-author">{{ trans('packages/plugin-management::plugin.author') }}: <a href="{{ $plugin->url }}" target="_blank">{{ $plugin->author }}</a></div>
+                        @if (!config('packages.plugin-management.general.hide_plugin_author', false))
+                            <div class="app-author">{{ trans('packages/plugin-management::plugin.author') }}: <a href="{{ $plugin->url }}" target="_blank">{{ $plugin->author }}</a></div>
+                        @endif
                         <div class="app-version">{{ trans('packages/plugin-management::plugin.version') }}: {{ $plugin->version }}</div>
                         <div class="app-actions">
                             @if (Auth::user()->hasPermission('plugins.edit'))

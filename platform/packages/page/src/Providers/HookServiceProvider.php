@@ -43,12 +43,12 @@ class HookServiceProvider extends ServiceProvider
 
                     $schema = [
                         '@context' => 'https://schema.org',
-                        '@type'    => 'Organization',
-                        'name'     => theme_option('site_title'),
-                        'url'      => $page->url,
-                        'logo'     => [
+                        '@type' => 'Organization',
+                        'name' => theme_option('site_title'),
+                        'url' => $page->url,
+                        'logo' => [
                             '@type' => 'ImageObject',
-                            'url'   => RvMedia::getImageUrl(theme_option('logo')),
+                            'url' => RvMedia::getImageUrl(theme_option('logo')),
                         ],
                     ];
 
@@ -66,20 +66,20 @@ class HookServiceProvider extends ServiceProvider
 
         theme_option()
             ->setSection([
-                'title'      => 'Page',
-                'desc'       => 'Theme options for Page',
-                'id'         => 'opt-text-subsection-page',
+                'title' => 'Page',
+                'desc' => 'Theme options for Page',
+                'id' => 'opt-text-subsection-page',
                 'subsection' => true,
-                'icon'       => 'fa fa-book',
-                'fields'     => [
+                'icon' => 'fa fa-book',
+                'fields' => [
                     [
-                        'id'         => 'homepage_id',
-                        'type'       => 'customSelect',
-                        'label'      => trans('packages/page::pages.settings.show_on_front'),
+                        'id' => 'homepage_id',
+                        'type' => 'customSelect',
+                        'label' => trans('packages/page::pages.settings.show_on_front'),
                         'attributes' => [
-                            'name'    => 'homepage_id',
-                            'list'    => ['' => trans('packages/page::pages.settings.select')] + $pages,
-                            'value'   => '',
+                            'name' => 'homepage_id',
+                            'list' => ['' => trans('packages/page::pages.settings.select')] + $pages,
+                            'value' => '',
                             'options' => [
                                 'class' => 'form-control',
                             ],

@@ -104,11 +104,9 @@ if (!defined('ECOMMERCE_PRODUCT_DETAIL_RENDER')) {
     define('ECOMMERCE_PRODUCT_DETAIL_RENDER', 'product_detail_render');
 }
 
-
 if (!defined('ECOMMERCE_PRODUCT_DETAIL_EXTRA_HTML')) {
     define('ECOMMERCE_PRODUCT_DETAIL_EXTRA_HTML', 'product_detail_extra_html');
 }
-
 
 if (!defined('ECOMMERCE_ORDER_DETAIL_EXTRA_HTML')) {
     define('ECOMMERCE_ORDER_DETAIL_EXTRA_HTML', 'order_detail_extra_html');

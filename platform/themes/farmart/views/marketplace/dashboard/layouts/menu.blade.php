@@ -25,7 +25,6 @@
             ],
             'order' => 2,
         ],
-        
         [
             'key'    => 'marketplace.vendor.orders.index',
             'icon'   => 'icon-bag2',

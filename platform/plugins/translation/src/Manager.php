@@ -115,7 +115,7 @@ class Manager
             } elseif ($this->files->isDirectory($from)) {
                 $manager = new MountManager([
                     'from' => new Flysystem(new LocalAdapter($from)),
-                    'to'   => new Flysystem(new LocalAdapter($to)),
+                    'to' => new Flysystem(new LocalAdapter($to)),
                 ]);
 
                 foreach ($manager->listContents('from://', true) as $file) {
@@ -145,8 +145,8 @@ class Manager
         $value = (string)$value;
         $translation = Translation::firstOrNew([
             'locale' => $locale,
-            'group'  => $group,
-            'key'    => $key,
+            'group' => $group,
+            'key' => $key,
         ]);
 
         // Check if the database is different from files
@@ -326,7 +326,7 @@ class Manager
             $info = $client->request('GET', 'https://api.github.com/repos/botble/translations/git/trees/master', [
                 'headers' => [
                     'Content-Type' => 'application/json',
-                    'Accept'       => 'application/json',
+                    'Accept' => 'application/json',
                 ],
             ]);
 
@@ -364,7 +364,7 @@ class Manager
 
         if (!in_array($locale, $availableLocales)) {
             return [
-                'error'   => true,
+                'error' => true,
                 'message' => 'This locale is not available on ' . $repository,
             ];
         }
@@ -375,7 +375,7 @@ class Manager
             ]);
         } catch (Exception|GuzzleException $exception) {
             return [
-                'error'   => true,
+                'error' => true,
                 'message' => $exception->getMessage(),
             ];
         }
@@ -388,7 +388,7 @@ class Manager
                 $zip->close();
             } else {
                 return [
-                    'error'   => true,
+                    'error' => true,
                     'message' => 'Extract translation files failed!',
                 ];
             }
@@ -426,7 +426,7 @@ class Manager
         $this->removeUnusedThemeTranslations();
 
         return [
-            'error'   => false,
+            'error' => false,
             'message' => 'Downloaded translation files!',
         ];
     }

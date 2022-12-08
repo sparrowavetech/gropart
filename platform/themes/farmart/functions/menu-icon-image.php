@@ -9,7 +9,7 @@ add_filter(BASE_FILTER_BEFORE_RENDER_FORM, function ($form, $data) {
         if ($form->getFormHelper()->hasCustomField('themeIcon')) {
             $form
                 ->modify('icon_font', 'themeIcon', [
-                    'attr'        => [
+                    'attr' => [
                         'placeholder' => null,
                     ],
                     'empty_value' => __('-- None --'),
@@ -18,16 +18,16 @@ add_filter(BASE_FILTER_BEFORE_RENDER_FORM, function ($form, $data) {
 
         $form
             ->addAfter('icon_font', 'icon_image', 'mediaImage', [
-                'label'      => __('Icon image'),
+                'label' => __('Icon image'),
                 'label_attr' => ['class' => 'control-label'],
-                'attr'       => [
+                'attr' => [
                     'data-update' => 'icon_image',
                 ],
-                'value'      => $iconImage,
+                'value' => $iconImage,
                 'help_block' => [
                     'text' => __('It will replace Icon Font if it is present.'),
                 ],
-                'wrapper'    => [
+                'wrapper' => [
                     'style' => 'display: block;',
                 ],
             ]);

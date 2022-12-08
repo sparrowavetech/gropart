@@ -60,7 +60,7 @@ class LanguageManager
      *
      * @var string
      */
-    protected $defaultLocale = 'en';
+    protected $defaultLocale;
 
     /**
      * Supported Locales
@@ -158,9 +158,7 @@ class LanguageManager
         $this->request = $this->app['request'];
         $this->url = $this->app['url'];
 
-        $this->setDefaultLocale();
-
-        if ($request->has('ref_lang')) {
+        if ($request->has('ref_lang') && is_string($request->input('ref_lang'))) {
             $this->currentAdminLocaleCode = $request->input('ref_lang');
         }
     }
@@ -182,11 +180,11 @@ class LanguageManager
         foreach ($languages as $language) {
             if (!in_array($language->lang_id, json_decode(setting('language_hide_languages', '[]'), true))) {
                 $locales[$language->lang_locale] = [
-                    'lang_name'       => $language->lang_name,
-                    'lang_locale'     => $language->lang_locale,
-                    'lang_code'       => $language->lang_code,
-                    'lang_flag'       => $language->lang_flag,
-                    'lang_is_rtl'     => $language->lang_is_rtl,
+                    'lang_name' => $language->lang_name,
+                    'lang_locale' => $language->lang_locale,
+                    'lang_code' => $language->lang_code,
+                    'lang_flag' => $language->lang_flag,
+                    'lang_is_rtl' => $language->lang_is_rtl,
                     'lang_is_default' => $language->lang_is_default,
                 ];
             }
@@ -231,6 +229,10 @@ class LanguageManager
      */
     public function getDefaultLocale(): string
     {
+        if (!$this->defaultLanguage) {
+            $this->setDefaultLocale();
+        }
+
         return $this->defaultLocale;
     }
 
@@ -246,7 +248,7 @@ class LanguageManager
         }
 
         if (empty($this->defaultLocale)) {
-            $this->defaultLocale = config('app.locale');
+            $this->defaultLocale = config('app.locale', 'en');
         }
     }
 
@@ -380,12 +382,14 @@ class LanguageManager
                 $parsedUrl['path'] = preg_replace('%^/?' . $localeCode . '/%', '$1', $parsedUrl['path']);
                 if ($parsedUrl['path'] !== $path) {
                     $urlLocale = $localeCode;
+
                     break;
                 }
 
                 $parsedUrl['path'] = preg_replace('%^/?' . $localeCode . '$%', '$1', $parsedUrl['path']);
                 if ($parsedUrl['path'] !== $path) {
                     $urlLocale = $localeCode;
+
                     break;
                 }
             }
@@ -508,6 +512,7 @@ class LanguageManager
                     if (isset($url[$index])) {
                         if ($segment === $url[$index]) {
                             $index++;
+
                             continue;
                         }
                         if (preg_match('/{[\w]+}/', $segment)) {
@@ -515,6 +520,7 @@ class LanguageManager
                             $attribute_name = preg_replace(['/}/', '/{/', '/\?/'], '', $segment);
                             $attributes[$attribute_name] = $url[$index];
                             $index++;
+
                             continue;
                         }
                         if (preg_match('/{[\w]+\?}/', $segment)) {
@@ -524,6 +530,7 @@ class LanguageManager
                                 $attribute_name = preg_replace(['/}/', '/{/', '/\?/'], '', $segment);
                                 $attributes[$attribute_name] = $url[$index];
                                 $index++;
+
                                 continue;
                             }
                         }
@@ -531,6 +538,7 @@ class LanguageManager
                         // no optional parameters but no more $url given
                         // this route does not match the url
                         $match = false;
+
                         break;
                     }
                 }
@@ -912,7 +920,7 @@ class LanguageManager
             return $this->currentAdminLocaleCode;
         }
 
-        if ($this->request->has('ref_lang')) {
+        if ($this->request->has('ref_lang') && is_string($this->request->input('ref_lang'))) {
             return $this->request->input('ref_lang');
         }
 
@@ -1039,7 +1047,7 @@ class LanguageManager
                     $uniqueKey = null;
                     $meta = $this->languageMetaRepository->getFirstBy(
                         [
-                            'reference_id'   => $data->id,
+                            'reference_id' => $data->id,
                             'reference_type' => get_class($data),
                         ]
                     );
@@ -1048,7 +1056,7 @@ class LanguageManager
                     } elseif ($request->input('ref_from')) {
                         $uniqueKey = $this->languageMetaRepository->getFirstBy(
                             [
-                                'reference_id'   => $request->input('ref_from'),
+                                'reference_id' => $request->input('ref_from'),
                                 'reference_type' => get_class($data),
                             ]
                         )->lang_meta_origin;
@@ -1112,7 +1120,7 @@ class LanguageManager
         $defaultLanguage = $this->getDefaultLanguage(['lang_id']);
         if (!empty($defaultLanguage) && in_array(get_class($data), $this->supportedModels())) {
             $this->languageMetaRepository->deleteBy([
-                'reference_id'   => $data->id,
+                'reference_id' => $data->id,
                 'reference_type' => get_class($data),
             ]);
 
@@ -1181,10 +1189,10 @@ class LanguageManager
             // we have to assume we are routing to a defaultLocale route.
             if ($this->hideDefaultLocaleInURL()) {
                 $this->currentLocale = $this->getDefaultLocale();
-            }
-            // but if hideDefaultLocaleInURL is false, we have
-            // to retrieve it from the browser...
-            else {
+            } else {
+                // but if hideDefaultLocaleInURL is false, we have
+                // to retrieve it from the browser...
+
                 $this->currentLocale = $this->getCurrentLocale();
             }
         }

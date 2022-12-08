@@ -14,8 +14,8 @@ class ContactRequest extends Request
     public function rules()
     {
         $rules = [
-            'name'    => 'required',
-            'email'   => 'required|email',
+            'name' => 'required',
+            'email' => 'required|email',
             'content' => 'required',
         ];
 
@@ -40,14 +40,14 @@ class ContactRequest extends Request
     public function messages()
     {
         return [
-            'name.required'                 => trans('plugins/contact::contact.form.name.required'),
-            'email.required'                => trans('plugins/contact::contact.form.email.required'),
-            'email.email'                   => trans('plugins/contact::contact.form.email.email'),
-            'content.required'              => trans('plugins/contact::contact.form.content.required'),
+            'name.required' => trans('plugins/contact::contact.form.name.required'),
+            'email.required' => trans('plugins/contact::contact.form.email.required'),
+            'email.email' => trans('plugins/contact::contact.form.email.email'),
+            'content.required' => trans('plugins/contact::contact.form.content.required'),
             'g-recaptcha-response.required' => __('Captcha Verification Failed!'),
-            'g-recaptcha-response.captcha'  => __('Captcha Verification Failed!'),
-            'math-captcha.required'         => __('Math function Verification Failed!'),
-            'math_captcha'                  => __('Math function Verification Failed!'),
+            'g-recaptcha-response.captcha' => __('Captcha Verification Failed!'),
+            'math-captcha.required' => __('Math function Verification Failed!'),
+            'math_captcha' => __('Math function Verification Failed!'),
         ];
     }
 }

@@ -9,7 +9,7 @@ return [
             'application/csv',
             'text/plain',
         ],
-        'mimes'      => [
+        'mimes' => [
             'xls',
             'xlsx',
             'csv',

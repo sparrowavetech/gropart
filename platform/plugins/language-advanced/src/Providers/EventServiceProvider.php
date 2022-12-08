@@ -20,10 +20,10 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
-        DeletedContentEvent::class  => [
+        DeletedContentEvent::class => [
             DeletedContentListener::class,
         ],
-        CreatedContentEvent::class  => [
+        CreatedContentEvent::class => [
             AddDefaultTranslations::class,
         ],
         UpdatedContentEvent::class => [

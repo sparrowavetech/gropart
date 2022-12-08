@@ -24,7 +24,7 @@ class PluginManagementServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->setNamespace('packages/plugin-management')
-            ->loadAndPublishConfigurations(['permissions'])
+            ->loadAndPublishConfigurations(['permissions', 'general'])
             ->loadAndPublishViews()
             ->loadAndPublishTranslations()
             ->loadRoutes(['web'])
@@ -96,12 +96,12 @@ class PluginManagementServiceProvider extends ServiceProvider
         Event::listen(RouteMatched::class, function () {
             dashboard_menu()
                 ->registerItem([
-                    'id'          => 'cms-core-plugins',
-                    'priority'    => 997,
-                    'parent_id'   => null,
-                    'name'        => 'core/base::layouts.plugins',
-                    'icon'        => 'fa fa-plug',
-                    'url'         => route('plugins.index'),
+                    'id' => 'cms-core-plugins',
+                    'priority' => 997,
+                    'parent_id' => null,
+                    'name' => 'core/base::layouts.plugins',
+                    'icon' => 'fa fa-plug',
+                    'url' => route('plugins.index'),
                     'permissions' => ['plugins.index'],
                 ]);
         });

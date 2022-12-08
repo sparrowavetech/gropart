@@ -16,7 +16,7 @@
                 </div>
             </div>
 
-            <div class="flexbox-annotated-section-content">
+            <div class="flexbox-annotated-section-content" v-pre>
                 <div class="wrapper-content pd-all-20 email-template-edit-wrap">
                     @if ($emailSubject)
                         <div class="form-group mb-3">

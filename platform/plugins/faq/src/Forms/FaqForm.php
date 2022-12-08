@@ -20,34 +20,34 @@ class FaqForm extends FormAbstract
             ->setValidatorClass(FaqRequest::class)
             ->withCustomFields()
             ->add('category_id', 'customSelect', [
-                'label'      => trans('plugins/faq::faq.category'),
+                'label' => trans('plugins/faq::faq.category'),
                 'label_attr' => ['class' => 'control-label required'],
-                'attr'       => [
+                'attr' => [
                     'class' => 'form-control select-full',
                 ],
-                'choices'    => ['' => trans('plugins/faq::faq.select_category')] + app(FaqCategoryInterface::class)->pluck('name', 'id'),
+                'choices' => ['' => trans('plugins/faq::faq.select_category')] + app(FaqCategoryInterface::class)->pluck('name', 'id'),
             ])
             ->add('question', 'text', [
-                'label'      => trans('plugins/faq::faq.question'),
+                'label' => trans('plugins/faq::faq.question'),
                 'label_attr' => ['class' => 'control-label required'],
-                'attr'       => [
+                'attr' => [
                     'rows' => 4,
                 ],
             ])
             ->add('answer', 'editor', [
-                'label'      => trans('plugins/faq::faq.answer'),
+                'label' => trans('plugins/faq::faq.answer'),
                 'label_attr' => ['class' => 'control-label required'],
-                'attr'       => [
+                'attr' => [
                     'rows' => 4,
                 ],
             ])
             ->add('status', 'customSelect', [
-                'label'      => trans('core/base::tables.status'),
+                'label' => trans('core/base::tables.status'),
                 'label_attr' => ['class' => 'control-label required'],
-                'attr'       => [
+                'attr' => [
                     'class' => 'form-control select-full',
                 ],
-                'choices'    => BaseStatusEnum::labels(),
+                'choices' => BaseStatusEnum::labels(),
             ])
             ->setBreakFieldPoint('status');
     }

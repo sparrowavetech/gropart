@@ -25,9 +25,9 @@ class CheckoutRequest extends Request
         });
 
         $rules = [
-            'payment_method'  => 'required|' . Rule::in($paymentMethods),
+            'payment_method' => 'required|' . Rule::in($paymentMethods),
             'shipping_method' => 'required|' . Rule::in(ShippingMethodEnum::values()),
-            'amount'          => 'required|min:0',
+            'amount' => 'required|min:0',
         ];
 
         $rules['address.address_id'] = 'required_without:address.name';
@@ -56,12 +56,12 @@ class CheckoutRequest extends Request
     public function messages()
     {
         $messages = [
-            'address.name.required'    => trans('plugins/ecommerce::order.address_name_required'),
-            'address.phone.required'   => trans('plugins/ecommerce::order.address_phone_required'),
-            'address.email.required'   => trans('plugins/ecommerce::order.address_email_required'),
-            'address.email.unique'     => trans('plugins/ecommerce::order.address_email_unique'),
-            'address.state.required'   => trans('plugins/ecommerce::order.address_state_required'),
-            'address.city.required'    => trans('plugins/ecommerce::order.address_city_required'),
+            'address.name.required' => trans('plugins/ecommerce::order.address_name_required'),
+            'address.phone.required' => trans('plugins/ecommerce::order.address_phone_required'),
+            'address.email.required' => trans('plugins/ecommerce::order.address_email_required'),
+            'address.email.unique' => trans('plugins/ecommerce::order.address_email_unique'),
+            'address.state.required' => trans('plugins/ecommerce::order.address_state_required'),
+            'address.city.required' => trans('plugins/ecommerce::order.address_city_required'),
             'address.country.required' => trans('plugins/ecommerce::order.address_country_required'),
             'address.address.required' => trans('plugins/ecommerce::order.address_address_required'),
         ];
@@ -77,11 +77,11 @@ class CheckoutRequest extends Request
     public function attributes()
     {
         $attributes = [
-            'address.name'    => __('Name'),
-            'address.phone'   => __('Phone'),
-            'address.email'   => __('Email'),
-            'address.state'   => __('State'),
-            'address.city'    => __('City'),
+            'address.name' => __('Name'),
+            'address.phone' => __('Phone'),
+            'address.email' => __('Email'),
+            'address.state' => __('State'),
+            'address.city' => __('City'),
             'address.country' => __('Country'),
             'address.address' => __('Address'),
         ];

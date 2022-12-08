@@ -53,6 +53,7 @@ class BackupRestoreCommand extends Command
 
                 if (!File::isDirectory($this->backup->getBackupPath($backup))) {
                     $this->error('Cannot found backup folder!');
+
                     return 1;
                 }
             } else {
@@ -60,6 +61,7 @@ class BackupRestoreCommand extends Command
 
                 if (empty($backups)) {
                     $this->error('No backup found to restore!');
+
                     return 1;
                 }
 

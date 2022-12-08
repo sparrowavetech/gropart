@@ -30,38 +30,38 @@ class SendWebhookWhenOrderPlaced
             $order = $event->order;
 
             $data = [
-                'id'                   => $order->id,
-                'status'               => [
+                'id' => $order->id,
+                'status' => [
                     'value' => $order->status,
-                    'text'  => $order->status->label(),
+                    'text' => $order->status->label(),
                 ],
-                'shipping_status'      => $order->shipment->id ? [
+                'shipping_status' => $order->shipment->id ? [
                     'value' => $order->shipment->status,
-                    'text'  => $order->shipment->status->label(),
+                    'text' => $order->shipment->status->label(),
                 ] : [],
-                'payment_method'       => $order->payment->id ? [
+                'payment_method' => $order->payment->id ? [
                     'value' => $order->payment->payment_channel,
-                    'text'  => $order->payment->payment_channel->label(),
+                    'text' => $order->payment->payment_channel->label(),
                 ] : [],
-                'payment_status'       => $order->payment->id ? [
+                'payment_status' => $order->payment->id ? [
                     'value' => $order->payment->status,
-                    'text'  => $order->payment->status->label(),
+                    'text' => $order->payment->status->label(),
                 ] : [],
-                'customer'             => [
-                    'id'   => $order->user->id,
+                'customer' => [
+                    'id' => $order->user->id,
                     'name' => $order->user->name,
                 ],
-                'sub_total'            => $order->sub_total,
-                'tax_amount'           => $order->tax_amount,
-                'shipping_method'      => $order->shipping_method,
-                'shipping_option'      => $order->shipping_option,
-                'shipping_amount'      => $order->shipping_amount,
-                'amount'               => $order->amount,
-                'coupon_code'          => $order->coupon_code,
-                'discount_amount'      => $order->discount_amount,
+                'sub_total' => $order->sub_total,
+                'tax_amount' => $order->tax_amount,
+                'shipping_method' => $order->shipping_method,
+                'shipping_option' => $order->shipping_option,
+                'shipping_amount' => $order->shipping_amount,
+                'amount' => $order->amount,
+                'coupon_code' => $order->coupon_code,
+                'discount_amount' => $order->discount_amount,
                 'discount_description' => $order->discount_description,
-                'note'                 => $order->description,
-                'is_confirmed'         => $order->is_confirmed,
+                'note' => $order->description,
+                'is_confirmed' => $order->is_confirmed,
             ];
 
             $client = new Client(['verify' => false]);
@@ -69,9 +69,9 @@ class SendWebhookWhenOrderPlaced
             $client->post($webhookURL, [
                 'headers' => [
                     'Content-Type' => 'application/json',
-                    'Accept'       => 'application/json',
+                    'Accept' => 'application/json',
                 ],
-                'json'    => $data,
+                'json' => $data,
             ]);
         } catch (Exception|GuzzleException $exception) {
             info($exception->getMessage());

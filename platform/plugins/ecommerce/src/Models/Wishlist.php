@@ -28,10 +28,7 @@ class Wishlist extends BaseModel
         'updated_at',
     ];
 
-    /**
-     * @return HasOne
-     */
-    public function product()
+    public function product(): HasOne
     {
         return $this->hasOne(Product::class, 'id', 'product_id')->withDefault();
     }

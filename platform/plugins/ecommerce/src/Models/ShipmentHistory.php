@@ -32,26 +32,17 @@ class ShipmentHistory extends BaseModel
         'updated_at',
     ];
 
-    /**
-     * @return BelongsTo
-     */
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'id')->withDefault();
     }
 
-    /**
-     * @return BelongsTo
-     */
-    public function shipment()
+    public function shipment(): BelongsTo
     {
         return $this->belongsTo(Shipment::class, 'shipment_id', 'id')->withDefault();
     }
 
-    /**
-     * @return BelongsTo
-     */
-    public function order()
+    public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class, 'order_id', 'id')->withDefault();
     }

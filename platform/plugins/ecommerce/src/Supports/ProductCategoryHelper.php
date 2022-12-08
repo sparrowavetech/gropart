@@ -40,7 +40,8 @@ class ProductCategoryHelper
 
             $this->allCategories = app(ProductCategoryInterface::class)->getProductCategories(
                 Arr::get($params, 'condition', []),
-                $with, Arr::get($params, 'withCount', []),
+                $with,
+                Arr::get($params, 'withCount', []),
                 $onlyParent
             );
         }
@@ -142,11 +143,10 @@ class ProductCategoryHelper
      */
     public function appendIndentTextToProductCategoryName(
         Collection $categories,
-        int        $depth = 0,
-        array      &$results = [],
-        string     $indent = '&nbsp;&nbsp;'
-    ): bool
-    {
+        int $depth = 0,
+        array &$results = [],
+        string $indent = '&nbsp;&nbsp;'
+    ): bool {
         foreach ($categories as $category) {
             $results[$category->id] = str_repeat($indent, $depth) . $category->name;
 
@@ -168,11 +168,10 @@ class ProductCategoryHelper
         }
 
         if ($this->treeCategories->count() == 0) {
-
             $this->treeCategories = $this->getAllProductCategories(
                 [
                     'condition' => ['status' => BaseStatusEnum::PUBLISHED],
-                    'with'      => ['activeChildren'],
+                    'with' => ['activeChildren'],
                 ],
                 true
             );

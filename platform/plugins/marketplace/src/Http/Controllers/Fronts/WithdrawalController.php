@@ -48,6 +48,7 @@ class WithdrawalController
 
     /**
      * @param FormBuilder $formBuilder
+     * @param BaseHttpResponse $response
      * @return BaseHttpResponse|string
      */
     public function create(FormBuilder $formBuilder, BaseHttpResponse $response)
@@ -71,6 +72,7 @@ class WithdrawalController
      * @param VendorWithdrawalRequest $request
      * @param BaseHttpResponse $response
      * @return BaseHttpResponse
+     * @throws Throwable
      */
     public function store(VendorWithdrawalRequest $request, BaseHttpResponse $response)
     {
@@ -78,16 +80,18 @@ class WithdrawalController
         $vendor = auth('customer')->user();
         $vendorInfo = $vendor->vendorInfo;
 
-        DB::beginTransaction();
         try {
+            DB::beginTransaction();
+
             $this->withdrawalRepository->create([
-                'fee'             => $fee,
-                'amount'          => $request->input('amount'),
-                'customer_id'     => $vendor->getKey(),
-                'currency'        => get_application_currency()->title,
-                'bank_info'       => $vendorInfo->bank_info,
-                'description'     => $request->input('description'),
+                'fee' => $fee,
+                'amount' => $request->input('amount'),
+                'customer_id' => $vendor->getKey(),
+                'currency' => get_application_currency()->title,
+                'bank_info' => $vendorInfo->bank_info,
+                'description' => $request->input('description'),
                 'current_balance' => $vendorInfo->balance,
+                'payment_channel' => $vendorInfo->payout_payment_method,
             ]);
 
             $vendorInfo->balance -= $request->input('amount') + $fee;
@@ -115,9 +119,9 @@ class WithdrawalController
     public function edit($id, FormBuilder $formBuilder)
     {
         $withdrawal = $this->withdrawalRepository->getFirstBy([
-            'id'          => $id,
+            'id' => $id,
             'customer_id' => auth('customer')->id(),
-            'status'      => WithdrawalStatusEnum::PENDING,
+            'status' => WithdrawalStatusEnum::PENDING,
         ]);
 
         if (!$withdrawal) {
@@ -138,9 +142,9 @@ class WithdrawalController
     public function update($id, VendorEditWithdrawalRequest $request, BaseHttpResponse $response)
     {
         $withdrawal = $this->withdrawalRepository->getFirstBy([
-            'id'          => $id,
+            'id' => $id,
             'customer_id' => auth('customer')->id(),
-            'status'      => WithdrawalStatusEnum::PENDING,
+            'status' => WithdrawalStatusEnum::PENDING,
         ]);
 
         if (!$withdrawal) {
@@ -154,7 +158,7 @@ class WithdrawalController
         }
 
         $withdrawal->fill([
-            'status'      => $status,
+            'status' => $status,
             'description' => $request->input('description'),
         ]);
 

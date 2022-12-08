@@ -18,12 +18,12 @@ if (!function_exists('get_product_attribute_groups_for_product_list')) {
              */
             $first = $item->first();
             $groups[] = [
-                'attribute_set_id'                     => $key,
-                'attribute_set_title'                  => $first->product_attribute_set_title,
-                'product_attribute_set_slug'           => $first->product_attribute_set_slug,
-                'product_attribute_set_order'          => $first->product_attribute_set_order,
+                'attribute_set_id' => $key,
+                'attribute_set_title' => $first->product_attribute_set_title,
+                'product_attribute_set_slug' => $first->product_attribute_set_slug,
+                'product_attribute_set_order' => $first->product_attribute_set_order,
                 'product_attribute_set_display_layout' => $first->product_attribute_set_display_layout,
-                'items'                                => $item,
+                'items' => $item,
             ];
         }
 

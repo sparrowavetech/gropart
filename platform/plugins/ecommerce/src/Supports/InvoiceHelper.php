@@ -17,10 +17,14 @@ class InvoiceHelper
 {
     /**
      * @param Order $order
-     * @return Invoice
+     * @return Invoice|\Illuminate\Database\Eloquent\Model
      */
-    public function store(Order $order): Invoice
+    public function store(Order $order)
     {
+        if ($order->invoice()->count()) {
+            return $order->invoice()->first();
+        }
+
         $address = $order->shippingAddress;
 
         if (\EcommerceHelper::isBillingAddressEnabled() && $order->billingAddress->id) {
@@ -28,45 +32,45 @@ class InvoiceHelper
         }
 
         $invoice = new Invoice([
-            'reference_id'         => $order->id,
-            'reference_type'       => Order::class,
-            'customer_name'        => $address->name ?: $order->user->name,
-            'company_name'         => '',
-            'company_logo'         => null,
-            'customer_email'       => $address->email ?: $order->user->email,
-            'customer_phone'       => $address->phone,
-            'customer_address'     => $address->address,
-            'customer_tax_id'      => null,
-            'payment_id'           => $order->payment->id,
-            'status'               => $order->payment->status,
-            'paid_at'              => $order->payment->status == PaymentStatusEnum::COMPLETED ? Carbon::now() : null,
-            'tax_amount'           => $order->tax_amount,
-            'shipping_amount'      => $order->shipping_amount,
-            'discount_amount'      => $order->discount_amount,
-            'sub_total'            => $order->sub_total,
-            'amount'               => $order->amount,
-            'shipping_method'      => $order->shipping_method,
-            'shipping_option'      => $order->shipping_option,
-            'coupon_code'          => $order->coupon_code,
+            'reference_id' => $order->id,
+            'reference_type' => Order::class,
+            'customer_name' => $address->name ?: $order->user->name,
+            'company_name' => '',
+            'company_logo' => null,
+            'customer_email' => $address->email ?: $order->user->email,
+            'customer_phone' => $address->phone,
+            'customer_address' => $address->address,
+            'customer_tax_id' => null,
+            'payment_id' => $order->payment->id,
+            'status' => $order->payment->status,
+            'paid_at' => $order->payment->status == PaymentStatusEnum::COMPLETED ? Carbon::now() : null,
+            'tax_amount' => $order->tax_amount,
+            'shipping_amount' => $order->shipping_amount,
+            'discount_amount' => $order->discount_amount,
+            'sub_total' => $order->sub_total,
+            'amount' => $order->amount,
+            'shipping_method' => $order->shipping_method,
+            'shipping_option' => $order->shipping_option,
+            'coupon_code' => $order->coupon_code,
             'discount_description' => $order->discount_description,
-            'description'          => $order->description,
+            'description' => $order->description,
         ]);
 
         $invoice->save();
 
         foreach ($order->products as $orderProduct) {
             $invoice->items()->create([
-                'reference_id'    => $orderProduct->product_id,
-                'reference_type'  => Product::class,
-                'name'            => $orderProduct->product_name,
-                'description'     => null,
-                'image'           => $orderProduct->product_image,
-                'qty'             => $orderProduct->qty,
-                'sub_total'       => $orderProduct->price,
-                'tax_amount'      => $orderProduct->tax_amount,
+                'reference_id' => $orderProduct->product_id,
+                'reference_type' => Product::class,
+                'name' => $orderProduct->product_name,
+                'description' => null,
+                'image' => $orderProduct->product_image,
+                'qty' => $orderProduct->qty,
+                'sub_total' => $orderProduct->price,
+                'tax_amount' => $orderProduct->tax_amount,
                 'discount_amount' => 0,
-                'amount'          => $orderProduct->price * $orderProduct->qty + $orderProduct->tax_amount,
-                'options'         => json_encode($orderProduct->options),
+                'amount' => $orderProduct->price * $orderProduct->qty + $orderProduct->tax_amount,
+                'options' => json_encode($orderProduct->options),
             ]);
         }
 

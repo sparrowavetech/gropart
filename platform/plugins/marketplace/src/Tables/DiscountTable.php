@@ -71,18 +71,15 @@ class DiscountTable extends TableAbstract
             })
             ->addColumn('operations', function ($item) {
                 return view(MarketplaceHelper::viewPath('dashboard.table.actions'), [
-                    'edit'   => '',
+                    'edit' => '',
                     'delete' => 'marketplace.vendor.discounts.destroy',
-                    'item'   => $item,
+                    'item' => $item,
                 ])->render();
             });
 
         return $this->toJson($data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function query()
     {
         $storeId = auth('customer')->user()->store->id;
@@ -97,16 +94,16 @@ class DiscountTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function columns()
+    public function columns(): array
     {
         return [
-            'id'         => [
+            'id' => [
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
                 'class' => 'text-start',
             ],
-            'detail'     => [
-                'name'  => 'code',
+            'detail' => [
+                'name' => 'code',
                 'title' => trans('plugins/ecommerce::discount.detail'),
                 'class' => 'text-start',
             ],
@@ -118,7 +115,7 @@ class DiscountTable extends TableAbstract
                 'title' => trans('plugins/ecommerce::discount.start_date'),
                 'class' => 'text-center',
             ],
-            'end_date'   => [
+            'end_date' => [
                 'title' => trans('plugins/ecommerce::discount.end_date'),
                 'class' => 'text-center',
             ],
@@ -128,7 +125,7 @@ class DiscountTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function buttons()
+    public function buttons(): array
     {
         return $this->addCreateButton(route('marketplace.vendor.discounts.create'));
     }

@@ -33,6 +33,7 @@ class DiscountSupport
                             return $promotion;
                         }
                     }
+
                     break;
 
                 case 'group-products':
@@ -41,6 +42,7 @@ class DiscountSupport
                             return $promotion;
                         }
                     }
+
                     break;
 
                 case 'customer':
@@ -49,6 +51,7 @@ class DiscountSupport
                             return $promotion;
                         }
                     }
+
                     break;
             }
         }

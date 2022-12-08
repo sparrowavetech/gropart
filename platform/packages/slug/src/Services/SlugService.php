@@ -61,7 +61,7 @@ class SlugService
         return $this->slugRepository
                 ->getModel()
                 ->where([
-                    'key'    => $slug,
+                    'key' => $slug,
                     'prefix' => $prefix,
                 ])
                 ->where('id', '!=', (int)$slugId)

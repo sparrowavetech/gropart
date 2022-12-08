@@ -9,7 +9,8 @@
                         <li class="nav-item">
                             <a href="#tab_information" class="nav-link active" data-bs-toggle="tab">{{ __('General Information') }}</a>
                         </li>
-                        @include('plugins/marketplace::customers.bank-info-tab')
+                        @include('plugins/marketplace::customers.tax-info-tab')
+                        @include('plugins/marketplace::customers.payout-info-tab')
                         {!! apply_filters('marketplace_vendor_settings_register_content_tabs', null, $store) !!}
                     </ul>
                     <div class="tab-content card-body border border-top-0">
@@ -143,7 +144,8 @@
                                 {!! Form::error('content', $errors) !!}
                             </div>
                         </div>
-                        @include('plugins/marketplace::customers.bank-info-content', ['model' => $store->customer])
+                        @include('plugins/marketplace::customers.tax-form', ['model' => $store->customer])
+                        @include('plugins/marketplace::customers.payout-form', ['model' => $store->customer])
                         {!! apply_filters('marketplace_vendor_settings_register_content_tab_inside', null, $store) !!}
                     </div>
 

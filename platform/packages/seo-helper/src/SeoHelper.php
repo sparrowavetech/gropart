@@ -61,7 +61,7 @@ class SeoHelper implements SeoHelperContract
      *
      * @return SeoHelper
      */
-    public function setSeoMeta(SeoMetaContract $seoMeta)
+    public function setSeoMeta(SeoMetaContract $seoMeta): self
     {
         $this->seoMeta = $seoMeta;
 
@@ -75,7 +75,7 @@ class SeoHelper implements SeoHelperContract
      *
      * @return SeoHelper
      */
-    public function setSeoOpenGraph(SeoOpenGraphContract $seoOpenGraph)
+    public function setSeoOpenGraph(SeoOpenGraphContract $seoOpenGraph): self
     {
         $this->seoOpenGraph = $seoOpenGraph;
 
@@ -89,7 +89,7 @@ class SeoHelper implements SeoHelperContract
      *
      * @return SeoHelper
      */
-    public function setSeoTwitter(SeoTwitterContract $seoTwitter)
+    public function setSeoTwitter(SeoTwitterContract $seoTwitter): self
     {
         $this->seoTwitter = $seoTwitter;
 
@@ -101,7 +101,7 @@ class SeoHelper implements SeoHelperContract
      *
      * @return SeoOpenGraphContract
      */
-    public function openGraph()
+    public function openGraph(): SeoOpenGraphContract
     {
         return $this->seoOpenGraph;
     }
@@ -115,7 +115,7 @@ class SeoHelper implements SeoHelperContract
      *
      * @return SeoHelper
      */
-    public function setTitle($title, $siteName = null, $separator = null)
+    public function setTitle($title, $siteName = null, $separator = null): self
     {
         $this->meta()->setTitle($title, $siteName, $separator);
         $this->openGraph()->setTitle($title);
@@ -132,7 +132,7 @@ class SeoHelper implements SeoHelperContract
      *
      * @return SeoMetaContract
      */
-    public function meta()
+    public function meta(): SeoMetaContract
     {
         return $this->seoMeta;
     }
@@ -142,7 +142,7 @@ class SeoHelper implements SeoHelperContract
      *
      * @return SeoTwitterContract
      */
-    public function twitter()
+    public function twitter(): SeoTwitterContract
     {
         return $this->seoTwitter;
     }
@@ -150,7 +150,7 @@ class SeoHelper implements SeoHelperContract
     /**
      * @return string
      */
-    public function getTitle()
+    public function getTitle(): ?string
     {
         return $this->meta()->getTitle();
     }
@@ -158,7 +158,7 @@ class SeoHelper implements SeoHelperContract
     /**
      * @return string
      */
-    public function getDescription()
+    public function getDescription(): ?string
     {
         return $this->meta()->getDescription();
     }
@@ -168,9 +168,9 @@ class SeoHelper implements SeoHelperContract
      *
      * @param string $description
      *
-     * @return SeoHelperContract
+     * @return SeoHelper
      */
-    public function setDescription($description)
+    public function setDescription($description): self
     {
         $description = BaseHelper::cleanShortcodes($description);
 
@@ -217,6 +217,7 @@ class SeoHelper implements SeoHelperContract
             try {
                 if (empty($request->input('seo_meta'))) {
                     MetaBox::deleteMetaData($object, 'seo_meta');
+
                     return false;
                 }
 
@@ -250,7 +251,7 @@ class SeoHelper implements SeoHelperContract
      * @param BaseModel $object
      * @return bool
      */
-    public function deleteMetaData($screen, $object)
+    public function deleteMetaData($screen, $object): bool
     {
         try {
             if (in_array(get_class($object), config('packages.seo-helper.general.supported', []))) {
@@ -267,7 +268,7 @@ class SeoHelper implements SeoHelperContract
      * @param string | array $model
      * @return $this
      */
-    public function registerModule($model)
+    public function registerModule($model): self
     {
         if (!is_array($model)) {
             $model = [$model];

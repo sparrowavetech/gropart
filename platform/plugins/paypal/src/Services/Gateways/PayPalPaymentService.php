@@ -25,11 +25,11 @@ class PayPalPaymentService extends PayPalPaymentAbstract
         $currency = strtoupper($currency);
 
         $queryParams = [
-            'type'          => PAYPAL_PAYMENT_METHOD_NAME,
-            'amount'        => $amount,
-            'currency'      => $currency,
-            'order_id'      => $data['order_id'],
-            'customer_id'   => Arr::get($data, 'customer_id'),
+            'type' => PAYPAL_PAYMENT_METHOD_NAME,
+            'amount' => $amount,
+            'currency' => $currency,
+            'order_id' => $data['order_id'],
+            'customer_id' => Arr::get($data, 'customer_id'),
             'customer_type' => Arr::get($data, 'customer_type'),
         ];
 
@@ -42,11 +42,11 @@ class PayPalPaymentService extends PayPalPaymentAbstract
             ->setCurrency($currency)
             ->setCustomer(Arr::get($data, 'address.email'))
             ->setItem([
-                'name'     => $data['description'],
+                'name' => $data['description'],
                 'quantity' => 1,
-                'price'    => $amount,
-                'sku'      => null,
-                'type'     => PAYPAL_PAYMENT_METHOD_NAME,
+                'price' => $amount,
+                'sku' => null,
+                'type' => PAYPAL_PAYMENT_METHOD_NAME,
             ])
             ->createPayment($data['description']);
     }
@@ -66,14 +66,14 @@ class PayPalPaymentService extends PayPalPaymentAbstract
         $orderIds = (array)Arr::get($data, 'order_id', []);
 
         do_action(PAYMENT_ACTION_PAYMENT_PROCESSED, [
-            'amount'          => $data['amount'],
-            'currency'        => $data['currency'],
-            'charge_id'       => $chargeId,
-            'order_id'        => $orderIds,
-            'customer_id'     => Arr::get($data, 'customer_id'),
-            'customer_type'   => Arr::get($data, 'customer_type'),
+            'amount' => $data['amount'],
+            'currency' => $data['currency'],
+            'charge_id' => $chargeId,
+            'order_id' => $orderIds,
+            'customer_id' => Arr::get($data, 'customer_id'),
+            'customer_type' => Arr::get($data, 'customer_type'),
             'payment_channel' => PAYPAL_PAYMENT_METHOD_NAME,
-            'status'          => $status,
+            'status' => $status,
         ]);
 
         session()->forget('paypal_payment_id');

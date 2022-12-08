@@ -46,8 +46,8 @@ class Payment extends BaseModel
      */
     protected $casts = [
         'payment_channel' => PaymentMethodEnum::class,
-        'status'          => PaymentStatusEnum::class,
-        'metadata'        => 'array',
+        'status' => PaymentStatusEnum::class,
+        'metadata' => 'array',
     ];
 
     /**
@@ -75,9 +75,9 @@ class Payment extends BaseModel
 
         return __('You have created a payment #:charge_id via :channel :time : :amount', [
             'charge_id' => $this->charge_id,
-            'channel'   => $this->payment_channel->label(),
-            'time'      => $time,
-            'amount'    => number_format($this->amount, 2) . $this->currency,
+            'channel' => $this->payment_channel->label(),
+            'time' => $time,
+            'amount' => number_format($this->amount, 2) . $this->currency,
         ]);
     }
 }

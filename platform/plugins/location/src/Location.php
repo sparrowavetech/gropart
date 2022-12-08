@@ -53,7 +53,7 @@ class Location
             'condition' => [
                 'status' => BaseStatusEnum::PUBLISHED,
             ],
-            'order_by'  => ['order' => 'ASC', 'name' => 'ASC'],
+            'order_by' => ['order' => 'ASC', 'name' => 'ASC'],
         ]);
 
         return $states->pluck('name', 'id')->all();
@@ -67,10 +67,10 @@ class Location
     {
         $cities = $this->cityRepository->advancedGet([
             'condition' => [
-                'status'   => BaseStatusEnum::PUBLISHED,
+                'status' => BaseStatusEnum::PUBLISHED,
                 'state_id' => $stateId,
             ],
-            'order_by'  => ['order' => 'ASC', 'name' => 'ASC'],
+            'order_by' => ['order' => 'ASC', 'name' => 'ASC'],
         ]);
 
         return $cities->pluck('name', 'id')->all();
@@ -83,7 +83,7 @@ class Location
     public function getCityById($cityId): ?City
     {
         return $this->cityRepository->getFirstBy([
-            'id'     => $cityId,
+            'id' => $cityId,
             'status' => BaseStatusEnum::PUBLISHED,
         ]);
     }
@@ -106,7 +106,7 @@ class Location
     public function getStateNameById($stateId): ?string
     {
         $state = $this->stateRepository->getFirstBy([
-            'id'     => $stateId,
+            'id' => $stateId,
             'status' => BaseStatusEnum::PUBLISHED,
         ]);
 
@@ -164,8 +164,8 @@ class Location
     {
         $keys = array_filter(array_merge([
             'country' => 'country_id',
-            'state'   => 'state_id',
-            'city'    => 'city_id',
+            'state' => 'state_id',
+            'city' => 'city_id',
         ], $keys));
 
         config([
@@ -186,7 +186,7 @@ class Location
             $info = $client->request('GET', 'https://api.github.com/repos/botble/locations/git/trees/master', [
                 'headers' => [
                     'Content-Type' => 'application/json',
-                    'Accept'       => 'application/json',
+                    'Accept' => 'application/json',
                 ],
             ]);
 
@@ -224,7 +224,7 @@ class Location
 
         if (!in_array($countryCode, $availableLocations)) {
             return [
-                'error'   => true,
+                'error' => true,
                 'message' => 'This country locations data is not available on ' . $repository,
             ];
         }
@@ -235,7 +235,7 @@ class Location
             ]);
         } catch (Exception|GuzzleException $exception) {
             return [
-                'error'   => true,
+                'error' => true,
                 'message' => $exception->getMessage(),
             ];
         }
@@ -248,7 +248,7 @@ class Location
                 $zip->close();
             } else {
                 return [
-                    'error'   => true,
+                    'error' => true,
                     'message' => 'Extract location files failed!',
                 ];
             }
@@ -290,8 +290,8 @@ class Location
 
             foreach ($item['cities'] as $cityName) {
                 $city = [
-                    'name'       => $cityName,
-                    'state_id'   => $state->id,
+                    'name' => $cityName,
+                    'state_id' => $state->id,
                     'country_id' => $country->id,
                 ];
 
@@ -302,7 +302,7 @@ class Location
         File::deleteDirectory(storage_path('app/locations-master'));
 
         return [
-            'error'   => false,
+            'error' => false,
             'message' => trans('plugins/location::bulk-import.imported_successfully'),
         ];
     }

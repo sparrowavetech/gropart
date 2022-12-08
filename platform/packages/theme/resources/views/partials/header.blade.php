@@ -12,4 +12,8 @@
 
 <script>
     window.siteUrl = "{{ route('public.index') }}";
+
+    if (!window.siteUrl.includes(window.location.protocol)) {
+        window.siteUrl = window.location.protocol + window.siteUrl;
+    }
 </script>

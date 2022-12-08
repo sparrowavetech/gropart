@@ -41,7 +41,7 @@ class InfoTable extends TableAbstract
     /**
      * @return Collection
      */
-    public function query()
+    public function query(): Collection
     {
         $composerArray = SystemManagement::getComposerArray();
         $packages = SystemManagement::getPackagesAndDependencies($composerArray['require']);
@@ -52,28 +52,20 @@ class InfoTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function columns()
+    public function columns(): array
     {
         return [
-            'name'         => [
-                'name'  => 'name',
+            'name' => [
+                'name' => 'name',
                 'title' => trans('core/base::system.package_name') . ' : ' . trans('core/base::system.version'),
                 'class' => 'text-start',
             ],
             'dependencies' => [
-                'name'  => 'dependencies',
+                'name' => 'dependencies',
                 'title' => trans('core/base::system.dependency_name') . ' : ' . trans('core/base::system.version'),
                 'class' => 'text-start',
             ],
         ];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function buttons()
-    {
-        return [];
     }
 
     /**
@@ -84,14 +76,6 @@ class InfoTable extends TableAbstract
         return [
             'stateSave' => true,
         ];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function actions()
-    {
-        return [];
     }
 
     /**

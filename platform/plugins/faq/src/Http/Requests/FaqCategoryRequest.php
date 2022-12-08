@@ -16,8 +16,8 @@ class FaqCategoryRequest extends Request
     public function rules()
     {
         return [
-            'name'   => 'required',
-            'order'  => 'required|integer|min:0|max:127',
+            'name' => 'required',
+            'order' => 'required|integer|min:0|max:127',
             'status' => Rule::in(BaseStatusEnum::values()),
         ];
     }

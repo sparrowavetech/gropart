@@ -3,7 +3,6 @@
 namespace Botble\Captcha\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Throwable;
 
 class HookServiceProvider extends ServiceProvider
 {

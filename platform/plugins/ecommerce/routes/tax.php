@@ -6,8 +6,8 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
             Route::resource('', 'TaxController')->parameters(['' => 'tax']);
 
             Route::delete('items/destroy', [
-                'as'         => 'deletes',
-                'uses'       => 'TaxController@deletes',
+                'as' => 'deletes',
+                'uses' => 'TaxController@deletes',
                 'permission' => 'tax.destroy',
             ]);
         });

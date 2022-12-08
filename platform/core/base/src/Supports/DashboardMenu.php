@@ -32,15 +32,15 @@ class DashboardMenu
         }
 
         $defaultOptions = [
-            'id'          => '',
-            'priority'    => 99,
-            'parent_id'   => null,
-            'name'        => '',
-            'icon'        => null,
-            'url'         => '',
-            'children'    => [],
+            'id' => '',
+            'priority' => 99,
+            'parent_id' => null,
+            'name' => '',
+            'icon' => null,
+            'url' => '',
+            'children' => [],
             'permissions' => [],
-            'active'      => false,
+            'active' => false,
         ];
 
         $options = array_merge($defaultOptions, $options);
@@ -51,6 +51,7 @@ class DashboardMenu
                 debug_backtrace()[1]['class'] . '@' . debug_backtrace()[1]['function']
                 :
                 null;
+
             throw new RuntimeException('Menu id not specified: ' . $calledClass);
         }
 
@@ -59,6 +60,7 @@ class DashboardMenu
                 debug_backtrace()[1]['class'] . '@' . debug_backtrace()[1]['function']
                 :
                 null;
+
             throw new RuntimeException('Menu id already exists: ' . $id . ' on class ' . $calledClass);
         }
 
@@ -102,12 +104,14 @@ class DashboardMenu
         foreach ($id as $item) {
             if (!$parentId) {
                 Arr::forget($this->links, $item);
+
                 break;
             }
 
             foreach ($this->links[$parentId]['children'] as $key => $child) {
                 if ($child['id'] === $item) {
                     Arr::forget($this->links[$parentId]['children'], $key);
+
                     break;
                 }
             }
@@ -133,7 +137,6 @@ class DashboardMenu
 
         return Arr::has($this->links, $id . '.name');
     }
-
 
     /**
      * Rearrange links
@@ -178,6 +181,7 @@ class DashboardMenu
         foreach ($links as $key => &$link) {
             if ($link['permissions'] && !Auth::user()->hasAnyPermission($link['permissions'])) {
                 Arr::forget($links, $key);
+
                 continue;
             }
 
@@ -194,6 +198,7 @@ class DashboardMenu
             foreach ($link['children'] as $subKey => $subMenu) {
                 if ($subMenu['permissions'] && !Auth::user()->hasAnyPermission($subMenu['permissions'])) {
                     Arr::forget($link['children'], $subKey);
+
                     continue;
                 }
 

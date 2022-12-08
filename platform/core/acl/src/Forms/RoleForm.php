@@ -33,30 +33,30 @@ class RoleForm extends FormAbstract
             ->setValidatorClass(RoleCreateRequest::class)
             ->withCustomFields()
             ->add('name', 'text', [
-                'label'      => trans('core/base::forms.name'),
+                'label' => trans('core/base::forms.name'),
                 'label_attr' => ['class' => 'control-label required'],
-                'attr'       => [
-                    'placeholder'  => trans('core/base::forms.name_placeholder'),
+                'attr' => [
+                    'placeholder' => trans('core/base::forms.name_placeholder'),
                     'data-counter' => 120,
                 ],
             ])
             ->add('description', 'textarea', [
-                'label'      => trans('core/base::forms.description'),
+                'label' => trans('core/base::forms.description'),
                 'label_attr' => ['class' => 'control-label required'],
-                'attr'       => [
-                    'rows'         => 4,
-                    'placeholder'  => trans('core/base::forms.description_placeholder'),
+                'attr' => [
+                    'rows' => 4,
+                    'placeholder' => trans('core/base::forms.description_placeholder'),
                     'data-counter' => 400,
                 ],
             ])
             ->add('is_default', 'onOff', [
-                'label'      => trans('core/base::forms.is_default'),
-                'label_attr'    => ['class' => 'control-label'],
+                'label' => trans('core/base::forms.is_default'),
+                'label_attr' => ['class' => 'control-label'],
                 'default_value' => false,
             ])
             ->addMetaBoxes([
                 'permissions' => [
-                    'title'   => trans('core/acl::permissions.permission_flags'),
+                    'title' => trans('core/acl::permissions.permission_flags'),
                     'content' => view('core/acl::roles.permissions', compact('active', 'flags', 'children'))->render(),
                 ],
             ])

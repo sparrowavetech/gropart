@@ -12,8 +12,8 @@ class HtmlField extends FormField
     protected function getDefaults()
     {
         return [
-            'html'       => '',
-            'wrapper'    => false,
+            'html' => '',
+            'wrapper' => false,
             'label_show' => false,
         ];
     }

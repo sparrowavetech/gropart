@@ -16,7 +16,7 @@ class MenuRequest extends Request
     public function rules()
     {
         return [
-            'name'   => 'required|min:3|max:120',
+            'name' => 'required|min:3|max:120',
             'status' => Rule::in(BaseStatusEnum::values()),
         ];
     }

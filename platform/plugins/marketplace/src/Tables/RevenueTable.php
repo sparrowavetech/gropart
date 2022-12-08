@@ -80,9 +80,6 @@ class RevenueTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function query()
     {
         $query = $this->repository->getModel()
@@ -107,31 +104,31 @@ class RevenueTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function columns()
+    public function columns(): array
     {
         return [
-            'id'              => [
+            'id' => [
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
                 'class' => 'text-start',
             ],
-            'order_id'        => [
+            'order_id' => [
                 'title' => trans('plugins/ecommerce::order.order'),
                 'class' => 'text-center',
             ],
-            'sub_amount'      => [
+            'sub_amount' => [
                 'title' => trans('plugins/ecommerce::order.sub_amount'),
                 'class' => 'text-center',
             ],
-            'fee'             => [
+            'fee' => [
                 'title' => trans('plugins/ecommerce::shipping.fee'),
                 'class' => 'text-center',
             ],
-            'amount'          => [
+            'amount' => [
                 'title' => trans('plugins/ecommerce::order.amount'),
                 'class' => 'text-center',
             ],
-            'currency'        => [
+            'currency' => [
                 'title' => trans('plugins/ecommerce::payment.currency'),
                 'class' => 'text-center',
             ],
@@ -139,7 +136,7 @@ class RevenueTable extends TableAbstract
                 'title' => trans('plugins/marketplace::marketplace.current_balance'),
                 'class' => 'text-center',
             ],
-            'created_at'      => [
+            'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
                 'class' => 'text-center',
             ],

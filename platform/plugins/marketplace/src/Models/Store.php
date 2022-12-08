@@ -71,34 +71,22 @@ class Store extends BaseModel
         });
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class)->withDefault();
     }
 
-    /**
-     * @return HasMany
-     */
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);
     }
 
-    /**
-     * @return HasMany
-     */
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class)->where('is_finished', 1);
     }
 
-    /**
-     * @return string
-     */
-    public function getLogoUrlAttribute()
+    public function getLogoUrlAttribute(): ?string
     {
         if ($this->logo) {
             return RvMedia::getImageUrl($this->logo, 'thumb');
@@ -111,18 +99,13 @@ class Store extends BaseModel
         }
     }
 
-    /**
-     * @return HasMany
-     */
-    public function reviews()
+    public function reviews(): HasMany
     {
-        return $this->hasMany(Product::class)
+        return $this
+            ->hasMany(Product::class)
             ->join('ec_reviews', 'ec_products.id', '=', 'ec_reviews.product_id');
     }
 
-    /**
-     * @return HasMany
-     */
     public function enquires(): HasMany
     {
         return $this->hasMany(Enquiry::class);

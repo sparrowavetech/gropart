@@ -50,8 +50,8 @@ class UnverifiedVendorController extends BaseController
     public function view($id)
     {
         $vendor = $this->customerRepository->getFirstBy([
-            'id'                 => $id,
-            'is_vendor'          => true,
+            'id' => $id,
+            'is_vendor' => true,
             'vendor_verified_at' => null,
         ]);
 
@@ -76,8 +76,8 @@ class UnverifiedVendorController extends BaseController
     {
         $vendor = $this->customerRepository
             ->getFirstBy([
-                'id'                 => $id,
-                'is_vendor'          => true,
+                'id' => $id,
+                'is_vendor' => true,
                 'vendor_verified_at' => null,
             ]);
 

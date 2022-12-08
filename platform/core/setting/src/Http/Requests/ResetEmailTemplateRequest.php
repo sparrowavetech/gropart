@@ -13,7 +13,7 @@ class ResetEmailTemplateRequest extends Request
     public function rules()
     {
         return [
-            'module'        => 'required|string|alpha_dash',
+            'module' => 'required|string|alpha_dash',
             'template_file' => 'required|string|alpha_dash',
         ];
     }

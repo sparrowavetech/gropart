@@ -12,11 +12,11 @@ class CollapseWhitespace extends PageSpeed
     {
         $replace = [
             "/\n([\S])/" => '$1',
-            "/\r/"       => '',
-            "/\n/"       => '',
-            "/\t/"       => '',
-            '/ +/'       => ' ',
-            '/> +</'     => '><',
+            "/\r/" => '',
+            "/\n/" => '',
+            "/\t/" => '',
+            '/ +/' => ' ',
+            '/> +</' => '><',
         ];
 
         return $this->replace($replace, $buffer);

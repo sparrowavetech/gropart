@@ -170,6 +170,7 @@ class UserController extends BaseController
                     ->setError()
                     ->setMessage(trans('core/acl::users.delete_user_logged_in'));
             }
+
             try {
                 $user = $this->userRepository->findOrFail($id);
                 if (!$request->user()->isSuperUser() && $user->isSuperUser()) {

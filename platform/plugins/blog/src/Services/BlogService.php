@@ -13,6 +13,7 @@ use Botble\Blog\Repositories\Interfaces\TagInterface;
 use Botble\SeoHelper\SeoOpenGraph;
 use Botble\Slug\Models\Slug;
 use Eloquent;
+use Html;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use RvMedia;
@@ -32,7 +33,7 @@ class BlogService
         }
 
         $condition = [
-            'id'     => $slug->reference_id,
+            'id' => $slug->reference_id,
             'status' => BaseStatusEnum::PUBLISHED,
         ];
 
@@ -72,7 +73,9 @@ class BlogService
                 if (function_exists('admin_bar') && Auth::check() && Auth::user()->hasPermission('posts.edit')) {
                     admin_bar()->registerLink(
                         trans('plugins/blog::posts.edit_this_post'),
-                        route('posts.edit', $post->id)
+                        route('posts.edit', $post->id),
+                        null,
+                        'posts.edit'
                     );
                 }
 
@@ -91,13 +94,17 @@ class BlogService
 
                 Theme::breadcrumb()->add($post->name, $post->url);
 
+                Theme::asset()->add('ckeditor-content-styles', 'vendor/core/core/base/libraries/ckeditor/content-styles.css');
+
+                $post->content = Html::tag('div', (string)$post->content, ['class' => 'ck-content'])->toHtml();
+
                 do_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, POST_MODULE_SCREEN_NAME, $post);
 
                 return [
-                    'view'         => 'post',
+                    'view' => 'post',
                     'default_view' => 'plugins/blog::themes.post',
-                    'data'         => compact('post'),
-                    'slug'         => $post->slug,
+                    'data' => compact('post'),
+                    'slug' => $post->slug,
                 ];
             case Category::class:
                 $category = app(CategoryInterface::class)
@@ -121,14 +128,16 @@ class BlogService
 
                 SeoHelper::setSeoOpenGraph($meta);
 
-                if (function_exists('admin_bar') && Auth::check() && Auth::user()->hasPermission('categories.edit')) {
+                if (function_exists('admin_bar')) {
                     admin_bar()->registerLink(
                         trans('plugins/blog::categories.edit_this_category'),
-                        route('categories.edit', $category->id)
+                        route('categories.edit', $category->id),
+                        null,
+                        'categories.edit'
                     );
                 }
 
-                $allRelatedCategoryIds = $category->getChildrenIds($category, [$category->id]);
+                $allRelatedCategoryIds = array_merge([$category->id], $category->activeChildren->pluck('id')->all());
 
                 $posts = app(PostInterface::class)
                     ->getByCategory($allRelatedCategoryIds, (int)theme_option('number_of_posts_in_a_category', 12));
@@ -147,10 +156,10 @@ class BlogService
                 do_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, CATEGORY_MODULE_SCREEN_NAME, $category);
 
                 return [
-                    'view'         => 'category',
+                    'view' => 'category',
                     'default_view' => 'plugins/blog::themes.category',
-                    'data'         => compact('category', 'posts'),
-                    'slug'         => $category->slug,
+                    'data' => compact('category', 'posts'),
+                    'slug' => $category->slug,
                 ];
             case Tag::class:
                 $tag = app(TagInterface::class)->getFirstBy($condition, ['*'], ['slugable']);
@@ -168,8 +177,8 @@ class BlogService
                 $meta->setTitle($tag->name);
                 $meta->setType('article');
 
-                if (function_exists('admin_bar') && Auth::check() && Auth::user()->hasPermission('tags.edit')) {
-                    admin_bar()->registerLink(trans('plugins/blog::tags.edit_this_tag'), route('tags.edit', $tag->id));
+                if (function_exists('admin_bar')) {
+                    admin_bar()->registerLink(trans('plugins/blog::tags.edit_this_tag'), route('tags.edit', $tag->id), null, 'tags.edit');
                 }
 
                 $posts = get_posts_by_tag($tag->id, (int)theme_option('number_of_posts_in_a_tag', 12));
@@ -181,10 +190,10 @@ class BlogService
                 do_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, TAG_MODULE_SCREEN_NAME, $tag);
 
                 return [
-                    'view'         => 'tag',
+                    'view' => 'tag',
                     'default_view' => 'plugins/blog::themes.tag',
-                    'data'         => compact('tag', 'posts'),
-                    'slug'         => $tag->slug,
+                    'data' => compact('tag', 'posts'),
+                    'slug' => $tag->slug,
                 ];
         }
 

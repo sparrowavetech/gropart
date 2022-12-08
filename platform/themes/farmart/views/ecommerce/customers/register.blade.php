@@ -68,7 +68,7 @@
                             <div class="form-check mb-3">
                                 <input type="hidden" name="agree_terms_and_policy" value="0">
                                 <input class="form-check-input" type="checkbox" name="agree_terms_and_policy" id="agree-terms-and-policy" value="1" @if (old('agree_terms_and_policy') == 1) checked @endif>
-                                <label for="agree-terms-and-policy">{{ __('I agree to terms & Policy.') }}</label>
+                                <label for="agree-terms-and-policy">{{ __('I agree to terms & Policy.') }}</label> <a target="_BLANK" href="/gropart-policy" style="color:var(--primary-color);text-decoration: underline"><strong>{{ __('Read policy') }}</strong></a>
                                 @if ($errors->has('agree_terms_and_policy'))
                                     <div class="mt-1">
                                         <span class="text-danger small">{{ $errors->first('agree_terms_and_policy') }}</span>

@@ -85,9 +85,6 @@ class WithdrawalTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function query()
     {
         $query = $this->repository->getModel()
@@ -108,10 +105,10 @@ class WithdrawalTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function columns()
+    public function columns(): array
     {
         return [
-            'id'          => [
+            'id' => [
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
             ],
@@ -119,19 +116,19 @@ class WithdrawalTable extends TableAbstract
                 'title' => trans('plugins/marketplace::withdrawal.vendor'),
                 'class' => 'text-start',
             ],
-            'amount'      => [
+            'amount' => [
                 'title' => trans('plugins/marketplace::withdrawal.amount'),
                 'class' => 'text-start',
             ],
-            'fee'         => [
+            'fee' => [
                 'title' => trans('plugins/ecommerce::shipping.fee'),
                 'class' => 'text-start',
             ],
-            'created_at'  => [
+            'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
                 'width' => '100px',
             ],
-            'status'      => [
+            'status' => [
                 'title' => trans('core/base::tables.status'),
                 'width' => '100px',
             ],
@@ -145,9 +142,9 @@ class WithdrawalTable extends TableAbstract
     {
         return [
             'status' => [
-                'title'    => trans('core/base::tables.status'),
-                'type'     => 'select',
-                'choices'  => WithdrawalStatusEnum::labels(),
+                'title' => trans('core/base::tables.status'),
+                'type' => 'select',
+                'choices' => WithdrawalStatusEnum::labels(),
                 'validate' => 'required|' . Rule::in(WithdrawalStatusEnum::values()),
             ],
         ];

@@ -31,20 +31,20 @@ class AddShippingRegionForm extends FormAbstract
             ->setupModel(new Shipping())
             ->setFormOptions([
                 'template' => 'core/base::forms.form-content-only',
-                'url'      => route('shipping_methods.region.create'),
+                'url' => route('shipping_methods.region.create'),
             ])
             ->setTitle(trans('plugins/ecommerce::shipping.add_shipping_region'))
             ->setValidatorClass(AddShippingRegionRequest::class)
             ->withCustomFields()
             ->add('region', 'customSelect', [
-                'label'      => trans('plugins/ecommerce::shipping.country'),
+                'label' => trans('plugins/ecommerce::shipping.country'),
                 'label_attr' => [
                     'class' => 'control-label required',
                 ],
-                'attr'       => [
+                'attr' => [
                     'class' => 'select-country-search',
                 ],
-                'choices'    => $countries,
+                'choices' => $countries,
             ]);
     }
 }

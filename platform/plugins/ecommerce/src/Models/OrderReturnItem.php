@@ -3,10 +3,14 @@
 namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Models\BaseModel;
+use Botble\Base\Traits\EnumCastable;
+use Botble\Ecommerce\Enums\OrderReturnReasonEnum;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OrderReturnItem extends BaseModel
 {
+    use EnumCastable;
+
     /**
      * @var string
      */
@@ -27,24 +31,22 @@ class OrderReturnItem extends BaseModel
     ];
 
     /**
-     * @return BelongsTo
+     * @var string[]
      */
+    protected $casts = [
+        'reason' => OrderReturnReasonEnum::class,
+    ];
+
     public function orderReturn(): BelongsTo
     {
         return $this->belongsTo(OrderReturn::class, 'order_return_id');
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function orderProduct(): BelongsTo
     {
         return $this->belongsTo(OrderProduct::class, 'order_product_id');
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');

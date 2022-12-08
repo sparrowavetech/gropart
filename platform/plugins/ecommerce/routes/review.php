@@ -6,8 +6,8 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
             Route::resource('', 'ReviewController')->parameters(['' => 'review'])->only(['index', 'destroy']);
 
             Route::delete('items/destroy', [
-                'as'         => 'deletes',
-                'uses'       => 'ReviewController@deletes',
+                'as' => 'deletes',
+                'uses' => 'ReviewController@deletes',
                 'permission' => 'reviews.destroy',
             ]);
         });
@@ -15,17 +15,17 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
 });
 
 Route::group([
-    'namespace'  => 'Botble\Ecommerce\Http\Controllers\Fronts',
+    'namespace' => 'Botble\Ecommerce\Http\Controllers\Fronts',
     'middleware' => ['web', 'core', 'customer'],
 ], function () {
     Route::group(apply_filters(BASE_FILTER_GROUP_PUBLIC_ROUTE, []), function () {
         Route::post('review/create', [
-            'as'   => 'public.reviews.create',
+            'as' => 'public.reviews.create',
             'uses' => 'ReviewController@store',
         ]);
 
         Route::get('review/delete/{id}', [
-            'as'   => 'public.reviews.destroy',
+            'as' => 'public.reviews.destroy',
             'uses' => 'ReviewController@destroy',
         ]);
     });

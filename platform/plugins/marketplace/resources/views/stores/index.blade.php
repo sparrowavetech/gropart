@@ -14,9 +14,9 @@
                                 <img src="{{ RvMedia::getImageUrl($store->logo, 'thumb', false, RvMedia::getDefaultImage()) }}" width="120" class="mb-2" style="border-radius: 50%" alt="avatar" />
                             </div>
                             <div class="text-center">
-                                     @if($store->is_verified)
-                                        <img class="verified-store" style="max-height: 25px;" src="{{ asset('/storage/stores/verified.png')}}"alt="Verified">
-                                     @endif
+                                @if($store->is_verified)
+                                    <img class="verified-store" style="max-height: 25px;" src="{{ asset('/storage/stores/verified.png')}}"alt="Verified">
+                                @endif
                                 <strong>
                                     <a href="{{ $store->url }}" target="_blank">{{ $store->name }} <i class="fas fa-external-link-alt"></i></a>
                                 </strong>

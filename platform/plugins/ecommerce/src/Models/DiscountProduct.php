@@ -20,10 +20,7 @@ class DiscountProduct extends BaseModel
         'product_id',
     ];
 
-    /**
-     * @return BelongsTo
-     */
-    public function products()
+    public function products(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id')->withDefault();
     }

@@ -19,7 +19,7 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
     {
         $data = $this->model
             ->where([
-                'status'      => BaseStatusEnum::PUBLISHED,
+                'status' => BaseStatusEnum::PUBLISHED,
                 'is_featured' => 1,
             ])
             ->limit($limit)
@@ -113,7 +113,7 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
     {
         $data = $this->model
             ->where([
-                'status'    => BaseStatusEnum::PUBLISHED,
+                'status' => BaseStatusEnum::PUBLISHED,
                 'author_id' => $authorId,
             ])
             ->with('slugable')

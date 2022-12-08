@@ -109,16 +109,16 @@ class HookServiceProvider extends ServiceProvider
                     Validator::make(
                         $request->input(),
                         [
-                            'shop_name'  => 'required|min:2',
+                            'shop_name' => 'required|min:2',
                             'shop_phone' => 'required|' . BaseHelper::getPhoneValidationRule(),
-                            'shop_url'   => 'required',
+                            'shop_url' => 'required',
                             'shop_category'   => 'required',
                         ],
                         [],
                         [
-                            'shop_name'  => __('Shop Name'),
+                            'shop_name' => __('Shop Name'),
                             'shop_phone' => __('Shop Phone'),
-                            'shop_url'   => __('Shop URL'),
+                            'shop_url' => __('Shop URL'),
                             'shop_category'   => __('Shop Type'),
                         ]
                     )->validate();
@@ -193,21 +193,22 @@ class HookServiceProvider extends ServiceProvider
                         $vendorInfo->balance -= $refundAmount;
 
                         $data = [
-                            'fee'             => 0,
-                            'currency'        => get_application_currency()->title,
+                            'fee' => 0,
+                            'currency' => get_application_currency()->title,
                             'current_balance' => $vendor->balance,
-                            'customer_id'     => $vendor->getKey(),
-                            'order_id'        => $order->id,
-                            'user_id'         => Auth::id(),
-                            'type'            => RevenueTypeEnum::SUBTRACT_AMOUNT,
-                            'description'     => trans('plugins/marketplace::order.refund.description', [
+                            'customer_id' => $vendor->getKey(),
+                            'order_id' => $order->id,
+                            'user_id' => Auth::id(),
+                            'type' => RevenueTypeEnum::SUBTRACT_AMOUNT,
+                            'description' => trans('plugins/marketplace::order.refund.description', [
                                 'order' => $order->code,
                             ]),
-                            'amount'          => $refundAmount,
-                            'sub_amount'      => $refundAmount,
+                            'amount' => $refundAmount,
+                            'sub_amount' => $refundAmount,
                         ];
 
                         DB::beginTransaction();
+
                         try {
                             $revenue->fill($data);
                             $revenue->save();
@@ -239,18 +240,18 @@ class HookServiceProvider extends ServiceProvider
     {
         theme_option()
             ->setSection([
-                'title'      => trans('plugins/marketplace::marketplace.theme_options.name'),
-                'desc'       => trans('plugins/marketplace::marketplace.theme_options.description'),
-                'id'         => 'opt-text-subsection-marketplace',
+                'title' => trans('plugins/marketplace::marketplace.theme_options.name'),
+                'desc' => trans('plugins/marketplace::marketplace.theme_options.description'),
+                'id' => 'opt-text-subsection-marketplace',
                 'subsection' => true,
-                'icon'       => 'fa fa-shopping-cart',
-                'fields'     => [
+                'icon' => 'fa fa-shopping-cart',
+                'fields' => [
                     [
-                        'id'         => 'logo_vendor_dashboard',
-                        'type'       => 'mediaImage',
-                        'label'      => trans('plugins/marketplace::marketplace.theme_options.logo_vendor_dashboard'),
+                        'id' => 'logo_vendor_dashboard',
+                        'type' => 'mediaImage',
+                        'label' => trans('plugins/marketplace::marketplace.theme_options.logo_vendor_dashboard'),
                         'attributes' => [
-                            'name'  => 'logo_vendor_dashboard',
+                            'name' => 'logo_vendor_dashboard',
                             'value' => null,
                         ],
                     ],
@@ -269,9 +270,9 @@ class HookServiceProvider extends ServiceProvider
             $stores = $this->app->make(StoreInterface::class)->pluck('name', 'id');
 
             $form->addAfter('status', 'store_id', 'customSelect', [
-                'label'      => trans('plugins/marketplace::store.forms.store'),
+                'label' => trans('plugins/marketplace::store.forms.store'),
                 'label_attr' => ['class' => 'control-label'],
-                'choices'    => [0 => trans('plugins/marketplace::store.forms.select_store')] + $stores,
+                'choices' => [0 => trans('plugins/marketplace::store.forms.select_store')] + $stores,
             ]);
         } elseif (get_class($data) == Customer::class) {
             if ($data && $data->is_vendor && $form->has('status')) {
@@ -279,7 +280,7 @@ class HookServiceProvider extends ServiceProvider
                 $statusOptions['help_block'] = [
                     'text' => trans('plugins/marketplace::marketplace.helpers.customer_status', [
                         'status' => CustomerStatusEnum::ACTIVATED()->label(),
-                        'store'  => BaseStatusEnum::DRAFT()->label(),
+                        'store' => BaseStatusEnum::DRAFT()->label(),
                     ]),
                 ];
 
@@ -287,8 +288,8 @@ class HookServiceProvider extends ServiceProvider
             }
 
             $form->addAfter('email', 'is_vendor', 'onOff', [
-                'label'         => trans('plugins/marketplace::store.forms.is_vendor'),
-                'label_attr'    => ['class' => 'control-label'],
+                'label' => trans('plugins/marketplace::store.forms.is_vendor'),
+                'label_attr' => ['class' => 'control-label'],
                 'default_value' => false,
             ]);
         }
@@ -320,13 +321,13 @@ class HookServiceProvider extends ServiceProvider
 
                 $customer->save();
             }
-        } elseif (in_array($type, [PRODUCT_MODULE_SCREEN_NAME]) && $request->has('store_id') && request()->segment(1) !== 'vendor') {
+        } elseif ($type == PRODUCT_MODULE_SCREEN_NAME && $request->has('store_id') && request()->segment(1) !== 'vendor') {
             $object->store_id = $request->input('store_id');
             $object->save();
         } elseif (in_array($type, [CUSTOMER_MODULE_SCREEN_NAME, (new Customer())->getTable()])
             && in_array(Route::currentRouteName(), ['customers.create', 'customers.create.store', 'customers.edit', 'customers.edit.update'])
         ) {
-            if ($type == CUSTOMER_MODULE_SCREEN_NAME && $request->has('is_vendor')) {
+            if ($request->has('is_vendor')) {
                 $object->is_vendor = $request->input('is_vendor');
             }
 
@@ -364,9 +365,9 @@ class HookServiceProvider extends ServiceProvider
                 if (!$store->slug) {
                     Slug::create([
                         'reference_type' => Store::class,
-                        'reference_id'   => $store->id,
-                        'key'            => Str::slug($store->name),
-                        'prefix'         => SlugHelper::getPrefix(Store::class),
+                        'reference_id' => $store->id,
+                        'key' => Str::slug($store->name),
+                        'prefix' => SlugHelper::getPrefix(Store::class),
                     ]);
                 }
             }
@@ -479,9 +480,9 @@ class HookServiceProvider extends ServiceProvider
      * @param string|Model $model
      * @return array
      */
-    public function addHeadingToEcommerceTable($headings, $model)
+    public function addHeadingToEcommerceTable(array $headings, $model): array
     {
-        if (!$model || !is_in_admin(true)) {
+        if (!$model || !is_in_admin(true) || Route::is('marketplace.vendors.index')) {
             return $headings;
         }
 
@@ -489,7 +490,7 @@ class HookServiceProvider extends ServiceProvider
             case Customer::class:
                 return array_merge($headings, [
                     'is_vendor' => [
-                        'name'  => 'is_vendor',
+                        'name' => 'is_vendor',
                         'title' => trans('plugins/marketplace::store.forms.is_vendor'),
                         'class' => 'text-center',
                         'width' => '100px',
@@ -501,9 +502,9 @@ class HookServiceProvider extends ServiceProvider
             case Discount::class:
                 return array_merge($headings, [
                     'store_id' => [
-                        'name'      => 'store_id',
-                        'title'     => trans('plugins/marketplace::store.forms.store'),
-                        'class'     => 'text-start no-sort',
+                        'name' => 'store_id',
+                        'title' => trans('plugins/marketplace::store.forms.store'),
+                        'class' => 'text-start no-sort',
                         'orderable' => false,
                     ],
                 ]);
@@ -545,7 +546,9 @@ class HookServiceProvider extends ServiceProvider
     public function addBankInfoTab($tabs, $data = null)
     {
         if (!empty($data) && get_class($data) == Store::class && $data->customer->is_vendor) {
-            return $tabs . view('plugins/marketplace::customers.bank-info-tab')->render();
+            return $tabs .
+                view('plugins/marketplace::customers.tax-info-tab')->render() .
+                view('plugins/marketplace::customers.payout-info-tab')->render();
         }
 
         return $tabs;
@@ -561,8 +564,9 @@ class HookServiceProvider extends ServiceProvider
         if (!empty($data) && get_class($data) == Store::class) {
             $customer = $data->customer;
             if ($customer->is_vendor) {
-                return $tabs . view('plugins/marketplace::customers.bank-info-content', ['model' => $customer])
-                        ->render();
+                return $tabs .
+                    view('plugins/marketplace::customers.tax-form', ['model' => $customer])->render() .
+                    view('plugins/marketplace::customers.payout-form', ['model' => $customer])->render();
             }
         }
 
@@ -652,12 +656,12 @@ class HookServiceProvider extends ServiceProvider
             MarketplaceHelper::getSetting('verify_vendor', 1)
         ) {
             $countUnverifiedVendors = app(CustomerInterface::class)->count([
-                'is_vendor'          => true,
+                'is_vendor' => true,
                 'vendor_verified_at' => null,
             ]);
 
             $data[] = [
-                'key'   => 'unverified-vendors',
+                'key' => 'unverified-vendors',
                 'value' => $countUnverifiedVendors,
             ];
         }
@@ -670,38 +674,38 @@ class HookServiceProvider extends ServiceProvider
             ]);
 
             $data[] = [
-                'key'   => 'pending-withdrawals',
+                'key' => 'pending-withdrawals',
                 'value' => $countPendingWithdrawals,
             ];
         }
 
         if (Auth::user()->hasAnyPermission(['marketplace.withdrawal.index', 'marketplace.unverified-vendor.index'])) {
             $data[] = [
-                'key'   => 'marketplace-notifications-count',
+                'key' => 'marketplace-notifications-count',
                 'value' => $countUnverifiedVendors + $countPendingWithdrawals,
             ];
         }
 
         if (Auth::user()->hasPermission('products.index')) {
             $countPendingProducts = app(ProductInterface::class)->count([
-                'status'          => BaseStatusEnum::PENDING,
+                'status' => BaseStatusEnum::PENDING,
                 'created_by_type' => Customer::class,
                 ['created_by_id', '!=', 0],
-                'approved_by'     => 0,
+                'approved_by' => 0,
             ]);
 
             $data[] = [
-                'key'   => 'pending-products',
+                'key' => 'pending-products',
                 'value' => $countPendingProducts,
             ];
 
             $pendingOrders = app(OrderInterface::class)->count([
-                'status'      => BaseStatusEnum::PENDING,
+                'status' => BaseStatusEnum::PENDING,
                 'is_finished' => 1,
             ]);
 
             $data[] = [
-                'key'   => 'ecommerce-count',
+                'key' => 'ecommerce-count',
                 'value' => $pendingOrders + $countPendingProducts,
             ];
         }

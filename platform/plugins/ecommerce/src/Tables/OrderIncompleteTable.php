@@ -44,8 +44,8 @@ class OrderIncompleteTable extends OrderTable
                     route('orders.view-incomplete-order', $item->id),
                     Html::tag('i', '', ['class' => 'fa fa-eye'])->toHtml(),
                     [
-                        'class'                  => 'btn btn-icon btn-sm btn-primary',
-                        'data-bs-toggle'         => 'tooltip',
+                        'class' => 'btn btn-icon btn-sm btn-primary',
+                        'data-bs-toggle' => 'tooltip',
                         'data-bs-original-title' => trans('core/base::tables.edit'),
                     ],
                     null,
@@ -115,16 +115,16 @@ class OrderIncompleteTable extends OrderTable
     public function columns()
     {
         return [
-            'id'         => [
+            'id' => [
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
                 'class' => 'text-start',
             ],
-            'user_id'    => [
+            'user_id' => [
                 'title' => trans('plugins/ecommerce::order.customer_label'),
                 'class' => 'text-start',
             ],
-            'amount'     => [
+            'amount' => [
                 'title' => trans('plugins/ecommerce::order.amount'),
                 'class' => 'text-center',
             ],

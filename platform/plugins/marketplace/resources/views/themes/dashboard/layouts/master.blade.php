@@ -10,12 +10,19 @@
         <link rel="shortcut icon" href="{{ RvMedia::getImageUrl(theme_option('favicon')) }}">
     @endif
 
-    <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ page_title()->getTitle(false) }}</title>
 
     @yield('header', view(MarketplaceHelper::viewPath('dashboard.layouts.header')))
+
+    <script>
+        $(function () {
+            window.vueApp.boot();
+        });
+
+        window.siteUrl = "{{ route('public.index') }}";
+    </script>
 
     <!-- Put translation key to translate in VueJS -->
     <script type="text/javascript">
@@ -38,7 +45,9 @@
 
     @include('core/base::layouts.partials.svg-icon')
 
-    @yield('body', view(MarketplaceHelper::viewPath('dashboard.layouts.body')))
+    <div id="app">
+        @yield('body', view(MarketplaceHelper::viewPath('dashboard.layouts.body')))
+    </div>
 
     @stack('pre-footer')
 

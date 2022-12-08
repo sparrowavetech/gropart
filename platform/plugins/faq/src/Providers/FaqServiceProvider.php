@@ -66,30 +66,30 @@ class FaqServiceProvider extends ServiceProvider
         Event::listen(RouteMatched::class, function () {
             dashboard_menu()
                 ->registerItem([
-                    'id'          => 'cms-plugins-faq',
-                    'priority'    => 5,
-                    'parent_id'   => null,
-                    'name'        => 'plugins/faq::faq.name',
-                    'icon'        => 'far fa-question-circle',
-                    'url'         => route('faq.index'),
+                    'id' => 'cms-plugins-faq',
+                    'priority' => 5,
+                    'parent_id' => null,
+                    'name' => 'plugins/faq::faq.name',
+                    'icon' => 'far fa-question-circle',
+                    'url' => route('faq.index'),
                     'permissions' => ['faq.index'],
                 ])
                 ->registerItem([
-                    'id'          => 'cms-plugins-faq-list',
-                    'priority'    => 0,
-                    'parent_id'   => 'cms-plugins-faq',
-                    'name'        => 'plugins/faq::faq.all',
-                    'icon'        => null,
-                    'url'         => route('faq.index'),
+                    'id' => 'cms-plugins-faq-list',
+                    'priority' => 0,
+                    'parent_id' => 'cms-plugins-faq',
+                    'name' => 'plugins/faq::faq.all',
+                    'icon' => null,
+                    'url' => route('faq.index'),
                     'permissions' => ['faq.index'],
                 ])
                 ->registerItem([
-                    'id'          => 'cms-packages-faq-category',
-                    'priority'    => 1,
-                    'parent_id'   => 'cms-plugins-faq',
-                    'name'        => 'plugins/faq::faq-category.name',
-                    'icon'        => null,
-                    'url'         => route('faq_category.index'),
+                    'id' => 'cms-packages-faq-category',
+                    'priority' => 1,
+                    'parent_id' => 'cms-plugins-faq',
+                    'name' => 'plugins/faq::faq-category.name',
+                    'icon' => null,
+                    'url' => route('faq_category.index'),
                     'permissions' => ['faq_category.index'],
                 ]);
         });

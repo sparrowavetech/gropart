@@ -16,12 +16,12 @@ class ListCategoryResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id'          => $this->id,
-            'name'        => $this->name,
-            'slug'        => $this->slug,
+            'id' => $this->id,
+            'name' => $this->name,
+            'slug' => $this->slug,
             'description' => $this->description,
-            'children'    => CategoryResource::collection($this->children),
-            'parent'      => new CategoryResource($this->parent),
+            'children' => CategoryResource::collection($this->children),
+            'parent' => new CategoryResource($this->parent),
         ];
     }
 }

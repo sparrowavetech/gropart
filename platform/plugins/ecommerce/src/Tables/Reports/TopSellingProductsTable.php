@@ -98,22 +98,22 @@ class TopSellingProductsTable extends TableAbstract
     public function columns()
     {
         return [
-            'id'   => [
-                'title'     => trans('plugins/ecommerce::order.product_id'),
-                'width'     => '80px',
+            'id' => [
+                'title' => trans('plugins/ecommerce::order.product_id'),
+                'width' => '80px',
                 'orderable' => false,
-                'class'     => 'no-sort text-center',
+                'class' => 'no-sort text-center',
             ],
             'name' => [
-                'title'     => trans('plugins/ecommerce::reports.product_name'),
+                'title' => trans('plugins/ecommerce::reports.product_name'),
                 'orderable' => false,
-                'class'     => 'text-start no-sort',
+                'class' => 'text-start no-sort',
             ],
-            'qty'  => [
-                'title'     => trans('plugins/ecommerce::reports.quantity'),
+            'qty' => [
+                'title' => trans('plugins/ecommerce::reports.quantity'),
                 'orderable' => false,
-                'class'     => 'text-center no-sort',
-                'width'     => '60px',
+                'class' => 'text-center no-sort',
+                'width' => '60px',
             ],
         ];
     }

@@ -2,7 +2,6 @@
 
 namespace Botble\Theme\Supports;
 
-use AdminBar;
 use BaseHelper;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Botble\Sitemap\Sitemap;
@@ -31,8 +30,6 @@ class SiteMapManager
         if (!BaseHelper::getHomepageId()) {
             $this->siteMap->add(route('public.index'), '2022-07-25 10:00', '1.0', 'daily');
         }
-
-        AdminBar::setIsDisplay(false);
     }
 
     /**

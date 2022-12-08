@@ -38,10 +38,7 @@ class PluginActivateAllCommand extends Command
         $this->pluginService = $pluginService;
     }
 
-    /**
-     * @return int
-     */
-    public function handle()
+    public function handle(): int
     {
         foreach (BaseHelper::scanFolder(plugin_path()) as $plugin) {
             $this->pluginService->activate($plugin);
@@ -49,6 +46,6 @@ class PluginActivateAllCommand extends Command
 
         $this->info('Activated successfully!');
 
-        return 0;
+        return self::SUCCESS;
     }
 }

@@ -40,6 +40,7 @@ class Helper
             try {
                 $object->increment('views');
                 session()->put($sessionName . '.' . $object->id, time());
+
                 return true;
             } catch (Exception $exception) {
                 return false;
@@ -61,11 +62,11 @@ class Helper
     public static function formatLog(array $input, string $line = '', string $function = '', string $class = ''): array
     {
         return array_merge($input, [
-            'user_id'   => Auth::check() ? Auth::id() : 'System',
-            'ip'        => Request::ip(),
-            'line'      => $line,
-            'function'  => $function,
-            'class'     => $class,
+            'user_id' => Auth::check() ? Auth::id() : 'System',
+            'ip' => Request::ip(),
+            'line' => $line,
+            'function' => $function,
+            'class' => $class,
             'userAgent' => Request::header('User-Agent'),
         ]);
     }

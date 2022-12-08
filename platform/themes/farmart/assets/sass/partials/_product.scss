@@ -1599,6 +1599,7 @@ html:not([dir="rtl"]) .noUi-horizontal .noUi-handle {
         margin-right: 5px;
         border: 1px solid #dee2e6;
         border-radius: 0.25rem !important;
+        line-height: 0;
 
         img {
             object-fit: cover;
@@ -2125,6 +2126,7 @@ html:not([dir="rtl"]) .noUi-horizontal .noUi-handle {
 
         .product-gallery__variants {
             max-width: 100%;
+
             .slick-slide {
                 max-width: 60px;
             }

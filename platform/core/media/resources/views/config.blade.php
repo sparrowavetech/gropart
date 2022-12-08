@@ -12,6 +12,6 @@
         ],
         'chunk'         => RvMedia::getConfig('chunk'),
         'random_hash'   => setting('media_random_hash') ?: null,
-        'default_image' => RvMedia::getDefaultImage(false),
+        'default_image' => RvMedia::getDefaultImage(),
     ]) !!}
 </script>

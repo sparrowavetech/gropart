@@ -31,6 +31,7 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
         while ($this->checkIfExistsName($name, $folder)) {
             $name = $baseName . '-' . $index++;
         }
+
         return $name;
     }
 
@@ -75,10 +76,10 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
     public function getFilesByFolderId($folderId, array $params = [], $withFolders = true, $folderParams = [])
     {
         $params = array_merge([
-            'order_by'         => [
+            'order_by' => [
                 'name' => 'ASC',
             ],
-            'select'           => [
+            'select' => [
                 'media_files.id as id',
                 'media_files.name as name',
                 'media_files.url as url',
@@ -92,23 +93,23 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
                 DB::raw('NULL as slug'),
                 DB::raw('NULL as parent_id'),
             ],
-            'condition'        => [],
-            'recent_items'     => null,
-            'paginate'         => [
-                'per_page'      => null,
+            'condition' => [],
+            'recent_items' => null,
+            'paginate' => [
+                'per_page' => null,
                 'current_paged' => 1,
             ],
             'selected_file_id' => null,
-            'is_popup'         => false,
-            'filter'           => 'everything',
-            'take'             => null,
-            'with'             => [],
+            'is_popup' => false,
+            'filter' => 'everything',
+            'take' => null,
+            'with' => [],
         ], $params);
 
         if ($withFolders) {
             $folderParams = array_merge([
                 'condition' => [],
-                'select'    => [
+                'select' => [
                     'media_folders.id as id',
                     'media_folders.name as name',
                     DB::raw('NULL as url'),
@@ -227,6 +228,7 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
                     }
                     $allMimes = array_unique(array_merge($allMimes, $value));
                 }
+
                 return $query->whereNotIn('media_files.mime_type', $allMimes);
             });
         }
@@ -283,10 +285,10 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
     public function getTrashed($folderId, array $params = [], $withFolders = true, $folderParams = [])
     {
         $params = array_merge([
-            'order_by'  => [
+            'order_by' => [
                 'name' => 'ASC',
             ],
-            'select'    => [
+            'select' => [
                 'media_files.id as id',
                 'media_files.name as name',
                 'media_files.url as url',
@@ -301,13 +303,13 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
                 DB::raw('NULL as parent_id'),
             ],
             'condition' => [],
-            'paginate'  => [
-                'per_page'      => null,
+            'paginate' => [
+                'per_page' => null,
                 'current_paged' => 1,
             ],
-            'filter'    => 'everything',
-            'take'      => null,
-            'with'      => [],
+            'filter' => 'everything',
+            'take' => null,
+            'with' => [],
         ], $params);
 
         $this->model = $this->model->onlyTrashed();
@@ -315,7 +317,7 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
         if ($withFolders) {
             $folderParams = array_merge([
                 'condition' => [],
-                'select'    => [
+                'select' => [
                     'media_folders.id as id',
                     'media_folders.name as name',
                     DB::raw('NULL as url'),
@@ -405,6 +407,7 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
              */
             $file->forceDelete();
         }
+
         return true;
     }
 }

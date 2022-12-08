@@ -76,11 +76,11 @@ class WithdrawalController extends BaseController
         $withdrawal = $this->withdrawalRepository->findOrFail($id);
 
         $data = [
-            'images'          => array_filter($request->input('images', [])),
-            'user_id'         => Auth::id(),
-            'description'     => $request->input('description'),
+            'images' => array_filter($request->input('images', [])),
+            'user_id' => Auth::id(),
+            'description' => $request->input('description'),
             'payment_channel' => $request->input('payment_channel'),
-            'transaction_id'  => $request->input('transaction_id'),
+            'transaction_id' => $request->input('transaction_id'),
         ];
 
         if ($withdrawal->canEditStatus()) {
@@ -93,7 +93,7 @@ class WithdrawalController extends BaseController
 
                 EmailHandler::setModule(MARKETPLACE_MODULE_SCREEN_NAME)
                     ->setVariableValues([
-                        'store_name'        => $store->name,
+                        'store_name' => $store->name,
                         'withdrawal_amount' => format_price($withdrawal->amount),
                     ])
                     ->sendUsingTemplate('withdrawal-approved', $store->email);

@@ -182,13 +182,13 @@ abstract class PayPalPaymentAbstract
             $amount = $data['price'] * $data['quantity'];
 
             $item = [
-                'name'        => $data['name'],
-                'sku'         => $data['sku'],
+                'name' => $data['name'],
+                'sku' => $data['sku'],
                 'unit_amount' => [
                     'currency_code' => $this->paymentCurrency,
-                    'value'         => $amount,
+                    'value' => $amount,
                 ],
-                'quantity'    => $data['quantity'],
+                'quantity' => $data['quantity'],
             ];
 
             if ($description = Arr::get($data, 'description')) {
@@ -198,7 +198,7 @@ abstract class PayPalPaymentAbstract
             if ($tax = Arr::get($data, 'tax')) {
                 $item['tax'] = [
                     'currency_code' => $this->paymentCurrency,
-                    'value'         => $tax,
+                    'value' => $tax,
                 ];
             }
 
@@ -289,25 +289,24 @@ abstract class PayPalPaymentAbstract
     protected function buildRequestBody()
     {
         return [
-            'intent'              => 'CAPTURE',
+            'intent' => 'CAPTURE',
             'application_context' => [
                 'return_url' => $this->returnUrl,
                 'cancel_url' => $this->cancelUrl ?: $this->returnUrl,
                 'brand_name' => theme_option('site_name'),
             ],
-            'purchase_units'      => [
+            'purchase_units' => [
                 0 => [
                     'description' => $this->transactionDescription,
-                    'custom_id'   => $this->customer,
-                    'amount'      => [
+                    'custom_id' => $this->customer,
+                    'amount' => [
                         'currency_code' => $this->paymentCurrency,
-                        'value'         => (string)$this->totalAmount,
+                        'value' => (string)$this->totalAmount,
                     ],
                 ],
             ],
         ];
     }
-
 
     /**
      * Create payment
@@ -340,11 +339,13 @@ abstract class PayPalPaymentAbstract
             }
         } catch (Exception $exception) {
             $this->setErrorMessageAndLogging($exception, 1);
+
             return false;
         }
 
         if ($checkoutUrl && $paymentId) {
             session(['paypal_payment_id' => $paymentId]);
+
             return $checkoutUrl;
         }
 
@@ -393,6 +394,7 @@ abstract class PayPalPaymentAbstract
             $response = $this->client->execute(new OrdersGetRequest($paymentId));
         } catch (Exception $exception) {
             $this->setErrorMessageAndLogging($exception, 1);
+
             return false;
         }
 
@@ -408,7 +410,7 @@ abstract class PayPalPaymentAbstract
 
         return [
             'amount' => [
-                'value'         => (string) $totalAmount,
+                'value' => (string) $totalAmount,
                 'currency_code' => $this->paymentCurrency,
             ],
         ];
@@ -435,26 +437,28 @@ abstract class PayPalPaymentAbstract
 
                 if ($response && $response->statusCode == 201 && $response->result->status == 'COMPLETED') {
                     return [
-                        'error'  => false,
+                        'error' => false,
                         'status' => $response->result->status,
-                        'data'   => (array) $response->result,
+                        'data' => (array) $response->result,
                     ];
                 }
 
                 return [
-                    'error'   => true,
-                    'status'  => $response->statusCode,
-                    'message' => trans('plugins/payment::payment.status_is_not_completed')
+                    'error' => true,
+                    'status' => $response->statusCode,
+                    'message' => trans('plugins/payment::payment.status_is_not_completed'),
                 ];
             }
+
             return [
-                'error'   => true,
+                'error' => true,
                 'message' => trans('plugins/payment::payment.cannot_found_capture_id'),
             ];
         } catch (Exception $exception) {
             $this->setErrorMessageAndLogging($exception, 1);
+
             return [
-                'error'   => true,
+                'error' => true,
                 'message' => $exception->getMessage(),
             ];
         }
@@ -472,6 +476,7 @@ abstract class PayPalPaymentAbstract
             return $this->makePayment($data);
         } catch (Exception $exception) {
             $this->setErrorMessageAndLogging($exception, 1);
+
             return false;
         }
     }
@@ -496,7 +501,7 @@ abstract class PayPalPaymentAbstract
             'VUV',
             'XAF',
             'XOF',
-            'XPF'
+            'XPF',
         ]);
     }
 

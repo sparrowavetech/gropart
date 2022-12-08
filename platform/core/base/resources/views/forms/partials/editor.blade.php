@@ -1,4 +1,4 @@
-@if (Arr::get($attributes, 'without-buttons', false) != true)
+@if (!Arr::get($attributes, 'without-buttons', false))
     <div class="d-flex mb-2">
         @php $result = Arr::get($attributes, 'id', $name); @endphp
         <div class="d-inline-block editor-action-item action-show-hide-editor">
@@ -12,13 +12,14 @@
                 <i class="far fa-image"></i> {{ trans('core/media::media.add') }}
             </a>
         </div>
-        @if (function_exists('shortcode') && Arr::get($attributes, 'with-short-code', false) == true)
+        @if (function_exists('shortcode') && Arr::get($attributes, 'with-short-code', false))
             <div class="d-inline-block editor-action-item list-shortcode-items">
                 <div class="dropdown">
                     <button class="btn btn-primary dropdown-toggle add_shortcode_btn_trigger" data-result="{{ $result }}" type="button" data-bs-toggle="dropdown"><i class="fa fa-code"></i> {{ trans('core/base::forms.short_code') }}
                     </button>
                     <ul class="dropdown-menu">
                         @foreach (shortcode()->getAll() as $key => $item)
+                            @continue(!isset($item['name']))
                             @if ($item['name'])
                                 <li>
                                     <a href="{{ route('short-codes.ajax-get-admin-config', $key) }}" data-has-admin-config="{{ Arr::has($item, 'admin_config') }}"

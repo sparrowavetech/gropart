@@ -3,7 +3,7 @@
 return [
 
     // List supported modules or plugins
-    'supported'              => [
+    'supported' => [
         'Botble\Page\Models\Page',
         'Botble\Menu\Models\Menu',
         'Botble\Menu\Models\MenuLocation',

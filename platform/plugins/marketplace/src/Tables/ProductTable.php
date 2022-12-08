@@ -93,18 +93,15 @@ class ProductTable extends TableAbstract
             })
             ->addColumn('operations', function ($item) {
                 return view(MarketplaceHelper::viewPath('dashboard.table.actions'), [
-                    'edit'   => 'marketplace.vendor.products.edit',
+                    'edit' => 'marketplace.vendor.products.edit',
                     'delete' => 'marketplace.vendor.products.destroy',
-                    'item'   => $item,
+                    'item' => $item,
                 ])->render();
             });
 
         return $this->toJson($data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function query()
     {
         $query = $this->repository->getModel()
@@ -134,36 +131,36 @@ class ProductTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function columns()
+    public function columns(): array
     {
         return [
-            'id'         => [
+            'id' => [
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
             ],
-            'image'      => [
-                'name'  => 'images',
+            'image' => [
+                'name' => 'images',
                 'title' => trans('plugins/ecommerce::products.image'),
                 'width' => '100px',
                 'class' => 'text-center',
             ],
-            'name'       => [
+            'name' => [
                 'title' => trans('core/base::tables.name'),
                 'class' => 'text-start',
             ],
-            'price'      => [
+            'price' => [
                 'title' => trans('plugins/ecommerce::products.price'),
                 'class' => 'text-start',
             ],
-            'quantity'   => [
+            'quantity' => [
                 'title' => trans('plugins/ecommerce::products.quantity'),
                 'class' => 'text-start',
             ],
-            'sku'        => [
+            'sku' => [
                 'title' => trans('plugins/ecommerce::products.sku'),
                 'class' => 'text-start',
             ],
-            'order'      => [
+            'order' => [
                 'title' => trans('core/base::tables.order'),
                 'width' => '50px',
                 'class' => 'text-center',
@@ -173,7 +170,7 @@ class ProductTable extends TableAbstract
                 'width' => '100px',
                 'class' => 'text-center',
             ],
-            'status'     => [
+            'status' => [
                 'title' => trans('core/base::tables.status'),
                 'width' => '100px',
                 'class' => 'text-center',
@@ -184,27 +181,27 @@ class ProductTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function buttons()
+    public function buttons(): array
     {
         if (EcommerceHelper::isEnabledSupportDigitalProducts()) {
             $buttons['create'] = [
-                'extend'  => 'collection',
-                'text'    => view('core/table::partials.create')->render(),
+                'extend' => 'collection',
+                'text' => view('core/table::partials.create')->render(),
                 'buttons' => [
                     [
                         'className' => 'action-item',
-                        'text'      => ProductTypeEnum::PHYSICAL()->toIcon() . ' ' . Html::tag('span', ProductTypeEnum::PHYSICAL()->label(), [
+                        'text' => ProductTypeEnum::PHYSICAL()->toIcon() . ' ' . Html::tag('span', ProductTypeEnum::PHYSICAL()->label(), [
                             'data-action' => 'physical-product',
-                            'data-href'   => route('marketplace.vendor.products.create'),
-                            'class'       => 'ms-1',
+                            'data-href' => route('marketplace.vendor.products.create'),
+                            'class' => 'ms-1',
                         ])->toHtml(),
                     ],
                     [
                         'className' => 'action-item',
-                        'text'      => ProductTypeEnum::DIGITAL()->toIcon() . ' ' . Html::tag('span', ProductTypeEnum::DIGITAL()->label(), [
+                        'text' => ProductTypeEnum::DIGITAL()->toIcon() . ' ' . Html::tag('span', ProductTypeEnum::DIGITAL()->label(), [
                             'data-action' => 'digital-product',
-                            'data-href'   => route('marketplace.vendor.products.create', ['product_type' => 'digital']),
-                            'class'       => 'ms-1',
+                            'data-href' => route('marketplace.vendor.products.create', ['product_type' => 'digital']),
+                            'class' => 'ms-1',
                         ])->toHtml(),
                     ],
                 ],
@@ -230,25 +227,25 @@ class ProductTable extends TableAbstract
     public function getBulkChanges(): array
     {
         return [
-            'name'       => [
-                'title'    => trans('core/base::tables.name'),
-                'type'     => 'text',
+            'name' => [
+                'title' => trans('core/base::tables.name'),
+                'type' => 'text',
                 'validate' => 'required|max:120',
             ],
-            'order'      => [
-                'title'    => trans('core/base::tables.order'),
-                'type'     => 'number',
+            'order' => [
+                'title' => trans('core/base::tables.order'),
+                'type' => 'number',
                 'validate' => 'required|min:0',
             ],
-            'status'     => [
-                'title'    => trans('core/base::tables.status'),
-                'type'     => 'select',
-                'choices'  => BaseStatusEnum::labels(),
+            'status' => [
+                'title' => trans('core/base::tables.status'),
+                'type' => 'select',
+                'choices' => BaseStatusEnum::labels(),
                 'validate' => 'required|in:' . implode(',', BaseStatusEnum::values()),
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type'  => 'date',
+                'type' => 'date',
             ],
         ];
     }

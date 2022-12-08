@@ -128,6 +128,7 @@ class BaseHelper
             return true;
         } catch (Exception $exception) {
             info($exception->getMessage());
+
             return false;
         }
     }
@@ -152,6 +153,7 @@ class BaseHelper
             if (File::isDirectory($path)) {
                 $data = array_diff(scandir($path), array_merge(['.', '..', '.DS_Store'], $ignoreFiles));
                 natsort($data);
+
                 return $data;
             }
 
@@ -458,5 +460,18 @@ class BaseHelper
         $shortcodeCompiler = shortcode()->getCompiler();
 
         return $shortcodeCompiler->strip($content, []);
+    }
+
+    public function stringify($content): ?string
+    {
+        if (is_string($content)) {
+            return $content;
+        }
+
+        if (is_array($content)) {
+            return json_encode($content);
+        }
+
+        return null;
     }
 }

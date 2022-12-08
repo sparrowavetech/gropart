@@ -8,8 +8,8 @@ Route::group(['namespace' => 'Botble\Page\Http\Controllers', 'middleware' => ['w
             Route::resource('', 'PageController')->parameters(['' => 'page']);
 
             Route::delete('items/destroy', [
-                'as'         => 'deletes',
-                'uses'       => 'PageController@deletes',
+                'as' => 'deletes',
+                'uses' => 'PageController@deletes',
                 'permission' => 'pages.destroy',
             ]);
         });

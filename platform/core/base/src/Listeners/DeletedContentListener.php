@@ -34,7 +34,7 @@ class DeletedContentListener
             do_action(BASE_ACTION_AFTER_DELETE_CONTENT, $event->screen, $event->request, $event->data);
 
             $this->metaBoxRepository->deleteBy([
-                'reference_id'   => $event->data->id,
+                'reference_id' => $event->data->id,
                 'reference_type' => get_class($event->data),
             ]);
         } catch (Exception $exception) {

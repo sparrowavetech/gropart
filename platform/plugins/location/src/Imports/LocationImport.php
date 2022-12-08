@@ -115,6 +115,7 @@ class LocationImport implements
             switch ($row['import_type']) {
                 case 'city':
                     $state = $this->getStateByName($stateName, $countryId);
+
                     return $this->storeCity($state);
                 case 'state':
                     return $this->storeState();
@@ -188,10 +189,10 @@ class LocationImport implements
         }
 
         $this->states->push(collect([
-            'keyword'       => $name,
+            'keyword' => $name,
             'is_create_new' => $isCreateNew,
-            'model'         => $state,
-            'country'       => $this->request->input('country_temp'),
+            'model' => $state,
+            'country' => $this->request->input('country_temp'),
         ]));
 
         return $state;
@@ -226,7 +227,7 @@ class LocationImport implements
                 CityTranslation::insertOrIgnore([
                     'cities_id' => $city->id,
                     'lang_code' => $language->lang_code,
-                    'name'      => Arr::get($row, 'name_' . $language->lang_code) ?: Arr::get($row, 'name'),
+                    'name' => Arr::get($row, 'name_' . $language->lang_code) ?: Arr::get($row, 'name'),
                 ]);
             }
         }
@@ -261,9 +262,9 @@ class LocationImport implements
                 }
 
                 StateTranslation::insertOrIgnore([
-                    'states_id'    => $state->id,
-                    'lang_code'    => $language->lang_code,
-                    'name'         => Arr::get($row, 'name_' . $language->lang_code) ?: Arr::get($row, 'name'),
+                    'states_id' => $state->id,
+                    'lang_code' => $language->lang_code,
+                    'name' => Arr::get($row, 'name_' . $language->lang_code) ?: Arr::get($row, 'name'),
                     'abbreviation' => Arr::get($row, 'abbreviation_' . $language->lang_code) ?: Arr::get(
                         $row,
                         'abbreviation'
@@ -273,17 +274,17 @@ class LocationImport implements
         }
 
         $this->onSuccess(collect([
-            'name'        => $state->name,
-            'country'     => $row['country_temp'],
+            'name' => $state->name,
+            'country' => $row['country_temp'],
             'import_type' => 'state',
-            'model'       => $state,
+            'model' => $state,
         ]));
 
         $this->states->push(collect([
-            'keyword'       => $state->name,
+            'keyword' => $state->name,
             'is_create_new' => false,
-            'model'         => $state,
-            'country'       => $row['country_temp'],
+            'model' => $state,
+            'country' => $row['country_temp'],
         ]));
 
         return $state;
@@ -314,9 +315,9 @@ class LocationImport implements
 
                 CountryTranslation::insertOrIgnore([
                     'countries_id' => $country->id,
-                    'lang_code'    => $language->lang_code,
-                    'name'         => Arr::get($row, 'name_' . $language->lang_code) ?: Arr::get($row, 'name'),
-                    'nationality'  => Arr::get($row, 'nationality_' . $language->lang_code) ?: Arr::get(
+                    'lang_code' => $language->lang_code,
+                    'name' => Arr::get($row, 'name_' . $language->lang_code) ?: Arr::get($row, 'name'),
+                    'nationality' => Arr::get($row, 'nationality_' . $language->lang_code) ?: Arr::get(
                         $row,
                         'nationality'
                     ),
@@ -325,15 +326,15 @@ class LocationImport implements
         }
 
         $this->countries->push([
-            'keyword'    => $country->name,
+            'keyword' => $country->name,
             'country_id' => $country->id,
         ]);
 
         $this->onSuccess(collect([
-            'name'        => $country->name,
-            'country'     => $row['country_temp'],
+            'name' => $country->name,
+            'country' => $row['country_temp'],
             'import_type' => 'country',
-            'model'       => $country,
+            'model' => $country,
         ]));
 
         return $country;
@@ -439,9 +440,9 @@ class LocationImport implements
 
             if (!$country) {
                 $country = $this->countryRepository->create([
-                    'name'        => $value,
+                    'name' => $value,
                     'nationality' => $this->getNationalityFromName($value),
-                    'status'      => BaseStatusEnum::PUBLISHED,
+                    'status' => BaseStatusEnum::PUBLISHED,
                 ]);
                 $isCreateNew = true;
             }
@@ -449,8 +450,8 @@ class LocationImport implements
             $countryId = $country->id;
 
             $this->countries->push([
-                'keyword'       => $value,
-                'country_id'    => $countryId,
+                'keyword' => $value,
+                'country_id' => $countryId,
                 'is_create_new' => $isCreateNew,
             ]);
         }

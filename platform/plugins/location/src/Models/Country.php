@@ -37,9 +37,6 @@ class Country extends BaseModel
         'status' => BaseStatusEnum::class,
     ];
 
-    /**
-     * @return HasMany
-     */
     public function states(): HasMany
     {
         return $this->hasMany(State::class);

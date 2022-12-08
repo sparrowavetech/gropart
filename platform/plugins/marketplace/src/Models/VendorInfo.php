@@ -26,16 +26,19 @@ class VendorInfo extends BaseModel
         'signature',
         'total_revenue',
         'bank_info',
+        'tax_info',
+        'payout_payment_method',
     ];
 
     /**
      * @var array
      */
     protected $casts = [
-        'balance'       => 'decimal:2',
-        'total_fee'     => 'decimal:2',
+        'balance' => 'decimal:2',
+        'total_fee' => 'decimal:2',
         'total_revenue' => 'decimal:2',
-        'bank_info'     => 'array',
+        'bank_info' => 'array',
+        'tax_info' => 'array',
     ];
 
     /**
@@ -75,9 +78,6 @@ class VendorInfo extends BaseModel
         });
     }
 
-    /**
-     * @return bool
-     */
     public function isCheckSignature(): bool
     {
         return MarketplaceHelper::getSetting(
@@ -86,9 +86,6 @@ class VendorInfo extends BaseModel
         );
     }
 
-    /**
-     * @return string
-     */
     public function checkSignature(): string
     {
         return Hash::check($this->getSignatureKey(), $this->signature);

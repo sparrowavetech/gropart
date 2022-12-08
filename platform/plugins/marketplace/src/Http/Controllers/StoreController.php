@@ -44,7 +44,7 @@ class StoreController extends BaseController
 
     /**
      * @param StoreTable $table
-     * @return Factory|View
+     * @return Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\JsonResponse|View
      * @throws Throwable
      */
     public function index(StoreTable $table)
@@ -116,7 +116,9 @@ class StoreController extends BaseController
         $customer = $store->customer;
         if ($customer && $customer->id) {
             $vendorInfo = $customer->vendorInfo;
-            $vendorInfo->bank_info = $request->input('bank_info');
+            $vendorInfo->payout_payment_method = $request->input('payout_payment_method');
+            $vendorInfo->bank_info = $request->input('bank_info', []);
+            $vendorInfo->tax_info = $request->input('tax_info', []);
             $vendorInfo->save();
         }
 

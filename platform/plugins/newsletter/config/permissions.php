@@ -6,8 +6,8 @@ return [
         'flag' => 'newsletter.index',
     ],
     [
-        'name'        => 'Delete',
-        'flag'        => 'newsletter.destroy',
+        'name' => 'Delete',
+        'flag' => 'newsletter.destroy',
         'parent_flag' => 'newsletter.index',
     ],
 ];

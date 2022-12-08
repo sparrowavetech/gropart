@@ -30,33 +30,21 @@ class ProductVariation extends BaseModel
      */
     public $timestamps = false;
 
-    /**
-     * @return HasMany
-     */
     public function variationItems(): HasMany
     {
         return $this->hasMany(ProductVariationItem::class, 'variation_id');
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id')->withDefault();
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function configurableProduct(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'configurable_product_id')->withDefault();
     }
 
-    /**
-     * @return BelongsToMany
-     */
     public function productAttributes(): BelongsToMany
     {
         return $this->belongsToMany(

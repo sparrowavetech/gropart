@@ -53,11 +53,13 @@ class ThemeAssetsPublishCommand extends Command
     {
         if ($this->option('name') && !preg_match('/^[a-z0-9\-]+$/i', $this->option('name'))) {
             $this->error('Only alphabetic characters are allowed.');
+
             return 1;
         }
 
         if ($this->option('name') && !File::isDirectory($this->getPath())) {
             $this->error('Theme "' . $this->getTheme() . '" is not exists.');
+
             return 1;
         }
 
@@ -65,6 +67,7 @@ class ThemeAssetsPublishCommand extends Command
 
         if ($result['error']) {
             $this->error($result['message']);
+
             return 1;
         }
 

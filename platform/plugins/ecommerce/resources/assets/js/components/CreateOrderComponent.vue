@@ -63,7 +63,7 @@
                                        @keyup="handleSearchProduct($event.target.value)">
                             </div>
                             <div class="panel panel-default"
-                                 v-bind:class="{ active: list_products, hidden : hidden_product_search_panel }">
+                                 :class="{ active: list_products, hidden : hidden_product_search_panel }">
                                 <div class="panel-body">
                                     <div class="box-search-advance-head" v-b-modal.add-product-item>
                                         <img width="30"
@@ -76,7 +76,7 @@
                                         </div>
                                         <ul class="clearfix" v-show="!loading">
                                             <li v-for="product_item in list_products.data"
-                                                v-bind:class="{ 'item-selectable' : !product_item.variations.length, 'item-not-selectable' : product_item.variations.length }"
+                                                :class="{ 'item-selectable' : !product_item.variations.length, 'item-not-selectable' : product_item.variations.length }"
                                                 v-on="!product_item.variations.length ? { click : () => selectProductVariant(product_item) } : {}">
                                                 <div class="wrap-img inline_block vertical-align-t float-start">
                                                     <img class="thumb-image"
@@ -122,7 +122,7 @@
                                     <div class="btn-group float-end">
                                         <button type="button"
                                                 @click="loadListProductsAndVariations((list_products.prev_page_url ? list_products.current_page - 1 : list_products.current_page), true)"
-                                                v-bind:class="{ 'btn btn-secondary': list_products.current_page !== 1, 'btn btn-secondary disable': list_products.current_page === 1}"
+                                                :class="{ 'btn btn-secondary': list_products.current_page !== 1, 'btn btn-secondary disable': list_products.current_page === 1}"
                                                 :disabled="list_products.current_page === 1">
                                             <svg role="img"
                                                  class="svg-next-icon svg-next-icon-size-16 svg-next-icon-rotate-180">
@@ -132,7 +132,7 @@
                                         </button>
                                         <button type="button"
                                                 @click="loadListProductsAndVariations((list_products.next_page_url ? list_products.current_page + 1 : list_products.current_page), true)"
-                                                v-bind:class="{ 'btn btn-secondary': list_products.next_page_url, 'btn btn-secondary disable': !list_products.next_page_url }"
+                                                :class="{ 'btn btn-secondary': list_products.next_page_url, 'btn btn-secondary disable': !list_products.next_page_url }"
                                                 :disabled="!list_products.next_page_url">
                                             <svg role="img" class="svg-next-icon svg-next-icon-size-16">
                                                 <use xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -240,7 +240,7 @@
                                            :placeholder="__('order.search_or_create_new_customer')">
                                 </div>
                                 <div class="panel panel-default"
-                                     v-bind:class="{ active: customers, hidden : hidden_customer_search_panel }">
+                                     :class="{ active: customers, hidden : hidden_customer_search_panel }">
                                     <div class="panel-body">
                                         <div class="box-search-advance-head" v-b-modal.add-customer>
                                             <div class="flexbox-grid-default flexbox-align-items-center">
@@ -289,7 +289,7 @@
                                         <div class="btn-group float-end">
                                             <button type="button"
                                                     @click="loadListCustomersForSearch((customers.prev_page_url ? customers.current_page - 1 : customers.current_page), true)"
-                                                    v-bind:class="{ 'btn btn-secondary': customers.current_page !== 1, 'btn btn-secondary disable': customers.current_page === 1}"
+                                                    :class="{ 'btn btn-secondary': customers.current_page !== 1, 'btn btn-secondary disable': customers.current_page === 1}"
                                                     :disabled="customers.current_page === 1">
                                                 <svg role="img"
                                                      class="svg-next-icon svg-next-icon-size-16 svg-next-icon-rotate-180">
@@ -299,7 +299,7 @@
                                             </button>
                                             <button type="button"
                                                     @click="loadListCustomersForSearch((customers.next_page_url ? customers.current_page + 1 : customers.current_page), true)"
-                                                    v-bind:class="{ 'btn btn-secondary': customers.next_page_url, 'btn btn-secondary disable': !customers.next_page_url }"
+                                                    :class="{ 'btn btn-secondary': customers.next_page_url, 'btn btn-secondary disable': !customers.next_page_url }"
                                                     :disabled="!customers.next_page_url">
                                                 <svg role="img" class="svg-next-icon svg-next-icon-size-16">
                                                     <use xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -560,13 +560,13 @@
                             <div class="flexbox-auto-left">
                                 <div class="flexbox-input-group">
                                     <button value="amount" class="item-group btn btn-secondary btn-active"
-                                            v-bind:class="{ active : discount_type === 'amount' }"
+                                            :class="{ active : discount_type === 'amount' }"
                                             @click="changeDiscountType($event)">
                                         {{ currency ? currency : '$' }}
                                     </button>&nbsp;
                                     <button value="percentage"
                                             class="item-group border-radius-right-none btn btn-secondary btn-active"
-                                            v-bind:class="{ active : discount_type === 'percentage' }"
+                                            :class="{ active : discount_type === 'percentage' }"
                                             @click="changeDiscountType($event)">
                                         %
                                     </button>&nbsp;
@@ -585,7 +585,7 @@
                 <div class="next-form-grid">
                     <div class="next-form-grid-cell">
                         <label class="text-title-field">{{ __('order.or_coupon_code') }}</label>
-                        <div class="next-input--stylized" v-bind:class="{ 'field-has-error' : has_invalid_coupon }">
+                        <div class="next-input--stylized" :class="{ 'field-has-error' : has_invalid_coupon }">
                             <input class="next-input next-input--invisible" v-model="coupon_code">
                         </div>
                     </div>
@@ -1100,6 +1100,10 @@
                 }
             },
             loadStates: function ($event) {
+                if (!this.use_location_data) {
+                    return false;
+                }
+
                 let context = this;
                 axios
                     .get(route('ajax.states-by-country', {country_id: $event.target.value}))
@@ -1111,6 +1115,10 @@
                     });
             },
             loadCities: function ($event) {
+                if (!this.use_location_data) {
+                    return false;
+                }
+
                 let context = this;
                 axios
                     .get(route('ajax.cities-by-state', {state_id: $event.target.value}))

@@ -1,0 +1,158 @@
+* Email: contact@botble.com
+* Website: botble.com
+* Support center: https://botble.ticksy.com
+* Online documentation: https://docs.botble.com/farmart/master
+                                       https://docs.botble.com/cms/master
+		         https://github.com/botble/martfury-docs
+* Usage documentation: https://www.evernote.com/l/AUeUlVmSTNxDeaEe0VjQbTwB7yVuokc5cOE
+
+(Manual update):
+Step 1: Backup Custom CSS and Custom JS from existing Site
+Step 2: Override folder app, database, config, platform, bootstrap, vendor, composer.json,
+            public/themes, public/vendor, public/index.php, and composer.lock from the latest version.
+Step 3: Override Changed files from changes folder
+Step 4: Go to Admin -> Platform Administration -> Cache management then clear all caches.
+Step 5: Go to Admin -> Plugins: deactivate plugin Ecommerce & Marketplace then activate them again.
+Step 6: Go to Admin -> Translations -> Other translations then click on Import group to update translations.
+
+/*Deepak Works updates*/
+platform/themes/farmart/assets/sass/marketplace.scss
+platform/themes/farmart/public/css/marketplace.css
+public/themes/gropart/css/marketplace.css
+
+platform/themes/farmart/partials/header.blade.php
+platform/themes/farmart/partials/footer.blade.php
+platform/themes/farmart/partials/language-switcher-full.blade.php
+platform/themes/farmart/partials/ecommerce/product-loop-buttons.blade.php
+platform/themes/farmart/partials/shortcodes/ads/theme-ads.blade.php (for full ad view)
+platform/themes/farmart/partials/shortcodes/ecommerce/flash-sale.blade.php
+
+platform/themes/farmart/widgets/site-features/templates/frontend.blade.php
+platform/themes/farmart/widgets/site-info/templates/frontend.blade.php (footer margins)
+platform/themes/farmart/widgets/custom-menu/templates/frontend.blade.php (footer margins)
+
+platform/themes/farmart/views/ecommerce/customers/register.blade.php
+platform/themes/farmart/views/ecommerce/includes/product-items.blade.php
+platform/themes/farmart/views/ecommerce/product.blade.php
+platform/themes/farmart/views/ecommerce/products.blade.php
+platform/themes/farmart/views/ecommerce/order-tracking.blade.php
+platform/themes/farmart/functions/shortcodes.php
+
+platform/plugins/ads/src/Supports/AdsManager.php
+platform/plugins/ecommerce/resources/views/orders/checkout/product.blade.php (Design update)
+platform/plugins/ecommerce/resources/views/themes/discounts/partials/apply-coupon.blade.php (Design update)
+platform/plugins/marketplace/resources/views/orders/checkout/products.blade.php (Design update)
+
+
+/*Vikram Works updates*/
+vendor/autoload.php
+app/Providers/AppServiceProvider.php
+
+platform/plugins/ecommerce/database/migrations/2022_11_18_182222_enquiry.php
+platform/plugins/ecommerce/database/migrations/2022_11_12_001725_add_is_enquiry_to_ec_products.php
+platform/plugins/ecommerce/database/migrations/2022_11_12_000731_create_ec_product_frequently_bought_together.php
+platform/plugins/ecommerce/database/migrations/2022_11_20_140445_add_column_to_enquiry_table.php
+platform/plugins/ecommerce/database/migrations/2022_12_03_215933_add_column_to_ec_product_enquiry_table.php
+platform/plugins/ecommerce/src/Enums/EnquiryStatusEnum.php
+platform/plugins/ecommerce/src/Forms/ProductForm.php
+platform/plugins/ecommerce/src/Http/Controllers/EnquiryController.php
+platform/plugins/ecommerce/src/Http/Controllers/Fronts/PublicProductController.php
+platform/plugins/ecommerce/src/Http/Controllers/Fronts/PublicCartController.php
+platform/plugins/ecommerce/src/Http/Requests/EnquiryRequest.php
+platform/plugins/ecommerce/src/Providers/EcommerceServiceProvider.php
+platform/plugins/ecommerce/src/Providers/HookServiceProvider.php
+platform/plugins/ecommerce/src/Repositories/Interfaces/EnquiryInterface.php
+platform/plugins/ecommerce/src/Repositories/Eloquent/EnquiryRepository.php
+platform/plugins/ecommerce/src/Repositories/Caches/EnquiryCacheDecorator.php
+platform/plugins/ecommerce/src/Services/Products/StoreProductService.php
+platform/plugins/ecommerce/src/Supports/OrderHelper.php
+platform/plugins/ecommerce/src/Tables/EnquiryTable.php
+platform/plugins/ecommerce/src/Models/Enquiry.php
+platform/plugins/ecommerce/src/Models/Product.php
+platform/plugins/ecommerce/resources/email-templates/admin_new_enquiry.tpl
+platform/plugins/ecommerce/resources/email-templates/customer_new_enquiry.tpl
+platform/plugins/ecommerce/resources/email-templates/store_new_enquiry.tpl
+platform/plugins/ecommerce/resources/views/emails/partials/enquiry-detail.blade.php
+platform/plugins/ecommerce/resources/views/products/partials/extras.blade.php
+platform/plugins/ecommerce/resources/views/orders/thank-you/enquiry-info.blade.php
+platform/plugins/ecommerce/resources/views/orders/edit.blade.php
+platform/plugins/ecommerce/resources/views/themes/enquiry_from.blade.php
+platform/plugins/ecommerce/resources/views/enquires/enquiry-thank-you.blade.php
+platform/plugins/ecommerce/resources/views/enquires/intro.blade.php
+platform/plugins/ecommerce/resources/views/enquires/edit.blade.php
+platform/plugins/ecommerce/resources/views/settings/index.blade.php
+platform/plugins/ecommerce/resources/lang/en/products.php
+platform/plugins/ecommerce/resources/lang/en/order.php
+platform/plugins/ecommerce/resources/lang/en/enquiry.php
+platform/plugins/ecommerce/resources/lang/en/ecommerce.php
+platform/plugins/ecommerce/resources/lang/en/email.php
+platform/plugins/ecommerce/helpers/products.php
+platform/plugins/ecommerce/helpers/order.php
+platform/plugins/ecommerce/routes/base.php
+platform/plugins/ecommerce/config/permissions.php
+platform/plugins/ecommerce/config/email.php
+
+platform/core/base/resources/lang/en/tables.php
+platform/core/base/resources/lang/en/enums.php
+platform/core/base/src/Enums/BaseStatusEnum.php
+
+platform/plugins/marketplace/routes/fronts.php
+platform/plugins/marketplace/config/email.php
+platform/plugins/marketplace/src/Models/Store.php
+platform/plugins/marketplace/src/Enums/ShopTypeEnum.php
+platform/plugins/marketplace/src/Forms/ProductForm.php
+platform/plugins/marketplace/src/Forms/StoreForm.php
+platform/plugins/marketplace/src/Tables/StoreTable.php
+platform/plugins/marketplace/src/Tables/EnquiryTable.php
+platform/plugins/marketplace/src/Models/Store.php
+platform/plugins/marketplace/src/Providers/HookServiceProvider.php
+platform/plugins/marketplace/src/Listeners/SaveVendorInformationListener.php
+platform/plugins/marketplace/src/Http/Requests/BecomeVendorRequest.php
+platform/plugins/marketplace/src/Http/Controllers/Fronts/EnquiryController.php
+platform/plugins/marketplace/src/Supports/MarketplaceHelper.php
+platform/plugins/marketplace/resources/views/stores/index.blade.php
+platform/plugins/marketplace/resources/views/themes/become-vendor.blade.php
+platform/plugins/marketplace/resources/views/themes/dashboard/enquires/edit.blade.php
+platform/plugins/marketplace/resources/email-templates/store_new_enquiry.tpl
+platform/plugins/marketplace/resources/lang/en/store.php
+platform/plugins/marketplace/resources/lang/en/marketplace.php
+platform/plugins/marketplace/database/migrations/2022_11_07_233701_add_is_verified_to_mp_stores_table.php
+platform/plugins/marketplace/database/migrations/2022_11_10_000650_add_shop_category_to_mp_store_table.php
+
+platform/themes/farmart/routes/web.php
+platform/themes/farmart/src/Http/Controllers/FarmartController.php
+platform/themes/farmart/partials/shortcodes/ecommerce/featured-brands.blade.php
+platform/themes/farmart/partials/ecommerce/product-item.blade.php
+platform/themes/farmart/partials/ecommerce/quick-view.blade.php
+platform/themes/farmart/partials/ecommerce/product-cart-form.blade.php
+platform/themes/farmart/partials/footer.blade.php
+platform/themes/farmart/views/marketplace/includes/become-vendor-form.blade.php
+platform/themes/farmart/views/marketplace/includes/info-box.blade.php
+platform/themes/farmart/views/marketplace/dashboard/layouts/body.blade.php
+platform/themes/farmart/views/marketplace/dashboard/layouts/menu.blade.php
+platform/themes/farmart/views/marketplace/stores.blade.php
+platform/themes/farmart/views/ecommerce/product.blade.php
+platform/themes/farmart/views/ecommerce/includes/filters.blade.php
+platform/themes/farmart/views/ecommerce/includes/frequently-bought-together.blade.php
+
+/*Martfury Pincode Works updates*/
+platform/plugins/ecommerce/resources/views/orders/checkout.blade.php //for pincode error message & Design update
+platform/plugins/locations/config/permissions.php // for pincode permission
+platform/plugins/location/helpers/constants.php // for pincode Constant
+platform/plugins/location/routes/web.php // for pincode Import
+
+platform/plugins/location/src/Forms/PincodeForm.php  // Pincode Add
+platform/plugins/location/src/Http/Controllers/PincodeController.php // for Pincode Access
+platform/plugins/location/src/Http/Requests/PincodeRequest.php // for Pincode Request Handler
+platform/plugins/location/src/Models/Pincode.php // for Pincode Function
+
+platform/plugins/location/src/Providers/LocationServiceProvider.php  // for Pincode Function
+platform/plugins/location/src/Repositories/Caches/PicodeCacheDecorator.php
+platform/plugins/location/src/Repositories/Eloquent/PincodeRepository.php
+platform/plugins/location/src/Repositories/Interfaces/PincodeInterface.php
+platform/plugins/location/src/Tables/PincodeTable.php
+
+
+/*Martfury Validation Works updates*/
+platform/plugins/ecommerce/src/Http/Requests/EditAccountRequest.php //edit profile registration validation
+platform/plugins/ecommerce/src/Http/Requests/CheckoutRequest.php  //checkout registration validation

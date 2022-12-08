@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}">
     <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, user-scalable=1" name="viewport"/>
-        <meta name="csrf-token" content="{{ csrf_token() }}">
+        <meta name="csrf-token" content="{{ csrf_token() }}" />
 
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family={{ urlencode(theme_option('primary_font', 'Muli')) }}:wght@400;600;700&display=swap" rel="stylesheet">
-
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family={{ urlencode(theme_option('primary_font', 'Muli')) }}:wght@400;600;700&display=swap" rel="stylesheet" />
+        <link rel="stylesheet" href="{{ url('/') }}/themes/gropart/plugins/font-awesome/css/font-awesome.min.css" />
         <style>
             :root {
                 --primary-font: '{{ theme_option('primary_font', 'Muli') }}', sans-serif;

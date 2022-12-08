@@ -5,15 +5,11 @@ namespace Botble\Ecommerce\Http\Controllers\Customers;
 use App\Http\Controllers\Controller;
 use Botble\Ecommerce\Models\Invoice;
 use Botble\Ecommerce\Repositories\Interfaces\InvoiceInterface;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
-use EcommerceHelper;
 use InvoiceHelper;
 use SeoHelper;
 use Theme;
 use Throwable;
-use View;
 
 class InvoiceController extends Controller
 {

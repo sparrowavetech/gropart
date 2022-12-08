@@ -6,6 +6,7 @@ use Botble\ACL\Repositories\Interfaces\UserInterface;
 use Botble\ACL\Services\ActivateUserService;
 use Exception;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 class UserCreateCommand extends Command
@@ -60,7 +61,7 @@ class UserCreateCommand extends Command
             $user->last_name = $this->askWithValidate('Enter last name', 'required|min:2|max:60');
             $user->email = $this->askWithValidate('Enter email address', 'required|email|unique:users,email');
             $user->username = $this->askWithValidate('Enter username', 'required|min:4|max:60|unique:users,username');
-            $user->password = bcrypt($this->askWithValidate('Enter password', 'required|min:6|max:60', true));
+            $user->password = Hash::make($this->askWithValidate('Enter password', 'required|min:6|max:60', true));
             $user->super_user = 1;
             $user->manage_supers = 1;
 
@@ -73,6 +74,7 @@ class UserCreateCommand extends Command
         } catch (Exception $exception) {
             $this->error('User could not be created.');
             $this->error($exception->getMessage());
+
             return 1;
         }
     }
@@ -111,7 +113,7 @@ class UserCreateCommand extends Command
         $validator = Validator::make($data, $rules);
         if ($validator->fails()) {
             return [
-                'error'   => true,
+                'error' => true,
                 'message' => $validator->messages()->first(),
             ];
         }

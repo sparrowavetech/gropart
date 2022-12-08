@@ -26,7 +26,7 @@ class LanguageAdvancedManager
         $language = $request->input('language');
 
         $condition = [
-            'lang_code'                 => $language,
+            'lang_code' => $language,
             $object->getTable() . '_id' => $object->id,
         ];
 
@@ -52,7 +52,7 @@ class LanguageAdvancedManager
         if ($language != Language::getDefaultLocaleCode()) {
             $defaultTranslation = DB::table($table)
                 ->where([
-                    'lang_code'                 => Language::getDefaultLocaleCode(),
+                    'lang_code' => Language::getDefaultLocaleCode(),
                     $object->getTable() . '_id' => $object->id,
                 ])
                 ->first();

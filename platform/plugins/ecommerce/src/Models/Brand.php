@@ -46,10 +46,7 @@ class Brand extends BaseModel
         'status' => BaseStatusEnum::class,
     ];
 
-    /**
-     * @return HasMany
-     */
-    public function products()
+    public function products(): HasMany
     {
         return $this
             ->hasMany(Product::class, 'brand_id')

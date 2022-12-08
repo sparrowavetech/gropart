@@ -62,9 +62,6 @@ class ProductCategory extends BaseModel
         return $this->belongsTo(ProductCategory::class, 'parent_id')->withDefault();
     }
 
-    /**
-     * @return Collection
-     */
     public function getParentsAttribute(): Collection
     {
         $parents = collect([]);
@@ -92,51 +89,36 @@ class ProductCategory extends BaseModel
             ->with(['slugable', 'activeChildren']);
     }
 
-    /**
-     * @param $category
-     * @param array $childrenIds
-     * @return array
-     */
-    public function getChildrenIds($category, array $childrenIds = []): array
-    {
-        $children = $category->children()->select('id')->get();
-
-        foreach ($children as $child) {
-            $childrenIds[] = $child->id;
-
-            $childrenIds = array_merge($childrenIds, $this->getChildrenIds($child, $childrenIds));
-        }
-
-        return array_unique($childrenIds);
-    }
-
     public function getBadgeWithCountAttribute(): HtmlString
     {
         switch ($this->status->getValue()) {
             case BaseStatusEnum::DRAFT:
                 $badge = 'bg-secondary';
+
                 break;
 
             case BaseStatusEnum::PENDING:
                 $badge = 'bg-warning';
+
                 break;
 
             default:
                 $badge = 'bg-success';
+
                 break;
         }
 
         $link = route('products.index', [
-            'filter_table_id'  => strtolower(Str::slug(Str::snake(ProductTable::class))),
-            'class'            => Product::class,
-            'filter_columns'   => ['category'],
+            'filter_table_id' => strtolower(Str::slug(Str::snake(ProductTable::class))),
+            'class' => Product::class,
+            'filter_columns' => ['category'],
             'filter_operators' => ['='],
-            'filter_values'    => [$this->id],
+            'filter_values' => [$this->id],
         ]);
 
         return Html::link($link, (string)$this->products_count, [
-            'class'                  => 'badge font-weight-bold ' . $badge,
-            'data-bs-toggle'         => 'tooltip',
+            'class' => 'badge font-weight-bold ' . $badge,
+            'data-bs-toggle' => 'tooltip',
             'data-bs-original-title' => trans('plugins/ecommerce::product-categories.total_products', ['total' => $this->products_count]),
         ]);
     }

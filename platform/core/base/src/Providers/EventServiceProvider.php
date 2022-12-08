@@ -24,16 +24,16 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
-        SendMailEvent::class          => [
+        SendMailEvent::class => [
             SendMailListener::class,
         ],
-        CreatedContentEvent::class    => [
+        CreatedContentEvent::class => [
             CreatedContentListener::class,
         ],
-        UpdatedContentEvent::class    => [
+        UpdatedContentEvent::class => [
             UpdatedContentListener::class,
         ],
-        DeletedContentEvent::class    => [
+        DeletedContentEvent::class => [
             DeletedContentListener::class,
         ],
         BeforeEditContentEvent::class => [

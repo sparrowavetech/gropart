@@ -40,7 +40,7 @@ class ShippingRuleItem extends BaseModel
     /**
      * @return string
      */
-    public function getAdjustmentPriceAttribute()
+    public function getAdjustmentPriceAttribute(): string
     {
         return number_format($this->attributes['adjustment_price'], 0, false, false);
     }

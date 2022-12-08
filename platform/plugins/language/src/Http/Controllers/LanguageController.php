@@ -159,9 +159,9 @@ class LanguageController extends BaseController
                         $data = [];
                         foreach ($referenceIds as $referenceId) {
                             $data[] = [
-                                'reference_id'     => $referenceId,
-                                'reference_type'   => $model,
-                                'lang_meta_code'   => $language->lang_code,
+                                'reference_id' => $referenceId,
+                                'reference_type' => $model,
+                                'lang_meta_code' => $language->lang_code,
                                 'lang_meta_origin' => md5($referenceId . $model . time()),
                             ];
                         }
@@ -225,7 +225,7 @@ class LanguageController extends BaseController
     {
         $referenceId = $request->input('reference_id') ?: $request->input('lang_meta_created_from');
         $currentLanguage = $this->languageMetaRepository->getFirstBy([
-            'reference_id'   => $referenceId,
+            'reference_id' => $referenceId,
             'reference_type' => $request->input('reference_type'),
         ]);
 
@@ -344,26 +344,23 @@ class LanguageController extends BaseController
 
                 $themeName = Theme::getThemeName();
 
-                $themeOptions = Setting::where('key', 'LIKE', 'theme-' . $themeName . '-%')
-                    ->where('key', 'NOT LIKE', 'theme-' . $themeName . '-' . $language->lang_code . '-%')->get();
+                $currentKey = 'theme-' . $themeName . '-';
+                $newKey = 'theme-' . $themeName . '-' . $language->lang_code . '-';
+
+                $themeOptions = Setting::where('key', 'LIKE', $currentKey . '%')
+                    ->where('key', 'NOT LIKE', $newKey . '%')->get();
 
                 foreach ($themeOptions as $themeOption) {
-                    $currentLanguageKey = str_replace('theme-' . $themeName . '-', 'theme-' . $themeName . '-' . $language->lang_code . '-', $themeOption->key);
-
-                    if (!Setting::where('key', $currentLanguageKey)->count()) {
-                        $themeOption->replicate()->save();
-                    }
-
-                    $themeOption->key = str_replace('theme-' . $themeName . '-', 'theme-' . $themeName . '-' . $defaultLanguage->lang_code . '-', $themeOption->key);
+                    $themeOption->key = str_replace($currentKey, $currentKey . $defaultLanguage->lang_code . '-', $themeOption->key);
                     if (!Setting::where('key', $themeOption->key)->count()) {
                         $themeOption->save();
                     }
                 }
 
-                $themeOptions = Setting::where('key', 'LIKE', 'theme-' . $themeName . '-' . $language->lang_code . '-%')->get();
+                $themeOptions = Setting::where('key', 'LIKE', $newKey . '%')->get();
 
                 foreach ($themeOptions as $themeOption) {
-                    $themeOption->key = str_replace('theme-' . $themeName . '-' . $language->lang_code . '-', 'theme-' . $themeName . '-', $themeOption->key);
+                    $themeOption->key = str_replace($newKey, $currentKey, $themeOption->key);
 
                     if (!Setting::where('key', $themeOption->key)->count()) {
                         $themeOption->save();
@@ -454,9 +451,6 @@ class LanguageController extends BaseController
         return count($folders);
     }
 
-    /**
-     * @return bool
-     */
     public function clearRoutesCache(): bool
     {
         foreach (LanguageFacade::getSupportedLanguagesKeys() as $locale) {

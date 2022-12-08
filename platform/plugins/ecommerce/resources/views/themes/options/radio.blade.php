@@ -1,12 +1,12 @@
 <div class="form-group variant-radio product-option product-option-{{ Str::slug($option['name']) }} product-option-{{ $option['id'] }}"
     style="margin-bottom: 10px">
-    <div class="row">
-        <div class="col-4">
+    <div class="product-option-item-wrapper">
+        <div class="product-option-item-label">
             <label class="{{ ($option['required']) ? 'required' : '' }}">
                 {{ $option['name'] }}
             </label>
         </div>
-        <div class="col-8">
+        <div class="product-option-item-values">
             <input type="hidden" name="options[{{ $option['id'] }}][option_type]" value="radio" />
             @foreach ($option['values'] as $value)
                 @php

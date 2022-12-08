@@ -30,7 +30,7 @@ class CategoryRepository extends RepositoriesAbstract implements CategoryInterfa
         $data = $this->model
             ->with(array_merge(['slugable'], $with))
             ->where([
-                'status'      => BaseStatusEnum::PUBLISHED,
+                'status' => BaseStatusEnum::PUBLISHED,
                 'is_featured' => 1,
             ])
             ->select([
@@ -73,7 +73,7 @@ class CategoryRepository extends RepositoriesAbstract implements CategoryInterfa
     public function getCategoryById($id)
     {
         $data = $this->model->with('slugable')->where([
-            'id'     => $id,
+            'id' => $id,
             'status' => BaseStatusEnum::PUBLISHED,
         ]);
 

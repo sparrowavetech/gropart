@@ -44,7 +44,7 @@ class PublicCartController extends Controller
         if (!EcommerceHelper::isCartEnabled()) {
             abort(404);
         }
-     
+
         $product = $this->productRepository->findById($request->input('id'));
 
         if (!$product) {
@@ -85,6 +85,7 @@ class PublicCartController extends Controller
 
                 if ($product->isOutOfStock()) {
                     $outOfQuantity = true;
+
                     break;
                 }
 
@@ -152,10 +153,10 @@ class PublicCartController extends Controller
 
         return $response
             ->setData([
-                'status'      => true,
-                'count'       => Cart::instance('cart')->count(),
+                'status' => true,
+                'count' => Cart::instance('cart')->count(),
                 'total_price' => format_price(Cart::instance('cart')->rawSubTotal()),
-                'content'     => $cartItems,
+                'content' => $cartItems,
             ]);
     }
 
@@ -258,18 +259,18 @@ class PublicCartController extends Controller
             return $response
                 ->setError()
                 ->setData([
-                    'count'       => Cart::instance('cart')->count(),
+                    'count' => Cart::instance('cart')->count(),
                     'total_price' => format_price(Cart::instance('cart')->rawSubTotal()),
-                    'content'     => Cart::instance('cart')->content(),
+                    'content' => Cart::instance('cart')->content(),
                 ])
                 ->setMessage(__('One or all products are not enough quantity so cannot update!'));
         }
 
         return $response
             ->setData([
-                'count'       => Cart::instance('cart')->count(),
+                'count' => Cart::instance('cart')->count(),
                 'total_price' => format_price(Cart::instance('cart')->rawSubTotal()),
-                'content'     => Cart::instance('cart')->content(),
+                'content' => Cart::instance('cart')->content(),
             ])
             ->setMessage(__('Update cart successfully!'));
     }
@@ -293,9 +294,9 @@ class PublicCartController extends Controller
 
         return $response
             ->setData([
-                'count'       => Cart::instance('cart')->count(),
+                'count' => Cart::instance('cart')->count(),
                 'total_price' => format_price(Cart::instance('cart')->rawSubTotal()),
-                'content'     => Cart::instance('cart')->content(),
+                'content' => Cart::instance('cart')->content(),
             ])
             ->setMessage(__('Removed item from cart successfully!'));
     }

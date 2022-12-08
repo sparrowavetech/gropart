@@ -148,24 +148,24 @@ class UserTable extends TableAbstract
     public function columns(): array
     {
         return [
-            'username'   => [
+            'username' => [
                 'title' => trans('core/acl::users.username'),
                 'class' => 'text-start',
             ],
-            'email'      => [
+            'email' => [
                 'title' => trans('core/acl::users.email'),
                 'class' => 'text-start',
             ],
-            'role_name'  => [
-                'title'      => trans('core/acl::users.role'),
+            'role_name' => [
+                'title' => trans('core/acl::users.role'),
                 'searchable' => false,
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
                 'width' => '100px',
             ],
-            'status'     => [
-                'name'  => 'users.updated_at',
+            'status' => [
+                'name' => 'users.updated_at',
                 'title' => trans('core/base::tables.status'),
                 'width' => '100px',
             ],
@@ -217,25 +217,25 @@ class UserTable extends TableAbstract
     public function getBulkChanges(): array
     {
         return [
-            'username'   => [
-                'title'    => trans('core/acl::users.username'),
-                'type'     => 'text',
+            'username' => [
+                'title' => trans('core/acl::users.username'),
+                'type' => 'text',
                 'validate' => 'required|max:120',
             ],
-            'email'      => [
-                'title'    => trans('core/base::tables.email'),
-                'type'     => 'text',
+            'email' => [
+                'title' => trans('core/base::tables.email'),
+                'type' => 'text',
                 'validate' => 'required|max:120|email',
             ],
-            'status'     => [
-                'title'    => trans('core/base::tables.status'),
-                'type'     => 'customSelect',
-                'choices'  => UserStatusEnum::labels(),
+            'status' => [
+                'title' => trans('core/base::tables.status'),
+                'type' => 'customSelect',
+                'choices' => UserStatusEnum::labels(),
                 'validate' => 'required|in:' . implode(',', UserStatusEnum::values()),
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type'  => 'date',
+                'type' => 'date',
             ],
         ];
     }
@@ -247,13 +247,13 @@ class UserTable extends TableAbstract
     {
         return [
             'operations' => [
-                'title'      => trans('core/base::tables.operations'),
-                'width'      => '350px',
-                'class'      => 'text-end',
-                'orderable'  => false,
+                'title' => trans('core/base::tables.operations'),
+                'width' => '350px',
+                'class' => 'text-end',
+                'orderable' => false,
                 'searchable' => false,
                 'exportable' => false,
-                'printable'  => false,
+                'printable' => false,
             ],
         ];
     }

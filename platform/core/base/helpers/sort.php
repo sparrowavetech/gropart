@@ -25,6 +25,7 @@ if (!function_exists('sort_item_with_children')) {
         foreach ($list as $key => $object) {
             if ($object->parent_id == $object->id) {
                 $result[] = $object;
+
                 continue;
             }
 

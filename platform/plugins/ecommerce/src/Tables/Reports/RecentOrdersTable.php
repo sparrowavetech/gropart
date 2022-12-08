@@ -117,43 +117,43 @@ class RecentOrdersTable extends TableAbstract
     public function columns()
     {
         $columns = [
-            'id'             => [
-                'title'     => trans('core/base::tables.id'),
-                'width'     => '20px',
-                'class'     => 'text-start no-sort',
+            'id' => [
+                'title' => trans('core/base::tables.id'),
+                'width' => '20px',
+                'class' => 'text-start no-sort',
                 'orderable' => false,
             ],
-            'user_id'        => [
-                'title'     => trans('plugins/ecommerce::order.customer_label'),
-                'class'     => 'text-start',
+            'user_id' => [
+                'title' => trans('plugins/ecommerce::order.customer_label'),
+                'class' => 'text-start',
                 'orderable' => false,
             ],
-            'amount'         => [
-                'title'     => trans('plugins/ecommerce::order.amount'),
-                'class'     => 'text-center',
+            'amount' => [
+                'title' => trans('plugins/ecommerce::order.amount'),
+                'class' => 'text-center',
                 'orderable' => false,
             ],
             'payment_method' => [
-                'name'      => 'payment_id',
-                'title'     => trans('plugins/ecommerce::order.payment_method'),
-                'class'     => 'text-center',
+                'name' => 'payment_id',
+                'title' => trans('plugins/ecommerce::order.payment_method'),
+                'class' => 'text-center',
                 'orderable' => false,
             ],
             'payment_status' => [
-                'name'      => 'payment_id',
-                'title'     => trans('plugins/ecommerce::order.payment_status_label'),
-                'class'     => 'text-center',
+                'name' => 'payment_id',
+                'title' => trans('plugins/ecommerce::order.payment_status_label'),
+                'class' => 'text-center',
                 'orderable' => false,
             ],
-            'status'         => [
-                'title'     => trans('core/base::tables.status'),
-                'class'     => 'text-center',
+            'status' => [
+                'title' => trans('core/base::tables.status'),
+                'class' => 'text-center',
                 'orderable' => false,
             ],
-            'created_at'     => [
-                'title'     => trans('core/base::tables.created_at'),
-                'width'     => '100px',
-                'class'     => 'text-start',
+            'created_at' => [
+                'title' => trans('core/base::tables.created_at'),
+                'width' => '100px',
+                'class' => 'text-start',
                 'orderable' => false,
             ],
         ];

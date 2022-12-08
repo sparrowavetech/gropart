@@ -30,11 +30,10 @@ class GlobalOptionTable extends TableAbstract
      * @param GlobalOptionInterface $globalOptionRepository
      */
     public function __construct(
-        DataTables            $table,
-        UrlGenerator          $urlGenerator,
+        DataTables $table,
+        UrlGenerator $urlGenerator,
         GlobalOptionInterface $globalOptionRepository
-    )
-    {
+    ) {
         parent::__construct($table, $urlGenerator);
 
         $this->repository = $globalOptionRepository;
@@ -96,15 +95,15 @@ class GlobalOptionTable extends TableAbstract
     public function columns()
     {
         return [
-            'id'         => [
+            'id' => [
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
             ],
-            'name'       => [
+            'name' => [
                 'title' => trans('core/base::tables.name'),
                 'class' => 'text-start',
             ],
-            'required'   => [
+            'required' => [
                 'title' => trans('plugins/ecommerce::product-option.required'),
                 'class' => 'text-start',
             ],
@@ -138,20 +137,20 @@ class GlobalOptionTable extends TableAbstract
     public function getBulkChanges(): array
     {
         return [
-            'name'       => [
-                'title'    => trans('core/base::tables.name'),
-                'type'     => 'text',
+            'name' => [
+                'title' => trans('core/base::tables.name'),
+                'type' => 'text',
                 'validate' => 'required|max:120',
             ],
-            'status'     => [
-                'title'    => trans('core/base::tables.status'),
-                'type'     => 'select',
-                'choices'  => BaseStatusEnum::labels(),
+            'status' => [
+                'title' => trans('core/base::tables.status'),
+                'type' => 'select',
+                'choices' => BaseStatusEnum::labels(),
                 'validate' => 'required|in:' . implode(',', BaseStatusEnum::values()),
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type'  => 'date',
+                'type' => 'date',
             ],
         ];
     }

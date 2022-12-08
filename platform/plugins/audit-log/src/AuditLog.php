@@ -39,6 +39,7 @@ class AuditLog
             case USER_MODULE_SCREEN_NAME:
             case AUTH_MODULE_SCREEN_NAME:
                 $name = $data->name;
+
                 break;
             default:
                 if (!empty($data)) {

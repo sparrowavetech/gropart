@@ -74,11 +74,11 @@ class Menu
      * @param Repository $config
      */
     public function __construct(
-        MenuInterface     $menuRepository,
-        HtmlBuilder       $html,
+        MenuInterface $menuRepository,
+        HtmlBuilder $html,
         MenuNodeInterface $menuNodeRepository,
-        CacheManager      $cache,
-        Repository        $config
+        CacheManager $cache,
+        Repository $config
     ) {
         $this->config = $config;
         $this->menuRepository = $menuRepository;
@@ -164,7 +164,6 @@ class Menu
             event(new UpdatedContentEvent(MENU_NODE_MODULE_SCREEN_NAME, request(), $item));
         }
 
-
         return $menuItem;
     }
 
@@ -181,6 +180,7 @@ class Menu
                 $menuNode->reference_id = 0;
                 $menuNode->reference_type = null;
                 $menuNode->url = str_replace('&amp;', '&', Arr::get($item, 'url'));
+
                 break;
 
             default:
@@ -192,6 +192,7 @@ class Menu
                         $menuNode->url = str_replace(url(''), '', $reference->url);
                     }
                 }
+
                 break;
         }
 
@@ -295,17 +296,14 @@ class Menu
      */
     protected function read(): Collection
     {
-        return $this->menuRepository->allBy(
-            [
-                'status' => BaseStatusEnum::PUBLISHED,
-            ],
-            [
-                'menuNodes',
-                'menuNodes.child',
-                'menuNodes.metadata',
-                'locations',
-            ]
-        );
+        $with = [
+            'menuNodes',
+            'menuNodes.child',
+            'menuNodes.metadata',
+            'locations',
+        ];
+
+        return $this->menuRepository->allBy(['status' => BaseStatusEnum::PUBLISHED], $with);
     }
 
     /**
@@ -348,7 +346,7 @@ class Menu
         }
 
         $data = [
-            'menu'       => $menu,
+            'menu' => $menu,
             'menu_nodes' => $menuNodes,
         ];
 
@@ -374,7 +372,7 @@ class Menu
     public function registerMenuOptions(string $model, string $name)
     {
         $options = Menu::generateSelect([
-            'model'   => new $model(),
+            'model' => new $model(),
             'options' => [
                 'class' => 'list-item',
             ],

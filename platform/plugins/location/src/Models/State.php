@@ -38,17 +38,11 @@ class State extends BaseModel
         'status' => BaseStatusEnum::class,
     ];
 
-    /**
-     * @return BelongsTo
-     */
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class)->withDefault();
     }
 
-    /**
-     * @return HasMany
-     */
     public function cities(): HasMany
     {
         return $this->hasMany(City::class);

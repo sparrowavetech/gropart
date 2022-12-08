@@ -10,10 +10,9 @@ if (!function_exists('render_product_options')) {
      */
     function render_product_options(Product $product, array $options = []): string
     {
-        Theme::asset()->container('footer')
-            ->add('change-product-options', 'vendor/core/plugins/ecommerce/js/change-product-options.js', [
-                'jquery',
-            ]);
+        $script = 'vendor/core/plugins/ecommerce/js/change-product-options.js';
+
+        Theme::asset()->container('footer')->add('change-product-options', $script, ['jquery']);
 
         $html = '';
         foreach ($options as $option) {
@@ -26,7 +25,11 @@ if (!function_exists('render_product_options')) {
             }
         }
 
-        return $html;
+        if (!request()->ajax()) {
+            return $html;
+        }
+
+        return $html . Html::script($script)->toHtml();
     }
 }
 
@@ -48,8 +51,8 @@ if (!function_exists('render_product_options_info')) {
         }
 
         return view($view, [
-            'productOptions'   => $productOption,
-            'product'          => $product,
+            'productOptions' => $productOption,
+            'product' => $product,
             'displayBasePrice' => $displayBasePrice,
         ])->render();
     }

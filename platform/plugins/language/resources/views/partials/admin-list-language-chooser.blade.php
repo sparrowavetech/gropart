@@ -13,6 +13,6 @@ $languages = Language::getActiveLanguage(['lang_id', 'lang_name', 'lang_code', '
                 </span>&nbsp;
             @endif
         @endforeach
-        <input type="hidden" name="ref_lang" value="{{ request()->input('ref_lang') }}">
+        <input type="hidden" name="ref_lang" value="{{ BaseHelper::stringify(request()->input('ref_lang')) }}">
     </span>
 @endif

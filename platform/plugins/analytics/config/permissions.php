@@ -6,18 +6,18 @@ return [
         'flag' => 'analytics.general',
     ],
     [
-        'name'        => 'Top Page',
-        'flag'        => 'analytics.page',
+        'name' => 'Top Page',
+        'flag' => 'analytics.page',
         'parent_flag' => 'analytics.general',
     ],
     [
-        'name'        => 'Top Browser',
-        'flag'        => 'analytics.browser',
+        'name' => 'Top Browser',
+        'flag' => 'analytics.browser',
         'parent_flag' => 'analytics.general',
     ],
     [
-        'name'        => 'Top Referrer',
-        'flag'        => 'analytics.referrer',
+        'name' => 'Top Referrer',
+        'flag' => 'analytics.referrer',
         'parent_flag' => 'analytics.general',
     ],
 ];

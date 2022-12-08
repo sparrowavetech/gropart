@@ -98,17 +98,21 @@ class SystemController extends Controller
             case 'clear_cms_cache':
                 Helper::clearCache();
                 Menu::clearCacheMenuItems();
+
                 break;
             case 'refresh_compiled_views':
                 foreach ($files->glob(config('view.compiled') . '/*') as $view) {
                     $files->delete($view);
                 }
+
                 break;
             case 'clear_config_cache':
                 $files->delete($app->getCachedConfigPath());
+
                 break;
             case 'clear_route_cache':
                 $files->delete($app->getCachedRoutesPath());
+
                 break;
             case 'clear_log':
                 if ($files->isDirectory(storage_path('logs'))) {
@@ -116,6 +120,7 @@ class SystemController extends Controller
                         $files->delete($file->getPathname());
                     }
                 }
+
                 break;
         }
 

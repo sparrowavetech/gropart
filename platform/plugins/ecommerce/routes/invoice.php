@@ -8,14 +8,14 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
                 ->except(['create', 'store', 'update']);
 
             Route::delete('items/destroy', [
-                'as'         => 'deletes',
-                'uses'       => 'InvoiceController@deletes',
+                'as' => 'deletes',
+                'uses' => 'InvoiceController@deletes',
                 'permission' => 'ecommerce.invoice.destroy',
             ]);
 
             Route::get('generate-invoice/{id}', [
-                'as'         => 'generate-invoice',
-                'uses'       => 'InvoiceController@getGenerateInvoice',
+                'as' => 'generate-invoice',
+                'uses' => 'InvoiceController@getGenerateInvoice',
                 'permission' => 'ecommerce.invoice.edit',
             ]);
         });

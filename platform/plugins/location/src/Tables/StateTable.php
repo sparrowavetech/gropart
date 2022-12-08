@@ -34,6 +34,7 @@ class StateTable extends TableAbstract
      * @param DataTables $table
      * @param UrlGenerator $urlGenerator
      * @param StateInterface $stateRepository
+     * @param CountryInterface $countryRepository
      */
     public function __construct(
         DataTables $table,
@@ -63,12 +64,14 @@ class StateTable extends TableAbstract
                 if (!Auth::user()->hasPermission('state.edit')) {
                     return $item->name;
                 }
+
                 return Html::link(route('state.edit', $item->id), $item->name);
             })
             ->editColumn('country_id', function ($item) {
                 if (!$item->country_id && $item->country->name) {
                     return null;
                 }
+
                 return Html::link(route('country.edit', $item->country_id), $item->country->name);
             })
             ->editColumn('checkbox', function ($item) {
@@ -87,9 +90,6 @@ class StateTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function query()
     {
         $query = $this->repository->getModel()->select([
@@ -106,14 +106,14 @@ class StateTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function columns()
+    public function columns(): array
     {
         return [
-            'id'         => [
+            'id' => [
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
             ],
-            'name'       => [
+            'name' => [
                 'title' => trans('core/base::tables.name'),
                 'class' => 'text-start',
             ],
@@ -125,7 +125,7 @@ class StateTable extends TableAbstract
                 'title' => trans('core/base::tables.created_at'),
                 'width' => '100px',
             ],
-            'status'     => [
+            'status' => [
                 'title' => trans('core/base::tables.status'),
                 'width' => '100px',
             ],
@@ -135,7 +135,7 @@ class StateTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function buttons()
+    public function buttons(): array
     {
         return $this->addCreateButton(route('state.create'), 'state.create');
     }
@@ -154,25 +154,25 @@ class StateTable extends TableAbstract
     public function getBulkChanges(): array
     {
         return [
-            'name'       => [
-                'title'    => trans('core/base::tables.name'),
-                'type'     => 'text',
+            'name' => [
+                'title' => trans('core/base::tables.name'),
+                'type' => 'text',
                 'validate' => 'required|max:120',
             ],
             'country_id' => [
-                'title'    => trans('plugins/location::state.country'),
-                'type'     => 'customSelect',
+                'title' => trans('plugins/location::state.country'),
+                'type' => 'customSelect',
                 'validate' => 'required|max:120',
             ],
-            'status'     => [
-                'title'    => trans('core/base::tables.status'),
-                'type'     => 'customSelect',
-                'choices'  => BaseStatusEnum::labels(),
+            'status' => [
+                'title' => trans('core/base::tables.status'),
+                'type' => 'customSelect',
+                'choices' => BaseStatusEnum::labels(),
                 'validate' => 'required|in:' . implode(',', BaseStatusEnum::values()),
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type'  => 'date',
+                'type' => 'date',
             ],
         ];
     }

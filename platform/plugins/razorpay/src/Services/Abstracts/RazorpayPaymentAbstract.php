@@ -107,6 +107,7 @@ abstract class RazorpayPaymentAbstract implements ProduceServiceInterface
             $response = $this->client->payment->fetch($paymentId); // Returns a particular payment
         } catch (Exception $exception) {
             $this->setErrorMessageAndLogging($exception, 1);
+
             return false;
         }
 
@@ -121,8 +122,8 @@ abstract class RazorpayPaymentAbstract implements ProduceServiceInterface
         try {
             $response = $this->client->refund->create([
                 'payment_id' => $paymentId,
-                'amount'     => $amount * 100,
-                'notes'      => $options,
+                'amount' => $amount * 100,
+                'notes' => $options,
             ]);
 
             $status = $response->status;
@@ -132,20 +133,21 @@ abstract class RazorpayPaymentAbstract implements ProduceServiceInterface
                 $response = array_merge($response, ['_refund_id' => Arr::get($response, 'id')]);
 
                 return [
-                    'error'   => false,
+                    'error' => false,
                     'message' => $status,
-                    'data'    => $response,
+                    'data' => $response,
                 ];
             }
 
             return [
-                'error'   => true,
+                'error' => true,
                 'message' => trans('plugins/payment::payment.status_is_not_completed'),
             ];
         } catch (Exception $exception) {
             $this->setErrorMessageAndLogging($exception, 1);
+
             return [
-                'error'   => true,
+                'error' => true,
                 'message' => $exception->getMessage(),
             ];
         }
@@ -164,15 +166,16 @@ abstract class RazorpayPaymentAbstract implements ProduceServiceInterface
             $response = $this->client->refund->fetch($refundId);
 
             return [
-                'error'   => false,
+                'error' => false,
                 'message' => $response->status,
-                'data'    => (array)$response->toArray(),
-                'status'  => $response->status,
+                'data' => (array)$response->toArray(),
+                'status' => $response->status,
             ];
         } catch (Exception $exception) {
             $this->setErrorMessageAndLogging($exception, 1);
+
             return [
-                'error'   => true,
+                'error' => true,
                 'message' => $exception->getMessage(),
             ];
         }
@@ -191,6 +194,7 @@ abstract class RazorpayPaymentAbstract implements ProduceServiceInterface
             return $this->makePayment($request);
         } catch (Exception $exception) {
             $this->setErrorMessageAndLogging($exception, 1);
+
             return false;
         }
     }

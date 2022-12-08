@@ -53,13 +53,13 @@ class ProductVariationRepository extends RepositoriesAbstract implements Product
 
             return [
                 'variation' => $variation,
-                'created'   => true,
+                'created' => true,
             ];
         }
 
         return [
             'variation' => $variation,
-            'created'   => false,
+            'created' => false,
         ];
     }
 

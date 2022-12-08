@@ -137,22 +137,22 @@ class BunnyCDNAdapter extends AbstractAdapter
     protected function normalizeObject(stdClass $fileObject): array
     {
         return [
-            'type'              => $fileObject->IsDirectory ? 'dir' : 'file',
-            'dirname'           => trim($this->removePathPrefix($fileObject->Path), '/'),
-            'mimetype'          => '',
-            'guid'              => $fileObject->Guid,
-            'path'              => Util::normalizePath($this->removePathPrefix($fileObject->Path) . $fileObject->ObjectName),
-            'object_name'       => $fileObject->ObjectName,
-            'size'              => $fileObject->Length,
-            'timestamp'         => strtotime($fileObject->LastChanged),
-            'server_id'         => $fileObject->ServerId,
-            'user_id'           => $fileObject->UserId,
-            'last_changed'      => $fileObject->LastChanged,
-            'date_created'      => $fileObject->DateCreated,
+            'type' => $fileObject->IsDirectory ? 'dir' : 'file',
+            'dirname' => trim($this->removePathPrefix($fileObject->Path), '/'),
+            'mimetype' => '',
+            'guid' => $fileObject->Guid,
+            'path' => Util::normalizePath($this->removePathPrefix($fileObject->Path) . $fileObject->ObjectName),
+            'object_name' => $fileObject->ObjectName,
+            'size' => $fileObject->Length,
+            'timestamp' => strtotime($fileObject->LastChanged),
+            'server_id' => $fileObject->ServerId,
+            'user_id' => $fileObject->UserId,
+            'last_changed' => $fileObject->LastChanged,
+            'date_created' => $fileObject->DateCreated,
             'storage_zone_name' => $fileObject->StorageZoneName,
-            'storage_zone_id'   => $fileObject->StorageZoneId,
-            'checksum'          => $fileObject->Checksum,
-            'replicated_zones'  => $fileObject->ReplicatedZones,
+            'storage_zone_id' => $fileObject->StorageZoneId,
+            'checksum' => $fileObject->Checksum,
+            'replicated_zones' => $fileObject->ReplicatedZones,
         ];
     }
 

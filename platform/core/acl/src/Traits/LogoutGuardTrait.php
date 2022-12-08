@@ -17,6 +17,7 @@ trait LogoutGuardTrait
     public function isActiveGuard($request, $guard)
     {
         $name = Auth::guard($guard)->getName();
+
         return $this->sessionHas($request, $name) && $this->sessionGet(
             $request,
             $name

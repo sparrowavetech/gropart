@@ -9,17 +9,14 @@ use Throwable;
 
 class Editor
 {
-    public function __construct()
-    {
-        add_action(BASE_ACTION_ENQUEUE_SCRIPTS, [$this, 'registerAssets'], 12);
-    }
-
-    public function registerAssets()
+    public function registerAssets(): self
     {
         Assets::addScriptsDirectly(
             config('core.base.general.editor.' . BaseHelper::getRichEditor() . '.js')
         )
             ->addScriptsDirectly('vendor/core/core/base/js/editor.js');
+
+        return $this;
     }
 
     /**

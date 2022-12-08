@@ -13,7 +13,6 @@ use Botble\Ecommerce\Repositories\Interfaces\ShippingRuleInterface;
 use Botble\Ecommerce\Repositories\Interfaces\StoreLocatorInterface;
 use Botble\Support\Services\Cache\Cache;
 use EcommerceHelper;
-use Illuminate\Cache\CacheManager;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 
@@ -189,6 +188,7 @@ class HandleShippingFeeService
                         $option
                     );
                 }
+
                 break;
         }
 
@@ -228,12 +228,12 @@ class HandleShippingFeeService
                     ->first();
                 if ($ruleDetail) {
                     $result[$rule->id] = [
-                        'name'  => $rule->name,
+                        'name' => $rule->name,
                         'price' => $rule->price + $ruleDetail->adjustment_price,
                     ];
                 } else {
                     $result[$rule->id] = [
-                        'name'  => $rule->name,
+                        'name' => $rule->name,
                         'price' => $rule->price,
                     ];
                 }
@@ -278,12 +278,12 @@ class HandleShippingFeeService
                         ->first();
                     if ($ruleDetail) {
                         $result[$rule->id] = [
-                            'name'  => $rule->name,
+                            'name' => $rule->name,
                             'price' => $rule->price + $ruleDetail->adjustment_price,
                         ];
                     } else {
                         $result[$rule->id] = [
-                            'name'  => $rule->name,
+                            'name' => $rule->name,
                             'price' => $rule->price,
                         ];
                     }
@@ -299,24 +299,24 @@ class HandleShippingFeeService
      * @return string
      */
     protected function getCacheKey(array $data): string
-	{
-		$jsonData = json_encode(Arr::only($data, ['origin', 'address_to', 'parcels', 'extra']));
+    {
+        $jsonData = json_encode(Arr::only($data, ['origin', 'address_to', 'parcels', 'extra']));
 
-		return md5($jsonData);
-	}
+        return md5($jsonData);
+    }
 
     /**
      * @param string $key
      * @return mixed
      */
     protected function getCacheValue(string $key)
-	{
-		if ($this->useCache) {
-			return $this->cache->get($key);
-		}
+    {
+        if ($this->useCache) {
+            return $this->cache->get($key);
+        }
 
-		return null;
-	}
+        return null;
+    }
 
     /**
      * @param string $key
@@ -324,10 +324,11 @@ class HandleShippingFeeService
      * @return bool
      */
     protected function setCacheValue(string $key, $value): bool
-	{
-		if ($key) {
-			return $this->cache->put($key, $value);
-		}
-		return true;
-	}
+    {
+        if ($key) {
+            return $this->cache->put($key, $value);
+        }
+
+        return true;
+    }
 }

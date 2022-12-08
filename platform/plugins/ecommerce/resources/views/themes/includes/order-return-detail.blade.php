@@ -21,10 +21,12 @@
                     <span>{{ __('Status') }}: </span>
                     <strong class="text-warning">{{ $orderReturn->return_status->label() }}</strong>
                 </p>
-                <p>
-                    <span>{{ __('Reason') }}: </span>
-                    <strong class="text-warning">{{ $orderReturn->reason->label() }}</strong>
-                </p>
+                @if (!EcommerceHelper::allowPartialReturn())
+                    <p>
+                        <span>{{ __('Reason') }}: </span>
+                        <strong class="text-warning">{{ $orderReturn->reason->label() }}</strong>
+                    </p>
+                @endif
             </div>
 
         </div>
@@ -40,7 +42,7 @@
                             <th class="text-center">{{ __('Image') }}</th>
                             <th>{{ __('Product') }}</th>
                             <th class="text-center" style="width: 100px;">{{ __('Quantity') }}</th>
-                            @if (EcommerceHelper::canCustomReturnProductQty())
+                            @if (EcommerceHelper::allowPartialReturn())
                                 <th class="text-end">{{ __('Reason') }}</th>
                             @endif
                         </tr>
@@ -92,9 +94,9 @@
                                 <td>
                                     <strong class="text-info">{{ number_format($item->qty) }}</strong>
                                 </td>
-                                @if (EcommerceHelper::canCustomReturnProductQty())
+                                @if (EcommerceHelper::allowPartialReturn())
                                     <td class="text-end">
-                                        <span class="text-dark">{{ $item->reason }}</span>
+                                        <span class="text-warning">{{ $item->reason->label() }}</span>
                                     </td>
                                 @endif
                             </tr>

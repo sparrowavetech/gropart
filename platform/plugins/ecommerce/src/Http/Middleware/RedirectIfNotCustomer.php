@@ -23,12 +23,14 @@ class RedirectIfNotCustomer
             if ($request->ajax() || $request->wantsJson()) {
                 return response('Unauthorized.', 401);
             }
+
             return redirect()->guest(route('customer.login'));
         }
 
         $customer = Auth::guard($guard)->user();
         if ($customer->status->getValue() !== CustomerStatusEnum::ACTIVATED) {
             Auth::guard($guard)->logout();
+
             return redirect()
                 ->guest(route('customer.login'))
                 ->withErrors([

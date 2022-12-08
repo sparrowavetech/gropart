@@ -61,142 +61,142 @@ class CookieConsentServiceProvider extends ServiceProvider
 
         theme_option()
             ->setSection([
-                'title'      => trans('plugins/cookie-consent::cookie-consent.theme_options.name'),
-                'desc'       => trans('plugins/cookie-consent::cookie-consent.theme_options.description'),
-                'id'         => 'opt-text-subsection-cookie-consent',
+                'title' => trans('plugins/cookie-consent::cookie-consent.theme_options.name'),
+                'desc' => trans('plugins/cookie-consent::cookie-consent.theme_options.description'),
+                'id' => 'opt-text-subsection-cookie-consent',
                 'subsection' => true,
-                'icon'       => 'fas fa-cookie-bite',
-                'priority'   => 9999,
-                'fields'     => [
+                'icon' => 'fas fa-cookie-bite',
+                'priority' => 9999,
+                'fields' => [
                     [
-                        'id'         => 'cookie_consent_enable',
-                        'type'       => 'customSelect',
-                        'label'      => trans('plugins/cookie-consent::cookie-consent.theme_options.enable'),
+                        'id' => 'cookie_consent_enable',
+                        'type' => 'customSelect',
+                        'label' => trans('plugins/cookie-consent::cookie-consent.theme_options.enable'),
                         'attributes' => [
-                            'name'    => 'cookie_consent_enable',
-                            'list'    => [
+                            'name' => 'cookie_consent_enable',
+                            'list' => [
                                 'yes' => trans('core/base::base.yes'),
-                                'no'  => trans('core/base::base.no'),
+                                'no' => trans('core/base::base.no'),
                             ],
-                            'value'   => 'yes',
+                            'value' => 'yes',
                             'options' => [
                                 'class' => 'form-control',
                             ],
                         ],
                     ],
                     [
-                        'id'         => 'cookie_consent_style',
-                        'type'       => 'customSelect',
-                        'label'      => trans('plugins/cookie-consent::cookie-consent.theme_options.style'),
+                        'id' => 'cookie_consent_style',
+                        'type' => 'customSelect',
+                        'label' => trans('plugins/cookie-consent::cookie-consent.theme_options.style'),
                         'attributes' => [
-                            'name'    => 'cookie_consent_style',
-                            'list'    => [
+                            'name' => 'cookie_consent_style',
+                            'list' => [
                                 'full-width' => trans('plugins/cookie-consent::cookie-consent.theme_options.full_width'),
-                                'minimal'    => trans('plugins/cookie-consent::cookie-consent.theme_options.minimal'),
+                                'minimal' => trans('plugins/cookie-consent::cookie-consent.theme_options.minimal'),
                             ],
-                            'value'   => 'yes',
+                            'value' => 'yes',
                             'options' => [
                                 'class' => 'form-control',
                             ],
                         ],
                     ],
                     [
-                        'id'         => 'cookie_consent_message',
-                        'type'       => 'text',
-                        'label'      => trans('plugins/cookie-consent::cookie-consent.theme_options.message'),
+                        'id' => 'cookie_consent_message',
+                        'type' => 'text',
+                        'label' => trans('plugins/cookie-consent::cookie-consent.theme_options.message'),
                         'attributes' => [
-                            'name'    => 'cookie_consent_message',
-                            'value'   => trans('plugins/cookie-consent::cookie-consent.message'),
+                            'name' => 'cookie_consent_message',
+                            'value' => trans('plugins/cookie-consent::cookie-consent.message'),
                             'options' => [
-                                'class'        => 'form-control',
-                                'placeholder'  => trans('plugins/cookie-consent::cookie-consent.theme_options.message'),
+                                'class' => 'form-control',
+                                'placeholder' => trans('plugins/cookie-consent::cookie-consent.theme_options.message'),
                                 'data-counter' => 400,
                             ],
                         ],
                     ],
 
                     [
-                        'id'         => 'cookie_consent_button_text',
-                        'type'       => 'text',
-                        'label'      => trans('plugins/cookie-consent::cookie-consent.theme_options.button_text'),
+                        'id' => 'cookie_consent_button_text',
+                        'type' => 'text',
+                        'label' => trans('plugins/cookie-consent::cookie-consent.theme_options.button_text'),
                         'attributes' => [
-                            'name'    => 'cookie_consent_button_text',
-                            'value'   => trans('plugins/cookie-consent::cookie-consent.button_text'),
+                            'name' => 'cookie_consent_button_text',
+                            'value' => trans('plugins/cookie-consent::cookie-consent.button_text'),
                             'options' => [
-                                'class'        => 'form-control',
-                                'placeholder'  => trans('plugins/cookie-consent::cookie-consent.theme_options.button_text'),
+                                'class' => 'form-control',
+                                'placeholder' => trans('plugins/cookie-consent::cookie-consent.theme_options.button_text'),
                                 'data-counter' => 120,
                             ],
                         ],
                     ],
 
                     [
-                        'id'         => 'cookie_consent_learn_more_url',
-                        'type'       => 'text',
-                        'label'      => trans('plugins/cookie-consent::cookie-consent.theme_options.learn_more_url'),
+                        'id' => 'cookie_consent_learn_more_url',
+                        'type' => 'text',
+                        'label' => trans('plugins/cookie-consent::cookie-consent.theme_options.learn_more_url'),
                         'attributes' => [
-                            'name'    => 'cookie_consent_learn_more_url',
-                            'value'   => null,
+                            'name' => 'cookie_consent_learn_more_url',
+                            'value' => null,
                             'options' => [
-                                'class'        => 'form-control',
-                                'placeholder'  => trans('plugins/cookie-consent::cookie-consent.theme_options.learn_more_url'),
+                                'class' => 'form-control',
+                                'placeholder' => trans('plugins/cookie-consent::cookie-consent.theme_options.learn_more_url'),
                                 'data-counter' => 120,
                             ],
                         ],
                     ],
 
                     [
-                        'id'         => 'cookie_consent_learn_more_text',
-                        'type'       => 'text',
-                        'label'      => trans('plugins/cookie-consent::cookie-consent.theme_options.learn_more_text'),
+                        'id' => 'cookie_consent_learn_more_text',
+                        'type' => 'text',
+                        'label' => trans('plugins/cookie-consent::cookie-consent.theme_options.learn_more_text'),
                         'attributes' => [
-                            'name'    => 'cookie_consent_learn_more_text',
-                            'value'   => null,
+                            'name' => 'cookie_consent_learn_more_text',
+                            'value' => null,
                             'options' => [
-                                'class'        => 'form-control',
-                                'placeholder'  => trans('plugins/cookie-consent::cookie-consent.theme_options.learn_more_text'),
+                                'class' => 'form-control',
+                                'placeholder' => trans('plugins/cookie-consent::cookie-consent.theme_options.learn_more_text'),
                                 'data-counter' => 120,
                             ],
                         ],
                     ],
 
                     [
-                        'id'         => 'cookie_consent_background_color',
-                        'type'       => 'customColor',
-                        'label'      => trans('plugins/cookie-consent::cookie-consent.theme_options.background_color'),
+                        'id' => 'cookie_consent_background_color',
+                        'type' => 'customColor',
+                        'label' => trans('plugins/cookie-consent::cookie-consent.theme_options.background_color'),
                         'attributes' => [
-                            'name'    => 'cookie_consent_background_color',
-                            'value'   => '#000',
+                            'name' => 'cookie_consent_background_color',
+                            'value' => '#000',
                             'options' => [
-                                'class'       => 'form-control',
+                                'class' => 'form-control',
                                 'placeholder' => trans('plugins/cookie-consent::cookie-consent.theme_options.background_color'),
                             ],
                         ],
                     ],
 
                     [
-                        'id'         => 'cookie_consent_text_color',
-                        'type'       => 'customColor',
-                        'label'      => trans('plugins/cookie-consent::cookie-consent.theme_options.text_color'),
+                        'id' => 'cookie_consent_text_color',
+                        'type' => 'customColor',
+                        'label' => trans('plugins/cookie-consent::cookie-consent.theme_options.text_color'),
                         'attributes' => [
-                            'name'    => 'cookie_consent_text_color',
-                            'value'   => '#fff',
+                            'name' => 'cookie_consent_text_color',
+                            'value' => '#fff',
                             'options' => [
-                                'class'       => 'form-control',
+                                'class' => 'form-control',
                                 'placeholder' => trans('plugins/cookie-consent::cookie-consent.theme_options.text_color'),
                             ],
                         ],
                     ],
 
                     [
-                        'id'         => 'cookie_consent_max_width',
-                        'type'       => 'number',
-                        'label'      => trans('plugins/cookie-consent::cookie-consent.theme_options.max_width'),
+                        'id' => 'cookie_consent_max_width',
+                        'type' => 'number',
+                        'label' => trans('plugins/cookie-consent::cookie-consent.theme_options.max_width'),
                         'attributes' => [
-                            'name'    => 'cookie_consent_max_width',
-                            'value'   => 1170,
+                            'name' => 'cookie_consent_max_width',
+                            'value' => 1170,
                             'options' => [
-                                'class'       => 'form-control',
+                                'class' => 'form-control',
                                 'placeholder' => trans('plugins/cookie-consent::cookie-consent.theme_options.max_width'),
                             ],
                         ],

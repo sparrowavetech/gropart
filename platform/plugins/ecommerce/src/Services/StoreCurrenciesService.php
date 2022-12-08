@@ -36,23 +36,23 @@ class StoreCurrenciesService
         $validated = Validator::make(
             $currencies,
             [
-                '*.title'  => 'required|string|' . Rule::in(CurrencyHelper::currencyCodes()),
+                '*.title' => 'required|string|' . Rule::in(CurrencyHelper::currencyCodes()),
                 '*.symbol' => 'required|string',
             ],
             [
                 '*.title.in' => trans('plugins/ecommerce::currency.invalid_currency_name', [
-                    'currencies' => implode(', ', CurrencyHelper::currencyCodes())
+                    'currencies' => implode(', ', CurrencyHelper::currencyCodes()),
                 ]),
             ],
             [
-                '*.title'  => trans('plugins/ecommerce::currency.invalid_currency_name'),
+                '*.title' => trans('plugins/ecommerce::currency.invalid_currency_name'),
                 '*.symbol' => trans('plugins/ecommerce::currency.symbol'),
             ]
         );
 
         if ($validated->fails()) {
             return [
-                'error'   => true,
+                'error' => true,
                 'message' => $validated->getMessageBag()->first(),
             ];
         }

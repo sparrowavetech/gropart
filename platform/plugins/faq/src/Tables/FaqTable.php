@@ -93,14 +93,14 @@ class FaqTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function columns()
+    public function columns(): array
     {
         return [
-            'id'          => [
+            'id' => [
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
             ],
-            'question'    => [
+            'question' => [
                 'title' => trans('plugins/faq::faq.question'),
                 'class' => 'text-start',
             ],
@@ -108,11 +108,11 @@ class FaqTable extends TableAbstract
                 'title' => trans('plugins/faq::faq.category'),
                 'class' => 'text-start',
             ],
-            'created_at'  => [
+            'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
                 'width' => '100px',
             ],
-            'status'      => [
+            'status' => [
                 'title' => trans('core/base::tables.status'),
                 'width' => '100px',
             ],
@@ -122,7 +122,7 @@ class FaqTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function buttons()
+    public function buttons(): array
     {
         return $this->addCreateButton(route('faq.create'), 'faq.create');
     }
@@ -141,14 +141,14 @@ class FaqTable extends TableAbstract
     public function getBulkChanges(): array
     {
         return [
-            'question'   => [
-                'title'    => trans('plugins/faq::faq.question'),
-                'type'     => 'text',
+            'question' => [
+                'title' => trans('plugins/faq::faq.question'),
+                'type' => 'text',
                 'validate' => 'required|max:120',
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type'  => 'date',
+                'type' => 'date',
             ],
         ];
     }

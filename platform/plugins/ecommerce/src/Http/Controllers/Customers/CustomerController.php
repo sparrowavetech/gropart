@@ -25,6 +25,8 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Throwable;
 
 class CustomerController extends BaseController
@@ -84,7 +86,7 @@ class CustomerController extends BaseController
         $customer = $this->customerRepository->getModel();
         $customer->fill($request->input());
         $customer->confirmed_at = Carbon::now();
-        $customer->password = bcrypt($request->input('password'));
+        $customer->password = Hash::make($request->input('password'));
         $customer->dob = Carbon::parse($request->input('dob'))->toDateString();
         $customer = $this->customerRepository->createOrUpdate($customer);
 
@@ -126,7 +128,7 @@ class CustomerController extends BaseController
         $customer->fill($request->except('password'));
 
         if ($request->input('is_change_password') == 1) {
-            $customer->password = bcrypt($request->input('password'));
+            $customer->password = Hash::make($request->input('password'));
         }
 
         $customer->dob = Carbon::parse($request->input('dob'))->toDateString();
@@ -266,7 +268,7 @@ class CustomerController extends BaseController
         AddCustomerWhenCreateOrderRequest $request,
         BaseHttpResponse $response
     ) {
-        $request->merge(['password' => bcrypt(time())]);
+        $request->merge(['password' => Hash::make(Str::random(36))]);
         $customer = $this->customerRepository->createOrUpdate($request->input());
         $customer->avatar = (string)$customer->avatar_url;
 
@@ -274,7 +276,7 @@ class CustomerController extends BaseController
 
         $request->merge([
             'customer_id' => $customer->id,
-            'is_default'  => true,
+            'is_default' => true,
         ]);
 
         $address = $this->addressRepository->createOrUpdate($request->input());

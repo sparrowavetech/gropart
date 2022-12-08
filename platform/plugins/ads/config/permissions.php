@@ -6,18 +6,18 @@ return [
         'flag' => 'ads.index',
     ],
     [
-        'name'        => 'Create',
-        'flag'        => 'ads.create',
+        'name' => 'Create',
+        'flag' => 'ads.create',
         'parent_flag' => 'ads.index',
     ],
     [
-        'name'        => 'Edit',
-        'flag'        => 'ads.edit',
+        'name' => 'Edit',
+        'flag' => 'ads.edit',
         'parent_flag' => 'ads.index',
     ],
     [
-        'name'        => 'Delete',
-        'flag'        => 'ads.destroy',
+        'name' => 'Delete',
+        'flag' => 'ads.destroy',
         'parent_flag' => 'ads.index',
     ],
 ];

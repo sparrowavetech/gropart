@@ -14,7 +14,7 @@ class ProductCategoryRequest extends Request
     public function rules()
     {
         return [
-            'name'  => 'required',
+            'name' => 'required',
             'order' => 'required|integer|min:0',
         ];
     }

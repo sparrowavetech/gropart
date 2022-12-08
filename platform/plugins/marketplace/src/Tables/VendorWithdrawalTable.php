@@ -63,9 +63,6 @@ class VendorWithdrawalTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function query()
     {
         $query = $this->repository->getModel()
@@ -85,20 +82,20 @@ class VendorWithdrawalTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function columns()
+    public function columns(): array
     {
         return [
-            'id'         => [
+            'id' => [
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
             ],
-            'amount'     => [
+            'amount' => [
                 'title' => trans('plugins/ecommerce::order.amount'),
             ],
-            'fee'        => [
+            'fee' => [
                 'title' => trans('plugins/ecommerce::shipping.fee'),
             ],
-            'status'     => [
+            'status' => [
                 'title' => trans('core/base::tables.status'),
                 'width' => '100px',
             ],
@@ -122,7 +119,7 @@ class VendorWithdrawalTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function buttons()
+    public function buttons(): array
     {
         return $this->addCreateButton(route('marketplace.vendor.withdrawals.create'));
     }

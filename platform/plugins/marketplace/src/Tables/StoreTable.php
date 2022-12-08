@@ -102,8 +102,8 @@ class StoreTable extends TableAbstract
                         route('marketplace.store.view', $item->id),
                         '<i class="fa fa-eye"></i>',
                         [
-                            'class'                  => 'btn btn-info',
-                            'data-bs-toggle'         => 'tooltip',
+                            'class' => 'btn btn-info',
+                            'data-bs-toggle' => 'tooltip',
                             'data-bs-original-title' => trans('plugins/marketplace::store.view'),
                         ],
                         null,
@@ -117,9 +117,6 @@ class StoreTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function query()
     {
         $query = $this->repository->getModel()
@@ -142,38 +139,38 @@ class StoreTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function columns()
+    public function columns(): array
     {
         return [
-            'id'             => [
+            'id' => [
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
             ],
-            'logo'           => [
+            'logo' => [
                 'title' => trans('plugins/marketplace::store.forms.logo'),
                 'width' => '70px',
             ],
-            'name'           => [
+            'name' => [
                 'title' => trans('core/base::tables.name'),
                 'class' => 'text-start',
             ],
-            'earnings'       => [
-                'title'      => trans('plugins/marketplace::marketplace.tables.earnings'),
-                'class'      => 'text-start',
+            'earnings' => [
+                'title' => trans('plugins/marketplace::marketplace.tables.earnings'),
+                'class' => 'text-start',
                 'searchable' => false,
-                'orderable'  => false,
-                'width'      => '100px',
+                'orderable' => false,
+                'width' => '100px',
             ],
             'products_count' => [
-                'title'      => trans('plugins/marketplace::marketplace.tables.products_count'),
+                'title' => trans('plugins/marketplace::marketplace.tables.products_count'),
                 'searchable' => false,
-                'orderable'  => false,
+                'orderable' => false,
             ],
-            'created_at'     => [
+            'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
                 'width' => '100px',
             ],
-            'status'         => [
+            'status' => [
                 'title' => trans('core/base::tables.status'),
                 'width' => '100px',
             ],
@@ -191,7 +188,7 @@ class StoreTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function buttons()
+    public function buttons(): array
     {
         return $this->addCreateButton(route('marketplace.store.create'), 'marketplace.store.create');
     }
@@ -214,20 +211,20 @@ class StoreTable extends TableAbstract
     public function getBulkChanges(): array
     {
         return [
-            'name'       => [
-                'title'    => trans('core/base::tables.name'),
-                'type'     => 'text',
+            'name' => [
+                'title' => trans('core/base::tables.name'),
+                'type' => 'text',
                 'validate' => 'required|max:120',
             ],
-            'status'     => [
-                'title'    => trans('core/base::tables.status'),
-                'type'     => 'select',
-                'choices'  => BaseStatusEnum::labels(),
+            'status' => [
+                'title' => trans('core/base::tables.status'),
+                'type' => 'select',
+                'choices' => BaseStatusEnum::labels(),
                 'validate' => 'required|in:' . implode(',', BaseStatusEnum::values()),
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type'  => 'date',
+                'type' => 'date',
             ],
         ];
     }
@@ -235,17 +232,17 @@ class StoreTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function getOperationsHeading()
+    public function getOperationsHeading(): array
     {
         return [
             'operations' => [
-                'title'      => trans('core/base::tables.operations'),
-                'width'      => '180px',
-                'class'      => 'text-end',
-                'orderable'  => false,
+                'title' => trans('core/base::tables.operations'),
+                'width' => '180px',
+                'class' => 'text-end',
+                'orderable' => false,
                 'searchable' => false,
                 'exportable' => false,
-                'printable'  => false,
+                'printable' => false,
             ],
         ];
     }

@@ -11,37 +11,37 @@ class FormServiceProvider extends ServiceProvider
     {
         Form::component('mediaImage', 'core/base::forms.partials.image', [
             'name',
-            'value'      => null,
+            'value' => null,
             'attributes' => [],
         ]);
 
         Form::component('mediaImages', 'core/base::forms.partials.images', [
             'name',
-            'values'     => [],
+            'values' => [],
             'attributes' => [],
         ]);
 
         Form::component('mediaFile', 'core/base::forms.partials.file', [
             'name',
-            'value'      => null,
+            'value' => null,
             'attributes' => [],
         ]);
 
         Form::component('modalAction', 'core/base::forms.partials.modal', [
             'name',
             'title',
-            'type'        => null,
-            'content'     => null,
-            'action_id'   => null,
+            'type' => null,
+            'content' => null,
+            'action_id' => null,
             'action_name' => null,
-            'modal_size'  => null,
+            'modal_size' => null,
         ]);
 
         Form::component('helper', 'core/base::forms.partials.helper', ['content']);
 
         Form::component('onOff', 'core/base::forms.partials.on-off', [
             'name',
-            'value'      => false,
+            'value' => false,
             'attributes' => [],
         ]);
 
@@ -92,63 +92,63 @@ class FormServiceProvider extends ServiceProvider
 
         Form::component('editor', 'core/base::forms.partials.editor', [
             'name',
-            'value'      => null,
+            'value' => null,
             'attributes' => [],
         ]);
 
         Form::component('ckeditor', 'core/base::forms.partials.ckeditor', [
             'name',
-            'value'      => null,
+            'value' => null,
             'attributes' => [],
         ]);
 
         Form::component('tinymce', 'core/base::forms.partials.tinymce', [
             'name',
-            'value'      => null,
+            'value' => null,
             'attributes' => [],
         ]);
 
         Form::component('customSelect', 'core/base::forms.partials.custom-select', [
             'name',
-            'choices'             => [],
-            'selected'            => null,
-            'selectAttributes'    => [],
-            'optionsAttributes'   => [],
+            'choices' => [],
+            'selected' => null,
+            'selectAttributes' => [],
+            'optionsAttributes' => [],
             'optgroupsAttributes' => [],
         ]);
 
         Form::component('autocomplete', 'core/base::forms.partials.autocomplete', [
             'name',
-            'choices'             => [],
-            'selected'            => null,
-            'selectAttributes'    => [],
-            'optionsAttributes'   => [],
+            'choices' => [],
+            'selected' => null,
+            'selectAttributes' => [],
+            'optionsAttributes' => [],
             'optgroupsAttributes' => [],
         ]);
 
         Form::component('googleFonts', 'core/base::forms.partials.google-fonts', [
             'name',
-            'selected'          => null,
-            'selectAttributes'  => [],
+            'selected' => null,
+            'selectAttributes' => [],
             'optionsAttributes' => [],
         ]);
 
         Form::component('customColor', 'core/base::forms.partials.color', [
             'name',
-            'value'      => null,
+            'value' => null,
             'attributes' => [],
         ]);
 
         Form::component('repeater', 'core/base::forms.partials.repeater', [
             'name',
-            'value'      => null,
-            'fields'     => [],
+            'value' => null,
+            'fields' => [],
             'attributes' => [],
         ]);
 
         Form::component('phoneNumber', 'core/base::forms.partials.phone-number', [
             'name',
-            'value'      => null,
+            'value' => null,
             'attributes' => [],
         ]);
     }

@@ -53,7 +53,7 @@ class Order extends BaseModel
      * @var string[]
      */
     protected $casts = [
-        'status'          => OrderStatusEnum::class,
+        'status' => OrderStatusEnum::class,
         'shipping_method' => ShippingMethodEnum::class,
     ];
 
@@ -83,9 +83,6 @@ class Order extends BaseModel
         });
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(Customer::class, 'user_id', 'id')->withDefault();
@@ -99,9 +96,6 @@ class Order extends BaseModel
         return $this->user->name;
     }
 
-    /**
-     * @return HasOne
-     */
     public function address(): HasOne
     {
         return $this->hasOne(OrderAddress::class, 'order_id')
@@ -109,9 +103,6 @@ class Order extends BaseModel
             ->withDefault();
     }
 
-    /**
-     * @return HasOne
-     */
     public function shippingAddress(): HasOne
     {
         return $this->hasOne(OrderAddress::class, 'order_id')
@@ -119,9 +110,6 @@ class Order extends BaseModel
             ->withDefault();
     }
 
-    /**
-     * @return HasOne
-     */
     public function billingAddress(): HasOne
     {
         return $this->hasOne(OrderAddress::class, 'order_id')
@@ -129,33 +117,21 @@ class Order extends BaseModel
             ->withDefault();
     }
 
-    /**
-     * @return HasOne
-     */
     public function referral(): HasOne
     {
         return $this->hasOne(OrderReferral::class, 'order_id')->withDefault();
     }
 
-    /**
-     * @return string
-     */
     public function getFullAddressAttribute(): string
     {
         return $this->shippingAddress->full_address;
     }
 
-    /**
-     * @return HasMany
-     */
     public function products(): HasMany
     {
         return $this->hasMany(OrderProduct::class, 'order_id')->with(['product']);
     }
 
-    /**
-     * @return HasMany
-     */
     public function histories(): HasMany
     {
         return $this->hasMany(OrderHistory::class, 'order_id')->with(['user', 'order']);
@@ -172,33 +148,21 @@ class Order extends BaseModel
         );
     }
 
-    /**
-     * @return HasOne
-     */
     public function shipment(): HasOne
     {
         return $this->hasOne(Shipment::class)->withDefault();
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function payment(): BelongsTo
     {
         return $this->belongsTo(Payment::class, 'payment_id')->withDefault();
     }
 
-    /**
-     * @return HasOne
-     */
     public function invoice(): HasOne
     {
         return $this->hasOne(Invoice::class, 'reference_id')->withDefault();
     }
 
-    /**
-     * @return bool
-     */
     public function canBeCanceled(): bool
     {
         if ($this->shipment && in_array($this->shipment->status, [ShippingStatusEnum::PICKED, ShippingStatusEnum::DELIVERED, ShippingStatusEnum::AUDITED])) {
@@ -208,9 +172,6 @@ class Order extends BaseModel
         return in_array($this->status, [OrderStatusEnum::PENDING, OrderStatusEnum::PROCESSING]);
     }
 
-    /**
-     * @return bool
-     */
     public function canBeCanceledByAdmin(): bool
     {
         if ($this->shipment && in_array($this->shipment->status, [ShippingStatusEnum::DELIVERED, ShippingStatusEnum::AUDITED])) {
@@ -234,33 +195,21 @@ class Order extends BaseModel
         return true;
     }
 
-    /**
-     * @return bool
-     */
     public function getIsFreeShippingAttribute(): bool
     {
         return $this->shipping_amount == 0 && $this->discount_amount == 0 && $this->coupon_code;
     }
 
-    /**
-     * @return string
-     */
     public function getAmountFormatAttribute(): string
     {
         return format_price($this->amount);
     }
 
-    /**
-     * @return string
-     */
     public function getDiscountAmountFormatAttribute(): string
     {
         return format_price($this->shipping_amount);
     }
 
-    /**
-     * @return bool
-     */
     public function isInvoiceAvailable(): bool
     {
         return $this->invoice()->exists() && !EcommerceHelper::disableOrderInvoiceUntilOrderConfirmed() || $this->is_confirmed;
@@ -282,17 +231,11 @@ class Order extends BaseModel
         return EcommerceHelper::validateOrderWeight($weight);
     }
 
-    /**
-     * @return HasOne
-     */
     public function returnRequest(): HasOne
     {
         return $this->hasOne(OrderReturn::class, 'order_id')->withDefault();
     }
 
-    /**
-     * @return bool
-     */
     public function canBeReturned(): bool
     {
         if ($this->status != OrderStatusEnum::COMPLETED || !$this->completed_at) {

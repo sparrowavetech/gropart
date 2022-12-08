@@ -47,8 +47,8 @@ class SelectLocationField extends FormField
     ) {
         $default = [
             'country' => 'country_id',
-            'state'   => 'state_id',
-            'city'    => 'city_id',
+            'state' => 'state_id',
+            'city' => 'city_id',
         ];
         $this->locationKeys = array_filter(array_merge($default, Arr::get($options, 'locationKeys', [])));
 
@@ -119,16 +119,16 @@ class SelectLocationField extends FormField
         $countries = $this->countryRepository->pluck('name', 'id');
         $value = Arr::get($this->getValue(), 'country');
         $attr = array_merge($this->getOption('attr', []), [
-            'id'        => $countryKey,
-            'class'     => 'form-control select-search-full',
-            'data-type' => 'country'
+            'id' => $countryKey,
+            'class' => 'form-control select-search-full',
+            'data-type' => 'country',
         ]);
 
         return array_merge([
-            'label'       => trans('plugins/location::city.country'),
-            'attr'        => $attr,
-            'choices'     => ['' => trans('plugins/location::city.select_country')] + $countries,
-            'selected'    => $value,
+            'label' => trans('plugins/location::city.country'),
+            'attr' => $attr,
+            'choices' => ['' => trans('plugins/location::city.select_country')] + $countries,
+            'selected' => $value,
             'empty_value' => null,
         ], $this->getOption('attrs.country', []));
     }
@@ -149,16 +149,16 @@ class SelectLocationField extends FormField
         }
 
         $attr = array_merge($this->getOption('attr', []), [
-            'id'        => $stateKey,
-            'data-url'  => route('ajax.states-by-country'),
-            'class'     => 'form-control select-search-full',
-            'data-type' => 'state'
+            'id' => $stateKey,
+            'data-url' => route('ajax.states-by-country'),
+            'class' => 'form-control select-search-full',
+            'data-type' => 'state',
         ]);
 
         return array_merge([
-            'label'    => trans('plugins/location::city.state'),
-            'attr'     => $attr,
-            'choices'  => ['' => trans('plugins/location::city.select_state')] + $states,
+            'label' => trans('plugins/location::city.state'),
+            'attr' => $attr,
+            'choices' => ['' => trans('plugins/location::city.select_state')] + $states,
             'selected' => $value,
             'empty_value' => null,
         ], $this->getOption('attrs.state', []));
@@ -180,17 +180,17 @@ class SelectLocationField extends FormField
         }
 
         $attr = array_merge($this->getOption('attr', []), [
-            'id'        => $cityKey,
-            'data-url'  => route('ajax.cities-by-state'),
-            'class'     => 'form-control select-search-full',
-            'data-type' => 'city'
+            'id' => $cityKey,
+            'data-url' => route('ajax.cities-by-state'),
+            'class' => 'form-control select-search-full',
+            'data-type' => 'city',
         ]);
 
         return array_merge([
-            'label'       => trans('plugins/location::city.city'),
-            'attr'        => $attr,
-            'choices'     => ['' => trans('plugins/location::city.select_city')] + $cities,
-            'selected'    => $value,
+            'label' => trans('plugins/location::city.city'),
+            'attr' => $attr,
+            'choices' => ['' => trans('plugins/location::city.select_city')] + $cities,
+            'selected' => $value,
             'empty_value' => null,
         ], $this->getOption('attrs.city', []));
     }
@@ -233,12 +233,15 @@ class SelectLocationField extends FormField
             switch ($k) {
                 case 'country':
                     $options = $this->getCountryOptions();
+
                     break;
                 case 'state':
                     $options = $this->getStateOptions();
+
                     break;
                 case 'city':
                     $options = $this->getCityOptions();
+
                     break;
             }
 
@@ -247,14 +250,14 @@ class SelectLocationField extends FormField
             $html .= $this->formHelper->getView()->make(
                 $this->getViewTemplate(),
                 $data + [
-                    'name'                => $v,
-                    'nameKey'             => $v,
-                    'type'                => $this->type,
-                    'options'             => $options,
-                    'showLabel'           => $showLabel,
-                    'showField'           => $showField,
-                    'showError'           => $showError,
-                    'errorBag'            => $this->parent->getErrorBag(),
+                    'name' => $v,
+                    'nameKey' => $v,
+                    'type' => $this->type,
+                    'options' => $options,
+                    'showLabel' => $showLabel,
+                    'showField' => $showField,
+                    'showError' => $showError,
+                    'errorBag' => $this->parent->getErrorBag(),
                     'translationTemplate' => $this->parent->getTranslationTemplate(),
                 ]
             )->render();

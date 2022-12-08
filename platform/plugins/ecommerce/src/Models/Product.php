@@ -78,7 +78,7 @@ class Product extends BaseModel
      * @var array
      */
     protected $casts = [
-        'status'       => BaseStatusEnum::class,
+        'status' => BaseStatusEnum::class,
         'stock_status' => StockStatusEnum::class,
         'product_type' => ProductTypeEnum::class,
     ];
@@ -133,9 +133,6 @@ class Product extends BaseModel
         });
     }
 
-    /**
-     * @return BelongsToMany
-     */
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -146,9 +143,6 @@ class Product extends BaseModel
         );
     }
 
-    /**
-     * @return BelongsToMany
-     */
     public function productAttributeSets(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -159,9 +153,6 @@ class Product extends BaseModel
         );
     }
 
-    /**
-     * @return BelongsToMany
-     */
     public function productCollections(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -172,17 +163,11 @@ class Product extends BaseModel
         );
     }
 
-    /**
-     * @return BelongsToMany
-     */
     public function discounts(): BelongsToMany
     {
         return $this->belongsToMany(Discount::class, 'ec_discount_products', 'product_id', 'id');
     }
 
-    /**
-     * @return BelongsToMany
-     */
     public function crossSales(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -192,6 +177,7 @@ class Product extends BaseModel
             'to_product_id'
         );
     }
+
     public function frequentlyBoughtTogether(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -202,25 +188,16 @@ class Product extends BaseModel
         );
     }
 
-    /**
-     * @return BelongsToMany
-     */
     public function upSales(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'ec_product_up_sale_relations', 'from_product_id', 'to_product_id');
     }
 
-    /**
-     * @return BelongsToMany
-     */
     public function groupedProduct(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'ec_grouped_products', 'parent_product_id', 'product_id');
     }
 
-    /**
-     * @return BelongsToMany
-     */
     public function productLabels(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -231,17 +208,11 @@ class Product extends BaseModel
         );
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * @return BelongsToMany
-     */
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -252,17 +223,11 @@ class Product extends BaseModel
         );
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function brand(): BelongsTo
     {
         return $this->belongsTo(Brand::class)->withDefault();
     }
 
-    /**
-     * @return BelongsToMany
-     */
     public function products(): BelongsToMany
     {
         return $this
@@ -270,25 +235,16 @@ class Product extends BaseModel
             ->where('is_variation', 0);
     }
 
-    /**
-     * @return HasMany
-     */
     public function variations(): HasMany
     {
         return $this->hasMany(ProductVariation::class, 'configurable_product_id');
     }
 
-    /**
-     * @return BelongsToMany
-     */
     public function parentProduct(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'ec_product_variations', 'product_id', 'configurable_product_id');
     }
 
-    /**
-     * @return HasMany
-     */
     public function variationAttributeSwatchesForProductList(): HasMany
     {
         return $this
@@ -317,17 +273,11 @@ class Product extends BaseModel
             ]);
     }
 
-    /**
-     * @return HasOne
-     */
     public function variationInfo(): HasOne
     {
         return $this->hasOne(ProductVariation::class, 'product_id')->withDefault();
     }
 
-    /**
-     * @return HasOne
-     */
     public function defaultVariation(): HasOne
     {
         return $this
@@ -336,9 +286,6 @@ class Product extends BaseModel
             ->withDefault();
     }
 
-    /**
-     * @return HasMany
-     */
     public function groupedItems(): HasMany
     {
         return $this->hasMany(GroupedProduct::class, 'parent_product_id');
@@ -348,7 +295,7 @@ class Product extends BaseModel
      * @param string|null $value
      * @return array
      */
-    public function getImagesAttribute($value): array
+    public function getImagesAttribute(?string $value): array
     {
         try {
             if ($value === '[null]') {
@@ -368,10 +315,10 @@ class Product extends BaseModel
     }
 
     /**
-     * @param string $value
+     * @param string|null $value
      * @return array
      */
-    public function getOptionsAttribute($value): array
+    public function getOptionsAttribute(?string $value): array
     {
         try {
             return json_decode($value, true) ?: [];
@@ -381,10 +328,10 @@ class Product extends BaseModel
     }
 
     /**
-     * @param string $value
+     * @param string|null $value
      * @return mixed
      */
-    public function getImageAttribute($value)
+    public function getImageAttribute(?string $value)
     {
         $firstImage = Arr::first($this->images) ?: null;
 
@@ -452,18 +399,21 @@ class Product extends BaseModel
         switch ($promotion->type_option) {
             case 'same-price':
                 $price = $promotion->value;
+
                 break;
             case 'amount':
                 $price = $price - $promotion->value;
                 if ($price < 0) {
                     $price = 0;
                 }
+
                 break;
             case 'percentage':
                 $price = $price - ($price * $promotion->value / 100);
                 if ($price < 0) {
                     $price = 0;
                 }
+
                 break;
         }
 
@@ -505,7 +455,7 @@ class Product extends BaseModel
     /**
      * @return string|null
      */
-    public function getStockStatusLabelAttribute()
+    public function getStockStatusLabelAttribute(): ?string
     {
         if ($this->with_storehouse_management) {
             return $this->isOutOfStock() ? StockStatusEnum::OUT_OF_STOCK()->label() : StockStatusEnum::IN_STOCK()
@@ -515,10 +465,7 @@ class Product extends BaseModel
         return $this->stock_status->label();
     }
 
-    /**
-     * @return bool
-     */
-    public function isOutOfStock()
+    public function isOutOfStock(): bool
     {
         if (!$this->with_storehouse_management) {
             return $this->stock_status == StockStatusEnum::OUT_OF_STOCK;
@@ -530,7 +477,7 @@ class Product extends BaseModel
     /**
      * @return string|null
      */
-    public function getStockStatusHtmlAttribute()
+    public function getStockStatusHtmlAttribute(): ?string
     {
         if ($this->with_storehouse_management) {
             return $this->isOutOfStock() ? StockStatusEnum::OUT_OF_STOCK()->toHtml() : StockStatusEnum::IN_STOCK()
@@ -540,21 +487,14 @@ class Product extends BaseModel
         return $this->stock_status->toHtml();
     }
 
-    /**
-     * @param int $quantity
-     * @return bool
-     */
-    public function canAddToCart(int $quantity)
+    public function canAddToCart(int $quantity): bool
     {
         return !$this->with_storehouse_management ||
             ($this->quantity - $quantity) >= 0 ||
             $this->allow_checkout_when_out_of_stock;
     }
 
-    /**
-     * @return BelongsToMany
-     */
-    public function promotions()
+    public function promotions(): BelongsToMany
     {
         return $this
             ->belongsToMany(Discount::class, 'ec_discount_products', 'product_id')
@@ -581,9 +521,6 @@ class Product extends BaseModel
         return $this->variationInfo->id ? $this->variationInfo->configurableProduct : $this;
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function tax(): BelongsTo
     {
         if (!$this->original_product->tax_id && $defaultTaxRate = get_ecommerce_setting('default_tax_rate')) {
@@ -593,9 +530,6 @@ class Product extends BaseModel
         return $this->original_product->belongsTo(Tax::class, 'tax_id')->withDefault();
     }
 
-    /**
-     * @return HasMany
-     */
     public function reviews(): HasMany
     {
         return $this->hasMany(Review::class, 'product_id')->where('status', BaseStatusEnum::PUBLISHED);
@@ -640,9 +574,6 @@ class Product extends BaseModel
         return $this->price + $this->price * ($this->tax->percentage / 100);
     }
 
-    /**
-     * @return HasMany
-     */
     public function variationProductAttributes(): HasMany
     {
         return $this
@@ -671,9 +602,6 @@ class Product extends BaseModel
             ->orderBy('order');
     }
 
-    /**
-     * @return string
-     */
     public function getVariationAttributesAttribute(): string
     {
         if (!$this->variationProductAttributes->count()) {
@@ -685,9 +613,6 @@ class Product extends BaseModel
         return '(' . mapped_implode(', ', $attributes, ': ') . ')';
     }
 
-    /**
-     * @return string
-     */
     public function getPriceInTableAttribute(): string
     {
         $price = format_price($this->front_sale_price);
@@ -699,18 +624,12 @@ class Product extends BaseModel
         return $price;
     }
 
-    /**
-     * @return MorphTo
-     */
     public function createdBy(): MorphTo
     {
         return $this->morphTo()->withDefault();
     }
 
-    /**
-     * @return array
-     */
-    public function getFaqItemsAttribute()
+    public function getFaqItemsAttribute(): array
     {
         $this->loadMissing('metadata');
         $faqs = (array)$this->getMetaData('faq_schema_config', true);
@@ -726,35 +645,23 @@ class Product extends BaseModel
         return $faqs;
     }
 
-    /**
-     * @return array
-     */
-    public function getReviewImagesAttribute()
+    public function getReviewImagesAttribute(): array
     {
         return $this->reviews->sortByDesc('created_at')->reduce(function ($carry, $item) {
             return array_merge($carry, (array)$item->images);
         }, []);
     }
 
-    /**
-     * @return bool
-     */
     public function isTypePhysical(): bool
     {
         return !isset($this->attributes['product_type']) || $this->attributes['product_type'] == ProductTypeEnum::PHYSICAL;
     }
 
-    /**
-     * @return bool
-     */
     public function isTypeDigital(): bool
     {
         return isset($this->attributes['product_type']) && $this->attributes['product_type'] == ProductTypeEnum::DIGITAL;
     }
 
-    /**
-     * @return HasMany
-     */
     public function productFiles(): HasMany
     {
         return $this->hasMany(ProductFile::class, 'product_id');
@@ -793,6 +700,6 @@ class Product extends BaseModel
 
     public function options(): HasMany
     {
-       return $this->hasMany(Option::class)->orderBy('order');
+        return $this->hasMany(Option::class)->orderBy('order');
     }
 }

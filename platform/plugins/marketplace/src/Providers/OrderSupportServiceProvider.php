@@ -110,7 +110,7 @@ class OrderSupportServiceProvider extends ServiceProvider
             $storeId = ($product->original_product && $product->original_product->store_id) ? $product->original_product->store_id : 0;
             if (!Arr::has($groupedProducts, $storeId)) {
                 $groupedProducts[$storeId] = collect([
-                    'store'    => $product->original_product->store,
+                    'store' => $product->original_product->store,
                     'products' => collect([$product]),
                 ]);
             } else {
@@ -300,7 +300,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         $message = '';
         $successData = [
             'error' => true,
-            'data'  => [],
+            'data' => [],
         ];
 
         $sessionCheckoutData = OrderHelper::getOrderSessionData($token);
@@ -336,6 +336,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         // return if all are error
         if ($results->count() == $error) {
             session()->forget('applied_coupon_code');
+
             return compact('error', 'message');
         }
 
@@ -385,7 +386,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         $couponDiscountAmount = collect($sessionMarketplaceData)->sum('coupon_discount_amount');
 
         OrderHelper::setOrderSessionData($token, [
-            'marketplace'            => $sessionMarketplaceData,
+            'marketplace' => $sessionMarketplaceData,
             'coupon_discount_amount' => $couponDiscountAmount,
         ]);
 
@@ -485,18 +486,18 @@ class OrderSupportServiceProvider extends ServiceProvider
         }
 
         $data = array_merge($request->input(), [
-            'amount'          => $orderAmount,
-            'currency'        => $request->input('currency', strtoupper(get_application_currency()->title)),
-            'user_id'         => $currentUserId,
+            'amount' => $orderAmount,
+            'currency' => $request->input('currency', strtoupper(get_application_currency()->title)),
+            'user_id' => $currentUserId,
             'shipping_method' => $hasShippingMethod ? $shippingMethodInput : '',
             'shipping_option' => $hasShippingMethod ? $request->input("shipping_option.$storeId") : null,
             'shipping_amount' => (float)$shippingAmount,
-            'tax_amount'      => Cart::instance('cart')->rawTaxByItems($cartItems),
-            'sub_total'       => Cart::instance('cart')->rawSubTotalByItems($cartItems),
-            'coupon_code'     => $couponCode,
+            'tax_amount' => Cart::instance('cart')->rawTaxByItems($cartItems),
+            'sub_total' => Cart::instance('cart')->rawSubTotalByItems($cartItems),
+            'coupon_code' => $couponCode,
             'discount_amount' => $promotionDiscountAmount + $couponDiscountAmount,
-            'status'          => OrderStatusEnum::PENDING,
-            'token'           => $token,
+            'status' => OrderStatusEnum::PENDING,
+            'token' => $token,
         ]);
 
         if ($order) {
@@ -508,16 +509,16 @@ class OrderSupportServiceProvider extends ServiceProvider
 
         if ($hasShippingMethod) {
             app(ShipmentInterface::class)->createOrUpdate([
-                'order_id'    => $order->id,
-                'user_id'     => 0,
-                'weight'      => $shippingData ? Arr::get($shippingData, 'weight') : 0,
-                'cod_amount'  => ($order->payment->id && $order->payment->status != PaymentStatusEnum::COMPLETED) ? $order->amount : 0,
-                'cod_status'  => ShippingCodStatusEnum::PENDING,
-                'type'        => $order->shipping_method,
-                'status'      => ShippingStatusEnum::PENDING,
-                'price'       => $order->shipping_amount,
-                'store_id'    => $order->store_id,
-                'shipment_id' => $shippingData ? Arr::get($shippingMethod, 'id') : ''
+                'order_id' => $order->id,
+                'user_id' => 0,
+                'weight' => $shippingData ? Arr::get($shippingData, 'weight') : 0,
+                'cod_amount' => ($order->payment->id && $order->payment->status != PaymentStatusEnum::COMPLETED) ? $order->amount : 0,
+                'cod_status' => ShippingCodStatusEnum::PENDING,
+                'type' => $order->shipping_method,
+                'status' => ShippingStatusEnum::PENDING,
+                'price' => $order->shipping_amount,
+                'store_id' => $order->store_id,
+                'shipment_id' => $shippingData ? Arr::get($shippingMethod, 'id') : '',
             ]);
         }
 
@@ -529,9 +530,9 @@ class OrderSupportServiceProvider extends ServiceProvider
         OrderHelper::processAddressOrder($currentUserId, $sessionStoreData, $request);
 
         $this->app->make(OrderHistoryInterface::class)->createOrUpdate([
-            'action'      => 'create_order_from_payment_page',
+            'action' => 'create_order_from_payment_page',
             'description' => __('Order is created from checkout page'),
-            'order_id'    => $order->id,
+            'order_id' => $order->id,
         ]);
 
         OrderHelper::processOrderProductData($products, $sessionStoreData);
@@ -573,11 +574,11 @@ class OrderSupportServiceProvider extends ServiceProvider
     public function processPaymentMethodPostCheckout($request, $totalAmount)
     {
         $paymentData = [
-            'error'     => false,
-            'message'   => false,
-            'amount'    => round((float)$totalAmount, 2),
-            'currency'  => $request->input('currency', strtoupper(cms_currency()->getDefaultCurrency()->title)),
-            'type'      => $request->input('payment_method'),
+            'error' => false,
+            'message' => false,
+            'amount' => round((float)$totalAmount, 2),
+            'currency' => $request->input('currency', strtoupper(cms_currency()->getDefaultCurrency()->title)),
+            'type' => $request->input('payment_method'),
             'charge_id' => null,
         ];
 
@@ -595,20 +596,22 @@ class OrderSupportServiceProvider extends ServiceProvider
             'token' => $token,
         ], ['address', 'products']);
 
-        if (!$orders->count() || session('tracked_start_checkout') && $token !== session('tracked_start_checkout')) {
+        if (!$orders->count()) {
             abort(404);
         }
 
-        foreach ($orders as $order) {
-            event(new OrderPlacedEvent($order));
+        if ($orders->where('is_finished', false)->count()) {
+            foreach ($orders->where('is_finished', false) as $order) {
+                event(new OrderPlacedEvent($order));
 
-            $order->is_finished = true;
-            $order->save();
+                $order->is_finished = true;
+                $order->save();
 
-            OrderHelper::decreaseProductQuantity($order);
+                OrderHelper::decreaseProductQuantity($order);
+            }
+
+            OrderHelper::clearSessions($token);
         }
-
-        OrderHelper::clearSessions($token);
 
         return view('plugins/marketplace::orders.thank-you', compact('orders'));
     }
@@ -666,18 +669,18 @@ class OrderSupportServiceProvider extends ServiceProvider
 
         return EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME)
             ->setVariableValues([
-                'store_address'    => get_ecommerce_setting('store_address'),
-                'store_phone'      => get_ecommerce_setting('store_phone'),
-                'order_id'         => $theFirst->code,
-                'order_token'      => $theFirst->token,
-                'customer_name'    => $theFirst->user->name ?: $theFirst->address->name,
-                'customer_email'   => $theFirst->user->email ?: $theFirst->address->email,
-                'customer_phone'   => $theFirst->user->phone ?: $theFirst->address->phone,
+                'store_address' => get_ecommerce_setting('store_address'),
+                'store_phone' => get_ecommerce_setting('store_phone'),
+                'order_id' => $theFirst->code,
+                'order_token' => $theFirst->token,
+                'customer_name' => $theFirst->user->name ?: $theFirst->address->name,
+                'customer_email' => $theFirst->user->email ?: $theFirst->address->email,
+                'customer_phone' => $theFirst->user->phone ?: $theFirst->address->phone,
                 'customer_address' => $customerAddress,
-                'product_list'     => view('plugins/marketplace::emails.partials.order-detail', compact('orders'))
+                'product_list' => view('plugins/marketplace::emails.partials.order-detail', compact('orders'))
                     ->render(),
-                'shipping_method'  => $theFirst->shipping_method_name,
-                'payment_method'   => $theFirst->payment->payment_channel->label(),
+                'shipping_method' => $theFirst->shipping_method_name,
+                'payment_method' => $theFirst->payment->payment_channel->label(),
             ]);
     }
 
@@ -704,9 +707,9 @@ class OrderSupportServiceProvider extends ServiceProvider
                 if ($saveHistory) {
                     foreach ($orders as $order) {
                         $this->app->make(OrderHistoryInterface::class)->createOrUpdate([
-                            'action'      => 'send_order_confirmation_email',
+                            'action' => 'send_order_confirmation_email',
                             'description' => trans('plugins/ecommerce::order.confirmation_email_was_sent_to_customer'),
-                            'order_id'    => $order->id,
+                            'order_id' => $order->id,
                         ]);
                     }
                 }
@@ -763,6 +766,10 @@ class OrderSupportServiceProvider extends ServiceProvider
         $shippingHasValue = []; // use to show shipping amount
         $shipping = [];
         $paymentMethod = session('selected_payment_method');
+
+        $shippingAmount = 0;
+        $defaultShippingMethod = null;
+        $defaultShippingOption = null;
 
         foreach ($groupedProducts as $storeId => $productsByStore) {
             $cartItems = $productsByStore['products']->pluck('cartItem');
@@ -857,13 +864,13 @@ class OrderSupportServiceProvider extends ServiceProvider
             }
 
             $marketplaceData[$storeId] = [
-                'shipping'                  => $shipping,
-                'default_shipping_method'   => $defaultShippingMethod,
-                'default_shipping_option'   => $defaultShippingOption,
-                'shipping_amount'           => $shippingAmount,
+                'shipping' => $shipping,
+                'default_shipping_method' => $defaultShippingMethod,
+                'default_shipping_option' => $defaultShippingOption,
+                'shipping_amount' => $shippingAmount,
                 'promotion_discount_amount' => $promotionDiscountAmount,
-                'coupon_discount_amount'    => $couponDiscountAmount,
-                'is_available_shipping'     => $isAvailableShipping,
+                'coupon_discount_amount' => $couponDiscountAmount,
+                'is_available_shipping' => $isAvailableShipping,
             ];
         }
 
@@ -922,7 +929,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         $message = '';
         $successData = [
             'error' => true,
-            'data'  => [],
+            'data' => [],
         ];
 
         foreach ($results as $result) {
@@ -993,7 +1000,7 @@ class OrderSupportServiceProvider extends ServiceProvider
     {
         $orders = $this->app->make(OrderInterface::class)
             ->allBy([
-                'token'       => $token,
+                'token' => $token,
                 'is_finished' => 0,
             ], ['address', 'products']);
 
@@ -1008,7 +1015,7 @@ class OrderSupportServiceProvider extends ServiceProvider
 
             $trashOrders = $this->app->make(OrderInterface::class)
                 ->allBy([
-                    'token'       => $token,
+                    'token' => $token,
                     'is_finished' => 0,
                 ], ['address']);
 
@@ -1021,14 +1028,14 @@ class OrderSupportServiceProvider extends ServiceProvider
 
             $order = $orders->first();
             $sessionCheckoutData = [
-                'name'            => $order->address->name,
-                'email'           => $order->address->email,
-                'phone'           => $order->address->phone,
-                'address'         => $order->address->address,
-                'country'         => $order->address->country,
-                'state'           => $order->address->state,
-                'city'            => $order->address->city,
-                'zip_code'        => $order->address->zip_code,
+                'name' => $order->address->name,
+                'email' => $order->address->email,
+                'phone' => $order->address->phone,
+                'address' => $order->address->address,
+                'country' => $order->address->country,
+                'state' => $order->address->state,
+                'city' => $order->address->city,
+                'zip_code' => $order->address->zip_code,
                 'shipping_method' => $order->shipping_method,
                 'shipping_option' => $order->shipping_option,
                 'shipping_amount' => $order->shipping_amount,
@@ -1153,11 +1160,11 @@ class OrderSupportServiceProvider extends ServiceProvider
         $cartItems = $products['products']->pluck('cartItem');
 
         $generalData = [
-            'user_id'         => $currentUserId,
+            'user_id' => $currentUserId,
             'shipping_method' => $request->input('shipping_method.' . $store->id, ShippingMethodEnum::DEFAULT),
             'shipping_option' => $request->input('shipping_option.' . $store->id),
-            'coupon_code'     => Arr::get($sessionData, 'applied_coupon_code'),
-            'token'           => $token,
+            'coupon_code' => Arr::get($sessionData, 'applied_coupon_code'),
+            'token' => $token,
         ];
 
         [$sessionData, $order] = OrderHelper::processOrderInCheckout(
@@ -1215,6 +1222,7 @@ class OrderSupportServiceProvider extends ServiceProvider
                 if ($store = $stores->firstWhere('id', $original->store_id)) {
                     $storesInCart[$store->id] = $store->name;
                     $groupedProducts[$store->id][] = $original;
+
                     continue;
                 }
             }
@@ -1224,6 +1232,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         if ($includeProducts) {
             return [$storesInCart, $groupedProducts];
         }
+
         return $storesInCart;
     }
 
@@ -1287,15 +1296,16 @@ class OrderSupportServiceProvider extends ServiceProvider
                 $revenueAmount = $revenue ? $revenue->amount : 0;
 
                 $data = [
-                    'sub_amount'      => $orderAmountWithoutShippingFee,
-                    'fee'             => $fee,
-                    'amount'          => $amount,
-                    'currency'        => get_application_currency()->title,
+                    'sub_amount' => $orderAmountWithoutShippingFee,
+                    'fee' => $fee,
+                    'amount' => $amount,
+                    'currency' => get_application_currency()->title,
                     'current_balance' => $currentBalance,
-                    'customer_id'     => $customer->getKey(),
+                    'customer_id' => $customer->getKey(),
                 ];
 
                 DB::beginTransaction();
+
                 try {
                     if ($revenue) {
                         $amountByCurrency -= $revenueAmount;

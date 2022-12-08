@@ -3,5 +3,8 @@
     "source": "envato",
     "apiUrl": "https://license.botble.com",
     "apiKey": "CAF4B17F6D3F656125F9",
-    "version": "1.5.3.2"
+    "version": "1.6.3",
+    "coreVersion": "5.31.3",
+    "marketplaceUrl": "https://marketplace.botble.com/api/v1",
+    "marketplaceToken": null
 }

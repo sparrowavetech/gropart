@@ -15,9 +15,9 @@ class SimpleSliderItemRequest extends Request
     {
         return [
             'simple_slider_id' => 'required',
-            'title'            => 'max:255',
-            'image'            => 'required',
-            'order'            => 'required|integer|min:0|max:1000',
+            'title' => 'max:255',
+            'image' => 'required',
+            'order' => 'required|integer|min:0|max:1000',
         ];
     }
 }

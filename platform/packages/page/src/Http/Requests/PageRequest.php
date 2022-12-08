@@ -17,11 +17,11 @@ class PageRequest extends Request
     public function rules()
     {
         return [
-            'name'        => 'required|max:120',
+            'name' => 'required|max:120',
             'description' => 'max:400',
-            'content'     => 'required',
-            'template'    => Rule::in(array_keys(Template::getPageTemplates())),
-            'status'      => Rule::in(BaseStatusEnum::values()),
+            'content' => 'required',
+            'template' => Rule::in(array_keys(Template::getPageTemplates())),
+            'status' => Rule::in(BaseStatusEnum::values()),
         ];
     }
 }

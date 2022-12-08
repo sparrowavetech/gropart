@@ -60,6 +60,7 @@ class AdsTable extends TableAbstract
                 if (!Auth::user()->hasPermission('ads.edit')) {
                     return $item->name;
                 }
+
                 return Html::link(route('ads.edit', $item->id), $item->name);
             })
             ->editColumn('checkbox', function ($item) {
@@ -109,38 +110,38 @@ class AdsTable extends TableAbstract
     public function columns()
     {
         return [
-            'id'         => [
-                'name'  => 'ads.id',
+            'id' => [
+                'name' => 'ads.id',
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
             ],
-            'image'      => [
-                'name'  => 'ads.image',
+            'image' => [
+                'name' => 'ads.image',
                 'title' => trans('core/base::tables.image'),
                 'width' => '70px',
             ],
-            'name'       => [
-                'name'  => 'ads.name',
+            'name' => [
+                'name' => 'ads.name',
                 'title' => trans('core/base::tables.name'),
                 'class' => 'text-start',
             ],
-            'key'        => [
-                'name'  => 'ads.key',
+            'key' => [
+                'name' => 'ads.key',
                 'title' => trans('plugins/ads::ads.shortcode'),
                 'class' => 'text-start',
             ],
-            'clicked'    => [
-                'name'  => 'ads.clicked',
+            'clicked' => [
+                'name' => 'ads.clicked',
                 'title' => trans('plugins/ads::ads.clicked'),
                 'class' => 'text-start',
             ],
             'expired_at' => [
-                'name'  => 'ads.expired_at',
+                'name' => 'ads.expired_at',
                 'title' => trans('plugins/ads::ads.expired_at'),
                 'width' => '100px',
             ],
-            'status'     => [
-                'name'  => 'ads.status',
+            'status' => [
+                'name' => 'ads.status',
                 'title' => trans('core/base::tables.status'),
                 'width' => '100px',
             ],
@@ -179,20 +180,20 @@ class AdsTable extends TableAbstract
     public function getBulkChanges(): array
     {
         return [
-            'ads.name'       => [
-                'title'    => trans('core/base::tables.name'),
-                'type'     => 'text',
+            'ads.name' => [
+                'title' => trans('core/base::tables.name'),
+                'type' => 'text',
                 'validate' => 'required|max:120',
             ],
-            'ads.status'     => [
-                'title'    => trans('core/base::tables.status'),
-                'type'     => 'select',
-                'choices'  => BaseStatusEnum::labels(),
+            'ads.status' => [
+                'title' => trans('core/base::tables.status'),
+                'type' => 'select',
+                'choices' => BaseStatusEnum::labels(),
                 'validate' => 'required|in:' . implode(',', BaseStatusEnum::values()),
             ],
             'ads.expired_at' => [
                 'title' => trans('plugins/ads::ads.expired_at'),
-                'type'  => 'date',
+                'type' => 'date',
             ],
         ];
     }

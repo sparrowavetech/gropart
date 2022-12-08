@@ -26,18 +26,18 @@ class EventServiceProvider extends ServiceProvider
         RenderingSiteMapEvent::class => [
             RenderingSiteMapListener::class,
         ],
-        CreatedContentEvent::class   => [
+        CreatedContentEvent::class => [
             AddLanguageForVariantsListener::class,
             ClearProductCategoriesCacheListener::class,
         ],
-        UpdatedContentEvent::class   => [
+        UpdatedContentEvent::class => [
             AddLanguageForVariantsListener::class,
             ClearProductCategoriesCacheListener::class,
         ],
-        Registered::class            => [
+        Registered::class => [
             SendMailsAfterCustomerRegistered::class,
         ],
-        OrderPlacedEvent::class      => [
+        OrderPlacedEvent::class => [
             SendWebhookWhenOrderPlaced::class,
             GenerateInvoiceListener::class,
         ],

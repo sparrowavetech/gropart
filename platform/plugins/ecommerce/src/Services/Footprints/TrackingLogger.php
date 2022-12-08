@@ -46,14 +46,14 @@ class TrackingLogger implements TrackingLoggerInterface
     {
         $attributes = array_merge(
             [
-                'footprint'         => $this->request->footprint(),
-                'ip'                => $this->captureIp(),
-                'landing_domain'    => $this->captureLandingDomain(),
-                'landing_page'      => $this->captureLandingPage(),
-                'landing_params'    => $this->captureLandingParams(),
-                'referral'          => $this->captureReferral(),
-                'gclid'             => $this->captureGCLID(),
-                'fclid'             => $this->captureFCLID(),
+                'footprint' => $this->request->footprint(),
+                'ip' => $this->captureIp(),
+                'landing_domain' => $this->captureLandingDomain(),
+                'landing_page' => $this->captureLandingPage(),
+                'landing_params' => $this->captureLandingParams(),
+                'referral' => $this->captureReferral(),
+                'gclid' => $this->captureGCLID(),
+                'fclid' => $this->captureFCLID(),
             ],
             $this->captureUTM(),
             $this->captureReferrer(),

@@ -18,8 +18,8 @@
     @if (setting('admin_logo') || config('core.base.general.logo'))
         <meta property="og:image" content="{{ setting('admin_logo') ? RvMedia::getImageUrl(setting('admin_logo')) : url(config('core.base.general.logo')) }}">
     @endif
-    <meta name="description" content="{{ strip_tags(trans('core/base::layouts.copyright', ['year' =>Carbon\Carbon::now()->format('Y'), 'company' => setting('admin_title', config('core.base.general.base_name')), 'version' => get_cms_version()])) }}">
-    <meta property="og:description" content="{{ strip_tags(trans('core/base::layouts.copyright', ['year' =>Carbon\Carbon::now()->format('Y'), 'company' => setting('admin_title', config('core.base.general.base_name')), 'version' => get_cms_version()])) }}">
+    <meta name="description" content="{{ strip_tags(trans('core/base::layouts.copyright', ['year' => Carbon\Carbon::now()->format('Y'), 'company' => setting('admin_title', config('core.base.general.base_name')), 'version' => get_cms_version()])) }}">
+    <meta property="og:description" content="{{ strip_tags(trans('core/base::layouts.copyright', ['year' => Carbon\Carbon::now()->format('Y'), 'company' => setting('admin_title', config('core.base.general.base_name')), 'version' => get_cms_version()])) }}">
 
     @if (setting('admin_favicon') || config('core.base.general.favicon'))
         <link rel="icon shortcut" href="{{ setting('admin_favicon') ? RvMedia::getImageUrl(setting('admin_favicon'), 'thumb') : url(config('core.base.general.favicon')) }}">
@@ -28,6 +28,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
 
     {!! Assets::renderHeader(['core']) !!}
+
+    <script>
+        $(function () {
+            window.vueApp.boot();
+        });
+
+        window.siteUrl = "{{ url('') }}";
+    </script>
 
     @if (BaseHelper::adminLanguageDirection() == 'rtl')
         <link rel="stylesheet" href="{{ asset('vendor/core/core/base/css/rtl.css') }}">
@@ -38,9 +46,12 @@
     @stack('header')
 </head>
 <body @if (BaseHelper::adminLanguageDirection() == 'rtl') dir="rtl" @endif class="@yield('body-class', 'page-sidebar-closed-hide-logo page-content-white page-container-bg-solid') {{ session()->get('sidebar-menu-toggle') ? 'page-sidebar-closed' : '' }}" style="@yield('body-style')">
+
     {!! apply_filters(BASE_FILTER_HEADER_LAYOUT_TEMPLATE, null) !!}
 
-    @yield('page')
+    <div id="app">
+        @yield('page')
+    </div>
 
     @include('core/base::elements.common')
 

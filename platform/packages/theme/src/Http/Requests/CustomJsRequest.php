@@ -11,11 +11,11 @@ class CustomJsRequest extends Request
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'header_js' => 'max:2500',
-            'body_js'   => 'max:2500',
+            'body_js' => 'max:2500',
             'footer_js' => 'max:2500',
         ];
     }

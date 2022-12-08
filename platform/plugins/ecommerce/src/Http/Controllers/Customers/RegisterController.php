@@ -16,6 +16,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Response;
 use SeoHelper;
@@ -121,8 +122,8 @@ class RegisterController extends Controller
     protected function validator(array $data)
     {
         $rules = [
-            'name'     => 'required|max:255',
-            'email'    => 'required|email|max:255|unique:ec_customers',
+            'name' => 'required|max:255',
+            'email' => 'required|email|max:255|unique:ec_customers',
             'password' => 'required|min:6|confirmed',
         ];
 
@@ -138,16 +139,16 @@ class RegisterController extends Controller
         }
 
         $attributes = [
-            'name'                   => __('Name'),
-            'email'                  => __('Email'),
-            'password'               => __('Password'),
-            'g-recaptcha-response'   => __('Captcha'),
+            'name' => __('Name'),
+            'email' => __('Email'),
+            'password' => __('Password'),
+            'g-recaptcha-response' => __('Captcha'),
             'agree_terms_and_policy' => __('Term and Policy'),
         ];
 
         return Validator::make($data, $rules, [
             'g-recaptcha-response.required' => __('Captcha Verification Failed!'),
-            'g-recaptcha-response.captcha'  => __('Captcha Verification Failed!'),
+            'g-recaptcha-response.captcha' => __('Captcha Verification Failed!'),
         ], $attributes);
     }
 
@@ -160,9 +161,9 @@ class RegisterController extends Controller
     protected function create(array $data)
     {
         return $this->customerRepository->create([
-            'name'     => BaseHelper::clean($data['name']),
-            'email'    => BaseHelper::clean($data['email']),
-            'password' => bcrypt($data['password']),
+            'name' => BaseHelper::clean($data['name']),
+            'email' => BaseHelper::clean($data['email']),
+            'password' => Hash::make($data['password']),
         ]);
     }
 

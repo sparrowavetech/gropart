@@ -150,7 +150,7 @@ class ValidatorHandler
         $jsValidations = $this->generateJavascriptValidations();
 
         return [
-            'rules'    => $jsValidations,
+            'rules' => $jsValidations,
             'messages' => $jsMessages,
         ];
     }

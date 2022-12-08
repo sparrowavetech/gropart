@@ -12,7 +12,7 @@ class TrimUrls extends PageSpeed
     {
         $replace = [
             '/https:/' => '',
-            '/http:/'  => '',
+            '/http:/' => '',
         ];
 
         return $this->replace($replace, $buffer);

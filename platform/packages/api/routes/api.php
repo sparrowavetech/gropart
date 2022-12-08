@@ -1,8 +1,8 @@
 <?php
 
 Route::group([
-    'prefix'     => 'api/v1',
-    'namespace'  => 'Botble\Api\Http\Controllers',
+    'prefix' => 'api/v1',
+    'namespace' => 'Botble\Api\Http\Controllers',
     'middleware' => ['api'],
 ], function () {
     Route::post('register', 'AuthenticationController@register');

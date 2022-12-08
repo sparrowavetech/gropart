@@ -4,7 +4,7 @@
         <div class="widget-title">
             <h4>&nbsp; {{ trans('plugins/translation::translation.theme-translations') }}</h4>
         </div>
-        <div class="widget-body box-translation">
+        <div class="widget-body box-translation" v-pre>
             @if (count(\Botble\Base\Supports\Language::getAvailableLocales()) > 0 && $group)
                 {!! Form::open(['role' => 'form', 'route' => 'translations.theme-translations', 'method' => 'POST']) !!}
                     <input type="hidden" name="locale" value="{{ $group['locale'] }}">

@@ -75,9 +75,10 @@ class PublicProductController
      */
     protected $slugRepository;
     /**
-     * @var EnquiryInterface 
+     * @var EnquiryInterface
      */
     protected $enquiryRepository;
+
     /**
      * PublicProductController constructor.
      * @param ProductInterface $productRepository
@@ -89,13 +90,13 @@ class PublicProductController
      * @param EnquiryInterface $enquiryRepository
      */
     public function __construct(
-        ProductInterface             $productRepository,
-        ProductCategoryInterface     $productCategoryRepository,
+        ProductInterface $productRepository,
+        ProductCategoryInterface $productCategoryRepository,
         ProductAttributeSetInterface $productAttributeSet,
-        BrandInterface               $brandRepository,
-        ProductVariationInterface    $productVariationRepository,
-        SlugInterface                $slugRepository,
-        EnquiryInterface             $enquiryRepository
+        BrandInterface $brandRepository,
+        ProductVariationInterface $productVariationRepository,
+        SlugInterface $slugRepository,
+        EnquiryInterface $enquiryRepository
     ) {
         $this->productRepository = $productRepository;
         $this->productCategoryRepository = $productCategoryRepository;
@@ -133,10 +134,9 @@ class PublicProductController
             $with = array_merge($with, ['store', 'store.slugable']);
         }
 
-        $withCount = EcommerceHelper::withReviewsCount();
         $condition = ['is_enquiry' => 0];
         if ($query && !$request->ajax()) {
-            $products = $productService->getProduct($request, null, null, $with, $withCount, $condition);
+            $products = $productService->getProduct($request, null, null, $with, $condition);
 
             SeoHelper::setTitle(__('Search result for ":query"', compact('query')));
 
@@ -151,7 +151,7 @@ class PublicProductController
             )->render();
         }
 
-        $products = $productService->getProduct($request, null, null, $with, $withCount, $condition);
+        $products = $productService->getProduct($request, null, null, $with);
 
         if ($request->ajax()) {
             return $this->ajaxFilterProductsResponse($products, $request, $response);
@@ -215,14 +215,14 @@ class PublicProductController
                 'attachment'      => $result['data']->url,
             ]);
         }
-       
+
         $enquiry = $this->enquiryRepository->createOrUpdate($request->input());
         event(new CreatedContentEvent(CUSTOMER_MODULE_SCREEN_NAME, $request, $enquiry));
-       
+
         if (is_plugin_active('marketplace')) {
             MarketplaceHelper::sendEnquiryMail($enquiry);
         }
-       
+
         OrderHelper::sendEnquiryMail($enquiry);
 
         return $response
@@ -235,7 +235,7 @@ class PublicProductController
         SeoHelper::setTitle(__('Enquiry Success'))->setDescription(__('Enquiry Success'));
         $enquiry_id = base64_decode($enquiry_id);
         $enquiry = $this->enquiryRepository->findOrFail($enquiry_id, ['product']);
-        
+
         return view('plugins/ecommerce::enquires.enquiry-thank-you', compact('enquiry'));
         // return Theme::scope(
         //     'plugins/ecommerce::orders.thank-you.enquiry-info',
@@ -243,7 +243,6 @@ class PublicProductController
         //     'plugins/ecommerce::orders.thank-you.enquiry-info'
         // )->render();
     }
-
 
     /**
      * @param string $slug
@@ -253,17 +252,17 @@ class PublicProductController
     public function getProduct($slug, Request $request)
     {
         $slug = $this->slugRepository->getFirstBy([
-            'key'            => $slug,
+            'key' => $slug,
             'reference_type' => Product::class,
-            'prefix'         => SlugHelper::getPrefix(Product::class),
+            'prefix' => SlugHelper::getPrefix(Product::class),
         ]);
-       
+
         if (!$slug) {
             abort(404);
         }
 
         $condition = [
-            'ec_products.id'     => $slug->reference_id,
+            'ec_products.id' => $slug->reference_id,
             'ec_products.status' => BaseStatusEnum::PUBLISHED,
         ];
 
@@ -271,22 +270,21 @@ class PublicProductController
             Arr::forget($condition, 'ec_products.status');
         }
 
-        $product = get_products([
-            'condition' => $condition,
-            'take'      => 1,
-            'with'      => [
-                'slugable',
-                'tags',
-                'tags.slugable',
-                'categories',
-                'categories.slugable',
-                'frequentlyBoughtTogether',
-                'options' => function ($query) {
-                    return $query->with('values');
-                }
-            ],
-            'withCount' => EcommerceHelper::withReviewsCount(),
-        ]);
+        $product = get_products(array_merge([
+                'condition' => $condition,
+                'take' => 1,
+                'with' => [
+                    'slugable',
+                    'tags',
+                    'tags.slugable',
+                    'categories',
+                    'categories.slugable',
+                    'frequentlyBoughtTogether',
+                    'options' => function ($query) {
+                        return $query->with('values');
+                    },
+                ],
+            ], EcommerceHelper::withReviewsParams()));
 
         if (!$product) {
             abort(404);
@@ -404,6 +402,7 @@ class PublicProductController
             'plugins/ecommerce::themes.products'
         )->render();
     }
+
     /**
      * @param string $slug
      * @param Request $request
@@ -419,9 +418,9 @@ class PublicProductController
         BaseHttpResponse $response
     ) {
         $slug = $this->slugRepository->getFirstBy([
-            'key'            => $slug,
+            'key' => $slug,
             'reference_type' => ProductTag::class,
-            'prefix'         => SlugHelper::getPrefix(ProductTag::class),
+            'prefix' => SlugHelper::getPrefix(ProductTag::class),
         ]);
 
         if (!$slug) {
@@ -429,7 +428,7 @@ class PublicProductController
         }
 
         $condition = [
-            'ec_product_categories.id'     => $slug->reference_id,
+            'ec_product_categories.id' => $slug->reference_id,
             'ec_product_categories.status' => BaseStatusEnum::PUBLISHED,
         ];
 
@@ -451,26 +450,23 @@ class PublicProductController
             return $response->setNextUrl($tag->url);
         }
 
-        $withCount = EcommerceHelper::withReviewsCount();
-
-        $products = $this->productRepository->getProductByTags([
-            'product_tag' => [
-                'by'       => 'id',
-                'value_in' => [$tag->id],
-            ],
-            'paginate'    => [
-                'per_page'      => (int)theme_option('number_of_products_per_page', 12),
-                'current_paged' => (int)$request->input('page', 1),
-            ],
-            'with'        => [
-                'slugable',
-                'variations',
-                'productLabels',
-                'variationAttributeSwatchesForProductList',
-                'productCollections',
-            ],
-            'withCount'   => $withCount,
-        ]);
+        $products = $this->productRepository->getProductByTags(array_merge([
+                'product_tag' => [
+                    'by' => 'id',
+                    'value_in' => [$tag->id],
+                ],
+                'paginate' => [
+                    'per_page' => (int)theme_option('number_of_products_per_page', 12),
+                    'current_paged' => (int)$request->input('page', 1),
+                ],
+                'with' => [
+                    'slugable',
+                    'variations',
+                    'productLabels',
+                    'variationAttributeSwatchesForProductList',
+                    'productCollections',
+                ],
+            ], EcommerceHelper::withReviewsParams()));
 
         if ($request->ajax()) {
             return $this->ajaxFilterProductsResponse($products, $request, $response);
@@ -516,9 +512,9 @@ class PublicProductController
         BaseHttpResponse $response
     ) {
         $slug = $this->slugRepository->getFirstBy([
-            'key'            => $slug,
+            'key' => $slug,
             'reference_type' => ProductCategory::class,
-            'prefix'         => SlugHelper::getPrefix(ProductCategory::class),
+            'prefix' => SlugHelper::getPrefix(ProductCategory::class),
         ]);
 
         if (!$slug) {
@@ -526,7 +522,7 @@ class PublicProductController
         }
 
         $condition = [
-            'ec_product_categories.id'     => $slug->reference_id,
+            'ec_product_categories.id' => $slug->reference_id,
             'ec_product_categories.status' => BaseStatusEnum::PUBLISHED,
         ];
 
@@ -560,9 +556,11 @@ class PublicProductController
             $with = array_merge($with, ['store', 'store.slugable']);
         }
 
-        $request->merge(['categories' => $category->getChildrenIds($category, [$category->id])]);
+        $request->merge(['categories' => array_merge([$category->id], $category->activeChildren->pluck('id')->all())]);
         $condition = ['is_enquiry' => 0];
-        $products = $getProductService->getProduct($request, null, null, $with, EcommerceHelper::withReviewsCount(),$condition);
+        $products = $getProductService->getProduct($request, null, null, $with,$condition);
+
+        $request->request->remove('categories');
 
         SeoHelper::setTitle($category->name)->setDescription($category->description);
 
@@ -593,7 +591,7 @@ class PublicProductController
         if ($request->ajax()) {
             return $this->ajaxFilterProductsResponse($products, $request, $response);
         }
-        
+
         return Theme::scope(
             'ecommerce.product-category',
             compact('category', 'products','condition'),
@@ -627,7 +625,7 @@ class PublicProductController
                     'ec_product_variations.id' => $variation->id,
                     'original_products.status' => BaseStatusEnum::PUBLISHED,
                 ],
-                'select'    => [
+                'select' => [
                     'ec_products.id',
                     'ec_products.name',
                     'ec_products.quantity',
@@ -646,7 +644,7 @@ class PublicProductController
                     'ec_products.wide',
                     'ec_products.length',
                 ],
-                'take'      => 1,
+                'take' => 1,
             ]);
 
             if ($product) {
@@ -694,10 +692,10 @@ class PublicProductController
         } else {
             $originalProduct = $this->productRepository->advancedGet([
                 'condition' => [
-                    'ec_products.id'     => $id,
+                    'ec_products.id' => $id,
                     'ec_products.status' => BaseStatusEnum::PUBLISHED,
                 ],
-                'select'    => [
+                'select' => [
                     'ec_products.id',
                     'ec_products.name',
                     'ec_products.quantity',
@@ -715,7 +713,7 @@ class PublicProductController
                     'ec_products.wide',
                     'ec_products.length',
                 ],
-                'take'      => 1,
+                'take' => 1,
             ]);
 
             if ($originalProduct) {
@@ -788,15 +786,15 @@ class PublicProductController
     public function getBrand($slug, Request $request, GetProductService $getProductService, BaseHttpResponse $response)
     {
         $slug = $this->slugRepository->getFirstBy([
-            'key'            => $slug,
+            'key' => $slug,
             'reference_type' => Brand::class,
-            'prefix'         => SlugHelper::getPrefix(Brand::class),
+            'prefix' => SlugHelper::getPrefix(Brand::class),
         ]);
 
         if (!$slug) {
             abort(404);
         }
-        
+
         $brand = $this->brandRepository->getFirstBy(['id' => $slug->reference_id], ['*'], ['slugable']);
 
         if (!$brand) {
@@ -821,9 +819,7 @@ class PublicProductController
                 'productLabels',
                 'variationAttributeSwatchesForProductList',
                 'productCollections',
-            ],
-            EcommerceHelper::withReviewsCount(),
-            $condition
+            ], $condition
         );
 
         if ($request->ajax()) {
@@ -946,5 +942,4 @@ class PublicProductController
         return Theme::scope('ecommerce.order-tracking', compact('order'), 'plugins/ecommerce::themes.order-tracking')
             ->render();
     }
-    
 }

@@ -40,6 +40,7 @@ class FarmartController extends PublicController
             if (!$request->ajax()) {
                 return $this->httpResponse->setNextUrl(route('public.index'));
             }
+
             return $next($request);
         })->only([
             'ajaxGetProducts',
@@ -112,19 +113,18 @@ class FarmartController extends PublicController
     public function ajaxGetProducts(Request $request)
     {
         $products = get_products_by_collections([
-            'collections' => [
-                'by'       => 'id',
-                'value_in' => [(int)$request->input('collection_id')],
-            ],
-            'take'        => (int)$request->input('limit', 10),
-            'with'        => [
-                'slugable',
-                'variations',
-                'productCollections',
-                'variationAttributeSwatchesForProductList',
-            ],
-            'withCount'   => EcommerceHelper::withReviewsCount(),
-        ]);
+                'collections' => [
+                    'by' => 'id',
+                    'value_in' => [(int)$request->input('collection_id')],
+                ],
+                'take' => (int)$request->input('limit', 10),
+                'with' => [
+                    'slugable',
+                    'variations',
+                    'productCollections',
+                    'variationAttributeSwatchesForProductList',
+                ],
+            ] + EcommerceHelper::withReviewsParams());
 
         $wishlistIds = $this->getWishlistIds($products->pluck('id')->all());
 
@@ -169,9 +169,15 @@ class FarmartController extends PublicController
             ->where('status', BaseStatusEnum::PUBLISHED)
             ->with([
                 'products' => function ($query) {
+                    $reviewParams = EcommerceHelper::withReviewsParams();
+
+                    if (EcommerceHelper::isReviewEnabled()) {
+                        $query->withAvg($reviewParams['withAvg'][0], $reviewParams['withAvg'][1]);
+                    }
+
                     return $query
                         ->where('status', BaseStatusEnum::PUBLISHED)
-                        ->withCount(EcommerceHelper::withReviewsCount());
+                        ->withCount($reviewParams['withCount']);
                 },
             ])
             ->first();
@@ -204,15 +210,14 @@ class FarmartController extends PublicController
         $data = [];
 
         $products = get_featured_products([
-            'take'      => (int)$request->input('limit', 10),
-            'with'      => [
-                'slugable',
-                'variations',
-                'productCollections',
-                'variationAttributeSwatchesForProductList',
-            ],
-            'withCount' => EcommerceHelper::withReviewsCount(),
-        ]);
+                'take' => (int)$request->input('limit', 10),
+                'with' => [
+                    'slugable',
+                    'variations',
+                    'productCollections',
+                    'variationAttributeSwatchesForProductList',
+                ],
+            ] + EcommerceHelper::withReviewsParams());
 
         $wishlistIds = $this->getWishlistIds($products->pluck('id')->all());
 
@@ -230,8 +235,8 @@ class FarmartController extends PublicController
      * @return BaseHttpResponse
      */
     public function ajaxGetProductsByCategoryId(
-        Request                  $request,
-        ProductInterface         $productRepository,
+        Request $request,
+        ProductInterface $productRepository,
         ProductCategoryInterface $productCategoryRepository
     ) {
         $categoryId = $request->input('category_id');
@@ -243,13 +248,12 @@ class FarmartController extends PublicController
         $category = $productCategoryRepository->findOrFail($categoryId);
 
         $products = $productRepository->getProductsByCategories([
-            'categories' => [
-                'by'       => 'id',
-                'value_in' => $category->getChildrenIds($category, [$category->id]),
-            ],
-            'take'       => (int)$request->input('limit', 10),
-            'withCount'  => EcommerceHelper::withReviewsCount(),
-        ]);
+                'categories' => [
+                    'by' => 'id',
+                    'value_in' => array_merge([$category->id], $category->activeChildren->pluck('id')->all()),
+                ],
+                'take' => (int)$request->input('limit', 10),
+            ] + EcommerceHelper::withReviewsParams());
 
         $wishlistIds = $this->getWishlistIds($products->pluck('id')->all());
 
@@ -267,9 +271,9 @@ class FarmartController extends PublicController
     public function ajaxCart()
     {
         return $this->httpResponse->setData([
-            'count'       => Cart::instance('cart')->count(),
+            'count' => Cart::instance('cart')->count(),
             'total_price' => format_price(Cart::instance('cart')->rawSubTotal() + Cart::instance('cart')->rawTax()),
-            'html'        => Theme::partial('cart-mini.list'),
+            'html' => Theme::partial('cart-mini.list'),
         ]);
     }
 
@@ -288,21 +292,20 @@ class FarmartController extends PublicController
 
         if ($id) {
             $product = get_products([
-                'condition' => [
-                    'ec_products.id'     => $id,
-                    'ec_products.status' => BaseStatusEnum::PUBLISHED,
-                ],
-                'take'      => 1,
-                'with'      => [
-                    'slugable',
-                    'tags',
-                    'tags.slugable',
-                    'options' => function($query) {
-                        return $query->with('values');
-                    }
-                ],
-                'withCount' => EcommerceHelper::withReviewsCount(),
-            ]);
+                    'condition' => [
+                        'ec_products.id' => $id,
+                        'ec_products.status' => BaseStatusEnum::PUBLISHED,
+                    ],
+                    'take' => 1,
+                    'with' => [
+                        'slugable',
+                        'tags',
+                        'tags.slugable',
+                        'options' => function ($query) {
+                            return $query->with('values');
+                        },
+                    ],
+                ] + EcommerceHelper::withReviewsParams());
         }
 
         if (!$product) {
@@ -353,6 +356,7 @@ class FarmartController extends PublicController
                 Cart::instance('wishlist')->search(function ($cartItem, $rowId) use ($productId) {
                     if ($cartItem->id == $productId) {
                         Cart::instance('wishlist')->remove($rowId);
+
                         return true;
                     }
 
@@ -378,13 +382,13 @@ class FarmartController extends PublicController
         if (is_added_to_wishlist($productId)) {
             $added = false;
             $wishlistRepository->deleteBy([
-                'product_id'  => $productId,
+                'product_id' => $productId,
                 'customer_id' => $customer->getKey(),
             ]);
         } else {
             $added = true;
             $wishlistRepository->createOrUpdate([
-                'product_id'  => $productId,
+                'product_id' => $productId,
                 'customer_id' => $customer->getKey(),
             ]);
         }
@@ -436,7 +440,7 @@ class FarmartController extends PublicController
             'variationAttributeSwatchesForProductList',
         ];
 
-        $products = $productService->getProduct($request, null, null, $with, EcommerceHelper::withReviewsCount());
+        $products = $productService->getProduct($request, null, null, $with);
 
         $queries = $request->input();
         foreach ($queries as $key => $query) {
@@ -465,8 +469,8 @@ class FarmartController extends PublicController
         ProductInterface $productRepository
     ) {
         $product = $productRepository->getFirstBy([
-            'id'           => $id,
-            'status'       => BaseStatusEnum::PUBLISHED,
+            'id' => $id,
+            'status' => BaseStatusEnum::PUBLISHED,
             'is_variation' => 0,
         ], [], ['variations']);
 
@@ -481,13 +485,13 @@ class FarmartController extends PublicController
 
         if ($star) {
             $message = __(':total review(s) ":star star" for ":product"', [
-                'total'   => $reviews->total(),
+                'total' => $reviews->total(),
                 'product' => $product->name,
-                'star'    => $star,
+                'star' => $star,
             ]);
         } else {
             $message = __(':total review(s) for ":product"', [
-                'total'   => $reviews->total(),
+                'total' => $reviews->total(),
                 'product' => $product->name,
             ]);
         }
@@ -505,8 +509,8 @@ class FarmartController extends PublicController
      * @return BaseHttpResponse
      */
     public function ajaxGetProductCategories(
-        Request                  $request,
-        BaseHttpResponse         $response,
+        Request $request,
+        BaseHttpResponse $response,
         ProductCategoryInterface $productCategoryRepository
     ) {
         $categoryIds = $request->input('categories', []);
@@ -519,7 +523,7 @@ class FarmartController extends PublicController
                 'status' => BaseStatusEnum::PUBLISHED,
                 ['id', 'IN', $categoryIds],
             ],
-            'with'      => ['slugable'],
+            'with' => ['slugable'],
         ]);
 
         return $response->setData(ProductCategoryResource::collection($categories));
@@ -535,10 +539,9 @@ class FarmartController extends PublicController
         }
 
         $queryParams = [
-            'with'      => ['slugable'],
-            'withCount' => EcommerceHelper::withReviewsCount(),
-            'take'      => 12,
-        ];
+                'with' => ['slugable'],
+                'take' => 12,
+            ] + EcommerceHelper::withReviewsParams();
 
         if (auth('customer')->check()) {
             $products = $productRepository->getProductsRecentlyViewed(auth('customer')->id(), $queryParams);
@@ -580,8 +583,8 @@ class FarmartController extends PublicController
         EmailHandler::setModule(Theme::getThemeName())
             ->setVariableValues([
                 'contact_message' => $request->input('content'),
-                'customer_name'   => $name,
-                'customer_email'  => $email,
+                'customer_name' => $name,
+                'customer_email' => $email,
             ])
             ->sendUsingTemplate('contact-seller', $email, [], false, 'themes');
 

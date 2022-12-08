@@ -42,7 +42,9 @@ class CityRepository extends RepositoriesAbstract implements CityInterface
                 });
         }
 
-        $data = $data->limit($limit);
+        if ($limit) {
+            $data = $data->limit($limit);
+        }
 
         if ($with) {
             $data = $data->with($with);

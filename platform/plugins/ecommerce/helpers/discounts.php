@@ -21,6 +21,7 @@ if (!function_exists('get_discount_description')) {
                 }
 
                 $description .= ' ' . __('when shipping fee less than or equal') . ' ' . format_price($discount->value);
+
                 break;
             case 'same-price':
                 $description = __('Same fee') . ' ' . format_price($discount->value) . ' ';
@@ -37,11 +38,14 @@ if (!function_exists('get_discount_description')) {
                             ->all();
 
                         $description .= __('for all product in collection') . ' ' . implode(', ', $collections);
+
                         break;
                     default:
                         $description .= __('for all products in order');
+
                         break;
                 }
+
                 break;
             default:
                 if ($discount->type_option === 'percentage') {
@@ -53,6 +57,7 @@ if (!function_exists('get_discount_description')) {
                 switch ($discount->target) {
                     case 'amount-minimum-order':
                         $description .= __('for order with amount from') . ' ' . format_price($discount->min_order_price);
+
                         break;
                     case 'specific-product':
                         $products = DiscountProduct::where('discount_id', $discount->id)
@@ -62,6 +67,7 @@ if (!function_exists('get_discount_description')) {
                             ->all();
 
                         $description .= __('for product(s)') . ' ' . implode(', ', array_unique($products));
+
                         break;
                     case 'customer':
                         $customers = DiscountCustomer::where('discount_id', $discount->id)
@@ -70,6 +76,7 @@ if (!function_exists('get_discount_description')) {
                             ->all();
 
                         $description .= __('for customer(s)') . ' ' . implode(', ', $customers);
+
                         break;
                     case 'group-products':
                         $collections = DiscountProductCollection::where('discount_id', $discount->id)
@@ -83,6 +90,7 @@ if (!function_exists('get_discount_description')) {
                             ->all();
 
                         $description .= __('for all products in collection') . ' ' . implode(', ', $collections);
+
                         break;
                     case 'product-variant':
                         $products = DiscountProduct::where('discount_id', $discount->id)
@@ -91,9 +99,11 @@ if (!function_exists('get_discount_description')) {
                             ->all();
 
                         $description .= __('for product(s) variant') . ' ' . implode(', ', array_unique($products));
+
                         break;
                     default:
                         $description .= __('for all orders');
+
                         break;
                 }
         }

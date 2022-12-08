@@ -88,12 +88,12 @@ class PublicController extends Controller
      * @param OrderProductInterface $orderProductRepository
      */
     public function __construct(
-        CustomerInterface     $customerRepository,
-        ProductInterface      $productRepository,
-        AddressInterface      $addressRepository,
-        OrderInterface        $orderRepository,
+        CustomerInterface $customerRepository,
+        ProductInterface $productRepository,
+        AddressInterface $addressRepository,
+        OrderInterface $orderRepository,
         OrderHistoryInterface $orderHistoryRepository,
-        OrderReturnInterface  $orderReturnRepository,
+        OrderReturnInterface $orderReturnRepository,
         OrderProductInterface $orderProductRepository
     ) {
         $this->customerRepository = $customerRepository;
@@ -218,7 +218,7 @@ class PublicController extends Controller
         }
 
         $this->customerRepository->update(['id' => auth('customer')->id()], [
-            'password' => bcrypt($request->input('password')),
+            'password' => Hash::make($request->input('password')),
         ]);
 
         return $response->setMessage(trans('acl::users.password_update_success'));
@@ -234,15 +234,15 @@ class PublicController extends Controller
 
         $orders = $this->orderRepository->advancedGet([
             'condition' => [
-                'user_id'     => auth('customer')->id(),
+                'user_id' => auth('customer')->id(),
                 'is_finished' => 1,
             ],
-            'paginate'  => [
-                'per_page'      => 10,
+            'paginate' => [
+                'per_page' => 10,
                 'current_paged' => (int)$request->input('page'),
             ],
             'withCount' => ['products'],
-            'order_by'  => ['created_at' => 'DESC'],
+            'order_by' => ['created_at' => 'DESC'],
         ]);
 
         Theme::breadcrumb()
@@ -264,7 +264,7 @@ class PublicController extends Controller
     {
         $order = $this->orderRepository->getFirstBy(
             [
-                'id'      => $id,
+                'id' => $id,
                 'user_id' => auth('customer')->id(),
             ],
             ['ec_orders.*'],
@@ -300,7 +300,7 @@ class PublicController extends Controller
     public function getCancelOrder($id, BaseHttpResponse $response)
     {
         $order = $this->orderRepository->getFirstBy([
-            'id'      => $id,
+            'id' => $id,
             'user_id' => auth('customer')->id(),
         ], ['*']);
 
@@ -316,9 +316,9 @@ class PublicController extends Controller
         OrderHelper::cancelOrder($order);
 
         $this->orderHistoryRepository->createOrUpdate([
-            'action'      => 'cancel_order',
+            'action' => 'cancel_order',
             'description' => __('Order was cancelled by custom :customer', ['customer' => $order->address->name]),
-            'order_id'    => $order->id,
+            'order_id' => $order->id,
         ]);
 
         return $response->setMessage(trans('plugins/ecommerce::order.cancel_success'));
@@ -336,12 +336,12 @@ class PublicController extends Controller
             'condition' => [
                 'customer_id' => auth('customer')->id(),
             ],
-            'order_by'  => [
+            'order_by' => [
                 'is_default' => 'DESC',
                 'created_at' => 'DESC',
             ],
-            'paginate'  => [
-                'per_page'      => 10,
+            'paginate' => [
+                'per_page' => 10,
                 'current_paged' => (int)$request->input('page', 1),
             ],
         ]);
@@ -386,21 +386,21 @@ class PublicController extends Controller
     {
         if ($request->input('is_default') == 1) {
             $this->addressRepository->update([
-                'is_default'  => 1,
+                'is_default' => 1,
                 'customer_id' => auth('customer')->id(),
             ], ['is_default' => 0]);
         }
 
         $request->merge([
             'customer_id' => auth('customer')->id(),
-            'is_default'  => $request->input('is_default', 0),
+            'is_default' => $request->input('is_default', 0),
         ]);
 
         $address = $this->addressRepository->createOrUpdate($request->input());
 
         return $response
             ->setData([
-                'id'   => $address->id,
+                'id' => $address->id,
                 'html' => view(
                     'plugins/ecommerce::orders.partials.address-item',
                     compact('address')
@@ -419,7 +419,7 @@ class PublicController extends Controller
         SeoHelper::setTitle(__('Edit Address #:id', ['id' => $id]));
 
         $address = $this->addressRepository->getFirstBy([
-            'id'          => $id,
+            'id' => $id,
             'customer_id' => auth('customer')->id(),
         ]);
 
@@ -446,9 +446,10 @@ class PublicController extends Controller
     public function getDeleteAddress($id, BaseHttpResponse $response)
     {
         $this->addressRepository->deleteBy([
-            'id'          => $id,
+            'id' => $id,
             'customer_id' => auth('customer')->id(),
         ]);
+
         return $response->setNextUrl(route('customer.address'))
             ->setMessage(trans('core/base::notices.delete_success_message'));
     }
@@ -464,19 +465,19 @@ class PublicController extends Controller
     {
         if ($request->input('is_default')) {
             $this->addressRepository->update([
-                'is_default'  => 1,
+                'is_default' => 1,
                 'customer_id' => auth('customer')->id(),
             ], ['is_default' => 0]);
         }
 
         $address = $this->addressRepository->createOrUpdate($request->input(), [
-            'id'          => $id,
+            'id' => $id,
             'customer_id' => auth('customer')->id(),
         ]);
 
         return $response
             ->setData([
-                'id'   => $address->id,
+                'id' => $address->id,
                 'html' => view('plugins/ecommerce::orders.partials.address-item', compact('address'))
                     ->render(),
             ])
@@ -491,7 +492,7 @@ class PublicController extends Controller
     public function getPrintOrder($id, Request $request)
     {
         $order = $this->orderRepository->getFirstBy([
-            'id'      => $id,
+            'id' => $id,
             'user_id' => auth('customer')->id(),
         ]);
 
@@ -549,7 +550,6 @@ class PublicController extends Controller
         }
     }
 
-
     /**
      * @param int $orderId
      * @return Response
@@ -558,9 +558,9 @@ class PublicController extends Controller
     {
         $order = $this->orderRepository->getFirstBy(
             [
-                'id'      => $orderId,
+                'id' => $orderId,
                 'user_id' => auth('customer')->id(),
-                'status'  => OrderStatusEnum::COMPLETED,
+                'status' => OrderStatusEnum::COMPLETED,
             ],
             ['ec_orders.*'],
             ['products']
@@ -578,6 +578,9 @@ class PublicController extends Controller
                 route('customer.order_returns.request_view', $orderId)
             );
 
+        Theme::asset()->container('footer')->add('order-return-js', 'vendor/core/plugins/ecommerce/js/order-return.js', ['jquery']);
+        Theme::asset()->add('order-return-css', 'vendor/core/plugins/ecommerce/css/order-return.css');
+
         return Theme::scope(
             'ecommerce.customers.order-returns.view',
             compact('order'),
@@ -593,7 +596,7 @@ class PublicController extends Controller
     public function postReturnOrder(OrderReturnRequest $request, BaseHttpResponse $response)
     {
         $order = $this->orderRepository->getFirstBy([
-            'id'      => $request->input('order_id'),
+            'id' => $request->input('order_id'),
             'user_id' => auth('customer')->id(),
         ]);
 
@@ -624,9 +627,9 @@ class PublicController extends Controller
         }
 
         $this->orderHistoryRepository->createOrUpdate([
-            'action'      => 'return_order',
+            'action' => 'return_order',
             'description' => __(':customer has requested return product(s)', ['customer' => $order->address->name]),
-            'order_id'    => $order->id,
+            'order_id' => $order->id,
         ]);
 
         return $response
@@ -646,12 +649,12 @@ class PublicController extends Controller
             'condition' => [
                 'user_id' => auth('customer')->id(),
             ],
-            'paginate'  => [
-                'per_page'      => 10,
+            'paginate' => [
+                'per_page' => 10,
                 'current_paged' => (int)$request->input('page'),
             ],
             'withCount' => ['items'],
-            'order_by'  => ['created_at' => 'DESC'],
+            'order_by' => ['created_at' => 'DESC'],
         ]);
 
         Theme::breadcrumb()
@@ -674,7 +677,7 @@ class PublicController extends Controller
         SeoHelper::setTitle(__('Order Return Requests'));
 
         $orderReturn = $this->orderReturnRepository->getFirstBy([
-            'id'      => $id,
+            'id' => $id,
             'user_id' => auth('customer')->id(),
         ]);
 
@@ -709,7 +712,7 @@ class PublicController extends Controller
         $orderProducts = $this->orderProductRepository->getModel()
             ->whereHas('order', function ($query) {
                 $query->where([
-                    'user_id'     => auth('customer')->id(),
+                    'user_id' => auth('customer')->id(),
                     'is_finished' => 1,
                 ]);
             })
@@ -745,12 +748,12 @@ class PublicController extends Controller
 
         $orderProduct = $this->orderProductRepository->getModel()
             ->where([
-                'id'           => $id,
-                'product_type' => ProductTypeEnum::DIGITAL
+                'id' => $id,
+                'product_type' => ProductTypeEnum::DIGITAL,
             ])
             ->whereHas('order', function ($query) {
                 $query->where([
-                    'user_id'     => auth('customer')->id(),
+                    'user_id' => auth('customer')->id(),
                     'is_finished' => 1,
                 ]);
             })
@@ -796,6 +799,7 @@ class PublicController extends Controller
 
         if (File::exists($fileName)) {
             $orderProduct->increment('times_downloaded');
+
             return response()->download($fileName)->deleteFileAfterSend();
         }
 

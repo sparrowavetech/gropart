@@ -34,30 +34,21 @@ class OrderReturn extends BaseModel
      * @var string[]
      */
     protected $casts = [
-        'order_status'  => OrderStatusEnum::class,
+        'order_status' => OrderStatusEnum::class,
         'return_status' => OrderReturnStatusEnum::class,
-        'reason'        => OrderReturnReasonEnum::class,
+        'reason' => OrderReturnReasonEnum::class,
     ];
 
-    /**
-     * @return BelongsTo
-     */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class, 'order_id')->withDefault();
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class, 'user_id')->withDefault();
     }
 
-    /**
-     * @return HasMany
-     */
     public function items(): HasMany
     {
         return $this->hasMany(OrderReturnItem::class, 'order_return_id');

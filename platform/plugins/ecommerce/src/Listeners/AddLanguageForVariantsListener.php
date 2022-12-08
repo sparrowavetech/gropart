@@ -34,7 +34,7 @@ class AddLanguageForVariantsListener
                     }
 
                     $condition = [
-                        'lang_code'      => $language->lang_code,
+                        'lang_code' => $language->lang_code,
                         'ec_products_id' => $variation->product->id,
                     ];
 
@@ -45,7 +45,7 @@ class AddLanguageForVariantsListener
                     }
 
                     $parentTranslation = ProductTranslation::where([
-                        'lang_code'      => $language->lang_code,
+                        'lang_code' => $language->lang_code,
                         'ec_products_id' => $event->data->id,
                     ])->first();
 

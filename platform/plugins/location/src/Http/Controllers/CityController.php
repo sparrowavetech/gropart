@@ -179,9 +179,9 @@ class CityController extends BaseController
             'condition' => [
                 ['cities.name', 'LIKE', '%' . $keyword . '%'],
             ],
-            'select'    => ['cities.id', 'cities.name'],
-            'take'      => 10,
-            'order_by'  => ['order' => 'ASC', 'name' => 'ASC'],
+            'select' => ['cities.id', 'cities.name'],
+            'take' => 10,
+            'order_by' => ['order' => 'ASC', 'name' => 'ASC'],
         ]);
 
         $data->prepend(new City(['id' => 0, 'name' => trans('plugins/location::city.select_city')]));
@@ -201,7 +201,7 @@ class CityController extends BaseController
             'condition' => [
                 'cities.status' => BaseStatusEnum::PUBLISHED,
             ],
-            'order_by'  => ['order' => 'ASC', 'name' => 'ASC'],
+            'order_by' => ['order' => 'ASC', 'name' => 'ASC'],
         ];
 
         if ($request->input('state_id') && $request->input('state_id') != 'null') {

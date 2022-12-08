@@ -743,7 +743,7 @@
     "You can update in <a href=\":link\">here</a>": "You can update in <a href=\":link\">here</a>",
     "You can upload up to :total photos, each photo maximum size is :max kilobytes": "You can upload up to :total photos, each photo maximum size is :max kilobytes",
     "You have :total product(s) but no orders yet": "You have :total product(s) but no orders yet",
-    "You have a coupon code?": "You have a coupon code?",
+    "You have a coupon code?": "Do you have a coupon code? Click here to apply",
     "You have been successfully logged out!": "You have been successfully logged out!",
     "You have created a payment #:charge_id via :channel :time : :amount": "You have created a payment #:charge_id via :channel :time : :amount",
     "You have not set up this type of address yet.": "You have not set up this type of address yet.",

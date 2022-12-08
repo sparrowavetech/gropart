@@ -12,12 +12,12 @@ class VendorWithdrawalRequest extends Request
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         $fee = MarketplaceHelper::getSetting('fee_withdrawal', 0);
 
         return [
-            'amount'      => 'required|numeric|min:1|max:' . (auth('customer')->user()->balance - $fee),
+            'amount' => 'required|numeric|min:1|max:' . (auth('customer')->user()->balance - $fee),
             'description' => 'nullable|max:400',
         ];
     }

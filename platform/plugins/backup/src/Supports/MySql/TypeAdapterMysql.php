@@ -24,7 +24,7 @@ class TypeAdapterMysql extends TypeAdapterFactory
             'decimal',
             'numeric',
         ],
-        'blob'      => [
+        'blob' => [
             'tinyblob',
             'blob',
             'mediumblob',

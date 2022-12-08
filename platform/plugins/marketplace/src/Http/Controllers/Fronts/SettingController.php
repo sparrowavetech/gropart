@@ -73,7 +73,9 @@ class SettingController
 
         if ($customer && $customer->id) {
             $vendorInfo = $customer->vendorInfo;
-            $vendorInfo->bank_info = $request->input('bank_info');
+            $vendorInfo->payout_payment_method = $request->input('payout_payment_method');
+            $vendorInfo->bank_info = $request->input('bank_info', []);
+            $vendorInfo->tax_info = $request->input('tax_info', []);
             $vendorInfo->save();
         }
 

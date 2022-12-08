@@ -172,13 +172,13 @@ trait RevisionableTrait
             foreach ($changes_to_record as $key => $change) {
                 $revisions[] = [
                     'revisionable_type' => $this->getMorphClass(),
-                    'revisionable_id'   => $this->getKey(),
-                    'key'               => $key,
-                    'old_value'         => Arr::get($this->originalData, $key),
-                    'new_value'         => $this->updatedData[$key],
-                    'user_id'           => $this->getSystemUserId(),
-                    'created_at'        => new DateTime(),
-                    'updated_at'        => new DateTime(),
+                    'revisionable_id' => $this->getKey(),
+                    'key' => $key,
+                    'old_value' => Arr::get($this->originalData, $key),
+                    'new_value' => $this->updatedData[$key],
+                    'user_id' => $this->getSystemUserId(),
+                    'created_at' => new DateTime(),
+                    'updated_at' => new DateTime(),
                 ];
             }
 
@@ -287,13 +287,13 @@ trait RevisionableTrait
         if ((!isset($this->revisionEnabled) || $this->revisionEnabled)) {
             $revisions[] = [
                 'revisionable_type' => $this->getMorphClass(),
-                'revisionable_id'   => $this->getKey(),
-                'key'               => self::CREATED_AT,
-                'old_value'         => null,
-                'new_value'         => $this->{self::CREATED_AT},
-                'user_id'           => $this->getSystemUserId(),
-                'created_at'        => new DateTime(),
-                'updated_at'        => new DateTime(),
+                'revisionable_id' => $this->getKey(),
+                'key' => self::CREATED_AT,
+                'old_value' => null,
+                'new_value' => $this->{self::CREATED_AT},
+                'user_id' => $this->getSystemUserId(),
+                'created_at' => new DateTime(),
+                'updated_at' => new DateTime(),
             ];
 
             $revision = new Revision();
@@ -316,13 +316,13 @@ trait RevisionableTrait
         ) {
             $revisions[] = [
                 'revisionable_type' => $this->getMorphClass(),
-                'revisionable_id'   => $this->getKey(),
-                'key'               => $this->getDeletedAtColumn(),
-                'old_value'         => null,
-                'new_value'         => $this->{$this->getDeletedAtColumn()},
-                'user_id'           => $this->getSystemUserId(),
-                'created_at'        => new DateTime(),
-                'updated_at'        => new DateTime(),
+                'revisionable_id' => $this->getKey(),
+                'key' => $this->getDeletedAtColumn(),
+                'old_value' => null,
+                'new_value' => $this->{$this->getDeletedAtColumn()},
+                'user_id' => $this->getSystemUserId(),
+                'created_at' => new DateTime(),
+                'updated_at' => new DateTime(),
             ];
             $revision = new Revision();
             DB::table($revision->getTable())->insert($revisions);

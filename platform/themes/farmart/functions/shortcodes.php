@@ -192,7 +192,7 @@ app()->booted(function () {
                 );
 
                 return Theme::partial('shortcodes.ecommerce.product-collections', [
-                    'shortcode'          => $shortcode,
+                    'shortcode' => $shortcode,
                     'productCollections' => ProductCollectionResource::collection($productCollections),
                 ]);
             }
@@ -215,7 +215,7 @@ app()->booted(function () {
             function ($shortcode) {
                 $category = app(ProductCategoryInterface::class)->getFirstBy([
                     'status' => BaseStatusEnum::PUBLISHED,
-                    'id'     => $shortcode->category_id,
+                    'id' => $shortcode->category_id,
                 ], ['*'], [
                     'activeChildren' => function ($query) use ($shortcode) {
                         $query->limit($shortcode->number_of_categories ? (int)$shortcode->number_of_categories : 3);
@@ -282,19 +282,19 @@ app()->booted(function () {
                     'condition' => [
                         'status' => BaseStatusEnum::PUBLISHED,
                     ],
-                    'with'      => [
+                    'with' => [
                         'faqs' => function ($query) {
                             $query->where('status', BaseStatusEnum::PUBLISHED);
                         },
                     ],
-                    'order_by'  => [
-                        'faq_categories.order'      => 'ASC',
+                    'order_by' => [
+                        'faq_categories.order' => 'ASC',
                         'faq_categories.created_at' => 'DESC',
                     ],
                 ]);
 
             return Theme::partial('shortcodes.faq', [
-                'title'      => $shortcode->title,
+                'title' => $shortcode->title,
                 'categories' => $categories,
             ]);
         });

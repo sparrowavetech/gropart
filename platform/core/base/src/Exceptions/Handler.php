@@ -8,19 +8,15 @@ use Botble\Base\Http\Responses\BaseHttpResponse;
 use EmailHandler;
 use Exception;
 use Illuminate\Auth\AuthenticationException;
-use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Exceptions\PostTooLargeException;
-use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Session\TokenMismatchException;
-use Log;
 use RvMedia;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Theme;
 use Throwable;
-use Illuminate\Support\Facades\URL;
 
 class Handler extends ExceptionHandler
 {
@@ -50,10 +46,6 @@ class Handler extends ExceptionHandler
             $code = $exception->getStatusCode();
 
             if ($request->expectsJson()) {
-                if (function_exists('admin_bar')) {
-                    admin_bar()->setIsDisplay(false);
-                }
-
                 $response = new BaseHttpResponse();
 
                 switch ($code) {
@@ -101,34 +93,6 @@ class Handler extends ExceptionHandler
     /**
      * {@inheritDoc}
      */
-    protected function renderHttpException(HttpExceptionInterface $exception)
-    {
-        if ($exception instanceof NotFoundHttpException) {
-            /**
-             * @var EncryptCookies $encryptCookies
-             */
-            $encryptCookies = app(EncryptCookies::class);
-
-            /**
-             * @var StartSession $startSession
-             */
-            $startSession = app(StartSession::class);
-
-            $request = app('request');
-
-            $encryptCookies->handle($request, function () use ($startSession, $request) {
-                return $startSession->handle($request, function () {
-                    return response('');
-                });
-            });
-        }
-
-        return parent::renderHttpException($exception);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public function report(Throwable $exception)
     {
         if ($this->shouldReport($exception) && !$this->isExceptionFromBot()) {
@@ -141,8 +105,16 @@ class Handler extends ExceptionHandler
                 }
 
                 if (config('core.base.general.error_reporting.via_slack', false)) {
-                    Log::channel('slack')
-                        ->critical(URL::full() . "\n" . $exception->getFile() . ':' . $exception->getLine() . "\n" . $exception->getMessage());
+                    logger()->channel('slack')->critical(
+                        $exception->getMessage() . ($exception->getPrevious() ? '(' . $exception->getPrevious() . ')' : null),
+                        [
+                            'Request URL' => request()->fullUrl(),
+                            'Request IP' => request()->ip(),
+                            'Request Method' => request()->method(),
+                            'Exception Type' => get_class($exception),
+                            'File Path' => ltrim(str_replace(base_path(), '', $exception->getFile()), '/') . ':' . $exception->getLine(),
+                        ]
+                    );
                 }
             }
         }
@@ -158,14 +130,14 @@ class Handler extends ExceptionHandler
     protected function isExceptionFromBot(): bool
     {
         $ignoredBots = config('core.base.general.error_reporting.ignored_bots', []);
-        $agent = strtolower(request()->server('HTTP_USER_AGENT'));
+        $agent = strtolower(request()->userAgent());
 
         if (empty($agent)) {
             return false;
         }
 
         foreach ($ignoredBots as $bot) {
-            if ((strpos($agent, $bot) !== false)) {
+            if (str_contains($agent, $bot)) {
                 return true;
             }
         }
@@ -187,10 +159,10 @@ class Handler extends ExceptionHandler
         }
 
         if (class_exists('Theme')) {
-            try {
-                return 'theme.' . Theme::getThemeName() . '::views.' . $code;
-            } catch (Throwable $throwable) {
-                return parent::getHttpExceptionView($exception);
+            $view = 'theme.' . Theme::getThemeName() . '::views.' . $code;
+
+            if (view()->exists($view)) {
+                return $view;
             }
         }
 

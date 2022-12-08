@@ -16,11 +16,11 @@ class Plugin extends PluginOperationAbstract
     {
         Setting::insertOrIgnore([
             [
-                'key'   => 'payment_cod_status',
+                'key' => 'payment_cod_status',
                 'value' => 1,
             ],
             [
-                'key'   => 'payment_bank_transfer_status',
+                'key' => 'payment_bank_transfer_status',
                 'value' => 1,
             ],
         ]);

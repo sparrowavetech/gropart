@@ -45,12 +45,12 @@ class ContactServiceProvider extends ServiceProvider
 
         Event::listen(RouteMatched::class, function () {
             dashboard_menu()->registerItem([
-                'id'          => 'cms-plugins-contact',
-                'priority'    => 120,
-                'parent_id'   => null,
-                'name'        => 'plugins/contact::contact.menu',
-                'icon'        => 'far fa-envelope',
-                'url'         => route('contacts.index'),
+                'id' => 'cms-plugins-contact',
+                'priority' => 120,
+                'parent_id' => null,
+                'name' => 'plugins/contact::contact.menu',
+                'icon' => 'far fa-envelope',
+                'url' => route('contacts.index'),
                 'permissions' => ['contacts.index'],
             ]);
 

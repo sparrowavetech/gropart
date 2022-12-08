@@ -28,7 +28,7 @@ class Breadcrumb
                 foreach ($label as $crumb) {
                     $defaults = [
                         'label' => '',
-                        'url'   => '',
+                        'url' => '',
                     ];
                     $crumb = array_merge($defaults, $crumb);
                     $this->add($crumb['label'], $crumb['url']);

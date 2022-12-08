@@ -1,12 +1,9 @@
-import Vue from 'vue';
 import VerifyLicenseComponent from './components/VerifyLicenseComponent';
 import CheckUpdateComponent from './components/CheckUpdateComponent';
 
-Vue.component('verify-license-component', VerifyLicenseComponent);
-Vue.component('check-update-component', CheckUpdateComponent);
-
-new Vue({
-    el: '#dashboard-alerts',
+vueApp.booting(vue => {
+    vue.component('verify-license-component', VerifyLicenseComponent);
+    vue.component('check-update-component', CheckUpdateComponent);
 });
 
 let callbackWidgets = {};
@@ -43,16 +40,14 @@ class BDashboard {
             cache: false,
             url: url,
             data: data,
-            success: res =>  {
+            success: res => {
                 Botble.unblockUI(el);
                 if (!res.error) {
                     el.html(res.data);
                     if (typeof (callback) !== 'undefined') {
                         callback();
-                    } else {
-                        if (callbackWidgets[widgetId]) {
-                            callbackWidgets[widgetId]();
-                        }
+                    } else if (callbackWidgets[widgetId]) {
+                        callbackWidgets[widgetId]();
                     }
                     if (el.find('.scroller').length !== 0) {
                         Botble.callScroll(el.find('.scroller'));
@@ -64,7 +59,7 @@ class BDashboard {
                     el.html('<div class="dashboard_widget_msg col-12"><p>' + res.message + '</p>');
                 }
             },
-            error: res =>  {
+            error: res => {
                 Botble.unblockUI(el);
                 Botble.handleError(res);
             }
@@ -107,14 +102,14 @@ class BDashboard {
                         data: {
                             items: items
                         },
-                        success: res =>  {
+                        success: res => {
                             if (!res.error) {
                                 Botble.showSuccess(res.message);
                             } else {
                                 Botble.showError(res.message);
                             }
                         },
-                        error: data =>  {
+                        error: data => {
                             Botble.handleError(data);
                         }
                     });
@@ -126,13 +121,13 @@ class BDashboard {
     init() {
         let list_widgets = $('#list_widgets');
 
-        $(document).on('click', '.portlet > .portlet-title .tools > a.remove', event =>  {
+        $(document).on('click', '.portlet > .portlet-title .tools > a.remove', event => {
             event.preventDefault();
             $('#hide-widget-confirm-bttn').data('id', $(event.currentTarget).closest('.widget_item').prop('id'));
             $('#hide_widget_modal').modal('show');
         });
 
-        list_widgets.on('click', '.page_next, .page_previous', e =>  {
+        list_widgets.on('click', '.page_next, .page_previous', e => {
             e.preventDefault();
             const $this = $(e.currentTarget);
             const href = $this.prop('href');
@@ -141,7 +136,7 @@ class BDashboard {
             }
         });
 
-        list_widgets.on('change', '.number_record .numb', e =>  {
+        list_widgets.on('change', '.number_record .numb', e => {
             e.preventDefault();
             const $this = $(e.currentTarget);
             const numb = $this.closest('.number_record').find('.numb');
@@ -153,7 +148,7 @@ class BDashboard {
             }
         });
 
-        list_widgets.on('click', '.btn_change_paginate', e =>  {
+        list_widgets.on('click', '.btn_change_paginate', e => {
             e.preventDefault();
             const $this = $(e.currentTarget);
             const numb = $this.closest('.number_record').find('.numb');
@@ -181,14 +176,14 @@ class BDashboard {
             }
         });
 
-        $('#hide-widget-confirm-bttn').on('click', event =>  {
+        $('#hide-widget-confirm-bttn').on('click', event => {
             event.preventDefault();
             let name = $(event.currentTarget).data('id');
             $.ajax({
                 type: 'GET',
                 cache: false,
                 url: route('dashboard.hide_widget', {name: name}),
-                success: res =>  {
+                success: res => {
                     if (!res.error) {
                         $('#' + name).fadeOut();
                         Botble.showSuccess(res.message);
@@ -206,19 +201,19 @@ class BDashboard {
 
                     portlet.remove();
                 },
-                error: data =>  {
+                error: data => {
                     Botble.handleError(data);
                 }
             });
         });
 
-        $(document).on('click', '.portlet:not(.widget-load-has-callback) > .portlet-title .tools > a.reload', e =>  {
+        $(document).on('click', '.portlet:not(.widget-load-has-callback) > .portlet-title .tools > a.reload', e => {
             e.preventDefault();
             const $this = $(e.currentTarget);
             BDashboard.loadWidget($this.closest('.portlet').find('.portlet-body'), $this.closest('.widget_item').attr('data-url'));
         });
 
-        $(document).on('click', '.portlet > .portlet-title .tools > .collapse, .portlet .portlet-title .tools > .expand', event =>  {
+        $(document).on('click', '.portlet > .portlet-title .tools > .collapse, .portlet .portlet-title .tools > .expand', event => {
             event.preventDefault();
             let _self = $(event.currentTarget);
             let $portlet = _self.closest('.portlet');
@@ -252,7 +247,7 @@ class BDashboard {
                         $portlet.find('a.fullscreen').removeClass('d-none');
                     }
                 },
-                error: data =>  {
+                error: data => {
                     Botble.handleError(data);
                 }
             });
@@ -264,13 +259,13 @@ class BDashboard {
             BDashboard.loadWidget($this.closest('.portlet').find('.portlet-body'), $this.closest('.widget_item').attr('data-url'), {changed_predefined_range: 1});
         });
 
-        let manage_widget_modal = $('#manage_widget_modal');
-        $(document).on('click', '.manage-widget', event =>  {
+        let $manageWidgetModal = $('#manage_widget_modal');
+        $(document).on('click', '.manage-widget', event => {
             event.preventDefault();
-            manage_widget_modal.modal('show');
+            $manageWidgetModal.modal('show');
         });
 
-        manage_widget_modal.on('change', '.swc_wrap input', event =>  {
+        $manageWidgetModal.on('change', '.swc_wrap input', event => {
             $(event.currentTarget).closest('section').find('i').toggleClass('widget_none_color');
         });
     }

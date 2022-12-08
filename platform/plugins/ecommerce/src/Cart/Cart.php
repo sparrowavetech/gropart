@@ -157,10 +157,10 @@ class Cart
     protected function createCartItem($id, $name, $qty, $price, array $options)
     {
         $basePrice = $price;
-        if(!empty($options['options'])) {
-            foreach($options['options']['optionCartValue'] as $value) {
-                if(is_array($value)) {
-                    foreach($value as $_value) {
+        if (!empty($options['options'])) {
+            foreach ($options['options']['optionCartValue'] as $value) {
+                if (is_array($value)) {
+                    foreach ($value as $_value) {
                         if ($_value['affect_type'] == 1) {
                             $_value['affect_price'] = ($basePrice * $_value['affect_price']) / 100;
                         }
@@ -256,6 +256,7 @@ class Cart
 
         if ($cartItem->qty <= 0) {
             $this->remove($cartItem->rowId);
+
             return false;
         }
 
@@ -481,8 +482,8 @@ class Cart
 
         $this->getConnection()->table($this->getTableName())->insert([
             'identifier' => $identifier,
-            'instance'   => $this->currentInstance(),
-            'content'    => serialize($content),
+            'instance' => $this->currentInstance(),
+            'content' => serialize($content),
         ]);
 
         $this->events->dispatch('cart.stored');
@@ -699,7 +700,7 @@ class Cart
                 'condition' => [
                     ['ec_products.id', 'IN', $productIds],
                 ],
-                'with'      => $with,
+                'with' => $with,
             ]);
         }
 

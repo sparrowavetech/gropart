@@ -4,10 +4,7 @@
 </div>
 
 @php
-  $categories = ProductCategoryHelper::getAllProductCategories()
-    ->where('status', \Botble\Base\Enums\BaseStatusEnum::PUBLISHED)
-    ->whereIn('parent_id', [0, null])
-    ->loadMissing(['activeChildren']);
+  $categories = ProductCategoryHelper::getActiveTreeCategories();
 @endphp
 
 <div class="form-group product-categories-select">

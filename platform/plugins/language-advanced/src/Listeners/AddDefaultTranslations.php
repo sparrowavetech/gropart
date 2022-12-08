@@ -26,7 +26,7 @@ class AddDefaultTranslations
                 }
 
                 $condition = [
-                    'lang_code'                      => $language->lang_code,
+                    'lang_code' => $language->lang_code,
                     $event->data->getTable() . '_id' => $event->data->id,
                 ];
 

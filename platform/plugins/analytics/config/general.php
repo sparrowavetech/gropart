@@ -5,7 +5,7 @@ return [
     /*
      * The view id of which you want to display data.
      */
-    'view_id'                   => env('ANALYTICS_VIEW_ID'),
+    'view_id' => env('ANALYTICS_VIEW_ID'),
 
     /*
      * The amount of minutes the Google API responses will be cached.
@@ -20,7 +20,7 @@ return [
      *
      * Optional parameters: "lifetime", "prefix"
      */
-    'cache'                     => [
+    'cache' => [
         'store' => 'file',
     ],
     'enabled_dashboard_widgets' => env('ANALYTICS_ENABLE_DASHBOARD_WIDGETS', true),

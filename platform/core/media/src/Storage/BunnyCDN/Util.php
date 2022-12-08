@@ -22,7 +22,7 @@ class Util
 
         return [
             'file' => $file,
-            'dir'  => $directory,
+            'dir' => $directory,
         ];
     }
 

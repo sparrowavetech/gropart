@@ -58,7 +58,7 @@ class UpdatedContentListener
 
                 $item = $this->slugRepository->getFirstBy([
                     'reference_type' => get_class($event->data),
-                    'reference_id'   => $event->data->id,
+                    'reference_id' => $event->data->id,
                 ]);
 
                 if ($item) {
@@ -70,10 +70,10 @@ class UpdatedContentListener
                     }
                 } else {
                     $item = $this->slugRepository->createOrUpdate([
-                        'key'            => $slug,
+                        'key' => $slug,
                         'reference_type' => get_class($event->data),
-                        'reference_id'   => $event->data->id,
-                        'prefix'         => SlugHelper::getPrefix(get_class($event->data)),
+                        'reference_id' => $event->data->id,
+                        'prefix' => SlugHelper::getPrefix(get_class($event->data)),
                     ]);
                 }
 

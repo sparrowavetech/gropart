@@ -42,10 +42,7 @@ class Discount extends BaseModel
         'updated_at',
     ];
 
-    /**
-     * @return bool
-     */
-    public function isExpired()
+    public function isExpired(): bool
     {
         if ($this->end_date && strtotime($this->end_date) < strtotime(now()->toDateTimeString())) {
             return true;
@@ -54,10 +51,7 @@ class Discount extends BaseModel
         return false;
     }
 
-    /**
-     * @return BelongsToMany
-     */
-    public function productCollections()
+    public function productCollections(): BelongsToMany
     {
         return $this->belongsToMany(
             ProductCollection::class,
@@ -67,18 +61,12 @@ class Discount extends BaseModel
         );
     }
 
-    /**
-     * @return BelongsToMany
-     */
-    public function customers()
+    public function customers(): BelongsToMany
     {
         return $this->belongsToMany(Customer::class, 'ec_discount_customers', 'discount_id', 'customer_id');
     }
 
-    /**
-     * @return BelongsToMany
-     */
-    public function products()
+    public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'ec_discount_products', 'discount_id', 'product_id');
     }

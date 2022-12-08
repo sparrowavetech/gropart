@@ -7,40 +7,40 @@ use Theme\Farmart\Fields\ThemeIconField;
 use Botble\Marketplace\Models\Store;
 
 register_page_template([
-    'default'     => __('Default'),
-    'homepage'    => __('Homepage'),
-    'full-width'  => __('Full Width'),
+    'default' => __('Default'),
+    'homepage' => __('Homepage'),
+    'full-width' => __('Full Width'),
     'coming-soon' => __('Coming Soon'),
 ]);
 
 register_sidebar([
-    'id'          => 'pre_footer_sidebar',
-    'name'        => __('Top footer sidebar'),
+    'id' => 'pre_footer_sidebar',
+    'name' => __('Top footer sidebar'),
     'description' => __('Widgets in the blog page'),
 ]);
 
 register_sidebar([
-    'id'          => 'footer_sidebar',
-    'name'        => __('Footer sidebar'),
+    'id' => 'footer_sidebar',
+    'name' => __('Footer sidebar'),
     'description' => __('Widgets in footer sidebar'),
 ]);
 
 register_sidebar([
-    'id'          => 'bottom_footer_sidebar',
-    'name'        => __('Bottom footer sidebar'),
+    'id' => 'bottom_footer_sidebar',
+    'name' => __('Bottom footer sidebar'),
     'description' => __('Widgets in bottom footer sidebar'),
 ]);
 
 if (is_plugin_active('ecommerce')) {
     register_sidebar([
-        'id'          => 'products_list_sidebar',
-        'name'        => __('Products list sidebar'),
+        'id' => 'products_list_sidebar',
+        'name' => __('Products list sidebar'),
         'description' => __('Widgets on header products list page'),
     ]);
 
     register_sidebar([
-        'id'          => 'product_detail_sidebar',
-        'name'        => __('Product detail sidebar'),
+        'id' => 'product_detail_sidebar',
+        'name' => __('Product detail sidebar'),
         'description' => __('Widgets in the product detail page'),
     ]);
 }
@@ -53,11 +53,11 @@ Menu::addMenuLocation('header-navigation', __('Header Navigation'));
 function available_socials_store(): array
 {
     return [
-        'facebook'  => 'Facebook',
-        'twitter'   => 'Twitter',
+        'facebook' => 'Facebook',
+        'twitter' => 'Twitter',
         'instagram' => 'Instagram',
-        'youtube'   => 'Youtube',
-        'linkedin'  => 'Linkedin',
+        'youtube' => 'Youtube',
+        'linkedin' => 'Linkedin',
     ];
 }
 
@@ -128,9 +128,9 @@ app()->booted(function () {
     add_filter(BASE_FILTER_AFTER_FORM_CREATED, function ($form, $data) {
         if (get_class($data) == Store::class && request()->segment(1) === BaseHelper::getAdminPrefix()) {
             $form->addAfter('logo', 'background', 'mediaImage', [
-                'label'      => __('Background'),
+                'label' => __('Background'),
                 'label_attr' => ['class' => 'control-label'],
-                'value'      => $data->getMetaData('background', true),
+                'value' => $data->getMetaData('background', true),
             ]);
         }
 
@@ -149,7 +149,7 @@ app()->booted(function () {
 
 Form::component('themeIcon', Theme::getThemeNamespace() . '::partials.forms.icons-field', [
     'name',
-    'value'      => null,
+    'value' => null,
     'attributes' => [],
 ]);
 
@@ -165,17 +165,17 @@ add_filter(BASE_FILTER_BEFORE_RENDER_FORM, function ($form, $data) {
     if (get_class($data) == SimpleSliderItem::class) {
         $form
             ->addAfter('image', 'tablet_image', 'mediaImage', [
-                'label'      => __('Tablet Image'),
+                'label' => __('Tablet Image'),
                 'label_attr' => ['class' => 'control-label'],
-                'value'      => $data->getMetaData('tablet_image', true),
+                'value' => $data->getMetaData('tablet_image', true),
                 'help_block' => [
                     'text' => __('For devices with width from 768px to 1200px, if empty, will use the image from the desktop.'),
                 ],
             ])
             ->addAfter('tablet_image', 'mobile_image', 'mediaImage', [
-                'label'      => __('Mobile Image'),
+                'label' => __('Mobile Image'),
                 'label_attr' => ['class' => 'control-label'],
-                'value'      => $data->getMetaData('mobile_image', true),
+                'value' => $data->getMetaData('mobile_image', true),
                 'help_block' => [
                     'text' => __('For devices with width less than 768px, if empty, will use the image from the tablet.'),
                 ],
@@ -197,20 +197,20 @@ if (!function_exists('theme_get_autoplay_speed_options')) {
 
 add_action('init', function () {
     EmailHandler::addTemplateSettings(Theme::getThemeName(), [
-        'name'        => __('Theme emails'),
+        'name' => __('Theme emails'),
         'description' => __('Config email templates for theme'),
-        'templates'   => [
+        'templates' => [
             'contact-seller' => [
-                'title'       => __('Contact Seller'),
+                'title' => __('Contact Seller'),
                 'description' => __('Email will be sent to the seller when someone contact from store profile page'),
-                'subject'     => __('Message sent via your market profile on {{ site_title }}'),
-                'can_off'     => true,
+                'subject' => __('Message sent via your market profile on {{ site_title }}'),
+                'can_off' => true,
             ],
         ],
-        'variables'   => [
+        'variables' => [
             'contact_message' => __('Contact seller message'),
-            'customer_name'   => __('Customer Name'),
-            'customer_email'  => __('Customer Email'),
+            'customer_name' => __('Customer Name'),
+            'customer_email' => __('Customer Email'),
         ],
     ], 'themes');
 }, 125);

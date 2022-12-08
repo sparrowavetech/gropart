@@ -53,9 +53,9 @@ class ValidateProductImport extends ProductImport
     {
         $product = collect($this->request->all());
         $collect = collect([
-            'name'        => $product['name'],
+            'name' => $product['name'],
             'import_type' => 'product',
-            'model'       => $product,
+            'model' => $product,
         ]);
         $this->onSuccess($collect);
 

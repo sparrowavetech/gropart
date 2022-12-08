@@ -20,10 +20,7 @@ class DiscountCustomer extends BaseModel
         'customer_id',
     ];
 
-    /**
-     * @return BelongsTo
-     */
-    public function customers()
+    public function customers(): BelongsTo
     {
         return $this->belongsTo(Customer::class, 'customer_id')->withDefault();
     }

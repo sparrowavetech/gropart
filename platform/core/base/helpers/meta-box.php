@@ -14,12 +14,12 @@ if (!function_exists('add_meta_box')) {
      * @deprecated since 5.7
      */
     function add_meta_box(
-        string   $id,
-        string   $title,
+        string $id,
+        string $title,
         callable $callback,
-        ?string  $screen = null,
-        string   $context = 'advanced',
-        string   $priority = 'default',
+        ?string $screen = null,
+        string $context = 'advanced',
+        string $priority = 'default',
         $callbackArgs = null
     ) {
         MetaBox::addMetaBox($id, $title, $callback, $screen, $context, $priority, $callbackArgs);

@@ -147,7 +147,7 @@ class MacroableModels
             if (in_array($model, array_keys($models))) {
                 $params = (new ReflectionFunction($this->macros[$macro][$model]))->getParameters();
                 $macros[$macro] = [
-                    'name'       => $macro,
+                    'name' => $macro,
                     'parameters' => $params,
                 ];
             }

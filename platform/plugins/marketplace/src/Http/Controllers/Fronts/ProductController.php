@@ -85,14 +85,14 @@ class ProductController extends BaseController
      * @throws Exception|Throwable
      */
     public function store(
-        ProductRequest                  $request,
-        StoreProductService             $service,
-        BaseHttpResponse                $response,
-        ProductVariationInterface       $variationRepository,
-        ProductVariationItemInterface   $productVariationItemRepository,
-        GroupedProductInterface         $groupedProductRepository,
+        ProductRequest $request,
+        StoreProductService $service,
+        BaseHttpResponse $response,
+        ProductVariationInterface $variationRepository,
+        ProductVariationItemInterface $productVariationItemRepository,
+        GroupedProductInterface $groupedProductRepository,
         StoreAttributesOfProductService $storeAttributesOfProductService,
-        StoreProductTagService          $storeProductTagService
+        StoreProductTagService $storeProductTagService
     ) {
         $request = $this->processRequestData($request);
 
@@ -150,7 +150,7 @@ class ProductController extends BaseController
         if ($request->has('grouped_products')) {
             $groupedProductRepository->createGroupedProducts($product->id, array_map(function ($item) {
                 return [
-                    'id'  => $item,
+                    'id' => $item,
                     'qty' => 1,
                 ];
             }, array_filter(explode(',', $request->input('grouped_products', '')))));
@@ -160,8 +160,8 @@ class ProductController extends BaseController
             EmailHandler::setModule(MARKETPLACE_MODULE_SCREEN_NAME)
                 ->setVariableValues([
                     'product_name' => $product->name,
-                    'product_url'  => route('products.edit', $product->id),
-                    'store_name'   => auth('customer')->user()->store->name,
+                    'product_url' => route('products.edit', $product->id),
+                    'store_name' => auth('customer')->user()->store->name,
                 ])
                 ->sendUsingTemplate('pending-product-approval');
         }
@@ -180,7 +180,7 @@ class ProductController extends BaseController
     public function edit($id, FormBuilder $formBuilder)
     {
         $product = $this->productRepository->findOrFail($id);
-       
+
         if ($product->is_variation || $product->store_id != auth('customer')->user()->store->id) {
             abort(404);
         }
@@ -275,7 +275,7 @@ class ProductController extends BaseController
         if ($request->has('grouped_products')) {
             $groupedProductRepository->createGroupedProducts($product->id, array_map(function ($item) {
                 return [
-                    'id'  => $item,
+                    'id' => $item,
                     'qty' => 1,
                 ];
             }, array_filter(explode(',', $request->input('grouped_products', '')))));
@@ -296,7 +296,7 @@ class ProductController extends BaseController
 
         $request->merge([
             'content' => $shortcodeCompiler->strip($request->input('content'), $shortcodeCompiler->whitelistShortcodes()),
-            'images'  => json_decode($request->input('images')),
+            'images' => json_decode($request->input('images')),
         ]);
 
         $except = [
@@ -336,10 +336,10 @@ class ProductController extends BaseController
      * {@inheritDoc}
      */
     public function postAddVersion(
-        ProductVersionRequest     $request,
+        ProductVersionRequest $request,
         ProductVariationInterface $productVariation,
         $id,
-        BaseHttpResponse          $response
+        BaseHttpResponse $response
     ) {
         $request->merge([
             'images' => json_decode($request->input('images', '[]')),
@@ -352,10 +352,10 @@ class ProductController extends BaseController
      * {@inheritDoc}
      */
     public function postUpdateVersion(
-        ProductVersionRequest     $request,
+        ProductVersionRequest $request,
         ProductVariationInterface $productVariation,
         $id,
-        BaseHttpResponse          $response
+        BaseHttpResponse $response
     ) {
         $request->merge([
             'images' => json_decode($request->input('images', '[]')),
@@ -410,7 +410,7 @@ class ProductController extends BaseController
      * {@inheritDoc}
      */
     protected function deleteVersionItem(
-        ProductVariationInterface     $productVariation,
+        ProductVariationInterface $productVariation,
         ProductVariationItemInterface $productVariationItem,
         $variationId
     ) {
@@ -433,22 +433,22 @@ class ProductController extends BaseController
         $availableProducts = $this->productRepository
             ->advancedGet([
                 'condition' => [
-                    'status'   => BaseStatusEnum::PUBLISHED,
+                    'status' => BaseStatusEnum::PUBLISHED,
                     ['is_variation', '<>', 1],
                     ['id', '<>', $request->input('product_id', 0)],
                     ['name', 'LIKE', '%' . $request->input('keyword') . '%'],
                     'store_id' => auth('customer')->user()->store->id,
                 ],
-                'select'    => [
+                'select' => [
                     'id',
                     'name',
                     'images',
                     'image',
                     'price',
                 ],
-                'paginate'  => [
-                    'per_page'      => 5,
-                    'type'          => 'simplePaginate',
+                'paginate' => [
+                    'per_page' => 5,
+                    'type' => 'simplePaginate',
                     'current_paged' => (int)$request->input('page', 1),
                 ],
             ]);

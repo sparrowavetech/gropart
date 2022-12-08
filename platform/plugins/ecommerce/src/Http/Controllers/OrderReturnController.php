@@ -46,7 +46,7 @@ class OrderReturnController extends BaseController
     public function __construct(
         OrderReturnInterface $orderReturnRepository,
         OrderReturnInterface $orderReturnItemRepository,
-        ProductInterface     $productRepository
+        ProductInterface $productRepository
     ) {
         $this->orderReturnRepository = $orderReturnRepository;
         $this->orderReturnItemRepository = $orderReturnItemRepository;
@@ -137,6 +137,7 @@ class OrderReturnController extends BaseController
         try {
             $this->orderReturnRepository->deleteBy(['id' => $id]);
             event(new DeletedContentEvent(ORDER_RETURN_MODULE_SCREEN_NAME, $request, $order));
+
             return $response->setMessage(trans('core/base::notices.delete_success_message'));
         } catch (Exception $exception) {
             return $response

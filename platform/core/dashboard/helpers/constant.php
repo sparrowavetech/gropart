@@ -8,7 +8,6 @@ if (!defined('DASHBOARD_ACTION_REGISTER_SCRIPTS')) {
     define('DASHBOARD_ACTION_REGISTER_SCRIPTS', 'dashboard_register_scripts');
 }
 
-
 if (!defined('DASHBOARD_FILTER_ADMIN_NOTIFICATIONS')) {
     define('DASHBOARD_FILTER_ADMIN_NOTIFICATIONS', 'admin_dashboard_notifications');
 }

@@ -196,18 +196,18 @@ class ProductImport implements
      * @param Request $request
      */
     public function __construct(
-        ProductInterface             $productRepository,
-        ProductCategoryInterface     $productCategoryRepository,
-        ProductTagInterface          $productTagRepository,
-        ProductLabelInterface        $productLabelRepository,
-        TaxInterface                 $taxRepository,
-        ProductCollectionInterface   $productCollectionRepository,
+        ProductInterface $productRepository,
+        ProductCategoryInterface $productCategoryRepository,
+        ProductTagInterface $productTagRepository,
+        ProductLabelInterface $productLabelRepository,
+        TaxInterface $taxRepository,
+        ProductCollectionInterface $productCollectionRepository,
         ProductAttributeSetInterface $productAttributeSetRepository,
-        ProductAttributeInterface    $productAttributeRepository,
-        ProductVariationInterface    $productVariationRepository,
-        BrandInterface               $brandRepository,
-        StoreProductTagService       $storeProductTagService,
-        Request                      $request
+        ProductAttributeInterface $productAttributeRepository,
+        ProductVariationInterface $productVariationRepository,
+        BrandInterface $brandRepository,
+        StoreProductTagService $storeProductTagService,
+        Request $request
     ) {
         $this->productRepository = $productRepository;
         $this->productCategoryRepository = $productCategoryRepository;
@@ -313,7 +313,7 @@ class ProductImport implements
 
             if ($slug) {
                 return $this->productRepository->getFirstBy([
-                    'id'           => $slug->reference_id,
+                    'id' => $slug->reference_id,
                     'is_variation' => 0,
                 ]);
             }
@@ -365,11 +365,11 @@ class ProductImport implements
         $product->productAttributeSets()->sync($attributeSets);
 
         $collect = collect([
-            'name'           => $product->name,
-            'slug'           => $this->request->input('slug'),
-            'import_type'    => 'product',
+            'name' => $product->name,
+            'slug' => $this->request->input('slug'),
+            'import_type' => 'product',
             'attribute_sets' => $attributeSets,
-            'model'          => $product,
+            'model' => $product,
         ]);
 
         $this->onSuccess($collect);
@@ -629,7 +629,7 @@ class ProductImport implements
                 $taxId = $tax ? $tax->id : 0;
                 $this->taxes->push([
                     'keyword' => $row['tax'],
-                    'tax_id'  => $taxId,
+                    'tax_id' => $taxId,
                 ]);
             }
 
@@ -664,7 +664,7 @@ class ProductImport implements
 
                 $storeId = $store ? $store->id : 0;
                 $this->stores->push([
-                    'keyword'  => $row['vendor'],
+                    'keyword' => $row['vendor'],
                     'store_id' => $storeId,
                 ]);
             }
@@ -698,7 +698,7 @@ class ProductImport implements
 
                 $brandId = $brand ? $brand->id : 0;
                 $this->brands->push([
-                    'keyword'  => $row['brand'],
+                    'keyword' => $row['brand'],
                     'brand_id' => $brandId,
                 ]);
             }
@@ -733,7 +733,7 @@ class ProductImport implements
 
                     $categoryId = $category ? $category->id : 0;
                     $this->categories->push([
-                        'keyword'     => $value,
+                        'keyword' => $value,
                         'category_id' => $categoryId,
                     ]);
                 }
@@ -770,7 +770,7 @@ class ProductImport implements
 
                     $collectionId = $collection ? $collection->id : 0;
                     $this->productCollections->push([
-                        'keyword'       => $value,
+                        'keyword' => $value,
                         'collection_id' => $collectionId,
                     ]);
                 }
@@ -807,7 +807,7 @@ class ProductImport implements
 
                     $productLabelId = $productLabel ? $productLabel->id : 0;
                     $this->productLabels->push([
-                        'keyword'          => $value,
+                        'keyword' => $value,
                         'product_label_id' => $productLabelId,
                     ]);
                 }
@@ -967,12 +967,14 @@ class ProductImport implements
         switch ($type) {
             case 'array':
                 $value = $value ? explode(',', $value) : [];
+
                 break;
             case 'bool':
                 if (Str::lower($value) == 'false' || $value == '0' || Str::lower($value) == 'no') {
                     $value = false;
                 }
                 $value = (bool)$value;
+
                 break;
             case 'datetime':
                 if ($value) {
@@ -982,6 +984,7 @@ class ProductImport implements
                         $value = $this->getDate($value);
                     }
                 }
+
                 break;
         }
 

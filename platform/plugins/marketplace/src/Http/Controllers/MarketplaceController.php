@@ -78,7 +78,6 @@ class MarketplaceController extends BaseController
             return Str::startsWith($key, $settingKey);
         });
 
-
         if ($request->input('marketplace_enable_commission_fee_for_each_category')) {
             $commissionByCategories = $request->input('commission_by_category');
             $this->storeRepository->handleCommissionEachCategory($commissionByCategories);

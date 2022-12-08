@@ -18,13 +18,13 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
-        UpdatedContentEvent::class   => [
+        UpdatedContentEvent::class => [
             UpdatedContentListener::class,
         ],
-        CreatedContentEvent::class   => [
+        CreatedContentEvent::class => [
             CreatedContentListener::class,
         ],
-        DeletedContentEvent::class   => [
+        DeletedContentEvent::class => [
             DeletedContentListener::class,
         ],
     ];

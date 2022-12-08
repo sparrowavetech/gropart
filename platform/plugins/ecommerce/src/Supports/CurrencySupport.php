@@ -95,13 +95,13 @@ class CurrencySupport
 
         if (!$currency) {
             $currency = new Currency([
-                'title'            => 'USD',
-                'symbol'           => '$',
+                'title' => 'USD',
+                'symbol' => '$',
                 'is_prefix_symbol' => true,
-                'order'            => 0,
-                'decimals'         => 2,
-                'is_default'       => true,
-                'exchange_rate'    => 1,
+                'order' => 0,
+                'decimals' => 2,
+                'is_default' => true,
+                'exchange_rate' => 1,
             ]);
         }
 
@@ -145,6 +145,7 @@ class CurrencySupport
             foreach ($languages as $language) {
                 if ($language[1] == $httpAcceptLanguage) {
                     $httpAcceptLanguage = $language[4];
+
                     break;
                 }
             }

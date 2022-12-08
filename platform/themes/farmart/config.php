@@ -36,14 +36,14 @@ return [
         // Before event inherit from package config and the theme that call before,
         // you can use this event to set meta, breadcrumb template or anything
         // you want inheriting.
-        'before'             => function ($theme) {
+        'before' => function ($theme) {
             // You can remove this line anytime.
         },
 
         // Listen on event before render a theme,
         // this event should call to assign some assets,
         // breadcrumb template.
-        'beforeRenderTheme'  => function (Theme $theme) {
+        'beforeRenderTheme' => function (Theme $theme) {
             // Partial composer.
             if (is_plugin_active('ecommerce')) {
                 $categories = ProductCategoryHelper::getActiveTreeCategories();
@@ -68,11 +68,11 @@ return [
             $useCDN = theme_option('use_source_assets_from', 'cdn') == 'cdn';
 
             $assets = [
-                'bootstrap-css'       => [
-                    'cdn'   => [
-                        'source'     => '//cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css',
+                'bootstrap-css' => [
+                    'cdn' => [
+                        'source' => '//cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css',
                         'attributes' => [
-                            'integrity'   => 'sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3',
+                            'integrity' => 'sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3',
                             'crossorigin' => 'anonymous',
                         ],
                     ],
@@ -80,17 +80,17 @@ return [
                         'source' => 'plugins/bootstrap/css/bootstrap.min.css',
                     ],
                 ],
-                'linearicons'         => [
+                'linearicons' => [
                     'local' => [
                         'source' => 'fonts/Linearicons/Linearicons/Font/demo-files/demo.css',
                     ],
                 ],
-                'slick-css'           => [
-                    'cdn'   => [
-                        'source'     => '//cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css',
+                'slick-css' => [
+                    'cdn' => [
+                        'source' => '//cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css',
                         'attributes' => [
-                            'integrity'      => 'sha512-yHknP1/AwR+yx26cB1y0cjvQUMvEa2PFzt1c9LlS4pRQ5NOTZFWbhBig+X9G9eYW/8m0/4OXNx8pxJ6z57x0dw==',
-                            'crossorigin'    => 'anonymous',
+                            'integrity' => 'sha512-yHknP1/AwR+yx26cB1y0cjvQUMvEa2PFzt1c9LlS4pRQ5NOTZFWbhBig+X9G9eYW/8m0/4OXNx8pxJ6z57x0dw==',
+                            'crossorigin' => 'anonymous',
                             'referrerpolicy' => 'no-referrer',
                         ],
                     ],
@@ -98,20 +98,20 @@ return [
                         'source' => 'plugins/slick/slick.css',
                     ],
                 ],
-                'nouislider-css'      => [
-                    'cdn'   => [
+                'nouislider-css' => [
+                    'cdn' => [
                         'source' => '//cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.0.3/nouislider.min.css',
                     ],
                     'local' => [
                         'source' => 'plugins/nouislider/nouislider.min.css',
                     ],
                 ],
-                'lightgallery-css'    => [
-                    'cdn'   => [
-                        'source'     => '//cdnjs.cloudflare.com/ajax/libs/lightgallery/1.6.9/css/lightgallery.min.css',
+                'lightgallery-css' => [
+                    'cdn' => [
+                        'source' => '//cdnjs.cloudflare.com/ajax/libs/lightgallery/1.6.9/css/lightgallery.min.css',
                         'attributes' => [
-                            'integrity'      => 'sha512-UMUaaaRK/i2ihAzNyraiLZzT8feWBDY+lLnBnhA3+MEfQn4jaNJMGBad6nyklImf7d0Id6n/Jb0ynr7RCpyNPQ==',
-                            'crossorigin'    => 'anonymous',
+                            'integrity' => 'sha512-UMUaaaRK/i2ihAzNyraiLZzT8feWBDY+lLnBnhA3+MEfQn4jaNJMGBad6nyklImf7d0Id6n/Jb0ynr7RCpyNPQ==',
+                            'crossorigin' => 'anonymous',
                             'referrerpolicy' => 'no-referrer',
                         ],
                     ],
@@ -119,133 +119,133 @@ return [
                         'source' => 'plugins/light-gallery/css/lightgallery.min.css',
                     ],
                 ],
-                'style-css'           => [
+                'style-css' => [
                     'local' => [
-                        'source'  => 'css/style.css',
+                        'source' => 'css/style.css',
                         'version' => $version,
                     ],
                 ],
-                'jquery'              => [
-                    'cdn'       => [
+                'jquery' => [
+                    'cdn' => [
                         'source' => '//ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js',
                     ],
-                    'local'     => [
+                    'local' => [
                         'source' => 'plugins/jquery-3.6.0.min.js',
                     ],
                     'container' => 'footer',
                 ],
-                'popper-js'           => [
-                    'cdn'       => [
-                        'source'     => '//cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js',
+                'popper-js' => [
+                    'cdn' => [
+                        'source' => '//cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js',
                         'attributes' => [
-                            'integrity'   => 'sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB',
+                            'integrity' => 'sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB',
                             'crossorigin' => 'anonymous',
                         ],
                     ],
-                    'local'     => [
+                    'local' => [
                         'source' => 'plugins/popper.min.js',
                     ],
                     'container' => 'footer',
                 ],
-                'bootstrap-js'        => [
-                    'cdn'       => [
-                        'source'     => '//cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js',
+                'bootstrap-js' => [
+                    'cdn' => [
+                        'source' => '//cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js',
                         'attributes' => [
-                            'integrity'   => 'sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13',
+                            'integrity' => 'sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13',
                             'crossorigin' => 'anonymous',
                         ],
                     ],
-                    'local'     => [
+                    'local' => [
                         'source' => 'plugins/bootstrap/js/bootstrap.min.js',
                     ],
                     'container' => 'footer',
                 ],
-                'slick-js'            => [
-                    'cdn'       => [
-                        'source'     => '//cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js',
+                'slick-js' => [
+                    'cdn' => [
+                        'source' => '//cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js',
                         'attributes' => [
-                            'integrity'      => 'sha512-XtmMtDEcNz2j7ekrtHvOVR4iwwaD6o/FUJe6+Zq+HgcCsk3kj4uSQQR8weQ2QVj1o0Pk6PwYLohm206ZzNfubg==',
-                            'crossorigin'    => 'anonymous',
+                            'integrity' => 'sha512-XtmMtDEcNz2j7ekrtHvOVR4iwwaD6o/FUJe6+Zq+HgcCsk3kj4uSQQR8weQ2QVj1o0Pk6PwYLohm206ZzNfubg==',
+                            'crossorigin' => 'anonymous',
                             'referrerpolicy' => 'no-referrer',
                         ],
                     ],
-                    'local'     => [
+                    'local' => [
                         'source' => 'plugins/slick/slick.min.js',
                     ],
                     'container' => 'footer',
                 ],
-                'nouislider-js'       => [
-                    'cdn'       => [
+                'nouislider-js' => [
+                    'cdn' => [
                         'source' => '//cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.0.3/nouislider.min.js',
                     ],
-                    'local'     => [
-                        'source'       => 'plugins/nouislider/nouislider.min.js',
+                    'local' => [
+                        'source' => 'plugins/nouislider/nouislider.min.js',
                         'dependencies' => ['jquery'],
                     ],
                     'container' => 'footer',
                 ],
-                'lightgallery-js'     => [
-                    'cdn'       => [
-                        'source'     => '//cdnjs.cloudflare.com/ajax/libs/lightgallery/1.6.9/js/lightgallery.min.js',
+                'lightgallery-js' => [
+                    'cdn' => [
+                        'source' => '//cdnjs.cloudflare.com/ajax/libs/lightgallery/1.6.9/js/lightgallery.min.js',
                         'attributes' => [
-                            'integrity'      => 'sha512-npsyW6Y41omzDDDg6pQtcW/pvdj4mkTG3a0LBofGH4EEYeX/LsdJgII2bu4s+O7cRcW1qBUkIz2YFZS/Rk6T3A==',
-                            'crossorigin'    => 'anonymous',
+                            'integrity' => 'sha512-npsyW6Y41omzDDDg6pQtcW/pvdj4mkTG3a0LBofGH4EEYeX/LsdJgII2bu4s+O7cRcW1qBUkIz2YFZS/Rk6T3A==',
+                            'crossorigin' => 'anonymous',
                             'referrerpolicy' => 'no-referrer',
                         ],
                     ],
-                    'local'     => [
-                        'source'       => 'plugins/light-gallery/js/lightgallery.min.js',
+                    'local' => [
+                        'source' => 'plugins/light-gallery/js/lightgallery.min.js',
                         'dependencies' => ['jquery'],
                     ],
                     'container' => 'footer',
                 ],
-                'lazyload-js'         => [
-                    'cdn'       => [
-                        'source'       => '//cdn.jsdelivr.net/npm/vanilla-lazyload@17.8.3/dist/lazyload.min.js',
+                'lazyload-js' => [
+                    'cdn' => [
+                        'source' => '//cdn.jsdelivr.net/npm/vanilla-lazyload@17.8.3/dist/lazyload.min.js',
                         'dependencies' => ['jquery'],
                     ],
-                    'local'     => [
-                        'source'       => 'plugins/lazyload/lazyload.min.js',
+                    'local' => [
+                        'source' => 'plugins/lazyload/lazyload.min.js',
                         'dependencies' => ['jquery'],
                     ],
                     'container' => 'footer',
                 ],
                 'expire-countdown-js' => [
-                    'local'     => [
-                        'source'       => 'plugins/expire-countdown.js',
+                    'local' => [
+                        'source' => 'plugins/expire-countdown.js',
                         'dependencies' => ['jquery'],
                     ],
                     'container' => 'footer',
                 ],
-                'scrollbar-js'        => [
-                    'local'     => [
-                        'source'       => 'plugins/scrollbar.js',
+                'scrollbar-js' => [
+                    'local' => [
+                        'source' => 'plugins/scrollbar.js',
                         'dependencies' => ['jquery'],
                     ],
                     'container' => 'footer',
                 ],
-                'main-js'             => [
-                    'local'     => [
-                        'source'       => 'js/main.js',
+                'main-js' => [
+                    'local' => [
+                        'source' => 'js/main.js',
                         'dependencies' => ['jquery'],
-                        'version'      => $version . '.1',
+                        'version' => $version . '.1',
                     ],
                     'container' => 'footer',
                 ],
                 'vue-infinite-scroll' => [
-                    'cdn'       => [
+                    'cdn' => [
                         'source' => '//cdn.jsdelivr.net/npm/vue-infinite-scroll@2.0.2/vue-infinite-scroll.min.js',
                     ],
-                    'local'     => [
+                    'local' => [
                         'source' => 'plugins/vue-infinite-scroll.js',
                     ],
                     'container' => 'footer',
                 ],
-                'app-js'              => [
-                    'local'     => [
-                        'source'       => 'js/app.js',
+                'app-js' => [
+                    'local' => [
+                        'source' => 'js/app.js',
                         'dependencies' => ['jquery'],
-                        'version'      => $version,
+                        'version' => $version,
                     ],
                     'container' => 'footer',
                 ],
@@ -253,10 +253,10 @@ return [
 
             if (BaseHelper::siteLanguageDirection() == 'rtl') {
                 $assets['bootstrap-css'] = [
-                    'cdn'   => [
-                        'source'     => '//cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.rtl.min.css',
+                    'cdn' => [
+                        'source' => '//cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.rtl.min.css',
                         'attributes' => [
-                            'integrity'   => 'sha384-+qdLaIRZfNu4cVPK/PxJJEy0B0f3Ugv8i482AKY7gwXwhaCroABd086ybrVKTa0q',
+                            'integrity' => 'sha384-+qdLaIRZfNu4cVPK/PxJJEy0B0f3Ugv8i482AKY7gwXwhaCroABd086ybrVKTa0q',
                             'crossorigin' => 'anonymous',
                         ],
                     ],
@@ -267,7 +267,7 @@ return [
 
                 $assets['style-rtl'] = [
                     'local' => [
-                        'source'  => 'css/style-rtl.css',
+                        'source' => 'css/style-rtl.css',
                         'version' => $version,
                     ],
                 ];

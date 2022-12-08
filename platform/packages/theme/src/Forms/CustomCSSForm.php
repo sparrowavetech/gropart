@@ -27,12 +27,18 @@ class CustomCSSForm extends FormAbstract
             ->setUrl(route('theme.custom-css.post'))
             ->setValidatorClass(CustomCssRequest::class)
             ->add('custom_css', 'textarea', [
-                'label'      => trans('packages/theme::theme.custom_css'),
+                'label' => trans('packages/theme::theme.custom_css'),
                 'label_attr' => ['class' => 'control-label'],
-                'value'      => $css,
+                'value' => $css,
                 'help_block' => [
                     'text' => trans('packages/theme::theme.custom_css_placeholder'),
+                    'v-pre',
                 ],
             ]);
+    }
+
+    public function getActionButtons(): string
+    {
+        return view('core/base::forms.partials.form-actions', ['onlySave' => true])->render();
     }
 }

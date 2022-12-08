@@ -85,54 +85,53 @@ class ProductForm extends FormAbstract
             ->addCustomField('tags', TagField::class)
             ->setFormOption('files', true)
             ->add('name', 'text', [
-                'label'      => trans('plugins/ecommerce::products.form.name'),
+                'label' => trans('plugins/ecommerce::products.form.name'),
                 'label_attr' => ['class' => 'text-title-field required'],
-                'attr'       => [
-                    'placeholder'  => trans('core/base::forms.name_placeholder'),
+                'attr' => [
+                    'placeholder' => trans('core/base::forms.name_placeholder'),
                     'data-counter' => 150,
                 ],
             ])
             ->add('description', 'editor', [
-                'label'      => trans('core/base::forms.description'),
+                'label' => trans('core/base::forms.description'),
                 'label_attr' => ['class' => 'control-label'],
-                'attr'       => [
-                    'rows'         => 2,
-                    'placeholder'  => trans('core/base::forms.description_placeholder'),
+                'attr' => [
+                    'rows' => 2,
+                    'placeholder' => trans('core/base::forms.description_placeholder'),
                     'data-counter' => 1000,
                 ],
             ])
             ->add('content', 'editor', [
-                'label'      => trans('plugins/ecommerce::products.form.content'),
+                'label' => trans('plugins/ecommerce::products.form.content'),
                 'label_attr' => ['class' => 'text-title-field'],
-                'attr'       => [
-                    'rows'            => 4,
+                'attr' => [
+                    'rows' => 4,
                     'with-short-code' => true,
                 ],
             ])
             ->add('images[]', 'mediaImages', [
-                'label'      => trans('plugins/ecommerce::products.form.image'),
+                'label' => trans('plugins/ecommerce::products.form.image'),
                 'label_attr' => ['class' => 'control-label'],
-                'values'     => $productId ? $this->getModel()->images : [],
+                'values' => $productId ? $this->getModel()->images : [],
             ])
             ->addMetaBoxes([
                 'with_related' => [
-                    'title'    => null,
-                    'content'  => Html::tag('div', '', [
-                        'class'       => 'wrap-relation-product',
+                    'title' => null,
+                    'content' => Html::tag('div', '', [
+                        'class' => 'wrap-relation-product',
                         'data-target' => route('products.get-relations-boxes', $productId ?: 0),
                     ]),
-                    'wrap'     => false,
+                    'wrap' => false,
                     'priority' => 9999,
                 ],
             ])
-            
             ->add('product_type', 'hidden', [
                 'value' => request()->input('product_type') ?: ProductTypeEnum::PHYSICAL,
             ])
             ->add('status', 'customSelect', [
-                'label'      => trans('core/base::tables.status'),
+                'label' => trans('core/base::tables.status'),
                 'label_attr' => ['class' => 'control-label required'],
-                'choices'    => BaseStatusEnum::labels(),
+                'choices' => BaseStatusEnum::labels(),
             ])
             ->add('is_featured', 'onOff', [
                 'label'         => trans('core/base::forms.is_featured'),
@@ -145,31 +144,31 @@ class ProductForm extends FormAbstract
                 'default_value' => false,
             ])
             ->add('categories[]', 'categoryMulti', [
-                'label'      => trans('plugins/ecommerce::products.form.categories'),
+                'label' => trans('plugins/ecommerce::products.form.categories'),
                 'label_attr' => ['class' => 'control-label'],
-                'choices'    => ProductCategoryHelper::getAllProductCategoriesWithChildren(),
-                'value'      => old('categories', $selectedCategories),
+                'choices' => ProductCategoryHelper::getAllProductCategoriesWithChildren(),
+                'value' => old('categories', $selectedCategories),
             ])
             ->add('brand_id', 'customSelect', [
-                'label'      => trans('plugins/ecommerce::products.form.brand'),
+                'label' => trans('plugins/ecommerce::products.form.brand'),
                 'label_attr' => ['class' => 'control-label'],
-                'choices'    => $brands,
+                'choices' => $brands,
             ])
             ->add('image', 'mediaImage', [
-                'label'      => trans('plugins/ecommerce::products.form.featured_image'),
+                'label' => trans('plugins/ecommerce::products.form.featured_image'),
                 'label_attr' => ['class' => 'control-label'],
             ])
             ->add('product_collections[]', 'multiCheckList', [
-                'label'      => trans('plugins/ecommerce::products.form.collections'),
+                'label' => trans('plugins/ecommerce::products.form.collections'),
                 'label_attr' => ['class' => 'control-label'],
-                'choices'    => $productCollections,
-                'value'      => old('product_collections', $selectedProductCollections),
+                'choices' => $productCollections,
+                'value' => old('product_collections', $selectedProductCollections),
             ])
             ->add('product_labels[]', 'multiCheckList', [
-                'label'      => trans('plugins/ecommerce::products.form.labels'),
+                'label' => trans('plugins/ecommerce::products.form.labels'),
                 'label_attr' => ['class' => 'control-label'],
-                'choices'    => $productLabels,
-                'value'      => old('product_labels', $selectedProductLabels),
+                'choices' => $productLabels,
+                'value' => old('product_labels', $selectedProductLabels),
             ]);
 
         if (EcommerceHelper::isTaxEnabled()) {
@@ -178,20 +177,20 @@ class ProductForm extends FormAbstract
             $taxes = [0 => trans('plugins/ecommerce::tax.select_tax')] + $taxes;
 
             $this->add('tax_id', 'customSelect', [
-                'label'      => trans('plugins/ecommerce::products.form.tax'),
+                'label' => trans('plugins/ecommerce::products.form.tax'),
                 'label_attr' => ['class' => 'control-label'],
-                'choices'    => $taxes,
+                'choices' => $taxes,
             ]);
         }
 
         $this
             ->add('tag', 'tags', [
-                'label'      => trans('plugins/ecommerce::products.form.tags'),
+                'label' => trans('plugins/ecommerce::products.form.tags'),
                 'label_attr' => ['class' => 'control-label'],
-                'value'      => $tags,
-                'attr'       => [
+                'value' => $tags,
+                'attr' => [
                     'placeholder' => trans('plugins/ecommerce::products.form.write_some_tags'),
-                    'data-url'    => route('product-tag.all'),
+                    'data-url' => route('product-tag.all'),
                 ],
             ])
             ->setBreakFieldPoint('status');
@@ -201,11 +200,11 @@ class ProductForm extends FormAbstract
          */
         $this->addMetaBoxes([
             'options' => [
-                'title'    => trans('plugins/ecommerce::product-option.name'),
-                'content'  => view('plugins/ecommerce::products.partials.product-option-form', [
-                    'options'       => GlobalOptionEnum::options(),
+                'title' => trans('plugins/ecommerce::product-option.name'),
+                'content' => view('plugins/ecommerce::products.partials.product-option-form', [
+                    'options' => GlobalOptionEnum::options(),
                     'globalOptions' => app(GlobalOptionInterface::class)->pluck('name', 'id'),
-                    'product'       => $this->getModel()->toArray(),
+                    'product' => $this->getModel()->toArray(),
                 ]),
                 'priority' => 4,
             ],
@@ -216,29 +215,29 @@ class ProductForm extends FormAbstract
             $this
                 ->removeMetaBox('variations')
                 ->addMetaBoxes([
-                    'general'    => [
-                        'title'          => trans('plugins/ecommerce::products.overview'),
-                        'content'        => view(
+                    'general' => [
+                        'title' => trans('plugins/ecommerce::products.overview'),
+                        'content' => view(
                             'plugins/ecommerce::products.partials.general',
                             [
-                                'product'         => $productId ? $this->getModel() : null,
-                                'isVariation'     => false,
+                                'product' => $productId ? $this->getModel() : null,
+                                'isVariation' => false,
                                 'originalProduct' => null,
                             ]
                         )->render(),
                         'before_wrapper' => '<div id="main-manage-product-type">',
-                        'priority'       => 2,
+                        'priority' => 2,
                     ],
                     'attributes' => [
-                        'title'         => trans('plugins/ecommerce::products.attributes'),
-                        'content'       => view('plugins/ecommerce::products.partials.add-product-attributes', [
+                        'title' => trans('plugins/ecommerce::products.attributes'),
+                        'content' => view('plugins/ecommerce::products.partials.add-product-attributes', [
                             'productAttributeSets' => $productAttributeSets,
-                            'productAttributes'    => $this->getProductAttributes($attributeSetId),
-                            'attributeSetId'       => $attributeSetId,
-                            'product'              => $this->getModel(),
+                            'productAttributes' => $this->getProductAttributes($attributeSetId),
+                            'attributeSetId' => $attributeSetId,
+                            'product' => $this->getModel(),
                         ])->render(),
                         'after_wrapper' => '</div>',
-                        'priority'      => 3,
+                        'priority' => 3,
                     ],
                 ]);
         } elseif ($productId) {
@@ -256,17 +255,17 @@ class ProductForm extends FormAbstract
                 ->removeMetaBox('attributes')
                 ->addMetaBoxes([
                     'variations' => [
-                        'title'          => trans('plugins/ecommerce::products.product_has_variations'),
-                        'content'        => view('plugins/ecommerce::products.partials.configurable', [
-                            'productAttributeSets'       => $productAttributeSets,
-                            'productVariations'          => $productVariations,
-                            'productVariationsInfo'      => $productVariationsInfo,
+                        'title' => trans('plugins/ecommerce::products.product_has_variations'),
+                        'content' => view('plugins/ecommerce::products.partials.configurable', [
+                            'productAttributeSets' => $productAttributeSets,
+                            'productVariations' => $productVariations,
+                            'productVariationsInfo' => $productVariationsInfo,
                             'productsRelatedToVariation' => $productsRelatedToVariation,
-                            'product'                    => $this->getModel(),
+                            'product' => $this->getModel(),
                         ])->render(),
                         'before_wrapper' => '<div id="main-manage-product-type">',
-                        'after_wrapper'  => '</div>',
-                        'priority'       => 4,
+                        'after_wrapper' => '</div>',
+                        'priority' => 4,
                     ],
                 ]);
         }

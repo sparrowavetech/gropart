@@ -39,10 +39,10 @@ class TagController extends Controller
     {
         $data = $this->tagRepository
             ->advancedGet([
-                'with'      => ['slugable'],
+                'with' => ['slugable'],
                 'condition' => ['status' => BaseStatusEnum::PUBLISHED],
-                'paginate'  => [
-                    'per_page'      => (int)$request->input('per_page', 10),
+                'paginate' => [
+                    'per_page' => (int)$request->input('per_page', 10),
                     'current_paged' => (int)$request->input('page', 1),
                 ],
             ]);

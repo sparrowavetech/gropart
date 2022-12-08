@@ -46,7 +46,7 @@ if (!function_exists('parse_args')) {
         if (is_object($args)) {
             $result = get_object_vars($args);
         } else {
-            $result =& $args;
+            $result =&$args;
         }
 
         if (is_array($defaults)) {
@@ -92,6 +92,7 @@ if (!function_exists('theme_option')) {
                 return ThemeOption::getOption($key, $default);
             } catch (Exception $exception) {
                 info($exception->getMessage());
+
                 return $default;
             }
         }

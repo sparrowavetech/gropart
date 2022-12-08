@@ -52,6 +52,7 @@ class BackupRemoveCommand extends Command
 
             if (!File::isDirectory($this->backup->getBackupPath($backup))) {
                 $this->error('Cannot found backup folder!');
+
                 return 1;
             }
 

@@ -41,6 +41,7 @@ class BreadcrumbsServiceProvider extends ServiceProvider
                     if ($defaultTitle != trans($menuCategory['name']) && $defaultTitle != $siteTitle) {
                         $breadcrumbs->push($defaultTitle, $menuCategory['url']);
                     }
+
                     break;
                 }
             }
@@ -62,6 +63,7 @@ class BreadcrumbsServiceProvider extends ServiceProvider
                             if ($defaultTitle != trans($menuItem['name']) && $defaultTitle != $siteTitle) {
                                 $breadcrumbs->push($defaultTitle, $menuItem['url']);
                             }
+
                             break;
                         }
                     }

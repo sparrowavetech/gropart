@@ -56,15 +56,15 @@ class CsvLocationExport implements FromCollection, WithHeadings
 
         foreach ($countries as $country) {
             $countryData = [
-                'name'         => $country->name,
-                'slug'         => $country->slug ?: Str::slug($country->name),
+                'name' => $country->name,
+                'slug' => $country->slug ?: Str::slug($country->name),
                 'abbreviation' => '',
-                'state'        => '',
-                'country'      => '',
-                'import_type'  => 'country',
-                'status'       => $country->status,
-                'order'        => $country->order,
-                'nationality'  => $country->nationality,
+                'state' => '',
+                'country' => '',
+                'import_type' => 'country',
+                'status' => $country->status,
+                'order' => $country->order,
+                'nationality' => $country->nationality,
             ];
 
             foreach ($supportedLocales as $properties) {
@@ -77,15 +77,15 @@ class CsvLocationExport implements FromCollection, WithHeadings
 
             foreach ($country->states as $state) {
                 $stateData = [
-                    'name'         => $state->name,
-                    'slug'         => $state->slug ?: Str::slug($state->name),
+                    'name' => $state->name,
+                    'slug' => $state->slug ?: Str::slug($state->name),
                     'abbreviation' => $state->abbreviation,
-                    'state'        => '',
-                    'country'      => $country->name,
-                    'import_type'  => 'state',
-                    'status'       => $state->status,
-                    'order'        => $state->order,
-                    'nationality'  => '',
+                    'state' => '',
+                    'country' => $country->name,
+                    'import_type' => 'state',
+                    'status' => $state->status,
+                    'order' => $state->order,
+                    'nationality' => '',
                 ];
 
                 foreach ($supportedLocales as $properties) {
@@ -98,15 +98,15 @@ class CsvLocationExport implements FromCollection, WithHeadings
 
                 foreach ($state->cities as $city) {
                     $cityData = [
-                        'name'         => $city->name,
-                        'slug'         => $city->slug ?: Str::slug($state->name),
+                        'name' => $city->name,
+                        'slug' => $city->slug ?: Str::slug($state->name),
                         'abbreviation' => '',
-                        'state'        => $state->name,
-                        'country'      => $city->country->name,
-                        'import_type'  => 'city',
-                        'status'       => $city->status,
-                        'order'        => $city->order,
-                        'nationality'  => '',
+                        'state' => $state->name,
+                        'country' => $city->country->name,
+                        'import_type' => 'city',
+                        'status' => $city->status,
+                        'order' => $city->order,
+                        'nationality' => '',
                     ];
 
                     foreach ($supportedLocales as $properties) {
@@ -130,15 +130,15 @@ class CsvLocationExport implements FromCollection, WithHeadings
     public function headings(): array
     {
         $headings = [
-            'name'         => 'Name', // 1 => A
-            'slug'         => 'Slug', // 2 => B
+            'name' => 'Name', // 1 => A
+            'slug' => 'Slug', // 2 => B
             'abbreviation' => 'Abbreviation', // 3 => C
-            'state'        => 'State', // 4 => D
-            'country'      => 'Country', // 5 => E
-            'import_type'  => 'Import Type', // 6 => F
-            'status'       => 'Status', // 7 => G
-            'order'        => 'Order', // 8 => H
-            'nationality'  => 'Nationality', // 9 => I
+            'state' => 'State', // 4 => D
+            'country' => 'Country', // 5 => E
+            'import_type' => 'Import Type', // 6 => F
+            'status' => 'Status', // 7 => G
+            'order' => 'Order', // 8 => H
+            'nationality' => 'Nationality', // 9 => I
         ];
 
         if (defined('LANGUAGE_MODULE_SCREEN_NAME')) {
@@ -147,7 +147,7 @@ class CsvLocationExport implements FromCollection, WithHeadings
             $supportedLocales = Language::getSupportedLocales();
             foreach ($supportedLocales as $properties) {
                 if ($properties['lang_code'] != $defaultLanguage) {
-                    $headings['name_' . $properties['lang_code']] = 'Name (' .  strtoupper($properties['lang_code']) . ')';
+                    $headings['name_' . $properties['lang_code']] = 'Name (' . strtoupper($properties['lang_code']) . ')';
                 }
             }
         }

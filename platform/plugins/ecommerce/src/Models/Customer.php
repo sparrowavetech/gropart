@@ -13,10 +13,12 @@ use Botble\Marketplace\Models\Withdrawal;
 use Carbon\Carbon;
 use Eloquent;
 use Exception;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 use RvMedia;
 use MacroableModels;
 use Illuminate\Support\Str;
@@ -26,8 +28,10 @@ use Illuminate\Support\Str;
  */
 class Customer extends Authenticatable
 {
-    use Notifiable;
+    use HasApiTokens;
+    use HasFactory;
     use EnumCastable;
+    use Notifiable;
 
     /**
      * @var string
@@ -90,7 +94,7 @@ class Customer extends Authenticatable
     /**
      * @return string
      */
-    public function getAvatarUrlAttribute()
+    public function getAvatarUrlAttribute(): string
     {
         if ($this->avatar) {
             return RvMedia::getImageUrl($this->avatar, 'thumb');
@@ -103,33 +107,21 @@ class Customer extends Authenticatable
         }
     }
 
-    /**
-     * @return HasMany
-     */
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class, 'user_id', 'id');
     }
 
-    /**
-     * @return HasMany
-     */
     public function addresses(): HasMany
     {
         return $this->hasMany(Address::class, 'customer_id', 'id');
     }
 
-    /**
-     * @return BelongsToMany
-     */
     public function discounts(): BelongsToMany
     {
         return $this->belongsToMany(Discount::class, 'ec_discount_customers', 'customer_id', 'id');
     }
 
-    /**
-     * @return HasMany
-     */
     public function wishlist(): HasMany
     {
         return $this->hasMany(Wishlist::class, 'customer_id');
@@ -170,17 +162,11 @@ class Customer extends Authenticatable
         return parent::__get($key);
     }
 
-    /**
-     * @return HasMany
-     */
     public function reviews(): HasMany
     {
         return $this->hasMany(Review::class, 'customer_id');
     }
 
-    /**
-     * @return BelongsToMany
-     */
     public function promotions(): BelongsToMany
     {
         return $this
@@ -196,9 +182,6 @@ class Customer extends Authenticatable
             ->where('product_quantity', 1);
     }
 
-    /**
-     * @return BelongsToMany
-     */
     public function viewedProducts(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'ec_customer_recently_viewed_products');

@@ -73,6 +73,7 @@ class CityTable extends TableAbstract
                 if (!Auth::user()->hasPermission('city.edit')) {
                     return $item->name;
                 }
+
                 return Html::link(route('city.edit', $item->id), $item->name);
             })
             ->editColumn('state_id', function ($item) {
@@ -105,9 +106,6 @@ class CityTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function query()
     {
         $query = $this->repository->getModel()->select([
@@ -125,18 +123,18 @@ class CityTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function columns()
+    public function columns(): array
     {
         return [
-            'id'         => [
+            'id' => [
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
             ],
-            'name'       => [
+            'name' => [
                 'title' => trans('core/base::tables.name'),
                 'class' => 'text-start',
             ],
-            'state_id'   => [
+            'state_id' => [
                 'title' => trans('plugins/location::city.state'),
                 'class' => 'text-start',
             ],
@@ -148,7 +146,7 @@ class CityTable extends TableAbstract
                 'title' => trans('core/base::tables.created_at'),
                 'width' => '100px',
             ],
-            'status'     => [
+            'status' => [
                 'title' => trans('core/base::tables.status'),
                 'width' => '100px',
             ],
@@ -158,7 +156,7 @@ class CityTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function buttons()
+    public function buttons(): array
     {
         return $this->addCreateButton(route('city.create'), 'city.create');
     }
@@ -177,30 +175,30 @@ class CityTable extends TableAbstract
     public function getBulkChanges(): array
     {
         return [
-            'name'       => [
-                'title'    => trans('core/base::tables.name'),
-                'type'     => 'text',
+            'name' => [
+                'title' => trans('core/base::tables.name'),
+                'type' => 'text',
                 'validate' => 'required|max:120',
             ],
-            'state_id'   => [
-                'title'    => trans('plugins/location::city.state'),
-                'type'     => 'customSelect',
+            'state_id' => [
+                'title' => trans('plugins/location::city.state'),
+                'type' => 'customSelect',
                 'validate' => 'required|max:120',
             ],
             'country_id' => [
-                'title'    => trans('plugins/location::city.country'),
-                'type'     => 'customSelect',
+                'title' => trans('plugins/location::city.country'),
+                'type' => 'customSelect',
                 'validate' => 'required|max:120',
             ],
-            'status'     => [
-                'title'    => trans('core/base::tables.status'),
-                'type'     => 'customSelect',
-                'choices'  => BaseStatusEnum::labels(),
+            'status' => [
+                'title' => trans('core/base::tables.status'),
+                'type' => 'customSelect',
+                'choices' => BaseStatusEnum::labels(),
                 'validate' => 'required|in:' . implode(',', BaseStatusEnum::values()),
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type'  => 'date',
+                'type' => 'date',
             ],
         ];
     }

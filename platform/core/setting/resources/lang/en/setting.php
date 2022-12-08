@@ -30,6 +30,7 @@ return [
         'enable' => 'Enable',
         'disable' => 'Disable',
         'enable_cache' => 'Enable cache?',
+        'disable_cache_in_the_admin_panel' => 'Disable cache in the admin panel?',
         'cache_time' => 'Cache time (minutes)',
         'enable_cache_site_map' => 'Enable cache site map?',
         'cache_time_site_map' => 'Cache Time Site map (minutes)',

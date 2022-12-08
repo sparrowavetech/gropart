@@ -127,15 +127,15 @@ class MarketplaceHelper
     {
         return EmailHandler::setModule(MARKETPLACE_MODULE_SCREEN_NAME)
             ->setVariableValues([
-                'customer_name'    => $order->user->name ?: $order->address->name,
-                'customer_email'   => $order->user->email ?: $order->address->email,
-                'customer_phone'   => $order->user->phone ?: $order->address->phone,
+                'customer_name' => $order->user->name ?: $order->address->name,
+                'customer_email' => $order->user->email ?: $order->address->email,
+                'customer_phone' => $order->user->phone ?: $order->address->phone,
                 'customer_address' => $order->full_address,
-                'product_list'     => view('plugins/ecommerce::emails.partials.order-detail', compact('order'))
+                'product_list' => view('plugins/ecommerce::emails.partials.order-detail', compact('order'))
                     ->render(),
-                'shipping_method'  => $order->shipping_method_name,
-                'payment_method'   => $order->payment->payment_channel->label(),
-                'store_name'       => $order->store->name,
+                'shipping_method' => $order->shipping_method_name,
+                'payment_method' => $order->payment->payment_channel->label(),
+                'store_name' => $order->store->name,
             ]);
     }
 
@@ -152,7 +152,7 @@ class MarketplaceHelper
     public static function sendEnquiryMail($enquiry)
     {
         $mailer = EmailHandler::setModule(MARKETPLACE_MODULE_SCREEN_NAME);
-      
+
         if ($mailer->templateEnabled('store_new_enquiry')) {
             if ($enquiry->product->store->email) {
                 self::setEmailVendorVariablesForEnquiry($enquiry);

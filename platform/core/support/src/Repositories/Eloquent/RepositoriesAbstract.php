@@ -173,6 +173,7 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         foreach ($where as $field => $value) {
             if ($value instanceof Closure) {
                 $newModel = $value($newModel);
+
                 continue;
             }
 
@@ -181,12 +182,15 @@ abstract class RepositoriesAbstract implements RepositoryInterface
                 switch (strtoupper($condition)) {
                     case 'IN':
                         $newModel = $newModel->whereIn($field, $val);
+
                         break;
                     case 'NOT_IN':
                         $newModel = $newModel->whereNotIn($field, $val);
+
                         break;
                     default:
                         $newModel = $newModel->where($field, $condition, $val);
+
                         break;
                 }
             } else {
@@ -377,16 +381,16 @@ abstract class RepositoriesAbstract implements RepositoryInterface
     {
         $params = array_merge([
             'condition' => [],
-            'order_by'  => [],
-            'take'      => null,
-            'paginate'  => [
-                'per_page'      => null,
+            'order_by' => [],
+            'take' => null,
+            'paginate' => [
+                'per_page' => null,
                 'current_paged' => 1,
             ],
-            'select'    => ['*'],
-            'with'      => [],
+            'select' => ['*'],
+            'with' => [],
             'withCount' => [],
-            'withAvg'   => [],
+            'withAvg' => [],
         ], $params);
 
         $this->applyConditions($params['condition']);

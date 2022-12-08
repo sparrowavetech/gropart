@@ -115,6 +115,7 @@ class StoreProductService
                 $product->products()->detach();
                 $product->products()->attach(array_filter(explode(',', $request->input('related_products', ''))));
             }
+
             if ($request->has('frequently_bought_together')) {
                 $product->frequentlyBoughtTogether()->detach();
                 $product->frequentlyBoughtTogether()->attach(array_filter(explode(',', $request->input('frequently_bought_together', ''))));
@@ -196,7 +197,7 @@ class StoreProductService
         $data['extension'] = $fileExtension;
 
         return [
-            'url'    => $filePath,
+            'url' => $filePath,
             'extras' => $data,
         ];
     }

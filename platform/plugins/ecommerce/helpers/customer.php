@@ -17,7 +17,7 @@ if (!function_exists('is_added_to_wishlist')) {
         }
 
         return app(WishlistInterface::class)->count([
-                'product_id'  => $productId,
+                'product_id' => $productId,
                 'customer_id' => auth('customer')->id(),
             ]) > 0;
     }
@@ -51,7 +51,7 @@ if (!function_exists('get_customer_addresses')) {
             'condition' => [
                 'customer_id' => auth('customer')->id(),
             ],
-            'order_by'  => [
+            'order_by' => [
                 'is_default' => 'DESC',
             ],
         ]);
@@ -69,7 +69,7 @@ if (!function_exists('get_default_customer_address')) {
         }
 
         return app(AddressInterface::class)->getFirstBy([
-            'is_default'  => 1,
+            'is_default' => 1,
             'customer_id' => auth('customer')->id(),
         ]);
     }

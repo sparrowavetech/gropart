@@ -8,42 +8,29 @@ use Botble\Ecommerce\Repositories\Interfaces\ShipmentInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\DataTables;
 
 class ShipmentTable extends TableAbstract
 {
-    /**
-     * @var bool
-     */
     protected $hasActions = true;
 
-    /**
-     * @var bool
-     */
     protected $hasFilter = true;
 
-    /**
-     * @param DataTables $table
-     * @param UrlGenerator $urlGenerator
-     * @param ShipmentInterface $repository
-     */
     public function __construct(DataTables $table, UrlGenerator $urlGenerator, ShipmentInterface $repository)
     {
         parent::__construct($table, $urlGenerator);
 
         $this->repository = $repository;
 
-        if (!Auth::user()->hasAnyPermission(['orders.edit'])) {
+        if (!Auth::user()->hasAnyPermission(['ecommerce.shipments.edit', 'ecommerce.shipments.destroy'])) {
             $this->hasOperations = false;
             $this->hasActions = false;
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
@@ -55,7 +42,7 @@ class ShipmentTable extends TableAbstract
                     return $item->order->code;
                 }
 
-                return Html::link(route('orders.edit', $item->id), $item->order->code . ' <i class="fa fa-external-link-alt"></i>', ['target' => '_blank'], null, false);
+                return Html::link(route('orders.edit', $item->order->id), $item->order->code . ' <i class="fa fa-external-link-alt"></i>', ['target' => '_blank'], null, false);
             })
             ->editColumn('user_id', function ($item) {
                 return BaseHelper::clean($item->order->user->name ?: $item->order->address->name);
@@ -78,7 +65,7 @@ class ShipmentTable extends TableAbstract
                 return BaseHelper::clean($item->cod_status->toHtml());
             })
             ->addColumn('operations', function ($item) {
-                return $this->getOperations('ecommerce.shipments.edit', null, $item);
+                return $this->getOperations('ecommerce.shipments.edit', 'ecommerce.shipments.destroy', $item);
             })
             ->filter(function ($query) {
                 $keyword = $this->request->input('search.value');
@@ -95,9 +82,6 @@ class ShipmentTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function query()
     {
         $query = $this->repository->getModel()->select([
@@ -113,18 +97,15 @@ class ShipmentTable extends TableAbstract
         return $this->applyScopes($query);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function columns()
+    public function columns(): array
     {
         return [
-            'id'         => [
+            'id' => [
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
                 'class' => 'text-start',
             ],
-            'order_id'   => [
+            'order_id' => [
                 'title' => trans('plugins/ecommerce::shipping.order_id'),
                 'class' => 'text-center',
             ],
@@ -132,15 +113,15 @@ class ShipmentTable extends TableAbstract
                 'title' => trans('plugins/ecommerce::order.customer_label'),
                 'class' => 'text-start',
             ],
-            'price'   => [
+            'price' => [
                 'title' => trans('plugins/ecommerce::shipping.shipping_amount'),
                 'class' => 'text-center',
             ],
-            'status'     => [
+            'status' => [
                 'title' => trans('core/base::tables.status'),
                 'class' => 'text-center',
             ],
-            'cod_status'   => [
+            'cod_status' => [
                 'title' => trans('plugins/ecommerce::shipping.cod_status'),
                 'class' => 'text-center',
             ],
@@ -152,22 +133,25 @@ class ShipmentTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getBulkChanges(): array
     {
         return [
-            'status'     => [
-                'title'    => trans('core/base::tables.status'),
-                'type'     => 'select',
-                'choices'  => ShippingStatusEnum::labels(),
+            'status' => [
+                'title' => trans('core/base::tables.status'),
+                'type' => 'select',
+                'choices' => ShippingStatusEnum::labels(),
                 'validate' => 'required|in:' . implode(',', ShippingStatusEnum::values()),
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type'  => 'date',
+                'type' => 'date',
             ],
         ];
     }
+
+    public function bulkActions(): array
+    {
+        return $this->addDeleteAction(route('ecommerce.shipments.deletes'), 'ecommerce.shipments.destroy', parent::bulkActions());
+    }
+
 }

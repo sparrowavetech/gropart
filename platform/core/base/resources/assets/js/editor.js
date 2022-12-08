@@ -38,12 +38,14 @@ class EditorManagement {
                     onEdit: (shortcode, name = () => {
                     }) => {
                         let description = null;
-                        this.shortcodes.forEach(function (item) {
-                            if (item.key === name) {
-                                description = item.description;
-                                return true;
-                            }
-                        });
+                        if (this.shortcodes.length) {
+                            this.shortcodes.forEach(function (item) {
+                                if (item.key === name) {
+                                    description = item.description;
+                                    return true;
+                                }
+                            });
+                        }
 
                         this.shortcodeCallback({
                             key: name,
@@ -52,16 +54,16 @@ class EditorManagement {
                                 code: shortcode,
                             },
                             description: description,
-                            preview_image: '',
+                            previewImage: '',
                             update: true
                         })
                     },
-                    shortcodes: this.getShortcodesAvailable(editor),
+                    shortcodes: this.getShortcodesAvailable(editor) || [],
                     onCallback: (shortcode, options) => {
                         this.shortcodeCallback({
                             key: shortcode,
                             href: options.url,
-                            preview_image: ''
+                            previewImage: ''
                         });
                     }
                 },
@@ -211,7 +213,7 @@ class EditorManagement {
         const $dropdown = $(editor).parents('.form-group').find('.add_shortcode_btn_trigger')?.next('.dropdown-menu');
         const lists = [];
 
-        if ($dropdown) {
+        if ($dropdown && $dropdown.find('> li').length) {
             $dropdown.find('> li').each(function () {
                 let item = $(this).find('> a');
                 lists.push({
@@ -258,7 +260,7 @@ class EditorManagement {
             selector: '#' + element,
             min_height: $('#' + element).prop('rows') * 110,
             resize: 'vertical',
-            plugins: 'code autolink advlist visualchars link image media table charmap hr pagebreak nonbreaking hanbiroclip anchor insertdatetime lists textcolor wordcount imagetools  contextmenu  visualblocks',
+            plugins: 'code autolink advlist visualchars link image media table charmap hr pagebreak nonbreaking anchor insertdatetime lists wordcount imagetools visualblocks',
             extended_valid_elements: 'input[id|name|value|type|class|style|required|placeholder|autocomplete|onclick]',
             toolbar: 'formatselect | bold italic strikethrough forecolor backcolor | link image table | alignleft aligncenter alignright alignjustify  | numlist bullist indent  |  visualblocks code',
             convert_urls: false,
@@ -348,7 +350,7 @@ class EditorManagement {
             description = null,
             data = {},
             update = false,
-            preview_image = null
+            previewImage = null
         } = params;
         $('.short-code-admin-config').html('');
 
@@ -360,12 +362,12 @@ class EditorManagement {
             $addShortcodeButton.text($addShortcodeButton.data('add-text'));
         }
 
-        if (description !== '' && description != null) {
+        if (description != null) {
             $('.short_code_modal .modal-title strong').text(description);
         }
 
-        if (preview_image !== '' && preview_image != null) {
-            $('.short_code_modal .shortcode-preview-image-link').attr('href', preview_image).show();
+        if (previewImage != null) {
+            $('.short_code_modal .shortcode-preview-image-link').attr('href', previewImage).show();
         } else {
             $('.short_code_modal .shortcode-preview-image-link').hide();
         }
@@ -407,7 +409,7 @@ class EditorManagement {
                     href: $(this).prop('href'),
                     key: $(this).data('key'),
                     description: $(this).data('description'),
-                    preview_image: $(this).data('preview-image'),
+                    previewImage: $(this).data('preview-image'),
                 });
 
             } else {

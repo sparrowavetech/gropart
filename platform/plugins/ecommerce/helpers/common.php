@@ -99,6 +99,7 @@ if (!function_exists('ecommerce_convert_weight')) {
                 break;
             case 'kg':
                 $weight = $weight * 1000;
+
                 break;
         }
 
@@ -118,6 +119,7 @@ if (!function_exists('ecommerce_convert_width_height')) {
                 break;
             case 'm':
                 $data = $data * 100;
+
                 break;
         }
 
@@ -141,9 +143,11 @@ if (!function_exists('ecommerce_weight_unit')) {
         switch ($unit) {
             case 'g':
                 $unit = __('grams');
+
                 break;
             case 'kg':
                 $unit = __('kilograms');
+
                 break;
         }
 
@@ -167,9 +171,11 @@ if (!function_exists('ecommerce_width_height_unit')) {
         switch ($unit) {
             case 'cm':
                 $unit = __('centimeters');
+
                 break;
             case 'm':
                 $unit = __('meters');
+
                 break;
         }
 

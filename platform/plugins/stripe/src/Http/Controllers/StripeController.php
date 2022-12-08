@@ -38,14 +38,14 @@ class StripeController extends Controller
                 $chargeId = $charge->charges->first()->id;
 
                 do_action(PAYMENT_ACTION_PAYMENT_PROCESSED, [
-                    'amount'          => $metadata['amount'],
-                    'currency'        => strtoupper($session->currency),
-                    'charge_id'       => $chargeId,
-                    'order_id'        => $orderIds,
-                    'customer_id'     => Arr::get($metadata, 'customer_id'),
-                    'customer_type'   => Arr::get($metadata, 'customer_type'),
+                    'amount' => $metadata['amount'],
+                    'currency' => strtoupper($session->currency),
+                    'charge_id' => $chargeId,
+                    'order_id' => $orderIds,
+                    'customer_id' => Arr::get($metadata, 'customer_id'),
+                    'customer_type' => Arr::get($metadata, 'customer_type'),
                     'payment_channel' => STRIPE_PAYMENT_METHOD_NAME,
-                    'status'          => PaymentStatusEnum::COMPLETED,
+                    'status' => PaymentStatusEnum::COMPLETED,
                 ]);
 
                 return $response

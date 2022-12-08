@@ -169,6 +169,7 @@ class DatabaseSettingStore extends SettingStore
                 $value = $row->value;
             } else {
                 $msg = 'Expected array or object, got ' . gettype($row);
+
                 throw new UnexpectedValueException($msg);
             }
 

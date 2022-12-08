@@ -13,7 +13,7 @@
                         <div class="logo-title-container">
                             <div class="copy animated fadeIn">
                                 <h1>{{ setting('admin_title', config('core.base.general.base_name')) }}</h1>
-                                <p>{!! BaseHelper::clean(trans('core/base::layouts.copyright', ['year' =>Carbon\Carbon::now()->format('Y'), 'company' => setting('admin_title', config('core.base.general.base_name')), 'version' => get_cms_version()])) !!}</p>
+                                <p>{!! BaseHelper::clean(trans('core/base::layouts.copyright', ['year' => Carbon\Carbon::now()->format('Y'), 'company' => setting('admin_title', config('core.base.general.base_name')), 'version' => get_cms_version()])) !!}</p>
                             </div>
                         </div> <!-- .logo-title-container -->
                     </div>

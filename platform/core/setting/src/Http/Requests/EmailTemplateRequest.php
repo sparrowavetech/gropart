@@ -15,7 +15,7 @@ class EmailTemplateRequest extends Request
         return [
             'email_subject' => $this->has('email_subject_key') ? 'required|string' : '',
             'email_content' => 'required|string',
-            'module'        => 'required|string|alpha_dash',
+            'module' => 'required|string|alpha_dash',
             'template_file' => 'required|string|alpha_dash',
         ];
     }

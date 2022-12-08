@@ -26,11 +26,11 @@ class InvoiceItem extends BaseModel
     ];
 
     protected $casts = [
-        'sub_total'       => 'decimal:2',
-        'tax_amount'      => 'decimal:2',
+        'sub_total' => 'decimal:2',
+        'tax_amount' => 'decimal:2',
         'discount_amount' => 'decimal:2',
-        'amount'          => 'decimal:2',
-        'metadata'        => 'json',
+        'amount' => 'decimal:2',
+        'metadata' => 'json',
     ];
 
     protected $dates = [

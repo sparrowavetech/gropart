@@ -59,8 +59,8 @@ class StoreRevenueTable extends TableAbstract
      * @param RevenueInterface $revenueRepository
      */
     public function __construct(
-        DataTables       $table,
-        UrlGenerator     $urlGenerator,
+        DataTables $table,
+        UrlGenerator $urlGenerator,
         RevenueInterface $revenueRepository
     ) {
         parent::__construct($table, $urlGenerator);
@@ -89,7 +89,7 @@ class StoreRevenueTable extends TableAbstract
                     return $item->description;
                 }
 
-                $url = Route::currentRouteName() ==  'marketplace.vendor.statements.index' ? route('marketplace.vendor.orders.edit', $item->order->id) : route('orders.edit', $item->order->id);
+                $url = Route::currentRouteName() == 'marketplace.vendor.statements.index' ? route('marketplace.vendor.orders.edit', $item->order->id) : route('orders.edit', $item->order->id);
 
                 return Html::link($url, $item->order->code, ['target' => '_blank']);
             })
@@ -100,9 +100,6 @@ class StoreRevenueTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function query()
     {
         $query = $this->repository->getModel()
@@ -126,19 +123,19 @@ class StoreRevenueTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function columns()
+    public function columns(): array
     {
         return [
-            'id'         => [
+            'id' => [
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
                 'class' => 'text-start',
             ],
-            'order_id'   => [
+            'order_id' => [
                 'title' => trans('plugins/ecommerce::order.description'),
                 'class' => 'text-start',
             ],
-            'fee'        => [
+            'fee' => [
                 'title' => trans('plugins/ecommerce::shipping.fee'),
                 'class' => 'text-start',
             ],
@@ -146,7 +143,7 @@ class StoreRevenueTable extends TableAbstract
                 'title' => trans('plugins/ecommerce::order.sub_amount'),
                 'class' => 'text-start',
             ],
-            'amount'     => [
+            'amount' => [
                 'title' => trans('plugins/ecommerce::order.amount'),
                 'class' => 'text-start',
             ],

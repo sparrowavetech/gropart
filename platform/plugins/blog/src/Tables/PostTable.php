@@ -49,9 +49,9 @@ class PostTable extends TableAbstract
      * @param CategoryInterface $categoryRepository
      */
     public function __construct(
-        DataTables        $table,
-        UrlGenerator      $urlGenerator,
-        PostInterface     $postRepository,
+        DataTables $table,
+        UrlGenerator $urlGenerator,
+        PostInterface $postRepository,
         CategoryInterface $categoryRepository
     ) {
         parent::__construct($table, $urlGenerator);
@@ -142,31 +142,31 @@ class PostTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function columns()
+    public function columns(): array
     {
         return [
-            'id'         => [
+            'id' => [
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
             ],
-            'image'      => [
+            'image' => [
                 'title' => trans('core/base::tables.image'),
                 'width' => '70px',
             ],
-            'name'       => [
+            'name' => [
                 'title' => trans('core/base::tables.name'),
                 'class' => 'text-start',
             ],
             'updated_at' => [
-                'title'     => trans('plugins/blog::posts.categories'),
-                'width'     => '150px',
-                'class'     => 'no-sort text-center',
+                'title' => trans('plugins/blog::posts.categories'),
+                'width' => '150px',
+                'class' => 'no-sort text-center',
                 'orderable' => false,
             ],
-            'author_id'  => [
-                'title'     => trans('plugins/blog::posts.author'),
-                'width'     => '150px',
-                'class'     => 'no-sort text-center',
+            'author_id' => [
+                'title' => trans('plugins/blog::posts.author'),
+                'width' => '150px',
+                'class' => 'no-sort text-center',
                 'orderable' => false,
             ],
             'created_at' => [
@@ -174,7 +174,7 @@ class PostTable extends TableAbstract
                 'width' => '100px',
                 'class' => 'text-center',
             ],
-            'status'     => [
+            'status' => [
                 'title' => trans('core/base::tables.status'),
                 'width' => '100px',
                 'class' => 'text-center',
@@ -185,7 +185,7 @@ class PostTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function buttons()
+    public function buttons(): array
     {
         return $this->addCreateButton(route('posts.create'), 'posts.create');
     }
@@ -204,26 +204,26 @@ class PostTable extends TableAbstract
     public function getBulkChanges(): array
     {
         return [
-            'name'       => [
-                'title'    => trans('core/base::tables.name'),
-                'type'     => 'text',
+            'name' => [
+                'title' => trans('core/base::tables.name'),
+                'type' => 'text',
                 'validate' => 'required|max:120',
             ],
-            'status'     => [
-                'title'    => trans('core/base::tables.status'),
-                'type'     => 'customSelect',
-                'choices'  => BaseStatusEnum::labels(),
+            'status' => [
+                'title' => trans('core/base::tables.status'),
+                'type' => 'customSelect',
+                'choices' => BaseStatusEnum::labels(),
                 'validate' => 'required|in:' . implode(',', BaseStatusEnum::values()),
             ],
-            'category'   => [
-                'title'    => trans('plugins/blog::posts.category'),
-                'type'     => 'select-search',
+            'category' => [
+                'title' => trans('plugins/blog::posts.category'),
+                'type' => 'select-search',
                 'validate' => 'required',
                 'callback' => 'getCategories',
             ],
             'created_at' => [
-                'title'    => trans('core/base::tables.created_at'),
-                'type'     => 'date',
+                'title' => trans('core/base::tables.created_at'),
+                'type' => 'date',
                 'validate' => 'required',
             ],
         ];

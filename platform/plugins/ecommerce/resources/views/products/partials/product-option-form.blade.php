@@ -27,21 +27,23 @@
                 <button type="button" class="btn btn-info add-new-option"
                         id="add-new-option">{{ trans('plugins/ecommerce::product-option.add_new_option') }}</button>
             </div>
-            <div class="col-12 col-md-6 d-flex justify-content-end">
-                <div class="ui-select-wrapper d-inline-block" style="width: 200px;">
-                    <select id="global-option" class="form-control ui-select">
-                        <option
-                            value="-1">{{ trans('plugins/ecommerce::product-option.select_global_option') }}</option>
-                        @foreach($globalOptions as $id => $name)
-                            <option value="{{ $id }}">{{ $name }}</option>
-                        @endforeach
-                    </select>
-                    <svg class="svg-next-icon svg-next-icon-size-16">
-                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#select-chevron"></use>
-                    </svg>
+            @if (count($globalOptions))
+                <div class="col-12 col-md-6 d-flex justify-content-end">
+                    <div class="ui-select-wrapper d-inline-block" style="width: 200px;">
+                        <select id="global-option" class="form-control ui-select">
+                            <option
+                                value="-1">{{ trans('plugins/ecommerce::product-option.select_global_option') }}</option>
+                            @foreach($globalOptions as $id => $name)
+                                <option value="{{ $id }}">{{ $name }}</option>
+                            @endforeach
+                        </select>
+                        <svg class="svg-next-icon svg-next-icon-size-16">
+                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#select-chevron"></use>
+                        </svg>
+                    </div>
+                    <button type="button" role="button" class="btn btn-info add-from-global-option ms-3">{{ trans('plugins/ecommerce::product-option.add_global_option') }}</button>
                 </div>
-                <button type="button" role="button" class="btn btn-info add-from-global-option ms-3">{{ trans('plugins/ecommerce::product-option.add_global_option') }}</button>
-            </div>
+            @endif
         </div>
     </div>
 </div>

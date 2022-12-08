@@ -33,9 +33,6 @@ class OrderReferral extends BaseModel
         'order_id',
     ];
 
-    /**
-     * @return BelongsTo
-     */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class)->withDefault();

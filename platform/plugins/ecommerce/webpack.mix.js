@@ -21,6 +21,7 @@ mix
     .js(source + '/resources/assets/js/discount.js', dist + '/js').vue({ version: 2 })
     .js(source + '/resources/assets/js/order-create.js', dist + '/js').vue({ version: 2 })
     .js(source + '/resources/assets/js/front/checkout.js', dist + '/js')
+    .js(source + '/resources/assets/js/front/order-return.js', dist + '/js')
     .copy(dist + '/js/discount.js', source + '/public/js')
     .copy(dist + '/js/order-create.js', source + '/public/js')
     .copy(dist + '/js/checkout.js', source + '/public/js');
@@ -66,6 +67,7 @@ const styles = [
     'front-theme.scss',
     'front-theme-rtl.scss',
     'report.scss',
+    'order-return.scss',
 ];
 
 styles.forEach(item => {

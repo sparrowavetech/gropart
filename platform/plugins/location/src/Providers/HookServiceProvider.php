@@ -15,6 +15,7 @@ class HookServiceProvider extends ServiceProvider
             if (!$formHelper->hasCustomField('selectLocation')) {
                 $form->addCustomField('selectLocation', SelectLocationField::class);
             }
+
             return $form;
         }, 29, 2);
     }

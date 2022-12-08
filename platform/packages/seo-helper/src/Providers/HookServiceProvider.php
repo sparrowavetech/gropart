@@ -21,13 +21,13 @@ class HookServiceProvider extends ServiceProvider
     }
 
     /**
-     * @param $priority
-     * @param BaseModel $data
+     * @param string $priority
+     * @param BaseModel|null $data
      * @return bool
      */
-    public function addMetaBox($priority, $data)
+    public function addMetaBox(string $priority, $data): bool
     {
-        if (!empty($data) && in_array(get_class($data), config('packages.seo-helper.general.supported', []))) {
+        if ($priority == 'advanced' && !empty($data) && in_array(get_class($data), config('packages.seo-helper.general.supported', []))) {
             if (get_class($data) == Page::class && BaseHelper::isHomepage($data->id)) {
                 return false;
             }
@@ -56,7 +56,7 @@ class HookServiceProvider extends ServiceProvider
     public function seoMetaBox()
     {
         $meta = [
-            'seo_title'       => null,
+            'seo_title' => null,
             'seo_description' => null,
         ];
 
@@ -76,9 +76,10 @@ class HookServiceProvider extends ServiceProvider
 
     /**
      * @param string $screen
-     * @param BaseModel $object
+     * @param BaseModel|null $object
+     * @return bool
      */
-    public function setSeoMeta($screen, $object)
+    public function setSeoMeta(string $screen, $object): bool
     {
         if (get_class($object) == Page::class && BaseHelper::isHomepage($object->id)) {
             return false;
@@ -96,5 +97,7 @@ class HookServiceProvider extends ServiceProvider
                 SeoHelper::setDescription($meta['seo_description']);
             }
         }
+
+        return true;
     }
 }

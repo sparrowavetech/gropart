@@ -52,59 +52,59 @@ class TemplateLocationExport implements
 
         $locations = [
             [
-                'name'         => 'United States of America',
-                'slug'         => '',
+                'name' => 'United States of America',
+                'slug' => '',
                 'abbreviation' => '',
-                'state'        => '',
-                'country'      => '',
-                'import_type'  => 'country',
-                'status'       => BaseStatusEnum::PUBLISHED,
-                'order'        => 0,
-                'nationality'  => 'Americans',
+                'state' => '',
+                'country' => '',
+                'import_type' => 'country',
+                'status' => BaseStatusEnum::PUBLISHED,
+                'order' => 0,
+                'nationality' => 'Americans',
             ],
             [
-                'name'         => 'Texas',
-                'slug'         => '',
+                'name' => 'Texas',
+                'slug' => '',
                 'abbreviation' => 'TX',
-                'state'        => '',
-                'country'      => 'United States of America',
-                'import_type'  => 'state',
-                'status'       => BaseStatusEnum::PUBLISHED,
-                'order'        => 0,
-                'nationality'  => '',
+                'state' => '',
+                'country' => 'United States of America',
+                'import_type' => 'state',
+                'status' => BaseStatusEnum::PUBLISHED,
+                'order' => 0,
+                'nationality' => '',
             ],
             [
-                'name'         => 'Washington',
-                'slug'         => '',
+                'name' => 'Washington',
+                'slug' => '',
                 'abbreviation' => 'WA',
-                'state'        => '',
-                'country'      => 'United States of America',
-                'import_type'  => 'state',
-                'status'       => BaseStatusEnum::PUBLISHED,
-                'order'        => 0,
-                'nationality'  => '',
+                'state' => '',
+                'country' => 'United States of America',
+                'import_type' => 'state',
+                'status' => BaseStatusEnum::PUBLISHED,
+                'order' => 0,
+                'nationality' => '',
             ],
             [
-                'name'         => 'Houston',
-                'slug'         => 'houston',
+                'name' => 'Houston',
+                'slug' => 'houston',
                 'abbreviation' => '',
-                'state'        => 'Texas',
-                'country'      => 'United States of America',
-                'import_type'  => 'city',
-                'status'       => BaseStatusEnum::PUBLISHED,
-                'order'        => 0,
-                'nationality'  => '',
+                'state' => 'Texas',
+                'country' => 'United States of America',
+                'import_type' => 'city',
+                'status' => BaseStatusEnum::PUBLISHED,
+                'order' => 0,
+                'nationality' => '',
             ],
             [
-                'name'         => 'San Antonio',
-                'slug'         => 'san-antonio',
+                'name' => 'San Antonio',
+                'slug' => 'san-antonio',
                 'abbreviation' => '',
-                'state'        => 'Texas',
-                'country'      => 'United States of America',
-                'import_type'  => 'city',
-                'status'       => BaseStatusEnum::PUBLISHED,
-                'order'        => 0,
-                'nationality'  => '',
+                'state' => 'Texas',
+                'country' => 'United States of America',
+                'import_type' => 'city',
+                'status' => BaseStatusEnum::PUBLISHED,
+                'order' => 0,
+                'nationality' => '',
             ],
         ];
 
@@ -140,15 +140,15 @@ class TemplateLocationExport implements
     public function headings(): array
     {
         $headings = [
-            'name'         => 'Name', // 1 => A
-            'slug'         => 'Slug', // 2 => B
+            'name' => 'Name', // 1 => A
+            'slug' => 'Slug', // 2 => B
             'abbreviation' => 'Abbreviation', // 3 => C
-            'state'        => 'State', // 4 => D
-            'country'      => 'Country', // 5 => E
-            'import_type'  => 'Import Type', // 6 => F
-            'status'       => 'Status', // 7 => G
-            'order'        => 'Order', // 8 => H
-            'nationality'  => 'Nationality', // 9 => I
+            'state' => 'State', // 4 => D
+            'country' => 'Country', // 5 => E
+            'import_type' => 'Import Type', // 6 => F
+            'status' => 'Status', // 7 => G
+            'order' => 'Order', // 8 => H
+            'nationality' => 'Nationality', // 9 => I
         ];
         if (defined('LANGUAGE_MODULE_SCREEN_NAME')) {
             $defaultLanguage = Language::getDefaultLanguage(['lang_code'])->lang_code;

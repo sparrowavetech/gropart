@@ -66,9 +66,9 @@ class Analytics
 
         return collect($response['rows'] ?? [])->map(function (array $dateRow) {
             return [
-                'date'      => Carbon::createFromFormat('Ymd', $dateRow[0]),
+                'date' => Carbon::createFromFormat('Ymd', $dateRow[0]),
                 'pageTitle' => $dateRow[1],
-                'visitors'  => (int)$dateRow[2],
+                'visitors' => (int)$dateRow[2],
                 'pageViews' => (int)$dateRow[3],
             ];
         });
@@ -108,8 +108,8 @@ class Analytics
 
         return collect($response['rows'] ?? [])->map(function (array $dateRow) {
             return [
-                'date'      => Carbon::createFromFormat('Ymd', $dateRow[0]),
-                'visitors'  => (int)$dateRow[1],
+                'date' => Carbon::createFromFormat('Ymd', $dateRow[0]),
+                'visitors' => (int)$dateRow[1],
                 'pageViews' => (int)$dateRow[2],
             ];
         });
@@ -126,8 +126,8 @@ class Analytics
             $period,
             'ga:pageviews',
             [
-                'dimensions'  => 'ga:pagePath,ga:pageTitle',
-                'sort'        => '-ga:pageviews',
+                'dimensions' => 'ga:pagePath,ga:pageTitle',
+                'sort' => '-ga:pageviews',
                 'max-results' => $maxResults,
             ]
         );
@@ -135,7 +135,7 @@ class Analytics
         return collect($response['rows'] ?? [])
             ->map(function (array $pageRow) {
                 return [
-                    'url'       => $pageRow[0],
+                    'url' => $pageRow[0],
                     'pageTitle' => $pageRow[1],
                     'pageViews' => (int)$pageRow[2],
                 ];
@@ -153,15 +153,15 @@ class Analytics
             $period,
             'ga:pageviews',
             [
-                'dimensions'  => 'ga:fullReferrer',
-                'sort'        => '-ga:pageviews',
+                'dimensions' => 'ga:fullReferrer',
+                'sort' => '-ga:pageviews',
                 'max-results' => $maxResults,
             ]
         );
 
         return collect($response['rows'] ?? [])->map(function (array $pageRow) {
             return [
-                'url'       => $pageRow[0],
+                'url' => $pageRow[0],
                 'pageViews' => (int)$pageRow[1],
             ];
         });
@@ -183,7 +183,7 @@ class Analytics
 
         return collect($response->rows ?? [])->map(function (array $userRow) {
             return [
-                'type'     => $userRow[0],
+                'type' => $userRow[0],
                 'sessions' => (int)$userRow[1],
             ];
         });
@@ -201,13 +201,13 @@ class Analytics
             'ga:sessions',
             [
                 'dimensions' => 'ga:browser',
-                'sort'       => '-ga:sessions',
+                'sort' => '-ga:sessions',
             ]
         );
 
         $topBrowsers = collect($response['rows'] ?? [])->map(function (array $browserRow) {
             return [
-                'browser'  => $browserRow[0],
+                'browser' => $browserRow[0],
                 'sessions' => (int)$browserRow[1],
             ];
         });
@@ -229,7 +229,7 @@ class Analytics
         return $topBrowsers
             ->take($maxResults - 1)
             ->push([
-                'browser'  => 'Others',
+                'browser' => 'Others',
                 'sessions' => $topBrowsers->splice($maxResults - 1)->sum('sessions'),
             ]);
     }

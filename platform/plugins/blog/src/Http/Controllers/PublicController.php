@@ -43,7 +43,7 @@ class PublicController extends Controller
 
     /**
      * @param string $slug
-     * @param Request $request
+     * @param BlogService $blogService
      * @return RedirectResponse|Response
      */
     public function getTag($slug, BlogService $blogService)
@@ -86,6 +86,8 @@ class PublicController extends Controller
         }
 
         event(new RenderingSingleEvent($slug));
+
+        Theme::asset()->add('ckeditor-content-styles', 'vendor/core/core/base/libraries/ckeditor/content-styles.css');
 
         return Theme::scope($data['view'], $data['data'], $data['default_view'])
             ->render();

@@ -22,10 +22,10 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
-        AuditHandlerEvent::class   => [
+        AuditHandlerEvent::class => [
             AuditHandlerListener::class,
         ],
-        Login::class               => [
+        Login::class => [
             LoginListener::class,
         ],
         UpdatedContentEvent::class => [

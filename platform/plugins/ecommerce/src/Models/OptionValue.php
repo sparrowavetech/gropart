@@ -20,7 +20,7 @@ class OptionValue extends BaseModel
         'option_value',
         'affect_price',
         'affect_type',
-        'order'
+        'order',
     ];
 
     public function option(): BelongsTo

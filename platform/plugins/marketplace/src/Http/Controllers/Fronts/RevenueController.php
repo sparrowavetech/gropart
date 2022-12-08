@@ -100,7 +100,7 @@ class RevenueController
                 $currency
             ) : human_price_text($data['data']->sum(), null, $key);
             $earningSales[] = [
-                'text'  => __('Items Earning Sales: :amount', compact('amount')),
+                'text' => __('Items Earning Sales: :amount', compact('amount')),
                 'color' => Arr::get($colors, $earningSales->count(), Arr::first($colors)),
             ];
             $series[] = $data;

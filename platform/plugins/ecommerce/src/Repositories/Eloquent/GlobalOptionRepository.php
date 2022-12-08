@@ -31,11 +31,10 @@ class GlobalOptionRepository extends RepositoriesAbstract implements GlobalOptio
                 $item = new $this->model();
             }
 
-
             $option_data = [
-                'name'        => $data['option_name'],
+                'name' => $data['option_name'],
                 'option_type' => $data['option_type'],
-                'required'    => $data['required'],
+                'required' => $data['required'],
             ];
 
             $option_values = $this->formatOptionValue($data);
@@ -51,6 +50,7 @@ class GlobalOptionRepository extends RepositoriesAbstract implements GlobalOptio
         if ($item->save()) {
             $item->values()->delete();
             $item->values()->saveMany($option_values);
+
             return $item;
         }
 

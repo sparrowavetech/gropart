@@ -130,7 +130,7 @@
                         <div class="form-group mb-3">
                             <p class="setting-note mb0">{{ trans('plugins/ecommerce::ecommerce.order_will_be_shown') }} <span class="sample-order-code">#<span class="sample-order-code-prefix">{{ get_ecommerce_setting('store_order_prefix') ? get_ecommerce_setting('store_order_prefix') . '-' : '' }}</span>{{ config('plugins.ecommerce.order.default_order_start_number') }}<span class="sample-order-code-suffix">{{ get_ecommerce_setting('store_order_suffix') ? '-' . get_ecommerce_setting('store_order_suffix') : '' }}</span></span> </p>
                         </div>
-                        
+
                         <label class="next-label">{{ trans('plugins/ecommerce::ecommerce.change_enquiry_format') }}</label>
                         <div class="form-group mb-3 row">
                             <div class="col-sm-6">

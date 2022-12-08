@@ -16,11 +16,11 @@ class StateRequest extends Request
     public function rules()
     {
         return [
-            'name'         => 'required',
-            'country_id'   => 'required',
-            'order'        => 'required|integer|min:0|max:127',
-            'abbreviation' => 'max:2',
-            'status'       => Rule::in(BaseStatusEnum::values()),
+            'name' => 'required',
+            'country_id' => 'required',
+            'order' => 'required|integer|min:0|max:127',
+            'abbreviation' => 'max:3',
+            'status' => Rule::in(BaseStatusEnum::values()),
         ];
     }
 }
