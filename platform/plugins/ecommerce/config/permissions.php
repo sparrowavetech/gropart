@@ -434,4 +434,17 @@ return [
         'flag' => 'ecommerce.invoice.destroy',
         'parent_flag' => 'ecommerce.invoice.index',
     ],
+    /**
+     * Products Enquires
+     */
+    [
+        'name' => 'Enquiry',
+        'flag' => 'ecommerce.enquires.index',
+        'parent_flag' => 'plugins.ecommerce',
+    ],
+    [
+        'name' => 'Edit',
+        'flag' => 'ecommerce.enquires.edit',
+        'parent_flag' => 'ecommerce.enquires.index',
+    ],
 ];

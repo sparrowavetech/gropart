@@ -11,6 +11,8 @@ use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Repositories\Interfaces\EnquiryInterface;
+use Enquiry;
+use Exception;
 
 class EnquiryController extends BaseController
 {
@@ -63,7 +65,7 @@ class EnquiryController extends BaseController
             $enquiry = $this->enquiryRepository->findOrFail($id);
             $this->enquiryRepository->delete($enquiry);
 
-            event(new DeletedContentEvent(BRAND_MODULE_SCREEN_NAME, $request, $enquiry));
+            event(new DeletedContentEvent(ENQUIRY_DELETED, $request, $enquiry));
 
             return $response->setMessage(trans('core/base::notices.delete_success_message'));
         } catch (Exception $exception) {
@@ -90,9 +92,54 @@ class EnquiryController extends BaseController
         foreach ($ids as $id) {
             $enquiry = $this->enquiryRepository->findOrFail($id);
             $this->enquiryRepository->delete($enquiry);
-            event(new DeletedContentEvent(BRAND_MODULE_SCREEN_NAME, $request, $enquiry));
+            event(new DeletedContentEvent(ENQUIRY_DELETED, $request, $enquiry));
         }
 
         return $response->setMessage(trans('core/base::notices.delete_success_message'));
+    }
+    public function not_available(Request $request, $id, BaseHttpResponse $response)
+    {
+        try {
+            $enquiry = $this->enquiryRepository->findOrFail($id);
+            $enquiry->status = 'not_available';
+            $enquiry->save();
+            event(new UpdatedContentEvent(ENQUIRY_STATUS_UPDATE, $request, $enquiry));
+            return $response->setMessage(trans('core/base::notices.update_success_message'));
+        } catch (Exception $exception) {
+            return $response
+                ->setError()
+                ->setMessage($exception->getMessage());
+        }
+        
+    }
+    public function contacted(Request $request, $id, BaseHttpResponse $response)
+    {
+        try {
+            $enquiry = $this->enquiryRepository->findOrFail($id);
+            $enquiry->status = 'contacted';
+            $enquiry->save();
+            event(new UpdatedContentEvent(ENQUIRY_STATUS_UPDATE, $request, $enquiry));
+            return $response->setMessage(trans('core/base::notices.update_success_message'));
+        } catch (Exception $exception) {
+            return $response
+                ->setError()
+                ->setMessage($exception->getMessage());
+        }
+        
+    }
+    public function rejected(Request $request, $id, BaseHttpResponse $response)
+    {
+        try {
+            $enquiry = $this->enquiryRepository->findOrFail($id);
+            $enquiry->status = 'rejected';
+            $enquiry->save();
+            event(new UpdatedContentEvent(ENQUIRY_STATUS_UPDATE, $request, $enquiry));
+            return $response->setMessage(trans('core/base::notices.update_success_message'));
+        } catch (Exception $exception) {
+            return $response
+                ->setError()
+                ->setMessage($exception->getMessage());
+        }
+        
     }
 }

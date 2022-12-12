@@ -320,6 +320,21 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
                 'uses'       => 'EnquiryController@deletes',
                 'permission' => 'enquires.destroy',
             ]);
+            Route::get('not_available/{id}', [
+                'as'         => 'not_available',
+                'uses'       => 'EnquiryController@not_available',
+                'permission' => 'enquires.edit',
+            ]);
+            Route::get('contacted/{id}', [
+                'as'         => 'contacted',
+                'uses'       => 'EnquiryController@contacted',
+                'permission' => 'enquires.edit',
+            ]);
+            Route::get('rejected/{id}', [
+                'as'         => 'rejected',
+                'uses'       => 'EnquiryController@rejected',
+                'permission' => 'enquires.edit',
+            ]);
         });
     });
 });

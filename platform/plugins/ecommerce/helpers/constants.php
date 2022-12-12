@@ -199,3 +199,10 @@ if (!defined('INVOICE_MODULE_SCREEN_NAME')) {
 if (!defined('INVOICE_PAYMENT_CREATED')) {
     define('INVOICE_PAYMENT_CREATED', 'invoice_payment_created');
 }
+
+if (!defined('ENQUIRY_DELETED')) {
+    define('ENQUIRY_DELETED', 'enquiry_deleted');
+}
+if (!defined('ENQUIRY_STATUS_UPDATE')) {
+    define('ENQUIRY_STATUS_UPDATE', 'enquiry_status_updated');
+}
