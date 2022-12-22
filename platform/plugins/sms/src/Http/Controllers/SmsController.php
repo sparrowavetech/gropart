@@ -2,19 +2,22 @@
 
 namespace Botble\Sms\Http\Controllers;
 
-use Botble\Base\Events\BeforeEditContentEvent;
-use Botble\Sms\Http\Requests\SmsRequest;
-use Botble\Sms\Repositories\Interfaces\SmsInterface;
-use Botble\Base\Http\Controllers\BaseController;
-use Illuminate\Http\Request;
 use Exception;
+use Illuminate\Support\Arr;
+use Illuminate\Http\Request;
+use Botble\Sms\Forms\SmsForm;
 use Botble\Sms\Tables\SmsTable;
+use Botble\Base\Forms\FormBuilder;
+use Botble\Ecommerce\Models\Enquiry;
+use Botble\Sms\Http\Requests\SmsRequest;
+use Botble\Ecommerce\Supports\OrderHelper;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Events\BeforeEditContentEvent;
+use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
-use Botble\Sms\Forms\SmsForm;
-use Botble\Base\Forms\FormBuilder;
+use Botble\Sms\Repositories\Interfaces\SmsInterface;
 
 class SmsController extends BaseController
 {
@@ -155,8 +158,11 @@ class SmsController extends BaseController
         return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
-    public function SmsController(Type $var = null)
+    public function test()
     {
-        # code...
+        $enquiry = Enquiry::first();
+        $res = OrderHelper::sendEnquirySms($enquiry);
+       
+       
     }
 }

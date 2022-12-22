@@ -36,6 +36,11 @@ class SmsForm extends FormAbstract
                     'data-counter' => 120,
                 ],
             ])
+            ->addMetaBoxes([
+                'general' => [
+                    'title' => trans('plugins/sms::sms.variable'),
+                    'content' => view('plugins/sms::partials.sms-variable')->render()
+                ]])
             ->add('template', 'textarea', [
                 'label'      => trans('plugins/sms::sms.template'),
                 'label_attr' => ['class' => 'control-label required'],
@@ -43,6 +48,8 @@ class SmsForm extends FormAbstract
                     'placeholder'  => trans('plugins/sms::sms.template_placeholder'),
                     'data-counter' => 500,
                 ],
+                 'content' => view(
+                        'plugins/sms::partials.sms-variable')->render(),
             ])
             
             ->add('status', 'customSelect', [
@@ -53,6 +60,7 @@ class SmsForm extends FormAbstract
                 ],
                 'choices'    => BaseStatusEnum::labels(),
             ])
+            
             ->setBreakFieldPoint('status');
     }
 }

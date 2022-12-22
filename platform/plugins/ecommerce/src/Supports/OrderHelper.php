@@ -2,47 +2,49 @@
 
 namespace Botble\Ecommerce\Supports;
 
-use Barryvdh\DomPDF\PDF as PDFHelper;
+use Cart;
+use Html;
+use RvMedia;
+use Exception;
+use Throwable;
+use Validator;
 use BaseHelper;
+use EmailHandler;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use Botble\Sms\Enums\SmsEnum;
+use Illuminate\Http\Response;
 use Botble\Base\Models\BaseModel;
-use Botble\Base\Supports\EmailHandler as EmailHandlerSupport;
+use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Cart\CartItem;
+use Botble\Ecommerce\Models\Option;
+use Illuminate\Support\Facades\Log;
+use Botble\Ecommerce\Models\Enquiry;
+use Botble\Ecommerce\Models\Product;
+use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\PDF as PDFHelper;
+use Botble\Ecommerce\Models\OptionValue;
+use Botble\Ecommerce\Models\OrderHistory;
+use InvoiceHelper as InvoiceHelperFacade;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
+use Botble\Payment\Enums\PaymentStatusEnum;
+use Botble\Ecommerce\Models\ShipmentHistory;
+use EcommerceHelper as EcommerceHelperFacade;
 use Botble\Ecommerce\Enums\ShippingMethodEnum;
 use Botble\Ecommerce\Events\OrderCancelledEvent;
 use Botble\Ecommerce\Events\OrderPaymentConfirmedEvent;
-use Botble\Ecommerce\Models\Option;
-use Botble\Ecommerce\Models\OptionValue;
-use Botble\Ecommerce\Models\Order;
-use Botble\Ecommerce\Models\Enquiry;
-use Botble\Ecommerce\Models\OrderHistory;
-use Botble\Ecommerce\Models\Product;
-use Botble\Ecommerce\Models\ShipmentHistory;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
+use Botble\Payment\Repositories\Interfaces\PaymentInterface;
+use Botble\Base\Supports\EmailHandler as EmailHandlerSupport;
+use Botble\Sms\Supports\SmsHandler;
 use Botble\Ecommerce\Repositories\Interfaces\AddressInterface;
+use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderAddressInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderHistoryInterface;
-use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderProductInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ShippingRuleInterface;
-use Botble\Payment\Enums\PaymentStatusEnum;
-use Botble\Payment\Repositories\Interfaces\PaymentInterface;
-use Cart;
-use EcommerceHelper as EcommerceHelperFacade;
-use EmailHandler;
-use Exception;
-use Html;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
-use InvoiceHelper as InvoiceHelperFacade;
-use RvMedia;
-use Throwable;
-use Validator;
 
 class OrderHelper
 {
@@ -168,7 +170,8 @@ class OrderHelper
                     compact('order')
                 )
                     ->render(),
-            ]);
+            ])
+            ->setVariableValues();
     }
 
     /**
@@ -921,6 +924,68 @@ class OrderHelper
                 'enquiry_id'    => $enquiry->code,
                 'enquiry_description'      => $enquiry->description,
                 'store_name'       => $enquiry->product->store->name,
+            ]);
+    }
+
+    /**
+     * @param Enquiry $order
+     *
+     * @return Enquiry
+     */
+    public static function sendEnquirySms(Enquiry $enquiry): Enquiry
+    {  
+        $sms = new  SmsHandler;
+        $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+        if ($sms->templateEnabled(SmsEnum::ENQUIRY_CONFIRMATION())) {
+            self::setSmsVendorVariablesForEnquiry($enquiry, $sms);
+            $sms->sendUsingTemplate(
+                SmsEnum::ENQUIRY_CONFIRMATION(),
+                $enquiry->phone
+            );
+        }
+        return $enquiry;
+    }
+      /**
+     * @param EnquiryrModel $order
+     * @return \Botble\Base\Supports\EmailHandler
+     * @throws Throwable
+     */
+    public static function setSmsVendorVariablesForEnquiry(Enquiry $enquiry, SmsHandler $sms)
+    {
+        $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME)
+            ->setVariableValues([
+                'customer_name'    => $enquiry->name,
+                'customer_email'   => $enquiry->email,
+                'customer_phone'   => $enquiry->phone,
+                'customer_address' => $enquiry->address.', '.$enquiry->cityName->name.', '.$enquiry->stateName->name.', '.$enquiry->zip_code,
+                'enquiry_id'    => $enquiry->code,
+                'enquiry_description'  => $enquiry->description,
+                'store_name'       => $enquiry->product->store->name,
+            ]);
+            
+        return $sms;
+    }
+    
+    /**
+     * @param Order $order
+     *
+     * @return SmsHandler
+     * @throws Throwable
+     */
+    public function setSmsVariables(Order $order, SmsHandler $sms)
+    {
+        $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME)
+            ->setVariableValues([
+                'store_address' => get_ecommerce_setting('store_address'),
+                'store_phone' => get_ecommerce_setting('store_phone'),
+                'order_id' => $order->code,
+                'order_token' => $order->token,
+                'customer_name' => BaseHelper::clean($order->user->name ?: $order->address->name),
+                'customer_email' => $order->user->email ?: $order->address->email,
+                'customer_phone' => $order->user->phone ?: $order->address->phone,
+                'customer_address' => $order->full_address,
+                'shipping_method' => $order->shipping_method_name,
+                'payment_method' => $order->payment->payment_channel->label(),
             ]);
     }
 }

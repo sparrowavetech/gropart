@@ -3,36 +3,45 @@
 namespace Botble\Sms\Providers;
 
 use Botble\Sms\Models\Sms;
+use Botble\Sms\Events\SendSmsEvent;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Foundation\AliasLoader;
+use Botble\Sms\Facades\SmsHelperFacade;
 use Illuminate\Support\ServiceProvider;
-use Botble\Sms\Repositories\Caches\SmsCacheDecorator;
+use Illuminate\Routing\Events\RouteMatched;
+use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Sms\Repositories\Eloquent\SmsRepository;
 use Botble\Sms\Repositories\Interfaces\SmsInterface;
-use Illuminate\Support\Facades\Event;
-use Botble\Base\Traits\LoadAndPublishDataTrait;
-use Illuminate\Routing\Events\RouteMatched;
+use Botble\Sms\Repositories\Caches\SmsCacheDecorator;
 
 class SmsServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
-
+    protected $listen = [
+        SendSmsEvent::class => [
+            SendSmsListener::class,
+        ],
+    ];
     public function register()
     {
         $this->app->bind(SmsInterface::class, function () {
             return new SmsCacheDecorator(new SmsRepository(new Sms));
         });
-
+        $loader = AliasLoader::getInstance();
+        $loader->alias('SmsHelper', SmsHelperFacade::class);
         $this->setNamespace('plugins/sms')->loadHelpers();
     }
 
     public function boot()
     {
+        
         $this
-            ->loadAndPublishConfigurations(['permissions'])
+            ->loadAndPublishConfigurations(['permissions','sms','general'])
             ->loadMigrations()
             ->loadAndPublishTranslations()
             ->loadAndPublishViews()
             ->loadRoutes(['web']);
-
+            
         if (defined('LANGUAGE_MODULE_SCREEN_NAME')) {
             if (defined('LANGUAGE_ADVANCED_MODULE_SCREEN_NAME')) {
                 // Use language v2

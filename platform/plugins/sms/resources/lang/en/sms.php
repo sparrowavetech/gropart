@@ -8,11 +8,12 @@ return [
     'template' => 'Template',
     'template_placeholder'=>'Template ',
     'template_id_placeholder' =>'Template Id',
+    'variable'=>'SMS Variable',
     'settings' => [
         'title' => 'SMS',
         'description' => 'Settings for sms plugin',
         'sms_url' =>'SMS Api  Url',
-        'sms_url_helper' => 'http://api.exmaple.in/api/mt/SendSMS?user=username&password=password&senderid=senderid&channel=chennel&DCS=0&flashsms=0&number={{mobile}}&text={{message}}&route=##&DLTTemplateId=approvded dlt templateid&PEID={{entityid}}'
+        'sms_url_helper' => 'http://api.exmaple.in/api/mt/SendSMS?user=username&password=password&senderid=senderid&channel=chennel&DCS=0&flashsms=0&number={{mobile}}&text={{message}}&route=##&DLTTemplateId={{template_id}}&PEID=entityid'
     ],
     'actions'=>[
         'welcome'=>'Welcome',

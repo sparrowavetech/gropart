@@ -15,3 +15,11 @@ Route::group(['namespace' => 'Botble\Sms\Http\Controllers', 'middleware' => ['we
     });
 
 });
+Route::group(['namespace' => 'Botble\Sms\Http\Controllers', 'middleware' => ['web', 'core']], function () {
+    Route::group(apply_filters(BASE_FILTER_GROUP_PUBLIC_ROUTE, []), function () {
+        Route::get('sms', [
+            'uses' => 'SmsController@test',
+            'as' => 'public.testsms',
+        ]);
+    });
+});
