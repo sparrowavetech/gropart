@@ -8,22 +8,15 @@ use Illuminate\Support\Collection;
 
 class FlashSaleSupport
 {
-    /**
-     * @var Collection
-     */
-    protected $flashSales = [];
+    protected Collection|array $flashSales = [];
 
-    /**
-     * @param Product $product
-     * @return Product|null
-     */
     public function flashSaleForProduct(Product $product): ?Product
     {
-        if (!$this->flashSales) {
+        if (! $this->flashSales) {
             $this->getAvailableFlashSales();
         }
 
-        if (!$product->id) {
+        if (! $product->id) {
             return null;
         }
 
@@ -43,12 +36,9 @@ class FlashSaleSupport
         return null;
     }
 
-    /**
-     * @return Collection
-     */
     public function getAvailableFlashSales(): Collection
     {
-        if (!$this->flashSales instanceof Collection) {
+        if (! $this->flashSales instanceof Collection) {
             $this->flashSales = collect([]);
         }
 

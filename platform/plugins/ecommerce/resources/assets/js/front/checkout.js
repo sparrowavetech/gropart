@@ -89,8 +89,6 @@ class MainCheckout {
         $.each(errors, (index, item) => {
             message += item + '<br />';
 
-            // can show message to input in here
-            return;
             let inputName = MainCheckout.dotArrayToJs(index);
             let $input = $('*[name="' + inputName + '"]');
             if ($container) {
@@ -138,6 +136,18 @@ class MainCheckout {
             $('.payment-checkout-btn').prop('disabled', false);
 
             document.dispatchEvent(new CustomEvent('payment-form-reloaded'));
+        }
+
+        let getBaseUrl = () => {
+            let baseUrl = window.location.href;
+
+            if (!baseUrl.includes('?')) {
+                baseUrl = baseUrl + '?';
+            } else {
+                baseUrl = baseUrl + '&';
+            }
+
+            return baseUrl;
         }
 
         let reloadAddressForm = url => {
@@ -212,7 +222,7 @@ class MainCheckout {
                     params.payment_method = paymentMethod.val();
                 }
 
-                reloadAddressForm(window.location.href + '?' + $.param(params) + ' ' + shippingForm + ' > *');
+                reloadAddressForm(getBaseUrl() + $.param(params) + ' ' + shippingForm + ' > *');
             }
         }
 
@@ -265,9 +275,10 @@ class MainCheckout {
             if (paymentMethod.length) {
                 methods.payment_method = paymentMethod.val();
             }
+
             disablePaymentMethodsForm();
 
-            reloadAddressForm(window.location.href + '?' + $.param(methods) + ' ' + shippingForm + ' > *');
+            reloadAddressForm(getBaseUrl() + $.param(methods) + ' ' + shippingForm + ' > *');
         }
 
         loadShippingFeeAtTheSecondTime();
@@ -296,15 +307,7 @@ class MainCheckout {
                 params.payment_method = paymentMethod.val();
             }
 
-            let baseUrl = window.location.href;
-
-            if (!baseUrl.includes('?')) {
-                baseUrl = baseUrl + '?';
-            } else {
-                baseUrl = baseUrl + '&';
-            }
-
-            reloadAddressForm(baseUrl + $.param(params) + ' ' + shippingForm + ' > *');
+            reloadAddressForm(getBaseUrl() + $.param(params) + ' ' + shippingForm + ' > *');
         });
 
         $(document).on('change', 'input[name=payment_method]', event => {
@@ -318,15 +321,7 @@ class MainCheckout {
                 payment_method: $this.val(),
             }
 
-            let baseUrl = window.location.href;
-
-            if (!baseUrl.includes('?')) {
-                baseUrl = baseUrl + '?';
-            } else {
-                baseUrl = baseUrl + '&';
-            }
-
-            reloadAddressForm(baseUrl + $.param(params) + ' ' + shippingForm + ' > *');
+            reloadAddressForm(getBaseUrl() + $.param(params) + ' ' + shippingForm + ' > *');
         });
 
         let validatedFormFields = () => {

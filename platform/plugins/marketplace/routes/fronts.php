@@ -239,6 +239,11 @@ Route::group([
                 Route::resource('', 'EnquiryController')
                     ->parameters(['' => 'product']);
             });
+
+            Route::get('ajax/product-options', [
+                'as' => 'ajax-product-option-info',
+                'uses' => 'ProductController@ajaxProductOptionInfo',
+            ]);
         });
 
         Route::group([

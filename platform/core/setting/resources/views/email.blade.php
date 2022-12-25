@@ -21,7 +21,11 @@
                         <div class="ui-select-wrapper">
                             <select name="email_driver" class="ui-select setting-select-options" id="email_driver">
                                 <option value="smtp" @if (setting('email_driver', config('mail.default')) == 'smtp') selected @endif>SMTP</option>
-                                <option value="sendmail" @if (setting('email_driver', config('mail.default')) == 'sendmail') selected @endif>Sendmail</option>
+
+                                @if (function_exists('proc_open'))
+                                    <option value="sendmail" @if (setting('email_driver', config('mail.default')) == 'sendmail') selected @endif>Sendmail</option>
+                                @endif
+
                                 <option value="mailgun" @if (setting('email_driver', config('mail.default')) == 'mailgun') selected @endif>Mailgun</option>
                                 <option value="ses" @if (setting('email_driver', config('mail.default')) == 'ses') selected @endif>SES</option>
                                 <option value="postmark" @if (setting('email_driver', config('mail.default')) == 'postmark') selected @endif>Postmark</option>

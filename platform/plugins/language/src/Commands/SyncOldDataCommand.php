@@ -7,47 +7,33 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Console\Command;
 use Language;
 use Illuminate\Support\Facades\Schema;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Input\InputArgument;
 
+#[AsCommand('cms:language:sync', 'Set default language for old objects')]
 class SyncOldDataCommand extends Command
 {
-    /**
-     * The console command signature.
-     *
-     * @var string
-     */
-    protected $signature = 'cms:language:sync {class : Model class name}';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Set default language for old objects';
-
-    /**
-     * Execute the console command.
-     */
-    public function handle()
+    public function handle(): int
     {
-        if (!Language::getDefaultLanguage()) {
+        if (! Language::getDefaultLanguage()) {
             $this->error('No languages in the system, please add a language!');
 
-            return 1;
+            return self::FAILURE;
         }
 
         $class = $this->argument('class');
         $table = (new $class())->getTable();
 
-        if (!Schema::hasTable($table)) {
+        if (! Schema::hasTable($table)) {
             $this->error('That table is not existed!');
 
-            return 1;
+            return self::FAILURE;
         }
 
-        if (!Schema::hasColumn($table, 'id')) {
+        if (! Schema::hasColumn($table, 'id')) {
             $this->error('Table "' . $table . '" does not have ID column!');
 
-            return 1;
+            return self::FAILURE;
         }
 
         $ids = LanguageMeta::where('reference_type', $this->argument('class'))
@@ -73,6 +59,11 @@ class SyncOldDataCommand extends Command
 
         $this->info('Processed ' . count($data) . ' item(s)!');
 
-        return 0;
+        return self::SUCCESS;
+    }
+
+    protected function configure(): void
+    {
+        $this->addArgument('name', InputArgument::REQUIRED, 'The model class name');
     }
 }

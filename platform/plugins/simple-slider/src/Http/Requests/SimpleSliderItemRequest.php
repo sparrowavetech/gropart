@@ -6,12 +6,7 @@ use Botble\Support\Http\Requests\Request;
 
 class SimpleSliderItemRequest extends Request
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
             'simple_slider_id' => 'required',

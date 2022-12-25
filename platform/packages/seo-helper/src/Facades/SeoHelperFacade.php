@@ -10,10 +10,7 @@ use Illuminate\Support\Facades\Facade;
  */
 class SeoHelperFacade extends Facade
 {
-    /**
-     * @return string
-     */
-    protected static function getFacadeAccessor()
+    protected static function getFacadeAccessor(): string
     {
         return SeoHelper::class;
     }

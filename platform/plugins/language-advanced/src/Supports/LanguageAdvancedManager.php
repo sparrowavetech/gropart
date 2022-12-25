@@ -2,9 +2,9 @@
 
 namespace Botble\LanguageAdvanced\Supports;
 
-use Botble\Base\Models\BaseModel;
 use Botble\LanguageAdvanced\Models\PageTranslation;
 use Botble\Page\Models\Page;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -12,18 +12,17 @@ use Language;
 
 class LanguageAdvancedManager
 {
-    /**
-     * @param BaseModel|\stdClass $object
-     * @param Request $request
-     * @return bool
-     */
-    public static function save($object, $request): bool
+    public static function save(?Model $object, Request $request): bool
     {
-        if (!self::isSupported($object)) {
+        if (! self::isSupported($object)) {
             return false;
         }
 
         $language = $request->input('language');
+
+        if (! $language) {
+            $language = Language::getCurrentAdminLocaleCode();
+        }
 
         $condition = [
             'lang_code' => $language,
@@ -34,7 +33,7 @@ class LanguageAdvancedManager
 
         $data = [];
         foreach (DB::getSchemaBuilder()->getColumnListing($table) as $column) {
-            if (!in_array($column, array_keys($condition))) {
+            if (! in_array($column, array_keys($condition))) {
                 $data[$column] = $request->input($column);
             }
         }
@@ -59,7 +58,7 @@ class LanguageAdvancedManager
 
             if ($defaultTranslation) {
                 foreach (DB::getSchemaBuilder()->getColumnListing($table) as $column) {
-                    if (!in_array($column, array_keys($condition))) {
+                    if (! in_array($column, array_keys($condition))) {
                         $object->{$column} = $defaultTranslation->{$column};
                     }
                 }
@@ -71,13 +70,9 @@ class LanguageAdvancedManager
         return true;
     }
 
-    /**
-     * @param string|BaseModel $model
-     * @return bool
-     */
-    public static function isSupported($model): bool
+    public static function isSupported(Model|string|null $model): bool
     {
-        if (!$model) {
+        if (! $model) {
             return false;
         }
 
@@ -88,37 +83,24 @@ class LanguageAdvancedManager
         return in_array($model, self::supportedModels());
     }
 
-    /**
-     * @return int[]|string[]
-     */
     public static function supportedModels(): array
     {
         return array_keys(self::getSupported());
     }
 
-    /**
-     * @return array
-     */
     public static function getSupported(): array
     {
         return config('plugins.language-advanced.general.supported', []);
     }
 
-    /**
-     * @return array
-     */
     public static function getConfigs(): array
     {
         return config('plugins.language-advanced.general', []);
     }
 
-    /**
-     * @param string|BaseModel $model
-     * @return array
-     */
-    public static function getTranslatableColumns($model): array
+    public static function getTranslatableColumns(Model|string|null $model): array
     {
-        if (!$model) {
+        if (! $model) {
             return [];
         }
 
@@ -129,13 +111,9 @@ class LanguageAdvancedManager
         return Arr::get(LanguageAdvancedManager::getSupported(), $model, []);
     }
 
-    /**
-     * @param string|BaseModel $model
-     * @return ?string
-     */
-    public static function getTranslationModel($model): ?string
+    public static function getTranslationModel(Model|string|null $model): ?string
     {
-        if (!$model) {
+        if (! $model) {
             return null;
         }
 
@@ -150,11 +128,6 @@ class LanguageAdvancedManager
         return $model . 'Translation';
     }
 
-    /**
-     * @param string $model
-     * @param array $columns
-     * @return bool
-     */
     public static function registerModule(string $model, array $columns): bool
     {
         config([
@@ -164,13 +137,9 @@ class LanguageAdvancedManager
         return true;
     }
 
-    /**
-     * @param BaseModel|\stdClass $object
-     * @return bool
-     */
-    public static function delete($object): bool
+    public static function delete(Model|string|null $object): bool
     {
-        if (!self::isSupported($object)) {
+        if (! self::isSupported($object)) {
             return false;
         }
 
@@ -181,19 +150,11 @@ class LanguageAdvancedManager
         return true;
     }
 
-    /**
-     * @param string $metaBoxKey
-     * @return bool
-     */
     public static function isTranslatableMetaBox(string $metaBoxKey): bool
     {
         return in_array($metaBoxKey, Arr::get(self::getConfigs(), 'translatable_meta_boxes', []));
     }
 
-    /**
-     * @param string $metaBoxKey
-     * @return bool
-     */
     public static function addTranslatableMetaBox(string $metaBoxKey): bool
     {
         $metaBoxes = array_merge(Arr::get(self::getConfigs(), 'translatable_meta_boxes', []), [$metaBoxKey]);

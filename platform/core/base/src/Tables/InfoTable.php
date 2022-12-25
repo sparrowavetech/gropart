@@ -4,6 +4,7 @@ namespace Botble\Base\Tables;
 
 use Botble\Base\Supports\SystemManagement;
 use Botble\Table\Abstracts\TableAbstract;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
 
 class InfoTable extends TableAbstract
@@ -23,13 +24,14 @@ class InfoTable extends TableAbstract
      */
     protected $hasOperations = false;
 
-    /**
-     * {@inheritDoc}
-     */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
-        return $this->toJson($this->table
-            ->of($this->query())
+        $composerArray = SystemManagement::getComposerArray();
+        $packages = SystemManagement::getPackagesAndDependencies($composerArray['require']);
+
+        return $this
+            ->toJson($this->table
+            ->of(collect($packages))
             ->editColumn('name', function ($item) {
                 return view('core/base::system.partials.info-package-line', compact('item'))->render();
             })
@@ -38,20 +40,6 @@ class InfoTable extends TableAbstract
             }));
     }
 
-    /**
-     * @return Collection
-     */
-    public function query(): Collection
-    {
-        $composerArray = SystemManagement::getComposerArray();
-        $packages = SystemManagement::getPackagesAndDependencies($composerArray['require']);
-
-        return collect($packages);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public function columns(): array
     {
         return [
@@ -68,9 +56,6 @@ class InfoTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getBuilderParameters(): array
     {
         return [
@@ -78,9 +63,6 @@ class InfoTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     protected function getDom(): ?string
     {
         return "rt<'datatables__info_wrap'pli<'clearfix'>>";

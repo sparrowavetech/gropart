@@ -4,11 +4,7 @@ namespace Botble\Optimize\Http\Middleware;
 
 class DeferJavascript extends PageSpeed
 {
-    /**
-     * @param $buffer
-     * @return string
-     */
-    public function apply($buffer)
+    public function apply(string $buffer): string
     {
         $replace = [
             '/<script(?=[^>]+src[^>]+)((?![^>]+defer|data-pagespeed-no-defer[^>]+)[^>]+)/i' => '<script $1 defer',

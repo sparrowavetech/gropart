@@ -55,7 +55,7 @@ class UnverifiedVendorController extends BaseController
             'vendor_verified_at' => null,
         ]);
 
-        if (!$vendor) {
+        if (! $vendor) {
             abort(404);
         }
 
@@ -81,7 +81,7 @@ class UnverifiedVendorController extends BaseController
                 'vendor_verified_at' => null,
             ]);
 
-        if (!$vendor) {
+        if (! $vendor) {
             abort(404);
         }
 

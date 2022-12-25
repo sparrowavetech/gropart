@@ -13,6 +13,7 @@ use Botble\Payment\Models\Payment;
 use Botble\Payment\Repositories\Interfaces\PaymentInterface;
 use Carbon\Carbon;
 use EcommerceHelper;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -22,14 +23,8 @@ class Order extends BaseModel
 {
     use EnumCastable;
 
-    /**
-     * @var string
-     */
     protected $table = 'ec_orders';
 
-    /**
-     * @var array
-     */
     protected $fillable = [
         'status',
         'user_id',
@@ -49,21 +44,10 @@ class Order extends BaseModel
         'completed_at',
     ];
 
-    /**
-     * @var string[]
-     */
     protected $casts = [
         'status' => OrderStatusEnum::class,
         'shipping_method' => ShippingMethodEnum::class,
-    ];
-
-    /**
-     * @var array
-     */
-    protected $dates = [
-        'created_at',
-        'updated_at',
-        'completed_at',
+        'completed_at' => 'datetime',
     ];
 
     protected static function boot()
@@ -88,12 +72,28 @@ class Order extends BaseModel
         return $this->belongsTo(Customer::class, 'user_id', 'id')->withDefault();
     }
 
-    /**
-     * @return string|null
-     */
-    public function getUserNameAttribute()
+    protected function userName(): Attribute
     {
-        return $this->user->name;
+        return Attribute::make(
+            get: fn () => $this->user->name
+        );
+    }
+
+    protected function fullAddress(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->shippingAddress->full_address
+        );
+    }
+
+    protected function shippingMethodName(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => OrderHelper::getShippingMethod(
+                $this->attributes['shipping_method'],
+                $this->attributes['shipping_option']
+            )
+        );
     }
 
     public function address(): HasOne
@@ -122,11 +122,6 @@ class Order extends BaseModel
         return $this->hasOne(OrderReferral::class, 'order_id')->withDefault();
     }
 
-    public function getFullAddressAttribute(): string
-    {
-        return $this->shippingAddress->full_address;
-    }
-
     public function products(): HasMany
     {
         return $this->hasMany(OrderProduct::class, 'order_id')->with(['product']);
@@ -135,17 +130,6 @@ class Order extends BaseModel
     public function histories(): HasMany
     {
         return $this->hasMany(OrderHistory::class, 'order_id')->with(['user', 'order']);
-    }
-
-    /**
-     * @return array|null|string
-     */
-    public function getShippingMethodNameAttribute()
-    {
-        return OrderHelper::getShippingMethod(
-            $this->attributes['shipping_method'],
-            $this->attributes['shipping_option']
-        );
     }
 
     public function shipment(): HasOne
@@ -165,7 +149,10 @@ class Order extends BaseModel
 
     public function canBeCanceled(): bool
     {
-        if ($this->shipment && in_array($this->shipment->status, [ShippingStatusEnum::PICKED, ShippingStatusEnum::DELIVERED, ShippingStatusEnum::AUDITED])) {
+        if ($this->shipment && in_array(
+            $this->shipment->status,
+            [ShippingStatusEnum::PICKED, ShippingStatusEnum::DELIVERED, ShippingStatusEnum::AUDITED]
+        )) {
             return false;
         }
 
@@ -174,7 +161,10 @@ class Order extends BaseModel
 
     public function canBeCanceledByAdmin(): bool
     {
-        if ($this->shipment && in_array($this->shipment->status, [ShippingStatusEnum::DELIVERED, ShippingStatusEnum::AUDITED])) {
+        if ($this->shipment && in_array(
+            $this->shipment->status,
+            [ShippingStatusEnum::DELIVERED, ShippingStatusEnum::AUDITED]
+        )) {
             return false;
         }
 
@@ -183,12 +173,12 @@ class Order extends BaseModel
         }
 
         if ($this->shipment && in_array($this->shipment->status, [
-            ShippingStatusEnum::PENDING,
-            ShippingStatusEnum::APPROVED,
-            ShippingStatusEnum::NOT_APPROVED,
-            ShippingStatusEnum::ARRANGE_SHIPMENT,
-            ShippingStatusEnum::READY_TO_BE_SHIPPED_OUT,
-        ])) {
+                ShippingStatusEnum::PENDING,
+                ShippingStatusEnum::APPROVED,
+                ShippingStatusEnum::NOT_APPROVED,
+                ShippingStatusEnum::ARRANGE_SHIPMENT,
+                ShippingStatusEnum::READY_TO_BE_SHIPPED_OUT,
+            ])) {
             return true;
         }
 
@@ -212,13 +202,11 @@ class Order extends BaseModel
 
     public function isInvoiceAvailable(): bool
     {
-        return $this->invoice()->exists() && !EcommerceHelper::disableOrderInvoiceUntilOrderConfirmed() || $this->is_confirmed;
+        return $this->invoice()->exists() && (! EcommerceHelper::disableOrderInvoiceUntilOrderConfirmed(
+        ) || $this->is_confirmed);
     }
 
-    /**
-     * @return float|int
-     */
-    public function getProductsWeightAttribute()
+    public function getProductsWeightAttribute(): float|int
     {
         $weight = 0;
 
@@ -238,7 +226,7 @@ class Order extends BaseModel
 
     public function canBeReturned(): bool
     {
-        if ($this->status != OrderStatusEnum::COMPLETED || !$this->completed_at) {
+        if ($this->status != OrderStatusEnum::COMPLETED || ! $this->completed_at) {
             return false;
         }
 
@@ -254,7 +242,7 @@ class Order extends BaseModel
             }
         }
 
-        return !$this->returnRequest()->exists();
+        return ! $this->returnRequest()->exists();
     }
 
     public static function generateUniqueCode(): string

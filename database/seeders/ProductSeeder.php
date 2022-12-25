@@ -18,6 +18,7 @@ use Botble\Ecommerce\Models\Shipment;
 use Botble\Ecommerce\Models\ShipmentHistory;
 use Botble\Ecommerce\Models\Wishlist;
 use Botble\Ecommerce\Services\Products\StoreProductService;
+use Botble\Payment\Models\Payment;
 use Botble\Slug\Models\Slug;
 use Faker\Factory;
 use File;
@@ -30,12 +31,7 @@ use SlugHelper;
 
 class ProductSeeder extends BaseSeeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
         $this->uploadFiles('products');
 
@@ -43,282 +39,282 @@ class ProductSeeder extends BaseSeeder
 
         $products = [
             [
-                'name'        => 'Dual Camera 20MP',
-                'price'       => 80.25,
+                'name' => 'Dual Camera 20MP',
+                'price' => 80.25,
                 'is_featured' => true,
             ],
             [
-                'name'        => 'Smart Watches',
-                'price'       => 40.5,
-                'sale_price'  => 35,
+                'name' => 'Smart Watches',
+                'price' => 40.5,
+                'sale_price' => 35,
                 'is_featured' => true,
             ],
             [
-                'name'        => 'Beat Headphone',
-                'price'       => 20,
+                'name' => 'Beat Headphone',
+                'price' => 20,
                 'is_featured' => true,
             ],
             [
-                'name'        => 'Red & Black Headphone',
-                'price'       => $faker->numberBetween(500, 600),
+                'name' => 'Red & Black Headphone',
+                'price' => $faker->numberBetween(500, 600),
                 'is_featured' => true,
             ],
             [
-                'name'        => 'Smart Watch External',
-                'price'       => $faker->numberBetween(700, 900),
+                'name' => 'Smart Watch External',
+                'price' => $faker->numberBetween(700, 900),
                 'is_featured' => true,
             ],
             [
-                'name'        => 'Nikon HD camera',
-                'price'       => $faker->numberBetween(400, 500),
+                'name' => 'Nikon HD camera',
+                'price' => $faker->numberBetween(400, 500),
                 'is_featured' => true,
             ],
             [
-                'name'        => 'Audio Equipment',
-                'price'       => $faker->numberBetween(500, 600),
+                'name' => 'Audio Equipment',
+                'price' => $faker->numberBetween(500, 600),
                 'is_featured' => true,
             ],
             [
-                'name'        => 'Smart Televisions',
-                'price'       => $faker->numberBetween(1100, 1300),
-                'sale_price'  => $faker->numberBetween(800, 1000),
+                'name' => 'Smart Televisions',
+                'price' => $faker->numberBetween(1100, 1300),
+                'sale_price' => $faker->numberBetween(800, 1000),
                 'is_featured' => true,
             ],
             [
-                'name'        => 'Samsung Smart Phone',
-                'price'       => $faker->numberBetween(500, 600),
+                'name' => 'Samsung Smart Phone',
+                'price' => $faker->numberBetween(500, 600),
                 'is_featured' => true,
             ],
             [
-                'name'       => 'Herschel Leather Duffle Bag In Brown Color',
-                'price'      => $faker->numberBetween(1100, 1300),
+                'name' => 'Herschel Leather Duffle Bag In Brown Color',
+                'price' => $faker->numberBetween(1100, 1300),
                 'sale_price' => $faker->numberBetween(800, 1000),
             ],
             [
-                'name'       => 'Xbox One Wireless Controller Black Color',
-                'price'      => $faker->numberBetween(1100, 1300),
+                'name' => 'Xbox One Wireless Controller Black Color',
+                'price' => $faker->numberBetween(1100, 1300),
                 'sale_price' => $faker->numberBetween(500, 700),
             ],
             [
-                'name'  => 'EPSION Plaster Printer',
+                'name' => 'EPSION Plaster Printer',
                 'price' => $faker->numberBetween(500, 600),
             ],
             [
-                'name'  => 'Sound Intone I65 Earphone White Version',
+                'name' => 'Sound Intone I65 Earphone White Version',
                 'price' => $faker->numberBetween(500, 600),
             ],
             [
-                'name'  => 'B&O Play Mini Bluetooth Speaker',
+                'name' => 'B&O Play Mini Bluetooth Speaker',
                 'price' => $faker->numberBetween(500, 600),
             ],
             [
-                'name'  => 'Apple MacBook Air Retina 13.3-Inch Laptop',
+                'name' => 'Apple MacBook Air Retina 13.3-Inch Laptop',
                 'price' => $faker->numberBetween(500, 600),
             ],
             [
-                'name'  => 'Apple MacBook Air Retina 12-Inch Laptop',
+                'name' => 'Apple MacBook Air Retina 12-Inch Laptop',
                 'price' => $faker->numberBetween(500, 600),
             ],
             [
-                'name'  => 'Samsung Gear VR Virtual Reality Headset',
+                'name' => 'Samsung Gear VR Virtual Reality Headset',
                 'price' => $faker->numberBetween(500, 600),
             ],
             [
-                'name'       => 'Aveeno Moisturizing Body Shower 450ml',
-                'price'      => $faker->numberBetween(900, 1300),
+                'name' => 'Aveeno Moisturizing Body Shower 450ml',
+                'price' => $faker->numberBetween(900, 1300),
                 'sale_price' => $faker->numberBetween(200, 700),
             ],
             [
-                'name'       => 'NYX Beauty Couton Pallete Makeup 12',
-                'price'      => $faker->numberBetween(900, 1300),
+                'name' => 'NYX Beauty Couton Pallete Makeup 12',
+                'price' => $faker->numberBetween(900, 1300),
                 'sale_price' => $faker->numberBetween(300, 800),
             ],
             [
-                'name'       => 'NYX Beauty Couton Pallete Makeup 12',
-                'price'      => $faker->numberBetween(700, 1000),
+                'name' => 'NYX Beauty Couton Pallete Makeup 12',
+                'price' => $faker->numberBetween(700, 1000),
                 'sale_price' => $faker->numberBetween(400, 700),
             ],
             [
-                'name'       => 'MVMTH Classical Leather Watch In Black',
-                'price'      => $faker->numberBetween(600, 1000),
+                'name' => 'MVMTH Classical Leather Watch In Black',
+                'price' => $faker->numberBetween(600, 1000),
                 'sale_price' => $faker->numberBetween(200, 500),
             ],
             [
-                'name'       => 'Baxter Care Hair Kit For Bearded Mens',
-                'price'      => $faker->numberBetween(400, 700),
+                'name' => 'Baxter Care Hair Kit For Bearded Mens',
+                'price' => $faker->numberBetween(400, 700),
                 'sale_price' => $faker->numberBetween(100, 300),
             ],
             [
-                'name'       => 'Ciate Palemore Lipstick Bold Red Color',
-                'price'      => $faker->numberBetween(500, 1300),
+                'name' => 'Ciate Palemore Lipstick Bold Red Color',
+                'price' => $faker->numberBetween(500, 1300),
                 'sale_price' => $faker->numberBetween(200, 400),
             ],
             [
-                'name'  => 'Vimto Squash Remix Apple 1.5 Litres',
+                'name' => 'Vimto Squash Remix Apple 1.5 Litres',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Crock Pot Slow Cooker',
+                'name' => 'Crock Pot Slow Cooker',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Taylors of Harrogate Yorkshire Coffee',
+                'name' => 'Taylors of Harrogate Yorkshire Coffee',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Soft Mochi & Galeto Ice Cream',
+                'name' => 'Soft Mochi & Galeto Ice Cream',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Naked Noodle Egg Noodles Singapore',
+                'name' => 'Naked Noodle Egg Noodles Singapore',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Saute Pan Silver',
+                'name' => 'Saute Pan Silver',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Bar S – Classic Bun Length Franks',
+                'name' => 'Bar S – Classic Bun Length Franks',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Broccoli Crowns',
+                'name' => 'Broccoli Crowns',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Slimming World Vegan Mac Greens',
+                'name' => 'Slimming World Vegan Mac Greens',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Häagen-Dazs Salted Caramel',
+                'name' => 'Häagen-Dazs Salted Caramel',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Iceland 3 Solo Exotic Burst',
+                'name' => 'Iceland 3 Solo Exotic Burst',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Extreme Budweiser Light Can',
+                'name' => 'Extreme Budweiser Light Can',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Iceland Macaroni Cheese Traybake',
+                'name' => 'Iceland Macaroni Cheese Traybake',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Dolmio Bolognese Pasta Sauce',
+                'name' => 'Dolmio Bolognese Pasta Sauce',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Sitema BakeIT Plastic Box',
+                'name' => 'Sitema BakeIT Plastic Box',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Wayfair Basics Dinner Plate Storage',
+                'name' => 'Wayfair Basics Dinner Plate Storage',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Miko The Panda Water Bottle',
+                'name' => 'Miko The Panda Water Bottle',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Sesame Seed Bread',
+                'name' => 'Sesame Seed Bread',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Morrisons The Best Beef',
+                'name' => 'Morrisons The Best Beef',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Avocado, Hass Large',
+                'name' => 'Avocado, Hass Large',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Italia Beef Lasagne',
+                'name' => 'Italia Beef Lasagne',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Maxwell House Classic Roast Mocha',
+                'name' => 'Maxwell House Classic Roast Mocha',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Bottled Pure Water 500ml',
+                'name' => 'Bottled Pure Water 500ml',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Famart Farmhouse Soft White',
+                'name' => 'Famart Farmhouse Soft White',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Coca-Cola Original Taste',
+                'name' => 'Coca-Cola Original Taste',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Casillero Diablo Cabernet Sauvignon',
+                'name' => 'Casillero Diablo Cabernet Sauvignon',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Arla Organic Free Range Milk',
+                'name' => 'Arla Organic Free Range Milk',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Aptamil Follow On Baby Milk',
+                'name' => 'Aptamil Follow On Baby Milk',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Cuisinart Chef’S Classic Hard-Anodized',
+                'name' => 'Cuisinart Chef’S Classic Hard-Anodized',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Corn, Yellow Sweet',
+                'name' => 'Corn, Yellow Sweet',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Hobnobs The Nobbly Biscuit',
+                'name' => 'Hobnobs The Nobbly Biscuit',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Honest Organic Still Lemonade',
+                'name' => 'Honest Organic Still Lemonade',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Ice Beck’s Beer 350ml x 24 Pieces',
+                'name' => 'Ice Beck’s Beer 350ml x 24 Pieces',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Iceland 6 Hot Cross Buns',
+                'name' => 'Iceland 6 Hot Cross Buns',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Iceland Luxury 4 Panini Rolls',
+                'name' => 'Iceland Luxury 4 Panini Rolls',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Iceland Soft Scoop Vanilla',
+                'name' => 'Iceland Soft Scoop Vanilla',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Iceland Spaghetti Bolognese',
+                'name' => 'Iceland Spaghetti Bolognese',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Kellogg’s Coco Pops Cereal',
+                'name' => 'Kellogg’s Coco Pops Cereal',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Kit Kat Chunky Milk Chocolate',
+                'name' => 'Kit Kat Chunky Milk Chocolate',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Large Green Bell Pepper',
+                'name' => 'Large Green Bell Pepper',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Pice 94w Beasley Journal',
+                'name' => 'Pice 94w Beasley Journal',
                 'price' => $faker->numberBetween(500, 1300),
             ],
             [
-                'name'  => 'Province Piece Glass Drinking Glass',
+                'name' => 'Province Piece Glass Drinking Glass',
                 'price' => $faker->numberBetween(500, 1300),
             ],
         ];
@@ -331,6 +327,7 @@ class ProductSeeder extends BaseSeeder
         DB::table('ec_product_label_products')->truncate();
         DB::table('ec_product_category_product')->truncate();
         DB::table('ec_product_related_relations')->truncate();
+        DB::table('ec_tax_products')->truncate();
         Slug::where('reference_type', Product::class)->delete();
         Wishlist::truncate();
         Order::truncate();
@@ -339,10 +336,10 @@ class ProductSeeder extends BaseSeeder
         OrderHistory::truncate();
         Shipment::truncate();
         ShipmentHistory::truncate();
+        Payment::truncate();
         MetaBoxModel::where('reference_type', Product::class)->delete();
 
         ProductFile::truncate();
-        File::deleteDirectory(config('filesystems.disks.public.root') . '/product-files');
 
         foreach ($products as $key => $item) {
             $item['description'] = '<ul><li> Unrestrained and portable active stereo speaker</li>
@@ -379,7 +376,6 @@ class ProductSeeder extends BaseSeeder
             $item['status'] = BaseStatusEnum::PUBLISHED;
             $item['sku'] = 'SW-' . $faker->numberBetween(100, 200);
             $item['brand_id'] = $faker->numberBetween(1, 5);
-            $item['tax_id'] = 1;
             $item['views'] = $faker->numberBetween(1000, 200000);
             $item['quantity'] = $faker->numberBetween(10, 20);
             $item['length'] = $faker->numberBetween(10, 20);
@@ -428,11 +424,13 @@ class ProductSeeder extends BaseSeeder
                 $faker->numberBetween(1, 6),
             ]);
 
+            $product->taxes()->sync([1]);
+
             Slug::create([
                 'reference_type' => Product::class,
-                'reference_id'   => $product->id,
-                'key'            => Str::slug($productName),
-                'prefix'         => SlugHelper::getPrefix(Product::class),
+                'reference_id' => $product->id,
+                'key' => Str::slug($productName),
+                'prefix' => SlugHelper::getPrefix(Product::class),
             ]);
 
             MetaBox::saveMetaBoxData(
@@ -461,35 +459,35 @@ class ProductSeeder extends BaseSeeder
 
             for ($j = 0; $j < $faker->numberBetween(1, 5); $j++) {
                 $variation = Product::create([
-                    'name'                       => $product->name,
-                    'status'                     => BaseStatusEnum::PUBLISHED,
-                    'sku'                        => $product->sku . '-A' . $j,
-                    'quantity'                   => $product->quantity,
-                    'weight'                     => $product->weight,
-                    'height'                     => $product->height,
-                    'wide'                       => $product->wide,
-                    'length'                     => $product->length,
-                    'price'                      => $product->price,
-                    'sale_price'                 => $product->id % 4 == 0 ? ($product->price - $product->price * $faker->numberBetween(
+                    'name' => $product->name,
+                    'status' => BaseStatusEnum::PUBLISHED,
+                    'sku' => $product->sku . '-A' . $j,
+                    'quantity' => $product->quantity,
+                    'weight' => $product->weight,
+                    'height' => $product->height,
+                    'wide' => $product->wide,
+                    'length' => $product->length,
+                    'price' => $product->price,
+                    'sale_price' => $product->id % 4 == 0 ? ($product->price - $product->price * $faker->numberBetween(
                         10,
                         30
                     ) / 100) : null,
-                    'brand_id'                   => $product->brand_id,
+                    'brand_id' => $product->brand_id,
                     'with_storehouse_management' => $product->with_storehouse_management,
-                    'is_variation'               => true,
-                    'images'                     => json_encode([$product->images[$j] ?? Arr::first($product->images)]),
-                    'product_type'               => $product->product_type,
+                    'is_variation' => true,
+                    'images' => json_encode([$product->images[$j] ?? Arr::first($product->images)]),
+                    'product_type' => $product->product_type,
                 ]);
 
                 $productVariation = ProductVariation::create([
-                    'product_id'              => $variation->id,
+                    'product_id' => $variation->id,
                     'configurable_product_id' => $product->id,
-                    'is_default'              => $j == 0,
+                    'is_default' => $j == 0,
                 ]);
 
                 if ($productVariation->is_default) {
                     $product->update([
-                        'sku'        => $variation->sku,
+                        'sku' => $variation->sku,
                         'sale_price' => $variation->sale_price,
                     ]);
                 }
@@ -505,8 +503,14 @@ class ProductSeeder extends BaseSeeder
                 ]);
 
                 if ($product->isTypeDigital()) {
-                    foreach($product->images as $img) {
-                        $fileUpload = new UploadedFile(database_path('seeders/files/' . $img), Str::replace('products/', '', $img), 'image/jpeg', null, true);
+                    foreach ($product->images as $img) {
+                        $productFile = database_path('seeders/files/' . $img);
+
+                        if (! File::isFile($productFile)) {
+                            continue;
+                        }
+
+                        $fileUpload = new UploadedFile($productFile, Str::replace('products/', '', $img), 'image/jpeg', null, true);
                         $productFileData = app(StoreProductService::class)->saveProductFile($fileUpload);
                         $variation->productFiles()->create($productFileData);
                     }
@@ -675,26 +679,5 @@ class ProductSeeder extends BaseSeeder
                 }
             }
         }
-    }
-
-    /**
-     * @param int $from
-     * @param int $to
-     * @param array $exceptions
-     * @return int
-     */
-    protected function random(int $from, int $to, array $exceptions = []): int
-    {
-        sort($exceptions); // lets us use break; in the foreach reliably
-        $number = rand($from, $to - count($exceptions)); // or mt_rand()
-        foreach ($exceptions as $exception) {
-            if ($number >= $exception) {
-                $number++; // make up for the gap
-            } else /*if ($number < $exception)*/ {
-                break;
-            }
-        }
-
-        return $number;
     }
 }

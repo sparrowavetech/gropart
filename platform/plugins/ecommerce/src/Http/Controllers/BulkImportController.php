@@ -20,20 +20,10 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class BulkImportController extends BaseController
 {
-    /**
-     * @var ProductImport
-     */
-    protected $productImport;
+    protected ProductImport $productImport;
 
-    /**
-     * @var ProductImport
-     */
-    protected $validateProductImport;
+    protected ProductImport|ValidateProductImport $validateProductImport;
 
-    /**
-     * @param ProductImport $productImport
-     * @param ValidateProductImport $validateProductImport
-     */
     public function __construct(ProductImport $productImport, ValidateProductImport $validateProductImport)
     {
         $this->productImport = $productImport;

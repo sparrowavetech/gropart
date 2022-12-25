@@ -3,19 +3,11 @@
 namespace Botble\Installer\Http\Middleware;
 
 use Closure;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class CheckIfInstalledMiddleware extends InstallerMiddleware
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param Request $request
-     * @param Closure $next
-     * @return RedirectResponse|mixed
-     */
-    public function handle($request, Closure $next)
+    public function handle(Request $request, Closure $next)
     {
         if ($this->alreadyInstalled()) {
             return redirect()->route('public.index');

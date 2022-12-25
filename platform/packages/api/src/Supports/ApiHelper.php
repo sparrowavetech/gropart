@@ -69,7 +69,7 @@ class ApiHelper
     {
         $model = $this->modelName();
 
-        if (!$model || !class_exists($model)) {
+        if (! $model || ! class_exists($model)) {
             return new BaseModel();
         }
 

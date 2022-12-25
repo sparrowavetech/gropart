@@ -11,6 +11,7 @@ use Botble\Ecommerce\Repositories\Interfaces\OrderReturnInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderReturnItemInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Carbon\Carbon;
+use EcommerceHelper as EcommerceHelperFacade;
 use Illuminate\Support\Facades\DB;
 use EmailHandler;
 use Illuminate\Support\Facades\Log;
@@ -19,12 +20,6 @@ use Throwable;
 
 class OrderReturnHelper
 {
-    /**
-     * @param Order $order
-     * @param array $data
-     * @return array
-     * @throws Throwable
-     */
     public function returnOrder(Order $order, array $data): array
     {
         $orderReturnData = [
@@ -36,9 +31,9 @@ class OrderReturnHelper
             'return_status' => OrderReturnStatusEnum::PENDING,
         ];
 
-        DB::beginTransaction();
-
         try {
+            DB::beginTransaction();
+
             $orderReturn = app(OrderReturnInterface::class)->create($orderReturnData);
 
             $orderReturnItemData = [];
@@ -47,11 +42,11 @@ class OrderReturnHelper
 
             foreach ($data['items'] as $returnItem) {
                 $orderProduct = app(OrderProductInterface::class)->findById($returnItem['order_item_id']);
-                if (!$orderProduct) {
+                if (! $orderProduct) {
                     continue;
                 }
 
-                if (!EcommerceHelper::allowPartialReturn()) {
+                if (! EcommerceHelperFacade::allowPartialReturn()) {
                     $returnItem['qty'] = $orderProduct->qty;
                 }
 
@@ -104,6 +99,7 @@ class OrderReturnHelper
             return [true, $orderReturn, null];
         } catch (Throwable $exception) {
             DB::rollBack();
+
             Log::error($exception->getMessage(), [
                 'file' => $exception->getFile(),
                 'function' => __FUNCTION__,
@@ -115,10 +111,6 @@ class OrderReturnHelper
         }
     }
 
-    /**
-     * @param OrderReturn $orderReturn
-     * @return array
-     */
     public function cancelReturnOrder(OrderReturn $orderReturn): array
     {
         $orderReturn->return_status = OrderReturnStatusEnum::CANCELED;
@@ -127,17 +119,11 @@ class OrderReturnHelper
         return [true, $orderReturn];
     }
 
-    /**
-     * @param OrderReturn $orderReturn
-     * @param array $data
-     * @return array
-     * @throws Throwable
-     */
     public function updateReturnOrder(OrderReturn $orderReturn, array $data): array
     {
-        DB::beginTransaction();
-
         try {
+            DB::beginTransaction();
+
             $orderReturn->return_status = $data['return_status'];
             $orderReturn->save();
 
@@ -157,11 +143,13 @@ class OrderReturnHelper
                     }
                 }
             }
+
             DB::commit();
 
             return [true, $orderReturn];
         } catch (Throwable $exception) {
             DB::rollBack();
+
             Log::error($exception->getMessage(), [
                 'file' => $exception->getFile(),
                 'function' => __FUNCTION__,

@@ -13,25 +13,13 @@ class EnvironmentSaved
     use InteractsWithSockets;
     use SerializesModels;
 
-    /**
-     * @var Request
-     */
-    protected $request;
+    protected Request $request;
 
-    /**
-     * Create a new event instance.
-     *
-     * @param Request $request
-     * @return void
-     */
     public function __construct(Request $request)
     {
         $this->request = $request;
     }
 
-    /**
-     * @return Request
-     */
     public function getRequest(): Request
     {
         return $this->request;

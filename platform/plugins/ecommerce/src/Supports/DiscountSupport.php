@@ -8,19 +8,11 @@ use Illuminate\Support\Collection;
 
 class DiscountSupport
 {
-    /**
-     * @var Collection
-     */
-    protected $promotions = [];
+    protected Collection|array $promotions = [];
 
-    /**
-     * @param array $productIds
-     * @param array $productCollectionIds
-     * @return Discount|null
-     */
     public function promotionForProduct(array $productIds, array $productCollectionIds): ?Discount
     {
-        if (!$this->promotions) {
+        if (! $this->promotions) {
             $this->getAvailablePromotions();
         }
 
@@ -59,12 +51,9 @@ class DiscountSupport
         return null;
     }
 
-    /**
-     * @return Collection
-     */
     public function getAvailablePromotions(): Collection
     {
-        if (!$this->promotions instanceof Collection) {
+        if (! $this->promotions instanceof Collection) {
             $this->promotions = collect([]);
         }
 

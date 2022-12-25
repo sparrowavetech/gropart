@@ -7,17 +7,11 @@ use Kris\LaravelFormBuilder\Fields\FormField;
 
 class CkEditorField extends FormField
 {
-    /**
-     * {@inheritDoc}
-     */
     protected function getTemplate(): string
     {
         return 'core/base::forms.fields.ckeditor';
     }
 
-    /**
-     *{@inheritDoc}
-     */
     public function render(array $options = [], $showLabel = true, $showField = true, $showError = true): string
     {
         $options['class'] = Arr::get($options, 'class', '') . 'form-control editor-ckeditor';

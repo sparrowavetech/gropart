@@ -6,73 +6,44 @@ use Botble\Theme\Commands\Traits\ThemeTrait;
 use Botble\Theme\Services\ThemeService;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem as File;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Input\InputOption;
 
+#[AsCommand('cms:theme:assets:publish', 'Publish assets for a theme')]
 class ThemeAssetsPublishCommand extends Command
 {
     use ThemeTrait;
 
-    /**
-     * @var ThemeService
-     */
-    public $themeService;
-
-    /**
-     * The console command name.
-     *
-     * @var string
-     */
-    protected $signature = '
-        cms:theme:assets:publish
-        {--name= : The theme that you want to publish assets}
-        {--path= : Path to theme directory}
-    ';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Publish assets for a theme';
-
-    /**
-     * ThemeAssetsPublishCommand constructor.
-     * @param ThemeService $themeService
-     */
-    public function __construct(ThemeService $themeService)
+    public function handle(File $files, ThemeService $themeService): int
     {
-        parent::__construct();
-        $this->themeService = $themeService;
-    }
-
-    /**
-     * Execute the console command.
-     *
-     * @return int
-     */
-    public function handle()
-    {
-        if ($this->option('name') && !preg_match('/^[a-z0-9\-]+$/i', $this->option('name'))) {
+        if ($this->option('name') && ! preg_match('/^[a-z0-9\-]+$/i', $this->option('name'))) {
             $this->error('Only alphabetic characters are allowed.');
 
-            return 1;
+            return self::FAILURE;
         }
 
-        if ($this->option('name') && !File::isDirectory($this->getPath())) {
+        if ($this->option('name') && ! $files->isDirectory($this->getPath())) {
             $this->error('Theme "' . $this->getTheme() . '" is not exists.');
 
-            return 1;
+            return self::FAILURE;
         }
 
-        $result = $this->themeService->publishAssets($this->option('name'));
+        $result = $themeService->publishAssets($this->option('name'));
 
         if ($result['error']) {
             $this->error($result['message']);
 
-            return 1;
+            return self::FAILURE;
         }
 
         $this->info($result['message']);
 
-        return 0;
+        return self::SUCCESS;
+    }
+
+    protected function configure(): void
+    {
+        $this->addOption('name', null, InputOption::VALUE_REQUIRED, 'The theme name that you want to remove assets');
+        $this->addOption('path', null, InputOption::VALUE_REQUIRED, 'Path to theme directory');
     }
 }

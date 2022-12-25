@@ -25,7 +25,7 @@
                                placeholder="{{ trans('plugins/ecommerce::product-option.affect_price_label') }}"/>
                     </td>
                     <td>
-                        <select class="form-control affect_type" name="options[{{$key}}][affect_type]">
+                        <select class="form-select affect_type" name="options[{{$key}}][affect_type]">
                             <option {{($value["affect_type"]) == 0 ? "selected" : ''}} value="0">{{ trans('plugins/ecommerce::product-option.fixed') }}</option>
                             <option {{($value["affect_type"]) == 1 ? "selected" : ''}} value="1">{{ trans('plugins/ecommerce::product-option.percent') }}</option>
                         </select>
@@ -46,7 +46,7 @@
                            placeholder="{{ trans('plugins/ecommerce::product-option.affect_price_label') }}"/>
                 </td>
                 <td>
-                    <select class="form-control affect_type" name="options[0][affect_type]">
+                    <select class="form-select affect_type" name="options[0][affect_type]">
                         <option value="0">{{ trans('plugins/ecommerce::product-option.fixed') }}</option>
                         <option value="1">{{ trans('plugins/ecommerce::product-option.percent') }}</option>
                     </select>

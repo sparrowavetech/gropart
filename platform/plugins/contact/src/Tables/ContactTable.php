@@ -5,6 +5,10 @@ namespace Botble\Contact\Tables;
 use BaseHelper;
 use Botble\Contact\Exports\ContactExport;
 use Html;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Botble\Contact\Enums\ContactStatusEnum;
 use Botble\Contact\Repositories\Interfaces\ContactInterface;
@@ -15,48 +19,30 @@ use Yajra\DataTables\DataTables;
 
 class ContactTable extends TableAbstract
 {
-    /**
-     * @var bool
-     */
     protected $hasActions = true;
 
-    /**
-     * @var bool
-     */
     protected $hasFilter = true;
 
-    /**
-     * @var string
-     */
-    protected $exportClass = ContactExport::class;
+    protected string $exportClass = ContactExport::class;
 
-    /**
-     * ContactTable constructor.
-     * @param DataTables $table
-     * @param UrlGenerator $urlGenerator
-     * @param ContactInterface $contactRepository
-     */
     public function __construct(DataTables $table, UrlGenerator $urlGenerator, ContactInterface $contactRepository)
     {
         parent::__construct($table, $urlGenerator);
 
         $this->repository = $contactRepository;
 
-        if (!Auth::user()->hasAnyPermission(['contacts.edit', 'contacts.destroy'])) {
+        if (! Auth::user()->hasAnyPermission(['contacts.edit', 'contacts.destroy'])) {
             $this->hasOperations = false;
             $this->hasActions = false;
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
             ->editColumn('name', function ($item) {
-                if (!Auth::user()->hasPermission('contacts.edit')) {
+                if (! Auth::user()->hasPermission('contacts.edit')) {
                     return $item->name;
                 }
 
@@ -78,10 +64,7 @@ class ContactTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
         $query = $this->repository->getModel()->select([
             'id',
@@ -95,9 +78,6 @@ class ContactTable extends TableAbstract
         return $this->applyScopes($query);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function columns(): array
     {
         return [
@@ -127,17 +107,11 @@ class ContactTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function bulkActions(): array
     {
         return $this->addDeleteAction(route('contacts.deletes'), 'contacts.destroy', parent::bulkActions());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getBulkChanges(): array
     {
         return [
@@ -169,9 +143,6 @@ class ContactTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getDefaultButtons(): array
     {
         return [

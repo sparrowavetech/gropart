@@ -2,7 +2,7 @@
 
 use Carbon\Carbon;
 
-if (!function_exists('format_time')) {
+if (! function_exists('format_time')) {
     /**
      * @param Carbon $timestamp
      * @param string $format
@@ -15,7 +15,7 @@ if (!function_exists('format_time')) {
     }
 }
 
-if (!function_exists('date_from_database')) {
+if (! function_exists('date_from_database')) {
     /**
      * @param string $time
      * @param string|null $format
@@ -28,7 +28,7 @@ if (!function_exists('date_from_database')) {
     }
 }
 
-if (!function_exists('human_file_size')) {
+if (! function_exists('human_file_size')) {
     /**
      * @param float $bytes
      * @param int $precision
@@ -41,7 +41,7 @@ if (!function_exists('human_file_size')) {
     }
 }
 
-if (!function_exists('get_file_data')) {
+if (! function_exists('get_file_data')) {
     /**
      * @param string $file
      * @param bool $toArray
@@ -54,7 +54,7 @@ if (!function_exists('get_file_data')) {
     }
 }
 
-if (!function_exists('json_encode_prettify')) {
+if (! function_exists('json_encode_prettify')) {
     /**
      * @param array $data
      * @return string
@@ -66,7 +66,7 @@ if (!function_exists('json_encode_prettify')) {
     }
 }
 
-if (!function_exists('save_file_data')) {
+if (! function_exists('save_file_data')) {
     /**
      * @param string $path
      * @param array|string $data
@@ -80,7 +80,7 @@ if (!function_exists('save_file_data')) {
     }
 }
 
-if (!function_exists('scan_folder')) {
+if (! function_exists('scan_folder')) {
     /**
      * @param string $path
      * @param array $ignoreFiles

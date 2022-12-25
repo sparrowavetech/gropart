@@ -6,7 +6,6 @@ use Botble\Ecommerce\Models\GlobalOptionValue;
 use Botble\Ecommerce\Repositories\Interfaces\GlobalOptionInterface;
 use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class GlobalOptionRepository extends RepositoriesAbstract implements GlobalOptionInterface
 {
@@ -19,7 +18,7 @@ class GlobalOptionRepository extends RepositoriesAbstract implements GlobalOptio
      */
     public function createOrUpdate($data, array $condition = [])
     {
-        $option_values = [];
+        $optionValues = [];
         if (is_array($data)) {
             if (empty($condition)) {
                 $item = new $this->model();
@@ -31,14 +30,14 @@ class GlobalOptionRepository extends RepositoriesAbstract implements GlobalOptio
                 $item = new $this->model();
             }
 
-            $option_data = [
+            $optionData = [
                 'name' => $data['option_name'],
                 'option_type' => $data['option_type'],
                 'required' => $data['required'],
             ];
 
-            $option_values = $this->formatOptionValue($data);
-            $item = $item->fill($option_data);
+            $optionValues = $this->formatOptionValue($data);
+            $item = $item->fill($optionData);
         } elseif ($data instanceof Model) {
             $item = $data;
         } else {
@@ -49,7 +48,7 @@ class GlobalOptionRepository extends RepositoriesAbstract implements GlobalOptio
 
         if ($item->save()) {
             $item->values()->delete();
-            $item->values()->saveMany($option_values);
+            $item->values()->saveMany($optionValues);
 
             return $item;
         }
@@ -57,11 +56,7 @@ class GlobalOptionRepository extends RepositoriesAbstract implements GlobalOptio
         return false;
     }
 
-    /**
-     * @param $data
-     * @return array
-     */
-    private function formatOptionValue($data): array
+    protected function formatOptionValue($data): array
     {
         $type = explode('\\', $data['option_type']);
         $type = end($type);
@@ -85,7 +80,7 @@ class GlobalOptionRepository extends RepositoriesAbstract implements GlobalOptio
              */
             foreach ($data['options'] as $item) {
                 $globalOptionValue = new GlobalOptionValue();
-                $item['affect_price'] = (!empty($item['affect_price'])) ? $item['affect_price'] : 0;
+                $item['affect_price'] = (! empty($item['affect_price'])) ? $item['affect_price'] : 0;
                 $item['option_value'] = $item['label'];
                 $globalOptionValue->fill($item);
                 $values[] = $globalOptionValue;
@@ -93,34 +88,5 @@ class GlobalOptionRepository extends RepositoriesAbstract implements GlobalOptio
         }
 
         return $values;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function findOrFail($id, array $with = [])
-    {
-        $data = $this->make($with)->where('id', $id);
-
-        $result = $this->applyBeforeExecuteQuery($data, true)->first();
-
-        if (!empty($result)) {
-            $result->option_name = $result->name;
-
-            return $result;
-        }
-
-        throw (new ModelNotFoundException())->setModel(get_class($this->originalModel), $id);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function delete(Model $model): bool
-    {
-        $delete = $model->delete();
-        $model->values()->delete();
-
-        return $delete;
     }
 }

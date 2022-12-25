@@ -10,6 +10,7 @@ use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Http\Requests\ProductRequest;
 use Botble\Ecommerce\Http\Requests\ProductVersionRequest;
 use Botble\Ecommerce\Models\Customer;
+use Botble\Ecommerce\Repositories\Interfaces\GlobalOptionInterface;
 use Botble\Ecommerce\Repositories\Interfaces\GroupedProductInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeSetInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductVariationInterface;
@@ -24,8 +25,6 @@ use EcommerceHelper;
 use EmailHandler;
 use Exception;
 use Illuminate\Contracts\View\Factory;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
@@ -54,7 +53,7 @@ class ProductController extends BaseController
 
     /**
      * @param FormBuilder $formBuilder
-     * @param Request $formBuilder
+     * @param Request $request
      * @return string
      */
     public function create(FormBuilder $formBuilder, Request $request)
@@ -201,7 +200,7 @@ class ProductController extends BaseController
      * @param ProductVariationInterface $variationRepository
      * @param ProductVariationItemInterface $productVariationItemRepository
      * @param StoreProductTagService $storeProductTagService
-     * @return BaseHttpResponse|JsonResponse|RedirectResponse
+     * @return BaseHttpResponse
      */
     public function update(
         $id,
@@ -418,7 +417,7 @@ class ProductController extends BaseController
 
         $product = $variation->product()->first();
 
-        if (!$product || $product->original_product->store_id != auth('customer')->user()->store->id) {
+        if (! $product || $product->original_product->store_id != auth('customer')->user()->store->id) {
             abort(404);
         }
 
@@ -461,5 +460,15 @@ class ProductController extends BaseController
                 'includeVariation'
             ))->render()
         );
+    }
+
+    public function ajaxProductOptionInfo(
+        Request $request,
+        BaseHttpResponse $response,
+        GlobalOptionInterface $globalOptionRepository
+    ): BaseHttpResponse {
+        $optionsValues = $globalOptionRepository->findOrFail($request->input('id'), ['values']);
+
+        return $response->setData($optionsValues);
     }
 }

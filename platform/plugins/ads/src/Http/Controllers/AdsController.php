@@ -21,14 +21,8 @@ use Throwable;
 
 class AdsController extends BaseController
 {
-    /**
-     * @var AdsInterface
-     */
-    protected $adsRepository;
+    protected AdsInterface $adsRepository;
 
-    /**
-     * @param AdsInterface $adsRepository
-     */
     public function __construct(AdsInterface $adsRepository)
     {
         $this->adsRepository = $adsRepository;

@@ -10,14 +10,8 @@ use Botble\Ecommerce\Models\Customer;
 
 class CustomerForm extends FormAbstract
 {
-    /**
-     * @var string
-     */
     protected $template = 'core/base::forms.form-tabs';
 
-    /**
-     * {@inheritDoc}
-     */
     public function buildForm()
     {
         $this

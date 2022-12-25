@@ -23,21 +23,10 @@ use Throwable;
 
 class RoleController extends BaseController
 {
-    /**
-     * @var RoleInterface
-     */
-    protected $roleRepository;
+    protected RoleInterface $roleRepository;
 
-    /**
-     * @var UserInterface
-     */
-    protected $userRepository;
+    protected UserInterface $userRepository;
 
-    /**
-     * RoleController constructor.
-     * @param RoleInterface $roleRepository
-     * @param UserInterface $userRepository
-     */
     public function __construct(RoleInterface $roleRepository, UserInterface $userRepository)
     {
         $this->roleRepository = $roleRepository;
@@ -153,7 +142,7 @@ class RoleController extends BaseController
      */
     protected function cleanPermission(array $permissions): array
     {
-        if (!$permissions) {
+        if (! $permissions) {
             return [];
         }
 

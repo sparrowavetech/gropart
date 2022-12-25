@@ -10,22 +10,27 @@ use Language;
 
 class ThemeRemoveListener
 {
-    /**
-     * Handle the event.
-     *
-     * @param ThemeRemoveEvent $event
-     * @return void
-     */
-    public function handle(ThemeRemoveEvent $event)
+    protected WidgetInterface $widgetRepository;
+
+    protected SettingInterface $settingRepository;
+
+    public function __construct(WidgetInterface $widgetRepository, SettingInterface $settingRepository)
+    {
+        $this->widgetRepository = $widgetRepository;
+        $this->settingRepository = $settingRepository;
+    }
+
+    public function handle(ThemeRemoveEvent $event): void
     {
         try {
             $languages = Language::getActiveLanguage(['lang_code']);
 
             foreach ($languages as $language) {
-                app(WidgetInterface::class)->deleteBy(['theme' => $event->theme . '-' . $language->lang_code]);
+                $themeNameByLanguage = $event->theme . '-' . $language->lang_code;
 
-                app(SettingInterface::class)
-                    ->deleteBy(['key', 'like', 'theme-' . $event->theme . '-' . $language->lang_code . '-%']);
+                $this->widgetRepository->deleteBy(['theme' => $themeNameByLanguage]);
+
+                $this->settingRepository->deleteBy(['key', 'like', 'theme-' . $themeNameByLanguage . '-%']);
             }
         } catch (Exception $exception) {
             info($exception->getMessage());

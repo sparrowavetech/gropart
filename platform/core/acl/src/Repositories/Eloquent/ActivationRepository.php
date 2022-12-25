@@ -15,10 +15,8 @@ class ActivationRepository extends RepositoriesAbstract implements ActivationInt
 {
     /**
      * The activation expiration time, in seconds.
-     *
-     * @var int
      */
-    protected $expires = 259200;
+    protected int $expires = 259200;
 
     /**
      * {@inheritDoc}
@@ -129,7 +127,7 @@ class ActivationRepository extends RepositoriesAbstract implements ActivationInt
          */
         $activation = $this->completed($user);
 
-        if (!$activation) {
+        if (! $activation) {
             return false;
         }
 

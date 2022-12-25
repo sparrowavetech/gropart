@@ -10,18 +10,8 @@ use Throwable;
 
 class ResetPasswordNotification extends Notification
 {
-    /**
-     * The password reset token.
-     *
-     * @var string
-     */
-    public $token;
+    public string $token;
 
-    /**
-     * Create a notification instance.
-     *
-     * @param string $token
-     */
     public function __construct(string $token)
     {
         $this->token = $token;

@@ -9,26 +9,18 @@ use Botble\Table\Abstracts\TableAbstract;
 use EcommerceHelper;
 use Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
 use Yajra\DataTables\DataTables;
 
 class TopSellingProductsTable extends TableAbstract
 {
-    /**
-     * @var string
-     */
-    protected $type = self::TABLE_TYPE_SIMPLE;
+    protected string $type = self::TABLE_TYPE_SIMPLE;
 
-    /**
-     * @var string
-     */
     protected $view = 'core/table::simple-table';
 
-    /**
-     * TopSellingProductsTable constructor.
-     * @param DataTables $table
-     * @param UrlGenerator $urlGenerator
-     * @param ProductInterface $productRepository
-     */
     public function __construct(
         DataTables $table,
         UrlGenerator $urlGenerator,
@@ -38,22 +30,19 @@ class TopSellingProductsTable extends TableAbstract
         $this->repository = $productRepository;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
             ->editColumn('id', function ($item) {
-                if (!$item->is_variation) {
+                if (! $item->is_variation) {
                     return $item->id;
                 }
 
                 return $item->original_product->id;
             })
             ->editColumn('name', function ($item) {
-                if (!$item->is_variation) {
+                if (! $item->is_variation) {
                     return Html::link($item->url, BaseHelper::clean($item->name), ['target' => '_blank']);
                 }
 
@@ -66,10 +55,7 @@ class TopSellingProductsTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    /**
-     * @return mixed
-     */
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
         [$startDate, $endDate] = EcommerceHelper::getDateRangeInReport(request());
 
@@ -92,10 +78,7 @@ class TopSellingProductsTable extends TableAbstract
         return $this->applyScopes($query);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function columns()
+    public function columns(): array
     {
         return [
             'id' => [

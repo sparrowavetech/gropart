@@ -8,55 +8,18 @@ use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Throwable;
 
+#[AsCommand('cms:user:create', 'Create a super user')]
 class UserCreateCommand extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'cms:user:create';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Create a super user';
-
-    /**
-     * @var UserInterface
-     */
-    protected $userRepository;
-
-    /**
-     * @var ActivateUserService
-     */
-    protected $activateUserService;
-
-    /**
-     * UserCreateCommand constructor.
-     * @param UserInterface $userRepository
-     * @param ActivateUserService $activateUserService
-     */
-    public function __construct(UserInterface $userRepository, ActivateUserService $activateUserService)
-    {
-        parent::__construct();
-
-        $this->userRepository = $userRepository;
-        $this->activateUserService = $activateUserService;
-    }
-
-    /**
-     * @return int
-     */
-    public function handle()
+    public function handle(UserInterface $userRepository, ActivateUserService $activateUserService): int
     {
         $this->info('Creating a super user...');
 
         try {
-            $user = $this->userRepository->getModel();
+            $user = $userRepository->getModel();
             $user->first_name = $this->askWithValidate('Enter first name', 'required|min:2|max:60');
             $user->last_name = $this->askWithValidate('Enter last name', 'required|min:2|max:60');
             $user->email = $this->askWithValidate('Enter email address', 'required|email|unique:users,email');
@@ -65,31 +28,30 @@ class UserCreateCommand extends Command
             $user->super_user = 1;
             $user->manage_supers = 1;
 
-            $this->userRepository->createOrUpdate($user);
-            if ($this->activateUserService->activate($user)) {
+            $userRepository->createOrUpdate($user);
+
+            if ($activateUserService->activate($user)) {
                 $this->info('Super user is created.');
             }
 
-            return 0;
+            return self::SUCCESS;
         } catch (Exception $exception) {
             $this->error('User could not be created.');
             $this->error($exception->getMessage());
 
-            return 1;
+            return self::FAILURE;
         }
     }
 
-    /**
-     * @param string $message
-     * @param string $rules
-     * @param bool $secret
-     * @return string
-     */
     protected function askWithValidate(string $message, string $rules, bool $secret = false): string
     {
         do {
             if ($secret) {
-                $input = $this->secret($message);
+                try {
+                    $input = $this->secret($message);
+                } catch (Throwable) {
+                    $input = $this->ask($message);
+                }
             } else {
                 $input = $this->ask($message);
             }
@@ -103,11 +65,6 @@ class UserCreateCommand extends Command
         return $input;
     }
 
-    /**
-     * @param array $data
-     * @param array $rules
-     * @return array
-     */
     protected function validate(array $data, array $rules): array
     {
         $validator = Validator::make($data, $rules);

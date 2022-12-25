@@ -4,7 +4,7 @@ use Botble\Ecommerce\Models\Currency;
 use Botble\Payment\Models\Payment;
 use Botble\Stripe\Supports\StripeHelper;
 
-if (!function_exists('convert_stripe_amount_from_api')) {
+if (! function_exists('convert_stripe_amount_from_api')) {
     /**
      * @param int|float $amount
      * @param Currency|null $currency
@@ -16,7 +16,7 @@ if (!function_exists('convert_stripe_amount_from_api')) {
     }
 }
 
-if (!function_exists('get_payment_setting')) {
+if (! function_exists('get_payment_setting')) {
     /**
      * @param string $key
      * @param null $type
@@ -25,7 +25,7 @@ if (!function_exists('get_payment_setting')) {
      */
     function get_payment_setting(string $key, $type = null, $default = null): ?string
     {
-        if (!empty($type)) {
+        if (! empty($type)) {
             $key = 'payment_' . $type . '_' . $key;
         } else {
             $key = 'payment_' . $key;
@@ -35,7 +35,7 @@ if (!function_exists('get_payment_setting')) {
     }
 }
 
-if (!function_exists('get_payment_is_support_refund_online')) {
+if (! function_exists('get_payment_is_support_refund_online')) {
     /**
      * @param Payment $payment
      * @return false|string

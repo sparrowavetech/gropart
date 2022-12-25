@@ -12,13 +12,7 @@ class ShortcodeServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    /**
-     * Register the service provider.
-     *
-     * @return void
-     * @since 2.1
-     */
-    public function register()
+    public function register(): void
     {
         $this->app->singleton('shortcode.compiler', ShortcodeCompiler::class);
 

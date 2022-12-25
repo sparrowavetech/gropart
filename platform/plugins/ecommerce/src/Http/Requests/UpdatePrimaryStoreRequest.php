@@ -6,12 +6,7 @@ use Botble\Support\Http\Requests\Request;
 
 class UpdatePrimaryStoreRequest extends Request
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
             'primary_store_id' => 'required|numeric',

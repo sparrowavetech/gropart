@@ -1,10 +1,12 @@
-import VerifyLicenseComponent from './components/VerifyLicenseComponent';
-import CheckUpdateComponent from './components/CheckUpdateComponent';
+import VerifyLicenseComponent from './components/VerifyLicenseComponent.vue';
+import CheckUpdateComponent from './components/CheckUpdateComponent.vue';
 
-vueApp.booting(vue => {
-    vue.component('verify-license-component', VerifyLicenseComponent);
-    vue.component('check-update-component', CheckUpdateComponent);
-});
+if (typeof vueApp !== 'undefined') {
+    vueApp.booting(vue => {
+        vue.component('verify-license-component', VerifyLicenseComponent);
+        vue.component('check-update-component', CheckUpdateComponent);
+    });
+}
 
 let callbackWidgets = {};
 

@@ -10,15 +10,16 @@
     <div class="widget-body">
         <div class="btn-set">
             @php do_action(BASE_ACTION_FORM_ACTIONS, 'default') @endphp
-            <button type="submit" name="submit" value="save" class="btn btn-info">
-                <i class="{{ $saveIcon ?? 'fa fa-save' }}"></i> {{ $saveTitle ?? trans('core/base::forms.save') }}
-            </button>
-            @if (!isset($only_save) || $only_save == false)
-                &nbsp;
-                <button type="submit" name="submit" value="apply" class="btn btn-success">
-                    <i class="fa fa-check-circle"></i> {{ trans('core/base::forms.save_and_continue') }}
+            @if (!isset($onlySave) || !$onlySave)
+                <button type="submit" name="submit" value="save" class="btn btn-info">
+                    <i class="{{ $saveIcon ?? 'fa fa-save' }}"></i> {{ $saveTitle ?? trans('core/base::forms.save') }}
                 </button>
             @endif
+            &nbsp;
+            <button type="submit" name="submit" value="apply" class="btn btn-success">
+                <i class="fa fa-check-circle"></i> {{ trans('core/base::forms.save_and_continue') }}
+            </button>
+
         </div>
     </div>
 </div>
@@ -27,14 +28,15 @@
     {!! Breadcrumbs::render('main', page_title()->getTitle(false)) !!}
     <div class="btn-set">
         @php do_action(BASE_ACTION_FORM_ACTIONS, 'fixed-top') @endphp
-        <button type="submit" name="submit" value="save" class="btn btn-info">
-            <i class="{{ $saveIcon ?? 'fa fa-save' }}"></i> {{ $saveTitle ?? trans('core/base::forms.save') }}
-        </button>
-        @if (!isset($only_save) || $only_save == false)
-            &nbsp;
-            <button type="submit" name="submit" value="apply" class="btn btn-success">
-                <i class="fa fa-check-circle"></i> {{ trans('core/base::forms.save_and_continue') }}
+        @if (!isset($onlySave) || !$onlySave)
+            <button type="submit" name="submit" value="save" class="btn btn-info">
+                <i class="{{ $saveIcon ?? 'fa fa-save' }}"></i> {{ $saveTitle ?? trans('core/base::forms.save') }}
             </button>
         @endif
+
+        &nbsp;
+        <button type="submit" name="submit" value="apply" class="btn btn-success">
+            <i class="fa fa-check-circle"></i> {{ trans('core/base::forms.save_and_continue') }}
+        </button>
     </div>
 </div>

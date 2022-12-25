@@ -11,16 +11,8 @@ use Illuminate\Http\Request;
 
 class TagController extends Controller
 {
-    /**
-     * @var TagInterface
-     */
-    protected $tagRepository;
+    protected TagInterface $tagRepository;
 
-    /**
-     * AuthenticationController constructor.
-     *
-     * @param TagInterface $tagRepository
-     */
     public function __construct(TagInterface $tagRepository)
     {
         $this->tagRepository = $tagRepository;
@@ -30,10 +22,6 @@ class TagController extends Controller
      * List tags
      *
      * @group Blog
-     *
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
      */
     public function index(Request $request, BaseHttpResponse $response)
     {

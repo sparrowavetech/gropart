@@ -8,7 +8,6 @@ use Botble\Faq\Http\Requests\FaqRequest;
 use Botble\Faq\Repositories\Interfaces\FaqInterface;
 use Botble\Base\Http\Controllers\BaseController;
 use Exception;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Botble\Faq\Tables\FaqTable;
 use Botble\Base\Events\CreatedContentEvent;
@@ -24,15 +23,8 @@ class FaqController extends BaseController
 {
     use HasDeleteManyItemsTrait;
 
-    /**
-     * @var FaqInterface
-     */
-    protected $faqRepository;
+    protected FaqInterface $faqRepository;
 
-    /**
-     * FaqController constructor.
-     * @param FaqInterface $faqRepository
-     */
     public function __construct(FaqInterface $faqRepository)
     {
         $this->faqRepository = $faqRepository;
@@ -40,7 +32,7 @@ class FaqController extends BaseController
 
     /**
      * @param FaqTable $table
-     * @return JsonResponse|View
+     * @return \Illuminate\Contracts\View\Factory|\Symfony\Component\HttpFoundation\Response|View
      * @throws Throwable
      */
     public function index(FaqTable $table)

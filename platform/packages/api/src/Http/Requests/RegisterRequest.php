@@ -7,12 +7,7 @@ use Botble\Support\Http\Requests\Request;
 
 class RegisterRequest extends Request
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
             'first_name' => 'required|max:120|min:2',

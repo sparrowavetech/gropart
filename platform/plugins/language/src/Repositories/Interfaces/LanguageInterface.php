@@ -3,22 +3,12 @@
 namespace Botble\Language\Repositories\Interfaces;
 
 use Botble\Support\Repositories\Interfaces\RepositoryInterface;
+use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 interface LanguageInterface extends RepositoryInterface
 {
-    /**
-     * @param array $select
-     * @return mixed
-     *
-     * @since 2.1
-     */
-    public function getActiveLanguage($select = ['*']);
+    public function getActiveLanguage(array $select = ['*']): Collection;
 
-    /**
-     * @param array $select
-     * @return mixed
-     *
-     * @since 2.2
-     */
-    public function getDefaultLanguage($select = ['*']);
+    public function getDefaultLanguage(array $select = ['*']): ?Model;
 }

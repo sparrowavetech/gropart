@@ -2,33 +2,19 @@
 
 namespace Botble\Optimize\Http\Middleware;
 
+use Illuminate\Support\Collection;
+
 class InlineCss extends PageSpeed
 {
-    /**
-     * @var string
-     */
-    protected $html = '';
+    protected string $html = '';
 
-    /**
-     * @var array
-     */
-    protected $class = [];
+    protected array|Collection $class = [];
 
-    /**
-     * @var array
-     */
-    protected $style = [];
+    protected array $style = [];
 
-    /**
-     * @var array
-     */
-    protected $inline = [];
+    protected array $inline = [];
 
-    /**
-     * @param string $buffer
-     * @return string
-     */
-    public function apply($buffer)
+    public function apply(string $buffer): string
     {
         $this->html = $buffer;
 
@@ -46,9 +32,6 @@ class InlineCss extends PageSpeed
         return $this->injectStyle()->injectClass()->fixHTML()->html;
     }
 
-    /**
-     * @return $this
-     */
     protected function injectStyle(): InlineCss
     {
         collect($this->class)->each(function ($attributes, $class) {
@@ -71,9 +54,6 @@ class InlineCss extends PageSpeed
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     protected function injectClass(): InlineCss
     {
         collect($this->style)->each(function ($item) {
@@ -87,9 +67,6 @@ class InlineCss extends PageSpeed
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     protected function fixHTML(): InlineCss
     {
         $newHTML = [];

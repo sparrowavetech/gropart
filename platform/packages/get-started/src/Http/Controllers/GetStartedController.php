@@ -54,7 +54,7 @@ class GetStartedController extends BaseController
                 $user = auth()->user();
 
                 if ($user->username != config('core.base.general.demo.account.username', 'botble') &&
-                    !Hash::check($user->getAuthPassword(), config('core.base.general.demo.account.password', '159357'))
+                    ! Hash::check($user->getAuthPassword(), config('core.base.general.demo.account.password', '159357'))
                 ) {
                     $nextStep = 4;
                 }

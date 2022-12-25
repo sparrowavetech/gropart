@@ -2,35 +2,20 @@
 
 namespace Botble\Ecommerce\Services;
 
-use Botble\Ecommerce\Repositories\Eloquent\CurrencyRepository;
 use Botble\Ecommerce\Repositories\Interfaces\CurrencyInterface;
 use CurrencyHelper;
-use Exception;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
 class StoreCurrenciesService
 {
-    /**
-     * @var CurrencyRepository
-     */
-    protected $currencyRepository;
+    protected CurrencyInterface $currencyRepository;
 
-    /**
-     * StoreCurrenciesService constructor.
-     * @param CurrencyInterface $currency
-     */
     public function __construct(CurrencyInterface $currency)
     {
         $this->currencyRepository = $currency;
     }
 
-    /**
-     * @param array $currencies
-     * @param array $deletedCurrencies
-     * @return array
-     * @throws Exception
-     */
     public function execute(array $currencies, array $deletedCurrencies): array
     {
         $validated = Validator::make(
@@ -64,7 +49,7 @@ class StoreCurrenciesService
         }
 
         foreach ($currencies as $item) {
-            if (!$item['title'] || !$item['symbol']) {
+            if (! $item['title'] || ! $item['symbol']) {
                 continue;
             }
 
@@ -78,7 +63,7 @@ class StoreCurrenciesService
 
             $currency = $this->currencyRepository->findById($item['id']);
 
-            if (!$currency) {
+            if (! $currency) {
                 $this->currencyRepository->create($item);
             } else {
                 $currency->fill($item);

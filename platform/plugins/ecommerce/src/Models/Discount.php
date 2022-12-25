@@ -7,14 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Discount extends BaseModel
 {
-    /**
-     * @var string
-     */
     protected $table = 'ec_discounts';
 
-    /**
-     * @var array
-     */
     protected $fillable = [
         'title',
         'code',
@@ -32,14 +26,9 @@ class Discount extends BaseModel
         'product_quantity',
     ];
 
-    /**
-     * @var array
-     */
-    protected $dates = [
-        'start_date',
-        'end_date',
-        'created_at',
-        'updated_at',
+    protected $casts = [
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
     ];
 
     public function isExpired(): bool

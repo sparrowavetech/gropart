@@ -3,10 +3,6 @@
 namespace Botble\Widget;
 
 use Botble\Widget\Repositories\Interfaces\WidgetInterface;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Theme;
 
@@ -42,29 +38,14 @@ abstract class AbstractWidget
     /**
      * @var WidgetInterface
      */
-    protected $widgetRepository;
+    protected mixed $widgetRepository;
 
-    /**
-     * @var string
-     */
-    protected $theme = null;
+    protected ?string $theme = null;
 
-    /**
-     * @var Collection
-     */
-    protected $data = [];
+    protected Collection|array $data = [];
 
-    /**
-     * Whether the settings data are loaded.
-     *
-     * @var boolean
-     */
-    protected $loaded = false;
+    protected bool $loaded = false;
 
-    /**
-     * AbstractWidget constructor.
-     * @param array $config
-     */
     public function __construct(array $config = [])
     {
         foreach ($config as $key => $value) {
@@ -74,9 +55,6 @@ abstract class AbstractWidget
         $this->widgetRepository = app(WidgetInterface::class);
     }
 
-    /**
-     * @return array
-     */
     public function getConfig(): array
     {
         return $this->config;
@@ -85,8 +63,6 @@ abstract class AbstractWidget
     /**
      * Treat this method as a controller action.
      * Return view() or other content to display.
-     *
-     * @throws FileNotFoundException
      */
     public function run()
     {
@@ -102,11 +78,11 @@ abstract class AbstractWidget
             ->where('position', $args[1])
             ->first();
 
-        if (!empty($data)) {
+        if (! empty($data)) {
             $this->config = array_merge($this->config, $data->data);
         }
 
-        if (!$this->isCore) {
+        if (! $this->isCore) {
             return Theme::loadPartial(
                 $this->frontendTemplate,
                 Theme::getThemeNamespace('/../widgets/' . $this->widgetDirectory . '/templates'),
@@ -123,24 +99,15 @@ abstract class AbstractWidget
         ]);
     }
 
-    /**
-     * @return string
-     */
     public function getId(): string
     {
         return get_class($this);
     }
 
-    /**
-     * @param string|null $sidebarId
-     * @param int $position
-     * @return Factory|Application|View|string|null
-     * @throws FileNotFoundException
-     */
     public function form(?string $sidebarId = null, int $position = 0)
     {
         Theme::uses(Theme::getThemeName());
-        if (!empty($sidebarId)) {
+        if (! empty($sidebarId)) {
             $widgetGroup = app('botble.widget-group-collection');
             $widgetGroup->load();
             $widgetGroupData = $widgetGroup->getData();
@@ -151,12 +118,12 @@ abstract class AbstractWidget
                 ->where('position', $position)
                 ->first();
 
-            if (!empty($data)) {
+            if (! empty($data)) {
                 $this->config = array_merge($this->config, $data->data);
             }
         }
 
-        if (!$this->isCore) {
+        if (! $this->isCore) {
             return Theme::loadPartial(
                 $this->backendTemplate,
                 Theme::getThemeNamespace('/../widgets/' . $this->widgetDirectory . '/templates'),

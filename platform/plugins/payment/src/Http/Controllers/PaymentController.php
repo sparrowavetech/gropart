@@ -222,7 +222,7 @@ class PaymentController extends Controller
 
         $data = apply_filters(PAYMENT_FILTER_GET_REFUND_DETAIL, $data, $payment, $refundId);
 
-        if (!Arr::get($data, 'error') && Arr::get($data, 'data', [])) {
+        if (! Arr::get($data, 'error') && Arr::get($data, 'data', [])) {
             $metadata = $payment->metadata;
             $refunds = Arr::get($metadata, 'refunds', []);
             if ($refunds) {

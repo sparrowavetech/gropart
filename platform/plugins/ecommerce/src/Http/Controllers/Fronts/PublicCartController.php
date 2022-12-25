@@ -20,15 +20,8 @@ use Theme;
 
 class PublicCartController extends Controller
 {
-    /**
-     * @var ProductInterface
-     */
-    protected $productRepository;
+    protected ProductInterface $productRepository;
 
-    /**
-     * PublicCartController constructor.
-     * @param ProductInterface $productRepository
-     */
     public function __construct(ProductInterface $productRepository)
     {
         $this->productRepository = $productRepository;
@@ -41,19 +34,19 @@ class PublicCartController extends Controller
      */
     public function store(CartRequest $request, BaseHttpResponse $response)
     {
-        if (!EcommerceHelper::isCartEnabled()) {
+        if (! EcommerceHelper::isCartEnabled()) {
             abort(404);
         }
 
         $product = $this->productRepository->findById($request->input('id'));
 
-        if (!$product) {
+        if (! $product) {
             return $response
                 ->setError()
                 ->setMessage(__('This product is out of stock or not exists!'));
         }
 
-        if ($product->variations->count() > 0 && !$product->is_variation) {
+        if ($product->variations->count() > 0 && ! $product->is_variation) {
             $product = $product->defaultVariation->product;
         }
 
@@ -65,7 +58,7 @@ class PublicCartController extends Controller
 
         $maxQuantity = $product->quantity;
 
-        if (!$product->canAddToCart($request->input('qty', 1))) {
+        if (! $product->canAddToCart($request->input('qty', 1))) {
             return $response
                 ->setError()
                 ->setMessage(__('Maximum quantity is :max!', ['max' => $maxQuantity]));
@@ -94,7 +87,7 @@ class PublicCartController extends Controller
         }
 
         if ($product->original_product->options()->where('required', true)->exists()) {
-            if (!$request->input('options')) {
+            if (! $request->input('options')) {
                 return $response
                     ->setError()
                     ->setData(['next_url' => $product->original_product->url])
@@ -106,7 +99,7 @@ class PublicCartController extends Controller
             $message = null;
 
             foreach ($requiredOptions as $requiredOption) {
-                if (!$request->input('options.' . $requiredOption->id . '.values')) {
+                if (! $request->input('options.' . $requiredOption->id . '.values')) {
                     $message .= trans('plugins/ecommerce::product-option.add_to_cart_value_required', ['value' => $requiredOption->name]);
                 }
             }
@@ -166,7 +159,7 @@ class PublicCartController extends Controller
      */
     public function getView(HandleApplyPromotionsService $applyPromotionsService)
     {
-        if (!EcommerceHelper::isCartEnabled()) {
+        if (! EcommerceHelper::isCartEnabled()) {
             abort(404);
         }
 
@@ -214,7 +207,7 @@ class PublicCartController extends Controller
      */
     public function postUpdate(UpdateCartRequest $request, BaseHttpResponse $response)
     {
-        if (!EcommerceHelper::isCartEnabled()) {
+        if (! EcommerceHelper::isCartEnabled()) {
             abort(404);
         }
 
@@ -229,7 +222,7 @@ class PublicCartController extends Controller
         foreach ($data as $item) {
             $cartItem = Cart::instance('cart')->get($item['rowId']);
 
-            if (!$cartItem) {
+            if (! $cartItem) {
                 continue;
             }
 
@@ -282,7 +275,7 @@ class PublicCartController extends Controller
      */
     public function getRemove($id, BaseHttpResponse $response)
     {
-        if (!EcommerceHelper::isCartEnabled()) {
+        if (! EcommerceHelper::isCartEnabled()) {
             abort(404);
         }
 
@@ -307,7 +300,7 @@ class PublicCartController extends Controller
      */
     public function getDestroy(BaseHttpResponse $response)
     {
-        if (!EcommerceHelper::isCartEnabled()) {
+        if (! EcommerceHelper::isCartEnabled()) {
             abort(404);
         }
 

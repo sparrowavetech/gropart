@@ -9,12 +9,7 @@ use Illuminate\Validation\Rule;
 
 class StoreRevenueRequest extends Request
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         $rules = [
             'type' => Rule::in(RevenueTypeEnum::values()),

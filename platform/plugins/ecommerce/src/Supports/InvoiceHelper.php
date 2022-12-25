@@ -9,25 +9,22 @@ use Botble\Ecommerce\Models\Invoice;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\Product;
 use Botble\Payment\Enums\PaymentStatusEnum;
+use EcommerceHelper as EcommerceHelperFacade;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
 
 class InvoiceHelper
 {
-    /**
-     * @param Order $order
-     * @return Invoice|\Illuminate\Database\Eloquent\Model
-     */
     public function store(Order $order)
     {
-        if ($order->invoice()->count()) {
+        if ($order->invoice()->exists()) {
             return $order->invoice()->first();
         }
 
         $address = $order->shippingAddress;
 
-        if (\EcommerceHelper::isBillingAddressEnabled() && $order->billingAddress->id) {
+        if (EcommerceHelperFacade::isBillingAddressEnabled() && $order->billingAddress->id) {
             $address = $order->billingAddress;
         }
 
@@ -39,7 +36,7 @@ class InvoiceHelper
             'company_logo' => null,
             'customer_email' => $address->email ?: $order->user->email,
             'customer_phone' => $address->phone,
-            'customer_address' => $address->address,
+            'customer_address' => $address->full_address,
             'customer_tax_id' => null,
             'payment_id' => $order->payment->id,
             'status' => $order->payment->status,
@@ -79,15 +76,10 @@ class InvoiceHelper
         return $invoice;
     }
 
-    /**
-     * @param Invoice $invoice
-     *
-     * @return PDFHelper
-     */
     public function makeInvoicePDF(Invoice $invoice): PDFHelper
     {
         $fontsPath = storage_path('fonts');
-        if (!File::isDirectory($fontsPath)) {
+        if (! File::isDirectory($fontsPath)) {
             File::makeDirectory($fontsPath);
         }
 
@@ -120,15 +112,10 @@ class InvoiceHelper
             ->setOption('isRemoteEnabled', true);
     }
 
-    /**
-     * @param Invoice $invoice
-     *
-     * @return string
-     */
     public function generateInvoice(Invoice $invoice): string
     {
         $folderPath = storage_path('app/public');
-        if (!File::isDirectory($folderPath)) {
+        if (! File::isDirectory($folderPath)) {
             File::makeDirectory($folderPath);
         }
 
@@ -143,21 +130,11 @@ class InvoiceHelper
         return $invoice;
     }
 
-    /**
-     * @param Invoice $invoice
-     *
-     * @return Response
-     */
     public function downloadInvoice(Invoice $invoice): Response
     {
         return $this->makeInvoicePDF($invoice)->download('invoice-' . $invoice->code . '.pdf');
     }
 
-    /**
-     * @param Invoice $invoice
-     *
-     * @return Response
-     */
     public function streamInvoice(Invoice $invoice): Response
     {
         return $this->makeInvoicePDF($invoice)->stream();

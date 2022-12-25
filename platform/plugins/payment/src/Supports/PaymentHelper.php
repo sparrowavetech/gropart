@@ -87,4 +87,12 @@ class PaymentHelper
             'userAgent' => Request::header('User-Agent'),
         ]);
     }
+
+    /**
+     * @return string
+     */
+    public static function defaultPaymentMethod(): string
+    {
+        return setting('default_payment_method', PaymentMethodEnum::COD);
+    }
 }

@@ -12,9 +12,6 @@ use Illuminate\Support\Arr;
 
 class PostRepository extends RepositoriesAbstract implements PostInterface
 {
-    /**
-     * {@inheritDoc}
-     */
     public function getFeatured(int $limit = 5, array $with = [])
     {
         $data = $this->model
@@ -29,9 +26,6 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getListPostNonInList(array $selected = [], $limit = 7, array $with = [])
     {
         $data = $this->model
@@ -44,9 +38,6 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getRelated($id, $limit = 3)
     {
         $data = $this->model
@@ -62,30 +53,24 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getRelatedCategoryIds($model)
     {
         $model = $model instanceof Eloquent ? $model : $this->findById($model);
 
-        if (!$model) {
+        if (! $model) {
             return [];
         }
 
         try {
             return $model->categories()->allRelatedIds()->toArray();
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return [];
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getByCategory($categoryId, $paginate = 12, $limit = 0)
     {
-        if (!is_array($categoryId)) {
+        if (! is_array($categoryId)) {
             $categoryId = [$categoryId];
         }
 
@@ -106,9 +91,6 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         return $this->applyBeforeExecuteQuery($data)->limit($limit)->get();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getByUserId($authorId, $paginate = 6)
     {
         $data = $this->model
@@ -122,9 +104,6 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         return $this->applyBeforeExecuteQuery($data)->paginate($paginate);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getDataSiteMap()
     {
         $data = $this->model
@@ -135,9 +114,6 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getByTag($tag, $paginate = 12)
     {
         $data = $this->model
@@ -154,9 +130,6 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         return $this->applyBeforeExecuteQuery($data)->paginate($paginate);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getRecentPosts($limit = 5, $categoryId = 0)
     {
         $data = $this->model->where(['status' => BaseStatusEnum::PUBLISHED]);
@@ -175,9 +148,6 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getSearch($keyword, $limit = 10, $paginate = 10)
     {
         $data = $this->model
@@ -199,9 +169,6 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getAllPosts($perPage = 12, $active = true, array $with = ['slugable'])
     {
         $data = $this->model
@@ -215,9 +182,6 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         return $this->applyBeforeExecuteQuery($data)->paginate($perPage);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getPopularPosts($limit, array $args = [])
     {
         $data = $this->model
@@ -226,16 +190,13 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
             ->where('status', BaseStatusEnum::PUBLISHED)
             ->limit($limit);
 
-        if (!empty(Arr::get($args, 'where'))) {
+        if (! empty(Arr::get($args, 'where'))) {
             $data = $data->where($args['where']);
         }
 
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getFilters(array $filters)
     {
         $data = $this->originalModel;

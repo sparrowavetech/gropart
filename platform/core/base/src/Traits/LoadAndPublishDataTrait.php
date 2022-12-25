@@ -3,6 +3,7 @@
 namespace Botble\Base\Traits;
 
 use Botble\Base\Supports\Helper;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use ReflectionClass;
@@ -12,49 +13,33 @@ use ReflectionClass;
  */
 trait LoadAndPublishDataTrait
 {
-    /**
-     * @var string
-     */
-    protected $namespace = null;
+    protected ?string $namespace = null;
 
-    /**
-     * @param string $namespace
-     * @return $this
-     */
     public function setNamespace(string $namespace): self
     {
         $this->namespace = ltrim(rtrim($namespace, '/'), '/');
 
-        $this->app['config']->set(['core.base.general.plugin_namespaces.' . basename($this->getPath()) => $namespace]);
+        $this->app['config']->set(['core.base.general.plugin_namespaces.' . File::basename($this->getPath()) => $namespace]);
 
         return $this;
     }
 
-    /**
-     * @param string|null $path
-     * @return string
-     */
     protected function getPath(string $path = null): string
     {
         $reflection = new ReflectionClass($this);
 
-        $modulePath = str_replace('/src/Providers', '', dirname($reflection->getFilename()));
+        $modulePath = str_replace('/src/Providers', '', File::dirname($reflection->getFilename()));
 
-        if (!Str::contains($modulePath, base_path('platform/plugins'))) {
+        if (! Str::contains($modulePath, base_path('platform/plugins'))) {
             $modulePath = base_path('platform/' . $this->getDashedNamespace());
         }
 
-        return $modulePath . ($path ? '/' . ltrim($path) : '');
+        return $modulePath . ($path ? '/' . ltrim($path, '/') : '');
     }
 
-    /**
-     * Publish the given configuration file name (without extension) and the given module
-     * @param array|string $fileNames
-     * @return $this
-     */
-    public function loadAndPublishConfigurations($fileNames): self
+    public function loadAndPublishConfigurations(array|string $fileNames): self
     {
-        if (!is_array($fileNames)) {
+        if (! is_array($fileNames)) {
             $fileNames = [$fileNames];
         }
 
@@ -71,40 +56,24 @@ trait LoadAndPublishDataTrait
         return $this;
     }
 
-    /**
-     * Get path of the give file name in the given module
-     * @param string $file
-     * @return string
-     */
     protected function getConfigFilePath(string $file): string
     {
         return $this->getPath('config/' . $file . '.php');
     }
 
-    /**
-     * @return string
-     */
     protected function getDashedNamespace(): string
     {
         return str_replace('.', '/', $this->namespace);
     }
 
-    /**
-     * @return string
-     */
     protected function getDotedNamespace(): string
     {
         return str_replace('/', '.', $this->namespace);
     }
 
-    /**
-     * Publish the given configuration file name (without extension) and the given module
-     * @param array|string $fileNames
-     * @return $this
-     */
-    public function loadRoutes($fileNames = ['web']): self
+    public function loadRoutes(array|string $fileNames = ['web']): self
     {
-        if (!is_array($fileNames)) {
+        if (! is_array($fileNames)) {
             $fileNames = [$fileNames];
         }
 
@@ -115,18 +84,11 @@ trait LoadAndPublishDataTrait
         return $this;
     }
 
-    /**
-     * @param string $file
-     * @return string
-     */
     protected function getRouteFilePath(string $file): string
     {
         return $this->getPath('routes/' . $file . '.php');
     }
 
-    /**
-     * @return $this
-     */
     public function loadAndPublishViews(): self
     {
         $this->loadViewsFrom($this->getViewsPath(), $this->getDashedNamespace());
@@ -140,17 +102,11 @@ trait LoadAndPublishDataTrait
         return $this;
     }
 
-    /**
-     * @return string
-     */
     protected function getViewsPath(): string
     {
-        return $this->getPath('/resources/views/');
+        return $this->getPath('/resources/views');
     }
 
-    /**
-     * @return $this
-     */
     public function loadAndPublishTranslations(): self
     {
         $this->loadTranslationsFrom($this->getTranslationsPath(), $this->getDashedNamespace());
@@ -162,17 +118,11 @@ trait LoadAndPublishDataTrait
         return $this;
     }
 
-    /**
-     * @return string
-     */
     protected function getTranslationsPath(): string
     {
-        return $this->getPath('/resources/lang/');
+        return $this->getPath('/resources/lang');
     }
 
-    /**
-     * @return $this
-     */
     public function loadMigrations(): self
     {
         $this->loadMigrationsFrom($this->getMigrationsPath());
@@ -180,19 +130,12 @@ trait LoadAndPublishDataTrait
         return $this;
     }
 
-    /**
-     * @return string
-     */
     protected function getMigrationsPath(): string
     {
-        return $this->getPath('/database/migrations/');
+        return $this->getPath('/database/migrations');
     }
 
-    /**
-     * @param string|null $path
-     * @return $this
-     */
-    public function publishAssets(?string $path = null): self
+    public function publishAssets(string $path = null): self
     {
         if ($this->app->runningInConsole()) {
             if (empty($path)) {
@@ -205,17 +148,11 @@ trait LoadAndPublishDataTrait
         return $this;
     }
 
-    /**
-     * @return string
-     */
     protected function getAssetsPath(): string
     {
-        return $this->getPath('public/');
+        return $this->getPath('public');
     }
 
-    /**
-     * @return $this
-     */
     public function loadHelpers(): self
     {
         Helper::autoload($this->getPath('/helpers'));

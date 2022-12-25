@@ -9,9 +9,6 @@ use Html;
 
 class PasswordForm extends FormAbstract
 {
-    /**
-     * {@inheritDoc}
-     */
     public function buildForm()
     {
         $this

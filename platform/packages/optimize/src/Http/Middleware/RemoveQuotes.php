@@ -4,7 +4,7 @@ namespace Botble\Optimize\Http\Middleware;
 
 class RemoveQuotes extends PageSpeed
 {
-    public function apply($buffer)
+    public function apply(string $buffer): string
     {
         $buffer = $this->replaceInsideHtmlTags($this->voidElements(), '/\/>/', '>', $buffer);
 
@@ -23,9 +23,6 @@ class RemoveQuotes extends PageSpeed
         return $this->replace($replace, $buffer);
     }
 
-    /**
-     * @return string[]
-     */
     protected function voidElements(): array
     {
         return [
@@ -65,12 +62,6 @@ class RemoveQuotes extends PageSpeed
         );
     }
 
-    /**
-     * @param array $tags
-     * @param string $pattern
-     * @param string $buffer
-     * @return array
-     */
     protected function matchTags(array $tags, string $pattern, string $buffer): array
     {
         if (empty($tags)) {

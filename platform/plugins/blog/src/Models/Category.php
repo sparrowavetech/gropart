@@ -2,41 +2,20 @@
 
 namespace Botble\Blog\Models;
 
-use Botble\Base\Traits\EnumCastable;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Html;
 use Illuminate\Support\Collection;
+use Illuminate\Support\HtmlString;
 
 class Category extends BaseModel
 {
-    use EnumCastable;
-
-    /**
-     * The database table used by the model.
-     *
-     * @var string
-     */
     protected $table = 'categories';
 
-    /**
-     * The date fields
-     *
-     * @var array
-     */
-    protected $dates = [
-        'created_at',
-        'updated_at',
-    ];
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
     protected $fillable = [
         'name',
         'description',
@@ -50,49 +29,57 @@ class Category extends BaseModel
         'author_type',
     ];
 
-    /**
-     * @var array
-     */
     protected $casts = [
         'status' => BaseStatusEnum::class,
     ];
 
-    /**
-     * @return BelongsToMany
-     */
     public function posts(): BelongsToMany
     {
         return $this->belongsToMany(Post::class, 'post_categories')->with('slugable');
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function parent(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'parent_id')->withDefault();
     }
 
-    /**
-     * @return Collection
-     */
-    public function getParentsAttribute(): Collection
+    protected function parents(): Attribute
     {
-        $parents = collect([]);
+        return Attribute::make(
+            get: function (): Collection {
+                $parents = collect([]);
 
-        $parent = $this->parent;
+                $parent = $this->parent;
 
-        while ($parent->id) {
-            $parents->push($parent);
-            $parent = $parent->parent;
-        }
+                while ($parent->id) {
+                    $parents->push($parent);
+                    $parent = $parent->parent;
+                }
 
-        return $parents;
+                return $parents;
+            },
+        );
     }
 
-    /**
-     * @return HasMany
-     */
+    protected function badgeWithCount(): Attribute
+    {
+        return Attribute::make(
+            get: function (): HtmlString {
+                $badge = match ($this->status->getValue()) {
+                    BaseStatusEnum::DRAFT => 'bg-secondary',
+                    BaseStatusEnum::PENDING => 'bg-warning',
+                    default => 'bg-success',
+                };
+
+                return Html::tag('span', (string)$this->posts_count, [
+                    'class' => 'badge font-weight-bold ' . $badge,
+                    'data-bs-toggle' => 'tooltip',
+                    'data-bs-original-title' => trans('plugins/blog::categories.total_posts', ['total' => $this->posts_count]),
+                ]);
+            },
+        );
+    }
+
     public function children(): HasMany
     {
         return $this->hasMany(Category::class, 'parent_id');
@@ -104,33 +91,6 @@ class Category extends BaseModel
             ->children()
             ->where('status', BaseStatusEnum::PUBLISHED)
             ->with(['slugable', 'activeChildren']);
-    }
-
-    /**
-     * @return \Illuminate\Support\HtmlString
-     */
-    public function getBadgeWithCountAttribute()
-    {
-        switch ($this->status->getValue()) {
-            case BaseStatusEnum::DRAFT:
-                $badge = 'bg-secondary';
-
-                break;
-            case BaseStatusEnum::PENDING:
-                $badge = 'bg-warning';
-
-                break;
-            default:
-                $badge = 'bg-success';
-
-                break;
-        }
-
-        return Html::tag('span', (string)$this->posts_count, [
-            'class' => 'badge font-weight-bold ' . $badge,
-            'data-bs-toggle' => 'tooltip',
-            'data-bs-original-title' => trans('plugins/blog::categories.total_posts', ['total' => $this->posts_count]),
-        ]);
     }
 
     protected static function boot()

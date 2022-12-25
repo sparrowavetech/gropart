@@ -10,28 +10,14 @@ use Log;
 
 class SendMailListener
 {
-    /**
-     * @var Mailer
-     */
-    protected $mailer;
+    protected Mailer $mailer;
 
-    /**
-     * SendMailListener constructor.
-     * @param Mailer $mailer
-     */
     public function __construct(Mailer $mailer)
     {
         $this->mailer = $mailer;
     }
 
-    /**
-     * Handle the event.
-     *
-     * @param SendMailEvent $event
-     * @return void
-     * @throws Exception
-     */
-    public function handle(SendMailEvent $event)
+    public function handle(SendMailEvent $event): void
     {
         try {
             $this->mailer->to($event->to)->send(new EmailAbstract($event->content, $event->title, $event->args));

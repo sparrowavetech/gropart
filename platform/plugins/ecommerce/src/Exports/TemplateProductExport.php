@@ -25,6 +25,7 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStrictNullComparison;
 use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Excel;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
@@ -38,44 +39,18 @@ class TemplateProductExport implements
 {
     use Exportable;
 
-    /**
-     * @var Collection
-     */
-    protected $results;
+    protected Collection $results;
 
-    /**
-     * @var string
-     */
-    protected $exportType;
+    protected string $exportType;
 
-    /**
-     * @var int
-     */
-    protected $totalRow;
+    protected int $totalRow;
 
-    /**
-     * @var Collection
-     */
-    protected $taxes;
+    protected Collection $brands;
 
-    /**
-     * @var Collection
-     */
-    protected $brands;
+    protected bool $enabledDigital;
 
-    /**
-     * @var bool
-     */
-    protected $enabledDigital;
+    protected bool $isMarketplaceActive;
 
-    /**
-     * @var bool
-     */
-    protected $isMarketplaceActive;
-
-    /**
-     * @param string $exportType
-     */
     public function __construct(string $exportType = Excel::XLSX)
     {
         $this->exportType = $exportType;
@@ -97,8 +72,7 @@ class TemplateProductExport implements
         $categories = app(ProductCategoryInterface::class)->getModel()->inRandomOrder()->limit(2)->get();
         $brands = app(BrandInterface::class)->pluck('name', 'id');
         $this->brands = collect($brands);
-        $taxes = app(TaxInterface::class)->pluck('title', 'id');
-        $this->taxes = collect($taxes);
+        $taxes = app(TaxInterface::class)->getModel()->inRandomOrder()->limit(2)->get();
 
         $productTags = app(ProductTagInterface::class)->getModel()->inRandomOrder()->limit(2)->get();
 
@@ -111,38 +85,21 @@ class TemplateProductExport implements
 
         $this->enabledDigital = EcommerceHelper::isEnabledSupportDigitalProducts();
 
-        $product = [
+        $product = array_replace($this->getTempProductData(), [
             'name' => $productName,
             'description' => $descriptions->random(),
-            'slug' => '',
             'sku' => Str::upper(Str::random(7)),
-            'auto_generate_sku' => '',
             'categories' => $categories->pluck('name')->implode(','),
             'status' => BaseStatusEnum::PUBLISHED,
             'is_featured' => Arr::random(['Yes', 'No']),
             'brand' => $this->brands->count() ? $this->brands->random() : null,
-            'product_collections' => '',
-            'labels' => '',
-            'tax' => $this->taxes->count() ? $this->taxes->random() : null,
+            'taxes' => $taxes->pluck('title')->implode(','),
             'images' => 'products/1.jpg',
             'price' => $price,
             'product_attributes' => $attributeSets->pluck('title')->implode(','),
             'import_type' => 'product',
-            'is_variation_default' => '',
-            'stock_status' => '',
-            'with_storehouse_management' => '',
-            'quantity' => '',
-            'allow_checkout_when_out_of_stock' => '',
-            'sale_price' => '',
-            'start_date_sale_price' => '',
-            'end_date_sale_price' => '',
-            'weight' => '',
-            'length' => '',
-            'wide' => '',
-            'height' => '',
-            'content' => '',
             'tags' => $productTags->pluck('name')->implode(','),
-        ];
+        ]);
 
         if ($this->enabledDigital) {
             $product['product_type'] = ProductTypeEnum::PHYSICAL;
@@ -160,19 +117,11 @@ class TemplateProductExport implements
             $attributes1[] = $set->title . ':' . ($set->attributes->count() ? $set->attributes->random()->title : null);
         }
 
-        $productVariation1 = [
+        $productVariation1 = array_replace($this->getTempProductData(), [
             'name' => $productName,
-            'description' => '',
-            'slug' => '',
-            'sku' => '',
             'auto_generate_sku' => 'Yes',
-            'categories' => '',
             'status' => BaseStatusEnum::PUBLISHED,
             'is_featured' => Arr::random(['Yes', 'No']),
-            'brand' => '',
-            'product_collections' => '',
-            'labels' => '',
-            'tax' => '',
             'images' => 'products/1.jpg,products/2.jpg',
             'price' => $price,
             'product_attributes' => implode(',', $attributes1),
@@ -181,7 +130,6 @@ class TemplateProductExport implements
             'stock_status' => StockStatusEnum::IN_STOCK,
             'with_storehouse_management' => 'Yes',
             'quantity' => rand(20, 300),
-            'allow_checkout_when_out_of_stock' => '',
             'sale_price' => $price - rand(2, 5),
             'start_date_sale_price' => Carbon::now()->startOfDay()->format('Y-m-d H:i:s'),
             'end_date_sale_price' => Carbon::now()->addDays(20)->endOfDay()->format('Y-m-d H:i:s'),
@@ -189,9 +137,7 @@ class TemplateProductExport implements
             'length' => rand(20, 300),
             'wide' => rand(20, 300),
             'height' => rand(20, 300),
-            'content' => '',
-            'tags' => '',
-        ];
+        ]);
 
         $attributes2 = [];
         foreach ($attributeSets as $set) {
@@ -204,19 +150,11 @@ class TemplateProductExport implements
             $attributes2[] = $attr;
         }
 
-        $productVariation2 = [
+        $productVariation2 = array_replace($this->getTempProductData(), [
             'name' => $productName,
-            'description' => '',
-            'slug' => '',
-            'sku' => '',
             'auto_generate_sku' => 'Yes',
-            'categories' => '',
             'status' => BaseStatusEnum::PUBLISHED,
             'is_featured' => Arr::random(['Yes', 'No']),
-            'brand' => '',
-            'product_collections' => '',
-            'labels' => '',
-            'tax' => '',
             'images' => 'products/1.jpg,products/3.jpg',
             'price' => $price,
             'product_attributes' => implode(',', $attributes2),
@@ -224,18 +162,12 @@ class TemplateProductExport implements
             'is_variation_default' => 'No',
             'stock_status' => StockStatusEnum::IN_STOCK,
             'with_storehouse_management' => 'No',
-            'quantity' => '',
-            'allow_checkout_when_out_of_stock' => '',
             'sale_price' => $price,
-            'start_date_sale_price' => '',
-            'end_date_sale_price' => '',
             'weight' => rand(20, 300),
             'length' => rand(20, 300),
             'wide' => rand(20, 300),
             'height' => rand(20, 300),
-            'content' => '',
-            'tags' => '',
-        ];
+        ]);
 
         $this->results = collect([
             $product,
@@ -246,17 +178,11 @@ class TemplateProductExport implements
         $this->totalRow = $exportType == Excel::XLSX ? 100 : ($this->results->count() + 1);
     }
 
-    /**
-     * @return Collection
-     */
-    public function collection()
+    public function collection(): Collection
     {
         return $this->results;
     }
 
-    /**
-     * @return array
-     */
     public function headings(): array
     {
         $headings = [
@@ -271,7 +197,7 @@ class TemplateProductExport implements
             'brand' => 'Brand',
             'product_collections' => 'Product collections',
             'labels' => 'Labels',
-            'tax' => 'Tax',
+            'taxes' => 'Taxes',
             'images' => 'Images',
             'price' => 'Price',
             'product_attributes' => 'Product attributes',
@@ -303,33 +229,45 @@ class TemplateProductExport implements
         return $headings;
     }
 
-    /**
-     * @return array
-     */
+    public function getTempProductData(): array
+    {
+        return array_fill_keys(array_keys($this->headings()), '');
+    }
+
+    public function stringFromColumnIndex(string $column): string
+    {
+        $key = array_search($column, array_keys($this->headings()));
+
+        if ($key !== false) {
+            return Coordinate::stringFromColumnIndex($key);
+        }
+
+        return '';
+    }
+
     public function registerEvents(): array
     {
         return [
             // handle by a closure.
             AfterSheet::class => function (AfterSheet $event) {
-                $statusColumn = 'G';
-                $stockColumn = 'R';
-                $autoGenerateSKUColumn = 'E';
-                $isFeaturedColumn = 'H';
-                $brandColumn = 'I';
-                $taxColumn = 'L';
+                $statusColumn = $this->stringFromColumnIndex('status');
+                $stockColumn = $this->stringFromColumnIndex('stock_status');
+                $autoGenerateSKUColumn = $this->stringFromColumnIndex('auto_generate_sku');
+                $isFeaturedColumn = $this->stringFromColumnIndex('is_featured');
+                $brandColumn = $this->stringFromColumnIndex('brand');
 
-                $importTypeColumn = 'P';
-                $isVariationDefaultColumn = 'Q';
-                $withStorehouseManagementColumn = 'S';
-                $allowCheckoutWhenOutOfStockColumn = 'U';
-                $quantityColumn = 'T';
-                $priceColumn = 'N';
-                $saleColumn = 'V';
-                $weightColumn = 'Y';
-                $lengthColumn = 'Z';
-                $wideColumn = 'AA';
-                $heightColumn = 'AB';
-                $productTypeColumn = 'AE';
+                $importTypeColumn = $this->stringFromColumnIndex('import_type');
+                $isVariationDefaultColumn = $this->stringFromColumnIndex('is_variation_default');
+                $withStorehouseManagementColumn = $this->stringFromColumnIndex('with_storehouse_management');
+                $allowCheckoutWhenOutOfStockColumn = $this->stringFromColumnIndex('allow_checkout_when_out_of_stock');
+                $quantityColumn = $this->stringFromColumnIndex('quantity');
+                $priceColumn = $this->stringFromColumnIndex('price');
+                $saleColumn = $this->stringFromColumnIndex('sale_price');
+                $weightColumn = $this->stringFromColumnIndex('weight');
+                $lengthColumn = $this->stringFromColumnIndex('length');
+                $wideColumn = $this->stringFromColumnIndex('wide');
+                $heightColumn = $this->stringFromColumnIndex('height');
+                $productTypeColumn = $this->stringFromColumnIndex('product_type');
 
                 // set dropdown list for first data row
                 $statusValidation = $this->getStatusValidation();
@@ -338,7 +276,6 @@ class TemplateProductExport implements
                 $importTypeValidation = $this->getImportTypeValidation();
                 $wholeNumberValidation = $this->getWholeNumberValidation();
                 $decimalValidation = $this->getDecimalValidation();
-                $taxValidation = $this->getTaxValidation();
                 $brandValidation = $this->getBrandValidation();
 
                 $productTypeValidation = $this->getProductTypeValidation();
@@ -350,7 +287,6 @@ class TemplateProductExport implements
                     $event->sheet->getCell($autoGenerateSKUColumn . $index)->setDataValidation($booleanValidation);
                     $event->sheet->getCell($isFeaturedColumn . $index)->setDataValidation($booleanValidation);
                     $event->sheet->getCell($brandColumn . $index)->setDataValidation($brandValidation);
-                    $event->sheet->getCell($taxColumn . $index)->setDataValidation($taxValidation);
 
                     $event->sheet->getCell($importTypeColumn . $index)->setDataValidation($importTypeValidation);
                     $event->sheet->getCell($isVariationDefaultColumn . $index)->setDataValidation($booleanValidation);
@@ -386,27 +322,17 @@ class TemplateProductExport implements
         ];
     }
 
-    /**
-     * @return DataValidation
-     */
-    protected function getStatusValidation()
+    protected function getStatusValidation(): DataValidation
     {
         return $this->getDropDownListValidation(BaseStatusEnum::values());
     }
 
-    /**
-     * @return DataValidation
-     */
-    protected function getProductTypeValidation()
+    protected function getProductTypeValidation(): DataValidation
     {
         return $this->getDropDownListValidation(ProductTypeEnum::values());
     }
 
-    /**
-     * @param array $options
-     * @return DataValidation
-     */
-    protected function getDropDownListValidation($options)
+    protected function getDropDownListValidation(array $options): DataValidation
     {
         // set dropdown list for first data row
         $validation = new DataValidation();
@@ -425,35 +351,22 @@ class TemplateProductExport implements
         return $validation;
     }
 
-    /**
-     * @return DataValidation
-     */
-    protected function getStockValidation()
+    protected function getStockValidation(): DataValidation
     {
         return $this->getDropDownListValidation(StockStatusEnum::values());
     }
 
-    /**
-     * @return DataValidation
-     */
-    protected function getBooleanValidation()
+    protected function getBooleanValidation(): DataValidation
     {
         return $this->getDropDownListValidation(['No', 'Yes']);
     }
 
-    /**
-     * @return DataValidation
-     */
-    protected function getImportTypeValidation()
+    protected function getImportTypeValidation(): DataValidation
     {
         return $this->getDropDownListValidation(['product', 'variation']);
     }
 
-    /**
-     * @param int $min
-     * @return DataValidation
-     */
-    protected function getWholeNumberValidation($min = 0)
+    protected function getWholeNumberValidation(int $min = 0): DataValidation
     {
         // set dropdown list for first data row
         $validation = new DataValidation();
@@ -476,11 +389,7 @@ class TemplateProductExport implements
         return $validation;
     }
 
-    /**
-     * @param int $min
-     * @return DataValidation
-     */
-    protected function getDecimalValidation($min = 0)
+    protected function getDecimalValidation(int $min = 0): DataValidation
     {
         // set dropdown list for first data row
         $validation = new DataValidation();
@@ -500,68 +409,55 @@ class TemplateProductExport implements
         return $validation;
     }
 
-    /**
-     * @return DataValidation
-     */
-    protected function getTaxValidation()
-    {
-        return $this->getDropDownListValidation(['-- None --'] + $this->taxes->toArray());
-    }
-
-    /**
-     * @return DataValidation
-     */
-    protected function getBrandValidation()
+    protected function getBrandValidation(): DataValidation
     {
         return $this->getDropDownListValidation(['-- None --'] + $this->brands->toArray());
     }
 
-    /**
-     * @return array
-     */
     public function columnFormats(): array
     {
         if ($this->exportType != Excel::XLSX) {
             return [];
         }
 
-        return [
-            'A2:A' . $this->totalRow => NumberFormat::FORMAT_TEXT,
-            'B2:B' . $this->totalRow => NumberFormat::FORMAT_TEXT,
-            'C2:C' . $this->totalRow => NumberFormat::FORMAT_TEXT,
-            'D2:D' . $this->totalRow => NumberFormat::FORMAT_TEXT,
-            'F2:F' . $this->totalRow => NumberFormat::FORMAT_TEXT,
-            'I2:I' . $this->totalRow => NumberFormat::FORMAT_TEXT,
-            'J2:J' . $this->totalRow => NumberFormat::FORMAT_TEXT,
-            'K2:K' . $this->totalRow => NumberFormat::FORMAT_TEXT,
-            'L2:L' . $this->totalRow => NumberFormat::FORMAT_TEXT,
-            'M2:M' . $this->totalRow => NumberFormat::FORMAT_TEXT,
-            'N2:N' . $this->totalRow => NumberFormat::FORMAT_NUMBER_00,
-            'T2:T' . $this->totalRow => NumberFormat::FORMAT_NUMBER,
-            'V2:V' . $this->totalRow => NumberFormat::FORMAT_NUMBER_00,
-            'W2:W' . $this->totalRow => 'yyyy-mm-dd hh:mm:ss',
-            'X2:X' . $this->totalRow => 'yyyy-mm-dd hh:mm:ss',
-            'Y2:Y' . $this->totalRow => NumberFormat::FORMAT_GENERAL,
-            'Z2:Z' . $this->totalRow => NumberFormat::FORMAT_GENERAL,
-            'AA2:AA' . $this->totalRow => NumberFormat::FORMAT_GENERAL,
-            'AB2:AB' . $this->totalRow => NumberFormat::FORMAT_GENERAL,
+        $columns = [
+            'name' => NumberFormat::FORMAT_TEXT,
+            'description' => NumberFormat::FORMAT_TEXT,
+            'slug' => NumberFormat::FORMAT_TEXT,
+            'sku' => NumberFormat::FORMAT_TEXT,
+            'categories' => NumberFormat::FORMAT_TEXT,
+            'product_collections' => NumberFormat::FORMAT_TEXT,
+            'labels' => NumberFormat::FORMAT_TEXT,
+            'taxes' => NumberFormat::FORMAT_TEXT,
+            'images' => NumberFormat::FORMAT_TEXT,
+            'price' => NumberFormat::FORMAT_NUMBER_00,
+            'quantity' => NumberFormat::FORMAT_NUMBER,
+            'sale_price' => NumberFormat::FORMAT_NUMBER_00,
+            'start_date_sale_price' => 'yyyy-mm-dd hh:mm:ss',
+            'end_date_sale_price' => 'yyyy-mm-dd hh:mm:ss',
+            'weight' => NumberFormat::FORMAT_GENERAL,
+            'length' => NumberFormat::FORMAT_GENERAL,
+            'wide' => NumberFormat::FORMAT_GENERAL,
+            'height' => NumberFormat::FORMAT_GENERAL,
         ];
+
+        $formatted = [];
+        foreach ($columns as $key => $value) {
+            $column = $this->stringFromColumnIndex($key);
+            $formatted[$column . '2:' . $column . $this->totalRow] = $value;
+        }
+
+        return $formatted;
     }
 
-    /**
-     * @return array
-     */
     public function columnWidths(): array
     {
         return [
-            'A' => 25,
-            'B' => 30,
+            $this->stringFromColumnIndex('name') => 25,
+            $this->stringFromColumnIndex('description') => 30,
         ];
     }
 
-    /**
-     * @return array
-     */
     public function rules(): array
     {
         $rules = [
@@ -576,7 +472,7 @@ class TemplateProductExport implements
             'brand' => 'nullable|[Brand name | Brand ID]',
             'product_collections' => 'nullable|[Product collection name | Product collection ID]|multiple',
             'labels' => 'nullable|[Product label name | Product label ID]|multiple',
-            'tax' => 'nullable|[Tax name | Tax ID]|default:0',
+            'taxes' => 'nullable|[Tax title | Tax ID]|multiple',
             'images' => 'nullable|string|multiple',
             'price' => 'nullable|number',
             'product_attributes' => 'nullable|string',

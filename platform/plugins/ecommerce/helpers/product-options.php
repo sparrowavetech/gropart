@@ -2,7 +2,7 @@
 
 use Botble\Ecommerce\Models\Product;
 
-if (!function_exists('render_product_options')) {
+if (! function_exists('render_product_options')) {
     /**
      * @param Product $product
      * @param array $options
@@ -25,7 +25,7 @@ if (!function_exists('render_product_options')) {
             }
         }
 
-        if (!request()->ajax()) {
+        if (! request()->ajax()) {
             return $html;
         }
 
@@ -33,7 +33,7 @@ if (!function_exists('render_product_options')) {
     }
 }
 
-if (!function_exists('render_product_options_info')) {
+if (! function_exists('render_product_options_info')) {
     /**
      * @param array $productOption
      * @param Product $product

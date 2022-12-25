@@ -251,7 +251,7 @@
                                                                 </div>
                                                             </div>
                                                             <div class="col-12 mb-3">
-                                                                <label class="required" for="comment">{{ __('Review') }}:</label>
+                                                                <label class="required" for="txt-comment">{{ __('Review') }}:</label>
                                                                 <textarea class="form-control" name="comment" id="txt-comment" required aria-required="true"
                                                                     rows="8" placeholder="{{ __('Write your review') }}"></textarea>
                                                             </div>

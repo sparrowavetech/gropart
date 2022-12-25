@@ -18,27 +18,12 @@ use Illuminate\Support\Collection;
 
 class DashboardController extends BaseController
 {
-    /**
-     * @var DashboardWidgetSettingInterface
-     */
-    protected $widgetSettingRepository;
+    protected DashboardWidgetSettingInterface $widgetSettingRepository;
 
-    /**
-     * @var DashboardWidgetInterface
-     */
-    protected $widgetRepository;
+    protected DashboardWidgetInterface $widgetRepository;
 
-    /**
-     * @var UserInterface
-     */
-    protected $userRepository;
+    protected UserInterface $userRepository;
 
-    /**
-     * DashboardController constructor.
-     * @param DashboardWidgetSettingInterface $widgetSettingRepository
-     * @param DashboardWidgetInterface $widgetRepository
-     * @param UserInterface $userRepository
-     */
     public function __construct(
         DashboardWidgetSettingInterface $widgetSettingRepository,
         DashboardWidgetInterface $widgetRepository,
@@ -59,7 +44,8 @@ class DashboardController extends BaseController
 
         Assets::addScripts(['blockui', 'sortable', 'equal-height', 'counterup'])
             ->addScriptsDirectly('vendor/core/core/dashboard/js/dashboard.js')
-            ->addStylesDirectly('vendor/core/core/dashboard/css/dashboard.css');
+            ->addStylesDirectly('vendor/core/core/dashboard/css/dashboard.css')
+            ->usingVueJS();
 
         do_action(DASHBOARD_ACTION_REGISTER_SCRIPTS);
 
@@ -83,7 +69,7 @@ class DashboardController extends BaseController
         $availableWidgetIds = collect($widgetData)->pluck('id')->all();
 
         $widgets = $widgets->reject(function ($item) use ($availableWidgetIds) {
-            return !in_array($item->id, $availableWidgetIds);
+            return ! in_array($item->id, $availableWidgetIds);
         });
 
         $statWidgets = collect($widgetData)->where('type', '!=', 'widget')->pluck('view')->all();
@@ -104,7 +90,7 @@ class DashboardController extends BaseController
                 'name' => $request->input('name'),
             ]);
 
-            if (!$widget) {
+            if (! $widget) {
                 return $response
                     ->setError()
                     ->setMessage(trans('core/dashboard::dashboard.widget_not_exists'));
@@ -161,7 +147,7 @@ class DashboardController extends BaseController
         $widget = $this->widgetRepository->getFirstBy([
             'name' => $request->input('name'),
         ], ['id']);
-        if (!empty($widget)) {
+        if (! empty($widget)) {
             $widgetSetting = $this->widgetSettingRepository->firstOrCreate([
                 'widget_id' => $widget->id,
                 'user_id' => $request->user()->getKey(),

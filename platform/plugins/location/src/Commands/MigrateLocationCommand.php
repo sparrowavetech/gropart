@@ -6,32 +6,18 @@ use Illuminate\Console\Command;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Location;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Input\InputOption;
 
+#[AsCommand('cms:location:migrate', 'Migrate location columns to table')]
 class MigrateLocationCommand extends Command
 {
-    /**
-     * The console command signature.
-     *
-     * @var string
-     */
-    protected $signature = 'cms:location:migrate {--class=}';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Migrate location columns to table';
-
-    /**
-     * Execute the console command.
-     */
-    public function handle()
+    public function handle(): int
     {
         $className = str_replace('/', '\\', $this->option('class'));
         $error = true;
 
-        if (!$className) {
+        if (! $className) {
             foreach (Location::supportedModels() as $className) {
                 $this->runSchema($className);
                 $error = false;
@@ -46,16 +32,23 @@ class MigrateLocationCommand extends Command
         } else {
             $this->info('Migrate location successfully!');
         }
+
+        return self::SUCCESS;
     }
 
-    /**
-     * @param string $className
-     */
-    public function runSchema(string $className)
+    public function runSchema(string $className): void
     {
         $model = new $className();
-        Schema::connection($model->getConnectionName())->table($model->getTable(), function (Blueprint $table) use ($className) {
-            $table->location($className);
-        });
+        Schema::connection($model->getConnectionName())->table(
+            $model->getTable(),
+            function (Blueprint $table) use ($className) {
+                $table->location($className);
+            }
+        );
+    }
+
+    protected function configure(): void
+    {
+        $this->addOption('class', null, InputOption::VALUE_REQUIRED, 'The model class name');
     }
 }

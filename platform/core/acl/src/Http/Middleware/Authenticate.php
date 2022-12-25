@@ -22,7 +22,7 @@ class Authenticate extends BaseAuthenticate
     {
         $this->authenticate($request, $guards);
 
-        if (!$guards) {
+        if (! $guards) {
             $route = $request->route();
             $flag = $route->getAction('permission');
             if ($flag === null) {
@@ -32,7 +32,7 @@ class Authenticate extends BaseAuthenticate
             $flag = preg_replace('/.create.store$/', '.create', $flag);
             $flag = preg_replace('/.edit.update$/', '.edit', $flag);
 
-            if ($flag && !$request->user()->hasAnyPermission((array)$flag)) {
+            if ($flag && ! $request->user()->hasAnyPermission((array)$flag)) {
                 if ($request->expectsJson()) {
                     return response()->json(['message' => 'Unauthenticated.'], 401);
                 }
@@ -52,7 +52,7 @@ class Authenticate extends BaseAuthenticate
      */
     protected function redirectTo($request)
     {
-        if (!$request->expectsJson()) {
+        if (! $request->expectsJson()) {
             return route('access.login');
         }
     }

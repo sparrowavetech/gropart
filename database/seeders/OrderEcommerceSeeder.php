@@ -18,6 +18,7 @@ use Botble\Ecommerce\Models\ShipmentHistory;
 use Botble\Ecommerce\Models\StoreLocator;
 use Botble\Ecommerce\Services\HandleShippingFeeService;
 use Botble\Marketplace\Enums\WithdrawalStatusEnum;
+use Botble\Marketplace\Models\CategoryCommission;
 use Botble\Marketplace\Models\Revenue;
 use Botble\Marketplace\Models\Withdrawal;
 use Botble\Payment\Enums\PaymentMethodEnum;
@@ -34,12 +35,7 @@ use Throwable;
 
 class OrderEcommerceSeeder extends BaseSeeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
         Order::truncate();
         OrderProduct::truncate();
@@ -74,7 +70,7 @@ class OrderEcommerceSeeder extends BaseSeeder
             $customer = $customers->random();
             $address = $customer->addresses->first();
 
-            if (!$address) {
+            if (! $address) {
                 continue;
             }
 
@@ -96,11 +92,11 @@ class OrderEcommerceSeeder extends BaseSeeder
                 }
 
                 $shippingData = [
-                    'address'     => $address->address,
-                    'country'     => $address->country,
-                    'state'       => $address->state,
-                    'city'        => $address->city,
-                    'weight'      => $weight ?: 0.1,
+                    'address' => $address->address,
+                    'country' => $address->country,
+                    'state' => $address->state,
+                    'city' => $address->city,
+                    'weight' => $weight ?: 0.1,
                     'order_total' => $subTotal,
                 ];
 
@@ -109,28 +105,28 @@ class OrderEcommerceSeeder extends BaseSeeder
                 $shippingMethod = $shippingFeeService->execute($shippingData, ShippingMethodEnum::DEFAULT);
 
                 $shippingAmount = Arr::get(Arr::first($shippingMethod), 'price', 0);
-                if (!$isAvailableShipping) {
+                if (! $isAvailableShipping) {
                     $shippingAmount = 0;
                 }
 
                 $time = now()->subMinutes(($total - $i) * 120 * rand(1, 10));
 
                 $order = [
-                    'amount'          => $subTotal + $taxAmount + $shippingAmount,
-                    'user_id'         => $customer->id,
+                    'amount' => $subTotal + $taxAmount + $shippingAmount,
+                    'user_id' => $customer->id,
                     'shipping_method' => $isAvailableShipping ? ShippingMethodEnum::DEFAULT : '',
                     'shipping_option' => $isAvailableShipping ? 1 : null,
                     'shipping_amount' => $shippingAmount,
-                    'tax_amount'      => $taxAmount,
-                    'sub_total'       => $subTotal,
-                    'coupon_code'     => null,
+                    'tax_amount' => $taxAmount,
+                    'sub_total' => $subTotal,
+                    'coupon_code' => null,
                     'discount_amount' => 0,
-                    'status'          => OrderStatusEnum::PENDING,
-                    'is_finished'     => true,
-                    'token'           => Str::random(29),
-                    'created_at'      => $time,
-                    'updated_at'      => $time,
-                    'is_confirmed'    => true,
+                    'status' => OrderStatusEnum::PENDING,
+                    'is_finished' => true,
+                    'token' => Str::random(29),
+                    'created_at' => $time,
+                    'updated_at' => $time,
+                    'is_confirmed' => true,
                 ];
 
                 $order = Order::create($order);
@@ -140,47 +136,47 @@ class OrderEcommerceSeeder extends BaseSeeder
 
                 foreach ($grouped['products'] as $product) {
                     $data = [
-                        'order_id'         => $order->id,
-                        'product_id'       => $product->id,
-                        'product_name'     => $product->name,
-                        'qty'              => $product->qty,
-                        'weight'           => $product->weight * $product->qty,
-                        'price'            => $product->price ?: 1,
-                        'tax_amount'       => $product->tax_amount,
-                        'options'          => [],
-                        'product_type'     => $product->product_type,
+                        'order_id' => $order->id,
+                        'product_id' => $product->id,
+                        'product_name' => $product->name,
+                        'qty' => $product->qty,
+                        'weight' => $product->weight * $product->qty,
+                        'price' => $product->price ?: 1,
+                        'tax_amount' => $product->tax_amount,
+                        'options' => [],
+                        'product_type' => $product->product_type,
                         'times_downloaded' => $product->isTypeDigital() ? rand(0, 10) : 0,
                     ];
                     OrderProduct::create($data);
                 }
 
                 OrderAddress::create([
-                    'name'     => $address->name,
-                    'phone'    => $address->phone,
-                    'email'    => $address->email,
-                    'country'  => $address->country,
-                    'state'    => $address->state,
-                    'city'     => $address->city,
-                    'address'  => $address->address,
+                    'name' => $address->name,
+                    'phone' => $address->phone,
+                    'email' => $address->email,
+                    'country' => $address->country,
+                    'state' => $address->state,
+                    'city' => $address->city,
+                    'address' => $address->address,
                     'zip_code' => $address->zip_code,
                     'order_id' => $order->id,
                 ]);
 
                 OrderHistory::create([
-                    'action'      => 'create_order_from_seeder',
+                    'action' => 'create_order_from_seeder',
                     'description' => __('Order is created from the checkout page'),
-                    'order_id'    => $order->id,
-                    'created_at'  => $time,
-                    'updated_at'  => $time,
+                    'order_id' => $order->id,
+                    'created_at' => $time,
+                    'updated_at' => $time,
                 ]);
 
                 OrderHistory::create([
-                    'action'      => 'confirm_order',
+                    'action' => 'confirm_order',
                     'description' => trans('plugins/ecommerce::order.order_was_verified_by'),
-                    'order_id'    => $order->id,
-                    'user_id'     => 0,
-                    'created_at'  => $time,
-                    'updated_at'  => $time,
+                    'order_id' => $order->id,
+                    'user_id' => 0,
+                    'created_at' => $time,
+                    'updated_at' => $time,
                 ]);
 
                 $paymentStatus = PaymentStatusEnum::COMPLETED;
@@ -191,26 +187,26 @@ class OrderEcommerceSeeder extends BaseSeeder
                 }
 
                 $payment = Payment::create([
-                    'amount'          => $order->amount,
-                    'currency'        => $currency->title,
+                    'amount' => $order->amount,
+                    'currency' => $currency->title,
                     'payment_channel' => $paymentMethod,
-                    'status'          => $paymentStatus,
-                    'payment_type'    => 'confirm',
-                    'order_id'        => $order->id,
-                    'charge_id'       => Str::upper(Str::random(10)),
-                    'user_id'         => 0,
-                    'customer_id'     => $customer->id,
-                    'customer_type'   => Customer::class,
+                    'status' => $paymentStatus,
+                    'payment_type' => 'confirm',
+                    'order_id' => $order->id,
+                    'charge_id' => Str::upper(Str::random(10)),
+                    'user_id' => 0,
+                    'customer_id' => $customer->id,
+                    'customer_type' => Customer::class,
                 ]);
 
                 if ($paymentStatus == PaymentStatusEnum::COMPLETED) {
                     OrderHistory::create([
-                        'action'      => 'confirm_payment',
+                        'action' => 'confirm_payment',
                         'description' => trans('plugins/ecommerce::order.payment_was_confirmed_by', [
                             'money' => format_price($order->amount),
                         ]),
-                        'order_id'    => $order->id,
-                        'user_id'     => 0,
+                        'order_id' => $order->id,
+                        'user_id' => 0,
                     ]);
                 }
 
@@ -231,47 +227,47 @@ class OrderEcommerceSeeder extends BaseSeeder
 
                 if ($isAvailableShipping) {
                     $shipment = Shipment::create([
-                        'status'                => $shipmentStatus,
-                        'order_id'              => $order->id,
-                        'weight'                => $weight,
-                        'note'                  => '',
-                        'cod_amount'            => $codAmount,
-                        'cod_status'            => $codStatus,
-                        'price'                 => $order->shipping_amount,
-                        'store_id'              => $storeLocators->count() > 1 ? $storeLocators->random(1)->id : 0,
-                        'tracking_id'           => 'JJD00' . rand(1111111, 99999999),
+                        'status' => $shipmentStatus,
+                        'order_id' => $order->id,
+                        'weight' => $weight,
+                        'note' => '',
+                        'cod_amount' => $codAmount,
+                        'cod_status' => $codStatus,
+                        'price' => $order->shipping_amount,
+                        'store_id' => $storeLocators->count() > 1 ? $storeLocators->random(1)->id : 0,
+                        'tracking_id' => 'JJD00' . rand(1111111, 99999999),
                         'shipping_company_name' => Arr::random(['DHL', 'AliExpress', 'GHN', 'FastShipping']),
-                        'tracking_link'         => 'https://mydhl.express.dhl/us/en/tracking.html#/track-by-reference',
+                        'tracking_link' => 'https://mydhl.express.dhl/us/en/tracking.html#/track-by-reference',
                         'estimate_date_shipped' => now()->addDays(rand(1, 10)),
-                        'date_shipped'          => $shipmentStatus == ShippingStatusEnum::DELIVERED ? now() : null,
+                        'date_shipped' => $shipmentStatus == ShippingStatusEnum::DELIVERED ? now() : null,
                     ]);
 
                     OrderHistory::create([
-                        'action'      => 'create_shipment',
+                        'action' => 'create_shipment',
                         'description' => __('Created shipment for order'),
-                        'order_id'    => $order->id,
-                        'user_id'     => 0,
+                        'order_id' => $order->id,
+                        'user_id' => 0,
                     ]);
 
                     ShipmentHistory::create([
-                        'action'      => 'create_from_order',
+                        'action' => 'create_from_order',
                         'description' => trans('plugins/ecommerce::order.shipping_was_created_from'),
                         'shipment_id' => $shipment->id,
-                        'order_id'    => $order->id,
-                        'user_id'     => 0,
-                        'created_at'  => $time,
-                        'updated_at'  => $time,
+                        'order_id' => $order->id,
+                        'user_id' => 0,
+                        'created_at' => $time,
+                        'updated_at' => $time,
                     ]);
 
                     ShipmentHistory::create([
-                        'action'      => 'update_status',
+                        'action' => 'update_status',
                         'description' => trans('plugins/ecommerce::shipping.changed_shipping_status', [
                             'status' => ShippingStatusEnum::getLabel(ShippingStatusEnum::APPROVED),
                         ]),
                         'shipment_id' => $shipment->id,
-                        'order_id'    => $order->id,
-                        'user_id'     => 0,
-                        'created_at'  => now()->subMinutes(($total - $i) * 120),
+                        'order_id' => $order->id,
+                        'user_id' => 0,
+                        'created_at' => now()->subMinutes(($total - $i) * 120),
                     ]);
 
                     if ($shipmentStatus == ShippingStatusEnum::DELIVERED) {
@@ -282,24 +278,24 @@ class OrderEcommerceSeeder extends BaseSeeder
                             $shipment->save();
 
                             ShipmentHistory::create([
-                                'action'      => 'update_cod_status',
+                                'action' => 'update_cod_status',
                                 'description' => trans('plugins/ecommerce::shipping.updated_cod_status_by', [
                                     'status' => ShippingCodStatusEnum::getLabel(ShippingCodStatusEnum::COMPLETED),
                                 ]),
                                 'shipment_id' => $shipment->id,
-                                'order_id'    => $order->id,
-                                'user_id'     => 0,
+                                'order_id' => $order->id,
+                                'user_id' => 0,
                             ]);
                         }
 
                         ShipmentHistory::create([
-                            'action'      => 'update_status',
+                            'action' => 'update_status',
                             'description' => trans('plugins/ecommerce::shipping.changed_shipping_status', [
                                 'status' => ShippingStatusEnum::getLabel($shipmentStatus),
                             ]),
                             'shipment_id' => $shipment->id,
-                            'order_id'    => $order->id,
-                            'user_id'     => 0,
+                            'order_id' => $order->id,
+                            'user_id' => 0,
                         ]);
                     }
                 } else {
@@ -310,7 +306,7 @@ class OrderEcommerceSeeder extends BaseSeeder
             }
         }
 
-        $orders = Order::with(['payment', 'shipment'])->get();
+        $orders = Order::with(['payment', 'shipment', 'products'])->get();
         if ($isMarketplace) {
             Revenue::truncate();
             $orders->load(['store', 'store.customer']);
@@ -322,10 +318,10 @@ class OrderEcommerceSeeder extends BaseSeeder
                 $order->save();
 
                 OrderHistory::create([
-                    'action'      => 'update_status',
+                    'action' => 'update_status',
                     'description' => trans('plugins/ecommerce::shipping.order_confirmed_by'),
-                    'order_id'    => $order->id,
-                    'user_id'     => 0,
+                    'order_id' => $order->id,
+                    'user_id' => 0,
                 ]);
 
                 if ($isMarketplace && $order->store->id && $order->store->customer->id) {
@@ -333,9 +329,7 @@ class OrderEcommerceSeeder extends BaseSeeder
                     $vendorInfo = $customer->vendorInfo;
 
                     if ($vendorInfo->id) {
-                        $feePercentage = MarketplaceHelper::getSetting('fee_per_order', 0);
-
-                        $fee = $order->amount * ($feePercentage / 100);
+                        $fee = $this->calculatorCommissionFeeByProduct($order->products);
                         $amount = $order->amount - $fee;
                         $currentBalance = $customer->balance;
 
@@ -343,16 +337,17 @@ class OrderEcommerceSeeder extends BaseSeeder
                         $time = now()->subMinutes(($order->id + 1) * 120 * rand(1, 10));
 
                         $data = [
-                            'sub_amount'      => $order->amount,
-                            'fee'             => $fee,
-                            'amount'          => $amount,
-                            'currency'        => get_application_currency()->title,
+                            'sub_amount' => $order->amount,
+                            'fee' => $fee,
+                            'amount' => $amount,
+                            'currency' => get_application_currency()->title,
                             'current_balance' => $currentBalance,
-                            'customer_id'     => $customer->getKey(),
-                            'created_at'      => $time,
-                            'updated_at'      => $time,
+                            'customer_id' => $customer->getKey(),
+                            'created_at' => $time,
+                            'updated_at' => $time,
                         ];
                         DB::beginTransaction();
+
                         try {
                             Revenue::create(array_merge([
                                 'order_id' => $order->id,
@@ -366,6 +361,7 @@ class OrderEcommerceSeeder extends BaseSeeder
                             DB::commit();
                         } catch (Throwable $th) {
                             DB::rollBack();
+
                             throw $th;
                         }
                     }
@@ -373,7 +369,7 @@ class OrderEcommerceSeeder extends BaseSeeder
             }
         }
 
-        if (!$isMarketplace) {
+        if (! $isMarketplace) {
             return;
         }
 
@@ -388,14 +384,14 @@ class OrderEcommerceSeeder extends BaseSeeder
 
                 if ($amount - $fee > 0) {
                     Withdrawal::create([
-                        'fee'             => $fee,
-                        'amount'          => $amount,
-                        'customer_id'     => $vendor->getKey(),
-                        'currency'        => $currency->title,
-                        'bank_info'       => $vendorInfo->bank_info,
-                        'description'     => '',
+                        'fee' => $fee,
+                        'amount' => $amount,
+                        'customer_id' => $vendor->getKey(),
+                        'currency' => $currency->title,
+                        'bank_info' => $vendorInfo->bank_info,
+                        'description' => '',
                         'current_balance' => $vendorInfo->balance > 0 ? $vendorInfo->balance : 0,
-                        'status'          => Arr::random([
+                        'status' => Arr::random([
                             WithdrawalStatusEnum::PENDING,
                             WithdrawalStatusEnum::COMPLETED,
                             WithdrawalStatusEnum::PROCESSING,
@@ -410,6 +406,33 @@ class OrderEcommerceSeeder extends BaseSeeder
     }
 
     /**
+     * @param $orderProducts
+     * @return float
+     */
+    private function calculatorCommissionFeeByProduct($orderProducts)
+    {
+        $totalFee = 0;
+        foreach ($orderProducts as $orderProduct) {
+            $product = $orderProduct->product->toArray();
+            if ($product['is_variation']) {
+                $id = $product['variation_info']['configurable_product_id'];
+            } else {
+                $id = $orderProduct->product_id;
+            }
+            $product = Product::with(['categories'])->find($id);
+            $listCategories = $product->categories->pluck('id')->all();
+            $commissionSetting = CategoryCommission::whereIn('product_category_id', $listCategories)->orderBy('commission_percentage', 'desc')->first(); // lay commission setting cao nhat
+            $commissionFeePercentage = MarketplaceHelper::getSetting('fee_per_order', 0);
+            if (! empty($commissionSetting)) {
+                $commissionFeePercentage = $commissionSetting->commission_percentage;
+            }
+            $totalFee += $orderProduct->price * $commissionFeePercentage / 100;
+        }
+
+        return $totalFee;
+    }
+
+    /**
      * Group products by store
      *
      * @param Collection $products
@@ -420,9 +443,9 @@ class OrderEcommerceSeeder extends BaseSeeder
         $groupedProducts = collect([]);
         foreach ($products as $product) {
             $storeId = $product->original_product && $product->original_product->store_id ? $product->original_product->store_id : 0;
-            if (!Arr::has($groupedProducts, $storeId)) {
+            if (! Arr::has($groupedProducts, $storeId)) {
                 $groupedProducts[$storeId] = collect([
-                    'store'    => $product->original_product->store,
+                    'store' => $product->original_product->store,
                     'products' => collect([$product]),
                 ]);
             } else {
@@ -441,7 +464,7 @@ class OrderEcommerceSeeder extends BaseSeeder
      */
     public function getTax(Product $product)
     {
-        if (!EcommerceHelper::isTaxEnabled()) {
+        if (! EcommerceHelper::isTaxEnabled()) {
             return 0;
         }
 
@@ -461,12 +484,12 @@ class OrderEcommerceSeeder extends BaseSeeder
         $order->save();
 
         OrderHistory::create([
-            'action'      => 'update_status',
+            'action' => 'update_status',
             'description' => trans('plugins/ecommerce::shipping.changed_shipping_status', [
                 'status' => ShippingStatusEnum::getLabel($shipmentStatus),
             ]),
-            'order_id'    => $order->id,
-            'user_id'     => 0,
+            'order_id' => $order->id,
+            'user_id' => 0,
         ]);
 
         return $order;

@@ -12,7 +12,7 @@ return new class () extends Migration {
      */
     public function up()
     {
-        if (!Schema::hasTable('ec_order_return_items')) {
+        if (! Schema::hasTable('ec_order_return_items')) {
             Schema::create('ec_order_return_items', function (Blueprint $table) {
                 $table->id();
                 $table->unsignedInteger('order_return_id')->comment('Order return id');

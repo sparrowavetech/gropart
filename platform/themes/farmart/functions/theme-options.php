@@ -390,6 +390,10 @@ app()->booted(function () {
             'label' => __('Accepted Payment methods'),
             'attributes' => [
                 'name' => 'payment_methods_image',
+                'value' => null,
+                'attributes' => [
+                    'allow_thumb' => false,
+                ],
             ],
         ])
         ->setField([

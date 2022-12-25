@@ -12,38 +12,22 @@ class AreaChart extends Chart
      * Accept values between 0.0 (for completely transparent) and 1.0 (for completely opaque).
      *
      * @brief Opacity
-     *
-     * @var string
      */
-    protected $fillOpacity = 'auto';
+    protected string $fillOpacity = 'auto';
 
     /**
      * Set to true to overlay the areas on top of each other instead of stacking them.
      *
      * @brief Line
-     *
-     * @var bool
      */
-    protected $behaveLikeLine = false;
+    protected bool $behaveLikeLine = false;
 
-    /**
-     * @var array
-     */
-    protected $pointFillColors = [];
+    protected array $pointFillColors = [];
 
-    /**
-     * @var array
-     */
-    protected $pointStrokeColors = [];
+    protected array $pointStrokeColors = [];
 
-    /**
-     * @var array
-     */
-    protected $lineColors = [];
+    protected array $lineColors = [];
 
-    /**
-     * Create an instance of MorrisAreaCharts class
-     */
     public function __construct()
     {
         parent::__construct(ChartTypes::AREA);

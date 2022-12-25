@@ -1,4 +1,5 @@
 {
+    "id": "botble/location",
     "name": "Location",
     "namespace": "Botble\\Location\\",
     "provider": "Botble\\Location\\Providers\\LocationServiceProvider",

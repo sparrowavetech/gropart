@@ -78,7 +78,7 @@ class ValidatorHandler
         $jsValidations = [];
 
         foreach ($this->validator->getRules() as $attribute => $rules) {
-            if (!$this->jsValidationEnabled($attribute)) {
+            if (! $this->jsValidationEnabled($attribute)) {
                 continue;
             }
 
@@ -136,7 +136,7 @@ class ValidatorHandler
      */
     public function jsValidationEnabled($attribute)
     {
-        return !$this->validator->hasRule($attribute, self::JS_VALIDATION_DISABLE);
+        return ! $this->validator->hasRule($attribute, self::JS_VALIDATION_DISABLE);
     }
 
     /**

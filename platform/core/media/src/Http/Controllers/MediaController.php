@@ -196,7 +196,7 @@ class MediaController extends Controller
                     ],
                 ];
 
-                if (!count($request->input('recent_items', []))) {
+                if (! count($request->input('recent_items', []))) {
                     break;
                 }
 
@@ -222,7 +222,7 @@ class MediaController extends Controller
                         'user_id' => Auth::id(),
                     ]);
 
-                if (!empty($favoriteItems)) {
+                if (! empty($favoriteItems)) {
                     $fileIds = collect($favoriteItems->value)
                         ->where('is_folder', 'false')
                         ->pluck('id')
@@ -278,7 +278,7 @@ class MediaController extends Controller
     protected function transformOrderBy(?string $orderBy): array
     {
         $result = explode('-', $orderBy);
-        if (!count($result) == 2) {
+        if (! count($result) == 2) {
             return ['name', 'asc'];
         }
 
@@ -293,7 +293,7 @@ class MediaController extends Controller
     {
         $folderId = $request->input('folder_id');
 
-        if (!$folderId) {
+        if (! $folderId) {
             return [];
         }
 
@@ -317,7 +317,7 @@ class MediaController extends Controller
         }
 
         $child = $this->folderRepository->getBreadcrumbs($folder->parent_id);
-        if (!empty($child)) {
+        if (! empty($child)) {
             return array_merge($child, $breadcrumbs);
         }
 
@@ -392,7 +392,7 @@ class MediaController extends Controller
                     if ($item['is_folder'] == 'false') {
                         $file = $this->fileRepository->getFirstBy(['id' => $id]);
 
-                        if (!$file) {
+                        if (! $file) {
                             break;
                         }
 
@@ -400,7 +400,7 @@ class MediaController extends Controller
                     } else {
                         $oldFolder = $this->folderRepository->getFirstBy(['id' => $id]);
 
-                        if (!$oldFolder) {
+                        if (! $oldFolder) {
                             break;
                         }
 
@@ -427,7 +427,7 @@ class MediaController extends Controller
                                  */
                                 $folder = $this->folderRepository->getFirstBy(['id' => $parentId]);
 
-                                if (!$folder) {
+                                if (! $folder) {
                                     break;
                                 }
 
@@ -502,7 +502,7 @@ class MediaController extends Controller
                     'user_id' => Auth::id(),
                 ]);
 
-                if (!empty($meta->value)) {
+                if (! empty($meta->value)) {
                     $meta->value = array_merge($meta->value, $request->input('selected', []));
                 } else {
                     $meta->value = $request->input('selected', []);
@@ -520,9 +520,9 @@ class MediaController extends Controller
                     'user_id' => Auth::id(),
                 ]);
 
-                if (!empty($meta)) {
+                if (! empty($meta)) {
                     $value = $meta->value;
-                    if (!empty($value)) {
+                    if (! empty($value)) {
                         foreach ($value as $key => $item) {
                             foreach ($request->input('selected') as $selectedItem) {
                                 if ($item['is_folder'] == $selectedItem['is_folder'] && $item['id'] == $selectedItem['id']) {
@@ -542,7 +542,7 @@ class MediaController extends Controller
 
             case 'rename':
                 foreach ($request->input('selected') as $item) {
-                    if (!$item['id'] || !$item['name']) {
+                    if (! $item['id'] || ! $item['name']) {
                         continue;
                     }
 
@@ -550,7 +550,7 @@ class MediaController extends Controller
                     if ($item['is_folder'] == 'false') {
                         $file = $this->fileRepository->getFirstBy(['id' => $id]);
 
-                        if (!empty($file)) {
+                        if (! empty($file)) {
                             $file->name = $this->fileRepository->createName($item['name'], $file->folder_id);
                             $this->fileRepository->createOrUpdate($file);
                         }
@@ -558,7 +558,7 @@ class MediaController extends Controller
                         $name = $item['name'];
                         $folder = $this->folderRepository->getFirstBy(['id' => $id]);
 
-                        if (!empty($folder)) {
+                        if (! empty($folder)) {
                             $folder->name = $this->folderRepository->createName($name, $folder->parent_id);
                             $this->folderRepository->createOrUpdate($folder);
                         }
@@ -641,10 +641,10 @@ class MediaController extends Controller
 
         if (count($items) == 1 && $items['0']['is_folder'] == 'false') {
             $file = $this->fileRepository->getFirstByWithTrash(['id' => $items[0]['id']]);
-            if (!empty($file) && $file->type != 'video') {
+            if (! empty($file) && $file->type != 'video') {
                 $filePath = RvMedia::getRealPath($file->url);
-                if (!RvMedia::isUsingCloud()) {
-                    if (!File::exists($filePath)) {
+                if (! RvMedia::isUsingCloud()) {
+                    if (! File::exists($filePath)) {
                         return RvMedia::responseError(trans('core/media::media.file_not_exists'));
                     }
 
@@ -664,9 +664,9 @@ class MediaController extends Controller
                 $id = $item['id'];
                 if ($item['is_folder'] == 'false') {
                     $file = $this->fileRepository->getFirstByWithTrash(['id' => $id]);
-                    if (!empty($file) && $file->type != 'video') {
+                    if (! empty($file) && $file->type != 'video') {
                         $filePath = RvMedia::getRealPath($file->url);
-                        if (!RvMedia::isUsingCloud()) {
+                        if (! RvMedia::isUsingCloud()) {
                             if (File::exists($filePath)) {
                                 $zip->add($filePath);
                             }
@@ -679,9 +679,12 @@ class MediaController extends Controller
                     }
                 } else {
                     $folder = $this->folderRepository->getFirstByWithTrash(['id' => $id]);
-                    if (!empty($folder)) {
-                        if (!RvMedia::isUsingCloud()) {
-                            $zip->add(RvMedia::getRealPath($this->folderRepository->getFullPath($folder->id)));
+                    if (! empty($folder)) {
+                        if (! RvMedia::isUsingCloud()) {
+                            $folderPath = RvMedia::getRealPath($this->folderRepository->getFullPath($folder->id));
+                            if (File::isDirectory($folderPath)) {
+                                $zip->add($folderPath);
+                            }
                         } else {
                             $allFiles = Storage::allFiles($this->folderRepository->getFullPath($folder->id));
                             foreach ($allFiles as $file) {

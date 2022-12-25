@@ -18,7 +18,6 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Response;
 use SeoHelper;
 use Theme;
 use URL;
@@ -41,20 +40,11 @@ class RegisterController extends Controller
     /**
      * Where to redirect users after login / registration.
      *
-     * @var string
      */
-    protected $redirectTo = '/';
+    protected string $redirectTo = '/';
 
-    /**
-     * @var CustomerInterface
-     */
-    protected $customerRepository;
+    protected CustomerInterface $customerRepository;
 
-    /**
-     * Create a new controller instance.
-     *
-     * @param CustomerInterface $customerRepository
-     */
     public function __construct(CustomerInterface $customerRepository)
     {
         $this->middleware('customer.guest');
@@ -64,7 +54,7 @@ class RegisterController extends Controller
     /**
      * Show the application registration form.
      *
-     * @return Response
+     * @return \Illuminate\Http\Response
      */
     public function showRegistrationForm()
     {
@@ -72,8 +62,8 @@ class RegisterController extends Controller
 
         Theme::breadcrumb()->add(__('Home'), route('public.index'))->add(__('Register'), route('customer.register'));
 
-        if (!session()->has('url.intended')) {
-            if (!in_array(url()->previous(), [route('customer.login'), route('customer.register')])) {
+        if (! session()->has('url.intended')) {
+            if (! in_array(url()->previous(), [route('customer.login'), route('customer.register')])) {
                 session(['url.intended' => url()->previous()]);
             }
         }
@@ -146,7 +136,7 @@ class RegisterController extends Controller
             'agree_terms_and_policy' => __('Term and Policy'),
         ];
 
-        return Validator::make($data, $rules, [
+        return Validator::make($data, apply_filters('ecommerce_customer_registration_form_validation_rules', $rules), [
             'g-recaptcha-response.required' => __('Captcha Verification Failed!'),
             'g-recaptcha-response.captcha' => __('Captcha Verification Failed!'),
         ], $attributes);
@@ -203,7 +193,7 @@ class RegisterController extends Controller
      */
     public function confirm($id, Request $request, BaseHttpResponse $response, CustomerInterface $customerRepository)
     {
-        if (!URL::hasValidSignature($request)) {
+        if (! URL::hasValidSignature($request)) {
             abort(404);
         }
 
@@ -234,7 +224,7 @@ class RegisterController extends Controller
     ) {
         $customer = $customerRepository->getFirstBy(['email' => $request->input('email')]);
 
-        if (!$customer) {
+        if (! $customer) {
             return $response
                 ->setError()
                 ->setMessage(__('Cannot find this customer!'));

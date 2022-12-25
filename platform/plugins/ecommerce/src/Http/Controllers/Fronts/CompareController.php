@@ -9,32 +9,24 @@ use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Cart;
 use EcommerceHelper;
 use Illuminate\Routing\Controller;
-use Response;
 use SeoHelper;
 use Theme;
 
 class CompareController extends Controller
 {
-    /**
-     * @var ProductInterface
-     */
-    protected $productRepository;
+    protected ProductInterface $productRepository;
 
-    /**
-     * CompareController constructor.
-     * @param ProductInterface $productRepository
-     */
     public function __construct(ProductInterface $productRepository)
     {
         $this->productRepository = $productRepository;
     }
 
     /**
-     * @return Response
+     * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        if (!EcommerceHelper::isCompareEnabled()) {
+        if (! EcommerceHelper::isCompareEnabled()) {
             abort(404);
         }
 
@@ -79,7 +71,7 @@ class CompareController extends Controller
      */
     public function store($productId, BaseHttpResponse $response)
     {
-        if (!EcommerceHelper::isCompareEnabled()) {
+        if (! EcommerceHelper::isCompareEnabled()) {
             abort(404);
         }
 
@@ -89,10 +81,10 @@ class CompareController extends Controller
             return $cartItem->id == $productId;
         });
 
-        if (!$duplicates->isEmpty()) {
+        if (! $duplicates->isEmpty()) {
             return $response
                 ->setMessage(__(':product is already in your compare list!', ['product' => $product->name]))
-                ->setError(true);
+                ->setError();
         }
 
         Cart::instance('compare')->add($productId, $product->name, 1, $product->front_sale_price)
@@ -110,7 +102,7 @@ class CompareController extends Controller
      */
     public function destroy($productId, BaseHttpResponse $response)
     {
-        if (!EcommerceHelper::isCompareEnabled()) {
+        if (! EcommerceHelper::isCompareEnabled()) {
             abort(404);
         }
 

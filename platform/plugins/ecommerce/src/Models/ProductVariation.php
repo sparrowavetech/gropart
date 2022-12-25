@@ -11,23 +11,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProductVariation extends BaseModel
 {
-    /**
-     * @var string
-     */
     protected $table = 'ec_product_variations';
 
-    /**
-     * @var array
-     */
     protected $fillable = [
         'product_id',
         'configurable_product_id',
         'is_default',
     ];
 
-    /**
-     * @var bool
-     */
     public $timestamps = false;
 
     public function variationItems(): HasMany

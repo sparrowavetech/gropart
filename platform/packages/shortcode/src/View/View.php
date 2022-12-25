@@ -10,69 +10,35 @@ use Illuminate\View\View as IlluminateView;
 
 class View extends IlluminateView implements ArrayAccess, Renderable
 {
-    /**
-     * Short code engine resolver
-     *
-     * @var ShortcodeCompiler
-     */
-    public $shortcode;
+    public ShortcodeCompiler $shortcode;
 
-    /**
-     * Create a new view instance.
-     *
-     * @param \Illuminate\View\Factory|Factory $factory
-     * @param Engine $engine
-     * @param string $view
-     * @param string $path
-     * @param array $data
-     * @param ShortcodeCompiler $shortcode
-     * @since 2.1
-     */
     public function __construct(Factory $factory, Engine $engine, $view, $path, $data, ShortcodeCompiler $shortcode)
     {
         parent::__construct($factory, $engine, $view, $path, $data);
         $this->shortcode = $shortcode;
     }
 
-    /**
-     * Enable the shortcodes
-     * @since 2.1
-     */
-    public function withShortcodes(): View
+    public function withShortcodes(): self
     {
         $this->shortcode->enable();
 
         return $this;
     }
 
-    /**
-     * Disable the shortcodes
-     * @since 2.1
-     */
-    public function withoutShortcodes(): View
+    public function withoutShortcodes(): self
     {
         $this->shortcode->disable();
 
         return $this;
     }
 
-    /**
-     * @return $this
-     * @since 2.1
-     */
-    public function withStripShortcodes(): View
+    public function withStripShortcodes(): self
     {
         $this->shortcode->setStrip(true);
 
         return $this;
     }
 
-    /**
-     * Get the contents of the view instance.
-     *
-     * @return string
-     * @since 2.1
-     */
     protected function renderContents(): string
     {
         // We will keep track of the amount of views being rendered, so we can flush

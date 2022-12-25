@@ -6,17 +6,13 @@ use Botble\Support\Http\Requests\Request;
 
 class ContactSellerRequest extends Request
 {
-    /**
-     * Get the validation rules that apply to the request.
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         $rules = [
             'content' => 'required',
         ];
 
-        if (!auth('customer')->check()) {
+        if (! auth('customer')->check()) {
             $rules += [
                 'name' => 'required',
                 'email' => 'required|email',
@@ -38,10 +34,7 @@ class ContactSellerRequest extends Request
         return $rules;
     }
 
-    /**
-     * @return array
-     */
-    public function messages()
+    public function messages(): array
     {
         return [
             'g-recaptcha-response.required' => __('Captcha Verification Failed!'),

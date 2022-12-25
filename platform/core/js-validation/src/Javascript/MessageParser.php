@@ -96,7 +96,7 @@ class MessageParser
      */
     private function fakeFileData($data, $attribute)
     {
-        if (!$this->validator->hasRule($attribute, ['Mimes', 'Image'])) {
+        if (! $this->validator->hasRule($attribute, ['Mimes', 'Image'])) {
             return;
         }
 

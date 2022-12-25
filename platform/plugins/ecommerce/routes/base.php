@@ -118,7 +118,8 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
                 'uses' => 'ProductOptionController@deletes',
                 'permission' => 'global-options.destroy',
             ]);
-            Route::get('ajax/{id}', [
+
+            Route::get('ajax', [
                 'as' => 'ajaxInfo',
                 'uses' => 'ProductOptionController@ajaxInfo',
                 'permission' => 'products.edit',

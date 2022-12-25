@@ -14,14 +14,11 @@ use Symfony\Component\Process\Process;
 
 class Backup
 {
-    protected $files;
+    protected Filesystem $files;
 
-    /**
-     * @var string
-     */
-    protected $folder;
+    protected ?string $folder = null;
 
-    protected $zipper;
+    protected Zipper $zipper;
 
     public function __construct(Filesystem $file, Zipper $zipper)
     {
@@ -80,10 +77,7 @@ class Backup
         return file_exists($file) && filesize($file) > 1024;
     }
 
-    /**
-     * @return array|bool|mixed
-     */
-    public function getBackupList()
+    public function getBackupList(): array
     {
         $file = $this->getBackupPath('backup.json');
         if (file_exists($file)) {
@@ -93,10 +87,6 @@ class Backup
         return [];
     }
 
-    /**
-     * @return bool
-     * @throws Exception
-     */
     public function backupDb(): bool
     {
         $file = 'database-' . Carbon::now()->format('Y-m-d-H-i-s');
@@ -104,13 +94,13 @@ class Backup
 
         $mysqlPath = rtrim(config('plugins.backup.general.backup_mysql_execute_path'), '/');
 
-        if (!empty($mysqlPath)) {
+        if (! empty($mysqlPath)) {
             $mysqlPath = $mysqlPath . '/';
         }
 
         $config = config('database.connections.mysql', []);
 
-        if (!$config) {
+        if (! $config) {
             return false;
         }
 
@@ -120,15 +110,15 @@ class Backup
 
         try {
             Process::fromShellCommandline($sql)->mustRun();
-        } catch (Exception $exception) {
+        } catch (Exception) {
             try {
                 system($sql);
-            } catch (Exception $e) {
+            } catch (Exception) {
                 $this->processMySqlDumpPHP($path, $config);
             }
         }
 
-        if (!$this->files->exists($path . '.sql') || $this->files->size($path . '.sql') < 1024) {
+        if (! $this->files->exists($path . '.sql') || $this->files->size($path . '.sql') < 1024) {
             $this->processMySqlDumpPHP($path, $config);
         }
 
@@ -141,12 +131,6 @@ class Backup
         return true;
     }
 
-    /**
-     * @param string $path
-     * @param array $config
-     * @return bool
-     * @throws Exception
-     */
     protected function processMySqlDumpPHP(string $path, array $config): bool
     {
         $dump = new MySqlDump('mysql:host=' . $config['host'] . ';dbname=' . $config['database'], $config['username'], $config['password']);
@@ -155,11 +139,6 @@ class Backup
         return true;
     }
 
-    /**
-     * @param string $path
-     * @param string $destination
-     * @throws Exception
-     */
     public function compressFileToZip(string $path, string $destination): void
     {
         $this->zipper->compress($path . '.sql', $destination);
@@ -167,10 +146,6 @@ class Backup
         $this->deleteFile($path . '.sql');
     }
 
-    /**
-     * @param string $file
-     * @throws Exception
-     */
     protected function deleteFile(string $file): void
     {
         if ($this->files->exists($file)) {
@@ -178,17 +153,13 @@ class Backup
         }
     }
 
-    /**
-     * @param string $source
-     * @return bool
-     */
     public function backupFolder(string $source): bool
     {
         $file = $this->folder . DIRECTORY_SEPARATOR . 'storage-' . Carbon::now()->format('Y-m-d-H-i-s') . '.zip';
 
         BaseHelper::maximumExecutionTimeAndMemoryLimit();
 
-        if (!$this->zipper->compress($source, $file)) {
+        if (! $this->zipper->compress($source, $file)) {
             $this->deleteFolderBackup($this->folder);
         }
 
@@ -199,9 +170,6 @@ class Backup
         return true;
     }
 
-    /**
-     * @param string $path
-     */
     public function deleteFolderBackup(string $path): void
     {
         $backupFolder = $this->getBackupPath();
@@ -223,24 +191,18 @@ class Backup
             $data = BaseHelper::getFileData($file);
         }
 
-        if (!empty($data)) {
+        if (! empty($data)) {
             unset($data[Arr::last(explode('/', $path))]);
             BaseHelper::saveFileData($file, $data);
         }
     }
 
-    /**
-     * @param string $path
-     * @param string $file
-     * @return bool
-     * @throws Exception
-     */
     public function restoreDatabase(string $file, string $path): bool
     {
         $this->extractFileTo($file, $path);
         $file = $path . DIRECTORY_SEPARATOR . $this->files->name($file) . '.sql';
 
-        if (!file_exists($file)) {
+        if (! file_exists($file)) {
             return false;
         }
 
@@ -268,7 +230,7 @@ class Backup
         foreach ($this->files->glob(rtrim($directory, '/') . '/*') as $item) {
             if ($this->files->isDirectory($item)) {
                 $this->files->deleteDirectory($item);
-            } elseif (!in_array($this->files->basename($item), ['.htaccess', '.gitignore'])) {
+            } elseif (! in_array($this->files->basename($item), ['.htaccess', '.gitignore'])) {
                 $this->files->delete($item);
             }
         }

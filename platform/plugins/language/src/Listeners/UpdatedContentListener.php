@@ -8,13 +8,7 @@ use Language;
 
 class UpdatedContentListener
 {
-    /**
-     * Handle the event.
-     *
-     * @param UpdatedContentEvent $event
-     * @return void
-     */
-    public function handle(UpdatedContentEvent $event)
+    public function handle(UpdatedContentEvent $event): void
     {
         try {
             if ($event->request->input('language')) {

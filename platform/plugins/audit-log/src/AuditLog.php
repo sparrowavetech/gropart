@@ -2,23 +2,15 @@
 
 namespace Botble\AuditLog;
 
-use Botble\ACL\Models\User;
 use Botble\AuditLog\Events\AuditHandlerEvent;
 use Eloquent;
-use stdClass;
+use Illuminate\Database\Eloquent\Model;
 
 class AuditLog
 {
-    /**
-     * @param string $screen
-     * @param Eloquent|false $data
-     * @param string $action
-     * @param string $type
-     * @return bool
-     */
-    public function handleEvent($screen, $data, $action, $type = 'info'): bool
+    public function handleEvent(string $screen, Model $data, string $action, string $type = 'info'): bool
     {
-        if (!$data instanceof Eloquent || !$data->id) {
+        if (! $data instanceof Eloquent || ! $data->id) {
             return false;
         }
 
@@ -27,12 +19,7 @@ class AuditLog
         return true;
     }
 
-    /**
-     * @param string $screen
-     * @param stdClass|User|Eloquent $data
-     * @return string
-     */
-    public function getReferenceName($screen, $data): string
+    public function getReferenceName(string $screen, Model $data): string
     {
         $name = '';
         switch ($screen) {
@@ -42,7 +29,7 @@ class AuditLog
 
                 break;
             default:
-                if (!empty($data)) {
+                if (! empty($data)) {
                     if (isset($data->name)) {
                         $name = $data->name;
                     } elseif (isset($data->title)) {

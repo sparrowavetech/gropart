@@ -11,9 +11,6 @@ use Illuminate\Support\Arr;
 
 class RoleForm extends FormAbstract
 {
-    /**
-     * {@inheritDoc}
-     */
     public function buildForm()
     {
         Assets::addStyles(['jquery-ui', 'jqueryTree'])
@@ -63,15 +60,12 @@ class RoleForm extends FormAbstract
             ->setActionButtons(view('core/acl::roles.actions', ['role' => $this->getModel()])->render());
     }
 
-    /**
-     * @return array
-     */
     protected function getAvailablePermissions(): array
     {
         $permissions = [];
 
         $configuration = config(strtolower('cms-permissions'));
-        if (!empty($configuration)) {
+        if (! empty($configuration)) {
             foreach ($configuration as $config) {
                 $permissions[$config['flag']] = $config;
             }
@@ -86,17 +80,13 @@ class RoleForm extends FormAbstract
         return $permissions;
     }
 
-    /**
-     * @param string $type
-     * @return array
-     */
     protected function getAvailablePermissionForEachType(string $type): array
     {
         $permissions = [];
 
         foreach (BaseHelper::scanFolder(platform_path($type)) as $module) {
             $configuration = config(strtolower($type . '.' . $module . '.permissions'));
-            if (!empty($configuration)) {
+            if (! empty($configuration)) {
                 foreach ($configuration as $config) {
                     $permissions[$config['flag']] = $config;
                 }
@@ -106,10 +96,6 @@ class RoleForm extends FormAbstract
         return $permissions;
     }
 
-    /**
-     * @param array $permissions
-     * @return array
-     */
     protected function getPermissionTree(array $permissions): array
     {
         $sortedFlag = $permissions;
@@ -126,11 +112,6 @@ class RoleForm extends FormAbstract
         return $children;
     }
 
-    /**
-     * @param string $parentFlag
-     * @param array $allFlags
-     * @return array
-     */
     protected function getChildren(string $parentFlag, array $allFlags): array
     {
         $newFlagArray = [];

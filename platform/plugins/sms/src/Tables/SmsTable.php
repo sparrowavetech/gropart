@@ -8,9 +8,16 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Sms\Enums\SmsEnum;
 use Botble\Sms\Repositories\Interfaces\SmsInterface;
 use Botble\Table\Abstracts\TableAbstract;
-use Illuminate\Contracts\Routing\UrlGenerator;
-use Yajra\DataTables\DataTables;
 use Html;
+use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
+use Yajra\DataTables\DataTables;
 
 class SmsTable extends TableAbstract
 {
@@ -46,7 +53,7 @@ class SmsTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function ajax()
+    public function ajax():JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
@@ -78,7 +85,7 @@ class SmsTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
         $query = $this->repository->getModel()
             ->select([
@@ -95,7 +102,7 @@ class SmsTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function columns()
+    public function columns():array
     {
         return [
             'id' => [
@@ -124,7 +131,7 @@ class SmsTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function buttons()
+    public function buttons():array
     {
         return $this->addCreateButton(route('sms.create'), 'sms.create');
     }

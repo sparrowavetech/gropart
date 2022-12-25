@@ -123,11 +123,7 @@ class HookServiceProvider extends ServiceProvider
             ->init($widgets, $widgetSettings);
     }
 
-    /**
-     * @param Eloquent|Builder $slug
-     * @return array|Eloquent
-     */
-    public function handleSingleView($slug)
+    public function handleSingleView(Eloquent|array $slug): Eloquent|array|Builder
     {
         return (new PageService())->handleFrontRoutes($slug);
     }

@@ -6,12 +6,7 @@ use Botble\Support\Http\Requests\Request;
 
 class RefundRequest extends Request
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         $rules = [
             'refund_amount' => 'numeric|min:0',

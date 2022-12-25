@@ -10,50 +10,23 @@ use Illuminate\Support\Arr;
 
 class CityRule implements DataAwareRule, Rule
 {
-    /**
-     * All the data under validation.
-     *
-     * @var array
-     */
-    protected $data = [];
+    protected array $data = [];
 
-    /**
-     *
-     * @var string|null
-     */
-    protected $stateKey;
+    protected ?string $stateKey;
 
-    /**
-     * Create a new rule instance.
-     *
-     * @param string|null $stateKey
-     */
     public function __construct(?string $stateKey = '')
     {
         $this->stateKey = $stateKey;
     }
 
-    /**
-     * Set the data under validation.
-     *
-     * @param array $data
-     * @return $this
-     */
-    public function setData($data)
+    public function setData($data): self
     {
         $this->data = $data;
 
         return $this;
     }
 
-    /**
-     * Determine if the validation rule passes.
-     *
-     * @param string $attribute
-     * @param mixed $value
-     * @return bool
-     */
-    public function passes($attribute, $value)
+    public function passes($attribute, $value): bool
     {
         $condition = [
             'id' => $value,
@@ -62,7 +35,7 @@ class CityRule implements DataAwareRule, Rule
 
         if ($this->stateKey) {
             $stateId = Arr::get($this->data, $this->stateKey);
-            if (!$stateId) {
+            if (! $stateId) {
                 return false;
             }
             $condition['state_id'] = $stateId;
@@ -71,12 +44,7 @@ class CityRule implements DataAwareRule, Rule
         return app(CityInterface::class)->count($condition);
     }
 
-    /**
-     * Get the validation error message.
-     *
-     * @return string
-     */
-    public function message()
+    public function message(): string
     {
         return trans('validation.exists');
     }

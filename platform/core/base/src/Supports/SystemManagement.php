@@ -3,27 +3,16 @@
 namespace Botble\Base\Supports;
 
 use BaseHelper;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\File;
 use Request;
 
 class SystemManagement
 {
-    /**
-     * Get the Composer file contents as an array
-     * @return array
-     */
     public static function getComposerArray(): array
     {
         return BaseHelper::getFileData(base_path('composer.json'));
     }
 
-    /**
-     * Get Installed packages & their Dependencies
-     *
-     * @param array $packagesArray
-     * @return array
-     */
     public static function getPackagesAndDependencies(array $packagesArray): array
     {
         $packages = [];
@@ -50,29 +39,18 @@ class SystemManagement
         return $packages;
     }
 
-    /**
-     * Get System environment details
-     *
-     * @return array
-     */
     public static function getSystemEnv(): array
     {
         return [
-            'version' => App::version(),
+            'version' => app()->version(),
             'timezone' => config('app.timezone'),
-            'debug_mode' => config('app.debug'),
+            'debug_mode' => app()->hasDebugModeEnabled(),
             'storage_dir_writable' => File::isWritable(base_path('storage')),
             'cache_dir_writable' => File::isReadable(base_path('bootstrap/cache')),
             'app_size' => BaseHelper::humanFilesize(self::folderSize(base_path())),
         ];
     }
 
-    /**
-     * Get the system app's size
-     *
-     * @param string $directory
-     * @return int
-     */
     protected static function folderSize(string $directory): int
     {
         $size = 0;
@@ -83,10 +61,6 @@ class SystemManagement
         return $size;
     }
 
-    /**
-     * Get PHP/Server environment details
-     * @return array
-     */
     public static function getServerEnv(): array
     {
         return [
@@ -112,12 +86,8 @@ class SystemManagement
         ];
     }
 
-    /**
-     * Check if SSL is installed or not
-     * @return boolean
-     */
     protected static function checkSslIsInstalled(): bool
     {
-        return !empty(Request::server('HTTPS')) && Request::server('HTTPS') != 'off';
+        return ! empty(Request::server('HTTPS')) && Request::server('HTTPS') != 'off';
     }
 }

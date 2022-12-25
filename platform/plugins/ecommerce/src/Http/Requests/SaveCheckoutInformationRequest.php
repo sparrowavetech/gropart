@@ -6,13 +6,7 @@ use Illuminate\Support\Arr;
 
 class SaveCheckoutInformationRequest extends CheckoutRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     *
-     */
-    public function rules()
+    public function rules(): array
     {
         $rules = parent::rules();
 

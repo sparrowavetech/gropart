@@ -7,35 +7,19 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use EcommerceHelper;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class GetProductService
 {
-    /**
-     * @var ProductInterface
-     */
-    protected $productRepository;
+    protected ProductInterface $productRepository;
 
-    /**
-     * GetProductService constructor.
-     * @param ProductInterface $productRepository
-     */
     public function __construct(ProductInterface $productRepository)
     {
         $this->productRepository = $productRepository;
     }
 
-    /**
-     * @param Request $request
-     * @param null $category
-     * @param null $brand
-     * @param array $with
-     * @param array $withCount
-     * @param array $conditions
-     * @return LengthAwarePaginator|\Illuminate\Database\Eloquent\Collection|Collection|mixed
-     */
     public function getProduct(
         Request $request,
         $category = null,
@@ -43,11 +27,11 @@ class GetProductService
         array $with = [],
         array $withCount = [],
         array $conditions = []
-    ) {
+    ): Collection|LengthAwarePaginator {
         $num = (int)$request->input('num');
         $shows = EcommerceHelper::getShowParams();
 
-        if (!array_key_exists($num, $shows)) {
+        if (! array_key_exists($num, $shows)) {
             $num = (int)theme_option('number_of_products_per_page', 12);
         }
 
@@ -85,7 +69,7 @@ class GetProductService
             'ec_products.created_at' => 'DESC',
         ];
 
-        if (!EcommerceHelper::isReviewEnabled() && in_array($queryVar['sort_by'], ['rating_asc', 'rating_desc'])) {
+        if (! EcommerceHelper::isReviewEnabled() && in_array($queryVar['sort_by'], ['rating_asc', 'rating_desc'])) {
             $queryVar['sort_by'] = 'date_desc';
         }
 
@@ -153,7 +137,7 @@ class GetProductService
                 break;
         }
 
-        if (!empty($conditions)) {
+        if (! empty($conditions)) {
             $params['condition'] = array_merge([
                 'ec_products.status' => BaseStatusEnum::PUBLISHED,
                 'ec_products.is_variation' => 0,

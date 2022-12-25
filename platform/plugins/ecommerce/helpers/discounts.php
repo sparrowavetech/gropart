@@ -5,7 +5,7 @@ use Botble\Ecommerce\Models\DiscountCustomer;
 use Botble\Ecommerce\Models\DiscountProduct;
 use Botble\Ecommerce\Models\DiscountProductCollection;
 
-if (!function_exists('get_discount_description')) {
+if (! function_exists('get_discount_description')) {
     /**
      * @param Discount $discount
      * @return string

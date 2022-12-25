@@ -2,17 +2,13 @@
 
 use Illuminate\Support\Collection;
 
-if (!function_exists('sort_item_with_children')) {
-    /**
-     * Sort parents before children
-     * @param Collection|array $list
-     * @param array $result
-     * @param int|null $parent
-     * @param int $depth
-     * @return array
-     */
-    function sort_item_with_children($list, array &$result = [], int $parent = null, int $depth = 0): array
-    {
+if (! function_exists('sort_item_with_children')) {
+    function sort_item_with_children(
+        Collection|array $list,
+        array &$result = [],
+        int $parent = null,
+        int $depth = 0
+    ): array {
         if ($list instanceof Collection) {
             $listArr = [];
             foreach ($list as $item) {

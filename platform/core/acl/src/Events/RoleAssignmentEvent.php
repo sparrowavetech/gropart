@@ -11,22 +11,10 @@ class RoleAssignmentEvent extends Event
 {
     use SerializesModels;
 
-    /**
-     * @var Role
-     */
-    public $role;
+    public Role $role;
 
-    /**
-     * @var User
-     */
-    public $user;
+    public User $user;
 
-    /**
-     * RoleAssignmentEvent constructor.
-     *
-     * @param Role $role
-     * @param User $user
-     */
     public function __construct(Role $role, User $user)
     {
         $this->role = $role;

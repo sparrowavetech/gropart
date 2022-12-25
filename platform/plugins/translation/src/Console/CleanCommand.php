@@ -4,48 +4,17 @@ namespace Botble\Translation\Console;
 
 use Botble\Translation\Manager;
 use Illuminate\Console\Command;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+#[AsCommand('cms:translations:clean', 'Clean empty translations')]
 class CleanCommand extends Command
 {
-    /**
-     * The console command name.
-     *
-     * @var string
-     */
-    protected $name = 'cms:translations:clean';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Clean empty translations';
-
-    /**
-     * @var Manager
-     */
-    protected $manager;
-
-    /**
-     * CleanCommand constructor.
-     * @param Manager $manager
-     */
-    public function __construct(Manager $manager)
+    public function handle(Manager $manager): int
     {
-        $this->manager = $manager;
+        $manager->cleanTranslations();
 
-        parent::__construct();
-    }
-
-    /**
-     * Execute the console command.
-     *
-     * @return void
-     * @throws \Exception
-     */
-    public function handle()
-    {
-        $this->manager->cleanTranslations();
         $this->info('Done cleaning translations');
+
+        return self::SUCCESS;
     }
 }

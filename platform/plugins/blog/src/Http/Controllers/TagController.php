@@ -26,14 +26,8 @@ class TagController extends BaseController
 {
     use HasDeleteManyItemsTrait;
 
-    /**
-     * @var TagInterface
-     */
-    protected $tagRepository;
+    protected TagInterface $tagRepository;
 
-    /**
-     * @param TagInterface $tagRepository
-     */
     public function __construct(TagInterface $tagRepository)
     {
         $this->tagRepository = $tagRepository;
@@ -136,7 +130,7 @@ class TagController extends BaseController
         } catch (Exception $exception) {
             return $response
                 ->setError()
-                ->setMessage(trans('plugins/blog::tags.cannot_delete'));
+                ->setMessage($exception->getMessage());
         }
     }
 

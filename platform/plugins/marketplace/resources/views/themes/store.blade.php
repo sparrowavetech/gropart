@@ -20,7 +20,7 @@
                         @if (!MarketplaceHelper::hideStorePhoneNumber() && $store->phone)
                             <p><i class="icon-telephone"></i> {{ $store->phone }}</p>
                         @endif
-                        @if ($store->email)
+                        @if (!MarketplaceHelper::hideStoreEmail() && $store->email)
                             <p><i class="icon-envelope"></i> <a href="mailto:{{ $store->email }}">{{ $store->email }}</a></p>
                         @endif
                     </div>

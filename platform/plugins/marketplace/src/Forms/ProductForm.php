@@ -5,11 +5,13 @@ namespace Botble\Marketplace\Forms;
 use Assets;
 use Botble\Base\Forms\Fields\MultiCheckListField;
 use Botble\Base\Forms\Fields\TagField;
+use Botble\Ecommerce\Enums\GlobalOptionEnum;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Forms\Fields\CategoryMultiField;
 use Botble\Ecommerce\Forms\ProductForm as BaseProductForm;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Repositories\Interfaces\BrandInterface;
+use Botble\Ecommerce\Repositories\Interfaces\GlobalOptionInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeSetInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductCollectionInterface;
@@ -27,9 +29,6 @@ use ProductCategoryHelper;
 
 class ProductForm extends BaseProductForm
 {
-    /**
-     * {@inheritDoc}
-     */
     public function buildForm()
     {
         Assets::addStyles(['datetimepicker'])
@@ -43,6 +42,7 @@ class ProductForm extends BaseProductForm
             ->addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
             ->addScriptsDirectly([
                 'vendor/core/plugins/ecommerce/js/edit-product.js',
+                'vendor/core/plugins/ecommerce/js/product-option.js',
             ]);
 
         $selectedCategories = [];
@@ -160,14 +160,20 @@ class ProductForm extends BaseProductForm
             ]);
 
         if (EcommerceHelper::isTaxEnabled()) {
-            $taxes = app(TaxInterface::class)->pluck('title', 'id');
+            $taxes = app(TaxInterface::class)->all()->pluck('title_with_percentage', 'id');
 
-            $taxes = [0 => trans('plugins/ecommerce::tax.select_tax')] + $taxes;
+            $selectedTaxes = [];
+            if ($this->getModel() && $this->getModel()->id) {
+                $selectedTaxes = $this->getModel()->taxes()->pluck('tax_id')->all();
+            } elseif ($defaultTaxRate = get_ecommerce_setting('default_tax_rate')) {
+                $selectedTaxes = [$defaultTaxRate];
+            }
 
-            $this->add('tax_id', 'customSelect', [
-                'label' => trans('plugins/ecommerce::products.form.tax'),
+            $this->add('taxes[]', 'multiCheckList', [
+                'label' => trans('plugins/ecommerce::products.form.taxes'),
                 'label_attr' => ['class' => 'control-label'],
                 'choices' => $taxes,
+                'value' => old('taxes', $selectedTaxes),
             ]);
         }
 
@@ -181,7 +187,21 @@ class ProductForm extends BaseProductForm
                     'data-url' => route('marketplace.vendor.tags.all'),
                 ],
             ])
-            ->setBreakFieldPoint('categories[]');
+            ->setBreakFieldPoint('categories[]')
+            ->addMetaBoxes([
+                'options' => [
+                    'title' => trans('plugins/ecommerce::product-option.name'),
+                    'content' => view('plugins/ecommerce::products.partials.product-option-form', [
+                        'options' => GlobalOptionEnum::options(),
+                        'globalOptions' => app(GlobalOptionInterface::class)->pluck('name', 'id'),
+                        'product' => $this->getModel(),
+                        'routes' => [
+                            'ajax_option_info' => route('marketplace.vendor.ajax-product-option-info'),
+                        ],
+                    ]),
+                    'priority' => 4,
+                ],
+            ]);
 
         if (empty($productVariations) || $productVariations->isEmpty()) {
             $attributeSetId = $productAttributeSets->first() ? $productAttributeSets->first()->id : 0;
@@ -244,11 +264,7 @@ class ProductForm extends BaseProductForm
         }
     }
 
-    /**
-     * @param int $attributeSetId
-     * @return Collection
-     */
-    public function getProductAttributes($attributeSetId): Collection
+    public function getProductAttributes(?int $attributeSetId): Collection
     {
         $params = ['order_by' => ['ec_product_attributes.order' => 'ASC']];
 

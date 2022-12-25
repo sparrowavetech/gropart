@@ -7,9 +7,6 @@ use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 
 class ProductVariationItemRepository extends RepositoriesAbstract implements ProductVariationItemInterface
 {
-    /**
-     * {@inheritDoc}
-     */
     public function getVariationsInfo(array $versionIds)
     {
         $data = $this->model
@@ -32,9 +29,6 @@ class ProductVariationItemRepository extends RepositoriesAbstract implements Pro
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getProductAttributes($productId)
     {
         $data = $this->model

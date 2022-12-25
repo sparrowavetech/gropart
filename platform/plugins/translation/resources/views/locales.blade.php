@@ -14,7 +14,7 @@
                                 <div class="form-group mb-3">
                                     <label for="locale_id" class="control-label">{{ trans('plugins/translation::translation.locale') }}</label>
                                     <div class="ui-select-wrapper form-group">
-                                        <select id="locale_id" name="locale" class="form-control select-search-full">
+                                        <select id="locale_id" name="locale" class="select-search-full">
                                             <option value="">{{ trans('plugins/translation::translation.select_locale') }}</option>
                                             @foreach ($locales as $key => $name)
                                                 <option value="{{ $key }}"> {{ $name }} - {{ $key }}</option>

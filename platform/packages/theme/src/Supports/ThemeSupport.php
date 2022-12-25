@@ -7,11 +7,7 @@ use Illuminate\Support\Str;
 
 class ThemeSupport
 {
-    /**
-     * @param null|string $viewPath
-     * @return void
-     */
-    public static function registerYoutubeShortcode(string $viewPath = null)
+    public static function registerYoutubeShortcode(string $viewPath = null): void
     {
         add_shortcode(
             'youtube-video',
@@ -29,11 +25,7 @@ class ThemeSupport
         });
     }
 
-    /**
-     * @param null|string $viewPath
-     * @return void
-     */
-    public static function registerGoogleMapsShortcode(string $viewPath = null)
+    public static function registerGoogleMapsShortcode(string $viewPath = null): void
     {
         add_shortcode('google-map', __('Google map'), __('Add Google map iframe'), function ($shortcode) use ($viewPath) {
             return view(($viewPath ?: 'packages/theme::shortcodes') . '.google-map', ['address' => $shortcode->content])
@@ -45,10 +37,6 @@ class ThemeSupport
         });
     }
 
-    /**
-     * @param string $location
-     * @return string
-     */
     public static function getCustomJS(string $location): string
     {
         $js = setting('custom_' . $location . '_js');
@@ -57,17 +45,13 @@ class ThemeSupport
             return '';
         }
 
-        if ((!Str::contains($js, '<script') || !Str::contains($js, '</script>')) && !Str::contains($js, '<noscript') && !Str::contains($js, '</noscript>')) {
+        if ((! Str::contains($js, '<script') || ! Str::contains($js, '</script>')) && ! Str::contains($js, '<noscript') && ! Str::contains($js, '</noscript>')) {
             $js = Html::tag('script', $js);
         }
 
         return $js;
     }
 
-    /**
-     * @param string $location
-     * @return string
-     */
     public static function getCustomHtml(string $location): string
     {
         $html = setting('custom_' . $location . '_html');

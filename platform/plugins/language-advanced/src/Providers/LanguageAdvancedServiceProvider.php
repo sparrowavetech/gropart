@@ -25,14 +25,14 @@ class LanguageAdvancedServiceProvider extends ServiceProvider
                 ->loadMigrations()
                 ->loadAndPublishConfigurations(['general'])
                 ->loadAndPublishViews()
-                ->loadRoutes(['web']);
+                ->loadRoutes();
 
             $this->app->register(HookServiceProvider::class);
             $this->app->register(EventServiceProvider::class);
 
             $this->app->booted(function () {
                 foreach (LanguageAdvancedManager::getSupported() as $item => $columns) {
-                    if (!class_exists($item)) {
+                    if (! class_exists($item)) {
                         continue;
                     }
 
@@ -56,7 +56,7 @@ class LanguageAdvancedServiceProvider extends ServiceProvider
                                  */
 
                                 $locale = is_in_admin() ? Language::getCurrentAdminLocaleCode() : Language::getCurrentLocaleCode();
-                                if (!$this->lang_code && $locale != Language::getDefaultLocaleCode()) {
+                                if (! $this->lang_code && $locale != Language::getDefaultLocaleCode()) {
                                     $translation = $this->translations->where('lang_code', $locale)->first();
 
                                     if ($translation) {

@@ -9,19 +9,11 @@ use Botble\Blog\Forms\Fields\CategoryMultiField;
 use Botble\Blog\Http\Requests\PostRequest;
 use Botble\Blog\Models\Post;
 use Botble\Blog\Repositories\Interfaces\CategoryInterface;
-use Exception;
 
 class PostForm extends FormAbstract
 {
-    /**
-     * @var string
-     */
     protected $template = 'core/base::forms.form-tabs';
 
-    /**
-     * {@inheritDoc}
-     * @throws Exception
-     */
     public function buildForm()
     {
         $selectedCategories = [];
@@ -44,7 +36,7 @@ class PostForm extends FormAbstract
             $tags = implode(',', $tags);
         }
 
-        if (!$this->formHelper->hasCustomField('categoryMulti')) {
+        if (! $this->formHelper->hasCustomField('categoryMulti')) {
             $this->formHelper->addCustomField('categoryMulti', CategoryMultiField::class);
         }
 

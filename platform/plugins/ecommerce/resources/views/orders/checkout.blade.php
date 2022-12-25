@@ -1,32 +1,3 @@
-<style>
-    .checkout-calculation p {
-        margin-bottom: 0;
-        font-size: 1rem;
-    }
-    .checkout-products-marketplace .price-text {
-        font-size: 1.15rem;
-    }
-    .checkout-calculation .price-text, .checkout-calculation .total-text,
-    .checkout-products-marketplace .price-text, .checkout-products-marketplace .total-text {
-        color: #198754;
-        float: right;
-        font-weight: 700;
-    }
-    .checkout-calculation .total-text {
-        font-size: 1.5em!important;
-    }
-    .btn.payment-checkout-btn.payment-checkout-btn-step {
-        width: 100%;
-        color: #fff;
-        font-size: 1.5rem!important;
-        padding: 10px 25px;
-        font-weight: 600;
-        background-color: #1cb063;
-    }
-    .btn.payment-checkout-btn.payment-checkout-btn-step:hover {
-        background-color: #02e06e!important;
-    }
-</style>
 @extends('plugins/ecommerce::orders.master')
 @section('title')
     {{ __('Checkout') }}
@@ -48,11 +19,6 @@
                     <div class="d-block d-sm-none">
                         @include('plugins/ecommerce::orders.partials.logo')
                     </div>
-                    <div class="row d-sm-block d-md-none mb-3" style="background: #f5f5f5;">
-                        <div class="col-md-12" style="line-height: 53px">
-                            <a class="text-info" href="{{ route('public.cart') }}"><i class="fas fa-long-arrow-alt-left"></i> <span class="d-inline-block back-to-cart">{{ __('Back to cart') }}</span></a>
-                        </div>
-                    </div>
                     <div id="cart-item" class="position-relative">
 
                         <div class="payment-info-loading" style="display: none;">
@@ -64,7 +30,7 @@
                         <!---------------------- RENDER PRODUCTS IN HERE ---------------- -->
                         {!! apply_filters(RENDER_PRODUCTS_IN_CHECKOUT_PAGE, $products) !!}
 
-                        <div class="mt-2 p-2 checkout-calculation">
+                        <div class="mt-2 p-2">
                             <div class="row">
                                 <div class="col-6">
                                     <p>{{ __('Subtotal') }}:</p>
@@ -148,12 +114,14 @@
                         @include('plugins/ecommerce::orders.partials.logo')
                     </div>
                     <div class="form-checkout">
-                        <div>
-                            <h5 class="checkout-payment-title">{{ __('Shipping information') }}</h5>
-                            <input type="hidden" value="{{ route('public.checkout.save-information', $token) }}" id="save-shipping-information-url">
-                            @include('plugins/ecommerce::orders.partials.address-form', compact('sessionCheckoutData'))
-                        </div>
-                        <br>
+                        @if (Arr::get($sessionCheckoutData, 'is_available_shipping', true))
+                            <div>
+                                <h5 class="checkout-payment-title">{{ __('Shipping information') }}</h5>
+                                <input type="hidden" value="{{ route('public.checkout.save-information', $token) }}" id="save-shipping-information-url">
+                                @include('plugins/ecommerce::orders.partials.address-form', compact('sessionCheckoutData'))
+                            </div>
+                            <br>
+                        @endif
 
                         @if (EcommerceHelper::isBillingAddressEnabled())
                             <div>
@@ -176,13 +144,18 @@
                                         <div class="payment-checkout-form">
                                             <input type="hidden" name="shipping_option" value="{{ old('shipping_option', $defaultShippingOption) }}">
                                             <ul class="list-group list_payment_method">
-                                                @foreach ($shipping as $shippingKey => $shippingItem)
-                                                    @foreach($shippingItem as $subShippingKey => $subShippingItem)
+                                                @foreach ($shipping as $shippingKey => $shippingItems)
+                                                    @foreach($shippingItems as $shippingOption => $shippingItem)
                                                         @include('plugins/ecommerce::orders.partials.shipping-option', [
-                                                            'defaultShippingMethod' => $defaultShippingMethod,
-                                                            'defaultShippingOption' => $defaultShippingOption,
-                                                            'shippingOption'        => $subShippingKey,
-                                                            'shippingItem'          => $subShippingItem,
+                                                            'shippingItem' => $shippingItem,
+                                                            'attributes' =>[
+                                                                'id' => 'shipping-method-' . $shippingKey . '-' . $shippingOption,
+                                                                'name' => 'shipping_method',
+                                                                'class' => 'magic-radio',
+                                                                'checked' => old('shipping_method', $defaultShippingMethod) == $shippingKey && old('shipping_option', $defaultShippingOption) == $shippingOption,
+                                                                'disabled' => Arr::get($shippingItem, 'disabled'),
+                                                                'data-option' => $shippingOption,
+                                                            ],
                                                         ])
                                                     @endforeach
                                                 @endforeach
@@ -193,8 +166,6 @@
                                     @endif
                                 </div>
                                 <br>
-                            @else
-                                {{-- Can render text to show for customer --}}
                             @endif
                         @endif
 
@@ -211,7 +182,7 @@
                             <ul class="list-group list_payment_method">
                                 @php
                                     $selected = session('selected_payment_method');
-                                    $default = setting('default_payment_method');
+                                    $default = \Botble\Payment\Supports\PaymentHelper::defaultPaymentMethod();
                                     $selecting = $selected ?: $default;
                                 @endphp
 

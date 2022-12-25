@@ -15,24 +15,12 @@ class CsvProductExport implements FromCollection, WithHeadings
 {
     use Exportable;
 
-    /**
-     * @var Collection
-     */
-    protected $results;
+    protected Collection $results;
 
-    /**
-     * @var bool
-     */
-    protected $isMarketplaceActive;
+    protected bool $isMarketplaceActive;
 
-    /**
-     * @var bool
-     */
-    protected $enabledDigital;
+    protected bool $enabledDigital;
 
-    /**
-     * CsvProductExport constructor.
-     */
     public function __construct()
     {
         $this->results = collect([]);
@@ -44,7 +32,7 @@ class CsvProductExport implements FromCollection, WithHeadings
             'categories',
             'slugable',
             'brand',
-            'tax',
+            'taxes',
             'productLabels',
             'productCollections',
             'variations',
@@ -67,16 +55,12 @@ class CsvProductExport implements FromCollection, WithHeadings
             });
     }
 
-    /**
-     * @param Collection $products
-     * @return array
-     */
     public function productResults(Collection $products): array
     {
         $results = [];
         foreach ($products as $product) {
             $productAttributes = [];
-            if (!$product->is_variation) {
+            if (! $product->is_variation) {
                 $productAttributes = $product->productAttributeSets->pluck('title')->all();
             }
 
@@ -91,7 +75,7 @@ class CsvProductExport implements FromCollection, WithHeadings
                 'brand' => $product->brand->name,
                 'product_collections' => $product->productCollections->pluck('name')->implode(','),
                 'labels' => $product->productLabels->pluck('name')->implode(','),
-                'tax' => $product->tax->title,
+                'taxes' => $product->taxes->pluck('title')->implode(','),
                 'images' => implode(',', $product->images),
                 'price' => $product->price,
                 'product_attributes' => implode(',', $productAttributes),
@@ -138,7 +122,7 @@ class CsvProductExport implements FromCollection, WithHeadings
                             'brand' => '',
                             'product_collections' => '',
                             'labels' => '',
-                            'tax' => '',
+                            'taxes' => '',
                             'images' => implode(',', $variation->product->images),
                             'price' => $variation->product->price,
                             'product_attributes' => implode(',', $productAttributes),
@@ -168,11 +152,7 @@ class CsvProductExport implements FromCollection, WithHeadings
         return $results;
     }
 
-    /**
-     * @param Product|ProductVariation $product
-     * @return array
-     */
-    public function getProductAttributes($product): array
+    public function getProductAttributes(Product|ProductVariation $product): array
     {
         $productAttributes = [];
         foreach ($product->productAttributes as $productAttribute) {
@@ -184,17 +164,11 @@ class CsvProductExport implements FromCollection, WithHeadings
         return $productAttributes;
     }
 
-    /**
-     * @return Collection
-     */
     public function collection(): Collection
     {
         return $this->results;
     }
 
-    /**
-     * @return array
-     */
     public function headings(): array
     {
         $headings = [
@@ -208,7 +182,7 @@ class CsvProductExport implements FromCollection, WithHeadings
             'brand' => 'Brand',
             'product_collections' => 'Product collections',
             'labels' => 'Labels',
-            'tax' => 'Tax',
+            'taxes' => 'Taxes',
             'images' => 'Images',
             'price' => 'Price',
             'product_attributes' => 'Product attributes',

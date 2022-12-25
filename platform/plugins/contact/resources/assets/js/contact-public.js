@@ -1,13 +1,13 @@
 $(document).ready(function () {
-    var showError = function (message) {
+    let showError = function (message) {
         $('.contact-error-message').html(message).show();
     }
 
-    var showSuccess = function (message) {
+    let showSuccess = function (message) {
         $('.contact-success-message').html(message).show();
     }
 
-    var handleError = function (data) {
+    let handleError = function (data) {
         if (typeof (data.errors) !== 'undefined' && data.errors.length) {
             handleValidationError(data.errors);
         } else {
@@ -31,7 +31,7 @@ $(document).ready(function () {
         }
     }
 
-    var handleValidationError = function (errors) {
+    let handleValidationError = function (errors) {
         let message = '';
         $.each(errors, (index, item) => {
             if (message !== '') {

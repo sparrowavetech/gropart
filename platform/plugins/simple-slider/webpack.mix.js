@@ -9,8 +9,11 @@ const dist = 'public/vendor/core/plugins/' + directory;
 mix
     .js(source + '/resources/assets/js/simple-slider.js', dist + '/js')
     .js(source + '/resources/assets/js/simple-slider-admin.js', dist + '/js')
+    .sass(source + '/resources/assets/sass/simple-slider.scss', dist + '/css');
 
-    .sass(source + '/resources/assets/sass/simple-slider.scss', dist + '/css')
-
-    .copyDirectory(dist + '/js', source + '/public/js')
-    .copyDirectory(dist + '/css', source + '/public/css');
+if (mix.inProduction()) {
+    mix
+        .copy(dist + '/js/simple-slider.js', source + '/public/js')
+        .copy(dist + '/js/simple-slider-admin.js', source + '/public/js')
+        .copy(dist + '/css/simple-slider.css', source + '/public/css');
+}

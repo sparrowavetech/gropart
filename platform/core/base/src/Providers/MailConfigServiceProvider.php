@@ -7,20 +7,17 @@ use Illuminate\Support\ServiceProvider;
 
 class MailConfigServiceProvider extends ServiceProvider
 {
-    /**
-     * Bootstrap the application services.
-     *
-     * @return void
-     */
-    public function boot()
+    public function boot(): void
     {
         $this->app->booted(function () {
             $config = $this->app->make('config');
             $setting = $this->app->make(SettingStore::class);
 
+            $defaultMailDriver = function_exists('proc_open') ? 'sendmail' : 'smtp';
+
             $config->set([
                 'mail' => array_merge($config->get('mail'), [
-                    'default' => $setting->get('email_driver', $this->app->environment('demo') ? $config->get('mail.default') : 'sendmail'),
+                    'default' => $setting->get('email_driver', $this->app->environment('demo') ? $config->get('mail.default') : $defaultMailDriver),
                     'from' => [
                         'address' => $setting->get('email_from_address', $config->get('mail.from.address')),
                         'name' => $setting->get('email_from_name', $config->get('mail.from.name')),

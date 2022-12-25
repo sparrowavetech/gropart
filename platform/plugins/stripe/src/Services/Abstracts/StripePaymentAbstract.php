@@ -43,20 +43,12 @@ abstract class StripePaymentAbstract
     /**
      * For Stripe, after make charge successfully, it will return a charge ID for tracking purpose
      * We will store this Charge ID in our DB for tracking purpose
-     *
-     * @var string
      */
-    protected $chargeId;
+    protected string $chargeId;
 
-    /**
-     * @var bool
-     */
-    protected $supportRefundOnline = true;
+    protected bool $supportRefundOnline = true;
 
-    /**
-     * @return bool
-     */
-    public function getSupportRefundOnline()
+    public function getSupportRefundOnline(): bool
     {
         return $this->supportRefundOnline;
     }
@@ -119,26 +111,23 @@ abstract class StripePaymentAbstract
      */
     public function getPaymentDetails($chargeId)
     {
-        if (!$this->setClient()) {
+        if (! $this->setClient()) {
             return null;
         }
 
         try {
             return Charge::retrieve($chargeId);
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return null;
         }
     }
 
-    /**
-     * @return bool
-     */
     public function setClient(): bool
     {
         $secret = setting('payment_stripe_secret');
         $clientId = setting('payment_stripe_client_id');
 
-        if (!$secret || !$clientId) {
+        if (! $secret || ! $clientId) {
             return false;
         }
 
@@ -168,7 +157,7 @@ abstract class StripePaymentAbstract
      */
     public function refundOrder($paymentId, $totalAmount, array $options = [])
     {
-        if (!$this->setClient()) {
+        if (! $this->setClient()) {
             return [
                 'error' => true,
                 'message' => trans('plugins/payment::payment.invalid_settings', ['name' => 'Stripe']),

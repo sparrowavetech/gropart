@@ -13,7 +13,7 @@ return [
     |
     */
     'core' => [
-        'php_version' => '7.3',
+        'php_version' => '8.0.2',
     ],
     'requirements' => [
         'php' => [

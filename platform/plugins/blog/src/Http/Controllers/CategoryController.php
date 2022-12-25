@@ -13,35 +13,22 @@ use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Blog\Forms\CategoryForm;
-use Botble\Blog\Models\Category;
 use Botble\Blog\Http\Requests\CategoryRequest;
+use Botble\Blog\Models\Category;
 use Botble\Blog\Repositories\Interfaces\CategoryInterface;
 use Exception;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Contracts\View\View;
-use Throwable;
 
 class CategoryController extends BaseController
 {
-    /**
-     * @var CategoryInterface
-     */
-    protected $categoryRepository;
+    protected CategoryInterface $categoryRepository;
 
-    /**
-     * @param CategoryInterface $categoryRepository
-     */
     public function __construct(CategoryInterface $categoryRepository)
     {
         $this->categoryRepository = $categoryRepository;
     }
 
-    /**
-     * @return BaseHttpResponse|Factory|View|string
-     * @throws Throwable
-     */
     public function index(FormBuilder $formBuilder, Request $request, BaseHttpResponse $response)
     {
         page_title()->setTitle(trans('plugins/blog::categories.menu'));
@@ -50,12 +37,13 @@ class CategoryController extends BaseController
             'created_at' => 'DESC',
             'is_default' => 'DESC',
             'order' => 'ASC',
-        ]);
+        ], []);
 
         $categories->load('slugable')->loadCount('posts');
 
         if ($request->ajax()) {
-            $data = view('core/base::forms.partials.tree-categories', $this->getOptions(compact('categories')))->render();
+            $data = view('core/base::forms.partials.tree-categories', $this->getOptions(compact('categories')))
+                ->render();
 
             return $response->setData($data);
         }
@@ -69,10 +57,6 @@ class CategoryController extends BaseController
         return $form->renderForm();
     }
 
-    /**
-     * @param FormBuilder $formBuilder
-     * @return BaseHttpResponse|string
-     */
     public function create(FormBuilder $formBuilder, Request $request, BaseHttpResponse $response)
     {
         page_title()->setTitle(trans('plugins/blog::categories.create'));
@@ -84,21 +68,18 @@ class CategoryController extends BaseController
         return $formBuilder->create(CategoryForm::class)->renderForm();
     }
 
-    /**
-     * @param CategoryRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function store(CategoryRequest $request, BaseHttpResponse $response)
     {
         if ($request->input('is_default')) {
             $this->categoryRepository->getModel()->where('id', '>', 0)->update(['is_default' => 0]);
         }
 
-        $category = $this->categoryRepository->createOrUpdate(array_merge($request->input(), [
-            'author_id' => Auth::id(),
-            'author_type' => User::class,
-        ]));
+        $category = $this->categoryRepository->createOrUpdate(
+            array_merge($request->input(), [
+                'author_id' => Auth::id(),
+                'author_type' => User::class,
+            ])
+        );
 
         event(new CreatedContentEvent(CATEGORY_MODULE_SCREEN_NAME, $request, $category));
 
@@ -123,12 +104,6 @@ class CategoryController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    /**
-     * @param Request $request
-     * @param int $id
-     * @param FormBuilder $formBuilder
-     * @return BaseHttpResponse|string
-     */
     public function edit($id, FormBuilder $formBuilder, Request $request, BaseHttpResponse $response)
     {
         $category = $this->categoryRepository->findOrFail($id);
@@ -144,12 +119,6 @@ class CategoryController extends BaseController
         return $formBuilder->create(CategoryForm::class, ['model' => $category])->renderForm();
     }
 
-    /**
-     * @param int $id
-     * @param CategoryRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function update($id, CategoryRequest $request, BaseHttpResponse $response)
     {
         $category = $this->categoryRepository->findOrFail($id);
@@ -183,12 +152,6 @@ class CategoryController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param Request $request
-     * @param int $id
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function destroy(Request $request, $id, BaseHttpResponse $response)
     {
         try {
@@ -205,12 +168,6 @@ class CategoryController extends BaseController
         }
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function deletes(Request $request, BaseHttpResponse $response)
     {
         $ids = $request->input('ids');
@@ -228,11 +185,7 @@ class CategoryController extends BaseController
         return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
-    /**
-     * @param CategoryForm|null $model
-     * @return string
-     */
-    protected function getForm($model = null)
+    protected function getForm(?Category $model = null): string
     {
         $options = ['template' => 'core/base::forms.form-no-wrap'];
 
@@ -247,19 +200,13 @@ class CategoryController extends BaseController
         return $form->renderForm();
     }
 
-    /**
-     * @param FormAbstract $form
-     * @param Category|null $model
-     * @param array $options
-     * @return FormAbstract
-     */
-    protected function setFormOptions($form, $model = null, $options = [])
+    protected function setFormOptions(FormAbstract $form, ?Category $model = null, array $options = []): FormAbstract
     {
-        if (!$model) {
+        if (! $model) {
             $form->setUrl(route('categories.create'));
         }
 
-        if (!Auth::user()->hasPermission('categories.create') && !$model) {
+        if (! Auth::user()->hasPermission('categories.create') && ! $model) {
             $class = $form->getFormOption('class');
             $form->setFormOption('class', $class . ' d-none');
         }
@@ -269,11 +216,7 @@ class CategoryController extends BaseController
         return $form;
     }
 
-    /**
-     * @param array $options
-     * @return array
-     */
-    protected function getOptions($options = [])
+    protected function getOptions(array $options = []): array
     {
         return array_merge([
             'canCreate' => Auth::user()->hasPermission('categories.create'),

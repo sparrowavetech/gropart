@@ -28,20 +28,10 @@ use URL;
 
 class InstallController extends Controller
 {
-    /**
-     * @var RequirementsChecker
-     */
-    protected $requirements;
+    protected RequirementsChecker $requirements;
 
-    /**
-     * @var EnvironmentManager
-     */
-    protected $environmentManager;
+    protected EnvironmentManager $environmentManager;
 
-    /**
-     * @param RequirementsChecker $requirementsChecker
-     * @param EnvironmentManager $environmentManager
-     */
     public function __construct(RequirementsChecker $requirementsChecker, EnvironmentManager $environmentManager)
     {
         $this->requirements = $requirementsChecker;
@@ -66,7 +56,7 @@ class InstallController extends Controller
      */
     public function getRequirements(Request $request)
     {
-        if (!URL::hasValidSignature($request)) {
+        if (! URL::hasValidSignature($request)) {
             return redirect()->route('installers.welcome');
         }
 
@@ -84,7 +74,7 @@ class InstallController extends Controller
      */
     public function getEnvironment(Request $request)
     {
-        if (!URL::hasValidSignature($request)) {
+        if (! URL::hasValidSignature($request)) {
             return redirect()->route('installers.welcome');
         }
 
@@ -120,6 +110,8 @@ class InstallController extends Controller
             DB::connection()->setDatabaseName($databaseName);
             DB::getSchemaBuilder()->dropAllTables();
             DB::unprepared(file_get_contents(base_path('database.sql')));
+
+            File::delete(app()->bootstrapPath('cache/plugins.php'));
         } catch (QueryException $exception) {
             $errors = new MessageBag();
             $errors->add('database', $exception->getMessage());
@@ -187,7 +179,7 @@ class InstallController extends Controller
      */
     public function getFinish(Request $request)
     {
-        if (!URL::hasValidSignature($request)) {
+        if (! URL::hasValidSignature($request)) {
             return redirect()->route('installers.welcome');
         }
 

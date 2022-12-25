@@ -34,21 +34,10 @@ use Throwable;
 
 class LanguageController extends BaseController
 {
-    /**
-     * @var LanguageInterface
-     */
-    protected $languageRepository;
+    protected LanguageInterface $languageRepository;
 
-    /**
-     * @var LanguageMetaInterface
-     */
-    protected $languageMetaRepository;
+    protected LanguageMetaInterface $languageMetaRepository;
 
-    /**
-     * LanguageController constructor.
-     * @param LanguageInterface $languageRepository
-     * @param LanguageMetaInterface $languageMetaRepository
-     */
     public function __construct(LanguageInterface $languageRepository, LanguageMetaInterface $languageMetaRepository)
     {
         $this->languageRepository = $languageRepository;
@@ -95,7 +84,7 @@ class LanguageController extends BaseController
                 $request->merge(['lang_is_default' => 1]);
             }
 
-            if (!File::isWritable(lang_path()) || !File::isWritable(lang_path('vendor'))) {
+            if (! File::isWritable(lang_path()) || ! File::isWritable(lang_path('vendor'))) {
                 return $response
                     ->setError()
                     ->setMessage(trans('plugins/translation::translation.folder_is_not_writeable', ['lang_path' => lang_path()]));
@@ -103,16 +92,16 @@ class LanguageController extends BaseController
 
             $locale = $request->input('lang_locale');
 
-            if (!File::isDirectory(lang_path($locale))) {
+            if (! File::isDirectory(lang_path($locale))) {
                 $importedLocale = false;
 
                 if (is_plugin_active('translation')) {
                     $result = app(Manager::class)->downloadRemoteLocale($locale);
 
-                    $importedLocale = !$result['error'];
+                    $importedLocale = ! $result['error'];
                 }
 
-                if (!$importedLocale) {
+                if (! $importedLocale) {
                     $defaultLocale = lang_path('en');
                     if (File::exists($defaultLocale)) {
                         File::copyDirectory($defaultLocale, lang_path($locale));
@@ -141,7 +130,7 @@ class LanguageController extends BaseController
 
                 if ($this->languageRepository->count() == 1) {
                     foreach ($models as $model) {
-                        if (!class_exists($model)) {
+                        if (! class_exists($model)) {
                             continue;
                         }
 
@@ -246,7 +235,7 @@ class LanguageController extends BaseController
                 'lang_code',
             ]);
 
-            if (!empty($language) && !empty($currentLanguage) && $language->lang_code != $currentLanguage->lang_meta_code) {
+            if (! empty($language) && ! empty($currentLanguage) && $language->lang_code != $currentLanguage->lang_meta_code) {
                 $data[$language->lang_code]['lang_flag'] = $language->lang_flag;
                 $data[$language->lang_code]['lang_name'] = $language->lang_name;
                 $data[$language->lang_code]['reference_id'] = $other->reference_id;
@@ -255,7 +244,7 @@ class LanguageController extends BaseController
 
         $languages = $this->languageRepository->all();
         foreach ($languages as $language) {
-            if (!array_key_exists(
+            if (! array_key_exists(
                 $language->lang_code,
                 $data
             ) && $language->lang_code != $request->input('lang_meta_current_language')) {
@@ -327,7 +316,7 @@ class LanguageController extends BaseController
                 $widgets = Widget::where('theme', 'NOT LIKE', '%-' . $language->lang_code)->get();
 
                 foreach ($widgets as $widget) {
-                    if (!Widget::where('theme', $widget->theme . '-' . $language->lang_code)->count()) {
+                    if (! Widget::where('theme', $widget->theme . '-' . $language->lang_code)->count()) {
                         $widget->replicate()->save();
                     }
 
@@ -352,7 +341,7 @@ class LanguageController extends BaseController
 
                 foreach ($themeOptions as $themeOption) {
                     $themeOption->key = str_replace($currentKey, $currentKey . $defaultLanguage->lang_code . '-', $themeOption->key);
-                    if (!Setting::where('key', $themeOption->key)->count()) {
+                    if (! Setting::where('key', $themeOption->key)->count()) {
                         $themeOption->save();
                     }
                 }
@@ -362,7 +351,7 @@ class LanguageController extends BaseController
                 foreach ($themeOptions as $themeOption) {
                     $themeOption->key = str_replace($newKey, $currentKey, $themeOption->key);
 
-                    if (!Setting::where('key', $themeOption->key)->count()) {
+                    if (! Setting::where('key', $themeOption->key)->count()) {
                         $themeOption->save();
                     }
                 }
@@ -456,7 +445,7 @@ class LanguageController extends BaseController
         foreach (LanguageFacade::getSupportedLanguagesKeys() as $locale) {
             $path = app()->getCachedRoutesPath();
 
-            if (!$locale) {
+            if (! $locale) {
                 $locale = LanguageFacade::getDefaultLocale();
             }
 

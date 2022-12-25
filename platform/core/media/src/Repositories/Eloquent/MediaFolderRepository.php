@@ -23,7 +23,7 @@ class MediaFolderRepository extends RepositoriesAbstract implements MediaFolderI
             'condition' => [],
         ], $params);
 
-        if (!$folderId) {
+        if (! $folderId) {
             $folderId = null;
         }
 
@@ -41,7 +41,7 @@ class MediaFolderRepository extends RepositoriesAbstract implements MediaFolderI
      */
     public function createSlug($name, $parentId)
     {
-        $slug = Str::slug($name, '-', !RvMedia::turnOffAutomaticUrlTranslationIntoLatin() ? 'en' : false);
+        $slug = Str::slug($name, '-', ! RvMedia::turnOffAutomaticUrlTranslationIntoLatin() ? 'en' : false);
         $index = 1;
         $baseSlug = $slug;
         while ($this->checkIfExists('slug', $slug, $parentId)) {
@@ -89,7 +89,7 @@ class MediaFolderRepository extends RepositoriesAbstract implements MediaFolderI
      */
     public function getBreadcrumbs($parentId, $breadcrumbs = [])
     {
-        if (!$parentId) {
+        if (! $parentId) {
             return $breadcrumbs;
         }
 
@@ -126,7 +126,7 @@ class MediaFolderRepository extends RepositoriesAbstract implements MediaFolderI
         /**
          * @var Builder $data
          */
-        if (!$parentId) {
+        if (! $parentId) {
             $data->leftJoin('media_folders as mf_parent', 'mf_parent.id', '=', 'media_folders.parent_id')
                 ->where(function ($query) {
                     /**
@@ -166,13 +166,13 @@ class MediaFolderRepository extends RepositoriesAbstract implements MediaFolderI
      */
     public function getAllChildFolders($parentId, $child = [])
     {
-        if (!$parentId) {
+        if (! $parentId) {
             return $child;
         }
 
         $folders = $this->allBy(['parent_id' => $parentId]);
 
-        if (!empty($folders)) {
+        if (! empty($folders)) {
             foreach ($folders as $folder) {
                 $child[$parentId][] = $folder;
 
@@ -188,7 +188,7 @@ class MediaFolderRepository extends RepositoriesAbstract implements MediaFolderI
      */
     public function getFullPath($folderId, $path = null)
     {
-        if (!$folderId) {
+        if (! $folderId) {
             return $path;
         }
 
@@ -200,7 +200,7 @@ class MediaFolderRepository extends RepositoriesAbstract implements MediaFolderI
 
         $parent = $this->getFullPath($folder->parent_id, $path);
 
-        if (!$parent) {
+        if (! $parent) {
             return $folder->slug;
         }
 

@@ -1,4 +1,5 @@
 {
+    "id": "botble/backup",
     "name": "Backup",
     "namespace": "Botble\\Backup\\",
     "provider": "Botble\\Backup\\Providers\\BackupServiceProvider",

@@ -16,64 +16,35 @@ use Botble\Base\Forms\Fields\MediaImagesField;
 use Botble\Base\Forms\Fields\OnOffField;
 use Botble\Base\Forms\Fields\RepeaterField;
 use Botble\Base\Forms\Fields\TimeField;
-use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use JsValidator;
 use Kris\LaravelFormBuilder\Fields\FormField;
 use Kris\LaravelFormBuilder\Form;
-use Throwable;
 
 abstract class FormAbstract extends Form
 {
-    /**
-     * @var array
-     */
-    protected $options = [];
+    protected array $options = [];
 
-    /**
-     * @var string
-     */
-    protected $title = '';
+    protected string $title = '';
 
-    /**
-     * @var string
-     */
-    protected $validatorClass = '';
+    protected string $validatorClass = '';
 
-    /**
-     * @var array
-     */
-    protected $metaBoxes = [];
+    protected array $metaBoxes = [];
 
-    /**
-     * @var string
-     */
-    protected $actionButtons = '';
+    protected string $actionButtons = '';
 
-    /**
-     * @var string
-     */
-    protected $breakFieldPoint = '';
+    protected string $breakFieldPoint = '';
 
-    /**
-     * @var bool
-     */
-    protected $useInlineJs = false;
+    protected bool $useInlineJs = false;
 
-    /**
-     * @var string
-     */
-    protected $wrapperClass = 'form-body';
+    protected string $wrapperClass = 'form-body';
 
     /**
      * @var string
      */
     protected $template = 'core/base::forms.form';
 
-    /**
-     * FormAbstract constructor.
-     */
     public function __construct()
     {
         $this->setMethod('POST');
@@ -81,18 +52,11 @@ abstract class FormAbstract extends Form
         $this->setFormOption('id', strtolower(Str::slug(Str::snake(get_class($this)))));
     }
 
-    /**
-     * @return array
-     */
     public function getOptions(): array
     {
         return $this->options;
     }
 
-    /**
-     * @param array $options
-     * @return $this
-     */
     public function setOptions(array $options): self
     {
         $this->options = $options;
@@ -100,18 +64,11 @@ abstract class FormAbstract extends Form
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getTitle(): string
     {
         return $this->title;
     }
 
-    /**
-     * @param string $title
-     * @return $this
-     */
     public function setTitle(string $title): self
     {
         $this->title = $title;
@@ -119,9 +76,6 @@ abstract class FormAbstract extends Form
         return $this;
     }
 
-    /**
-     * @return array
-     */
     public function getMetaBoxes(): array
     {
         uasort($this->metaBoxes, function ($before, $after) {
@@ -137,14 +91,9 @@ abstract class FormAbstract extends Form
         return $this->metaBoxes;
     }
 
-    /**
-     * @param string $name
-     * @return string
-     * @throws Throwable
-     */
     public function getMetaBox(string $name): string
     {
-        if (!Arr::get($this->metaBoxes, $name)) {
+        if (! Arr::get($this->metaBoxes, $name)) {
             return '';
         }
 
@@ -153,24 +102,17 @@ abstract class FormAbstract extends Form
         return view('core/base::forms.partials.meta-box', compact('metaBox'))->render();
     }
 
-    /**
-     * @param array|string $boxes
-     * @return $this
-     */
-    public function addMetaBoxes($boxes): self
+    public function addMetaBoxes(array|string $boxes): self
     {
-        if (!is_array($boxes)) {
+        if (! is_array($boxes)) {
             $boxes = [$boxes];
         }
+
         $this->metaBoxes = array_merge($this->metaBoxes, $boxes);
 
         return $this;
     }
 
-    /**
-     * @param string $name
-     * @return FormAbstract
-     */
     public function removeMetaBox(string $name): self
     {
         Arr::forget($this->metaBoxes, $name);
@@ -178,10 +120,6 @@ abstract class FormAbstract extends Form
         return $this;
     }
 
-    /**
-     * @return string
-     * @throws Throwable
-     */
     public function getActionButtons(): string
     {
         if ($this->actionButtons === '') {
@@ -191,10 +129,6 @@ abstract class FormAbstract extends Form
         return $this->actionButtons;
     }
 
-    /**
-     * @param string $actionButtons
-     * @return $this
-     */
     public function setActionButtons(string $actionButtons): self
     {
         $this->actionButtons = $actionButtons;
@@ -202,9 +136,6 @@ abstract class FormAbstract extends Form
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     public function removeActionButtons(): self
     {
         $this->actionButtons = '';
@@ -212,18 +143,11 @@ abstract class FormAbstract extends Form
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getBreakFieldPoint(): string
     {
         return $this->breakFieldPoint;
     }
 
-    /**
-     * @param string $breakFieldPoint
-     * @return $this
-     */
     public function setBreakFieldPoint(string $breakFieldPoint): self
     {
         $this->breakFieldPoint = $breakFieldPoint;
@@ -231,18 +155,11 @@ abstract class FormAbstract extends Form
         return $this;
     }
 
-    /**
-     * @return bool
-     */
     public function isUseInlineJs(): bool
     {
         return $this->useInlineJs;
     }
 
-    /**
-     * @param bool $useInlineJs
-     * @return $this
-     */
     public function setUseInlineJs(bool $useInlineJs): self
     {
         $this->useInlineJs = $useInlineJs;
@@ -250,18 +167,11 @@ abstract class FormAbstract extends Form
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getWrapperClass(): string
     {
         return $this->wrapperClass;
     }
 
-    /**
-     * @param string $wrapperClass
-     * @return $this
-     */
     public function setWrapperClass(string $wrapperClass): self
     {
         $this->wrapperClass = $wrapperClass;
@@ -269,9 +179,6 @@ abstract class FormAbstract extends Form
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     public function withCustomFields(): self
     {
         $customFields = [
@@ -300,20 +207,17 @@ abstract class FormAbstract extends Form
     /**
      * @param string $name
      * @param string $class
-     * @return $this|Form
+     * @return $this
      */
-    public function addCustomField($name, $class)
+    public function addCustomField($name, $class): self
     {
-        if (!$this->formHelper->hasCustomField($name)) {
+        if (! $this->formHelper->hasCustomField($name)) {
             parent::addCustomField($name, $class);
         }
 
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     public function hasTabs(): self
     {
         $this->setFormOption('template', 'core/base::forms.form-tabs');
@@ -321,12 +225,9 @@ abstract class FormAbstract extends Form
         return $this;
     }
 
-    /**
-     * @return int
-     */
     public function hasMainFields(): int
     {
-        if (!$this->breakFieldPoint) {
+        if (! $this->breakFieldPoint) {
             return count($this->fields);
         }
 
@@ -346,36 +247,25 @@ abstract class FormAbstract extends Form
         return count($mainFields);
     }
 
-    /**
-     * @return $this
-     */
-    public function disableFields()
+    public function disableFields(): self
     {
         parent::disableFields();
 
         return $this;
     }
 
-    /**
-     * @param array $options
-     * @param bool $showStart
-     * @param bool $showFields
-     * @param bool $showEnd
-     * @return string
-     */
     public function renderForm(array $options = [], $showStart = true, $showFields = true, $showEnd = true): string
     {
         Assets::addScripts(['form-validation', 'are-you-sure']);
+
+        $class = $this->getFormOption('class');
+        $this->setFormOption('class', $class . ' dirty-check');
 
         apply_filters(BASE_FILTER_BEFORE_RENDER_FORM, $this, $this->getModel());
 
         return parent::renderForm($options, $showStart, $showFields, $showEnd);
     }
 
-    /**
-     * @return string
-     * @throws Exception
-     */
     public function renderValidatorJs(): string
     {
         $element = null;
@@ -388,18 +278,11 @@ abstract class FormAbstract extends Form
         return JsValidator::formRequest($this->getValidatorClass(), $element);
     }
 
-    /**
-     * @return string
-     */
     public function getValidatorClass(): string
     {
         return $this->validatorClass;
     }
 
-    /**
-     * @param string $validatorClass
-     * @return $this
-     */
     public function setValidatorClass(string $validatorClass): self
     {
         $this->validatorClass = $validatorClass;
@@ -407,13 +290,7 @@ abstract class FormAbstract extends Form
         return $this;
     }
 
-    /**
-     * Set model to form object.
-     *
-     * @param mixed $model
-     * @return $this
-     */
-    public function setModel($model)
+    public function setModel($model): self
     {
         $this->model = $model;
 
@@ -422,15 +299,9 @@ abstract class FormAbstract extends Form
         return $this;
     }
 
-    /**
-     * Setup model for form, add namespace if needed for child forms.
-     *
-     * @param string $model
-     * @return $this
-     */
-    protected function setupModel($model)
+    protected function setupModel($model): self
     {
-        if (!$this->model) {
+        if (! $this->model) {
             $this->model = $model;
             $this->setupNamedModel();
         }
@@ -438,19 +309,22 @@ abstract class FormAbstract extends Form
         return $this;
     }
 
-    /**
-     * Set form options.
-     *
-     * @param array $formOptions
-     * @return $this
-     */
-    public function setFormOptions(array $formOptions)
+    public function setFormOptions(array $formOptions): self
     {
         parent::setFormOptions($formOptions);
 
         if (isset($formOptions['template'])) {
             $this->template = $formOptions['template'];
         }
+
+        return $this;
+    }
+
+    public function add($name, $type = 'text', array $options = [], $modify = false): self
+    {
+        $options['attr'][] = 'v-pre';
+
+        parent::add($name, $type, $options, $modify);
 
         return $this;
     }

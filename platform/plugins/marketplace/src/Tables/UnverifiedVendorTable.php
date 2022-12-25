@@ -8,46 +8,35 @@ use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
 use Yajra\DataTables\DataTables;
 
 class UnverifiedVendorTable extends TableAbstract
 {
-    /**
-     * @var bool
-     */
     protected $hasActions = true;
 
-    /**
-     * @var bool
-     */
     protected $hasFilter = true;
 
-    /**
-     * UnverifiedVendorTable constructor.
-     * @param DataTables $table
-     * @param UrlGenerator $urlGenerator
-     * @param CustomerInterface $customerRepository
-     */
     public function __construct(DataTables $table, UrlGenerator $urlGenerator, CustomerInterface $customerRepository)
     {
         $this->repository = $customerRepository;
         parent::__construct($table, $urlGenerator);
 
-        if (!Auth::user()->hasAnyPermission(['marketplace.unverified-vendors.edit'])) {
+        if (! Auth::user()->hasAnyPermission(['marketplace.unverified-vendors.edit'])) {
             $this->hasOperations = false;
             $this->hasActions = false;
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
             ->editColumn('name', function ($item) {
-                if (!Auth::user()->hasPermission('marketplace.unverified-vendors.edit')) {
+                if (! Auth::user()->hasPermission('marketplace.unverified-vendors.edit')) {
                     return BaseHelper::clean($item->name);
                 }
 
@@ -86,7 +75,7 @@ class UnverifiedVendorTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
         $query = $this->repository->getModel()
             ->select([
@@ -105,9 +94,6 @@ class UnverifiedVendorTable extends TableAbstract
         return $this->applyScopes($query);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function columns(): array
     {
         return [
@@ -142,9 +128,6 @@ class UnverifiedVendorTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getBulkChanges(): array
     {
         return [];

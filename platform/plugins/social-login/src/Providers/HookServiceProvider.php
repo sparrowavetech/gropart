@@ -6,7 +6,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\ServiceProvider;
 use SocialService;
 use Theme;
-use Throwable;
 
 class HookServiceProvider extends ServiceProvider
 {
@@ -17,15 +16,9 @@ class HookServiceProvider extends ServiceProvider
         }
     }
 
-    /**
-     * @param string|null $html
-     * @param string $module
-     * @return null|string
-     * @throws Throwable
-     */
     public function addLoginOptions(?string $html, string $module): ?string
     {
-        if (!SocialService::isSupportedModule($module)) {
+        if (! SocialService::isSupportedModule($module)) {
             return $html;
         }
 

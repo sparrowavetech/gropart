@@ -7,10 +7,6 @@ use Illuminate\Support\Str;
 
 class Youtube
 {
-    /**
-     * @param string $url
-     * @return string
-     */
     public static function getYoutubeVideoEmbedURL(string $url): string
     {
         $url = rtrim($url, '/');
@@ -30,10 +26,6 @@ class Youtube
         return $url;
     }
 
-    /**
-     * @param string $url
-     * @return string
-     */
     public static function getYoutubeWatchURL(string $url): string
     {
         $url = rtrim($url, '/');
@@ -53,10 +45,6 @@ class Youtube
         return $url;
     }
 
-    /**
-     * @param string $url
-     * @return null|string
-     */
     public static function getYoutubeVideoID(string $url): ?string
     {
         $regExp = '/^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/';
@@ -70,10 +58,6 @@ class Youtube
         return null;
     }
 
-    /**
-     * @param string $url
-     * @return bool
-     */
     public static function isYoutubeURL(string $url): bool
     {
         $regExp = '/^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$/';

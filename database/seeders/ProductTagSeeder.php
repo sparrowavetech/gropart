@@ -11,12 +11,7 @@ use SlugHelper;
 
 class ProductTagSeeder extends BaseSeeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
         $tags = [
             [
@@ -47,9 +42,9 @@ class ProductTagSeeder extends BaseSeeder
 
             Slug::create([
                 'reference_type' => ProductTag::class,
-                'reference_id'   => $tag->id,
-                'key'            => Str::slug($tag->name),
-                'prefix'         => SlugHelper::getPrefix(ProductTag::class),
+                'reference_id' => $tag->id,
+                'key' => Str::slug($tag->name),
+                'prefix' => SlugHelper::getPrefix(ProductTag::class),
             ]);
         }
 

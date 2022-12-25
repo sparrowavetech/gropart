@@ -9,5 +9,11 @@ const dist = 'public/vendor/core/plugins/' + directory;
 mix
     .js(source + '/resources/assets/js/location.js', dist + '/js')
     .js(source + '/resources/assets/js/bulk-import.js', dist + '/js')
-    .js(source + '/resources/assets/js/export.js', dist + '/js')
-    .copyDirectory(dist + '/js', source + '/public/js');
+    .js(source + '/resources/assets/js/export.js', dist + '/js');
+
+if (mix.inProduction()) {
+    mix
+        .copy(dist + '/js/location.js', source + '/public/js')
+        .copy(dist + '/js/bulk-import.js', source + '/public/js')
+        .copy(dist + '/js/export.js', source + '/public/js');
+}

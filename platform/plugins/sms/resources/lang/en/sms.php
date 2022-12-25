@@ -1,7 +1,9 @@
 <?php
 
 return [
-    'name'   => 'Sms',
+    'title' => 'SMS Gateway',
+    'name'   => 'Sms Template',
+    'setting' =>'SMS Setting',
     'create' => 'New sms',
     'edit'   => 'Edit sms',
     'template_id' => 'Template Id',
@@ -9,6 +11,7 @@ return [
     'template_placeholder'=>'Template ',
     'template_id_placeholder' =>'Template Id',
     'variable'=>'SMS Variable',
+    'save_settings'=>'Save Setting',
     'settings' => [
         'title' => 'SMS',
         'description' => 'Settings for sms plugin',
@@ -31,6 +34,6 @@ return [
         'vendor_account_approved'=>'Vendor account approved',
         'product_approved'=>'Product approved',
         'withdrawal_approved'=>'Withdrawal approved',
-        
+
     ]
 ];

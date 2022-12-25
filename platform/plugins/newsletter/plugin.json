@@ -1,4 +1,5 @@
 {
+    "id": "botble/newsletter",
     "name": "Newsletter",
     "namespace": "Botble\\Newsletter\\",
     "provider": "Botble\\Newsletter\\Providers\\NewsletterServiceProvider",

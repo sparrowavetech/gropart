@@ -19,6 +19,8 @@ mix
             source + '/resources/assets/js/helpers.js',
             source + '/resources/assets/js/timezones.js',
             source + '/resources/assets/js/validations.js'
-        ], dist + '/js/js-validation.js')
+        ], dist + '/js/js-validation.js');
 
-    .copy(dist + '/js/js-validation.js', source + '/public/js');
+if (mix.inProduction()) {
+    mix.copy(dist + '/js/js-validation.js', source + '/public/js');
+}

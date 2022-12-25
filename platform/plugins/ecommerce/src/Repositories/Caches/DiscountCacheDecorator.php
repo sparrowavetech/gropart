@@ -7,18 +7,12 @@ use Botble\Support\Repositories\Caches\CacheAbstractDecorator;
 
 class DiscountCacheDecorator extends CacheAbstractDecorator implements DiscountInterface
 {
-    /**
-     * {@inheritDoc}
-     */
     public function getAvailablePromotions(array $with = [], bool $forProductSingle = false)
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function getProductPriceBasedOnPromotion(array $productIds = [], array $productCollections = [])
+    public function getProductPriceBasedOnPromotion(array $productIds = [], array $productCollectionIds = [])
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }

@@ -1,4 +1,5 @@
 {
+    "id": "botble/social-login",
     "name": "Social Login",
     "namespace": "Botble\\SocialLogin\\",
     "provider": "Botble\\SocialLogin\\Providers\\SocialLoginServiceProvider",

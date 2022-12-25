@@ -9,9 +9,6 @@ use Botble\Blog\Models\Tag;
 
 class TagForm extends FormAbstract
 {
-    /**
-     * {@inheritDoc}
-     */
     public function buildForm()
     {
         $this

@@ -34,16 +34,21 @@
         @endif
     </div>
 
-    @if (MarketplaceHelper::allowVendorManageShipping() || in_array($shipment->status, [\Botble\Ecommerce\Enums\ShippingStatusEnum::PENDING,
- \Botble\Ecommerce\Enums\ShippingStatusEnum::APPROVED,
- \Botble\Ecommerce\Enums\ShippingStatusEnum::ARRANGE_SHIPMENT,
- \Botble\Ecommerce\Enums\ShippingStatusEnum::READY_TO_BE_SHIPPED_OUT]))
-        <div class="panel-heading order-bottom shipment-actions-wrapper">
-            <div class="flexbox-grid-default">
-                <div class="flexbox-content">
+    <div class="panel-heading order-bottom shipment-actions-wrapper">
+        <div class="flexbox-grid-default">
+            <div class="flexbox-content">
+                @if (MarketplaceHelper::allowVendorManageShipping() ||
+                    in_array($shipment->status, [
+                        \Botble\Ecommerce\Enums\ShippingStatusEnum::PENDING,
+                        \Botble\Ecommerce\Enums\ShippingStatusEnum::APPROVED,
+                        \Botble\Ecommerce\Enums\ShippingStatusEnum::ARRANGE_SHIPMENT,
+                        \Botble\Ecommerce\Enums\ShippingStatusEnum::READY_TO_BE_SHIPPED_OUT
+                    ]))
                     <button class="btn btn-info ml10 btn-trigger-update-shipping-status"><i class="fas fa-shipping-fast"></i> {{ trans('plugins/ecommerce::shipping.update_shipping_status') }}</button>
-                </div>
+                @endif
+
+                {!! apply_filters('shipment_buttons_detail_order', null, $shipment) !!}
             </div>
         </div>
-    @endif
+    </div>
 </div>

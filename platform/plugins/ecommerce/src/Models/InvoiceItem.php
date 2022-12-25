@@ -31,12 +31,7 @@ class InvoiceItem extends BaseModel
         'discount_amount' => 'decimal:2',
         'amount' => 'decimal:2',
         'metadata' => 'json',
-    ];
-
-    protected $dates = [
-        'paid_at',
-        'created_at',
-        'updated_at',
+        'paid_at' => 'datetime',
     ];
 
     public function invoice(): BelongsTo

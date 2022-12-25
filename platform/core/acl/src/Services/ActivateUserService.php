@@ -7,26 +7,13 @@ use Botble\ACL\Repositories\Interfaces\ActivationInterface;
 
 class ActivateUserService
 {
-    /**
-     * @var ActivationInterface
-     */
-    protected $activationRepository;
+    protected ActivationInterface $activationRepository;
 
-    /**
-     * ActivateUserService constructor.
-     * @param ActivationInterface $activationRepository
-     */
     public function __construct(ActivationInterface $activationRepository)
     {
         $this->activationRepository = $activationRepository;
     }
 
-    /**
-     * Activates the given user.
-     *
-     * @param User $user
-     * @return bool
-     */
     public function activate(User $user): bool
     {
         if ($this->activationRepository->completed($user)) {

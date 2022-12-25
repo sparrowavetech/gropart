@@ -3,7 +3,6 @@
 namespace Botble\Slug\Providers;
 
 use Assets;
-use Botble\Base\Models\BaseModel;
 use Eloquent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
@@ -20,12 +19,7 @@ class HookServiceProvider extends ServiceProvider
         add_filter(BASE_FILTER_BEFORE_GET_FRONT_PAGE_ITEM, [$this, 'getItemSlug'], 3, 2);
     }
 
-    /**
-     * @param string|null $html
-     * @param BaseModel $object
-     * @return null|string
-     */
-    public function addSlugBox(?string $html = null, $object = null)
+    public function addSlugBox(?string $html = null, ?Model $object = null): ?string
     {
         if ($object && SlugHelper::isSupportedModel(get_class($object))) {
             Assets::addScriptsDirectly('vendor/core/packages/slug/js/slug.js')
@@ -59,13 +53,13 @@ class HookServiceProvider extends ServiceProvider
             $query = $rawBindings->getQuery();
             if ($query instanceof Builder) {
                 $querySelect = $data->getQuery()->columns;
-                if (!empty($querySelect)) {
+                if (! empty($querySelect)) {
                     $select = $querySelect;
                 }
             }
 
             foreach ($select as &$column) {
-                if (strpos($column, '.') === false) {
+                if (! str_contains($column, '.')) {
                     $column = $table . '.' . $column;
                 }
             }

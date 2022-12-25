@@ -34,21 +34,11 @@ class LoginController extends BaseController
 
     /**
      * Where to redirect users after login.
-     *
-     * @var string
      */
-    protected $redirectTo;
+    protected string $redirectTo = '/';
 
-    /**
-     * @var BaseHttpResponse
-     */
-    protected $response;
+    protected BaseHttpResponse $response;
 
-    /**
-     * Create a new controller instance.
-     *
-     * @param BaseHttpResponse $response
-     */
     public function __construct(BaseHttpResponse $response)
     {
         $this->middleware('guest', ['except' => 'logout']);
@@ -109,8 +99,8 @@ class LoginController extends BaseController
         }
 
         $user = app(UserInterface::class)->getFirstBy([$this->username() => $request->input($this->username())]);
-        if (!empty($user)) {
-            if (!app(ActivationInterface::class)->completed($user)) {
+        if (! empty($user)) {
+            if (! app(ActivationInterface::class)->completed($user)) {
                 return $this->response
                     ->setError()
                     ->setMessage(trans('core/acl::auth.login.not_active'));
@@ -119,7 +109,7 @@ class LoginController extends BaseController
 
         if ($this->attemptLogin($request)) {
             app(UserInterface::class)->update(['id' => $user->id], ['last_login' => Carbon::now()]);
-            if (!session()->has('url.intended')) {
+            if (! session()->has('url.intended')) {
                 session()->flash('url.intended', url()->current());
             }
 

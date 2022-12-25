@@ -110,7 +110,7 @@
                                                     </ul>
                                                 </div>
                                             </li>
-                                            <li v-if="list_products.data.length === 0">
+                                            <li v-if="list_products.data && list_products.data.length === 0">
                                                 <span>{{ __('order.no_products_found')}}</span>
                                             </li>
                                         </ul>
@@ -277,7 +277,7 @@
                                                         </div>
                                                     </div>
                                                 </li>
-                                                <li v-if="customers.data.length === 0">
+                                                <li v-if="customers.data && customers.data.length === 0">
                                                     <span>{{ __('order.no_customer_found') }}</span>
                                                 </li>
                                             </ul>

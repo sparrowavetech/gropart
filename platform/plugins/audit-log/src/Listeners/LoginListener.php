@@ -5,39 +5,27 @@ namespace Botble\AuditLog\Listeners;
 use Botble\ACL\Models\User;
 use Botble\AuditLog\Models\AuditHistory;
 use Illuminate\Auth\Events\Login;
+use Illuminate\Http\Request;
 
 class LoginListener
 {
-    /**
-     * @var AuditHistory
-     */
-    public $auditHistory;
+    protected AuditHistory $auditHistory;
 
-    /**
-     * AuditHandlerListener constructor.
-     * @param AuditHistory $auditHistory
-     */
-    public function __construct(AuditHistory $auditHistory)
+    protected Request $request;
+
+    public function __construct(AuditHistory $auditHistory, Request $request)
     {
         $this->auditHistory = $auditHistory;
+        $this->request = $request;
     }
 
-    /**
-     * Handle the event.
-     *
-     * @param Login $event
-     * @return void
-     */
-    public function handle(Login $event)
+    public function handle(Login $event): void
     {
-        /**
-         * @var User $user
-         */
         $user = $event->user;
 
         if ($user instanceof User) {
-            $this->auditHistory->user_agent = request()->userAgent();
-            $this->auditHistory->ip_address = request()->ip();
+            $this->auditHistory->user_agent = $this->request->userAgent();
+            $this->auditHistory->ip_address = $this->request->ip();
             $this->auditHistory->module = 'to the system';
             $this->auditHistory->action = 'logged in';
             $this->auditHistory->user_id = $user->id;

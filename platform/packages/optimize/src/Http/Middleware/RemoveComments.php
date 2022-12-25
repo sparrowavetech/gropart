@@ -4,11 +4,7 @@ namespace Botble\Optimize\Http\Middleware;
 
 class RemoveComments extends PageSpeed
 {
-    /**
-     * @param string $buffer
-     * @return string
-     */
-    public function apply($buffer)
+    public function apply(string $buffer): string
     {
         $replace = [
             '/<!--[^]><!\[](.*?)[^\]]-->/s' => '',

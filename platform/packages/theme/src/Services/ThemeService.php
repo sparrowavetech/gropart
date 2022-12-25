@@ -16,39 +16,16 @@ use Theme;
 
 class ThemeService
 {
-    /**
-     * @var Filesystem
-     */
-    public $files;
+    protected Filesystem $files;
 
-    /**
-     * @var SettingStore
-     */
-    public $settingStore;
+    protected SettingStore $settingStore;
 
-    /**
-     * @var PluginService
-     */
-    public $pluginService;
+    protected PluginService $pluginService;
 
-    /**
-     * @var WidgetInterface
-     */
-    public $widgetRepository;
+    protected WidgetInterface $widgetRepository;
 
-    /**
-     * @var SettingInterface
-     */
-    public $settingRepository;
+    protected SettingInterface $settingRepository;
 
-    /**
-     * ThemeService constructor.
-     * @param Filesystem $files
-     * @param SettingStore $settingStore
-     * @param PluginService $pluginService
-     * @param WidgetInterface $widgetRepository
-     * @param SettingInterface $settingRepository
-     */
     public function __construct(
         Filesystem $files,
         SettingStore $settingStore,
@@ -63,10 +40,6 @@ class ThemeService
         $this->settingRepository = $settingRepository;
     }
 
-    /**
-     * @param string $theme
-     * @return array
-     */
     public function activate(string $theme): array
     {
         $validate = $this->validate($theme);
@@ -85,9 +58,9 @@ class ThemeService
         try {
             $content = BaseHelper::getFileData($this->getPath($theme, 'theme.json'));
 
-            if (!empty($content)) {
+            if (! empty($content)) {
                 $requiredPlugins = Arr::get($content, 'required_plugins', []);
-                if (!empty($requiredPlugins)) {
+                if (! empty($requiredPlugins)) {
                     foreach ($requiredPlugins as $plugin) {
                         $this->pluginService->activate($plugin);
                     }
@@ -120,22 +93,18 @@ class ThemeService
         ];
     }
 
-    /**
-     * @param string $theme
-     * @return array
-     */
     protected function validate(string $theme): array
     {
         $location = theme_path($theme);
 
-        if (!$this->files->isDirectory($location)) {
+        if (! $this->files->isDirectory($location)) {
             return [
                 'error' => true,
                 'message' => trans('packages/theme::theme.theme_is_not_existed'),
             ];
         }
 
-        if (!$this->files->exists($location . '/theme.json')) {
+        if (! $this->files->exists($location . '/theme.json')) {
             return [
                 'error' => true,
                 'message' => trans('packages/theme::theme.missing_json_file'),
@@ -148,23 +117,12 @@ class ThemeService
         ];
     }
 
-    /**
-     * Get root writable path.
-     *
-     * @param string $theme
-     * @param string|null $path
-     * @return string
-     */
     protected function getPath(string $theme, ?string $path = null): string
     {
         return rtrim(theme_path(), '/') . '/' . rtrim(ltrim(strtolower($theme), '/'), '/') . '/' . $path;
     }
 
-    /**
-     * @param string|null $theme
-     * @return array
-     */
-    public function publishAssets(string $theme = null): array
+    public function publishAssets(?string $theme = null): array
     {
         if ($theme) {
             $themes = [$theme];
@@ -176,9 +134,9 @@ class ThemeService
             $resourcePath = $this->getPath($theme, 'public');
 
             $themePath = public_path('themes');
-            if (!$this->files->isDirectory($themePath)) {
+            if (! $this->files->isDirectory($themePath)) {
                 $this->files->makeDirectory($themePath, 0755, true);
-            } elseif (!$this->files->isWritable($themePath)) {
+            } elseif (! $this->files->isWritable($themePath)) {
                 return [
                     'error' => true,
                     'message' => trans('packages/theme::theme.folder_is_not_writeable', ['name' => $themePath]),
@@ -187,7 +145,7 @@ class ThemeService
 
             $publishPath = $themePath . '/' . ($theme == Theme::getThemeName() ? Theme::getPublicThemeName() : $theme);
 
-            if (!$this->files->isDirectory($publishPath)) {
+            if (! $this->files->isDirectory($publishPath)) {
                 $this->files->makeDirectory($publishPath, 0755, true);
             }
 
@@ -201,11 +159,6 @@ class ThemeService
         ];
     }
 
-    /**
-     * @param string $theme
-     * @return array
-     * @throws Exception
-     */
     public function remove(string $theme): array
     {
         $validate = $this->validate($theme);
@@ -240,10 +193,6 @@ class ThemeService
         ];
     }
 
-    /**
-     * @param string $theme
-     * @return array
-     */
     public function removeAssets(string $theme): array
     {
         $validate = $this->validate($theme);

@@ -5,12 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class () extends Migration {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::create('dashboard_widgets', function (Blueprint $table) {
             $table->id();
@@ -21,20 +16,15 @@ return new class () extends Migration {
         Schema::create('dashboard_widget_settings', function (Blueprint $table) {
             $table->id();
             $table->text('settings')->nullable();
-            $table->integer('user_id')->unsigned()->index()->references('id')->on('users');
-            $table->integer('widget_id')->unsigned()->index()->references('id')->on('widgets');
+            $table->integer('user_id')->unsigned()->index();
+            $table->integer('widget_id')->unsigned()->index();
             $table->tinyInteger('order')->unsigned()->default(0);
             $table->tinyInteger('status')->unsigned()->default(1);
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('dashboard_widgets');
         Schema::dropIfExists('dashboard_widget_settings');

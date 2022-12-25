@@ -20,14 +20,8 @@ use Throwable;
 
 class InvoiceController extends BaseController
 {
-    /**
-     * @var InvoiceInterface
-     */
-    protected $invoiceRepository;
+    protected InvoiceInterface $invoiceRepository;
 
-    /**
-     * @param InvoiceInterface $invoiceRepository
-     */
     public function __construct(InvoiceInterface $invoiceRepository)
     {
         $this->invoiceRepository = $invoiceRepository;

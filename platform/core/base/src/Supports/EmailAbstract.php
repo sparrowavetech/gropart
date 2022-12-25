@@ -13,28 +13,12 @@ class EmailAbstract extends Mailable
     use Queueable;
     use SerializesModels;
 
-    /**
-     * @var string
-     */
-    public $content;
+    public string $content;
 
-    /**
-     * @var string
-     */
     public $subject;
 
-    /**
-     * @var array
-     */
-    public $data;
+    public array $data;
 
-    /**
-     * Create a new message instance.
-     *
-     * @param string|null $content
-     * @param string|null $subject
-     * @param array $data
-     */
     public function __construct(?string $content, ?string $subject, array $data = [])
     {
         $this->content = $content;
@@ -42,11 +26,6 @@ class EmailAbstract extends Mailable
         $this->data = $data;
     }
 
-    /**
-     * Build the message.
-     *
-     * @return EmailAbstract
-     */
     public function build(): EmailAbstract
     {
         $inlineCss = new CssToInlineStyles();
@@ -70,8 +49,8 @@ class EmailAbstract extends Mailable
             ->html($inlineCss->convert($this->content));
 
         $attachments = Arr::get($this->data, 'attachments');
-        if (!empty($attachments)) {
-            if (!is_array($attachments)) {
+        if (! empty($attachments)) {
+            if (! is_array($attachments)) {
                 $attachments = [$attachments];
             }
             foreach ($attachments as $file) {

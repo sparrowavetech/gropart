@@ -11,16 +11,8 @@ class ProductAttributeSet extends BaseModel
 {
     use EnumCastable;
 
-    /**
-     * The database table used by the model.
-     *
-     * @var string
-     */
     protected $table = 'ec_product_attribute_sets';
 
-    /**
-     * @var array
-     */
     protected $fillable = [
         'title',
         'slug',
@@ -33,9 +25,6 @@ class ProductAttributeSet extends BaseModel
         'use_image_from_product_variation',
     ];
 
-    /**
-     * @var array
-     */
     protected $casts = [
         'status' => BaseStatusEnum::class,
     ];

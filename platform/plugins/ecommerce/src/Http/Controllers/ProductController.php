@@ -75,9 +75,7 @@ class ProductController extends BaseController
      */
     public function edit($id, Request $request, FormBuilder $formBuilder)
     {
-        $product = $this->productRepository->findOrFail($id, ['options' => function ($query) {
-            return $query->with(['values']);
-        }]);
+        $product = $this->productRepository->findOrFail($id);
 
         if ($product->is_variation) {
             abort(404);

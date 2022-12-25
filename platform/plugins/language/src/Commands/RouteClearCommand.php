@@ -7,19 +7,14 @@ use Language;
 
 class RouteClearCommand extends BaseRouteClearCommand
 {
-    /**
-     * Execute the console command.
-     *
-     * @return int
-     */
-    public function handle()
+    public function handle(): int
     {
         parent::handle();
 
         foreach (Language::getSupportedLanguagesKeys() as $locale) {
             $path = $this->laravel->getCachedRoutesPath();
 
-            if (!$locale) {
+            if (! $locale) {
                 $locale = Language::getDefaultLocale();
             }
 
@@ -30,6 +25,6 @@ class RouteClearCommand extends BaseRouteClearCommand
             }
         }
 
-        return 0;
+        return self::SUCCESS;
     }
 }

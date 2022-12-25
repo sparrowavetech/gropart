@@ -16,15 +16,8 @@ use Throwable;
 
 class ReviewController extends BaseController
 {
-    /**
-     * @var ReviewInterface
-     */
-    protected $reviewRepository;
+    protected ReviewInterface $reviewRepository;
 
-    /**
-     * ReviewController constructor.
-     * @param ReviewInterface $reviewRepository
-     */
     public function __construct(ReviewInterface $reviewRepository)
     {
         $this->reviewRepository = $reviewRepository;

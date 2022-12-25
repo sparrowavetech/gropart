@@ -14,7 +14,7 @@ return new class () extends Migration {
      */
     public function up()
     {
-        if (!Schema::hasColumn('ec_orders', 'completed_at')) {
+        if (! Schema::hasColumn('ec_orders', 'completed_at')) {
             Schema::table('ec_orders', function (Blueprint $table) {
                 $table->timestamp('completed_at')->after('is_finished')->nullable();
             });

@@ -3,45 +3,37 @@
 namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Models\BaseModel;
+use Botble\Ecommerce\Traits\LocationTrait;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ShippingRuleItem extends BaseModel
 {
-    /**
-     * @var string
-     */
+    use LocationTrait;
+
     protected $table = 'ec_shipping_rule_items';
 
-    /**
-     * @var array
-     */
     protected $fillable = [
         'shipping_rule_id',
+        'country',
+        'state',
         'city',
         'adjustment_price',
         'is_enabled',
+        'zip_code',
     ];
 
-    /**
-     * @var array
-     */
-    protected $dates = [
-        'created_at',
-        'updated_at',
-    ];
-
-    /**
-     * @param string $value
-     */
-    public function setAdjustmentPriceAttribute($value)
+    public function setAdjustmentPriceAttribute(?string $value)
     {
         $this->attributes['adjustment_price'] = (float)str_replace(',', '', $value);
     }
 
-    /**
-     * @return string
-     */
-    public function getAdjustmentPriceAttribute(): string
+    public function shippingRule(): BelongsTo
     {
-        return number_format($this->attributes['adjustment_price'], 0, false, false);
+        return $this->belongsTo(ShippingRule::class)->withDefault();
+    }
+
+    public function getNameItemAttribute(): string
+    {
+        return sprintf(' "%s, %s, %s"', $this->state_name, $this->city_name, $this->zip_code);
     }
 }

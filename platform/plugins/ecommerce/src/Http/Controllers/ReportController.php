@@ -26,27 +26,12 @@ use Throwable;
 
 class ReportController extends BaseController
 {
-    /**
-     * @var OrderInterface
-     */
-    protected $orderRepository;
+    protected OrderInterface $orderRepository;
 
-    /**
-     * @var ProductInterface
-     */
-    protected $productRepository;
+    protected ProductInterface $productRepository;
 
-    /**
-     * @var CustomerInterface
-     */
-    protected $customerRepository;
+    protected CustomerInterface $customerRepository;
 
-    /**
-     * EcommerceReportController constructor.
-     * @param OrderInterface $order
-     * @param ProductInterface $product
-     * @param CustomerInterface $customer
-     */
     public function __construct(
         OrderInterface $order,
         ProductInterface $product,
@@ -80,7 +65,8 @@ class ReportController extends BaseController
                 'vendor/core/plugins/ecommerce/libraries/daterangepicker/daterangepicker.css',
                 'vendor/core/plugins/ecommerce/libraries/apexcharts-bundle/dist/apexcharts.css',
                 'vendor/core/plugins/ecommerce/css/report.css',
-            ]);
+            ])
+            ->usingVueJS();
 
         [$startDate, $endDate] = EcommerceHelper::getDateRangeInReport($request);
 

@@ -100,4 +100,6 @@ interface ProductInterface extends RepositoryInterface
      * @return mixed
      */
     public function getProductsRecentlyViewed(int $customerId, array $params = []);
+
+    public function saveProductOptions(array $options, Product $product);
 }

@@ -6,42 +6,22 @@ use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
 use EmailHandler;
 use Illuminate\Console\Command;
 use OrderHelper;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Throwable;
 
+#[AsCommand('cms:abandoned-carts:email', 'Send emails abandoned carts')]
 class SendAbandonedCartsEmailCommand extends Command
 {
-    /**
-     * @var OrderInterface
-     */
-    public $orderRepository;
+    public OrderInterface $orderRepository;
 
-    /**
-     * The console command signature.
-     *
-     * @var string
-     */
-    protected $signature = 'cms:abandoned-carts:email';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Send emails abandoned carts';
-
-    /**
-     * @param OrderInterface $orderRepository
-     */
     public function __construct(OrderInterface $orderRepository)
     {
         parent::__construct();
+
         $this->orderRepository = $orderRepository;
     }
 
-    /**
-     * Execute the console command.
-     */
-    public function handle()
+    public function handle(): int
     {
         $orders = $this->orderRepository->getModel()
             ->with(['user', 'address'])
@@ -53,7 +33,7 @@ class SendAbandonedCartsEmailCommand extends Command
         foreach ($orders as $order) {
             $email = $order->user->email ?: $order->address->email;
 
-            if (!$email) {
+            if (! $email) {
                 continue;
             }
 
@@ -67,9 +47,13 @@ class SendAbandonedCartsEmailCommand extends Command
                 $count++;
             } catch (Throwable $exception) {
                 info($exception->getMessage());
+
+                return self::FAILURE;
             }
         }
 
         $this->info('Send ' . $count . ' email' . ($count != 1 ? 's' : '') . ' successfully!');
+
+        return self::SUCCESS;
     }
 }

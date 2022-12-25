@@ -9,26 +9,14 @@ use Illuminate\Http\Request;
 
 class StoreProductTagService
 {
-    /**
-     * @var ProductTagInterface
-     */
-    public $productTagRepository;
+    public ProductTagInterface $productTagRepository;
 
-    /**
-     * StoreProductTagService constructor.
-     * @param ProductTagInterface $productTagRepository
-     */
     public function __construct(ProductTagInterface $productTagRepository)
     {
         $this->productTagRepository = $productTagRepository;
     }
 
-    /**
-     * @param Request $request
-     * @param Product $product
-     * @return void
-     */
-    public function execute(Request $request, Product $product)
+    public function execute(Request $request, Product $product): void
     {
         $tags = $product->tags->pluck('name')->all();
 
@@ -37,13 +25,13 @@ class StoreProductTagService
         if (count($tags) != count($tagsInput) || count(array_diff($tags, $tagsInput)) > 0) {
             $product->tags()->detach();
             foreach ($tagsInput as $tagName) {
-                if (!trim($tagName)) {
+                if (! trim($tagName)) {
                     continue;
                 }
 
                 $tag = $this->productTagRepository->getFirstBy(['name' => $tagName]);
 
-                if ($tag === null && !empty($tagName)) {
+                if ($tag === null && ! empty($tagName)) {
                     $tag = $this->productTagRepository->createOrUpdate(['name' => $tagName]);
 
                     $request->merge(['slug' => $tagName]);
@@ -51,7 +39,7 @@ class StoreProductTagService
                     event(new CreatedContentEvent(PRODUCT_TAG_MODULE_SCREEN_NAME, $request, $tag));
                 }
 
-                if (!empty($tag)) {
+                if (! empty($tag)) {
                     $product->tags()->attach($tag->id);
                 }
             }

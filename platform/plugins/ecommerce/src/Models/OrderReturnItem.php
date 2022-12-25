@@ -11,14 +11,8 @@ class OrderReturnItem extends BaseModel
 {
     use EnumCastable;
 
-    /**
-     * @var string
-     */
     protected $table = 'ec_order_return_items';
 
-    /**
-     * @var string[]
-     */
     protected $fillable = [
         'order_return_id',
         'order_product_id',
@@ -30,9 +24,6 @@ class OrderReturnItem extends BaseModel
         'reason',
     ];
 
-    /**
-     * @var string[]
-     */
     protected $casts = [
         'reason' => OrderReturnReasonEnum::class,
     ];

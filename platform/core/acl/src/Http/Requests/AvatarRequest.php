@@ -7,12 +7,7 @@ use RvMedia;
 
 class AvatarRequest extends Request
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
             'avatar_file' => RvMedia::imageValidationRule(),

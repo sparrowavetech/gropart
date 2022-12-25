@@ -4,16 +4,15 @@ namespace Botble\Base\Supports;
 
 use Botble\Base\Models\BaseModel;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 
 class RepositoryHelper
 {
     /**
      * @param Builder|EloquentBuilder $data
-     * @param BaseModel|Model $model
+     * @param BaseModel $model
      * @param false $isSingle
-     * @return Builder|EloquentBuilder
+     * @return Builder|EloquentBuilder|BaseModel
      */
     public static function applyBeforeExecuteQuery($data, $model, bool $isSingle = false)
     {

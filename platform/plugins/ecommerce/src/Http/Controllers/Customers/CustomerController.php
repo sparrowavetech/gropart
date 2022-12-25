@@ -20,10 +20,8 @@ use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
 use Botble\Ecommerce\Tables\CustomerTable;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -31,20 +29,10 @@ use Throwable;
 
 class CustomerController extends BaseController
 {
-    /**
-     * @var CustomerInterface
-     */
-    protected $customerRepository;
+    protected CustomerInterface $customerRepository;
 
-    /**
-     * @var AddressInterface
-     */
-    protected $addressRepository;
+    protected AddressInterface $addressRepository;
 
-    /**
-     * @param CustomerInterface $customerRepository
-     * @param AddressInterface $addressRepository
-     */
     public function __construct(CustomerInterface $customerRepository, AddressInterface $addressRepository)
     {
         $this->customerRepository = $customerRepository;
@@ -53,7 +41,7 @@ class CustomerController extends BaseController
 
     /**
      * @param CustomerTable $dataTable
-     * @return Factory|Application|View|JsonResponse
+     * @return Factory|View
      * @throws Throwable
      */
     public function index(CustomerTable $dataTable)
@@ -252,7 +240,7 @@ class CustomerController extends BaseController
     public function getCustomerOrderNumbers($id, BaseHttpResponse $response)
     {
         $customer = $this->customerRepository->findById($id);
-        if (!$customer) {
+        if (! $customer) {
             return $response->setData(0);
         }
 

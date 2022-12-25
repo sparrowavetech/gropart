@@ -51,7 +51,7 @@ class EditorManagement {
                             key: name,
                             href: route('short-codes.ajax-get-admin-config', name),
                             data: {
-                                code: shortcode,
+                                code: encodeURIComponent(shortcode),
                             },
                             description: description,
                             previewImage: '',
@@ -126,6 +126,25 @@ class EditorManagement {
                     upload: {
                         types: ['jpeg', 'png', 'gif', 'bmp', 'webp', 'tiff', 'svg+xml']
                     }
+                },
+                codeBlock: {
+                    languages: [
+                        {language: 'plaintext', label: 'Plain text'},
+                        {language: 'c', label: 'C'},
+                        {language: 'cs', label: 'C#'},
+                        {language: 'cpp', label: 'C++'},
+                        {language: 'css', label: 'CSS'},
+                        {language: 'diff', label: 'Diff'},
+                        {language: 'html', label: 'HTML'},
+                        {language: 'java', label: 'Java'},
+                        {language: 'javascript', label: 'JavaScript'},
+                        {language: 'php', label: 'PHP'},
+                        {language: 'python', label: 'Python'},
+                        {language: 'ruby', label: 'Ruby'},
+                        {language: 'typescript', label: 'TypeScript'},
+                        {language: 'xml', label: 'XML'},
+                        {language: 'dart', label: 'Dart', class: 'language-dart'},
+                    ]
                 },
                 link: {
                     defaultProtocol: 'http://',
@@ -366,7 +385,7 @@ class EditorManagement {
             $('.short_code_modal .modal-title strong').text(description);
         }
 
-        if (previewImage != null) {
+        if (previewImage != null && previewImage != '') {
             $('.short_code_modal .shortcode-preview-image-link').attr('href', previewImage).show();
         } else {
             $('.short_code_modal .shortcode-preview-image-link').hide();

@@ -57,14 +57,19 @@
                             <input type="hidden" name="shipping_option[{{ $storeId }}]" value="{{ old("shipping_option.$storeId", $defaultShippingOption) }}">
                             <div id="shipping-method-{{ $storeId }}">
                                 <ul class="list-group list_payment_method">
-                                    @foreach ($shipping as $shippingKey => $shippingItem)
-                                        @foreach($shippingItem as $subShippingKey => $subShippingItem)
-                                            @include('plugins/marketplace::orders.partials.shipping-option', [
-                                                'defaultShippingMethod' => $defaultShippingMethod,
-                                                'defaultShippingOption' => $defaultShippingOption,
-                                                'shippingOption'        => $subShippingKey,
-                                                'shippingItem'          => $subShippingItem,
-                                                'storeId'               => $storeId
+                                    @foreach ($shipping as $shippingKey => $shippingItems)
+                                        @foreach($shippingItems as $shippingOption => $shippingItem)
+                                            @include('plugins/ecommerce::orders.partials.shipping-option', [
+                                                'shippingItem' => $shippingItem,
+                                                'attributes' => [
+                                                    'id' => 'shipping-method-' . $storeId . '-' . $shippingKey . '-' . $shippingOption,
+                                                    'name' => 'shipping_method[' . $storeId . ']',
+                                                    'class' => 'magic-radio shipping_method_input',
+                                                    'checked' => old('shipping_method.' . $storeId, $shippingKey) == $defaultShippingMethod && old('shipping_option.' . $storeId, $shippingOption) == $defaultShippingOption,
+                                                    'disabled' => Arr::get($shippingItem, 'disabled'),
+                                                    'data-id'=> $storeId,
+                                                    'data-option' => $shippingOption,
+                                                ],
                                             ])
                                         @endforeach
                                     @endforeach
@@ -75,8 +80,6 @@
                         <p>{{ __('No shipping methods available!') }}</p>
                     @endif
                 </div>
-            @else
-                {{-- Can render text to show for customer --}}
             @endif
 
             <hr>

@@ -6,11 +6,7 @@ use Botble\Support\Http\Requests\Request;
 
 class MediaSettingRequest extends Request
 {
-    /**
-     * Get the validation rules that apply to the request.
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
             'media_aws_access_key_id' => 'required_if:media_driver,s3',

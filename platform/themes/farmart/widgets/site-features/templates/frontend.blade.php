@@ -1,4 +1,4 @@
-<div class="row {{ $sidebar == 'pre_footer_sidebar' ? 'row-cols-md-4 row-cols-2 justify-content-center my-4 g-2' :  'row-cols-1 bg-light mb-5 py-3 px-4 g-0' }}">
+<div class="row {{ $sidebar == 'pre_footer_sidebar' ? 'row-cols-xl-5 row-cols-lg-4 row-cols-md-3 row-cols-2 justify-content-center my-4 g-2' :  'row-cols-1 bg-light mb-5 py-3 px-4 g-0' }}">
     @for ($i = 1; $i <= 5; $i++)
         @if ($title = Arr::get(Arr::get($config['data'], $i), 'title'))
             <div class="col py-2">

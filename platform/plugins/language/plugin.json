@@ -1,4 +1,5 @@
 {
+    "id": "botble/language",
     "name": "Language",
     "namespace": "Botble\\Language\\",
     "provider": "Botble\\Language\\Providers\\LanguageServiceProvider",

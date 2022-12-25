@@ -13,7 +13,7 @@ class Filter extends ActionHookEvent
     public function fire(string $action, array $args)
     {
         $value = $args[0] ?? ''; // get the value, the first argument is always the value
-        if (!$this->getListeners()) {
+        if (! $this->getListeners()) {
             return $value;
         }
 

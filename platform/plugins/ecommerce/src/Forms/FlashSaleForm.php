@@ -11,9 +11,6 @@ use Carbon\Carbon;
 
 class FlashSaleForm extends FormAbstract
 {
-    /**
-     * {@inheritDoc}
-     */
     public function buildForm()
     {
         Assets::addScriptsDirectly('vendor/core/plugins/ecommerce/js/flash-sale.js')

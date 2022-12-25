@@ -12,27 +12,12 @@ use Illuminate\Http\Request;
 
 class CreateUserService implements ProduceServiceInterface
 {
-    /**
-     * @var UserInterface
-     */
-    protected $userRepository;
+    protected UserInterface $userRepository;
 
-    /**
-     * @var RoleInterface
-     */
-    protected $roleRepository;
+    protected RoleInterface $roleRepository;
 
-    /**
-     * @var ActivateUserService
-     */
-    protected $activateUserService;
+    protected ActivateUserService $activateUserService;
 
-    /**
-     * CreateUserService constructor.
-     * @param UserInterface $userRepository
-     * @param RoleInterface $roleRepository
-     * @param ActivateUserService $activateUserService
-     */
     public function __construct(
         UserInterface $userRepository,
         RoleInterface $roleRepository,
@@ -43,11 +28,6 @@ class CreateUserService implements ProduceServiceInterface
         $this->activateUserService = $activateUserService;
     }
 
-    /**
-     * @param Request $request
-     *
-     * @return User
-     */
     public function execute(Request $request): User
     {
         /**
@@ -64,7 +44,7 @@ class CreateUserService implements ProduceServiceInterface
             if ($this->activateUserService->activate($user) && $request->input('role_id')) {
                 $role = $this->roleRepository->findById($request->input('role_id'));
 
-                if (!empty($role)) {
+                if (! empty($role)) {
                     $role->users()->attach($user->id);
 
                     event(new RoleAssignmentEvent($role, $user));

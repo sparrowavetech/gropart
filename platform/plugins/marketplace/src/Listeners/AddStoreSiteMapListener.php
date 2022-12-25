@@ -8,25 +8,14 @@ use SiteMapManager;
 
 class AddStoreSiteMapListener
 {
-    /**
-     * @var StoreInterface
-     */
-    protected $storeRepository;
+    protected StoreInterface $storeRepository;
 
-    /**
-     * @param StoreInterface $storeRepository
-     */
     public function __construct(StoreInterface $storeRepository)
     {
         $this->storeRepository = $storeRepository;
     }
 
-    /**
-     * Handle the event.
-     *
-     * @return void
-     */
-    public function handle()
+    public function handle(): void
     {
         SiteMapManager::add(route('public.stores'), '2022-09-14 00:00:00', '1', 'monthly');
 
@@ -35,10 +24,11 @@ class AddStoreSiteMapListener
             ->with('slugable')
             ->where('status', BaseStatusEnum::PUBLISHED)
             ->orderBy('created_at', 'desc')
+            ->select(['id', 'name', 'updated_at'])
             ->get();
 
         foreach ($stores as $store) {
-            if (!$store->slugable) {
+            if (! $store->slugable) {
                 continue;
             }
 

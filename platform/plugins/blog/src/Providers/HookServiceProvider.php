@@ -5,7 +5,6 @@ namespace Botble\Blog\Providers;
 use Assets;
 use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Base\Models\BaseModel;
 use Botble\Blog\Models\Category;
 use Botble\Blog\Models\Post;
 use Botble\Blog\Models\Tag;
@@ -13,8 +12,11 @@ use Botble\Blog\Services\BlogService;
 use Botble\Dashboard\Supports\DashboardWidgetInstance;
 use Botble\Page\Models\Page;
 use Botble\Page\Repositories\Interfaces\PageInterface;
+use Botble\Shortcode\Compilers\Shortcode;
+use Botble\Slug\Models\Slug;
 use Eloquent;
 use Html;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -23,7 +25,6 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Menu;
 use RvMedia;
-use stdClass;
 use Theme;
 
 class HookServiceProvider extends ServiceProvider
@@ -78,7 +79,7 @@ class HookServiceProvider extends ServiceProvider
 
                     $schemaType = setting('blog_post_schema_type', 'NewsArticle');
 
-                    if (!in_array($schemaType, ['NewsArticle', 'News', 'Article', 'BlogPosting'])) {
+                    if (! in_array($schemaType, ['NewsArticle', 'News', 'Article', 'BlogPosting'])) {
                         $schemaType = 'NewsArticle';
                     }
 
@@ -188,14 +189,9 @@ class HookServiceProvider extends ServiceProvider
         }
     }
 
-    /**
-     * @param array $widgets
-     * @param Collection $widgetSettings
-     * @return array
-     */
-    public function registerDashboardWidgets($widgets, $widgetSettings)
+    public function registerDashboardWidgets(array $widgets, Collection $widgetSettings): array
     {
-        if (!Auth::user()->hasPermission('posts.index')) {
+        if (! Auth::user()->hasPermission('posts.index')) {
             return $widgets;
         }
 
@@ -213,25 +209,18 @@ class HookServiceProvider extends ServiceProvider
             ->init($widgets, $widgetSettings);
     }
 
-    /**
-     * @param Eloquent $slug
-     * @return array|Eloquent
-     */
-    public function handleSingleView($slug)
+    public function handleSingleView(Slug|array $slug): Eloquent|array
     {
         return (new BlogService())->handleFrontRoutes($slug);
     }
 
-    /**
-     * @param stdClass $shortcode
-     * @return array|string
-     */
-    public function renderBlogPosts($shortcode)
+    public function renderBlogPosts(Shortcode $shortcode): array|string
     {
-        $posts = get_all_posts(true, (int)$shortcode->paginate, ['slugable', 'categories', 'categories.slugable', 'author']);
+        $posts = get_all_posts(true, (int)$shortcode->paginate);
 
         $view = 'plugins/blog::themes.templates.posts';
         $themeView = Theme::getThemeNamespace() . '::views.templates.posts';
+
         if (view()->exists($themeView)) {
             $view = $themeView;
         }
@@ -239,12 +228,7 @@ class HookServiceProvider extends ServiceProvider
         return view($view, compact('posts'))->render();
     }
 
-    /**
-     * @param string|null $content
-     * @param Page $page
-     * @return array|string|null
-     */
-    public function renderBlogPage(?string $content, Page $page)
+    public function renderBlogPage(?string $content, Page $page): ?string
     {
         if ($page->id == theme_option('blog_page_id', setting('blog_page_id'))) {
             $view = 'plugins/blog::themes.loop';
@@ -254,24 +238,14 @@ class HookServiceProvider extends ServiceProvider
             }
 
             return view($view, [
-                'posts' => get_all_posts(
-                    true,
-                    (int)theme_option('number_of_posts_in_a_category', 12),
-                    ['slugable', 'categories', 'categories.slugable', 'author']
-                ),
-            ])
-                ->render();
+                'posts' => get_all_posts(true, (int)theme_option('number_of_posts_in_a_category', 12)),
+            ])->render();
         }
 
         return $content;
     }
 
-    /**
-     * @param string|null $name
-     * @param Page $page
-     * @return string|null
-     */
-    public function addAdditionNameToPageName(?string $name, Page $page)
+    public function addAdditionNameToPageName(?string $name, Page $page): ?string
     {
         if ($page->id == theme_option('blog_page_id', setting('blog_page_id'))) {
             $subTitle = Html::tag('span', trans('plugins/blog::base.blog_page'), ['class' => 'additional-page-name'])
@@ -287,27 +261,15 @@ class HookServiceProvider extends ServiceProvider
         return $name;
     }
 
-    /**
-     * @param BaseModel $model
-     * @param string $priority
-     * @return string
-     */
-    public function addLanguageChooser($priority, $model)
+    public function addLanguageChooser(string $priority, Model $model): void
     {
         if ($priority == 'head' && $model instanceof Category) {
             $route = 'categories.index';
 
-            if ($route) {
-                echo view('plugins/language::partials.admin-list-language-chooser', compact('route'))->render();
-            }
+            echo view('plugins/language::partials.admin-list-language-chooser', compact('route'))->render();
         }
     }
 
-    /**
-     * @param string|null $data
-     * @return string
-     * @throws Throwable
-     */
     public function addSettings(?string $data = null): string
     {
         return $data . view('plugins/blog::settings')->render();

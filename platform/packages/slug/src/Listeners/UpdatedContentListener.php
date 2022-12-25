@@ -12,27 +12,14 @@ use SlugHelper;
 
 class UpdatedContentListener
 {
-    /**
-     * @var SlugInterface
-     */
-    protected $slugRepository;
+    protected SlugInterface $slugRepository;
 
-    /**
-     * UpdatedContentListener constructor.
-     * @param SlugInterface $slugRepository
-     */
     public function __construct(SlugInterface $slugRepository)
     {
         $this->slugRepository = $slugRepository;
     }
 
-    /**
-     * Handle the event.
-     *
-     * @param UpdatedContentEvent $event
-     * @return void
-     */
-    public function handle(UpdatedContentEvent $event)
+    public function handle(UpdatedContentEvent $event): void
     {
         if (SlugHelper::isSupportedModel(get_class($event->data)) && $event->request->input('is_slug_editable', 0)) {
             try {
@@ -40,19 +27,19 @@ class UpdatedContentListener
 
                 $fieldNameToGenerateSlug = SlugHelper::getColumnNameToGenerateSlug($event->data);
 
-                if (!$slug) {
+                if (! $slug) {
                     $slug = $event->request->input($fieldNameToGenerateSlug);
                 }
 
-                if (!$slug && $event->data->{$fieldNameToGenerateSlug}) {
-                    if (!SlugHelper::turnOffAutomaticUrlTranslationIntoLatin()) {
+                if (! $slug && $event->data->{$fieldNameToGenerateSlug}) {
+                    if (! SlugHelper::turnOffAutomaticUrlTranslationIntoLatin()) {
                         $slug = Str::slug($event->data->{$fieldNameToGenerateSlug});
                     } else {
                         $slug = $event->data->{$fieldNameToGenerateSlug};
                     }
                 }
 
-                if (!$slug) {
+                if (! $slug) {
                     $slug = time();
                 }
 

@@ -114,7 +114,7 @@ class OrderReturnController extends BaseController
 
         [$status, $returnRequest] = OrderReturnHelper::updateReturnOrder($returnRequest, $data);
 
-        if (!$status) {
+        if (! $status) {
             return $response
                 ->setError()
                 ->setMessage(trans('plugins/ecommerce::order.notices.update_return_order_status_error'));

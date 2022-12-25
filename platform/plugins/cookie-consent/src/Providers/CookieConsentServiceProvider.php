@@ -27,14 +27,14 @@ class CookieConsentServiceProvider extends ServiceProvider
             });
 
             $this->app['view']->composer('plugins/cookie-consent::index', function (View $view) {
-                $cookieConsentConfig = config('plugins.cookie-consent.general');
+                $cookieConsentConfig = config('plugins.cookie-consent.general', []);
 
                 $alreadyConsentedWithCookies = Cookie::has($cookieConsentConfig['cookie_name']);
 
                 $view->with(compact('alreadyConsentedWithCookies', 'cookieConsentConfig'));
             });
 
-            if (!Cookie::has(config('plugins.cookie-consent.general.cookie_name'))) {
+            if (! Cookie::has(config('plugins.cookie-consent.general.cookie_name'))) {
                 Theme::asset()
                     ->usePath(false)
                     ->add(
@@ -205,12 +205,7 @@ class CookieConsentServiceProvider extends ServiceProvider
             ]);
     }
 
-    /**
-     * @param string $html
-     * @return string
-     * @throws \Throwable
-     */
-    public function registerCookieConsent($html): string
+    public function registerCookieConsent(?string $html): string
     {
         return $html . view('plugins/cookie-consent::index')->render();
     }

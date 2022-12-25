@@ -9,9 +9,6 @@ use Botble\Ecommerce\Models\ProductCollection;
 
 class ProductCollectionForm extends FormAbstract
 {
-    /**
-     * {@inheritDoc}
-     */
     public function buildForm()
     {
         $this

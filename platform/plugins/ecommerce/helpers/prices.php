@@ -3,7 +3,7 @@
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 
-if (!function_exists('get_product_price')) {
+if (! function_exists('get_product_price')) {
     /**
      * @param array $priceData
      * @return array
@@ -33,7 +33,7 @@ if (!function_exists('get_product_price')) {
             $endDate = $defaultEndDate;
         }
 
-        if ($saleType == 'none' || !$salePrice) {
+        if ($saleType == 'none' || ! $salePrice) {
             $priceInfo['price'] = $price;
 
             return $priceInfo;
@@ -55,7 +55,7 @@ if (!function_exists('get_product_price')) {
     }
 }
 
-if (!function_exists('get_sale_percentage')) {
+if (! function_exists('get_sale_percentage')) {
     /**
      * @param float|int $price
      * @param float|int $salePrice
@@ -67,12 +67,16 @@ if (!function_exists('get_sale_percentage')) {
     {
         $symbol = $appendSymbol ? '%' : '';
 
-        if (!$salePrice) {
+        if (! $salePrice) {
             return 0 . $symbol;
         }
 
         $down = $price - $salePrice;
         $result = $price > 0 ? ceil(-($down / $price) * 100) : 0;
+
+        if (! $result) {
+            return 0;
+        }
 
         if ($abs === true) {
             return abs($result) . $symbol;
@@ -82,7 +86,7 @@ if (!function_exists('get_sale_percentage')) {
     }
 }
 
-if (!function_exists('is_product_on_sale')) {
+if (! function_exists('is_product_on_sale')) {
     /**
      * @param string $saleStatus
      * @param null $startDate
@@ -91,7 +95,7 @@ if (!function_exists('is_product_on_sale')) {
      */
     function is_product_on_sale(string $saleStatus, $startDate = null, $endDate = null): bool
     {
-        if ($saleStatus == 'none' || !$endDate) {
+        if ($saleStatus == 'none' || ! $endDate) {
             return false;
         }
 

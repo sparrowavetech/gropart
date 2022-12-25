@@ -2,6 +2,10 @@
 
 namespace Botble\Location\Tables;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
@@ -14,28 +18,12 @@ use Yajra\DataTables\DataTables;
 
 class StateTable extends TableAbstract
 {
-    /**
-     * @var bool
-     */
     protected $hasActions = true;
 
-    /**
-     * @var bool
-     */
     protected $hasFilter = true;
 
-    /**
-     * @var CountryInterface
-     */
-    protected $countryRepository;
+    protected CountryInterface $countryRepository;
 
-    /**
-     * StateTable constructor.
-     * @param DataTables $table
-     * @param UrlGenerator $urlGenerator
-     * @param StateInterface $stateRepository
-     * @param CountryInterface $countryRepository
-     */
     public function __construct(
         DataTables $table,
         UrlGenerator $urlGenerator,
@@ -47,28 +35,25 @@ class StateTable extends TableAbstract
         $this->repository = $stateRepository;
         $this->countryRepository = $countryRepository;
 
-        if (!Auth::user()->hasAnyPermission(['state.edit', 'state.destroy'])) {
+        if (! Auth::user()->hasAnyPermission(['state.edit', 'state.destroy'])) {
             $this->hasOperations = false;
             $this->hasActions = false;
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
             ->editColumn('name', function ($item) {
-                if (!Auth::user()->hasPermission('state.edit')) {
+                if (! Auth::user()->hasPermission('state.edit')) {
                     return $item->name;
                 }
 
                 return Html::link(route('state.edit', $item->id), $item->name);
             })
             ->editColumn('country_id', function ($item) {
-                if (!$item->country_id && $item->country->name) {
+                if (! $item->country_id && $item->country->name) {
                     return null;
                 }
 
@@ -90,7 +75,7 @@ class StateTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
         $query = $this->repository->getModel()->select([
             'id',
@@ -103,9 +88,6 @@ class StateTable extends TableAbstract
         return $this->applyScopes($query);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function columns(): array
     {
         return [
@@ -132,25 +114,16 @@ class StateTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function buttons(): array
     {
         return $this->addCreateButton(route('state.create'), 'state.create');
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function bulkActions(): array
     {
         return $this->addDeleteAction(route('state.deletes'), 'state.destroy', parent::bulkActions());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getBulkChanges(): array
     {
         return [

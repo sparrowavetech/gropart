@@ -19,7 +19,7 @@ class MenuNodeRepository extends RepositoriesAbstract implements MenuNodeInterfa
                 'parent_id' => $parentId,
             ]);
 
-        if (!empty($select)) {
+        if (! empty($select)) {
             $data = $data->select($select);
         }
 

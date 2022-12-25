@@ -8,25 +8,20 @@ use SlugHelper;
 
 class SlugSettingsRequest extends Request
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         $rules = [];
 
         $canEmptyPrefixes = SlugHelper::getCanEmptyPrefixes();
 
         foreach ($this->except(['_token']) as $settingKey => $settingValue) {
-            if (!Str::contains($settingKey, '-model-key')) {
+            if (! Str::contains($settingKey, '-model-key')) {
                 continue;
             }
 
             $prefixKey = str_replace('-model-key', '', $settingKey);
 
-            if (!in_array($settingValue, $canEmptyPrefixes)) {
+            if (! in_array($settingValue, $canEmptyPrefixes)) {
                 $rules[$prefixKey] = 'required|regex:/^[\pL\s\ \_\-0-9\/]+$/u';
             } else {
                 $rules[$prefixKey] = 'nullable|regex:/^[\pL\s\ \_\-0-9\/]+$/u';
@@ -36,10 +31,7 @@ class SlugSettingsRequest extends Request
         return $rules;
     }
 
-    /**
-     * @return array
-     */
-    public function attributes()
+    public function attributes(): array
     {
         $attributes = [];
         foreach (SlugHelper::supportedModels() as $model => $name) {

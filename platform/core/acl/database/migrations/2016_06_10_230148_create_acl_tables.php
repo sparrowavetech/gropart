@@ -4,12 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 
 return new class () extends Migration {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('name');
@@ -29,7 +24,7 @@ return new class () extends Migration {
 
         Schema::create('activations', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id')->unsigned()->references('id')->on('users')->index();
+            $table->integer('user_id')->unsigned()->index();
             $table->string('code', 120);
             $table->boolean('completed')->default(0);
             $table->timestamp('completed_at')->nullable();
@@ -43,15 +38,15 @@ return new class () extends Migration {
             $table->text('permissions')->nullable();
             $table->string('description', 255)->nullable();
             $table->tinyInteger('is_default')->unsigned()->default(0);
-            $table->integer('created_by')->unsigned()->references('id')->on('users')->index();
-            $table->integer('updated_by')->unsigned()->references('id')->on('users')->index();
+            $table->integer('created_by')->unsigned()->index();
+            $table->integer('updated_by')->unsigned()->index();
             $table->timestamps();
         });
 
         Schema::create('role_users', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id')->unsigned()->references('id')->on('users')->index();
-            $table->integer('role_id')->unsigned()->references('id')->on('roles')->index();
+            $table->integer('user_id')->unsigned()->index();
+            $table->integer('role_id')->unsigned()->index();
             $table->nullableTimestamps();
         });
 
@@ -59,17 +54,12 @@ return new class () extends Migration {
             $table->id();
             $table->string('key')->nullable();
             $table->string('value')->nullable();
-            $table->integer('user_id')->unsigned()->references('id')->on('users')->index();
+            $table->integer('user_id')->unsigned()->index();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('activations');
         Schema::dropIfExists('roles');

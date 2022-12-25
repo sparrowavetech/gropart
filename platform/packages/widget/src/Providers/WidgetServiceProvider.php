@@ -23,12 +23,7 @@ class WidgetServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    /**
-     * Register the service provider.
-     *
-     * @return void
-     */
-    public function register()
+    public function register(): void
     {
         $this->app->bind(WidgetInterface::class, function () {
             return new WidgetCacheDecorator(new WidgetRepository(new Widget()));
@@ -46,16 +41,11 @@ class WidgetServiceProvider extends ServiceProvider
             ->loadHelpers();
     }
 
-    /**
-     * Bootstrap the application events.
-     *
-     * @return void
-     */
-    public function boot()
+    public function boot(): void
     {
         $this
             ->loadAndPublishConfigurations(['permissions'])
-            ->loadRoutes(['web'])
+            ->loadRoutes()
             ->loadMigrations()
             ->loadAndPublishViews()
             ->loadAndPublishTranslations()
@@ -72,7 +62,7 @@ class WidgetServiceProvider extends ServiceProvider
 
             $widgetPath = theme_path(Theme::getThemeName() . '/widgets');
             $widgets = BaseHelper::scanFolder($widgetPath);
-            if (!empty($widgets) && is_array($widgets)) {
+            if (! empty($widgets) && is_array($widgets)) {
                 foreach ($widgets as $widget) {
                     $registration = $widgetPath . '/' . $widget . '/registration.php';
                     if (File::exists($registration)) {

@@ -9,19 +9,12 @@ use Illuminate\Support\HtmlString;
 
 class ResetPasswordNotification extends Notification
 {
-    /**
-     * The password reset token.
-     *
-     * @var string
-     */
-    public $token;
+    public string $token;
 
     /**
      * Create a new notification instance.
-     *
-     * @param string $token
      */
-    public function __construct($token)
+    public function __construct(string $token)
     {
         $this->token = $token;
     }

@@ -1,4 +1,5 @@
 {
+    "id": "botble/razorpay",
     "name": "Razorpay Payment Gateway",
     "namespace": "Botble\\Razorpay\\",
     "provider": "Botble\\Razorpay\\Providers\\RazorpayServiceProvider",

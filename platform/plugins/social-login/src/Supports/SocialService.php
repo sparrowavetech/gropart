@@ -6,10 +6,6 @@ use Illuminate\Support\Arr;
 
 class SocialService
 {
-    /**
-     * @param string | array $model
-     * @return $this
-     */
     public function registerModule(array $model): self
     {
         config([
@@ -22,86 +18,52 @@ class SocialService
         return $this;
     }
 
-    /**
-     * @return array
-     */
     public function supportedModules(): array
     {
         return (array) config('plugins.social-login.general.supported', []);
     }
 
-    /**
-     * @param string $model
-     * @return bool
-     */
     public function isSupportedModule(string $model): bool
     {
-        return !!collect($this->supportedModules())->firstWhere('model', $model);
+        return ! ! collect($this->supportedModules())->firstWhere('model', $model);
     }
 
-    /**
-     * @param string $key
-     * @return bool
-     */
     public function isSupportedModuleByKey(string $key): bool
     {
-        return !!$this->getModule($key);
+        return ! ! $this->getModule($key);
     }
 
-    /**
-     * @param string $key
-     * @return array|null
-     */
     public function getModule(string $key): ?array
     {
         return Arr::get($this->supportedModules(), $key);
     }
 
-    /**
-     * @param string $guard
-     * @return bool
-     */
     public function isSupportedGuard(string $guard): bool
     {
         return in_array($guard, array_keys($this->supportedModules()));
     }
 
-    /**
-     * @return array
-     */
     public function getEnvDisableData(): array
     {
         return ['demo'];
     }
 
-    /**
-     * @param string $key
-     * @return string
-     */
     public function getDataDisable(string $key): string
     {
         $setting = $this->setting($key);
 
-        if (!$setting) {
+        if (! $setting) {
             return '';
         }
 
         return substr($setting, 0, 3) . '***' . substr($setting, -3, 3);
     }
 
-    /**
-     * @param string $key
-     * @param bool $default
-     * @return string
-     */
     public function setting(string $key, bool $default = false): string
     {
         return (string)setting('social_login_' . $key, $default);
     }
 
-    /**
-     * @return bool
-     */
     public function hasAnyProviderEnable(): bool
     {
         foreach ($this->getProviderKeys() as $value) {
@@ -113,17 +75,11 @@ class SocialService
         return false;
     }
 
-    /**
-     * @return array
-     */
     public function getProviderKeys(): array
     {
         return array_keys($this->getProviders());
     }
 
-    /**
-     * @return array
-     */
     public function getProviders(): array
     {
         return [
@@ -134,9 +90,6 @@ class SocialService
         ];
     }
 
-    /**
-     * @return array
-     */
     public function getDataProviderDefault(): array
     {
         return [
@@ -150,18 +103,11 @@ class SocialService
         ];
     }
 
-    /**
-     * @param string $provider
-     * @return string
-     */
     public function getProviderEnabled(string $provider): string
     {
         return $this->setting($provider . '_enable');
     }
 
-    /**
-     * @return array
-     */
     public function getProviderKeysEnabled(): array
     {
         return collect($this->getProviderKeys())

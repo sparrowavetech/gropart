@@ -20,11 +20,11 @@ class MenuRepository extends RepositoriesAbstract implements MenuInterface
             $data = $data->where('status', BaseStatusEnum::PUBLISHED);
         }
 
-        if (!empty($select)) {
+        if (! empty($select)) {
             $data = $data->select($select);
         }
 
-        if (!empty($with)) {
+        if (! empty($with)) {
             $data = $data->with($with);
         }
 

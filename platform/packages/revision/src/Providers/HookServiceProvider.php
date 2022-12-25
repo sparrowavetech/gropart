@@ -22,7 +22,7 @@ class HookServiceProvider extends ServiceProvider
      */
     public function addHistoryTab(?string $tabs, $data = null): string
     {
-        if (!empty($data) && $this->isSupported($data)) {
+        if (! empty($data) && $this->isSupported($data)) {
             Assets::addScriptsDirectly([
                 '/vendor/core/packages/revision/js/html-diff.js',
                 '/vendor/core/packages/revision/js/revision.js',
@@ -56,7 +56,7 @@ class HookServiceProvider extends ServiceProvider
      */
     public function addHistoryContent(?string $tabs, $data = null): string
     {
-        if (!empty($data) && $this->isSupported($data)) {
+        if (! empty($data) && $this->isSupported($data)) {
             return $tabs . view('packages/revision::history-content', ['model' => $data])->render();
         }
 

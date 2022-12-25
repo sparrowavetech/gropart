@@ -11,25 +11,14 @@ class ProductTag extends BaseModel
 {
     use EnumCastable;
 
-    /**
-     * The database table used by the model.
-     *
-     * @var string
-     */
     protected $table = 'ec_product_tags';
 
-    /**
-     * @var array
-     */
     protected $fillable = [
         'name',
         'description',
         'status',
     ];
 
-    /**
-     * @var array
-     */
     protected $casts = [
         'status' => BaseStatusEnum::class,
     ];

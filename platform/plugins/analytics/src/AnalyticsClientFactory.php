@@ -2,7 +2,6 @@
 
 namespace Botble\Analytics;
 
-use Google\Exception;
 use Google_Service_Analytics;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Facades\Cache;
@@ -10,11 +9,6 @@ use Symfony\Component\Cache\Adapter\Psr16Adapter;
 
 class AnalyticsClientFactory
 {
-    /**
-     * @param array $analyticsConfig
-     * @return AnalyticsClient
-     * @throws Exception
-     */
     public static function createForConfig(array $analyticsConfig): AnalyticsClient
     {
         $authenticatedClient = self::createAuthenticatedGoogleClient($analyticsConfig);
@@ -24,11 +18,6 @@ class AnalyticsClientFactory
         return self::createAnalyticsClient($analyticsConfig, $googleService);
     }
 
-    /**
-     * @param array $config
-     * @return GoogleClient
-     * @throws Exception
-     */
     public static function createAuthenticatedGoogleClient(array $config): GoogleClient
     {
         $client = new GoogleClient();
@@ -44,11 +33,7 @@ class AnalyticsClientFactory
         return $client;
     }
 
-    /**
-     * @param GoogleClient $client
-     * @param array $config
-     */
-    protected static function configureCache(GoogleClient $client, $config)
+    protected static function configureCache(GoogleClient $client, array $config): void
     {
         $config = collect($config);
 
@@ -58,14 +43,9 @@ class AnalyticsClientFactory
 
         $client->setCache($cache);
 
-        $client->setCacheConfig($config->except('store')->toArray());
+        $client->setCacheConfig($config->except(['store'])->toArray());
     }
 
-    /**
-     * @param array $analyticsConfig
-     * @param Google_Service_Analytics $googleService
-     * @return AnalyticsClient
-     */
     protected static function createAnalyticsClient(
         array $analyticsConfig,
         Google_Service_Analytics $googleService

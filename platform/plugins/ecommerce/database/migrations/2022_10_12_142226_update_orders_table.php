@@ -14,7 +14,7 @@ return new class () extends Migration {
      */
     public function up()
     {
-        if (!Schema::hasColumn('ec_orders', 'code')) {
+        if (! Schema::hasColumn('ec_orders', 'code')) {
             Schema::table('ec_orders', function (Blueprint $table) {
                 $table->string('code')->after('id')->unique()->nullable();
             });
@@ -25,7 +25,7 @@ return new class () extends Migration {
             $order->save();
         }
 
-        if (!Schema::hasColumn('ec_order_product', 'product_image')) {
+        if (! Schema::hasColumn('ec_order_product', 'product_image')) {
             Schema::table('ec_order_product', function (Blueprint $table) {
                 $table->string('product_image')->after('product_name')->nullable();
             });

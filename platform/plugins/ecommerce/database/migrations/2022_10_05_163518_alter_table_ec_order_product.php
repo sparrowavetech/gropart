@@ -12,7 +12,7 @@ return new class () extends Migration {
      */
     public function up()
     {
-        if (!Schema::hasColumn('ec_order_product', 'product_options')) {
+        if (! Schema::hasColumn('ec_order_product', 'product_options')) {
             Schema::table('ec_order_product', function (Blueprint $table) {
                 $table->text('product_options')->after('options')->nullable()->comment('product option data');
             });

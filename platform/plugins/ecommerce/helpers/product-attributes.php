@@ -3,7 +3,7 @@
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 
-if (!function_exists('get_product_attribute_groups_for_product_list')) {
+if (! function_exists('get_product_attribute_groups_for_product_list')) {
     /**
      * @param Collection $attributes
      * @return array

@@ -37,7 +37,7 @@ class AuditLogServiceProvider extends ServiceProvider
 
         $this->setNamespace('plugins/audit-log')
             ->loadHelpers()
-            ->loadRoutes(['web'])
+            ->loadRoutes()
             ->loadAndPublishViews()
             ->loadAndPublishTranslations()
             ->loadAndPublishConfigurations(['permissions'])

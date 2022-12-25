@@ -9,9 +9,6 @@ use Illuminate\Support\Facades\DB;
 
 class OrderRepository extends RepositoriesAbstract implements OrderInterface
 {
-    /**
-     * {@inheritDoc}
-     */
     public function getRevenueData($startDate, $endDate, $select = [])
     {
         if (empty($select)) {
@@ -31,9 +28,6 @@ class OrderRepository extends RepositoriesAbstract implements OrderInterface
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function countRevenueByDateRange($startDate, $endDate)
     {
         $data = $this->model

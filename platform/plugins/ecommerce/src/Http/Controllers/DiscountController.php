@@ -22,14 +22,8 @@ use Illuminate\View\View;
 
 class DiscountController extends BaseController
 {
-    /**
-     * @var DiscountInterface
-     */
-    protected $discountRepository;
+    protected DiscountInterface $discountRepository;
 
-    /**
-     * @param DiscountInterface $discountRepository
-     */
     public function __construct(DiscountInterface $discountRepository)
     {
         $this->discountRepository = $discountRepository;
@@ -60,7 +54,8 @@ class DiscountController extends BaseController
                 'vendor/core/plugins/ecommerce/js/discount.js',
             ])
             ->addScripts(['timepicker', 'input-mask', 'blockui'])
-            ->addStyles(['timepicker']);
+            ->addStyles(['timepicker'])
+            ->usingVueJS();
 
         return view('plugins/ecommerce::discounts.create');
     }
@@ -73,7 +68,7 @@ class DiscountController extends BaseController
      */
     public function store(DiscountRequest $request, BaseHttpResponse $response)
     {
-        if (!$request->has('can_use_with_promotion')) {
+        if (! $request->has('can_use_with_promotion')) {
             $request->merge(['can_use_with_promotion' => 0]);
         }
 
@@ -86,7 +81,7 @@ class DiscountController extends BaseController
                 ->toDateTimeString(),
         ]);
 
-        if ($request->has('end_date') && !$request->has('unlimited_time')) {
+        if ($request->has('end_date') && ! $request->has('unlimited_time')) {
             $request->merge([
                 'end_date' => Carbon::parse($request->input('end_date') . ' ' . $request->input('end_time'))
                     ->toDateTimeString(),
@@ -105,7 +100,7 @@ class DiscountController extends BaseController
         if ($discount) {
             $productCollections = $request->input('product_collections');
             if ($productCollections) {
-                if (!is_array($productCollections)) {
+                if (! is_array($productCollections)) {
                     $productCollections = [$productCollections];
                     $discount->productCollections()->attach($productCollections);
                 }
@@ -118,14 +113,14 @@ class DiscountController extends BaseController
                     $products = explode(',', $products);
                 }
 
-                if (!is_array($products)) {
+                if (! is_array($products)) {
                     $products = [$products];
                 }
 
                 foreach ($products as $productId) {
                     $product = app(ProductInterface::class)->findById($productId);
 
-                    if (!$product || $product->is_variation) {
+                    if (! $product || $product->is_variation) {
                         Arr::forget($products, $productId);
                     }
 
@@ -141,14 +136,14 @@ class DiscountController extends BaseController
                     $variants = explode(',', $variants);
                 }
 
-                if (!is_array($variants)) {
+                if (! is_array($variants)) {
                     $variants = [$variants];
                 }
 
                 foreach ($variants as $variantId) {
                     $product = app(ProductInterface::class)->findById($variantId);
 
-                    if (!$product || !$product->is_variation || !$product->original_product->id) {
+                    if (! $product || ! $product->is_variation || ! $product->original_product->id) {
                         Arr::forget($products, $productId);
                     }
 
@@ -164,7 +159,7 @@ class DiscountController extends BaseController
                     $customers = explode(',', $customers);
                 }
 
-                if (!is_array($customers)) {
+                if (! is_array($customers)) {
                     $customers = [$customers];
                 }
 

@@ -139,7 +139,8 @@ class DashboardController
                 'vendor/core/plugins/ecommerce/libraries/apexcharts-bundle/dist/apexcharts.css',
                 'vendor/core/plugins/ecommerce/css/report.css',
             ])
-            ->addScripts(['moment']);
+            ->addScripts(['moment'])
+            ->usingVueJS();
 
         [$startDate, $endDate, $predefinedRange] = EcommerceHelper::getDateRangeInReport($request);
 
@@ -328,7 +329,7 @@ class DashboardController
     {
         $customer = auth('customer')->user();
         if ($customer->is_vendor) {
-            if (MarketplaceHelper::getSetting('verify_vendor', 1) && !$customer->vendor_verified_at) {
+            if (MarketplaceHelper::getSetting('verify_vendor', 1) && ! $customer->vendor_verified_at) {
                 SeoHelper::setTitle(__('Become Vendor'));
 
                 Theme::breadcrumb()
@@ -356,7 +357,6 @@ class DashboardController
      * @param BecomeVendorRequest $request
      * @param BaseHttpResponse $response
      * @return BaseHttpResponse
-     * @throws FileNotFoundException
      */
     public function postBecomeVendor(BecomeVendorRequest $request, BaseHttpResponse $response)
     {

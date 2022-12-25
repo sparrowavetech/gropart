@@ -20,45 +20,16 @@ class Cart
 {
     public const DEFAULT_INSTANCE = 'default';
 
-    /**
-     * Instance of the session manager.
-     *
-     * @var SessionManager
-     */
-    protected $session;
+    protected SessionManager $session;
 
-    /**
-     * Instance of the event dispatcher.
-     *
-     * @var Dispatcher
-     */
-    protected $events;
+    protected Dispatcher $events;
 
-    /**
-     * Holds the current cart instance.
-     *
-     * @var string
-     */
-    protected $instance;
+    protected string $instance;
 
-    /**
-     *
-     * @var Collection
-     */
-    protected $products;
+    protected ?Collection $products = null;
 
-    /**
-     *
-     * @var float
-     */
-    protected $weight;
+    protected float $weight = 0;
 
-    /**
-     * Cart constructor.
-     *
-     * @param SessionManager $session
-     * @param Dispatcher $events
-     */
     public function __construct(SessionManager $session, Dispatcher $events)
     {
         $this->session = $session;
@@ -67,13 +38,7 @@ class Cart
         $this->instance(self::DEFAULT_INSTANCE);
     }
 
-    /**
-     * Set the current cart instance.
-     *
-     * @param string|null $instance
-     * @return Cart
-     */
-    public function instance($instance = null)
+    public function instance(string $instance = null): self
     {
         $instance = $instance ?: self::DEFAULT_INSTANCE;
 
@@ -160,15 +125,15 @@ class Cart
         if (!empty($options['options'])) {
             foreach ($options['options']['optionCartValue'] as $value) {
                 if (is_array($value)) {
-                    foreach ($value as $_value) {
-                        if ($_value['affect_type'] == 1) {
-                            $_value['affect_price'] = ($basePrice * $_value['affect_price']) / 100;
+                    foreach ($value as $valueItem) {
+                        if ($valueItem['affect_type'] == 1) {
+                            $valueItem['affect_price'] = ($basePrice * $valueItem['affect_price']) / 100;
                         }
-                        $price = $price + $_value['affect_price'];
+                        $price = $price + $valueItem['affect_price'];
                     }
                 } else {
-                    if ($_value['affect_type'] == 1) {
-                        $_value['affect_price'] = ($basePrice * $_value['affect_price']) / 100;
+                    if ($value['affect_type'] == 1) {
+                        $value['affect_price'] = ($basePrice * $value['affect_price']) / 100;
                     }
                     $price = $price + $value['affect_price'];
                 }
@@ -221,7 +186,7 @@ class Cart
      */
     public function setLastUpdatedAt()
     {
-        return $this->session->put($this->instance . '_updated_at', Carbon::now());
+        $this->session->put($this->instance . '_updated_at', Carbon::now());
     }
 
     /**

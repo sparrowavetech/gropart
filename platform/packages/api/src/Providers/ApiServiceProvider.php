@@ -24,7 +24,7 @@ class ApiServiceProvider extends ServiceProvider
     {
         $this
             ->setNamespace('packages/api')
-            ->loadRoutes(['web'])
+            ->loadRoutes()
             ->loadAndPublishConfigurations(['api', 'permissions'])
             ->loadAndPublishTranslations()
             ->loadMigrations()
@@ -35,7 +35,9 @@ class ApiServiceProvider extends ServiceProvider
         }
 
         Event::listen(RouteMatched::class, function () {
-            $this->app['router']->pushMiddlewareToGroup('api', ForceJsonResponseMiddleware::class);
+            if (ApiHelper::enabled()) {
+                $this->app['router']->pushMiddlewareToGroup('api', ForceJsonResponseMiddleware::class);
+            }
 
             dashboard_menu()
                 ->registerItem([

@@ -2,7 +2,7 @@
     @php
         Arr::set($selectAttributes, 'class', Arr::get($selectAttributes, 'class') . ' ui-select');
     @endphp
-    <select name="{{ $name }}" class='form-control select2_google_fonts_picker'>
+    <select name="{{ $name }}" class='form-select select2_google_fonts_picker'>
         @php
             $field['options'] = config('core.base.general.google_fonts', []);
 
@@ -23,7 +23,7 @@
 
 @once
     @push('footer')
-        <link href="https://fonts.googleapis.com/css?family={{ implode('|', array_map('urlencode', array_filter($field['options']))) }}" rel="stylesheet" type="text/css">
+        <link href="{{ BaseHelper::getGoogleFontsURL() }}/css?family={{ implode('|', array_map('urlencode', array_filter($field['options']))) }}&display=swap" rel="stylesheet" type="text/css">
     @endpush
 @endonce
 

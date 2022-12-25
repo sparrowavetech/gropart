@@ -34,14 +34,14 @@ class SmsServiceProvider extends ServiceProvider
 
     public function boot()
     {
-        
+
         $this
             ->loadAndPublishConfigurations(['permissions','sms','general'])
             ->loadMigrations()
             ->loadAndPublishTranslations()
             ->loadAndPublishViews()
             ->loadRoutes(['web']);
-            
+
         if (defined('LANGUAGE_MODULE_SCREEN_NAME')) {
             if (defined('LANGUAGE_ADVANCED_MODULE_SCREEN_NAME')) {
                 // Use language v2
@@ -61,10 +61,26 @@ class SmsServiceProvider extends ServiceProvider
                 'id'          => 'cms-plugins-sms',
                 'priority'    => 5,
                 'parent_id'   => null,
+                'name'        => 'plugins/sms::sms.title',
+                'icon'        => 'fa fa-envelope',
+                'url'         => route('sms.index'),
+                'permissions' => ['sms.index'],
+            ])->registerItem([
+                'id'          => 'cms-plugins-sms-template',
+                'priority'    => 1,
+                'parent_id'   => 'cms-plugins-sms',
                 'name'        => 'plugins/sms::sms.name',
                 'icon'        => 'fa fa-envelope',
                 'url'         => route('sms.index'),
                 'permissions' => ['sms.index'],
+            ])->registerItem([
+                'id'          => 'cms-plugins-sms-setting',
+                'priority'    => 2,
+                'parent_id'   => 'cms-plugins-sms',
+                'name'        => 'plugins/sms::sms.setting',
+                'icon'        => 'fa fa-cog',
+                'url'         => route('sms.settings'),
+                'permissions' => ['sms.settings'],
             ]);
         });
         add_filter(BASE_FILTER_AFTER_SETTING_CONTENT, [$this, 'addSettings'], 249);
@@ -76,8 +92,8 @@ class SmsServiceProvider extends ServiceProvider
      */
     public function addSettings($data = null)
     {
-        $sms_url = setting('sms_url');
-        return $data . view('plugins/sms::settings', compact('sms_url'))
-                ->render();
+        // $sms_url = setting('sms_url');
+        // return $data . view('plugins/sms::settings', compact('sms_url'))
+        //         ->render();
     }
 }

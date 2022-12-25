@@ -15,14 +15,12 @@ return [
         'seo_title' => 'SEO Title',
         'seo_description' => 'SEO Description',
         'webmaster_tools_block' => 'Google Webmaster Tools',
-        'google_site_verification' => 'Google site verification',
         'placeholder' => [
             'site_title' => 'Site Title (maximum 120 characters)',
             'admin_email' => 'Admin Email',
             'seo_title' => 'SEO Title (maximum 120 characters)',
             'seo_description' => 'SEO Description (maximum 120 characters)',
             'google_analytics' => 'Google Analytics',
-            'google_site_verification' => 'Google Site Verification',
         ],
         'cache_admin_menu' => 'Cache admin menu?',
         'enable_send_error_reporting_via_email' => 'Enable to send error reporting via email?',
@@ -54,6 +52,7 @@ return [
         'locale_direction' => 'Front site language direction',
         'admin_locale_direction' => 'Admin language direction',
         'admin_login_screen_backgrounds' => 'Login screen backgrounds (~1366x768)',
+        'minutes' => 'minutes',
     ],
     'email' => [
         'subject' => 'Subject',
@@ -161,6 +160,9 @@ return [
         'default_size_value' => 'Default: :size',
         'all' => 'All',
         'media_folders_can_add_watermark' => 'Add watermark for images in folders:',
+        'max_upload_filesize' => 'Max upload filesize (MB)',
+        'max_upload_filesize_placeholder' => 'Default: :size, must less than :size.',
+        'max_upload_filesize_helper' => 'Your server allows to upload files maximum :size, you can change this value to limit upload filesize.',
     ],
     'license' => [
         'purchase_code' => 'Purchase code',

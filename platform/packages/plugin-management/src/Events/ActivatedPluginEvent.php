@@ -9,15 +9,8 @@ class ActivatedPluginEvent extends Event
 {
     use SerializesModels;
 
-    /**
-     * @var string
-     */
-    public $plugin;
+    public string $plugin;
 
-    /**
-     * ActivatedPluginEvent constructor.
-     * @param string $plugin
-     */
     public function __construct(string $plugin)
     {
         $this->plugin = $plugin;

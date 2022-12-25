@@ -12,7 +12,13 @@ mix
     .js(source + '/resources/assets/js/language-public.js', dist + '/js')
 
     .sass(source + '/resources/assets/sass/language.scss', dist + '/css')
-    .sass(source + '/resources/assets/sass/language-public.scss', dist + '/css')
+    .sass(source + '/resources/assets/sass/language-public.scss', dist + '/css');
 
-    .copyDirectory(dist + '/js', source + '/public/js')
-    .copyDirectory(dist + '/css', source + '/public/css');
+if (mix.inProduction()) {
+    mix
+        .copy(dist + '/js/language.js', source + '/public/js')
+        .copy(dist + '/js/language-global.js', source + '/public/js')
+        .copy(dist + '/js/language-public.js', source + '/public/js')
+        .copy(dist + '/css/language.css', source + '/public/css')
+        .copy(dist + '/css/language-public.css', source + '/public/css');
+}

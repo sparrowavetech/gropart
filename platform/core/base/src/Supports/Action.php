@@ -11,7 +11,7 @@ class Action extends ActionHookEvent
      */
     public function fire(string $action, array $args)
     {
-        if (!$this->getListeners()) {
+        if (! $this->getListeners()) {
             return;
         }
 

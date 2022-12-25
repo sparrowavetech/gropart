@@ -6,10 +6,6 @@ use Botble\Base\Enums\BaseStatusEnum;
 
 class FilterPost
 {
-    /**
-     * @param array $request
-     * @return array
-     */
     public static function setFilters(array $request): array
     {
         if (isset($request['order'])) {

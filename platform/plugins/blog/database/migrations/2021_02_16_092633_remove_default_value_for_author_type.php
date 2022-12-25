@@ -6,14 +6,9 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class () extends Migration {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
-        if (!Schema::hasColumn('categories', 'author_type')) {
+        if (! Schema::hasColumn('categories', 'author_type')) {
             Schema::table('categories', function (Blueprint $table) {
                 $table->string('author_type', 255);
             });
@@ -23,7 +18,7 @@ return new class () extends Migration {
             $table->string('author_type', 255)->change();
         });
 
-        if (!Schema::hasColumn('tags', 'author_type')) {
+        if (! Schema::hasColumn('tags', 'author_type')) {
             Schema::table('tags', function (Blueprint $table) {
                 $table->string('author_type', 255);
             });
@@ -33,7 +28,7 @@ return new class () extends Migration {
             $table->string('author_type', 255)->change();
         });
 
-        if (!Schema::hasColumn('posts', 'author_type')) {
+        if (! Schema::hasColumn('posts', 'author_type')) {
             Schema::table('posts', function (Blueprint $table) {
                 $table->string('author_type', 255);
             });
@@ -44,12 +39,7 @@ return new class () extends Migration {
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('categories', function (Blueprint $table) {
             $table->string('author_type', 255)->default(addslashes(User::class))->change();

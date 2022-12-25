@@ -6,12 +6,7 @@ use Botble\Support\Http\Requests\Request;
 
 class CartRequest extends Request
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
             'id' => 'required|min:1|integer',
@@ -19,10 +14,7 @@ class CartRequest extends Request
         ];
     }
 
-    /**
-     * @return array
-     */
-    public function messages()
+    public function messages(): array
     {
         return [
             'id.required' => __('Product ID is required'),

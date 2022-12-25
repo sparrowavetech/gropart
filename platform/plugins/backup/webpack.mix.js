@@ -8,7 +8,10 @@ const dist = 'public/vendor/core/plugins/' + directory;
 
 mix
     .js(source + '/resources/assets/js/backup.js', dist + '/js')
-    .sass(source + '/resources/assets/sass/backup.scss', dist + '/css')
+    .sass(source + '/resources/assets/sass/backup.scss', dist + '/css');
 
-    .copyDirectory(dist + '/js', source + '/public/js')
-    .copyDirectory(dist + '/css', source + '/public/css');
+if (mix.inProduction()) {
+    mix
+        .copy(dist + '/js/backup.js', source + '/public/js')
+        .copy(dist + '/css/backup.css', source + '/public/css');
+}

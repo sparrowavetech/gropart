@@ -11,9 +11,6 @@ use ProductCategoryHelper;
 
 class ProductCategoryForm extends FormAbstract
 {
-    /**
-     * {@inheritDoc}
-     */
     public function buildForm()
     {
         $categories = ProductCategoryHelper::getProductCategoriesWithIndentName();

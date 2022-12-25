@@ -9,9 +9,6 @@ use Botble\Ecommerce\Models\Tax;
 
 class TaxForm extends FormAbstract
 {
-    /**
-     * {@inheritDoc}
-     */
     public function buildForm()
     {
         $this

@@ -8,22 +8,17 @@ use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 
 class TagRepository extends RepositoriesAbstract implements TagInterface
 {
-    /**
-     * {@inheritDoc}
-     */
     public function getDataSiteMap()
     {
         $data = $this->model
             ->with('slugable')
             ->where('status', BaseStatusEnum::PUBLISHED)
-            ->orderBy('created_at', 'desc');
+            ->orderBy('created_at', 'desc')
+            ->select(['id', 'name', 'updated_at']);
 
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getPopularTags($limit, array $with = ['slugable'], array $withCount = ['posts'])
     {
         $data = $this->model
@@ -35,9 +30,6 @@ class TagRepository extends RepositoriesAbstract implements TagInterface
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getAllTags($active = true)
     {
         $data = $this->model;

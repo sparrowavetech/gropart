@@ -11,13 +11,7 @@ use Language;
 
 class AddLanguageForVariantsListener
 {
-    /**
-     * Handle the event.
-     *
-     * @param CreatedContentEvent | UpdatedContentEvent $event
-     * @return void
-     */
-    public function handle($event)
+    public function handle(CreatedContentEvent|UpdatedContentEvent $event): void
     {
         if (is_plugin_active('language') &&
             is_plugin_active('language-advanced') &&
@@ -51,7 +45,7 @@ class AddLanguageForVariantsListener
 
                     $data = [];
                     foreach (DB::getSchemaBuilder()->getColumnListing('ec_products_translations') as $column) {
-                        if (!in_array($column, array_keys($condition))) {
+                        if (! in_array($column, array_keys($condition))) {
                             $data[$column] = $parentTranslation ? $parentTranslation->{$column} : $event->data->{$column};
                         }
                     }

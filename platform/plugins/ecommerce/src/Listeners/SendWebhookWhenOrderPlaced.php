@@ -7,22 +7,14 @@ use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\URL;
-use Throwable;
 
 class SendWebhookWhenOrderPlaced
 {
-    /**
-     * Handle the event.
-     *
-     * @param OrderPlacedEvent $event
-     * @return void
-     * @throws Throwable
-     */
-    public function handle(OrderPlacedEvent $event)
+    public function handle(OrderPlacedEvent $event): void
     {
         $webhookURL = get_ecommerce_setting('order_placed_webhook_url');
 
-        if (!$webhookURL || !URL::isValidUrl($webhookURL) || app()->environment('demo')) {
+        if (! $webhookURL || ! URL::isValidUrl($webhookURL) || app()->environment('demo')) {
             return;
         }
 
@@ -32,19 +24,19 @@ class SendWebhookWhenOrderPlaced
             $data = [
                 'id' => $order->id,
                 'status' => [
-                    'value' => $order->status,
+                    'value' => $order->status->getValue(),
                     'text' => $order->status->label(),
                 ],
                 'shipping_status' => $order->shipment->id ? [
-                    'value' => $order->shipment->status,
+                    'value' => $order->shipment->status->getValue(),
                     'text' => $order->shipment->status->label(),
                 ] : [],
                 'payment_method' => $order->payment->id ? [
-                    'value' => $order->payment->payment_channel,
+                    'value' => $order->payment->payment_channel->getValue(),
                     'text' => $order->payment->payment_channel->label(),
                 ] : [],
                 'payment_status' => $order->payment->id ? [
-                    'value' => $order->payment->status,
+                    'value' => $order->payment->status->getValue(),
                     'text' => $order->payment->status->label(),
                 ] : [],
                 'customer' => [
@@ -53,7 +45,7 @@ class SendWebhookWhenOrderPlaced
                 ],
                 'sub_total' => $order->sub_total,
                 'tax_amount' => $order->tax_amount,
-                'shipping_method' => $order->shipping_method,
+                'shipping_method' => $order->shipping_method->getValue(),
                 'shipping_option' => $order->shipping_option,
                 'shipping_amount' => $order->shipping_amount,
                 'amount' => $order->amount,

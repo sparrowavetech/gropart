@@ -18,7 +18,7 @@
             <label for="app_name">
                 {{ trans('packages/installer::installer.environment.wizard.form.app_name_label') }}
             </label>
-            <input type="text" name="app_name" id="app_name" value="{{ old('app_name', env('APP_NAME', 'Your App')) }}"
+            <input type="text" name="app_name" id="app_name" value="{{ old('app_name', config('app.name')) }}"
                    placeholder="{{ trans('packages/installer::installer.environment.wizard.form.app_name_placeholder') }}"/>
             @if ($errors->has('app_name'))
                 <span class="error-block">
@@ -48,11 +48,11 @@
             </label>
             <select name="database_connection" id="database_connection">
                 <option value="mysql"
-                        @if (old('database_connection', env('DB_CONNECTION', 'mysql')) === 'mysql') selected @endif>{{ trans('packages/installer::installer.environment.wizard.form.db_connection_label_mysql') }}</option>
+                        @if (old('database_connection', config('database.default')) === 'mysql') selected @endif>{{ trans('packages/installer::installer.environment.wizard.form.db_connection_label_mysql') }}</option>
                 <option value="sqlite"
-                        @if (old('database_connection', env('DB_CONNECTION', 'mysql')) === 'sqlite') selected @endif>{{ trans('packages/installer::installer.environment.wizard.form.db_connection_label_sqlite') }}</option>
+                        @if (old('database_connection', config('database.default')) === 'sqlite') selected @endif>{{ trans('packages/installer::installer.environment.wizard.form.db_connection_label_sqlite') }}</option>
                 <option value="pgsql"
-                        @if (old('database_connection', env('DB_CONNECTION', 'mysql')) === 'pgsql') selected @endif>{{ trans('packages/installer::installer.environment.wizard.form.db_connection_label_pgsql') }}</option>
+                        @if (old('database_connection', config('database.default')) === 'pgsql') selected @endif>{{ trans('packages/installer::installer.environment.wizard.form.db_connection_label_pgsql') }}</option>
             </select>
             @if ($errors->has('database_connection'))
                 <span class="error-block">
@@ -66,7 +66,7 @@
             <label for="database_hostname">
                 {{ trans('packages/installer::installer.environment.wizard.form.db_host_label') }}
             </label>
-            <input type="text" name="database_hostname" id="database_hostname" value="{{ old('database_hostname', env('DB_HOST', '127.0.0.1')) }}"
+            <input type="text" name="database_hostname" id="database_hostname" value="{{ old('database_hostname', config('database.connections.mysql.port')) }}"
                    placeholder="{{ trans('packages/installer::installer.environment.wizard.form.db_host_placeholder') }}"/>
             @if ($errors->has('database_hostname'))
                 <span class="error-block">
@@ -80,7 +80,7 @@
             <label for="database_port">
                 {{ trans('packages/installer::installer.environment.wizard.form.db_port_label') }}
             </label>
-            <input type="number" name="database_port" id="database_port" value="{{ old('database_port', env('DB_PORT', '3306')) }}"
+            <input type="number" name="database_port" id="database_port" value="{{ old('database_port', config('database.connections.mysql.port')) }}"
                    placeholder="{{ trans('packages/installer::installer.environment.wizard.form.db_port_placeholder') }}"/>
             @if ($errors->has('database_port'))
                 <span class="error-block">

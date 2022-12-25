@@ -9,9 +9,6 @@ use Illuminate\Database\Query\Builder;
 
 class DiscountRepository extends RepositoriesAbstract implements DiscountInterface
 {
-    /**
-     * {@inheritDoc}
-     */
     public function getAvailablePromotions(array $with = [], bool $forProductSingle = false)
     {
         $data = $this->model
@@ -54,9 +51,6 @@ class DiscountRepository extends RepositoriesAbstract implements DiscountInterfa
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getProductPriceBasedOnPromotion(array $productIds = [], array $productCollectionIds = [])
     {
         $data = $this->model

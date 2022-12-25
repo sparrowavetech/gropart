@@ -41,7 +41,7 @@ class DashboardServiceProvider extends ServiceProvider
     {
         $this->setNamespace('core/dashboard')
             ->loadHelpers()
-            ->loadRoutes(['web'])
+            ->loadRoutes()
             ->loadAndPublishViews()
             ->loadAndPublishTranslations()
             ->publishAssets()

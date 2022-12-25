@@ -69,7 +69,7 @@ class Webmasters implements WebmastersContract
      */
     public function add($webmaster, $content)
     {
-        if (!empty($name = $this->getWebmasterName($webmaster))) {
+        if (! empty($name = $this->getWebmasterName($webmaster))) {
             $this->meta->add(compact('name', 'content'));
         }
 

@@ -8,12 +8,7 @@ use Illuminate\Validation\Rule;
 
 class FlashSaleRequest extends Request
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
             'name' => 'required',
@@ -24,10 +19,7 @@ class FlashSaleRequest extends Request
         ];
     }
 
-    /**
-     * @return array
-     */
-    public function attributes()
+    public function attributes(): array
     {
         return [
             'products_extra.*.price' => trans('plugins/ecommerce::products.price'),

@@ -19,39 +19,16 @@ class SendMailJob implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    /**
-     * @var string
-     */
-    public $content;
+    public ?string $content;
 
-    /**
-     * @var string
-     */
-    public $title;
+    public ?string $title;
 
-    /**
-     * @var string
-     */
-    public $to;
+    public string|array|null $to;
 
-    /**
-     * @var array
-     */
-    public $args;
+    public array $args;
 
-    /**
-     * @var boolean
-     */
-    public $debug = false;
+    public bool $debug = false;
 
-    /**
-     * SendMailJob constructor.
-     * @param string|null $content
-     * @param string|null $title
-     * @param string|array $to
-     * @param array $args
-     * @param bool $debug
-     */
     public function __construct(?string $content, ?string $title, $to, array $args, bool $debug = false)
     {
         $this->content = $content;
@@ -61,13 +38,7 @@ class SendMailJob implements ShouldQueue
         $this->debug = $debug;
     }
 
-    /**
-     * Handle the job.
-     *
-     * @return void
-     * @throws Exception
-     */
-    public function handle()
+    public function handle(): void
     {
         try {
             Mail::to($this->to)->send(new EmailAbstract($this->content, $this->title, $this->args));

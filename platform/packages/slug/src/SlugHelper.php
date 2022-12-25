@@ -2,7 +2,6 @@
 
 namespace Botble\Slug;
 
-use Botble\Base\Models\BaseModel;
 use Botble\Page\Models\Page;
 use Botble\Slug\Repositories\Interfaces\SlugInterface;
 use Illuminate\Support\Arr;
@@ -10,21 +9,13 @@ use Illuminate\Support\Str;
 
 class SlugHelper
 {
-    /**
-     * @var array
-     */
-    protected $canEmptyPrefixes = [Page::class];
+    protected array $canEmptyPrefixes = [Page::class];
 
-    /**
-     * @param string|array $model
-     * @param string|null $name
-     * @return $this
-     */
-    public function registerModule($model, ?string $name = null): self
+    public function registerModule(string|array $model, ?string $name = null): self
     {
         $supported = $this->supportedModels();
 
-        if (!is_array($model)) {
+        if (! is_array($model)) {
             $supported[$model] = $name ?: $model;
         } else {
             foreach ($model as $item) {
@@ -37,11 +28,7 @@ class SlugHelper
         return $this;
     }
 
-    /**
-     * @param string|array $model
-     * @return $this
-     */
-    public function removeModule($model): self
+    public function removeModule(string|array $model): self
     {
         $supported = $this->supportedModels();
 
@@ -52,20 +39,11 @@ class SlugHelper
         return $this;
     }
 
-    /**
-     * @return array
-     */
     public function supportedModels(): array
     {
         return config('packages.slug.general.supported', []);
     }
 
-    /**
-     * @param string $model
-     * @param string|null $prefix
-     * @param bool $canEmptyPrefix
-     * @return $this
-     */
     public function setPrefix(string $model, ?string $prefix, bool $canEmptyPrefix = false): self
     {
         $prefixes = config('packages.slug.general.prefixes', []);
@@ -80,11 +58,6 @@ class SlugHelper
         return $this;
     }
 
-    /**
-     * @param string $model
-     * @param string $column
-     * @return $this
-     */
     public function setColumnUsedForSlugGenerator(string $model, string $column): self
     {
         $columns = config('packages.slug.general.slug_generated_columns', []);
@@ -95,22 +68,14 @@ class SlugHelper
         return $this;
     }
 
-    /**
-     * @param string $model
-     * @return bool
-     */
     public function isSupportedModel(string $model): bool
     {
         return in_array($model, array_keys($this->supportedModels()));
     }
 
-    /**
-     * @param BaseModel|array $model
-     * @return $this
-     */
-    public function disablePreview($model): self
+    public function disablePreview(array|string $model): self
     {
-        if (!is_array($model)) {
+        if (! is_array($model)) {
             $model = [$model];
         }
 
@@ -124,22 +89,11 @@ class SlugHelper
         return $this;
     }
 
-    /**
-     * @param string $model
-     * @return bool
-     */
     public function canPreview(string $model): bool
     {
-        return !in_array($model, config('packages.slug.general.disable_preview', []));
+        return ! in_array($model, config('packages.slug.general.disable_preview', []));
     }
 
-    /**
-     * @param string|null $key
-     * @param string|null $prefix
-     * @param string|null $model
-     * @param null $referenceId
-     * @return mixed
-     */
     public function getSlug(
         ?string $key,
         ?string $prefix = null,
@@ -167,11 +121,6 @@ class SlugHelper
         return app(SlugInterface::class)->getFirstBy($condition);
     }
 
-    /**
-     * @param string $model
-     * @param string $default
-     * @return string|null
-     */
     public function getPrefix(string $model, string $default = ''): ?string
     {
         $permalink = setting($this->getPermalinkSettingKey($model));
@@ -189,11 +138,7 @@ class SlugHelper
         return $default;
     }
 
-    /**
-     * @param string|object $model
-     * @return string|null
-     */
-    public function getColumnNameToGenerateSlug($model): ?string
+    public function getColumnNameToGenerateSlug(string|object $model): ?string
     {
         if (is_object($model)) {
             $model = get_class($model);
@@ -208,26 +153,16 @@ class SlugHelper
         return 'name';
     }
 
-    /**
-     * @param string $model
-     * @return string
-     */
     public function getPermalinkSettingKey(string $model): string
     {
         return 'permalink-' . Str::slug(str_replace('\\', '_', $model));
     }
 
-    /**
-     * @return bool
-     */
     public function turnOffAutomaticUrlTranslationIntoLatin(): bool
     {
         return setting('slug_turn_off_automatic_url_translation_into_latin', 0) == 1;
     }
 
-    /**
-     * @return array|string[]
-     */
     public function getCanEmptyPrefixes(): array
     {
         return $this->canEmptyPrefixes;

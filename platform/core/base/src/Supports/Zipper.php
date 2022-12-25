@@ -9,7 +9,7 @@ use ZipArchive;
 
 class Zipper
 {
-    protected $isZipArchiveEnabled;
+    protected bool $isZipArchiveEnabled;
 
     public function __construct()
     {

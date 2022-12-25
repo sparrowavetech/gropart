@@ -14,8 +14,7 @@ class GlobalOptionEnum extends Enum
 
     public const FIELD = Field::class;
 
-    public const TYPE_FIXED     = 0;
-    public const TYPE_PERCENT   = 1;
+    public const TYPE_PERCENT = 1;
 
     public static function options(): array
     {

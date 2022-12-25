@@ -9,12 +9,7 @@ use Illuminate\Support\Str;
 
 class ProductCollectionSeeder extends BaseSeeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
         ProductCollection::truncate();
 

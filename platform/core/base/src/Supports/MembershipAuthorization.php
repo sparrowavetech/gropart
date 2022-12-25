@@ -11,26 +11,12 @@ use Illuminate\Support\Str;
 
 class MembershipAuthorization
 {
-    /**
-     * @var Client
-     */
-    protected $client;
+    protected Client $client;
 
-    /**
-     * @var Request
-     */
-    protected $request;
+    protected Request $request;
 
-    /**
-     * @var string
-     */
-    protected $url;
+    protected string $url;
 
-    /**
-     * MembershipAuthorization constructor.
-     * @param Client $client
-     * @param Request $request
-     */
     public function __construct(Client $client, Request $request)
     {
         $this->client = $client;
@@ -38,14 +24,10 @@ class MembershipAuthorization
         $this->url = rtrim(url('/'), '/');
     }
 
-    /**
-     * @return boolean
-     * @throws GuzzleException
-     */
     public function authorize(): bool
     {
         try {
-            if (!filter_var($this->url, FILTER_VALIDATE_URL)) {
+            if (! filter_var($this->url, FILTER_VALIDATE_URL)) {
                 return false;
             }
 
@@ -55,7 +37,7 @@ class MembershipAuthorization
 
             $authorizeDate = setting('membership_authorization_at');
 
-            if (!$authorizeDate) {
+            if (! $authorizeDate) {
                 return $this->processAuthorize();
             }
 
@@ -65,14 +47,11 @@ class MembershipAuthorization
             }
 
             return true;
-        } catch (Exception $exception) {
+        } catch (Exception|GuzzleException) {
             return false;
         }
     }
 
-    /**
-     * @return bool
-     */
     protected function isInvalidDomain(): bool
     {
         if (filter_var($this->url, FILTER_VALIDATE_IP)) {
@@ -98,17 +77,17 @@ class MembershipAuthorization
         return false;
     }
 
-    /**
-     * @return bool
-     * @throws GuzzleException
-     */
     protected function processAuthorize(): bool
     {
-        $this->client->post('https://botble.com/membership/authorize', [
-            'form_params' => [
-                'website' => $this->url,
-            ],
-        ]);
+        try {
+            $this->client->post('https://botble.com/membership/authorize', [
+                'form_params' => [
+                    'website' => $this->url,
+                ],
+            ]);
+        } catch (GuzzleException) {
+            return true;
+        }
 
         setting()
             ->set('membership_authorization_at', Carbon::now()->toDateTimeString())

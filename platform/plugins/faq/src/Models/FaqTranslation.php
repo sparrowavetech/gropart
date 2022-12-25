@@ -6,16 +6,8 @@ use Botble\Base\Models\BaseModel;
 
 class FaqTranslation extends BaseModel
 {
-    /**
-     * The database table used by the model.
-     *
-     * @var string
-     */
     protected $table = 'faqs_translations';
 
-    /**
-     * @var array
-     */
     protected $fillable = [
         'lang_code',
         'faqs_id',
@@ -23,8 +15,5 @@ class FaqTranslation extends BaseModel
         'answer',
     ];
 
-    /**
-     * @var bool
-     */
     public $timestamps = false;
 }

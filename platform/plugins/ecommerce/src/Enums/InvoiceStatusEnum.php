@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Enums;
 
 use Botble\Base\Supports\Enum;
 use Html;
+use Illuminate\Support\HtmlString;
 
 /**
  * @method static InvoiceStatusEnum PENDING()
@@ -19,31 +20,20 @@ class InvoiceStatusEnum extends Enum
     public const COMPLETED = 'completed';
     public const CANCELED = 'canceled';
 
-    /**
-     * @var string
-     */
     public static $langPath = 'plugins/ecommerce::invoice.statuses';
 
-    /**
-     * @return string
-     */
-    public function toHtml()
+    public function toHtml(): HtmlString|string
     {
-        switch ($this->value) {
-            case self::PENDING:
-                return Html::tag('span', self::PENDING()->label(), ['class' => 'label-warning status-label'])
-                    ->toHtml();
-            case self::PROCESSING:
-                return Html::tag('span', self::PROCESSING()->label(), ['class' => 'label-info status-label'])
-                    ->toHtml();
-            case self::COMPLETED:
-                return Html::tag('span', self::COMPLETED()->label(), ['class' => 'label-success status-label'])
-                    ->toHtml();
-            case self::CANCELED:
-                return Html::tag('span', self::CANCELED()->label(), ['class' => 'label-danger status-label'])
-                    ->toHtml();
-            default:
-                return parent::toHtml();
-        }
+        return match ($this->value) {
+            self::PENDING => Html::tag('span', self::PENDING()->label(), ['class' => 'label-warning status-label'])
+                ->toHtml(),
+            self::PROCESSING => Html::tag('span', self::PROCESSING()->label(), ['class' => 'label-info status-label'])
+                ->toHtml(),
+            self::COMPLETED => Html::tag('span', self::COMPLETED()->label(), ['class' => 'label-success status-label'])
+                ->toHtml(),
+            self::CANCELED => Html::tag('span', self::CANCELED()->label(), ['class' => 'label-danger status-label'])
+                ->toHtml(),
+            default => parent::toHtml(),
+        };
     }
 }

@@ -10,9 +10,6 @@ use Botble\Faq\Repositories\Interfaces\FaqCategoryInterface;
 
 class FaqForm extends FormAbstract
 {
-    /**
-     * {@inheritDoc}
-     */
     public function buildForm()
     {
         $this
@@ -22,9 +19,6 @@ class FaqForm extends FormAbstract
             ->add('category_id', 'customSelect', [
                 'label' => trans('plugins/faq::faq.category'),
                 'label_attr' => ['class' => 'control-label required'],
-                'attr' => [
-                    'class' => 'form-control select-full',
-                ],
                 'choices' => ['' => trans('plugins/faq::faq.select_category')] + app(FaqCategoryInterface::class)->pluck('name', 'id'),
             ])
             ->add('question', 'text', [
@@ -44,9 +38,6 @@ class FaqForm extends FormAbstract
             ->add('status', 'customSelect', [
                 'label' => trans('core/base::tables.status'),
                 'label_attr' => ['class' => 'control-label required'],
-                'attr' => [
-                    'class' => 'form-control select-full',
-                ],
                 'choices' => BaseStatusEnum::labels(),
             ])
             ->setBreakFieldPoint('status');

@@ -11,7 +11,12 @@ mix
     .js(source + '/resources/assets/js/contact.js', dist + '/js')
 
     .sass(source + '/resources/assets/sass/contact-public.scss', dist + '/css')
-    .js(source + '/resources/assets/js/contact-public.js', dist + '/js')
+    .js(source + '/resources/assets/js/contact-public.js', dist + '/js');
 
-    .copyDirectory(dist + '/css', source + '/public/css')
-    .copyDirectory(dist + '/js', source + '/public/js');
+if (mix.inProduction()) {
+    mix
+        .copy(dist + '/css/contact.css', source + '/public/css')
+        .copy(dist + '/css/contact-public.css', source + '/public/css')
+        .copy(dist + '/js/contact.js', source + '/public/js')
+        .copy(dist + '/js/contact-public.js', source + '/public/js');
+}

@@ -56,7 +56,7 @@ class WithdrawalController
         $user = auth('customer')->user();
         $fee = MarketplaceHelper::getSetting('fee_withdrawal', 0);
 
-        if ($user->balance <= $fee || !$user->bank_info) {
+        if ($user->balance <= $fee || ! $user->bank_info) {
             return $response
                 ->setError()
                 ->setNextUrl(route('marketplace.vendor.withdrawals.index'))
@@ -124,7 +124,7 @@ class WithdrawalController
             'status' => WithdrawalStatusEnum::PENDING,
         ]);
 
-        if (!$withdrawal) {
+        if (! $withdrawal) {
             abort(404);
         }
 
@@ -147,7 +147,7 @@ class WithdrawalController
             'status' => WithdrawalStatusEnum::PENDING,
         ]);
 
-        if (!$withdrawal) {
+        if (! $withdrawal) {
             abort(404);
         }
 
@@ -183,7 +183,7 @@ class WithdrawalController
                 ['status', '!=', WithdrawalStatusEnum::PENDING],
             ]);
 
-        if (!$withdrawal) {
+        if (! $withdrawal) {
             abort(404);
         }
 

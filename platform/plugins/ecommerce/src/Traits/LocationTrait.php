@@ -11,22 +11,16 @@ use EcommerceHelper;
  */
 trait LocationTrait
 {
-    /**
-     * @return string|null
-     */
     public function getCountryNameAttribute(): ?string
     {
         return EcommerceHelper::getCountryNameById($this->country);
     }
 
-    /**
-     * @return string|null
-     */
     public function getStateNameAttribute(): ?string
     {
         $value = $this->state;
 
-        if (!$value || !is_plugin_active('location')) {
+        if (! $value || ! is_plugin_active('location')) {
             return $value;
         }
 
@@ -43,14 +37,11 @@ trait LocationTrait
         return $value;
     }
 
-    /**
-     * @return string|null
-     */
     public function getCityNameAttribute(): ?string
     {
         $value = $this->city;
 
-        if (!$value || !is_plugin_active('location')) {
+        if (! $value || ! is_plugin_active('location')) {
             return $value;
         }
 
@@ -65,9 +56,6 @@ trait LocationTrait
         return $value;
     }
 
-    /**
-     * @return string
-     */
     public function getFullAddressAttribute(): string
     {
         return ($this->address ? $this->address . ', ' : null) .

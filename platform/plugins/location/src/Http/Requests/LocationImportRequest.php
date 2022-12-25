@@ -8,12 +8,7 @@ use Illuminate\Validation\Rule;
 
 class LocationImportRequest extends Request
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
             'name' => 'required|max:120',
@@ -27,12 +22,7 @@ class LocationImportRequest extends Request
         ];
     }
 
-    /**
-     * Get the error messages for the defined validation rules.
-     *
-     * @return array
-     */
-    public function messages()
+    public function messages(): array
     {
         return [
             'country.required_if' => trans('plugins/location::bulk-import.import_type_required_if'),

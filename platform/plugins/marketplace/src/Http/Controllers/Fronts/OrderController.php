@@ -9,7 +9,6 @@ use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Enums\ShippingStatusEnum;
-use Botble\Ecommerce\Events\OrderCompletedEvent;
 use Botble\Ecommerce\Http\Requests\AddressRequest;
 use Botble\Ecommerce\Http\Requests\UpdateOrderRequest;
 use Botble\Ecommerce\Repositories\Interfaces\OrderAddressInterface;
@@ -271,7 +270,7 @@ class OrderController extends BaseController
 
         $result = OrderHelper::sendOrderConfirmationEmail($order);
 
-        if (!$result) {
+        if (! $result) {
             return $response
                 ->setError()
                 ->setMessage(trans('plugins/ecommerce::order.error_when_sending_email'));
@@ -291,7 +290,7 @@ class OrderController extends BaseController
     {
         $address = $this->orderAddressRepository->createOrUpdate($request->input(), compact('id'));
 
-        if (!$address) {
+        if (! $address) {
             abort(404);
         }
 
@@ -321,7 +320,7 @@ class OrderController extends BaseController
             abort(404);
         }
 
-        if (!$order->canBeCanceledByAdmin()) {
+        if (! $order->canBeCanceledByAdmin()) {
             abort(403);
         }
 
@@ -373,25 +372,7 @@ class OrderController extends BaseController
                 $shipment->date_shipped = Carbon::now();
                 $shipment->save();
 
-                // Update status and time order complete
-                $order = $this->orderRepository->createOrUpdate(
-                    [
-                        'status' => OrderStatusEnum::COMPLETED,
-                        'completed_at' => Carbon::now(),
-                    ],
-                    ['id' => $shipment->order_id]
-                );
-
-                event(new OrderCompletedEvent($order));
-
-                do_action(ACTION_AFTER_ORDER_STATUS_COMPLETED_ECOMMERCE, $order, $request);
-
-                $this->orderHistoryRepository->createOrUpdate([
-                    'action' => 'update_status',
-                    'description' => trans('plugins/ecommerce::shipping.order_confirmed_by'),
-                    'order_id' => $shipment->order_id,
-                    'user_id' => Auth::id() ?? 0,
-                ]);
+                OrderHelper::shippingStatusDelivered($shipment, $request);
 
                 break;
 

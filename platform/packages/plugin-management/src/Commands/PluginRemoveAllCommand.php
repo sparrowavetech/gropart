@@ -6,56 +6,25 @@ use BaseHelper;
 use Botble\PluginManagement\Services\PluginService;
 use Illuminate\Console\Command;
 use Illuminate\Console\ConfirmableTrait;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+#[AsCommand('cms:plugin:remove:all', 'Remove all plugins in /plugins directory')]
 class PluginRemoveAllCommand extends Command
 {
     use ConfirmableTrait;
 
-    /**
-     * The console command signature.
-     *
-     * @var string
-     */
-    protected $signature = 'cms:plugin:remove:all';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Remove all plugins in /plugins directory';
-
-    /**
-     * @var PluginService
-     */
-    protected $pluginService;
-
-    /**
-     * PluginActivateCommand constructor.
-     * @param PluginService $pluginService
-     */
-    public function __construct(PluginService $pluginService)
+    public function handle(PluginService $pluginService): int
     {
-        parent::__construct();
-
-        $this->pluginService = $pluginService;
-    }
-
-    /**
-     * @return int
-     */
-    public function handle()
-    {
-        if (!$this->confirmToProceed('Are you sure you want to remove ALL plugins?', true)) {
-            return 1;
+        if (! $this->confirmToProceed('Are you sure you want to remove ALL plugins?', true)) {
+            return self::FAILURE;
         }
 
         foreach (BaseHelper::scanFolder(plugin_path()) as $plugin) {
-            $this->pluginService->remove($plugin);
+            $pluginService->remove($plugin);
         }
 
         $this->info('Removed successfully!');
 
-        return 0;
+        return self::SUCCESS;
     }
 }

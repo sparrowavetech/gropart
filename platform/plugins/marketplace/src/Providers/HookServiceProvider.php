@@ -253,6 +253,9 @@ class HookServiceProvider extends ServiceProvider
                         'attributes' => [
                             'name' => 'logo_vendor_dashboard',
                             'value' => null,
+                            'attributes' => [
+                                'allow_thumb' => false,
+                            ],
                         ],
                     ],
                 ],
@@ -306,7 +309,7 @@ class HookServiceProvider extends ServiceProvider
      */
     public function saveAdditionalData($type, $request, $object)
     {
-        if (!is_in_admin()) {
+        if (! is_in_admin()) {
             return false;
         }
 
@@ -332,7 +335,7 @@ class HookServiceProvider extends ServiceProvider
             }
 
             // Create vendor info
-            if ($object->is_vendor && !$object->vendorInfo->id) {
+            if ($object->is_vendor && ! $object->vendorInfo->id) {
                 $this->app->make(VendorInfoInterface::class)
                     ->createOrUpdate([
                         'customer_id' => $object->id,
@@ -342,15 +345,15 @@ class HookServiceProvider extends ServiceProvider
             if ($object->is_vendor) {
                 $store = $object->store;
 
-                if (!$store->name) {
+                if (! $store->name) {
                     $store->name = $object->name;
                 }
 
-                if (!$store->phone) {
+                if (! $store->phone) {
                     $store->phone = $object->phone;
                 }
 
-                if (!$store->logo) {
+                if (! $store->logo) {
                     $store->logo = $object->avatar;
                 }
 
@@ -362,7 +365,7 @@ class HookServiceProvider extends ServiceProvider
 
                 $store->save();
 
-                if (!$store->slug) {
+                if (! $store->slug) {
                     Slug::create([
                         'reference_type' => Store::class,
                         'reference_id' => $store->id,
@@ -385,14 +388,14 @@ class HookServiceProvider extends ServiceProvider
      */
     public function addColumnToEcommerceTable($data, $model)
     {
-        if (!$model || !is_in_admin(true)) {
+        if (! $model || ! is_in_admin(true)) {
             return $data;
         }
 
         switch (get_class($model)) {
             case Customer::class:
                 return $data->addColumn('is_vendor', function ($item) {
-                    if (!$item->is_vendor) {
+                    if (! $item->is_vendor) {
                         return trans('core/base::base.no');
                     }
 
@@ -405,7 +408,7 @@ class HookServiceProvider extends ServiceProvider
                     ->addColumn('store_id', function ($item) {
                         $store = $item->original_product && $item->original_product->store->name ? $item->original_product->store : $item->store;
 
-                        if (!$store->name) {
+                        if (! $store->name) {
                             return '&mdash;';
                         }
 
@@ -440,7 +443,7 @@ class HookServiceProvider extends ServiceProvider
                     ->addColumn('store_id', function ($item) {
                         $store = $item->original_product && $item->original_product->store->name ? $item->original_product->store : $item->store;
 
-                        if (!$store->name) {
+                        if (! $store->name) {
                             return '&mdash;';
                         }
 
@@ -482,7 +485,7 @@ class HookServiceProvider extends ServiceProvider
      */
     public function addHeadingToEcommerceTable(array $headings, $model): array
     {
-        if (!$model || !is_in_admin(true) || Route::is('marketplace.vendors.index')) {
+        if (! $model || ! is_in_admin(true) || Route::is('marketplace.vendors.index')) {
             return $headings;
         }
 
@@ -545,7 +548,7 @@ class HookServiceProvider extends ServiceProvider
      */
     public function addBankInfoTab($tabs, $data = null)
     {
-        if (!empty($data) && get_class($data) == Store::class && $data->customer->is_vendor) {
+        if (! empty($data) && get_class($data) == Store::class && $data->customer->is_vendor) {
             return $tabs .
                 view('plugins/marketplace::customers.tax-info-tab')->render() .
                 view('plugins/marketplace::customers.payout-info-tab')->render();
@@ -561,7 +564,7 @@ class HookServiceProvider extends ServiceProvider
      */
     public function addBankInfoContent($tabs, $data = null)
     {
-        if (!empty($data) && get_class($data) == Store::class) {
+        if (! empty($data) && get_class($data) == Store::class) {
             $customer = $data->customer;
             if ($customer->is_vendor) {
                 return $tabs .
@@ -582,11 +585,11 @@ class HookServiceProvider extends ServiceProvider
     {
         switch ($menuId) {
             case 'cms-plugins-marketplace-unverified-vendor':
-                if (!Auth::user()->hasPermission('marketplace.unverified-vendor.index')) {
+                if (! Auth::user()->hasPermission('marketplace.unverified-vendor.index')) {
                     return $number;
                 }
 
-                if (!MarketplaceHelper::getSetting('verify_vendor', 1)) {
+                if (! MarketplaceHelper::getSetting('verify_vendor', 1)) {
                     return $number;
                 }
 
@@ -598,7 +601,7 @@ class HookServiceProvider extends ServiceProvider
                 return Html::tag('span', '', $attributes)->toHtml();
 
             case 'cms-plugins-withdrawal':
-                if (!Auth::user()->hasPermission('marketplace.withdrawal.index')) {
+                if (! Auth::user()->hasPermission('marketplace.withdrawal.index')) {
                     return $number;
                 }
 
@@ -610,7 +613,7 @@ class HookServiceProvider extends ServiceProvider
                 return Html::tag('span', '', $attributes)->toHtml();
 
             case 'cms-plugins-marketplace':
-                if (!Auth::user()->hasAnyPermission([
+                if (! Auth::user()->hasAnyPermission([
                     'marketplace.withdrawal.index',
                     'marketplace.unverified-vendor.index',
                 ])) {
@@ -625,7 +628,7 @@ class HookServiceProvider extends ServiceProvider
                 return Html::tag('span', '', $attributes)->toHtml();
 
             case 'cms-plugins-ecommerce.product':
-                if (!Auth::user()->hasPermission('products.index')) {
+                if (! Auth::user()->hasPermission('products.index')) {
                     return $number;
                 }
 
@@ -646,7 +649,7 @@ class HookServiceProvider extends ServiceProvider
      */
     public function getMenuItemCount(array $data = []): array
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return $data;
         }
 
@@ -720,11 +723,11 @@ class HookServiceProvider extends ServiceProvider
      */
     public function createdByVendorNotification($request, $data = null)
     {
-        if (!MarketplaceHelper::getSetting('enable_product_approval', 1)) {
+        if (! MarketplaceHelper::getSetting('enable_product_approval', 1)) {
             return false;
         }
 
-        if (!$data instanceof Product || !in_array(Route::currentRouteName(), ['products.create', 'products.edit'])) {
+        if (! $data instanceof Product || ! in_array(Route::currentRouteName(), ['products.create', 'products.edit'])) {
             return false;
         }
 
@@ -733,7 +736,7 @@ class HookServiceProvider extends ServiceProvider
             Auth::user()->hasPermission('products.edit')
         ) {
             $isApproved = $data->status == BaseStatusEnum::PUBLISHED;
-            if (!$isApproved) {
+            if (! $isApproved) {
                 Assets::addScriptsDirectly(['vendor/core/plugins/marketplace/js/marketplace-product.js']);
             }
 
@@ -753,11 +756,11 @@ class HookServiceProvider extends ServiceProvider
      */
     public function withdrawalVendorNotification($request, $data = null)
     {
-        if (!$data instanceof Withdrawal || !in_array(Route::currentRouteName(), ['marketplace.withdrawal.edit'])) {
+        if (! $data instanceof Withdrawal || ! in_array(Route::currentRouteName(), ['marketplace.withdrawal.edit'])) {
             return false;
         }
 
-        if (!$data->customer->store || !$data->customer->store->id) {
+        if (! $data->customer->store || ! $data->customer->store->id) {
             return false;
         }
 

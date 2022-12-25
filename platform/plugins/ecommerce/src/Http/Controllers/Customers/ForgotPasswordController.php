@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Botble\ACL\Traits\SendsPasswordResetEmails;
 use Illuminate\Contracts\Auth\PasswordBroker;
 use Password;
-use Response;
 use SeoHelper;
 use Theme;
 
@@ -35,8 +34,6 @@ class ForgotPasswordController extends Controller
 
     /**
      * Display the form to request a password reset link.
-     *
-     * @return Response
      */
     public function showLinkRequestForm()
     {
@@ -56,10 +53,8 @@ class ForgotPasswordController extends Controller
 
     /**
      * Get the broker to be used during password reset.
-     *
-     * @return PasswordBroker
      */
-    public function broker()
+    public function broker(): PasswordBroker
     {
         return Password::broker('customers');
     }

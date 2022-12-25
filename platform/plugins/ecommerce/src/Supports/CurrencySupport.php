@@ -11,25 +11,13 @@ use Locale;
 
 class CurrencySupport
 {
-    /**
-     * @var Currency
-     */
-    protected $currency;
+    protected ?Currency $currency = null;
 
-    /**
-     * @var Currency
-     */
-    protected $defaultCurrency = null;
+    protected ?Currency $defaultCurrency = null;
 
-    /**
-     * @var Collection
-     */
-    protected $currencies = [];
+    protected Collection|array $currencies = [];
 
-    /**
-     * @param Currency $currency
-     */
-    public function setApplicationCurrency(Currency $currency)
+    public function setApplicationCurrency(Currency $currency): void
     {
         $this->currency = $currency;
 
@@ -40,18 +28,15 @@ class CurrencySupport
         session(['currency' => $currency->title]);
     }
 
-    /**
-     * @return Currency
-     */
     public function getApplicationCurrency(): ?Currency
     {
         $currency = $this->currency;
 
-        if (!empty($currency)) {
+        if (! empty($currency)) {
             return $currency;
         }
 
-        if (!$this->currencies instanceof Collection) {
+        if (! $this->currencies instanceof Collection) {
             $this->currencies();
         }
 
@@ -61,7 +46,7 @@ class CurrencySupport
             $currency = $this->currencies->where('title', $this->detectedCurrencyCode())->first();
         }
 
-        if (!$currency) {
+        if (! $currency) {
             $currency = $this->getDefaultCurrency();
         }
 
@@ -70,9 +55,6 @@ class CurrencySupport
         return $currency;
     }
 
-    /**
-     * @return Currency
-     */
     public function getDefaultCurrency(): ?Currency
     {
         $currency = $this->defaultCurrency;
@@ -85,15 +67,15 @@ class CurrencySupport
             $currency = $this->currencies->where('is_default', 1)->first();
         }
 
-        if (!$currency) {
+        if (! $currency) {
             $currency = app(CurrencyInterface::class)->getFirstBy(['is_default' => 1]);
         }
 
-        if (!$currency) {
+        if (! $currency) {
             $currency = app(CurrencyInterface::class)->getFirstBy([]);
         }
 
-        if (!$currency) {
+        if (! $currency) {
             $currency = new Currency([
                 'title' => 'USD',
                 'symbol' => '$',
@@ -110,12 +92,9 @@ class CurrencySupport
         return $this->defaultCurrency;
     }
 
-    /**
-     * @return Collection
-     */
     public function currencies(): Collection
     {
-        if (!$this->currencies instanceof Collection) {
+        if (! $this->currencies instanceof Collection) {
             $this->currencies = collect([]);
         }
 
@@ -126,14 +105,11 @@ class CurrencySupport
         return $this->currencies;
     }
 
-    /**
-     * @return string|null
-     */
     public function detectedCurrencyCode(): ?string
     {
         $currencies = $this->countryCurrencies();
 
-        if (!isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+        if (! isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
             return null;
         }
 
@@ -156,9 +132,6 @@ class CurrencySupport
         return Arr::get($currencies, strtoupper(substr($httpAcceptLanguage, 0, 2)));
     }
 
-    /**
-     * @return string[]
-     */
     public function countryCurrencies(): array
     {
         return [
@@ -415,9 +388,6 @@ class CurrencySupport
         ];
     }
 
-    /**
-     * @return string[]
-     */
     public function currencyCodes(): array
     {
         return [

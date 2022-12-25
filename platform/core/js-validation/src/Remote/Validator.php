@@ -4,12 +4,12 @@ namespace Botble\JsValidation\Remote;
 
 use Botble\JsValidation\Support\AccessProtectedTrait;
 use Botble\JsValidation\Support\RuleListTrait;
+use Illuminate\Contracts\Validation\Validator as BaseValidator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\ValidationRuleParser;
-use Illuminate\Validation\Validator as BaseValidator;
 
 class Validator
 {
@@ -21,40 +21,17 @@ class Validator
      */
     public const EXTENSION_NAME = 'js_validation';
 
-    /**
-     * @var BaseValidator
-     */
-    protected $validator;
+    protected BaseValidator $validator;
 
-    /**
-     * Whether to escape validation messages.
-     *
-     * @var bool
-     */
-    protected $escape;
+    protected bool $escape;
 
-    /**
-     * RemoteValidator constructor.
-     *
-     * @param BaseValidator $validator
-     * @param bool $escape
-     */
-    public function __construct(BaseValidator $validator, $escape = false)
+    public function __construct(BaseValidator $validator, bool $escape = false)
     {
         $this->validator = $validator;
         $this->escape = $escape;
     }
 
-    /**
-     * Validate request.
-     *
-     * @param $field
-     * @param $parameters
-     * @return void
-     *
-     * @throws ValidationException
-     */
-    public function validate($field, $parameters = [])
+    public function validate(string $field, array $parameters = []): void
     {
         $attribute = $this->parseAttributeName($field);
         $validationParams = $this->parseParameters($parameters);
@@ -63,13 +40,7 @@ class Validator
         $this->throwValidationException($validationResult, $this->validator);
     }
 
-    /**
-     *  Parse Validation input request data.
-     *
-     * @param string $data
-     * @return array|int|string
-     */
-    protected function parseAttributeName($data)
+    protected function parseAttributeName($data): int|string|null
     {
         parse_str($data, $attrParts);
         $attrParts = is_null($attrParts) ? [] : $attrParts;
@@ -88,7 +59,7 @@ class Validator
     {
         $newParams = ['validate_all' => false];
         if (isset($parameters[0])) {
-            $newParams['validate_all'] = ($parameters[0] === 'true') ? true : false;
+            $newParams['validate_all'] = $parameters[0] === 'true';
         }
 
         return $newParams;
@@ -132,7 +103,7 @@ class Validator
     {
         $validator = $this->validator;
         $rules = $validator->getRules();
-        $rules = isset($rules[$attribute]) ? $rules[$attribute] : [];
+        $rules = $rules[$attribute] ?? [];
 
         if (in_array('no_js_validation', $rules)) {
             $validator->setRules([$attribute => []]);
@@ -140,7 +111,7 @@ class Validator
             return;
         }
 
-        if (!$validateAll) {
+        if (! $validateAll) {
             $rules = $this->purgeNonRemoteRules($rules, $validator);
         }
 
@@ -160,7 +131,7 @@ class Validator
 
         foreach ($rules as $i => $rule) {
             $parsedRule = ValidationRuleParser::parse([$rule]);
-            if (!$this->isRemoteRule($parsedRule[0])) {
+            if (! $this->isRemoteRule($parsedRule[0])) {
                 unset($rules[$i]);
             }
         }

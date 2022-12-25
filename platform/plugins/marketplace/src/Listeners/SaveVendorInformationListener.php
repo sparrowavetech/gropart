@@ -21,27 +21,12 @@ use Throwable;
 
 class SaveVendorInformationListener
 {
-    /**
-     * @var StoreInterface
-     */
-    protected $storeRepository;
+    protected StoreInterface $storeRepository;
 
-    /**
-     * @var VendorInfoInterface
-     */
-    protected $vendorInfoRepository;
+    protected VendorInfoInterface $vendorInfoRepository;
 
-    /**
-     * @var Request
-     */
-    protected $request;
+    protected Request $request;
 
-    /**
-     * SaveVendorInformationListener constructor.
-     * @param StoreInterface $storeRepository
-     * @param VendorInfoInterface $vendorInfoRepository
-     * @param Request $request
-     */
     public function __construct(
         StoreInterface $storeRepository,
         VendorInfoInterface $vendorInfoRepository,
@@ -52,19 +37,11 @@ class SaveVendorInformationListener
         $this->request = $request;
     }
 
-    /**
-     * Handle the event.
-     *
-     * @param Registered $event
-     * @return void
-     * @throws FileNotFoundException
-     * @throws Throwable
-     */
-    public function handle(Registered $event)
+    public function handle(Registered $event): void
     {
         $customer = $event->user;
         if (get_class($customer) == Customer::class &&
-            !$customer->is_vendor &&
+            ! $customer->is_vendor &&
             $this->request->input('is_vendor') == 1) {
             $store = $this->storeRepository->getFirstBy(['customer_id' => $customer->getAuthIdentifier()]);
 
@@ -75,7 +52,7 @@ class SaveVendorInformationListener
             } elseif ($this->request->input('shop_category') == ShopTypeEnum::RETAILER) {
                 $shop_category = ShopTypeEnum::RETAILER();
             }
-            if (!$store) {
+            if (! $store) {
                 $store = $this->storeRepository->createOrUpdate([
                     'name' => BaseHelper::clean($this->request->input('shop_name')),
                     'phone' => BaseHelper::clean($this->request->input('shop_phone')),
@@ -84,7 +61,7 @@ class SaveVendorInformationListener
                 ]);
             }
 
-            if (!$store->slug) {
+            if (! $store->slug) {
                 Slug::create([
                     'reference_type' => Store::class,
                     'reference_id' => $store->id,
@@ -113,7 +90,7 @@ class SaveVendorInformationListener
                 $customer->vendor_verified_at = Carbon::now();
             }
 
-            if (!$customer->vendorInfo->id) {
+            if (! $customer->vendorInfo->id) {
                 // Create vendor info
                 $this->vendorInfoRepository->createOrUpdate([
                     'customer_id' => $customer->id,

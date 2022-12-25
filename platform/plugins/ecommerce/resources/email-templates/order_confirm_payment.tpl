@@ -1,6 +1,6 @@
 {{ header }}
 
-<h2>Payment for order #{{ order_id }} was confirmed!</h2>
+<h2>Payment for order {{ order_id }} was confirmed!</h2>
 <p>Hi {{ customer_name }},</p>
 <p>Thank you for purchasing our product.</p>
 

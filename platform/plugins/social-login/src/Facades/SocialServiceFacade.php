@@ -7,10 +7,7 @@ use Illuminate\Support\Facades\Facade;
 
 class SocialServiceFacade extends Facade
 {
-    /**
-     * @return string
-     */
-    protected static function getFacadeAccessor()
+    protected static function getFacadeAccessor(): string
     {
         return SocialService::class;
     }

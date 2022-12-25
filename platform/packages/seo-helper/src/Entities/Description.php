@@ -125,7 +125,7 @@ class Description implements DescriptionContract
      */
     public function render()
     {
-        if (!$this->hasContent()) {
+        if (! $this->hasContent()) {
             return '';
         }
 
@@ -149,7 +149,7 @@ class Description implements DescriptionContract
      */
     protected function hasContent()
     {
-        return !empty($this->get());
+        return ! empty($this->get());
     }
 
     /**
@@ -161,7 +161,7 @@ class Description implements DescriptionContract
      */
     protected function checkMax($max)
     {
-        if (!is_int($max)) {
+        if (! is_int($max)) {
             throw new InvalidArgumentException(
                 'The description maximum length must be integer.'
             );

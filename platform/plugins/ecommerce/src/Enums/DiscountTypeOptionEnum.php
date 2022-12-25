@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Enums;
 
 use Botble\Base\Supports\Enum;
 use Html;
+use Illuminate\Support\HtmlString;
 
 /**
  * @method static DiscountTypeOptionEnum AMOUNT()
@@ -18,31 +19,20 @@ class DiscountTypeOptionEnum extends Enum
     public const SHIPPING = 'shipping';
     public const SAME_PRICE = 'same-price';
 
-    /**
-     * @var string
-     */
     public static $langPath = 'plugins/ecommerce::discount.enums.type-options';
 
-    /**
-     * @return string
-     */
-    public function toHtml()
+    public function toHtml(): HtmlString|string
     {
-        switch ($this->value) {
-            case self::AMOUNT:
-                return Html::tag('span', self::AMOUNT()->label(), ['class' => 'label-info status-label'])
-                    ->toHtml();
-            case self::PERCENTAGE:
-                return Html::tag('span', self::PERCENTAGE()->label(), ['class' => 'label-info status-label'])
-                    ->toHtml();
-            case self::SHIPPING:
-                return Html::tag('span', self::SHIPPING()->label(), ['class' => 'label-info status-label'])
-                    ->toHtml();
-            case self::SAME_PRICE:
-                return Html::tag('span', self::SAME_PRICE()->label(), ['class' => 'label-info status-label'])
-                    ->toHtml();
-            default:
-                return parent::toHtml();
-        }
+        return match ($this->value) {
+            self::AMOUNT => Html::tag('span', self::AMOUNT()->label(), ['class' => 'label-info status-label'])
+                ->toHtml(),
+            self::PERCENTAGE => Html::tag('span', self::PERCENTAGE()->label(), ['class' => 'label-info status-label'])
+                ->toHtml(),
+            self::SHIPPING => Html::tag('span', self::SHIPPING()->label(), ['class' => 'label-info status-label'])
+                ->toHtml(),
+            self::SAME_PRICE => Html::tag('span', self::SAME_PRICE()->label(), ['class' => 'label-info status-label'])
+                ->toHtml(),
+            default => parent::toHtml(),
+        };
     }
 }

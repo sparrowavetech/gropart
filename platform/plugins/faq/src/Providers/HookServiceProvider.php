@@ -11,21 +11,18 @@ use MetaBox;
 
 class HookServiceProvider extends ServiceProvider
 {
-    /**
-     * @throws \Throwable
-     */
     public function boot()
     {
         add_action(BASE_ACTION_META_BOXES, function ($context, $object) {
-            if (!$object || $context != 'advanced') {
+            if (! $object || $context != 'advanced') {
                 return false;
             }
 
-            if (!in_array(get_class($object), config('plugins.faq.general.schema_supported', []))) {
+            if (! in_array(get_class($object), config('plugins.faq.general.schema_supported', []))) {
                 return false;
             }
 
-            if (!setting('enable_faq_schema', 0)) {
+            if (! setting('enable_faq_schema', 0)) {
                 return false;
             }
 
@@ -49,7 +46,7 @@ class HookServiceProvider extends ServiceProvider
                         $value = MetaBox::getMetaData($args[0], 'faq_schema_config', true);
                     }
 
-                    $hasValue = !empty($value);
+                    $hasValue = ! empty($value);
 
                     $value = json_encode((array)$value);
 
@@ -64,23 +61,23 @@ class HookServiceProvider extends ServiceProvider
 
         add_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, function ($screen, $object) {
             add_filter(THEME_FRONT_HEADER, function ($html) use ($object) {
-                if (!in_array(get_class($object), config('plugins.faq.general.schema_supported', []))) {
+                if (! in_array(get_class($object), config('plugins.faq.general.schema_supported', []))) {
                     return $html;
                 }
 
-                if (!setting('enable_faq_schema', 0)) {
+                if (! setting('enable_faq_schema', 0)) {
                     return $html;
                 }
 
                 $value = MetaBox::getMetaData($object, 'faq_schema_config', true);
 
-                if (!$value || !is_array($value)) {
+                if (! $value || ! is_array($value)) {
                     return $html;
                 }
 
-                if (!empty($value)) {
+                if (! empty($value)) {
                     foreach ($value as $key => $item) {
-                        if (!$item[0]['value'] && !$item[1]['value']) {
+                        if (! $item[0]['value'] && ! $item[1]['value']) {
                             Arr::forget($value, $key);
                         }
                     }
@@ -112,10 +109,6 @@ class HookServiceProvider extends ServiceProvider
         add_filter(BASE_FILTER_AFTER_SETTING_CONTENT, [$this, 'addSettings'], 59);
     }
 
-    /**
-     * @param string|null $data
-     * @return string
-     */
     public function addSettings(?string $data = null): string
     {
         return $data . view('plugins/faq::settings')->render();

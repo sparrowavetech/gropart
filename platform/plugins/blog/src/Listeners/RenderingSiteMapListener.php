@@ -9,27 +9,12 @@ use SiteMapManager;
 
 class RenderingSiteMapListener
 {
-    /**
-     * @var PostInterface
-     */
-    protected $postRepository;
+    protected PostInterface $postRepository;
 
-    /**
-     * @var CategoryInterface
-     */
-    protected $categoryRepository;
+    protected CategoryInterface $categoryRepository;
 
-    /**
-     * @var TagInterface
-     */
-    protected $tagRepository;
+    protected TagInterface $tagRepository;
 
-    /**
-     * RenderingSiteMapListener constructor.
-     * @param PostInterface $postRepository
-     * @param CategoryInterface $categoryRepository
-     * @param TagInterface $tagRepository
-     */
     public function __construct(
         PostInterface $postRepository,
         CategoryInterface $categoryRepository,
@@ -40,12 +25,7 @@ class RenderingSiteMapListener
         $this->tagRepository = $tagRepository;
     }
 
-    /**
-     * Handle the event.
-     *
-     * @return void
-     */
-    public function handle()
+    public function handle(): void
     {
         $posts = $this->postRepository->getDataSiteMap();
 

@@ -13,36 +13,17 @@ class FlashSale extends BaseModel
 {
     use EnumCastable;
 
-    /**
-     * The database table used by the model.
-     *
-     * @var string
-     */
     protected $table = 'ec_flash_sales';
 
-    /**
-     * @var array
-     */
     protected $fillable = [
         'name',
         'end_date',
         'status',
     ];
 
-    /**
-     * @var array
-     */
     protected $casts = [
         'status' => BaseStatusEnum::class,
-    ];
-
-    /**
-     * @var string[]
-     */
-    protected $dates = [
-        'created_at',
-        'updated_at',
-        'end_date',
+        'end_date' => 'datetime',
     ];
 
     public function products(): BelongsToMany
@@ -52,33 +33,21 @@ class FlashSale extends BaseModel
             ->withPivot(['price', 'quantity', 'sold']);
     }
 
-    /**
-     * @param string $value
-     * @return string|null
-     */
     public function getEndDateAttribute($value): ?string
     {
-        if (!$value) {
+        if (! $value) {
             return $value;
         }
 
         return Carbon::parse($value)->format('Y/m/d');
     }
 
-    /**
-     * @param Builder $query
-     * @return Builder
-     */
-    public function scopeNotExpired($query)
+    public function scopeNotExpired(Builder $query): Builder
     {
         return $query->whereDate('end_date', '>', Carbon::now()->toDateString());
     }
 
-    /**
-     * @param Builder $query
-     * @return Builder
-     */
-    public function scopeExpired($query)
+    public function scopeExpired(Builder $query): Builder
     {
         return $query->whereDate('end_date', '=<', Carbon::now()->toDateString());
     }

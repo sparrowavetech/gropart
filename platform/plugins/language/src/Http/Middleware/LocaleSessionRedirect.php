@@ -10,14 +10,7 @@ use Language;
 
 class LocaleSessionRedirect extends LaravelLocalizationMiddlewareBase
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param Request $request
-     * @param Closure $next
-     * @return mixed
-     */
-    public function handle($request, Closure $next)
+    public function handle(Request $request, Closure $next)
     {
         // If the URL of the request is in exceptions.
         if ($this->shouldIgnore($request)) {
@@ -36,7 +29,7 @@ class LocaleSessionRedirect extends LaravelLocalizationMiddlewareBase
 
         $locale = session('language', false);
 
-        if (!empty($params) && !Language::checkLocaleInSupportedLocales($params[0])) {
+        if (! empty($params) && ! Language::checkLocaleInSupportedLocales($params[0])) {
             $locale = Language::getDefaultLocale();
         }
 
@@ -56,7 +49,7 @@ class LocaleSessionRedirect extends LaravelLocalizationMiddlewareBase
         session(['language' => Language::getDefaultLocale()]);
         app()->setLocale(session('language'));
 
-        if ($locale && Language::checkLocaleInSupportedLocales($locale) && !(Language::getDefaultLocale() === $locale && Language::hideDefaultLocaleInURL())) {
+        if ($locale && Language::checkLocaleInSupportedLocales($locale) && ! (Language::getDefaultLocale() === $locale && Language::hideDefaultLocaleInURL())) {
             app('session')->reflash();
             $redirection = Language::getLocalizedURL($locale, null, [], false);
 

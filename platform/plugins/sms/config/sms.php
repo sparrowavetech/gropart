@@ -20,4 +20,5 @@ return [
     'product_url' => 'Product Url',
     'verify_link' => 'Verify Link',
     'reset_link' => 'Reset Link',
+    'otp' => 'OTP',
 ];

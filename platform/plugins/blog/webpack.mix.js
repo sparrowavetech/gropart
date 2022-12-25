@@ -7,5 +7,8 @@ const source = 'platform/plugins/' + directory;
 const dist = 'public/vendor/core/plugins/' + directory;
 
 mix
-    .js(source + '/resources/assets/js/blog.js', dist + '/js')
-    .copyDirectory(dist + '/js', source + '/public/js');
+    .js(source + '/resources/assets/js/blog.js', dist + '/js');
+
+if (mix.inProduction()) {
+    mix.copy(dist + '/js/blog.js', source + '/public/js');
+}

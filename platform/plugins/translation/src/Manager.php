@@ -4,7 +4,6 @@ namespace Botble\Translation;
 
 use ArrayAccess;
 use BaseHelper;
-use Botble\Base\Supports\MountManager;
 use Botble\Base\Supports\PclZip as Zip;
 use Botble\Translation\Models\Translation;
 use Exception;
@@ -14,38 +13,25 @@ use GuzzleHttp\Psr7\Utils;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
 use Lang;
-use League\Flysystem\Adapter\Local as LocalAdapter;
 use League\Flysystem\Filesystem as Flysystem;
-use Symfony\Component\VarExporter\Exception\ExceptionInterface;
+use League\Flysystem\Local\LocalFilesystemAdapter;
+use League\Flysystem\MountManager;
 use Symfony\Component\VarExporter\VarExporter;
 use Theme;
 use ZipArchive;
 
 class Manager
 {
-    /**
-     * @var Application
-     */
-    protected $app;
+    protected Application $app;
 
-    /**
-     * @var Filesystem
-     */
-    protected $files;
+    protected Filesystem $files;
 
-    /**
-     * @var array|ArrayAccess
-     */
-    protected $config;
+    protected array|ArrayAccess $config;
 
-    /**
-     * Manager constructor.
-     * @param Application $app
-     * @param Filesystem $files
-     */
     public function __construct(Application $app, Filesystem $files)
     {
         $this->app = $app;
@@ -53,10 +39,6 @@ class Manager
         $this->config = $app['config']['plugins.translation.general'];
     }
 
-    /**
-     * @param bool $replace
-     * @return int
-     */
     public function importTranslations(bool $replace = false): int
     {
         try {
@@ -102,40 +84,32 @@ class Manager
         return $counter;
     }
 
-    public function publishLocales()
+    public function publishLocales(): void
     {
         $paths = ServiceProvider::pathsToPublish(null, 'cms-lang');
 
         foreach ($paths as $from => $to) {
             if ($this->files->isFile($from)) {
-                if (!$this->files->isDirectory(dirname($to))) {
+                if (! $this->files->isDirectory(dirname($to))) {
                     $this->files->makeDirectory(dirname($to), 0755, true);
                 }
                 $this->files->copy($from, $to);
             } elseif ($this->files->isDirectory($from)) {
                 $manager = new MountManager([
-                    'from' => new Flysystem(new LocalAdapter($from)),
-                    'to' => new Flysystem(new LocalAdapter($to)),
+                    'from' => new Flysystem(new LocalFilesystemAdapter($from)),
+                    'to' => new Flysystem(new LocalFilesystemAdapter($to)),
                 ]);
 
                 foreach ($manager->listContents('from://', true) as $file) {
                     if ($file['type'] === 'file') {
-                        $manager->put('to://' . $file['path'], $manager->read('from://' . $file['path']));
+                        $manager->write($file['path'], $manager->read($file['path']));
                     }
                 }
             }
         }
     }
 
-    /**
-     * @param string $key
-     * @param string $value
-     * @param string $locale
-     * @param string $group
-     * @param bool $replace
-     * @return bool
-     */
-    public function importTranslation($key, $value, $locale, $group, bool $replace = false): bool
+    public function importTranslation(string $key, string|null|array $value, ?string $locale, ?string $group, bool $replace = false): bool
     {
         // process only string values
         if (is_array($value)) {
@@ -156,7 +130,7 @@ class Manager
         }
 
         // Only replace when empty, or explicitly told so
-        if ($replace || !$translation->value) {
+        if ($replace || ! $translation->value) {
             $translation->value = $value;
         }
 
@@ -165,16 +139,14 @@ class Manager
         return true;
     }
 
-    /**
-     * @param null $group
-     * @throws ExceptionInterface
-     */
-    public function exportTranslations($group = null)
+    public function exportTranslations(?string $group = null): void
     {
-        if (!empty($group)) {
-            if (!in_array($group, $this->config['exclude_groups'])) {
+        if (! empty($group)) {
+            if (! in_array($group, $this->config['exclude_groups'])) {
                 if ($group == '*') {
-                    return $this->exportAllTranslations();
+                    $this->exportAllTranslations();
+
+                    return;
                 }
 
                 $tree = $this->makeTree(Translation::ofTranslatedGroup($group)->orderByGroupKeys(Arr::get(
@@ -188,9 +160,8 @@ class Manager
                         $translations = $groups[$group];
                         $file = $locale . '/' . $group;
 
-                        if (!$this->files->isDirectory(lang_path($locale))) {
+                        if (! $this->files->isDirectory(lang_path($locale))) {
                             $this->files->makeDirectory(lang_path($locale), 755, true);
-                            system('find ' . lang_path($locale) . ' -type d -exec chmod 755 {} \;');
                         }
 
                         $groups = explode('/', $group);
@@ -199,9 +170,8 @@ class Manager
                             Arr::forget($groups, count($groups) - 1);
 
                             $dir = 'vendor/' . implode('/', $groups) . '/' . $locale;
-                            if (!$this->files->isDirectory(lang_path($dir))) {
+                            if (! $this->files->isDirectory(lang_path($dir))) {
                                 $this->files->makeDirectory(lang_path($dir), 755, true);
-                                system('find ' . lang_path($dir) . ' -type d -exec chmod 755 {} \;');
                             }
 
                             $file = $dir . '/' . $folderName;
@@ -217,10 +187,6 @@ class Manager
         }
     }
 
-    /**
-     * @return bool
-     * @throws ExceptionInterface
-     */
     public function exportAllTranslations(): bool
     {
         $groups = Translation::whereNotNull('value')->selectDistinctGroup()->get('group');
@@ -232,11 +198,7 @@ class Manager
         return true;
     }
 
-    /**
-     * @param array|object $translations
-     * @return array
-     */
-    protected function makeTree($translations): array
+    protected function makeTree(array|Collection $translations): array
     {
         $array = [];
         foreach ($translations as $translation) {
@@ -246,24 +208,17 @@ class Manager
         return $array;
     }
 
-    /**
-     * @throws Exception
-     */
-    public function cleanTranslations()
+    public function cleanTranslations(): void
     {
         Translation::whereNull('value')->delete();
     }
 
-    public function truncateTranslations()
+    public function truncateTranslations(): void
     {
         Translation::truncate();
     }
 
-    /**
-     * @param null|string $key
-     * @return mixed
-     */
-    public function getConfig(?string $key = null)
+    public function getConfig(?string $key = null): string|array|null
     {
         if ($key == null) {
             return $this->config;
@@ -272,12 +227,9 @@ class Manager
         return $this->config[$key];
     }
 
-    /**
-     * @return bool
-     */
     public function removeUnusedThemeTranslations(): bool
     {
-        if (!defined('THEME_MODULE_SCREEN_NAME')) {
+        if (! defined('THEME_MODULE_SCREEN_NAME')) {
             return false;
         }
 
@@ -300,7 +252,7 @@ class Manager
                     $enTranslationKeys = array_keys($enTranslations);
 
                     foreach ($translations as $key => $translation) {
-                        if (!in_array($key, $enTranslationKeys)) {
+                        if (! in_array($key, $enTranslationKeys)) {
                             Arr::forget($translations, $key);
                         }
                     }
@@ -315,9 +267,6 @@ class Manager
         return true;
     }
 
-    /**
-     * @return array|string[]
-     */
     public function getRemoteAvailableLocales(): array
     {
         $client = new Client(['verify' => false]);
@@ -341,17 +290,13 @@ class Manager
 
                 $availableLocales[] = $tree['path'];
             }
-        } catch (Exception|GuzzleException $exception) {
+        } catch (Exception|GuzzleException) {
             $availableLocales = ['ar', 'es', 'vi'];
         }
 
         return $availableLocales;
     }
 
-    /**
-     * @param string $locale
-     * @return array|false[]
-     */
     public function downloadRemoteLocale(string $locale): array
     {
         $repository = 'https://github.com/botble/translations';
@@ -362,7 +307,7 @@ class Manager
 
         $availableLocales = $this->getRemoteAvailableLocales();
 
-        if (!in_array($locale, $availableLocales)) {
+        if (! in_array($locale, $availableLocales)) {
             return [
                 'error' => true,
                 'message' => 'This locale is not available on ' . $repository,
@@ -412,13 +357,13 @@ class Manager
         File::deleteDirectory(storage_path('app/translations-master'));
 
         foreach (File::directories(lang_path('vendor/packages')) as $package) {
-            if (!File::isDirectory(package_path(File::basename($package)))) {
+            if (! File::isDirectory(package_path(File::basename($package)))) {
                 File::deleteDirectory($package);
             }
         }
 
         foreach (File::directories(lang_path('vendor/plugins')) as $plugin) {
-            if (!File::isDirectory(plugin_path(File::basename($plugin)))) {
+            if (! File::isDirectory(plugin_path(File::basename($plugin)))) {
                 File::deleteDirectory($plugin);
             }
         }

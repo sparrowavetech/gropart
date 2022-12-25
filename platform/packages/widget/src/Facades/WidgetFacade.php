@@ -7,22 +7,12 @@ use Illuminate\Support\Facades\Facade;
 
 class WidgetFacade extends Facade
 {
-    /**
-     * @return string
-     */
-    protected static function getFacadeAccessor()
+    protected static function getFacadeAccessor(): string
     {
         return 'botble.widget';
     }
 
-    /**
-     * Get the widget group object.
-     *
-     * @param string $name
-     *
-     * @return WidgetGroup
-     */
-    public static function group($name)
+    public static function group(string $name): WidgetGroup
     {
         return app('botble.widget-group-collection')->group($name);
     }

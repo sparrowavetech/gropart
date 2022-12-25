@@ -1,4 +1,5 @@
 {
+    "id": "botble/cookie-consent",
     "name": "Cookie Consent",
     "namespace": "Botble\\CookieConsent\\",
     "provider": "Botble\\CookieConsent\\Providers\\CookieConsentServiceProvider",

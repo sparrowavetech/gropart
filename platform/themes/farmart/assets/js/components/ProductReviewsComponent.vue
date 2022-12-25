@@ -78,7 +78,7 @@
                         this.meta = res.data.meta;
                         this.isLoading = false;
 
-                        $('.product-reviews-container .product-reviews-header').text(res.data.message);
+                        $('.product-reviews-container .product-reviews-header').html(res.data.message);
                     })
                     .catch(() => {
                         this.isLoading = false;

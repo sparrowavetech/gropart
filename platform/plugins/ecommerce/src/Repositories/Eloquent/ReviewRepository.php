@@ -9,9 +9,6 @@ use Illuminate\Support\Facades\DB;
 
 class ReviewRepository extends RepositoriesAbstract implements ReviewInterface
 {
-    /**
-     * {@inheritDoc}
-     */
     public function getGroupedByProductId($productId)
     {
         $data = $this->model

@@ -11,22 +11,17 @@ use Botble\Setting\Repositories\Interfaces\SettingInterface;
 use Botble\Setting\Supports\SettingsManager;
 use Botble\Setting\Supports\SettingStore;
 use EmailHandler;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Foundation\AliasLoader;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class SettingServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    /**
-     * This provider is deferred and should be lazy loaded.
-     *
-     * @var boolean
-     */
-    protected $defer = true;
+    protected bool $defer = true;
 
     public function register()
     {
@@ -55,7 +50,7 @@ class SettingServiceProvider extends ServiceProvider
     public function boot()
     {
         $this
-            ->loadRoutes(['web'])
+            ->loadRoutes()
             ->loadAndPublishViews()
             ->loadAndPublishTranslations()
             ->loadAndPublishConfigurations(['permissions', 'email'])
@@ -105,12 +100,7 @@ class SettingServiceProvider extends ServiceProvider
         });
     }
 
-    /**
-     * Which IoC bindings the provider provides.
-     *
-     * @return array
-     */
-    public function provides()
+    public function provides(): array
     {
         return [
             SettingsManager::class,

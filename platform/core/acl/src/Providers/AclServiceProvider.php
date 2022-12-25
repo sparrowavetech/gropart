@@ -57,7 +57,7 @@ class AclServiceProvider extends ServiceProvider
             ->loadAndPublishViews()
             ->loadAndPublishTranslations()
             ->publishAssets()
-            ->loadRoutes(['web'])
+            ->loadRoutes()
             ->loadMigrations();
 
         $this->garbageCollect();
@@ -92,9 +92,9 @@ class AclServiceProvider extends ServiceProvider
             $router->aliasMiddleware('guest', RedirectIfAuthenticated::class);
         });
 
-        config()->set(['auth.providers.users.model' => User::class]);
-
         $this->app->booted(function () {
+            config()->set(['auth.providers.users.model' => User::class]);
+
             EmailHandler::addTemplateSettings('acl', config('core.acl.email', []), 'core');
 
             $this->app->register(HookServiceProvider::class);
@@ -104,24 +104,16 @@ class AclServiceProvider extends ServiceProvider
     /**
      * Garbage collect activations and reminders.
      *
-     * @return void
      * @throws BindingResolutionException
      */
-    protected function garbageCollect()
+    protected function garbageCollect(): void
     {
         $config = $this->app->make('config')->get('core.acl.general');
 
         $this->sweep($this->app->make(ActivationInterface::class), Arr::get($config, 'activations.lottery', [2, 100]));
     }
 
-    /**
-     * Sweep expired codes.
-     *
-     * @param mixed $repository
-     * @param array $lottery
-     * @return void
-     */
-    protected function sweep($repository, array $lottery)
+    protected function sweep(ActivationInterface $repository, array $lottery): void
     {
         if ($this->configHitsLottery($lottery)) {
             try {
@@ -134,9 +126,6 @@ class AclServiceProvider extends ServiceProvider
 
     /**
      * Determine if the configuration odds hit the lottery.
-     *
-     * @param array $lottery
-     * @return bool
      */
     protected function configHitsLottery(array $lottery): bool
     {

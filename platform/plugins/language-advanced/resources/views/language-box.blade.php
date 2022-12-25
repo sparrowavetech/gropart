@@ -9,6 +9,7 @@
             @endif
         @endforeach
     </div>
+    <input type="hidden" name="language" value="{{ Language::getCurrentLocale() !== Language::getDefaultLocale() && !Language::hideDefaultLocaleInURL() ? Language::getCurrentLocale() : null }}">
 @endif
 
 @push('header')

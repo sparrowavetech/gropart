@@ -11,10 +11,6 @@ class HookServiceProvider extends ServiceProvider
         add_filter(BASE_FILTER_AFTER_SETTING_CONTENT, [$this, 'addSettings'], 299);
     }
 
-    /**
-     * @param string|null $data
-     * @return string
-     */
     public function addSettings(?string $data = null): string
     {
         return $data . view('plugins/captcha::setting')->render();

@@ -10,47 +10,26 @@ class AuditHandlerEvent extends Event
 {
     use SerializesModels;
 
-    /**
-     * @var string
-     */
-    public $module;
+    public string $module;
 
-    /**
-     * @var string
-     */
-    public $action;
+    public string $action;
 
-    /**
-     * @var string
-     */
-    public $referenceId;
+    public string|int $referenceId;
 
-    /**
-     * @var string
-     */
-    public $referenceUser;
+    public string|int|null $referenceUser;
 
-    /**
-     * @var string
-     */
-    public $referenceName;
+    public ?string $referenceName;
 
-    /**
-     * @var string
-     */
-    public $type;
+    public string $type;
 
-    /**
-     * AuditHandlerEvent constructor.
-     * @param string $module
-     * @param string $action
-     * @param int $referenceId
-     * @param null $referenceName
-     * @param string $type
-     * @param int $referenceUser
-     */
-    public function __construct($module, $action, $referenceId, $referenceName, $type, $referenceUser = 0)
-    {
+    public function __construct(
+        string $module,
+        string $action,
+        int $referenceId,
+        ?string $referenceName,
+        string $type,
+        int $referenceUser = 0
+    ) {
         if ($referenceUser === 0 && Auth::check()) {
             $referenceUser = Auth::id();
         }

@@ -4,7 +4,7 @@ use Illuminate\Support\Arr;
 use Botble\Base\Facades\ActionFacade as Action;
 use Botble\Base\Facades\FilterFacade as Filter;
 
-if (!function_exists('add_filter')) {
+if (! function_exists('add_filter')) {
     /**
      * @param string | array $hook
      * @param $callback
@@ -17,7 +17,7 @@ if (!function_exists('add_filter')) {
     }
 }
 
-if (!function_exists('remove_filter')) {
+if (! function_exists('remove_filter')) {
     /**
      * @param string $hook
      */
@@ -27,7 +27,7 @@ if (!function_exists('remove_filter')) {
     }
 }
 
-if (!function_exists('add_action')) {
+if (! function_exists('add_action')) {
     /**
      * @param string|array $hook
      * @param $callback
@@ -40,7 +40,7 @@ if (!function_exists('add_action')) {
     }
 }
 
-if (!function_exists('apply_filters')) {
+if (! function_exists('apply_filters')) {
     /**
      * @return mixed
      */
@@ -52,7 +52,7 @@ if (!function_exists('apply_filters')) {
     }
 }
 
-if (!function_exists('do_action')) {
+if (! function_exists('do_action')) {
     function do_action()
     {
         $args = func_get_args();
@@ -61,7 +61,7 @@ if (!function_exists('do_action')) {
     }
 }
 
-if (!function_exists('get_hooks')) {
+if (! function_exists('get_hooks')) {
     /**
      * @param string|null $name
      * @param bool $isFilter

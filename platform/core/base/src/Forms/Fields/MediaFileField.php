@@ -6,10 +6,7 @@ use Kris\LaravelFormBuilder\Fields\FormField;
 
 class MediaFileField extends FormField
 {
-    /**
-     * {@inheritDoc}
-     */
-    protected function getTemplate()
+    protected function getTemplate(): string
     {
         return 'core/base::forms.fields.media-file';
     }

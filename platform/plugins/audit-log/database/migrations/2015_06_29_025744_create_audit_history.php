@@ -4,16 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 
 return new class () extends Migration {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::create('audit_histories', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id')->unsigned()->references('id')->on('users')->index();
+            $table->integer('user_id')->unsigned()->index();
             $table->string('module', 60)->index();
             $table->text('request')->nullable();
             $table->string('action', 120);
@@ -27,12 +22,7 @@ return new class () extends Migration {
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('audit_histories');
     }

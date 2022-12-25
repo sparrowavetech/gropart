@@ -10,21 +10,10 @@ use Illuminate\Support\Str;
 
 class Revision extends BaseModel
 {
-    /**
-     * @var string
-     */
     public $table = 'revisions';
 
-    /**
-     * @var array
-     */
-    protected $revisionFormattedFields = [];
+    protected array $revisionFormattedFields = [];
 
-    /**
-     * Grab the revision history for the model that is calling
-     *
-     * @return MorphTo
-     */
     public function revisionable(): MorphTo
     {
         return $this->morphTo();
@@ -35,10 +24,8 @@ class Revision extends BaseModel
      *
      * Returns the field that was updated, in the case that it's a foreign key
      * denoted by a suffix of "_id", then "_id" is simply stripped
-     *
-     * @return string field
      */
-    public function fieldName()
+    public function fieldName(): string
     {
         if ($formatted = $this->formatFieldName($this->key)) {
             return $formatted;
@@ -53,11 +40,8 @@ class Revision extends BaseModel
      * Format field name.
      *
      * Allow overrides for field names.
-     *
-     * @param string $key
-     * @return bool|string
      */
-    protected function formatFieldName(string $key)
+    protected function formatFieldName(string $key): bool|string
     {
         $relatedModel = $this->revisionable_type;
         $relatedModel = new $relatedModel();
@@ -75,8 +59,6 @@ class Revision extends BaseModel
      *
      * Grab the old value of the field, if it was a foreign key
      * attempt to get an identifying name for the model.
-     *
-     * @return string old value
      */
     public function oldValue(): ?string
     {
@@ -88,8 +70,6 @@ class Revision extends BaseModel
      * old or new value for the revision.
      *
      * @param string $which old or new
-     *
-     * @return string value
      */
     protected function getValue(string $which = 'new'): ?string
     {
@@ -106,9 +86,9 @@ class Revision extends BaseModel
                     $relatedModel = $this->getRelatedModel();
 
                     // Now we can find out the namespace of related model
-                    if (!method_exists($mainModel, $relatedModel)) {
+                    if (! method_exists($mainModel, $relatedModel)) {
                         $relatedModel = Str::camel($relatedModel); // for cases like published_status_id
-                        if (!method_exists($mainModel, $relatedModel)) {
+                        if (! method_exists($mainModel, $relatedModel)) {
                             throw new Exception('Relation ' . $relatedModel . ' does not exist for ' . $mainModel);
                         }
                     }
@@ -123,7 +103,7 @@ class Revision extends BaseModel
 
                         return $item->getRevisionNullString();
                     }
-                    if (!$item) {
+                    if (! $item) {
                         $item = new $relatedClass();
 
                         return $this->format($this->key, $item->getRevisionUnknownString());
@@ -160,8 +140,6 @@ class Revision extends BaseModel
 
     /**
      * Return true if the key is for a related model.
-     *
-     * @return bool
      */
     protected function isRelated(): bool
     {
@@ -178,8 +156,6 @@ class Revision extends BaseModel
 
     /**
      * Return the name of the related model.
-     *
-     * @return string
      */
     protected function getRelatedModel(): string
     {
@@ -190,11 +166,6 @@ class Revision extends BaseModel
 
     /**
      * Format the value according to the $revisionFormattedFields array.
-     *
-     * @param string $key
-     * @param string|null $value
-     *
-     * @return string formatted value
      */
     public function format(string $key, ?string $value): ?string
     {
@@ -214,8 +185,6 @@ class Revision extends BaseModel
      *
      * Grab the new value of the field, if it was a foreign key
      * attempt to get an identifying name for the model.
-     *
-     * @return string old value
      */
     public function newValue(): ?string
     {
@@ -233,16 +202,16 @@ class Revision extends BaseModel
             return false;
         }
 
-        $userModel = app('config')->get('auth.model');
+        $userModel = config('auth.model');
 
         if (empty($userModel)) {
-            $userModel = app('config')->get('auth.providers.users.model');
+            $userModel = config('auth.providers.users.model');
             if (empty($userModel)) {
                 return false;
             }
         }
 
-        if (!class_exists($userModel)) {
+        if (! class_exists($userModel)) {
             return false;
         }
 

@@ -16,12 +16,7 @@ use SlugHelper;
 
 class MarketplaceSeeder extends BaseSeeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
         $this->uploadFiles('stores');
 
@@ -43,9 +38,9 @@ class MarketplaceSeeder extends BaseSeeder
 
                 $vendorInfo = new VendorInfo();
                 $vendorInfo->bank_info = [
-                    'name'        => $faker->name(),
-                    'number'      => $faker->e164PhoneNumber(),
-                    'full_name'   => $faker->name(),
+                    'name' => $faker->name(),
+                    'number' => $faker->e164PhoneNumber(),
+                    'full_name' => $faker->name(),
                     'description' => $faker->name(),
                 ];
                 $vendorInfo->customer_id = $customer->id;
@@ -124,32 +119,32 @@ class MarketplaceSeeder extends BaseSeeder
 ';
 
             $store = Store::create([
-                'name'        => $storeNames[$i],
-                'email'       => $faker->safeEmail(),
-                'phone'       => $faker->e164PhoneNumber(),
-                'logo'        => 'stores/' . ($i + 1) . '.png',
-                'country'     => $faker->countryCode(),
-                'state'       => $faker->state(),
-                'city'        => $faker->city(),
-                'address'     => $faker->streetAddress(),
+                'name' => $storeNames[$i],
+                'email' => $faker->safeEmail(),
+                'phone' => $faker->e164PhoneNumber(),
+                'logo' => 'stores/' . ($i + 1) . '.png',
+                'country' => $faker->countryCode(),
+                'state' => $faker->state(),
+                'city' => $faker->city(),
+                'address' => $faker->streetAddress(),
                 'customer_id' => $vendors[$i],
                 'description' => $faker->text(400),
-                'content'     => $content,
+                'content' => $content,
             ]);
 
             Slug::create([
                 'reference_type' => Store::class,
-                'reference_id'   => $store->id,
-                'key'            => Str::slug($store->name),
-                'prefix'         => SlugHelper::getPrefix(Store::class),
+                'reference_id' => $store->id,
+                'key' => Str::slug($store->name),
+                'prefix' => SlugHelper::getPrefix(Store::class),
             ]);
 
             MetaBox::saveMetaBoxData($store, 'background', 'stores/background-' . rand(1, 2) . '.jpg');
 
             MetaBox::saveMetaBoxData($store, 'socials', [
                 'facebook' => 'https://www.facebook.com/',
-                'twitter'  => 'https://www.twitter.com/',
-                'youtube'  => 'https://www.youtube.com/',
+                'twitter' => 'https://www.twitter.com/',
+                'youtube' => 'https://www.youtube.com/',
                 'linkedin' => 'https://www.linkedin.com/',
             ]);
         }

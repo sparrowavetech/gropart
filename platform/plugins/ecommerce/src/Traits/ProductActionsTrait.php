@@ -7,12 +7,11 @@ use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Http\Responses\BaseHttpResponse;
-use Botble\Ecommerce\Enums\StockStatusEnum;
+use Botble\Ecommerce\Events\ProductQuantityUpdatedEvent;
 use Botble\Ecommerce\Http\Requests\CreateProductWhenCreatingOrderRequest;
 use Botble\Ecommerce\Http\Requests\ProductUpdateOrderByRequest;
 use Botble\Ecommerce\Http\Requests\ProductVersionRequest;
 use Botble\Ecommerce\Models\Product;
-use Botble\Ecommerce\Repositories\Eloquent\ProductVariationRepository;
 use Botble\Ecommerce\Repositories\Interfaces\BrandInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeSetInterface;
@@ -36,39 +35,16 @@ use Throwable;
 
 trait ProductActionsTrait
 {
-    /**
-     * @var ProductInterface
-     */
-    protected $productRepository;
+    protected ProductInterface $productRepository;
 
-    /**
-     * @var ProductCategoryInterface
-     */
-    protected $productCategoryRepository;
+    protected ProductCategoryInterface $productCategoryRepository;
 
-    /**
-     * @var ProductCollectionInterface
-     */
-    protected $productCollectionRepository;
+    protected ProductCollectionInterface $productCollectionRepository;
 
-    /**
-     * @var BrandInterface
-     */
-    protected $brandRepository;
+    protected BrandInterface $brandRepository;
 
-    /**
-     * @var ProductAttributeInterface
-     */
-    protected $productAttributeRepository;
+    protected ProductAttributeInterface $productAttributeRepository;
 
-    /**
-     * ProductActionsTrait constructor.
-     * @param ProductInterface $productRepository
-     * @param ProductCategoryInterface $productCategoryRepository
-     * @param ProductCollectionInterface $productCollectionRepository
-     * @param BrandInterface $brandRepository
-     * @param ProductAttributeInterface $productAttributeRepository
-     */
     public function __construct(
         ProductInterface $productRepository,
         ProductCategoryInterface $productCategoryRepository,
@@ -103,15 +79,15 @@ trait ProductActionsTrait
         foreach ($versionInRequest as $variationId => $version) {
             $variation = $productVariation->findById($variationId);
 
-            if (!$variation) {
+            if (! $variation) {
                 continue;
             }
 
-            if (!$variation->product_id || $isUpdateProduct) {
+            if (! $variation->product_id || $isUpdateProduct) {
                 $isNew = false;
                 $productRelatedToVariation = $this->productRepository->findById($variation->product_id);
 
-                if (!$productRelatedToVariation) {
+                if (! $productRelatedToVariation) {
                     $productRelatedToVariation = $this->productRepository->getModel();
                     $isNew = true;
                 }
@@ -126,7 +102,7 @@ trait ProductActionsTrait
                 $productRelatedToVariation->is_variation = 1;
 
                 $productRelatedToVariation->sku = Arr::get($version, 'sku');
-                if (!$productRelatedToVariation->sku && Arr::get($version, 'auto_generate_sku')) {
+                if (! $productRelatedToVariation->sku && Arr::get($version, 'auto_generate_sku')) {
                     $productRelatedToVariation->sku = $product->sku;
                     if (isset($version['attribute_sets']) && is_array($version['attribute_sets'])) {
                         foreach ($version['attribute_sets'] as $attributeId) {
@@ -145,23 +121,6 @@ trait ProductActionsTrait
                 $productRelatedToVariation->wide = Arr::get($version, 'wide', $product->wide);
                 $productRelatedToVariation->height = Arr::get($version, 'height', $product->height);
                 $productRelatedToVariation->weight = Arr::get($version, 'weight', $product->weight);
-
-                $productRelatedToVariation->with_storehouse_management = Arr::get(
-                    $version,
-                    'with_storehouse_management',
-                    $product->with_storehouse_management
-                );
-                $productRelatedToVariation->stock_status = Arr::get(
-                    $version,
-                    'stock_status',
-                    StockStatusEnum::IN_STOCK
-                );
-                $productRelatedToVariation->quantity = Arr::get($version, 'quantity', $product->quantity);
-                $productRelatedToVariation->allow_checkout_when_out_of_stock = Arr::get(
-                    $version,
-                    'allow_checkout_when_out_of_stock',
-                    $product->allow_checkout_when_out_of_stock
-                );
 
                 $productRelatedToVariation->sale_type = (int)Arr::get($version, 'sale_type', $product->sale_type);
 
@@ -190,13 +149,15 @@ trait ProductActionsTrait
                     }
                 }
 
-                if (!$productRelatedToVariation->is_variation) {
+                if (! $productRelatedToVariation->is_variation) {
                     if ($isNew) {
                         event(new CreatedContentEvent(PRODUCT_MODULE_SCREEN_NAME, request(), $productRelatedToVariation));
                     } else {
                         event(new UpdatedContentEvent(PRODUCT_MODULE_SCREEN_NAME, request(), $productRelatedToVariation));
                     }
                 }
+
+                event(new ProductQuantityUpdatedEvent($variation->product));
 
                 $variation->product_id = $productRelatedToVariation->id;
             }
@@ -239,7 +200,7 @@ trait ProductActionsTrait
                 }
             }
 
-            if (!empty($addedAttributes)) {
+            if (! empty($addedAttributes)) {
                 $result = $variationRepository->getVariationByAttributesOrCreate($id, $addedAttributes);
 
                 $addedAttributeSets = $request->input('added_attribute_sets', []);
@@ -376,7 +337,7 @@ trait ProductActionsTrait
     ) {
         $variation = $productVariation->findById($variationId);
 
-        if (!$variation) {
+        if (! $variation) {
             return true;
         }
 
@@ -400,10 +361,6 @@ trait ProductActionsTrait
                     $originProduct->wide = $latestVariation->product->wide;
                     $originProduct->height = $latestVariation->product->height;
                     $originProduct->weight = $latestVariation->product->weight;
-                    $originProduct->with_storehouse_management = $latestVariation->product->with_storehouse_management;
-                    $originProduct->stock_status = $latestVariation->product->stock_status;
-                    $originProduct->quantity = $latestVariation->product->quantity;
-                    $originProduct->allow_checkout_when_out_of_stock = $latestVariation->product->allow_checkout_when_out_of_stock;
                     $originProduct->sale_price = $latestVariation->product->sale_price;
                     $originProduct->sale_type = $latestVariation->product->sale_type;
                     $originProduct->start_date = $latestVariation->product->start_date;
@@ -415,12 +372,14 @@ trait ProductActionsTrait
             }
         }
 
+        event(new ProductQuantityUpdatedEvent($originProduct));
+
         return $result;
     }
 
     /**
      * @param ProductVersionRequest $request
-     * @param ProductVariationRepository|ProductVariationInterface $productVariation
+     * @param ProductVariationInterface $productVariation
      * @param int $id
      * @param BaseHttpResponse $response
      * @return BaseHttpResponse
@@ -433,9 +392,9 @@ trait ProductActionsTrait
     ) {
         $addedAttributes = $request->input('attribute_sets', []);
 
-        if (!empty($addedAttributes) && is_array($addedAttributes)) {
+        if (! empty($addedAttributes) && is_array($addedAttributes)) {
             $result = $productVariation->getVariationByAttributesOrCreate($id, $addedAttributes);
-            if (!$result['created']) {
+            if (! $result['created']) {
                 return $response
                     ->setError()
                     ->setMessage(trans('plugins/ecommerce::products.form.variation_existed'));
@@ -507,7 +466,7 @@ trait ProductActionsTrait
 
     /**
      * @param ProductVersionRequest $request
-     * @param ProductVariationRepository|ProductVariationInterface $productVariation
+     * @param ProductVariationInterface $productVariation
      * @param int $id
      * @param BaseHttpResponse $response
      * @return BaseHttpResponse
@@ -523,13 +482,13 @@ trait ProductActionsTrait
 
         $addedAttributes = $request->input('attribute_sets', []);
 
-        if (!empty($addedAttributes) && is_array($addedAttributes)) {
+        if (! empty($addedAttributes) && is_array($addedAttributes)) {
             $result = $productVariation->getVariationByAttributesOrCreate(
                 $variation->configurable_product_id,
                 $addedAttributes
             );
 
-            if (!$result['created'] && $result['variation']->id !== $variation->id) {
+            if (! $result['created'] && $result['variation']->id !== $variation->id) {
                 return $response
                     ->setError()
                     ->setMessage(trans('plugins/ecommerce::products.form.variation_existed'));

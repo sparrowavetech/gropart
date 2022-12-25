@@ -4,45 +4,24 @@ namespace Botble\Widget;
 
 class WidgetId
 {
-    /**
-     * Static incrementing widget id.
-     *
-     * @var int
-     */
-    protected static $id = 0;
+    protected static int $id = 0;
 
-    /**
-     * Getter for widget id.
-     *
-     * @return int
-     */
     public static function get(): int
     {
         return self::$id;
     }
 
-    /**
-     * Setter for widget id.
-     *
-     * @param int $id
-     */
-    public static function set(int $id)
+    public static function set(int $id): void
     {
         self::$id = $id;
     }
 
-    /**
-     * Increment widget id by one.
-     */
-    public static function increment()
+    public static function increment(): void
     {
         self::$id++;
     }
 
-    /**
-     * Resets widget id to zero.
-     */
-    public static function reset()
+    public static function reset(): void
     {
         self::$id = 0;
     }

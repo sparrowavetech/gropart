@@ -9,9 +9,6 @@ use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 
 class ProductVariationRepository extends RepositoriesAbstract implements ProductVariationInterface
 {
-    /**
-     * {@inheritDoc}
-     */
     public function getVariationByAttributes($configurableProductId, array $attributes)
     {
         $allRelatedVariations = $this->model
@@ -32,14 +29,11 @@ class ProductVariationRepository extends RepositoriesAbstract implements Product
         return $this->applyBeforeExecuteQuery($matchedVariation, true)->first();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getVariationByAttributesOrCreate($configurableProductId, array $attributes)
     {
         $variation = $this->getVariationByAttributes($configurableProductId, $attributes);
 
-        if (!$variation) {
+        if (! $variation) {
             $variation = $this->create([
                 'configurable_product_id' => $configurableProductId,
             ]);
@@ -63,12 +57,9 @@ class ProductVariationRepository extends RepositoriesAbstract implements Product
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function correctVariationItems($configurableProductId, array $attributes)
     {
-        if (!$attributes) {
+        if (! $attributes) {
             $attributes = [0];
         }
 
@@ -95,9 +86,6 @@ class ProductVariationRepository extends RepositoriesAbstract implements Product
         return ProductVariationItem::whereIn('id', $items)->delete();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getParentOfVariation($variationId, array $with = [])
     {
         $variation = $this->model
@@ -111,9 +99,6 @@ class ProductVariationRepository extends RepositoriesAbstract implements Product
             ->find($variation->configurable_product_id);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getAttributeIdsOfChildrenProduct($productId)
     {
         $result = $this->model

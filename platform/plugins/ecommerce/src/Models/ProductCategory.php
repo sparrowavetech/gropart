@@ -7,6 +7,7 @@ use Botble\Base\Models\BaseModel;
 use Botble\Base\Traits\EnumCastable;
 use Botble\Ecommerce\Tables\ProductTable;
 use Html;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -18,16 +19,8 @@ class ProductCategory extends BaseModel
 {
     use EnumCastable;
 
-    /**
-     * The database table used by the model.
-     *
-     * @var string
-     */
     protected $table = 'ec_product_categories';
 
-    /**
-     * @var array
-     */
     protected $fillable = [
         'name',
         'parent_id',
@@ -38,9 +31,6 @@ class ProductCategory extends BaseModel
         'is_featured',
     ];
 
-    /**
-     * @var array
-     */
     protected $casts = [
         'status' => BaseStatusEnum::class,
     ];
@@ -62,18 +52,49 @@ class ProductCategory extends BaseModel
         return $this->belongsTo(ProductCategory::class, 'parent_id')->withDefault();
     }
 
-    public function getParentsAttribute(): Collection
+    protected function parents(): Attribute
     {
-        $parents = collect([]);
+        return Attribute::make(
+            get: function (): Collection {
+                $parents = collect([]);
 
-        $parent = $this->parent;
+                $parent = $this->parent;
 
-        while ($parent->id) {
-            $parents->push($parent);
-            $parent = $parent->parent;
-        }
+                while ($parent->id) {
+                    $parents->push($parent);
+                    $parent = $parent->parent;
+                }
 
-        return $parents;
+                return $parents;
+            },
+        );
+    }
+
+    protected function badgeWithCount(): Attribute
+    {
+        return Attribute::make(
+            get: function (): HtmlString {
+                $badge = match ($this->status->getValue()) {
+                    BaseStatusEnum::DRAFT => 'bg-secondary',
+                    BaseStatusEnum::PENDING => 'bg-warning',
+                    default => 'bg-success',
+                };
+
+                $link = route('products.index', [
+                    'filter_table_id' => strtolower(Str::slug(Str::snake(ProductTable::class))),
+                    'class' => Product::class,
+                    'filter_columns' => ['category'],
+                    'filter_operators' => ['='],
+                    'filter_values' => [$this->id],
+                ]);
+
+                return Html::link($link, (string)$this->products_count, [
+                    'class' => 'badge font-weight-bold ' . $badge,
+                    'data-bs-toggle' => 'tooltip',
+                    'data-bs-original-title' => trans('plugins/ecommerce::product-categories.total_products', ['total' => $this->products_count]),
+                ]);
+            },
+        );
     }
 
     public function children(): HasMany
@@ -87,40 +108,6 @@ class ProductCategory extends BaseModel
             ->children()
             ->where('status', BaseStatusEnum::PUBLISHED)
             ->with(['slugable', 'activeChildren']);
-    }
-
-    public function getBadgeWithCountAttribute(): HtmlString
-    {
-        switch ($this->status->getValue()) {
-            case BaseStatusEnum::DRAFT:
-                $badge = 'bg-secondary';
-
-                break;
-
-            case BaseStatusEnum::PENDING:
-                $badge = 'bg-warning';
-
-                break;
-
-            default:
-                $badge = 'bg-success';
-
-                break;
-        }
-
-        $link = route('products.index', [
-            'filter_table_id' => strtolower(Str::slug(Str::snake(ProductTable::class))),
-            'class' => Product::class,
-            'filter_columns' => ['category'],
-            'filter_operators' => ['='],
-            'filter_values' => [$this->id],
-        ]);
-
-        return Html::link($link, (string)$this->products_count, [
-            'class' => 'badge font-weight-bold ' . $badge,
-            'data-bs-toggle' => 'tooltip',
-            'data-bs-original-title' => trans('plugins/ecommerce::product-categories.total_products', ['total' => $this->products_count]),
-        ]);
     }
 
     protected static function boot()

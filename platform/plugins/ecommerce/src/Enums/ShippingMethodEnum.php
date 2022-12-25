@@ -12,8 +12,5 @@ class ShippingMethodEnum extends Enum
     public const DEFAULT = 'default';
     public const NONE = '';
 
-    /**
-     * @var string
-     */
     public static $langPath = 'plugins/ecommerce::shipping.methods';
 }

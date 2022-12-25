@@ -34,10 +34,8 @@ class LoginController extends Controller
 
     /**
      * Where to redirect users after login / registration.
-     *
-     * @var string
      */
-    public $redirectTo;
+    public string $redirectTo = '/';
 
     /**
      * Create a new controller instance.
@@ -58,8 +56,8 @@ class LoginController extends Controller
 
         Theme::breadcrumb()->add(__('Home'), route('public.index'))->add(__('Login'), route('customer.login'));
 
-        if (!session()->has('url.intended')) {
-            if (!in_array(url()->previous(), [route('customer.login'), route('customer.register')])) {
+        if (! session()->has('url.intended')) {
+            if (! in_array(url()->previous(), [route('customer.login'), route('customer.register')])) {
                 session(['url.intended' => url()->previous()]);
             }
         }

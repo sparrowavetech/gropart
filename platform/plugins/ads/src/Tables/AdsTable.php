@@ -10,42 +10,31 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Table\Abstracts\TableAbstract;
 use Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
 use RvMedia;
 use Yajra\DataTables\DataTables;
 
 class AdsTable extends TableAbstract
 {
-    /**
-     * @var bool
-     */
     protected $hasActions = true;
 
-    /**
-     * @var bool
-     */
     protected $hasFilter = true;
 
-    /**
-     * AdsTable constructor.
-     * @param DataTables $table
-     * @param UrlGenerator $urlGenerator
-     * @param AdsInterface $adsRepository
-     */
     public function __construct(DataTables $table, UrlGenerator $urlGenerator, AdsInterface $adsRepository)
     {
         $this->repository = $adsRepository;
         parent::__construct($table, $urlGenerator);
 
-        if (!Auth::user()->hasAnyPermission(['ads.edit', 'ads.destroy'])) {
+        if (! Auth::user()->hasAnyPermission(['ads.edit', 'ads.destroy'])) {
             $this->hasOperations = false;
             $this->hasActions = false;
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
@@ -57,7 +46,7 @@ class AdsTable extends TableAbstract
                 );
             })
             ->editColumn('name', function ($item) {
-                if (!Auth::user()->hasPermission('ads.edit')) {
+                if (! Auth::user()->hasPermission('ads.edit')) {
                     return $item->name;
                 }
 
@@ -86,10 +75,7 @@ class AdsTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
         $query = $this->repository->getModel()->select([
             'ads.id',
@@ -104,10 +90,7 @@ class AdsTable extends TableAbstract
         return $this->applyScopes($query);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function columns()
+    public function columns(): array
     {
         return [
             'id' => [
@@ -148,35 +131,23 @@ class AdsTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function buttons()
+    public function buttons(): array
     {
         $buttons = $this->addCreateButton(route('ads.create'), 'ads.create');
 
         return apply_filters(BASE_FILTER_TABLE_BUTTONS, $buttons, Ads::class);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function bulkActions(): array
     {
         return $this->addDeleteAction(route('ads.deletes'), 'ads.destroy', parent::bulkActions());
     }
 
-    /**
-     * @return array
-     */
     public function getFilters(): array
     {
         return $this->getBulkChanges();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getBulkChanges(): array
     {
         return [

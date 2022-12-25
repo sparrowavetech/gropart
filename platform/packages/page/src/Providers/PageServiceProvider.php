@@ -35,6 +35,7 @@ class PageServiceProvider extends ServiceProvider
             ->loadAndPublishConfigurations(['permissions', 'general'])
             ->loadAndPublishViews()
             ->loadAndPublishTranslations()
+            ->loadRoutes()
             ->loadMigrations();
 
         Event::listen(RouteMatched::class, function () {
@@ -61,7 +62,6 @@ class PageServiceProvider extends ServiceProvider
 
         $this->app->booted(function () {
             $this->app->register(HookServiceProvider::class);
-            $this->app->register(RouteServiceProvider::class);
         });
 
         $this->app->register(EventServiceProvider::class);

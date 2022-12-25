@@ -1,4 +1,7 @@
 @php
+    $product = $product->loadMissing(['options' => function ($query) {
+            return $query->with(['values']);
+        }])->toArray();
     $oldOption = old('options', []) ?? [];
     $currentProductOption = $product['options'] ?? [];
     if (!empty($oldOption)) {
@@ -12,10 +15,12 @@
             productOptionLang: {!! Js::from(trans('plugins/ecommerce::product-option')) !!},
             coreBaseLang: {!! Js::from(trans('core/base::forms')) !!},
             currentProductOption: {!! Js::from($currentProductOption) !!},
-            options: {!! Js::from($options) !!}
+            options: {!! Js::from($options) !!},
+            routes: {!! Js::from($routes) !!},
         }
     </script>
 @endpush
+
 <div class="product-option-form-wrap">
     <div class="product-option-form-group">
         <div class="product-option-form-body mt-3 mb-3">
@@ -61,7 +66,7 @@
                     <input type="number" name="options[__index__][values][0][affect_price]" class="form-control option-label" value="__affectPrice__" placeholder="__affectPriceLabel__"/>
                 </td>
                 <td>
-                    <select class="form-control" name="options[__index__][values][0][affect_type]">
+                    <select class="form-select" name="options[__index__][values][0][affect_type]">
                         <option value="0" __selectedFixed__> __fixedLang__</option>
                         <option value="1" __selectedPercent__> __percentLang__</option>
                     </select>
@@ -99,7 +104,7 @@
             <input type="number" name="options[__index__][values][__key__][affect_price]" class="form-control affect_price" value="__affectPrice__" placeholder="__affectPriceLabel__" />
         </td>
         <td>
-            <select class="form-control affect_type" name="options[__index__][values][__key__][affect_type]">
+            <select class="form-select affect_type" name="options[__index__][values][__key__][affect_type]">
                 <option value="0" __selectedFixed__> __fixedLang__ </option>
                 <option value="1" __selectedPercent__> __percentLang__ </option>
             </select>

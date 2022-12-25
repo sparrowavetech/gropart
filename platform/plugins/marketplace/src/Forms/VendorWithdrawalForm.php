@@ -22,7 +22,7 @@ class VendorWithdrawalForm extends FormAbstract
         $actionButtons = view('plugins/marketplace::withdrawals.forms.actions')->render();
         if ($exists) {
             $fee = null;
-            if (!$this->getModel()->vendor_can_edit) {
+            if (! $this->getModel()->vendor_can_edit) {
                 $actionButtons = ' ';
             }
         }
@@ -75,7 +75,7 @@ class VendorWithdrawalForm extends FormAbstract
                     'rows' => 3,
                     'placeholder' => trans('core/base::forms.description_placeholder'),
                     'data-counter' => 200,
-                ], $exists && !$this->getModel()->vendor_can_edit ? $disabled : []),
+                ], $exists && ! $this->getModel()->vendor_can_edit ? $disabled : []),
             ])
             ->add('bankInfo', 'html', [
                 'html' => view('plugins/marketplace::withdrawals.payout-info', [

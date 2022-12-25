@@ -9,34 +9,29 @@ use Botble\Setting\Models\Setting;
 
 class LanguageSeeder extends BaseSeeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
         LanguageModel::truncate();
         LanguageMeta::truncate();
 
         $languages = [
             [
-                'lang_name'       => 'English',
-                'lang_locale'     => 'en',
+                'lang_name' => 'English',
+                'lang_locale' => 'en',
                 'lang_is_default' => true,
-                'lang_code'       => 'en_US',
-                'lang_is_rtl'     => false,
-                'lang_flag'       => 'us',
-                'lang_order'      => 0,
+                'lang_code' => 'en_US',
+                'lang_is_rtl' => false,
+                'lang_flag' => 'us',
+                'lang_order' => 0,
             ],
             [
-                'lang_name'       => 'Tiếng Việt',
-                'lang_locale'     => 'vi',
+                'lang_name' => 'Tiếng Việt',
+                'lang_locale' => 'vi',
                 'lang_is_default' => false,
-                'lang_code'       => 'vi',
-                'lang_is_rtl'     => false,
-                'lang_flag'       => 'vn',
-                'lang_order'      => 0,
+                'lang_code' => 'vi',
+                'lang_is_rtl' => false,
+                'lang_flag' => 'vn',
+                'lang_order' => 0,
             ],
         ];
 
@@ -54,19 +49,19 @@ class LanguageSeeder extends BaseSeeder
 
         Setting::insertOrIgnore([
             [
-                'key'   => 'language_hide_default',
+                'key' => 'language_hide_default',
                 'value' => '1',
             ],
             [
-                'key'   => 'language_switcher_display',
+                'key' => 'language_switcher_display',
                 'value' => 'dropdown',
             ],
             [
-                'key'   => 'language_display',
+                'key' => 'language_display',
                 'value' => 'all',
             ],
             [
-                'key'   => 'language_hide_languages',
+                'key' => 'language_hide_languages',
                 'value' => '[]',
             ],
         ]);

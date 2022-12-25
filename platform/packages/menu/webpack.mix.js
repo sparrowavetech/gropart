@@ -8,7 +8,10 @@ const dist = 'public/vendor/core/packages/' + directory;
 
 mix
     .js(source + '/resources/assets/js/menu.js', dist + '/js')
-    .sass(source + '/resources/assets/sass/menu.scss', dist + '/css')
+    .sass(source + '/resources/assets/sass/menu.scss', dist + '/css');
 
-    .copyDirectory(dist + '/js', source + '/public/js')
-    .copyDirectory(dist + '/css', source + '/public/css');
+if (mix.inProduction()) {
+    mix
+        .copy(dist + '/js/menu.js', source + '/public/js')
+        .copy(dist + '/css/menu.css', source + '/public/css');
+}

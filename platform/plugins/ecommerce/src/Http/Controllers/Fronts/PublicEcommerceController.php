@@ -8,15 +8,8 @@ use Illuminate\Http\Request;
 
 class PublicEcommerceController
 {
-    /**
-     * @var CurrencyInterface
-     */
-    protected $currencyRepository;
+    protected CurrencyInterface $currencyRepository;
 
-    /**
-     * PublicEcommerceController constructor.
-     * @param CurrencyInterface $currencyRepository
-     */
     public function __construct(CurrencyInterface $currencyRepository)
     {
         $this->currencyRepository = $currencyRepository;
@@ -34,7 +27,7 @@ class PublicEcommerceController
             $title = $request->input('currency');
         }
 
-        if (!$title) {
+        if (! $title) {
             return $response;
         }
 

@@ -8,52 +8,35 @@ use Botble\Ecommerce\Repositories\Interfaces\ReviewInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
 use Yajra\DataTables\DataTables;
 use RvMedia;
 
 class ReviewTable extends TableAbstract
 {
-    /**
-     * @var bool
-     */
     protected $hasActions = false;
 
-    /**
-     * @var bool
-     */
     protected $hasFilter = false;
 
-    /**
-     * @var bool
-     */
     protected $hasOperations = false;
 
-    /**
-     * @var bool
-     */
     protected $hasCheckbox = false;
 
-    /**
-     * ReviewTable constructor.
-     * @param DataTables $table
-     * @param UrlGenerator $urlGenerator
-     * @param ReviewInterface $reviewRepository
-     */
     public function __construct(DataTables $table, UrlGenerator $urlGenerator, ReviewInterface $reviewRepository)
     {
         $this->repository = $reviewRepository;
         parent::__construct($table, $urlGenerator);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
             ->editColumn('product_id', function ($item) {
-                if (!empty($item->product)) {
+                if (! empty($item->product)) {
                     return Html::link(
                         $item->product->url,
                         BaseHelper::clean($item->product_name),
@@ -70,7 +53,7 @@ class ReviewTable extends TableAbstract
                 return view('plugins/ecommerce::reviews.partials.rating', ['star' => $item->star])->render();
             })
             ->editColumn('images', function ($item) {
-                if (!is_array($item->images)) {
+                if (! is_array($item->images)) {
                     return '&mdash;';
                 }
 
@@ -148,7 +131,7 @@ class ReviewTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
         $query = $this->repository->getModel()
             ->select([
@@ -172,9 +155,6 @@ class ReviewTable extends TableAbstract
         return $this->applyScopes($query);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function columns(): array
     {
         return [
@@ -214,9 +194,6 @@ class ReviewTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function htmlDrawCallbackFunction(): ?string
     {
         return parent::htmlDrawCallbackFunction() . 'if (jQuery().fancybox) {

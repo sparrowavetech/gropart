@@ -12,7 +12,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
 use Theme;
-use Throwable;
 
 class HookServiceProvider extends ServiceProvider
 {
@@ -23,7 +22,7 @@ class HookServiceProvider extends ServiceProvider
         add_filter(BASE_FILTER_AFTER_SETTING_CONTENT, [$this, 'addSetting'], 39);
 
         theme_option()
-            ->setArgs(['debug' => config('app.debug')])
+            ->setArgs(['debug' => app()->hasDebugModeEnabled()])
             ->setSection([
                 'title' => trans('packages/theme::theme.theme_option_general'),
                 'desc' => trans('packages/theme::theme.theme_option_general_description'),
@@ -135,7 +134,7 @@ class HookServiceProvider extends ServiceProvider
         add_shortcode('media', null, null, function ($shortcode) {
             $url = rtrim($shortcode->url, '/');
 
-            if (!$url) {
+            if (! $url) {
                 return null;
             }
 
@@ -182,7 +181,7 @@ class HookServiceProvider extends ServiceProvider
             return $html;
         }, 15);
 
-        if (!$this->app->environment('demo')) {
+        if (! $this->app->environment('demo')) {
             if (config('packages.theme.general.enable_custom_html_shortcode')) {
                 add_shortcode('custom-html', __('Custom HTML'), __('Add custom HTML content'), function ($shortCode) {
                     return html_entity_decode($shortCode->content);
@@ -235,7 +234,7 @@ class HookServiceProvider extends ServiceProvider
             }
 
             add_filter(THEME_FRONT_FOOTER, function ($html) {
-                if (!auth()->check() || !admin_bar()->isDisplay() || !(int)setting('show_admin_bar', 1)) {
+                if (! auth()->check() || ! admin_bar()->isDisplay() || ! (int)setting('show_admin_bar', 1)) {
                     return $html;
                 }
 
@@ -244,12 +243,6 @@ class HookServiceProvider extends ServiceProvider
         }
     }
 
-    /**
-     * @param array $widgets
-     * @param Collection $widgetSettings
-     * @return array
-     * @throws Throwable
-     */
     public function addStatsWidgets(array $widgets, Collection $widgetSettings): array
     {
         $themes = count(BaseHelper::scanFolder(theme_path()));
@@ -266,12 +259,7 @@ class HookServiceProvider extends ServiceProvider
             ->init($widgets, $widgetSettings);
     }
 
-    /**
-     * @param null $data
-     * @return string
-     * @throws Throwable
-     */
-    public function addSetting($data = null): string
+    public function addSetting(?string $data = null): string
     {
         return $data . view('packages/theme::setting')->render();
     }

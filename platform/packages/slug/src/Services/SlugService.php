@@ -8,34 +8,22 @@ use SlugHelper;
 
 class SlugService
 {
-    /**
-     * @var SlugInterface
-     */
-    protected $slugRepository;
+    protected SlugInterface $slugRepository;
 
-    /**
-     * SlugService constructor.
-     * @param SlugInterface $slugRepository
-     */
     public function __construct(SlugInterface $slugRepository)
     {
         $this->slugRepository = $slugRepository;
     }
 
-    /**
-     * @param string $name
-     * @param int $slugId
-     * @return int|string
-     */
-    public function create($name, $slugId = 0, $model = null)
+    public function create(?string $name, ?int $slugId = 0, $model = null): ?string
     {
-        $slug = Str::slug($name, '-', !SlugHelper::turnOffAutomaticUrlTranslationIntoLatin() ? 'en' : false);
+        $slug = Str::slug($name, '-', ! SlugHelper::turnOffAutomaticUrlTranslationIntoLatin() ? 'en' : false);
 
         $index = 1;
         $baseSlug = $slug;
 
         $prefix = null;
-        if (!empty($model)) {
+        if (! empty($model)) {
             $prefix = SlugHelper::getPrefix($model);
         }
 
@@ -50,21 +38,15 @@ class SlugService
         return apply_filters(FILTER_SLUG_STRING, $slug, $model);
     }
 
-    /**
-     * @param string $slug
-     * @param string $slugId
-     * @param string $prefix
-     * @return bool
-     */
-    protected function checkIfExistedSlug($slug, $slugId, $prefix)
+    protected function checkIfExistedSlug(?string $slug, ?int $slugId, ?string $prefix): bool
     {
         return $this->slugRepository
-                ->getModel()
-                ->where([
-                    'key' => $slug,
-                    'prefix' => $prefix,
-                ])
-                ->where('id', '!=', (int)$slugId)
-                ->exists();
+            ->getModel()
+            ->where([
+                'key' => $slug,
+                'prefix' => $prefix,
+            ])
+            ->where('id', '!=', (int)$slugId)
+            ->exists();
     }
 }

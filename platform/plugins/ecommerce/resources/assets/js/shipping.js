@@ -1,15 +1,5 @@
 class ShippingManagement {
     init() {
-        $(document).on('click', '.btn-trigger-show-shipping-detail', event => {
-            event.preventDefault();
-            $(event.currentTarget).closest('.table').find('.shipping-detail-information').find('.panel').toggleClass('hidden');
-        });
-
-        $(document).on('click', '.click-cancel', event => {
-            event.preventDefault();
-            $(event.currentTarget).closest('.table').find('.shipping-detail-information').find('.panel').toggleClass('hidden');
-        });
-
         $(document).on('click', '.btn-confirm-delete-region-item-modal-trigger', event => {
             event.preventDefault();
             let $modal = $('#confirm-delete-region-item-modal');
@@ -27,7 +17,7 @@ class ShippingManagement {
                 type: 'POST',
                 url: $('div[data-delete-region-item-url]').data('delete-region-item-url'),
                 data: {
-                    '_method': 'DELETE',
+                    _method: 'DELETE',
                     id: _self.data('id')
                 },
                 success: res => {
@@ -37,11 +27,12 @@ class ShippingManagement {
                     } else {
                         Botble.showError(res.message);
                     }
-                    _self.removeClass('button-loading');
                     $('#confirm-delete-region-item-modal').modal('hide');
                 },
                 error: error => {
                     Botble.handleError(error);
+                },
+                complete: () => {
                     _self.removeClass('button-loading');
                 }
             });
@@ -64,7 +55,7 @@ class ShippingManagement {
                 type: 'POST',
                 url: $('div[data-delete-rule-item-url]').data('delete-rule-item-url'),
                 data: {
-                    '_method': 'DELETE',
+                    _method: 'DELETE',
                     id: _self.data('id')
                 },
                 success: res => {
@@ -77,11 +68,12 @@ class ShippingManagement {
                     } else {
                         Botble.showError(res.message);
                     }
-                    _self.removeClass('button-loading');
                     $('#confirm-delete-price-item-modal').modal('hide');
                 },
                 error: error => {
                     Botble.handleError(error);
+                },
+                complete: () => {
                     _self.removeClass('button-loading');
                 }
             });
@@ -96,7 +88,7 @@ class ShippingManagement {
             let formData = [];
 
             if (method !== 'POST') {
-                formData['_method'] = method;
+                formData._method = method;
             }
 
             $.each($form.serializeArray(), (index, el) => {
@@ -109,7 +101,7 @@ class ShippingManagement {
             });
 
             if (shippingId) {
-                formData['shipping_id'] = shippingId;
+                formData.shipping_id = shippingId;
             }
 
             formData = $.extend({}, formData);
@@ -121,8 +113,15 @@ class ShippingManagement {
                 success: res => {
                     if (!res.error) {
                         Botble.showSuccess(res.message);
-                        if (shippingId && res.data) {
-                            $('.wrap-table-shipping-' + shippingId + ' .pd-all-20.border-bottom').append(res.data);
+                        if (res?.data?.rule?.shipping_id && res?.data?.html) {
+                            const $box =  $('.wrap-table-shipping-' + res.data.rule.shipping_id + ' .pd-all-20.border-bottom');
+                            const $item = $box.find('.box-table-shipping-item-' + res.data.rule.id);
+
+                            if ($item.length) {
+                                $item.replaceWith(res.data.html);
+                            } else {
+                                $box.append(res.data.html);
+                            }
                             Botble.initResources();
                         }
                     } else {
@@ -132,10 +131,11 @@ class ShippingManagement {
                     if (shippingId) {
                         _self.closest('.modal').modal('hide');
                     }
-                    _self.removeClass('button-loading');
                 },
                 error: error => {
                     Botble.handleError(error);
+                },
+                complete: () => {
                     _self.removeClass('button-loading');
                 }
             });
@@ -143,49 +143,177 @@ class ShippingManagement {
 
         $(document).on('click', '.btn-save-rule', event => {
             event.preventDefault();
-            saveRuleItem($(event.currentTarget), $(event.currentTarget).closest('form'), 'PUT', null);
+            const $this = $(event.currentTarget);
+            saveRuleItem($this, $this.closest('form'), 'PUT', null);
         });
 
         $(document).on('change', '.select-rule-type', event => {
             event.preventDefault();
             let _self = $(event.currentTarget);
+            const $box = _self.closest('.box-table-shipping');
+            const $option = _self.find('option:selected');
 
-            _self.closest('.box-table-shipping').find('.unit-item-price-label').toggleClass('hidden');
-            _self.closest('.box-table-shipping').find('.unit-item-label').text($(event.currentTarget).find('option:selected').data('unit'));
-            _self.closest('.box-table-shipping').find('.rule-from-to-label').text($(event.currentTarget).find('option:selected').data('text'));
+            if ($option.data('show-from-to')) {
+                $box.find('.rule-from-to-inputs').removeClass('d-none');
+            } else {
+                $box.find('.rule-from-to-inputs').addClass('d-none');
+            }
+
+            $box.find('.unit-item-label').text($option.data('unit'));
+            $box.find('.rule-from-to-label').text($option.data('text'));
         });
 
         $(document).on('keyup', '.input-sync-item', event => {
-            let number = $(event.currentTarget).val();
+            const $this = $(event.currentTarget);
+            let number = $this.val();
             if (!number || isNaN(number)) {
                 number = 0;
             }
-            $(event.currentTarget).closest('.input-shipping-sync-wrapper').find($(event.currentTarget).data('target')).text(Botble.numberFormat(parseFloat(number), 2));
+            $this.closest('.input-shipping-sync-wrapper').find($this.data('target')).text(Botble.numberFormat(parseFloat(number), 2));
         });
 
         $(document).on('keyup', '.input-sync-text-item', event => {
-            $(event.currentTarget).closest('.input-shipping-sync-wrapper').find($(event.currentTarget).data('target')).text($(event.currentTarget).val());
+            const $this = $(event.currentTarget);
+            $this.closest('.input-shipping-sync-wrapper').find($this.data('target')).text($this.val());
         });
 
         $(document).on('keyup', '.input-to-value-field', event => {
-            if ($(event.currentTarget).val()) {
-                $('.rule-to-value-wrap').removeClass('hidden');
-                $('.rule-to-value-missing').addClass('hidden');
+            const $this = $(event.currentTarget);
+            const $parent = $this.closest('.input-shipping-sync-wrapper');
+            if ($this.val()) {
+                $parent.find('.rule-to-value-wrap').removeClass('hidden');
+                $parent.find('.rule-to-value-missing').addClass('hidden');
             } else {
-                $('.rule-to-value-wrap').addClass('hidden');
-                $('.rule-to-value-missing').removeClass('hidden');
+                $parent.find('.rule-to-value-wrap').addClass('hidden');
+                $parent.find('.rule-to-value-missing').removeClass('hidden');
             }
         });
 
         $(document).on('click', '.btn-add-shipping-rule-trigger', event => {
             event.preventDefault();
-            $('#add-shipping-rule-item-button').data('shipping-id', $(event.currentTarget).data('shipping-id'));
-            $('#add-shipping-rule-item-modal input[name=name]').val('');
-            $('#add-shipping-rule-item-modal select').val('base_on_price');
-            $('#add-shipping-rule-item-modal input[name=from]').val('0');
-            $('#add-shipping-rule-item-modal input[name=to]').val('');
-            $('#add-shipping-rule-item-modal input[name=price]').val('0');
-            $('#add-shipping-rule-item-modal').modal('show');
+            const $this = $(event.currentTarget);
+            const $modal = $('#add-shipping-rule-item-modal');
+            $('#add-shipping-rule-item-button').data('shipping-id', $this.data('shipping-id'));
+            $modal.find('select[name=type] option[disabled]').prop('disabled', false);
+            if (!$this.data('country')) {
+                $modal.find('select[name=type] option[value=base_on_zip_code]').prop('disabled', true);
+            }
+
+            $modal.find('input[name=name]').val('');
+            $modal.find('select[name=type]').val('base_on_price').trigger('change');
+            $modal.find('input[name=from]').val('0');
+            $modal.find('input[name=to]').val('');
+            $modal.find('input[name=price]').val('0');
+            $modal.modal('show');
+        });
+
+        $(document).on('click', '.btn-shipping-rule-item-trigger', event => {
+            event.preventDefault();
+            const $this = $(event.currentTarget);
+            const $modal = $('#form-shipping-rule-item-detail-modal');
+
+            $modal.modal('show');
+
+            $.ajax({
+                type: 'GET',
+                url: $this.data('url'),
+                beforeSend: () => {
+                    $modal.find('.modal-title strong').html('');
+                    $modal.find('.modal-body').html(`<div class="w-100 text-center py-3"><div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div></div>`)
+                },
+                success: res => {
+                    if (!res.error) {
+                        $modal.find('.modal-body').html(res.data.html);
+                        $modal.find('.modal-title strong').html(res.message);
+                        Botble.initResources();
+                    } else {
+                        Botble.showError(res.message);
+                    }
+                },
+                error: error => {
+                    Botble.handleError(error);
+                }
+            });
+        });
+
+        $(document).on('click', '#save-shipping-rule-item-detail-button', event => {
+            event.preventDefault();
+            const $this = $(event.currentTarget);
+            const $modal = $('#form-shipping-rule-item-detail-modal');
+            const $form = $modal.find('form');
+
+            $.ajax({
+                type: $form.prop('method'),
+                url: $form.prop('action'),
+                data: $form.serialize(),
+                beforeSend: () => {
+                    $this.addClass('button-loading');
+                },
+                success: res => {
+                    if (!res.error) {
+                        const $table = $('.table-shipping-rule-' + res.data.shipping_rule_id);
+                        if ($table.find('.shipping-rule-item-' + res.data.id).length) {
+                            $table.find('.shipping-rule-item-' + res.data.id).replaceWith(res.data.html);
+                        } else {
+                            $table.prepend(res.data.html)
+                        }
+                        $modal.modal('hide');
+                        Botble.showSuccess(res.message);
+                    } else {
+                        Botble.showError(res.message);
+                    }
+                },
+                error: error => {
+                    Botble.handleError(error);
+                },
+                complete: () => {
+                    $this.removeClass('button-loading');
+                }
+            });
+        });
+
+        $(document).on('click', '.btn-confirm-delete-rule-item-modal-trigger', event => {
+            event.preventDefault();
+            let $modal = $('#confirm-delete-shipping-rule-item-modal');
+            $modal.find('.item-label').text($(event.currentTarget).data('name'));
+            $modal.find('#confirm-delete-shipping-rule-item-button').data('url', $(event.currentTarget).data('section'));
+            $modal.modal('show');
+        });
+
+        $(document).on('click', '#confirm-delete-shipping-rule-item-button', event => {
+            event.preventDefault();
+            let _self = $(event.currentTarget);
+            _self.addClass('button-loading');
+
+            $.ajax({
+                type: 'POST',
+                url: _self.data('url'),
+                data: {
+                    _method: 'DELETE',
+                },
+                success: res => {
+                    if (!res.error) {
+                        const $table = $('.table-shipping-rule-' + res.data.shipping_rule_id);
+                        if ($table.find('.shipping-rule-item-' + res.data.id).length) {
+                            $table.find('.shipping-rule-item-' + res.data.id).fadeOut(500, function () {
+                                $(this).remove();
+                            });
+                        }
+                        Botble.showSuccess(res.message);
+                    } else {
+                        Botble.showError(res.message);
+                    }
+                    $('#confirm-delete-shipping-rule-item-modal').modal('hide');
+                },
+                error: error => {
+                    Botble.handleError(error);
+                },
+                complete: () => {
+                    _self.removeClass('button-loading');
+                }
+            });
         });
 
         $(document).find('.select-country-search').select2({
@@ -246,6 +374,24 @@ class ShippingManagement {
                 }
                 $(item).text(Botble.numberFormat(parseFloat(basePrice) + parseFloat(adjustmentPrice)), 2);
             });
+        });
+
+        $(document).on('change', 'select[name=shipping_rule_id].shipping-rule-id', function (e) {
+            e.preventDefault();
+            const $this = $(e.currentTarget);
+            const $form = $this.closest('form');
+            let $country = $form.find('select[data-type="country"]');
+            const val = $this.find('option:selected').data('country');
+            if ($country.length) {
+                if ($country.val() != val) {
+                    $country.val(val).trigger('change');
+                }
+            } else {
+                $country = $form.find('input[name="country"]');
+                if ($country.length && $country.val() != val) {
+                    $country.val(val);
+                }
+            }
         });
     }
 }

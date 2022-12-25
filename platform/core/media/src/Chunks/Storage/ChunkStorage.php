@@ -6,8 +6,7 @@ use Botble\Media\Chunks\ChunkFile;
 use Closure;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Collection;
-use League\Flysystem\Adapter\Local;
-use League\Flysystem\FilesystemInterface;
+use League\Flysystem\Local\LocalFilesystemAdapter;
 use RuntimeException;
 use RvMedia;
 use Storage;
@@ -29,7 +28,7 @@ class ChunkStorage
     protected $disk;
 
     /**
-     * @var Local
+     * @var LocalFilesystemAdapter
      */
     protected $diskAdapter;
 
@@ -50,10 +49,10 @@ class ChunkStorage
         // Cache the storage path
         $this->disk = Storage::disk($this->config['storage']['disk']);
 
-        $driver = $this->driver();
+        $driver = $this->disk;
 
         // Try to get the adapter
-        if (!method_exists($driver, 'getAdapter')) {
+        if (! method_exists($driver, 'getAdapter')) {
             throw new RuntimeException('FileSystem driver must have an adapter implemented');
         }
 
@@ -61,17 +60,7 @@ class ChunkStorage
         $this->diskAdapter = $driver->getAdapter();
 
         // Check if its local adapter
-        $this->isLocalDisk = $this->diskAdapter instanceof Local;
-    }
-
-    /**
-     * Returns the driver.
-     *
-     * @return FilesystemInterface
-     */
-    public function driver()
-    {
-        return $this->disk()->getDriver();
+        $this->isLocalDisk = $this->diskAdapter instanceof LocalFilesystemAdapter;
     }
 
     /**
@@ -154,7 +143,7 @@ class ChunkStorage
 
         return $filesCollection->reject(function ($file) use ($rejectClosure) {
             // Ensure the file ends with allowed extension
-            $shouldReject = !preg_match('/.' . self::CHUNK_EXTENSION . '$/', $file);
+            $shouldReject = ! preg_match('/.' . self::CHUNK_EXTENSION . '$/', $file);
             if ($shouldReject) {
                 return true;
             }

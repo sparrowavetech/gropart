@@ -13,16 +13,8 @@ class SubscribeNewsletterEvent
     use InteractsWithSockets;
     use SerializesModels;
 
-    /**
-     * @var Newsletter
-     */
-    public $newsletter;
+    public Newsletter $newsletter;
 
-    /**
-     * Create a new event instance.
-     *
-     * @param Newsletter $newsletter
-     */
     public function __construct(Newsletter $newsletter)
     {
         $this->newsletter = $newsletter;

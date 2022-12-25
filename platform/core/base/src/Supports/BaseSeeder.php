@@ -3,26 +3,23 @@
 namespace Botble\Base\Supports;
 
 use BaseHelper;
+use Botble\Base\Events\FinishedSeederEvent;
 use Botble\Media\Models\MediaFile;
 use Botble\Media\Models\MediaFolder;
 use Botble\PluginManagement\Services\PluginService;
 use Exception;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Mimey\MimeTypes;
 use RvMedia;
 use Setting;
 
 class BaseSeeder extends Seeder
 {
-    /**
-     * @param string $folder
-     * @param string|null $basePath
-     * @return array
-     */
     public function uploadFiles(string $folder, ?string $basePath = null): array
     {
-        File::deleteDirectory(config('filesystems.disks.public.root') . '/' . $folder);
+        Storage::deleteDirectory($folder);
         MediaFile::where('url', 'LIKE', $folder . '/%')->forceDelete();
         MediaFolder::where('name', $folder)->forceDelete();
 
@@ -32,7 +29,7 @@ class BaseSeeder extends Seeder
 
         $folderPath = ($basePath ?: database_path('seeders/files')) . '/' . $folder;
 
-        if (!File::isDirectory($folderPath)) {
+        if (! File::isDirectory($folderPath)) {
             return [];
         }
 
@@ -44,9 +41,6 @@ class BaseSeeder extends Seeder
         return $files;
     }
 
-    /**
-     * @return array
-     */
     public function activateAllPlugins(): array
     {
         try {
@@ -59,14 +53,11 @@ class BaseSeeder extends Seeder
             }
 
             return $plugins;
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return [];
         }
     }
 
-    /**
-     * @return array
-     */
     public function prepareRun(): array
     {
         Setting::forgetAll();
@@ -74,12 +65,6 @@ class BaseSeeder extends Seeder
         return $this->activateAllPlugins();
     }
 
-    /**
-     * @param int $from
-     * @param int $to
-     * @param array $exceptions
-     * @return int
-     */
     protected function random(int $from, int $to, array $exceptions = []): int
     {
         sort($exceptions); // lets us use break; in the foreach reliably
@@ -94,5 +79,10 @@ class BaseSeeder extends Seeder
         }
 
         return $number;
+    }
+
+    protected function finished(): void
+    {
+        event(new FinishedSeederEvent());
     }
 }

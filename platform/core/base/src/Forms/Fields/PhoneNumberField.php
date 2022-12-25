@@ -7,10 +7,7 @@ use Kris\LaravelFormBuilder\Fields\FormField;
 
 class PhoneNumberField extends FormField
 {
-    /**
-     * {@inheritDoc}
-     */
-    protected function getTemplate()
+    protected function getTemplate(): string
     {
         Assets::addStylesDirectly('vendor/core/core/base/libraries/intl-tel-input/css/intlTelInput.min.css')
             ->addScriptsDirectly([

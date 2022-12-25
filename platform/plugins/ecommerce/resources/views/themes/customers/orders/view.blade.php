@@ -9,9 +9,14 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="order-slogan">
-                    <img width="100" src="{{ RvMedia::getImageUrl(theme_option('logo')) }}"
-                         alt="{{ theme_option('site_title') }}">
-                    <br/>
+                    @php
+                        $logo = theme_option('logo_in_the_checkout_page') ?: theme_option('logo');
+                    @endphp
+                    @if ($logo)
+                        <img width="100" src="{{ RvMedia::getImageUrl($logo) }}"
+                             alt="{{ theme_option('site_title') }}">
+                        <br/>
+                    @endif
                     {{ setting('contact_address') }}
                 </div>
             </div>

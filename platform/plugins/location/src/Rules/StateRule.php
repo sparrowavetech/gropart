@@ -10,50 +10,23 @@ use Illuminate\Support\Arr;
 
 class StateRule implements DataAwareRule, Rule
 {
-    /**
-     * All the data under validation.
-     *
-     * @var array
-     */
-    protected $data = [];
+    protected array $data = [];
 
-    /**
-     *
-     * @var string|null
-     */
-    protected $countryKey;
+    protected ?string $countryKey;
 
-    /**
-     * Create a new rule instance.
-     *
-     * @param string|null $countryKey
-     */
     public function __construct(?string $countryKey = '')
     {
         $this->countryKey = $countryKey;
     }
 
-    /**
-     * Set the data under validation.
-     *
-     * @param array $data
-     * @return $this
-     */
-    public function setData($data)
+    public function setData($data): self
     {
         $this->data = $data;
 
         return $this;
     }
 
-    /**
-     * Determine if the validation rule passes.
-     *
-     * @param string $attribute
-     * @param mixed $value
-     * @return bool
-     */
-    public function passes($attribute, $value)
+    public function passes($attribute, $value): bool
     {
         $condition = [
             'id' => $value,
@@ -62,7 +35,7 @@ class StateRule implements DataAwareRule, Rule
 
         if ($this->countryKey) {
             $countryId = Arr::get($this->data, $this->countryKey);
-            if (!$countryId) {
+            if (! $countryId) {
                 return false;
             }
             $condition['country_id'] = $countryId;
@@ -71,12 +44,7 @@ class StateRule implements DataAwareRule, Rule
         return app(StateInterface::class)->count($condition);
     }
 
-    /**
-     * Get the validation error message.
-     *
-     * @return string
-     */
-    public function message()
+    public function message(): string
     {
         return trans('validation.exists');
     }

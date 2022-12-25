@@ -7,37 +7,37 @@ use Botble\Ecommerce\Models\Currency;
 
 class CurrencySeeder extends BaseSeeder
 {
-    public function run()
+    public function run(): void
     {
         Currency::truncate();
 
         $currencies = [
             [
-                'title'            => 'USD',
-                'symbol'           => '$',
+                'title' => 'USD',
+                'symbol' => '$',
                 'is_prefix_symbol' => true,
-                'order'            => 0,
-                'decimals'         => 2,
-                'is_default'       => 1,
-                'exchange_rate'    => 1,
+                'order' => 0,
+                'decimals' => 2,
+                'is_default' => 1,
+                'exchange_rate' => 1,
             ],
             [
-                'title'            => 'EUR',
-                'symbol'           => '€',
+                'title' => 'EUR',
+                'symbol' => '€',
                 'is_prefix_symbol' => false,
-                'order'            => 1,
-                'decimals'         => 2,
-                'is_default'       => 0,
-                'exchange_rate'    => 0.84,
+                'order' => 1,
+                'decimals' => 2,
+                'is_default' => 0,
+                'exchange_rate' => 0.84,
             ],
             [
-                'title'            => 'VND',
-                'symbol'           => '₫',
+                'title' => 'VND',
+                'symbol' => '₫',
                 'is_prefix_symbol' => false,
-                'order'            => 2,
-                'decimals'         => 0,
-                'is_default'       => 0,
-                'exchange_rate'    => 23203,
+                'order' => 2,
+                'decimals' => 0,
+                'is_default' => 0,
+                'exchange_rate' => 23203,
             ],
         ];
 

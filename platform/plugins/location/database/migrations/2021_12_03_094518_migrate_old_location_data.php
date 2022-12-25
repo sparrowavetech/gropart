@@ -10,12 +10,7 @@ use Botble\Location\Models\StateTranslation;
 use Illuminate\Database\Migrations\Migration;
 
 return new class () extends Migration {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         if (is_plugin_active('language')) {
             Schema::dropIfExists('countries_backup');
@@ -41,7 +36,7 @@ return new class () extends Migration {
             foreach ($cities as $item) {
                 $originalItem = City::find($item->reference_id);
 
-                if (!$originalItem) {
+                if (! $originalItem) {
                     continue;
                 }
 
@@ -50,7 +45,7 @@ return new class () extends Migration {
                     ->where('reference_id', '!=', $originalItem->id)
                     ->value('reference_id');
 
-                if (!$originalId) {
+                if (! $originalId) {
                     continue;
                 }
 
@@ -74,7 +69,7 @@ return new class () extends Migration {
             foreach ($states as $item) {
                 $originalItem = State::find($item->reference_id);
 
-                if (!$originalItem) {
+                if (! $originalItem) {
                     continue;
                 }
 
@@ -83,7 +78,7 @@ return new class () extends Migration {
                     ->where('reference_id', '!=', $originalItem->id)
                     ->value('reference_id');
 
-                if (!$originalId) {
+                if (! $originalId) {
                     continue;
                 }
 
@@ -106,7 +101,7 @@ return new class () extends Migration {
             foreach ($countries as $item) {
                 $originalItem = Country::find($item->reference_id);
 
-                if (!$originalItem) {
+                if (! $originalItem) {
                     continue;
                 }
 
@@ -115,7 +110,7 @@ return new class () extends Migration {
                     ->where('reference_id', '!=', $originalItem->id)
                     ->value('reference_id');
 
-                if (!$originalId) {
+                if (! $originalId) {
                     continue;
                 }
 
@@ -142,27 +137,15 @@ return new class () extends Migration {
             LanguageMeta::where('reference_type', State::class)->delete();
             LanguageMeta::where('reference_type', City::class)->delete();
             LanguageMeta::where('reference_type', Country::class)->delete();
+
+            Schema::dropIfExists('countries_backup');
+            Schema::dropIfExists('states_backup');
+            Schema::dropIfExists('cities_backup');
         }
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
-        Schema::drop('countries');
-        Schema::rename('countries_backup', 'countries');
-
-        Schema::drop('states');
-        Schema::rename('states_backup', 'states');
-
-        Schema::drop('cities');
-        Schema::rename('cities_backup', 'cities');
-
-        DB::statement('INSERT language_meta_backup SELECT * FROM language_meta');
-
-        Schema::drop('language_meta_backup');
+        //
     }
 };

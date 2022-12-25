@@ -128,7 +128,7 @@ abstract class SettingStore
      */
     public function save(): bool
     {
-        if (!$this->unsaved) {
+        if (! $this->unsaved) {
             // either nothing has been changed, or data has not been loaded, so
             // do nothing by returning early
             return false;
@@ -147,7 +147,7 @@ abstract class SettingStore
      */
     public function load(bool $force = false)
     {
-        if (!$this->loaded || $force) {
+        if (! $this->loaded || $force) {
             $this->data = $this->read();
             $this->loaded = true;
         }

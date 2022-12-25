@@ -8,12 +8,7 @@ use Illuminate\Validation\Rule;
 
 class EditContactRequest extends Request
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
             'status' => Rule::in(ContactStatusEnum::values()),

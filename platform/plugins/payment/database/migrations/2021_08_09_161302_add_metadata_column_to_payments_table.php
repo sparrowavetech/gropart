@@ -13,7 +13,7 @@ return new class () extends Migration {
     public function up()
     {
         Schema::table('payments', function (Blueprint $table) {
-            if (!Schema::hasColumn('payments', 'metadata')) {
+            if (! Schema::hasColumn('payments', 'metadata')) {
                 $table->text('metadata')->nullable();
             }
         });

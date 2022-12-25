@@ -11,9 +11,6 @@ use Theme;
 
 class CustomCSSForm extends FormAbstract
 {
-    /**
-     * {@inheritDoc}
-     */
     public function buildForm()
     {
         $css = null;
@@ -32,7 +29,6 @@ class CustomCSSForm extends FormAbstract
                 'value' => $css,
                 'help_block' => [
                     'text' => trans('packages/theme::theme.custom_css_placeholder'),
-                    'v-pre',
                 ],
             ]);
     }

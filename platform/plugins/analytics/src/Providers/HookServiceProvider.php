@@ -3,11 +3,10 @@
 namespace Botble\Analytics\Providers;
 
 use Assets;
-use Illuminate\Support\Facades\Auth;
 use Botble\Dashboard\Supports\DashboardWidgetInstance;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
-use Throwable;
 
 class HookServiceProvider extends ServiceProvider
 {
@@ -15,18 +14,12 @@ class HookServiceProvider extends ServiceProvider
     {
         if (config('plugins.analytics.general.enabled_dashboard_widgets')) {
             add_action(DASHBOARD_ACTION_REGISTER_SCRIPTS, [$this, 'registerScripts'], 18);
-            add_filter(DASHBOARD_FILTER_ADMIN_LIST, [$this, 'addGeneralWidget'], 18, 2);
-            add_filter(DASHBOARD_FILTER_ADMIN_LIST, [$this, 'addPageWidget'], 19, 2);
-            add_filter(DASHBOARD_FILTER_ADMIN_LIST, [$this, 'addBrowserWidget'], 20, 2);
-            add_filter(DASHBOARD_FILTER_ADMIN_LIST, [$this, 'addReferrerWidget'], 22, 2);
+            add_filter(DASHBOARD_FILTER_ADMIN_LIST, [$this, 'addAnalyticsWidgets'], 18, 2);
             add_filter(BASE_FILTER_AFTER_SETTING_CONTENT, [$this, 'addAnalyticsSetting'], 99);
         }
     }
 
-    /**
-     * @return void
-     */
-    public function registerScripts()
+    public function registerScripts(): void
     {
         if (Auth::user()->hasAnyPermission([
             'analytics.general',
@@ -47,15 +40,11 @@ class HookServiceProvider extends ServiceProvider
         }
     }
 
-    /**
-     * @param array $widgets
-     * @param Collection $widgetSettings
-     * @return array
-     * @throws Throwable
-     */
-    public function addGeneralWidget($widgets, $widgetSettings)
+    public function addAnalyticsWidgets(array $widgets, Collection $widgetSettings): array
     {
-        return (new DashboardWidgetInstance())
+        $dashboardWidgetInstance = new DashboardWidgetInstance();
+
+        $widgets = $dashboardWidgetInstance
             ->setPermission('analytics.general')
             ->setKey('widget_analytics_general')
             ->setTitle(trans('plugins/analytics::analytics.widget_analytics_general'))
@@ -67,17 +56,8 @@ class HookServiceProvider extends ServiceProvider
             ->setIsEqualHeight(false)
             ->setSettings(['show_predefined_ranges' => true])
             ->init($widgets, $widgetSettings);
-    }
 
-    /**
-     * @param array $widgets
-     * @param Collection $widgetSettings
-     * @return array
-     * @throws Throwable
-     */
-    public function addPageWidget($widgets, $widgetSettings)
-    {
-        return (new DashboardWidgetInstance())
+        $widgets = $dashboardWidgetInstance
             ->setPermission('analytics.page')
             ->setKey('widget_analytics_page')
             ->setTitle(trans('plugins/analytics::analytics.widget_analytics_page'))
@@ -88,17 +68,8 @@ class HookServiceProvider extends ServiceProvider
             ->setColumn('col-md-6 col-sm-6')
             ->setSettings(['show_predefined_ranges' => true])
             ->init($widgets, $widgetSettings);
-    }
 
-    /**
-     * @param array $widgets
-     * @param Collection $widgetSettings
-     * @return array
-     * @throws Throwable
-     */
-    public function addBrowserWidget($widgets, $widgetSettings)
-    {
-        return (new DashboardWidgetInstance())
+        $widgets = $dashboardWidgetInstance
             ->setPermission('analytics.browser')
             ->setKey('widget_analytics_browser')
             ->setTitle(trans('plugins/analytics::analytics.widget_analytics_browser'))
@@ -109,17 +80,8 @@ class HookServiceProvider extends ServiceProvider
             ->setColumn('col-md-6 col-sm-6')
             ->setSettings(['show_predefined_ranges' => true])
             ->init($widgets, $widgetSettings);
-    }
 
-    /**
-     * @param array $widgets
-     * @param Collection $widgetSettings
-     * @return array
-     * @throws Throwable
-     */
-    public function addReferrerWidget($widgets, $widgetSettings)
-    {
-        return (new DashboardWidgetInstance())
+        return $dashboardWidgetInstance
             ->setPermission('analytics.referrer')
             ->setKey('widget_analytics_referrer')
             ->setTitle(trans('plugins/analytics::analytics.widget_analytics_referrer'))
@@ -132,12 +94,7 @@ class HookServiceProvider extends ServiceProvider
             ->init($widgets, $widgetSettings);
     }
 
-    /**
-     * @param null|string $data
-     * @return string
-     * @throws Throwable
-     */
-    public function addAnalyticsSetting($data = null): string
+    public function addAnalyticsSetting(?string $data = null): string
     {
         return $data . view('plugins/analytics::setting')->render();
     }

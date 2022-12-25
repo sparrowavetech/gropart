@@ -41,7 +41,7 @@ class MediaFileController extends Controller
      */
     public function postUpload(Request $request)
     {
-        if (!RvMedia::isChunkUploadEnabled()) {
+        if (! RvMedia::isChunkUploadEnabled()) {
             $result = RvMedia::handleUpload(Arr::first($request->file('file')), $request->input('folder_id', 0));
 
             return $this->handleUploadResponse($result);
@@ -80,7 +80,7 @@ class MediaFileController extends Controller
      */
     protected function handleUploadResponse(array $result): JsonResponse
     {
-        if (!$result['error']) {
+        if (! $result['error']) {
             return RvMedia::responseSuccess([
                 'id' => $result['data']->id,
                 'src' => RvMedia::url($result['data']->url),
@@ -115,7 +115,7 @@ class MediaFileController extends Controller
 
         $result = RvMedia::uploadFromUrl($request->input('url'), $request->input('folderId'));
 
-        if (!$result['error']) {
+        if (! $result['error']) {
             return RvMedia::responseSuccess([
                 'id' => $result['data']->id,
                 'src' => Storage::url($result['data']->url),

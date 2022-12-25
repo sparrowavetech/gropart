@@ -23,16 +23,8 @@ class Store extends BaseModel
     use EnumCastable;
     use LocationTrait;
 
-    /**
-     * The database table used by the model.
-     *
-     * @var string
-     */
     protected $table = 'mp_stores';
 
-    /**
-     * @var array
-     */
     protected $fillable = [
         'name',
         'email',
@@ -52,9 +44,6 @@ class Store extends BaseModel
         'shop_category'
     ];
 
-    /**
-     * @var array
-     */
     protected $casts = [
         'status' => BaseStatusEnum::class,
         'shop_category' => ShopTypeEnum::class,
@@ -94,7 +83,7 @@ class Store extends BaseModel
 
         try {
             return (new Avatar())->create($this->name)->toBase64();
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return RvMedia::getDefaultImage();
         }
     }

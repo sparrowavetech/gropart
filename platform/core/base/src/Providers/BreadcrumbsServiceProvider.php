@@ -35,7 +35,7 @@ class BreadcrumbsServiceProvider extends ServiceProvider
                 if (($url == $menuCategory['url'] || (Str::contains(
                     (string) $menuCategory['url'],
                     $prefix
-                ) && $prefix != '//')) && !empty($menuCategory['name'])) {
+                ) && $prefix != '//')) && ! empty($menuCategory['name'])) {
                     $found = true;
                     $breadcrumbs->push(trans($menuCategory['name']), $menuCategory['url']);
                     if ($defaultTitle != trans($menuCategory['name']) && $defaultTitle != $siteTitle) {
@@ -46,9 +46,9 @@ class BreadcrumbsServiceProvider extends ServiceProvider
                 }
             }
 
-            if (!$found) {
+            if (! $found) {
                 foreach ($arMenu as $menuCategory) {
-                    if (!count($menuCategory['children'])) {
+                    if (! count($menuCategory['children'])) {
                         continue;
                     }
 
@@ -56,7 +56,7 @@ class BreadcrumbsServiceProvider extends ServiceProvider
                         if (($url == $menuItem['url'] || (Str::contains(
                             (string) $menuItem['url'],
                             $prefix
-                        ) && $prefix != '//')) && !empty($menuItem['name'])) {
+                        ) && $prefix != '//')) && ! empty($menuItem['name'])) {
                             $found = true;
                             $breadcrumbs->push(trans($menuCategory['name']), $menuCategory['url']);
                             $breadcrumbs->push(trans($menuItem['name']), $menuItem['url']);
@@ -70,7 +70,7 @@ class BreadcrumbsServiceProvider extends ServiceProvider
                 }
             }
 
-            if (!$found) {
+            if (! $found) {
                 $breadcrumbs->push($defaultTitle, $url);
             }
         });

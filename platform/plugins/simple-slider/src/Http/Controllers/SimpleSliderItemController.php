@@ -18,15 +18,8 @@ use Botble\SimpleSlider\Tables\SimpleSliderItemTable;
 
 class SimpleSliderItemController extends BaseController
 {
-    /**
-     * @var SimpleSliderItemInterface
-     */
-    protected $simpleSliderItemRepository;
+    protected SimpleSliderItemInterface $simpleSliderItemRepository;
 
-    /**
-     * SimpleSliderItemController constructor.
-     * @param SimpleSliderItemInterface $simpleSliderItemRepository
-     */
     public function __construct(SimpleSliderItemInterface $simpleSliderItemRepository)
     {
         $this->simpleSliderItemRepository = $simpleSliderItemRepository;
@@ -34,7 +27,7 @@ class SimpleSliderItemController extends BaseController
 
     /**
      * @param SimpleSliderItemTable $dataTable
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Symfony\Component\HttpFoundation\Response
      * @throws \Throwable
      */
     public function index(SimpleSliderItemTable $dataTable)

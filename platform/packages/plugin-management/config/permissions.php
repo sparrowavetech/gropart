@@ -16,4 +16,9 @@ return [
         'flag' => 'plugins.remove',
         'parent_flag' => 'plugins.index',
     ],
+    [
+        'name' => 'Add New Plugins',
+        'flag' => 'plugins.marketplace',
+        'parent_flag' => 'plugins.index',
+    ],
 ];

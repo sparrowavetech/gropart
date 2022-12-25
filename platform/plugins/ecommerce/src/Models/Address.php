@@ -9,14 +9,8 @@ class Address extends BaseModel
 {
     use LocationTrait;
 
-    /**
-     * @var string
-     */
     protected $table = 'ec_customer_addresses';
 
-    /**
-     * @var array
-     */
     protected $fillable = [
         'name',
         'phone',
@@ -28,13 +22,5 @@ class Address extends BaseModel
         'zip_code',
         'customer_id',
         'is_default',
-    ];
-
-    /**
-     * @var array
-     */
-    protected $dates = [
-        'created_at',
-        'updated_at',
     ];
 }

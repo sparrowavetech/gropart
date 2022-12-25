@@ -11,12 +11,12 @@ class BackupServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function boot()
+    public function boot(): void
     {
         $this->setNamespace('plugins/backup')
             ->loadHelpers()
             ->loadAndPublishConfigurations(['permissions', 'general'])
-            ->loadRoutes(['web'])
+            ->loadRoutes()
             ->loadAndPublishViews()
             ->loadAndPublishTranslations()
             ->publishAssets();

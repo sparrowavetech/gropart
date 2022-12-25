@@ -15,64 +15,28 @@ use Collective\Html\HtmlBuilder;
 use Exception;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Config\Repository;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Theme;
-use Throwable;
 
 class Menu
 {
-    /**
-     * @var MenuInterface
-     */
-    protected $menuRepository;
+    protected MenuInterface $menuRepository;
 
-    /**
-     * @var HtmlBuilder
-     */
-    protected $html;
+    protected HtmlBuilder $html;
 
-    /**
-     * @var MenuNodeInterface
-     */
-    protected $menuNodeRepository;
+    protected MenuNodeInterface $menuNodeRepository;
 
-    /**
-     * @var Cache
-     */
-    protected $cache;
+    protected Cache $cache;
 
-    /**
-     * @var Repository
-     */
-    protected $config;
+    protected Repository $config;
 
-    /**
-     * @var array
-     */
-    protected $menuOptionModels = [];
+    protected array $menuOptionModels = [];
 
-    /**
-     * @var Collection
-     */
-    protected $data = [];
+    protected Collection|array $data = [];
 
-    /**
-     * Whether the settings data are loaded.
-     *
-     * @var boolean
-     */
-    protected $loaded = false;
+    protected bool $loaded = false;
 
-    /**
-     * Menu constructor.
-     * @param MenuInterface $menuRepository
-     * @param HtmlBuilder $html
-     * @param MenuNodeInterface $menuNodeRepository
-     * @param CacheManager $cache
-     * @param Repository $config
-     */
     public function __construct(
         MenuInterface $menuRepository,
         HtmlBuilder $html,
@@ -88,22 +52,11 @@ class Menu
         $this->data = collect([]);
     }
 
-    /**
-     * @param string $slug
-     * @param bool $active
-     * @return bool
-     */
     public function hasMenu(string $slug, bool $active): bool
     {
         return $this->menuRepository->findBySlug($slug, $active);
     }
 
-    /**
-     * @param array $menuNodes
-     * @param int $menuId
-     * @param int $parentId
-     * @return array
-     */
     public function recursiveSaveMenu(array $menuNodes, int $menuId, int $parentId): array
     {
         try {
@@ -114,35 +67,28 @@ class Menu
                     $child[$index]['menuItem']['position'] = $index;
                 }
 
-                $hasChild = !empty($child);
+                $hasChild = ! empty($child);
 
                 $row['menuItem'] = $this->saveMenuNode($row['menuItem'], $menuId, $parentId, $hasChild);
 
-                if (!empty($child)) {
+                if (! empty($child)) {
                     $this->recursiveSaveMenu($child, $menuId, $row['menuItem']['id']);
                 }
             }
 
             return $menuNodes;
-        } catch (Exception $ex) {
+        } catch (Exception) {
             return [];
         }
     }
 
-    /**
-     * @param array $menuItem
-     * @param int $menuId
-     * @param int $parentId
-     * @param bool $hasChild
-     * @return array
-     */
     protected function saveMenuNode(array $menuItem, int $menuId, int $parentId, bool $hasChild = false): array
     {
         $item = $this->menuNodeRepository->findById(Arr::get($menuItem, 'id'));
 
         $created = false;
 
-        if (!$item) {
+        if (! $item) {
             $item = $this->menuNodeRepository->getModel();
             $created = true;
         }
@@ -167,11 +113,6 @@ class Menu
         return $menuItem;
     }
 
-    /**
-     * @param array $item
-     * @param MenuNode $menuNode
-     * @return MenuNode
-     */
     public function getReferenceMenuNode(array $item, MenuNode $menuNode): MenuNode
     {
         switch (Arr::get($item, 'reference_type')) {
@@ -186,6 +127,7 @@ class Menu
             default:
                 $menuNode->reference_id = (int)Arr::get($item, 'reference_id');
                 $menuNode->reference_type = Arr::get($item, 'reference_type');
+
                 if (class_exists($menuNode->reference_type)) {
                     $reference = $menuNode->reference_type::find($menuNode->reference_id);
                     if ($reference) {
@@ -199,11 +141,6 @@ class Menu
         return $menuNode;
     }
 
-    /**
-     * @param string $location
-     * @param string $description
-     * @return $this
-     */
     public function addMenuLocation(string $location, string $description): self
     {
         $locations = $this->getMenuLocations();
@@ -214,18 +151,11 @@ class Menu
         return $this;
     }
 
-    /**
-     * @return array
-     */
     public function getMenuLocations(): array
     {
         return $this->config->get('packages.menu.general.locations', []);
     }
 
-    /**
-     * @param string $location
-     * @return $this
-     */
     public function removeMenuLocation(string $location): self
     {
         $locations = $this->getMenuLocations();
@@ -236,12 +166,6 @@ class Menu
         return $this;
     }
 
-    /**
-     * @param string $location
-     * @param array $attributes
-     * @return string
-     * @throws Throwable
-     */
     public function renderMenuLocation(string $location, array $attributes = []): string
     {
         $this->load();
@@ -249,7 +173,7 @@ class Menu
         $html = '';
 
         foreach ($this->data as $menu) {
-            if (!in_array($location, $menu->locations->pluck('location')->all())) {
+            if (! in_array($location, $menu->locations->pluck('location')->all())) {
                 continue;
             }
 
@@ -260,11 +184,6 @@ class Menu
         return $html;
     }
 
-    /**
-     * @param string $location
-     * @return bool
-     * @throws Throwable
-     */
     public function isLocationHasMenu(string $location): bool
     {
         $this->load();
@@ -278,22 +197,14 @@ class Menu
         return false;
     }
 
-    /**
-     * Make sure data is loaded.
-     *
-     * @param boolean $force Force a reload of data. Default false.
-     */
-    public function load(bool $force = false)
+    public function load(bool $force = false): void
     {
-        if (!$this->loaded || $force) {
+        if (! $this->loaded || $force) {
             $this->data = $this->read();
             $this->loaded = true;
         }
     }
 
-    /**
-     * @return Collection
-     */
     protected function read(): Collection
     {
         $with = [
@@ -306,11 +217,6 @@ class Menu
         return $this->menuRepository->allBy(['status' => BaseStatusEnum::PUBLISHED], $with);
     }
 
-    /**
-     * @param array $args
-     * @return string|null
-     * @throws Throwable
-     */
     public function generateMenu(array $args = []): ?string
     {
         $this->load();
@@ -321,21 +227,21 @@ class Menu
         $menu = Arr::get($args, 'menu');
 
         $slug = Arr::get($args, 'slug');
-        if (!$menu && !$slug) {
+        if (! $menu && ! $slug) {
             return null;
         }
 
         $parentId = Arr::get($args, 'parent_id', 0);
 
-        if (!$menu) {
+        if (! $menu) {
             $menu = $this->data->where('slug', $slug)->first();
         }
 
-        if (!$menu) {
+        if (! $menu) {
             return null;
         }
 
-        if (!Arr::has($args, 'menu_nodes')) {
+        if (! Arr::has($args, 'menu_nodes')) {
             $menuNodes = $menu->menuNodes->where('parent_id', $parentId);
         } else {
             $menuNodes = Arr::get($args, 'menu_nodes', []);
@@ -343,6 +249,8 @@ class Menu
 
         if ($menuNodes instanceof Collection) {
             $menuNodes = $menuNodes->sortBy('position');
+        } else {
+            $menuNodes->loadMissing('reference');
         }
 
         $data = [
@@ -363,13 +271,7 @@ class Menu
         return view('packages/menu::partials.default', $data)->render();
     }
 
-    /**
-     * @param string $model
-     * @param string $name
-     * @throws FileNotFoundException
-     * @throws Throwable
-     */
-    public function registerMenuOptions(string $model, string $name)
+    public function registerMenuOptions(string $model, string $name): void
     {
         $options = Menu::generateSelect([
             'model' => new $model(),
@@ -381,12 +283,6 @@ class Menu
         echo view('packages/menu::menu-options', compact('options', 'name'));
     }
 
-    /**
-     * @param array $args
-     * @return string|null
-     * @throws FileNotFoundException
-     * @throws Throwable
-     */
     public function generateSelect(array $args = []): ?string
     {
         /**
@@ -396,7 +292,7 @@ class Menu
 
         $options = $this->html->attributes(Arr::get($args, 'options', []));
 
-        if (!Arr::has($args, 'items')) {
+        if (! Arr::has($args, 'items')) {
             if (method_exists($model, 'children')) {
                 $items = $model
                     ->where('parent_id', Arr::get($args, 'parent_id', 0))
@@ -422,10 +318,6 @@ class Menu
         return view('packages/menu::partials.select', compact('items', 'model', 'options'))->render();
     }
 
-    /**
-     * @param string $model
-     * @return $this
-     */
     public function addMenuOptionModel(string $model): self
     {
         $this->menuOptionModels[] = $model;
@@ -433,18 +325,11 @@ class Menu
         return $this;
     }
 
-    /**
-     * @return array
-     */
     public function getMenuOptionModels(): array
     {
         return $this->menuOptionModels;
     }
 
-    /**
-     * @param array $models
-     * @return $this
-     */
     public function setMenuOptionModels(array $models): self
     {
         $this->menuOptionModels = $models;
@@ -452,19 +337,16 @@ class Menu
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     public function clearCacheMenuItems(): self
     {
         try {
-            $nodes = $this->menuNodeRepository->all(['reference']);
+            $nodes = $this->menuNodeRepository->all();
 
             foreach ($nodes as $node) {
-                if (!$node->reference_type ||
-                    !class_exists($node->reference_type) ||
-                    !$node->reference_id ||
-                    !$node->reference
+                if (! $node->reference_type ||
+                    ! class_exists($node->reference_type) ||
+                    ! $node->reference_id ||
+                    ! $node->reference
                 ) {
                     continue;
                 }

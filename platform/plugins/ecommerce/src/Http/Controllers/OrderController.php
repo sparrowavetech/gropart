@@ -12,6 +12,7 @@ use Botble\Ecommerce\Enums\ShippingCodStatusEnum;
 use Botble\Ecommerce\Enums\ShippingMethodEnum;
 use Botble\Ecommerce\Enums\ShippingStatusEnum;
 use Botble\Ecommerce\Events\OrderConfirmedEvent;
+use Botble\Ecommerce\Events\ProductQuantityUpdatedEvent;
 use Botble\Ecommerce\Http\Requests\AddressRequest;
 use Botble\Ecommerce\Http\Requests\ApplyCouponRequest;
 use Botble\Ecommerce\Http\Requests\CreateOrderRequest;
@@ -35,11 +36,13 @@ use Botble\Ecommerce\Tables\OrderIncompleteTable;
 use Botble\Ecommerce\Tables\OrderTable;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Payment\Enums\PaymentStatusEnum;
+use Botble\Sms\Enums\SmsEnum;
 use Botble\Payment\Repositories\Interfaces\PaymentInterface;
 use Carbon\Carbon;
 use EcommerceHelper;
 use EmailHandler;
 use Exception;
+use Botble\Sms\Supports\SmsHandler;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -56,68 +59,26 @@ use Throwable;
 
 class OrderController extends BaseController
 {
-    /**
-     * @var OrderInterface
-     */
-    protected $orderRepository;
+    protected OrderInterface $orderRepository;
 
-    /**
-     * @var CustomerInterface
-     */
-    protected $customerRepository;
+    protected CustomerInterface $customerRepository;
 
-    /**
-     * @var OrderHistoryInterface
-     */
-    protected $orderHistoryRepository;
+    protected OrderHistoryInterface $orderHistoryRepository;
 
-    /**
-     * @var ProductInterface
-     */
-    protected $productRepository;
+    protected ProductInterface $productRepository;
 
-    /**
-     * @var ShipmentInterface
-     */
-    protected $shipmentRepository;
+    protected ShipmentInterface $shipmentRepository;
 
-    /**
-     * @var OrderHistoryInterface
-     */
-    protected $orderAddressRepository;
+    protected OrderAddressInterface $orderAddressRepository;
 
-    /**
-     * @var PaymentInterface
-     */
-    protected $paymentRepository;
+    protected PaymentInterface $paymentRepository;
 
-    /**
-     * @var StoreLocatorInterface
-     */
-    protected $storeLocatorRepository;
+    protected StoreLocatorInterface $storeLocatorRepository;
 
-    /**
-     * @var OrderProductInterface
-     */
-    protected $orderProductRepository;
+    protected OrderProductInterface $orderProductRepository;
 
-    /**
-     * @var AddressInterface
-     */
-    protected $addressRepository;
+    protected AddressInterface $addressRepository;
 
-    /**
-     * @param OrderInterface $orderRepository
-     * @param CustomerInterface $customerRepository
-     * @param OrderHistoryInterface $orderHistoryRepository
-     * @param ProductInterface $productRepository
-     * @param ShipmentInterface $shipmentRepository
-     * @param OrderAddressInterface $orderAddressRepository
-     * @param PaymentInterface $paymentRepository
-     * @param StoreLocatorInterface $storeLocatorRepository
-     * @param OrderProductInterface $orderProductRepository
-     * @param AddressInterface $addressRepository
-     */
     public function __construct(
         OrderInterface $orderRepository,
         CustomerInterface $customerRepository,
@@ -164,7 +125,8 @@ class OrderController extends BaseController
                 'vendor/core/plugins/ecommerce/libraries/jquery.textarea_autosize.js',
                 'vendor/core/plugins/ecommerce/js/order-create.js',
             ])
-            ->addScripts(['blockui', 'input-mask']);
+            ->addScripts(['blockui', 'input-mask'])
+            ->usingVueJS();
 
         if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
             Assets::addScriptsDirectly('vendor/core/plugins/location/js/location.js');
@@ -185,7 +147,7 @@ class OrderController extends BaseController
         $request->merge([
             'amount' => $request->input('amount') + $request->input('shipping_amount') - $request->input('discount_amount'),
             'user_id' => $request->input('customer_id') ?? 0,
-            'shipping_method' => $request->input('shipping_method', ShippingMethodEnum::DEFAULT),
+            'shipping_method' => $request->input('shipping_method') ?: ShippingMethodEnum::DEFAULT,
             'shipping_option' => $request->input('shipping_option'),
             'shipping_amount' => $request->input('shipping_amount'),
             'tax_amount' => session('tax_amount', 0),
@@ -203,7 +165,7 @@ class OrderController extends BaseController
 
         foreach ($request->input('products', []) as $productItem) {
             $product = $this->productRepository->findById(Arr::get($productItem, 'id'));
-            if (!$product) {
+            if (! $product) {
                 continue;
             }
 
@@ -298,7 +260,7 @@ class OrderController extends BaseController
 
             foreach ($request->input('products', []) as $productItem) {
                 $product = $this->productRepository->findById(Arr::get($productItem, 'id'));
-                if (!$product) {
+                if (! $product) {
                     continue;
                 }
 
@@ -328,6 +290,8 @@ class OrderController extends BaseController
                     ->where('with_storehouse_management', 1)
                     ->where('quantity', '>=', Arr::get($productItem, 'quantity', 1))
                     ->decrement('quantity', Arr::get($productItem, 'quantity', 1));
+
+                event(new ProductQuantityUpdatedEvent($product));
             }
 
             if (is_plugin_active('marketplace') && count($storeIds) > 0) {
@@ -457,7 +421,7 @@ class OrderController extends BaseController
     {
         $order = $this->orderRepository->findOrFail($orderId);
 
-        if (!$order->isInvoiceAvailable()) {
+        if (! $order->isInvoiceAvailable()) {
             abort(404);
         }
 
@@ -508,6 +472,18 @@ class OrderController extends BaseController
                 $order->user->email ?: $order->address->email
             );
         }
+        if (is_plugin_active('sms')) {
+            $sms = new  SmsHandler;
+            $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+            if ($sms->templateEnabled(SmsEnum::PAYMENT_CONFIRMATION())) {
+                $orderHelper = new OrderHelper;
+                $orderHelper->setSmsVariables($order, $sms);
+                $sms->sendUsingTemplate(
+                    SmsEnum::PAYMENT_CONFIRMATION(),
+                    $order->user->phone ?: $order->address->phone
+                );
+            }
+        }
 
         return $response->setMessage(trans('plugins/ecommerce::order.confirm_order_success'));
     }
@@ -523,7 +499,7 @@ class OrderController extends BaseController
         $order = $this->orderRepository->findOrFail($id);
         $result = OrderHelper::sendOrderConfirmationEmail($order);
 
-        if (!$result) {
+        if (! $result) {
             return $response
                 ->setError()
                 ->setMessage(trans('plugins/ecommerce::order.error_when_sending_email'));
@@ -616,7 +592,7 @@ class OrderController extends BaseController
 
         $store = $this->storeLocatorRepository->findById($request->input('store_id'));
 
-        if (!$store) {
+        if (! $store) {
             $defaultStore = $this->storeLocatorRepository->getFirstBy(['is_primary' => true]);
             $shipment['store_id'] = $defaultStore ? $defaultStore->id : null;
         }
@@ -628,7 +604,7 @@ class OrderController extends BaseController
                 break;
         }
 
-        if (!$result->isError()) {
+        if (! $result->isError()) {
             $this->orderRepository->createOrUpdate([
                 'status' => OrderStatusEnum::PROCESSING,
                 'shipping_method' => $request->input('method'),
@@ -644,6 +620,18 @@ class OrderController extends BaseController
                     'customer_delivery_order',
                     $order->user->email ?: $order->address->email
                 );
+            }
+            if (is_plugin_active('sms')) {
+                $sms = new  SmsHandler;
+                $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+                if ($sms->templateEnabled(SmsEnum::DELIVERING_CONFIRMATION())) {
+                    $orderHelper = new OrderHelper;
+                    $orderHelper->setSmsVariables($order, $sms);
+                    $sms->sendUsingTemplate(
+                        SmsEnum::DELIVERING_CONFIRMATION(),
+                        $order->user->phone ?: $order->address->phone
+                    );
+                }
             }
 
             $this->orderHistoryRepository->createOrUpdate([
@@ -703,7 +691,7 @@ class OrderController extends BaseController
     {
         $address = $this->orderAddressRepository->createOrUpdate($request->input(), compact('id'));
 
-        if (!$address) {
+        if (! $address) {
             abort(404);
         }
 
@@ -729,7 +717,7 @@ class OrderController extends BaseController
     {
         $order = $this->orderRepository->findOrFail($id);
 
-        if (!$order->canBeCanceledByAdmin()) {
+        if (! $order->canBeCanceledByAdmin()) {
             abort(403);
         }
 
@@ -809,7 +797,7 @@ class OrderController extends BaseController
         }
 
         $payment = $order->payment;
-        if (!$payment) {
+        if (! $payment) {
             return $response
                 ->setError()
                 ->setMessage(trans('plugins/ecommerce::order.cannot_found_payment_for_this_order'));
@@ -991,7 +979,7 @@ class OrderController extends BaseController
      */
     public function getReorder(Request $request, BaseHttpResponse $response)
     {
-        if (!$request->input('order_id')) {
+        if (! $request->input('order_id')) {
             return $response
                 ->setError()
                 ->setNextUrl(route('orders.index'))
@@ -1002,7 +990,7 @@ class OrderController extends BaseController
 
         $order = $this->orderRepository->findById($request->input('order_id'));
 
-        if (!$order) {
+        if (! $order) {
             return $response
                 ->setError()
                 ->setNextUrl(route('orders.index'))
@@ -1135,7 +1123,7 @@ class OrderController extends BaseController
 
         $email = $order->user->email ?: $order->address->email;
 
-        if (!$email) {
+        if (! $email) {
             return $response
                 ->setError()
                 ->setMessage(trans('plugins/ecommerce::order.error_when_sending_email'));

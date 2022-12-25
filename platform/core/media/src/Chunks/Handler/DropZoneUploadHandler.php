@@ -91,7 +91,7 @@ class DropZoneUploadHandler extends AbstractHandler
      */
     public function getPercentageDone()
     {
-        if (!$this->chunksTotal) {
+        if (! $this->chunksTotal) {
             return 100;
         }
 

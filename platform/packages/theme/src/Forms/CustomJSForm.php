@@ -8,9 +8,6 @@ use Botble\Theme\Http\Requests\CustomJsRequest;
 
 class CustomJSForm extends FormAbstract
 {
-    /**
-     * {@inheritDoc}
-     */
     public function buildForm()
     {
         $this
@@ -26,7 +23,6 @@ class CustomJSForm extends FormAbstract
                 ],
                 'attr' => [
                     'data-counter' => 2500,
-                    'v-pre',
                 ],
             ])
             ->add('body_js', 'textarea', [
@@ -38,7 +34,6 @@ class CustomJSForm extends FormAbstract
                 ],
                 'attr' => [
                     'data-counter' => 2500,
-                    'v-pre',
                 ],
             ])
             ->add('footer_js', 'textarea', [
@@ -50,7 +45,6 @@ class CustomJSForm extends FormAbstract
                 ],
                 'attr' => [
                     'data-counter' => 2500,
-                    'v-pre',
                 ],
             ]);
     }

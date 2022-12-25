@@ -20,21 +20,10 @@ use Throwable;
 
 class ProductAttributeSetsController extends BaseController
 {
-    /**
-     * @var ProductAttributeSetInterface
-     */
-    protected $productAttributeSetRepository;
+    protected ProductAttributeSetInterface $productAttributeSetRepository;
 
-    /**
-     * @var ProductCategoryInterface
-     */
-    protected $productCategoryRepository;
+    protected ProductCategoryInterface $productCategoryRepository;
 
-    /**
-     * ProductAttributesController constructor.
-     * @param ProductAttributeSetInterface $productAttributeSetRepository
-     * @param ProductCategoryInterface $productCategoryRepository
-     */
     public function __construct(
         ProductAttributeSetInterface $productAttributeSetRepository,
         ProductCategoryInterface $productCategoryRepository

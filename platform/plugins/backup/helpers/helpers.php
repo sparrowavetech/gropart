@@ -1,6 +1,6 @@
 <?php
 
-if (!function_exists('get_backup_size')) {
+if (! function_exists('get_backup_size')) {
     /**
      * @param string $key
      * @return int

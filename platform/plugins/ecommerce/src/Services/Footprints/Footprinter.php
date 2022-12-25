@@ -8,24 +8,15 @@ use Illuminate\Support\Str;
 
 class Footprinter implements FootprinterInterface
 {
-    /**
-     * @var Request
-     */
-    protected $request;
+    protected ?Request $request = null;
 
-    /**
-     * @var string
-     */
-    protected $random;
+    protected string $random;
 
     public function __construct()
     {
         $this->random = Str::random(20); // Will only be set once during requests since this class is a singleton
     }
 
-    /**
-     * @inheritDoc
-     */
     public function footprint(Request $request): string
     {
         $this->request = $request;
@@ -51,8 +42,6 @@ class Footprinter implements FootprinterInterface
      *
      * If relying on cookies then the logic of this function is not important, but if cookies are disabled this value
      * will be used to link previous requests with one another.
-     *
-     * @return string
      */
     protected function fingerprint(): string
     {
@@ -64,14 +53,11 @@ class Footprinter implements FootprinterInterface
         ])));
     }
 
-    /**
-     * @return array
-     */
     public function getFootprints(): array
     {
         $data = Cookie::get('botble_footprints_cookie_data');
 
-        if (!$data) {
+        if (! $data) {
             return [];
         }
 

@@ -11,10 +11,7 @@ use Carbon\Carbon;
 
 class AdsForm extends FormAbstract
 {
-    /**
-     * {@inheritDoc}
-     */
-    public function buildForm()
+    public function buildForm(): void
     {
         $this
             ->setupModel(new Ads())

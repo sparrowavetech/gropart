@@ -12,16 +12,8 @@ class ProductCollection extends BaseModel
 {
     use EnumCastable;
 
-    /**
-     * The database table used by the model.
-     *
-     * @var string
-     */
     protected $table = 'ec_product_collections';
 
-    /**
-     * @var array
-     */
     protected $fillable = [
         'name',
         'slug',
@@ -31,9 +23,6 @@ class ProductCollection extends BaseModel
         'is_featured',
     ];
 
-    /**
-     * @var array
-     */
     protected $casts = [
         'status' => BaseStatusEnum::class,
     ];

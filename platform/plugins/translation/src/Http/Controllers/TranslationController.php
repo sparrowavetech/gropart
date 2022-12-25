@@ -27,15 +27,8 @@ use ZipArchive;
 
 class TranslationController extends BaseController
 {
-    /**
-     * @var Manager
-     */
-    protected $manager;
+    protected Manager $manager;
 
-    /**
-     * TranslationController constructor.
-     * @param Manager $manager
-     */
     public function __construct(Manager $manager)
     {
         $this->manager = $manager;
@@ -87,9 +80,6 @@ class TranslationController extends BaseController
             ->with('editUrl', route('translations.group.edit', ['group' => $group]));
     }
 
-    /**
-     * @return array
-     */
     protected function loadLocales(): array
     {
         // Set the default locale as the first one.
@@ -115,7 +105,7 @@ class TranslationController extends BaseController
     {
         $group = $request->input('group');
 
-        if (!in_array($group, $this->manager->getConfig('exclude_groups'))) {
+        if (! in_array($group, $this->manager->getConfig('exclude_groups'))) {
             $name = $request->input('name');
             $value = $request->input('value');
 
@@ -153,7 +143,7 @@ class TranslationController extends BaseController
      */
     public function postPublish(Request $request, BaseHttpResponse $response)
     {
-        if (!File::isWritable(lang_path()) || !File::isWritable(lang_path('vendor'))) {
+        if (! File::isWritable(lang_path()) || ! File::isWritable(lang_path('vendor'))) {
             return $response
                 ->setError()
                 ->setMessage(trans('plugins/translation::translation.folder_is_not_writeable', ['lang_path' => lang_path()]));
@@ -191,7 +181,7 @@ class TranslationController extends BaseController
      */
     public function postLocales(LocaleRequest $request, BaseHttpResponse $response)
     {
-        if (!File::isWritable(lang_path()) || !File::isWritable(lang_path('vendor'))) {
+        if (! File::isWritable(lang_path()) || ! File::isWritable(lang_path('vendor'))) {
             return $response
                 ->setError()
                 ->setMessage(trans('plugins/translation::translation.folder_is_not_writeable', ['lang_path' => lang_path()]));
@@ -219,12 +209,7 @@ class TranslationController extends BaseController
         return $response->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    /**
-     * @param string $path
-     * @param string $locale
-     * @return int|void
-     */
-    protected function createLocaleInPath(string $path, $locale)
+    protected function createLocaleInPath(string $path, string $locale): int
     {
         $folders = File::directories($path);
 
@@ -247,7 +232,7 @@ class TranslationController extends BaseController
     public function deleteLocale($locale, BaseHttpResponse $response)
     {
         if ($locale !== 'en') {
-            if (!File::isWritable(lang_path()) || !File::isWritable(lang_path('vendor'))) {
+            if (! File::isWritable(lang_path()) || ! File::isWritable(lang_path('vendor'))) {
                 return $response
                     ->setError()
                     ->setMessage(trans('plugins/translation::translation.folder_is_not_writeable', ['lang_path' => lang_path()]));
@@ -272,12 +257,7 @@ class TranslationController extends BaseController
         return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
-    /**
-     * @param string $path
-     * @param $locale
-     * @return int
-     */
-    protected function removeLocaleInPath(string $path, $locale)
+    protected function removeLocaleInPath(string $path, string $locale): int
     {
         $folders = File::directories($path);
 
@@ -307,7 +287,7 @@ class TranslationController extends BaseController
         $groups = Language::getAvailableLocales();
         $defaultLanguage = Arr::get($groups, 'en');
 
-        if (!$request->has('ref_lang')) {
+        if (! $request->has('ref_lang')) {
             $group = $defaultLanguage;
         } else {
             $group = Arr::first(Arr::where($groups, function ($item) use ($request) {
@@ -319,14 +299,14 @@ class TranslationController extends BaseController
         if ($group) {
             $jsonFile = lang_path($group['locale'] . '.json');
 
-            if (!File::exists($jsonFile)) {
+            if (! File::exists($jsonFile)) {
                 $jsonFile = theme_path(Theme::getThemeName() . '/lang/' . $group['locale'] . '.json');
             }
 
-            if (!File::exists($jsonFile)) {
+            if (! File::exists($jsonFile)) {
                 $languages = BaseHelper::scanFolder(theme_path(Theme::getThemeName() . '/lang'));
 
-                if (!empty($languages)) {
+                if (! empty($languages)) {
                     $jsonFile = theme_path(Theme::getThemeName() . '/lang/' . Arr::first($languages));
                 }
             }
@@ -345,7 +325,7 @@ class TranslationController extends BaseController
                     $enTranslationKeys = array_keys($enTranslations);
 
                     foreach ($translations as $key => $translation) {
-                        if (!in_array($key, $enTranslationKeys)) {
+                        if (! in_array($key, $enTranslationKeys)) {
                             Arr::forget($translations, $key);
                         }
                     }
@@ -368,7 +348,7 @@ class TranslationController extends BaseController
      */
     public function postThemeTranslations(Request $request, BaseHttpResponse $response)
     {
-        if (!File::isWritable(lang_path())) {
+        if (! File::isWritable(lang_path())) {
             return $response
                 ->setError()
                 ->setMessage(trans('plugins/translation::translation.folder_is_not_writeable', ['lang_path' => lang_path()]));
@@ -381,7 +361,7 @@ class TranslationController extends BaseController
 
             $jsonFile = lang_path($locale . '.json');
 
-            if (!File::exists($jsonFile)) {
+            if (! File::exists($jsonFile)) {
                 $jsonFile = theme_path(Theme::getThemeName() . '/lang/' . $locale . '.json');
             }
 
@@ -399,7 +379,7 @@ class TranslationController extends BaseController
                     $enTranslationKeys = array_keys($enTranslations);
 
                     foreach ($translations as $key => $translation) {
-                        if (!in_array($key, $enTranslationKeys)) {
+                        if (! in_array($key, $enTranslationKeys)) {
                             Arr::forget($translations, $key);
                         }
                     }
@@ -424,7 +404,7 @@ class TranslationController extends BaseController
      * @param string $locale
      * @return BinaryFileResponse
      */
-    public function downloadLocale($locale)
+    public function downloadLocale(string $locale)
     {
         $file = RvMedia::getUploadPath() . '/locale-' . $locale . '.zip';
 
@@ -552,7 +532,7 @@ class TranslationController extends BaseController
                     break;
                 }
 
-                if (!array_key_exists($locale, $locales) &&
+                if (! array_key_exists($locale, $locales) &&
                     in_array($language[0], [$locale, str_replace('-', '_', $locale)])) {
                     $locales[$locale] = [
                         'locale' => $locale,

@@ -6,10 +6,7 @@ use Kris\LaravelFormBuilder\Fields\FormField;
 
 class CategoryMultiField extends FormField
 {
-    /**
-     * {@inheritDoc}
-     */
-    protected function getTemplate()
+    protected function getTemplate(): string
     {
         return 'plugins/blog::categories.categories-multi';
     }

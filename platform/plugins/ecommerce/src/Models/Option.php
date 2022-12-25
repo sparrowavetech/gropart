@@ -11,14 +11,8 @@ class Option extends BaseModel
 {
     use EnumCastable;
 
-    /**
-     * @var string
-     */
     protected $table = 'ec_options';
 
-    /**
-     * @var string[]
-     */
     protected $fillable = [
         'name',
         'option_type',
@@ -29,7 +23,9 @@ class Option extends BaseModel
 
     public function values(): HasMany
     {
-        return $this->hasMany(OptionValue::class, 'option_id')->orderBy('order', 'ASC');
+        return $this
+            ->hasMany(OptionValue::class, 'option_id')
+            ->orderBy('order', 'ASC');
     }
 
     public function products(): BelongsTo

@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Cache;
 
 class ClearProductCategoriesCacheListener
 {
-    /**
-     * Handle the event.
-     *
-     * @return void
-     */
-    public function handle()
+    public function handle(): void
     {
         Cache::forget('ecommerce-product-category-tree');
     }

@@ -8,12 +8,7 @@ use Illuminate\Validation\Rule;
 
 class NewsletterRequest extends Request
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         $rules = [
             'email' => 'required|email|unique:newsletters',
@@ -27,10 +22,7 @@ class NewsletterRequest extends Request
         return $rules;
     }
 
-    /**
-     * @return array
-     */
-    public function messages()
+    public function messages(): array
     {
         return [
             'g-recaptcha-response.required' => __('Captcha Verification Failed!'),

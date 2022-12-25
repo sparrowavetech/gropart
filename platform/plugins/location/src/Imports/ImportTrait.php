@@ -12,88 +12,55 @@ use Illuminate\Support\Str;
 
 trait ImportTrait
 {
-    /**
-     * @var int
-     */
-    protected $totalImported = 0;
+    protected int $totalImported = 0;
 
-    /**
-     * @var array
-     */
-    protected $successes = [];
+    protected array $successes = [];
 
-    /**
-     * @return int
-     */
-    public function getTotalImported()
+    public function getTotalImported(): int
     {
         return $this->totalImported;
     }
 
-    /**
-     * @return self
-     */
-    public function setTotalImported()
+    public function setTotalImported(): self
     {
         ++$this->totalImported;
 
         return $this;
     }
 
-    /**
-     * @param mixed $item
-     */
-    public function onSuccess($item)
+    public function onSuccess($item): void
     {
         $this->successes[] = $item;
     }
 
-    /**
-     * @return Collection
-     */
     public function successes(): Collection
     {
         return collect($this->successes);
     }
 
-    /**
-     * Transform a date value into a Carbon object.
-     *
-     * @return string
-     */
-    public function transformDate($value, $format = '')
+    public function transformDate($value, ?string $format = ''): string
     {
         $format = $format ?: config('core.base.general.date_format.date_time');
 
         try {
             return Carbon::instance(Date::excelToDateTimeObject($value))->format($format);
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return Carbon::createFromFormat($format, $value);
         }
     }
 
-    /**
-     * Transform a date value into a Carbon object.
-     *
-     * @return string
-     */
-    public function getDate($value, $format = 'Y-m-d H:i:s', $default = null)
+    public function getDate($value, $format = 'Y-m-d H:i:s', $default = null): string
     {
         try {
             $date = DateTime::createFromFormat('!' . $format, $value);
 
             return $date ? $date->format(config('core.base.general.date_format.date_time')) : $value;
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return $default;
         }
     }
 
-    /**
-     * @param array $row
-     * @param array $attributes
-     * @return $this
-     */
-    public function setValues(&$row, $attributes = [])
+    public function setValues(array &$row, array $attributes = []): self
     {
         foreach ($attributes as $attribute) {
             $this->setValue(
@@ -108,14 +75,7 @@ trait ImportTrait
         return $this;
     }
 
-    /**
-     * @param array $row
-     * @param string $key
-     * @param string $type
-     * @param null $default
-     * @return $this
-     */
-    public function setValue(&$row, $key, $type = 'array', $default = null, $from = null)
+    public function setValue(array &$row, string $key, string $type = 'array', ?string $default = null, ?string $from = null): self
     {
         $value = Arr::get($row, $from ?: $key, $default);
 

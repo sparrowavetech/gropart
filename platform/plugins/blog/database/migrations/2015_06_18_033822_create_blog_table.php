@@ -5,12 +5,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 
 return new class () extends Migration {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
@@ -54,23 +49,18 @@ return new class () extends Migration {
 
         Schema::create('post_tags', function (Blueprint $table) {
             $table->id();
-            $table->integer('tag_id')->unsigned()->references('id')->on('tags')->onDelete('cascade');
-            $table->integer('post_id')->unsigned()->references('id')->on('posts')->onDelete('cascade');
+            $table->integer('tag_id')->unsigned()->index();
+            $table->integer('post_id')->unsigned()->index();
         });
 
         Schema::create('post_categories', function (Blueprint $table) {
             $table->id();
-            $table->integer('category_id')->unsigned()->references('id')->on('categories')->onDelete('cascade');
-            $table->integer('post_id')->unsigned()->references('id')->on('posts')->onDelete('cascade');
+            $table->integer('category_id')->unsigned()->index();
+            $table->integer('post_id')->unsigned()->index();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::disableForeignKeyConstraints();
         Schema::dropIfExists('post_tags');

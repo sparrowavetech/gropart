@@ -12,7 +12,7 @@ return new class () extends Migration {
      */
     public function up()
     {
-        if (!Schema::hasTable('ads_translations')) {
+        if (! Schema::hasTable('ads_translations')) {
             Schema::create('ads_translations', function (Blueprint $table) {
                 $table->string('lang_code');
                 $table->integer('ads_id');

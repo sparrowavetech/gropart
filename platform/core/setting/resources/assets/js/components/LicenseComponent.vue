@@ -149,6 +149,7 @@
                         } else {
                             this.verified = true;
                             this.license = res.data.data;
+                            Botble.showSuccess(res.data.message);
                         }
                         this.activating = false;
                     })

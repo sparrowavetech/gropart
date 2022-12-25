@@ -9,26 +9,14 @@ use SlugHelper;
 
 class DeletedContentListener
 {
-    /**
-     * @var SlugInterface
-     */
-    protected $slugRepository;
+    protected SlugInterface $slugRepository;
 
-    /**
-     * @param SlugInterface $slugRepository
-     */
     public function __construct(SlugInterface $slugRepository)
     {
         $this->slugRepository = $slugRepository;
     }
 
-    /**
-     * Handle the event.
-     *
-     * @param DeletedContentEvent $event
-     * @return void
-     */
-    public function handle(DeletedContentEvent $event)
+    public function handle(DeletedContentEvent $event): void
     {
         if (SlugHelper::isSupportedModel(get_class($event->data))) {
             try {

@@ -8,7 +8,10 @@ const dist = 'public/vendor/core/packages/' + directory;
 
 mix
     .js(source + '/resources/assets/js/seo-helper.js', dist + '/js')
-    .sass(source + '/resources/assets/sass/seo-helper.scss', dist + '/css')
+    .sass(source + '/resources/assets/sass/seo-helper.scss', dist + '/css');
 
-    .copyDirectory(dist + '/js', source + '/public/js')
-    .copyDirectory(dist + '/css', source + '/public/css');
+if (mix.inProduction()) {
+    mix
+        .copy(dist + '/js/seo-helper.js', source + '/public/js')
+        .copy(dist + '/css/seo-helper.css', source + '/public/css');
+}

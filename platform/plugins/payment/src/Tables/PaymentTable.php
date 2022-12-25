@@ -8,44 +8,33 @@ use Botble\Payment\Repositories\Interfaces\PaymentInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Yajra\DataTables\DataTables;
 
 class PaymentTable extends TableAbstract
 {
-    /**
-     * @var bool
-     */
     protected $hasActions = true;
 
-    /**
-     * @var bool
-     */
     protected $hasFilter = true;
 
-    /**
-     * PaymentTable constructor.
-     * @param DataTables $table
-     * @param UrlGenerator $urlGenerator
-     * @param PaymentInterface $paymentRepository
-     */
     public function __construct(DataTables $table, UrlGenerator $urlGenerator, PaymentInterface $paymentRepository)
     {
         parent::__construct($table, $urlGenerator);
 
         $this->repository = $paymentRepository;
 
-        if (!Auth::user()->hasAnyPermission(['payment.show', 'payment.destroy'])) {
+        if (! Auth::user()->hasAnyPermission(['payment.show', 'payment.destroy'])) {
             $this->hasOperations = false;
             $this->hasActions = false;
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
@@ -85,10 +74,7 @@ class PaymentTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    /**
-     * @return mixed
-     */
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
         $query = $this->repository->getModel()->select([
             'id',
@@ -110,10 +96,7 @@ class PaymentTable extends TableAbstract
         return $this->applyScopes($query);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function columns()
+    public function columns(): array
     {
         return [
             'id' => [
@@ -147,17 +130,11 @@ class PaymentTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function bulkActions(): array
     {
         return $this->addDeleteAction(route('payment.deletes'), 'payment.destroy', parent::bulkActions());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getBulkChanges(): array
     {
         return [

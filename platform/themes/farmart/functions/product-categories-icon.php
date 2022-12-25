@@ -10,7 +10,7 @@ if (is_plugin_active('ecommerce')) {
                 $icon = null;
                 $iconImage = null;
                 $args = func_get_args();
-                if (!empty($args[0])) {
+                if (! empty($args[0])) {
                     $icon = MetaBox::getMetaData($args[0], 'icon', true);
                     $iconImage = MetaBox::getMetaData($args[0], 'icon_image', true);
                 }

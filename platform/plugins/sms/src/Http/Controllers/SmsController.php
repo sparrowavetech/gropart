@@ -10,6 +10,8 @@ use Botble\Sms\Tables\SmsTable;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Ecommerce\Models\Enquiry;
 use Botble\Sms\Http\Requests\SmsRequest;
+use Botble\Sms\Http\Requests\UpdateSettingsRequest;
+use Botble\Setting\Supports\SettingStore;
 use Botble\Ecommerce\Supports\OrderHelper;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
@@ -157,12 +159,43 @@ class SmsController extends BaseController
 
         return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
+     /**
+     * @return Factory|View
+     */
+    public function getSettings()
+    {
+        page_title()->setTitle(trans('plugins/sms::sms.setting'));
+        $sms_url = setting('sms_url');
+        return view('plugins/sms::settings', compact('sms_url'));
+    }
+    /**
+     * @param UpdateSettingsRequest $request
+     * @param BaseHttpResponse $response
+     * @param SettingStore $settingStore
+     * @return BaseHttpResponse
+     * @throws Exception
+     */
+    public function postSettings(
+        UpdateSettingsRequest $request,
+        BaseHttpResponse $response,
+        SettingStore $settingStore
+    ) {
+        foreach ($request->except([
+            '_token',
+        ]) as $settingKey => $settingValue) {
+            $settingStore->set($settingKey, $settingValue);
+        }
 
+        $settingStore->save();
+        $response->setNextUrl(route('sms.settings'));
+        return $response
+            ->setMessage(trans('core/base::notices.update_success_message'));
+    }
     public function test()
     {
         $enquiry = Enquiry::first();
         $res = OrderHelper::sendEnquirySms($enquiry);
-       
-       
+
+
     }
 }

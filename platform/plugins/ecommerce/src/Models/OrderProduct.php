@@ -8,14 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class OrderProduct extends BaseModel
 {
-    /**
-     * @var string
-     */
     protected $table = 'ec_order_product';
 
-    /**
-     * @var array
-     */
     protected $fillable = [
         'order_id',
         'product_id',
@@ -31,17 +25,6 @@ class OrderProduct extends BaseModel
         'product_type',
     ];
 
-    /**
-     * @var array
-     */
-    protected $dates = [
-        'created_at',
-        'updated_at',
-    ];
-
-    /**
-     * @var array
-     */
     protected $casts = [
         'options' => 'json',
         'product_options' => 'json',

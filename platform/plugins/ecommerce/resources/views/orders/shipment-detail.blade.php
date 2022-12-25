@@ -46,6 +46,9 @@
                     @endif
 
                     <button class="btn btn-info ml10 btn-trigger-update-shipping-status"><i class="fas fa-shipping-fast"></i> {{ trans('plugins/ecommerce::shipping.update_shipping_status') }}</button>
+
+                    {!! apply_filters('shipment_buttons_detail_order', null, $shipment) !!}
+
                 </div>
             </div>
         </div>

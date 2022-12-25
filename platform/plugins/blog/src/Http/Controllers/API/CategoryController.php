@@ -10,21 +10,13 @@ use Botble\Blog\Http\Resources\ListCategoryResource;
 use Botble\Blog\Models\Category;
 use Botble\Blog\Repositories\Interfaces\CategoryInterface;
 use Botble\Blog\Supports\FilterCategory;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use SlugHelper;
 
 class CategoryController extends Controller
 {
-    /**
-     * @var CategoryInterface
-     */
-    protected $categoryRepository;
+    protected CategoryInterface $categoryRepository;
 
-    /**
-     * CategoryController constructor.
-     * @param CategoryInterface $categoryRepository
-     */
     public function __construct(CategoryInterface $categoryRepository)
     {
         $this->categoryRepository = $categoryRepository;
@@ -34,10 +26,6 @@ class CategoryController extends Controller
      * List categories
      *
      * @group Blog
-     *
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
      */
     public function index(Request $request, BaseHttpResponse $response)
     {
@@ -60,10 +48,6 @@ class CategoryController extends Controller
      * Filters categories
      *
      * @group Blog
-     *
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
      */
     public function getFilters(Request $request, BaseHttpResponse $response)
     {
@@ -80,21 +64,18 @@ class CategoryController extends Controller
      *
      * @group Blog
      * @queryParam slug Find by slug of category.
-     * @param string $slug
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse|JsonResponse
      */
     public function findBySlug(string $slug, BaseHttpResponse $response)
     {
         $slug = SlugHelper::getSlug($slug, SlugHelper::getPrefix(Category::class), Category::class);
 
-        if (!$slug) {
+        if (! $slug) {
             return $response->setError()->setCode(404)->setMessage('Not found');
         }
 
         $category = $this->categoryRepository->getCategoryById($slug->reference_id);
 
-        if (!$category) {
+        if (! $category) {
             return $response->setError()->setCode(404)->setMessage('Not found');
         }
 

@@ -29,15 +29,8 @@ use Throwable;
 
 class SettingController extends BaseController
 {
-    /**
-     * @var SettingInterface
-     */
-    protected $settingRepository;
+    protected SettingInterface $settingRepository;
 
-    /**
-     * SettingController constructor.
-     * @param SettingInterface $settingRepository
-     */
     public function __construct(SettingInterface $settingRepository)
     {
         $this->settingRepository = $settingRepository;
@@ -51,7 +44,8 @@ class SettingController extends BaseController
         page_title()->setTitle(trans('core/setting::setting.title'));
 
         Assets::addScriptsDirectly('vendor/core/core/setting/js/setting.js')
-            ->addStylesDirectly('vendor/core/core/setting/css/setting.css');
+            ->addStylesDirectly('vendor/core/core/setting/css/setting.css')
+            ->usingVueJS();
 
         return view('core/setting::index');
     }
@@ -75,7 +69,7 @@ class SettingController extends BaseController
             session()->put('site-locale', $locale);
         }
 
-        if (!app()->environment('demo')) {
+        if (! app()->environment('demo')) {
             setting()->set('locale', $locale)->save();
         }
 
@@ -84,7 +78,7 @@ class SettingController extends BaseController
             session()->put('admin-theme', $adminTheme);
         }
 
-        if (!app()->environment('demo')) {
+        if (! app()->environment('demo')) {
             setting()->set('default_admin_theme', $adminTheme)->save();
         }
 
@@ -93,7 +87,7 @@ class SettingController extends BaseController
             session()->put('admin_locale_direction', $adminLocalDirection);
         }
 
-        if (!app()->environment('demo')) {
+        if (! app()->environment('demo')) {
             setting()->set('admin_locale_direction', $adminLocalDirection)->save();
         }
 
@@ -289,14 +283,14 @@ class SettingController extends BaseController
      */
     public function getVerifyLicense(Core $coreApi, BaseHttpResponse $response)
     {
-        if (!File::exists(storage_path('.license'))) {
+        if (! File::exists(storage_path('.license'))) {
             return $response->setError()->setMessage('Your license is invalid. Please activate your license!');
         }
 
         try {
             $result = $coreApi->verifyLicense(true);
 
-            if (!$result['status']) {
+            if (! $result['status']) {
                 return $response->setError()->setMessage($result['message']);
             }
 
@@ -337,15 +331,18 @@ class SettingController extends BaseController
 
             $result = $coreApi->activateLicense($purchaseCode, $buyer);
 
-            if (!$result['status']) {
+            $resetLicense = false;
+            if (! $result['status']) {
                 if (str_contains($result['message'], 'License is already active')) {
                     $coreApi->deactivateLicense($purchaseCode, $buyer);
 
                     $result = $coreApi->activateLicense($purchaseCode, $buyer);
 
-                    if (!$result['status']) {
+                    if (! $result['status']) {
                         return $response->setError()->setMessage($result['message']);
                     }
+
+                    $resetLicense = true;
                 } else {
                     return $response->setError()->setMessage($result['message']);
                 }
@@ -361,6 +358,10 @@ class SettingController extends BaseController
                 'activated_at' => $activatedAt->format('M d Y'),
                 'licensed_to' => $request->input('buyer'),
             ];
+
+            if ($resetLicense) {
+                return $response->setMessage($result['message'] . ' Your license on the previous domain has been revoked!')->setData($data);
+            }
 
             return $response->setMessage($result['message'])->setData($data);
         } catch (Throwable $exception) {
@@ -381,7 +382,7 @@ class SettingController extends BaseController
         try {
             $result = $coreApi->deactivateLicense();
 
-            if (!$result['status']) {
+            if (! $result['status']) {
                 return $response->setError()->setMessage($result['message']);
             }
 
@@ -404,7 +405,7 @@ class SettingController extends BaseController
         try {
             $result = $coreApi->deactivateLicense($request->input('purchase_code'), $request->input('buyer'));
 
-            if (!$result['status']) {
+            if (! $result['status']) {
                 return $response->setError()->setMessage($result['message']);
             }
 
@@ -432,7 +433,7 @@ class SettingController extends BaseController
         foreach ($files as $file) {
             try {
                 RvMedia::generateThumbnails($file);
-            } catch (Exception $exception) {
+            } catch (Exception) {
                 $errors[] = $file->url;
             }
         }

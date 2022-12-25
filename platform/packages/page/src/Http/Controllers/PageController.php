@@ -25,15 +25,8 @@ class PageController extends BaseController
 {
     use HasDeleteManyItemsTrait;
 
-    /**
-     * @var PageInterface
-     */
-    protected $pageRepository;
+    protected PageInterface $pageRepository;
 
-    /**
-     * PageController constructor.
-     * @param PageInterface $pageRepository
-     */
     public function __construct(PageInterface $pageRepository)
     {
         $this->pageRepository = $pageRepository;

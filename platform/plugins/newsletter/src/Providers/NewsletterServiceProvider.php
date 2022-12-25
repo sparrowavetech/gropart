@@ -36,7 +36,7 @@ class NewsletterServiceProvider extends ServiceProvider
             ->loadHelpers()
             ->loadAndPublishConfigurations(['permissions', 'email'])
             ->loadAndPublishTranslations()
-            ->loadRoutes(['web'])
+            ->loadRoutes()
             ->loadAndPublishViews()
             ->loadMigrations();
 
@@ -69,12 +69,7 @@ class NewsletterServiceProvider extends ServiceProvider
         });
     }
 
-    /**
-     * @param null $data
-     * @return string
-     * @throws \Throwable
-     */
-    public function addSettings($data = null)
+    public function addSettings(?string $data = null): string
     {
         $mailchimpContactList = [];
         $mailchimpApiKey = setting('newsletter_mailchimp_api_key');

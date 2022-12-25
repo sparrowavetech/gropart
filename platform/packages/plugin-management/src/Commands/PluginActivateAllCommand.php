@@ -5,43 +5,15 @@ namespace Botble\PluginManagement\Commands;
 use BaseHelper;
 use Botble\PluginManagement\Services\PluginService;
 use Illuminate\Console\Command;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+#[AsCommand('cms:plugin:activate:all', 'Activate all plugins in /plugins directory')]
 class PluginActivateAllCommand extends Command
 {
-    /**
-     * The console command signature.
-     *
-     * @var string
-     */
-    protected $signature = 'cms:plugin:activate:all';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Activate all plugins in /plugins directory';
-
-    /**
-     * @var PluginService
-     */
-    protected $pluginService;
-
-    /**
-     * PluginActivateCommand constructor.
-     * @param PluginService $pluginService
-     */
-    public function __construct(PluginService $pluginService)
-    {
-        parent::__construct();
-
-        $this->pluginService = $pluginService;
-    }
-
-    public function handle(): int
+    public function handle(PluginService $pluginService): int
     {
         foreach (BaseHelper::scanFolder(plugin_path()) as $plugin) {
-            $this->pluginService->activate($plugin);
+            $pluginService->activate($plugin);
         }
 
         $this->info('Activated successfully!');

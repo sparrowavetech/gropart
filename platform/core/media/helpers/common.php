@@ -4,7 +4,7 @@ use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\UploadedFile;
 
-if (!function_exists('is_image')) {
+if (! function_exists('is_image')) {
     /**
      * Is the mime type an image
      *
@@ -18,7 +18,7 @@ if (!function_exists('is_image')) {
     }
 }
 
-if (!function_exists('get_image_url')) {
+if (! function_exists('get_image_url')) {
     /**
      * @param string $url
      * @param string|null $size
@@ -33,7 +33,7 @@ if (!function_exists('get_image_url')) {
     }
 }
 
-if (!function_exists('get_object_image')) {
+if (! function_exists('get_object_image')) {
     /**
      * @param string $image
      * @param null $size
@@ -47,7 +47,7 @@ if (!function_exists('get_object_image')) {
     }
 }
 
-if (!function_exists('rv_media_handle_upload')) {
+if (! function_exists('rv_media_handle_upload')) {
     /**
      * @param UploadedFile|null $fileUpload
      * @param int $folderId

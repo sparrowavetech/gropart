@@ -60,7 +60,7 @@ return new class () extends Migration {
         });
 
         try {
-            foreach (Order::with('invoice')->get() as $order) {
+            foreach (Order::with('invoice')->where('is_finished', 1)->get() as $order) {
                 if ($order->invoice->id) {
                     continue;
                 }

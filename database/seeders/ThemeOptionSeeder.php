@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use BaseHelper;
 use Botble\Base\Supports\BaseSeeder;
 use Botble\Setting\Models\Setting;
 use EcommerceHelper;
@@ -9,118 +10,113 @@ use Illuminate\Support\Arr;
 
 class ThemeOptionSeeder extends BaseSeeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
         $this->uploadFiles('general');
 
-        $theme = Arr::first(scan_folder(theme_path()));
+        $theme = Arr::first(BaseHelper::scanFolder(theme_path()));
         Setting::where('key', 'LIKE', 'theme-' . $theme . '-%')->delete();
         Setting::whereIn('key', ['admin_logo', 'admin_favicon'])->delete();
 
         Setting::insertOrIgnore([
             [
-                'key'   => 'theme',
+                'key' => 'theme',
                 'value' => $theme,
             ],
             [
-                'key'   => 'admin_favicon',
+                'key' => 'admin_favicon',
                 'value' => 'general/favicon.png',
             ],
             [
-                'key'   => 'admin_logo',
+                'key' => 'admin_logo',
                 'value' => 'general/logo-light.png',
             ],
             [
-                'key'   => 'theme-' . $theme . '-site_title',
+                'key' => 'theme-' . $theme . '-site_title',
                 'value' => 'Farmart - Laravel Ecommerce system',
             ],
             [
-                'key'   => 'theme-' . $theme . '-copyright',
+                'key' => 'theme-' . $theme . '-copyright',
                 'value' => '© ' . now()->format('Y') . ' Farmart. All Rights Reserved.',
             ],
             [
-                'key'   => 'theme-' . $theme . '-favicon',
+                'key' => 'theme-' . $theme . '-favicon',
                 'value' => 'general/favicon.png',
             ],
             [
-                'key'   => 'theme-' . $theme . '-logo',
+                'key' => 'theme-' . $theme . '-logo',
                 'value' => 'general/logo.png',
             ],
             [
-                'key'   => 'theme-' . $theme . '-seo_og_image',
+                'key' => 'theme-' . $theme . '-seo_og_image',
                 'value' => 'general/open-graph-image.png',
             ],
             [
-                'key'   => 'theme-' . $theme . '-image-placeholder',
+                'key' => 'theme-' . $theme . '-image-placeholder',
                 'value' => 'general/placeholder.png',
             ],
             [
-                'key'   => 'theme-' . $theme . '-address',
+                'key' => 'theme-' . $theme . '-address',
                 'value' => '502 New Street, Brighton VIC, Australia',
             ],
             [
-                'key'   => 'theme-' . $theme . '-hotline',
+                'key' => 'theme-' . $theme . '-hotline',
                 'value' => '8 800 332 65-66',
             ],
             [
-                'key'   => 'theme-' . $theme . '-email',
+                'key' => 'theme-' . $theme . '-email',
                 'value' => 'contact@fartmart.co',
             ],
             [
-                'key'   => 'theme-' . $theme . '-working_time',
+                'key' => 'theme-' . $theme . '-working_time',
                 'value' => 'Mon - Fri: 07AM - 06PM',
             ],
             [
-                'key'   => 'theme-' . $theme . '-payment_methods_image',
+                'key' => 'theme-' . $theme . '-payment_methods_image',
                 'value' => 'general/footer-payments.png',
             ],
             [
-                'key'   => 'theme-' . $theme . '-homepage_id',
+                'key' => 'theme-' . $theme . '-homepage_id',
                 'value' => '1',
             ],
             [
-                'key'   => 'theme-' . $theme . '-blog_page_id',
+                'key' => 'theme-' . $theme . '-blog_page_id',
                 'value' => '6',
             ],
             [
-                'key'   => 'theme-' . $theme . '-cookie_consent_message',
+                'key' => 'theme-' . $theme . '-cookie_consent_message',
                 'value' => 'Your experience on this site will be improved by allowing cookies ',
             ],
             [
-                'key'   => 'theme-' . $theme . '-cookie_consent_learn_more_url',
+                'key' => 'theme-' . $theme . '-cookie_consent_learn_more_url',
                 'value' => url('cookie-policy'),
             ],
             [
-                'key'   => 'theme-' . $theme . '-cookie_consent_learn_more_text',
+                'key' => 'theme-' . $theme . '-cookie_consent_learn_more_text',
                 'value' => 'Cookie Policy',
             ],
             [
-                'key'   => 'theme-' . $theme . '-number_of_products_per_page',
+                'key' => 'theme-' . $theme . '-number_of_products_per_page',
                 'value' => 40,
             ],
             [
-                'key'   => 'theme-' . $theme . '-number_of_cross_sale_product',
+                'key' => 'theme-' . $theme . '-number_of_cross_sale_product',
                 'value' => 6,
             ],
             [
-                'key'   => 'theme-' . $theme . '-logo_in_the_checkout_page',
+                'key' => 'theme-' . $theme . '-logo_in_the_checkout_page',
                 'value' => 'general/logo.png',
             ],
             [
-                'key'   => 'theme-' . $theme . '-logo_in_invoices',
+                'key' => 'theme-' . $theme . '-logo_in_invoices',
                 'value' => 'general/logo.png',
             ],
             [
-                'key'   => 'theme-' . $theme . '-logo_vendor_dashboard',
+                'key' => 'theme-' . $theme . '-logo_vendor_dashboard',
                 'value' => 'general/logo.png',
             ],
             [
-                'key'   => 'theme-' . $theme . '-404_page_image',
+                'key' => 'theme-' . $theme . '-404_page_image',
                 'value' => 'general/404.png',
             ],
         ]);
@@ -128,108 +124,108 @@ class ThemeOptionSeeder extends BaseSeeder
         $socialLinks = [
             [
                 [
-                    'key'   => 'social-name',
+                    'key' => 'social-name',
                     'value' => 'Facebook',
                 ],
                 [
-                    'key'   => 'social-icon',
+                    'key' => 'social-icon',
                     'value' => 'general/facebook.png',
                 ],
                 [
-                    'key'   => 'social-url',
+                    'key' => 'social-url',
                     'value' => 'https://www.facebook.com/',
                 ],
             ],
             [
                 [
-                    'key'   => 'social-name',
+                    'key' => 'social-name',
                     'value' => 'Twitter',
                 ],
                 [
-                    'key'   => 'social-icon',
+                    'key' => 'social-icon',
                     'value' => 'general/twitter.png',
                 ],
                 [
-                    'key'   => 'social-url',
+                    'key' => 'social-url',
                     'value' => 'https://www.twitter.com/',
                 ],
             ],
             [
                 [
-                    'key'   => 'social-name',
+                    'key' => 'social-name',
                     'value' => 'Instagram',
                 ],
                 [
-                    'key'   => 'social-icon',
+                    'key' => 'social-icon',
                     'value' => 'general/instagram.png',
                 ],
                 [
-                    'key'   => 'social-url',
+                    'key' => 'social-url',
                     'value' => 'https://www.instagram.com/',
                 ],
             ],
             [
                 [
-                    'key'   => 'social-name',
+                    'key' => 'social-name',
                     'value' => 'Pinterest',
                 ],
                 [
-                    'key'   => 'social-icon',
+                    'key' => 'social-icon',
                     'value' => 'general/pinterest.png',
                 ],
                 [
-                    'key'   => 'social-url',
+                    'key' => 'social-url',
                     'value' => 'https://www.pinterest.com/',
                 ],
             ],
             [
                 [
-                    'key'   => 'social-name',
+                    'key' => 'social-name',
                     'value' => 'Youtube',
                 ],
                 [
-                    'key'   => 'social-icon',
+                    'key' => 'social-icon',
                     'value' => 'general/youtube.png',
                 ],
                 [
-                    'key'   => 'social-url',
+                    'key' => 'social-url',
                     'value' => 'https://www.youtube.com/',
                 ],
             ],
         ];
 
         Setting::insertOrIgnore([
-            'key'   => 'theme-' . $theme . '-social_links',
+            'key' => 'theme-' . $theme . '-social_links',
             'value' => json_encode($socialLinks),
         ]);
 
         Setting::insertOrIgnore([
             [
-                'key'   => 'theme-' . $theme . '-vi-copyright',
+                'key' => 'theme-' . $theme . '-vi-copyright',
                 'value' => '© ' . now()->format('Y') . ' Farmart. Tất cả quyền đã được bảo hộ.',
             ],
             [
-                'key'   => 'theme-' . $theme . '-vi-homepage_id',
+                'key' => 'theme-' . $theme . '-vi-homepage_id',
                 'value' => '1',
             ],
             [
-                'key'   => 'theme-' . $theme . '-vi-blog_page_id',
+                'key' => 'theme-' . $theme . '-vi-blog_page_id',
                 'value' => '6',
             ],
             [
-                'key'   => 'theme-' . $theme . '-vi-cookie_consent_message',
+                'key' => 'theme-' . $theme . '-vi-cookie_consent_message',
                 'value' => 'Trải nghiệm của bạn trên trang web này sẽ được cải thiện bằng cách cho phép cookie ',
             ],
             [
-                'key'   => 'theme-' . $theme . '-vi-cookie_consent_learn_more_url',
+                'key' => 'theme-' . $theme . '-vi-cookie_consent_learn_more_url',
                 'value' => url('cookie-policy'),
             ],
             [
-                'key'   => 'theme-' . $theme . '-vi-cookie_consent_learn_more_text',
+                'key' => 'theme-' . $theme . '-vi-cookie_consent_learn_more_text',
                 'value' => 'Chính sách cookie',
             ],
             [
-                'key'   => EcommerceHelper::getSettingPrefix() . 'is_enabled_support_digital_products',
+                'key' => EcommerceHelper::getSettingPrefix() . 'is_enabled_support_digital_products',
                 'value' => '1',
             ],
         ]);

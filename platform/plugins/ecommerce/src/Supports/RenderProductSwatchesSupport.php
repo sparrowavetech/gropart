@@ -7,34 +7,18 @@ use Botble\Ecommerce\Repositories\Eloquent\ProductRepository;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductVariationItemInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductVariationInterface;
-use Exception;
-use Throwable;
 
 class RenderProductSwatchesSupport
 {
-    /**
-     * @var Product
-     */
-    protected $product;
+    protected Product $product;
 
-    /**
-     * @var ProductRepository
-     */
-    protected $productRepository;
+    protected ProductRepository|ProductInterface $productRepository;
 
-    /**
-     * RenderProductSwatchesSupport constructor.
-     * @param ProductInterface $productRepository
-     */
     public function __construct(ProductInterface $productRepository)
     {
         $this->productRepository = $productRepository;
     }
 
-    /**
-     * @param Product $product
-     * @return $this
-     */
     public function setProduct(Product $product): RenderProductSwatchesSupport
     {
         $this->product = $product;
@@ -42,12 +26,6 @@ class RenderProductSwatchesSupport
         return $this;
     }
 
-    /**
-     * @param array $params
-     * @return string
-     * @throws Exception
-     * @throws Throwable
-     */
     public function render(array $params = []): string
     {
         $params = array_merge([

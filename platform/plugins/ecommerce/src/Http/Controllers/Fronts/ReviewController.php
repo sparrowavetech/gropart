@@ -12,14 +12,8 @@ use RvMedia;
 
 class ReviewController extends Controller
 {
-    /**
-     * @var ReviewInterface
-     */
-    protected $reviewRepository;
+    protected ReviewInterface $reviewRepository;
 
-    /**
-     * @param ReviewInterface $reviewRepository
-     */
     public function __construct(ReviewInterface $reviewRepository)
     {
         $this->reviewRepository = $reviewRepository;
@@ -32,7 +26,7 @@ class ReviewController extends Controller
      */
     public function store(ReviewRequest $request, BaseHttpResponse $response)
     {
-        if (!EcommerceHelper::isReviewEnabled()) {
+        if (! EcommerceHelper::isReviewEnabled()) {
             abort(404);
         }
 
@@ -79,7 +73,7 @@ class ReviewController extends Controller
      */
     public function destroy($id, BaseHttpResponse $response)
     {
-        if (!EcommerceHelper::isReviewEnabled()) {
+        if (! EcommerceHelper::isReviewEnabled()) {
             abort(404);
         }
 

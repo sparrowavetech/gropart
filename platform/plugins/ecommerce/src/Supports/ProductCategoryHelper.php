@@ -11,24 +11,13 @@ use Language;
 
 class ProductCategoryHelper
 {
-    /**
-     * @var Collection
-     */
-    protected $allCategories = [];
+    protected Collection|array $allCategories = [];
 
-    /**
-     * @var Collection
-     */
-    protected $treeCategories = [];
+    protected Collection|array $treeCategories = [];
 
-    /**
-     * @param array $params
-     * @param bool $onlyParent
-     * @return Collection
-     */
     public function getAllProductCategories(array $params = [], bool $onlyParent = false): Collection
     {
-        if (!$this->allCategories instanceof Collection) {
+        if (! $this->allCategories instanceof Collection) {
             $this->allCategories = collect([]);
         }
 
@@ -49,9 +38,6 @@ class ProductCategoryHelper
         return $this->allCategories;
     }
 
-    /**
-     * @return Collection
-     */
     public function getAllProductCategoriesSortByChildren(): Collection
     {
         $categories = $this->getAllProductCategories();
@@ -59,9 +45,6 @@ class ProductCategoryHelper
         return $this->sortChildren($categories);
     }
 
-    /**
-     * @return array
-     */
     public function getAllProductCategoriesWithChildren(): array
     {
         $categories = $this->getAllProductCategories();
@@ -72,12 +55,6 @@ class ProductCategoryHelper
             ->sort();
     }
 
-    /**
-     * @param Collection $categories
-     * @param null $parent
-     * @param int $depth
-     * @return Collection
-     */
     protected function sortChildren(Collection $categories, $parent = null, int $depth = 0): Collection
     {
         foreach ($categories as &$object) {
@@ -94,11 +71,6 @@ class ProductCategoryHelper
         return $categories;
     }
 
-    /**
-     * @param string $indent
-     * @param bool $sortChildren
-     * @return Collection
-     */
     public function getProductCategoriesWithIndent(string $indent = '&nbsp;&nbsp;', bool $sortChildren = true): Collection
     {
         $categories = $this->getAllProductCategoriesSortByChildren();
@@ -111,36 +83,25 @@ class ProductCategoryHelper
             $category->indent_text = $indentText;
         }
 
-        if (!$sortChildren) {
+        if (! $sortChildren) {
             return $categories;
         }
 
         return collect(sort_item_with_children($categories));
     }
 
-    /**
-     * @param Collection|array $categories
-     * @param string $indent
-     * @return array
-     */
-    public function getProductCategoriesWithIndentName($categories = [], string $indent = '&nbsp;&nbsp;'): array
+    public function getProductCategoriesWithIndentName(Collection|array $categories = [], string $indent = '&nbsp;&nbsp;'): array
     {
-        if (!$categories instanceof Collection) {
+        if (! $categories instanceof Collection) {
             $categories = $this->getAllProductCategories([], true);
         }
+
         $results = [];
         $this->appendIndentTextToProductCategoryName($categories, 0, $results, $indent);
 
         return $results;
     }
 
-    /**
-     * @param Collection $categories
-     * @param int $depth
-     * @param array $results
-     * @param string $indent
-     * @return bool
-     */
     public function appendIndentTextToProductCategoryName(
         Collection $categories,
         int $depth = 0,
@@ -158,12 +119,9 @@ class ProductCategoryHelper
         return true;
     }
 
-    /**
-     * @return Collection
-     */
     public function getActiveTreeCategories(): Collection
     {
-        if (!$this->treeCategories instanceof Collection) {
+        if (! $this->treeCategories instanceof Collection) {
             $this->treeCategories = collect([]);
         }
 

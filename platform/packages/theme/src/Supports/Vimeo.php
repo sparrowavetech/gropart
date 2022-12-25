@@ -4,10 +4,6 @@ namespace Botble\Theme\Supports;
 
 class Vimeo
 {
-    /**
-     * @param string $url
-     * @return null|string
-     */
     public static function getVimeoID(string $url): ?string
     {
         $regExp = '/(https?:\/\/)?(www\.)?(player\.)?vimeo\.com\/([a-z]*\/)*([0-9]{6,11})[?]?.*/';
@@ -21,10 +17,6 @@ class Vimeo
         return null;
     }
 
-    /**
-     * @param string $url
-     * @return bool
-     */
     public static function isVimeoURL(string $url): bool
     {
         $regExp = '/(https?:\/\/)?(www\.)?(player\.)?vimeo\.com\/([a-z]*\/)*([0-9]{6,11})[?]?.*/';

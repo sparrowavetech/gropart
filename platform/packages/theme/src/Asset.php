@@ -6,57 +6,27 @@ use Closure;
 
 class Asset
 {
-    /**
-     * Path to assets.
-     *
-     * @var string
-     */
-    public static $path;
+    public static string $path;
 
-    /**
-     * all the instantiated asset containers.
-     *
-     * @var array
-     */
-    public static $containers = [];
+    public static array $containers = [];
 
-    /**
-     * Asset buffering.
-     *
-     * @var array
-     */
-    protected $stacks = [
+    protected array $stacks = [
         'cooks' => [],
         'serves' => [],
     ];
 
-    /**
-     * Add a path to theme.
-     *
-     * @param string $path
-     */
-    public function addPath(string $path)
+    public function addPath(string $path): void
     {
         static::$path = rtrim($path, '/') . '/';
     }
 
-    /**
-     * Cooking your assets.
-     *
-     * @param string $name
-     * @param Closure $callbacks
-     * @return void
-     */
-    public function cook(string $name, Closure $callbacks)
+    public function cook(string $name, Closure $callbacks): void
     {
         $this->stacks['cooks'][$name] = $callbacks;
     }
 
     /**
      * Serve asset preparing from cook.
-     *
-     * @param string $name
-     * @return Asset
      */
     public function serve(string $name): self
     {
@@ -65,12 +35,7 @@ class Asset
         return $this;
     }
 
-    /**
-     * Flush all cooks.
-     *
-     * @return void
-     */
-    public function flush()
+    public function flush(): void
     {
         foreach (array_keys($this->stacks['serves']) as $key) {
             if (array_key_exists($key, $this->stacks['cooks'])) {
@@ -93,8 +58,6 @@ class Asset
      *        // Call the "add" method on the default container
      *        Asset::add('jquery', 'js/jquery.js');
      * </code>
-     * @param string $method
-     * @param array $parameters
      * @return mixed
      */
     public function __call(string $method, array $parameters)
@@ -112,13 +75,10 @@ class Asset
      *        // Get a named asset container
      *        $container = Asset::container('footer');
      * </code>
-     *
-     * @param string $container
-     * @return AssetContainer
      */
     public static function container(string $container = 'default'): AssetContainer
     {
-        if (!isset(static::$containers[$container])) {
+        if (! isset(static::$containers[$container])) {
             static::$containers[$container] = new AssetContainer($container);
         }
 

@@ -13,7 +13,7 @@ return new class () extends Migration {
     public function up()
     {
         Schema::table('ec_reviews', function (Blueprint $table) {
-            if (!Schema::hasColumn('ec_reviews', 'images')) {
+            if (! Schema::hasColumn('ec_reviews', 'images')) {
                 $table->text('images')->nullable();
             }
         });

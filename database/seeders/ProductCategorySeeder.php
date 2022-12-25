@@ -14,24 +14,19 @@ use SlugHelper;
 
 class ProductCategorySeeder extends BaseSeeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
         $this->uploadFiles('product-categories');
 
         $categories = [
             [
-                'name'        => 'Fruits & Vegetables',
+                'name' => 'Fruits & Vegetables',
                 'is_featured' => true,
-                'image'       => 'product-categories/1.png',
-                'icon'        => 'icon-star',
-                'children'    => [
+                'image' => 'product-categories/1.png',
+                'icon' => 'icon-star',
+                'children' => [
                     [
-                        'name'     => 'Fruits',
+                        'name' => 'Fruits',
                         'children' => [
                             ['name' => 'Apples'],
                             ['name' => 'Bananas'],
@@ -47,7 +42,7 @@ class ProductCategorySeeder extends BaseSeeder
                         ],
                     ],
                     [
-                        'name'     => 'Vegetables',
+                        'name' => 'Vegetables',
                         'children' => [
                             ['name' => 'Potatoes'],
                             ['name' => 'Carrots & Root Vegetables'],
@@ -63,13 +58,13 @@ class ProductCategorySeeder extends BaseSeeder
                 ],
             ],
             [
-                'name'        => 'Breads Sweets',
+                'name' => 'Breads Sweets',
                 'is_featured' => true,
-                'image'       => 'product-categories/2.png',
-                'icon'        => 'icon-bread',
-                'children'    => [
+                'image' => 'product-categories/2.png',
+                'icon' => 'icon-bread',
+                'children' => [
                     [
-                        'name'     => 'Crisps, Snacks & Nuts',
+                        'name' => 'Crisps, Snacks & Nuts',
                         'children' => [
                             ['name' => 'Crisps & Popcorn'],
                             ['name' => 'Nuts & Seeds'],
@@ -87,7 +82,7 @@ class ProductCategorySeeder extends BaseSeeder
                         ],
                     ],
                     [
-                        'name'     => 'Tins & Cans',
+                        'name' => 'Tins & Cans',
                         'children' => [
                             ['name' => 'Tomatoes'],
                             ['name' => 'Baked Beans, Spaghetti'],
@@ -106,25 +101,25 @@ class ProductCategorySeeder extends BaseSeeder
                 ],
             ],
             [
-                'name'        => 'Frozen Seafoods',
+                'name' => 'Frozen Seafoods',
                 'is_featured' => true,
-                'image'       => 'product-categories/3.png',
-                'icon'        => 'icon-hamburger',
+                'image' => 'product-categories/3.png',
+                'icon' => 'icon-hamburger',
             ],
             [
-                'name'        => 'Raw Meats',
+                'name' => 'Raw Meats',
                 'is_featured' => true,
-                'image'       => 'product-categories/4.png',
-                'icon'        => 'icon-steak',
+                'image' => 'product-categories/4.png',
+                'icon' => 'icon-steak',
             ],
             [
-                'name'        => 'Wines & Alcohol Drinks',
+                'name' => 'Wines & Alcohol Drinks',
                 'is_featured' => true,
-                'image'       => 'product-categories/5.png',
-                'icon'        => 'icon-glass',
-                'children'    => [
+                'image' => 'product-categories/5.png',
+                'icon' => 'icon-glass',
+                'children' => [
                     [
-                        'name'     => 'Ready Meals',
+                        'name' => 'Ready Meals',
                         'children' => [
                             ['name' => 'Meals for 1'],
                             ['name' => 'Meals for 2'],
@@ -140,7 +135,7 @@ class ProductCategorySeeder extends BaseSeeder
                         ],
                     ],
                     [
-                        'name'     => 'Salad & Herbs',
+                        'name' => 'Salad & Herbs',
                         'children' => [
                             ['name' => 'Salad Bags'],
                             ['name' => 'Cucumber'],
@@ -159,28 +154,28 @@ class ProductCategorySeeder extends BaseSeeder
                 ],
             ],
             [
-                'name'        => 'Tea & Coffee',
+                'name' => 'Tea & Coffee',
                 'is_featured' => true,
-                'image'       => 'product-categories/6.png',
-                'icon'        => 'icon-teacup',
+                'image' => 'product-categories/6.png',
+                'icon' => 'icon-teacup',
             ],
             [
-                'name'        => 'Milks and Dairies',
+                'name' => 'Milks and Dairies',
                 'is_featured' => true,
-                'image'       => 'product-categories/7.png',
-                'icon'        => 'icon-coffee-cup',
+                'image' => 'product-categories/7.png',
+                'icon' => 'icon-coffee-cup',
             ],
             [
-                'name'        => 'Pet Foods',
+                'name' => 'Pet Foods',
                 'is_featured' => true,
-                'image'       => 'product-categories/8.png',
-                'icon'        => 'icon-hotdog',
+                'image' => 'product-categories/8.png',
+                'icon' => 'icon-hotdog',
             ],
             [
-                'name'        => 'Food Cupboard',
+                'name' => 'Food Cupboard',
                 'is_featured' => true,
-                'image'       => 'product-categories/1.png',
-                'icon'        => 'icon-cheese',
+                'image' => 'product-categories/1.png',
+                'icon' => 'icon-cheese',
 
             ],
         ];
@@ -198,10 +193,10 @@ class ProductCategorySeeder extends BaseSeeder
 
         $translations = [
             [
-                'name'     => 'Rau củ quả',
+                'name' => 'Rau củ quả',
                 'children' => [
                     [
-                        'name'     => 'Trái cây',
+                        'name' => 'Trái cây',
                         'children' => [
                             ['name' => 'Táo'],
                             ['name' => 'Chuối'],
@@ -217,7 +212,7 @@ class ProductCategorySeeder extends BaseSeeder
                         ],
                     ],
                     [
-                        'name'     => 'Rau',
+                        'name' => 'Rau',
                         'children' => [
                             ['name' => 'Khoai Tây'],
                             ['name' => 'Cà rốt'],
@@ -233,10 +228,10 @@ class ProductCategorySeeder extends BaseSeeder
                 ],
             ],
             [
-                'name'     => 'Bánh mì kẹo',
+                'name' => 'Bánh mì kẹo',
                 'children' => [
                     [
-                        'name'     => 'Crisps, Snack & Nuts',
+                        'name' => 'Crisps, Snack & Nuts',
                         'children' => [
                             ['name' => 'Khoai tây chiên giòn & bỏng ngô'],
                             ['name' => 'Nuts & Seeds'],
@@ -254,7 +249,7 @@ class ProductCategorySeeder extends BaseSeeder
                         ],
                     ],
                     [
-                        'name'     => 'Tins & Cans',
+                        'name' => 'Tins & Cans',
                         'children' => [
                             ['name' => 'Khoai tây'],
                             ['name' => 'Baked Beans, Spaghetti'],
@@ -275,10 +270,10 @@ class ProductCategorySeeder extends BaseSeeder
             ['name' => 'Hải sản đông lạnh'],
             ['name' => 'Thịt sống'],
             [
-                'name'     => 'Rượu & Đồ uống có cồn',
+                'name' => 'Rượu & Đồ uống có cồn',
                 'children' => [
                     [
-                        'name'     => 'Ready Meals',
+                        'name' => 'Ready Meals',
                         'children' => [
                             ['name' => 'Meals for 1'],
                             ['name' => 'Meals for 2'],
@@ -294,7 +289,7 @@ class ProductCategorySeeder extends BaseSeeder
                         ],
                     ],
                     [
-                        'name'     => 'Salad & thảo mộc',
+                        'name' => 'Salad & thảo mộc',
                         'children' => [
                             ['name' => 'Túi đựng salad'],
                             ['name' => 'Quả dưa chuột'],
@@ -344,9 +339,9 @@ class ProductCategorySeeder extends BaseSeeder
 
         Slug::create([
             'reference_type' => ProductCategory::class,
-            'reference_id'   => $createdCategory->id,
-            'key'            => Str::slug($createdCategory->name),
-            'prefix'         => SlugHelper::getPrefix(ProductCategory::class),
+            'reference_id' => $createdCategory->id,
+            'key' => Str::slug($createdCategory->name),
+            'prefix' => SlugHelper::getPrefix(ProductCategory::class),
         ]);
 
         if (isset($category['icon'])) {
@@ -360,11 +355,6 @@ class ProductCategorySeeder extends BaseSeeder
         }
     }
 
-    /**
-     * @param int $count
-     * @param array $translation
-     * @return void
-     */
     protected function createCategoryItemTrans(int &$count, array $translation): void
     {
         $translation['lang_code'] = 'vi';

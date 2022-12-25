@@ -12,6 +12,7 @@
         </svg>
     </div>
 </div>
+
 <div class="form-group">
     <label class="control-label">{{ __('Is Infinite?') }}</label>
     <div class="ui-select-wrapper form-group">
@@ -26,6 +27,7 @@
         </svg>
     </div>
 </div>
+
 <div class="form-group">
     <label class="control-label">{{ __('Autoplay speed (if autoplay enabled)') }}</label>
     {!! Form::customSelect('autoplay_speed', theme_get_autoplay_speed_options(), Arr::get($attributes, 'autoplay_speed', 3000)) !!}

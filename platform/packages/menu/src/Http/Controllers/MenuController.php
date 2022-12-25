@@ -30,33 +30,14 @@ use Throwable;
 
 class MenuController extends BaseController
 {
-    /**
-     * @var MenuInterface
-     */
-    protected $menuRepository;
+    protected MenuInterface $menuRepository;
 
-    /**
-     * @var MenuNodeInterface
-     */
-    protected $menuNodeRepository;
+    protected MenuNodeInterface $menuNodeRepository;
 
-    /**
-     * @var MenuLocationInterface
-     */
-    protected $menuLocationRepository;
+    protected MenuLocationInterface $menuLocationRepository;
 
-    /**
-     * @var Cache
-     */
-    protected $cache;
+    protected Cache $cache;
 
-    /**
-     * MenuController constructor.
-     * @param MenuInterface $menuRepository
-     * @param MenuNodeInterface $menuNodeRepository
-     * @param MenuLocationInterface $menuLocationRepository
-     * @param CacheManager $cache
-     */
     public function __construct(
         MenuInterface $menuRepository,
         MenuNodeInterface $menuNodeRepository,

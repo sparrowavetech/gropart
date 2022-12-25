@@ -8,28 +8,16 @@ use OrderHelper;
 
 class HandleRemoveCouponService
 {
-    /**
-     * @var DiscountInterface
-     */
-    protected $discountRepository;
+    protected DiscountInterface $discountRepository;
 
-    /**
-     * HandleRemoveCouponService constructor.
-     * @param DiscountInterface $discountRepository
-     */
     public function __construct(DiscountInterface $discountRepository)
     {
         $this->discountRepository = $discountRepository;
     }
 
-    /**
-     * @param string|null $prefix
-     * @param bool $isForget
-     * @return array
-     */
     public function execute(?string $prefix = '', bool $isForget = true): array
     {
-        if (!session()->has('applied_coupon_code')) {
+        if (! session()->has('applied_coupon_code')) {
             return [
                 'error' => true,
                 'message' => trans('plugins/ecommerce::discount.not_used'),

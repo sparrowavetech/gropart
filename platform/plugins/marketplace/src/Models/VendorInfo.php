@@ -9,16 +9,8 @@ use MarketplaceHelper;
 
 class VendorInfo extends BaseModel
 {
-    /**
-     * The database table used by the model.
-     *
-     * @var string
-     */
     protected $table = 'mp_vendor_info';
 
-    /**
-     * @var array
-     */
     protected $fillable = [
         'customer_id',
         'balance',
@@ -30,9 +22,6 @@ class VendorInfo extends BaseModel
         'payout_payment_method',
     ];
 
-    /**
-     * @var array
-     */
     protected $casts = [
         'balance' => 'decimal:2',
         'total_fee' => 'decimal:2',
@@ -41,12 +30,7 @@ class VendorInfo extends BaseModel
         'tax_info' => 'array',
     ];
 
-    /**
-     * The "booted" method of the model.
-     *
-     * @return void
-     */
-    protected static function booted()
+    protected static function booted(): void
     {
         static::creating(function (&$vendorInfo) {
             $model = new VendorInfo();
@@ -67,7 +51,7 @@ class VendorInfo extends BaseModel
                 $totalRevenueOriginal = $vendorInfo->getOriginal('total_revenue');
                 $totalRevenue = $vendorInfo->total_revenue;
                 if ($balanceOriginal != $balance || $totalFeeOriginal != $totalFee || $totalRevenueOriginal != $totalRevenue) {
-                    if ($vendorInfo->isCheckSignature() && !$vendorInfo->checkSignature()) {
+                    if ($vendorInfo->isCheckSignature() && ! $vendorInfo->checkSignature()) {
                         throw new Exception(__('Invalid signature of vendor info'));
                     }
                     $vendorInfo->signature = Hash::make($vendorInfo->getSignatureKey(true));
@@ -91,14 +75,9 @@ class VendorInfo extends BaseModel
         return Hash::check($this->getSignatureKey(), $this->signature);
     }
 
-    /**
-     * @param bool $isNew
-     * @param null $item
-     * @return string
-     */
     public function getSignatureKey(bool $isNew = false, $item = null): string
     {
-        if (!$item) {
+        if (! $item) {
             $item = $this;
         }
 

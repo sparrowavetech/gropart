@@ -9,54 +9,36 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use InvalidArgumentException;
-use ReflectionException;
 use ReflectionFunction;
 
 class MacroableModels
 {
-    /**
-     * @var array
-     */
-    protected $macros = [];
+    protected array $macros = [];
 
-    /**
-     * @return array
-     */
     public function getAllMacros(): array
     {
         return $this->macros;
     }
 
-    /**
-     * @param string $model
-     * @param string $name
-     * @param Closure $closure
-     */
-    public function addMacro(string $model, string $name, Closure $closure)
+    public function addMacro(string $model, string $name, Closure $closure): void
     {
         $this->checkModelSubclass($model);
 
-        if (!isset($this->macros[$name])) {
+        if (! isset($this->macros[$name])) {
             $this->macros[$name] = [];
         }
         $this->macros[$name][$model] = $closure;
         $this->syncMacros($name);
     }
 
-    /**
-     * @param string $model
-     */
-    protected function checkModelSubclass(string $model)
+    protected function checkModelSubclass(string $model): void
     {
-        if (!is_subclass_of($model, Model::class)) {
+        if (! is_subclass_of($model, Model::class)) {
             throw new InvalidArgumentException('$model must be a subclass of Illuminate\\Database\\Eloquent\\Model');
         }
     }
 
-    /**
-     * @param string $name
-     */
-    protected function syncMacros(string $name)
+    protected function syncMacros(string $name): void
     {
         $models = $this->macros[$name];
         Builder::macro($name, function (...$args) use ($name, $models) {
@@ -65,7 +47,7 @@ class MacroableModels
              */
             $class = get_class($this->getModel());
 
-            if (!isset($models[$class])) {
+            if (! isset($models[$class])) {
                 throw new BadMethodCallException("Call to undefined method ${class}::${name}()");
             }
 
@@ -75,20 +57,11 @@ class MacroableModels
         });
     }
 
-    /**
-     * @param string $name
-     * @return array|\ArrayAccess|mixed
-     */
     public function getMacro(string $name)
     {
         return Arr::get($this->macros, $name);
     }
 
-    /**
-     * @param string $model
-     * @param string $name
-     * @return bool
-     */
     public function removeMacro(string $model, string $name): bool
     {
         $this->checkModelSubclass($model);
@@ -107,11 +80,6 @@ class MacroableModels
         return false;
     }
 
-    /**
-     * @param string $model
-     * @param string $name
-     * @return bool
-     */
     public function modelHasMacro(string $model, string $name): bool
     {
         $this->checkModelSubclass($model);
@@ -119,24 +87,15 @@ class MacroableModels
         return (isset($this->macros[$name]) && isset($this->macros[$name][$model]));
     }
 
-    /**
-     * @param string $name
-     * @return array
-     */
     public function modelsThatImplement(string $name): array
     {
-        if (!isset($this->macros[$name])) {
+        if (! isset($this->macros[$name])) {
             return [];
         }
 
         return array_keys($this->macros[$name]);
     }
 
-    /**
-     * @param string $model
-     * @return array
-     * @throws ReflectionException
-     */
     public function macrosForModel(string $model): array
     {
         $this->checkModelSubclass($model);

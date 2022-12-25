@@ -13,7 +13,7 @@ return new class () extends Migration {
     public function up()
     {
         Schema::table('ec_customers', function (Blueprint $table) {
-            if (!Schema::hasColumn('ec_customers', 'vendor_verified_at')) {
+            if (! Schema::hasColumn('ec_customers', 'vendor_verified_at')) {
                 $table->dateTime('vendor_verified_at')->nullable();
             }
         });

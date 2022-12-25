@@ -136,8 +136,12 @@
             color        : #0a9928
         }
     </style>
+
+    {!! apply_filters('ecommerce_invoice_header', null, $invoice) !!}
 </head>
 <body>
+
+{!! apply_filters('ecommerce_invoice_body', null, $invoice) !!}
 
 @if (get_ecommerce_setting('enable_invoice_stamp', 1) == 1)
     @if ($invoice->status == \Botble\Ecommerce\Enums\OrderStatusEnum::CANCELED && trim($invoice->status->label()))
@@ -182,10 +186,17 @@
                 <p>{{ get_ecommerce_setting('company_name_for_invoicing') ?: get_ecommerce_setting('store_name') }}</p>
             @endif
 
+            @php
+                $zipcode = null;
+                if (EcommerceHelper::isZipCodeEnabled()) {
+                    $zipcode = get_ecommerce_setting('company_zipcode_for_invoicing') ?: get_ecommerce_setting('store_zip_code');
+                }
+            @endphp
+
             @if (get_ecommerce_setting('company_address_for_invoicing'))
-                <p>{{ get_ecommerce_setting('company_address_for_invoicing') }}</p>
+                <p>{{ get_ecommerce_setting('company_address_for_invoicing') }} @if ($zipcode) - {{ $zipcode }} @endif</p>
             @else
-                <p>{{ get_ecommerce_setting('store_address') }}, {{ get_ecommerce_setting('store_city') }}, {{ get_ecommerce_setting('store_state') }}, {{ EcommerceHelper::getCountryNameById(get_ecommerce_setting('store_country')) }}</p>
+                <p>{{ get_ecommerce_setting('store_address') }}, {{ get_ecommerce_setting('store_city') }}, {{ get_ecommerce_setting('store_state') }}, {{ EcommerceHelper::getCountryNameById(get_ecommerce_setting('store_country')) }} @if ($zipcode) - {{ $zipcode }} @endif</p>
             @endif
             @if (get_ecommerce_setting('company_phone_for_invoicing') || get_ecommerce_setting('store_phone'))
                 <p>{{ get_ecommerce_setting('company_phone_for_invoicing') ?: get_ecommerce_setting('store_phone') }}</p>
@@ -361,5 +372,6 @@
         </tr>
     </tbody>
 </table>
+{!! apply_filters('ecommerce_invoice_footer', null, $invoice) !!}
 </body>
 </html>

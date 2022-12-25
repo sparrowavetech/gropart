@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Enums;
 
 use Botble\Base\Supports\Enum;
 use Html;
+use Illuminate\Support\HtmlString;
 
 /**
  * @method static ShippingCodStatusEnum PENDING()
@@ -14,25 +15,16 @@ class ShippingCodStatusEnum extends Enum
     public const PENDING = 'pending';
     public const COMPLETED = 'completed';
 
-    /**
-     * @var string
-     */
     public static $langPath = 'plugins/ecommerce::shipping.cod_statuses';
 
-    /**
-     * @return string
-     */
-    public function toHtml()
+    public function toHtml(): HtmlString|string
     {
-        switch ($this->value) {
-            case self::PENDING:
-                return Html::tag('span', self::PENDING()->label(), ['class' => 'label-warning status-label'])
-                    ->toHtml();
-            case self::COMPLETED:
-                return Html::tag('span', self::COMPLETED()->label(), ['class' => 'label-success status-label'])
-                    ->toHtml();
-            default:
-                return parent::toHtml();
-        }
+        return match ($this->value) {
+            self::PENDING => Html::tag('span', self::PENDING()->label(), ['class' => 'label-warning status-label'])
+                ->toHtml(),
+            self::COMPLETED => Html::tag('span', self::COMPLETED()->label(), ['class' => 'label-success status-label'])
+                ->toHtml(),
+            default => parent::toHtml(),
+        };
     }
 }

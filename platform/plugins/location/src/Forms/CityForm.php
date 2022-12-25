@@ -12,20 +12,10 @@ use Botble\Location\Repositories\Interfaces\StateInterface;
 
 class CityForm extends FormAbstract
 {
-    /**
-     * @var CountryInterface
-     */
-    protected $countryRepository;
+    protected CountryInterface $countryRepository;
 
-    /**
-     * @var StateInterface
-     */
-    protected $stateRepository;
+    protected StateInterface $stateRepository;
 
-    /**
-     * @param CountryInterface $countryRepository
-     * @param StateInterface $stateRepository
-     */
     public function __construct(CountryInterface $countryRepository, StateInterface $stateRepository)
     {
         parent::__construct();
@@ -34,9 +24,6 @@ class CityForm extends FormAbstract
         $this->stateRepository = $stateRepository;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function buildForm()
     {
         Assets::addScriptsDirectly('vendor/core/plugins/location/js/location.js');
@@ -69,7 +56,7 @@ class CityForm extends FormAbstract
                 'label_attr' => ['class' => 'control-label required'],
                 'attr' => [
                     'id' => 'country_id',
-                    'class' => 'form-control select-search-full',
+                    'class' => 'select-search-full',
                     'data-type' => 'country',
                 ],
                 'choices' => [0 => trans('plugins/location::city.select_country')] + $countries,
@@ -80,7 +67,7 @@ class CityForm extends FormAbstract
                 'attr' => [
                     'id' => 'state_id',
                     'data-url' => route('ajax.states-by-country'),
-                    'class' => 'form-control select-search-full',
+                    'class' => 'select-search-full',
                     'data-type' => 'state',
                 ],
                 'choices' => ($this->getModel()->state_id ?
@@ -106,9 +93,6 @@ class CityForm extends FormAbstract
             ->add('status', 'customSelect', [
                 'label' => trans('core/base::tables.status'),
                 'label_attr' => ['class' => 'control-label required'],
-                'attr' => [
-                    'class' => 'form-control select-full',
-                ],
                 'choices' => BaseStatusEnum::labels(),
             ])
             ->setBreakFieldPoint('status');

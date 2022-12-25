@@ -49,12 +49,7 @@ class Invoice extends BaseModel
         'discount_amount' => 'decimal:2',
         'amount' => 'decimal:2',
         'status' => InvoiceStatusEnum::class,
-    ];
-
-    protected $dates = [
-        'paid_at',
-        'created_at',
-        'updated_at',
+        'paid_at' => 'datetime',
     ];
 
     public static function boot()

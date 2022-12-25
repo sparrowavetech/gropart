@@ -32,7 +32,7 @@ class PaymentServiceProvider extends ServiceProvider
             ->loadAndPublishConfigurations(['payment', 'permissions'])
             ->loadAndPublishViews()
             ->loadAndPublishTranslations()
-            ->loadRoutes(['web'])
+            ->loadRoutes()
             ->loadMigrations()
             ->publishAssets();
 

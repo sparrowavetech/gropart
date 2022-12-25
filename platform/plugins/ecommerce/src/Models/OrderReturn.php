@@ -14,14 +14,8 @@ class OrderReturn extends BaseModel
 {
     use EnumCastable;
 
-    /**
-     * @var string
-     */
     protected $table = 'ec_order_returns';
 
-    /**
-     * @var string[]
-     */
     protected $fillable = [
         'order_id',
         'user_id',
@@ -30,9 +24,6 @@ class OrderReturn extends BaseModel
         'return_status',
     ];
 
-    /**
-     * @var string[]
-     */
     protected $casts = [
         'order_status' => OrderStatusEnum::class,
         'return_status' => OrderReturnStatusEnum::class,

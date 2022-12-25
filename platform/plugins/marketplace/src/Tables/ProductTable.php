@@ -11,48 +11,31 @@ use Botble\Table\Abstracts\TableAbstract;
 use EcommerceHelper;
 use Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
 use MarketplaceHelper;
 use RvMedia;
 use Yajra\DataTables\DataTables;
 
 class ProductTable extends TableAbstract
 {
-    /**
-     * @var bool
-     */
     protected $hasActions = false;
 
-    /**
-     * @var bool
-     */
     protected $hasFilter = false;
 
-    /**
-     * @var bool
-     */
     protected $hasCheckbox = false;
 
-    /**
-     * @var string
-     */
-    protected $exportClass = ProductExport::class;
+    protected string $exportClass = ProductExport::class;
 
-    /**
-     * ProductTable constructor.
-     * @param DataTables $table
-     * @param UrlGenerator $urlGenerator
-     * @param ProductInterface $productRepository
-     */
     public function __construct(DataTables $table, UrlGenerator $urlGenerator, ProductInterface $productRepository)
     {
         $this->repository = $productRepository;
         parent::__construct($table, $urlGenerator);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
@@ -102,7 +85,7 @@ class ProductTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
         $query = $this->repository->getModel()
             ->select([
@@ -128,9 +111,6 @@ class ProductTable extends TableAbstract
         return $this->applyScopes($query);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function columns(): array
     {
         return [
@@ -178,9 +158,6 @@ class ProductTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function buttons(): array
     {
         if (EcommerceHelper::isEnabledSupportDigitalProducts()) {
@@ -213,17 +190,11 @@ class ProductTable extends TableAbstract
         return $buttons;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function bulkActions(): array
     {
         return $this->addDeleteAction(route('marketplace.vendor.products.deletes'), null, parent::bulkActions());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getBulkChanges(): array
     {
         return [
@@ -250,9 +221,6 @@ class ProductTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getDefaultButtons(): array
     {
         return [

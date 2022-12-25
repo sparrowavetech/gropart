@@ -44,7 +44,7 @@ class TranslationServiceProvider extends ServiceProvider
         $this->setNamespace('plugins/translation')
             ->loadAndPublishConfigurations(['general', 'permissions'])
             ->loadMigrations()
-            ->loadRoutes(['web'])
+            ->loadRoutes()
             ->loadAndPublishViews()
             ->loadAndPublishTranslations()
             ->publishAssets();

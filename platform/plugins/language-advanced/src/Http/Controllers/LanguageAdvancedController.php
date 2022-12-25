@@ -10,17 +10,11 @@ use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 
 class LanguageAdvancedController extends BaseController
 {
-    /**
-     * @param int $id
-     * @param LanguageAdvancedRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function save($id, LanguageAdvancedRequest $request, BaseHttpResponse $response)
+    public function save(int $id, LanguageAdvancedRequest $request, BaseHttpResponse $response)
     {
         $model = $request->input('model');
 
-        if (!class_exists($model)) {
+        if (! class_exists($model)) {
             abort(404);
         }
 

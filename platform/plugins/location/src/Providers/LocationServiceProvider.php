@@ -57,7 +57,7 @@ class LocationServiceProvider extends ServiceProvider
             ->loadAndPublishViews()
             ->loadMigrations()
             ->loadAndPublishTranslations()
-            ->loadRoutes(['web'])
+            ->loadRoutes()
             ->publishAssets();
 
         if (defined('LANGUAGE_MODULE_SCREEN_NAME') && defined('LANGUAGE_ADVANCED_MODULE_SCREEN_NAME')) {
@@ -115,7 +115,7 @@ class LocationServiceProvider extends ServiceProvider
                     'permissions' => ['city.index'],
                 ]);
 
-            if (!dashboard_menu()->hasItem('cms-core-tools')) {
+            if (! dashboard_menu()->hasItem('cms-core-tools')) {
                 dashboard_menu()->registerItem([
                     'id' => 'cms-core-tools',
                     'priority' => 96,
@@ -158,7 +158,7 @@ class LocationServiceProvider extends ServiceProvider
                         $connection = $model->getConnectionName();
                         $keys = [];
                         foreach ($data as $key => $column) {
-                            if (!Schema::connection($connection)->hasColumn($table, $column)) {
+                            if (! Schema::connection($connection)->hasColumn($table, $column)) {
                                 $keys[$key] = $column;
                             }
                         }
@@ -190,7 +190,7 @@ class LocationServiceProvider extends ServiceProvider
             });
 
             foreach (Location::getSupported() as $item => $keys) {
-                if (!class_exists($item)) {
+                if (! class_exists($item)) {
                     continue;
                 }
 

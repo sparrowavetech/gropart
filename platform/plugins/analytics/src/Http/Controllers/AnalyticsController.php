@@ -12,16 +12,9 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Throwable;
 
 class AnalyticsController extends BaseController
 {
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Throwable
-     */
     public function getGeneral(Request $request, BaseHttpResponse $response)
     {
         $dashboardInstance = new DashboardWidgetInstance();
@@ -67,11 +60,13 @@ class AnalyticsController extends BaseController
                 'ga:sessions, ga:users, ga:pageviews, ga:percentNewSessions, ga:bounceRate, ga:pageviewsPerVisit, ga:avgSessionDuration, ga:newUsers'
             )->totalsForAllResults;
 
-            return $response->setData(view(
-                'plugins/analytics::widgets.general',
-                compact('stats', 'country_stats', 'total')
-            )->render());
-        } catch (InvalidConfiguration $exception) {
+            return $response->setData(
+                view(
+                    'plugins/analytics::widgets.general',
+                    compact('stats', 'country_stats', 'total')
+                )->render()
+            );
+        } catch (InvalidConfiguration) {
             return $response
                 ->setError()
                 ->setMessage(trans('plugins/analytics::analytics.wrong_configuration'));
@@ -82,28 +77,16 @@ class AnalyticsController extends BaseController
         }
     }
 
-    /**
-     * @param string $dateRow
-     * @param string $dimensions
-     * @return Carbon|string
-     */
-    protected function getAxisByDimensions($dateRow, $dimensions = 'hour')
+    protected function getAxisByDimensions(string $dateRow, string $dimensions = 'hour'): string
     {
-        switch ($dimensions) {
-            case 'date':
-                return Carbon::parse($dateRow)->toDateString();
-            case 'yearMonth':
-                return Carbon::createFromFormat('Ym', $dateRow)->format('Y-m');
-            default:
-                return (int)$dateRow . 'h';
-        }
+        return match ($dimensions) {
+            'date' => Carbon::parse($dateRow)->toDateString(),
+            'yearMonth' => Carbon::createFromFormat('Ym', $dateRow)->format('Y-m'),
+            default => (int)$dateRow . 'h',
+        };
     }
 
-    /**
-    * @param string $key
-    * @return string
-    */
-    protected function getDimension($key): string
+    protected function getDimension(string $key): string
     {
         $data = [
             'this_week' => 'date',
@@ -116,11 +99,6 @@ class AnalyticsController extends BaseController
         return Arr::get($data, $key, 'hour');
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function getTopVisitPages(Request $request, BaseHttpResponse $response)
     {
         $dashboardInstance = new DashboardWidgetInstance();
@@ -141,7 +119,7 @@ class AnalyticsController extends BaseController
             $pages = Analytics::fetchMostVisitedPages($period, 10);
 
             return $response->setData(view('plugins/analytics::widgets.page', compact('pages'))->render());
-        } catch (InvalidConfiguration $exception) {
+        } catch (InvalidConfiguration) {
             return $response
                 ->setError()
                 ->setMessage(trans('plugins/analytics::analytics.wrong_configuration'));
@@ -152,11 +130,6 @@ class AnalyticsController extends BaseController
         }
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function getTopBrowser(Request $request, BaseHttpResponse $response)
     {
         $dashboardInstance = new DashboardWidgetInstance();
@@ -177,7 +150,7 @@ class AnalyticsController extends BaseController
             $browsers = Analytics::fetchTopBrowsers($period);
 
             return $response->setData(view('plugins/analytics::widgets.browser', compact('browsers'))->render());
-        } catch (InvalidConfiguration $exception) {
+        } catch (InvalidConfiguration) {
             return $response
                 ->setError()
                 ->setMessage(trans('plugins/analytics::analytics.wrong_configuration'));
@@ -188,11 +161,6 @@ class AnalyticsController extends BaseController
         }
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function getTopReferrer(Request $request, BaseHttpResponse $response)
     {
         $dashboardInstance = new DashboardWidgetInstance();
@@ -213,7 +181,7 @@ class AnalyticsController extends BaseController
             $referrers = Analytics::fetchTopReferrers($period, 10);
 
             return $response->setData(view('plugins/analytics::widgets.referrer', compact('referrers'))->render());
-        } catch (InvalidConfiguration $exception) {
+        } catch (InvalidConfiguration) {
             return $response
                 ->setError()
                 ->setMessage(trans('plugins/analytics::analytics.wrong_configuration'));

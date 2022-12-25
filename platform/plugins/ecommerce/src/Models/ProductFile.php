@@ -8,31 +8,14 @@ use Illuminate\Support\Arr;
 
 class ProductFile extends BaseModel
 {
-    /**
-     * @var string
-     */
     protected $table = 'ec_product_files';
 
-    /**
-     * @var array
-     */
     protected $fillable = [
         'product_id',
         'url',
         'extras',
     ];
 
-    /**
-     * @var array
-     */
-    protected $dates = [
-        'created_at',
-        'updated_at',
-    ];
-
-    /**
-     * @var array
-     */
     protected $casts = [
         'extras' => 'json',
     ];

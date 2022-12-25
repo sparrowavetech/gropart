@@ -10,10 +10,7 @@ use Illuminate\Support\Facades\Facade;
  */
 class ApiHelperFacade extends Facade
 {
-    /**
-     * @return string
-     */
-    protected static function getFacadeAccessor()
+    protected static function getFacadeAccessor(): string
     {
         return ApiHelper::class;
     }

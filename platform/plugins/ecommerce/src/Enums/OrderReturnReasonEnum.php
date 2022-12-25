@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Enums;
 
 use Botble\Base\Supports\Enum;
 use Html;
+use Illuminate\Support\HtmlString;
 
 /**
  * @method static OrderReturnReasonEnum NO_LONGER_WANT()
@@ -23,37 +24,24 @@ class OrderReturnReasonEnum extends Enum
     public const NOT_AS_DESCRIBED = 'not_as_described';
     public const OTHER = 'other';
 
-    /**
-     * @var string
-     */
     public static $langPath = 'plugins/ecommerce::order.order_return_reasons';
 
-    /**
-     * @return string
-     */
-    public function toHtml()
+    public function toHtml(): HtmlString|string
     {
-        switch ($this->value) {
-            case self::NO_LONGER_WANT:
-                return Html::tag('span', self::NO_LONGER_WANT()->label(), ['class' => 'text-danger'])
-                    ->toHtml();
-            case self::DEFECTIVE:
-                return Html::tag('span', self::DEFECTIVE()->label(), ['class' => 'text-danger'])
-                    ->toHtml();
-            case self::INCORRECT_ITEM:
-                return Html::tag('span', self::INCORRECT_ITEM()->label(), ['class' => 'text-warning'])
-                    ->toHtml();
-            case self::ARRIVED_LATE:
-                return Html::tag('span', self::ARRIVED_LATE()->label(), ['class' => 'text-warning'])
-                    ->toHtml();
-            case self::NOT_AS_DESCRIBED:
-                return Html::tag('span', self::NOT_AS_DESCRIBED()->label(), ['class' => 'text-warning'])
-                    ->toHtml();
-            case self::DAMAGED:
-                return Html::tag('span', self::DAMAGED()->label(), ['class' => 'text-info'])
-                    ->toHtml();
-            default:
-                return parent::toHtml();
-        }
+        return match ($this->value) {
+            self::NO_LONGER_WANT => Html::tag('span', self::NO_LONGER_WANT()->label(), ['class' => 'text-danger'])
+                ->toHtml(),
+            self::DEFECTIVE => Html::tag('span', self::DEFECTIVE()->label(), ['class' => 'text-danger'])
+                ->toHtml(),
+            self::INCORRECT_ITEM => Html::tag('span', self::INCORRECT_ITEM()->label(), ['class' => 'text-warning'])
+                ->toHtml(),
+            self::ARRIVED_LATE => Html::tag('span', self::ARRIVED_LATE()->label(), ['class' => 'text-warning'])
+                ->toHtml(),
+            self::NOT_AS_DESCRIBED => Html::tag('span', self::NOT_AS_DESCRIBED()->label(), ['class' => 'text-warning'])
+                ->toHtml(),
+            self::DAMAGED => Html::tag('span', self::DAMAGED()->label(), ['class' => 'text-info'])
+                ->toHtml(),
+            default => parent::toHtml(),
+        };
     }
 }

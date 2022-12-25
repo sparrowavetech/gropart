@@ -1,6 +1,6 @@
 <?php
 
-if (!function_exists('get_shipping_setting')) {
+if (! function_exists('get_shipping_setting')) {
     /**
      * @param string $key
      * @param string|null $type

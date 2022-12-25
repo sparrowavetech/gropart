@@ -63,7 +63,7 @@ class BlogServiceProvider extends ServiceProvider
             ->loadAndPublishConfigurations(['permissions', 'general'])
             ->loadAndPublishViews()
             ->loadAndPublishTranslations()
-            ->loadRoutes(['web'])
+            ->loadRoutes()
             ->loadMigrations()
             ->publishAssets();
 
@@ -137,7 +137,7 @@ class BlogServiceProvider extends ServiceProvider
         $this->app->booted(function () use ($useLanguageV2) {
             $models = [Post::class, Category::class, Tag::class];
 
-            if (defined('LANGUAGE_MODULE_SCREEN_NAME') && !$useLanguageV2) {
+            if (defined('LANGUAGE_MODULE_SCREEN_NAME') && ! $useLanguageV2) {
                 Language::registerModule($models);
             }
 

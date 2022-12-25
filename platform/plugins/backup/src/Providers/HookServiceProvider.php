@@ -13,12 +13,7 @@ class HookServiceProvider extends ServiceProvider
         }
     }
 
-    /**
-     * @param string $alert
-     * @return string
-     * @throws \Throwable
-     */
-    public function registerAdminAlert($alert): string
+    public function registerAdminAlert(?string $alert): string
     {
         return $alert . view('plugins/backup::partials.admin-alert')->render();
     }

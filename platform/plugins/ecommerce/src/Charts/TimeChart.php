@@ -3,13 +3,11 @@
 namespace Botble\Ecommerce\Charts;
 
 use Botble\Chart\LineChart;
+use Botble\Chart\Supports\Base;
 
 class TimeChart extends LineChart
 {
-    /**
-     * @return LineChart
-     */
-    public function init()
+    public function init(): Base
     {
         return $this
             ->setElementId('ecommerce-time-chart')

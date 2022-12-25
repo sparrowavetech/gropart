@@ -8,40 +8,17 @@ class SendMailEvent extends Event
 {
     use SerializesModels;
 
-    /**
-     * @var string
-     */
-    public $content;
+    public string $content;
 
-    /**
-     * @var string
-     */
-    public $title;
+    public string $title;
 
-    /**
-     * @var string
-     */
-    public $to;
+    public array|string|null $to = null;
 
-    /**
-     * @var array
-     */
-    public $args;
+    public array $args = [];
 
-    /**
-     * @var boolean
-     */
-    public $debug = false;
+    public bool $debug = false;
 
-    /**
-     * SendMailEvent constructor.
-     * @param string $content
-     * @param string $title
-     * @param string $to
-     * @param array $args
-     * @param bool $debug
-     */
-    public function __construct($content, $title, $to, $args, $debug = false)
+    public function __construct(string $content, string $title, array|string|null $to, array $args, bool $debug = false)
     {
         $this->content = $content;
         $this->title = $title;

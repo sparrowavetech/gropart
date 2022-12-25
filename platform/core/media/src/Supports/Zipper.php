@@ -84,11 +84,11 @@ class Zipper
      */
     protected function createArchiveFile($pathToZip)
     {
-        if (!$this->file->exists($pathToZip)) {
+        if (! $this->file->exists($pathToZip)) {
             $dirname = dirname($pathToZip);
-            if (!$this->file->exists($dirname) && !$this->file->makeDirectory($dirname, 0755, true)) {
+            if (! $this->file->exists($dirname) && ! $this->file->makeDirectory($dirname, 0755, true)) {
                 throw new RuntimeException('Failed to create folder');
-            } elseif (!$this->file->isWritable($dirname)) {
+            } elseif (! $this->file->isWritable($dirname)) {
                 throw new Exception(sprintf('The path "%s" is not writeable', $pathToZip));
             }
 
@@ -110,7 +110,7 @@ class Zipper
     {
         if (is_array($pathToAdd)) {
             foreach ($pathToAdd as $key => $dir) {
-                if (!is_int($key)) {
+                if (! is_int($key)) {
                     $this->add($dir, $key);
                 } else {
                     $this->add($dir);
@@ -133,7 +133,7 @@ class Zipper
      */
     protected function addFile($pathToAdd, $fileName = null)
     {
-        if (!$fileName) {
+        if (! $fileName) {
             $info = pathinfo($pathToAdd);
             $fileName = isset($info['extension']) ?
                 $info['filename'] . '.' . $info['extension'] :

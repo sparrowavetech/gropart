@@ -31,7 +31,7 @@ class PublicController extends Controller
 
         $slug = SlugHelper::getSlug($key, '');
 
-        if (!$slug) {
+        if (! $slug) {
             abort(404);
         }
 
@@ -49,7 +49,7 @@ class PublicController extends Controller
 
         event(new RenderingSingleEvent($slug));
 
-        if (!empty($result) && is_array($result)) {
+        if (! empty($result) && is_array($result)) {
             return Theme::scope($result['view'], $result['data'], Arr::get($result, 'default_view'))->render();
         }
 

@@ -11,24 +11,14 @@ use Botble\Table\TableBuilder;
 
 class SimpleSliderForm extends FormAbstract
 {
-    /**
-     * @var TableBuilder
-     */
-    protected $tableBuilder;
+    protected TableBuilder $tableBuilder;
 
-    /**
-     * SimpleSliderForm constructor.
-     * @param TableBuilder $tableBuilder
-     */
     public function __construct(TableBuilder $tableBuilder)
     {
         parent::__construct();
         $this->tableBuilder = $tableBuilder;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function buildForm()
     {
         $this

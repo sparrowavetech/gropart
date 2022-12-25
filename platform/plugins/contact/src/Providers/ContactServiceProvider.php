@@ -37,7 +37,7 @@ class ContactServiceProvider extends ServiceProvider
             ->setNamespace('plugins/contact')
             ->loadHelpers()
             ->loadAndPublishConfigurations(['permissions', 'email'])
-            ->loadRoutes(['web'])
+            ->loadRoutes()
             ->loadAndPublishViews()
             ->loadAndPublishTranslations()
             ->loadMigrations()

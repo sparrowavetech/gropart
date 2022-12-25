@@ -9,12 +9,9 @@ use Illuminate\Support\Facades\DB;
 
 class ProductAttributeSetRepository extends RepositoriesAbstract implements ProductAttributeSetInterface
 {
-    /**
-     * {@inheritDoc}
-     */
     public function getByProductId($productId)
     {
-        if (!is_array($productId)) {
+        if (! is_array($productId)) {
             $productId = [$productId];
         }
 
@@ -34,12 +31,9 @@ class ProductAttributeSetRepository extends RepositoriesAbstract implements Prod
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getAllWithSelected($productId)
     {
-        if (!is_array($productId)) {
+        if (! is_array($productId)) {
             $productId = [esc_sql($productId)];
         }
 

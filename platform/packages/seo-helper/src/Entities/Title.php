@@ -287,7 +287,7 @@ class Title implements TitleContract
      */
     protected function checkMax($max)
     {
-        if (!is_int($max)) {
+        if (! is_int($max)) {
             throw new InvalidArgumentException('The title maximum lenght must be integer.');
         }
 
@@ -350,6 +350,6 @@ class Title implements TitleContract
      */
     protected function hasSiteName()
     {
-        return !empty($this->getSiteName());
+        return ! empty($this->getSiteName());
     }
 }

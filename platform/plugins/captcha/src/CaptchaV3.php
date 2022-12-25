@@ -9,29 +9,14 @@ use Theme;
 
 class CaptchaV3
 {
-    /**
-     * @var string
-     */
-    protected $secret;
+    protected ?string $secret;
 
-    /**
-     * @var string
-     */
-    protected $siteKey;
+    protected ?string $siteKey;
 
-    /**
-     * @var string
-     */
-    protected $origin;
+    protected ?string $origin;
 
-    /**
-     * @var bool
-     */
-    protected $rendered = false;
+    protected bool $rendered = false;
 
-    /**
-     * @param Application $app
-     */
     public function __construct(Application $app)
     {
         $this->secret = $app['config']->get('plugins.captcha.general.secret');
@@ -39,18 +24,7 @@ class CaptchaV3
         $this->origin = 'https://www.google.com/recaptcha';
     }
 
-    /**
-     * Verify the given token and return the score.
-     * Returns false if token is invalid.
-     * Returns the score if the token is valid.
-     *
-     * @param string $token
-     * @param string $clientIp
-     * @param array $parameters
-     * @return bool|mixed
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
-    public function verify(string $token, string $clientIp, array $parameters = [])
+    public function verify(string $token, string $clientIp, array $parameters = []): bool
     {
         $client = new Client();
 
@@ -64,14 +38,14 @@ class CaptchaV3
 
         $body = json_decode($response->getBody(), true);
 
-        if (!isset($body['success']) || $body['success'] !== true) {
+        if (! isset($body['success']) || $body['success'] !== true) {
             return false;
         }
 
         $action = $parameters[0];
         $minScore = isset($parameters[1]) ? (float)$parameters[1] : 0.5;
 
-        if ($action && (!isset($body['action']) || $action != $body['action'])) {
+        if ($action && (! isset($body['action']) || $action != $body['action'])) {
             return false;
         }
 
@@ -80,14 +54,9 @@ class CaptchaV3
         return $score && $score >= $minScore;
     }
 
-    /**
-     * @param string[] $attributes
-     * @param array $options
-     * @return string
-     */
     public function display(array $attributes = ['action' => 'form'], array $options = ['name' => 'g-recaptcha-response']): ?string
     {
-        if (!$this->siteKey) {
+        if (! $this->siteKey) {
             return null;
         }
 
@@ -98,7 +67,7 @@ class CaptchaV3
 
         $input = '<input type="hidden" name="' . $name . '" id="' . $fieldId . '">';
 
-        if (!$this->rendered && Arr::get($attributes, 'add-js', true)) {
+        if (! $this->rendered && Arr::get($attributes, 'add-js', true)) {
             $this->initJs($fieldId, $action);
         }
 
@@ -111,10 +80,7 @@ class CaptchaV3
         return $input;
     }
 
-    /**
-     * @return \Botble\Theme\AssetContainer
-     */
-    public function initJs($fieldId = null, $action = 'form')
+    public function initJs($fieldId = null, $action = 'form'): void
     {
         if ($fieldId && $action) {
             $script = "
@@ -137,7 +103,7 @@ class CaptchaV3
                 ->writeScript('google-recaptcha-script-' . $fieldId, $script, ['google-recaptcha']);
         }
 
-        return Theme::asset()
+        Theme::asset()
             ->container('footer')
             ->add('google-recaptcha', $this->origin . '/api.js?render=' . $this->siteKey . '&hl=' . app()->getLocale());
     }

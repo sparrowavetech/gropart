@@ -8,27 +8,29 @@ use Botble\Ecommerce\Models\Tax;
 
 class TaxSeeder extends BaseSeeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
         Tax::truncate();
 
         Tax::create([
-            'title'      => 'VAT',
+            'title' => 'VAT',
             'percentage' => 10,
-            'priority'   => 1,
-            'status'     => BaseStatusEnum::PUBLISHED,
+            'priority' => 1,
+            'status' => BaseStatusEnum::PUBLISHED,
         ]);
 
         Tax::create([
-            'title'      => 'None',
+            'title' => 'None',
             'percentage' => 0,
-            'priority'   => 2,
-            'status'     => BaseStatusEnum::PUBLISHED,
+            'priority' => 2,
+            'status' => BaseStatusEnum::PUBLISHED,
+        ]);
+
+        Tax::create([
+            'title' => 'Import Tax',
+            'percentage' => 15,
+            'priority' => 3,
+            'status' => BaseStatusEnum::PUBLISHED,
         ]);
     }
 }

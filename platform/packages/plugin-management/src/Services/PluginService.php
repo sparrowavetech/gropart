@@ -5,6 +5,7 @@ namespace Botble\PluginManagement\Services;
 use BaseHelper;
 use Botble\Base\Supports\Helper;
 use Botble\PluginManagement\Events\ActivatedPluginEvent;
+use Botble\PluginManagement\PluginManifest;
 use Composer\Autoload\ClassLoader;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Filesystem\Filesystem;
@@ -17,31 +18,19 @@ use Setting;
 
 class PluginService
 {
-    /**
-     * @var Application
-     */
-    protected $app;
+    protected Application $app;
 
-    /**
-     * @var Filesystem
-     */
-    protected $files;
+    protected Filesystem $files;
 
-    /**
-     * PluginService constructor.
-     * @param Application $app
-     * @param Filesystem $files
-     */
-    public function __construct(Application $app, Filesystem $files)
+    protected PluginManifest $pluginManifest;
+
+    public function __construct(Application $app, Filesystem $files, PluginManifest $pluginManifest)
     {
         $this->app = $app;
         $this->files = $files;
+        $this->pluginManifest = $pluginManifest;
     }
 
-    /**
-     * @param string $plugin
-     * @return array
-     */
     public function activate(string $plugin): array
     {
         $validate = $this->validate($plugin);
@@ -58,7 +47,7 @@ class PluginService
             ];
         }
 
-        if (!Arr::get($content, 'ready', 1)) {
+        if (! Arr::get($content, 'ready', 1)) {
             return [
                 'error' => true,
                 'message' => trans(
@@ -69,10 +58,10 @@ class PluginService
         }
 
         $activatedPlugins = get_active_plugins();
-        if (!in_array($plugin, $activatedPlugins)) {
-            if (!empty(Arr::get($content, 'require'))) {
+        if (! in_array($plugin, $activatedPlugins)) {
+            if (! empty(Arr::get($content, 'require'))) {
                 $valid = count(array_intersect($content['require'], $activatedPlugins)) == count($content['require']);
-                if (!$valid) {
+                if (! $valid) {
                     return [
                         'error' => true,
                         'message' => trans(
@@ -83,7 +72,7 @@ class PluginService
                 }
             }
 
-            if (!class_exists($content['provider'])) {
+            if (! class_exists($content['provider'])) {
                 $loader = new ClassLoader();
                 $loader->setPsr4($content['namespace'], plugin_path($plugin . '/src'));
                 $loader->register(true);
@@ -116,6 +105,8 @@ class PluginService
 
             Helper::clearCache();
 
+            $this->pluginManifest->generateManifest();
+
             event(new ActivatedPluginEvent($plugin));
 
             return [
@@ -130,22 +121,18 @@ class PluginService
         ];
     }
 
-    /**
-     * @param string $plugin
-     * @return array
-     */
     protected function validate(string $plugin): array
     {
         $location = plugin_path($plugin);
 
-        if (!$this->files->isDirectory($location)) {
+        if (! $this->files->isDirectory($location)) {
             return [
                 'error' => true,
                 'message' => trans('packages/plugin-management::plugin.plugin_not_exist'),
             ];
         }
 
-        if (!$this->files->exists($location . '/plugin.json')) {
+        if (! $this->files->exists($location . '/plugin.json')) {
             return [
                 'error' => true,
                 'message' => trans('packages/plugin-management::plugin.missing_json_file'),
@@ -158,10 +145,6 @@ class PluginService
         ];
     }
 
-    /**
-     * @param string $plugin
-     * @return array
-     */
     public function publishAssets(string $plugin): array
     {
         $validate = $this->validate($plugin);
@@ -172,11 +155,11 @@ class PluginService
 
         $pluginPath = public_path('vendor/core/plugins');
 
-        if (!$this->files->isDirectory($pluginPath)) {
+        if (! $this->files->isDirectory($pluginPath)) {
             $this->files->makeDirectory($pluginPath, 0755, true);
         }
 
-        if (!$this->files->isWritable($pluginPath)) {
+        if (! $this->files->isWritable($pluginPath)) {
             return [
                 'error' => true,
                 'message' => trans(
@@ -197,10 +180,6 @@ class PluginService
         ];
     }
 
-    /**
-     * @param string $plugin
-     * @return array
-     */
     public function remove(string $plugin): array
     {
         $validate = $this->validate($plugin);
@@ -218,8 +197,8 @@ class PluginService
         if ($this->files->exists($location . '/plugin.json')) {
             $content = BaseHelper::getFileData($location . '/plugin.json');
 
-            if (!empty($content)) {
-                if (!class_exists($content['provider'])) {
+            if (! empty($content)) {
+                if (! class_exists($content['provider'])) {
                     $loader = new ClassLoader();
                     $loader->setPsr4($content['namespace'], plugin_path($plugin . '/src'));
                     $loader->register(true);
@@ -260,16 +239,14 @@ class PluginService
 
         Helper::clearCache();
 
+        $this->pluginManifest->generateManifest();
+
         return [
             'error' => false,
             'message' => trans('packages/plugin-management::plugin.plugin_removed'),
         ];
     }
 
-    /**
-     * @param string $plugin
-     * @return array
-     */
     public function deactivate(string $plugin): array
     {
         $validate = $this->validate($plugin);
@@ -286,7 +263,7 @@ class PluginService
             ];
         }
 
-        if (!class_exists($content['provider'])) {
+        if (! class_exists($content['provider'])) {
             $loader = new ClassLoader();
             $loader->setPsr4($content['namespace'], plugin_path($plugin . '/src'));
             $loader->register(true);
@@ -311,6 +288,8 @@ class PluginService
 
             Helper::clearCache();
 
+            $this->pluginManifest->generateManifest();
+
             return [
                 'error' => false,
                 'message' => trans('packages/plugin-management::plugin.deactivated_success'),
@@ -323,10 +302,6 @@ class PluginService
         ];
     }
 
-    /**
-     * @param string $plugin
-     * @return string
-     */
     public function getPluginNamespace(string $plugin): string
     {
         return $this->app['config']->get('core.base.general.plugin_namespaces.' . $plugin, $plugin);

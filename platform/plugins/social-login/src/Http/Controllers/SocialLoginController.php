@@ -36,7 +36,7 @@ class SocialLoginController extends BaseController
     {
         $guard = $this->guard($request);
 
-        if (!$guard) {
+        if (! $guard) {
             return $response
                 ->setError()
                 ->setNextUrl(route('public.index'));
@@ -62,21 +62,17 @@ class SocialLoginController extends BaseController
             $guard = session('social_login_guard_current');
         }
 
-        if (!$guard) {
+        if (! $guard) {
             $guard = array_key_first(SocialService::supportedModules());
         }
 
-        if (!$guard || !SocialService::isSupportedModuleByKey($guard) || Auth::guard($guard)->check()) {
+        if (! $guard || ! SocialService::isSupportedModuleByKey($guard) || Auth::guard($guard)->check()) {
             return false;
         }
 
         return $guard;
     }
 
-    /**
-     * @param string $provider
-     * @return bool
-     */
     protected function setProvider(string $provider): bool
     {
         config()->set([
@@ -96,11 +92,11 @@ class SocialLoginController extends BaseController
      * @param BaseHttpResponse $response
      * @return BaseHttpResponse
      */
-    public function handleProviderCallback($provider, BaseHttpResponse $response)
+    public function handleProviderCallback(string $provider, BaseHttpResponse $response)
     {
         $guard = $this->guard();
 
-        if (!$guard) {
+        if (! $guard) {
             return $response
                 ->setError()
                 ->setNextUrl(route('public.index'))
@@ -123,7 +119,7 @@ class SocialLoginController extends BaseController
                 $message = json_encode($message);
             }
 
-            if (!$message) {
+            if (! $message) {
                 $message = __('An error occurred while trying to login');
             }
 
@@ -133,7 +129,7 @@ class SocialLoginController extends BaseController
                 ->setMessage($message);
         }
 
-        if (!$oAuth->getEmail()) {
+        if (! $oAuth->getEmail()) {
             return $response
                 ->setError()
                 ->setNextUrl($providerData['login_url'])
@@ -142,14 +138,14 @@ class SocialLoginController extends BaseController
 
         $account = (new $providerData['model']())->where('email', $oAuth->getEmail())->first();
 
-        if (!$account) {
+        if (! $account) {
             $avatarId = null;
 
             try {
                 $url = $oAuth->getAvatar();
                 if ($url) {
                     $result = RvMedia::uploadFromUrl($url, 0, 'accounts', 'image/png');
-                    if (!$result['error']) {
+                    if (! $result['error']) {
                         $avatarId = $result['data']->id;
                     }
                 }
@@ -209,8 +205,8 @@ class SocialLoginController extends BaseController
             $setting->set($prefix . 'enable', $request->input($prefix . 'enable'));
 
             foreach ($item['data'] as $input) {
-                if (!in_array(app()->environment(), SocialService::getEnvDisableData()) ||
-                    !in_array($input, Arr::get($item, 'disable', []))
+                if (! in_array(app()->environment(), SocialService::getEnvDisableData()) ||
+                    ! in_array($input, Arr::get($item, 'disable', []))
                 ) {
                     $setting->set($prefix . $input, $request->input($prefix . $input));
                 }

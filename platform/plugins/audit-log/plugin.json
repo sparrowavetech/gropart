@@ -1,4 +1,5 @@
 {
+    "id": "botble/audit-log",
     "name": "Audit Log",
     "namespace": "Botble\\AuditLog\\",
     "provider": "Botble\\AuditLog\\Providers\\AuditLogServiceProvider",

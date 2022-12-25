@@ -62,7 +62,8 @@ class DiscountController extends BaseController
                 'vendor/core/plugins/marketplace/js/discount.js',
             ])
             ->addScripts(['timepicker', 'input-mask', 'blockui'])
-            ->addStyles(['timepicker']);
+            ->addStyles(['timepicker'])
+            ->usingVueJS();
 
         return MarketplaceHelper::view('dashboard.discounts.create');
     }
@@ -96,7 +97,7 @@ class DiscountController extends BaseController
                 ->toDateTimeString(),
         ]);
 
-        if ($request->has('end_date') && !$request->has('unlimited_time')) {
+        if ($request->has('end_date') && ! $request->has('unlimited_time')) {
             $request->merge([
                 'end_date' => Carbon::parse($request->input('end_date') . ' ' . $request->input('end_time'))
                     ->toDateTimeString(),

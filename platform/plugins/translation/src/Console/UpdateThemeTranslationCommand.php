@@ -5,30 +5,14 @@ namespace Botble\Translation\Console;
 use BaseHelper;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Finder\Finder;
 use Theme;
 
+#[AsCommand('cms:translations:update-theme-translations', 'Update theme translations')]
 class UpdateThemeTranslationCommand extends Command
 {
-    /**
-     * The console command name.
-     *
-     * @var string
-     */
-    protected $name = 'cms:translations:update-theme-translations';
-
-    /**
-     * The console command description.
-     * @var string
-     */
-    protected $description = 'Update theme translations';
-
-    /**
-     * Execute the console command.
-     *
-     * @return void
-     */
-    public function handle()
+    public function handle(): int
     {
         $keys = $this->findTranslations(core_path());
         $keys += $this->findTranslations(package_path());
@@ -41,6 +25,8 @@ class UpdateThemeTranslationCommand extends Command
         BaseHelper::saveFileData(theme_path(Theme::getThemeName() . '/lang/en.json'), $data, false);
 
         $this->info('Found ' . count($keys) . ' keys');
+
+        return self::SUCCESS;
     }
 
     /**
@@ -68,18 +54,21 @@ class UpdateThemeTranslationCommand extends Command
          * @var \Symfony\Component\Finder\SplFileInfo $file
          */
         foreach ($finder as $file) {
-            if (!preg_match_all('/' . $stringPattern . '/siU', $file->getContents(), $matches)) {
+            if (! preg_match_all('/' . $stringPattern . '/siU', $file->getContents(), $matches)) {
                 continue;
             }
 
             foreach ($matches['string'] as $key) {
-                if (preg_match('/(^[a-zA-Z0-9_-]+([.][^\)\ ]+)+$)/siU', $key, $groupMatches) && !Str::contains($key, '...')) {
+                if (preg_match('/(^[a-zA-Z0-9_-]+([.][^\)\ ]+)+$)/siU', $key, $groupMatches) && ! Str::contains(
+                    $key,
+                    '...'
+                )) {
                     // Do nothing, it has to be treated as a group
                     continue;
                 }
 
                 // Skip keys which contain namespacing characters, unless they also contain a space, which makes it JSON.
-                if (!(Str::contains($key, '::') && Str::contains($key, '.')) || Str::contains($key, ' ')) {
+                if (! (Str::contains($key, '::') && Str::contains($key, '.')) || Str::contains($key, ' ')) {
                     $keys[trim($key)] = $key;
                 }
             }

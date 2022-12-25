@@ -14,15 +14,9 @@ class CsvLocationExport implements FromCollection, WithHeadings
 {
     use Exportable;
 
-    /**
-     * @var Collection
-     */
-    protected $results;
+    protected Collection $results;
 
-    /**
-     * @var int
-     */
-    protected $totalRow;
+    protected int $totalRow;
 
     public function __construct()
     {
@@ -124,9 +118,6 @@ class CsvLocationExport implements FromCollection, WithHeadings
         $this->totalRow = $this->results->count() + 1;
     }
 
-    /**
-     * @return array
-     */
     public function headings(): array
     {
         $headings = [
@@ -155,9 +146,6 @@ class CsvLocationExport implements FromCollection, WithHeadings
         return $headings;
     }
 
-    /**
-     * @return Collection
-     */
     public function collection(): Collection
     {
         return $this->results;

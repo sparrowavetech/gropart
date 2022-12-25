@@ -14,7 +14,7 @@ return new class () extends Migration {
      */
     public function up()
     {
-        if (!Schema::hasColumn('ec_products', 'image')) {
+        if (! Schema::hasColumn('ec_products', 'image')) {
             Schema::table('ec_products', function (Blueprint $table) {
                 $table->string('image', 255)->nullable();
             });

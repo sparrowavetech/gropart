@@ -14,8 +14,10 @@ use Botble\Base\Models\MetaBox as MetaBoxModel;
 use Botble\Base\Repositories\Caches\MetaBoxCacheDecorator;
 use Botble\Base\Repositories\Eloquent\MetaBoxRepository;
 use Botble\Base\Repositories\Interfaces\MetaBoxInterface;
+use Botble\Base\Supports\Action;
 use Botble\Base\Supports\BreadcrumbsManager;
 use Botble\Base\Supports\CustomResourceRegistrar;
+use Botble\Base\Supports\Filter;
 use Botble\Base\Supports\Helper;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Setting\Providers\SettingServiceProvider;
@@ -37,17 +39,9 @@ class BaseServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    /**
-     * @var bool
-     */
-    protected $defer = true;
+    protected bool $defer = true;
 
-    /**
-     * Register any application services.
-     *
-     * @return void
-     */
-    public function register()
+    public function register(): void
     {
         $this->app->bind(ResourceRegistrar::class, function ($app) {
             return new CustomResourceRegistrar($app['router']);
@@ -100,21 +94,25 @@ class BaseServiceProvider extends ServiceProvider
             'datatables-buttons.pdf_generator' => 'excel',
             'excel.exports.csv.use_bom' => true,
             'dompdf.public_path' => public_path(),
-            'debugbar.enabled' => $this->app['config']->get('app.debug') && !$this->app->runningInConsole() && !$this->app->environment(['testing', 'production']),
+            'debugbar.enabled' => $this->app->hasDebugModeEnabled() && ! $this->app->runningInConsole() && ! $this->app->environment(['testing', 'production']),
         ]);
 
-        $this->app->bind('path.lang', function () {
-            return base_path('lang');
+        $this->app->singleton('core:action', function () {
+            return new Action();
+        });
+
+        $this->app->singleton('core:filter', function () {
+            return new Filter();
         });
     }
 
-    public function boot()
+    public function boot(): void
     {
         $this
             ->loadAndPublishConfigurations(['permissions', 'assets'])
             ->loadAndPublishViews()
             ->loadAndPublishTranslations()
-            ->loadRoutes(['web'])
+            ->loadRoutes()
             ->loadMigrations()
             ->publishAssets();
 
@@ -164,12 +162,12 @@ class BaseServiceProvider extends ServiceProvider
         Paginator::useBootstrap();
 
         $forceUrl = $config->get('core.base.general.force_root_url');
-        if (!empty($forceUrl)) {
+        if (! empty($forceUrl)) {
             URL::forceRootUrl($forceUrl);
         }
 
         $forceSchema = $config->get('core.base.general.force_schema');
-        if (!empty($forceSchema)) {
+        if (! empty($forceSchema)) {
             $this->app['request']->server->set('HTTPS', 'on');
 
             URL::forceScheme($forceSchema);
@@ -186,7 +184,7 @@ class BaseServiceProvider extends ServiceProvider
             'database.connections.mysql.strict' => $config->get('core.base.general.db_strict_mode'),
         ]);
 
-        if (!$config->has('logging.channels.deprecations')) {
+        if (! $config->has('logging.channels.deprecations')) {
             $config->set([
                 'logging.channels.deprecations' => [
                     'driver' => 'single',
@@ -230,6 +228,19 @@ class BaseServiceProvider extends ServiceProvider
                 'permissions' => [ACL_ROLE_SUPER_USER],
             ]);
 
+        if (config('core.base.general.enabled_cleanup_database', true)) {
+            dashboard_menu()
+                ->registerItem([
+                    'id' => 'cms-core-system-cleanup',
+                    'priority' => 999,
+                    'parent_id' => 'cms-core-platform-administration',
+                    'name' => 'core/base::system.cleanup.title',
+                    'icon' => null,
+                    'url' => route('system.cleanup'),
+                    'permissions' => [ACL_ROLE_SUPER_USER],
+                ]);
+        }
+
         if (config('core.base.general.enable_system_updater')) {
             dashboard_menu()
                 ->registerItem([
@@ -252,7 +263,7 @@ class BaseServiceProvider extends ServiceProvider
         $memoryLimit = $this->app['config']->get('core.base.general.memory_limit');
 
         // Define memory limits.
-        if (!$memoryLimit) {
+        if (! $memoryLimit) {
             if (false === Helper::isIniValueChangeable('memory_limit')) {
                 $memoryLimit = $currentLimit;
             } else {

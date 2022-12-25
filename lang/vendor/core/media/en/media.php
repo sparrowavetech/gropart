@@ -61,6 +61,7 @@ return [
     'invalid_request' => 'Invalid request!',
     'add_success' => 'Add item successfully!',
     'file_too_big' => 'File too big. Max file upload is :size bytes',
+    'file_too_big_readable_size' => 'File too big. Max file upload is :size.',
     'can_not_detect_file_type' => 'File type is not allowed or can not detect file type!',
     'upload_failed' => 'The file is NOT uploaded completely. The server allows max upload file size is :size . Please check your file size OR try to upload again in case of having network errors',
     'menu_name' => 'Media',

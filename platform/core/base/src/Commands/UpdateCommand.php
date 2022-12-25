@@ -9,39 +9,23 @@ use Illuminate\Console\Command;
 use Illuminate\Console\ConfirmableTrait;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Process\Process;
 
+#[AsCommand('cms:update', 'Update core')]
 class UpdateCommand extends Command
 {
     use ConfirmableTrait;
 
-    /**
-     * The console command signature.
-     *
-     * @var string
-     */
-    protected $signature = 'cms:update';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Update CMS';
-
-    /**
-     * Execute the console command.
-     * @throws \Throwable
-     */
-    public function handle()
+    public function handle(): int
     {
-        if (!config('core.base.general.enable_system_updater')) {
+        if (! config('core.base.general.enable_system_updater')) {
             $this->error('Please enable system updater');
 
             return self::FAILURE;
         }
 
-        if (!version_compare(phpversion(), '8.0.2', '>=') > 0 && !config('core.base.general.upgrade_php_require_disabled')) {
+        if (! version_compare(phpversion(), '8.0.2', '>=') > 0 && ! config('core.base.general.upgrade_php_require_disabled')) {
             $this->error(trans('core/base::system.upgrade_php_version_required', ['version' => phpversion()]));
 
             return self::FAILURE;
@@ -56,7 +40,7 @@ class UpdateCommand extends Command
 
         $verifyLicense = $api->verifyLicense();
 
-        if (!$verifyLicense['status']) {
+        if (! $verifyLicense['status']) {
             $this->error('Your license is invalid. Please activate your license first!');
 
             return self::FAILURE;
@@ -149,7 +133,6 @@ class UpdateCommand extends Command
 
         $length = Str::length($longestString) + 14;
         $stringOpen = Str::padBoth('*', $length, ' *');
-        $stringSpace = Str::padBoth(Str::padRight('', $length - 6), $length, ' * ');
         $stringTitle = Str::padBoth(Str::padRight($title, $length - 6), $length, ' * ');
 
         /**** Open ****/

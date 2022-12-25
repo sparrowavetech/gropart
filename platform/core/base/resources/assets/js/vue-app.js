@@ -3,15 +3,20 @@ import sanitizeHTML from 'sanitize-html';
 import _ from 'lodash';
 import emitter from 'tiny-emitter/instance';
 
-Vue.prototype.__ = key => {
-    return _.get(window.trans, key, key);
-};
-
-Vue.prototype.$sanitize = sanitizeHTML;
-
 class VueApp {
     constructor() {
         this.vue = Vue;
+
+        this.vue.prototype.__ = key => {
+            if (typeof window.trans === 'undefined') {
+                return key;
+            }
+
+            return _.get(window.trans, key, key);
+        };
+
+        this.vue.prototype.$sanitize = sanitizeHTML;
+
         this.bootingCallbacks = [];
         this.bootedCallbacks = [];
         this.vueInstance = null;
@@ -21,6 +26,7 @@ class VueApp {
             $off: (...args) => emitter.off(...args),
             $emit: (...args) => emitter.emit(...args)
         };
+        this.hasBooted = false;
     }
 
     booting(callback) {
@@ -43,7 +49,15 @@ class VueApp {
         for (const callback of this.bootedCallbacks) {
             callback(this);
         }
+
+        this.hasBooted = true;
     }
 }
 
 window.vueApp = new VueApp();
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (!window.vueApp.hasBooted) {
+        window.vueApp.boot();
+    }
+});

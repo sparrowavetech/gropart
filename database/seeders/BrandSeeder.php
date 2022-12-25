@@ -11,39 +11,34 @@ use SlugHelper;
 
 class BrandSeeder extends BaseSeeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
         $this->uploadFiles('brands');
 
         $brands = [
             [
-                'logo'        => 'brands/1.png',
-                'name'        => 'FoodPound',
+                'logo' => 'brands/1.png',
+                'name' => 'FoodPound',
                 'description' => 'New Snacks Release',
             ],
             [
-                'logo'        => 'brands/2.png',
-                'name'        => 'iTea JSC',
+                'logo' => 'brands/2.png',
+                'name' => 'iTea JSC',
                 'description' => 'Happy Tea 100% Organic. From $29.9',
             ],
             [
-                'logo'        => 'brands/3.png',
-                'name'        => 'Soda Brand',
+                'logo' => 'brands/3.png',
+                'name' => 'Soda Brand',
                 'description' => 'Fresh Meat Sausage. BUY 2 GET 1!',
             ],
             [
-                'logo'        => 'brands/4.png',
-                'name'        => 'Farmart',
+                'logo' => 'brands/4.png',
+                'name' => 'Farmart',
                 'description' => 'Fresh Meat Sausage. BUY 2 GET 1!',
             ],
             [
-                'logo'        => 'brands/3.png',
-                'name'        => 'Soda Brand',
+                'logo' => 'brands/3.png',
+                'name' => 'Soda Brand',
                 'description' => 'Fresh Meat Sausage. BUY 2 GET 1!',
             ],
         ];
@@ -58,9 +53,9 @@ class BrandSeeder extends BaseSeeder
 
             Slug::create([
                 'reference_type' => Brand::class,
-                'reference_id'   => $brand->id,
-                'key'            => Str::slug($brand->name),
-                'prefix'         => SlugHelper::getPrefix(Brand::class),
+                'reference_id' => $brand->id,
+                'key' => Str::slug($brand->name),
+                'prefix' => SlugHelper::getPrefix(Brand::class),
             ]);
         }
 
@@ -68,23 +63,23 @@ class BrandSeeder extends BaseSeeder
 
         $translations = [
             [
-                'name'        => 'FoodPound',
+                'name' => 'FoodPound',
                 'description' => 'New Snacks Release',
             ],
             [
-                'name'        => 'iTea JSC',
+                'name' => 'iTea JSC',
                 'description' => 'Happy Tea 100% Organic. From $29.9',
             ],
             [
-                'name'        => 'Soda Brand',
+                'name' => 'Soda Brand',
                 'description' => 'Fresh Meat Sausage. BUY 2 GET 1!',
             ],
             [
-                'name'        => 'Farmart',
+                'name' => 'Farmart',
                 'description' => 'Fresh Meat Sausage. BUY 2 GET 1!',
             ],
             [
-                'name'        => 'Soda Brand',
+                'name' => 'Soda Brand',
                 'description' => 'Fresh Meat Sausage. BUY 2 GET 1!',
             ],
         ];

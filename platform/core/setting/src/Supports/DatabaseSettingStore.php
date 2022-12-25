@@ -116,11 +116,11 @@ class DatabaseSettingStore extends SettingStore
      */
     protected function read(): array
     {
-        if (!$this->connectedDatabase) {
+        if (! $this->connectedDatabase) {
             $this->connectedDatabase = Helper::isConnectedDatabase();
         }
 
-        if (!$this->connectedDatabase) {
+        if (! $this->connectedDatabase) {
             return [];
         }
 
@@ -130,7 +130,7 @@ class DatabaseSettingStore extends SettingStore
             $jsonSettingStore = new JsonSettingStore(new Filesystem());
             if (File::exists($jsonSettingStore->getPath())) {
                 $data = $jsonSettingStore->read();
-                if (!empty($data)) {
+                if (! empty($data)) {
                     return $data;
                 }
             }
@@ -139,7 +139,7 @@ class DatabaseSettingStore extends SettingStore
         $data = $this->parseReadData(Setting::get());
 
         if ($isSettingCacheEnabled) {
-            if (!isset($jsonSettingStore)) {
+            if (! isset($jsonSettingStore)) {
                 $jsonSettingStore = new JsonSettingStore(new Filesystem());
             }
 

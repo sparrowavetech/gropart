@@ -7,25 +7,17 @@ use Illuminate\Support\Facades\Auth;
 
 class TrackingFilter implements TrackingFilterInterface
 {
-    /**
-     * The Request instance.
-     *
-     * @var Request
-     */
-    protected $request;
+    protected ?Request $request = null;
 
     /**
      * Determine whether the request should be tracked.
-     *
-     * @param Request $request
-     * @return bool
      */
     public function shouldTrack(Request $request): bool
     {
         $this->request = $request;
 
         //Only track get requests
-        if (!$this->request->isMethod('get')) {
+        if (! $this->request->isMethod('get')) {
             return false;
         }
 
@@ -48,18 +40,11 @@ class TrackingFilter implements TrackingFilterInterface
         return true;
     }
 
-    /**
-     * @param string $guard
-     * @return bool
-     */
     protected function disableOnAuthentication(string $guard = 'web'): bool
     {
         return Auth::guard($guard)->check() || Auth::guard('customer')->check();
     }
 
-    /**
-     * @return bool
-     */
     protected function disableInternalLinks(): bool
     {
         if ($referrer_domain = $this->request->headers->get('referer')) {
@@ -74,35 +59,24 @@ class TrackingFilter implements TrackingFilterInterface
         return false;
     }
 
-    /**
-     *
-     * @param string|null $landingPage
-     * @return  array|boolean
-     */
-    protected function disabledLandingPages(?string $landingPage = null)
+    protected function disabledLandingPages(?string $landingPage = null): bool|array
     {
         $blacklist = [];
 
         if ($landingPage) {
             $k = in_array($landingPage, $blacklist);
 
-            return !($k === false);
+            return ! ($k === false);
         }
 
         return $blacklist;
     }
 
-    /**
-     * @return string
-     */
     protected function captureLandingPage(): string
     {
         return $this->request->path();
     }
 
-    /**
-     * @return bool
-     */
     protected function disableRobotsTracking(): bool
     {
         $ignoredBots = config('core.base.general.error_reporting.ignored_bots', []);
@@ -113,7 +87,7 @@ class TrackingFilter implements TrackingFilterInterface
         }
 
         foreach ($ignoredBots as $bot) {
-            if ((strpos($agent, $bot) !== false)) {
+            if ((str_contains($agent, $bot))) {
                 return true;
             }
         }

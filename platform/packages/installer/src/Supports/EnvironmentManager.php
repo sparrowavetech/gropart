@@ -7,12 +7,6 @@ use Illuminate\Http\Request;
 
 class EnvironmentManager
 {
-    /**
-     * Save the form content to the .env file.
-     *
-     * @param Request $request
-     * @return string
-     */
     public function save(Request $request): string
     {
         $results = trans('packages/installer::installer.environment.success');
@@ -64,7 +58,7 @@ class EnvironmentManager
 
         try {
             file_put_contents(base_path('.env'), $content);
-        } catch (Exception $exception) {
+        } catch (Exception) {
             $results = trans('packages/installer::installer.environment.errors');
         }
 

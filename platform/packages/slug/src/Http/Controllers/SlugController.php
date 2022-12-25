@@ -16,21 +16,10 @@ use Menu;
 
 class SlugController extends BaseController
 {
-    /**
-     * @var SlugInterface
-     */
-    protected $slugRepository;
+    protected SlugInterface $slugRepository;
 
-    /**
-     * @var SlugService
-     */
-    protected $slugService;
+    protected SlugService $slugService;
 
-    /**
-     * SlugController constructor.
-     * @param SlugInterface $slugRepository
-     * @param SlugService $slugService
-     */
     public function __construct(SlugInterface $slugRepository, SlugService $slugService)
     {
         $this->slugRepository = $slugRepository;

@@ -22,7 +22,7 @@ return [
     ],
     [
         'name'        => 'Setting',
-        'flag'        => 'sms.setting',
-        'parent_flag' => 'sms.setting',
+        'flag'        => 'sms.settings',
+        'parent_flag' => 'sms.settings',
     ],
 ];

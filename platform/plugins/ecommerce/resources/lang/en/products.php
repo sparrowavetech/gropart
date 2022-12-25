@@ -58,6 +58,7 @@ return [
             'quantity' => 'Quantity',
         ],
         'tax' => 'Tax',
+        'taxes' => 'Taxes',
         'is_default' => 'Is default',
         'action' => 'Action',
         'restock_quantity' => 'Restock quantity',

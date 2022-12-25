@@ -24,11 +24,11 @@ use Botble\Payment\Enums\PaymentStatusEnum;
 use Carbon\Carbon;
 use EcommerceHelper;
 use Exception;
-use Illuminate\Support\Facades\File;
 use Hash;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use InvoiceHelper;
 use OrderHelper;
@@ -41,52 +41,20 @@ use Throwable;
 
 class PublicController extends Controller
 {
-    /**
-     * @var CustomerInterface
-     */
-    protected $customerRepository;
+    protected CustomerInterface $customerRepository;
 
-    /**
-     * @var ProductInterface
-     */
-    protected $productRepository;
+    protected ProductInterface $productRepository;
 
-    /**
-     * @var AddressInterface
-     */
-    protected $addressRepository;
+    protected AddressInterface $addressRepository;
 
-    /**
-     * @var OrderInterface
-     */
-    protected $orderRepository;
+    protected OrderInterface $orderRepository;
 
-    /**
-     * @var OrderHistoryInterface
-     */
-    protected $orderHistoryRepository;
+    protected OrderHistoryInterface $orderHistoryRepository;
 
-    /**
-     * @var OrderReturnInterface
-     */
-    protected $orderReturnRepository;
+    protected OrderReturnInterface $orderReturnRepository;
 
-    /**
-     * @var OrderProductInterface
-     */
-    protected $orderProductRepository;
+    protected OrderProductInterface $orderProductRepository;
 
-    /**
-     * PublicController constructor.
-     *
-     * @param CustomerInterface $customerRepository
-     * @param ProductInterface $productRepository
-     * @param AddressInterface $addressRepository
-     * @param OrderInterface $orderRepository
-     * @param OrderHistoryInterface $orderHistoryRepository
-     * @param OrderReturnInterface $orderReturnRepository
-     * @param OrderProductInterface $orderProductRepository
-     */
     public function __construct(
         CustomerInterface $customerRepository,
         ProductInterface $productRepository,
@@ -211,7 +179,7 @@ class PublicController extends Controller
     {
         $currentUser = auth('customer')->user();
 
-        if (!Hash::check($request->input('old_password'), $currentUser->getAuthPassword())) {
+        if (! Hash::check($request->input('old_password'), $currentUser->getAuthPassword())) {
             return $response
                 ->setError()
                 ->setMessage(trans('acl::users.current_password_not_valid'));
@@ -271,7 +239,7 @@ class PublicController extends Controller
             ['address', 'products']
         );
 
-        if (!$order) {
+        if (! $order) {
             abort(404);
         }
 
@@ -304,11 +272,11 @@ class PublicController extends Controller
             'user_id' => auth('customer')->id(),
         ], ['*']);
 
-        if (!$order) {
+        if (! $order) {
             abort(404);
         }
 
-        if (!$order->canBeCanceled()) {
+        if (! $order->canBeCanceled()) {
             return $response->setError()
                 ->setMessage(trans('plugins/ecommerce::order.cancel_error'));
         }
@@ -423,7 +391,7 @@ class PublicController extends Controller
             'customer_id' => auth('customer')->id(),
         ]);
 
-        if (!$address) {
+        if (! $address) {
             abort(404);
         }
 
@@ -496,7 +464,7 @@ class PublicController extends Controller
             'user_id' => auth('customer')->id(),
         ]);
 
-        if (!$order || !$order->isInvoiceAvailable()) {
+        if (! $order || ! $order->isInvoiceAvailable()) {
             abort(404);
         }
 
@@ -551,10 +519,9 @@ class PublicController extends Controller
     }
 
     /**
-     * @param int $orderId
      * @return Response
      */
-    public function getReturnOrder($orderId)
+    public function getReturnOrder(int $orderId)
     {
         $order = $this->orderRepository->getFirstBy(
             [
@@ -566,7 +533,7 @@ class PublicController extends Controller
             ['products']
         );
 
-        if (!$order || !$order->canBeReturned()) {
+        if (! $order || ! $order->canBeReturned()) {
             abort(404);
         }
 
@@ -578,7 +545,11 @@ class PublicController extends Controller
                 route('customer.order_returns.request_view', $orderId)
             );
 
-        Theme::asset()->container('footer')->add('order-return-js', 'vendor/core/plugins/ecommerce/js/order-return.js', ['jquery']);
+        Theme::asset()->container('footer')->add(
+            'order-return-js',
+            'vendor/core/plugins/ecommerce/js/order-return.js',
+            ['jquery']
+        );
         Theme::asset()->add('order-return-css', 'vendor/core/plugins/ecommerce/css/order-return.css');
 
         return Theme::scope(
@@ -600,11 +571,11 @@ class PublicController extends Controller
             'user_id' => auth('customer')->id(),
         ]);
 
-        if (!$order) {
+        if (! $order) {
             abort(404);
         }
 
-        if (!$order->canBeReturned()) {
+        if (! $order->canBeReturned()) {
             return $response
                 ->setError()
                 ->withInput()
@@ -619,7 +590,7 @@ class PublicController extends Controller
 
         [$status, $data, $message] = OrderReturnHelper::returnOrder($order, $orderReturnData);
 
-        if (!$status) {
+        if (! $status) {
             return $response
                 ->setError()
                 ->withInput()
@@ -681,14 +652,17 @@ class PublicController extends Controller
             'user_id' => auth('customer')->id(),
         ]);
 
-        if (!$orderReturn) {
+        if (! $orderReturn) {
             abort(404);
         }
 
         Theme::breadcrumb()
             ->add(__('Home'), route('public.index'))
             ->add(__('Order Return Requests'), route('customer.order_returns'))
-            ->add(__('Order Return Requests :id', ['id' => $orderReturn->id]), route('customer.order_returns.detail', $orderReturn->id));
+            ->add(
+                __('Order Return Requests :id', ['id' => $orderReturn->id]),
+                route('customer.order_returns.detail', $orderReturn->id)
+            );
 
         return Theme::scope(
             'ecommerce.customers.order-returns.detail',
@@ -697,13 +671,9 @@ class PublicController extends Controller
         )->render();
     }
 
-    /**
-     * @param Request $request
-     * @return Response
-     */
-    public function getDownloads(Request $request)
+    public function getDownloads()
     {
-        if (!EcommerceHelper::isEnabledSupportDigitalProducts()) {
+        if (! EcommerceHelper::isEnabledSupportDigitalProducts()) {
             abort(404);
         }
 
@@ -742,7 +712,7 @@ class PublicController extends Controller
      */
     public function getDownload($id, BaseHttpResponse $response)
     {
-        if (!EcommerceHelper::isEnabledSupportDigitalProducts()) {
+        if (! EcommerceHelper::isEnabledSupportDigitalProducts()) {
             abort(404);
         }
 
@@ -763,23 +733,24 @@ class PublicController extends Controller
             ->with(['order', 'product'])
             ->first();
 
-        if (!$orderProduct) {
+        if (! $orderProduct) {
             abort(404);
         }
 
-        $zipName = 'digital-product-' . Str::slug($orderProduct->product_name) . Str::random(5) . '-' . Carbon::now()->format('Y-m-d-h-i-s') . '.zip';
+        $zipName = 'digital-product-' . Str::slug($orderProduct->product_name) . Str::random(5) . '-' . Carbon::now(
+        )->format('Y-m-d-h-i-s') . '.zip';
         $fileName = RvMedia::getRealPath($zipName);
         $zip = new Zipper();
         $zip->make($fileName);
         $product = $orderProduct->product;
         $productFiles = $product->id ? $product->productFiles : $orderProduct->productFiles;
 
-        if (!$productFiles->count()) {
+        if (! $productFiles->count()) {
             return $response->setError()->setMessage(__('Cannot found files'));
         }
         foreach ($productFiles as $file) {
             $filePath = RvMedia::getRealPath($file->url);
-            if (!RvMedia::isUsingCloud()) {
+            if (! RvMedia::isUsingCloud()) {
                 if (File::exists($filePath)) {
                     $zip->add($filePath);
                 }

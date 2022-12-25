@@ -14,16 +14,8 @@ class Withdrawal extends BaseModel
 {
     use EnumCastable;
 
-    /**
-     * The database table used by the model.
-     *
-     * @var string
-     */
     protected $table = 'mp_customer_withdrawals';
 
-    /**
-     * @var array
-     */
     protected $fillable = [
         'customer_id',
         'fee',
@@ -39,20 +31,13 @@ class Withdrawal extends BaseModel
         'transaction_id',
     ];
 
-    /**
-     * @var array
-     */
     protected $casts = [
         'status' => WithdrawalStatusEnum::class,
         'images' => 'array',
         'bank_info' => 'array',
     ];
 
-    /**
-     * The "booted" method of the model.
-     * @return void
-     */
-    protected static function booted()
+    protected static function booted(): void
     {
         static::updating(function (&$withdrawal) {
             if ($withdrawal->id) {
@@ -101,22 +86,17 @@ class Withdrawal extends BaseModel
 
     public function getNextStatuses(): array
     {
-        switch ($this->status->getValue()) {
-            case WithdrawalStatusEnum::PENDING:
-                $labels = Arr::except(WithdrawalStatusEnum::labels(), WithdrawalStatusEnum::COMPLETED);
-
-                break;
-            case WithdrawalStatusEnum::PROCESSING:
-                $labels = Arr::except(WithdrawalStatusEnum::labels(), WithdrawalStatusEnum::PENDING);
-
-                break;
-            default:
-                $labels = [$this->status->getValue() => $this->status->label()];
-
-                break;
-        }
-
-        return $labels;
+        return match ($this->status->getValue()) {
+            WithdrawalStatusEnum::PENDING => Arr::except(
+                WithdrawalStatusEnum::labels(),
+                WithdrawalStatusEnum::COMPLETED
+            ),
+            WithdrawalStatusEnum::PROCESSING => Arr::except(
+                WithdrawalStatusEnum::labels(),
+                WithdrawalStatusEnum::PENDING
+            ),
+            default => [$this->status->getValue() => $this->status->label()],
+        };
     }
 
     public function getStatusHelper(): ?string

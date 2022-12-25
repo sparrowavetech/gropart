@@ -9,13 +9,7 @@ use AuditLog;
 
 class CreatedContentListener
 {
-    /**
-     * Handle the event.
-     *
-     * @param CreatedContentEvent $event
-     * @return void
-     */
-    public function handle(CreatedContentEvent $event)
+    public function handle(CreatedContentEvent $event): void
     {
         try {
             if ($event->data->id) {

@@ -33,7 +33,7 @@ trait AccessProtectedTrait
      */
     protected function callProtected($instance, $method, $args = [])
     {
-        if (!($instance instanceof Closure)) {
+        if (! ($instance instanceof Closure)) {
             $instance = $this->createProtectedCaller($instance);
         }
 

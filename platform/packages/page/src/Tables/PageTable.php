@@ -8,6 +8,10 @@ use Botble\Page\Repositories\Interfaces\PageInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -15,45 +19,30 @@ use Yajra\DataTables\DataTables;
 
 class PageTable extends TableAbstract
 {
-    /**
-     * @var bool
-     */
     protected $hasActions = true;
 
-    /**
-     * @var bool
-     */
     protected $hasFilter = true;
 
-    /**
-     * PageTable constructor.
-     * @param DataTables $table
-     * @param UrlGenerator $urlGenerator
-     * @param PageInterface $pageRepository
-     */
     public function __construct(DataTables $table, UrlGenerator $urlGenerator, PageInterface $pageRepository)
     {
         parent::__construct($table, $urlGenerator);
 
         $this->repository = $pageRepository;
 
-        if (!Auth::user()->hasAnyPermission(['pages.edit', 'pages.destroy'])) {
+        if (! Auth::user()->hasAnyPermission(['pages.edit', 'pages.destroy'])) {
             $this->hasOperations = false;
             $this->hasActions = false;
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $pageTemplates = get_page_templates();
 
         $data = $this->table
             ->eloquent($this->query())
             ->editColumn('name', function ($item) {
-                if (!Auth::user()->hasPermission('posts.edit')) {
+                if (! Auth::user()->hasPermission('posts.edit')) {
                     $name = $item->name;
                 } else {
                     $name = Html::link(route('pages.edit', $item->id), $item->name);
@@ -86,10 +75,7 @@ class PageTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    /**
-     * @return mixed
-     */
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
         $query = $this->repository->getModel()->select([
             'id',
@@ -102,9 +88,6 @@ class PageTable extends TableAbstract
         return $this->applyScopes($query);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function columns(): array
     {
         return [
@@ -133,25 +116,16 @@ class PageTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function buttons(): array
     {
         return $this->addCreateButton(route('pages.create'), 'pages.create');
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function bulkActions(): array
     {
         return $this->addDeleteAction(route('pages.deletes'), 'pages.destroy', parent::bulkActions());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getBulkChanges(): array
     {
         return [

@@ -12,10 +12,8 @@ class DonutChart extends Chart
      * colors than segments, the colors will cycle back to the start of the array when exhausted.
      *
      * @brief Colors
-     *
-     * @var array
      */
-    protected $colors = [
+    protected array $colors = [
         '#0B62A4',
         '#3980B5',
         '#679DC6',
@@ -37,20 +35,12 @@ class DonutChart extends Chart
      * given value.
      *
      * @brief Formatter
-     *
-     * @var string
      */
-    protected $formatter = '';
+    protected string $formatter = '';
 
-    /**
-     * @var string
-     */
-    protected $backgroundColor = '#FFFFFF';
+    protected string $backgroundColor = '#FFFFFF';
 
-    /**
-     * @var string
-     */
-    protected $labelColor = '#000000';
+    protected string $labelColor = '#000000';
 
     /**
      * Create an instance of MorrisDonutCharts class

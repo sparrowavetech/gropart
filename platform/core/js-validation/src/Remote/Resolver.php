@@ -12,30 +12,13 @@ class Resolver
 {
     use AccessProtectedTrait;
 
-    /**
-     * @var Closure
-     */
-    protected $resolver;
+    protected ?Closure $resolver = null;
 
-    /**
-     * @var ValidationFactory
-     */
-    protected $factory;
+    protected ValidationFactory $factory;
 
-    /**
-     * Whether to escape validation messages.
-     *
-     * @var bool
-     */
-    protected $escape;
+    protected bool $escape;
 
-    /**
-     * RemoteValidator constructor.
-     *
-     * @param ValidationFactory $factory
-     * @param bool $escape
-     */
-    public function __construct(ValidationFactory $factory, $escape = false)
+    public function __construct(ValidationFactory $factory, bool $escape = false)
     {
         $this->factory = $factory;
         $this->resolver = $this->getProtected($factory, 'resolver');

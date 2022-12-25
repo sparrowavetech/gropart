@@ -15,11 +15,11 @@ use Botble\Theme\Http\Requests\CustomHtmlRequest;
 use Botble\Theme\Http\Requests\CustomJsRequest;
 use Botble\Theme\Services\ThemeService;
 use Exception;
-use Illuminate\Support\Facades\File;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\File;
 use Theme;
 use ThemeOption;
 
@@ -30,7 +30,7 @@ class ThemeController extends BaseController
      */
     public function index()
     {
-        if (!config('packages.theme.general.display_theme_manager_in_admin_panel', true)) {
+        if (! config('packages.theme.general.display_theme_manager_in_admin_panel', true)) {
             abort(404);
         }
 
@@ -100,7 +100,7 @@ class ThemeController extends BaseController
      */
     public function postActivateTheme(Request $request, BaseHttpResponse $response, ThemeService $themeService)
     {
-        if (!config('packages.theme.general.display_theme_manager_in_admin_panel', true)) {
+        if (! config('packages.theme.general.display_theme_manager_in_admin_panel', true)) {
             abort(404);
         }
 
@@ -157,7 +157,7 @@ class ThemeController extends BaseController
         } else {
             $saved = BaseHelper::saveFileData($file, $css, false);
 
-            if (!$saved) {
+            if (! $saved) {
                 return $response
                     ->setError()
                     ->setMessage(
@@ -175,7 +175,7 @@ class ThemeController extends BaseController
      */
     public function getCustomJs(FormBuilder $formBuilder)
     {
-        if (!config('packages.theme.general.enable_custom_js')) {
+        if (! config('packages.theme.general.enable_custom_js')) {
             abort(404);
         }
 
@@ -205,7 +205,7 @@ class ThemeController extends BaseController
      */
     public function postCustomJs(CustomJsRequest $request, BaseHttpResponse $response)
     {
-        if (!config('packages.theme.general.enable_custom_js')) {
+        if (! config('packages.theme.general.enable_custom_js')) {
             abort(404);
         }
 
@@ -228,7 +228,7 @@ class ThemeController extends BaseController
      */
     public function postRemoveTheme(Request $request, BaseHttpResponse $response, ThemeService $themeService)
     {
-        if (!config('packages.theme.general.display_theme_manager_in_admin_panel', true)) {
+        if (! config('packages.theme.general.display_theme_manager_in_admin_panel', true)) {
             abort(404);
         }
 
@@ -261,7 +261,7 @@ class ThemeController extends BaseController
      */
     public function getCustomHtml(FormBuilder $formBuilder)
     {
-        if (!config('packages.theme.general.enable_custom_html')) {
+        if (! config('packages.theme.general.enable_custom_html')) {
             abort(404);
         }
 
@@ -291,7 +291,7 @@ class ThemeController extends BaseController
      */
     public function postCustomHtml(CustomHtmlRequest $request, BaseHttpResponse $response)
     {
-        if (!config('packages.theme.general.enable_custom_html')) {
+        if (! config('packages.theme.general.enable_custom_html')) {
             abort(404);
         }
 

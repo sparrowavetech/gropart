@@ -16,20 +16,10 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ExportController extends BaseController
 {
-    /**
-     * @var ProductInterface
-     */
-    protected $productRepository;
+    protected ProductInterface $productRepository;
 
-    /**
-     * @var ProductVariationInterface
-     */
-    protected $productVariationRepository;
+    protected ProductVariationInterface $productVariationRepository;
 
-    /**
-     * @param ProductInterface $productRepository
-     * @param ProductVariationInterface $productVariationRepository
-     */
     public function __construct(
         ProductInterface $productRepository,
         ProductVariationInterface $productVariationRepository

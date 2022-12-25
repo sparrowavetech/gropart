@@ -15,15 +15,8 @@ class NewsletterController extends BaseController
 {
     use HasDeleteManyItemsTrait;
 
-    /**
-     * @var NewsletterInterface
-     */
-    protected $newsletterRepository;
+    protected NewsletterInterface $newsletterRepository;
 
-    /**
-     * NewsletterController constructor.
-     * @param NewsletterInterface $newsletterRepository
-     */
     public function __construct(NewsletterInterface $newsletterRepository)
     {
         $this->newsletterRepository = $newsletterRepository;
@@ -31,8 +24,7 @@ class NewsletterController extends BaseController
 
     /**
      * @param NewsletterTable $dataTable
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     * @throws \Throwable
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Symfony\Component\HttpFoundation\Response
      */
     public function index(NewsletterTable $dataTable)
     {

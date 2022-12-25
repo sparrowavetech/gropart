@@ -23,21 +23,10 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class BulkImportController extends BaseController
 {
-    /**
-     * @var LocationImport
-     */
-    protected $locationImport;
+    protected LocationImport $locationImport;
 
-    /**
-     * @var LocationImport
-     */
-    protected $validateLocationImport;
+    protected ValidateLocationImport $validateLocationImport;
 
-    /**
-     * BulkImportController constructor.
-     * @param LocationImport $locationImport
-     * @param ValidateLocationImport $validateLocationImport
-     */
     public function __construct(LocationImport $locationImport, ValidateLocationImport $validateLocationImport)
     {
         $this->locationImport = $locationImport;

@@ -3,32 +3,28 @@
 namespace Database\Seeders;
 
 use Botble\Base\Supports\BaseSeeder;
+use Botble\Ecommerce\Enums\ShippingRuleTypeEnum;
 use Botble\Ecommerce\Models\Shipping;
 use Botble\Ecommerce\Models\ShippingRule;
-use Illuminate\Support\Facades\DB;
+use Botble\Ecommerce\Models\ShippingRuleItem;
 
 class ShippingSeeder extends BaseSeeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
         Shipping::truncate();
         ShippingRule::truncate();
-        DB::table('ec_shipping_rule_items')->truncate();
+        ShippingRuleItem::truncate();
 
         Shipping::create(['title' => 'All']);
 
         ShippingRule::create([
-            'name'        => 'Delivery',
+            'name' => 'Free delivery',
             'shipping_id' => 1,
-            'type'        => 'base_on_price',
-            'from'        => 0,
-            'to'          => null,
-            'price'       => 0,
+            'type' => ShippingRuleTypeEnum::BASED_ON_PRICE,
+            'from' => 0,
+            'to' => null,
+            'price' => 0,
         ]);
     }
 }

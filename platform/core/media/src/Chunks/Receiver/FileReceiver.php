@@ -52,7 +52,7 @@ class FileReceiver
         $this->chunkStorage = $chunkStorage === null ? ChunkStorage::storage() : $chunkStorage;
 
         if ($this->isUploaded()) {
-            if (!$this->file->isValid()) {
+            if (! $this->file->isValid()) {
                 throw new UploadFailedException($this->file->getErrorMessage());
             }
 

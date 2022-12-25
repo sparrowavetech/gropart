@@ -6,12 +6,7 @@ use Botble\Ecommerce\Http\Requests\ProductRequest as BaseProductRequest;
 
 class MarketPlaceSettingFormRequest extends BaseProductRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         $rules = [];
         if ($this->input('marketplace_enable_commission_fee_for_each_category')) {
@@ -28,7 +23,7 @@ class MarketPlaceSettingFormRequest extends BaseProductRequest
         return $rules;
     }
 
-    public function attributes()
+    public function attributes(): array
     {
         $attributes = [];
 

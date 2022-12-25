@@ -7,10 +7,7 @@ use Kris\LaravelFormBuilder\Fields\FormField;
 
 class MediaImagesField extends FormField
 {
-    /**
-     * {@inheritDoc}
-     */
-    protected function getTemplate()
+    protected function getTemplate(): string
     {
         Assets::addScripts(['jquery-ui']);
 

@@ -8,28 +8,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ShipmentHistory extends BaseModel
 {
-    /**
-     * @var string
-     */
     protected $table = 'ec_shipment_histories';
 
-    /**
-     * @var array
-     */
     protected $fillable = [
         'action',
         'description',
         'user_id',
         'shipment_id',
         'order_id',
-    ];
-
-    /**
-     * @var array
-     */
-    protected $dates = [
-        'created_at',
-        'updated_at',
     ];
 
     public function user(): BelongsTo

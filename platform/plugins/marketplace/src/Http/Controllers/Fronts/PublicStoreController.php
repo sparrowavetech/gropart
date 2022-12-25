@@ -114,7 +114,7 @@ class PublicStoreController
             'prefix' => SlugHelper::getPrefix(Store::class),
         ]);
 
-        if (!$slug) {
+        if (! $slug) {
             abort(404);
         }
 
@@ -129,7 +129,7 @@ class PublicStoreController
 
         $store = $this->storeRepository->getFirstBy($condition, ['*'], ['slugable', 'metadata']);
 
-        if (!$store) {
+        if (! $store) {
             abort(404);
         }
 
@@ -174,7 +174,7 @@ class PublicStoreController
 
             $view = Theme::getThemeNamespace('views.marketplace.stores.items');
 
-            if (!view()->exists($view)) {
+            if (! view()->exists($view)) {
                 $view = 'plugins/marketplace::themes.stores.items';
             }
 
@@ -193,11 +193,11 @@ class PublicStoreController
      */
     public function checkStoreUrl(CheckStoreUrlRequest $request, BaseHttpResponse $response)
     {
-        if (!$request->ajax()) {
+        if (! $request->ajax()) {
             abort(404);
         }
         $slug = $request->input('url');
-        $slug = Str::slug($slug, '-', !SlugHelper::turnOffAutomaticUrlTranslationIntoLatin() ? 'en' : false);
+        $slug = Str::slug($slug, '-', ! SlugHelper::turnOffAutomaticUrlTranslationIntoLatin() ? 'en' : false);
 
         $existing = SlugHelper::getSlug($slug, SlugHelper::getPrefix(Store::class), Store::class);
 

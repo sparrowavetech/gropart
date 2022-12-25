@@ -15,7 +15,7 @@
                 {!! apply_filters(BASE_FILTER_TOP_HEADER_LAYOUT, null) !!}
             @endif
 
-            @if (isset($themes) && is_array($themes) && count($themes) > 1 && setting('enable_change_admin_theme') != false)
+            @if (isset($themes) && is_array($themes) && count($themes) > 1 && setting('enable_change_admin_theme'))
                 <li class="dropdown">
                     <a href="javascript:;" class="dropdown-toggle dropdown-header-name" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <span class="d-inline d-sm-none"><i class="fas fa-palette"></i></span>

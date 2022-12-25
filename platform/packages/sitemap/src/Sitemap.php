@@ -11,58 +11,18 @@ use Illuminate\Contracts\Routing\ResponseFactory as ResponseFactory;
 
 class Sitemap
 {
-    /**
-     * Model instance.
-     *
-     * @var Model
-     */
-    public $model = null;
+    public ?Model $model = null;
 
-    /**
-     * CacheRepository instance.
-     *
-     * @var CacheRepository
-     */
-    public $cache = null;
+    public ?CacheRepository $cache = null;
 
-    /**
-     * ConfigRepository instance.
-     *
-     * @var ConfigRepository
-     */
-    protected $configRepository = null;
+    protected ?ConfigRepository $configRepository = null;
 
-    /**
-     * Filesystem instance.
-     *
-     * @var Filesystem
-     */
-    protected $file = null;
+    protected ?Filesystem $file = null;
 
-    /**
-     * ResponseFactory instance.
-     *
-     * @var ResponseFactory
-     */
-    protected $response = null;
+    protected ?ResponseFactory $response = null;
 
-    /**
-     * ViewFactory instance.
-     *
-     * @var ViewFactory
-     */
-    protected $view = null;
+    protected ?ViewFactory $view = null;
 
-    /**
-     * Using constructor we populate our model from configuration file and loading dependencies.
-     *
-     * @param array $config
-     * @param CacheRepository $cache
-     * @param ConfigRepository $configRepository
-     * @param Filesystem $file
-     * @param ResponseFactory $response
-     * @param ViewFactory $view
-     */
     public function __construct(
         array $config,
         CacheRepository $cache,
@@ -80,14 +40,7 @@ class Sitemap
         $this->model = new Model($config);
     }
 
-    /**
-     * Set cache options.
-     *
-     * @param string|null $key
-     * @param null $duration
-     * @param bool $useCache
-     */
-    public function setCache(?string $key = null, $duration = null, bool $useCache = true)
+    public function setCache(?string $key = null, $duration = null, bool $useCache = true): void
     {
         $this->model->setUseCache($useCache);
 
@@ -167,34 +120,34 @@ class Sitemap
         }
 
         // set default values
-        if (!isset($loc)) {
+        if (! isset($loc)) {
             $loc = '/';
         }
-        if (!isset($lastmod)) {
+        if (! isset($lastmod)) {
             $lastmod = null;
         }
-        if (!isset($priority)) {
+        if (! isset($priority)) {
             $priority = null;
         }
-        if (!isset($freq)) {
+        if (! isset($freq)) {
             $freq = null;
         }
-        if (!isset($title)) {
+        if (! isset($title)) {
             $title = null;
         }
-        if (!isset($images)) {
+        if (! isset($images)) {
             $images = [];
         }
-        if (!isset($translations)) {
+        if (! isset($translations)) {
             $translations = [];
         }
-        if (!isset($alternates)) {
+        if (! isset($alternates)) {
             $alternates = [];
         }
-        if (!isset($videos)) {
+        if (! isset($videos)) {
             $videos = [];
         }
-        if (!isset($googlenews)) {
+        if (! isset($googlenews)) {
             $googlenews = [];
         }
 
@@ -232,10 +185,10 @@ class Sitemap
 
             if ($videos) {
                 foreach ($videos as $k => $video) {
-                    if (!empty($video['title'])) {
+                    if (! empty($video['title'])) {
                         $videos[$k]['title'] = htmlentities($video['title'], ENT_XML1);
                     }
-                    if (!empty($video['description'])) {
+                    if (! empty($video['description'])) {
                         $videos[$k]['description'] = htmlentities($video['description'], ENT_XML1);
                     }
                 }
@@ -322,11 +275,11 @@ class Sitemap
             );
         }
 
-        if (!$this->model->getLink()) {
+        if (! $this->model->getLink()) {
             $this->model->setLink($this->configRepository->get('app.url'));
         }
 
-        if (!$this->model->getTitle()) {
+        if (! $this->model->getTitle()) {
             $this->model->setTitle('Sitemap for ' . $this->model->getLink());
         }
 
@@ -349,27 +302,52 @@ class Sitemap
             $style = null;
         }
 
-        switch ($format) {
-            case 'ror-rss':
-                return ['content' => $this->view->make('packages/sitemap::ror-rss', ['items' => $this->model->getItems(), 'channel' => $channel, 'style' => $style])->render(), 'headers' => ['Content-type' => 'text/rss+xml; charset=utf-8']];
-            case 'ror-rdf':
-                return ['content' => $this->view->make('packages/sitemap::ror-rdf', ['items' => $this->model->getItems(), 'channel' => $channel, 'style' => $style])->render(), 'headers' => ['Content-type' => 'text/rdf+xml; charset=utf-8']];
-            case 'html':
-                return ['content' => $this->view->make('packages/sitemap::html', ['items' => $this->model->getItems(), 'channel' => $channel, 'style' => $style])->render(), 'headers' => ['Content-type' => 'text/html; charset=utf-8']];
-            case 'txt':
-                return ['content' => $this->view->make('packages/sitemap::txt', ['items' => $this->model->getItems(), 'style' => $style])->render(), 'headers' => ['Content-type' => 'text/plain; charset=utf-8']];
-            case 'sitemapindex':
-                return ['content' => $this->view->make('packages/sitemap::sitemapindex', ['sitemaps' => $this->model->getSitemaps(), 'style' => $style])->render(), 'headers' => ['Content-type' => 'text/xml; charset=utf-8']];
-            default:
-                return ['content' => $this->view->make('packages/sitemap::' . $format, ['items' => $this->model->getItems(), 'style' => $style])->render(), 'headers' => ['Content-type' => 'text/xml; charset=utf-8']];
-        }
+        return match ($format) {
+            'ror-rss' => [
+                'content' => $this->view->make(
+                    'packages/sitemap::ror-rss',
+                    ['items' => $this->model->getItems(), 'channel' => $channel, 'style' => $style]
+                )->render(),
+                'headers' => ['Content-type' => 'text/rss+xml; charset=utf-8'],
+            ],
+            'ror-rdf' => [
+                'content' => $this->view->make(
+                    'packages/sitemap::ror-rdf',
+                    ['items' => $this->model->getItems(), 'channel' => $channel, 'style' => $style]
+                )->render(),
+                'headers' => ['Content-type' => 'text/rdf+xml; charset=utf-8'],
+            ],
+            'html' => [
+                'content' => $this->view->make(
+                    'packages/sitemap::html',
+                    ['items' => $this->model->getItems(), 'channel' => $channel, 'style' => $style]
+                )->render(),
+                'headers' => ['Content-type' => 'text/html; charset=utf-8'],
+            ],
+            'txt' => [
+                'content' => $this->view->make(
+                    'packages/sitemap::txt',
+                    ['items' => $this->model->getItems(), 'style' => $style]
+                )->render(),
+                'headers' => ['Content-type' => 'text/plain; charset=utf-8'],
+            ],
+            'sitemapindex' => [
+                'content' => $this->view->make(
+                    'packages/sitemap::sitemapindex',
+                    ['sitemaps' => $this->model->getSitemaps(), 'style' => $style]
+                )->render(),
+                'headers' => ['Content-type' => 'text/xml; charset=utf-8'],
+            ],
+            default => [
+                'content' => $this->view->make(
+                    'packages/sitemap::' . $format,
+                    ['items' => $this->model->getItems(), 'style' => $style]
+                )->render(),
+                'headers' => ['Content-type' => 'text/xml; charset=utf-8'],
+            ],
+        };
     }
 
-    /**
-     * Checks if content is cached.
-     *
-     * @return bool
-     */
     public function isCached(): bool
     {
         return $this->model->isUseCache() && $this->cache->has($this->model->getCacheKey());
@@ -427,7 +405,7 @@ class Sitemap
             ('google-news' != $format) ? $max = 50000 : $max = 1000;
 
             // check if limiting size of items array is enabled
-            if (!$this->model->isUseLimitSize()) {
+            if (! $this->model->isUseLimitSize()) {
                 // use sitemapindex and generate partial sitemaps
                 foreach (array_chunk($this->model->getItems(), $max) as $key => $item) {
                     // reset current items

@@ -8,9 +8,6 @@ use Botble\Base\Forms\FormAbstract;
 
 class ProfileForm extends FormAbstract
 {
-    /**
-     * {@inheritDoc}
-     */
     public function buildForm()
     {
         $this

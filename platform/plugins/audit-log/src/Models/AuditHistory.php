@@ -13,22 +13,8 @@ class AuditHistory extends BaseModel
 {
     use MassPrunable;
 
-    /**
-     * @var string
-     */
     protected $table = 'audit_histories';
 
-    /**
-     * @var array
-     */
-    protected $dates = [
-        'created_at',
-        'updated_at',
-    ];
-
-    /**
-     * @var array
-     */
     protected $fillable = [
         'user_agent',
         'ip_address',
@@ -42,18 +28,12 @@ class AuditHistory extends BaseModel
         'request',
     ];
 
-    /**
-     * @return BelongsTo
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class)->withDefault();
     }
 
-    /**
-     * @return Builder
-     */
-    public function prunable()
+    public function prunable(): Builder
     {
         return $this->whereDate('created_at', '>', Carbon::now()->subDays(30)->toDateString());
     }

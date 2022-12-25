@@ -6,9 +6,8 @@
         <meta content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, user-scalable=1" name="viewport"/>
         <meta name="csrf-token" content="{{ csrf_token() }}" />
 
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link href="https://fonts.googleapis.com/css2?family={{ urlencode(theme_option('primary_font', 'Muli')) }}:wght@400;600;700&display=swap" rel="stylesheet" />
+        <link rel="preconnect" href="{{ $fontURL = config('core.base.general.google_fonts_url', 'https://fonts.bunny.net') }}" />
+        <link href="{{ $fontURL }}/css2?family={{ urlencode(theme_option('primary_font', 'Muli')) }}:wght@400;600;700&display=swap" rel="stylesheet" />
         <link rel="stylesheet" href="{{ url('/') }}/themes/gropart/plugins/font-awesome/css/font-awesome.min.css" />
         <style>
             :root {
@@ -61,7 +60,7 @@
                         <div class="col-6">
                             <div class="header-info header-info-right">
                                 <ul>
-                                    @if (is_plugin_active('marketplace'))
+                                @if (is_plugin_active('marketplace'))
                                          @if (auth('customer')->check())
                                             @if (auth('customer')->user()->is_vendor)
                                                 <li>
@@ -321,4 +320,3 @@
                 </div>
             </div>
         </header>
-

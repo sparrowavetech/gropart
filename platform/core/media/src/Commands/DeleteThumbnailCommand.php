@@ -2,57 +2,26 @@
 
 namespace Botble\Media\Commands;
 
-use Botble\Media\Repositories\Eloquent\MediaFileRepository;
 use Botble\Media\Repositories\Interfaces\MediaFileInterface;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 use RvMedia;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+#[AsCommand('cms:media:thumbnail:delete', 'Delete thumbnails for all images')]
 class DeleteThumbnailCommand extends Command
 {
-    /**
-     * The console command signature.
-     *
-     * @var string
-     */
-    protected $signature = 'cms:media:thumbnail:delete';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Delete thumbnails for all images';
-
-    /**
-     * @var MediaFileRepository
-     */
-    protected $fileRepository;
-
-    /**
-     * DeleteThumbnailCommand constructor.
-     * @param MediaFileInterface $fileRepository
-     */
-    public function __construct(MediaFileInterface $fileRepository)
+    public function handle(MediaFileInterface $fileRepository): int
     {
-        parent::__construct();
-        $this->fileRepository = $fileRepository;
-    }
-
-    /**
-     * @return int
-     */
-    public function handle()
-    {
-        $files = $this->fileRepository->allBy([], [], ['url', 'mime_type', 'folder_id']);
+        $files = $fileRepository->allBy([], [], ['url', 'mime_type', 'folder_id']);
 
         $this->info('Processing ' . $files->count() . ' ' . Str::plural('file', $files->count()) . '...');
 
         $errors = [];
 
         foreach ($files as $file) {
-            if (!$file->canGenerateThumbnails()) {
+            if (! $file->canGenerateThumbnails()) {
                 continue;
             }
 
@@ -79,9 +48,9 @@ class DeleteThumbnailCommand extends Command
 
             $this->table(['File directory'], $errors);
 
-            return 1;
+            return self::FAILURE;
         }
 
-        return 0;
+        return self::SUCCESS;
     }
 }

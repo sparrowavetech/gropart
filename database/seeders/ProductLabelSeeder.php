@@ -8,26 +8,21 @@ use Illuminate\Support\Facades\DB;
 
 class ProductLabelSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
         ProductLabel::truncate();
 
         $productCollections = [
             [
-                'name'  => 'Hot',
+                'name' => 'Hot',
                 'color' => '#ec2434',
             ],
             [
-                'name'  => 'New',
+                'name' => 'New',
                 'color' => '#00c9a7',
             ],
             [
-                'name'  => 'Sale',
+                'name' => 'Sale',
                 'color' => '#fe9931',
             ],
         ];
@@ -40,13 +35,13 @@ class ProductLabelSeeder extends Seeder
 
         $translations = [
             [
-                'name'  => 'Nổi bật',
+                'name' => 'Nổi bật',
             ],
             [
-                'name'  => 'Mới',
+                'name' => 'Mới',
             ],
             [
-                'name'  => 'Giảm giá',
+                'name' => 'Giảm giá',
             ],
         ];
 

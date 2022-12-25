@@ -3,7 +3,6 @@
 namespace Botble\Ecommerce\Http\Controllers;
 
 use Assets;
-use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Enums\ShippingCodStatusEnum;
@@ -25,32 +24,14 @@ use Throwable;
 
 class ShipmentController extends BaseController
 {
-    /**
-     * @var OrderInterface
-     */
-    protected $orderRepository;
+    protected OrderInterface $orderRepository;
 
-    /**
-     * @var ShipmentInterface
-     */
-    protected $shipmentRepository;
+    protected ShipmentInterface $shipmentRepository;
 
-    /**
-     * @var OrderHistoryInterface
-     */
-    protected $orderHistoryRepository;
+    protected OrderHistoryInterface $orderHistoryRepository;
 
-    /**
-     * @var ShipmentHistoryInterface
-     */
-    protected $shipmentHistoryRepository;
+    protected ShipmentHistoryInterface $shipmentHistoryRepository;
 
-    /**
-     * @param OrderInterface $orderRepository
-     * @param ShipmentInterface $shipmentRepository
-     * @param OrderHistoryInterface $orderHistoryRepository
-     * @param ShipmentHistoryInterface $shipmentHistoryRepository
-     */
     public function __construct(
         OrderInterface $orderRepository,
         ShipmentInterface $shipmentRepository,
@@ -192,12 +173,11 @@ class ShipmentController extends BaseController
     }
 
     /**
-     * @param Request $request
      * @param int $id
      * @param BaseHttpResponse $response
      * @return BaseHttpResponse
      */
-    public function destroy(Request $request, $id, BaseHttpResponse $response)
+    public function destroy($id, BaseHttpResponse $response)
     {
         try {
             $review = $this->shipmentRepository->findOrFail($id);

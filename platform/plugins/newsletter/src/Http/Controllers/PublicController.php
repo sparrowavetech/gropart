@@ -16,15 +16,8 @@ use Illuminate\Support\Facades\URL;
 
 class PublicController extends Controller
 {
-    /**
-     * @var NewsletterInterface
-     */
-    protected $newsletterRepository;
+    protected NewsletterInterface $newsletterRepository;
 
-    /**
-     * PublicController constructor.
-     * @param NewsletterInterface $newsletterRepository
-     */
     public function __construct(NewsletterInterface $newsletterRepository)
     {
         $this->newsletterRepository = $newsletterRepository;
@@ -38,7 +31,7 @@ class PublicController extends Controller
     public function postSubscribe(NewsletterRequest $request, BaseHttpResponse $response)
     {
         $newsletter = $this->newsletterRepository->getFirstBy(['email' => $request->input('email')]);
-        if (!$newsletter) {
+        if (! $newsletter) {
             $newsletter = $this->newsletterRepository->createOrUpdate($request->input());
 
             $mailchimpApiKey = setting('newsletter_mailchimp_api_key');
@@ -91,7 +84,7 @@ class PublicController extends Controller
      */
     public function getUnsubscribe($id, Request $request, BaseHttpResponse $response)
     {
-        if (!URL::hasValidSignature($request)) {
+        if (! URL::hasValidSignature($request)) {
             abort(404);
         }
 

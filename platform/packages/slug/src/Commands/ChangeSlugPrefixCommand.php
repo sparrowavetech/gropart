@@ -4,27 +4,14 @@ namespace Botble\Slug\Commands;
 
 use Botble\Slug\Repositories\Interfaces\SlugInterface;
 use Illuminate\Console\Command;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 
+#[AsCommand('cms:slug:prefix', 'Change/set prefix for slugs')]
 class ChangeSlugPrefixCommand extends Command
 {
-    /**
-     * The console command signature.
-     *
-     * @var string
-     */
-    protected $signature = 'cms:slug:prefix {class : model class} {--prefix= : The prefix of slugs}';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Change/set prefix for slugs';
-
-    /**
-     * Execute the console command.
-     */
-    public function handle()
+    public function handle(): int
     {
         $data = app(SlugInterface::class)->update(
             [
@@ -37,6 +24,12 @@ class ChangeSlugPrefixCommand extends Command
 
         $this->info('Processed ' . $data . ' item(s)!');
 
-        return 0;
+        return self::SUCCESS;
+    }
+
+    protected function configure(): void
+    {
+        $this->addArgument('class', InputArgument::REQUIRED, 'The model class');
+        $this->addOption('prefix', null, InputOption::VALUE_REQUIRED, 'The prefix of slugs');
     }
 }

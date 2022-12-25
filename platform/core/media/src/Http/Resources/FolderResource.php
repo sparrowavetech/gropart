@@ -3,16 +3,11 @@
 namespace Botble\Media\Http\Resources;
 
 use BaseHelper;
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class FolderResource extends JsonResource
 {
-    /**
-     * @param Request $request
-     * @return array
-     */
-    public function toArray($request)
+    public function toArray($request): array
     {
         return [
             'id' => $this->id,

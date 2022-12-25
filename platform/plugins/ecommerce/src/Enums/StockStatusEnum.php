@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Enums;
 
 use Botble\Base\Supports\Enum;
 use Html;
+use Illuminate\Support\HtmlString;
 
 /**
  * @method static StockStatusEnum IN_STOCK()
@@ -16,28 +17,18 @@ class StockStatusEnum extends Enum
     public const OUT_OF_STOCK = 'out_of_stock';
     public const ON_BACKORDER = 'on_backorder';
 
-    /**
-     * @var string
-     */
     public static $langPath = 'plugins/ecommerce::products.stock_statuses';
 
-    /**
-     * @return string
-     */
-    public function toHtml()
+    public function toHtml(): HtmlString|string
     {
-        switch ($this->value) {
-            case self::IN_STOCK:
-                return Html::tag('span', self::IN_STOCK()->label(), ['class' => 'text-success'])
-                    ->toHtml();
-            case self::OUT_OF_STOCK:
-                return Html::tag('span', self::OUT_OF_STOCK()->label(), ['class' => 'text-danger'])
-                    ->toHtml();
-            case self::ON_BACKORDER:
-                return Html::tag('span', self::ON_BACKORDER()->label(), ['class' => 'text-info'])
-                    ->toHtml();
-            default:
-                return parent::toHtml();
-        }
+        return match ($this->value) {
+            self::IN_STOCK => Html::tag('span', self::IN_STOCK()->label(), ['class' => 'text-success'])
+                ->toHtml(),
+            self::OUT_OF_STOCK => Html::tag('span', self::OUT_OF_STOCK()->label(), ['class' => 'text-danger'])
+                ->toHtml(),
+            self::ON_BACKORDER => Html::tag('span', self::ON_BACKORDER()->label(), ['class' => 'text-info'])
+                ->toHtml(),
+            default => parent::toHtml(),
+        };
     }
 }

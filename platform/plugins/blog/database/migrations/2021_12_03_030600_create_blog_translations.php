@@ -5,14 +5,9 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class () extends Migration {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
-        if (!Schema::hasTable('posts_translations')) {
+        if (! Schema::hasTable('posts_translations')) {
             Schema::create('posts_translations', function (Blueprint $table) {
                 $table->string('lang_code');
                 $table->integer('posts_id');
@@ -24,7 +19,7 @@ return new class () extends Migration {
             });
         }
 
-        if (!Schema::hasTable('categories_translations')) {
+        if (! Schema::hasTable('categories_translations')) {
             Schema::create('categories_translations', function (Blueprint $table) {
                 $table->string('lang_code');
                 $table->integer('categories_id');
@@ -35,7 +30,7 @@ return new class () extends Migration {
             });
         }
 
-        if (!Schema::hasTable('tags_translations')) {
+        if (! Schema::hasTable('tags_translations')) {
             Schema::create('tags_translations', function (Blueprint $table) {
                 $table->string('lang_code');
                 $table->integer('tags_id');
@@ -47,12 +42,7 @@ return new class () extends Migration {
         }
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('posts_translations');
         Schema::dropIfExists('categories_translations');

@@ -40,27 +40,12 @@ use Throwable;
 
 class UserController extends BaseController
 {
-    /**
-     * @var UserInterface
-     */
-    protected $userRepository;
+    protected UserInterface $userRepository;
 
-    /**
-     * @var RoleInterface
-     */
-    protected $roleRepository;
+    protected RoleInterface $roleRepository;
 
-    /**
-     * @var MediaFileInterface
-     */
-    protected $fileRepository;
+    protected MediaFileInterface $fileRepository;
 
-    /**
-     * UserController constructor.
-     * @param UserInterface $userRepository
-     * @param RoleInterface $roleRepository
-     * @param MediaFileInterface $fileRepository
-     */
     public function __construct(
         UserInterface $userRepository,
         RoleInterface $roleRepository,
@@ -133,7 +118,7 @@ class UserController extends BaseController
         try {
             $user = $this->userRepository->findOrFail($id);
 
-            if (!$request->user()->isSuperUser() && $user->isSuperUser()) {
+            if (! $request->user()->isSuperUser() && $user->isSuperUser()) {
                 return $response
                     ->setError()
                     ->setMessage(trans('core/acl::users.cannot_delete_super_user'));
@@ -143,7 +128,7 @@ class UserController extends BaseController
             event(new DeletedContentEvent(USER_MODULE_SCREEN_NAME, $request, $user));
 
             return $response->setMessage(trans('core/acl::users.deleted'));
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return $response
                 ->setError()
                 ->setMessage(trans('core/acl::users.cannot_delete'));
@@ -173,7 +158,7 @@ class UserController extends BaseController
 
             try {
                 $user = $this->userRepository->findOrFail($id);
-                if (!$request->user()->isSuperUser() && $user->isSuperUser()) {
+                if (! $request->user()->isSuperUser() && $user->isSuperUser()) {
                     continue;
                 }
                 $this->userRepository->delete($user);
@@ -213,7 +198,7 @@ class UserController extends BaseController
 
         $canChangeProfile = $request->user()->getKey() == $id || $request->user()->isSuperUser();
 
-        if (!$canChangeProfile) {
+        if (! $canChangeProfile) {
             $form->disableFields();
             $form->removeActionButtons();
             $form->setActionButtons(' ');
@@ -363,7 +348,7 @@ class UserController extends BaseController
      */
     public function getTheme($theme)
     {
-        if (Auth::check() && !app()->environment('demo')) {
+        if (Auth::check() && ! app()->environment('demo')) {
             UserMeta::setMeta('admin-theme', $theme);
         }
 
@@ -371,7 +356,7 @@ class UserController extends BaseController
 
         try {
             return redirect()->back();
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return redirect()->route('access.login');
         }
     }

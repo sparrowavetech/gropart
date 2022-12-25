@@ -22,13 +22,9 @@ use Theme;
 
 class BlogService
 {
-    /**
-     * @param Slug $slug
-     * @return array|Eloquent
-     */
-    public function handleFrontRoutes($slug)
+    public function handleFrontRoutes(Slug|array $slug): Eloquent|array
     {
-        if (!$slug instanceof Eloquent) {
+        if (! $slug instanceof Eloquent) {
             return $slug;
         }
 
@@ -69,6 +65,8 @@ class BlogService
                 $meta->setType('article');
 
                 SeoHelper::setSeoOpenGraph($meta);
+
+                SeoHelper::meta()->setUrl($post->url);
 
                 if (function_exists('admin_bar') && Auth::check() && Auth::user()->hasPermission('posts.edit')) {
                     admin_bar()->registerLink(
@@ -128,6 +126,8 @@ class BlogService
 
                 SeoHelper::setSeoOpenGraph($meta);
 
+                SeoHelper::meta()->setUrl($category->url);
+
                 if (function_exists('admin_bar')) {
                     admin_bar()->registerLink(
                         trans('plugins/blog::categories.edit_this_category'),
@@ -164,7 +164,7 @@ class BlogService
             case Tag::class:
                 $tag = app(TagInterface::class)->getFirstBy($condition, ['*'], ['slugable']);
 
-                if (!$tag) {
+                if (! $tag) {
                     abort(404);
                 }
 
@@ -176,6 +176,10 @@ class BlogService
                 $meta->setUrl($tag->url);
                 $meta->setTitle($tag->name);
                 $meta->setType('article');
+
+                SeoHelper::setSeoOpenGraph($meta);
+
+                SeoHelper::meta()->setUrl($tag->url);
 
                 if (function_exists('admin_bar')) {
                     admin_bar()->registerLink(trans('plugins/blog::tags.edit_this_tag'), route('tags.edit', $tag->id), null, 'tags.edit');

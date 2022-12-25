@@ -2,32 +2,27 @@
 
 namespace Botble\Blog\Http\Controllers;
 
+use BaseHelper;
 use Botble\Blog\Models\Category;
 use Botble\Blog\Models\Post;
 use Botble\Blog\Models\Tag;
 use Botble\Blog\Repositories\Interfaces\PostInterface;
 use Botble\Blog\Services\BlogService;
 use Botble\Theme\Events\RenderingSingleEvent;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Response;
 use SeoHelper;
 use SlugHelper;
 use Theme;
 
 class PublicController extends Controller
 {
-    /**
-     * @param Request $request
-     * @param PostInterface $postRepository
-     * @return Response
-     */
     public function getSearch(Request $request, PostInterface $postRepository)
     {
-        $query = $request->input('q');
+        $query = BaseHelper::stringify($request->input('q'));
 
         $title = __('Search result for: ":query"', compact('query'));
+
         SeoHelper::setTitle($title)
             ->setDescription($title);
 
@@ -41,16 +36,11 @@ class PublicController extends Controller
             ->render();
     }
 
-    /**
-     * @param string $slug
-     * @param BlogService $blogService
-     * @return RedirectResponse|Response
-     */
-    public function getTag($slug, BlogService $blogService)
+    public function getTag(string $slug, BlogService $blogService)
     {
         $slug = SlugHelper::getSlug($slug, SlugHelper::getPrefix(Tag::class));
 
-        if (!$slug) {
+        if (! $slug) {
             abort(404);
         }
 
@@ -66,16 +56,11 @@ class PublicController extends Controller
             ->render();
     }
 
-    /**
-     * @param string $slug
-     * @param BlogService $blogService
-     * @return RedirectResponse|Response
-     */
-    public function getPost($slug, BlogService $blogService)
+    public function getPost(string $slug, BlogService $blogService)
     {
         $slug = SlugHelper::getSlug($slug, SlugHelper::getPrefix(Post::class));
 
-        if (!$slug) {
+        if (! $slug) {
             abort(404);
         }
 
@@ -93,16 +78,11 @@ class PublicController extends Controller
             ->render();
     }
 
-    /**
-     * @param string $slug
-     * @param BlogService $blogService
-     * @return RedirectResponse|Response
-     */
-    public function getCategory($slug, BlogService $blogService)
+    public function getCategory(string $slug, BlogService $blogService)
     {
         $slug = SlugHelper::getSlug($slug, SlugHelper::getPrefix(Category::class));
 
-        if (!$slug) {
+        if (! $slug) {
             abort(404);
         }
 

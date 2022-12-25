@@ -7,13 +7,13 @@ use BaseHelper;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\PluginManagement\Services\PluginService;
 use Exception;
-use Illuminate\Support\Facades\File;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\File;
 
 class PluginManagementController extends Controller
 {
@@ -36,7 +36,7 @@ class PluginManagementController extends Controller
         }
 
         $plugins = BaseHelper::scanFolder(plugin_path());
-        if (!empty($plugins)) {
+        if (! empty($plugins)) {
             $installed = get_active_plugins();
             foreach ($plugins as $plugin) {
                 if (File::exists(plugin_path($plugin . '/.DS_Store'))) {
@@ -44,13 +44,13 @@ class PluginManagementController extends Controller
                 }
 
                 $pluginPath = plugin_path($plugin);
-                if (!File::isDirectory($pluginPath) || !File::exists($pluginPath . '/plugin.json')) {
+                if (! File::isDirectory($pluginPath) || ! File::exists($pluginPath . '/plugin.json')) {
                     continue;
                 }
 
                 $content = BaseHelper::getFileData($pluginPath . '/plugin.json');
-                if (!empty($content)) {
-                    if (!in_array($plugin, $installed)) {
+                if (! empty($content)) {
+                    if (! in_array($plugin, $installed)) {
                         $content['status'] = 0;
                     } else {
                         $content['status'] = 1;
@@ -90,8 +90,8 @@ class PluginManagementController extends Controller
 
         try {
             $activatedPlugins = get_active_plugins();
-            if (!in_array($plugin, $activatedPlugins)) {
-                if (!empty(Arr::get($content, 'require'))) {
+            if (! in_array($plugin, $activatedPlugins)) {
+                if (! empty(Arr::get($content, 'require'))) {
                     if (count(array_intersect($content['require'], $activatedPlugins)) != count($content['require'])) {
                         return $response
                             ->setError()
@@ -113,13 +113,13 @@ class PluginManagementController extends Controller
 
                 foreach ($paths as $path) {
                     foreach (BaseHelper::scanFolder($path) as $module) {
-                        if ($path == plugin_path() && !is_plugin_active($module)) {
+                        if ($path == plugin_path() && ! is_plugin_active($module)) {
                             continue;
                         }
 
                         $modulePath = $path . '/' . $module;
 
-                        if (!File::isDirectory($modulePath)) {
+                        if (! File::isDirectory($modulePath)) {
                             continue;
                         }
 

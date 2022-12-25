@@ -44,7 +44,7 @@ class WidgetFactory extends AbstractWidgetFactory
         try {
             $this->instantiateWidget($args);
         } catch (InvalidWidgetClassException | Exception $exception) {
-            return config('app.debug') ? $exception->getMessage() : null;
+            return app()->hasDebugModeEnabled() ? $exception->getMessage() : null;
         }
 
         return $this->convertToViewExpression($this->getContent());

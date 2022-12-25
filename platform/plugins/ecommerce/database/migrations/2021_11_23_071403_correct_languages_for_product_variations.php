@@ -41,7 +41,7 @@ return new class () extends Migration {
 
                     $data = [];
                     foreach (DB::getSchemaBuilder()->getColumnListing('ec_products_translations') as $column) {
-                        if (!in_array($column, array_keys($condition))) {
+                        if (! in_array($column, array_keys($condition))) {
                             $data[$column] = $parentTranslation ? $parentTranslation->{$column} : $product->original_product->{$column};
                         }
                     }

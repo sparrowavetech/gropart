@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Enums;
 
 use Botble\Base\Supports\Enum;
 use Html;
+use Illuminate\Support\HtmlString;
 
 /**
  * @method static OrderStatusEnum PENDING()
@@ -19,40 +20,31 @@ class OrderStatusEnum extends Enum
     public const PROCESSING = 'processing';
     public const COMPLETED = 'completed';
     public const CANCELED = 'canceled';
-    public const PARTIAL_RETURNED = 'partial returned';
+    public const PARTIAL_RETURNED = 'partial_returned';
     public const RETURNED = 'returned';
 
-    /**
-     * @var string
-     */
     public static $langPath = 'plugins/ecommerce::order.statuses';
 
-    /**
-     * @return string
-     */
-    public function toHtml()
+    public function toHtml(): HtmlString|string
     {
-        switch ($this->value) {
-            case self::PENDING:
-                return Html::tag('span', self::PENDING()->label(), ['class' => 'label-warning status-label'])
-                    ->toHtml();
-            case self::PROCESSING:
-                return Html::tag('span', self::PROCESSING()->label(), ['class' => 'label-info status-label'])
-                    ->toHtml();
-            case self::COMPLETED:
-                return Html::tag('span', self::COMPLETED()->label(), ['class' => 'label-success status-label'])
-                    ->toHtml();
-            case self::CANCELED:
-                return Html::tag('span', self::CANCELED()->label(), ['class' => 'label-danger status-label'])
-                    ->toHtml();
-            case self::PARTIAL_RETURNED:
-                return Html::tag('span', self::PARTIAL_RETURNED()->label(), ['class' => 'label-danger status-label'])
-                    ->toHtml();
-            case self::RETURNED:
-                return Html::tag('span', self::RETURNED()->label(), ['class' => 'label-danger status-label'])
-                    ->toHtml();
-            default:
-                return parent::toHtml();
-        }
+        return match ($this->value) {
+            self::PENDING => Html::tag('span', self::PENDING()->label(), ['class' => 'label-warning status-label'])
+                ->toHtml(),
+            self::PROCESSING => Html::tag('span', self::PROCESSING()->label(), ['class' => 'label-info status-label'])
+                ->toHtml(),
+            self::COMPLETED => Html::tag('span', self::COMPLETED()->label(), ['class' => 'label-success status-label'])
+                ->toHtml(),
+            self::CANCELED => Html::tag('span', self::CANCELED()->label(), ['class' => 'label-danger status-label'])
+                ->toHtml(),
+            self::PARTIAL_RETURNED => Html::tag(
+                'span',
+                self::PARTIAL_RETURNED()->label(),
+                ['class' => 'label-danger status-label']
+            )
+                ->toHtml(),
+            self::RETURNED => Html::tag('span', self::RETURNED()->label(), ['class' => 'label-danger status-label'])
+                ->toHtml(),
+            default => parent::toHtml(),
+        };
     }
 }

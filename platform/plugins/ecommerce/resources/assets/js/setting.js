@@ -32,6 +32,7 @@ $(document).ready(() => {
         let $settingContentContainer = $($(this).data('setting-container'));
         if ($(this).val() == '1') {
             $settingContentContainer.removeClass('d-none');
+            Botble.initResources();
         } else {
             $settingContentContainer.addClass('d-none');
         }

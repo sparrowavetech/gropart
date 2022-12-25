@@ -10,12 +10,7 @@ use Illuminate\Support\Str;
 
 class AdsSeeder extends BaseSeeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
         $this->uploadFiles('promotion');
 
@@ -23,42 +18,42 @@ class AdsSeeder extends BaseSeeder
 
         $items = [
             [
-                'name'     => 'Top Slider Image 1',
+                'name' => 'Top Slider Image 1',
                 'location' => 'not_set',
-                'key'      => 'VC2C8Q1UGCBG',
-                'image'    => 'promotion/1.jpg',
+                'key' => 'VC2C8Q1UGCBG',
+                'image' => 'promotion/1.jpg',
             ],
             [
-                'name'     => 'Homepage middle 1',
+                'name' => 'Homepage middle 1',
                 'location' => 'not_set',
-                'key'      => 'IZ6WU8KUALYD',
-                'image'    => 'promotion/2.png',
+                'key' => 'IZ6WU8KUALYD',
+                'image' => 'promotion/2.png',
             ],
             [
-                'name'     => 'Homepage middle 2',
+                'name' => 'Homepage middle 2',
                 'location' => 'not_set',
-                'key'      => 'ILSFJVYFGCPZ',
-                'image'    => 'promotion/3.png',
+                'key' => 'ILSFJVYFGCPZ',
+                'image' => 'promotion/3.png',
 
             ],
             [
-                'name'     => 'Homepage middle 3',
+                'name' => 'Homepage middle 3',
                 'location' => 'not_set',
-                'key'      => 'ZDOZUZZIU7FT',
-                'image'    => 'promotion/4.png',
+                'key' => 'ZDOZUZZIU7FT',
+                'image' => 'promotion/4.png',
             ],
             [
-                'name'     => 'Products list 1',
+                'name' => 'Products list 1',
                 'location' => 'not_set',
-                'key'      => 'ZDOZUZZIU7FZ',
-                'image'    => 'promotion/5.png',
-                'url'      => '/products/beat-headphone',
+                'key' => 'ZDOZUZZIU7FZ',
+                'image' => 'promotion/5.png',
+                'url' => '/products/beat-headphone',
             ],
         ];
 
         foreach ($items as $index => $item) {
             $item['order'] = $index + 1;
-            if (!isset($item['key'])) {
+            if (! isset($item['key'])) {
                 $item['key'] = strtoupper(Str::random(12));
             }
             $item['expired_at'] = now()->addYears(5)->toDateString();
@@ -71,25 +66,25 @@ class AdsSeeder extends BaseSeeder
 
         $translations = [
             [
-                'name'     => 'Top Slider Image 1',
-                'image'    => 'promotion/1.jpg',
+                'name' => 'Top Slider Image 1',
+                'image' => 'promotion/1.jpg',
             ],
             [
-                'name'     => 'Homepage middle 1',
-                'image'    => 'promotion/2.png',
+                'name' => 'Homepage middle 1',
+                'image' => 'promotion/2.png',
             ],
             [
-                'name'     => 'Homepage middle 2',
-                'image'    => 'promotion/3.png',
+                'name' => 'Homepage middle 2',
+                'image' => 'promotion/3.png',
 
             ],
             [
-                'name'     => 'Homepage middle 3',
-                'image'    => 'promotion/4.png',
+                'name' => 'Homepage middle 3',
+                'image' => 'promotion/4.png',
             ],
             [
-                'name'     => 'Products list 1',
-                'image'    => 'promotion/5.png',
+                'name' => 'Products list 1',
+                'image' => 'promotion/5.png',
             ],
         ];
 

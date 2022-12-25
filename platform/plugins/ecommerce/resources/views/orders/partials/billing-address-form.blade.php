@@ -1,12 +1,15 @@
 <div class="customer-billing-address-form">
 
+
     <div class="form-group mb-3">
-        <input type="hidden" name="billing_address_same_as_shipping_address" value="0">
-        <input type="checkbox" name="billing_address_same_as_shipping_address" value="1" id="billing_address_same_as_shipping_address" @if (old('billing_address_same_as_shipping_address', Arr::get($sessionCheckoutData, 'billing_address_same_as_shipping_address', true))) checked @endif>
-        <label for="billing_address_same_as_shipping_address" class="control-label" style="padding-left: 5px">{{ __('Same as shipping information') }}</label>
+        @if (Arr::get($sessionCheckoutData, 'is_available_shipping', true))
+            <input type="hidden" name="billing_address_same_as_shipping_address" value="0">
+            <input type="checkbox" name="billing_address_same_as_shipping_address" value="1" id="billing_address_same_as_shipping_address" @if (old('billing_address_same_as_shipping_address', Arr::get($sessionCheckoutData, 'billing_address_same_as_shipping_address', true))) checked @endif>
+            <label for="billing_address_same_as_shipping_address" class="control-label" style="padding-left: 5px">{{ __('Same as shipping information') }}</label>
+        @endif
     </div>
 
-    <div class="billing-address-form-wrapper" @if (old('billing_address_same_as_shipping_address', Arr::get($sessionCheckoutData, 'billing_address_same_as_shipping_address', true))) style="display: none" @endif>
+    <div class="billing-address-form-wrapper" @if (Arr::get($sessionCheckoutData, 'is_available_shipping', true) && old('billing_address_same_as_shipping_address', Arr::get($sessionCheckoutData, 'billing_address_same_as_shipping_address', true))) style="display: none" @endif>
         <div class="row">
             <div class="col-12">
                 <div class="form-group mb-3 @if ($errors->has('billing_address.name')) has-error @endif">
@@ -103,7 +106,7 @@
             @if (EcommerceHelper::isZipCodeEnabled())
                 <div class="col-12">
                     <div class="form-group mb-3 @if ($errors->has('billing_address.zip_code')) has-error @endif">
-                        <input id="billing-address-zip_code" type="text" class="form-control checkout-input" placeholder="{{ __('Zip code') }}" name="billing_address[zip_code]" value="{{ old('billing_address.zip_code', Arr::get($sessionCheckoutData, 'billing_address.zip_code')) }}">
+                        <input id="billing-address-zip-code" type="text" class="form-control checkout-input" placeholder="{{ __('Zip code') }}" name="billing_address[zip_code]" value="{{ old('billing_address.zip_code', Arr::get($sessionCheckoutData, 'billing_address.zip_code')) }}">
                         {!! Form::error('billing_address.zip_code', $errors) !!}
                     </div>
                 </div>

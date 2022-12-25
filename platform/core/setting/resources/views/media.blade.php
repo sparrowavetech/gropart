@@ -366,6 +366,22 @@
                         </div>
                     </div>
 
+                    <div class="form-group mb-3">
+                        <label class="text-title-field"
+                               for="media_image_processing_library">{{ trans('core/setting::setting.media.image_processing_library') }}
+                        </label>
+                        <label class="me-2">
+                            <input type="radio" name="media_image_processing_library" value="gd"
+                                @checked(RvMedia::getImageProcessingLibrary() == 'gd')>GD Library
+                        </label>
+                        @if (extension_loaded('imagick'))
+                            <label>
+                                <input type="radio" name="media_image_processing_library" value="imagick"
+                                    @checked(RvMedia::getImageProcessingLibrary() == 'imagick')>Imagick
+                            </label>
+                        @endif
+                    </div>
+
                     <hr>
 
                     <div>

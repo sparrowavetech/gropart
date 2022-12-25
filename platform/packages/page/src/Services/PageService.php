@@ -18,13 +18,9 @@ use Theme;
 
 class PageService
 {
-    /**
-     * @param Eloquent|Builder $slug
-     * @return array|Eloquent
-     */
-    public function handleFrontRoutes($slug)
+    public function handleFrontRoutes(Eloquent|array $slug): Eloquent|array|Builder
     {
-        if (!$slug instanceof Eloquent) {
+        if (! $slug instanceof Eloquent) {
             return $slug;
         }
 
@@ -52,7 +48,7 @@ class PageService
             $meta->setImage(RvMedia::getImageUrl($page->image));
         }
 
-        if (!BaseHelper::isHomepage($page->id)) {
+        if (! BaseHelper::isHomepage($page->id)) {
             SeoHelper::setTitle($page->name)
                 ->setDescription($page->description);
 
@@ -73,6 +69,8 @@ class PageService
         $meta->setType('article');
 
         SeoHelper::setSeoOpenGraph($meta);
+
+        SeoHelper::meta()->setUrl($page->url);
 
         if ($page->template) {
             Theme::uses(Theme::getThemeName())

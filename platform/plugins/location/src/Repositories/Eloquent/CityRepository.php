@@ -6,14 +6,12 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Location\Repositories\Interfaces\CityInterface;
 use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Language;
 
 class CityRepository extends RepositoriesAbstract implements CityInterface
 {
-    /**
-     * {@inheritDoc}
-     */
-    public function filters($keyword, $limit = 10, array $with = [], array $select = ['cities.*'])
+    public function filters(?string $keyword, ?int $limit = 10, array $with = [], array $select = ['cities.*']): Collection
     {
         $data = $this->model
             ->where('cities.status', BaseStatusEnum::PUBLISHED)

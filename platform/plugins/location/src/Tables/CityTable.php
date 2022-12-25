@@ -2,6 +2,10 @@
 
 namespace Botble\Location\Tables;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
@@ -15,34 +19,14 @@ use Yajra\DataTables\DataTables;
 
 class CityTable extends TableAbstract
 {
-    /**
-     * @var bool
-     */
     protected $hasActions = true;
 
-    /**
-     * @var bool
-     */
     protected $hasFilter = true;
 
-    /**
-     * @var CountryInterface
-     */
-    protected $countryRepository;
+    protected CountryInterface $countryRepository;
 
-    /**
-     * @var StateInterface
-     */
-    protected $stateRepository;
+    protected StateInterface $stateRepository;
 
-    /**
-     * CityTable constructor.
-     * @param DataTables $table
-     * @param UrlGenerator $urlGenerator
-     * @param CityInterface $cityRepository
-     * @param CountryInterface $countryRepository
-     * @param StateInterface $stateRepository
-     */
     public function __construct(
         DataTables $table,
         UrlGenerator $urlGenerator,
@@ -56,35 +40,32 @@ class CityTable extends TableAbstract
         $this->countryRepository = $countryRepository;
         $this->stateRepository = $stateRepository;
 
-        if (!Auth::user()->hasAnyPermission(['city.edit', 'city.destroy'])) {
+        if (! Auth::user()->hasAnyPermission(['city.edit', 'city.destroy'])) {
             $this->hasOperations = false;
             $this->hasActions = false;
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
             ->editColumn('name', function ($item) {
-                if (!Auth::user()->hasPermission('city.edit')) {
+                if (! Auth::user()->hasPermission('city.edit')) {
                     return $item->name;
                 }
 
                 return Html::link(route('city.edit', $item->id), $item->name);
             })
             ->editColumn('state_id', function ($item) {
-                if (!$item->state_id || !$item->state->name) {
+                if (! $item->state_id || ! $item->state->name) {
                     return '&mdash;';
                 }
 
                 return Html::link(route('state.edit', $item->state_id), $item->state->name);
             })
             ->editColumn('country_id', function ($item) {
-                if (!$item->country_id || !$item->country->name) {
+                if (! $item->country_id || ! $item->country->name) {
                     return '&mdash;';
                 }
 
@@ -106,7 +87,7 @@ class CityTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
         $query = $this->repository->getModel()->select([
             'id',
@@ -120,9 +101,6 @@ class CityTable extends TableAbstract
         return $this->applyScopes($query);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function columns(): array
     {
         return [
@@ -153,25 +131,16 @@ class CityTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function buttons(): array
     {
         return $this->addCreateButton(route('city.create'), 'city.create');
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function bulkActions(): array
     {
         return $this->addDeleteAction(route('city.deletes'), 'city.destroy', parent::bulkActions());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getBulkChanges(): array
     {
         return [

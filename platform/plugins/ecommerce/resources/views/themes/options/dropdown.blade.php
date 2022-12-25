@@ -1,5 +1,4 @@
-<div class="form-group variant-radio product-option product-option-{{ Str::slug($option['name']) }} product-option-{{ $option['id'] }}"
-    style="margin-bottom: 10px">
+<div class="form-group variant-radio product-option product-option-{{ Str::slug($option['name']) }} product-option-{{ $option['id'] }}">
     <div class="product-option-item-wrapper">
         <div class="product-option-item-label">
             <label class="{{ ($option['required']) ? 'required' : '' }}">
@@ -7,10 +6,9 @@
             </label>
         </div>
         <div class="product-option-item-values">
-        <div class="col-8">
             <input type="hidden" name="options[{{ $option['id'] }}][option_type]" value="dropdown" />
             <select {{ $option['required'] ? 'required' : '' }} name="options[{{ $option['id'] }}][values]"
-                    class="form-control">
+                    class="form-select">
                 @foreach ($option['values'] as $value)
                     @php
                         $price = 0;

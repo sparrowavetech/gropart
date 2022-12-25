@@ -20,14 +20,8 @@ use Throwable;
 
 class TaxController extends BaseController
 {
-    /**
-     * @var TaxInterface
-     */
-    protected $taxRepository;
+    protected TaxInterface $taxRepository;
 
-    /**
-     * @param TaxInterface $taxRepository
-     */
     public function __construct(TaxInterface $taxRepository)
     {
         $this->taxRepository = $taxRepository;

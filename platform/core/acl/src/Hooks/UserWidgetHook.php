@@ -5,16 +5,9 @@ namespace Botble\ACL\Hooks;
 use Botble\ACL\Repositories\Interfaces\UserInterface;
 use Botble\Dashboard\Supports\DashboardWidgetInstance;
 use Illuminate\Support\Collection;
-use Throwable;
 
 class UserWidgetHook
 {
-    /**
-     * @param array $widgets
-     * @param Collection $widgetSettings
-     * @return array
-     * @throws Throwable
-     */
     public static function addUserStatsWidget(array $widgets, Collection $widgetSettings): array
     {
         $users = app(UserInterface::class)->count();

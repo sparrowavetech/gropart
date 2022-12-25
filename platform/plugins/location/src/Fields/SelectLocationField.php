@@ -3,48 +3,33 @@
 namespace Botble\Location\Fields;
 
 use Assets;
-use Kris\LaravelFormBuilder\Fields\FormField;
-use Kris\LaravelFormBuilder\Form;
-use Botble\Location\Repositories\Interfaces\StateInterface;
-use Botble\Location\Repositories\Interfaces\CountryInterface;
 use Botble\Location\Repositories\Interfaces\CityInterface;
+use Botble\Location\Repositories\Interfaces\CountryInterface;
+use Botble\Location\Repositories\Interfaces\StateInterface;
 use Html;
 use Illuminate\Support\Arr;
+use Illuminate\Support\HtmlString;
+use Kris\LaravelFormBuilder\Fields\FormField;
+use Kris\LaravelFormBuilder\Form;
 
 class SelectLocationField extends FormField
 {
-    /**
-     * @var CountryInterface
-     */
-    protected $countryRepository;
+    protected CountryInterface $countryRepository;
 
-    /**
-     * @var StateInterface
-     */
-    protected $stateRepository;
+    protected StateInterface $stateRepository;
 
-    /**
-     * @var CityInterface
-     */
-    protected $cityRepository;
+    protected CityInterface $cityRepository;
 
-    /**
-     * @var array
-     */
-    protected $locationKeys = [];
+    protected array $locationKeys = [];
 
-    /**
-     * @param string $name
-     * @param string $type
-     * @param Form $parent
-     * @param array $options
-     */
     public function __construct(
         $name,
         $type,
         Form $parent,
         array $options = []
     ) {
+        parent::__construct($name, $type, $parent);
+
         $default = [
             'country' => 'country_id',
             'state' => 'state_id',
@@ -52,9 +37,9 @@ class SelectLocationField extends FormField
         ];
         $this->locationKeys = array_filter(array_merge($default, Arr::get($options, 'locationKeys', [])));
 
-        $this->name       = $name;
-        $this->type       = $type;
-        $this->parent     = $parent;
+        $this->name = $name;
+        $this->type = $type;
+        $this->parent = $parent;
         $this->formHelper = $this->parent->getFormHelper();
 
         $this->setTemplate();
@@ -63,38 +48,23 @@ class SelectLocationField extends FormField
         $this->initFilters();
 
         $this->countryRepository = app(CountryInterface::class);
-        $this->stateRepository   = app(StateInterface::class);
-        $this->cityRepository    = app(CityInterface::class);
+        $this->stateRepository = app(StateInterface::class);
+        $this->cityRepository = app(CityInterface::class);
 
         Assets::addScriptsDirectly('vendor/core/plugins/location/js/location.js');
     }
 
-    /**
-     * Get config from the form.
-     *
-     * @return mixed
-     */
-    private function getConfig($key = null, $default = null)
+    protected function getConfig($key = null, $default = null)
     {
         return $this->parent->getConfig($key, $default);
     }
 
-    /**
-     * Set the template property on the object.
-     *
-     * @return void
-     */
-    private function setTemplate()
+    protected function setTemplate(): void
     {
         $this->template = $this->getConfig($this->getTemplate(), $this->getTemplate());
     }
 
-    /**
-     * Setup the value of the form field.
-     *
-     * @return void
-     */
-    protected function setupValue()
+    protected function setupValue(): void
     {
         $values = $this->getOption($this->valueProperty);
         foreach ($this->locationKeys as $k => $v) {
@@ -108,19 +78,14 @@ class SelectLocationField extends FormField
         $this->setValue($values);
     }
 
-    /**
-     * Get options of country
-     *
-     * @return array
-     */
-    public function getCountryOptions()
+    public function getCountryOptions(): array
     {
         $countryKey = Arr::get($this->locationKeys, 'country');
         $countries = $this->countryRepository->pluck('name', 'id');
         $value = Arr::get($this->getValue(), 'country');
         $attr = array_merge($this->getOption('attr', []), [
             'id' => $countryKey,
-            'class' => 'form-control select-search-full',
+            'class' => 'select-search-full',
             'data-type' => 'country',
         ]);
 
@@ -133,12 +98,7 @@ class SelectLocationField extends FormField
         ], $this->getOption('attrs.country', []));
     }
 
-    /**
-     * Get options of state
-     *
-     * @return array
-     */
-    public function getStateOptions()
+    public function getStateOptions(): array
     {
         $states = [];
         $stateKey = Arr::get($this->locationKeys, 'state');
@@ -151,7 +111,7 @@ class SelectLocationField extends FormField
         $attr = array_merge($this->getOption('attr', []), [
             'id' => $stateKey,
             'data-url' => route('ajax.states-by-country'),
-            'class' => 'form-control select-search-full',
+            'class' => 'select-search-full',
             'data-type' => 'state',
         ]);
 
@@ -164,12 +124,7 @@ class SelectLocationField extends FormField
         ], $this->getOption('attrs.state', []));
     }
 
-    /**
-     * Get options of city
-     *
-     * @return array
-     */
-    public function getCityOptions()
+    public function getCityOptions(): array
     {
         $cities = [];
         $cityKey = Arr::get($this->locationKeys, 'city');
@@ -182,7 +137,7 @@ class SelectLocationField extends FormField
         $attr = array_merge($this->getOption('attr', []), [
             'id' => $cityKey,
             'data-url' => route('ajax.cities-by-state'),
-            'class' => 'form-control select-search-full',
+            'class' => 'select-search-full',
             'data-type' => 'city',
         ]);
 
@@ -195,17 +150,12 @@ class SelectLocationField extends FormField
         ], $this->getOption('attrs.city', []));
     }
 
-    /**
-     * Render the field.
-     *
-     * @param array $options
-     * @param bool  $showLabel
-     * @param bool  $showField
-     * @param bool  $showError
-     * @return string
-     */
-    public function render(array $options = [], $showLabel = true, $showField = true, $showError = true)
-    {
+    public function render(
+        array $options = [],
+        $showLabel = true,
+        $showField = true,
+        $showError = true
+    ): HtmlString|string {
         $html = '';
 
         $this->prepareOptions($options);
@@ -214,7 +164,7 @@ class SelectLocationField extends FormField
             $this->rendered = true;
         }
 
-        if (!$this->needsLabel()) {
+        if (! $this->needsLabel()) {
             $showLabel = false;
         }
 
@@ -223,11 +173,8 @@ class SelectLocationField extends FormField
         }
 
         $data = $this->getRenderData();
-        $values = $this->getValue();
 
         foreach ($this->locationKeys as $k => $v) {
-            $value        = Arr::get($values, $v);
-            $defaultValue = Arr::get($this->getDefaultValue(), $v);
             // Override default value with value
             $options = [];
             switch ($k) {
@@ -263,13 +210,14 @@ class SelectLocationField extends FormField
             )->render();
         }
 
-        return Html::tag('div', $html, ['class' => ($this->getOption('wrapperClassName') ?: 'row g-1') . ' select-location-fields']) ;
+        return Html::tag(
+            'div',
+            $html,
+            ['class' => ($this->getOption('wrapperClassName') ?: 'row g-1') . ' select-location-fields']
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    protected function getTemplate()
+    protected function getTemplate(): string
     {
         return 'core/base::forms.fields.custom-select';
     }

@@ -3,11 +3,6 @@
 return [
 
     /*
-     * The view id of which you want to display data.
-     */
-    'view_id' => env('ANALYTICS_VIEW_ID'),
-
-    /*
      * The amount of minutes the Google API responses will be cached.
      * If you set this to zero, the responses won't be cached at all.
      */
@@ -15,7 +10,7 @@ return [
 
     /*
      * Here you may configure the "store" that the underlying Google_Client will
-     * use to store it's data.  You may also add extra parameters that will
+     * use to store its data.  You may also add extra parameters that will
      * be passed on setCacheConfig (see docs for google-api-php-client).
      *
      * Optional parameters: "lifetime", "prefix"
@@ -23,5 +18,6 @@ return [
     'cache' => [
         'store' => 'file',
     ],
+
     'enabled_dashboard_widgets' => env('ANALYTICS_ENABLE_DASHBOARD_WIDGETS', true),
 ];

@@ -28,14 +28,9 @@ class ResetPasswordController extends BaseController
 
     /**
      * Where to redirect users after resetting their password.
-     *
-     * @var string
      */
-    protected $redirectTo;
+    protected string $redirectTo = '/';
 
-    /**
-     * ResetPasswordController constructor.
-     */
     public function __construct()
     {
         $this->middleware('guest');

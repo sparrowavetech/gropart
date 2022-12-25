@@ -23,14 +23,8 @@ use Throwable;
 
 class FlashSaleController extends BaseController
 {
-    /**
-     * @var FlashSaleInterface
-     */
-    protected $flashSaleRepository;
+    protected FlashSaleInterface $flashSaleRepository;
 
-    /**
-     * @param FlashSaleInterface $flashSaleRepository
-     */
     public function __construct(FlashSaleInterface $flashSaleRepository)
     {
         $this->flashSaleRepository = $flashSaleRepository;
@@ -90,13 +84,13 @@ class FlashSaleController extends BaseController
         $flashSale->products()->detach();
 
         foreach ($products as $index => $productId) {
-            if (!(int)$productId) {
+            if (! (int)$productId) {
                 continue;
             }
 
             $extra = Arr::get($request->input('products_extra', []), $index);
 
-            if (!$extra || !isset($extra['price']) || !isset($extra['quantity'])) {
+            if (! $extra || ! isset($extra['price']) || ! isset($extra['quantity'])) {
                 continue;
             }
 

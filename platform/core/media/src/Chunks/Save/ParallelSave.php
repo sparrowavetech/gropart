@@ -10,16 +10,15 @@ use Botble\Media\Chunks\Handler\AbstractHandler;
 use Botble\Media\Chunks\Storage\ChunkStorage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
 class ParallelSave extends ChunkSave
 {
     /**
      * Stored on construct - the file is moved and isValid will return false.
-     *
-     * @var bool
      */
-    protected $isFileValid;
+    protected bool $isFileValid;
 
     /**
      * {@inheritDoc}
@@ -96,7 +95,7 @@ class ParallelSave extends ChunkSave
         $finalFilePath = $this->getChunkDirectory(true) . './' . $this->handler()->createChunkFileName();
         // Delete the file if exists
         if (file_exists($finalFilePath)) {
-            @unlink($finalFilePath);
+            File::delete($finalFilePath);
         }
 
         $fileMerger = new FileMerger($finalFilePath);

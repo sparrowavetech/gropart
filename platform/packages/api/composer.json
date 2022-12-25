@@ -8,7 +8,7 @@
         }
     },
     "require": {
-        "knuckleswtf/scribe": "^2.0|^3.0"
+        "knuckleswtf/scribe": "^4.0"
     },
     "extra": {
         "laravel": {

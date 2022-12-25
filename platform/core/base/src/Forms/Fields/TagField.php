@@ -7,10 +7,7 @@ use Kris\LaravelFormBuilder\Fields\FormField;
 
 class TagField extends FormField
 {
-    /**
-     * {@inheritDoc}
-     */
-    protected function getTemplate()
+    protected function getTemplate(): string
     {
         Assets::addStylesDirectly('vendor/core/core/base/libraries/tagify/tagify.css')
             ->addScriptsDirectly([

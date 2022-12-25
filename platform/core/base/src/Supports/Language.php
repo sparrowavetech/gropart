@@ -14,7 +14,7 @@ class Language
      * the key is the flag file name (without the extension)
      * the value is the Country name
      */
-    protected static $flags = [
+    protected static array $flags = [
         'ad' => 'Andorra',
         'ae' => 'United Arab Emirates',
         'af' => 'Afghanistan',
@@ -266,7 +266,7 @@ class Language
      * [3] => text direction
      * [4] => flag code
      */
-    protected static $languages = [
+    protected static array $languages = [
         'af' => ['af', 'af', 'Afrikaans', 'ltr', 'za'],
         'ar' => ['ar', 'ar', 'العربية', 'rtl', 'ar'],
         'ary' => ['ar', 'ary', 'العربية المغربية', 'rtl', 'ma'],
@@ -372,17 +372,11 @@ class Language
         'zh_TW' => ['zh', 'zh_TW', '中文 (台灣)', 'ltr', 'tw'],
     ];
 
-    /**
-     * @return array
-     */
     public static function getListLanguageFlags(): array
     {
         return self::$flags;
     }
 
-    /**
-     * @return array
-     */
     public static function getAvailableLocales(): array
     {
         $languages = [];
@@ -409,7 +403,7 @@ class Language
                     break;
                 }
 
-                if (!array_key_exists($locale, $languages) &&
+                if (! array_key_exists($locale, $languages) &&
                     in_array($language[0], [$locale, str_replace('-', '_', $locale)])) {
                     $languages[$locale] = [
                         'locale' => $locale,
@@ -419,7 +413,7 @@ class Language
                 }
             }
 
-            if (!array_key_exists($locale, $languages) && File::isDirectory(lang_path($locale))) {
+            if (! array_key_exists($locale, $languages) && File::isDirectory(lang_path($locale))) {
                 $languages[$locale] = [
                     'locale' => $locale,
                     'name' => $locale,
@@ -431,9 +425,6 @@ class Language
         return $languages;
     }
 
-    /**
-     * @return array
-     */
     public static function getListLanguages(): array
     {
         return self::$languages;

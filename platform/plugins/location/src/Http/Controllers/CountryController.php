@@ -2,13 +2,13 @@
 
 namespace Botble\Location\Http\Controllers;
 
+use BaseHelper;
 use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Location\Http\Requests\CountryRequest;
 use Botble\Location\Http\Resources\CountryResource;
 use Botble\Location\Models\Country;
 use Botble\Location\Repositories\Interfaces\CountryInterface;
 use Botble\Base\Http\Controllers\BaseController;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Exception;
 use Botble\Location\Tables\CountryTable;
@@ -23,15 +23,8 @@ use Throwable;
 
 class CountryController extends BaseController
 {
-    /**
-     * @var CountryInterface
-     */
-    protected $countryRepository;
+    protected CountryInterface $countryRepository;
 
-    /**
-     * CountryController constructor.
-     * @param CountryInterface $countryRepository
-     */
     public function __construct(CountryInterface $countryRepository)
     {
         $this->countryRepository = $countryRepository;
@@ -39,7 +32,7 @@ class CountryController extends BaseController
 
     /**
      * @param CountryTable $table
-     * @return JsonResponse|View
+     * @return \Illuminate\Contracts\View\Factory|\Symfony\Component\HttpFoundation\Response|View
      * @throws Throwable
      */
     public function index(CountryTable $table)
@@ -169,9 +162,9 @@ class CountryController extends BaseController
      */
     public function getList(Request $request, BaseHttpResponse $response)
     {
-        $keyword = $request->input('q');
+        $keyword = BaseHelper::stringify($request->input('q'));
 
-        if (!$keyword) {
+        if (! $keyword) {
             return $response->setData([]);
         }
 

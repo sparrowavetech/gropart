@@ -2,10 +2,7 @@
 
 use Botble\Ads\Repositories\Interfaces\AdsInterface;
 
-if (!function_exists('generate_ads_key')) {
-    /**
-     * @return string
-     */
+if (! function_exists('generate_ads_key')) {
     function generate_ads_key(): string
     {
         $adsRepository = app(AdsInterface::class);

@@ -10,14 +10,8 @@ class OrderPlacedEvent extends Event
 {
     use SerializesModels;
 
-    /**
-     * @var Order
-     */
-    public $order;
+    public Order $order;
 
-    /**
-     * @param Order $order
-     */
     public function __construct(Order $order)
     {
         $this->order = $order;

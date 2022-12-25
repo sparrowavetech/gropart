@@ -6,20 +6,12 @@ use Botble\Ecommerce\Models\Product;
 
 class UpdateDefaultProductService
 {
-    /**
-     * @param Product $product
-     * @return mixed
-     */
     public function execute(Product $product)
     {
         $parent = $product->original_product;
 
         $data = [
             'sku',
-            'quantity',
-            'allow_checkout_when_out_of_stock',
-            'with_storehouse_management',
-            'stock_status',
             'sale_type',
             'price',
             'sale_price',

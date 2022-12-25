@@ -43,7 +43,7 @@ class MenuNodeForm extends FormAbstract
                 ],
             ]);
 
-        if (!$this->model->reference_id) {
+        if (! $this->model->reference_id) {
             $this
                 ->add('url', 'text', [
                     'label' => trans('packages/menu::menu.url'),

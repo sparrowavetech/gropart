@@ -53,7 +53,7 @@ trait PermissionTrait
      */
     public function addPermission(string $permission, $value = true): self
     {
-        if (!array_key_exists($permission, (array)$this->permissions)) {
+        if (! array_key_exists($permission, (array)$this->permissions)) {
             $this->permissions = array_merge($this->permissions, [$permission => $value]);
         }
 
@@ -90,7 +90,7 @@ trait PermissionTrait
         $prepared = $this->getPreparedPermissions();
 
         foreach ($permissions as $permission) {
-            if (!$this->checkPermission($prepared, $permission)) {
+            if (! $this->checkPermission($prepared, $permission)) {
                 return false;
             }
         }
@@ -119,7 +119,7 @@ trait PermissionTrait
     {
         $prepared = [];
 
-        if (!empty($this->permissions)) {
+        if (! empty($this->permissions)) {
             $this->preparePermissions($prepared, $this->permissions);
         }
 
@@ -138,7 +138,7 @@ trait PermissionTrait
         foreach ($permissions as $keys => $value) {
             foreach ($this->extractClassPermissions($keys) as $key) {
                 // If the value is not in the array, we're opting in
-                if (!array_key_exists($key, $prepared)) {
+                if (! array_key_exists($key, $prepared)) {
                     $prepared[$key] = $value;
 
                     continue;
@@ -161,7 +161,7 @@ trait PermissionTrait
      */
     protected function extractClassPermissions($key): array
     {
-        if (!Str::contains($key, '@')) {
+        if (! Str::contains($key, '@')) {
             return (array)$key;
         }
 

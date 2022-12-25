@@ -9,21 +9,10 @@ use Illuminate\Http\Request;
 
 class DisableInDemoModeMiddleware
 {
-    /**
-     * @var \Illuminate\Foundation\Application|mixed
-     */
-    protected $app;
+    protected Application $app;
 
-    /**
-     * @var BaseHttpResponse
-     */
-    protected $httpResponse;
+    protected BaseHttpResponse $httpResponse;
 
-    /**
-     * DisableInDemoModeMiddleware constructor.
-     * @param Application $application
-     * @param BaseHttpResponse $response
-     */
     public function __construct(Application $application, BaseHttpResponse $response)
     {
         $this->app = $application;

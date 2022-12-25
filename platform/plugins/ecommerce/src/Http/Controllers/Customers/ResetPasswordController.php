@@ -29,10 +29,8 @@ class ResetPasswordController extends Controller
 
     /**
      * Where to redirect users after login / registration.
-     *
-     * @var string
      */
-    public $redirectTo = '/';
+    public string $redirectTo = '/';
 
     /**
      * Create a new controller instance.
@@ -73,20 +71,16 @@ class ResetPasswordController extends Controller
 
     /**
      * Get the broker to be used during password reset.
-     *
-     * @return PasswordBroker
      */
-    public function broker()
+    public function broker(): PasswordBroker
     {
         return Password::broker('customers');
     }
 
     /**
      * Get the guard to be used during password reset.
-     *
-     * @return StatefulGuard
      */
-    protected function guard()
+    protected function guard(): StatefulGuard
     {
         return auth('customer');
     }

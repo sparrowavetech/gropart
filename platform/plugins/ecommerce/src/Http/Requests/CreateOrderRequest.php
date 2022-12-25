@@ -7,11 +7,6 @@ use Botble\Support\Http\Requests\Request;
 
 class CreateOrderRequest extends Request
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
     public function rules(): array
     {
         return [
@@ -20,9 +15,6 @@ class CreateOrderRequest extends Request
         ];
     }
 
-    /**
-     * @return array
-     */
     public function attributes(): array
     {
         return [

@@ -153,7 +153,7 @@ class SeoMeta implements SeoMetaContract
     {
         $title = $this->title->getTitleOnly();
 
-        if (!theme_option('show_site_name') && $title) {
+        if (! theme_option('show_site_name') && $title) {
             return $title;
         }
 
@@ -171,15 +171,15 @@ class SeoMeta implements SeoMetaContract
      */
     public function setTitle($title, $siteName = null, $separator = null)
     {
-        if (!empty($title)) {
+        if (! empty($title)) {
             $this->title->set($title);
         }
 
-        if (!empty($siteName)) {
+        if (! empty($siteName)) {
             $this->title->setSiteName($siteName);
         }
 
-        if (!empty($separator)) {
+        if (! empty($separator)) {
             $this->title->setSeparator($separator);
         }
 

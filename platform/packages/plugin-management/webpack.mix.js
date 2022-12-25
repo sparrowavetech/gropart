@@ -8,6 +8,15 @@ const dist = 'public/vendor/core/packages/' + directory;
 
 mix
     .js(source + '/resources/assets/js/plugin.js', dist + '/js')
-    .sass(source + '/resources/assets/sass/plugin.scss', dist + '/css')
-    .copyDirectory(dist + '/js', source + '/public/js')
-    .copyDirectory(dist + '/css', source + '/public/css');
+    .js(source + '/resources/assets/js/marketplace.js', dist + '/js')
+    .vue()
+
+    .sass(source + '/resources/assets/sass/plugin.scss', dist + '/css');
+
+if (mix.inProduction()) {
+    mix
+        .copy(dist + '/js/plugin.js', source + '/public/js')
+        .copy(dist + '/js/marketplace.js', source + '/public/js')
+        .copy(dist + '/css/plugin.css', source + '/public/css');
+
+}

@@ -7,26 +7,14 @@ use SiteMapManager;
 
 class RenderingSiteMapListener
 {
-    /**
-     * @var PageInterface
-     */
-    protected $pageRepository;
+    protected PageInterface $pageRepository;
 
-    /**
-     * RenderingSiteMapListener constructor.
-     * @param PageInterface $pageRepository
-     */
     public function __construct(PageInterface $pageRepository)
     {
         $this->pageRepository = $pageRepository;
     }
 
-    /**
-     * Handle the event.
-     *
-     * @return void
-     */
-    public function handle()
+    public function handle(): void
     {
         $pages = $this->pageRepository->getDataSiteMap();
 

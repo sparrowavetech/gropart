@@ -22,7 +22,7 @@ class PublicController extends Controller
     {
         $slug = SlugHelper::getSlug($slug, SlugHelper::getPrefix(Page::class));
 
-        if (!$slug) {
+        if (! $slug) {
             abort(404);
         }
 

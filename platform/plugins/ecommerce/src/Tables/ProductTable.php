@@ -6,6 +6,7 @@ use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Enums\StockStatusEnum;
+use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Repositories\Interfaces\ProductCategoryInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Table\Abstracts\TableAbstract;
@@ -13,53 +14,54 @@ use Carbon\Carbon;
 use EcommerceHelper;
 use Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Eloquent\Relations\Relation as EloquentRelation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use RvMedia;
+use Symfony\Component\HttpFoundation\Response;
 use Yajra\DataTables\DataTables;
 
 class ProductTable extends TableAbstract
 {
-    /**
-     * @var bool
-     */
     protected $hasActions = true;
 
-    /**
-     * @var bool
-     */
     protected $hasFilter = true;
 
-    /**
-     * ProductTable constructor.
-     * @param DataTables $table
-     * @param UrlGenerator $urlGenerator
-     * @param ProductInterface $productRepository
-     */
     public function __construct(DataTables $table, UrlGenerator $urlGenerator, ProductInterface $productRepository)
     {
         parent::__construct($table, $urlGenerator);
 
         $this->repository = $productRepository;
 
-        if (!Auth::user()->hasAnyPermission(['products.edit', 'products.destroy'])) {
+        if (! Auth::user()->hasAnyPermission(['products.edit', 'products.destroy'])) {
             $this->hasOperations = false;
             $this->hasActions = false;
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
             ->editColumn('name', function ($item) {
-                if (!Auth::user()->hasPermission('products.edit')) {
-                    return BaseHelper::clean($item->name);
+                $productType = null;
+
+                if (EcommerceHelper::isEnabledSupportDigitalProducts()) {
+                    $productType = Html::tag('small', ' &mdash; ' . $item->product_type->label())->toHtml();
                 }
 
-                return Html::link(route('products.edit', $item->id), BaseHelper::clean($item->name));
+                if (! Auth::user()->hasPermission('products.edit')) {
+                    return BaseHelper::clean($item->name) . $productType;
+                }
+
+                return Html::link(route('products.edit', $item->id), BaseHelper::clean($item->name)) . $productType;
             })
             ->editColumn('image', function ($item) {
                 if ($this->request()->input('action') == 'csv') {
@@ -103,10 +105,7 @@ class ProductTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
         $query = $this->repository->getModel()
             ->select([
@@ -132,18 +131,12 @@ class ProductTable extends TableAbstract
         return $this->applyScopes($query);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function htmlDrawCallbackFunction(): ?string
     {
         return parent::htmlDrawCallbackFunction() . '$(".editable").editable({mode: "inline"});';
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function columns()
+    public function columns(): array
     {
         return [
             'id' => [
@@ -194,10 +187,7 @@ class ProductTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function buttons()
+    public function buttons(): array
     {
         $buttons = [];
         if (EcommerceHelper::isEnabledSupportDigitalProducts() && Auth::user()->hasPermission('products.create')) {
@@ -244,22 +234,16 @@ class ProductTable extends TableAbstract
         return $buttons;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function bulkActions(): array
     {
         return $this->addDeleteAction(route('products.deletes'), 'products.destroy', parent::bulkActions());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function renderTable($data = [], $mergeData = [])
+    public function renderTable($data = [], $mergeData = []): View|Factory|Response
     {
         if ($this->query()->count() === 0 &&
-            !$this->request()->wantsJson() &&
-            $this->request()->input('filter_table_id') !== $this->getOption('id') && !$this->request()->ajax()
+            ! $this->request()->wantsJson() &&
+            $this->request()->input('filter_table_id') !== $this->getOption('id') && ! $this->request()->ajax()
         ) {
             return view('plugins/ecommerce::products.intro');
         }
@@ -267,9 +251,6 @@ class ProductTable extends TableAbstract
         return parent::renderTable($data, $mergeData);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getDefaultButtons(): array
     {
         return [
@@ -277,11 +258,7 @@ class ProductTable extends TableAbstract
         ];
     }
 
-    /**
-     * @param string|null|int $value
-     * @return array
-     */
-    public function getCategories($value = null): array
+    public function getCategories(int|string|null $value = null): array
     {
         $categorySelected = [];
         if ($value) {
@@ -297,9 +274,6 @@ class ProductTable extends TableAbstract
         ];
     }
 
-    /**
-     * @return array
-     */
     public function getFilters(): array
     {
         $data = $this->getBulkChanges();
@@ -326,9 +300,6 @@ class ProductTable extends TableAbstract
         return $data;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getBulkChanges(): array
     {
         return [
@@ -361,14 +332,11 @@ class ProductTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function applyFilterCondition($query, string $key, string $operator, ?string $value)
+    public function applyFilterCondition(EloquentBuilder|QueryBuilder|EloquentRelation $query, string $key, string $operator, ?string $value): EloquentRelation|EloquentBuilder|QueryBuilder
     {
         switch ($key) {
             case 'created_at':
-                if (!$value) {
+                if (! $value) {
                     break;
                 }
 
@@ -376,11 +344,11 @@ class ProductTable extends TableAbstract
 
                 return $query->whereDate($key, $operator, $value);
             case 'category':
-                if (!$value) {
+                if (! $value) {
                     break;
                 }
 
-                if (!BaseHelper::isJoined($query, 'ec_product_categories')) {
+                if (! BaseHelper::isJoined($query, 'ec_product_categories')) {
                     $query = $query
                         ->join(
                             'ec_product_category_product',
@@ -400,7 +368,7 @@ class ProductTable extends TableAbstract
                 return $query->where('ec_product_category_product.category_id', $value);
 
             case 'stock_status':
-                if (!$value) {
+                if (! $value) {
                     break;
                 }
 
@@ -451,10 +419,7 @@ class ProductTable extends TableAbstract
         return parent::applyFilterCondition($query, $key, $operator, $value);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function saveBulkChangeItem($item, string $inputKey, ?string $inputValue)
+    public function saveBulkChangeItem(Model|Product $item, string $inputKey, ?string $inputValue): Model|bool
     {
         if ($inputKey === 'category') {
             $item->categories()->sync([$inputValue]);

@@ -9,25 +9,20 @@ use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
 use RvMedia;
 use Yajra\DataTables\DataTables;
 
 class StoreTable extends TableAbstract
 {
-    /**
-     * @var bool
-     */
     protected $hasActions = true;
 
-    /**
-     * @var bool
-     */
     protected $hasFilter = true;
 
-    /**
-     * @var bool
-     */
-    protected $canEditWalletBalance = false;
+    protected bool $canEditWalletBalance = false;
 
     /**
      * StoreTable constructor.
@@ -40,7 +35,7 @@ class StoreTable extends TableAbstract
         $this->repository = $storeRepository;
         parent::__construct($table, $urlGenerator);
 
-        if (!Auth::user()->hasAnyPermission(['marketplace.store.edit', 'marketplace.store.destroy'])) {
+        if (! Auth::user()->hasAnyPermission(['marketplace.store.edit', 'marketplace.store.destroy'])) {
             $this->hasOperations = false;
             $this->hasActions = false;
         }
@@ -50,15 +45,12 @@ class StoreTable extends TableAbstract
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
             ->editColumn('name', function ($item) {
-                if (!Auth::user()->hasPermission('marketplace.store.edit')) {
+                if (! Auth::user()->hasPermission('marketplace.store.edit')) {
                     return BaseHelper::clean($item->name);
                 }
 
@@ -117,7 +109,7 @@ class StoreTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
         $query = $this->repository->getModel()
             ->select([
@@ -136,9 +128,6 @@ class StoreTable extends TableAbstract
         return $this->applyScopes($query);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function columns(): array
     {
         return [
@@ -185,17 +174,11 @@ class StoreTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function buttons(): array
     {
         return $this->addCreateButton(route('marketplace.store.create'), 'marketplace.store.create');
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function bulkActions(): array
     {
         return $this->addDeleteAction(
@@ -205,9 +188,6 @@ class StoreTable extends TableAbstract
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getBulkChanges(): array
     {
         return [
@@ -229,9 +209,6 @@ class StoreTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getOperationsHeading(): array
     {
         return [

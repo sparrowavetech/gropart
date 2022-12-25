@@ -27,6 +27,15 @@
                                 </div>
                                 <div class="col-sm-6">
                                     <div class="form-group">
+                                        <label for="shop-company" class="required">{{ __('Company Name') }}</label>
+                                        <input class="form-control" name="company" id="shop-company" type="text" value="{{ old('company', $store->company) }}" placeholder="{{ __('Company Name') }}">
+                                        @if ($errors->has('company'))
+                                            <span class="text-danger">{{ $errors->first('company') }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
                                         <label for="shop-phone" class="required">{{ __('Phone Number') }}</label>
                                         <input class="form-control" name="phone" id="shop-phone" type="text" value="{{ old('phone', $store->phone) }}" placeholder="{{ __('Shop phone') }}">
                                         @if ($errors->has('phone'))
@@ -34,8 +43,6 @@
                                         @endif
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row">
                                 <div class="col-sm-6">
                                     <div class="form-group">
                                         <label for="shop-email" class="required">{{ __('Shop Email') }}</label>
@@ -91,9 +98,6 @@
                                         {!! Form::error('state', $errors) !!}
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="row">
                                 <div class="col-sm-6">
                                     <div class="form-group @if ($errors->has('city')) has-error @endif">
                                         <label for="city">{{ __('City') }}</label>
@@ -112,7 +116,15 @@
                                         {!! Form::error('city', $errors) !!}
                                     </div>
                                 </div>
-
+                                @if (EcommerceHelper::isZipCodeEnabled())
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label for="zip_code">{{ __('Zip code') }}</label>
+                                            <input id="zip_code" type="text" class="form-control" name="zip_code" value="{{ old('zip_code', $store->zip_code) }}">
+                                            {!! Form::error('zip_code', $errors) !!}
+                                        </div>
+                                    </div>
+                                @endif
                                 <div class="col-sm-6">
                                     <div class="form-group">
                                         <label for="address">{{ __('Address') }}</label>

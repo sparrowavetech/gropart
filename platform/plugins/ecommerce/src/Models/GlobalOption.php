@@ -3,18 +3,13 @@
 namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Models\BaseModel;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class GlobalOption extends BaseModel
 {
-    /**
-     * @var string
-     */
     protected $table = 'ec_global_options';
 
-    /**
-     * @var string[]
-     */
     protected $fillable = [
         'name',
         'option_type',
@@ -23,7 +18,24 @@ class GlobalOption extends BaseModel
 
     public function values(): HasMany
     {
-        return $this->hasMany(GlobalOptionValue::class, 'option_id')
+        return $this
+            ->hasMany(GlobalOptionValue::class, 'option_id')
             ->orderBy('order', 'ASC');
+    }
+
+    protected function optionName(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->name
+        );
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        self::deleting(function (GlobalOption $option) {
+            GlobalOptionValue::where('option_id', $option->id)->delete();
+        });
     }
 }

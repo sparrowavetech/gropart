@@ -343,7 +343,7 @@ return new class () extends Migration {
             $table->id();
             $table->string('name', 120);
             $table->integer('shipping_id')->unsigned();
-            $table->enum('type', ['base_on_price', 'base_on_weight'])->default('base_on_price')->nullable();
+            $table->string('type', 60)->default('based_on_price')->nullable();
             $table->integer('currency_id')->unsigned()->nullable();
             $table->decimal('from', 15)->default(0)->nullable();
             $table->decimal('to', 15)->default(0)->nullable();

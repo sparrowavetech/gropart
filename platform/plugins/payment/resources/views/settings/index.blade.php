@@ -15,7 +15,7 @@
                         {!! Form::open(['route' => 'payments.settings']) !!}
                         <div class="form-group mb-3">
                             <label for="default_payment_method">{{ trans('plugins/payment::payment.default_payment_method') }}</label>
-                            {!! Form::customSelect('default_payment_method', \Botble\Payment\Enums\PaymentMethodEnum::labels(), setting('default_payment_method', Botble\Payment\Enums\PaymentMethodEnum::COD)) !!}
+                            {!! Form::customSelect('default_payment_method', \Botble\Payment\Enums\PaymentMethodEnum::labels(), \Botble\Payment\Supports\PaymentHelper::defaultPaymentMethod()) !!}
                         </div>
                         <button type="button" class="btn btn-info button-save-payment-settings">{{ trans('core/base::forms.save') }}</button>
                         {!! Form::close() !!}

@@ -7,12 +7,7 @@ use Illuminate\Support\Facades\DB as DBFacade;
 use Illuminate\Support\Facades\Schema;
 
 return new class () extends Migration {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         if (Schema::hasColumn('countries', 'code')) {
             Schema::table('countries', function (Blueprint $table) {
@@ -31,12 +26,7 @@ return new class () extends Migration {
         }
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         //
     }

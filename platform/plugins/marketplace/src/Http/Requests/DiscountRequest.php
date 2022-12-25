@@ -8,12 +8,7 @@ use MarketplaceHelper;
 
 class DiscountRequest extends Request
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
             'title' => 'nullable|max:255',
@@ -26,10 +21,7 @@ class DiscountRequest extends Request
         ];
     }
 
-    /**
-     * @return array
-     */
-    public function messages()
+    public function messages(): array
     {
         return [
             'title.required_if' => trans('plugins/ecommerce::discount.create_discount_validate_title_required_if'),

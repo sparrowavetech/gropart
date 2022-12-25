@@ -7,13 +7,7 @@ use Botble\Support\Services\Cache\Cache;
 
 class ClearCacheAfterUpdateData
 {
-    /**
-     * Handle the event.
-     *
-     * @param UpdatedContentEvent $event
-     * @return void
-     */
-    public function handle(UpdatedContentEvent $event)
+    public function handle(UpdatedContentEvent $event): void
     {
         if (setting('enable_cache', false)) {
             $cache = new Cache(app('cache'), get_class($event->data));

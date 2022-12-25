@@ -11,33 +11,14 @@ use SiteMapManager;
 
 class RenderingSiteMapListener
 {
-    /**
-     * @var ProductInterface
-     */
-    protected $productRepository;
+    protected ProductInterface $productRepository;
 
-    /**
-     * @var ProductCategoryInterface
-     */
-    protected $productCategoryRepository;
+    protected ProductCategoryInterface $productCategoryRepository;
 
-    /**
-     * @var BrandInterface
-     */
-    protected $brandRepository;
+    protected BrandInterface $brandRepository;
 
-    /**
-     * @var ProductTagInterface
-     */
-    protected $tagRepository;
+    protected ProductTagInterface $tagRepository;
 
-    /**
-     * RenderingSiteMapListener constructor.
-     * @param ProductInterface $productRepository
-     * @param ProductCategoryInterface $productCategoryRepository
-     * @param BrandInterface $brandRepository
-     * @param ProductTagInterface $tagRepository
-     */
     public function __construct(
         ProductInterface $productRepository,
         ProductCategoryInterface $productCategoryRepository,
@@ -50,12 +31,7 @@ class RenderingSiteMapListener
         $this->brandRepository = $brandRepository;
     }
 
-    /**
-     * Handle the event.
-     *
-     * @return void
-     */
-    public function handle()
+    public function handle(): void
     {
         SiteMapManager::add(route('public.products'), '2020-06-29 00:00:00', '1', 'monthly');
         SiteMapManager::add(route('public.cart'), '2020-06-29 00:00:00', '1', 'monthly');
@@ -65,10 +41,11 @@ class RenderingSiteMapListener
             ->where('status', BaseStatusEnum::PUBLISHED)
             ->where('is_variation', 0)
             ->orderBy('created_at', 'desc')
+            ->select(['id', 'name', 'updated_at'])
             ->get();
 
         foreach ($products as $product) {
-            if (!$product->slugable) {
+            if (! $product->slugable) {
                 continue;
             }
 
@@ -79,10 +56,11 @@ class RenderingSiteMapListener
             ->with('slugable')
             ->where('status', BaseStatusEnum::PUBLISHED)
             ->orderBy('created_at', 'desc')
+            ->select(['id', 'name', 'updated_at'])
             ->get();
 
         foreach ($tags as $tag) {
-            if (!$tag->slugable) {
+            if (! $tag->slugable) {
                 continue;
             }
 
@@ -93,10 +71,11 @@ class RenderingSiteMapListener
             ->with('slugable')
             ->where('status', BaseStatusEnum::PUBLISHED)
             ->orderBy('created_at', 'desc')
+            ->select(['id', 'name', 'updated_at'])
             ->get();
 
         foreach ($productCategories as $productCategory) {
-            if (!$productCategory->slugable) {
+            if (! $productCategory->slugable) {
                 continue;
             }
 
@@ -107,10 +86,11 @@ class RenderingSiteMapListener
             ->with('slugable')
             ->where('status', BaseStatusEnum::PUBLISHED)
             ->orderBy('created_at', 'desc')
+            ->select(['id', 'name', 'updated_at'])
             ->get();
 
         foreach ($brands as $brand) {
-            if (!$brand->slugable) {
+            if (! $brand->slugable) {
                 continue;
             }
 

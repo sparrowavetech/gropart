@@ -60,7 +60,7 @@ class StoreRevenueController extends BaseController
         $store = $this->storeRepository->findOrFail($id);
         $customer = $store->customer;
 
-        if (!$customer->id) {
+        if (! $customer->id) {
             abort(404);
         }
 
@@ -83,7 +83,7 @@ class StoreRevenueController extends BaseController
 
         $customer = $store->customer;
 
-        if (!$customer->id) {
+        if (! $customer->id) {
             abort(404);
         }
 

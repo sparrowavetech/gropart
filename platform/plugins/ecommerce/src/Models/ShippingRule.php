@@ -3,19 +3,18 @@
 namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Models\BaseModel;
+use Botble\Base\Traits\EnumCastable;
+use Botble\Ecommerce\Enums\ShippingRuleTypeEnum;
 use Botble\Ecommerce\Repositories\Interfaces\ShippingRuleItemInterface;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ShippingRule extends BaseModel
 {
-    /**
-     * @var string
-     */
+    use EnumCastable;
+
     protected $table = 'ec_shipping_rules';
 
-    /**
-     * @var array
-     */
     protected $fillable = [
         'name',
         'price',
@@ -25,13 +24,14 @@ class ShippingRule extends BaseModel
         'shipping_id',
     ];
 
-    /**
-     * @var array
-     */
-    protected $dates = [
-        'created_at',
-        'updated_at',
+    protected $casts = [
+        'type' => ShippingRuleTypeEnum::class,
     ];
+
+    public function shipping(): BelongsTo
+    {
+        return $this->belongsTo(Shipping::class)->withDefault();
+    }
 
     public function items(): HasMany
     {

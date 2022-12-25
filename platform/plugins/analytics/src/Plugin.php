@@ -6,13 +6,9 @@ use Botble\Dashboard\Models\DashboardWidget;
 use Botble\Dashboard\Repositories\Interfaces\DashboardWidgetInterface;
 use Botble\PluginManagement\Abstracts\PluginOperationAbstract;
 use Botble\Setting\Models\Setting;
-use Exception;
 
 class Plugin extends PluginOperationAbstract
 {
-    /**
-     * @throws Exception
-     */
     public static function remove()
     {
         $widgets = app(DashboardWidgetInterface::class)
@@ -41,7 +37,7 @@ class Plugin extends PluginOperationAbstract
         Setting::query()
             ->whereIn('key', [
                 'google_analytics',
-                'analytics_view_id',
+                'analytics_property_id',
                 'analytics_service_account_credentials',
             ])
             ->delete();

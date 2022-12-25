@@ -51,7 +51,7 @@ class MenuServiceProvider extends ServiceProvider
 
         $this
             ->loadAndPublishConfigurations(['permissions', 'general'])
-            ->loadRoutes(['web'])
+            ->loadRoutes()
             ->loadAndPublishViews()
             ->loadAndPublishTranslations()
             ->loadMigrations()
@@ -69,7 +69,7 @@ class MenuServiceProvider extends ServiceProvider
                     'permissions' => ['menus.index'],
                 ]);
 
-            if (!defined('THEME_MODULE_SCREEN_NAME')) {
+            if (! defined('THEME_MODULE_SCREEN_NAME')) {
                 dashboard_menu()
                     ->registerItem([
                         'id' => 'cms-core-appearance',

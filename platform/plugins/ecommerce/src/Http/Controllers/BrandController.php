@@ -20,15 +20,8 @@ use Throwable;
 
 class BrandController extends BaseController
 {
-    /**
-     * @var BrandInterface
-     */
-    protected $brandRepository;
+    protected BrandInterface $brandRepository;
 
-    /**
-     * BrandController constructor.
-     * @param BrandInterface $brandRepository
-     */
     public function __construct(BrandInterface $brandRepository)
     {
         $this->brandRepository = $brandRepository;

@@ -16,22 +16,15 @@ use Throwable;
 
 class BackupController extends BaseController
 {
-    /**
-     * @var Backup
-     */
-    protected $backup;
+    protected Backup $backup;
 
-    /**
-     * BackupController constructor.
-     * @param Backup $backup
-     */
     public function __construct(Backup $backup)
     {
         $this->backup = $backup;
     }
 
     /**
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
     public function getIndex()
     {
@@ -114,7 +107,7 @@ class BackupController extends BaseController
                 }
             }
 
-            if (!$hasSQL) {
+            if (! $hasSQL) {
                 return $response
                     ->setError()
                     ->setMessage(trans('plugins/backup::backup.cannot_restore_database'));
@@ -163,7 +156,7 @@ class BackupController extends BaseController
 
     /**
      * @param string $folder
-     * @return bool|BaseHttpResponse|\Symfony\Component\HttpFoundation\BinaryFileResponse
+     * @return BaseHttpResponse|\Symfony\Component\HttpFoundation\BinaryFileResponse
      */
     public function getDownloadUploadFolder($folder, BaseHttpResponse $response)
     {

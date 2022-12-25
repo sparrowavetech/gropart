@@ -13,7 +13,7 @@
         Arr::set($options['attr'], 'class', Arr::get($options['attr'], 'class') . ' ui-select');
         $emptyVal = $options['empty_value'] ? ['' => $options['empty_value']] : null;
     @endphp
-    {!! Form::customSelect($name, (array)$emptyVal + $options['choices'], $options['selected'], $options['attr']) !!}
+    {!! Form::customSelect($name, (array)$emptyVal + $options['choices'], $options['selected'], $options['attr'], Arr::get($options, 'optionAttrs', []), Arr::get($options, 'optgroupsAttributes', [])) !!}
     @include('core/base::forms.partials.help-block')
 @endif
 

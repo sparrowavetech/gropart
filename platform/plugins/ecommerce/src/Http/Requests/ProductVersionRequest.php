@@ -7,12 +7,7 @@ use Carbon\Carbon;
 
 class ProductVersionRequest extends Request
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
             'price' => 'numeric|nullable|min:0',
@@ -24,10 +19,7 @@ class ProductVersionRequest extends Request
         ];
     }
 
-    /**
-     * @return array
-     */
-    public function messages()
+    public function messages(): array
     {
         return [
             'sale_price.max' => trans('plugins/ecommerce::products.product_create_validate_sale_price_max'),

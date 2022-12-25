@@ -20,7 +20,7 @@ class SocialLoginServiceProvider extends ServiceProvider
             ->loadAndPublishConfigurations(['permissions', 'general'])
             ->loadAndPublishViews()
             ->loadAndPublishTranslations()
-            ->loadRoutes(['web'])
+            ->loadRoutes()
             ->publishAssets();
 
         Event::listen(RouteMatched::class, function () {

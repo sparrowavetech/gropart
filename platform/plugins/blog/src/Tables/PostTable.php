@@ -5,49 +5,34 @@ namespace Botble\Blog\Tables;
 use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Blog\Exports\PostExport;
+use Botble\Blog\Models\Post;
 use Botble\Blog\Repositories\Interfaces\CategoryInterface;
 use Botble\Blog\Repositories\Interfaces\PostInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Eloquent\Relations\Relation as EloquentRelation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\DataTables;
 
 class PostTable extends TableAbstract
 {
-    /**
-     * @var bool
-     */
     protected $hasActions = true;
 
-    /**
-     * @var bool
-     */
     protected $hasFilter = true;
 
-    /**
-     * @var CategoryInterface
-     */
-    protected $categoryRepository;
+    protected CategoryInterface $categoryRepository;
 
-    /**
-     * @var string
-     */
-    protected $exportClass = PostExport::class;
+    protected string $exportClass = PostExport::class;
 
-    /**
-     * @var int
-     */
-    protected $defaultSortColumn = 6;
+    protected int $defaultSortColumn = 6;
 
-    /**
-     * PostTable constructor.
-     * @param DataTables $table
-     * @param UrlGenerator $urlGenerator
-     * @param PostInterface $postRepository
-     * @param CategoryInterface $categoryRepository
-     */
     public function __construct(
         DataTables $table,
         UrlGenerator $urlGenerator,
@@ -59,21 +44,18 @@ class PostTable extends TableAbstract
         $this->repository = $postRepository;
         $this->categoryRepository = $categoryRepository;
 
-        if (!Auth::user()->hasAnyPermission(['posts.edit', 'posts.destroy'])) {
+        if (! Auth::user()->hasAnyPermission(['posts.edit', 'posts.destroy'])) {
             $this->hasOperations = false;
             $this->hasActions = false;
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
             ->editColumn('name', function ($item) {
-                if (!Auth::user()->hasPermission('posts.edit')) {
+                if (! Auth::user()->hasPermission('posts.edit')) {
                     return BaseHelper::clean($item->name);
                 }
 
@@ -113,10 +95,7 @@ class PostTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
         $query = $this->repository->getModel()
             ->with([
@@ -139,9 +118,6 @@ class PostTable extends TableAbstract
         return $this->applyScopes($query);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function columns(): array
     {
         return [
@@ -182,25 +158,16 @@ class PostTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function buttons(): array
     {
         return $this->addCreateButton(route('posts.create'), 'posts.create');
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function bulkActions(): array
     {
         return $this->addDeleteAction(route('posts.deletes'), 'posts.destroy', parent::bulkActions());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getBulkChanges(): array
     {
         return [
@@ -229,20 +196,14 @@ class PostTable extends TableAbstract
         ];
     }
 
-    /**
-     * @return array
-     */
     public function getCategories(): array
     {
         return $this->categoryRepository->pluck('name', 'id');
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function applyFilterCondition($query, string $key, string $operator, ?string $value)
+    public function applyFilterCondition(EloquentBuilder|QueryBuilder|EloquentRelation $query, string $key, string $operator, ?string $value): EloquentRelation|EloquentBuilder|QueryBuilder
     {
-        if ($key === 'category' && $value && !BaseHelper::isJoined($query, 'post_categories')) {
+        if ($key === 'category' && $value && ! BaseHelper::isJoined($query, 'post_categories')) {
             $query = $query
                 ->join('post_categories', 'post_categories.post_id', '=', 'posts.id')
                 ->join('categories', 'post_categories.category_id', '=', 'categories.id')
@@ -254,10 +215,7 @@ class PostTable extends TableAbstract
         return parent::applyFilterCondition($query, $key, $operator, $value);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function saveBulkChangeItem(Model $item, string $inputKey, ?string $inputValue)
+    public function saveBulkChangeItem(Model|Post $item, string $inputKey, ?string $inputValue): Model|bool
     {
         if ($inputKey === 'category') {
             $item->categories()->sync([$inputValue]);
@@ -268,9 +226,6 @@ class PostTable extends TableAbstract
         return parent::saveBulkChangeItem($item, $inputKey, $inputValue);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getDefaultButtons(): array
     {
         return [

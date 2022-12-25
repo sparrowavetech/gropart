@@ -2,6 +2,10 @@
 
 namespace Botble\Ecommerce\Tables;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
@@ -13,38 +17,23 @@ use Html;
 
 class InvoiceTable extends TableAbstract
 {
-    /**
-     * @var bool
-     */
     protected $hasActions = true;
 
-    /**
-     * @var bool
-     */
     protected $hasFilter = true;
 
-    /**
-     * InvoiceTable constructor.
-     * @param DataTables $table
-     * @param UrlGenerator $urlGenerator
-     * @param InvoiceInterface $invoiceRepository
-     */
     public function __construct(DataTables $table, UrlGenerator $urlGenerator, InvoiceInterface $invoiceRepository)
     {
         parent::__construct($table, $urlGenerator);
 
         $this->repository = $invoiceRepository;
 
-        if (!Auth::user()->hasAnyPermission(['ecommerce.invoice.edit', 'ecommerce.invoice.destroy'])) {
+        if (! Auth::user()->hasAnyPermission(['ecommerce.invoice.edit', 'ecommerce.invoice.destroy'])) {
             $this->hasOperations = false;
             $this->hasActions = false;
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
@@ -58,7 +47,7 @@ class InvoiceTable extends TableAbstract
                 return format_price($item->amount);
             })
             ->editColumn('code', function ($item) {
-                if (!Auth::user()->hasPermission('ecommerce.invoice.edit')) {
+                if (! Auth::user()->hasPermission('ecommerce.invoice.edit')) {
                     return $item->code;
                 }
 
@@ -77,10 +66,7 @@ class InvoiceTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
         $query = $this->repository->getModel()
             ->select([
@@ -96,10 +82,7 @@ class InvoiceTable extends TableAbstract
         return $this->applyScopes($query);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function columns()
+    public function columns(): array
     {
         return [
             'id' => [
@@ -129,17 +112,11 @@ class InvoiceTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function bulkActions(): array
     {
         return $this->addDeleteAction(route('ecommerce.invoice.deletes'), 'ecommerce.invoice.destroy', parent::bulkActions());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getBulkChanges(): array
     {
         return [
@@ -161,9 +138,6 @@ class InvoiceTable extends TableAbstract
         ];
     }
 
-    /**
-     * @return array
-     */
     public function getFilters(): array
     {
         return $this->getBulkChanges();

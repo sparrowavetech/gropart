@@ -4,60 +4,23 @@ namespace Botble\Translation\Console;
 
 use Botble\Translation\Manager;
 use Illuminate\Console\Command;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
 
+#[AsCommand('cms:translations:import', 'Import translations from the PHP sources')]
 class ImportCommand extends Command
 {
-    /**
-     * The console command name.
-     *
-     * @var string
-     */
-    protected $name = 'cms:translations:import';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Import translations from the PHP sources';
-
-    /**
-     * @var Manager
-     */
-    protected $manager;
-
-    /**
-     * ImportCommand constructor.
-     * @param Manager $manager
-     */
-    public function __construct(Manager $manager)
-    {
-        $this->manager = $manager;
-        parent::__construct();
-    }
-
-    /**
-     * Execute the console command.
-     *
-     * @return int
-     */
-    public function handle()
+    public function handle(Manager $manager): int
     {
         $this->info('Importing...');
         $replace = $this->option('replace');
-        $counter = $this->manager->importTranslations($replace);
+        $counter = $manager->importTranslations($replace);
         $this->info('Done importing, processed ' . $counter . ' items!');
 
-        return 0;
+        return self::SUCCESS;
     }
 
-    /**
-     * Get the console command options.
-     *
-     * @return array
-     */
-    protected function getOptions()
+    protected function getOptions(): array
     {
         return [
             ['replace', 'R', InputOption::VALUE_NONE, 'Replace existing keys'],

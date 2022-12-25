@@ -8,6 +8,9 @@ use Botble\Ecommerce\Repositories\Interfaces\ShipmentInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\DataTables;
@@ -24,7 +27,7 @@ class ShipmentTable extends TableAbstract
 
         $this->repository = $repository;
 
-        if (!Auth::user()->hasAnyPermission(['ecommerce.shipments.edit', 'ecommerce.shipments.destroy'])) {
+        if (! Auth::user()->hasAnyPermission(['ecommerce.shipments.edit', 'ecommerce.shipments.destroy'])) {
             $this->hasOperations = false;
             $this->hasActions = false;
         }
@@ -38,7 +41,7 @@ class ShipmentTable extends TableAbstract
                 return $this->getCheckbox($item->id);
             })
             ->editColumn('order_id', function ($item) {
-                if (!Auth::user()->hasPermission('orders.edit')) {
+                if (! Auth::user()->hasPermission('orders.edit')) {
                     return $item->order->code;
                 }
 
@@ -57,7 +60,7 @@ class ShipmentTable extends TableAbstract
                 return BaseHelper::clean($item->status->toHtml());
             })
             ->editColumn('cod_status', function ($item) {
-                if (!(float)$item->cod_amount) {
+                if (! (float)$item->cod_amount) {
                     return Html::tag('span', trans('plugins/ecommerce::shipping.not_available'), ['class' => 'label-info status-label'])
                         ->toHtml();
                 }
@@ -82,7 +85,7 @@ class ShipmentTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
         $query = $this->repository->getModel()->select([
             'id',
@@ -153,5 +156,4 @@ class ShipmentTable extends TableAbstract
     {
         return $this->addDeleteAction(route('ecommerce.shipments.deletes'), 'ecommerce.shipments.destroy', parent::bulkActions());
     }
-
 }

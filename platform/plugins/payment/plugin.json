@@ -1,4 +1,5 @@
 {
+    "id": "botble/payment",
     "name": "Payment",
     "namespace": "Botble\\Payment\\",
     "provider": "Botble\\Payment\\Providers\\PaymentServiceProvider",

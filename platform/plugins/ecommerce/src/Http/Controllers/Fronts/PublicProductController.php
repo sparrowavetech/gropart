@@ -45,50 +45,20 @@ use Botble\Ecommerce\Repositories\Interfaces\ProductVariationItemInterface;
 
 class PublicProductController
 {
-    /**
-     * @var ProductInterface
-     */
-    protected $productRepository;
+    protected ProductInterface $productRepository;
 
-    /**
-     * @var ProductCategoryInterface
-     */
-    protected $productCategoryRepository;
+    protected ProductCategoryInterface $productCategoryRepository;
 
-    /**
-     * @var ProductAttributeSetInterface
-     */
-    protected $productAttributeSetRepository;
+    protected ProductAttributeSetInterface $productAttributeSetRepository;
 
-    /**
-     * @var BrandInterface
-     */
-    protected $brandRepository;
+    protected BrandInterface $brandRepository;
 
-    /**
-     * @var ProductVariationInterface
-     */
-    protected $productVariationRepository;
+    protected ProductVariationInterface $productVariationRepository;
 
-    /**
-     * @var SlugInterface
-     */
-    protected $slugRepository;
-    /**
-     * @var EnquiryInterface
-     */
-    protected $enquiryRepository;
+    protected SlugInterface $slugRepository;
 
-    /**
-     * PublicProductController constructor.
-     * @param ProductInterface $productRepository
-     * @param ProductCategoryInterface $productCategoryRepository
-     * @param ProductAttributeSetInterface $productAttributeSet
-     * @param BrandInterface $brandRepository
-     * @param ProductVariationInterface $productVariationRepository
-     * @param SlugInterface $slugRepository
-     * @param EnquiryInterface $enquiryRepository
-     */
+    protected EnquiryInterface $enquiryRepository;
+
     public function __construct(
         ProductInterface $productRepository,
         ProductCategoryInterface $productCategoryRepository,
@@ -116,7 +86,7 @@ class PublicProductController
      */
     public function getProducts(Request $request, GetProductService $productService, BaseHttpResponse $response)
     {
-        if (!EcommerceHelper::productFilterParamsValidated($request)) {
+        if (! EcommerceHelper::productFilterParamsValidated($request)) {
             return $response->setNextUrl(route('public.products'));
         }
 
@@ -135,7 +105,7 @@ class PublicProductController
         }
 
         $condition = ['is_enquiry' => 0];
-        if ($query && !$request->ajax()) {
+        if ($query && ! $request->ajax()) {
             $products = $productService->getProduct($request, null, null, $with, $condition);
 
             SeoHelper::setTitle(__('Search result for ":query"', compact('query')));
@@ -143,6 +113,8 @@ class PublicProductController
             Theme::breadcrumb()
                 ->add(__('Home'), route('public.index'))
                 ->add(__('Search'), route('public.products'));
+
+            SeoHelper::meta()->setUrl(route('public.products'));
 
             return Theme::scope(
                 'ecommerce.search',
@@ -155,16 +127,6 @@ class PublicProductController
 
         if ($request->ajax()) {
             return $this->ajaxFilterProductsResponse($products, $request, $response);
-        }
-        Assets::addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
-            ->addScriptsDirectly([
-                'vendor/core/plugins/ecommerce/libraries/jquery.textarea_autosize.js',
-                'vendor/core/plugins/ecommerce/js/order-create.js',
-            ])
-            ->addScripts(['blockui', 'input-mask']);
-
-        if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
-            Assets::addScriptsDirectly('vendor/core/plugins/location/js/location.js');
         }
 
         Theme::breadcrumb()
@@ -257,7 +219,7 @@ class PublicProductController
             'prefix' => SlugHelper::getPrefix(Product::class),
         ]);
 
-        if (!$slug) {
+        if (! $slug) {
             abort(404);
         }
 
@@ -286,7 +248,7 @@ class PublicProductController
                 ],
             ], EcommerceHelper::withReviewsParams()));
 
-        if (!$product) {
+        if (! $product) {
             abort(404);
         }
 
@@ -305,6 +267,8 @@ class PublicProductController
         $meta->setTitle($product->name);
 
         SeoHelper::setSeoOpenGraph($meta);
+
+        SeoHelper::meta()->setUrl($product->url);
 
         Helper::handleViewCount($product, 'viewed_product');
         EcommerceHelper::handleCustomerRecentlyViewedProduct($product);
@@ -423,7 +387,7 @@ class PublicProductController
             'prefix' => SlugHelper::getPrefix(ProductTag::class),
         ]);
 
-        if (!$slug) {
+        if (! $slug) {
             abort(404);
         }
 
@@ -438,7 +402,7 @@ class PublicProductController
 
         $tag = $tagRepository->getFirstBy(['id' => $slug->reference_id], ['*'], ['slugable', 'products']);
 
-        if (!$tag) {
+        if (! $tag) {
             abort(404);
         }
 
@@ -446,7 +410,7 @@ class PublicProductController
             return redirect()->to($tag->url);
         }
 
-        if (!EcommerceHelper::productFilterParamsValidated($request)) {
+        if (! EcommerceHelper::productFilterParamsValidated($request)) {
             return $response->setNextUrl($tag->url);
         }
 
@@ -480,6 +444,8 @@ class PublicProductController
         $meta->setTitle($tag->name);
 
         SeoHelper::setSeoOpenGraph($meta);
+
+        SeoHelper::meta()->setUrl($tag->url);
 
         Theme::breadcrumb()
             ->add(__('Home'), route('public.index'))
@@ -517,7 +483,7 @@ class PublicProductController
             'prefix' => SlugHelper::getPrefix(ProductCategory::class),
         ]);
 
-        if (!$slug) {
+        if (! $slug) {
             abort(404);
         }
 
@@ -532,7 +498,7 @@ class PublicProductController
 
         $category = $categoryRepository->getFirstBy($condition, ['*'], ['slugable']);
 
-        if (!$category) {
+        if (! $category) {
             abort(404);
         }
 
@@ -540,7 +506,7 @@ class PublicProductController
             return redirect()->to($category->url);
         }
 
-        if (!EcommerceHelper::productFilterParamsValidated($request)) {
+        if (! EcommerceHelper::productFilterParamsValidated($request)) {
             return $response->setNextUrl($category->url);
         }
 
@@ -573,6 +539,8 @@ class PublicProductController
         $meta->setTitle($category->name);
 
         SeoHelper::setSeoOpenGraph($meta);
+
+        SeoHelper::meta()->setUrl($category->url);
 
         Theme::breadcrumb()
             ->add(__('Home'), route('public.index'))
@@ -674,7 +642,7 @@ class PublicProductController
                 $product->errorMessage = __('Out of stock');
             }
 
-            if (!$product->with_storehouse_management || $product->quantity < 1) {
+            if (! $product->with_storehouse_management || $product->quantity < 1) {
                 $product->successMessage = __('In stock');
             } elseif ($product->quantity) {
                 if (EcommerceHelper::showNumberOfProductsInProductSingle()) {
@@ -728,7 +696,7 @@ class PublicProductController
             }
         }
 
-        if (!$originalProduct) {
+        if (! $originalProduct) {
             return $response->setError()->setMessage(__('Not available'));
         }
 
@@ -765,7 +733,7 @@ class PublicProductController
             );
         }
 
-        if (!$product) {
+        if (! $product) {
             $product = $originalProduct;
         }
 
@@ -791,13 +759,13 @@ class PublicProductController
             'prefix' => SlugHelper::getPrefix(Brand::class),
         ]);
 
-        if (!$slug) {
+        if (! $slug) {
             abort(404);
         }
 
         $brand = $this->brandRepository->getFirstBy(['id' => $slug->reference_id], ['*'], ['slugable']);
 
-        if (!$brand) {
+        if (! $brand) {
             abort(404);
         }
 
@@ -805,7 +773,7 @@ class PublicProductController
             return redirect()->to($brand->url);
         }
 
-        if (!EcommerceHelper::productFilterParamsValidated($request)) {
+        if (! EcommerceHelper::productFilterParamsValidated($request)) {
             return $response->setNextUrl($brand->url);
         }
         $condition = ['is_enquiry' => 0];
@@ -840,6 +808,8 @@ class PublicProductController
 
         SeoHelper::setSeoOpenGraph($meta);
 
+        SeoHelper::meta()->setUrl($brand->url);
+
         do_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, BRAND_MODULE_SCREEN_NAME, $brand);
 
         return Theme::scope('ecommerce.brand', compact('brand', 'products','condition'), 'plugins/ecommerce::themes.brand')
@@ -863,7 +833,7 @@ class PublicProductController
 
         $view = Theme::getThemeNamespace('views.ecommerce.includes.product-items');
 
-        if (!view()->exists($view)) {
+        if (! view()->exists($view)) {
             $view = 'plugins/ecommerce::themes.includes.product-items';
         }
 
@@ -913,7 +883,7 @@ class PublicProductController
      */
     public function getOrderTracking(Request $request, OrderInterface $orderRepository)
     {
-        if (!EcommerceHelper::isOrderTrackingEnabled()) {
+        if (! EcommerceHelper::isOrderTrackingEnabled()) {
             abort(404);
         }
 

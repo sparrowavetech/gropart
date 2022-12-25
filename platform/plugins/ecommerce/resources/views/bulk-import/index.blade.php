@@ -10,23 +10,23 @@
                     <div class="widget-body">
                         <div class="form-group mb-3 @if ($errors->has('type')) has-error @endif">
                             <label class="control-label required" for="type">
-                                {{ __('Type') }}
+                                {{ trans('plugins/ecommerce::bulk-import.import_types.name') }}
                             </label>
                             {!! Form::customSelect('type', [
-                                'all'        => __('All'),
-                                'products'   => __('Products'),
-                                'variations' => __('Variations')
+                                'all' => trans('plugins/ecommerce::bulk-import.import_types.all'),
+                                'products' => trans('plugins/ecommerce::bulk-import.import_types.products'),
+                                'variations' => trans('plugins/ecommerce::bulk-import.import_types.variations'),
                             ], null, ['required' => true]) !!}
                             {!! Form::error('type', $errors) !!}
                         </div>
                         <div class="form-group mb-3 @if ($errors->has('file')) has-error @endif">
                             <label class="control-label required" for="input-group-file">
-                                {{ trans('plugins/ecommerce::bulk-import.choose_file')}}
+                                {{ trans('plugins/ecommerce::bulk-import.choose_file') }}
                             </label>
                             {!! Form::file('file', [
-                                'required'         => true,
-                                'class'            => 'form-control',
-                                'id'               => 'input-group-file',
+                                'id' => 'input-group-file',
+                                'class' => 'form-control',
+                                'required' => true,
                                 'aria-describedby' => 'input-group-addon',
                             ]) !!}
                             <label class="d-block mt-1 help-block" for="input-group-file">
@@ -71,9 +71,9 @@
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                  <th scope="col">#_Row</th>
-                                  <th scope="col">Attribute</th>
-                                  <th scope="col">Errors</th>
+                                  <th scope="col">#{{ trans('plugins/ecommerce::bulk-import.row') }}</th>
+                                  <th scope="col">{{ trans('plugins/ecommerce::bulk-import.attribute') }}</th>
+                                  <th scope="col">{{ trans('plugins/ecommerce::bulk-import.errors') }}</th>
                                 </tr>
                             </thead>
                             <tbody id="imported-listing">
@@ -122,8 +122,8 @@
             <table class="table text-start table-bordered">
                 <thead>
                     <tr>
-                        <th scope="col">Column</th>
-                        <th scope="col">Rules</th>
+                        <th scope="col">{{ trans('plugins/ecommerce::bulk-import.column') }}</th>
+                        <th scope="col">{{ trans('plugins/ecommerce::bulk-import.rules') }}</th>
                     </tr>
                 </thead>
                 <tbody>

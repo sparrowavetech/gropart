@@ -7,14 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class GlobalOptionValue extends BaseModel
 {
-    /**
-     * @var string
-     */
     protected $table = 'ec_global_option_value';
 
-    /**
-     * @var string[]
-     */
     protected $fillable = [
         'option_id',
         'option_value',
@@ -23,9 +17,6 @@ class GlobalOptionValue extends BaseModel
         'order',
     ];
 
-    /**
-     * @return BelongsTo
-     */
     public function option(): BelongsTo
     {
         return $this->belongsTo(GlobalOption::class, 'option_id');

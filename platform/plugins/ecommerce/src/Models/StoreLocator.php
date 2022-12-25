@@ -9,14 +9,8 @@ class StoreLocator extends BaseModel
 {
     use LocationTrait;
 
-    /**
-     * @var string
-     */
     protected $table = 'ec_store_locators';
 
-    /**
-     * @var array
-     */
     protected $fillable = [
         'name',
         'email',
@@ -27,13 +21,5 @@ class StoreLocator extends BaseModel
         'city',
         'is_primary',
         'is_shipping_location',
-    ];
-
-    /**
-     * @var array
-     */
-    protected $dates = [
-        'created_at',
-        'updated_at',
     ];
 }

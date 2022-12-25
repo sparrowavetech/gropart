@@ -17,13 +17,13 @@ class StoreRepository extends RepositoriesAbstract implements StoreInterface
         $commissions = [];
         CategoryCommission::truncate();
         foreach ($data as $datum) {
-            if (!$datum['categories']) {
+            if (! $datum['categories']) {
                 continue;
             }
 
             $categories = json_decode($datum['categories'], true);
 
-            if (!is_array($categories) || !count($categories)) {
+            if (! is_array($categories) || ! count($categories)) {
                 continue;
             }
 
@@ -32,7 +32,7 @@ class StoreRepository extends RepositoriesAbstract implements StoreInterface
                     'product_category_id' => $category['id'],
                 ]);
 
-                if (!$commission) {
+                if (! $commission) {
                     continue;
                 }
 
@@ -53,7 +53,7 @@ class StoreRepository extends RepositoriesAbstract implements StoreInterface
         $commissions = CategoryCommission::with(['category'])->get();
         $data = [];
         foreach ($commissions as $commission) {
-            if (!$commission->category) {
+            if (! $commission->category) {
                 continue;
             }
 

@@ -136,7 +136,7 @@ class AuthenticationController extends Controller
      */
     public function logout(Request $request, BaseHttpResponse $response)
     {
-        if (!$request->user()) {
+        if (! $request->user()) {
             abort(401);
         }
 

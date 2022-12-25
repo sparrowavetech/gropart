@@ -44,7 +44,6 @@ return [
     'public_single_ending_url' => env('PUBLIC_SINGLE_ENDING_URL'),
     'send_mail_using_job_queue' => env('SEND_MAIL_USING_JOB_QUEUE', false),
     'locale' => env('APP_LOCALE', 'en'),
-    'can_execute_command' => env('CAN_EXECUTE_COMMAND', true),
     'demo' => [
         'account' => [
             'username' => env('CMS_DEMO_ACCOUNT_USERNAME', 'botble'),
@@ -676,10 +675,13 @@ return [
         ],
     ],
     'enable_system_updater' => env('CMS_ENABLE_SYSTEM_UPDATER', true),
+    'enable_marketplace_feature' => env('CMS_ENABLE_MARKETPLACE_FEATURE', true),
     'phone_validation_rule' => env('CMS_PHONE_VALIDATION_RULE', 'min:8|max:15|regex:/^([0-9\s\-\+\(\)]*)$/'),
     'disable_verify_csrf_token' => env('CMS_DISABLE_VERIFY_CSRF_TOKEN', false),
     'enable_less_secure_web' => env('CMS_ENABLE_LESS_SECURE_WEB', false),
     'db_strict_mode' => env('DB_STRICT', true),
     'enable_ini_set' => env('CMS_ENABLE_INI_SET', true),
     'upgrade_php_require_disabled' => env('CMS_UPGRADE_PHP_REQUIRE_DISABLED', false),
+    'enabled_cleanup_database' => env('CMS_ENABLED_CLEANUP_DATABASE', true),
+    'google_fonts_url' => env('CMS_GOOGLE_FONTS_URL', 'https://fonts.bunny.net'),
 ];

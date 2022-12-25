@@ -21,39 +21,31 @@ class Chart extends Base
      * compatibility with ISO-8601 dates.
      *
      * @brief XKeys
-     *
-     * @var array
      */
-    protected $xkey = [];
+    protected array $xkey = [];
 
     /**
      * A list of strings containing names of attributes that contain Y values (one for each series of data to be plotted).
      *
      * @brief YKeys
-     *
-     * @var array
      */
-    protected $ykeys = [];
+    protected array $ykeys = [];
 
     /**
      * A list of strings containing labels for the data series to be plotted (corresponding to the values in the ykeys
      * option).
      *
      * @brief Labels
-     *
-     * @var array
      */
-    protected $labels = [];
+    protected array $labels = [];
 
     /**
      * Max. bound for Y-values. Alternatively, set this to 'auto' to compute automatically, or 'auto [num]' to
      * automatically compute and ensure that the max y-value is at least [num].
      *
      * @brief Max Y
-     *
-     * @var string
      */
-    protected $ymax = 'auto';
+    protected string $ymax = 'auto';
 
     /**
      * Min. bound for Y-values. Alternatively, set this to 'auto' to compute automatically, or 'auto [num]' to
@@ -61,10 +53,8 @@ class Chart extends Base
      * Hint: you can use this to create graphs with false origins.
      *
      * @brief Min Y
-     *
-     * @var int
      */
-    protected $ymin = 0;
+    protected int $ymin = 0;
 
     /**
      * Set too false to always show a hover legend.
@@ -72,10 +62,8 @@ class Chart extends Base
      * Set to 'always' to never show a hover legend.
      *
      * @brief Hide over legend
-     *
-     * @var string
      */
-    protected $hideHover = 'auto';
+    protected string $hideHover = 'auto';
 
     /**
      * Provide a function on this option to generate custom hover legends. The function will be called with the index of
@@ -90,64 +78,50 @@ class Chart extends Base
      *
      *
      * @brief Hover callback
-     *
-     * @var string
      */
-    protected $hoverCallback = '';
+    protected string $hoverCallback = '';
 
     /**
      * Set too false to disable drawing the x and y axes.
      *
      * @brief Axes
-     *
-     * @var bool
      */
-    protected $axes = true;
+    protected bool $axes = true;
 
     /**
      * Set too false to disable drawing the horizontal grid lines.
      *
      * @brief Grid
-     *
-     * @var bool
      */
-    protected $grid = true;
+    protected bool $grid = true;
 
     /**
      * Set the color of the axis labels (default: #888).
      *
      * @brief Grid text color
-     *
-     * @var string
      */
-    protected $gridTextColor = '#888';
+    protected string $gridTextColor = '#888';
 
     /**
      * Set the point size of the axis labels (default: 12).
      *
      * @brief Grid text color
-     *
-     * @var string
      */
-    protected $gridTextSize = '12';
+    protected string $gridTextSize = '12';
 
     /**
      * Set the font family of the axis labels (default: sans-serif).
      *
      * @brief Grid font
-     *
-     * @var string
      */
-    protected $gridTextFamily = 'sans-serif';
+    protected string $gridTextFamily = 'sans-serif';
 
     /**
      * Set the font weight of the axis labels (default: normal).
      *
      * @brief Font weight
-     *
-     * @var string
      */
-    protected $gridTextWeight = 'normal';
+    protected string $gridTextWeight = 'normal';
 
     /**
      * Set to true to enable automatic resizing when the containing element resizes. (default: false).
@@ -156,30 +130,16 @@ class Chart extends Base
      * @brief Resize
      *
      * @since Morris 0.5.0
-     *
-     * @var bool
      */
-    protected $resize = false;
+    protected bool $resize = false;
 
-    /**
-     * @var null
-     */
-    protected $rangeSelect = null;
+    protected ?string $rangeSelect = null;
 
-    /**
-     * @var string
-     */
-    protected $rangeSelectColor = '#eef';
+    protected string $rangeSelectColor = '#eef';
 
-    /**
-     * @var int
-     */
-    protected $padding = 25;
+    protected int $padding = 25;
 
-    /**
-     * @var int
-     */
-    protected $numLines = 5;
+    protected int $numLines = 5;
 
     /**
      * A list of x-values to draw as vertical 'event' lines on the chart.
@@ -187,29 +147,23 @@ class Chart extends Base
      * eg: events: ['2012-01-01', '2012-02-01', '2012-03-01']
      *
      * @brief Events
-     *
-     * @var array
      */
-    protected $events = [];
+    protected array $events = [];
 
     /**
      * Width, in pixels, of the event lines.
      *
      * @brief Events line width
-     *
-     * @var int
      */
-    protected $eventStrokeWidth = 1;
+    protected int $eventStrokeWidth = 1;
 
     /**
      * Array of color values to use for the event line colors. If you list fewer colors here than you have lines in
      * events, then the values will be cycled.
      *
      * @brief Events colors
-     *
-     * @var array
      */
-    protected $eventLineColors = ['#005a04', '#ccffbb', '#3a5f0b', '#005502'];
+    protected array $eventLineColors = ['#005a04', '#ccffbb', '#3a5f0b', '#005502'];
 
     /**
      * A list of y-values to draw as horizontal 'goal' lines on the chart.
@@ -217,63 +171,49 @@ class Chart extends Base
      * eg: goals: [1.0, -1.0]
      *
      * @brief Goals
-     *
-     * @var array
      */
-    protected $goals = [];
+    protected array $goals = [];
 
     /**
      * Width, in pixels, of the goal lines.
      *
      * @brief Goal stroke width
-     *
-     * @var int
      */
-    protected $goalStrokeWidth = 1;
+    protected int $goalStrokeWidth = 1;
 
     /**
      * Array of color values to use for the goal line colors. If you list fewer colors here than you have lines in goals,
      * then the values will be cycled.
      *
      * @brief Goals colors
-     *
-     * @var array
      */
-    protected $goalLineColors = ['#666633', '#999966', '#cc6666', '#663333'];
+    protected array $goalLineColors = ['#666633', '#999966', '#cc6666', '#663333'];
 
     /**
      * Set too false to skip time/date parsing for X values, instead treating them as an equally-spaced series.
      *
      * @brief Parse time
-     *
-     * @var bool
      */
-    protected $parseTime = true;
+    protected bool $parseTime = true;
 
     /**
      * Set to a string value (eg: '%') to add a label suffix all y-labels.
      *
      * @brief Post units
-     *
-     * @var string
      */
-    protected $postUnits = '';
+    protected string $postUnits = '';
 
     /**
      * Set to a string value (eg: '$') to add a label prefix all y-labels.
      *
      * @brief Pre units
-     *
-     * @var string
      */
-    protected $preUnits = '';
+    protected string $preUnits = '';
 
     /**
      * Angle of x label
      *
      * @brief Angle
-     *
-     * @var int
      */
-    protected $xLabelAngle = 0;
+    protected int $xLabelAngle = 0;
 }

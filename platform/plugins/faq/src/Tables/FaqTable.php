@@ -7,48 +7,37 @@ use Botble\Faq\Repositories\Interfaces\FaqInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\DataTables;
 
 class FaqTable extends TableAbstract
 {
-    /**
-     * @var bool
-     */
     protected $hasActions = true;
 
-    /**
-     * @var bool
-     */
     protected $hasFilter = true;
 
-    /**
-     * FaqTable constructor.
-     * @param DataTables $table
-     * @param UrlGenerator $urlGenerator
-     * @param FaqInterface $faqRepository
-     */
     public function __construct(DataTables $table, UrlGenerator $urlGenerator, FaqInterface $faqRepository)
     {
         parent::__construct($table, $urlGenerator);
 
         $this->repository = $faqRepository;
 
-        if (!Auth::user()->hasAnyPermission(['faq.edit', 'faq.destroy'])) {
+        if (! Auth::user()->hasAnyPermission(['faq.edit', 'faq.destroy'])) {
             $this->hasOperations = false;
             $this->hasActions = false;
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
             ->editColumn('question', function ($item) {
-                if (!Auth::user()->hasPermission('faq.edit')) {
+                if (! Auth::user()->hasPermission('faq.edit')) {
                     return $item->question;
                 }
 
@@ -73,10 +62,7 @@ class FaqTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
         $query = $this->repository->getModel()->select([
             'id',
@@ -90,9 +76,6 @@ class FaqTable extends TableAbstract
         return $this->applyScopes($query);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function columns(): array
     {
         return [
@@ -119,25 +102,16 @@ class FaqTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function buttons(): array
     {
         return $this->addCreateButton(route('faq.create'), 'faq.create');
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function bulkActions(): array
     {
         return $this->addDeleteAction(route('faq.deletes'), 'faq.destroy', parent::bulkActions());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getBulkChanges(): array
     {
         return [

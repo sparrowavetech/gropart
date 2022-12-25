@@ -21,14 +21,8 @@ use Throwable;
 
 class ProductLabelController extends BaseController
 {
-    /**
-     * @var ProductLabelInterface
-     */
-    protected $productLabelRepository;
+    protected ProductLabelInterface $productLabelRepository;
 
-    /**
-     * @param ProductLabelInterface $productLabelRepository
-     */
     public function __construct(ProductLabelInterface $productLabelRepository)
     {
         $this->productLabelRepository = $productLabelRepository;

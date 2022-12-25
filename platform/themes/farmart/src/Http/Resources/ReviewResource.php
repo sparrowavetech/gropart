@@ -3,19 +3,12 @@
 namespace Theme\Farmart\Http\Resources;
 
 use Carbon\Carbon;
-use RvMedia;
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use RvMedia;
 
 class ReviewResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @param Request $request
-     * @return array
-     */
-    public function toArray($request)
+    public function toArray($request): array
     {
         return [
             'user_name' => $this->user->name,
@@ -30,7 +23,10 @@ class ReviewResource extends JsonResource
                     'full_url' => RvMedia::getImageUrl($image),
                 ];
             }),
-            'ordered_at' => $this->order_created_at ? __('✅ Purchased :time', ['time' => Carbon::createFromDate($this->order_created_at)->diffForHumans()]) : null,
+            'ordered_at' => $this->order_created_at ? __(
+                '✅ Purchased :time',
+                ['time' => Carbon::createFromDate($this->order_created_at)->diffForHumans()]
+            ) : null,
         ];
     }
 }

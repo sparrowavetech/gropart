@@ -6,10 +6,6 @@ use EmailHandler;
 
 class EmailSettingHooks
 {
-    /**
-     * @param string|null $html
-     * @return string
-     */
     public static function addEmailTemplateSettings(?string $html): string
     {
         $templates = '';

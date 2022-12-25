@@ -18,15 +18,8 @@ class AuditLogController extends BaseController
 {
     use HasDeleteManyItemsTrait;
 
-    /**
-     * @var AuditLogInterface
-     */
-    protected $auditLogRepository;
+    protected AuditLogInterface $auditLogRepository;
 
-    /**
-     * AuditLogController constructor.
-     * @param AuditLogInterface $auditLogRepository
-     */
     public function __construct(AuditLogInterface $auditLogRepository)
     {
         $this->auditLogRepository = $auditLogRepository;

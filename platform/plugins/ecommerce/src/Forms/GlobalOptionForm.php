@@ -10,9 +10,6 @@ use Botble\Ecommerce\Models\GlobalOption;
 
 class GlobalOptionForm extends FormAbstract
 {
-    /**
-     * {@inheritDoc}
-     */
     public function buildForm()
     {
         Assets::addScripts(['jquery-ui'])->addScriptsDirectly([

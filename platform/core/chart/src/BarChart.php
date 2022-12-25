@@ -7,39 +7,17 @@ use Botble\Chart\Supports\ChartTypes;
 
 class BarChart extends Chart
 {
-    /**
-     * @var float
-     */
-    protected $barSizeRatio = 0.75;
+    protected float $barSizeRatio = 0.75;
 
-    /**
-     * @var int
-     */
-    protected $barGap = 3;
+    protected int $barGap = 3;
 
-    /**
-     * @var float
-     */
-    protected $barOpacity = 1.0;
+    protected float $barOpacity = 1.0;
 
-    /**
-     * @var array
-     */
-    protected $barRadius = [0, 0, 0, 0];
+    protected array $barRadius = [0, 0, 0, 0];
 
-    /**
-     * @var int
-     */
-    protected $xLabelMargin = 50;
+    protected int $xLabelMargin = 50;
 
-    /**
-     * Array containing colors for the series bars.
-     *
-     * @brief Bars colors
-     *
-     * @var array
-     */
-    protected $barColors = [
+    protected array $barColors = [
         '#0b62a4',
         '#7a92a3',
         '#4da74d',
@@ -53,10 +31,8 @@ class BarChart extends Chart
      * Set to true to draw bars stacked vertically.
      *
      * @brief Stacked
-     *
-     * @var bool
      */
-    protected $stacked = true;
+    protected bool $stacked = true;
 
     /**
      * Create an instance of MorrisBarCharts class

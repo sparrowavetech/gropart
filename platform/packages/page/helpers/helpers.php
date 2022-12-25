@@ -3,7 +3,7 @@
 use Botble\Page\Repositories\Interfaces\PageInterface;
 use Botble\Page\Supports\Template;
 
-if (!function_exists('get_page_by_slug')) {
+if (! function_exists('get_page_by_slug')) {
     /**
      * @param string $slug
      * @return mixed
@@ -14,7 +14,7 @@ if (!function_exists('get_page_by_slug')) {
     }
 }
 
-if (!function_exists('get_all_pages')) {
+if (! function_exists('get_all_pages')) {
     /**
      * @param boolean $active
      * @return mixed
@@ -25,7 +25,7 @@ if (!function_exists('get_all_pages')) {
     }
 }
 
-if (!function_exists('register_page_template')) {
+if (! function_exists('register_page_template')) {
     /**
      * @param array $templates
      * @return void
@@ -36,7 +36,7 @@ if (!function_exists('register_page_template')) {
     }
 }
 
-if (!function_exists('get_page_templates')) {
+if (! function_exists('get_page_templates')) {
     /**
      * @return array
      */

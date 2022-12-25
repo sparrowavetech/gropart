@@ -21,15 +21,8 @@ use Throwable;
 
 class ProductCollectionController extends BaseController
 {
-    /**
-     * @var ProductCollectionInterface
-     */
-    protected $productCollectionRepository;
+    protected ProductCollectionInterface $productCollectionRepository;
 
-    /**
-     * ProductCollectionController constructor.
-     * @param ProductCollectionInterface $productCollectionRepository
-     */
     public function __construct(ProductCollectionInterface $productCollectionRepository)
     {
         $this->productCollectionRepository = $productCollectionRepository;

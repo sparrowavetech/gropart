@@ -8,9 +8,6 @@ use Illuminate\Support\Str;
 
 class ProductCollectionRepository extends RepositoriesAbstract implements ProductCollectionInterface
 {
-    /**
-     * {@inheritDoc}
-     */
     public function createSlug($name, $id)
     {
         $slug = Str::slug($name);

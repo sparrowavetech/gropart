@@ -10,10 +10,8 @@ class LineChart extends Chart
      * Array containing colors for the series lines/points.
      *
      * @brief Line colors
-     *
-     * @var array
      */
-    protected $lineColors = [
+    protected array $lineColors = [
         '#0b62a4',
         '#7A92A3',
         '#4da74d',
@@ -27,56 +25,44 @@ class LineChart extends Chart
      * Width of the series lines, in pixels.
      *
      * @brief Line width
-     *
-     * @var int
      */
-    protected $lineWidth = 3;
+    protected int $lineWidth = 3;
 
     /**
      * Diameter of the series points, in pixels.
      *
      * @brief Point size
-     *
-     * @var int
      */
-    protected $pointSize = 4;
+    protected int $pointSize = 4;
 
     /**
      * Colors for the series points. By default, uses the same values as lineColors
      *
      * @brief Point fill colors
-     *
-     * @var array
      */
-    protected $pointFillColors = [];
+    protected array $pointFillColors = [];
 
     /**
      * Colors for the outlines of the series points. (#fff by default).
      *
      * @brief Point stroke color
-     *
-     * @var array
      */
-    protected $pointStrokeColors = [];
+    protected array $pointStrokeColors = [];
 
     /**
      * Set to false to disable line smoothing.
      *
      * @brief Smooth
-     *
-     * @var bool
      */
-    protected $smooth = true;
+    protected bool $smooth = true;
 
     /**
      * A function that accepts millisecond timestamps and formats them for display as chart labels.
      * default: function (x) { return new Date(x).toString(); }
      *
      * @brief Date format
-     *
-     * @var string
      */
-    protected $dateFormat = '';
+    protected string $dateFormat = '';
 
     /**
      * Sets the x axis labelling interval. By default, the interval will be automatically computed.
@@ -99,10 +85,8 @@ class LineChart extends Chart
      * "second"
      *
      * @brief X labels
-     *
-     * @var array
      */
-    protected $xLabels = [];
+    protected array $xLabels = [];
 
     /**
      * A function that accepts Date objects and formats them for display as x-axis labels. Overrides the default formatter
@@ -111,10 +95,8 @@ class LineChart extends Chart
      * eg: function (x) { return x.toString(); }
      *
      * @brief X label format
-     *
-     * @var string
      */
-    protected $xLabelFormat = '';
+    protected string $xLabelFormat = '';
 
     /**
      * A function that accepts y-values and formats them for display as y-axis labels.
@@ -122,8 +104,6 @@ class LineChart extends Chart
      * eg: function (y) { return y.toString() + 'km'; }
      *
      * @brief Y label format
-     *
-     * @var string
      */
-    protected $yLabelFormat = '';
+    protected string $yLabelFormat = '';
 }

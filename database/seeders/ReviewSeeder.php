@@ -11,12 +11,7 @@ use File;
 
 class ReviewSeeder extends BaseSeeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
         File::deleteDirectory(config('filesystems.disks.public.root') . '/reviews');
 
@@ -62,12 +57,12 @@ class ReviewSeeder extends BaseSeeder
             ];
 
             Review::create([
-                'product_id'  => rand(1, $totalProducts),
+                'product_id' => rand(1, $totalProducts),
                 'customer_id' => rand(1, $totalCustomers),
-                'star'        => rand(1, 5),
-                'comment'     => $reviews[rand(0, count($reviews) - 1)],
-                'status'      => BaseStatusEnum::PUBLISHED,
-                'images'      => collect($images)
+                'star' => rand(1, 5),
+                'comment' => $reviews[rand(0, count($reviews) - 1)],
+                'status' => BaseStatusEnum::PUBLISHED,
+                'images' => collect($images)
                     ->filter(function ($item, $key) {
                         return $key <= rand(0, 2);
                     })

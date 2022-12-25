@@ -8,18 +8,13 @@ class LaravelLocalizationMiddlewareBase
 {
     /**
      * The URIs that should not be localized.
-     *
-     * @var array
      */
-    protected $except = [];
+    protected array $except = [];
 
     /**
      * Determine if the request has a URI that should not be localized.
-     *
-     * @param Request $request
-     * @return bool
      */
-    protected function shouldIgnore($request): bool
+    protected function shouldIgnore(Request $request): bool
     {
         foreach ($this->except as $except) {
             if ($except !== '/') {

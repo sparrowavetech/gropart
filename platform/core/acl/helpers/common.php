@@ -1,6 +1,6 @@
 <?php
 
-if (!function_exists('get_login_background')) {
+if (! function_exists('get_login_background')) {
     /**
      * @return string
      */
@@ -10,7 +10,7 @@ if (!function_exists('get_login_background')) {
 
         $images = setting('login_screen_backgrounds', []);
 
-        if (!$images) {
+        if (! $images) {
             return $default;
         }
 
@@ -24,7 +24,7 @@ if (!function_exists('get_login_background')) {
 
         $image = Arr::random($images);
 
-        if (!$image) {
+        if (! $image) {
             return $default;
         }
 

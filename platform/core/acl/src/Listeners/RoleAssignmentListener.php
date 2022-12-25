@@ -2,21 +2,12 @@
 
 namespace Botble\ACL\Listeners;
 
-use Exception;
 use Illuminate\Support\Facades\Auth;
 use Botble\ACL\Events\RoleAssignmentEvent;
 
 class RoleAssignmentListener
 {
-    /**
-     * Handle the event.
-     *
-     * @param RoleAssignmentEvent $event
-     * @return void
-     *
-     * @throws Exception
-     */
-    public function handle(RoleAssignmentEvent $event)
+    public function handle(RoleAssignmentEvent $event): void
     {
         $permissions = $event->role->permissions;
         $permissions[ACL_ROLE_SUPER_USER] = $event->user->super_user;

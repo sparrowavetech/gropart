@@ -59,7 +59,7 @@ class SettingController
 
         if ($request->hasFile('logo_input')) {
             $result = RvMedia::handleUpload($request->file('logo_input'), 0, 'stores');
-            if (!$result['error']) {
+            if (! $result['error']) {
                 $file = $result['data'];
                 $request->merge(['logo' => $file->url]);
             }

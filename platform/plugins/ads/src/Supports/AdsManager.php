@@ -11,26 +11,12 @@ use RvMedia;
 
 class AdsManager
 {
-    /**
-     * @var Collection
-     */
-    protected $data = [];
+    protected Collection|array $data = [];
 
-    /**
-     * Whether the settings data are loaded.
-     *
-     * @var boolean
-     */
-    protected $loaded = false;
+    protected bool $loaded = false;
 
-    /**
-     * @var array
-     */
-    protected $locations = [];
+    protected array $locations = [];
 
-    /**
-     * AdsManager constructor.
-     */
     public function __construct()
     {
         $this->locations = [
@@ -38,11 +24,6 @@ class AdsManager
         ];
     }
 
-    /**
-     * @param string $location
-     * @param array $attributes
-     * @return string
-     */
     public function display(string $location, array $attributes = []): string
     {
         $this->load();
@@ -57,7 +38,7 @@ class AdsManager
 
         $html = '';
         foreach ($data as $item) {
-            if (!$item->image) {
+            if (! $item->image) {
                 continue;
             }
 
@@ -75,15 +56,9 @@ class AdsManager
         return $html;
     }
 
-    /**
-     * Make sure data is loaded.
-     *
-     * @param boolean $force Force a reload of data. Default false.
-     * @return self
-     */
-    public function load(bool $force = false)
+    public function load(bool $force = false): self
     {
-        if (!$this->loaded || $force) {
+        if (! $this->loaded || $force) {
             $this->data = $this->read();
             $this->loaded = true;
         }
@@ -91,18 +66,11 @@ class AdsManager
         return $this;
     }
 
-    /**
-     * @return Collection
-     */
-    protected function read()
+    protected function read(): Collection
     {
         return app(AdsInterface::class)->getAll();
     }
 
-    /**
-     * @param string $location
-     * @return bool
-     */
     public function locationHasAds(string $location): bool
     {
         $this->load();
@@ -113,15 +81,9 @@ class AdsManager
             ->count();
     }
 
-    /**
-     * @param string|null $key
-     * @param array $attributes
-     * @param array $linkAttributes
-     * @return string|null
-     */
-    public function displayAds(?string $key, array $attributes = [], array $linkAttributes = [])
+    public function displayAds(?string $key, array $attributes = [], array $linkAttributes = []): ?string
     {
-        if (!$key) {
+        if (! $key) {
             return null;
         }
 
@@ -131,7 +93,7 @@ class AdsManager
             ->where('key', $key)
             ->first();
 
-        if (!$ads || !$ads->image) {
+        if (! $ads || ! $ads->image) {
             return null;
         }
 
@@ -145,11 +107,6 @@ class AdsManager
         return Html::tag('div', $image, $attributes)->toHtml();
     }
 
-    /**
-     * @param bool $isLoad
-     * @param bool $isNotExpired
-     * @return Collection
-     */
     public function getData(bool $isLoad = false, bool $isNotExpired = false): Collection
     {
         if ($isLoad) {
@@ -163,6 +120,7 @@ class AdsManager
                     if ($expiredAt = $item->getRawOriginal('expired_at')) {
                         return Carbon::parse($expiredAt)->gte(now());
                     }
+
                     return true;
                 });
         }
@@ -170,11 +128,6 @@ class AdsManager
         return $this->data;
     }
 
-    /**
-     * @param string $key
-     * @param string $name
-     * @return $this
-     */
     public function registerLocation(string $key, string $name): self
     {
         $this->locations[$key] = $name;
@@ -182,9 +135,6 @@ class AdsManager
         return $this;
     }
 
-    /**
-     * @return array
-     */
     public function getLocations(): array
     {
         return $this->locations;

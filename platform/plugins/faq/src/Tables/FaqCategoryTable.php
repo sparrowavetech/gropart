@@ -8,48 +8,37 @@ use Botble\Faq\Repositories\Interfaces\FaqCategoryInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\DataTables;
 
 class FaqCategoryTable extends TableAbstract
 {
-    /**
-     * @var bool
-     */
     protected $hasActions = true;
 
-    /**
-     * @var bool
-     */
     protected $hasFilter = true;
 
-    /**
-     * FaqCategoryTable constructor.
-     * @param DataTables $table
-     * @param UrlGenerator $urlGenerator
-     * @param FaqCategoryInterface $faqCategoryRepository
-     */
     public function __construct(DataTables $table, UrlGenerator $urlGenerator, FaqCategoryInterface $faqCategoryRepository)
     {
         parent::__construct($table, $urlGenerator);
 
         $this->repository = $faqCategoryRepository;
 
-        if (!Auth::user()->hasAnyPermission(['faq_category.edit', 'faq_category.destroy'])) {
+        if (! Auth::user()->hasAnyPermission(['faq_category.edit', 'faq_category.destroy'])) {
             $this->hasOperations = false;
             $this->hasActions = false;
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
             ->editColumn('name', function ($item) {
-                if (!Auth::user()->hasPermission('faq_category.edit')) {
+                if (! Auth::user()->hasPermission('faq_category.edit')) {
                     return $item->name;
                 }
 
@@ -71,10 +60,7 @@ class FaqCategoryTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
         $query = $this->repository->getModel()->select([
             'id',
@@ -86,9 +72,6 @@ class FaqCategoryTable extends TableAbstract
         return $this->applyScopes($query);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function columns(): array
     {
         return [
@@ -111,25 +94,16 @@ class FaqCategoryTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function buttons(): array
     {
         return $this->addCreateButton(route('faq_category.create'), 'faq_category.create');
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function bulkActions(): array
     {
         return $this->addDeleteAction(route('faq_category.deletes'), 'faq_category.destroy', parent::bulkActions());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getBulkChanges(): array
     {
         return [

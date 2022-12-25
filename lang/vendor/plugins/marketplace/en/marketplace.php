@@ -27,6 +27,7 @@ return [
         'verify_vendor' => 'Vendor verification (Vendor just can post their product listing after getting verified)',
         'enable_product_approval' => 'Enable product approval',
         'hide_store_phone_number' => 'Hide store phone number?',
+        'allow_vendor_manage_shipping' => 'Allow vendor manage shipping?',
     ],
     'theme_options' => [
         'name' => 'Marketplace',

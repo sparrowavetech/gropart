@@ -6,12 +6,7 @@ use Botble\Support\Http\Requests\Request;
 
 class ContactRequest extends Request
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         $rules = [
             'name' => 'required',
@@ -34,10 +29,7 @@ class ContactRequest extends Request
         return $rules;
     }
 
-    /**
-     * @return array
-     */
-    public function messages()
+    public function messages(): array
     {
         return [
             'name.required' => trans('plugins/contact::contact.form.name.required'),

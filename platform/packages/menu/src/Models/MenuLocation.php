@@ -7,14 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MenuLocation extends BaseModel
 {
-    /**
-     * @var string
-     */
     protected $table = 'menu_locations';
 
-    /**
-     * @var array
-     */
     protected $fillable = [
         'menu_id',
         'location',

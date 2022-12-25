@@ -19,65 +19,29 @@ use ZipArchive;
 
 class Core
 {
-    /**
-     * @var string
-     */
-    protected $productId;
+    protected string $productId;
 
-    /**
-     * @var string
-     */
-    protected $apiUrl;
+    protected string $apiUrl;
 
-    /**
-     * @var string
-     */
-    protected $apiKey;
+    protected string $apiKey;
 
-    /**
-     * @var string
-     */
-    protected $verifyType;
+    protected string $verifyType;
 
-    /**
-     * @var int
-     */
-    protected $verificationPeriod;
+    protected string $verificationPeriod;
 
-    /**
-     * @var string
-     */
-    protected $currentVersion;
+    protected string $currentVersion;
 
-    /**
-     * @var string
-     */
-    protected $rootPath;
+    protected string $rootPath;
 
-    /**
-     * @var string
-     */
-    protected $licenseFile;
+    protected string $licenseFile;
 
-    /**
-     * @var bool
-     */
-    protected $showUpdateProcess = true;
+    protected bool $showUpdateProcess = true;
 
-    /**
-     * @var bool
-     */
-    protected $runningInConsole = false;
+    protected bool $runningInConsole = false;
 
-    /**
-     * @var string
-     */
-    protected $sessionKey = '44622179e10cab6';
+    protected string $sessionKey = '44622179e10cab6';
 
-    /**
-     * @var string
-     */
-    protected $coreFilePath;
+    protected string $coreFilePath;
 
     public function __construct()
     {
@@ -122,7 +86,7 @@ class Core
 
     protected function callApi(string $url, array $data = []): array
     {
-        if (!extension_loaded('curl')) {
+        if (! extension_loaded('curl')) {
             return [
                 'status' => false,
                 'message' => 'Cannot activate license. PHP Curl extension needs to be installed first.',
@@ -143,39 +107,29 @@ class Core
                 ],
                 'json' => $data,
             ]);
+
+            $result = json_decode($result->getBody(), true);
+
+            if (! $result['status']) {
+                if (app()->hasDebugModeEnabled()) {
+                    return $result;
+                }
+
+                return [
+                    'status' => false,
+                    'message' => 'Server returned an invalid response, please contact support.',
+                ];
+            }
+
+            return $result;
         } catch (Exception|GuzzleException $exception) {
             return [
                 'status' => false,
                 'message' => $exception->getMessage(),
             ];
         }
-
-        if (!$result && config('app.debug')) {
-            return [
-                'status' => false,
-                'message' => 'Server is unavailable at the moment, please try again.',
-            ];
-        }
-
-        $result = json_decode($result->getBody(), true);
-
-        if (!$result['status']) {
-            if (config('app.debug')) {
-                return $result;
-            }
-
-            return [
-                'status' => false,
-                'message' => 'Server returned an invalid response, please contact support.',
-            ];
-        }
-
-        return $result;
     }
 
-    /**
-     * @return array
-     */
     public function getLatestVersion(): array
     {
         return $this->callApi(
@@ -198,7 +152,7 @@ class Core
         try {
             $response = $this->callApi($this->apiUrl . '/api/activate_license', $data);
 
-            if (!empty($createLicense)) {
+            if (! empty($createLicense)) {
                 if ($response['status']) {
                     $license = trim($response['lic_response']);
                     file_put_contents($this->licenseFile, $license, LOCK_EX);
@@ -228,7 +182,7 @@ class Core
             'client_name' => null,
         ];
 
-        if (!empty($license) && !empty($client)) {
+        if (! empty($license) && ! empty($client)) {
             $data = [
                 'product_id' => $this->productId,
                 'license_file' => null,
@@ -252,7 +206,7 @@ class Core
         if ($timeBasedCheck && $this->verificationPeriod > 0) {
             $type = $this->verificationPeriod;
             $today = date('d-m-Y');
-            if (!session($this->sessionKey)) {
+            if (! session($this->sessionKey)) {
                 session([$this->sessionKey => '00-00-0000']);
             }
             $typeText = $type . ' days';
@@ -288,7 +242,7 @@ class Core
     {
         $data = [];
 
-        if (!empty($license) && !empty($client)) {
+        if (! empty($license) && ! empty($client)) {
             $data = [
                 'product_id' => $this->productId,
                 'license_file' => null,
@@ -333,8 +287,8 @@ class Core
         string $version,
         ?string $license = null,
         ?string $client = null
-    ) {
-        if (!empty($license) && !empty($client)) {
+    ): void {
+        if (! empty($license) && ! empty($client)) {
             $dataArray = [
                 'license_file' => null,
                 'license_code' => $license,
@@ -433,7 +387,7 @@ class Core
             $error = true;
         }
 
-        if (!$error) {
+        if (! $error) {
             event(new UpdatingEvent());
 
             curl_close($ch);
@@ -441,7 +395,7 @@ class Core
 
             $file = fopen($destination, 'w+');
 
-            if (!$file) {
+            if (! $file) {
                 echo '<br><span class="text-danger">Folder does not have permission to write file or the update file path could not be resolved, please contact support.</span>';
             } else {
                 fputs($file, $data);
@@ -456,7 +410,7 @@ class Core
                     echo '-';
                 }
 
-                if (!$this->validateUpdateFile($destination)) {
+                if (! $this->validateUpdateFile($destination)) {
                     echo '<br><span class="text-danger">Updated files are invalid. Please contact support.</span>';
                 } else {
                     $this->processUpdate($destination);
@@ -468,7 +422,7 @@ class Core
         ob_end_flush();
     }
 
-    public function processUpdate(string $destination)
+    public function processUpdate(string $destination): void
     {
         $this->clearCache();
 
@@ -503,19 +457,19 @@ class Core
 
             foreach ($paths as $path) {
                 foreach (BaseHelper::scanFolder($path) as $module) {
-                    if ($path == plugin_path() && !is_plugin_active($module)) {
+                    if ($path == plugin_path() && ! is_plugin_active($module)) {
                         continue;
                     }
 
                     $modulePath = $path . '/' . $module;
 
-                    if (!File::isDirectory($modulePath)) {
+                    if (! File::isDirectory($modulePath)) {
                         continue;
                     }
 
                     $publishedPath = 'vendor/core/' . File::basename($path);
 
-                    if (!File::isDirectory($publishedPath)) {
+                    if (! File::isDirectory($publishedPath)) {
                         File::makeDirectory($publishedPath, 0755, true);
                     }
 
@@ -572,12 +526,13 @@ class Core
             File::delete(app()->getCachedRoutesPath());
             File::delete(base_path('bootstrap/cache/packages.php'));
             File::delete(base_path('bootstrap/cache/services.php'));
+            File::delete(base_path('bootstrap/cache/plugins.php'));
             foreach (File::glob(storage_path('app/purifier') . '/*') as $view) {
                 File::delete($view);
             }
 
             return true;
-        } catch (Exception $exception) {
+        } catch (Throwable) {
             return false;
         }
     }
@@ -594,18 +549,12 @@ class Core
         return $thisHttpOrHttps . $thisServerName . $request->server('REQUEST_URI');
     }
 
-    /**
-     * @return string
-     */
     protected function getSiteIP(): string
     {
         return request()->server('SERVER_ADDR') ?: Helper::getIpFromThirdParty() ?: gethostbyname(gethostname());
     }
 
-    /**
-     * @return float|string
-     */
-    protected function getRemoteFileSize(string $url)
+    protected function getRemoteFileSize(string $url): float|int|string
     {
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_HEADER, true);
@@ -635,9 +584,10 @@ class Core
         return -1;
     }
 
-    protected function progress($resource, $downloadSize, $downloaded)
+    protected function progress($resource, $downloadSize, $downloaded): void
     {
         static $prev = 0;
+
         if ($downloadSize == 0) {
             $progress = 0;
         } else {
@@ -674,7 +624,7 @@ class Core
 
     protected function validateUpdateFile(string $filePath): bool
     {
-        if (!class_exists('ZipArchive', false)) {
+        if (! class_exists('ZipArchive', false)) {
             return true;
         }
 
@@ -686,6 +636,10 @@ class Core
             }
 
             $content = json_decode($zip->getFromName('platform/core/core.json'), true);
+
+            if (! $content) {
+                return false;
+            }
 
             $validator = Validator::make($content, [
                 'productId' => ['required'],
@@ -705,7 +659,7 @@ class Core
                 return false;
             }
 
-            if (!version_compare($content['version'], get_cms_version(), '>=') > 0) {
+            if (! version_compare($content['version'], get_cms_version(), '>=') > 0) {
                 return false;
             }
         }

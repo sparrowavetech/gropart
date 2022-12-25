@@ -5,6 +5,9 @@ namespace Botble\SimpleSlider\Providers;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Shortcode\Compilers\Shortcode;
 use Botble\SimpleSlider\Repositories\Interfaces\SimpleSliderInterface;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\ServiceProvider;
 use Theme;
 
@@ -32,12 +35,7 @@ class HookServiceProvider extends ServiceProvider
         add_filter(BASE_FILTER_AFTER_SETTING_CONTENT, [$this, 'addSettings'], 301);
     }
 
-    /**
-     * @param Shortcode $shortcode
-     * @return null
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     */
-    public function render($shortcode)
+    public function render(Shortcode $shortcode): View|Factory|Application|null
     {
         $slider = $this->app->make(SimpleSliderInterface::class)->getFirstBy([
             'key' => $shortcode->key,
@@ -68,12 +66,7 @@ class HookServiceProvider extends ServiceProvider
         ]);
     }
 
-    /**
-     * @param null $data
-     * @return string
-     * @throws \Throwable
-     */
-    public function addSettings($data = null)
+    public function addSettings(?string $data = null): string
     {
         return $data . view('plugins/simple-slider::setting')->render();
     }

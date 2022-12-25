@@ -1,4 +1,5 @@
 {
+    "id": "botble/language-advanced",
     "name": "Language Advanced",
     "namespace": "Botble\\LanguageAdvanced\\",
     "provider": "Botble\\LanguageAdvanced\\Providers\\LanguageAdvancedServiceProvider",

@@ -1,5 +1,6 @@
 @php
     Arr::set($attributes, 'class', Arr::get($attributes, 'class') . ' icon-select');
+    Arr::set($attributes, 'data-empty', __('None'));
 @endphp
 
 {!! Form::customSelect($name, [$value => $value], $value, $attributes) !!}

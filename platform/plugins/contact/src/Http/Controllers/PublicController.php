@@ -14,14 +14,8 @@ use Throwable;
 
 class PublicController extends Controller
 {
-    /**
-     * @var ContactInterface
-     */
-    protected $contactRepository;
+    protected ContactInterface $contactRepository;
 
-    /**
-     * @param ContactInterface $contactRepository
-     */
     public function __construct(ContactInterface $contactRepository)
     {
         $this->contactRepository = $contactRepository;

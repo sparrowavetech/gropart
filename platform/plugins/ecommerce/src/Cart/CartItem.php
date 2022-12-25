@@ -84,7 +84,7 @@ class CartItem implements Arrayable, Jsonable
         if (empty($name)) {
             throw new InvalidArgumentException('Please supply a valid name.');
         }
-        if (strlen($price) < 0 || !is_numeric($price)) {
+        if (! is_numeric($price)) {
             throw new InvalidArgumentException('Please supply a valid price.');
         }
 
@@ -142,9 +142,6 @@ class CartItem implements Arrayable, Jsonable
     /**
      * Returns the formatted tax.
      *
-     * @param int $decimals
-     * @param string $decimalPoint
-     * @param string $thousandSeperator
      * @return string
      */
     public function tax()
@@ -155,9 +152,6 @@ class CartItem implements Arrayable, Jsonable
     /**
      * Returns the formatted tax.
      *
-     * @param int $decimals
-     * @param string $decimalPoint
-     * @param string $thousandSeperator
      * @return string
      */
     public function taxTotal()
@@ -172,7 +166,7 @@ class CartItem implements Arrayable, Jsonable
      */
     public function setQuantity($qty)
     {
-        if (empty($qty) || !is_numeric($qty)) {
+        if (empty($qty) || ! is_numeric($qty)) {
             throw new InvalidArgumentException('Please supply a valid quantity.');
         }
 
@@ -250,7 +244,7 @@ class CartItem implements Arrayable, Jsonable
         }
 
         if ($attribute === 'priceTax') {
-            if (!EcommerceHelper::isTaxEnabled()) {
+            if (! EcommerceHelper::isTaxEnabled()) {
                 return 0;
             }
 
@@ -266,7 +260,7 @@ class CartItem implements Arrayable, Jsonable
         }
 
         if ($attribute === 'tax') {
-            if (!EcommerceHelper::isTaxEnabled()) {
+            if (! EcommerceHelper::isTaxEnabled()) {
                 return 0;
             }
 
@@ -274,7 +268,7 @@ class CartItem implements Arrayable, Jsonable
         }
 
         if ($attribute === 'taxTotal') {
-            if (!EcommerceHelper::isTaxEnabled()) {
+            if (! EcommerceHelper::isTaxEnabled()) {
                 return 0;
             }
 
@@ -339,7 +333,7 @@ class CartItem implements Arrayable, Jsonable
      * @param array $options
      * @return string
      */
-    protected function generateRowId($id, array $options)
+    protected function generateRowId($id, array $options): string
     {
         ksort($options);
 
@@ -348,10 +342,8 @@ class CartItem implements Arrayable, Jsonable
 
     /**
      * Get the instance as an array.
-     *
-     * @return array
      */
-    public function toArray()
+    public function toArray(): array
     {
         return [
             'rowId' => $this->rowId,
@@ -370,9 +362,8 @@ class CartItem implements Arrayable, Jsonable
      * Convert the object to its JSON representation.
      *
      * @param int $options
-     * @return string
      */
-    public function toJson($options = 0)
+    public function toJson($options = 0): string
     {
         return json_encode($this->toArray(), $options);
     }

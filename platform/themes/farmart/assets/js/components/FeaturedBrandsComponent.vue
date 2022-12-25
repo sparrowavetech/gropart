@@ -70,7 +70,7 @@ export default {
                     this.data = res.data.data ? res.data.data : [];
                     this.isLoading = false;
                 })
-                .catch(res => {
+                .catch(() => {
                     this.isLoading = false;
                 });
         },

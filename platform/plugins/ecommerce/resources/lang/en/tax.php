@@ -8,4 +8,5 @@ return [
     'percentage' => 'Percentage %',
     'priority' => 'Priority',
     'select_tax' => '-- select --',
+    'default' => 'Default',
 ];

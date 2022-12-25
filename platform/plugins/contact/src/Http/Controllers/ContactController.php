@@ -24,14 +24,8 @@ class ContactController extends BaseController
 {
     use HasDeleteManyItemsTrait;
 
-    /**
-     * @var ContactInterface
-     */
-    protected $contactRepository;
+    protected ContactInterface $contactRepository;
 
-    /**
-     * @param ContactInterface $contactRepository
-     */
     public function __construct(ContactInterface $contactRepository)
     {
         $this->contactRepository = $contactRepository;
@@ -39,7 +33,7 @@ class ContactController extends BaseController
 
     /**
      * @param ContactTable $dataTable
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return \Illuminate\Contracts\View\View|\Illuminate\Http\JsonResponse
      * @throws \Throwable
      */
     public function index(ContactTable $dataTable)
@@ -68,7 +62,7 @@ class ContactController extends BaseController
 
     /**
      * @param $id
-     * @param Request $request
+     * @param EditContactRequest $request
      * @param BaseHttpResponse $response
      * @return BaseHttpResponse
      */

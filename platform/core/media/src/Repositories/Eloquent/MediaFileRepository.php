@@ -21,9 +21,6 @@ use RvMedia;
  */
 class MediaFileRepository extends RepositoriesAbstract implements MediaFileInterface
 {
-    /**
-     * {@inheritDoc}
-     */
     public function createName($name, $folder)
     {
         $index = 1;
@@ -35,11 +32,6 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
         return $name;
     }
 
-    /**
-     * @param string|null $name
-     * @param int|null $folder
-     * @return bool
-     */
     protected function checkIfExistsName(?string $name, ?int $folder): bool
     {
         $count = $this->model
@@ -51,12 +43,9 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
         return $count > 0;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function createSlug($name, $extension, $folderPath): string
     {
-        $slug = Str::slug($name, '-', !RvMedia::turnOffAutomaticUrlTranslationIntoLatin() ? 'en' : false);
+        $slug = Str::slug($name, '-', ! RvMedia::turnOffAutomaticUrlTranslationIntoLatin() ? 'en' : false);
         $index = 1;
         $baseSlug = $slug;
         while (File::exists(RvMedia::getRealPath(rtrim($folderPath, '/') . '/' . $slug . '.' . $extension))) {
@@ -70,9 +59,6 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
         return $slug . '.' . $extension;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getFilesByFolderId($folderId, array $params = [], $withFolders = true, $folderParams = [])
     {
         $params = array_merge([
@@ -186,7 +172,7 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
         $result = $this->getFile($params);
 
         if ($params['selected_file_id']) {
-            if (!$params['paginate']['current_paged'] || $params['paginate']['current_paged'] == 1) {
+            if (! $params['paginate']['current_paged'] || $params['paginate']['current_paged'] == 1) {
                 $currentFile = $this->originalModel;
 
                 $currentFile = $currentFile
@@ -259,7 +245,7 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
             $result = $this->model->get();
         }
 
-        if (!empty($params['selected_file_id']) && !$params['paginate']['current_paged'] || $params['paginate']['current_paged'] == 1) {
+        if (! empty($params['selected_file_id']) && ! $params['paginate']['current_paged'] || $params['paginate']['current_paged'] == 1) {
             $currentFile = $this->originalModel
                 ->where('id', $params['selected_file_id'])
                 ->select($params['select'])
@@ -279,9 +265,6 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
         return $result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getTrashed($folderId, array $params = [], $withFolders = true, $folderParams = [])
     {
         $params = array_merge([
@@ -384,15 +367,10 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
             $this->model = $this->model->where('media_files.folder_id', $folderId);
         }
 
-        $result = $this->getFile($params);
-
-        return $result;
+        return $this->getFile($params);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function emptyTrash()
+    public function emptyTrash(): bool
     {
         $files = $this->model->onlyTrashed();
 

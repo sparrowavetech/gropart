@@ -4,29 +4,18 @@ namespace Botble\Slug\Events;
 
 use Botble\Base\Events\Event;
 use Botble\Slug\Models\Slug;
-use Eloquent;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Queue\SerializesModels;
 
 class UpdatedSlugEvent extends Event
 {
     use SerializesModels;
 
-    /**
-     * @var Eloquent|false
-     */
-    public $data;
+    public false|Model|null $data;
 
-    /**
-     * @var Slug
-     */
-    public $slug;
+    public Slug $slug;
 
-    /**
-     * UpdatedSlugEvent constructor.
-     * @param Eloquent $data
-     * @param Slug $slug
-     */
-    public function __construct($data, Slug $slug)
+    public function __construct(false|Model|null $data, Slug $slug)
     {
         $this->data = $data;
         $this->slug = $slug;

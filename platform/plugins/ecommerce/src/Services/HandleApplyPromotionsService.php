@@ -12,39 +12,19 @@ use OrderHelper;
 
 class HandleApplyPromotionsService
 {
-    /**
-     * @var DiscountInterface
-     */
-    protected $discountRepository;
+    protected DiscountInterface $discountRepository;
 
-    /**
-     * @var ProductInterface
-     */
-    protected $productRepository;
+    protected ProductInterface $productRepository;
 
-    /**
-     * @var null|Collection
-     */
-    protected $promotions;
+    protected ?Collection $promotions = null;
 
-    /**
-     * HandleApplyPromotionsService constructor.
-     * @param DiscountInterface $discountRepository
-     * @param ProductInterface $productRepository
-     */
     public function __construct(DiscountInterface $discountRepository, ProductInterface $productRepository)
     {
         $this->discountRepository = $discountRepository;
         $this->productRepository = $productRepository;
     }
 
-    /**
-     * @param null $token
-     * @param array $data
-     * @param string|null $prefix
-     * @return float
-     */
-    public function execute($token = null, array $data = [], ?string $prefix = '')
+    public function execute($token = null, array $data = [], ?string $prefix = ''): float|int
     {
         if (empty($this->promotions)) {
             $promotions = $this->discountRepository->getAvailablePromotions();
@@ -124,7 +104,7 @@ class HandleApplyPromotionsService
                                         ->pluck('ec_product_collections.id')
                                         ->all();
 
-                                    if (!empty(array_intersect(
+                                    if (! empty(array_intersect(
                                         $productCollections,
                                         $discountProductCollections
                                     ))) {
@@ -139,7 +119,7 @@ class HandleApplyPromotionsService
             }
         }
 
-        if (!$token) {
+        if (! $token) {
             $token = OrderHelper::getOrderSessionToken();
         }
 

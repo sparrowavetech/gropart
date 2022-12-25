@@ -9,22 +9,17 @@ use Eloquent;
 
 class CategoryRepository extends RepositoriesAbstract implements CategoryInterface
 {
-    /**
-     * {@inheritDoc}
-     */
     public function getDataSiteMap()
     {
         $data = $this->model
             ->with('slugable')
             ->where('status', BaseStatusEnum::PUBLISHED)
+            ->select(['id', 'name', 'updated_at'])
             ->orderBy('created_at', 'desc');
 
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getFeaturedCategories($limit, array $with = [])
     {
         $data = $this->model
@@ -45,13 +40,10 @@ class CategoryRepository extends RepositoriesAbstract implements CategoryInterfa
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getAllCategories(array $condition = [], array $with = [])
     {
         $data = $this->model->with('slugable');
-        if (!empty($condition)) {
+        if (! empty($condition)) {
             $data = $data->where($condition);
         }
 
@@ -67,9 +59,6 @@ class CategoryRepository extends RepositoriesAbstract implements CategoryInterfa
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getCategoryById($id)
     {
         $data = $this->model->with('slugable')->where([
@@ -80,15 +69,15 @@ class CategoryRepository extends RepositoriesAbstract implements CategoryInterfa
         return $this->applyBeforeExecuteQuery($data, true)->first();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function getCategories(array $select, array $orderBy)
+    public function getCategories(array $select, array $orderBy, array $conditions = ['status' => BaseStatusEnum::PUBLISHED])
     {
         $data = $this->model
-            ->where('status', BaseStatusEnum::PUBLISHED)
             ->with('slugable')
             ->select($select);
+
+        if ($conditions) {
+            $data = $data->where($conditions);
+        }
 
         foreach ($orderBy as $by => $direction) {
             $data = $data->orderBy($by, $direction);
@@ -97,9 +86,6 @@ class CategoryRepository extends RepositoriesAbstract implements CategoryInterfa
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getAllRelatedChildrenIds($id)
     {
         if ($id instanceof Eloquent) {
@@ -108,7 +94,7 @@ class CategoryRepository extends RepositoriesAbstract implements CategoryInterfa
             $model = $this->getFirstBy(['id' => $id]);
         }
 
-        if (!$model) {
+        if (! $model) {
             return null;
         }
 
@@ -126,9 +112,6 @@ class CategoryRepository extends RepositoriesAbstract implements CategoryInterfa
         return array_unique($result);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getAllCategoriesWithChildren(array $condition = [], array $with = [], array $select = ['*'])
     {
         $data = $this->model
@@ -139,25 +122,19 @@ class CategoryRepository extends RepositoriesAbstract implements CategoryInterfa
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getFilters($filters)
     {
         $this->model = $this->originalModel;
 
-        $orderBy = isset($filters['order_by']) ? $filters['order_by'] : 'created_at';
+        $orderBy = $filters['order_by'] ?? 'created_at';
 
-        $order = isset($filters['order']) ? $filters['order'] : 'desc';
+        $order = $filters['order'] ?? 'desc';
 
         $this->model = $this->model->where('status', BaseStatusEnum::PUBLISHED)->orderBy($orderBy, $order);
 
         return $this->applyBeforeExecuteQuery($this->model)->paginate((int)$filters['per_page']);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getPopularCategories(int $limit, array $with = ['slugable'], array $withCount = ['posts'])
     {
         $data = $this->model

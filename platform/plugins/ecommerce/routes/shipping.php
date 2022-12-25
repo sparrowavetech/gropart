@@ -45,5 +45,41 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
                 ]);
             });
         });
+
+        Route::group(['prefix' => 'ecommerce', 'as' => 'ecommerce.'], function () {
+            Route::group([
+                'prefix' => 'shipping-rule-items',
+                'as' => 'shipping-rule-items.',
+            ], function () {
+                Route::resource('', 'ShippingRuleItemController')->parameters(['' => 'item']);
+
+                Route::delete('items/destroy', [
+                    'as' => 'deletes',
+                    'uses' => 'ShippingRuleItemController@deletes',
+                    'permission' => 'ecommerce.shipping-rule-items.destroy',
+                ]);
+
+                Route::group([
+                    'as' => 'bulk-import.',
+                    'prefix' => 'bulk-import',
+                    'permission' => 'ecommerce.shipping-rule-items.bulk-import',
+                ], function () {
+                    Route::get('/', [
+                        'as' => 'index',
+                        'uses' => 'ShippingRuleItemController@import',
+                    ]);
+
+                    Route::post('/', [
+                        'as' => 'post',
+                        'uses' => 'ShippingRuleItemController@postImport',
+                    ]);
+
+                    Route::post('/download-template', [
+                        'as' => 'download-template',
+                        'uses' => 'ShippingRuleItemController@downloadTemplate',
+                    ]);
+                });
+            });
+        });
     });
 });

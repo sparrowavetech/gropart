@@ -31,7 +31,7 @@ class StripePaymentService extends StripePaymentAbstract
         $this->setClient();
 
         if ($this->isStripeApiCharge()) {
-            if (!$this->token) {
+            if (! $this->token) {
                 $this->setErrorMessage(trans('plugins/payment::payment.could_not_get_stripe_token'));
 
                 Log::error(
@@ -87,7 +87,7 @@ class StripePaymentService extends StripePaymentAbstract
                         ],
                         'description' => $product['name'],
                     ],
-                    'unit_amount' => $this->convertAmount($product['price_per_order'] * get_current_exchange_rate()),
+                    'unit_amount' => $this->convertAmount($product['price_per_order'] / $product['qty'] * get_current_exchange_rate()),
                     'currency' => $this->currency,
                 ],
                 'quantity' => $product['qty'],
@@ -110,7 +110,7 @@ class StripePaymentService extends StripePaymentAbstract
             ],
         ];
 
-        if (!empty($data['shipping_method'])) {
+        if (! empty($data['shipping_method'])) {
             $requestData['shipping_options'] = [
                 [
                     'shipping_rate_data' => [
@@ -183,9 +183,6 @@ class StripePaymentService extends StripePaymentAbstract
         return $chargeId;
     }
 
-    /**
-     * @return bool
-     */
     public function isStripeApiCharge(): bool
     {
         $key = 'stripe_api_charge';

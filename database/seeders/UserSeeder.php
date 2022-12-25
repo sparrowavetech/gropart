@@ -9,12 +9,7 @@ use Schema;
 
 class UserSeeder extends BaseSeeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
         Schema::disableForeignKeyConstraints();
 
@@ -38,6 +33,6 @@ class UserSeeder extends BaseSeeder
 
         event('acl.activated', [$user, $activation]);
 
-        return $activationRepository->complete($user, $activation->code);
+        $activationRepository->complete($user, $activation->code);
     }
 }

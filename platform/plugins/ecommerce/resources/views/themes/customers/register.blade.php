@@ -20,6 +20,8 @@
                             </div>
                         </div>
 
+                        {!! apply_filters('ecommerce_customer_register_form_before', null) !!}
+
                         <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
                             <label for="email" class="col-md-4 control-label">{{ __('E-Mail Address') }}</label>
 

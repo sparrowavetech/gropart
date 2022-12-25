@@ -14,7 +14,7 @@ class StripeServiceProvider extends ServiceProvider
         if (is_plugin_active('payment')) {
             $this->setNamespace('plugins/stripe')
                 ->loadHelpers()
-                ->loadRoutes(['web'])
+                ->loadRoutes()
                 ->loadAndPublishViews()
                 ->publishAssets();
 

@@ -8,27 +8,14 @@ use Exception;
 
 class DeletedContentListener
 {
-    /**
-     * @var MetaBoxInterface
-     */
-    protected $metaBoxRepository;
+    protected MetaBoxInterface $metaBoxRepository;
 
-    /**
-     * DeletedContentListener constructor.
-     * @param MetaBoxInterface $metaBoxRepository
-     */
     public function __construct(MetaBoxInterface $metaBoxRepository)
     {
         $this->metaBoxRepository = $metaBoxRepository;
     }
 
-    /**
-     * Handle the event.
-     *
-     * @param DeletedContentEvent $event
-     * @return void
-     */
-    public function handle(DeletedContentEvent $event)
+    public function handle(DeletedContentEvent $event): void
     {
         try {
             do_action(BASE_ACTION_AFTER_DELETE_CONTENT, $event->screen, $event->request, $event->data);

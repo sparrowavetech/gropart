@@ -2,7 +2,7 @@
 
 namespace Botble\Analytics\Facades;
 
-use Botble\Analytics\Analytics;
+use Botble\Analytics\Abstracts\AnalyticsAbstract;
 use Illuminate\Support\Facades\Facade;
 
 /**
@@ -10,11 +10,8 @@ use Illuminate\Support\Facades\Facade;
  */
 class AnalyticsFacade extends Facade
 {
-    /**
-     * @return string
-     */
-    protected static function getFacadeAccessor()
+    protected static function getFacadeAccessor(): string
     {
-        return Analytics::class;
+        return AnalyticsAbstract::class;
     }
 }

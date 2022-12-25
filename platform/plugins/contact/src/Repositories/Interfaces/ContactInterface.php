@@ -3,17 +3,11 @@
 namespace Botble\Contact\Repositories\Interfaces;
 
 use Botble\Support\Repositories\Interfaces\RepositoryInterface;
+use Illuminate\Database\Eloquent\Collection;
 
 interface ContactInterface extends RepositoryInterface
 {
-    /**
-     * @param array $select
-     * @return mixed
-     */
-    public function getUnread($select = ['*']);
+    public function getUnread(array $select = ['*']): Collection;
 
-    /**
-     * @return int
-     */
-    public function countUnread();
+    public function countUnread(): int;
 }

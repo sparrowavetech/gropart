@@ -560,7 +560,7 @@ class EcommerceServiceProvider extends ServiceProvider
                         $variations = $data->variations()->get();
 
                         foreach ($variations as $variation) {
-                            if (!$variation->product->id) {
+                            if (! $variation->product->id) {
                                 continue;
                             }
 
@@ -572,7 +572,7 @@ class EcommerceServiceProvider extends ServiceProvider
 
                         $attributes = json_decode($request->input('attributes', '[]'), true) ?: [];
 
-                        if (!$attributes) {
+                        if (! $attributes) {
                             break;
                         }
 
@@ -834,7 +834,7 @@ class EcommerceServiceProvider extends ServiceProvider
                 ]);
             }
 
-            if (!dashboard_menu()->hasItem('cms-core-tools')) {
+            if (! dashboard_menu()->hasItem('cms-core-tools')) {
                 dashboard_menu()->registerItem([
                     'id' => 'cms-core-tools',
                     'priority' => 96,

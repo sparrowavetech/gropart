@@ -6,12 +6,7 @@ use Botble\Support\Http\Requests\Request;
 
 class LanguageRequest extends Request
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
             'lang_name' => 'required|max:30|min:2',

@@ -42,7 +42,7 @@ class ThemeServiceProvider extends ServiceProvider
             ->loadAndPublishConfigurations(['general', 'permissions'])
             ->loadAndPublishViews()
             ->loadAndPublishTranslations()
-            ->loadRoutes(['web'])
+            ->loadRoutes()
             ->publishAssets();
 
         Event::listen(RouteMatched::class, function () {

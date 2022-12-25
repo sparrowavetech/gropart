@@ -223,15 +223,15 @@ class SeoHelper implements SeoHelperContract
 
                 $seoMeta = $request->input('seo_meta', []);
 
-                if (!Arr::get($seoMeta, 'seo_title')) {
+                if (! Arr::get($seoMeta, 'seo_title')) {
                     Arr::forget($seoMeta, 'seo_title');
                 }
 
-                if (!Arr::get($seoMeta, 'seo_description')) {
+                if (! Arr::get($seoMeta, 'seo_description')) {
                     Arr::forget($seoMeta, 'seo_description');
                 }
 
-                if (!empty($seoMeta)) {
+                if (! empty($seoMeta)) {
                     MetaBox::saveMetaBoxData($object, 'seo_meta', $seoMeta);
                 } else {
                     MetaBox::deleteMetaData($object, 'seo_meta');
@@ -270,7 +270,7 @@ class SeoHelper implements SeoHelperContract
      */
     public function registerModule($model): self
     {
-        if (!is_array($model)) {
+        if (! is_array($model)) {
             $model = [$model];
         }
 

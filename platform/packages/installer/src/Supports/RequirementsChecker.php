@@ -6,31 +6,19 @@ use Illuminate\Support\Facades\File;
 
 class RequirementsChecker
 {
-    /**
-     * Minimum PHP Version Supported (Override is in installer.php config file).
-     *
-     * @var string
-     */
-    protected $phpVersion = null;
+    protected ?string $phpVersion = null;
 
-    /**
-     * Check for the server requirements.
-     *
-     * @param array $requirements
-     * @return array
-     */
     public function check(array $requirements): array
     {
         $results = [];
 
         foreach ($requirements as $type => $item) {
             switch ($type) {
-                // check php requirements
                 case 'php':
                     foreach ($item as $requirement) {
                         $results['requirements'][$type][$requirement] = true;
 
-                        if (!extension_loaded($requirement)) {
+                        if (! extension_loaded($requirement)) {
                             $results['requirements'][$type][$requirement] = false;
 
                             $results['errors'] = true;
@@ -41,11 +29,10 @@ class RequirementsChecker
 
                 case 'apache':
                     foreach ($item as $requirement) {
-                        // if function doesn't exist we can't check apache modules
                         if (function_exists('apache_get_modules')) {
                             $results['requirements'][$type][$requirement] = true;
 
-                            if (!in_array($requirement, apache_get_modules())) {
+                            if (! in_array($requirement, apache_get_modules())) {
                                 $results['requirements'][$type][$requirement] = false;
 
                                 $results['errors'] = true;
@@ -67,12 +54,6 @@ class RequirementsChecker
         return $results;
     }
 
-    /**
-     * Check PHP version requirement.
-     *
-     * @param string|null $minPhpVersion
-     * @return array
-     */
     public function checkPhpVersion(string $minPhpVersion = null): array
     {
         $minVersionPhp = $minPhpVersion;
@@ -91,11 +72,6 @@ class RequirementsChecker
         ];
     }
 
-    /**
-     * Get current Php version information
-     *
-     * @return array
-     */
     protected static function getPhpVersionInfo(): array
     {
         $currentVersionFull = PHP_VERSION;

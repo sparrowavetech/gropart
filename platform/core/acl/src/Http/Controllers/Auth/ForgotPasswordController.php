@@ -28,10 +28,7 @@ class ForgotPasswordController extends BaseController
 
     use SendsPasswordResetEmails;
 
-    /**
-     * @var BaseHttpResponse
-     */
-    protected $response;
+    protected BaseHttpResponse $response;
 
     /**
      * Create a new controller instance.

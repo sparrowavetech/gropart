@@ -24,15 +24,8 @@ use Throwable;
 
 class ProductCategoryController extends BaseController
 {
-    /**
-     * @var ProductCategoryInterface
-     */
-    protected $productCategoryRepository;
+    protected ProductCategoryInterface $productCategoryRepository;
 
-    /**
-     * ProductCategoryController constructor.
-     * @param ProductCategoryInterface $productCategoryRepository
-     */
     public function __construct(ProductCategoryInterface $productCategoryRepository)
     {
         $this->productCategoryRepository = $productCategoryRepository;
@@ -66,6 +59,8 @@ class ProductCategoryController extends BaseController
 
     /**
      * @param FormBuilder $formBuilder
+     * @param Request $request
+     * @param BaseHttpResponse $response
      * @return BaseHttpResponse|string
      */
     public function create(FormBuilder $formBuilder, Request $request, BaseHttpResponse $response)
@@ -114,6 +109,8 @@ class ProductCategoryController extends BaseController
     /**
      * @param int $id
      * @param FormBuilder $formBuilder
+     * @param Request $request
+     * @param BaseHttpResponse $response
      * @return BaseHttpResponse|string
      */
     public function edit($id, FormBuilder $formBuilder, Request $request, BaseHttpResponse $response)
@@ -208,11 +205,7 @@ class ProductCategoryController extends BaseController
         return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
-    /**
-     * @param ProductCategory|null $model
-     * @return string
-     */
-    private function getForm($model = null)
+    protected function getForm(?ProductCategory $model = null): string
     {
         $options = ['template' => 'core/base::forms.form-no-wrap'];
         if ($model) {
@@ -232,13 +225,13 @@ class ProductCategoryController extends BaseController
      * @param array $options
      * @return FormAbstract
      */
-    private function setFormOptions($form, $model = null, $options = [])
+    protected function setFormOptions($form, $model = null, $options = [])
     {
-        if (!$model) {
+        if (! $model) {
             $form->setUrl(route('product-categories.create'));
         }
 
-        if (!Auth::user()->hasPermission('product-categories.create') && !$model) {
+        if (! Auth::user()->hasPermission('product-categories.create') && ! $model) {
             $class = $form->getFormOption('class');
             $form->setFormOption('class', $class . ' d-none');
         }
@@ -248,11 +241,7 @@ class ProductCategoryController extends BaseController
         return $form;
     }
 
-    /**
-     * @param array $options
-     * @return array
-     */
-    private function getOptions($options = [])
+    protected function getOptions(array $options = []): array
     {
         return array_merge([
             'canCreate' => Auth::user()->hasPermission('product-categories.create'),

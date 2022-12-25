@@ -5,7 +5,6 @@ namespace Botble\Base\Supports;
 use Assets;
 use BaseHelper;
 use Illuminate\Support\Arr;
-use Throwable;
 
 class Editor
 {
@@ -19,14 +18,6 @@ class Editor
         return $this;
     }
 
-    /**
-     * @param string $name
-     * @param null $value
-     * @param bool $withShortcode
-     * @param array $attributes
-     * @return string
-     * @throws Throwable
-     */
     public function render(string $name, $value = null, bool $withShortcode = false, array $attributes = []): string
     {
         $attributes['class'] = Arr::get($attributes, 'class', '') . ' editor-' . BaseHelper::getRichEditor();

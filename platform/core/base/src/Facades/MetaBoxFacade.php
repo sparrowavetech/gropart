@@ -7,11 +7,7 @@ use Illuminate\Support\Facades\Facade;
 
 class MetaBoxFacade extends Facade
 {
-    /**
-     * @return string
-     * @since 2.2
-     */
-    protected static function getFacadeAccessor()
+    protected static function getFacadeAccessor(): string
     {
         return MetaBox::class;
     }

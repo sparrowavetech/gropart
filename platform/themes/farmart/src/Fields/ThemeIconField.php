@@ -8,10 +8,7 @@ use Theme;
 
 class ThemeIconField extends FormField
 {
-    /**
-     * {@inheritDoc}
-     */
-    protected function getTemplate()
+    protected function getTemplate(): string
     {
         Assets::addScriptsDirectly(Theme::asset()->url('js/icons-field.js'))
             ->addStylesDirectly(Theme::asset()->url('fonts/Linearicons/Linearicons/Font/demo-files/demo.css'));

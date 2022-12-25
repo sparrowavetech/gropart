@@ -98,7 +98,7 @@ class TypeAdapterMysql extends TypeAdapterFactory
 
     public function createTable($row)
     {
-        if (!isset($row['Create Table'])) {
+        if (! isset($row['Create Table'])) {
             throw new Exception('Error getting table code, unknown output');
         }
 
@@ -125,7 +125,7 @@ class TypeAdapterMysql extends TypeAdapterFactory
     public function createView($row)
     {
         $ret = '';
-        if (!isset($row['Create View'])) {
+        if (! isset($row['Create View'])) {
             throw new Exception('Error getting view structure, unknown output');
         }
 
@@ -151,7 +151,7 @@ class TypeAdapterMysql extends TypeAdapterFactory
     public function createTrigger($row)
     {
         $ret = '';
-        if (!isset($row['SQL Original Statement'])) {
+        if (! isset($row['SQL Original Statement'])) {
             throw new Exception('Error getting trigger code, unknown output');
         }
 
@@ -176,7 +176,7 @@ class TypeAdapterMysql extends TypeAdapterFactory
     public function createProcedure($row)
     {
         $ret = '';
-        if (!isset($row['Create Procedure'])) {
+        if (! isset($row['Create Procedure'])) {
             throw new Exception('Error getting procedure code, unknown output. ' . "Please check 'https://bugs.mysql.com/bug.php?id=14564'");
         }
         $procedureStmt = $row['Create Procedure'];
@@ -206,7 +206,7 @@ class TypeAdapterMysql extends TypeAdapterFactory
     public function createFunction($row)
     {
         $ret = '';
-        if (!isset($row['Create Function'])) {
+        if (! isset($row['Create Function'])) {
             throw new Exception('Error getting function code, unknown output. ' . "Please check 'https://bugs.mysql.com/bug.php?id=14564'");
         }
         $functionStmt = $row['Create Function'];
@@ -251,7 +251,7 @@ class TypeAdapterMysql extends TypeAdapterFactory
     public function createEvent($row)
     {
         $ret = '';
-        if (!isset($row['Create Event'])) {
+        if (! isset($row['Create Event'])) {
             throw new Exception('Error getting event code, unknown output. ' . "Please check 'http://stackoverflow.com/questions/10853826/mysql-5-5-create-event-gives-syntax-error'");
         }
         $eventName = $row['Event'];

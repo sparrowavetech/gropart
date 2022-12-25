@@ -8,70 +8,46 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use RvMedia;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Input\InputOption;
 
+#[AsCommand('cms:media:insert-watermark', 'Insert watermark for existing images')]
 class InsertWatermarkCommand extends Command
 {
-    /**
-     * The console command signature.
-     *
-     * @var string
-     */
-    protected $signature = 'cms:media:insert-watermark {--folder= : Folder ID}';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Insert watermark for existing images';
-
-    /**
-     * @var MediaFileInterface
-     */
-    protected $fileRepository;
-
-    /**
-     * @param MediaFileInterface $fileRepository
-     */
-    public function __construct(MediaFileInterface $fileRepository)
-    {
-        parent::__construct();
-        $this->fileRepository = $fileRepository;
-    }
-
-    /**
-     * @return int
-     */
-    public function handle()
+    public function handle(MediaFileInterface $fileRepository): int
     {
         $this->info('Starting to insert watermark...');
 
-        if (!setting('media_watermark_enabled', RvMedia::getConfig('watermark.enabled'))) {
+        if (! setting('media_watermark_enabled', RvMedia::getConfig('watermark.enabled'))) {
             $this->error('Watermark is not enabled!');
 
-            return 1;
+            return self::FAILURE;
         }
 
         $watermarkImage = setting('media_watermark_source', RvMedia::getConfig('watermark.source'));
 
-        if (!$watermarkImage) {
+        if (! $watermarkImage) {
             $this->error('Path to watermark image is not correct!');
 
-            return 1;
+            return self::FAILURE;
         }
 
         $watermarkPath = RvMedia::getRealPath($watermarkImage);
 
-        if (!File::exists($watermarkPath)) {
+        if (! File::exists($watermarkPath)) {
             $this->error('Path to watermark image is not correct!');
 
-            return 1;
+            return self::FAILURE;
         }
 
         if ($this->option('folder')) {
-            $files = $this->fileRepository->allBy(['folder_id' => $this->option('folder')], [], ['url', 'mime_type', 'folder_id']);
+            $files = $fileRepository->allBy(
+                ['folder_id' => $this->option('folder')],
+                [],
+                ['url', 'mime_type', 'folder_id']
+            );
         } else {
-            $files = $this->fileRepository->allBy([], [], ['url', 'mime_type', 'folder_id']);
+            $files = $fileRepository->allBy([], [], ['url', 'mime_type', 'folder_id']);
         }
 
         $this->info('Processing ' . $files->count() . ' ' . Str::plural('file', $files->count()) . '...');
@@ -82,7 +58,7 @@ class InsertWatermarkCommand extends Command
 
         foreach ($files as $file) {
             try {
-                if (!$file->canGenerateThumbnails()) {
+                if (! $file->canGenerateThumbnails()) {
                     continue;
                 }
 
@@ -114,9 +90,14 @@ class InsertWatermarkCommand extends Command
 
             $this->table(['File directory'], $errors);
 
-            return 1;
+            return self::FAILURE;
         }
 
-        return 0;
+        return self::SUCCESS;
+    }
+
+    protected function configure(): void
+    {
+        $this->addOption('folder', 'f', InputOption::VALUE_REQUIRED, 'The folder ID');
     }
 }

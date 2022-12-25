@@ -7,18 +7,13 @@ use EcommerceHelper;
 
 class AddressRequest extends Request
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         $rules = [
             'is_default' => 'integer|min:0|max:1',
         ];
 
-        if (!EcommerceHelper::isUsingInMultipleCountries()) {
+        if (! EcommerceHelper::isUsingInMultipleCountries()) {
             $this->merge(['country' => EcommerceHelper::getFirstCountryId()]);
         }
 

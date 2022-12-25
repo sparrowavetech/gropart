@@ -6,12 +6,6 @@ use Botble\Support\Http\Requests\Request;
 
 class SaveEnvironmentRequest extends Request
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     *
-     */
     public function rules(): array
     {
         return [
@@ -26,13 +20,12 @@ class SaveEnvironmentRequest extends Request
         ];
     }
 
-    /**
-     * @return array
-     */
     public function messages(): array
     {
         return [
-            'environment_custom.required_if' => trans('packages/installer::installer.environment.wizard.form.name_required'),
+            'environment_custom.required_if' => trans(
+                'packages/installer::installer.environment.wizard.form.name_required'
+            ),
         ];
     }
 }

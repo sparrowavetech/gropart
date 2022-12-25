@@ -8,32 +8,21 @@ use Botble\Table\Abstracts\TableAbstract;
 use EcommerceHelper;
 use Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\DataTables;
 
 class RecentOrdersTable extends TableAbstract
 {
-    /**
-     * @var string
-     */
-    protected $type = self::TABLE_TYPE_SIMPLE;
+    protected string $type = self::TABLE_TYPE_SIMPLE;
 
-    /**
-     * @var int
-     */
-    protected $defaultSortColumn = 0;
+    protected int $defaultSortColumn = 0;
 
-    /**
-     * @var string
-     */
     protected $view = 'core/table::simple-table';
 
-    /**
-     * RecentOrdersTable constructor.
-     * @param DataTables $table
-     * @param UrlGenerator $urlGenerator
-     * @param OrderInterface $orderRepository
-     */
     public function __construct(DataTables $table, UrlGenerator $urlGenerator, OrderInterface $orderRepository)
     {
         parent::__construct($table, $urlGenerator);
@@ -41,10 +30,7 @@ class RecentOrdersTable extends TableAbstract
         $this->repository = $orderRepository;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
@@ -52,7 +38,7 @@ class RecentOrdersTable extends TableAbstract
                 return $this->getCheckbox($item->id);
             })
             ->editColumn('id', function ($item) {
-                if (!Auth::user()->hasPermission('orders.edit')) {
+                if (! Auth::user()->hasPermission('orders.edit')) {
                     return $item->code;
                 }
 
@@ -83,10 +69,7 @@ class RecentOrdersTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
         [$startDate, $endDate] = EcommerceHelper::getDateRangeInReport(request());
 
@@ -94,6 +77,7 @@ class RecentOrdersTable extends TableAbstract
             ->select([
                 'id',
                 'status',
+                'code',
                 'user_id',
                 'created_at',
                 'amount',
@@ -111,12 +95,9 @@ class RecentOrdersTable extends TableAbstract
         return $this->applyScopes($query);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function columns()
+    public function columns(): array
     {
-        $columns = [
+        return [
             'id' => [
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
@@ -157,7 +138,5 @@ class RecentOrdersTable extends TableAbstract
                 'orderable' => false,
             ],
         ];
-
-        return $columns;
     }
 }

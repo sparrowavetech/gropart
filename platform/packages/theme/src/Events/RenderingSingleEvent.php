@@ -10,15 +10,8 @@ class RenderingSingleEvent extends Event
 {
     use SerializesModels;
 
-    /**
-     * @var Slug
-     */
-    public $slug;
+    public Slug $slug;
 
-    /**
-     * RenderingSingleEvent constructor.
-     * @param Slug $slug
-     */
     public function __construct(Slug $slug)
     {
         $this->slug = $slug;

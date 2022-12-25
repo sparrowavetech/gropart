@@ -21,12 +21,7 @@ use SlugHelper;
 
 class BlogSeeder extends BaseSeeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
         $this->uploadFiles('news');
 
@@ -50,7 +45,7 @@ class BlogSeeder extends BaseSeeder
 
         $categories = [
             [
-                'name'       => 'Ecommerce',
+                'name' => 'Ecommerce',
                 'is_default' => true,
             ],
             [
@@ -67,7 +62,7 @@ class BlogSeeder extends BaseSeeder
         foreach ($categories as $index => $item) {
             $category = $this->createCategory(Arr::except($item, 'children'), 0, $index != 0);
 
-            if (isset($item['children']) && !empty($item['children'])) {
+            if (isset($item['children']) && ! empty($item['children'])) {
                 foreach ($item['children'] as $child) {
                     $this->createCategory($child, $category->id);
                 }
@@ -99,24 +94,24 @@ class BlogSeeder extends BaseSeeder
 
             Slug::create([
                 'reference_type' => Tag::class,
-                'reference_id'   => $tag->id,
-                'key'            => Str::slug($tag->name),
-                'prefix'         => SlugHelper::getPrefix(Tag::class),
+                'reference_id' => $tag->id,
+                'key' => Str::slug($tag->name),
+                'prefix' => SlugHelper::getPrefix(Tag::class),
             ]);
         }
 
         $posts = [
             [
-                'name'   => '4 Expert Tips On How To Choose The Right Men’s Wallet',
+                'name' => '4 Expert Tips On How To Choose The Right Men’s Wallet',
             ],
             [
-                'name'   => 'Sexy Clutches: How to Buy & Wear a Designer Clutch Bag',
+                'name' => 'Sexy Clutches: How to Buy & Wear a Designer Clutch Bag',
             ],
             [
-                'name'   => 'The Top 2020 Handbag Trends to Know',
+                'name' => 'The Top 2020 Handbag Trends to Know',
             ],
             [
-                'name'   => 'How to Match the Color of Your Handbag With an Outfit',
+                'name' => 'How to Match the Color of Your Handbag With an Outfit',
             ],
             [
                 'name' => 'How to Care for Leather Bags',
@@ -206,7 +201,7 @@ class BlogSeeder extends BaseSeeder
             $item['image'] = 'news/' . ($index + 1) . '.jpg';
             $item['description'] = 'You should pay more attention when you choose your wallets. There are a lot of them on the market with the different designs and styles. When you choose carefully, you would be able to buy a wallet that is catered to your needs. Not to mention that it will help to enhance your style significantly.';
             $item['content'] = str_replace(url(''), '', $item['content']);
- 
+
             $post = Post::create(Arr::except($item, ['layout']));
 
             $layout = $item['layout'] ?? null;
@@ -223,9 +218,9 @@ class BlogSeeder extends BaseSeeder
 
             Slug::create([
                 'reference_type' => Post::class,
-                'reference_id'   => $post->id,
-                'key'            => Str::slug($post->name),
-                'prefix'         => SlugHelper::getPrefix(Post::class),
+                'reference_id' => $post->id,
+                'key' => Str::slug($post->name),
+                'prefix' => SlugHelper::getPrefix(Post::class),
             ]);
         }
 
@@ -344,9 +339,9 @@ class BlogSeeder extends BaseSeeder
 
         Slug::create([
             'reference_type' => Category::class,
-            'reference_id'   => $category->id,
-            'key'            => Str::slug($category->name),
-            'prefix'         => SlugHelper::getPrefix(Category::class),
+            'reference_id' => $category->id,
+            'key' => Str::slug($category->name),
+            'prefix' => SlugHelper::getPrefix(Category::class),
         ]);
 
         return $category;

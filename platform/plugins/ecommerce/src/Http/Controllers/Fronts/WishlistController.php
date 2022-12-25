@@ -11,27 +11,15 @@ use EcommerceHelper;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Routing\Controller;
-use Response;
 use SeoHelper;
 use Theme;
 
 class WishlistController extends Controller
 {
-    /**
-     * @var ProductInterface
-     */
-    protected $productRepository;
+    protected ProductInterface $productRepository;
 
-    /**
-     * @var WishlistInterface
-     */
-    protected $wishlistRepository;
+    protected WishlistInterface $wishlistRepository;
 
-    /**
-     * WishlistController constructor.
-     * @param WishlistInterface $wishlistRepository
-     * @param ProductInterface $productRepository
-     */
     public function __construct(WishlistInterface $wishlistRepository, ProductInterface $productRepository)
     {
         $this->productRepository = $productRepository;
@@ -40,11 +28,11 @@ class WishlistController extends Controller
 
     /**
      * @param Request $request
-     * @return Response
+     * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
     {
-        if (!EcommerceHelper::isWishlistEnabled()) {
+        if (! EcommerceHelper::isWishlistEnabled()) {
             abort(404);
         }
 
@@ -85,23 +73,23 @@ class WishlistController extends Controller
      */
     public function store($productId, BaseHttpResponse $response)
     {
-        if (!EcommerceHelper::isWishlistEnabled()) {
+        if (! EcommerceHelper::isWishlistEnabled()) {
             abort(404);
         }
 
         $product = $this->productRepository->findOrFail($productId);
 
-        if (!auth('customer')->check()) {
-            $duplicates = Cart::instance('wishlist')->search(function ($cartItem) use ($productId) {
-                return $cartItem->id == $productId;
-            });
+        $duplicates = Cart::instance('wishlist')->search(function ($cartItem) use ($productId) {
+            return $cartItem->id == $productId;
+        });
 
-            if (!$duplicates->isEmpty()) {
-                return $response
-                    ->setMessage(__(':product is already in your wishlist!', ['product' => $product->name]))
-                    ->setError(true);
-            }
+        if (! $duplicates->isEmpty()) {
+            return $response
+                ->setMessage(__(':product is already in your wishlist!', ['product' => $product->name]))
+                ->setError();
+        }
 
+        if (! auth('customer')->check()) {
             Cart::instance('wishlist')->add($productId, $product->name, 1, $product->front_sale_price)
                 ->associate(Product::class);
 
@@ -113,7 +101,7 @@ class WishlistController extends Controller
         if (is_added_to_wishlist($productId)) {
             return $response
                 ->setMessage(__(':product is already in your wishlist!', ['product' => $product->name]))
-                ->setError(true);
+                ->setError();
         }
 
         $this->wishlistRepository->createOrUpdate([
@@ -130,16 +118,17 @@ class WishlistController extends Controller
      * @param int $productId
      * @param BaseHttpResponse $response
      * @return BaseHttpResponse
+     * @throws \Exception
      */
     public function destroy($productId, BaseHttpResponse $response)
     {
-        if (!EcommerceHelper::isWishlistEnabled()) {
+        if (! EcommerceHelper::isWishlistEnabled()) {
             abort(404);
         }
 
         $product = $this->productRepository->findOrFail($productId);
 
-        if (!auth('customer')->check()) {
+        if (! auth('customer')->check()) {
             Cart::instance('wishlist')->search(function ($cartItem, $rowId) use ($productId) {
                 if ($cartItem->id == $productId) {
                     Cart::instance('wishlist')->remove($rowId);

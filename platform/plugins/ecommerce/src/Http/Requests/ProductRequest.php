@@ -11,12 +11,7 @@ use Illuminate\Validation\Rule;
 
 class ProductRequest extends Request
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         $rules = [
             'name' => 'required|max:255',
@@ -33,11 +28,12 @@ class ProductRequest extends Request
             'product_type' => Rule::in(ProductTypeEnum::values()),
             'product_files_input' => 'nullable|array',
             'product_files_input.*' => 'nullable|file|mimes:' . config('plugins.ecommerce.general.digital_products.allowed_mime_types'),
+            'taxes' => 'nullable|array',
         ];
 
-        $options = $this->get('options');
+        $options = $this->input('options');
 
-        if (!empty($options)) {
+        if (! empty($options)) {
             $productOptionRules = $this->getRuleProductOptionRequest($options);
             $rules = array_merge($rules, $productOptionRules);
         }
@@ -45,10 +41,7 @@ class ProductRequest extends Request
         return $rules;
     }
 
-    /**
-     * @return array
-     */
-    public function messages()
+    public function messages(): array
     {
         return [
             'name.required' => trans('plugins/ecommerce::products.product_create_validate_name_required'),
@@ -60,14 +53,11 @@ class ProductRequest extends Request
         ];
     }
 
-    /**
-     * @return array
-     */
-    public function attributes()
+    public function attributes(): array
     {
         $options = $this->input('options');
         $attrs = [];
-        if (!empty($options)) {
+        if (! empty($options)) {
             foreach ($options as $key => $option) {
                 $name = sprintf('options.%s.name', $key);
                 $type = sprintf('options.%s.option_type', $key);
@@ -76,7 +66,7 @@ class ProductRequest extends Request
                 $attrs[$name] = trans('plugins/ecommerce::product-option.option_name_attribute', ['key' => $optionNumber]);
                 $attrs[$type] = trans('plugins/ecommerce::product-option.option_type_attribute', ['key' => $optionNumber]);
                 $attrs[$value] = trans('plugins/ecommerce::product-option.option_value_name_attribute', ['key' => $optionNumber]);
-                if (!empty($option['values'])) {
+                if (! empty($option['values'])) {
                     $attrs = array_merge($attrs, $this->getAttributeValue($key, $option['values']));
                 }
             }
@@ -85,11 +75,6 @@ class ProductRequest extends Request
         return $attrs;
     }
 
-    /**
-     * @param string $optionKey
-     * @param array $values
-     * @return array
-     */
     protected function getAttributeValue(string $optionKey, array $values = []): array
     {
         $attrs = [];
@@ -102,10 +87,6 @@ class ProductRequest extends Request
         return $attrs;
     }
 
-    /**
-     * @param array $options
-     * @return array
-     */
     protected function getRuleProductOptionRequest(array $options = []): array
     {
         $rules = [];
@@ -128,12 +109,6 @@ class ProductRequest extends Request
         return $rules;
     }
 
-    /**
-     * @param string $baseName
-     * @param string $optionType
-     * @param array $values
-     * @return array
-     */
     protected function getRulesOfProductOptionValues(string $baseName, string $optionType, array $values = []): array
     {
         $rules = [];

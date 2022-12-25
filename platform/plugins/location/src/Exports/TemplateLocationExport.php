@@ -28,24 +28,12 @@ class TemplateLocationExport implements
 {
     use Exportable;
 
-    /**
-     * @var Collection
-     */
-    protected $results;
+    protected Collection $results;
 
-    /**
-     * @var string
-     */
-    protected $exportType;
+    protected string $exportType;
 
-    /**
-     * @var int
-     */
-    protected $totalRow;
+    protected int $totalRow;
 
-    /**
-     * @param string $exportType
-     */
     public function __construct(string $exportType = Excel::XLSX)
     {
         $this->exportType = $exportType;
@@ -126,17 +114,11 @@ class TemplateLocationExport implements
         $this->totalRow = $exportType == Excel::XLSX ? 100 : ($this->results->count() + 1);
     }
 
-    /**
-     * @return Collection
-     */
-    public function collection()
+    public function collection(): Collection
     {
         return $this->results;
     }
 
-    /**
-     * @return array
-     */
     public function headings(): array
     {
         $headings = [
@@ -164,9 +146,6 @@ class TemplateLocationExport implements
         return $headings;
     }
 
-    /**
-     * @return array
-     */
     public function registerEvents(): array
     {
         return [
@@ -201,19 +180,12 @@ class TemplateLocationExport implements
         ];
     }
 
-    /**
-     * @return DataValidation
-     */
-    protected function getStatusValidation()
+    protected function getStatusValidation(): DataValidation
     {
         return $this->getDropDownListValidation(BaseStatusEnum::values());
     }
 
-    /**
-     * @param array $options
-     * @return DataValidation
-     */
-    protected function getDropDownListValidation($options)
+    protected function getDropDownListValidation(array $options): DataValidation
     {
         // set dropdown list for first data row
         $validation = new DataValidation();
@@ -232,19 +204,12 @@ class TemplateLocationExport implements
         return $validation;
     }
 
-    /**
-     * @return DataValidation
-     */
-    protected function getImportTypeValidation()
+    protected function getImportTypeValidation(): DataValidation
     {
         return $this->getDropDownListValidation(['country', 'state', 'city']);
     }
 
-    /**
-     * @param int $max
-     * @return DataValidation
-     */
-    protected function getTextLengthValidation($max = 2)
+    protected function getTextLengthValidation(int $max = 2): DataValidation
     {
         $validation = new DataValidation();
         $validation->setType(DataValidation::TYPE_TEXTLENGTH)
@@ -262,9 +227,6 @@ class TemplateLocationExport implements
         return $validation;
     }
 
-    /**
-     * @return array
-     */
     public function columnFormats(): array
     {
         if ($this->exportType != Excel::XLSX) {
@@ -283,9 +245,6 @@ class TemplateLocationExport implements
         ];
     }
 
-    /**
-     * @return array
-     */
     public function columnWidths(): array
     {
         return [
@@ -294,10 +253,7 @@ class TemplateLocationExport implements
         ];
     }
 
-    /**
-     * @return DataValidation
-     */
-    protected function getBooleanValidation()
+    protected function getBooleanValidation(): DataValidation
     {
         return $this->getDropDownListValidation(['No', 'Yes']);
     }

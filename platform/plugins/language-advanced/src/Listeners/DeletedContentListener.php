@@ -8,13 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 class DeletedContentListener
 {
-    /**
-     * Handle the event.
-     *
-     * @param DeletedContentEvent $event
-     * @return void
-     */
-    public function handle(DeletedContentEvent $event)
+    public function handle(DeletedContentEvent $event): void
     {
         if (LanguageAdvancedManager::isSupported($event->data)) {
             $table = $event->data->getTable() . '_translations';

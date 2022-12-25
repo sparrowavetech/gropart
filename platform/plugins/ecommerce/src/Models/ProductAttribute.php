@@ -7,22 +7,15 @@ use Botble\Base\Models\BaseModel;
 use Botble\Base\Traits\EnumCastable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 use RvMedia;
 
 class ProductAttribute extends BaseModel
 {
     use EnumCastable;
 
-    /**
-     * The database table used by the model.
-     *
-     * @var string
-     */
     protected $table = 'ec_product_attributes';
 
-    /**
-     * @var array
-     */
     protected $fillable = [
         'title',
         'slug',
@@ -34,9 +27,6 @@ class ProductAttribute extends BaseModel
         'is_default',
     ];
 
-    /**
-     * @var array
-     */
     protected $casts = [
         'status' => BaseStatusEnum::class,
     ];
@@ -70,12 +60,7 @@ class ProductAttribute extends BaseModel
         return $this->hasMany(ProductVariationItem::class, 'attribute_id');
     }
 
-    /**
-     * @param ProductAttributeSet|null $attributeSet
-     * @param array $productVariations
-     * @return string
-     */
-    public function getAttributeStyle(?ProductAttributeSet $attributeSet = null, $productVariations = []): string
+    public function getAttributeStyle(?ProductAttributeSet $attributeSet = null, array|Collection $productVariations = []): string
     {
         if ($attributeSet && $attributeSet->use_image_from_product_variation) {
             foreach ($productVariations as $productVariation) {

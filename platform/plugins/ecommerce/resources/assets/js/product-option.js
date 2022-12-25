@@ -44,10 +44,11 @@ $(document).ready(function () {
                 .on('click', '.add-from-global-option', function () {
                     let selectedOption = $('#global-option').val();
                     if (selectedOption != -1) {
-                        self.addFromGlobalOption(selectedOption)
+                        self.addFromGlobalOption(selectedOption);
                     } else {
-                        toastr.error(productOptionLang.please_select_option)
+                        toastr.error(productOptionLang.please_select_option);
                     }
+
                     return false
                 })
                 .on('click', '.remove-option', function () {
@@ -82,7 +83,7 @@ $(document).ready(function () {
                 })
 
                 .on('click', '.add-new-option', function () {
-                    self.productOptions.push({
+                    const option = {
                         name: '',
                         values: [{
                             affect_price: 0,
@@ -90,8 +91,14 @@ $(document).ready(function () {
                         }],
                         option_type: 'N/A',
                         required: false
-                    })
-                    self.generateProductOption();
+                    };
+
+                    self.productOptions.push(option);
+
+                    const html = self.generateOptionTemplate(option, self.productOptions.length - 1);
+                    $('#accordion-product-option').append(html);
+
+                    self.sortable();
                 });
         },
         addNewRow(element) {
@@ -101,27 +108,30 @@ $(document).ready(function () {
             let labelName = 'options[' + index + '][values][' + table.find('tr').length + '][option_value]',
                 affectName = 'options[' + index + '][values][' + table.find('tr').length + '][affect_price]',
                 affectTypeName = 'options[' + index + '][values][' + table.find('tr').length + '][affect_type]';
-            tr.find('.option-label').attr('name', labelName).attr('value', '');
-            tr.find('.affect_price').attr('name', affectName).attr('value', '');
-            tr.find('.affect_type').attr('name', affectTypeName).attr('value', '');
+            tr.find('.option-label').prop('name', labelName).val('');
+            tr.find('.affect_price').prop('name', affectName).val(0);
+            tr.find('.affect_type').prop('name', affectTypeName).val(0);
             tr.find('.option-value-order').val(table.find('tr').length)
             tr.attr('data-index', table.find('tr').length)
             table.append(tr);
         },
-        addFromGlobalOption(option_id) {
+        addFromGlobalOption(optionId) {
             let self = this;
-            fetch(route('global-option.ajaxInfo', {id: option_id})).then(function (res) {
-                return res.json();
-            }).then(function (json) {
-                self.productOptions.push({
-                    name: json.name,
-                    option_type: json.option_type,
-                    option_value: json.option_value,
-                    values: json.values,
-                    required: json.required
-                })
-                self.generateProductOption()
-            });
+            axios
+                .get(window.productOptions.routes.ajax_option_info + '?id=' + optionId)
+                .then(function (res) {
+                    const option = res.data.data;
+
+                    self.productOptions.push({
+                        name: option.name,
+                        option_type: option.option_type,
+                        option_value: option.option_value,
+                        values: option.values,
+                        required: option.required
+                    })
+
+                    self.generateProductOption()
+                });
         },
         generateOptionTemplate(option, index) {
             let options = this.generateFieldOptions(option)
@@ -167,10 +177,10 @@ $(document).ready(function () {
                 priceType = productOptionLang.price_type,
                 template = '',
                 html = '';
-            let option_type = type.split("\\");
-            option_type = option_type[option_type.length - 1];
-            if (option_type != '' && typeof type !== 'undefined' && type != 'N/A') {
-                if (option_type == 'Field') {
+            let optionType = type.split("\\");
+            optionType = optionType[optionType.length - 1];
+            if (optionType !== '' && typeof type !== 'undefined' && type !== 'N/A') {
+                if (optionType === 'Field') {
                     template = $('#template-option-values-of-field').html();
                     const selectedFixed = (values[0].affect_type === 0) ? 'selected' : ''
                     const selectedPercent = (values[0].affect_type === 1) ? 'selected' : ''
@@ -205,7 +215,7 @@ $(document).ready(function () {
                                 .replace(/__selectedFixed__/g, selectedFixed)
                                 .replace(/__fixedLang__/g, productOptionLang.fixed)
                                 .replace(/__selectedPercent__/g, selectedPercent)
-                                .replace(/__option_value_input__/g, value.option_value)
+                                .replace(/__option_value_input__/g, value.option_value ? value.option_value : '')
                                 .replace(/__affectPrice__/g, value.affect_price)
                                 .replace(/__percentLang__/g, productOptionLang.percent)
                         })

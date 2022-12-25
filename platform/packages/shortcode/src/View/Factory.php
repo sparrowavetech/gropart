@@ -10,26 +10,10 @@ use Illuminate\View\ViewFinderInterface;
 
 class Factory extends IlluminateViewFactory
 {
-    /**
-     * Short code engine resolver
-     *
-     * @var ShortcodeCompiler
-     */
-    public $shortcode;
+    public ShortcodeCompiler $shortcode;
 
-    /**
-     * @var array
-     */
-    protected $aliases = [];
+    protected array $aliases = [];
 
-    /**
-     * Factory constructor.
-     * @param EngineResolver $engines
-     * @param ViewFinderInterface $finder
-     * @param Dispatcher $events
-     * @param ShortcodeCompiler $shortcode
-     * @since 2.1
-     */
     public function __construct(
         EngineResolver $engines,
         ViewFinderInterface $finder,
@@ -40,15 +24,6 @@ class Factory extends IlluminateViewFactory
         $this->shortcode = $shortcode;
     }
 
-    /**
-     * Get the evaluated view contents for the given view.
-     *
-     * @param string $view
-     * @param array $data
-     * @param array $mergeData
-     * @return View
-     * @since 2.1
-     */
     public function make($view, $data = [], $mergeData = []): View
     {
         if (isset($this->aliases[$view])) {

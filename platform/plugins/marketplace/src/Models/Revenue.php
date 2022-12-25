@@ -16,16 +16,8 @@ class Revenue extends BaseModel
 {
     use EnumCastable;
 
-    /**
-     * The database table used by the model.
-     *
-     * @var string
-     */
     protected $table = 'mp_customer_revenues';
 
-    /**
-     * @var array
-     */
     protected $fillable = [
         'customer_id',
         'order_id',
@@ -39,9 +31,6 @@ class Revenue extends BaseModel
         'type',
     ];
 
-    /**
-     * @var array
-     */
     protected $casts = [
         'type' => RevenueTypeEnum::class,
     ];
@@ -68,7 +57,7 @@ class Revenue extends BaseModel
 
     public function getDescriptionTooltipAttribute(): string
     {
-        if (!$this->description) {
+        if (! $this->description) {
             return '';
         }
 

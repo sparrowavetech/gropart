@@ -23,15 +23,8 @@ use Throwable;
 
 class CityController extends BaseController
 {
-    /**
-     * @var CityInterface
-     */
-    protected $cityRepository;
+    protected CityInterface $cityRepository;
 
-    /**
-     * CityController constructor.
-     * @param CityInterface $cityRepository
-     */
     public function __construct(CityInterface $cityRepository)
     {
         $this->cityRepository = $cityRepository;
@@ -39,7 +32,7 @@ class CityController extends BaseController
 
     /**
      * @param CityTable $table
-     * @return \Illuminate\Http\JsonResponse|View
+     * @return \Illuminate\Contracts\View\Factory|\Symfony\Component\HttpFoundation\Response|View
      * @throws Throwable
      */
     public function index(CityTable $table)
@@ -171,7 +164,7 @@ class CityController extends BaseController
     {
         $keyword = $request->input('q');
 
-        if (!$keyword) {
+        if (! $keyword) {
             return $response->setData([]);
         }
 

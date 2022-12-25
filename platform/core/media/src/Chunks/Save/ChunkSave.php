@@ -124,7 +124,7 @@ class ChunkSave extends AbstractSave
         $path = $this->getChunkDirectory(true);
 
         // creates the chunks dir
-        if (!file_exists($path)) {
+        if (! file_exists($path)) {
             mkdir($path, 0777, true);
         }
     }

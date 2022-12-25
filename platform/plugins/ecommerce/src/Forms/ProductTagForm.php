@@ -9,9 +9,6 @@ use Botble\Ecommerce\Models\ProductTag;
 
 class ProductTagForm extends FormAbstract
 {
-    /**
-     * {@inheritDoc}
-     */
     public function buildForm()
     {
         $this

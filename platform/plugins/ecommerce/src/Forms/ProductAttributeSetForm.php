@@ -10,9 +10,6 @@ use Language;
 
 class ProductAttributeSetForm extends FormAbstract
 {
-    /**
-     * {@inheritDoc}
-     */
     public function buildForm()
     {
         $displayLayout = [

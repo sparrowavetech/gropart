@@ -10,7 +10,7 @@
                 {!! BaseHelper::clean(trans('core/base::errors.404_msg')) !!}
             </ul>
 
-            <p>{!! BaseHelper::clean(trans('core/base::errors.try_again')) !!}</p>
+            <p>{!! BaseHelper::clean(trans('core/base::errors.try_again', ['link' => route('dashboard.index')])) !!}</p>
         </div>
     </div>
 

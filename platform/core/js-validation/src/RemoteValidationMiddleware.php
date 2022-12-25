@@ -11,33 +11,18 @@ use Illuminate\Http\Request;
 
 class RemoteValidationMiddleware
 {
-    /**
-     * Validator factory instance to wrap.
-     *
-     * @var ValidationFactory
-     */
-    protected $factory;
+    protected ValidationFactory $factory;
 
     /**
      * Field used to detect Javascript validation.
-     *
-     * @var mixed
      */
-    protected $field;
+    protected string $field;
 
     /**
      * Whether to escape messages or not.
-     *
-     * @var bool
      */
-    protected $escape;
+    protected bool $escape;
 
-    /**
-     * RemoteValidationMiddleware constructor.
-     *
-     * @param ValidationFactory $validator
-     * @param Config $config
-     */
     public function __construct(ValidationFactory $validator, Config $config)
     {
         $this->factory = $validator;
@@ -63,10 +48,8 @@ class RemoteValidationMiddleware
 
     /**
      * Wraps Validator resolver with RemoteValidator resolver.
-     *
-     * @return void
      */
-    protected function wrapValidator()
+    protected function wrapValidator(): void
     {
         $resolver = new Resolver($this->factory, $this->escape);
         $this->factory->resolver($resolver->resolver($this->field));

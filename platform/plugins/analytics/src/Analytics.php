@@ -2,60 +2,23 @@
 
 namespace Botble\Analytics;
 
+use Botble\Analytics\Abstracts\AnalyticsAbstract;
 use Carbon\Carbon;
+use Google\Service\Analytics\GaData;
 use Google_Service_Analytics;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Traits\Macroable;
 
-class Analytics
+class Analytics extends AnalyticsAbstract
 {
-    use Macroable;
+    protected AnalyticsClient $client;
 
-    /**
-     * @var AnalyticsClient
-     */
-    protected $client;
-
-    /**
-     * @var string
-     */
-    protected $viewId;
-
-    /**
-     * @param \Botble\Analytics\AnalyticsClient $client
-     * @param string $viewId
-     */
-    public function __construct(AnalyticsClient $client, string $viewId)
+    public function __construct(AnalyticsClient $client, string $propertyId)
     {
         $this->client = $client;
 
-        $this->viewId = $viewId;
+        $this->propertyId = $propertyId;
     }
 
-    /**
-     * @return string
-     */
-    public function getViewId()
-    {
-        return $this->viewId;
-    }
-
-    /**
-     * @param string $viewId
-     *
-     * @return $this
-     */
-    public function setViewId(string $viewId)
-    {
-        $this->viewId = $viewId;
-
-        return $this;
-    }
-
-    /**
-     * @param Period $period
-     * @return Collection
-     */
     public function fetchVisitorsAndPageViews(Period $period): Collection
     {
         $response = $this->performQuery(
@@ -76,17 +39,11 @@ class Analytics
 
     /**
      * Call the query method on the authenticated client.
-     *
-     * @param Period $period
-     * @param string $metrics
-     * @param array $others
-     *
-     * @return array|null
      */
-    public function performQuery(Period $period, string $metrics, array $others = [])
+    public function performQuery(Period $period, string $metrics, array $others = []): array|GaData|null
     {
         return $this->client->performQuery(
-            $this->viewId,
+            $this->propertyId,
             $period->startDate,
             $period->endDate,
             $metrics,
@@ -94,10 +51,6 @@ class Analytics
         );
     }
 
-    /**
-     * @param Period $period
-     * @return Collection
-     */
     public function fetchTotalVisitorsAndPageViews(Period $period): Collection
     {
         $response = $this->performQuery(
@@ -115,11 +68,6 @@ class Analytics
         });
     }
 
-    /**
-     * @param Period $period
-     * @param int $maxResults
-     * @return Collection
-     */
     public function fetchMostVisitedPages(Period $period, int $maxResults = 20): Collection
     {
         $response = $this->performQuery(
@@ -142,11 +90,6 @@ class Analytics
             });
     }
 
-    /**
-     * @param Period $period
-     * @param int $maxResults
-     * @return Collection
-     */
     public function fetchTopReferrers(Period $period, int $maxResults = 20): Collection
     {
         $response = $this->performQuery(
@@ -167,10 +110,6 @@ class Analytics
         });
     }
 
-    /**
-     * @param Period $period
-     * @return Collection
-     */
     public function fetchUserTypes(Period $period): Collection
     {
         $response = $this->performQuery(
@@ -189,11 +128,6 @@ class Analytics
         });
     }
 
-    /**
-     * @param Period $period
-     * @param int $maxResults
-     * @return Collection
-     */
     public function fetchTopBrowsers(Period $period, int $maxResults = 10): Collection
     {
         $response = $this->performQuery(
@@ -219,11 +153,6 @@ class Analytics
         return $this->summarizeTopBrowsers($topBrowsers, $maxResults);
     }
 
-    /**
-     * @param Collection $topBrowsers
-     * @param int $maxResults
-     * @return Collection
-     */
     protected function summarizeTopBrowsers(Collection $topBrowsers, int $maxResults): Collection
     {
         return $topBrowsers

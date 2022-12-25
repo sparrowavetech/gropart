@@ -6,7 +6,7 @@ use Botble\Ecommerce\Repositories\Interfaces\CurrencyInterface;
 use Botble\Ecommerce\Supports\CurrencySupport;
 use Illuminate\Support\Collection;
 
-if (!function_exists('format_price')) {
+if (! function_exists('format_price')) {
     /**
      * @param float|int|null $price
      * @param Currency|null|string $currency
@@ -17,11 +17,11 @@ if (!function_exists('format_price')) {
     function format_price($price, $currency = null, bool $withoutCurrency = false, bool $useSymbol = true): string
     {
         if ($currency) {
-            if (!$currency instanceof Currency) {
+            if (! $currency instanceof Currency) {
                 $currency = app(CurrencyInterface::class)->getFirstBy(['id' => $currency]);
             }
 
-            if (!$currency) {
+            if (! $currency) {
                 return human_price_text($price, $currency);
             }
 
@@ -39,11 +39,11 @@ if (!function_exists('format_price')) {
         } else {
             $currency = get_application_currency();
 
-            if (!$currency) {
+            if (! $currency) {
                 return human_price_text($price, $currency);
             }
 
-            if (!$currency->is_default && $currency->exchange_rate > 0) {
+            if (! $currency->is_default && $currency->exchange_rate > 0) {
                 $price = $price * $currency->exchange_rate;
             }
         }
@@ -62,7 +62,7 @@ if (!function_exists('format_price')) {
     }
 }
 
-if (!function_exists('human_price_text')) {
+if (! function_exists('human_price_text')) {
     /**
      * @param float|null|mixed $price
      * @param Currency|null|string $currency
@@ -114,19 +114,19 @@ if (!function_exists('human_price_text')) {
     }
 }
 
-if (!function_exists('get_current_exchange_rate')) {
+if (! function_exists('get_current_exchange_rate')) {
     /**
      * @param null $currency
      */
     function get_current_exchange_rate($currency = null)
     {
-        if (!$currency) {
+        if (! $currency) {
             $currency = get_application_currency();
-        } elseif (!$currency instanceof Currency) {
+        } elseif (! $currency instanceof Currency) {
             $currency = app(CurrencyInterface::class)->getFirstBy(['id' => $currency]);
         }
 
-        if (!$currency->is_default && $currency->exchange_rate > 0) {
+        if (! $currency->is_default && $currency->exchange_rate > 0) {
             return $currency->exchange_rate;
         }
 
@@ -134,7 +134,7 @@ if (!function_exists('get_current_exchange_rate')) {
     }
 }
 
-if (!function_exists('cms_currency')) {
+if (! function_exists('cms_currency')) {
     /**
      * @return CurrencySupport
      */
@@ -144,7 +144,7 @@ if (!function_exists('cms_currency')) {
     }
 }
 
-if (!function_exists('get_all_currencies')) {
+if (! function_exists('get_all_currencies')) {
     /**
      * @return Collection
      */
@@ -154,7 +154,7 @@ if (!function_exists('get_all_currencies')) {
     }
 }
 
-if (!function_exists('get_application_currency')) {
+if (! function_exists('get_application_currency')) {
     /**
      * @return Currency|null
      */
@@ -162,7 +162,7 @@ if (!function_exists('get_application_currency')) {
     {
         $currency = cms_currency()->getApplicationCurrency();
 
-        if (is_in_admin() || !$currency) {
+        if (is_in_admin() || ! $currency) {
             $currency = cms_currency()->getDefaultCurrency();
         }
 
@@ -170,7 +170,7 @@ if (!function_exists('get_application_currency')) {
     }
 }
 
-if (!function_exists('get_application_currency_id')) {
+if (! function_exists('get_application_currency_id')) {
     /**
      * @return int|null
      */

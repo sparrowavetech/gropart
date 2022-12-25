@@ -8,48 +8,41 @@ use Botble\Ecommerce\Repositories\Interfaces\EnquiryInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 use Yajra\DataTables\DataTables;
 
 class EnquiryTable extends TableAbstract
 {
-    /**
-     * @var bool
-     */
     protected $hasActions = true;
 
-    /**
-     * @var bool
-     */
     protected $hasFilter = true;
 
-    /**
-     * EnquiryTable constructor.
-     * @param DataTables $table
-     * @param UrlGenerator $urlGenerator
-     * @param EnquiryInterface $brandRepository
-     */
     public function __construct(DataTables $table, UrlGenerator $urlGenerator, EnquiryInterface $enquiryRepository)
     {
         parent::__construct($table, $urlGenerator);
 
         $this->repository = $enquiryRepository;
-        if (!Auth::user()->hasAnyPermission(['enquires.edit', 'enquires.destroy'])) {
+
+        if (! Auth::user()->hasAnyPermission(['brands.edit', 'brands.destroy'])) {
             $this->hasOperations = false;
             $this->hasActions = false;
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
             ->editColumn('product', function ($item) {
                 return Html::link(route('products.edit', $item->product_id), BaseHelper::clean($item->product->name));
-               
+
             })
             ->editColumn('checkbox', function ($item) {
                 return $this->getCheckbox($item->id);
@@ -78,10 +71,7 @@ class EnquiryTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
         $query = $this->repository->getModel()->select([
             'id',
@@ -96,10 +86,7 @@ class EnquiryTable extends TableAbstract
         return $this->applyScopes($query);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function columns()
+    public function columns(): array
     {
         return [
             'id'          => [
@@ -136,13 +123,12 @@ class EnquiryTable extends TableAbstract
                 'width' => '100px',
                 'class' => 'text-start',
             ],
-           
+
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
+
+
     public function bulkActions(): array
     {
         return $this->addDeleteAction(
@@ -152,9 +138,6 @@ class EnquiryTable extends TableAbstract
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getBulkChanges(): array
     {
         return [
@@ -169,7 +152,7 @@ class EnquiryTable extends TableAbstract
                 'choices'  => EnquiryStatusEnum::labels(),
                 'validate' => 'required|in:' . implode(',', EnquiryStatusEnum::values()),
             ],
-            
+
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
                 'type'  => 'date',
@@ -177,23 +160,17 @@ class EnquiryTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function renderTable($data = [], $mergeData = [])
+    public function renderTable($data = [], $mergeData = []): View|Factory|Response
     {
         if ($this->query()->count() === 0 &&
-            !$this->request()->wantsJson() &&
-            $this->request()->input('filter_table_id') !== $this->getOption('id') && !$this->request()->ajax()
+            ! $this->request()->wantsJson() &&
+            $this->request()->input('filter_table_id') !== $this->getOption('id') && ! $this->request()->ajax()
         ) {
             return view('plugins/ecommerce::enquires.intro');
         }
 
         return parent::renderTable($data, $mergeData);
     }
-      /**
-     * {@inheritDoc}
-     */
     public function getDefaultButtons(): array
     {
         return [

@@ -35,6 +35,7 @@ return [
         'verify_vendor' => 'Vendor verification (Vendor just can post their product listing after getting verified)',
         'enable_product_approval' => 'Enable product approval',
         'hide_store_phone_number' => 'Hide store phone number?',
+        'hide_store_email' => 'Hide store email?',
         'allow_vendor_manage_shipping' => 'Allow vendor manage shipping?',
         'commission_fee_each_category_fee_name' => 'Commission fee of commission setting :key',
         'commission_fee_each_category_name' => 'Categories of commission setting :key',

@@ -23,21 +23,14 @@ use Theme\Farmart\Http\Resources\ReviewResource;
 
 class FarmartController extends PublicController
 {
-    /**
-     * @var BaseHttpResponse
-     */
-    protected $httpResponse;
+    protected BaseHttpResponse $httpResponse;
 
-    /**
-     * FarmartController constructor.
-     * @param BaseHttpResponse $response
-     */
     public function __construct(BaseHttpResponse $response)
     {
         $this->httpResponse = $response;
 
         $this->middleware(function ($request, $next) {
-            if (!$request->ajax()) {
+            if (! $request->ajax()) {
                 return $this->httpResponse->setNextUrl(route('public.index'));
             }
 
@@ -91,7 +84,7 @@ class FarmartController extends PublicController
      */
     protected function getWishlistIds(array $productIds = []): array
     {
-        if (!EcommerceHelper::isWishlistEnabled()) {
+        if (! EcommerceHelper::isWishlistEnabled()) {
             return [];
         }
 
@@ -182,7 +175,7 @@ class FarmartController extends PublicController
             ])
             ->first();
 
-        if (!$flashSale) {
+        if (! $flashSale) {
             return $this->httpResponse->setData([]);
         }
 
@@ -191,7 +184,7 @@ class FarmartController extends PublicController
         $wishlistIds = $this->getWishlistIds($flashSale->products->pluck('id')->all());
 
         foreach ($flashSale->products as $product) {
-            if (!EcommerceHelper::showOutOfStockProducts() && $product->isOutOfStock()) {
+            if (! EcommerceHelper::showOutOfStockProducts() && $product->isOutOfStock()) {
                 continue;
             }
 
@@ -241,7 +234,7 @@ class FarmartController extends PublicController
     ) {
         $categoryId = $request->input('category_id');
 
-        if (!$categoryId) {
+        if (! $categoryId) {
             return $this->httpResponse;
         }
 
@@ -284,7 +277,7 @@ class FarmartController extends PublicController
      */
     public function ajaxGetQuickView(Request $request, $id = null)
     {
-        if (!$id) {
+        if (! $id) {
             $id = (int)$request->input('product_id');
         }
 
@@ -308,7 +301,7 @@ class FarmartController extends PublicController
                 ] + EcommerceHelper::withReviewsParams());
         }
 
-        if (!$product) {
+        if (! $product) {
             return $this->httpResponse->setError()->setMessage(__('This product is not available.'));
         }
 
@@ -331,14 +324,14 @@ class FarmartController extends PublicController
      */
     public function ajaxAddProductToWishlist(Request $request, ProductInterface $productRepository, WishlistInterface $wishlistRepository, $productId = null)
     {
-        if (!EcommerceHelper::isWishlistEnabled()) {
+        if (! EcommerceHelper::isWishlistEnabled()) {
             abort(404);
         }
-        if (!$productId) {
+        if (! $productId) {
             $productId = $request->input('product_id');
         }
 
-        if (!$productId) {
+        if (! $productId) {
             return $this->httpResponse->setError()->setMessage(__('This product is not available.'));
         }
         $product = $productRepository->findOrFail($productId);
@@ -346,12 +339,12 @@ class FarmartController extends PublicController
         $messageAdded = __('Added product :product successfully!', ['product' => $product->name]);
         $messageRemoved = __('Removed product :product from wishlist successfully!', ['product' => $product->name]);
 
-        if (!auth('customer')->check()) {
+        if (! auth('customer')->check()) {
             $duplicates = Cart::instance('wishlist')->search(function ($cartItem) use ($productId) {
                 return $cartItem->id == $productId;
             });
 
-            if (!$duplicates->isEmpty()) {
+            if (! $duplicates->isEmpty()) {
                 $added = false;
                 Cart::instance('wishlist')->search(function ($cartItem, $rowId) use ($productId) {
                     if ($cartItem->id == $productId) {
@@ -444,7 +437,7 @@ class FarmartController extends PublicController
 
         $queries = $request->input();
         foreach ($queries as $key => $query) {
-            if (!$query || $key == 'num' || (is_array($query) && !Arr::get($query, 0))) {
+            if (! $query || $key == 'num' || (is_array($query) && ! Arr::get($query, 0))) {
                 unset($queries[$key]);
             }
         }
@@ -474,7 +467,7 @@ class FarmartController extends PublicController
             'is_variation' => 0,
         ], [], ['variations']);
 
-        if (!$product) {
+        if (! $product) {
             abort(404);
         }
 
@@ -534,7 +527,7 @@ class FarmartController extends PublicController
      */
     public function ajaxGetRecentlyViewedProducts(ProductInterface $productRepository)
     {
-        if (!EcommerceHelper::isEnabledCustomerRecentlyViewedProducts()) {
+        if (! EcommerceHelper::isEnabledCustomerRecentlyViewedProducts()) {
             abort(404);
         }
 
@@ -567,7 +560,6 @@ class FarmartController extends PublicController
      * @param Theme\Farmart\Http\Requests\ContactSellerRequest $request
      * @param BaseHttpResponse $response
      * @return BaseHttpResponse
-     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
      * @throws \Throwable
      */
     public function ajaxContactSeller(Theme\Farmart\Http\Requests\ContactSellerRequest $request, BaseHttpResponse $response)

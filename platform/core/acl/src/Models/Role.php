@@ -5,6 +5,7 @@ namespace Botble\ACL\Models;
 use Botble\ACL\Traits\PermissionTrait;
 use Botble\Base\Models\BaseModel;
 use Exception;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -12,22 +13,8 @@ class Role extends BaseModel
 {
     use PermissionTrait;
 
-    /**
-     * {@inheritDoc}
-     */
     protected $table = 'roles';
 
-    /**
-     * {@inheritDoc}
-     */
-    protected $dates = [
-        'created_at',
-        'updated_at',
-    ];
-
-    /**
-     * {@inheritDoc}
-     */
     protected $fillable = [
         'name',
         'slug',
@@ -38,30 +25,24 @@ class Role extends BaseModel
         'updated_by',
     ];
 
-    /**
-     * {@inheritDoc}
-     */
     protected $casts = [
         'permissions' => 'json',
     ];
 
-    public function getPermissionsAttribute(?string $value): array
+    protected function permissions(): Attribute
     {
-        try {
-            return json_decode((string)$value, true) ?: [];
-        } catch (Exception $exception) {
-            return [];
-        }
+        return Attribute::make(
+            get: function ($value) {
+                try {
+                    return json_decode($value ?: '', true) ?: [];
+                } catch (Exception) {
+                    return [];
+                }
+            },
+            set: fn ($value) => $value ? json_encode($value) : ''
+        );
     }
 
-    public function setPermissionsAttribute(array $permissions)
-    {
-        $this->attributes['permissions'] = $permissions ? json_encode($permissions) : '';
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public function delete(): ?bool
     {
         if ($this->exists) {

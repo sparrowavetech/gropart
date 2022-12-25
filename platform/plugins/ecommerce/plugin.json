@@ -1,4 +1,5 @@
 {
+    "id": "botble/ecommerce",
     "name": "Ecommerce",
     "namespace": "Botble\\Ecommerce\\",
     "provider": "Botble\\Ecommerce\\Providers\\EcommerceServiceProvider",

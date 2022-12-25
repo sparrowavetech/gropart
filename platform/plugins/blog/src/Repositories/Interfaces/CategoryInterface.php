@@ -2,6 +2,7 @@
 
 namespace Botble\Blog\Repositories\Interfaces;
 
+use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Support\Repositories\Interfaces\RepositoryInterface;
 use Illuminate\Support\Collection;
 
@@ -36,7 +37,7 @@ interface CategoryInterface extends RepositoryInterface
      * @param array $orderBy
      * @return Collection
      */
-    public function getCategories(array $select, array $orderBy);
+    public function getCategories(array $select, array $orderBy, array $conditions = ['status' => BaseStatusEnum::PUBLISHED]);
 
     /**
      * @param int $id

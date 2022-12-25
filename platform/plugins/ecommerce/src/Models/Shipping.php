@@ -4,29 +4,18 @@ namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Models\BaseModel;
 use Botble\Ecommerce\Repositories\Interfaces\ShippingRuleInterface;
+use Botble\Ecommerce\Traits\LocationTrait;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Shipping extends BaseModel
 {
-    /**
-     * @var string
-     */
+    use LocationTrait;
+
     protected $table = 'ec_shipping';
 
-    /**
-     * @var array
-     */
     protected $fillable = [
         'title',
         'country',
-    ];
-
-    /**
-     * @var array
-     */
-    protected $dates = [
-        'created_at',
-        'updated_at',
     ];
 
     protected static function boot()

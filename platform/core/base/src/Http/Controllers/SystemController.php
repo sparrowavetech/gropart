@@ -6,6 +6,7 @@ use Arr;
 use Assets;
 use BaseHelper;
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Base\Services\CleanDatabaseService;
 use Botble\Base\Supports\Core;
 use Botble\Base\Supports\Helper;
 use Botble\Base\Supports\Language;
@@ -14,9 +15,7 @@ use Botble\Base\Supports\SystemManagement;
 use Botble\Base\Tables\InfoTable;
 use Botble\Table\TableBuilder;
 use Exception;
-use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Contracts\Container\BindingResolutionException;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -25,6 +24,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 use Menu;
 use Throwable;
 
@@ -36,7 +38,6 @@ class SystemController extends Controller
      * @return Factory|View
      * @throws Throwable
      * @throws BindingResolutionException
-     * @throws FileNotFoundException
      */
     public function getInfo(Request $request, TableBuilder $tableBuilder)
     {
@@ -63,14 +64,17 @@ class SystemController extends Controller
 
         $matchPHPRequirement = version_compare(phpversion(), $requiredPhpVersion, '>=') > 0;
 
-        return view('core/base::system.info', compact(
-            'packages',
-            'infoTable',
-            'systemEnv',
-            'serverEnv',
-            'matchPHPRequirement',
-            'requiredPhpVersion'
-        ));
+        return view(
+            'core/base::system.info',
+            compact(
+                'packages',
+                'infoTable',
+                'systemEnv',
+                'serverEnv',
+                'matchPHPRequirement',
+                'requiredPhpVersion'
+            )
+        );
     }
 
     /**
@@ -131,7 +135,6 @@ class SystemController extends Controller
      * @param MembershipAuthorization $authorization
      * @param BaseHttpResponse $response
      * @return BaseHttpResponse
-     * @throws GuzzleException
      */
     public function authorize(MembershipAuthorization $authorization, BaseHttpResponse $response)
     {
@@ -174,7 +177,7 @@ class SystemController extends Controller
      */
     public function getCheckUpdate(BaseHttpResponse $response)
     {
-        if (!config('core.base.general.enable_system_updater')) {
+        if (! config('core.base.general.enable_system_updater')) {
             return $response;
         }
 
@@ -187,7 +190,9 @@ class SystemController extends Controller
         if ($updateData['status']) {
             $response
                 ->setData(['has_new_version' => true])
-                ->setMessage('A new version (' . $updateData['version'] . ' / released on ' . $updateData['release_date'] . ') is available to update');
+                ->setMessage(
+                    'A new version (' . $updateData['version'] . ' / released on ' . $updateData['release_date'] . ') is available to update'
+                );
         }
 
         return $response;
@@ -198,11 +203,14 @@ class SystemController extends Controller
      */
     public function getUpdater(Request $request, BaseHttpResponse $response)
     {
-        if (!config('core.base.general.enable_system_updater')) {
+        if (! config('core.base.general.enable_system_updater')) {
             abort(404);
         }
 
-        if ($request->isMethod('POST') && !version_compare(phpversion(), '8.0.2', '>=') > 0 && !config('core.base.general.upgrade_php_require_disabled')) {
+        if ($request->isMethod('POST') &&
+            ! version_compare(phpversion(), '8.0.2', '>=') > 0 &&
+            ! config('core.base.general.upgrade_php_require_disabled')
+        ) {
             return $response
                 ->setError()
                 ->setMessage(trans('core/base::system.upgrade_php_version_required', ['version' => phpversion()]));
@@ -225,5 +233,44 @@ class SystemController extends Controller
         }
 
         return view('core/base::system.updater', compact('api', 'updateData'));
+    }
+
+    /**
+     * @param Request $request
+     * @param BaseHttpResponse $response
+     * @param CleanDatabaseService $cleanDatabaseService
+     * @return BaseHttpResponse|View
+     * @throws \Doctrine\DBAL\Exception
+     * @throws ValidationException
+     */
+    public function getCleanup(
+        Request $request,
+        BaseHttpResponse $response,
+        CleanDatabaseService $cleanDatabaseService
+    ): BaseHttpResponse|View {
+        if (! config('core.base.general.enabled_cleanup_database', true)) {
+            abort(401);
+        }
+
+        page_title()->setTitle(trans('core/base::system.cleanup.title'));
+
+        Assets::addScriptsDirectly('vendor/core/core/base/js/cleanup.js');
+
+        $tables = DB::connection()->getDoctrineSchemaManager()->listTableNames();
+
+        $disabledTables = [
+            'disabled' => $cleanDatabaseService->getIgnoreTables(),
+            'checked' => [],
+        ];
+
+        if ($request->isMethod('POST')) {
+            Validator::validate($request->input(), ['tables' => 'array']);
+
+            $cleanDatabaseService->execute($request->input('tables', []));
+
+            return $response->setMessage(trans('core/base::system.cleanup.success_message'));
+        }
+
+        return view('core/base::system.cleanup', compact('tables', 'disabledTables'));
     }
 }

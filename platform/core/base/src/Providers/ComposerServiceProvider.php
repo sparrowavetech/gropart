@@ -12,9 +12,6 @@ use RvMedia;
 
 class ComposerServiceProvider extends ServiceProvider
 {
-    /**
-     * @param Factory $view
-     */
     public function boot(Factory $view)
     {
         $view->composer(['core/base::layouts.partials.top-header', 'core/acl::auth.master'], function (View $view) {
@@ -22,7 +19,7 @@ class ComposerServiceProvider extends ServiceProvider
 
             $defaultTheme = setting('default_admin_theme', config('core.base.general.default-theme'));
 
-            if (Auth::check() && !session()->has('admin-theme') && !app()->environment('demo')) {
+            if (Auth::check() && ! session()->has('admin-theme') && ! app()->environment('demo')) {
                 $activeTheme = UserMeta::getMeta('admin-theme', $defaultTheme);
             } elseif (session()->has('admin-theme')) {
                 $activeTheme = session('admin-theme');
@@ -30,7 +27,7 @@ class ComposerServiceProvider extends ServiceProvider
                 $activeTheme = $defaultTheme;
             }
 
-            if (!array_key_exists($activeTheme, $themes)) {
+            if (! array_key_exists($activeTheme, $themes)) {
                 $activeTheme = $defaultTheme;
             }
 
@@ -45,7 +42,7 @@ class ComposerServiceProvider extends ServiceProvider
 
         $view->composer(['core/media::config'], function () {
             $mediaPermissions = RvMedia::getConfig('permissions');
-            if (Auth::check() && !Auth::user()->isSuperUser()) {
+            if (Auth::check() && ! Auth::user()->isSuperUser()) {
                 $mediaPermissions = array_intersect(array_keys(Auth::user()->permissions), $mediaPermissions);
             }
 

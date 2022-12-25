@@ -57,6 +57,13 @@ Route::group(['namespace' => 'Botble\Base\Http\Controllers', 'middleware' => ['w
             'permission' => 'superuser',
             'middleware' => 'preventDemo',
         ]);
+
+        Route::match(['get', 'post'], 'system/cleanup', [
+            'as' => 'system.cleanup',
+            'uses' => 'SystemController@getCleanup',
+            'permission' => 'superuser',
+            'middleware' => 'preventDemo',
+        ]);
     });
 
     Route::get('settings-language/{alias}', [SystemController::class, 'getLanguage'])->name('settings.language');

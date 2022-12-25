@@ -15,19 +15,14 @@ use SlugHelper;
 
 class PageSeeder extends BaseSeeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
         $faker = Factory::create();
 
         $pages = [
             [
-                'name'     => 'Home',
-                'content'  =>
+                'name' => 'Home',
+                'content' =>
                     Html::tag('div', '[simple-slider key="home-slider" is_autoplay="yes" autoplay_speed="5000" ads="VC2C8Q1UGCBG" background="general/slider-bg.jpg"][/simple-slider]') .
                     Html::tag('div', '[featured-product-categories title="Browse by Category"][/featured-product-categories]') .
                     Html::tag('div', '[featured-brands title="Featured Brands"][/featured-brands]') .
@@ -62,17 +57,17 @@ class PageSeeder extends BaseSeeder
                 'name' => 'Refund Policy',
             ],
             [
-                'name'     => 'Blog',
-                'content'  => Html::tag('p', '---'),
+                'name' => 'Blog',
+                'content' => Html::tag('p', '---'),
                 'template' => 'full-width',
             ],
             [
-                'name'    => 'FAQs',
+                'name' => 'FAQs',
                 'content' => Html::tag('div', '[faq title="Frequently Asked Questions"][/faq]'),
             ],
             [
-                'name'     => 'Contact',
-                'content'  => Html::tag('div', '[google-map]502 New Street, Brighton VIC, Australia[/google-map]') .
+                'name' => 'Contact',
+                'content' => Html::tag('div', '[google-map]502 New Street, Brighton VIC, Australia[/google-map]') .
                     Html::tag(
                         'div',
                         '[contact-info-boxes title="Contact Info" subtitle="Location" ' .
@@ -88,7 +83,7 @@ class PageSeeder extends BaseSeeder
                     ),
             ],
             [
-                'name'    => 'Cookie Policy',
+                'name' => 'Cookie Policy',
                 'content' => Html::tag('h3', 'EU Cookie Consent') .
                     Html::tag(
                         'p',
@@ -115,8 +110,8 @@ class PageSeeder extends BaseSeeder
                 'name' => 'Career',
             ],
             [
-                'name'     => 'Coming soon',
-                'content'  => Html::tag(
+                'name' => 'Coming soon',
+                'content' => Html::tag(
                     'div',
                     '[coming-soon time="2022-07-15" title="We’re coming soon." subtitle="Currently we’re working on our brand new website and will be
 launching soon." social_title="Connect us on social networks" image="general/coming-soon.jpg"][/coming-soon]'
@@ -134,11 +129,11 @@ launching soon." social_title="Connect us on social networks" image="general/com
         foreach ($pages as $item) {
             $item['user_id'] = 1;
 
-            if (!isset($item['template'])) {
+            if (! isset($item['template'])) {
                 $item['template'] = 'default';
             }
 
-            if (!isset($item['content'])) {
+            if (! isset($item['content'])) {
                 $item['content'] = Html::tag('p', $faker->realText(500)) . Html::tag('p', $faker->realText(500)) .
                     Html::tag('p', $faker->realText(500)) . Html::tag('p', $faker->realText(500));
             }
@@ -147,15 +142,15 @@ launching soon." social_title="Connect us on social networks" image="general/com
 
             Slug::create([
                 'reference_type' => Page::class,
-                'reference_id'   => $page->id,
-                'key'            => Str::slug($page->name),
-                'prefix'         => SlugHelper::getPrefix(Page::class),
+                'reference_id' => $page->id,
+                'key' => Str::slug($page->name),
+                'prefix' => SlugHelper::getPrefix(Page::class),
             ]);
         }
 
         $translations = [
             [
-                'name'    => 'Trang chủ',
+                'name' => 'Trang chủ',
                 'content' =>
                     Html::tag('div', '[simple-slider key="home-slider" is_autoplay="yes" autoplay_speed="5000" ads="VC2C8Q1UGCBG" background="general/slider-bg.jpg"][/simple-slider]') .
                     Html::tag('div', '[featured-product-categories title="Tìm kiếm bằng danh mục"][/featured-product-categories]') .
@@ -181,15 +176,15 @@ launching soon." social_title="Connect us on social networks" image="general/com
                 'name' => 'Điều kiện hoàn hàng',
             ],
             [
-                'name'    => 'Tin tức',
+                'name' => 'Tin tức',
                 'content' => Html::tag('p', '---'),
             ],
             [
-                'name'    => 'Câu hỏi thường gặp',
+                'name' => 'Câu hỏi thường gặp',
                 'content' => Html::tag('div', '[faq title="Các câu hỏi thường gặp"][/faq]'),
             ],
             [
-                'name'    => 'Liên hệ',
+                'name' => 'Liên hệ',
                 'content' => Html::tag('div', '[google-map]502 New Street, Brighton VIC, Australia[/google-map]') .
                     Html::tag(
                         'div',
@@ -199,7 +194,7 @@ launching soon." social_title="Connect us on social networks" image="general/com
                 ,
             ],
             [
-                'name'    => 'Chính sách cookie',
+                'name' => 'Chính sách cookie',
                 'content' => Html::tag('h3', 'EU Cookie Consent') .
                     Html::tag(
                         'p',
@@ -226,7 +221,7 @@ launching soon." social_title="Connect us on social networks" image="general/com
                 'name' => 'Tuyển dụng',
             ],
             [
-                'name'    => 'Sắp ra mắt',
+                'name' => 'Sắp ra mắt',
                 'content' => Html::tag(
                     'p',
                     'Condimentum ipsum a adipiscing hac dolor set consectetur urna commodo elit parturient <br/>molestie ut nisl partu convallier ullamcorpe.'

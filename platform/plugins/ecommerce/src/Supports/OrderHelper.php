@@ -10,35 +10,44 @@ use Throwable;
 use Validator;
 use BaseHelper;
 use EmailHandler;
+use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Botble\Sms\Enums\SmsEnum;
 use Illuminate\Http\Response;
 use Botble\Base\Models\BaseModel;
+use Illuminate\Support\Collection;
 use Botble\Ecommerce\Models\Order;
+use Botble\Sms\Supports\SmsHandler;
 use Botble\Ecommerce\Cart\CartItem;
 use Botble\Ecommerce\Models\Option;
 use Illuminate\Support\Facades\Log;
 use Botble\Ecommerce\Models\Enquiry;
 use Botble\Ecommerce\Models\Product;
 use Illuminate\Support\Facades\Auth;
+use Botble\Ecommerce\Models\Shipment;
 use Barryvdh\DomPDF\PDF as PDFHelper;
+use Illuminate\Database\Eloquent\Model;
 use Botble\Ecommerce\Models\OptionValue;
 use Botble\Ecommerce\Models\OrderHistory;
 use InvoiceHelper as InvoiceHelperFacade;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Payment\Enums\PaymentStatusEnum;
+use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Ecommerce\Models\ShipmentHistory;
 use EcommerceHelper as EcommerceHelperFacade;
+use Psr\Container\NotFoundExceptionInterface;
 use Botble\Ecommerce\Enums\ShippingMethodEnum;
+use Psr\Container\ContainerExceptionInterface;
 use Botble\Ecommerce\Events\OrderCancelledEvent;
+use Botble\Ecommerce\Events\OrderCompletedEvent;
 use Botble\Ecommerce\Events\OrderPaymentConfirmedEvent;
+use Botble\Ecommerce\Events\ProductQuantityUpdatedEvent;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
 use Botble\Payment\Repositories\Interfaces\PaymentInterface;
 use Botble\Base\Supports\EmailHandler as EmailHandlerSupport;
-use Botble\Sms\Supports\SmsHandler;
 use Botble\Ecommerce\Repositories\Interfaces\AddressInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderAddressInterface;
@@ -48,21 +57,13 @@ use Botble\Ecommerce\Repositories\Interfaces\ShippingRuleInterface;
 
 class OrderHelper
 {
-    /**
-     * @param string|array $orderIds
-     * @param string|null $chargeId
-     *
-     * @return BaseModel|bool
-     * @throws FileNotFoundException
-     * @throws Throwable
-     */
-    public function processOrder($orderIds, ?string $chargeId = null)
+    public function processOrder(string|array|null $orderIds, ?string $chargeId = null): bool|Collection|array|Model
     {
         $orderIds = (array)$orderIds;
 
         $orders = app(OrderInterface::class)->allBy([['id', 'IN', $orderIds]]);
 
-        if (!$orders->count()) {
+        if (! $orders->count()) {
             return false;
         }
 
@@ -125,7 +126,7 @@ class OrderHelper
                 $product = $orderProduct->product->original_product;
 
                 $flashSale = $product->latestFlashSales()->first();
-                if (!$flashSale) {
+                if (! $flashSale) {
                     continue;
                 }
 
@@ -143,20 +144,23 @@ class OrderHelper
         return $orders;
     }
 
-    /**
-     * @param Order $order
-     *
-     * @return EmailHandlerSupport
-     * @throws Throwable
-     */
     public function setEmailVariables(Order $order): EmailHandlerSupport
     {
+        $paymentMethod = $order->payment->payment_channel->label();
+
+        if ($order->payment->payment_channel == PaymentMethodEnum::BANK_TRANSFER && $order->payment->status == PaymentStatusEnum::PENDING) {
+            $paymentMethod .= '<div>' . trans('plugins/ecommerce::order.payment_info') . ': <strong>' .
+                BaseHelper::clean(get_payment_setting('description', $order->payment->payment_channel)) .
+                '</strong</div>';
+        }
+
         return EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME)
             ->setVariableValues([
                 'store_address' => get_ecommerce_setting('store_address'),
                 'store_phone' => get_ecommerce_setting('store_phone'),
                 'order_id' => $order->code,
                 'order_token' => $order->token,
+                'order_note' => $order->description,
                 'customer_name' => BaseHelper::clean($order->user->name ?: $order->address->name),
                 'customer_email' => $order->user->email ?: $order->address->email,
                 'customer_phone' => $order->user->phone ?: $order->address->phone,
@@ -164,23 +168,15 @@ class OrderHelper
                 'product_list' => view('plugins/ecommerce::emails.partials.order-detail', compact('order'))
                     ->render(),
                 'shipping_method' => $order->shipping_method_name,
-                'payment_method' => $order->payment->payment_channel->label(),
+                'payment_method' => $paymentMethod,
                 'order_delivery_notes' => view(
                     'plugins/ecommerce::emails.partials.order-delivery-notes',
                     compact('order')
                 )
                     ->render(),
-            ])
-            ->setVariableValues();
+            ]);
     }
 
-    /**
-     * @param Order $order
-     * @param bool $saveHistory
-     *
-     * @return boolean
-     * @throws Throwable
-     */
     public function sendOrderConfirmationEmail(Order $order, bool $saveHistory = false): bool
     {
         try {
@@ -202,6 +198,17 @@ class OrderHelper
                     ]);
                 }
             }
+            if (is_plugin_active('sms')) {
+                $sms = new  SmsHandler;
+                $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+                if ($sms->templateEnabled(SmsEnum::ORDER_CONFIRMATION())) {
+                    self::setSmsVariables($order, $sms);
+                    $sms->sendUsingTemplate(
+                        SmsEnum::ORDER_CONFIRMATION(),
+                        $order->user->phone ?: $order->address->phone
+                    );
+                }
+            }
 
             return true;
         } catch (Exception $exception) {
@@ -212,10 +219,6 @@ class OrderHelper
     }
 
     /**
-     * @param Order $order
-     *
-     * @return PDFHelper
-     *
      * @deprecated
      */
     public function makeInvoicePDF(Order $order): PDFHelper
@@ -224,10 +227,6 @@ class OrderHelper
     }
 
     /**
-     * @param Order $order
-     *
-     * @return string
-     *
      * @deprecated
      */
     public function generateInvoice(Order $order): string
@@ -236,10 +235,6 @@ class OrderHelper
     }
 
     /**
-     * @param Order $order
-     *
-     * @return Response
-     *
      * @deprecated
      */
     public function downloadInvoice(Order $order): Response
@@ -248,10 +243,6 @@ class OrderHelper
     }
 
     /**
-     * @param Order $order
-     *
-     * @return Response
-     *
      * @deprecated
      */
     public function streamInvoice(Order $order): Response
@@ -259,45 +250,31 @@ class OrderHelper
         return InvoiceHelperFacade::streamInvoice($order->invoice);
     }
 
-    /**
-     * @param string $method
-     * @param null $option
-     *
-     * @return array|null|string
-     */
-    public function getShippingMethod(string $method, $option = null)
+    public function getShippingMethod(string $method, array|string|null $option = null): array|string|null
     {
         $name = null;
 
-        switch ($method) {
-            case ShippingMethodEnum::DEFAULT:
-                if ($option) {
-                    $rule = app(ShippingRuleInterface::class)->findById($option);
-                    if ($rule) {
-                        $name = $rule->name;
-                    }
+        if ($method == ShippingMethodEnum::DEFAULT) {
+            if ($option) {
+                $rule = app(ShippingRuleInterface::class)->findById($option);
+                if ($rule) {
+                    $name = $rule->name;
                 }
+            }
 
-                if (empty($name)) {
-                    $name = trans('plugins/ecommerce::order.default');
-                }
-
-                break;
+            if (empty($name)) {
+                $name = trans('plugins/ecommerce::order.default');
+            }
         }
 
-        if (!$name && ShippingMethodEnum::search($method)) {
+        if (! $name && ShippingMethodEnum::search($method)) {
             $name = ShippingMethodEnum::getLabel($method);
         }
 
         return $name ?: $method;
     }
 
-    /**
-     * @param OrderHistory|ShipmentHistory $history
-     *
-     * @return mixed
-     */
-    public function processHistoryVariables($history)
+    public function processHistoryVariables(OrderHistory|ShipmentHistory $history): ?string
     {
         if (empty($history)) {
             return null;
@@ -331,15 +308,9 @@ class OrderHelper
         return $content;
     }
 
-    /**
-     * @param string|null $token
-     * @param string|array $data
-     *
-     * @return array
-     */
-    public function setOrderSessionData(?string $token, $data): array
+    public function setOrderSessionData(?string $token, string|array $data): array
     {
-        if (!$token) {
+        if (! $token) {
             $token = $this->getOrderSessionToken();
         }
 
@@ -352,9 +323,6 @@ class OrderHelper
         return $data;
     }
 
-    /**
-     * @return string
-     */
     public function getOrderSessionToken(): string
     {
         if (session()->has('tracked_start_checkout')) {
@@ -367,14 +335,9 @@ class OrderHelper
         return $token;
     }
 
-    /**
-     * @param string|null $token
-     *
-     * @return array
-     */
     public function getOrderSessionData(?string $token = null): array
     {
-        if (!$token) {
+        if (! $token) {
             $token = $this->getOrderSessionToken();
         }
 
@@ -387,15 +350,10 @@ class OrderHelper
         return $this->cleanData($data);
     }
 
-    /**
-     * @param array $data
-     *
-     * @return array
-     */
     protected function cleanData(array $data): array
     {
         foreach ($data as $key => $item) {
-            if (!is_string($item)) {
+            if (! is_string($item)) {
                 continue;
             }
 
@@ -405,15 +363,9 @@ class OrderHelper
         return $data;
     }
 
-    /**
-     * @param string|null $token
-     * @param string|array $data
-     *
-     * @return array
-     */
-    public function mergeOrderSessionData(?string $token, $data): array
+    public function mergeOrderSessionData(?string $token, string|array $data): array
     {
-        if (!$token) {
+        if (! $token) {
             $token = $this->getOrderSessionToken();
         }
 
@@ -424,10 +376,7 @@ class OrderHelper
         return $this->cleanData($data);
     }
 
-    /**
-     * @param string|null $token
-     */
-    public function clearSessions(?string $token)
+    public function clearSessions(?string $token): void
     {
         Cart::instance('cart')->destroy();
         session()->forget('applied_coupon_code');
@@ -436,12 +385,6 @@ class OrderHelper
         session()->forget('tracked_start_checkout');
     }
 
-    /**
-     * @param Product $product
-     * @param Request $request
-     *
-     * @return array
-     */
     public function handleAddCart(Product $product, Request $request): array
     {
         $parentProduct = $product->original_product;
@@ -463,7 +406,7 @@ class OrderHelper
             [
                 'image' => RvMedia::getImageUrl($image, 'thumb', false, RvMedia::getDefaultImage()),
                 'attributes' => $product->is_variation ? $product->variation_attributes : '',
-                'taxRate' => $parentProduct->tax->percentage,
+                'taxRate' => $parentProduct->total_taxes_percentage,
                 'options' => $options,
                 'extras' => $request->input('extras', []),
             ]
@@ -481,14 +424,10 @@ class OrderHelper
         return $cartItems;
     }
 
-    /**
-     * @param $data
-     * @return array
-     */
-    protected function getProductOptionData($data): array
+    protected function getProductOptionData(array $data): array
     {
         $result = [];
-        if (!empty($data)) {
+        if (! empty($data)) {
             foreach ($data as $key => $option) {
                 if (empty($option)) {
                     continue;
@@ -516,18 +455,11 @@ class OrderHelper
         return $result;
     }
 
-    /**
-     * @param int $currentUserId
-     * @param array $sessionData
-     * @param Request $request
-     *
-     * @return array
-     */
     public function processAddressOrder(int $currentUserId, array $sessionData, Request $request): array
     {
         $address = null;
 
-        if ($currentUserId && !Arr::get($sessionData, 'address_id')) {
+        if ($currentUserId && ! Arr::get($sessionData, 'address_id')) {
             $address = app(AddressInterface::class)->getFirstBy([
                 'customer_id' => auth('customer')->id(),
                 'is_default' => true,
@@ -538,7 +470,7 @@ class OrderHelper
             }
         } elseif ($request->input('address.address_id') && $request->input('address.address_id') !== 'new') {
             $address = app(AddressInterface::class)->findById($request->input('address.address_id'));
-            if (!empty($address)) {
+            if (! empty($address)) {
                 $sessionData['address_id'] = $address->id;
             }
         }
@@ -547,7 +479,7 @@ class OrderHelper
             $address = app(AddressInterface::class)->findById(Arr::get($sessionData, 'address_id'));
         }
 
-        if (!empty($address)) {
+        if (! empty($address)) {
             $addressData = [
                 'name' => $address->name,
                 'phone' => $address->phone,
@@ -580,8 +512,8 @@ class OrderHelper
 
         $addressData = $this->cleanData($addressData);
 
-        if ($addressData && !empty($addressData['name']) && !empty($addressData['phone']) && !empty($addressData['address'])) {
-            if (!isset($sessionData['created_order_address'])) {
+        if ($addressData && ! empty($addressData['name']) && ! empty($addressData['phone']) && ! empty($addressData['address'])) {
+            if (! isset($sessionData['created_order_address'])) {
                 $createdOrderAddress = $this->createOrderAddress($addressData);
                 if ($createdOrderAddress) {
                     $sessionData['created_order_address'] = true;
@@ -600,12 +532,6 @@ class OrderHelper
         return $sessionData;
     }
 
-    /**
-     * @param array $data
-     * @param int|null $orderAddressId
-     *
-     * @return false|mixed
-     */
     protected function createOrderAddress(array $data, ?int $orderAddressId = null)
     {
         if ($orderAddressId) {
@@ -649,7 +575,7 @@ class OrderHelper
         $lastUpdatedAt = Cart::instance('cart')->getLastUpdatedAt();
 
         // Check latest updated at of cart
-        if (!$createdOrderProduct || !$createdOrderProduct->eq($lastUpdatedAt)) {
+        if (! $createdOrderProduct || ! $createdOrderProduct->eq($lastUpdatedAt)) {
             $orderProducts = app(OrderProductInterface::class)->allBy(['order_id' => $sessionData['created_order_id']]);
             $productIds = [];
             foreach ($cartItems as $cartItem) {
@@ -690,7 +616,7 @@ class OrderHelper
 
             // Delete orderProducts not exists;
             foreach ($orderProducts as $orderProduct) {
-                if (!in_array($orderProduct->product_id, $productIds)) {
+                if (! in_array($orderProduct->product_id, $productIds)) {
                     $orderProduct->delete();
                 }
             }
@@ -709,6 +635,8 @@ class OrderHelper
      * @param array $generalData
      *
      * @return array
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function processOrderInCheckout(
         $sessionData,
@@ -732,12 +660,12 @@ class OrderHelper
         ], $generalData);
 
         if ($createdOrder && $createdOrderId) {
-            if ($order && (is_string($createdOrder) || !$createdOrder->eq($lastUpdatedAt))) {
+            if ($order && (is_string($createdOrder) || ! $createdOrder->eq($lastUpdatedAt))) {
                 $order->fill($data);
             }
         }
 
-        if (!$order) {
+        if (! $order) {
             $data = array_merge($data, [
                 'shipping_amount' => 0,
                 'discount_amount' => 0,
@@ -781,18 +709,11 @@ class OrderHelper
         return app(OrderInterface::class)->createOrUpdate($request->input());
     }
 
-    /**
-     * @param Order $order
-     *
-     * @return bool
-     * @throws FileNotFoundException
-     * @throws Throwable
-     */
     public function confirmPayment(Order $order): bool
     {
         $payment = $order->payment;
 
-        if (!$payment) {
+        if (! $payment) {
             return false;
         }
 
@@ -813,6 +734,18 @@ class OrderHelper
             );
         }
 
+        if (is_plugin_active('sms')) {
+            $sms = new  SmsHandler;
+            $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+            if ($sms->templateEnabled(SmsEnum::ORDER_CONFIRMATION())) {
+                self::setSmsVariables($order, $sms);
+                $sms->sendUsingTemplate(
+                    SmsEnum::ORDER_CONFIRMATION(),
+                    $order->user->phone ?: $order->address->phone
+                );
+            }
+        }
+
         app(OrderHistoryInterface::class)->createOrUpdate([
             'action' => 'confirm_payment',
             'description' => trans('plugins/ecommerce::order.payment_was_confirmed_by', [
@@ -825,13 +758,6 @@ class OrderHelper
         return true;
     }
 
-    /**
-     * @param Order $order
-     *
-     * @return Order
-     * @throws FileNotFoundException
-     * @throws Throwable
-     */
     public function cancelOrder(Order $order): Order
     {
         $order->status = OrderStatusEnum::CANCELED;
@@ -853,6 +779,8 @@ class OrderHelper
                     $originalProduct->save();
                 }
             }
+
+            event(new ProductQuantityUpdatedEvent($product));
         }
 
         $mailer = EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME);
@@ -863,23 +791,33 @@ class OrderHelper
                 $order->user->email ?: $order->address->email
             );
         }
+        if (is_plugin_active('sms')) {
+            $sms = new  SmsHandler;
+            $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+            if ($sms->templateEnabled(SmsEnum::ORDER_CANCELLATION())) {
+                self::setSmsVariables($order, $sms);
+                $sms->sendUsingTemplate(
+                    SmsEnum::ORDER_CANCELLATION(),
+                    $order->user->phone ?: $order->address->phone
+                );
+            }
+        }
 
         return $order;
     }
 
-    /**
-     * @param Order $order
-     *
-     * @return bool
-     */
     public function decreaseProductQuantity(Order $order): bool
     {
         foreach ($order->products as $orderProduct) {
             $product = app(ProductInterface::class)->findById($orderProduct->product_id);
 
             if ($product) {
-                $product->quantity = $product->quantity >= $orderProduct->qty ? $product->quantity - $orderProduct->qty : 0;
-                $product->save();
+                if ($product->with_storehouse_management || $product->quantity >= $orderProduct->qty) {
+                    $product->quantity = $product->quantity >= $orderProduct->qty ? $product->quantity - $orderProduct->qty : 0;
+                    $product->save();
+
+                    event(new ProductQuantityUpdatedEvent($product));
+                }
             }
         }
 
@@ -933,7 +871,7 @@ class OrderHelper
      * @return Enquiry
      */
     public static function sendEnquirySms(Enquiry $enquiry): Enquiry
-    {  
+    {
         $sms = new  SmsHandler;
         $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
         if ($sms->templateEnabled(SmsEnum::ENQUIRY_CONFIRMATION())) {
@@ -962,10 +900,10 @@ class OrderHelper
                 'enquiry_description'  => $enquiry->description,
                 'store_name'       => $enquiry->product->store->name,
             ]);
-            
+
         return $sms;
     }
-    
+
     /**
      * @param Order $order
      *
@@ -987,5 +925,30 @@ class OrderHelper
                 'shipping_method' => $order->shipping_method_name,
                 'payment_method' => $order->payment->payment_channel->label(),
             ]);
+    }
+
+    public function shippingStatusDelivered(Shipment $shipment, Request $request, int $userId = 0): Order
+    {
+        // Update status and time order complete
+        $order = app(OrderInterface::class)->createOrUpdate(
+            [
+                'status' => OrderStatusEnum::COMPLETED,
+                'completed_at' => Carbon::now(),
+            ],
+            ['id' => $shipment->order_id]
+        );
+
+        event(new OrderCompletedEvent($order));
+
+        do_action(ACTION_AFTER_ORDER_STATUS_COMPLETED_ECOMMERCE, $order, $request);
+
+        app(OrderHistoryInterface::class)->createOrUpdate([
+            'action' => 'update_status',
+            'description' => trans('plugins/ecommerce::shipping.order_confirmed_by'),
+            'order_id' => $shipment->order_id,
+            'user_id' => $userId,
+        ]);
+
+        return $order;
     }
 }

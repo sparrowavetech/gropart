@@ -20,7 +20,7 @@
                                 <div class="form-group mb-3">
                                     <input type="hidden" id="language_flag_path" value="{{ BASE_LANGUAGE_FLAG_PATH }}">
                                     <label for="language_id" class="control-label">{{ trans('plugins/language::language.choose_language') }}</label>
-                                    <select id="language_id" class="form-control select-search-full">
+                                    <select id="language_id" class="form-select select-search-full">
                                         <option>{{ trans('plugins/language::language.select_language') }}</option>
                                         @foreach ($languages as $key => $language)
                                             <option value="{{ $key }}" data-language="{{ json_encode($language) }}"> {{ $language[2] }} - {{ $language[1] }}</option>

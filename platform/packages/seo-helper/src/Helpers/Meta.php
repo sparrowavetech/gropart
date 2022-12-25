@@ -92,7 +92,7 @@ class Meta implements MetaContract
      */
     protected function checkNameProperty(&$nameProperty)
     {
-        if (!is_string($nameProperty)) {
+        if (! is_string($nameProperty)) {
             throw new InvalidArgumentException(
                 'The meta name property is must be a string value, ' . gettype($nameProperty) . ' is given.'
             );
@@ -101,7 +101,7 @@ class Meta implements MetaContract
         $name = Str::slug($nameProperty);
         $allowed = ['charset', 'http-equiv', 'itemprop', 'name', 'property'];
 
-        if (!in_array($name, $allowed)) {
+        if (! in_array($name, $allowed)) {
             throw new InvalidArgumentException(
                 'The meta name property [' . $name . '] is not supported, ' .
                 'the allowed name properties are ["' . implode("', '", $allowed) . '"].'
@@ -291,6 +291,6 @@ class Meta implements MetaContract
      */
     public function isValid()
     {
-        return !empty($this->content);
+        return ! empty($this->content);
     }
 }

@@ -6,12 +6,7 @@ use Botble\Support\Http\Requests\Request;
 
 class UpdateCartRequest extends Request
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         $rules = [];
         foreach (array_keys($this->input('items', [])) as $rowId) {
@@ -25,7 +20,7 @@ class UpdateCartRequest extends Request
         return $rules;
     }
 
-    public function messages()
+    public function messages(): array
     {
         $messages = [];
 

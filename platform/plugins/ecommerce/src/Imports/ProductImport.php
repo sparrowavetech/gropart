@@ -9,6 +9,7 @@ use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Enums\StockStatusEnum;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductVariation;
+use Botble\Ecommerce\Models\Tax;
 use Botble\Ecommerce\Repositories\Interfaces\BrandInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeSetInterface;
@@ -61,140 +62,56 @@ class ProductImport implements
     use SkipsErrors;
     use ImportTrait;
 
-    /**
-     * @var ProductInterface
-     */
-    protected $productRepository;
+    protected ProductInterface $productRepository;
 
-    /**
-     * @var ProductCategoryInterface
-     */
-    protected $productCategoryRepository;
+    protected ProductCategoryInterface $productCategoryRepository;
 
-    /**
-     * @var ProductTagInterface
-     */
-    protected $productTagRepository;
+    protected ProductTagInterface $productTagRepository;
 
-    /**
-     * @var ProductLabelInterface
-     */
-    protected $productLabelRepository;
+    protected ProductLabelInterface $productLabelRepository;
 
-    /**
-     * @var TaxInterface
-     */
-    protected $taxRepository;
+    protected TaxInterface $taxRepository;
 
-    /**
-     * @var ProductCollectionInterface
-     */
-    protected $productCollectionRepository;
+    protected ProductCollectionInterface $productCollectionRepository;
 
-    /**
-     * @var ProductAttributeInterface
-     */
-    protected $productAttributeRepository;
+    protected ProductAttributeInterface $productAttributeRepository;
 
-    /**
-     * @var ProductVariationInterface
-     */
-    protected $productVariationRepository;
+    protected ProductVariationInterface $productVariationRepository;
 
-    /**
-     * @var BrandInterface
-     */
-    protected $brandRepository;
+    protected BrandInterface $brandRepository;
 
-    /**
-     * @var StoreProductTagService
-     */
-    protected $storeProductTagService;
+    protected StoreProductTagService $storeProductTagService;
 
-    /**
-     * @var Request
-     */
-    protected $request;
+    protected Request $request;
 
-    /**
-     * @var mixed
-     */
-    protected $validatorClass;
+    protected Request $validatorClass;
 
-    /**
-     * @var Collection
-     */
-    protected $brands;
+    protected Collection $brands;
 
-    /**
-     * @var Collection
-     */
-    protected $categories;
+    protected Collection $categories;
 
-    /**
-     * @var Collection
-     */
-    protected $tags;
+    protected Collection $tags;
 
-    /**
-     * @var Collection
-     */
-    protected $taxes;
+    protected Collection $taxes;
 
-    /**
-     * @var Collection
-     */
-    protected $stores;
+    protected Collection $stores;
 
-    /**
-     * @var Collection
-     */
-    protected $labels;
+    protected Collection $labels;
 
-    /**
-     * @var Collection
-     */
-    protected $productCollections;
+    protected Collection $productCollections;
 
-    /**
-     * @var Collection
-     */
-    protected $productLabels;
+    protected Collection $productLabels;
 
-    /**
-     * @var string
-     */
-    protected $importType = 'all';
+    protected string $importType = 'all';
 
-    /**
-     * @var Collection
-     */
-    protected $productAttributeSets;
+    protected Collection|Model $productAttributeSets;
 
-    /**
-     * @var int
-     */
-    protected $rowCurrent = 1; // include header
+    protected int $rowCurrent = 1; // include header
 
-    /**
-     * @var ProductAttributeSetInterface
-     */
-    protected $productAttributeSetRepository;
+    protected ProductAttributeSetInterface $productAttributeSetRepository;
 
-    /**
-     * @param ProductInterface $productRepository
-     * @param ProductCategoryInterface $productCategoryRepository
-     * @param ProductTagInterface $productTagRepository
-     * @param ProductLabelInterface $productLabelRepository
-     * @param TaxInterface $taxRepository
-     * @param ProductCollectionInterface $productCollectionRepository
-     * @param ProductAttributeSetInterface $productAttributeSetRepository
-     * @param ProductAttributeInterface $productAttributeRepository
-     * @param ProductVariationInterface $productVariationRepository
-     * @param BrandInterface $brandRepository
-     * @param StoreProductTagService $storeProductTagService
-     * @param Request $request
-     */
+    protected Collection $allTaxes;
+
     public function __construct(
         ProductInterface $productRepository,
         ProductCategoryInterface $productCategoryRepository,
@@ -228,34 +145,26 @@ class ProductImport implements
         $this->productAttributeSets = $this->productAttributeSetRepository->all(['attributes']);
         $this->productAttributeRepository = $productAttributeRepository;
         $this->productVariationRepository = $productVariationRepository;
+        $this->allTaxes = $this->taxRepository->all();
 
         if (is_plugin_active('marketplace')) {
             $this->stores = collect();
         }
     }
 
-    /**
-     * @param string $importType
-     * @return self
-     */
-    public function setImportType(string $importType): ProductImport
+    public function setImportType(string $importType): self
     {
         $this->importType = $importType;
 
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getImportType(): string
     {
         return $this->importType;
     }
 
     /**
-     * @param array $row
-     *
      * @return Product|ProductVariation
      * @throws Exception
      */
@@ -301,12 +210,7 @@ class ProductImport implements
         return $this->storeProduct();
     }
 
-    /**
-     * @param string $name
-     * @param string|null $slug
-     * @return \Eloquent|Builder|Model|object|null
-     */
-    protected function getProduct(string $name, ?string $slug)
+    protected function getProduct(string $name, ?string $slug): Model|\Eloquent|Builder|null
     {
         if ($slug) {
             $slug = SlugHelper::getSlug($slug, SlugHelper::getPrefix(Product::class), Product::class);
@@ -330,10 +234,6 @@ class ProductImport implements
             ->first();
     }
 
-    /**
-     * @return Product|null
-     * @throws Exception
-     */
     public function storeProduct(): ?Product
     {
         $product = $this->productRepository->getModel();
@@ -350,7 +250,7 @@ class ProductImport implements
 
         $product = (new StoreProductService($this->productRepository))->execute($this->request, $product);
 
-        $tagsInput = (array) $this->request->input('tags', []);
+        $tagsInput = (array)$this->request->input('tags', []);
         if ($tagsInput) {
             $tags = [];
             foreach ($tagsInput as $tag) {
@@ -377,10 +277,6 @@ class ProductImport implements
         return $product;
     }
 
-    /**
-     * @param array $images
-     * @return array
-     */
     protected function getImageURLs(array $images): array
     {
         $images = array_values(array_filter($images));
@@ -396,10 +292,6 @@ class ProductImport implements
         return $images;
     }
 
-    /**
-     * @param string|null $url
-     * @return string
-     */
     protected function uploadImageFromURL(?string $url): ?string
     {
         if (empty($url)) {
@@ -410,7 +302,7 @@ class ProductImport implements
 
         try {
             $contents = file_get_contents($url);
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return $url;
         }
 
@@ -420,7 +312,7 @@ class ProductImport implements
 
         $path = '/tmp';
 
-        if (!File::isDirectory($path)) {
+        if (! File::isDirectory($path)) {
             File::makeDirectory($path, 0755);
         }
 
@@ -436,20 +328,16 @@ class ProductImport implements
 
         File::delete($path);
 
-        if (!$result['error']) {
+        if (! $result['error']) {
             $url = $result['data']->url;
         }
 
         return $url;
     }
 
-    /**
-     * @param $product
-     * @return ProductVariation|null
-     */
     public function storeVariant($product): ?ProductVariation
     {
-        if (!$product) {
+        if (! $product) {
             if (method_exists($this, 'onFailure')) {
                 $failures[] = new Failure(
                     $this->rowCurrent,
@@ -465,12 +353,16 @@ class ProductImport implements
 
         $addedAttributes = $this->request->input('attribute_sets', []);
         $result = $this->productVariationRepository->getVariationByAttributesOrCreate($product->id, $addedAttributes);
-        if (!$result['created']) {
+        if (! $result['created']) {
             if (method_exists($this, 'onFailure')) {
                 $failures[] = new Failure(
                     $this->rowCurrent,
                     'variation',
-                    [trans('plugins/ecommerce::products.form.variation_existed') . ' ' . trans('plugins/ecommerce::products.form.product_id') . ': ' . $product->id],
+                    [
+                        trans('plugins/ecommerce::products.form.variation_existed') . ' ' . trans(
+                            'plugins/ecommerce::products.form.product_id'
+                        ) . ': ' . $product->id,
+                    ],
                     []
                 );
                 $this->onFailure(...$failures);
@@ -502,7 +394,7 @@ class ProductImport implements
         $productRelatedToVariation->is_variation = 1;
 
         $productRelatedToVariation->sku = Arr::get($version, 'sku');
-        if (!$productRelatedToVariation->sku && Arr::get($version, 'auto_generate_sku')) {
+        if (! $productRelatedToVariation->sku && Arr::get($version, 'auto_generate_sku')) {
             $productRelatedToVariation->sku = $product->sku;
             foreach ($version['attribute_sets'] as $setId => $attributeId) {
                 $attributeSet = $this->productAttributeSets->firstWhere('id', $setId);
@@ -531,34 +423,23 @@ class ProductImport implements
         $productRelatedToVariation->height = Arr::get($version, 'height', $product->height);
         $productRelatedToVariation->weight = Arr::get($version, 'weight', $product->weight);
 
-        $productRelatedToVariation->with_storehouse_management = Arr::get(
-            $version,
-            'with_storehouse_management',
-            $product->with_storehouse_management
-        );
-        $productRelatedToVariation->stock_status = Arr::get(
-            $version,
-            'stock_status',
-            StockStatusEnum::IN_STOCK
-        );
-        $productRelatedToVariation->quantity = Arr::get($version, 'quantity', $product->quantity);
-        $productRelatedToVariation->allow_checkout_when_out_of_stock = Arr::get(
-            $version,
-            'allow_checkout_when_out_of_stock',
-            $product->allow_checkout_when_out_of_stock
-        );
-
         $productRelatedToVariation->sale_type = (int)Arr::get($version, 'sale_type', $product->sale_type);
 
         if ($productRelatedToVariation->sale_type == 0) {
             $productRelatedToVariation->start_date = null;
             $productRelatedToVariation->end_date = null;
         } else {
-            $productRelatedToVariation->start_date = Carbon::parse(Arr::get($version, 'start_date', $product->start_date))->toDateTimeString();
-            $productRelatedToVariation->end_date = Carbon::parse(Arr::get($version, 'end_date', $product->end_date))->toDateTimeString();
+            $productRelatedToVariation->start_date = Carbon::parse(
+                Arr::get($version, 'start_date', $product->start_date)
+            )->toDateTimeString();
+            $productRelatedToVariation->end_date = Carbon::parse(
+                Arr::get($version, 'end_date', $product->end_date)
+            )->toDateTimeString();
         }
 
-        $productRelatedToVariation->images = json_encode($this->getImageURLs((array)Arr::get($version, 'images', []) ?: []));
+        $productRelatedToVariation->images = json_encode(
+            $this->getImageURLs((array)Arr::get($version, 'images', []) ?: [])
+        );
 
         $productRelatedToVariation->status = Arr::get($version, 'status', $product->status);
 
@@ -578,14 +459,17 @@ class ProductImport implements
             $variation->productAttributes()->sync($version['attribute_sets']);
         }
 
+        $this->onSuccess(collect([
+            'name' => $variation->name,
+            'slug' => '',
+            'import_type' => 'variation',
+            'attribute_sets' => [],
+            'model' => $variation,
+        ]));
+
         return $variation;
     }
 
-    /**
-     * Change value before insert to model
-     *
-     * @param array $row
-     */
     public function map($row): array
     {
         ++$this->rowCurrent;
@@ -605,49 +489,48 @@ class ProductImport implements
         return $row;
     }
 
-    /**
-     * @param array $row
-     * @return array
-     */
     protected function setTaxToRow(array $row): array
     {
-        $row['tax_id'] = 0;
+        $row['tax_id'] = null;
 
-        if (!empty($row['tax'])) {
-            $row['tax'] = trim($row['tax']);
-
-            $tax = $this->taxes->firstWhere('keyword', $row['tax']);
+        $taxIds = [];
+        if (! empty($row['tax'])) {
+            $tax = $this->getTaxByKeyword(trim($row['tax']));
             if ($tax) {
-                $taxId = $tax['tax_id'];
-            } else {
-                if (is_numeric($row['tax'])) {
-                    $tax = $this->taxRepository->findById($row['tax']);
-                } else {
-                    $tax = $this->taxRepository->getFirstBy(['title' => $row['tax']]);
-                }
+                $taxIds[] = $tax->id;
+            }
+        }
 
-                $taxId = $tax ? $tax->id : 0;
-                $this->taxes->push([
-                    'keyword' => $row['tax'],
-                    'tax_id' => $taxId,
-                ]);
+        if ($row['taxes']) {
+            foreach ($row['taxes'] as $value) {
+                $tax = $this->getTaxByKeyword(trim($value));
+                if ($tax) {
+                    $taxIds[] = $tax->id;
+                }
             }
 
-            $row['tax_id'] = $taxId;
+            $row['taxes'] = array_filter($taxIds);
         }
 
         return $row;
     }
 
-    /**
-     * @param array $row
-     * @return array
-     */
+    protected function getTaxByKeyword(string|int $keyword): Tax|null
+    {
+        return $this->allTaxes->filter(function ($item) use ($keyword) {
+            if (is_numeric($keyword)) {
+                return $item->id == $keyword;
+            }
+
+            return $item->title == $keyword;
+        })->first();
+    }
+
     protected function setStoreToRow(array $row): array
     {
         $row['store_id'] = 0;
 
-        if (!empty($row['vendor'])) {
+        if (! empty($row['vendor'])) {
             $row['vendor'] = trim($row['vendor']);
 
             $store = $this->stores->firstWhere('keyword', $row['vendor']);
@@ -675,15 +558,11 @@ class ProductImport implements
         return $row;
     }
 
-    /**
-     * @param array $row
-     * @return array
-     */
     protected function setBrandToRow(array $row): array
     {
         $row['brand_id'] = 0;
 
-        if (!empty($row['brand'])) {
+        if (! empty($row['brand'])) {
             $row['brand'] = trim($row['brand']);
 
             $brand = $this->brands->firstWhere('keyword', $row['brand']);
@@ -709,10 +588,6 @@ class ProductImport implements
         return $row;
     }
 
-    /**
-     * @param array $row
-     * @return array
-     */
     protected function setCategoriesToRow(array $row): array
     {
         if ($row['categories']) {
@@ -746,10 +621,6 @@ class ProductImport implements
         return $row;
     }
 
-    /**
-     * @param array $row
-     * @return array
-     */
     protected function setProductCollectionsToRow(array $row): array
     {
         if ($row['product_collections']) {
@@ -783,10 +654,6 @@ class ProductImport implements
         return $row;
     }
 
-    /**
-     * @param array $row
-     * @return array
-     */
     protected function setProductLabelsToRow(array $row): array
     {
         if ($row['product_labels']) {
@@ -820,24 +687,20 @@ class ProductImport implements
         return $row;
     }
 
-    /**
-     * @param array $row
-     * @return array
-     */
     public function mapLocalization(array $row): array
     {
         $row['stock_status'] = (string)Arr::get($row, 'stock_status');
-        if (!in_array($row['stock_status'], StockStatusEnum::values())) {
+        if (! in_array($row['stock_status'], StockStatusEnum::values())) {
             $row['stock_status'] = StockStatusEnum::IN_STOCK;
         }
 
         $row['status'] = Arr::get($row, 'status');
-        if (!in_array($row['status'], BaseStatusEnum::values())) {
+        if (! in_array($row['status'], BaseStatusEnum::values())) {
             $row['status'] = BaseStatusEnum::PENDING;
         }
 
         $row['product_type'] = Arr::get($row, 'product_type');
-        if (!in_array($row['product_type'], ProductTypeEnum::values())) {
+        if (! in_array($row['product_type'], ProductTypeEnum::values())) {
             $row['product_type'] = ProductTypeEnum::PHYSICAL;
         }
 
@@ -873,11 +736,12 @@ class ProductImport implements
             ['key' => 'start_date', 'type' => 'datetime', 'from' => 'start_date_sale_price'],
             ['key' => 'end_date', 'type' => 'datetime', 'from' => 'end_date_sale_price'],
             ['key' => 'tags'],
+            ['key' => 'taxes'],
         ]);
 
         $row['product_labels'] = $row['labels'];
 
-        if ($row['import_type'] == 'product' && !$row['sku'] && $row['auto_generate_sku']) {
+        if ($row['import_type'] == 'product' && ! $row['sku'] && $row['auto_generate_sku']) {
             $row['sku'] = Str::upper(Str::random(7));
         }
 
@@ -886,7 +750,7 @@ class ProductImport implements
             $row['sale_type'] = 1;
         }
 
-        if (!$row['with_storehouse_management']) {
+        if (! $row['with_storehouse_management']) {
             $row['quantity'] = null;
             $row['allow_checkout_when_out_of_stock'] = false;
         }
@@ -932,12 +796,7 @@ class ProductImport implements
         return $row;
     }
 
-    /**
-     * @param array $row
-     * @param array $attributes
-     * @return $this
-     */
-    protected function setValues(array &$row, array $attributes = []): ProductImport
+    protected function setValues(array &$row, array $attributes = []): self
     {
         foreach ($attributes as $attribute) {
             $this->setValue(
@@ -952,15 +811,7 @@ class ProductImport implements
         return $this;
     }
 
-    /**
-     * @param array $row
-     * @param string $key
-     * @param string $type
-     * @param $default
-     * @param $from
-     * @return $this
-     */
-    protected function setValue(array &$row, string $key, string $type = 'array', $default = null, $from = null): ProductImport
+    protected function setValue(array &$row, string $key, string $type = 'array', $default = null, $from = null): self
     {
         $value = Arr::get($row, $from ?: $key, $default);
 
@@ -993,36 +844,23 @@ class ProductImport implements
         return $this;
     }
 
-    /**
-     * @return array
-     */
     public function rules(): array
     {
         return method_exists($this->getValidatorClass(), 'rules') ? $this->getValidatorClass()->rules() : [];
     }
 
-    /**
-     * @return mixed
-     */
-    public function getValidatorClass()
+    public function getValidatorClass(): Request
     {
         return $this->validatorClass;
     }
 
-    /**
-     * @param mixed $validatorClass
-     * @return self
-     */
-    public function setValidatorClass($validatorClass): self
+    public function setValidatorClass(Request $validatorClass): self
     {
         $this->validatorClass = $validatorClass;
 
         return $this;
     }
 
-    /**
-     * @return int
-     */
     public function chunkSize(): int
     {
         return 100;

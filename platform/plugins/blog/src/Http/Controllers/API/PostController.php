@@ -9,23 +9,14 @@ use Botble\Blog\Http\Resources\PostResource;
 use Botble\Blog\Models\Post;
 use Botble\Blog\Repositories\Interfaces\PostInterface;
 use Botble\Blog\Supports\FilterPost;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use SlugHelper;
 
 class PostController extends Controller
 {
-    /**
-     * @var PostInterface
-     */
-    protected $postRepository;
+    protected PostInterface $postRepository;
 
-    /**
-     * AuthenticationController constructor.
-     *
-     * @param PostInterface $postRepository
-     */
     public function __construct(PostInterface $postRepository)
     {
         $this->postRepository = $postRepository;
@@ -35,10 +26,6 @@ class PostController extends Controller
      * List posts
      *
      * @group Blog
-     *
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
      */
     public function index(Request $request, BaseHttpResponse $response)
     {
@@ -63,11 +50,6 @@ class PostController extends Controller
      * @bodyParam q string required The search keyword.
      *
      * @group Blog
-     *
-     * @param Request $request
-     * @param PostInterface $postRepository
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
      */
     public function getSearch(Request $request, PostInterface $postRepository, BaseHttpResponse $response)
     {
@@ -109,9 +91,6 @@ class PostController extends Controller
      * @queryParam tags                 Limit result set to all items that have the specified term assigned in the tags taxonomy.
      * @queryParam tags_exclude         Limit result set to all items except those that have the specified term assigned in the tags taxonomy.
      * @queryParam featured             Limit result set to items that are sticky.
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
      */
     public function getFilters(Request $request, BaseHttpResponse $response)
     {
@@ -129,15 +108,12 @@ class PostController extends Controller
      *
      * @group Blog
      * @queryParam slug Find by slug of post.
-     * @param string $slug
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse|JsonResponse
      */
     public function findBySlug(string $slug, BaseHttpResponse $response)
     {
         $slug = SlugHelper::getSlug($slug, SlugHelper::getPrefix(Post::class), Post::class);
 
-        if (!$slug) {
+        if (! $slug) {
             return $response->setError()->setCode(404)->setMessage('Not found');
         }
 
@@ -146,7 +122,7 @@ class PostController extends Controller
             'status' => BaseStatusEnum::PUBLISHED,
         ]);
 
-        if (!$post) {
+        if (! $post) {
             return $response->setError()->setCode(404)->setMessage('Not found');
         }
 

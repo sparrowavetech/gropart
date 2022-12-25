@@ -21,14 +21,8 @@ use Throwable;
 
 class ProductOptionController extends BaseController
 {
-    /**
-     * @var GlobalOptionInterface
-     */
-    protected $globalOptionRepository;
+    protected GlobalOptionInterface $globalOptionRepository;
 
-    /**
-     * @param GlobalOptionInterface $globalOptionRepository
-     */
     public function __construct(GlobalOptionInterface $globalOptionRepository)
     {
         $this->globalOptionRepository = $globalOptionRepository;
@@ -156,12 +150,10 @@ class ProductOptionController extends BaseController
         return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
-    /**
-     * @param $id
-     * @return mixed
-     */
-    public function ajaxInfo($id)
+    public function ajaxInfo(Request $request, BaseHttpResponse $response): BaseHttpResponse
     {
-        return $this->globalOptionRepository->findOrFail($id, ['values']);
+        $optionsValues = $this->globalOptionRepository->findOrFail($request->input('id'), ['values']);
+
+        return $response->setData($optionsValues);
     }
 }

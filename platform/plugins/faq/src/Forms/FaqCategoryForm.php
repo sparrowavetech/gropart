@@ -9,9 +9,6 @@ use Botble\Faq\Models\FaqCategory;
 
 class FaqCategoryForm extends FormAbstract
 {
-    /**
-     * {@inheritDoc}
-     */
     public function buildForm()
     {
         $this
@@ -37,9 +34,6 @@ class FaqCategoryForm extends FormAbstract
             ->add('status', 'customSelect', [
                 'label' => trans('core/base::tables.status'),
                 'label_attr' => ['class' => 'control-label required'],
-                'attr' => [
-                    'class' => 'form-control select-full',
-                ],
                 'choices' => BaseStatusEnum::labels(),
             ])
             ->setBreakFieldPoint('status');

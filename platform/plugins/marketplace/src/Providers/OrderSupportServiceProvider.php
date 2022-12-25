@@ -41,6 +41,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\Factory;
 use Log;
 use MarketplaceHelper;
@@ -95,7 +96,7 @@ class OrderSupportServiceProvider extends ServiceProvider
      */
     protected function cartGroupByStore(Collection $products)
     {
-        if (!$products->count()) {
+        if (! $products->count()) {
             return $products;
         }
 
@@ -108,7 +109,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         $groupedProducts = collect([]);
         foreach ($products as $product) {
             $storeId = ($product->original_product && $product->original_product->store_id) ? $product->original_product->store_id : 0;
-            if (!Arr::has($groupedProducts, $storeId)) {
+            if (! Arr::has($groupedProducts, $storeId)) {
                 $groupedProducts[$storeId] = collect([
                     'store' => $product->original_product->store,
                     'products' => collect([$product]),
@@ -202,7 +203,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         // Remove orders not exists pre checkout
         if ($preOrders) {
             foreach ($preOrders as $order) {
-                if (!in_array($order->store_id, $foundOrderIds)) {
+                if (! in_array($order->store_id, $foundOrderIds)) {
                     $order->delete();
                     if ($order->address && $order->address->id) {
                         $order->address->delete();
@@ -227,7 +228,7 @@ class OrderSupportServiceProvider extends ServiceProvider
                 })
                 ->first();
 
-            if (!empty($discount)) {
+            if (! empty($discount)) {
                 $discount->total_used++;
                 $this->app->make(DiscountInterface::class)->createOrUpdate($discount);
             }
@@ -246,7 +247,7 @@ class OrderSupportServiceProvider extends ServiceProvider
                 ->setMessage($paymentData['message']);
         }
 
-        if ($paymentData['error'] || !$paymentData['charge_id']) {
+        if ($paymentData['error'] || ! $paymentData['charge_id']) {
             return $response
                 ->setError()
                 ->setNextUrl(route('public.checkout.information', $token))
@@ -272,7 +273,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         $groupedProducts = $this->cartGroupByStore($products);
         $token = OrderHelper::getOrderSessionToken();
 
-        if (!$token) {
+        if (! $token) {
             $token = OrderHelper::getOrderSessionToken();
         }
 
@@ -281,7 +282,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         $results = collect([]);
         $couponCode = $request->input('coupon_code');
 
-        if (!$couponCode) {
+        if (! $couponCode) {
             $couponCode = session('applied_coupon_code');
         }
 
@@ -317,7 +318,7 @@ class OrderSupportServiceProvider extends ServiceProvider
                 Arr::set($sessionData, 'is_free_shipping', false);
             } else {
                 $discount = Arr::get($result, 'data.discount');
-                if ((!$discount->store_id || $discount->store_id == $storeId) &&
+                if ((! $discount->store_id || $discount->store_id == $storeId) &&
                     (Arr::get($result, 'data.is_free_shipping', false) || Arr::get($result, 'data.discount_amount'))) {
                     $successData = $result;
                     Arr::set($sessionData, 'applied_coupon_code', $couponCode);
@@ -343,14 +344,14 @@ class OrderSupportServiceProvider extends ServiceProvider
         $isFreeShipping = Arr::get($successData, 'data.is_free_shipping', false);
         $discountTypeOption = Arr::get($successData, 'data.discount_type_option');
 
-        if (!$isFreeShipping && !in_array($discountTypeOption, ['percentage', 'same-price'])) {
+        if (! $isFreeShipping && ! in_array($discountTypeOption, ['percentage', 'same-price'])) {
             $validRawTotals = 0;
 
             foreach ($groupedProducts as $storeId => $groupedProduct) {
                 $result = Arr::get($results, $storeId, []);
-                if (!Arr::get($result, 'error') && Arr::get($result, 'data.discount_amount')) {
+                if (! Arr::get($result, 'error') && Arr::get($result, 'data.discount_amount')) {
                     $discount = Arr::get($result, 'data.discount');
-                    if ($discount && (!$discount->store_id || $discount->store_id == $storeId)) {
+                    if ($discount && (! $discount->store_id || $discount->store_id == $storeId)) {
                         $cartItems = $groupedProduct['products']->pluck('cartItem');
                         $rawTotal = Cart::instance('cart')->rawTotalByItems($cartItems);
                         $validRawTotals += $rawTotal;
@@ -363,12 +364,12 @@ class OrderSupportServiceProvider extends ServiceProvider
                     $result = Arr::get($results, $storeId, []);
                     $sessionData = Arr::get($sessionMarketplaceData, $storeId, []);
                     $discountAmount = 0;
-                    if (Arr::get($result, 'error') || !Arr::get($result, 'data.discount_amount')) {
+                    if (Arr::get($result, 'error') || ! Arr::get($result, 'data.discount_amount')) {
                         Arr::set($sessionData, 'coupon_discount_amount', $discountAmount);
                         Arr::set($sessionData, 'applied_coupon_code', null);
                     } else {
                         $discount = Arr::get($result, 'data.discount');
-                        if ($discount && (!$discount->store_id || $discount->store_id == $storeId)) {
+                        if ($discount && (! $discount->store_id || $discount->store_id == $storeId)) {
                             $cartItems = $groupedProduct['products']->pluck('cartItem');
                             $rawTotal = Cart::instance('cart')->rawTotalByItems($cartItems);
                             $discountAmount = round($totalDiscountAmount / $validRawTotals * $rawTotal, 2);
@@ -431,11 +432,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         $couponCode = Arr::get($sessionStoreData, 'applied_coupon_code');
 
         $isAvailableShipping = EcommerceHelper::isAvailableShipping($products['products']);
-        $hasShippingMethod = $request->has("shipping_method.$storeId");
         $shippingMethodInput = $request->input("shipping_method.$storeId", ShippingMethodEnum::DEFAULT);
-        if (!$isAvailableShipping) {
-            $hasShippingMethod = false;
-        }
 
         $promotionDiscountAmount = $promotionService
             ->execute($token, compact('cartItems', 'rawTotal', 'countCart'), "marketplace.$storeId.");
@@ -449,7 +446,7 @@ class OrderSupportServiceProvider extends ServiceProvider
 
         $shippingData = [];
         $shippingMethod = [];
-        if ($hasShippingMethod) {
+        if ($isAvailableShipping) {
             $orderTotal = $rawTotal - $promotionDiscountAmount - $couponDiscountAmount;
 
             $shippingData = $this->getShippingData($sessionStoreData, $orderTotal, $products, $paymentMethod);
@@ -462,6 +459,12 @@ class OrderSupportServiceProvider extends ServiceProvider
                 );
 
             $shippingMethod = Arr::first($shippingMethodData);
+            if (! $shippingMethod) {
+                throw ValidationException::withMessages([
+                    'shipping_method.' . $storeId => trans('validation.exists', ['attribute' => trans('plugins/ecommerce::shipping.shipping_method')]),
+                ]);
+            }
+
             $shippingAmount = Arr::get($shippingMethod, 'price', 0);
 
             if (get_shipping_setting('free_ship', $shippingMethodInput)) {
@@ -472,7 +475,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         if ($couponCode) {
             $discount = $applyCouponService->getCouponData($couponCode, $sessionStoreData);
             if ($discount) {
-                if (!$discount->store_id || $discount->store_id == $storeId) {
+                if (! $discount->store_id || $discount->store_id == $storeId) {
                     $discounts->push($discount);
                     $shippingAmount = Arr::get($sessionStoreData, 'is_free_shipping') ? 0 : $shippingAmount;
                 }
@@ -489,8 +492,8 @@ class OrderSupportServiceProvider extends ServiceProvider
             'amount' => $orderAmount,
             'currency' => $request->input('currency', strtoupper(get_application_currency()->title)),
             'user_id' => $currentUserId,
-            'shipping_method' => $hasShippingMethod ? $shippingMethodInput : '',
-            'shipping_option' => $hasShippingMethod ? $request->input("shipping_option.$storeId") : null,
+            'shipping_method' => $isAvailableShipping ? $shippingMethodInput : '',
+            'shipping_option' => $isAvailableShipping ? $request->input("shipping_option.$storeId") : null,
             'shipping_amount' => (float)$shippingAmount,
             'tax_amount' => Cart::instance('cart')->rawTaxByItems($cartItems),
             'sub_total' => Cart::instance('cart')->rawSubTotalByItems($cartItems),
@@ -507,7 +510,7 @@ class OrderSupportServiceProvider extends ServiceProvider
             $order = $this->app->make(OrderInterface::class)->createOrUpdate($data);
         }
 
-        if ($hasShippingMethod) {
+        if ($isAvailableShipping) {
             app(ShipmentInterface::class)->createOrUpdate([
                 'order_id' => $order->id,
                 'user_id' => 0,
@@ -518,7 +521,9 @@ class OrderSupportServiceProvider extends ServiceProvider
                 'status' => ShippingStatusEnum::PENDING,
                 'price' => $order->shipping_amount,
                 'store_id' => $order->store_id,
-                'shipment_id' => $shippingData ? Arr::get($shippingMethod, 'id') : '',
+                'rate_id' => $shippingData ? Arr::get($shippingMethod, 'id', '') : '',
+                'shipment_id' => $shippingData ? Arr::get($shippingMethod, 'shipment_id', '') : '',
+                'shipping_company_name' => $shippingData ? Arr::get($shippingMethod, 'company_name') : '',
             ]);
         }
 
@@ -556,7 +561,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         if ($products['store'] && $products['store']->id) {
             $keys = ['name', 'company', 'address', 'country', 'state', 'city', 'zip_code', 'email', 'phone'];
             $origin = Arr::only($products['store']->toArray(), $keys);
-            if (!EcommerceHelper::isUsingInMultipleCountries()) {
+            if (! EcommerceHelper::isUsingInMultipleCountries()) {
                 $origin['country'] = EcommerceHelper::getFirstCountryId();
             }
         } else {
@@ -596,7 +601,7 @@ class OrderSupportServiceProvider extends ServiceProvider
             'token' => $token,
         ], ['address', 'products']);
 
-        if (!$orders->count()) {
+        if (! $orders->count()) {
             abort(404);
         }
 
@@ -624,7 +629,7 @@ class OrderSupportServiceProvider extends ServiceProvider
     {
         $token = session('tracked_start_checkout');
 
-        if (!$token) {
+        if (! $token) {
             return $response->setNextUrl(route('public.index'));
         }
 
@@ -809,15 +814,15 @@ class OrderSupportServiceProvider extends ServiceProvider
                     }
                 }
 
-                if (!$defaultShippingMethod) {
+                if (! $defaultShippingMethod) {
                     $defaultShippingMethod = old(
                         "shipping_method.$storeId",
                         Arr::get($vendorSessionData, 'shipping_method', Arr::first(array_keys($shipping)))
                     );
                 }
 
-                if (!empty($shipping)) {
-                    if (!$shippingHasValue) {
+                if (! empty($shipping)) {
+                    if (! $shippingHasValue) {
                         $shippingHasValue = $shipping;
                     }
 
@@ -845,11 +850,11 @@ class OrderSupportServiceProvider extends ServiceProvider
             OrderHelper::setOrderSessionData($token, $sessionCheckoutData);
 
             if ($couponCode) {
-                if (!$request->input('applied_coupon')) {
+                if (! $request->input('applied_coupon')) {
                     $discount = $applyCouponService->getCouponData($couponCode, $vendorSessionData);
 
                     if ($discount) {
-                        if (!$discount->store_id || $discount->store_id == $storeId) {
+                        if (! $discount->store_id || $discount->store_id == $storeId) {
                             $discounts->push($discount);
                             $shippingAmount = Arr::get($vendorSessionData, 'is_free_shipping') ? 0 : $shippingAmount;
                         }
@@ -859,7 +864,7 @@ class OrderSupportServiceProvider extends ServiceProvider
                 }
             }
 
-            if (!$isAvailableShipping) {
+            if (! $isAvailableShipping) {
                 $shippingAmount = 0;
             }
 
@@ -963,7 +968,7 @@ class OrderSupportServiceProvider extends ServiceProvider
             foreach ($mpSessionData as $storeId => $sessionStoreData) {
                 $discount = $this->app->make(HandleApplyCouponService::class)
                     ->getCouponData(session('applied_coupon_code'), $sessionStoreData);
-                if (!$discount) {
+                if (! $discount) {
                     $discounts->push($discount);
                     $prefix = "marketplace.$storeId.";
                     $this->app->make(HandleRemoveCouponService::class)->execute($prefix, false);
@@ -1004,7 +1009,7 @@ class OrderSupportServiceProvider extends ServiceProvider
                 'is_finished' => 0,
             ], ['address', 'products']);
 
-        if (!$orders->count()) {
+        if (! $orders->count()) {
             abort(404);
         }
 
@@ -1123,7 +1128,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         // Remove orders not exists pre checkout
         if ($preOrders) {
             foreach ($preOrders as $order) {
-                if (!in_array($order->store_id, $foundOrderIds)) {
+                if (! in_array($order->store_id, $foundOrderIds)) {
                     $order->delete();
                     if ($order->address && $order->address->id) {
                         $order->address->delete();
@@ -1273,7 +1278,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         if ($order->store->id && $order->store->customer->id) {
             $customer = $order->store->customer;
             $vendorInfo = $customer->vendorInfo;
-            if (!$vendorInfo->id) {
+            if (! $vendorInfo->id) {
                 $vendorInfo = $this->app->make(VendorInfoInterface::class)
                     ->createOrUpdate([
                         'customer_id' => $customer->id,
@@ -1283,7 +1288,7 @@ class OrderSupportServiceProvider extends ServiceProvider
             if ($vendorInfo->id) {
                 $revenue = $this->app->make(RevenueInterface::class)->getFirstBy(['order_id' => $order->id]);
                 $orderAmountWithoutShippingFee = $order->amount - $order->shipping_amount;
-                if (!MarketplaceHelper::isCommissionCategoryFeeBasedEnabled()) {
+                if (! MarketplaceHelper::isCommissionCategoryFeeBasedEnabled()) {
                     $feePercentage = MarketplaceHelper::getSetting('fee_per_order', 0);
                     $fee = $orderAmountWithoutShippingFee * ($feePercentage / 100);
                 } else {
@@ -1348,7 +1353,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         foreach ($orderProducts as $orderProduct) {
             $product = $orderProduct->product->original_product;
 
-            if (!$product) {
+            if (! $product) {
                 continue;
             }
 
@@ -1356,7 +1361,7 @@ class OrderSupportServiceProvider extends ServiceProvider
 
             $commissionFeePercentage = MarketplaceHelper::getSetting('fee_per_order', 0);
             $commissionSetting = CategoryCommission::whereIn('product_category_id', $listCategories)->orderBy('commission_percentage', 'desc')->first(); // lay commission setting cao nhat
-            if (!empty($commissionSetting)) {
+            if (! empty($commissionSetting)) {
                 $commissionFeePercentage = $commissionSetting->commission_percentage;
             }
 

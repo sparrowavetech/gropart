@@ -11,23 +11,16 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Theme;
 use Throwable;
+use Botble\Sms\Supports\SmsHandler;
+use Botble\Sms\Enums\SmsEnum;
 
 class MarketplaceHelper
 {
-    /**
-     * @param string $view
-     * @param array $data
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
-     */
     public function view(string $view, array $data = [])
     {
         return view($this->viewPath($view), $data);
     }
 
-    /**
-     * @param string $view
-     * @return string
-     */
     public function viewPath(string $view): string
     {
         $themeView = Theme::getThemeNamespace() . '::views.marketplace.' . $view;
@@ -39,63 +32,41 @@ class MarketplaceHelper
         return 'plugins/marketplace::themes.' . $view;
     }
 
-    /**
-     * @param string $key
-     * @param null $default
-     * @return string
-     */
-    public function getSetting($key, $default = '')
+    public function getSetting(string $key, string|array|null|bool $default = ''): string|array|null|bool
     {
         return setting($this->getSettingKey($key), $default);
     }
 
-    /**
-     * @param string $key
-     * @return string
-     */
-    public function getSettingKey($key = '')
+    public function getSettingKey(string $key = ''): string
     {
         return config('plugins.marketplace.general.prefix') . $key;
     }
 
-    /**
-     * @return array
-     */
     public function discountTypes(): array
     {
         return Arr::except(DiscountTypeOptionEnum::labels(), [DiscountTypeOptionEnum::SAME_PRICE]);
     }
 
-    /**
-     * @return string
-     */
     public function getAssetVersion(): string
     {
-        return '1.0.1';
+        return '1.1.0';
     }
 
-    /**
-     * @return bool
-     */
     public function hideStorePhoneNumber(): bool
     {
         return $this->getSetting('hide_store_phone_number', 0) == 1;
     }
 
-    /**
-     * @return bool
-     */
+    public function hideStoreEmail(): bool
+    {
+        return $this->getSetting('hide_store_email', 0) == 1;
+    }
+
     public function allowVendorManageShipping(): bool
     {
         return $this->getSetting('allow_vendor_manage_shipping', 0) == 1;
     }
 
-    /**
-     * @param Collection $orders
-     * @return Collection
-     * @throws FileNotFoundException
-     * @throws Throwable
-     */
     public function sendMailToVendorAfterProcessingOrder($orders)
     {
         if ($orders instanceof Collection) {
@@ -112,17 +83,23 @@ class MarketplaceHelper
                     $this->setEmailVendorVariables($order);
                     $mailer->sendUsingTemplate('store_new_order', $order->store->email);
                 }
+                if (is_plugin_active('sms') && $order->store->phone) {
+                    $sms = new  SmsHandler;
+                    $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+                    if ($sms->templateEnabled(SmsEnum::VENDOR_NEW_ORDER())) {
+                        self::setSmsVariables($order, $sms);
+                        $sms->sendUsingTemplate(
+                            SmsEnum::VENDOR_NEW_ORDER(),
+                            $order->store->phone
+                        );
+                    }
+                }
             }
         }
 
         return $orders;
     }
 
-    /**
-     * @param OrderModel $order
-     * @return \Botble\Base\Supports\EmailHandler
-     * @throws Throwable
-     */
     public function setEmailVendorVariables(OrderModel $order): \Botble\Base\Supports\EmailHandler
     {
         return EmailHandler::setModule(MARKETPLACE_MODULE_SCREEN_NAME)
@@ -180,6 +157,46 @@ class MarketplaceHelper
                     ->render(),
                 'enquiry_description'      => $enquiry->description,
                 'store_name'       => $enquiry->product->store->name,
+            ]);
+    }
+     /**
+     * @param EnquiryrModel $order
+     * @return \Botble\Base\Supports\EmailHandler
+     * @throws Throwable
+     */
+    public static function setSmsVendorVariablesForEnquiry(Enquiry $enquiry, SmsHandler $sms)
+    {
+        $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME)
+            ->setVariableValues([
+                'customer_name'    => $enquiry->name,
+                'customer_email'   => $enquiry->email,
+                'customer_phone'   => $enquiry->phone,
+                'customer_address' => $enquiry->address.', '.$enquiry->cityName->name.', '.$enquiry->stateName->name.', '.$enquiry->zip_code,
+                'enquiry_id'    => $enquiry->code,
+                'enquiry_description'  => $enquiry->description,
+                'store_name'       => $enquiry->product->store->name,
+            ]);
+
+        return $sms;
+    }
+
+    /**
+     * @param Order $order
+     *
+     * @return SmsHandler
+     * @throws Throwable
+     */
+    public function setSmsVariables(OrderModel $order, SmsHandler $sms)
+    {
+        $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME)
+            ->setVariableValues([
+                'customer_name' => $order->user->name ?: $order->address->name,
+                'customer_email' => $order->user->email ?: $order->address->email,
+                'customer_phone' => $order->user->phone ?: $order->address->phone,
+                'customer_address' => $order->full_address,
+                'shipping_method' => $order->shipping_method_name,
+                'payment_method' => $order->payment->payment_channel->label(),
+                'store_name' => $order->store->name,
             ]);
     }
 }

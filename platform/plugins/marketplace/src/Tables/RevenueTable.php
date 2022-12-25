@@ -7,46 +7,29 @@ use Botble\Marketplace\Repositories\Interfaces\RevenueInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
 use Yajra\DataTables\DataTables;
 
 class RevenueTable extends TableAbstract
 {
-    /**
-     * @var bool
-     */
     protected $hasActions = false;
 
-    /**
-     * @var bool
-     */
     protected $hasFilter = true;
 
-    /**
-     * @var bool
-     */
     protected $hasOperations = false;
 
-    /**
-     * @var bool
-     */
     protected $hasCheckbox = false;
 
-    /**
-     * RevenueTable constructor.
-     * @param DataTables $table
-     * @param UrlGenerator $urlGenerator
-     * @param RevenueInterface $revenueRepository
-     */
     public function __construct(DataTables $table, UrlGenerator $urlGenerator, RevenueInterface $revenueRepository)
     {
         $this->repository = $revenueRepository;
         parent::__construct($table, $urlGenerator);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
@@ -63,7 +46,7 @@ class RevenueTable extends TableAbstract
                 return format_price($item->fee);
             })
             ->editColumn('order_id', function ($item) {
-                if (!$item->order->id) {
+                if (! $item->order->id) {
                     return '&mdash;';
                 }
 
@@ -80,7 +63,7 @@ class RevenueTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
         $query = $this->repository->getModel()
             ->select([
@@ -101,9 +84,6 @@ class RevenueTable extends TableAbstract
         return $this->applyScopes($query);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function columns(): array
     {
         return [
@@ -143,9 +123,6 @@ class RevenueTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getDefaultButtons(): array
     {
         return [

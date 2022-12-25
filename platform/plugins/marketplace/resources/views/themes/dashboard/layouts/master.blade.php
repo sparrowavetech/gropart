@@ -17,10 +17,6 @@
     @yield('header', view(MarketplaceHelper::viewPath('dashboard.layouts.header')))
 
     <script>
-        $(function () {
-            window.vueApp.boot();
-        });
-
         window.siteUrl = "{{ route('public.index') }}";
     </script>
 
@@ -39,6 +35,8 @@
             }
         };
     </script>
+
+    @stack('header')
 </head>
 
 <body @if (BaseHelper::siteLanguageDirection() == 'rtl') dir="rtl" @endif>

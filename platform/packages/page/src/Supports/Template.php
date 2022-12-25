@@ -8,11 +8,9 @@ use Theme;
 class Template
 {
     /**
-     * @param array $templates
-     * @return void
      * @since 16-09-2016
      */
-    public static function registerPageTemplate(array $templates = [])
+    public static function registerPageTemplate(array $templates = []): void
     {
         $validTemplates = [];
         foreach ($templates as $key => $template) {
@@ -30,7 +28,6 @@ class Template
     }
 
     /**
-     * @return array
      * @since 16-09-2016
      */
     protected static function getExistsTemplate(): array
@@ -44,7 +41,6 @@ class Template
     }
 
     /**
-     * @return array
      * @since 16-09-2016
      */
     public static function getPageTemplates(): array

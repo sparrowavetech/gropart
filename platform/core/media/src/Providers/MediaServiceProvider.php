@@ -23,15 +23,17 @@ use Botble\Media\Repositories\Interfaces\MediaFileInterface;
 use Botble\Media\Repositories\Interfaces\MediaFolderInterface;
 use Botble\Media\Repositories\Interfaces\MediaSettingInterface;
 use Botble\Media\Storage\BunnyCDN\BunnyCDNAdapter;
-use Botble\Media\Storage\BunnyCDN\BunnyCDNStorage;
+use Botble\Media\Storage\BunnyCDN\BunnyCDNClient;
 use Botble\Setting\Supports\SettingStore;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Filesystem\AwsS3V3Adapter as IlluminateAwsS3V3Adapter;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
-use League\Flysystem\AwsS3v3\AwsS3Adapter;
+use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
 use League\Flysystem\Filesystem;
 use RvMedia;
 
@@ -80,8 +82,10 @@ class MediaServiceProvider extends ServiceProvider
             ->publishAssets();
 
         Storage::extend('wasabi', function ($app, $config) {
+            $config['url'] = 'https://' . $config['bucket'] . '.s3.' . $config['region'] . '.wasabisys.com/';
+
             $client = new S3Client([
-                'endpoint' => 'https://' . $config['bucket'] . '.s3.' . $config['region'] . '.wasabisys.com/',
+                'endpoint' => $config['url'],
                 'bucket_endpoint' => true,
                 'credentials' => [
                     'key' => $config['key'],
@@ -91,15 +95,31 @@ class MediaServiceProvider extends ServiceProvider
                 'version' => 'latest',
             ]);
 
-            $adapter = new AwsS3Adapter($client, $config['bucket'], $config['root']);
+            $adapter = new AwsS3V3Adapter($client, $config['bucket'], trim($config['root'], '/'));
 
-            return new Filesystem($adapter);
+            return new IlluminateAwsS3V3Adapter(
+                new Filesystem($adapter, $config),
+                $adapter,
+                $config,
+                $client,
+            );
         });
 
         Storage::extend('bunnycdn', function ($app, $config) {
-            $adapter = new BunnyCDNAdapter(new BunnyCDNStorage($config['zone'], $config['key'], $config['region']));
+            $adapter = new BunnyCDNAdapter(
+                new BunnyCDNClient(
+                    $config['storage_zone'],
+                    $config['api_key'],
+                    $config['region']
+                ),
+                'https://' . $config['hostname']
+            );
 
-            return new Filesystem($adapter);
+            return new FilesystemAdapter(
+                new Filesystem($adapter, $config),
+                $adapter,
+                $config
+            );
         });
 
         $config = $this->app->make('config');
@@ -138,9 +158,11 @@ class MediaServiceProvider extends ServiceProvider
             ],
             'filesystems.disks.bunnycdn' => [
                 'driver' => 'bunnycdn',
+                'visibility' => 'public',
                 'hostname' => $setting->get('media_bunnycdn_hostname'),
-                'zone' => $setting->get('media_bunnycdn_zone'),
-                'key' => $setting->get('media_bunnycdn_key'),
+                'storage_zone' => $setting->get('media_bunnycdn_zone'),
+                'url' => $setting->get('media_bunnycdn_pull_zone_url'),
+                'api_key' => $setting->get('media_bunnycdn_key'),
                 'region' => $setting->get('media_bunnycdn_region'),
             ],
             'core.media.media.chunk.enabled' => (bool)$setting->get(

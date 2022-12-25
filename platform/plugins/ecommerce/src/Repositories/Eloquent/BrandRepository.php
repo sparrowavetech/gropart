@@ -7,9 +7,6 @@ use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 
 class BrandRepository extends RepositoriesAbstract implements BrandInterface
 {
-    /**
-     * {@inheritDoc}
-     */
     public function getAll(array $condition = [])
     {
         $data = $this->model

@@ -17,22 +17,14 @@ use Botble\Location\Models\State;
 use Botble\Location\Repositories\Interfaces\StateInterface;
 use Botble\Location\Tables\StateTable;
 use Exception;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Contracts\View\View;
 use Throwable;
 
 class StateController extends BaseController
 {
-    /**
-     * @var StateInterface
-     */
-    protected $stateRepository;
+    protected StateInterface $stateRepository;
 
-    /**
-     * StateController constructor.
-     * @param StateInterface $stateRepository
-     */
     public function __construct(StateInterface $stateRepository)
     {
         $this->stateRepository = $stateRepository;
@@ -40,7 +32,7 @@ class StateController extends BaseController
 
     /**
      * @param StateTable $table
-     * @return JsonResponse|View
+     * @return \Illuminate\Contracts\View\Factory|\Symfony\Component\HttpFoundation\Response|View
      * @throws Throwable
      */
     public function index(StateTable $table)
@@ -172,7 +164,7 @@ class StateController extends BaseController
     {
         $keyword = $request->input('q');
 
-        if (!$keyword) {
+        if (! $keyword) {
             return $response->setData([]);
         }
 

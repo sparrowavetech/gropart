@@ -6,10 +6,7 @@ use Illuminate\Support\Facades\Facade;
 
 class WidgetGroupFacade extends Facade
 {
-    /**
-     * @return string
-     */
-    protected static function getFacadeAccessor()
+    protected static function getFacadeAccessor(): string
     {
         return 'botble.widget-group-collection';
     }

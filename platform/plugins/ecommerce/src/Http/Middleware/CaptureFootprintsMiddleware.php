@@ -10,15 +10,9 @@ use Botble\Ecommerce\Services\Footprints\TrackingLoggerInterface;
 
 class CaptureFootprintsMiddleware
 {
-    /**
-     * @var TrackingFilterInterface
-     */
-    protected $filter;
+    protected TrackingFilterInterface $filter;
 
-    /**
-     * @var TrackingLoggerInterface
-     */
-    protected $logger;
+    protected TrackingLoggerInterface $logger;
 
     public function __construct(TrackingFilterInterface $filter, TrackingLoggerInterface $logger)
     {
@@ -26,14 +20,6 @@ class CaptureFootprintsMiddleware
         $this->logger = $logger;
     }
 
-    /**
-     * Handle an incoming request.
-     *
-     * @param Request $request
-     * @param Closure $next
-     *
-     * @return mixed
-     */
     public function handle(Request $request, Closure $next)
     {
         if ($this->filter->shouldTrack($request)) {

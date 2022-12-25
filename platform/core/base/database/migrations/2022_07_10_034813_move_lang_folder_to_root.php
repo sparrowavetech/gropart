@@ -3,24 +3,14 @@
 use Illuminate\Database\Migrations\Migration;
 
 return new class () extends Migration {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         if (File::isDirectory(resource_path('lang'))) {
             File::moveDirectory(resource_path('lang'), base_path('lang'));
         }
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         //
     }

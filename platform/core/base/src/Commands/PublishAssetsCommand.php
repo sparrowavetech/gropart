@@ -3,27 +3,12 @@
 namespace Botble\Base\Commands;
 
 use Illuminate\Console\Command;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+#[AsCommand('cms:publish:assets', 'Publish assets (CSS, JS, Images...)')]
 class PublishAssetsCommand extends Command
 {
-    /**
-     * The console command signature.
-     *
-     * @var string
-     */
-    protected $signature = 'cms:publish:assets';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Publish assets (CSS, JS, Images...)';
-
-    /**
-     * Execute the console command.
-     */
-    public function handle()
+    public function handle(): int
     {
         $this->info('Publishing core, packages, plugins assets...');
         $this->call('vendor:publish', ['--tag' => 'cms-public', '--force' => true]);
@@ -34,5 +19,7 @@ class PublishAssetsCommand extends Command
         }
 
         $this->info('Published assets successfully!');
+
+        return self::SUCCESS;
     }
 }

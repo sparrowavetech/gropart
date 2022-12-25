@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Enums;
 
 use Botble\Base\Supports\Enum;
 use Html;
+use Illuminate\Support\HtmlString;
 
 /**
  * @method static ShippingStatusEnum NOT_APPROVED()
@@ -38,71 +39,58 @@ class ShippingStatusEnum extends Enum
     public const AUDITED = 'audited';
     public const CANCELED = 'canceled';
 
-    /**
-     * @var string
-     */
     public static $langPath = 'plugins/ecommerce::shipping.statuses';
 
-    /**
-     * @return string
-     */
-    public function toHtml()
+    public function toHtml(): HtmlString|string
     {
-        switch ($this->value) {
-            case self::NOT_APPROVED:
-                return Html::tag('span', self::NOT_APPROVED()->label(), ['class' => 'label-warning status-label'])
-                    ->toHtml();
-
-            case self::APPROVED:
-                return Html::tag('span', self::APPROVED()->label(), ['class' => 'label-warning status-label'])
-                    ->toHtml();
-
-            case self::PENDING:
-                return Html::tag('span', self::PENDING()->label(), ['class' => 'label-warning status-label'])
-                    ->toHtml();
-
-            case self::PICKING:
-                return Html::tag('span', self::PICKING()->label(), ['class' => 'label-info status-label'])
-                    ->toHtml();
-
-            case self::DELAY_PICKING:
-                return Html::tag('span', self::DELAY_PICKING()->label(), ['class' => 'label-warning status-label'])
-                    ->toHtml();
-
-            case self::NOT_PICKED:
-                return Html::tag('span', self::NOT_PICKED()->label(), ['class' => 'label-danger status-label'])
-                    ->toHtml();
-
-            case self::ARRANGE_SHIPMENT:
-                return Html::tag('span', self::ARRANGE_SHIPMENT()->label(), ['class' => 'label-info status-label'])
-                    ->toHtml();
-
-            case self::READY_TO_BE_SHIPPED_OUT:
-                return Html::tag('span', self::READY_TO_BE_SHIPPED_OUT()->label(), ['class' => 'label-info status-label'])
-                    ->toHtml();
-
-            case self::DELIVERING:
-                return Html::tag('span', self::DELIVERING()->label(), ['class' => 'label-info status-label'])
-                    ->toHtml();
-
-            case self::DELIVERED:
-                return Html::tag('span', self::DELIVERED()->label(), ['class' => 'label-success status-label'])
-                    ->toHtml();
-
-            case self::AUDITED:
-                return Html::tag('span', self::AUDITED()->label(), ['class' => 'label-success status-label'])
-                    ->toHtml();
-
-            case self::NOT_DELIVERED:
-                return Html::tag('span', self::NOT_DELIVERED()->label(), ['class' => 'label-danger status-label'])
-                    ->toHtml();
-
-            case self::CANCELED:
-                return Html::tag('span', self::CANCELED()->label(), ['class' => 'label-danger status-label'])
-                    ->toHtml();
-
-            default:
-                return parent::toHtml();
-        }
+        return match ($this->value) {
+            self::NOT_APPROVED => Html::tag(
+                'span',
+                self::NOT_APPROVED()->label(),
+                ['class' => 'label-warning status-label']
+            )
+                ->toHtml(),
+            self::APPROVED => Html::tag('span', self::APPROVED()->label(), ['class' => 'label-warning status-label'])
+                ->toHtml(),
+            self::PENDING => Html::tag('span', self::PENDING()->label(), ['class' => 'label-warning status-label'])
+                ->toHtml(),
+            self::PICKING => Html::tag('span', self::PICKING()->label(), ['class' => 'label-info status-label'])
+                ->toHtml(),
+            self::DELAY_PICKING => Html::tag(
+                'span',
+                self::DELAY_PICKING()->label(),
+                ['class' => 'label-warning status-label']
+            )
+                ->toHtml(),
+            self::NOT_PICKED => Html::tag('span', self::NOT_PICKED()->label(), ['class' => 'label-danger status-label'])
+                ->toHtml(),
+            self::ARRANGE_SHIPMENT => Html::tag(
+                'span',
+                self::ARRANGE_SHIPMENT()->label(),
+                ['class' => 'label-info status-label']
+            )
+                ->toHtml(),
+            self::READY_TO_BE_SHIPPED_OUT => Html::tag(
+                'span',
+                self::READY_TO_BE_SHIPPED_OUT()->label(),
+                ['class' => 'label-info status-label']
+            )
+                ->toHtml(),
+            self::DELIVERING => Html::tag('span', self::DELIVERING()->label(), ['class' => 'label-info status-label'])
+                ->toHtml(),
+            self::DELIVERED => Html::tag('span', self::DELIVERED()->label(), ['class' => 'label-success status-label'])
+                ->toHtml(),
+            self::AUDITED => Html::tag('span', self::AUDITED()->label(), ['class' => 'label-success status-label'])
+                ->toHtml(),
+            self::NOT_DELIVERED => Html::tag(
+                'span',
+                self::NOT_DELIVERED()->label(),
+                ['class' => 'label-danger status-label']
+            )
+                ->toHtml(),
+            self::CANCELED => Html::tag('span', self::CANCELED()->label(), ['class' => 'label-danger status-label'])
+                ->toHtml(),
+            default => parent::toHtml(),
+        };
     }
 }

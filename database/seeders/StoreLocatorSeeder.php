@@ -8,24 +8,19 @@ use Illuminate\Database\Seeder;
 
 class StoreLocatorSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
         StoreLocator::truncate();
 
         $storeLocator = StoreLocator::create([
-            'name'                 => 'Farmart',
-            'email'                => 'sales@botble.com',
-            'phone'                => '1800979769',
-            'address'              => '502 New Street',
-            'state'                => 'Brighton VIC',
-            'city'                 => 'Brighton VIC',
-            'country'              => 'AU',
-            'is_primary'           => 1,
+            'name' => 'Farmart',
+            'email' => 'sales@botble.com',
+            'phone' => '1800979769',
+            'address' => '502 New Street',
+            'state' => 'Brighton VIC',
+            'city' => 'Brighton VIC',
+            'country' => 'AU',
+            'is_primary' => 1,
             'is_shipping_location' => 1,
         ]);
 
@@ -40,27 +35,27 @@ class StoreLocatorSeeder extends Seeder
 
         Setting::insertOrIgnore([
             [
-                'key'   => 'ecommerce_store_name',
+                'key' => 'ecommerce_store_name',
                 'value' => $storeLocator->name,
             ],
             [
-                'key'   => 'ecommerce_store_phone',
+                'key' => 'ecommerce_store_phone',
                 'value' => $storeLocator->phone,
             ],
             [
-                'key'   => 'ecommerce_store_address',
+                'key' => 'ecommerce_store_address',
                 'value' => $storeLocator->address,
             ],
             [
-                'key'   => 'ecommerce_store_state',
+                'key' => 'ecommerce_store_state',
                 'value' => $storeLocator->state,
             ],
             [
-                'key'   => 'ecommerce_store_city',
+                'key' => 'ecommerce_store_city',
                 'value' => $storeLocator->city,
             ],
             [
-                'key'   => 'ecommerce_store_country',
+                'key' => 'ecommerce_store_country',
                 'value' => $storeLocator->country,
             ],
         ]);

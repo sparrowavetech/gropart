@@ -12,6 +12,8 @@ return new class () extends Migration {
      */
     public function up()
     {
+        Schema::dropIfExists('mp_category_sale_commissions');
+
         Schema::create('mp_category_sale_commissions', function (Blueprint $table) {
             $table->id();
             $table->integer('product_category_id')->unsigned()->unique();

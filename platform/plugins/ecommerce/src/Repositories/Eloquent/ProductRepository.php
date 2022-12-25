@@ -11,9 +11,7 @@ use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 use Carbon\Carbon;
 use EcommerceHelper;
-use Eloquent;
 use Exception;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Arr;
@@ -22,9 +20,6 @@ use Language;
 
 class ProductRepository extends RepositoriesAbstract implements ProductInterface
 {
-    /**
-     * {@inheritDoc}
-     */
     public function getSearch($keyword, $paginate = 10)
     {
         return $this->filterProducts([
@@ -36,17 +31,11 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
         ]);
     }
 
-    /**
-     * @return Eloquent|\Illuminate\Database\Eloquent\Builder|Model
-     */
     protected function exceptOutOfStockProducts()
     {
         return $this->model->notOutOfStock();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getRelatedProductAttributes($product)
     {
         try {
@@ -68,14 +57,11 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
                 ->distinct();
 
             return $this->applyBeforeExecuteQuery($data)->get();
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return collect([]);
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getProducts(array $params)
     {
         $params = array_merge([
@@ -100,9 +86,6 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
         return $this->filterProducts([], $params);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getProductsWithCategory(array $params)
     {
         $params = array_merge([
@@ -138,9 +121,6 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
         return $this->filterProducts($filters, $params);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getOnSaleProducts(array $params)
     {
         $this->model = $this->originalModel;
@@ -210,9 +190,6 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
         return $this->advancedGet($params);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getProductVariations($configurableProductId, array $params = [])
     {
         $this->model = $this->model
@@ -243,9 +220,6 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
         return $this->advancedGet($params);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getProductsByCollections(array $params)
     {
         $params = array_merge([
@@ -280,9 +254,6 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
         return $this->filterProducts($filters, $params);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getProductByBrands(array $params)
     {
         $params = array_merge([
@@ -315,9 +286,6 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
         return $this->filterProducts($filters, $params);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getProductsByCategories(array $params)
     {
         $params = array_merge([
@@ -352,9 +320,6 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
         return $this->filterProducts($filters, $params);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getProductByTags(array $params)
     {
         $params = array_merge([
@@ -389,9 +354,6 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
         return $this->filterProducts($filters, $params);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function filterProducts(array $filters, array $params = [])
     {
         $filters = array_merge([
@@ -408,11 +370,11 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
 
         $isUsingDefaultCurrency = get_application_currency_id() == cms_currency()->getDefaultCurrency()->id;
 
-        if ($filters['min_price'] && !$isUsingDefaultCurrency) {
+        if ($filters['min_price'] && ! $isUsingDefaultCurrency) {
             $filters['min_price'] = (float)$filters['min_price'] / get_current_exchange_rate();
         }
 
-        if ($filters['max_price'] && !$isUsingDefaultCurrency) {
+        if ($filters['max_price'] && ! $isUsingDefaultCurrency) {
             $filters['max_price'] = (float)$filters['max_price'] / get_current_exchange_rate();
         }
 
@@ -721,16 +683,13 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
                 );
         }
 
-        if (!Arr::get($params, 'include_out_of_stock_products')) {
+        if (! Arr::get($params, 'include_out_of_stock_products')) {
             $this->exceptOutOfStockProducts();
         }
 
         return $this->advancedGet($params);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getProductsByIds(array $ids, array $params = [])
     {
         $this->model = $this->originalModel;
@@ -751,7 +710,7 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
 
         if (config('database.default') == 'mysql') {
             $idsOrdered = implode(',', $ids);
-            if (!empty($idsOrdered)) {
+            if (! empty($idsOrdered)) {
                 $this->model = $this->model->orderByRaw("FIELD(id, $idsOrdered)");
             }
         }
@@ -759,9 +718,6 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
         return $this->advancedGet($params);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getProductsWishlist(int $customerId, array $params = [])
     {
         $this->model = $this->originalModel;
@@ -787,9 +743,6 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
         return $this->advancedGet($params);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getProductsRecentlyViewed(int $customerId, array $params = [])
     {
         $this->model = $this->originalModel;
@@ -815,11 +768,6 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
         return $this->advancedGet($params);
     }
 
-    /**
-     * @param array $options
-     * @param Product $product
-     * @throws Exception
-     */
     public function saveProductOptions(array $options, Product $product)
     {
         try {
@@ -828,7 +776,7 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
                 if (isset($opt['id']) && intval($opt['id']) > 0) {
                     $option = Option::find($opt['id']);
 
-                    if (!$option) {
+                    if (! $option) {
                         $option = new Option();
                     }
 
@@ -837,42 +785,42 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
                     $option = new Option();
                 }
 
-                $option->product_id = $product->id;
                 $opt['required'] = isset($opt['required']) && $opt['required'] === 'on';
                 $option->fill($opt);
                 $option->product_id = $product->id;
                 $option->save();
                 $option->values()->delete();
-                if (!empty($opt['values'])) {
+                if (! empty($opt['values'])) {
                     $optionValues = $this->formatOptionValue($opt['values']);
                     $option->values()->saveMany($optionValues);
                 }
                 $existsOptionIds[] = $option->id;
             }
 
-            if (!empty($existsOptionIds)) {
-                Option::whereNotIn('id', $existsOptionIds)->delete();
-                OptionValue::whereNotIn('option_id', $existsOptionIds)->delete();
+            if (! empty($existsOptionIds)) {
+                Option::whereNotIn('id', $existsOptionIds)
+                    ->where('product_id', $product->id)
+                    ->delete();
+
+                OptionValue::whereNotIn('option_id', $existsOptionIds)
+                    ->where('product_id', $product->id)
+                    ->delete();
             } else {
                 foreach ($product->options()->get() as $option) {
                     $option->delete();
                 }
             }
         } catch (Exception $exception) {
-            throw new Exception($exception->getMessage());
+            info($exception->getMessage());
         }
     }
 
-    /**
-     * @param array $options
-     * @return array
-     */
     protected function formatOptionValue(array $options): array
     {
         $values = [];
         foreach ($options as $value) {
             $optionValue = new OptionValue();
-            if (!isset($value['option_value'])) {
+            if (! isset($value['option_value'])) {
                 $value['option_value'] = '';
             }
             $optionValue->fill($value);

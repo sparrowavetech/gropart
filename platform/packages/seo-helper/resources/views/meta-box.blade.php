@@ -1,5 +1,5 @@
-<a href="#" class="btn-trigger-show-seo-detail">{{ trans('packages/seo-helper::seo-helper.edit_seo_meta') }}</a>
-<div class="seo-preview">
+<a href="#" class="btn-trigger-show-seo-detail" v-pre>{{ trans('packages/seo-helper::seo-helper.edit_seo_meta') }}</a>
+<div class="seo-preview" v-pre>
     <p class="default-seo-description @if (!empty($object->id)) hidden @endif">{{ trans('packages/seo-helper::seo-helper.default_description') }}</p>
     <div class="existed-seo-meta @if (empty($object->id)) hidden @endif">
         <span class="page-title-seo">
@@ -20,7 +20,7 @@
 </div>
 
 
-<div class="seo-edit-section hidden">
+<div class="seo-edit-section hidden" v-pre>
     <hr>
     <div class="form-group mb-3">
         <label for="seo_title" class="control-label">{{ trans('packages/seo-helper::seo-helper.seo_title') }}</label>

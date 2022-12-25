@@ -29,9 +29,6 @@ use ProductCategoryHelper;
 
 class ProductForm extends FormAbstract
 {
-    /**
-     * {@inheritDoc}
-     */
     public function buildForm()
     {
         Assets::addStyles(['datetimepicker'])
@@ -66,7 +63,10 @@ class ProductForm extends FormAbstract
             $productId = $this->getModel()->id;
 
             $selectedCategories = $this->getModel()->categories()->pluck('category_id')->all();
-            $selectedProductCollections = $this->getModel()->productCollections()->pluck('product_collection_id')->all();
+            $selectedProductCollections = $this->getModel()
+                ->productCollections()
+                ->pluck('product_collection_id')
+                ->all();
             $selectedProductLabels = $this->getModel()->productLabels()->pluck('product_label_id')->all();
             $productVariations = app(ProductVariationInterface::class)->allBy([
                 'configurable_product_id' => $productId,
@@ -134,8 +134,8 @@ class ProductForm extends FormAbstract
                 'choices' => BaseStatusEnum::labels(),
             ])
             ->add('is_featured', 'onOff', [
-                'label'         => trans('core/base::forms.is_featured'),
-                'label_attr'    => ['class' => 'control-label'],
+                'label' => trans('core/base::forms.is_featured'),
+                'label_attr' => ['class' => 'control-label'],
                 'default_value' => false,
             ])
             ->add('is_enquiry', 'onOff', [
@@ -172,14 +172,20 @@ class ProductForm extends FormAbstract
             ]);
 
         if (EcommerceHelper::isTaxEnabled()) {
-            $taxes = app(TaxInterface::class)->pluck('title', 'id');
+            $taxes = app(TaxInterface::class)->all()->pluck('title_with_percentage', 'id');
 
-            $taxes = [0 => trans('plugins/ecommerce::tax.select_tax')] + $taxes;
+            $selectedTaxes = [];
+            if ($this->getModel() && $this->getModel()->id) {
+                $selectedTaxes = $this->getModel()->taxes()->pluck('tax_id')->all();
+            } elseif ($defaultTaxRate = get_ecommerce_setting('default_tax_rate')) {
+                $selectedTaxes = [$defaultTaxRate];
+            }
 
-            $this->add('tax_id', 'customSelect', [
-                'label' => trans('plugins/ecommerce::products.form.tax'),
+            $this->add('taxes[]', 'multiCheckList', [
+                'label' => trans('plugins/ecommerce::products.form.taxes'),
                 'label_attr' => ['class' => 'control-label'],
                 'choices' => $taxes,
+                'value' => old('taxes', $selectedTaxes),
             ]);
         }
 
@@ -193,22 +199,21 @@ class ProductForm extends FormAbstract
                     'data-url' => route('product-tag.all'),
                 ],
             ])
-            ->setBreakFieldPoint('status');
-
-        /**
-         * Product option
-         */
-        $this->addMetaBoxes([
-            'options' => [
-                'title' => trans('plugins/ecommerce::product-option.name'),
-                'content' => view('plugins/ecommerce::products.partials.product-option-form', [
-                    'options' => GlobalOptionEnum::options(),
-                    'globalOptions' => app(GlobalOptionInterface::class)->pluck('name', 'id'),
-                    'product' => $this->getModel()->toArray(),
-                ]),
-                'priority' => 4,
-            ],
-        ]);
+            ->setBreakFieldPoint('status')
+            ->addMetaBoxes([
+                'options' => [
+                    'title' => trans('plugins/ecommerce::product-option.name'),
+                    'content' => view('plugins/ecommerce::products.partials.product-option-form', [
+                        'options' => GlobalOptionEnum::options(),
+                        'globalOptions' => app(GlobalOptionInterface::class)->pluck('name', 'id'),
+                        'product' => $this->getModel(),
+                        'routes' => [
+                            'ajax_option_info' => route('global-option.ajaxInfo'),
+                        ],
+                    ]),
+                    'priority' => 4,
+                ],
+            ]);
 
         if (empty($productVariations) || $productVariations->isEmpty()) {
             $attributeSetId = $productAttributeSets->first() ? $productAttributeSets->first()->id : 0;
@@ -271,10 +276,7 @@ class ProductForm extends FormAbstract
         }
     }
 
-    /**
-     * @return Collection
-     */
-    public function getProductAttributes($attributeSetId)
+    public function getProductAttributes(?int $attributeSetId): Collection
     {
         $params = ['order_by' => ['order' => 'ASC']];
 

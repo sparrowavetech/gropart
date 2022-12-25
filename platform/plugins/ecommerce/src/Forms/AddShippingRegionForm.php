@@ -10,9 +10,6 @@ use EcommerceHelper;
 
 class AddShippingRegionForm extends FormAbstract
 {
-    /**
-     * {@inheritDoc}
-     */
     public function buildForm()
     {
         $existedCountries = app(ShippingInterface::class)->pluck('country');

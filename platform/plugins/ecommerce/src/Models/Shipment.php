@@ -14,19 +14,14 @@ class Shipment extends BaseModel
 {
     use EnumCastable;
 
-    /**
-     * @var string
-     */
     protected $table = 'ec_shipments';
 
-    /**
-     * @var array
-     */
     protected $fillable = [
         'order_id',
         'user_id',
         'weight',
         'shipment_id',
+        'rate_id',
         'note',
         'status',
         'cod_amount',
@@ -41,22 +36,12 @@ class Shipment extends BaseModel
         'date_shipped',
     ];
 
-    /**
-     * @var array
-     */
-    protected $dates = [
-        'created_at',
-        'updated_at',
-        'estimate_date_shipped',
-        'date_shipped',
-    ];
-
-    /**
-     * @var array
-     */
     protected $casts = [
         'status' => ShippingStatusEnum::class,
         'cod_status' => ShippingCodStatusEnum::class,
+        'metadata' => 'json',
+        'estimate_date_shipped' => 'datetime',
+        'date_shipped' => 'datetime',
     ];
 
     protected static function boot()

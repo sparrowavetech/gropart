@@ -1104,11 +1104,7 @@ $(document).ready(function () {
         $('.icon-select').each(function (index, el) {
             let value = $(el).children('option:selected').val();
 
-            let options = '';
-
-            if (!value) {
-                options = '<option value="">&nbsp;</option>';
-            }
+            let options = '<option value="">' + $(el).data('empty') + '</option>';
 
             icons.forEach(function (value) {
                 options += '<option value="' + value + '">' + value + '</option>';

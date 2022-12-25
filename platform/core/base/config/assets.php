@@ -18,7 +18,6 @@ return [
         'cookie',
         'core',
         'app',
-        'vue-app',
         'bootstrap',
         'toastr',
         'pace',

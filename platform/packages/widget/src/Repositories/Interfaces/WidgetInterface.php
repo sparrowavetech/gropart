@@ -3,13 +3,9 @@
 namespace Botble\Widget\Repositories\Interfaces;
 
 use Botble\Support\Repositories\Interfaces\RepositoryInterface;
+use Illuminate\Database\Eloquent\Collection;
 
 interface WidgetInterface extends RepositoryInterface
 {
-    /**
-     * Get all theme widgets
-     * @param string $theme
-     * @return mixed
-     */
-    public function getByTheme($theme);
+    public function getByTheme(string $theme): Collection;
 }

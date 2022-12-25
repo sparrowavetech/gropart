@@ -7,12 +7,7 @@ use Exception;
 
 class PriorityLanguageAdvancedPluginListener
 {
-    /**
-     * Handle the event.
-     *
-     * @return void
-     */
-    public function handle()
+    public function handle(): void
     {
         try {
             Plugin::activated();

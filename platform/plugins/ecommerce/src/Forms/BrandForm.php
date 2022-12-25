@@ -9,9 +9,6 @@ use Botble\Ecommerce\Models\Brand;
 
 class BrandForm extends FormAbstract
 {
-    /**
-     * {@inheritDoc}
-     */
     public function buildForm()
     {
         $this

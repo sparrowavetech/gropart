@@ -11,14 +11,8 @@ class Review extends BaseModel
 {
     use EnumCastable;
 
-    /**
-     * @var string
-     */
     protected $table = 'ec_reviews';
 
-    /**
-     * @var array
-     */
     protected $fillable = [
         'product_id',
         'customer_id',
@@ -28,9 +22,6 @@ class Review extends BaseModel
         'images',
     ];
 
-    /**
-     * @var array
-     */
     protected $casts = [
         'status' => BaseStatusEnum::class,
         'images' => 'array',
@@ -61,13 +52,13 @@ class Review extends BaseModel
         parent::boot();
 
         self::creating(function (Review $review) {
-            if (!$review->images || !is_array($review->images) || !count($review->images)) {
+            if (! $review->images || ! is_array($review->images) || ! count($review->images)) {
                 $review->images = null;
             }
         });
 
         self::updating(function (Review $review) {
-            if (!$review->images || !is_array($review->images) || !count($review->images)) {
+            if (! $review->images || ! is_array($review->images) || ! count($review->images)) {
                 $review->images = null;
             }
         });

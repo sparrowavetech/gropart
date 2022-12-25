@@ -94,7 +94,7 @@ app()->booted(function () {
                 } elseif (Route::currentRouteName() == 'marketplace.vendor.settings.post') {
                     if ($request->hasFile('background_input')) {
                         $result = RvMedia::handleUpload($request->file('background_input'), 0, 'stores');
-                        if (!$result['error']) {
+                        if (! $result['error']) {
                             $file = $result['data'];
                             MetaBox::saveMetaBoxData($object, 'background', $file->url);
                         }
@@ -154,7 +154,7 @@ Form::component('themeIcon', Theme::getThemeNamespace() . '::partials.forms.icon
 ]);
 
 add_filter('form_custom_fields', function (FormAbstract $form, FormHelper $formHelper) {
-    if (!$formHelper->hasCustomField('themeIcon')) {
+    if (! $formHelper->hasCustomField('themeIcon')) {
         $form->addCustomField('themeIcon', ThemeIconField::class);
     }
 
@@ -164,6 +164,7 @@ add_filter('form_custom_fields', function (FormAbstract $form, FormHelper $formH
 add_filter(BASE_FILTER_BEFORE_RENDER_FORM, function ($form, $data) {
     if (get_class($data) == SimpleSliderItem::class) {
         $form
+            ->remove('description')
             ->addAfter('image', 'tablet_image', 'mediaImage', [
                 'label' => __('Tablet Image'),
                 'label_attr' => ['class' => 'control-label'],
@@ -185,7 +186,7 @@ add_filter(BASE_FILTER_BEFORE_RENDER_FORM, function ($form, $data) {
     return $form;
 }, 127, 3);
 
-if (!function_exists('theme_get_autoplay_speed_options')) {
+if (! function_exists('theme_get_autoplay_speed_options')) {
     /**
      * @return int[]
      */
@@ -215,7 +216,7 @@ add_action('init', function () {
     ], 'themes');
 }, 125);
 
-if (!function_exists('get_store_list_layouts')) {
+if (! function_exists('get_store_list_layouts')) {
     /**
      * @return string[]
      */

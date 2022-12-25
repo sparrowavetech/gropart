@@ -457,7 +457,7 @@ class Botble {
                     groupSeparator: $(element).data('thousands-separator') ?? ',',
                     radixPoint: $(element).data('decimal-separator') ?? '.',
                     digitsOptional: true,
-                    placeholder: '0',
+                    placeholder: $(element).data('placeholder') ?? '0',
                     autoGroup: true,
                     autoUnmask: true,
                     removeMaskOnSubmit: true,
@@ -532,7 +532,7 @@ class Botble {
         }
 
         if (jQuery().areYouSure) {
-            $('form').areYouSure();
+            $('form.dirty-check').areYouSure();
         }
 
         Botble.initDatePicker('.datepicker');

@@ -8,9 +8,6 @@ use Botble\SimpleSlider\Models\SimpleSliderItem;
 
 class SimpleSliderItemForm extends FormAbstract
 {
-    /**
-     * {@inheritDoc}
-     */
     public function buildForm()
     {
         $this

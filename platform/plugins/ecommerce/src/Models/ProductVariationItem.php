@@ -8,22 +8,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProductVariationItem extends BaseModel
 {
-    /**
-     * @var string
-     */
     protected $table = 'ec_product_variation_items';
 
-    /**
-     * @var array
-     */
     protected $fillable = [
         'attribute_id',
         'variation_id',
     ];
 
-    /**
-     * @var bool
-     */
     public $timestamps = false;
 
     public function productVariation(): BelongsTo

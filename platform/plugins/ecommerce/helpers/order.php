@@ -1,6 +1,6 @@
 <?php
 
-if (!function_exists('render_cart_form')) {
+if (! function_exists('render_cart_form')) {
     /**
      * @return string
      * @throws Throwable
@@ -11,7 +11,7 @@ if (!function_exists('render_cart_form')) {
     }
 }
 
-if (!function_exists('get_order_code')) {
+if (! function_exists('get_order_code')) {
     /**
      * @param int $orderId
      * @return string
@@ -25,7 +25,7 @@ if (!function_exists('get_order_code')) {
     }
 }
 
-if (!function_exists('get_order_id_from_order_code')) {
+if (! function_exists('get_order_id_from_order_code')) {
     /**
      * @param string $code
      * @return int
@@ -45,7 +45,7 @@ if (!function_exists('get_order_id_from_order_code')) {
     }
 }
 
-if (!function_exists('get_enquiry_code')) {
+if (! function_exists('get_enquiry_code')) {
     /**
      * @param int $enquiryId
      * @return string

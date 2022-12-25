@@ -30,4 +30,7 @@ return [
     'deactivated_already' => 'This plugin is deactivated already!',
     'folder_is_not_writeable' => 'Cannot write files! Folder :name is not writable. Please chmod to make it writable!',
     'plugin_is_not_ready' => 'Plugin :name is not ready to use',
+    'plugins_installed' => 'Installed Plugins',
+    'plugins_add_new' => 'Add new',
+    'update' => 'Update',
 ];

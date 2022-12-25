@@ -5,6 +5,10 @@ namespace Botble\Marketplace\Tables;
 use BaseHelper;
 use Botble\Ecommerce\Repositories\Interfaces\OrderReturnInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderReturnItemInterface;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
 use MarketplaceHelper;
 use Botble\Table\Abstracts\TableAbstract;
 use Illuminate\Contracts\Routing\UrlGenerator;
@@ -12,28 +16,12 @@ use Yajra\DataTables\DataTables;
 
 class OrderReturnTable extends TableAbstract
 {
-    /**
-     * @var bool
-     */
     protected $hasActions = true;
 
-    /**
-     * @var bool
-     */
     protected $hasFilter = true;
 
-    /**
-     * @var OrderReturnItemInterface
-     */
-    protected $orderReturnItemRepository;
+    protected OrderReturnItemInterface $orderReturnItemRepository;
 
-    /**
-     * OrderTable constructor.
-     * @param DataTables $table
-     * @param UrlGenerator $urlGenerator
-     * @param OrderReturnInterface $orderReturnRepository
-     * @param OrderReturnItemInterface $orderReturnItemRepository
-     */
     public function __construct(DataTables $table, UrlGenerator $urlGenerator, OrderReturnInterface $orderReturnRepository, OrderReturnItemInterface $orderReturnItemRepository)
     {
         parent::__construct($table, $urlGenerator);
@@ -42,10 +30,7 @@ class OrderReturnTable extends TableAbstract
         $this->orderReturnItemRepository = $orderReturnItemRepository;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
@@ -62,7 +47,7 @@ class OrderReturnTable extends TableAbstract
                 return BaseHelper::clean($item->order->code);
             })
             ->editColumn('user_id', function ($item) {
-                if (!$item->customer->name) {
+                if (! $item->customer->name) {
                     return '&mdash;';
                 }
 
@@ -99,10 +84,7 @@ class OrderReturnTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    /**
-     * @return mixed
-     */
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
         $query = $this->repository->getModel()
             ->select([
@@ -121,9 +103,6 @@ class OrderReturnTable extends TableAbstract
         return $this->applyScopes($query);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function columns(): array
     {
         return [
@@ -156,9 +135,6 @@ class OrderReturnTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getDefaultButtons(): array
     {
         return [

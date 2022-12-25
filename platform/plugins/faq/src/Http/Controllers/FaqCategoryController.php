@@ -6,7 +6,6 @@ use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Faq\Http\Requests\FaqCategoryRequest;
 use Botble\Faq\Repositories\Interfaces\FaqCategoryInterface;
 use Botble\Base\Http\Controllers\BaseController;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Exception;
 use Botble\Faq\Tables\FaqCategoryTable;
@@ -21,15 +20,8 @@ use Throwable;
 
 class FaqCategoryController extends BaseController
 {
-    /**
-     * @var FaqCategoryInterface
-     */
-    protected $faqCategoryRepository;
+    protected FaqCategoryInterface $faqCategoryRepository;
 
-    /**
-     * FaqCategoryController constructor.
-     * @param FaqCategoryInterface $faqCategoryRepository
-     */
     public function __construct(FaqCategoryInterface $faqCategoryRepository)
     {
         $this->faqCategoryRepository = $faqCategoryRepository;
@@ -37,7 +29,7 @@ class FaqCategoryController extends BaseController
 
     /**
      * @param FaqCategoryTable $table
-     * @return JsonResponse|View
+     * @return \Illuminate\Contracts\View\Factory|\Symfony\Component\HttpFoundation\Response|View
      * @throws Throwable
      */
     public function index(FaqCategoryTable $table)

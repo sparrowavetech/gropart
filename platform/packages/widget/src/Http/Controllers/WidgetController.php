@@ -22,20 +22,10 @@ use WidgetGroup;
 
 class WidgetController extends BaseController
 {
-    /**
-     * @var WidgetInterface
-     */
-    protected $widgetRepository;
+    protected WidgetInterface $widgetRepository;
 
-    /**
-     * @var string|null
-     */
-    protected $theme = null;
+    protected ?string $theme = null;
 
-    /**
-     * WidgetController constructor.
-     * @param WidgetInterface $widgetRepository
-     */
     public function __construct(WidgetInterface $widgetRepository)
     {
         $this->widgetRepository = $widgetRepository;

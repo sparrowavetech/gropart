@@ -6,7 +6,6 @@ use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Events\BeforeSheet;
 use Maatwebsite\Excel\Events\Event;
-use PhpOffice\PhpSpreadsheet\Exception;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\MemoryDrawing;
@@ -15,9 +14,6 @@ use Yajra\DataTables\Services\DataTablesExportHandler;
 
 class TableExportHandler extends DataTablesExportHandler implements WithEvents
 {
-    /**
-     * @return array
-     */
     public function registerEvents(): array
     {
         return [
@@ -30,9 +26,6 @@ class TableExportHandler extends DataTablesExportHandler implements WithEvents
         ];
     }
 
-    /**
-     * @param BeforeSheet $event
-     */
     protected function beforeSheet(BeforeSheet $event)
     {
         $delegate = $event->sheet->getDelegate();
@@ -56,40 +49,32 @@ class TableExportHandler extends DataTablesExportHandler implements WithEvents
             ->setFooter(0.0);
     }
 
-    /**
-     * @param AfterSheet $event
-     * @throws Exception
-     */
     protected function afterSheet(AfterSheet $event)
     {
         $delegate = $event->sheet->getDelegate();
         $totalColumns = count(array_filter($this->headings()));
         $lastColumnName = $this->getNameFromNumber($totalColumns);
 
-        try {
-            $dimensions = 'A1:' . $lastColumnName . '1';
-            $delegate->getStyle($dimensions)->applyFromArray(
-                [
-                    'font' => [
-                        'bold' => true,
-                        'color' => [
-                            'argb' => 'ffffff',
-                        ],
+        $dimensions = 'A1:' . $lastColumnName . '1';
+        $delegate->getStyle($dimensions)->applyFromArray(
+            [
+                'font' => [
+                    'bold' => true,
+                    'color' => [
+                        'argb' => 'ffffff',
                     ],
-                    'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_CENTER,
+                ],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                ],
+                'fill' => [
+                    'fillType' => Fill::FILL_SOLID,
+                    'startColor' => [
+                        'argb' => '1d9977',
                     ],
-                    'fill' => [
-                        'fillType' => Fill::FILL_SOLID,
-                        'startColor' => [
-                            'argb' => '1d9977',
-                        ],
-                    ],
-                ]
-            );
-        } catch (Exception $exception) {
-            info($exception->getMessage());
-        }
+                ],
+            ]
+        );
 
         $delegate->getColumnDimension('A')->setWidth(10);
         $delegate->getRowDimension(1)->setRowHeight(20);
@@ -110,10 +95,6 @@ class TableExportHandler extends DataTablesExportHandler implements WithEvents
             ->freezePane('A2');
     }
 
-    /**
-     * @param int $number
-     * @return string
-     */
     protected function getNameFromNumber(int $number): string
     {
         $numeric = ($number - 1) % 26;
@@ -126,37 +107,22 @@ class TableExportHandler extends DataTablesExportHandler implements WithEvents
         return $letter;
     }
 
-    /**
-     * @param string|null $imageUrl
-     * @return null|resource
-     */
     protected function getImageResourceFromURL(?string $imageUrl)
     {
-        if (!$imageUrl) {
+        if (! $imageUrl) {
             return null;
         }
 
         $imageUrl = url($imageUrl);
 
-        try {
-            $content = @file_get_contents($imageUrl);
-            if (!$content) {
-                return null;
-            }
-
-            return imagecreatefromstring($content);
-        } catch (Exception $exception) {
+        $content = @file_get_contents($imageUrl);
+        if (! $content) {
             return null;
         }
+
+        return imagecreatefromstring($content);
     }
 
-    /**
-     * @param Event $event
-     * @param string $column
-     * @param int $row
-     * @return bool
-     * @throws Exception
-     */
     protected function drawingImage(Event $event, string $column, int $row): bool
     {
         if (request()->input('action') !== 'excel') {

@@ -12,7 +12,7 @@ class HookServiceProvider extends ServiceProvider
     public function boot()
     {
         add_filter('form_custom_fields', function (FormAbstract $form, FormHelper $formHelper) {
-            if (!$formHelper->hasCustomField('selectLocation')) {
+            if (! $formHelper->hasCustomField('selectLocation')) {
                 $form->addCustomField('selectLocation', SelectLocationField::class);
             }
 

@@ -1620,7 +1620,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl';
 
             const params = new URLSearchParams(window.location.search);
             params.set('layout', $this.data('layout'));
-            const nextHref = window.location.protocol + "//" + window.location.host + window.location.pathname + '?' + params.toString();
+            const nextHref = window.location.protocol + '//' + window.location.host + window.location.pathname + '?' + params.toString();
             if (nextHref != window.location.href) {
                 window.history.pushState(
                     MartApp.$productListing.html(),
@@ -1934,8 +1934,8 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl';
                     if (!$this.is(':nth-child(3)')) {
                         $this.find('a').closest('li').hide();
                     } else {
-                        $this.find('a span').hide();
-                        $this.find('a .extra-breadcrumb-name').text('...').show();
+                        $this.find('a').hide();
+                        $this.find('.extra-breadcrumb-name').text('...').show();
                     }
                 }
             });

@@ -42,12 +42,12 @@ trait PaymentErrorTrait
         try {
             $error = [];
 
-            if (!$exception instanceof ApiErrorException) {
+            if (! $exception instanceof ApiErrorException) {
                 $this->errorMessage = $exception->getMessage();
             } else {
                 $body = $exception->getJsonBody();
                 $error = $body['error'];
-                if (!empty($err['message'])) {
+                if (! empty($err['message'])) {
                     $this->errorMessage = $error['message'];
                 } else {
                     $this->errorMessage = $exception->getMessage();

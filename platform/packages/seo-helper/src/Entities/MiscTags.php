@@ -150,7 +150,7 @@ class MiscTags implements MiscTagsContract
      */
     protected function hasUrl()
     {
-        return !empty($this->getUrl());
+        return ! empty($this->getUrl());
     }
 
     /**

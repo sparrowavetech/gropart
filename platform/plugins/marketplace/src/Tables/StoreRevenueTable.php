@@ -7,57 +7,31 @@ use Botble\Marketplace\Repositories\Interfaces\RevenueInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Route;
 use Yajra\DataTables\DataTables;
 
 class StoreRevenueTable extends TableAbstract
 {
-    /**
-     * @var string
-     */
-    protected $type = self::TABLE_TYPE_SIMPLE;
+    protected string $type = self::TABLE_TYPE_SIMPLE;
 
-    /**
-     * @var int
-     */
-    protected $defaultSortColumn = 0;
+    protected int $defaultSortColumn = 0;
 
-    /**
-     * @var string
-     */
     protected $view = 'core/table::simple-table';
 
-    /**
-     * @var bool
-     */
     protected $hasActions = false;
 
-    /**
-     * @var bool
-     */
     protected $hasFilter = false;
 
-    /**
-     * @var bool
-     */
     protected $hasCheckbox = false;
 
-    /**
-     * @var bool
-     */
     protected $hasOperations = false;
 
-    /**
-     * @var RevenueInterface
-     */
     protected $repository;
 
-    /**
-     * StoreRevenueTable constructor.
-     * @param DataTables $table
-     * @param UrlGenerator $urlGenerator
-     * @param RevenueInterface $revenueRepository
-     */
     public function __construct(
         DataTables $table,
         UrlGenerator $urlGenerator,
@@ -68,10 +42,7 @@ class StoreRevenueTable extends TableAbstract
         $this->repository = $revenueRepository;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
@@ -85,7 +56,7 @@ class StoreRevenueTable extends TableAbstract
                 return Html::tag('span', format_price($item->fee), ['class' => 'text-danger']);
             })
             ->editColumn('order_id', function ($item) {
-                if (!$item->order->id) {
+                if (! $item->order->id) {
                     return $item->description;
                 }
 
@@ -100,7 +71,7 @@ class StoreRevenueTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
         $query = $this->repository->getModel()
             ->select([
@@ -120,9 +91,6 @@ class StoreRevenueTable extends TableAbstract
         return $this->applyScopes($query);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function columns(): array
     {
         return [
@@ -155,9 +123,6 @@ class StoreRevenueTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function htmlDrawCallbackFunction(): ?string
     {
         return parent::htmlDrawCallbackFunction() . '$("[data-bs-toggle=tooltip]").tooltip({placement: "top", boundary: "window"});';

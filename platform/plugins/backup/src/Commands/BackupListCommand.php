@@ -6,49 +6,18 @@ use BaseHelper;
 use Botble\Backup\Supports\Backup;
 use Exception;
 use Illuminate\Console\Command;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+#[AsCommand('cms:backup:list', 'List all backups')]
 class BackupListCommand extends Command
 {
-    /**
-     * @var Backup
-     */
-    public $backup;
-
-    /**
-     * The console command signature.
-     *
-     * @var string
-     */
-    protected $signature = 'cms:backup:list';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'List all backups';
-
-    /**
-     * BackupCommand constructor.
-     * @param Backup $backup
-     */
-    public function __construct(Backup $backup)
-    {
-        parent::__construct();
-        $this->backup = $backup;
-    }
-
-    /**
-     * Execute the console command.
-     * @throws Exception
-     */
-    public function handle()
+    public function handle(Backup $backupService): int
     {
         try {
-            $backups = BaseHelper::getFileData($this->backup->getBackupPath('backup.json'));
+            $backups = BaseHelper::getFileData($backupService->getBackupPath('backup.json'));
 
-            foreach ($backups as $key => &$backup) {
-                $backup['key'] = $key;
+            foreach ($backups as $key => &$item) {
+                $item['key'] = $key;
             }
 
             $header = [
@@ -63,6 +32,6 @@ class BackupListCommand extends Command
             $this->error($exception->getMessage());
         }
 
-        return 0;
+        return self::SUCCESS;
     }
 }

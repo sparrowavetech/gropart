@@ -7,42 +7,28 @@ use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use EcommerceHelper;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
 use MarketplaceHelper;
 use Yajra\DataTables\DataTables;
 
 class OrderTable extends TableAbstract
 {
-    /**
-     * @var bool
-     */
     protected $hasActions = false;
 
-    /**
-     * @var bool
-     */
     protected $hasFilter = false;
 
-    /**
-     * @var bool
-     */
     protected $hasCheckbox = false;
 
-    /**
-     * OrderTable constructor.
-     * @param DataTables $table
-     * @param UrlGenerator $urlGenerator
-     * @param OrderInterface $orderRepository
-     */
     public function __construct(DataTables $table, UrlGenerator $urlGenerator, OrderInterface $orderRepository)
     {
         $this->repository = $orderRepository;
         parent::__construct($table, $urlGenerator);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
@@ -89,7 +75,7 @@ class OrderTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
         $query = $this->repository->getModel()
             ->select([
@@ -109,9 +95,6 @@ class OrderTable extends TableAbstract
         return $this->applyScopes($query);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function columns(): array
     {
         $columns = [
@@ -166,9 +149,6 @@ class OrderTable extends TableAbstract
         return $columns;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getDefaultButtons(): array
     {
         return [

@@ -11,46 +11,19 @@ use Theme;
 
 class WidgetGroupCollection
 {
-    /**
-     * The array of widget groups.
-     *
-     * @var array
-     */
-    protected $groups;
+    protected array $groups;
 
-    /**
-     * @var ApplicationWrapperContract
-     */
-    protected $app;
+    protected ApplicationWrapperContract $app;
 
-    /**
-     * @var Collection
-     */
-    protected $data = [];
+    protected Collection|array $data = [];
 
-    /**
-     * Whether the settings data are loaded.
-     *
-     * @var boolean
-     */
-    protected $loaded = false;
+    protected bool $loaded = false;
 
-    /**
-     * Constructor.
-     *
-     * @param ApplicationWrapperContract $app
-     */
     public function __construct(ApplicationWrapperContract $app)
     {
         $this->app = $app;
     }
 
-    /**
-     * Get the widget group object.
-     *
-     * @param string $sidebarId
-     * @return WidgetGroup
-     */
     public function group(string $sidebarId): WidgetGroup
     {
         if (isset($this->groups[$sidebarId])) {
@@ -61,10 +34,6 @@ class WidgetGroupCollection
         return $this->groups[$sidebarId];
     }
 
-    /**
-     * @param array $args
-     * @return $this
-     */
     public function setGroup(array $args): WidgetGroupCollection
     {
         if (isset($this->groups[$args['id']])) {
@@ -79,10 +48,6 @@ class WidgetGroupCollection
         return $this;
     }
 
-    /**
-     * @param string $groupId
-     * @return $this
-     */
     public function removeGroup(string $groupId): WidgetGroupCollection
     {
         if (isset($this->groups[$groupId])) {
@@ -92,18 +57,11 @@ class WidgetGroupCollection
         return $this;
     }
 
-    /**
-     * @return array
-     */
     public function getGroups(): array
     {
         return $this->groups;
     }
 
-    /**
-     * @param string $sidebarId
-     * @return string
-     */
     public function render(string $sidebarId): string
     {
         $this->load();
@@ -117,22 +75,14 @@ class WidgetGroupCollection
         return $this->group($sidebarId)->display();
     }
 
-    /**
-     * Make sure data is loaded.
-     *
-     * @param boolean $force Force a reload of data. Default false.
-     */
-    public function load(bool $force = false)
+    public function load(bool $force = false): void
     {
-        if (!$this->loaded || $force) {
+        if (! $this->loaded || $force) {
             $this->data = $this->read();
             $this->loaded = true;
         }
     }
 
-    /**
-     * @return Collection
-     */
     protected function read(): Collection
     {
         $languageCode = null;
@@ -144,9 +94,6 @@ class WidgetGroupCollection
         return app(WidgetInterface::class)->allBy(['theme' => Theme::getThemeName() . $languageCode]);
     }
 
-    /**
-     * @return Collection
-     */
     public function getData(): Collection
     {
         return $this->data;

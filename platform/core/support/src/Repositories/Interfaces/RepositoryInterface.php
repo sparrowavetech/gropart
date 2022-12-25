@@ -7,6 +7,7 @@ use Eloquent;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 
@@ -29,7 +30,7 @@ interface RepositoryInterface
 
     /**
      * Get empty model.
-     * @return Eloquent|Model
+     * @return Eloquent|Model|SoftDeletes
      */
     public function getModel();
 
@@ -85,7 +86,7 @@ interface RepositoryInterface
      * Get all models.
      *
      * @param array $with Eager load related models
-     * @return Model
+     * @return Collection
      */
     public function all(array $with = []);
 

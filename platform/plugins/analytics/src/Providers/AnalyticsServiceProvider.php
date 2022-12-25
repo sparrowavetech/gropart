@@ -5,7 +5,9 @@ namespace Botble\Analytics\Providers;
 use Botble\Analytics\Analytics;
 use Botble\Analytics\AnalyticsClient;
 use Botble\Analytics\AnalyticsClientFactory;
+use Botble\Analytics\Abstracts\AnalyticsAbstract;
 use Botble\Analytics\Facades\AnalyticsFacade;
+use Botble\Analytics\GA4\Analytics as AnalyticsGA4;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\ServiceProvider;
@@ -21,18 +23,24 @@ class AnalyticsServiceProvider extends ServiceProvider
             return AnalyticsClientFactory::createForConfig(config('plugins.analytics.general'));
         });
 
-        $this->app->bind(Analytics::class, function () {
-            $viewId = setting('analytics_view_id', config('plugins.analytics.general.view_id'));
+        $this->app->bind(AnalyticsAbstract::class, function () {
+            $propertyId = setting('analytics_view_id') ?: setting('analytics_property_id');
 
-            if (empty($viewId)) {
-                throw InvalidConfiguration::viewIdNotSpecified();
+            if (empty($propertyId)) {
+                throw InvalidConfiguration::propertyIdNotSpecified();
             }
 
-            if (!setting('analytics_service_account_credentials')) {
+            $credentials = setting('analytics_service_account_credentials');
+
+            if (! $credentials) {
                 throw InvalidConfiguration::credentialsIsNotValid();
             }
 
-            return new Analytics($this->app->make(AnalyticsClient::class), $viewId);
+            if (setting('analytics_property_id')) {
+                return new AnalyticsGA4($propertyId, $credentials);
+            }
+
+            return new Analytics($this->app->make(AnalyticsClient::class), $propertyId);
         });
 
         AliasLoader::getInstance()->alias('Analytics', AnalyticsFacade::class);
@@ -42,7 +50,7 @@ class AnalyticsServiceProvider extends ServiceProvider
     {
         $this->setNamespace('plugins/analytics')
             ->loadAndPublishConfigurations(['general', 'permissions'])
-            ->loadRoutes(['web'])
+            ->loadRoutes()
             ->loadAndPublishViews()
             ->loadAndPublishTranslations()
             ->publishAssets();

@@ -9,14 +9,7 @@ use Language;
 
 class LocalizationRedirectFilter extends LaravelLocalizationMiddlewareBase
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param Request $request
-     * @param Closure $next
-     * @return mixed
-     */
-    public function handle($request, Closure $next)
+    public function handle(Request $request, Closure $next)
     {
         // If the URL of the request is in exceptions.
         if ($this->shouldIgnore($request)) {
@@ -34,15 +27,15 @@ class LocalizationRedirectFilter extends LaravelLocalizationMiddlewareBase
             $locales = Language::getSupportedLocales();
             $hideDefaultLocale = Language::hideDefaultLocaleInURL();
             $redirection = false;
-            if (!empty($locales[$localeCode])) {
+            if (! empty($locales[$localeCode])) {
                 if ($localeCode === $defaultLocale && $hideDefaultLocale) {
                     $redirection = Language::getNonLocalizedURL();
                 }
-            } elseif ($currentLocale !== $defaultLocale || !$hideDefaultLocale) {
+            } elseif ($currentLocale !== $defaultLocale || ! $hideDefaultLocale) {
                 // If the current url does not contain any locale
                 // The system redirect the user to the very same url "localized"
                 // we use the current locale to redirect him
-                if (!Language::getActiveLanguage(['lang_id'])->isEmpty()) {
+                if (! Language::getActiveLanguage(['lang_id'])->isEmpty()) {
                     $redirection = Language::getLocalizedURL(session('language'), $request->fullUrl(), [], false);
                 }
             }

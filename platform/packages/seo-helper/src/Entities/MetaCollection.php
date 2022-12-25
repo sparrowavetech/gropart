@@ -28,7 +28,7 @@ class MetaCollection extends BaseMetaCollection
     {
         $meta = Meta::make($item['name'], $item['content']);
 
-        if ($meta->isValid() && !$this->isIgnored($item['name'])) {
+        if ($meta->isValid() && ! $this->isIgnored($item['name'])) {
             $this->put($meta->key(), $meta);
         }
 

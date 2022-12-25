@@ -15,43 +15,25 @@ use OrderHelper;
 
 class HandleApplyCouponService
 {
-    /**
-     * @var DiscountInterface
-     */
-    protected $discountRepository;
+    protected DiscountInterface $discountRepository;
 
-    /**
-     * @var ProductInterface
-     */
-    protected $productRepository;
+    protected ProductInterface $productRepository;
 
-    /**
-     * HandleApplyCouponService constructor.
-     * @param DiscountInterface $discountRepository
-     * @param ProductInterface $productRepository
-     */
     public function __construct(DiscountInterface $discountRepository, ProductInterface $productRepository)
     {
         $this->discountRepository = $discountRepository;
         $this->productRepository = $productRepository;
     }
 
-    /**
-     * @param string $coupon
-     * @param array $sessionData
-     * @param array $cartData
-     * @param string|null $prefix
-     * @return array
-     */
     public function execute(string $coupon, array $sessionData = [], array $cartData = [], ?string $prefix = ''): array
     {
         $token = OrderHelper::getOrderSessionToken();
 
-        if (!$token) {
+        if (! $token) {
             $token = OrderHelper::getOrderSessionToken();
         }
 
-        if (!$sessionData) {
+        if (! $sessionData) {
             $sessionData = OrderHelper::getOrderSessionData($token);
         }
 
@@ -68,8 +50,8 @@ class HandleApplyCouponService
 
         if ($discount->target === 'customer') {
             $discountCustomers = $discount->customers()->pluck('customer_id')->all();
-            if (!auth('customer')->check() ||
-                !in_array(auth('customer')->id(), $discountCustomers)
+            if (! auth('customer')->check() ||
+                ! in_array(auth('customer')->id(), $discountCustomers)
             ) {
                 return [
                     'error' => true,
@@ -78,7 +60,7 @@ class HandleApplyCouponService
             }
         }
 
-        if (!$discount->can_use_with_promotion && (float)Arr::get($sessionData, 'promotion_discount_amount')) {
+        if (! $discount->can_use_with_promotion && (float)Arr::get($sessionData, 'promotion_discount_amount')) {
             return [
                 'error' => true,
                 'message' => trans('plugins/ecommerce::discount.cannot_use_same_time_with_other_discount_program'),
@@ -193,7 +175,7 @@ class HandleApplyCouponService
                                 ->pluck('ec_product_collections.id')
                                 ->all();
 
-                            if (!empty(array_intersect($productCollections, $discountProductCollections))) {
+                            if (! empty(array_intersect($productCollections, $discountProductCollections))) {
                                 $discountValue = $item->price - $discount->value;
                                 $couponDiscountAmount += max($discountValue, 0);
                             }
@@ -236,12 +218,7 @@ class HandleApplyCouponService
         ];
     }
 
-    /**
-     * @param string $couponCode
-     * @param array $sessionData
-     * @return Eloquent|Builder|Model|object|null
-     */
-    public function getCouponData(string $couponCode, array $sessionData)
+    public function getCouponData(string $couponCode, array $sessionData): Model|Eloquent|Builder|null
     {
         $couponCode = trim($couponCode);
 
@@ -306,10 +283,6 @@ class HandleApplyCouponService
             ->first();
     }
 
-    /**
-     * @param Request $request
-     * @return array
-     */
     public function applyCouponWhenCreatingOrderFromAdmin(Request $request): array
     {
         $couponCode = trim($request->input('coupon_code'));
@@ -330,7 +303,7 @@ class HandleApplyCouponService
 
         if ($discount->target == 'customer') {
             $discountCustomers = $discount->customers()->pluck('customer_id')->all();
-            if (!in_array($request->input('customer_id'), $discountCustomers)) {
+            if (! in_array($request->input('customer_id'), $discountCustomers)) {
                 return [
                     'error' => true,
                     'message' => trans('plugins/ecommerce::discount.invalid_coupon'),
@@ -338,7 +311,7 @@ class HandleApplyCouponService
             }
         }
 
-        if (!$discount->can_use_with_promotion && Arr::get($sessionData, 'promotion_discount_amount')) {
+        if (! $discount->can_use_with_promotion && Arr::get($sessionData, 'promotion_discount_amount')) {
             return [
                 'error' => true,
                 'message' => trans('plugins/ecommerce::discount.cannot_use_same_time_with_other_discount_program'),
@@ -400,7 +373,7 @@ class HandleApplyCouponService
                     foreach ($request->input('product_ids', []) as $productId) {
                         $product = $this->productRepository->findById($productId);
 
-                        if (!$product) {
+                        if (! $product) {
                             break;
                         }
 
@@ -421,7 +394,7 @@ class HandleApplyCouponService
                                 ->pluck('product_collection_id')
                                 ->all();
 
-                            if (!empty(array_intersect($productCollections, $discountProductCollections))) {
+                            if (! empty(array_intersect($productCollections, $discountProductCollections))) {
                                 $discountValue = $product->original_price - $discount->value;
 
                                 $couponDiscountAmount += max($discountValue, 0);

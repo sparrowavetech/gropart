@@ -12,7 +12,13 @@ mix
     .js(source + '/resources/assets/js/theme-translations.js', dist + '/js')
 
     .sass(source + '/resources/assets/sass/translation.scss', dist + '/css')
-    .sass(source + '/resources/assets/sass/theme-translations.scss', dist + '/css')
+    .sass(source + '/resources/assets/sass/theme-translations.scss', dist + '/css');
 
-    .copyDirectory(dist + '/js', source + '/public/js')
-    .copyDirectory(dist + '/css', source + '/public/css');
+if (mix.inProduction()) {
+    mix
+        .copy(dist + '/js/translation.js', source + '/public/js')
+        .copy(dist + '/js/locales.js', source + '/public/js')
+        .copy(dist + '/js/theme-translations.js', source + '/public/js')
+        .copy(dist + '/css/translation.css', source + '/public/css')
+        .copy(dist + '/css/theme-translations.css', source + '/public/css');
+}

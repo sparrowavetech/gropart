@@ -5,13 +5,7 @@
 </template>
 
 <script>
-    import {HalfCircleSpinner} from 'epic-spinners'
-
     export default {
-        components: {
-            HalfCircleSpinner
-        },
-
         props: {
             checkUpdateUrl: {
                 type: String,

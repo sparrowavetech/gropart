@@ -65,7 +65,7 @@
                                             </h4>
                                             <div class="h5 fw-bold brand__desc">
                                                 <div>
-                                                    {{ BaseHelper::clean(Str::limit($brand->description, 150)) }}
+                                                    {!! BaseHelper::clean(Str::limit($brand->description, 150)) !!}
                                                 </div>
                                             </div>
                                         </div>

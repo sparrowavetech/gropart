@@ -2,6 +2,10 @@
 
 namespace Botble\AuditLog\Tables;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Botble\AuditLog\Repositories\Interfaces\AuditLogInterface;
 use Botble\Table\Abstracts\TableAbstract;
@@ -11,38 +15,23 @@ use Yajra\DataTables\DataTables;
 
 class AuditLogTable extends TableAbstract
 {
-    /**
-     * @var bool
-     */
     protected $hasActions = true;
 
-    /**
-     * @var bool
-     */
     protected $hasFilter = false;
 
-    /**
-     * AuditLogTable constructor.
-     * @param DataTables $table
-     * @param UrlGenerator $urlGenerator
-     * @param AuditLogInterface $auditLogRepository
-     */
     public function __construct(DataTables $table, UrlGenerator $urlGenerator, AuditLogInterface $auditLogRepository)
     {
         parent::__construct($table, $urlGenerator);
 
         $this->repository = $auditLogRepository;
 
-        if (!Auth::user()->hasPermission('audit-log.destroy')) {
+        if (! Auth::user()->hasPermission('audit-log.destroy')) {
             $this->hasOperations = false;
             $this->hasActions = false;
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
@@ -59,10 +48,7 @@ class AuditLogTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
         $query = $this->repository->getModel()
             ->with(['user'])
@@ -71,9 +57,6 @@ class AuditLogTable extends TableAbstract
         return $this->applyScopes($query);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function columns(): array
     {
         return [
@@ -95,9 +78,6 @@ class AuditLogTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function buttons(): array
     {
         return [
@@ -108,9 +88,6 @@ class AuditLogTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function bulkActions(): array
     {
         return $this->addDeleteAction(route('audit-log.deletes'), 'audit-log.destroy', parent::bulkActions());

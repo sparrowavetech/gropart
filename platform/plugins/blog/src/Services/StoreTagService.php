@@ -11,12 +11,7 @@ use Illuminate\Support\Facades\Auth;
 
 class StoreTagService extends StoreTagServiceAbstract
 {
-    /**
-     * @param Request $request
-     * @param Post $post
-     * @return mixed|void
-     */
-    public function execute(Request $request, Post $post)
+    public function execute(Request $request, Post $post): void
     {
         $tags = $post->tags->pluck('name')->all();
 
@@ -25,13 +20,13 @@ class StoreTagService extends StoreTagServiceAbstract
         if (count($tags) != count($tagsInput) || count(array_diff($tags, $tagsInput)) > 0) {
             $post->tags()->detach();
             foreach ($tagsInput as $tagName) {
-                if (!trim($tagName)) {
+                if (! trim($tagName)) {
                     continue;
                 }
 
                 $tag = $this->tagRepository->getFirstBy(['name' => $tagName]);
 
-                if ($tag === null && !empty($tagName)) {
+                if ($tag === null && ! empty($tagName)) {
                     $tag = $this->tagRepository->createOrUpdate([
                         'name' => $tagName,
                         'author_id' => Auth::check() ? Auth::id() : 0,
@@ -43,7 +38,7 @@ class StoreTagService extends StoreTagServiceAbstract
                     event(new CreatedContentEvent(TAG_MODULE_SCREEN_NAME, $request, $tag));
                 }
 
-                if (!empty($tag)) {
+                if (! empty($tag)) {
                     $post->tags()->attach($tag->id);
                 }
             }

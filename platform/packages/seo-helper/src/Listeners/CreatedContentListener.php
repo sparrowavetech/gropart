@@ -8,13 +8,7 @@ use SeoHelper;
 
 class CreatedContentListener
 {
-    /**
-     * Handle the event.
-     *
-     * @param CreatedContentEvent $event
-     * @return void
-     */
-    public function handle(CreatedContentEvent $event)
+    public function handle(CreatedContentEvent $event): void
     {
         try {
             SeoHelper::saveMetaData($event->screen, $event->request, $event->data);

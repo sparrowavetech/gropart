@@ -6,53 +6,43 @@ use BaseHelper;
 use Botble\Ecommerce\Enums\OrderReturnStatusEnum;
 use Botble\Ecommerce\Repositories\Interfaces\OrderReturnInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderReturnItemInterface;
-use Botble\Ecommerce\Supports\OrderReturnHelper;
 use Botble\Table\Abstracts\TableAbstract;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use OrderReturnHelper;
 use Yajra\DataTables\DataTables;
 
 class OrderReturnTable extends TableAbstract
 {
-    /**
-     * @var bool
-     */
     protected $hasActions = true;
 
-    /**
-     * @var bool
-     */
     protected $hasFilter = true;
 
-    /**
-     * @var OrderReturnItemInterface
-     */
-    protected $orderReturnItemRepository;
+    protected OrderReturnItemInterface $orderReturnItemRepository;
 
-    /**
-     * OrderTable constructor.
-     * @param DataTables $table
-     * @param UrlGenerator $urlGenerator
-     * @param OrderReturnInterface $orderReturnRepository
-     * @param OrderReturnItemInterface $orderReturnItemRepository
-     */
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, OrderReturnInterface $orderReturnRepository, OrderReturnItemInterface $orderReturnItemRepository)
-    {
+    public function __construct(
+        DataTables $table,
+        UrlGenerator $urlGenerator,
+        OrderReturnInterface $orderReturnRepository,
+        OrderReturnItemInterface $orderReturnItemRepository
+    ) {
         parent::__construct($table, $urlGenerator);
 
         $this->repository = $orderReturnRepository;
         $this->orderReturnItemRepository = $orderReturnItemRepository;
 
-        if (!Auth::user()->hasPermission('orders.edit')) {
+        if (! Auth::user()->hasPermission('orders.edit')) {
             $this->hasOperations = false;
             $this->hasActions = false;
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
@@ -69,7 +59,7 @@ class OrderReturnTable extends TableAbstract
                 return BaseHelper::clean($item->order->code);
             })
             ->editColumn('user_id', function ($item) {
-                if (!$item->customer->name) {
+                if (! $item->customer->name) {
                     return '&mdash;';
                 }
 
@@ -100,10 +90,7 @@ class OrderReturnTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    /**
-     * @return mixed
-     */
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
         $query = $this->repository->getModel()
             ->select([
@@ -122,10 +109,7 @@ class OrderReturnTable extends TableAbstract
         return $this->applyScopes($query);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function columns()
+    public function columns(): array
     {
         return [
             'id' => [
@@ -157,9 +141,6 @@ class OrderReturnTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getBulkChanges(): array
     {
         return [
@@ -176,9 +157,6 @@ class OrderReturnTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getDefaultButtons(): array
     {
         return [
@@ -187,18 +165,12 @@ class OrderReturnTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function bulkActions(): array
     {
         return $this->addDeleteAction(route('order_returns.deletes'), 'order_returns.destroy', parent::bulkActions());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function saveBulkChangeItem($item, string $inputKey, ?string $inputValue)
+    public function saveBulkChangeItem(Model $item, string $inputKey, ?string $inputValue): Model|bool
     {
         if ($inputKey === 'status' && $inputValue == OrderReturnStatusEnum::CANCELED) {
             OrderReturnHelper::cancelReturnOrder($item);

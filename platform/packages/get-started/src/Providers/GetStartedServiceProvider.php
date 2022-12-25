@@ -16,7 +16,7 @@ class GetStartedServiceProvider extends ServiceProvider
         $this->setNamespace('packages/get-started')
             ->loadAndPublishTranslations()
             ->publishAssets()
-            ->loadRoutes(['web'])
+            ->loadRoutes()
             ->loadAndPublishViews();
 
         $this->app->booted(function () {
@@ -24,7 +24,7 @@ class GetStartedServiceProvider extends ServiceProvider
                 if ($this->shouldShowGetStartedPopup()) {
                     Assets::addScriptsDirectly('vendor/core/packages/get-started/js/get-started.js')
                         ->addStylesDirectly('vendor/core/packages/get-started/css/get-started.css')
-                        ->addScripts(['are-you-sure', 'colorpicker', 'jquery-ui'])
+                        ->addScripts(['colorpicker', 'jquery-ui'])
                         ->addStyles(['colorpicker']);
 
                     add_filter(BASE_FILTER_FOOTER_LAYOUT_TEMPLATE, function ($html) {
@@ -39,13 +39,10 @@ class GetStartedServiceProvider extends ServiceProvider
         });
     }
 
-    /**
-     * @return bool
-     */
     protected function shouldShowGetStartedPopup(): bool
     {
-        return !$this->app->environment('demo') &&
-            is_in_admin() &&
+        return ! $this->app->environment('demo') &&
+            is_in_admin(true) &&
             Auth::check() &&
             setting('is_completed_get_started') != '1';
     }

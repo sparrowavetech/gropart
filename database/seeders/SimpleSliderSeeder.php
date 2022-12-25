@@ -12,12 +12,7 @@ use MetaBox;
 
 class SimpleSliderSeeder extends BaseSeeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
         $this->uploadFiles('sliders');
 
@@ -29,15 +24,15 @@ class SimpleSliderSeeder extends BaseSeeder
         $sliders = [
             'en_US' => [
                 [
-                    'name'        => 'Home slider',
-                    'key'         => 'home-slider',
+                    'name' => 'Home slider',
+                    'key' => 'home-slider',
                     'description' => 'The main slider on homepage',
-                ]
+                ],
             ],
-            'vi'    => [
+            'vi' => [
                 [
                     'name' => 'Slider trang chủ',
-                    'key'  => 'slider-trang-chu',
+                    'key' => 'slider-trang-chu',
                     'description' => 'Slider chính trên trang chủ',
                 ],
             ],
@@ -52,7 +47,7 @@ class SimpleSliderSeeder extends BaseSeeder
                     'title' => 'Slider 2',
                 ],
             ],
-            'vi'    => [
+            'vi' => [
                 [
                     'title' => 'Slider 1',
                 ],
@@ -70,7 +65,7 @@ class SimpleSliderSeeder extends BaseSeeder
 
                 if ($locale !== 'en_US') {
                     $originValue = LanguageMeta::where([
-                        'reference_id'   => $index + 1,
+                        'reference_id' => $index + 1,
                         'reference_type' => SimpleSlider::class,
                     ])->value('lang_meta_origin');
                 }
@@ -93,7 +88,7 @@ class SimpleSliderSeeder extends BaseSeeder
 
         Setting::insertOrIgnore([
             [
-                'key'   => 'simple_slider_using_assets',
+                'key' => 'simple_slider_using_assets',
                 'value' => 0,
             ],
         ]);

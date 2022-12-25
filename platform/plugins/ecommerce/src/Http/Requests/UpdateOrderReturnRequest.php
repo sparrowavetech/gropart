@@ -7,12 +7,7 @@ use Botble\Support\Http\Requests\Request;
 
 class UpdateOrderReturnRequest extends Request
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
             'return_status' => 'required|string|in:' . implode(',', OrderReturnStatusEnum::values()),

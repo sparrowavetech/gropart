@@ -7,22 +7,9 @@ use Illuminate\Routing\Route;
 
 class CustomResourceRegistrar extends ResourceRegistrar
 {
-    /**
-     * The default actions for a resourceful controller.
-     *
-     * @var array
-     */
     protected $resourceDefaults = ['index', 'create', 'store', 'edit', 'update', 'destroy'];
 
-    /**
-     * Get the name for a given resource.
-     *
-     * @param string $resource
-     * @param string $method
-     * @param array $options
-     * @return string
-     */
-    protected function getResourceRouteName($resource, $method, $options)
+    protected function getResourceRouteName($resource, $method, $options): string
     {
         switch ($method) {
             case 'store':
@@ -38,16 +25,7 @@ class CustomResourceRegistrar extends ResourceRegistrar
         return parent::getResourceRouteName($resource, $method, $options);
     }
 
-    /**
-     * Add the edit method for a resourceful route.
-     *
-     * @param string $name
-     * @param string $base
-     * @param string $controller
-     * @param array $options
-     * @return Route
-     */
-    protected function addResourceEdit($name, $base, $controller, $options)
+    protected function addResourceEdit($name, $base, $controller, $options): Route
     {
         $uri = $this->getResourceUri($name) . '/' . static::$verbs['edit'] . '/{' . $base . '}';
 
@@ -56,16 +34,7 @@ class CustomResourceRegistrar extends ResourceRegistrar
         return $this->router->get($uri, $action);
     }
 
-    /**
-     * Add the update method for a resourceful route.
-     *
-     * @param string $name
-     * @param string $base
-     * @param string $controller
-     * @param array $options
-     * @return Route
-     */
-    protected function addResourceUpdate($name, $base, $controller, $options)
+    protected function addResourceUpdate($name, $base, $controller, $options): Route
     {
         $uri = $this->getResourceUri($name) . '/' . static::$verbs['edit'] . '/{' . $base . '}';
 
@@ -74,16 +43,7 @@ class CustomResourceRegistrar extends ResourceRegistrar
         return $this->router->post($uri, $action)->name($name . '.update');
     }
 
-    /**
-     * Add the store method for a resourceful route.
-     *
-     * @param string $name
-     * @param string $base
-     * @param string $controller
-     * @param array $options
-     * @return Route
-     */
-    protected function addResourceStore($name, $base, $controller, $options)
+    protected function addResourceStore($name, $base, $controller, $options): Route
     {
         $uri = $this->getResourceUri($name) . '/' . static::$verbs['create'];
 
@@ -92,16 +52,7 @@ class CustomResourceRegistrar extends ResourceRegistrar
         return $this->router->post($uri, $action)->name($name . '.store');
     }
 
-    /**
-     * Add the index method for a resourceful route.
-     *
-     * @param string $name
-     * @param string $base
-     * @param string $controller
-     * @param array $options
-     * @return Route
-     */
-    protected function addResourceIndex($name, $base, $controller, $options)
+    protected function addResourceIndex($name, $base, $controller, $options): Route
     {
         $uri = $this->getResourceUri($name);
 

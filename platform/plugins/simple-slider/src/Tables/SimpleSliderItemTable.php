@@ -7,32 +7,21 @@ use Botble\SimpleSlider\Repositories\Interfaces\SimpleSliderItemInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\DataTables;
 
 class SimpleSliderItemTable extends TableAbstract
 {
-    /**
-     * @var string
-     */
-    protected $type = self::TABLE_TYPE_SIMPLE;
+    protected string $type = self::TABLE_TYPE_SIMPLE;
 
-    /**
-     * @var string
-     */
     protected $view = 'plugins/simple-slider::items';
 
-    /**
-     * @var SimpleSliderItemInterface
-     */
     protected $repository;
 
-    /**
-     * SimpleSliderItemTable constructor.
-     * @param DataTables $table
-     * @param UrlGenerator $urlGenerator
-     * @param SimpleSliderItemInterface $simpleSliderItemRepository
-     */
     public function __construct(
         DataTables $table,
         UrlGenerator $urlGenerator,
@@ -43,16 +32,13 @@ class SimpleSliderItemTable extends TableAbstract
 
         $this->repository = $simpleSliderItemRepository;
 
-        if (!Auth::user()->hasAnyPermission(['simple-slider-item.edit', 'simple-slider-item.destroy'])) {
+        if (! Auth::user()->hasAnyPermission(['simple-slider-item.edit', 'simple-slider-item.destroy'])) {
             $this->hasOperations = false;
             $this->hasActions = false;
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
@@ -60,7 +46,7 @@ class SimpleSliderItemTable extends TableAbstract
                 return view('plugins/simple-slider::partials.thumbnail', compact('item'))->render();
             })
             ->editColumn('title', function ($item) {
-                if (!Auth::user()->hasPermission('simple-slider-item.edit')) {
+                if (! Auth::user()->hasPermission('simple-slider-item.edit')) {
                     return $item->title;
                 }
 
@@ -83,10 +69,7 @@ class SimpleSliderItemTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
         $query = $this->repository->getModel()
             ->select([
@@ -102,9 +85,6 @@ class SimpleSliderItemTable extends TableAbstract
         return $this->applyScopes($query);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function columns(): array
     {
         return [
@@ -131,9 +111,6 @@ class SimpleSliderItemTable extends TableAbstract
             ] + $this->getOperationsHeading();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getOperationsHeading(): array
     {
         return array_merge(parent::getOperationsHeading(), ['operations' => ['width' => '170px']]);

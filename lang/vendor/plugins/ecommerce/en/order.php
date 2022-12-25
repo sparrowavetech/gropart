@@ -253,4 +253,5 @@ return [
         'update_return_order_status_success' => 'Update return order status successfully!',
     ],
     'order_return' => 'Order returns',
+    'order_return_items_count' => 'Product item(s)',
 ];

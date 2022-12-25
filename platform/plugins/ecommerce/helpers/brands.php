@@ -4,7 +4,7 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Ecommerce\Repositories\Interfaces\BrandInterface;
 use Illuminate\Support\Collection;
 
-if (!function_exists('get_featured_brands')) {
+if (! function_exists('get_featured_brands')) {
     /**
      * @param int $limit
      * @param array $with
@@ -29,7 +29,7 @@ if (!function_exists('get_featured_brands')) {
     }
 }
 
-if (!function_exists('get_all_brands')) {
+if (! function_exists('get_all_brands')) {
     /**
      * @param array $conditions
      * @param array $with

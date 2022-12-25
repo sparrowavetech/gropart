@@ -7,26 +7,15 @@ use Illuminate\Support\Facades\Cookie;
 
 class TrackingLogger implements TrackingLoggerInterface
 {
-    /**
-     * The Request instance.
-     *
-     * @var Request
-     */
-    protected $request;
+    protected ?Request $request = null;
 
-    /**
-     * Track the request.
-     *
-     * @param Request $request
-     * @return Request
-     */
     public function track(Request $request): Request
     {
         $this->request = $request;
 
         $data = $this->captureAttributionData();
 
-        if ($data && !app(FootprinterInterface::class)->getFootprints()) {
+        if ($data && ! app(FootprinterInterface::class)->getFootprints()) {
             Cookie::queue(
                 'botble_footprints_cookie_data',
                 json_encode($data),
@@ -39,9 +28,6 @@ class TrackingLogger implements TrackingLoggerInterface
         return $this->request;
     }
 
-    /**
-     * @return array
-     */
     protected function captureAttributionData(): array
     {
         $attributes = array_merge(
@@ -65,49 +51,31 @@ class TrackingLogger implements TrackingLoggerInterface
         }, $attributes);
     }
 
-    /**
-     * @return array
-     */
     protected function getCustomParameter(): array
     {
         return [];
     }
 
-    /**
-     * @return string|null
-     */
     protected function captureIp(): ?string
     {
         return $this->request->ip();
     }
 
-    /**
-     * @return string
-     */
     protected function captureLandingDomain(): string
     {
         return $this->request->server('SERVER_NAME');
     }
 
-    /**
-     * @return string
-     */
     protected function captureLandingPage(): string
     {
         return $this->request->path();
     }
 
-    /**
-     * @return string|null
-     */
     protected function captureLandingParams(): ?string
     {
         return $this->request->getQueryString();
     }
 
-    /**
-     * @return array
-     */
     protected function captureUTM(): array
     {
         $parameters = ['utm_source', 'utm_campaign', 'utm_medium', 'utm_term', 'utm_content'];
@@ -125,9 +93,6 @@ class TrackingLogger implements TrackingLoggerInterface
         return $utm;
     }
 
-    /**
-     * @return array
-     */
     protected function captureReferrer(): array
     {
         $referrer = [];
@@ -141,25 +106,16 @@ class TrackingLogger implements TrackingLoggerInterface
         return $referrer;
     }
 
-    /**
-     * @return string|null
-     */
     protected function captureGCLID(): ?string
     {
         return $this->request->input('gclid');
     }
 
-    /**
-     * @return string|null
-     */
     protected function captureFCLID(): ?string
     {
         return $this->request->input('fbclid');
     }
 
-    /**
-     * @return string|null
-     */
     protected function captureReferral(): ?string
     {
         return $this->request->input('ref');

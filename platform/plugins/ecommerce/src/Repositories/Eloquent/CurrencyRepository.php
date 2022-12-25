@@ -7,9 +7,6 @@ use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 
 class CurrencyRepository extends RepositoriesAbstract implements CurrencyInterface
 {
-    /**
-     * {@inheritDoc}
-     */
     public function getAllCurrencies()
     {
         $data = $this->model

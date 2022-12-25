@@ -9,24 +9,21 @@ use Eloquent;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Arr;
 
 abstract class RepositoriesAbstract implements RepositoryInterface
 {
     /**
-     * @var Eloquent | Model
+     * @var Eloquent | Model | SoftDeletes
      */
     protected $model;
 
     /**
-     * @var Eloquent | Model
+     * @var Eloquent | Model | SoftDeletes
      */
     protected $originalModel;
 
-    /**
-     * RepositoriesAbstract constructor.
-     * @param Model|Eloquent $model
-     */
     public function __construct(Model $model)
     {
         $this->model = $model;
@@ -74,7 +71,7 @@ abstract class RepositoriesAbstract implements RepositoryInterface
      */
     public function make(array $with = [])
     {
-        if (!empty($with)) {
+        if (! empty($with)) {
             $this->model = $this->model->with($with);
         }
 
@@ -112,7 +109,7 @@ abstract class RepositoriesAbstract implements RepositoryInterface
 
         $result = $this->applyBeforeExecuteQuery($data, true)->first();
 
-        if (!empty($result)) {
+        if (! empty($result)) {
             return $result;
         }
 
@@ -137,7 +134,7 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         $this->applyConditions($condition);
 
         $select = [$column];
-        if (!empty($key)) {
+        if (! empty($key)) {
             $select = [$column, $key];
         }
 
@@ -164,7 +161,7 @@ abstract class RepositoriesAbstract implements RepositoryInterface
      */
     protected function applyConditions(array $where, &$model = null)
     {
-        if (!$model) {
+        if (! $model) {
             $newModel = $this->model;
         } else {
             $newModel = $model;
@@ -198,7 +195,7 @@ abstract class RepositoriesAbstract implements RepositoryInterface
             }
         }
 
-        if (!$model) {
+        if (! $model) {
             $this->model = $newModel;
         } else {
             $model = $newModel;
@@ -261,7 +258,7 @@ abstract class RepositoriesAbstract implements RepositoryInterface
 
         $this->applyConditions($condition);
 
-        if (!empty($select)) {
+        if (! empty($select)) {
             $data = $this->model->select($select);
         } else {
             $data = $this->model->select('*');
@@ -359,15 +356,15 @@ abstract class RepositoriesAbstract implements RepositoryInterface
     {
         $data = $this->model->whereIn($column, $value);
 
-        if (!empty(Arr::get($args, 'where'))) {
+        if (! empty(Arr::get($args, 'where'))) {
             $this->applyConditions($args['where']);
         }
 
         $data = $this->applyBeforeExecuteQuery($data);
 
-        if (!empty(Arr::get($args, 'paginate'))) {
+        if (! empty(Arr::get($args, 'paginate'))) {
             return $data->paginate((int)$args['paginate']);
-        } elseif (!empty(Arr::get($args, 'limit'))) {
+        } elseif (! empty(Arr::get($args, 'limit'))) {
             return $data->limit((int)$args['limit']);
         }
 
@@ -402,7 +399,7 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         }
 
         foreach ($params['order_by'] as $column => $direction) {
-            if (!in_array(strtolower($direction), ['asc', 'desc'])) {
+            if (! in_array(strtolower($direction), ['asc', 'desc'])) {
                 continue;
             }
 
@@ -411,15 +408,15 @@ abstract class RepositoriesAbstract implements RepositoryInterface
             }
         }
 
-        if (!empty($params['with'])) {
+        if (! empty($params['with'])) {
             $data = $data->with($params['with']);
         }
 
-        if (!empty($params['withCount'])) {
+        if (! empty($params['withCount'])) {
             $data = $data->withCount($params['withCount']);
         }
 
-        if (!empty($params['withAvg'])) {
+        if (! empty($params['withAvg'])) {
             $data = $data->withAvg($params['withAvg'][0], $params['withAvg'][1]);
         }
 
@@ -456,7 +453,7 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         $this->applyConditions($condition);
 
         $item = $this->model->withTrashed()->first();
-        if (!empty($item)) {
+        if (! empty($item)) {
             $item->forceDelete();
         }
     }
@@ -469,7 +466,7 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         $this->applyConditions($condition);
 
         $item = $this->model->withTrashed()->first();
-        if (!empty($item)) {
+        if (! empty($item)) {
             $item->restore();
         }
     }
@@ -483,7 +480,7 @@ abstract class RepositoriesAbstract implements RepositoryInterface
 
         $query = $this->model->withTrashed();
 
-        if (!empty($select)) {
+        if (! empty($select)) {
             return $query->select($select)->first();
         }
 

@@ -6,24 +6,12 @@ use Illuminate\Support\Facades\Auth;
 
 class AdminBar
 {
-    /**
-     * @var array
-     */
-    protected $groups = [];
+    protected array $groups = [];
 
-    /**
-     * @var bool
-     */
-    protected $isDisplay = true;
+    protected bool $isDisplay = true;
 
-    /**
-     * @var array
-     */
-    protected $noGroupLinks = [];
+    protected array $noGroupLinks = [];
 
-    /**
-     * AdminBar constructor.
-     */
     public function __construct()
     {
         $this->groups = [
@@ -40,18 +28,11 @@ class AdminBar
         ];
     }
 
-    /**
-     * @return bool
-     */
     public function isDisplay(): bool
     {
         return $this->isDisplay;
     }
 
-    /**
-     * @param bool $isDisplay
-     * @return $this
-     */
     public function setIsDisplay(bool $isDisplay = true): self
     {
         $this->isDisplay = $isDisplay;
@@ -59,28 +40,16 @@ class AdminBar
         return $this;
     }
 
-    /**
-     * @return array
-     */
     public function getGroups(): array
     {
         return $this->groups;
     }
 
-    /**
-     * @return array
-     */
     public function getLinksNoGroup(): array
     {
         return $this->noGroupLinks;
     }
 
-    /**
-     * @param string $slug
-     * @param string $title
-     * @param string $link
-     * @return $this
-     */
     public function registerGroup(string $slug, string $title, string $link = 'javascript:;'): self
     {
         if (isset($this->groups[$slug])) {
@@ -98,16 +67,9 @@ class AdminBar
         return $this;
     }
 
-    /**
-     * @param string $title
-     * @param string $url
-     * @param null $group
-     * @param string|null $permission
-     * @return $this
-     */
     public function registerLink(string $title, string $url, $group = null, string $permission = null): self
     {
-        if ($group === null || !isset($this->groups[$group])) {
+        if ($group === null || ! isset($this->groups[$group])) {
             $this->noGroupLinks[] = [
                 'link' => $url,
                 'title' => $title,
@@ -124,12 +86,9 @@ class AdminBar
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function render(): string
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return '';
         }
 

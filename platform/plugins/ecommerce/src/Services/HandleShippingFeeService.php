@@ -4,8 +4,8 @@ namespace Botble\Ecommerce\Services;
 
 use Botble\Base\Models\BaseModel;
 use Botble\Ecommerce\Enums\ShippingMethodEnum;
+use Botble\Ecommerce\Enums\ShippingRuleTypeEnum;
 use Botble\Ecommerce\Models\Shipping;
-use Botble\Ecommerce\Models\ShippingRule;
 use Botble\Ecommerce\Repositories\Interfaces\AddressInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ShippingInterface;
@@ -18,64 +18,26 @@ use Illuminate\Support\Arr;
 
 class HandleShippingFeeService
 {
-    /**
-     * @var ShippingInterface
-     */
-    protected $shippingRepository;
+    protected ShippingInterface $shippingRepository;
 
-    /**
-     * @var AddressInterface
-     */
-    protected $addressRepository;
+    protected AddressInterface $addressRepository;
 
-    /**
-     * @var ShippingRuleInterface
-     */
-    protected $shippingRuleRepository;
+    protected ShippingRuleInterface $shippingRuleRepository;
 
-    /**
-     * @var ProductInterface
-     */
-    protected $productRepository;
+    protected ProductInterface $productRepository;
 
-    /**
-     * @var StoreLocatorInterface
-     */
-    protected $storeLocatorRepository;
+    protected StoreLocatorInterface $storeLocatorRepository;
 
-    /**
-     * @var array
-     */
-    protected $shipping;
+    protected array $shipping;
 
-    /**
-     * @var BaseModel
-     */
-    protected $shippingDefault;
+    protected ?BaseModel $shippingDefault = null;
 
-    /**
-     * @var array
-     */
-    protected $shippingRules;
+    protected array $shippingRules;
 
-    /**
-     * @var Cache
-     */
-    protected $cache;
+    protected Cache $cache;
 
-    /**
-     * @var bool
-     */
-    protected $useCache;
+    protected bool $useCache;
 
-    /**
-     * HandleShippingFeeService constructor.
-     * @param ShippingInterface $shippingRepository
-     * @param AddressInterface $addressRepository
-     * @param ShippingRuleInterface $shippingRuleRepository
-     * @param ProductInterface $productRepository
-     * @param StoreLocatorInterface $storeLocatorRepository
-     */
     public function __construct(
         ShippingInterface $shippingRepository,
         AddressInterface $addressRepository,
@@ -95,20 +57,14 @@ class HandleShippingFeeService
         $this->useCache = true;
     }
 
-    /**
-     * @param array $data
-     * @param null $method
-     * @param null $option
-     * @return array
-     */
-    public function execute(array $data, $method = null, $option = null): array
+    public function execute(array $data, ?string $method = null, ?string $option = null): array
     {
         $result = [];
 
         $cacheKey = $this->getCacheKey($data);
         $cacheValue = $this->getCacheValue($cacheKey);
         if ($cacheValue) {
-            $result = $cacheValue;
+            $result[ShippingMethodEnum::DEFAULT] = $cacheValue;
         } else {
             $default = $this->getShippingFee($data, ShippingMethodEnum::DEFAULT, $option);
 
@@ -116,26 +72,30 @@ class HandleShippingFeeService
                 $result[ShippingMethodEnum::DEFAULT] = $default;
             }
 
-            $result = apply_filters('handle_shipping_fee', $result, $data, $option);
-
-            $this->setCacheValue($cacheKey, $result);
+            $this->setCacheValue($cacheKey, $default);
         }
 
+        $result = apply_filters('handle_shipping_fee', $result, $data, $option);
+
         if ($method) {
-            if ($response = Arr::get($result, $method . '.' . $option)) {
-                return [$response];
+            $options = Arr::get($result, $method, []);
+
+            if (! is_array($options) || ! count($options)) {
+                return [];
             }
+
+            $filtered = Arr::where($options, function ($rate) {
+                return ! Arr::get($rate, 'disabled');
+            });
+
+            $response = Arr::get($filtered, $option);
+
+            return $response ? [$response] : [];
         }
 
         return $result;
     }
 
-    /**
-     * @param array $data
-     * @param string $method
-     * @param string|null $option
-     * @return array
-     */
     protected function getShippingFee(array $data, string $method, ?string $option = null): array
     {
         $weight = EcommerceHelper::validateOrderWeight(Arr::get($data, 'weight'));
@@ -149,47 +109,44 @@ class HandleShippingFeeService
         }
 
         $result = [];
-        switch ($method) {
-            case 'default':
-                $methodKey = $method . '-' . $country;
-                if (Arr::has($this->shipping, $methodKey)) {
-                    $shipping = Arr::get($this->shipping, $methodKey);
+        if ($method == ShippingMethodEnum::DEFAULT) {
+            $methodKey = $method . '-' . $country;
+            if (Arr::has($this->shipping, $methodKey)) {
+                $shipping = Arr::get($this->shipping, $methodKey);
+            } else {
+                $shipping = $this->shippingRepository->getFirstBy(['country' => $country]);
+                Arr::set($this->shipping, $methodKey, $shipping);
+            }
+
+            if (! empty($shipping)) {
+                $result = $this->calculateDefaultFeeByAddress(
+                    $shipping,
+                    $weight,
+                    $orderTotal,
+                    $data,
+                    $option
+                );
+            }
+
+            if (empty($result)) {
+                if ($this->shippingDefault) {
+                    $default = $this->shippingDefault;
                 } else {
-                    $shipping = $this->shippingRepository->getFirstBy(['country' => $country]);
-                    Arr::set($this->shipping, $methodKey, $shipping);
+                    $default = $this->shippingRepository
+                        ->getModel()
+                        ->whereNull('country')
+                        ->first();
+                    $this->shippingDefault = $default;
                 }
 
-                if (!empty($shipping)) {
-                    $result = $this->calculateDefaultFeeByAddress(
-                        $shipping,
-                        $weight,
-                        $orderTotal,
-                        Arr::get($data, 'city'),
-                        $option
-                    );
-                }
-
-                if (empty($result)) {
-                    if ($this->shippingDefault) {
-                        $default = $this->shippingDefault;
-                    } else {
-                        $default = $this->shippingRepository
-                            ->getModel()
-                            ->whereNull('country')
-                            ->first();
-                        $this->shippingDefault = $default;
-                    }
-
-                    $result = $this->calculateDefaultFeeByAddress(
-                        $default,
-                        $weight,
-                        $orderTotal,
-                        Arr::get($data, 'city'),
-                        $option
-                    );
-                }
-
-                break;
+                $result = $this->calculateDefaultFeeByAddress(
+                    $default,
+                    $weight,
+                    $orderTotal,
+                    $data,
+                    $option
+                );
+            }
         }
 
         if ($result) {
@@ -199,16 +156,13 @@ class HandleShippingFeeService
         return $result;
     }
 
-    /**
-     * @param Shipping $shipping
-     * @param int $weight
-     * @param int $orderTotal
-     * @param string $city
-     * @param null $option
-     * @return array
-     */
-    protected function calculateDefaultFeeByAddress($shipping, $weight, $orderTotal, $city, $option = null): array
-    {
+    protected function calculateDefaultFeeByAddress(
+        ?Shipping $shipping,
+        int $weight,
+        int $orderTotal,
+        array $data,
+        string $option = null
+    ): array {
         $result = [];
 
         if ($shipping) {
@@ -219,6 +173,8 @@ class HandleShippingFeeService
                 $rule = $this->shippingRuleRepository->findById($option, ['items']);
                 Arr::set($this->shippingRules, $ruleKey, $rule);
             }
+            $city = Arr::get($data, 'city');
+            $state = Arr::get($data, 'state');
 
             if ($rule) {
                 $ruleDetail = $rule
@@ -238,48 +194,114 @@ class HandleShippingFeeService
                     ];
                 }
             } else {
+                $zipCode = Arr::get($data, 'address_to.zip_code');
+
                 $rules = $this->shippingRuleRepository
                     ->getModel()
                     ->where(function (Builder $query) use ($orderTotal, $shipping) {
                         $query
                             ->where('shipping_id', $shipping->id)
-                            ->where('type', 'base_on_price')
+                            ->where('type', ShippingRuleTypeEnum::BASED_ON_PRICE)
                             ->where('from', '<=', $orderTotal)
                             ->where(function (Builder $sub) use ($orderTotal) {
                                 $sub
                                     ->whereNull('to')
-                                    // ->orWhere('to', '<=', 0)
                                     ->orWhere('to', '>=', $orderTotal);
                             });
                     })
                     ->orWhere(function (Builder $query) use ($weight, $shipping) {
                         $query
                             ->where('shipping_id', $shipping->id)
-                            ->where('type', 'base_on_weight')
+                            ->where('type', ShippingRuleTypeEnum::BASED_ON_WEIGHT)
                             ->where('from', '<=', $weight)
                             ->where(function (Builder $sub) use ($weight) {
                                 $sub
                                     ->whereNull('to')
-                                    // ->orWhere('to', '<=', 0)
                                     ->orWhere('to', '>=', $weight);
                             });
-                    })
-                    ->with(['items'])
+                    });
+
+                if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
+                    $rules = $rules
+                        ->orWhere(function (Builder $query) use ($shipping) {
+                            $query
+                                ->where('shipping_id', $shipping->id)
+                                ->where('type', ShippingRuleTypeEnum::BASED_ON_LOCATION);
+                        });
+                }
+
+                if (EcommerceHelper::isZipCodeEnabled()) {
+                    $rules = $rules
+                        ->orWhere(function (Builder $query) use ($city, $state, $zipCode, $shipping) {
+                            $query
+                                ->where('shipping_id', $shipping->id)
+                                ->where('type', ShippingRuleTypeEnum::BASED_ON_ZIPCODE)
+                                ->whereHas('items', function (Builder $sub) use ($city, $state, $zipCode) {
+                                    $sub
+                                        ->where([
+                                            'state' => $state,
+                                            'city' => $city,
+                                            'zip_code' => $zipCode,
+                                        ]);
+                                });
+                        });
+                }
+
+                $rules = $rules
+                    ->with([
+                        'items' => function ($query) {
+                            $query
+                                ->where(['is_enabled' => 1])
+                                ->orderBy('adjustment_price');
+                        },
+                    ])
                     ->get();
 
                 foreach ($rules as $rule) {
-                    /**
-                     * @var ShippingRule $rule
-                     */
-                    $ruleDetail = $rule
-                        ->items
-                        ->where('city', $city)
-                        ->where('is_enabled', 1)
-                        ->first();
-                    if ($ruleDetail) {
+                    switch ($rule->type) {
+                        case ShippingRuleTypeEnum::BASED_ON_ZIPCODE:
+                            $ruleItem = $rule
+                                ->items
+                                ->where('state', $state)
+                                ->where('city', $city)
+                                ->where('zip_code', $zipCode)
+                                ->first();
+
+                            if (! $ruleItem) {
+                                continue 2;
+                            }
+
+                            break;
+                        case ShippingRuleTypeEnum::BASED_ON_LOCATION:
+                            $ruleItem = $rule
+                                ->items
+                                ->where('state', $state)
+                                ->where('city', $city)
+                                ->first();
+
+                            if (! $ruleItem) {
+                                $ruleItem = $rule
+                                    ->items
+                                    ->where('state', $state)
+                                    ->whereIn('city', ['', null, 0])
+                                    ->first();
+                            }
+
+                            break;
+                        default:
+                            $ruleItem = $rule
+                                ->items
+                                ->where('state', $state)
+                                ->where('city', $city)
+                                ->first();
+
+                            break;
+                    }
+
+                    if ($ruleItem) {
                         $result[$rule->id] = [
                             'name' => $rule->name,
-                            'price' => $rule->price + $ruleDetail->adjustment_price,
+                            'price' => max($rule->price + $ruleItem->adjustment_price, 0),
                         ];
                     } else {
                         $result[$rule->id] = [
@@ -294,22 +316,12 @@ class HandleShippingFeeService
         return $result;
     }
 
-    /**
-     * @param array $data
-     * @return string
-     */
     protected function getCacheKey(array $data): string
     {
-        $jsonData = json_encode(Arr::only($data, ['origin', 'address_to', 'parcels', 'extra']));
-
-        return md5($jsonData);
+        return md5(json_encode(Arr::only($data, ['origin', 'address_to', 'items', 'extra'])));
     }
 
-    /**
-     * @param string $key
-     * @return mixed
-     */
-    protected function getCacheValue(string $key)
+    protected function getCacheValue(string $key): mixed
     {
         if ($this->useCache) {
             return $this->cache->get($key);
@@ -318,12 +330,7 @@ class HandleShippingFeeService
         return null;
     }
 
-    /**
-     * @param string $key
-     * @param mixed $value
-     * @return bool
-     */
-    protected function setCacheValue(string $key, $value): bool
+    protected function setCacheValue(string $key, mixed $value): bool
     {
         if ($key) {
             return $this->cache->put($key, $value);

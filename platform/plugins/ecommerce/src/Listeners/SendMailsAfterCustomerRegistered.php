@@ -6,20 +6,10 @@ use Botble\Ecommerce\Models\Customer;
 use EcommerceHelper;
 use EmailHandler;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
-use Throwable;
 
 class SendMailsAfterCustomerRegistered
 {
-    /**
-     * Handle the event.
-     *
-     * @param Registered $event
-     * @return void
-     * @throws FileNotFoundException
-     * @throws Throwable
-     */
-    public function handle(Registered $event)
+    public function handle(Registered $event): void
     {
         $customer = $event->user;
 

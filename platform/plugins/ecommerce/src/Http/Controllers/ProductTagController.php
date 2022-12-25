@@ -21,14 +21,8 @@ use Throwable;
 
 class ProductTagController extends BaseController
 {
-    /**
-     * @var ProductTagInterface
-     */
-    protected $productTagRepository;
+    protected ProductTagInterface $productTagRepository;
 
-    /**
-     * @param ProductTagInterface $productTagRepository
-     */
     public function __construct(ProductTagInterface $productTagRepository)
     {
         $this->productTagRepository = $productTagRepository;

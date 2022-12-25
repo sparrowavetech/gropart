@@ -8,15 +8,7 @@ use Illuminate\Support\Facades\Auth;
 
 class RedirectIfCustomer
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param Request $request
-     * @param Closure $next
-     * @param string|null $guard
-     * @return mixed
-     */
-    public function handle($request, Closure $next, $guard = 'customer')
+    public function handle(Request $request, Closure $next, string $guard = 'customer')
     {
         if (Auth::guard($guard)->check()) {
             return redirect(route('customer.overview'));

@@ -48,7 +48,8 @@ use OrderHelper;
 use Route;
 use RvMedia;
 use Theme;
-use Throwable;
+use Botble\Sms\Supports\SmsHandler;
+use Botble\Sms\Enums\SmsEnum;
 
 class HookServiceProvider extends ServiceProvider
 {
@@ -153,7 +154,7 @@ class HookServiceProvider extends ServiceProvider
 
             if (defined('PAYMENT_FILTER_PAYMENT_PARAMETERS')) {
                 add_filter(PAYMENT_FILTER_PAYMENT_PARAMETERS, function ($html) {
-                    if (!auth('customer')->check()) {
+                    if (! auth('customer')->check()) {
                         return $html;
                     }
 
@@ -230,7 +231,7 @@ class HookServiceProvider extends ServiceProvider
             add_filter([THEME_FRONT_HEADER, 'ecommerce_checkout_header'], function ($html) {
                 $pixelID = get_ecommerce_setting('facebook_pixel_id');
 
-                if ($this->app->environment('demo') || !$pixelID) {
+                if ($this->app->environment('demo') || ! $pixelID) {
                     return $html;
                 }
 
@@ -240,7 +241,7 @@ class HookServiceProvider extends ServiceProvider
             add_filter([THEME_FRONT_HEADER, 'ecommerce_checkout_header'], function ($html) {
                 $tagManagerCode = get_ecommerce_setting('google_tag_manager_code');
 
-                if ($this->app->environment('demo') || !$tagManagerCode) {
+                if ($this->app->environment('demo') || ! $tagManagerCode) {
                     return $html;
                 }
 
@@ -252,15 +253,15 @@ class HookServiceProvider extends ServiceProvider
                 false
             )) {
                 add_action(BASE_ACTION_META_BOXES, function ($context, $object) {
-                    if (!$object || $context != 'advanced') {
+                    if (! $object || $context != 'advanced') {
                         return false;
                     }
 
-                    if (!is_in_admin() || get_class($object) != Product::class) {
+                    if (! is_in_admin() || get_class($object) != Product::class) {
                         return false;
                     }
 
-                    if (!in_array(Route::currentRouteName(), ['products.create', 'products.edit', 'marketplace.vendor.products.create', 'marketplace.vendor.products.edit'])) {
+                    if (! in_array(Route::currentRouteName(), ['products.create', 'products.edit', 'marketplace.vendor.products.create', 'marketplace.vendor.products.edit'])) {
                         return false;
                     }
 
@@ -275,7 +276,7 @@ class HookServiceProvider extends ServiceProvider
                             $value = MetaBox::getMetaData($args[0], 'faq_schema_config', true);
                         }
 
-                        $hasValue = !empty($value);
+                        $hasValue = ! empty($value);
 
                         $value = json_encode((array)$value);
 
@@ -288,22 +289,22 @@ class HookServiceProvider extends ServiceProvider
 
             add_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, function ($screen, $object) {
                 add_filter(THEME_FRONT_HEADER, function ($html) use ($object) {
-                    if (!defined('FAQ_MODULE_SCREEN_NAME') ||
+                    if (! defined('FAQ_MODULE_SCREEN_NAME') ||
                         get_class($object) != Product::class ||
-                        !config('plugins.ecommerce.general.enable_faq_in_product_details', false)
+                        ! config('plugins.ecommerce.general.enable_faq_in_product_details', false)
                     ) {
                         return $html;
                     }
 
                     $value = MetaBox::getMetaData($object, 'faq_schema_config', true);
 
-                    if (!$value || !is_array($value)) {
+                    if (! $value || ! is_array($value)) {
                         return $html;
                     }
 
-                    if (!empty($value)) {
+                    if (! empty($value)) {
                         foreach ($value as $key => $item) {
-                            if (!$item[0]['value'] && !$item[1]['value']) {
+                            if (! $item[0]['value'] && ! $item[1]['value']) {
                                 Arr::forget($value, $key);
                             }
                         }
@@ -393,7 +394,7 @@ class HookServiceProvider extends ServiceProvider
         });
 
         add_action(BASE_ACTION_TOP_FORM_CONTENT_NOTIFICATION, function ($request, $data = null) {
-            if (!$data instanceof Product || Route::currentRouteName() != 'products.edit') {
+            if (! $data instanceof Product || Route::currentRouteName() != 'products.edit') {
                 return false;
             }
 
@@ -417,7 +418,7 @@ class HookServiceProvider extends ServiceProvider
                 if ($discountPrice < $flashSalePrice) {
                     $flashSale = null;
 
-                    if (!$data->is_variation) {
+                    if (! $data->is_variation) {
                         $productCollections = $data->productCollections;
                     } else {
                         $productCollections = $data->original_product->productCollections;
@@ -438,7 +439,7 @@ class HookServiceProvider extends ServiceProvider
 
         if (function_exists('add_shortcode')) {
             add_shortcode('recently-viewed-products', __('Customer Recently Viewed Products'), __('Customer Recently Viewed Products'), function () {
-                if (!EcommerceHelper::isEnabledCustomerRecentlyViewedProducts()) {
+                if (! EcommerceHelper::isEnabledCustomerRecentlyViewedProducts()) {
                     return '';
                 }
 
@@ -578,7 +579,7 @@ class HookServiceProvider extends ServiceProvider
                 ];
             }, 120, 2);
 
-            if (!$this->app->runningInConsole()) {
+            if (! $this->app->runningInConsole()) {
                 add_action(INVOICE_PAYMENT_CREATED, function (Invoice $invoice) {
                     try {
                         $customer = $invoice->payment->customer;
@@ -595,7 +596,21 @@ class HookServiceProvider extends ServiceProvider
                             ->sendUsingTemplate('invoice-payment-created', $customer->email, [
                                 'attachments' => [$localDisk->path($invoiceName)],
                             ]);
-
+                            if (is_plugin_active('sms')) {
+                                $sms = new  SmsHandler;
+                                $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+                                if ($sms->templateEnabled(SmsEnum::INVOICE_PAYMENT_DETAIL())) {
+                                    $sms->setVariableValues([
+                                        'customer_name' => $customer->name,
+                                        'invoice_code' => $invoice->code,
+                                        'invoice_link' => route('customer.invoices.show', $invoice->id),
+                                    ]);
+                                    $sms->sendUsingTemplate(
+                                        SmsEnum::INVOICE_PAYMENT_DETAIL(),
+                                        $customer->phone
+                                    );
+                                }
+                            }
                         $localDisk->delete($invoiceName);
                     } catch (Exception $exception) {
                         info($exception->getMessage());
@@ -607,7 +622,7 @@ class HookServiceProvider extends ServiceProvider
                 add_filter(PAYMENT_FILTER_PAYMENT_INFO_DETAIL, function ($data, $payment) {
                     $invoice = Invoice::where('payment_id', $payment->id)->first();
 
-                    if (!$invoice) {
+                    if (! $invoice) {
                         return $data;
                     }
 
@@ -672,17 +687,15 @@ class HookServiceProvider extends ServiceProvider
                         'attributes' => [
                             'name' => 'logo_in_the_checkout_page',
                             'value' => null,
+                            'attributes' => [
+                                'allow_thumb' => false,
+                            ],
                         ],
                     ],
                 ],
             ]);
     }
 
-    /**
-     * Register sidebar options in menu
-     *
-     * @throws Throwable
-     */
     public function registerMenuOptions(): bool
     {
         if (Auth::user()->hasPermission('brands.index')) {
@@ -696,15 +709,9 @@ class HookServiceProvider extends ServiceProvider
         return true;
     }
 
-    /**
-     * @param array $widgets
-     * @param Collection $widgetSettings
-     * @return array
-     * @throws Throwable
-     */
-    public function registerDashboardWidgets($widgets, $widgetSettings)
+    public function registerDashboardWidgets(array $widgets, Collection $widgetSettings): array
     {
-        if (!Auth::user()->hasPermission('ecommerce.report.index')) {
+        if (! Auth::user()->hasPermission('ecommerce.report.index')) {
             return $widgets;
         }
 
@@ -722,13 +729,7 @@ class HookServiceProvider extends ServiceProvider
             ->init($widgets, $widgetSettings);
     }
 
-    /**
-     * @param string $options
-     * @return string
-     *
-     * @throws Throwable
-     */
-    public function registerTopHeaderNotification($options)
+    public function registerTopHeaderNotification(?string $options): ?string
     {
         try {
             if (Auth::user()->hasPermission('orders.edit')) {
@@ -751,24 +752,19 @@ class HookServiceProvider extends ServiceProvider
 
                 return $options . view('plugins/ecommerce::orders.notification', compact('orders'))->render();
             }
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return $options;
         }
 
         return $options;
     }
 
-    /**
-     * @param int $number
-     * @param string $menuId
-     * @return string
-     */
-    public function getPendingOrders($number, $menuId)
+    public function getPendingOrders(int|string|null $number, string $menuId): string
     {
         switch ($menuId) {
             case 'cms-plugins-ecommerce-order':
 
-                if (!Auth::user()->hasPermission('orders.index')) {
+                if (! Auth::user()->hasPermission('orders.index')) {
                     return $number;
                 }
 
@@ -781,7 +777,7 @@ class HookServiceProvider extends ServiceProvider
 
             case 'cms-plugins-ecommerce':
 
-                if (!Auth::user()->hasPermission('orders.index')) {
+                if (! Auth::user()->hasPermission('orders.index')) {
                     return $number;
                 }
 
@@ -794,7 +790,7 @@ class HookServiceProvider extends ServiceProvider
 
             case 'cms-plugins-ecommerce-order-return':
 
-                if (!Auth::user()->hasPermission('orders.index')) {
+                if (! Auth::user()->hasPermission('orders.index')) {
                     return $number;
                 }
 
@@ -809,10 +805,6 @@ class HookServiceProvider extends ServiceProvider
         return $number;
     }
 
-    /**
-     * @param array $data
-     * @return array
-     */
     public function getMenuItemCount(array $data = []): array
     {
         if (Auth::check() && Auth::user()->hasPermission('orders.index')) {
@@ -844,11 +836,7 @@ class HookServiceProvider extends ServiceProvider
         return $data;
     }
 
-    /**
-     * @param Collection|string $products
-     * @return string
-     */
-    public function renderProductsInCheckoutPage($products)
+    public function renderProductsInCheckoutPage(Collection|string $products): string|Collection
     {
         if ($products instanceof Collection) {
             return view('plugins/ecommerce::orders.checkout.products', compact('products'))->render();

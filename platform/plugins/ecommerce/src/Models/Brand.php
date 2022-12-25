@@ -11,16 +11,8 @@ class Brand extends BaseModel
 {
     use EnumCastable;
 
-    /**
-     * The database table used by the model.
-     *
-     * @var string
-     */
     protected $table = 'ec_brands';
 
-    /**
-     * @var array
-     */
     protected $fillable = [
         'name',
         'website',
@@ -31,17 +23,6 @@ class Brand extends BaseModel
         'status',
     ];
 
-    /**
-     * @var array
-     */
-    protected $dates = [
-        'created_at',
-        'updated_at',
-    ];
-
-    /**
-     * @var array
-     */
     protected $casts = [
         'status' => BaseStatusEnum::class,
     ];

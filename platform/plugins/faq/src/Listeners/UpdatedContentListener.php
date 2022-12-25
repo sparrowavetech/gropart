@@ -9,20 +9,14 @@ use MetaBox;
 
 class UpdatedContentListener
 {
-    /**
-     * Handle the event.
-     *
-     * @param UpdatedContentEvent $event
-     * @return void
-     */
-    public function handle(UpdatedContentEvent $event)
+    public function handle(UpdatedContentEvent $event): void
     {
         try {
             if ($event->request->has('content') && $event->request->has('faq_schema_config')) {
                 $config = $event->request->input('faq_schema_config');
-                if (!empty($config)) {
+                if (! empty($config)) {
                     foreach ($config as $key => $item) {
-                        if (!$item[0]['value'] && !$item[1]['value']) {
+                        if (! $item[0]['value'] && ! $item[1]['value']) {
                             Arr::forget($config, $key);
                         }
                     }

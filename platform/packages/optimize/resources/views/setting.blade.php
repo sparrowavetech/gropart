@@ -57,12 +57,6 @@
                         <input type="checkbox" value="1" @if (setting('optimize_remove_comments', 0)) checked @endif name="optimize_remove_comments"> {{ trans('packages/optimize::optimize.remove_comments') }} </label>
                     {{ Form::helper(trans('packages/optimize::optimize.remove_comments_description')) }}
                 </div>
-                <div class="form-group">
-                    <input type="hidden" name="optimize_trim_urls" value="0">
-                    <label>
-                        <input type="checkbox" value="1" @if (setting('optimize_trim_urls', 0)) checked @endif name="optimize_trim_urls"> {{ trans('packages/optimize::optimize.trim_urls') }} </label>
-                    {{ Form::helper(trans('packages/optimize::optimize.trim_urls_description')) }}
-                </div>
 
                 <div class="form-group">
                     <input type="hidden" name="optimize_remove_quotes" value="0">

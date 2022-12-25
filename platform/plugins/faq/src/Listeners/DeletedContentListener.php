@@ -8,13 +8,7 @@ use MetaBox;
 
 class DeletedContentListener
 {
-    /**
-     * Handle the event.
-     *
-     * @param DeletedContentEvent $event
-     * @return void
-     */
-    public function handle(DeletedContentEvent $event)
+    public function handle(DeletedContentEvent $event): void
     {
         try {
             MetaBox::deleteMetaData($event->data, 'faq_schema_config');

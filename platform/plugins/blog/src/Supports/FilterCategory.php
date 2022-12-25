@@ -4,10 +4,6 @@ namespace Botble\Blog\Supports;
 
 class FilterCategory
 {
-    /**
-     * @param array $request
-     * @return array
-     */
     public static function setFilters(array $request): array
     {
         return [

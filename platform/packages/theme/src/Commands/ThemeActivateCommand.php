@@ -5,66 +5,39 @@ namespace Botble\Theme\Commands;
 use Botble\Theme\Commands\Traits\ThemeTrait;
 use Botble\Theme\Services\ThemeService;
 use Illuminate\Console\Command;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 
+#[AsCommand('cms:theme:activate', 'Activate a theme')]
 class ThemeActivateCommand extends Command
 {
     use ThemeTrait;
 
-    /**
-     * @var ThemeService
-     */
-    public $themeService;
-
-    /**
-     * The console command name.
-     *
-     * @var string
-     */
-    protected $signature = 'cms:theme:activate
-        {name : The theme that you want to activate}
-        {--path= : Path to theme directory}
-    ';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Activate a theme';
-
-    /**
-     * ThemeActivateCommand constructor.
-     * @param ThemeService $themeService
-     */
-    public function __construct(ThemeService $themeService)
+    public function handle(ThemeService $themeService): int
     {
-        parent::__construct();
-        $this->themeService = $themeService;
-    }
-
-    /**
-     * Execute the console command.
-     *
-     * @return int
-     */
-    public function handle()
-    {
-        if (!preg_match('/^[a-z0-9\-]+$/i', $this->argument('name'))) {
+        if (! preg_match('/^[a-z0-9\-]+$/i', $this->argument('name'))) {
             $this->error('Only alphabetic characters are allowed.');
 
-            return 1;
+            return self::FAILURE;
         }
 
-        $result = $this->themeService->activate($this->getTheme());
+        $result = $themeService->activate($this->getTheme());
 
         if ($result['error']) {
             $this->error($result['message']);
 
-            return 1;
+            return self::FAILURE;
         }
 
         $this->info($result['message']);
 
-        return 0;
+        return self::SUCCESS;
+    }
+
+    protected function configure(): void
+    {
+        $this->addArgument('name', InputArgument::REQUIRED, 'The theme name that you want to remove assets');
+        $this->addOption('path', null, InputOption::VALUE_REQUIRED, 'Path to theme directory');
     }
 }

@@ -29,7 +29,7 @@ class JsValidatorFactory
      *
      * @var array
      */
-    protected $options;
+    protected array $options = [];
 
     /**
      * Create a new Validator factory instance.
@@ -124,7 +124,7 @@ class JsValidatorFactory
      */
     public function formRequest($formRequest, $selector = null)
     {
-        if (!is_object($formRequest)) {
+        if (! is_object($formRequest)) {
             $formRequest = $this->createFormRequest($formRequest);
         }
 
@@ -201,7 +201,7 @@ class JsValidatorFactory
      */
     protected function jsValidator(Validator $validator, $selector = null)
     {
-        $remote = !$this->options['disable_remote_validation'];
+        $remote = ! $this->options['disable_remote_validation'];
         $view = $this->options['view'];
         $selector = is_null($selector) ? $this->options['form_selector'] : $selector;
 

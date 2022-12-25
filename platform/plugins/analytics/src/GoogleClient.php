@@ -3,7 +3,6 @@
 namespace Botble\Analytics;
 
 use Google\Client;
-use Google\Exception;
 use LogicException;
 
 class GoogleClient extends Client
@@ -14,12 +13,11 @@ class GoogleClient extends Client
      * the "Download JSON" button on in the Google Developer
      * Console.
      * @param string|array $config the configuration json
-     * @throws Exception
      */
-    public function setAuthConfig($config)
+    public function setAuthConfig($config): void
     {
         if (is_string($config)) {
-            if (!$config = json_decode($config, true)) {
+            if (! $config = json_decode($config, true)) {
                 throw new LogicException('Invalid data for auth config');
             }
         }

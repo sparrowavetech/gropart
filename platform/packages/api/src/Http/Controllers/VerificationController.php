@@ -29,7 +29,7 @@ class VerificationController extends Controller
     {
         $user = ApiHelper::newModel()->where(['email' => $request->input('email')])->first();
 
-        if (!$user) {
+        if (! $user) {
             return $response
                 ->setError()
                 ->setMessage(__('User not found!'))

@@ -6,32 +6,24 @@ use BaseHelper;
 use Botble\Ecommerce\Repositories\Interfaces\DiscountInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
 use MarketplaceHelper;
+use Symfony\Component\HttpFoundation\Response;
 use Yajra\DataTables\DataTables;
 
 class DiscountTable extends TableAbstract
 {
-    /**
-     * @var bool
-     */
     protected $hasActions = false;
 
-    /**
-     * @var bool
-     */
     protected $hasFilter = false;
 
-    /**
-     * @var bool
-     */
     protected $hasCheckbox = false;
 
-    /**
-     * DiscountTable constructor.
-     * @param DataTables $table
-     * @param UrlGenerator $urlGenerator
-     * @param DiscountInterface $discountRepository
-     */
     public function __construct(DataTables $table, UrlGenerator $urlGenerator, DiscountInterface $discountRepository)
     {
         parent::__construct($table, $urlGenerator);
@@ -39,10 +31,7 @@ class DiscountTable extends TableAbstract
         $this->repository = $discountRepository;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
@@ -80,7 +69,7 @@ class DiscountTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
         $storeId = auth('customer')->user()->store->id;
         $query = $this->repository
@@ -91,9 +80,6 @@ class DiscountTable extends TableAbstract
         return $this->applyScopes($query);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function columns(): array
     {
         return [
@@ -122,29 +108,20 @@ class DiscountTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function buttons(): array
     {
         return $this->addCreateButton(route('marketplace.vendor.discounts.create'));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function bulkActions(): array
     {
         return $this->addDeleteAction(route('marketplace.vendor.discounts.deletes'), null, parent::bulkActions());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function renderTable($data = [], $mergeData = [])
+    public function renderTable($data = [], $mergeData = []): View|Factory|Response
     {
         if ($this->query()->count() === 0 &&
-            $this->request()->input('filter_table_id') !== $this->getOption('id') && !$this->request()->ajax()
+            $this->request()->input('filter_table_id') !== $this->getOption('id') && ! $this->request()->ajax()
         ) {
             return view('plugins/ecommerce::discounts.intro');
         }

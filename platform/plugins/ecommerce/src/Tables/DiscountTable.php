@@ -6,43 +6,35 @@ use BaseHelper;
 use Botble\Ecommerce\Repositories\Interfaces\DiscountInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 use Yajra\DataTables\DataTables;
 
 class DiscountTable extends TableAbstract
 {
-    /**
-     * @var bool
-     */
     protected $hasActions = true;
 
-    /**
-     * @var bool
-     */
     protected $hasFilter = false;
 
-    /**
-     * DiscountTable constructor.
-     * @param DataTables $table
-     * @param UrlGenerator $urlGenerator
-     * @param DiscountInterface $discountRepository
-     */
     public function __construct(DataTables $table, UrlGenerator $urlGenerator, DiscountInterface $discountRepository)
     {
         parent::__construct($table, $urlGenerator);
 
         $this->repository = $discountRepository;
 
-        if (!Auth::user()->hasPermission('discounts.destroy')) {
+        if (! Auth::user()->hasPermission('discounts.destroy')) {
             $this->hasOperations = false;
             $this->hasActions = false;
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
@@ -67,7 +59,7 @@ class DiscountTable extends TableAbstract
                 return BaseHelper::formatDate($item->start_date);
             })
             ->editColumn('end_date', function ($item) {
-                if (!$item->end_date) {
+                if (! $item->end_date) {
                     return '&mdash;';
                 }
 
@@ -80,20 +72,14 @@ class DiscountTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
         $query = $this->repository->getModel()->select(['*']);
 
         return $this->applyScopes($query);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function columns()
+    public function columns(): array
     {
         return [
             'id' => [
@@ -121,30 +107,21 @@ class DiscountTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function buttons()
+    public function buttons(): array
     {
         return $this->addCreateButton(route('discounts.create'), 'discounts.create');
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function bulkActions(): array
     {
         return $this->addDeleteAction(route('discounts.deletes'), 'discounts.destroy', parent::bulkActions());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function renderTable($data = [], $mergeData = [])
+    public function renderTable($data = [], $mergeData = []): View|Factory|Response
     {
         if ($this->query()->count() === 0 &&
-            !$this->request()->wantsJson() &&
-            $this->request()->input('filter_table_id') !== $this->getOption('id') && !$this->request()->ajax()
+            ! $this->request()->wantsJson() &&
+            $this->request()->input('filter_table_id') !== $this->getOption('id') && ! $this->request()->ajax()
         ) {
             return view('plugins/ecommerce::discounts.intro');
         }

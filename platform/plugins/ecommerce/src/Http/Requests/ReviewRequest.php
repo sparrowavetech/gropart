@@ -7,12 +7,7 @@ use Botble\Support\Http\Requests\Request;
 
 class ReviewRequest extends Request
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
             'product_id' => 'required',

@@ -9,17 +9,9 @@ use MarketplaceHelper;
 
 class RedirectIfNotVendor
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param Request $request
-     * @param Closure $next
-     * @param string|null $guard
-     * @return mixed
-     */
-    public function handle($request, Closure $next, $guard = 'customer')
+    public function handle(Request $request, Closure $next, string $guard = 'customer')
     {
-        if (!Auth::guard($guard)->check() || !Auth::guard($guard)->user()->is_vendor) {
+        if (! Auth::guard($guard)->check() || ! Auth::guard($guard)->user()->is_vendor) {
             if ($request->ajax() || $request->wantsJson()) {
                 return response('Unauthorized.', 401);
             }
@@ -28,7 +20,7 @@ class RedirectIfNotVendor
         }
 
         if (MarketplaceHelper::getSetting('verify_vendor', 1) &&
-            !Auth::guard($guard)->user()->vendor_verified_at) {
+            ! Auth::guard($guard)->user()->vendor_verified_at) {
             if ($request->ajax() || $request->wantsJson()) {
                 return response('Vendor account is not verified.', 403);
             }

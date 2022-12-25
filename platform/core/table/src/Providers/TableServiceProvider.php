@@ -15,7 +15,7 @@ class TableServiceProvider extends ServiceProvider
             ->loadHelpers()
             ->loadAndPublishViews()
             ->loadAndPublishTranslations()
-            ->loadRoutes(['web'])
+            ->loadRoutes()
             ->publishAssets();
     }
 }

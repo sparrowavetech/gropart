@@ -5,18 +5,14 @@ namespace Botble\Contact\Providers;
 use Assets;
 use Botble\Contact\Enums\ContactStatusEnum;
 use Botble\Contact\Repositories\Interfaces\ContactInterface;
+use Botble\Shortcode\Compilers\Shortcode;
 use Html;
-use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 use Theme;
-use Throwable;
 
 class HookServiceProvider extends ServiceProvider
 {
-    /**
-     * @throws Throwable
-     */
     public function boot()
     {
         add_filter(BASE_FILTER_TOP_HEADER_LAYOUT, [$this, 'registerTopHeaderNotification'], 120);
@@ -38,15 +34,10 @@ class HookServiceProvider extends ServiceProvider
         add_filter(BASE_FILTER_AFTER_SETTING_CONTENT, [$this, 'addSettings'], 93);
     }
 
-    /**
-     * @param string|null $options
-     * @return string
-     * @throws BindingResolutionException
-     */
     public function registerTopHeaderNotification(?string $options): ?string
     {
         if (Auth::user()->hasPermission('contacts.edit')) {
-            $contacts = $this->app->make(ContactInterface::class)
+            $contacts = $this->app[ContactInterface::class]
                 ->advancedGet([
                     'condition' => [
                         'status' => ContactStatusEnum::UNREAD,
@@ -69,29 +60,20 @@ class HookServiceProvider extends ServiceProvider
         return $options;
     }
 
-    /**
-     * @param int|null|string $number
-     * @param string|null $menuId
-     * @return string
-     */
-    public function getUnreadCount($number, string $menuId)
+    public function getUnreadCount(string|null|int $number, string $menuId): int|string|null
     {
-        if ($menuId == 'cms-plugins-contact') {
-            $attributes = [
-                'class' => 'badge badge-success menu-item-count unread-contacts',
-                'style' => 'display: none;',
-            ];
-
-            return Html::tag('span', '', $attributes)->toHtml();
+        if ($menuId !== 'cms-plugins-contact') {
+            return $number;
         }
 
-        return $number;
+        $attributes = [
+            'class' => 'badge badge-success menu-item-count unread-contacts',
+            'style' => 'display: none;',
+        ];
+
+        return Html::tag('span', '', $attributes)->toHtml();
     }
 
-    /**
-     * @param array $data
-     * @return array
-     */
     public function getMenuItemCount(array $data = []): array
     {
         if (Auth::user()->hasPermission('contacts.index')) {
@@ -104,11 +86,7 @@ class HookServiceProvider extends ServiceProvider
         return $data;
     }
 
-    /**
-     * @param $shortcode
-     * @return string
-     */
-    public function form($shortcode): string
+    public function form(Shortcode $shortcode): string
     {
         $view = apply_filters(CONTACT_FORM_TEMPLATE_VIEW, 'plugins/contact::forms.contact');
 
@@ -138,11 +116,6 @@ class HookServiceProvider extends ServiceProvider
         return view($view, compact('shortcode'))->render();
     }
 
-    /**
-     * @param string|null $data
-     * @return string
-     * @throws Throwable
-     */
     public function addSettings(?string $data = null): string
     {
         Assets::addStylesDirectly('vendor/core/core/base/libraries/tagify/tagify.css')

@@ -27,7 +27,7 @@ class HookServiceProvider extends ServiceProvider
      */
     public function addMetaBox(string $priority, $data): bool
     {
-        if ($priority == 'advanced' && !empty($data) && in_array(get_class($data), config('packages.seo-helper.general.supported', []))) {
+        if ($priority == 'advanced' && ! empty($data) && in_array(get_class($data), config('packages.seo-helper.general.supported', []))) {
             if (get_class($data) == Page::class && BaseHelper::isHomepage($data->id)) {
                 return false;
             }
@@ -61,11 +61,11 @@ class HookServiceProvider extends ServiceProvider
         ];
 
         $args = func_get_args();
-        if (!empty($args[0]) && $args[0]->id) {
+        if (! empty($args[0]) && $args[0]->id) {
             $metadata = MetaBox::getMetaData($args[0], 'seo_meta', true);
         }
 
-        if (!empty($metadata) && is_array($metadata)) {
+        if (! empty($metadata) && is_array($metadata)) {
             $meta = array_merge($meta, $metadata);
         }
 
@@ -88,12 +88,12 @@ class HookServiceProvider extends ServiceProvider
         $object->loadMissing('metadata');
         $meta = $object->getMetaData('seo_meta', true);
 
-        if (!empty($meta)) {
-            if (!empty($meta['seo_title'])) {
+        if (! empty($meta)) {
+            if (! empty($meta['seo_title'])) {
                 SeoHelper::setTitle($meta['seo_title']);
             }
 
-            if (!empty($meta['seo_description'])) {
+            if (! empty($meta['seo_description'])) {
                 SeoHelper::setDescription($meta['seo_description']);
             }
         }

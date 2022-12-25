@@ -22,21 +22,10 @@ use Throwable;
 
 class EcommerceController extends BaseController
 {
-    /**
-     * @var StoreLocatorInterface
-     */
-    protected $storeLocatorRepository;
+    protected StoreLocatorInterface $storeLocatorRepository;
 
-    /**
-     * @var CurrencyInterface
-     */
-    protected $currencyRepository;
+    protected CurrencyInterface $currencyRepository;
 
-    /**
-     * EcommerceController constructor.
-     * @param StoreLocatorInterface $storeLocatorRepository
-     * @param CurrencyInterface $currencyRepository
-     */
     public function __construct(StoreLocatorInterface $storeLocatorRepository, CurrencyInterface $currencyRepository)
     {
         $this->storeLocatorRepository = $storeLocatorRepository;
@@ -83,11 +72,7 @@ class EcommerceController extends BaseController
 
         Assets::addScripts(['jquery-ui'])
             ->addScriptsDirectly([
-                'vendor/core/plugins/ecommerce/js/currencies.js',
                 'vendor/core/plugins/ecommerce/js/setting.js',
-            ])
-            ->addStylesDirectly([
-                'vendor/core/plugins/ecommerce/css/ecommerce.css',
             ]);
 
         if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
@@ -149,7 +134,7 @@ class EcommerceController extends BaseController
 
         $primaryStore = $this->storeLocatorRepository->getFirstBy(['is_primary' => 1]);
 
-        if (!$primaryStore) {
+        if (! $primaryStore) {
             $primaryStore = $this->storeLocatorRepository->getModel();
             $primaryStore->is_primary = true;
             $primaryStore->is_shipping_location = true;
@@ -169,7 +154,7 @@ class EcommerceController extends BaseController
 
         $currencies = json_decode($request->input('currencies'), true) ?: [];
 
-        if (!$currencies) {
+        if (! $currencies) {
             return $response
                 ->setNextUrl(route('ecommerce.settings'))
                 ->setError()

@@ -10,19 +10,13 @@ use Illuminate\Support\Arr;
 
 class ShortcodeController extends BaseController
 {
-    /**
-     * @param string $key
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function ajaxGetAdminConfig($key, Request $request, BaseHttpResponse $response)
+    public function ajaxGetAdminConfig(?string $key, Request $request, BaseHttpResponse $response)
     {
         $registered = shortcode()->getAll();
 
         $data = Arr::get($registered, $key . '.admin_config');
 
-        $code = $request->input('code');
+        $code = urldecode($request->input('code'));
 
         $attributes = [];
         $content = null;

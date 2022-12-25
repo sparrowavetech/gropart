@@ -13,7 +13,7 @@ return new class () extends Migration {
      */
     public function up()
     {
-        if (!Schema::hasColumn('ec_customers', 'status')) {
+        if (! Schema::hasColumn('ec_customers', 'status')) {
             Schema::table('ec_customers', function (Blueprint $table) {
                 $table->string('status', 60)->default(CustomerStatusEnum::ACTIVATED);
             });

@@ -14,19 +14,9 @@ class SitemapServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    /**
-     * Indicates if loading of the provider is deferred.
-     *
-     * @var bool
-     */
-    protected $defer = true;
+    protected bool $defer = true;
 
-    /**
-     * Bootstrap the application events.
-     *
-     * @return void
-     */
-    public function boot()
+    public function boot(): void
     {
         $this->setNamespace('packages/sitemap')
             ->loadAndPublishConfigurations(['config'])
@@ -46,12 +36,7 @@ class SitemapServiceProvider extends ServiceProvider
         });
     }
 
-    /**
-     * Register the service provider.
-     *
-     * @return void
-     */
-    public function register()
+    public function register(): void
     {
         $this->app->bind('sitemap', function ($app) {
             $config = config('packages.sitemap.config');
@@ -69,12 +54,7 @@ class SitemapServiceProvider extends ServiceProvider
         $this->app->alias('sitemap', Sitemap::class);
     }
 
-    /**
-     * Get the services provided by the provider.
-     *
-     * @return array
-     */
-    public function provides()
+    public function provides(): array
     {
         return ['sitemap', Sitemap::class];
     }

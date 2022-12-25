@@ -10,20 +10,10 @@ use Botble\Base\Models\MetaBox as MetaBoxModel;
 
 class MetaBox
 {
-    /**
-     * @var array
-     */
-    protected $metaBoxes = [];
+    protected array $metaBoxes = [];
 
-    /**
-     * @var MetaBoxInterface
-     */
-    protected $metaBoxRepository;
+    protected MetaBoxInterface $metaBoxRepository;
 
-    /**
-     * MetaBox constructor.
-     * @param MetaBoxInterface $metaBoxRepository
-     */
     public function __construct(MetaBoxInterface $metaBoxRepository)
     {
         $this->metaBoxRepository = $metaBoxRepository;
@@ -47,16 +37,16 @@ class MetaBox
         string $priority = 'default',
         $callbackArgs = null
     ) {
-        if (!isset($this->metaBoxes[$reference])) {
+        if (! isset($this->metaBoxes[$reference])) {
             $this->metaBoxes[$reference] = [];
         }
-        if (!isset($this->metaBoxes[$reference][$context])) {
+        if (! isset($this->metaBoxes[$reference][$context])) {
             $this->metaBoxes[$reference][$context] = [];
         }
 
         foreach (array_keys($this->metaBoxes[$reference]) as $a_context) {
             foreach (['high', 'core', 'default', 'low'] as $a_priority) {
-                if (!isset($this->metaBoxes[$reference][$a_context][$a_priority][$id])) {
+                if (! isset($this->metaBoxes[$reference][$a_context][$a_priority][$id])) {
                     continue;
                 }
 
@@ -101,7 +91,7 @@ class MetaBox
             $priority = 'low';
         }
 
-        if (!isset($this->metaBoxes[$reference][$context][$priority])) {
+        if (! isset($this->metaBoxes[$reference][$context][$priority])) {
             $this->metaBoxes[$reference][$context][$priority] = [];
         }
 
@@ -129,12 +119,12 @@ class MetaBox
         $reference = get_class($object);
         if (isset($this->metaBoxes[$reference][$context])) {
             foreach (['high', 'sorted', 'core', 'default', 'low'] as $priority) {
-                if (!isset($this->metaBoxes[$reference][$context][$priority])) {
+                if (! isset($this->metaBoxes[$reference][$context][$priority])) {
                     continue;
                 }
 
                 foreach ((array)$this->metaBoxes[$reference][$context][$priority] as $box) {
-                    if (!$box || !$box['title']) {
+                    if (! $box || ! $box['title']) {
                         continue;
                     }
                     $index++;
@@ -160,11 +150,11 @@ class MetaBox
      */
     public function removeMetaBox(string $id, $reference, string $context)
     {
-        if (!isset($this->metaBoxes[$reference])) {
+        if (! isset($this->metaBoxes[$reference])) {
             $this->metaBoxes[$reference] = [];
         }
 
-        if (!isset($this->metaBoxes[$reference][$context])) {
+        if (! isset($this->metaBoxes[$reference][$context])) {
             $this->metaBoxes[$reference][$context] = [];
         }
 
@@ -192,14 +182,14 @@ class MetaBox
                 'reference_type' => get_class($object),
             ]);
 
-            if (!$fieldMeta) {
+            if (! $fieldMeta) {
                 $fieldMeta = $this->metaBoxRepository->getModel();
                 $fieldMeta->reference_id = $object->id;
                 $fieldMeta->meta_key = $key;
                 $fieldMeta->reference_type = get_class($object);
             }
 
-            if (!empty($options)) {
+            if (! empty($options)) {
                 $fieldMeta->options = $options;
             }
 
@@ -207,7 +197,7 @@ class MetaBox
             $this->metaBoxRepository->createOrUpdate($fieldMeta);
 
             return true;
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return false;
         }
     }
@@ -227,7 +217,7 @@ class MetaBox
             $field = $this->getMeta($object, $key, $select);
         }
 
-        if (!$field) {
+        if (! $field) {
             return $single ? '' : [];
         }
 

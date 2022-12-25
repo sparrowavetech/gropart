@@ -9,9 +9,6 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
 class ContactExport extends TableExportHandler
 {
-    /**
-     * {@inheritDoc}
-     */
     protected function afterSheet(AfterSheet $event)
     {
         parent::afterSheet($event);

@@ -8,9 +8,6 @@ use Illuminate\Support\Facades\DB;
 
 class GroupedProductRepository extends RepositoriesAbstract implements GroupedProductInterface
 {
-    /**
-     * {@inheritDoc}
-     */
     public function getChildren($groupedProductId, array $params)
     {
         $this->model = $this->model
@@ -21,9 +18,6 @@ class GroupedProductRepository extends RepositoriesAbstract implements GroupedPr
         return $this->advancedGet($params);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function createGroupedProducts($groupedProductId, array $childItems)
     {
         DB::beginTransaction();

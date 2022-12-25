@@ -4,11 +4,7 @@ namespace Botble\Optimize\Http\Middleware;
 
 class InsertDNSPrefetch extends PageSpeed
 {
-    /**
-     * @param string $buffer
-     * @return string
-     */
-    public function apply($buffer)
+    public function apply(string $buffer): string
     {
         preg_match_all(
             '#\bhttps?://[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|/))#',
@@ -18,7 +14,11 @@ class InsertDNSPrefetch extends PageSpeed
         );
 
         $dnsPrefetch = collect($match[0])->map(function ($item) {
-            $domain = (new TrimUrls())->apply($item[0]);
+            $domain = $this->replace([
+                '/https:/' => '',
+                '/http:/' => '',
+            ], $item[0]);
+
             $domain = explode(
                 '/',
                 str_replace('//', '', $domain)

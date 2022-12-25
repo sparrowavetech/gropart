@@ -23,7 +23,7 @@ app()->booted(function () {
             return RvMedia::getImageUrl($default, $size);
         }
 
-        if (!theme_option('image-placeholder')) {
+        if (! theme_option('image-placeholder')) {
             return Theme::asset()->url('images/placeholder.png');
         }
 
@@ -55,13 +55,13 @@ app()->booted(function () {
          */
         function get_ads_from_key(?string $key)
         {
-            if (!$key) {
+            if (! $key) {
                 return null;
             }
 
             $ads = AdsManager::getData(true)->firstWhere('key', $key);
 
-            if (!$ads || !$ads->image) {
+            if (! $ads || ! $ads->image) {
                 return null;
             }
 
@@ -77,7 +77,7 @@ app()->booted(function () {
         {
             $ads = get_ads_from_key($key);
 
-            if (!$ads) {
+            if (! $ads) {
                 return null;
             }
 
@@ -98,7 +98,7 @@ app()->booted(function () {
             $attributes = $shortcode->toArray();
 
             for ($i = 1; $i < 5; $i++) {
-                if (isset($attributes['key_' . $i]) && !empty($attributes['key_' . $i])) {
+                if (isset($attributes['key_' . $i]) && ! empty($attributes['key_' . $i])) {
                     $ad = display_ads_advanced((string)$attributes['key_' . $i]);
                     if ($ad) {
                         $ads[] = $ad;
@@ -152,7 +152,7 @@ app()->booted(function () {
                 ->notExpired()
                 ->first();
 
-            if (!$flashSale || !$flashSale->products()->count()) {
+            if (! $flashSale || ! $flashSale->products()->count()) {
                 return null;
             }
 
@@ -223,7 +223,7 @@ app()->booted(function () {
                     'activeChildren.slugable',
                 ]);
 
-                if (!$category) {
+                if (! $category) {
                     return null;
                 }
 

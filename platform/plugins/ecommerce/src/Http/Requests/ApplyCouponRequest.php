@@ -6,12 +6,7 @@ use Botble\Support\Http\Requests\Request;
 
 class ApplyCouponRequest extends Request
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
             'coupon_code' => 'required|max:255',

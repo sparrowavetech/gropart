@@ -5,6 +5,7 @@ namespace Botble\Ecommerce\Services\Products;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
+use Botble\Ecommerce\Events\ProductQuantityUpdatedEvent;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Repositories\Eloquent\ProductRepository;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
@@ -12,40 +13,27 @@ use Botble\Media\Repositories\Interfaces\MediaFileInterface;
 use Botble\Media\Services\UploadsManager;
 use EcommerceHelper;
 use Exception;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Http\Request;
 use Storage;
 
 class StoreProductService
 {
-    /**
-     * @var ProductRepository
-     */
-    protected $productRepository;
+    protected ProductRepository|ProductInterface $productRepository;
 
-    /**
-     * StoreProductService constructor.
-     * @param ProductInterface $product
-     */
     public function __construct(ProductInterface $product)
     {
         $this->productRepository = $product;
     }
 
-    /**
-     * @param Request $request
-     * @param Product $product
-     * @param bool $forceUpdateAll
-     * @return Product
-     */
     public function execute(Request $request, Product $product, bool $forceUpdateAll = false): Product
     {
         $data = $request->input();
 
         $hasVariation = $product->variations()->count() > 0;
 
-        if ($hasVariation && !$forceUpdateAll) {
+        if ($hasVariation && ! $forceUpdateAll) {
             $data = $request->except([
                 'sku',
                 'quantity',
@@ -74,7 +62,7 @@ class StoreProductService
 
         $product->images = json_encode($images);
 
-        if (!$hasVariation || $forceUpdateAll) {
+        if (! $hasVariation || $forceUpdateAll) {
             if ($product->sale_price > $product->price) {
                 $product->sale_price = null;
             }
@@ -87,7 +75,7 @@ class StoreProductService
 
         $exists = $product->id;
 
-        if (!$exists && EcommerceHelper::isEnabledCustomerRecentlyViewedProducts() && $request->input('product_type')) {
+        if (! $exists && EcommerceHelper::isEnabledCustomerRecentlyViewedProducts() && $request->input('product_type')) {
             if (in_array($request->input('product_type'), ProductTypeEnum::values())) {
                 $product->product_type = $request->input('product_type');
             }
@@ -98,7 +86,7 @@ class StoreProductService
          */
         $product = $this->productRepository->createOrUpdate($product);
 
-        if (!$exists) {
+        if (! $exists) {
             event(new CreatedContentEvent(PRODUCT_MODULE_SCREEN_NAME, $request, $product));
         } else {
             event(new UpdatedContentEvent(PRODUCT_MODULE_SCREEN_NAME, $request, $product));
@@ -110,6 +98,8 @@ class StoreProductService
             $product->productCollections()->sync($request->input('product_collections', []));
 
             $product->productLabels()->sync($request->input('product_labels', []));
+
+            $product->taxes()->sync($request->input('taxes', []));
 
             if ($request->has('related_products')) {
                 $product->products()->detach();
@@ -140,20 +130,16 @@ class StoreProductService
             }
         }
 
+        event(new ProductQuantityUpdatedEvent($product));
+
         return $product;
     }
 
-    /**
-     * @param Request $request
-     * @param Product $product
-     * @param bool $exists
-     * @return Product
-     */
-    public function saveProductFiles(Request $request, Product $product, $exists = true)
+    public function saveProductFiles(Request $request, Product $product, bool $exists = true): Product
     {
         if ($exists) {
             foreach ($request->input('product_files', []) as $key => $value) {
-                if (!$value) {
+                if (! $value) {
                     $product->productFiles()->where('id', $key)->delete();
                 }
             }
@@ -173,12 +159,7 @@ class StoreProductService
         return $product;
     }
 
-    /**
-     * @param mixed $file
-     * @return array
-     * @throws FileNotFoundException
-     */
-    public function saveProductFile($file): array
+    public function saveProductFile(UploadedFile $file): array
     {
         $folderPath = 'product-files';
         $fileExtension = $file->getClientOriginalExtension();

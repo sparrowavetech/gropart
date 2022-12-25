@@ -2,16 +2,13 @@
 
 namespace Botble\Ecommerce\Http\Requests;
 
+use Botble\Ecommerce\Enums\ShippingRuleTypeEnum;
 use Botble\Support\Http\Requests\Request;
+use Illuminate\Validation\Rule;
 
 class ShippingRuleRequest extends Request
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         $ruleItems = [];
 
@@ -19,19 +16,29 @@ class ShippingRuleRequest extends Request
             $ruleItems['shipping_rule_items.' . $key . '.adjustment_price'] = 'required|numeric';
         }
 
-        return [
-                'name' => 'required|max:120',
-                'from' => 'required|numeric',
-                'to' => 'nullable|numeric|min:' . (float)$this->input('from'),
-                'price' => 'required',
-                'type' => 'required',
-            ] + $ruleItems;
+        $ruleItems = [
+            'name' => 'required|max:120',
+            'from' => 'required|numeric',
+            'to' => 'nullable|numeric|min:' . (float)$this->input('from'),
+            'price' => 'required',
+            'type' => Rule::in(array_keys(ShippingRuleTypeEnum::availableLabels())),
+        ] + $ruleItems;
+
+        if (request()->isMethod('POST')) {
+            $ruleItems['shipping_id'] = [
+                'required',
+                Rule::exists('ec_shipping', 'id')->where(function ($query) {
+                    if ($this->input('type') == ShippingRuleTypeEnum::BASED_ON_ZIPCODE) {
+                        return $query->whereNotNull('country');
+                    }
+                }),
+            ];
+        }
+
+        return $ruleItems;
     }
 
-    /**
-     * @return array
-     */
-    public function attributes()
+    public function attributes(): array
     {
         $attributes = [];
         foreach ($this->input('shipping_rule_items', []) as $key => $item) {

@@ -11,7 +11,6 @@ use Botble\Optimize\Http\Middleware\InlineCss;
 use Botble\Optimize\Http\Middleware\InsertDNSPrefetch;
 use Botble\Optimize\Http\Middleware\RemoveComments;
 use Botble\Optimize\Http\Middleware\RemoveQuotes;
-use Botble\Optimize\Http\Middleware\TrimUrls;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\Router;
@@ -23,7 +22,7 @@ class OptimizeServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function boot()
+    public function boot(): void
     {
         $this->setNamespace('packages/optimize')
             ->loadAndPublishConfigurations(['general'])
@@ -57,10 +56,6 @@ class OptimizeServiceProvider extends ServiceProvider
 
                 if (setting('optimize_remove_comments', 0)) {
                     $router->pushMiddlewareToGroup('web', RemoveComments::class);
-                }
-
-                if (setting('optimize_trim_urls', 0)) {
-                    $router->pushMiddlewareToGroup('web', TrimUrls::class);
                 }
 
                 if (setting('optimize_remove_quotes', 0)) {

@@ -6,13 +6,7 @@ use Botble\Support\Http\Requests\Request;
 
 class ShippingMethodRequest extends Request
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     *
-     */
-    public function rules()
+    public function rules(): array
     {
         $rules = [
             'name' => 'required|max:120',
@@ -29,11 +23,7 @@ class ShippingMethodRequest extends Request
         return $rules;
     }
 
-    /**
-     * @return array
-     *
-     */
-    public function attributes()
+    public function attributes(): array
     {
         $attributes = [];
         foreach (config(

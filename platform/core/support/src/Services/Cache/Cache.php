@@ -36,7 +36,7 @@ class Cache implements CacheInterface
     {
         $this->cache = $cache;
         $this->cacheGroup = $cacheGroup;
-        $this->config = !empty($config) ? $config : [
+        $this->config = ! empty($config) ? $config : [
             'cache_time' => setting('cache_time', 10) * 60,
             'stored_keys' => storage_path('cache_keys.json'),
         ];
@@ -50,7 +50,7 @@ class Cache implements CacheInterface
      */
     public function get(string $key)
     {
-        if (!file_exists($this->config['stored_keys'])) {
+        if (! file_exists($this->config['stored_keys'])) {
             return null;
         }
 
@@ -76,7 +76,7 @@ class Cache implements CacheInterface
      */
     public function put(string $key, $value, $minutes = false): bool
     {
-        if (!$minutes) {
+        if (! $minutes) {
             $minutes = $this->config['cache_time'];
         }
 
@@ -99,7 +99,7 @@ class Cache implements CacheInterface
     {
         if (file_exists($this->config['stored_keys'])) {
             $cacheKeys = BaseHelper::getFileData($this->config['stored_keys']);
-            if (!empty($cacheKeys) && !in_array($key, Arr::get($cacheKeys, $this->cacheGroup, []))) {
+            if (! empty($cacheKeys) && ! in_array($key, Arr::get($cacheKeys, $this->cacheGroup, []))) {
                 $cacheKeys[$this->cacheGroup][] = $key;
             }
         } else {
@@ -123,7 +123,7 @@ class Cache implements CacheInterface
      */
     public function has(string $key): bool
     {
-        if (!file_exists($this->config['stored_keys'])) {
+        if (! file_exists($this->config['stored_keys'])) {
             return false;
         }
 
@@ -144,7 +144,7 @@ class Cache implements CacheInterface
             $cacheKeys = BaseHelper::getFileData($this->config['stored_keys']);
         }
 
-        if (!empty($cacheKeys) && $caches = Arr::get($cacheKeys, $this->cacheGroup)) {
+        if (! empty($cacheKeys) && $caches = Arr::get($cacheKeys, $this->cacheGroup)) {
             foreach ($caches as $cache) {
                 $this->cache->forget($cache);
             }
@@ -152,7 +152,7 @@ class Cache implements CacheInterface
             unset($cacheKeys[$this->cacheGroup]);
         }
 
-        if (!empty($cacheKeys)) {
+        if (! empty($cacheKeys)) {
             BaseHelper::saveFileData($this->config['stored_keys'], $cacheKeys);
         } else {
             File::delete($this->config['stored_keys']);

@@ -7,10 +7,7 @@ use Illuminate\Support\Facades\Facade;
 
 class FlashSaleFacade extends Facade
 {
-    /**
-     * @return string
-     */
-    protected static function getFacadeAccessor()
+    protected static function getFacadeAccessor(): string
     {
         return FlashSaleSupport::class;
     }

@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Enums;
 
 use Botble\Base\Supports\Enum;
 use Html;
+use Illuminate\Support\HtmlString;
 
 /**
  * @method static CustomerStatusEnum ACTIVATED()
@@ -14,25 +15,16 @@ class CustomerStatusEnum extends Enum
     public const ACTIVATED = 'activated';
     public const LOCKED = 'locked';
 
-    /**
-     * @var string
-     */
     public static $langPath = 'plugins/ecommerce::customer.statuses';
 
-    /**
-     * @return string
-     */
-    public function toHtml()
+    public function toHtml(): HtmlString|string
     {
-        switch ($this->value) {
-            case self::ACTIVATED:
-                return Html::tag('span', self::ACTIVATED()->label(), ['class' => 'label-info status-label'])
-                    ->toHtml();
-            case self::LOCKED:
-                return Html::tag('span', self::LOCKED()->label(), ['class' => 'label-warning status-label'])
-                    ->toHtml();
-            default:
-                return parent::toHtml();
-        }
+        return match ($this->value) {
+            self::ACTIVATED => Html::tag('span', self::ACTIVATED()->label(), ['class' => 'label-info status-label'])
+                ->toHtml(),
+            self::LOCKED => Html::tag('span', self::LOCKED()->label(), ['class' => 'label-warning status-label'])
+                ->toHtml(),
+            default => parent::toHtml(),
+        };
     }
 }

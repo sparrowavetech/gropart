@@ -10,15 +10,8 @@ use Botble\Location\Models\State;
 
 class StateForm extends FormAbstract
 {
-    /**
-     * @var CountryInterface
-     */
-    protected $countryRepository;
+    protected CountryInterface $countryRepository;
 
-    /**
-     * StateForm constructor.
-     * @param CountryInterface $countryRepository
-     */
     public function __construct(CountryInterface $countryRepository)
     {
         parent::__construct();
@@ -26,9 +19,6 @@ class StateForm extends FormAbstract
         $this->countryRepository = $countryRepository;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function buildForm()
     {
         $countries = $this->countryRepository->pluck('countries.name', 'countries.id');
@@ -57,7 +47,7 @@ class StateForm extends FormAbstract
                 'label' => trans('plugins/location::state.country'),
                 'label_attr' => ['class' => 'control-label required'],
                 'attr' => [
-                    'class' => 'form-control select-search-full',
+                    'class' => 'select-search-full',
                 ],
                 'choices' => [0 => trans('plugins/location::state.select_country')] + $countries,
             ])
@@ -77,9 +67,6 @@ class StateForm extends FormAbstract
             ->add('status', 'customSelect', [
                 'label' => trans('core/base::tables.status'),
                 'label_attr' => ['class' => 'control-label required'],
-                'attr' => [
-                    'class' => 'form-control select-full',
-                ],
                 'choices' => BaseStatusEnum::labels(),
             ])
             ->setBreakFieldPoint('status');

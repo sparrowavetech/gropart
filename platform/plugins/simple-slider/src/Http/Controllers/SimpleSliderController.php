@@ -23,21 +23,10 @@ class SimpleSliderController extends BaseController
 {
     use HasDeleteManyItemsTrait;
 
-    /**
-     * @var SimpleSliderInterface
-     */
-    protected $simpleSliderRepository;
+    protected SimpleSliderInterface $simpleSliderRepository;
 
-    /**
-     * @var SimpleSliderItemInterface
-     */
-    protected $simpleSliderItemRepository;
+    protected SimpleSliderItemInterface $simpleSliderItemRepository;
 
-    /**
-     * SimpleSliderController constructor.
-     * @param SimpleSliderInterface $simpleSliderRepository
-     * @param SimpleSliderItemInterface $simpleSliderItemRepository
-     */
     public function __construct(
         SimpleSliderInterface $simpleSliderRepository,
         SimpleSliderItemInterface $simpleSliderItemRepository
@@ -48,7 +37,7 @@ class SimpleSliderController extends BaseController
 
     /**
      * @param SimpleSliderTable $dataTable
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Symfony\Component\HttpFoundation\Response
      * @throws \Throwable
      */
     public function index(SimpleSliderTable $dataTable)
@@ -156,7 +145,7 @@ class SimpleSliderController extends BaseController
     /**
      * @param Request $request
      * @param BaseHttpResponse $response
-     * @return array|BaseHttpResponse|\Illuminate\Http\JsonResponse
+     * @return BaseHttpResponse
      * @throws Exception
      */
     public function deletes(Request $request, BaseHttpResponse $response)

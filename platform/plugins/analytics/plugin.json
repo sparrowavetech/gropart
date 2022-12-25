@@ -1,4 +1,5 @@
 {
+    "id": "botble/analytics",
     "name": "Analytics",
     "namespace": "Botble\\Analytics\\",
     "provider": "Botble\\Analytics\\Providers\\AnalyticsServiceProvider",

@@ -5,14 +5,9 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class () extends Migration {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
-        if (!Schema::hasTable('pages_translations')) {
+        if (! Schema::hasTable('pages_translations')) {
             Schema::create('pages_translations', function (Blueprint $table) {
                 $table->string('lang_code');
                 $table->integer('pages_id');
@@ -25,12 +20,7 @@ return new class () extends Migration {
         }
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('pages_translations');
     }

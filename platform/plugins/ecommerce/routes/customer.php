@@ -196,7 +196,7 @@ if (defined('THEME_MODULE_SCREEN_NAME')) {
                 'uses' => 'PublicController@getReturnOrder',
             ]);
 
-            Route::post('order-returns/send_request', [
+            Route::post('order-returns/send-request', [
                 'as' => 'order_returns.send_request',
                 'uses' => 'PublicController@postReturnOrder',
             ]);

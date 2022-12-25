@@ -1,4 +1,5 @@
 {
+    "id": "botble/blog",
     "name": "Blog",
     "namespace": "Botble\\Blog\\",
     "provider": "Botble\\Blog\\Providers\\BlogServiceProvider",
