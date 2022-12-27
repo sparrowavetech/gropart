@@ -22,6 +22,7 @@ use Html;
  * @method static SmsEnum VENDOR_ACCOUNT_APPROVED()
  * @method static SmsEnum PRODUCT_APPROVED()
  * @method static SmsEnum WITHDRAWAL_APPROVED()
+ * @method static SmsEnum OTP()
  */
 class SmsEnum extends Enum
 {
@@ -40,6 +41,7 @@ class SmsEnum extends Enum
     public const VENDOR_ACCOUNT_APPROVED = 'vendor_account_approved';
     public const PRODUCT_APPROVED = 'product_approved';
     public const WITHDRAWAL_APPROVED = 'withdrawal_approved';
+    public const OTP = 'otp';
 
     /**
      * @var string
@@ -96,6 +98,9 @@ class SmsEnum extends Enum
                     ->toHtml();
             case self::WITHDRAWAL_APPROVED:
                 return Html::tag('span', self::WITHDRAWAL_APPROVED()->label(), ['class' => 'label-info status-label'])
+                    ->toHtml();
+            case self::OTP:
+                return Html::tag('span', self::OTP()->label(), ['class' => 'label-info status-label'])
                     ->toHtml();
             default:
                 return parent::toHtml();

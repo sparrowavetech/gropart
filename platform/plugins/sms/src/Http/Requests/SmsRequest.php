@@ -15,13 +15,13 @@ class SmsRequest extends Request
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'name' => [
                 'required',
                 Rule::in(SmsEnum::values()),
-                'unique:sms'
+                Rule::unique('sms')->ignore($this->id)
             ],
             'status' => Rule::in(BaseStatusEnum::values()),
             'template_id' => 'required|integer',

@@ -170,7 +170,10 @@ class DashboardMenu
                 continue;
             }
 
-            $link['children'] = collect($link['children'])->sortBy('priority')->toArray();
+           $link['children'] = collect($link['children'])
+                ->unique(fn ($item) => $item['id'])
+                ->sortBy('priority')
+                ->toArray();
 
             foreach ($link['children'] as $subKey => $subMenu) {
                 if ($subMenu['permissions'] && ! Auth::user()->hasAnyPermission($subMenu['permissions'])) {

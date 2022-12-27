@@ -34,6 +34,7 @@ return [
         'vendor_account_approved'=>'Vendor account approved',
         'product_approved'=>'Product approved',
         'withdrawal_approved'=>'Withdrawal approved',
+        'otp'=>'OTP',
 
     ]
 ];
