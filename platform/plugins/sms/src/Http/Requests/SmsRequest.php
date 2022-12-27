@@ -20,8 +20,7 @@ class SmsRequest extends Request
         return [
             'name' => [
                 'required',
-                Rule::in(SmsEnum::values()),
-                Rule::unique('sms')->ignore($this->id)
+                Rule::in(SmsEnum::values())
             ],
             'status' => Rule::in(BaseStatusEnum::values()),
             'template_id' => 'required|integer',
