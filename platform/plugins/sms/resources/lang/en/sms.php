@@ -2,10 +2,10 @@
 
 return [
     'title' => 'SMS Gateway',
-    'name'   => 'Sms Template',
+    'name'   => 'SMS Template',
     'setting' =>'SMS Setting',
-    'create' => 'New sms',
-    'edit'   => 'Edit sms',
+    'create' => 'New SMS',
+    'edit'   => 'Edit SMS',
     'template_id' => 'Template Id',
     'template' => 'Template',
     'template_placeholder'=>'Template ',
@@ -14,7 +14,7 @@ return [
     'save_settings'=>'Save Setting',
     'settings' => [
         'title' => 'SMS',
-        'description' => 'Settings for sms plugin',
+        'description' => 'Settings for SMS plugin',
         'sms_url' =>'SMS Api  Url',
         'sms_url_helper' => 'http://api.exmaple.in/api/mt/SendSMS?user=username&password=password&senderid=senderid&channel=chennel&DCS=0&flashsms=0&number={{mobile}}&text={{message}}&route=##&DLTTemplateId={{template_id}}&PEID=entityid'
     ],
