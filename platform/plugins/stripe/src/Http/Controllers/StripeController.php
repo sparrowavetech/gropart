@@ -15,6 +15,12 @@ use Stripe\PaymentIntent;
 
 class StripeController extends Controller
 {
+    /**
+     * @param StripePaymentCallbackRequest $request
+     * @param StripePaymentService $stripePaymentService
+     * @param BaseHttpResponse $response
+     * @return BaseHttpResponse
+     */
     public function success(StripePaymentCallbackRequest $request, StripePaymentService $stripePaymentService, BaseHttpResponse $response)
     {
         try {
@@ -28,13 +34,6 @@ class StripeController extends Controller
                 $orderIds = json_decode($metadata['order_id'], true);
 
                 $charge = PaymentIntent::retrieve($session->payment_intent);
-
-                if (! $charge->charges) {
-                    return $response
-                        ->setError()
-                        ->setNextUrl(PaymentHelper::getCancelURL())
-                        ->setMessage(__('Payment failed!'));
-                }
 
                 $chargeId = $charge->charges->first()->id;
 
@@ -67,6 +66,10 @@ class StripeController extends Controller
         }
     }
 
+    /**
+     * @param BaseHttpResponse $response
+     * @return BaseHttpResponse
+     */
     public function error(BaseHttpResponse $response)
     {
         return $response

@@ -87,7 +87,7 @@ class StripePaymentService extends StripePaymentAbstract
                         ],
                         'description' => $product['name'],
                     ],
-                    'unit_amount' => $this->convertAmount($product['price_per_order'] / $product['qty'] * get_current_exchange_rate()),
+                    'unit_amount' => $this->convertAmount($product['price_per_order'] * get_current_exchange_rate()),
                     'currency' => $this->currency,
                 ],
                 'quantity' => $product['qty'],
@@ -183,6 +183,9 @@ class StripePaymentService extends StripePaymentAbstract
         return $chargeId;
     }
 
+    /**
+     * @return bool
+     */
     public function isStripeApiCharge(): bool
     {
         $key = 'stripe_api_charge';
