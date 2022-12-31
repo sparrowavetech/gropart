@@ -345,4 +345,15 @@ app()->booted(function () {
             return Theme::partial('shortcodes.testimonials.admin-config', compact('attributes'));
         });
     }
+
+    if (is_plugin_active('faq')) {
+
+        add_shortcode('faq-by-category', __('FAQs by Category'), __('FAQs by Category'), function ($shortcode) {
+            return Theme::partial('shortcodes.faq-by-category', compact('shortcode'));
+        });
+
+        shortcode()->setAdminConfig('faq-by-category', function ($attributes) {
+            return Theme::partial('shortcodes.faq-by-category-admin-config', compact('attributes'));
+        });
+    }
 });
