@@ -1,7 +1,7 @@
 @php Theme::set('withTitle', false); @endphp
 
 <div class="row mt-5">
-    <div class="col-md-9">
+    <div class="col-sm-9">
         <h1 class="h2">{{ $post->name }}</h1>
         <div class="post-item__inner pb-4 my-3 border-bottom">
             <div class="entry-meta">
@@ -80,7 +80,7 @@
             </div>
         @endif
     </div>
-    <div class="col-md-3">
+    <div class="col-sm-3">
         <div class="primary-sidebar">
             <aside class="widget-area" id="primary-sidebar">
                 {!! dynamic_sidebar('primary_sidebar') !!}

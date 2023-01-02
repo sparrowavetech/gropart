@@ -262,6 +262,16 @@ app()->booted(function () {
         });
     }
 
+    if (is_plugin_active('blog')) {
+        add_shortcode('blog-posts-by-category', __('Blog Posts by Category'), __('Blog Posts by Category'), function ($shortcode) {
+            return Theme::partial('shortcodes.blog-posts-by-category', compact('shortcode'));
+        });
+
+        shortcode()->setAdminConfig('blog-posts-by-category', function ($attributes) {
+            return Theme::partial('shortcodes.blog-posts-by-category-admin-config', compact('attributes'));
+        });
+    }
+
     if (is_plugin_active('contact')) {
         add_filter(CONTACT_FORM_TEMPLATE_VIEW, function () {
             return Theme::getThemeNamespace() . '::partials.shortcodes.contact-form';

@@ -1,5 +1,5 @@
 @if (count($ads))
-    <div class="widget-featured-banners py-5 theme-short-ad">
+    <div class="widget-featured-banners theme-short-ad">
         <div class="container-xxxl">
         @if (count($ads)<=2)
                 <div class="row row-cols-md-2 row-cols-1 justify-content-center">
@@ -10,7 +10,7 @@
             @endif
                 @for($i = 0; $i < count($ads); $i++)
                     <div class="col">
-                        <div class="featured-banner-item img-fluid-eq my-2">
+                        <div class="featured-banner-item img-fluid-eq">
                             <div class="img-fluid-eq__dummy"></div>
                             <div class="img-fluid-eq__wrap">
                                 {!! BaseHelper::clean($ads[$i]) !!}
