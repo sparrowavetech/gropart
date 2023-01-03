@@ -65,6 +65,7 @@
 .mt-5.pt-3.post-detail__content { margin-top: 5px !important; }
 .widget__inner .card .img-fluid-eq { height: 100%; }
 .widget-area .widget-title { padding: 0 0 0; }
+.post-item__inner .entry-meta { width: 100%; }
 .customer-auth-page .bg-light { border-radius: 5px; }
 .customer-auth-form .nav-tabs h1 { margin-top: 20px !important; }
 .related-posts .list-post--wrapper .post-item-wrapper .post-item__content { padding: 0 1.1rem !important; }
@@ -95,6 +96,19 @@
 .verified-store-info { max-width:25px; }
 .vendor-info-content .vendor-name { vertical-align: bottom; }
 .slick-slide .sold-by-meta img.verified-store { display: inline-block; }
+.testimonialSection .card-grid-style-3 .text-desc {height: auto; overflow: hidden; min-height:100px;}
+.testimonialSection .card-grid-style-3 { padding: 10px 20px; }
+.testimonialSection .card-grid-style-3.bd-bg-6 { border-color: #fff2b1; }
+.testimonialSection .card-grid-style-3.bd-bg-9 { border-color: #ffe0c6; }
+.testimonialSection .card-grid-style-3.bd-bg-10 { border-color: #e7d4cd; }
+.testimonialSection .box-swiper .swiper-button-next, .testimonialSection .box-swiper .swiper-button-prev {top:-80px; margin-top:0; }
+.newsletter .newsletter-inner {background-repeat:no-repeat; background-position:50%; background-size: cover; border-radius: 20px; clear: both; display: table; min-height: 230px; overflow: hidden; padding: 84px 78px; width: 100%; }
+.newsletter .newsletter-inner img {bottom: 0;max-width: 40%;position: absolute;right: 50px;}
+.newsletter .newsletter-inner .newsletter-content p {font-size: 1rem;}
+.newsletter .newsletter-inner .newsletter-content h2 {font-size: 2rem;}
+.newsletter .newsletter-inner .newsletter-content .form-subscribe {background-color: #fff;border-radius: 50px;margin-bottom: 10px;max-width: 450px;position: relative;z-index: 4;}
+.newsletter .newsletter-inner .newsletter-content .form-subscribe input {background: url('../imgs/icons/icon-plane.png') no-repeat 25px;border: 0;border-radius: 50px 0 0 50px;padding-left: 60px; width:100%;}
+.newsletter .newsletter-inner .newsletter-content .form-subscribe button {border: 0;border-radius: 50px;font-weight: 700;background-color: var(--primary-color);color: #fff;font-size: 16px;padding: 15px 40px;}
 @media screen and (min-width: 1441px) {
 	.product-button .quantity { flex: 0 1 65px; }
   	.all-brands .featured-brand-item .brand__thumb.img-fluid-eq { max-height:250px; }

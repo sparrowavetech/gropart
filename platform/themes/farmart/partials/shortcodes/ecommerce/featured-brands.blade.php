@@ -37,7 +37,7 @@
                 <div class="row align-items-center mb-2 widget-header">
                     <h2 class="col-auto mb-0 py-2">{!! BaseHelper::clean($shortcode->title) !!}</h2>
                     <div class="ps-4 col-auto py-2 d-md-block">
-                        <a href="/brands-with-gropart">
+                        <a href="/all-brands">
                             <span class="link-text">{{ __('View All Brands') }} <span class="svg-icon"><svg><use href="#svg-icon-chevron-right" xlink:href="#svg-icon-chevron-right"></use></svg></span></span>
                         </a>
                     </div>

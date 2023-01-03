@@ -34,7 +34,7 @@ if (! function_exists('get_related_posts')) {
 }
 
 if (! function_exists('get_posts_by_category')) {
-    function get_posts_by_category(int $categoryId, int $paginate = 12, int $limit = 0): Collection|LengthAwarePaginator
+    function get_posts_by_category($categoryId, int $paginate = 12, int $limit = 0): Collection|LengthAwarePaginator
     {
         return app(PostInterface::class)->getByCategory($categoryId, $paginate, $limit);
     }

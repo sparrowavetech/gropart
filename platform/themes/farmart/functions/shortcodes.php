@@ -5,6 +5,7 @@ use Botble\Ecommerce\Repositories\Interfaces\FlashSaleInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductCategoryInterface;
 use Botble\Faq\Repositories\Interfaces\FaqCategoryInterface;
 use Botble\Theme\Supports\ThemeSupport;
+use Botble\Testimonial\Repositories\Interfaces\TestimonialInterface;
 use Theme\Farmart\Http\Resources\ProductCategoryResource;
 use Theme\Farmart\Http\Resources\ProductCollectionResource;
 
@@ -261,6 +262,16 @@ app()->booted(function () {
         });
     }
 
+    if (is_plugin_active('blog')) {
+        add_shortcode('blog-posts-by-category', __('Blog Posts by Category'), __('Blog Posts by Category'), function ($shortcode) {
+            return Theme::partial('shortcodes.blog-posts-by-category', compact('shortcode'));
+        });
+
+        shortcode()->setAdminConfig('blog-posts-by-category', function ($attributes) {
+            return Theme::partial('shortcodes.blog-posts-by-category-admin-config', compact('attributes'));
+        });
+    }
+
     if (is_plugin_active('contact')) {
         add_filter(CONTACT_FORM_TEMPLATE_VIEW, function () {
             return Theme::getThemeNamespace() . '::partials.shortcodes.contact-form';
@@ -311,4 +322,48 @@ app()->booted(function () {
     shortcode()->setAdminConfig('coming-soon', function ($attributes) {
         return Theme::partial('shortcodes.coming-soon-admin-config', compact('attributes'));
     });
+
+    add_shortcode('site-features', __('Site Features'), __('Site Features'), function ($shortcode) {
+        return Theme::partial('shortcodes.site-features', compact('shortcode'));
+    });
+
+    shortcode()->setAdminConfig('site-features', function ($attributes) {
+        return Theme::partial('shortcodes.site-features-admin-config', compact('attributes'));
+    });
+
+    add_shortcode('newsletter-home', __('Newsletter Form'), __('Newsletter Form'), function ($shortcode) {
+        return Theme::partial('shortcodes.newsletter-home', compact('shortcode'));
+    });
+
+    shortcode()->setAdminConfig('newsletter-home', function ($attributes) {
+        return Theme::partial('shortcodes.newsletter-home-admin-config', compact('attributes'));
+    });
+
+    if (is_plugin_active('testimonial')) {
+        add_shortcode('testimonials', __('Testimonials'), __('Testimonials'), function ($shortcode) {
+            $testimonials = app(TestimonialInterface::class)->advancedGet([
+                'condition' => [
+                    'status' => BaseStatusEnum::PUBLISHED,
+                ],
+                'take' => (int)$shortcode->number_of_displays,
+            ]);
+
+            return Theme::partial('shortcodes.testimonials.index', compact('shortcode', 'testimonials'));
+        });
+
+        shortcode()->setAdminConfig('testimonials', function ($attributes) {
+            return Theme::partial('shortcodes.testimonials.admin-config', compact('attributes'));
+        });
+    }
+
+    if (is_plugin_active('faq')) {
+
+        add_shortcode('faq-by-category', __('FAQs by Category'), __('FAQs by Category'), function ($shortcode) {
+            return Theme::partial('shortcodes.faq-by-category', compact('shortcode'));
+        });
+
+        shortcode()->setAdminConfig('faq-by-category', function ($attributes) {
+            return Theme::partial('shortcodes.faq-by-category-admin-config', compact('attributes'));
+        });
+    }
 });
