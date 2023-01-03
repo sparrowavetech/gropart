@@ -21,6 +21,8 @@ use Illuminate\Support\Facades\Validator;
 use SeoHelper;
 use Theme;
 use URL;
+use Botble\Sms\Supports\SmsHandler;
+use Botble\Sms\Enums\SmsEnum;
 
 class RegisterController extends Controller
 {
@@ -94,6 +96,28 @@ class RegisterController extends Controller
                 ?: $response
                     ->setNextUrl(route('customer.login'))
                     ->setMessage(__('We have sent you an email to verify your email. Please check and confirm your email address!'));
+        }
+        if (is_plugin_active('sms') && setting('sms_otp_enabled')) {
+                $otp = mt_rand(000000,999999);
+                $sms = new  SmsHandler;
+                $customer->otp  = $otp;
+                $customer->save();
+                $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+                if ($sms->templateEnabled(SmsEnum::OTP())) {
+                    $sms->setVariableValues([
+                        'customer_name' => $customer->name,
+                        'otp' => $otp,
+                    ]);
+                    $sms->sendUsingTemplate(
+                        SmsEnum::OTP(),
+                        $customer->phone
+                    );
+                }
+         
+            return $this->registered($request, $customer)
+                ?: $response
+                    ->setNextUrl(route('customer.otp'))
+                    ->setMessage(__('We have sent you an OTP to verify your mobile. Please check and confirm your mobile No!'));
         }
 
         $customer->confirmed_at = Carbon::now();

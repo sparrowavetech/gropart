@@ -21,14 +21,28 @@
         </div>
     </div>
 
-</div>
-<div class="flexbox-annotated-section" style="border: none">
-        <div class="flexbox-annotated-section-annotation">
-            &nbsp;
-        </div>
-        <div class="flexbox-annotated-section-content">
-            <button class="btn btn-info" type="submit">{{ trans('plugins/sms::sms.save_settings') }}</button>
+    <div class="flexbox-annotated-section-content">
+        <div class="wrapper-content pd-all-20">
+            <div class="form-group mb-3">
+                <label class="text-title-field" for="sms_otp_enabled">{{ trans('plugins/sms::sms.sms_otp_enabled') }}
+                </label>
+                <label class="me-2">
+                    <input type="radio" name="sms_otp_enabled" value="1" @if (setting('sms_otp_enabled')) checked @endif>{{ trans('core/setting::setting.general.yes') }}
+                </label>
+                <label>
+                    <input type="radio" name="sms_otp_enabled" value="0" @if (!setting('sms_otp_enabled')) checked @endif>{{ trans('core/setting::setting.general.no') }}
+                </label>
+            </div>
         </div>
     </div>
+</div>
+<div class="flexbox-annotated-section" style="border: none">
+    <div class="flexbox-annotated-section-annotation">
+        &nbsp;
+    </div>
+    <div class="flexbox-annotated-section-content">
+        <button class="btn btn-info" type="submit">{{ trans('plugins/sms::sms.save_settings') }}</button>
+    </div>
+</div>
 {!! Form::close() !!}
 @endsection

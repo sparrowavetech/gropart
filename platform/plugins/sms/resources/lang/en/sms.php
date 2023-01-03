@@ -12,6 +12,7 @@ return [
     'template_id_placeholder' =>'Template Id',
     'variable'=>'SMS Variable',
     'save_settings'=>'Save Setting',
+    'sms_otp_enabled'=>'OTP Enabled',
     'settings' => [
         'title' => 'SMS',
         'description' => 'Settings for SMS plugin',

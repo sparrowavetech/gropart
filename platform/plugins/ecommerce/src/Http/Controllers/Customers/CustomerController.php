@@ -26,6 +26,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Throwable;
+use SeoHelper;
+use Theme;
 
 class CustomerController extends BaseController
 {
@@ -280,5 +282,24 @@ class CustomerController extends BaseController
         return $response
             ->setData(compact('address', 'customer'))
             ->setMessage(trans('core/base::notices.create_success_message'));
+    }
+    /**
+     * @param AddCustomerWhenCreateOrderRequest $request
+     * @param BaseHttpResponse $response
+     * @return BaseHttpResponse
+     */
+    public function otp() {
+        SeoHelper::setTitle(__('OTP'));
+
+        Theme::breadcrumb()->add(__('Home'), route('public.index'))->add(__('Register'), route('customer.register'));
+
+        if (! session()->has('url.intended')) {
+            if (! in_array(url()->previous(), [route('customer.login'), route('customer.register')])) {
+                session(['url.intended' => url()->previous()]);
+            }
+        }
+
+        return Theme::scope('ecommerce.customers.otp', [], 'plugins/ecommerce::themes.customers.register')
+            ->render();
     }
 }
