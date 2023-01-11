@@ -89,7 +89,7 @@ class RegisterController extends Controller
 
         $customer = $this->create($request->input());
 
-      //  event(new Registered($customer));
+        event(new Registered($customer));
 
         if (is_plugin_active('sms') && setting('sms_otp_enabled')) {
             $otp = mt_rand(000000, 999999);
