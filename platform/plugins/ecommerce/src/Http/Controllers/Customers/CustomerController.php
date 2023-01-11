@@ -11,6 +11,7 @@ use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Forms\CustomerForm;
 use Botble\Ecommerce\Http\Requests\AddCustomerWhenCreateOrderRequest;
+use Botble\Ecommerce\Http\Requests\OTPRequest;
 use Botble\Ecommerce\Http\Requests\CustomerCreateRequest;
 use Botble\Ecommerce\Http\Requests\CustomerEditRequest;
 use Botble\Ecommerce\Http\Requests\CustomerUpdateEmailRequest;
@@ -28,6 +29,9 @@ use Illuminate\Support\Str;
 use Throwable;
 use SeoHelper;
 use Theme;
+use Illuminate\Validation\ValidationException;
+use Botble\Sms\Supports\SmsHandler;
+use Botble\Sms\Enums\SmsEnum;
 
 class CustomerController extends BaseController
 {
@@ -242,7 +246,7 @@ class CustomerController extends BaseController
     public function getCustomerOrderNumbers($id, BaseHttpResponse $response)
     {
         $customer = $this->customerRepository->findById($id);
-        if (! $customer) {
+        if (!$customer) {
             return $response->setData(0);
         }
 
@@ -288,18 +292,66 @@ class CustomerController extends BaseController
      * @param BaseHttpResponse $response
      * @return BaseHttpResponse
      */
-    public function otp() {
+    public function otp($customer_id)
+    {
         SeoHelper::setTitle(__('OTP'));
 
-        Theme::breadcrumb()->add(__('Home'), route('public.index'))->add(__('Register'), route('customer.register'));
+        Theme::breadcrumb()->add(__('Home'), route('public.index'))->add(__('OTP Verify'), route('customer.register'));
 
-        if (! session()->has('url.intended')) {
-            if (! in_array(url()->previous(), [route('customer.login'), route('customer.register')])) {
+        if (!session()->has('url.intended')) {
+            if (!in_array(url()->previous(), [route('customer.login'), route('customer.register')])) {
                 session(['url.intended' => url()->previous()]);
             }
         }
 
-        return Theme::scope('ecommerce.customers.otp', [], 'plugins/ecommerce::themes.customers.register')
+        return Theme::scope('ecommerce.customers.otp',  compact('customer_id'), 'plugins/ecommerce::customer.verify_otp')
             ->render();
+    }
+    public function verifyotp(
+        OtpRequest $request,
+        BaseHttpResponse $response
+    ) {
+        $customer = $this->customerRepository->findById($request->customer_id);
+
+        if ($customer && $customer->otp == $request->otp) {
+            $customer->confirmed_at = Carbon::now();
+            $this->customerRepository->createOrUpdate($customer);
+            $this->guard()->login($customer);
+            return $response
+                ->setMessage(trans('plugins/ecommerce::customer.otp_verify_success'));
+        } else {
+            throw ValidationException::withMessages([
+                'confirmation' => trans('plugins/ecommerce::customer.otp_verify_error'),
+            ]);
+        }
+    }
+    public function resend( BaseHttpResponse $response,$id)
+    {
+        $customer = $this->customerRepository->findById($id);
+        if (is_plugin_active('sms') && setting('sms_otp_enabled')) {
+            $otp = mt_rand(000000, 999999);
+            $sms = new  SmsHandler;
+            $customer->otp  = $otp;
+            $this->customerRepository->createOrUpdate($customer);
+            $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+            if ($sms->templateEnabled(SmsEnum::OTP())) {
+                $sms->setVariableValues([
+                    'customer_name' => $customer->name,
+                    'otp' => $otp,
+                ]);
+                $sms->sendUsingTemplate(
+                    SmsEnum::OTP(),
+                    $customer->phone
+                );
+            }
+
+            return  $response
+                ->setNextUrl(route('customer.otp', $customer->id))
+                ->setMessage(__('We have resent you an OTP '));
+        }
+    }
+    protected function guard()
+    {
+        return auth('customer');
     }
 }

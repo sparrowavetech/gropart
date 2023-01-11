@@ -237,15 +237,15 @@ class SmsHandler
         try {
             $content = $this->prepareData($content);
             $url = $this->getUrl($to,$content);
-            file_get_contents($url);
+        
+            $res = file_get_contents($url);
            // event(new SendSmsEvent($url, $args, $debug));
         } catch (Exception $exception) {
             if ($debug) {
                 throw $exception;
             }
-
             info($exception->getMessage());
-            $this->sendErrorException($exception);
+            //$this->sendErrorException($exception);
         }
     }
 
@@ -383,7 +383,7 @@ class SmsHandler
      */
     public function getUrl($to,$content): string
     {
-        $finalvar = ['mobile'=>$to,'message'=>($content),'template_id'=>$this->templateId];
+        $finalvar = ['mobile'=>$to,'message'=>urlencode($content),'template_id'=>$this->templateId];
       
         $url  = setting('sms_url');
         foreach($finalvar as $key => $value){

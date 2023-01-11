@@ -64,8 +64,9 @@ if (defined('THEME_MODULE_SCREEN_NAME')) {
         ], function () {
             Route::get('login', 'LoginController@showLoginForm')->name('login');
             Route::post('login', 'LoginController@login')->name('login.post');
-            Route::get('otp', 'CustomerController@otp')->name('otp');
-            Route::get('otp', 'CustomerController@otp')->name('otp.post');
+            Route::get('otp/{id}', 'CustomerController@otp')->name('otp');
+            Route::get('resend/{id}', 'CustomerController@resend')->name('resend');
+            Route::post('otp', 'CustomerController@verifyotp')->name('otp.post');
 
             Route::get('register', 'RegisterController@showRegistrationForm')->name('register');
             Route::post('register', 'RegisterController@register')->name('register.post');

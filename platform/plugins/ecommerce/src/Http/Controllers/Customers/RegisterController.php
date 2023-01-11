@@ -64,8 +64,8 @@ class RegisterController extends Controller
 
         Theme::breadcrumb()->add(__('Home'), route('public.index'))->add(__('Register'), route('customer.register'));
 
-        if (! session()->has('url.intended')) {
-            if (! in_array(url()->previous(), [route('customer.login'), route('customer.register')])) {
+        if (!session()->has('url.intended')) {
+            if (!in_array(url()->previous(), [route('customer.login'), route('customer.register')])) {
                 session(['url.intended' => url()->previous()]);
             }
         }
@@ -89,35 +89,34 @@ class RegisterController extends Controller
 
         $customer = $this->create($request->input());
 
-        event(new Registered($customer));
+      //  event(new Registered($customer));
 
-        if (EcommerceHelper::isEnableEmailVerification()) {
-            return $this->registered($request, $customer)
-                ?: $response
-                    ->setNextUrl(route('customer.login'))
-                    ->setMessage(__('We have sent you an email to verify your email. Please check and confirm your email address!'));
-        }
         if (is_plugin_active('sms') && setting('sms_otp_enabled')) {
-                $otp = mt_rand(000000,999999);
-                $sms = new  SmsHandler;
-                $customer->otp  = $otp;
-                $customer->save();
-                $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
-                if ($sms->templateEnabled(SmsEnum::OTP())) {
-                    $sms->setVariableValues([
-                        'customer_name' => $customer->name,
-                        'otp' => $otp,
-                    ]);
-                    $sms->sendUsingTemplate(
-                        SmsEnum::OTP(),
-                        $customer->phone
-                    );
-                }
-         
+            $otp = mt_rand(000000, 999999);
+            $sms = new  SmsHandler;
+            $customer->otp  = $otp;
+            $this->customerRepository->createOrUpdate($customer);
+            $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+            if ($sms->templateEnabled(SmsEnum::OTP())) {
+                $sms->setVariableValues([
+                    'customer_name' => $customer->name,
+                    'otp' => $otp,
+                ]);
+                $sms->sendUsingTemplate(
+                    SmsEnum::OTP(),
+                    $customer->phone
+                );
+            }
+
+            return  $this->registered($request, $customer)
+                ?: $response
+                ->setNextUrl(route('customer.otp', $customer->id))
+                ->setMessage(__('We have sent you an OTP to verify your mobile. Please check and confirm your mobile No!'));
+        } else if (EcommerceHelper::isEnableEmailVerification()) {
             return $this->registered($request, $customer)
                 ?: $response
-                    ->setNextUrl(route('customer.otp'))
-                    ->setMessage(__('We have sent you an OTP to verify your mobile. Please check and confirm your mobile No!'));
+                ->setNextUrl(route('customer.login'))
+                ->setMessage(__('We have sent you an email to verify your email. Please check and confirm your email address!'));
         }
 
         $customer->confirmed_at = Carbon::now();
@@ -137,6 +136,7 @@ class RegisterController extends Controller
     {
         $rules = [
             'name' => 'required|max:255',
+            'phone' => 'required|' . BaseHelper::getPhoneValidationRule(),
             'email' => 'required|email|max:255|unique:ec_customers',
             'password' => 'required|min:6|confirmed',
         ];
@@ -155,6 +155,7 @@ class RegisterController extends Controller
         $attributes = [
             'name' => __('Name'),
             'email' => __('Email'),
+            'phone' => __('Phone'),
             'password' => __('Password'),
             'g-recaptcha-response' => __('Captcha'),
             'agree_terms_and_policy' => __('Term and Policy'),
@@ -177,6 +178,7 @@ class RegisterController extends Controller
         return $this->customerRepository->create([
             'name' => BaseHelper::clean($data['name']),
             'email' => BaseHelper::clean($data['email']),
+            'phone' => BaseHelper::clean($data['phone']),
             'password' => Hash::make($data['password']),
         ]);
     }
@@ -217,7 +219,7 @@ class RegisterController extends Controller
      */
     public function confirm($id, Request $request, BaseHttpResponse $response, CustomerInterface $customerRepository)
     {
-        if (! URL::hasValidSignature($request)) {
+        if (!URL::hasValidSignature($request)) {
             abort(404);
         }
 
@@ -248,7 +250,7 @@ class RegisterController extends Controller
     ) {
         $customer = $customerRepository->getFirstBy(['email' => $request->input('email')]);
 
-        if (! $customer) {
+        if (!$customer) {
             return $response
                 ->setError()
                 ->setMessage(__('Cannot find this customer!'));

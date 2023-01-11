@@ -23,4 +23,7 @@ return [
         'locked' => 'Locked',
     ],
     'email_verified' => 'Email verified?',
+    'otp_verify_success' => 'Otp verify successfully',
+    'otp_verify_error' => 'Otp Does not match',
+    'verify_otp'=>'verify OTP'
 ];

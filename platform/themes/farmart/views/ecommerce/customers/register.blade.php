@@ -11,75 +11,72 @@
                     </div>
                 </nav>
                 <div class="tab-content my-3">
-                    <div class="tab-pane fade pt-4 show active" id="nav-register-content" role="tabpanel"
-                         aria-labelledby="nav-profile-tab">
+                    <div class="tab-pane fade pt-4 show active" id="nav-register-content" role="tabpanel" aria-labelledby="nav-profile-tab">
                         <form method="POST" action="{{ route('customer.register.post') }}">
                             @csrf
                             <div class="input-group mb-3">
-                                <input class="form-control @if ($errors->has('name')) is-invalid @endif"
-                                       name="name" id="name-register" type="text" value="{{ old('name') }}" placeholder="{{ __('Your Name') }}">
+                                <input class="form-control @if ($errors->has('name')) is-invalid @endif" name="name" id="name-register" type="text" value="{{ old('name') }}" placeholder="{{ __('Your Name') }}">
                                 @if ($errors->has('name'))
-                                    <div class="invalid-feedback">{{ $errors->first('name') }}</div>
+                                <div class="invalid-feedback">{{ $errors->first('name') }}</div>
+                                @endif
+                            </div>
+                            <div class="mb-3">
+                                <input class="form-control @if ($errors->has('phone')) is-invalid @endif" id="phone-register" type="text" name="phone" maxlength="10" placeholder="{{ __('Phone') }}">
+                                @if ($errors->has('phone'))
+                                <div class="invalid-feedback">{{ $errors->first('phone') }}</div>
                                 @endif
                             </div>
                             <div class="input-group mb-3">
-                                <input class="form-control @if ($errors->has('email')) is-invalid @endif"
-                                       type="email" required="required" placeholder="{{ __('Email Address') }}"
-                                       name="email" autocomplete="email" value="{{ old('email') }}">
+                                <input class="form-control @if ($errors->has('email')) is-invalid @endif" type="email" required="required" placeholder="{{ __('Email Address') }}" name="email" autocomplete="email" value="{{ old('email') }}">
                                 @if ($errors->has('email'))
-                                    <div class="invalid-feedback">{{ $errors->first('email') }}</div>
+                                <div class="invalid-feedback">{{ $errors->first('email') }}</div>
                                 @endif
                             </div>
                             <div class="input-group mb-3">
-                                <input class="form-control @if ($errors->has('password')) is-invalid @endif"
-                                       type="password" placeholder="{{ __('Password') }}" aria-label="{{ __('Password') }}"
-                                       autocomplete="new-password" name="password">
+                                <input class="form-control @if ($errors->has('password')) is-invalid @endif" type="password" placeholder="{{ __('Password') }}" aria-label="{{ __('Password') }}" autocomplete="new-password" name="password">
                                 @if ($errors->has('password'))
-                                    <div class="invalid-feedback">{{ $errors->first('password') }}</div>
+                                <div class="invalid-feedback">{{ $errors->first('password') }}</div>
                                 @endif
                             </div>
                             <div class="input-group mb-3">
-                                <input class="form-control @if ($errors->has('password_confirmation')) is-invalid @endif"
-                                       type="password" placeholder="{{ __('Password confirmation') }}" aria-label="{{ __('Password') }}" name="password_confirmation">
+                                <input class="form-control @if ($errors->has('password_confirmation')) is-invalid @endif" type="password" placeholder="{{ __('Password confirmation') }}" aria-label="{{ __('Password') }}" name="password_confirmation">
                                 @if ($errors->has('password_confirmation'))
-                                    <div class="invalid-feedback">{{ $errors->first('password_confirmation') }}</div>
+                                <div class="invalid-feedback">{{ $errors->first('password_confirmation') }}</div>
                                 @endif
                             </div>
                             @if (is_plugin_active('marketplace'))
-                                <div class="show-if-vendor" @if (old('is_vendor') != 1) style="display: none" @endif>
-                                    @include(Theme::getThemeNamespace() . '::views.marketplace.includes.become-vendor-form')
+                            <div class="show-if-vendor" @if (old('is_vendor') !=1) style="display: none" @endif>
+                                @include(Theme::getThemeNamespace() . '::views.marketplace.includes.become-vendor-form')
+                            </div>
+                            <div class="vendor-customer-registration">
+                                <div class="form-check my-1">
+                                    <input class="form-check-input" name="is_vendor" value="0" id="customer-role-register" type="radio" @if (old('is_vendor') !=1) checked="checked" @endif>
+                                    <label class="form-check-label" for="customer-role-register">{{ __('I am a customer') }}</label>
                                 </div>
-                                <div class="vendor-customer-registration">
-                                    <div class="form-check my-1">
-                                        <input class="form-check-input" name="is_vendor" value="0" id="customer-role-register"
-                                               type="radio" @if (old('is_vendor') != 1) checked="checked" @endif>
-                                        <label class="form-check-label" for="customer-role-register">{{ __('I am a customer') }}</label>
-                                    </div>
-                                    <div class="form-check my-1 mb-3">
-                                        <input class="form-check-input" id="vendor-role-register" value="1"
-                                               type="radio" name="is_vendor" @if (old('is_vendor') == 1) checked="checked" @endif>
-                                        <label class="form-check-label" for="vendor-role-register">{{ __('I am a vendor') }}</label>
-                                    </div>
+                                <div class="form-check my-1 mb-3">
+                                    <input class="form-check-input" id="vendor-role-register" value="1" type="radio" name="is_vendor" @if (old('is_vendor')==1) checked="checked" @endif>
+                                    <label class="form-check-label" for="vendor-role-register">{{ __('I am a vendor') }}</label>
                                 </div>
+                            </div>
                             @endif
                             <div class="form-group">
                                 <p>{{ __('Your personal data will be used to support your experience throughout this website, to manage access to your account, and for other purposes described in our privacy policy.') }}</p>
                             </div>
                             <div class="form-check mb-3">
                                 <input type="hidden" name="agree_terms_and_policy" value="0">
-                                <input class="form-check-input" type="checkbox" name="agree_terms_and_policy" id="agree-terms-and-policy" value="1" @if (old('agree_terms_and_policy') == 1) checked @endif>
+                                <input class="form-check-input" type="checkbox" name="agree_terms_and_policy" id="agree-terms-and-policy" value="1" @if (old('agree_terms_and_policy')==1) checked @endif>
                                 <label for="agree-terms-and-policy">{{ __('I agree to terms & Policy.') }}</label> <a target="_BLANK" href="/gropart-policy" style="color:var(--primary-color);text-decoration: underline"><strong>{{ __('Read policy') }}</strong></a>
                                 @if ($errors->has('agree_terms_and_policy'))
-                                    <div class="mt-1">
-                                        <span class="text-danger small">{{ $errors->first('agree_terms_and_policy') }}</span>
-                                    </div>
+                                <div class="mt-1">
+                                    <span class="text-danger small">{{ $errors->first('agree_terms_and_policy') }}</span>
+                                </div>
                                 @endif
                             </div>
 
                             @if (is_plugin_active('captcha') && setting('enable_captcha') && get_ecommerce_setting('enable_recaptcha_in_register_page', 0))
-                                <div class="form-group mb-3">
-                                    {!! Captcha::display() !!}
-                                </div>
+                            <div class="form-group mb-3">
+                                {!! Captcha::display() !!}
+                            </div>
                             @endif
                             <div class="d-grid">
                                 <button class="btn btn-primary" type="submit">{{ __('Register') }}</button>
