@@ -380,36 +380,27 @@
         }
         function addToCartAll(){
             $("#preloader").show();
-            var maxCount =  $('.fqtcheckbox:checked').length;
-            var counter = 0;
+            var checkboxArr=[];
             $('.fqtcheckbox:checked').each(function() {
-                var product_id = $(this).val();
-                var form = $('#combo_'+product_id);
-			    var url = form.attr('action');
-                data = form.serialize();
-                data += "&data=" + 1;
-                $.ajax({
+                checkboxArr.push($(this).val());
+            });
+            console.log(checkboxArr);
+            $.ajax({
                     type: "POST",
-                    url: url,
-                    data: data,
+                    url: "{{ route('public.cart.multiple')}}",
+                    data: {id:checkboxArr},
                     success: function(data) {
                         if(data.error == false){
                             MartApp.showSuccess(data.message);
                         }else{
                             MartApp.showSuccess(data.message);
                         }
-                        counter++;
-                        console.log(maxCount,counter)
-                        if(maxCount == counter){
-                            $("#preloader").hide();
-                            MartApp.loadAjaxCart();
-                        }
+                        $("#preloader").hide();
+                        MartApp.loadAjaxCart();
                     },
                     error: function(data) {
                     }
                 });
-
-            });
 
         }
     </script>
