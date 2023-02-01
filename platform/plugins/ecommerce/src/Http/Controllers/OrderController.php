@@ -56,6 +56,7 @@ use MarketplaceHelper;
 use OrderHelper;
 use RvMedia;
 use Throwable;
+use Botble\Pickrr\Pickrr;
 
 class OrderController extends BaseController
 {
@@ -165,7 +166,7 @@ class OrderController extends BaseController
 
         foreach ($request->input('products', []) as $productItem) {
             $product = $this->productRepository->findById(Arr::get($productItem, 'id'));
-            if (! $product) {
+            if (!$product) {
                 continue;
             }
 
@@ -260,7 +261,7 @@ class OrderController extends BaseController
 
             foreach ($request->input('products', []) as $productItem) {
                 $product = $this->productRepository->findById(Arr::get($productItem, 'id'));
-                if (! $product) {
+                if (!$product) {
                     continue;
                 }
 
@@ -421,7 +422,7 @@ class OrderController extends BaseController
     {
         $order = $this->orderRepository->findOrFail($orderId);
 
-        if (! $order->isInvoiceAvailable()) {
+        if (!$order->isInvoiceAvailable()) {
             abort(404);
         }
 
@@ -476,8 +477,8 @@ class OrderController extends BaseController
             $sms = new  SmsHandler;
             $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
             if ($sms->templateEnabled(SmsEnum::PAYMENT_CONFIRMATION())) {
-                $orderHelper = new OrderHelper;
-                $orderHelper->setSmsVariables($order, $sms);
+               // $orderHelper = new OrderHelper;
+                OrderHelper::setSmsVariables($order, $sms);
                 $sms->sendUsingTemplate(
                     SmsEnum::PAYMENT_CONFIRMATION(),
                     $order->user->phone ?: $order->address->phone
@@ -499,7 +500,7 @@ class OrderController extends BaseController
         $order = $this->orderRepository->findOrFail($id);
         $result = OrderHelper::sendOrderConfirmationEmail($order);
 
-        if (! $result) {
+        if (!$result) {
             return $response
                 ->setError()
                 ->setMessage(trans('plugins/ecommerce::order.error_when_sending_email'));
@@ -592,7 +593,7 @@ class OrderController extends BaseController
 
         $store = $this->storeLocatorRepository->findById($request->input('store_id'));
 
-        if (! $store) {
+        if (!$store) {
             $defaultStore = $this->storeLocatorRepository->getFirstBy(['is_primary' => true]);
             $shipment['store_id'] = $defaultStore ? $defaultStore->id : null;
         }
@@ -604,7 +605,7 @@ class OrderController extends BaseController
                 break;
         }
 
-        if (! $result->isError()) {
+        if (!$result->isError()) {
             $this->orderRepository->createOrUpdate([
                 'status' => OrderStatusEnum::PROCESSING,
                 'shipping_method' => $request->input('method'),
@@ -625,8 +626,8 @@ class OrderController extends BaseController
                 $sms = new  SmsHandler;
                 $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
                 if ($sms->templateEnabled(SmsEnum::DELIVERING_CONFIRMATION())) {
-                    $orderHelper = new OrderHelper;
-                    $orderHelper->setSmsVariables($order, $sms);
+                    //$orderHelper = new OrderHelper;
+                    OrderHelper::setSmsVariables($order, $sms);
                     $sms->sendUsingTemplate(
                         SmsEnum::DELIVERING_CONFIRMATION(),
                         $order->user->phone ?: $order->address->phone
@@ -652,6 +653,8 @@ class OrderController extends BaseController
 
         return $result;
     }
+
+
 
     /**
      * @param int $id
@@ -691,7 +694,7 @@ class OrderController extends BaseController
     {
         $address = $this->orderAddressRepository->createOrUpdate($request->input(), compact('id'));
 
-        if (! $address) {
+        if (!$address) {
             abort(404);
         }
 
@@ -717,7 +720,7 @@ class OrderController extends BaseController
     {
         $order = $this->orderRepository->findOrFail($id);
 
-        if (! $order->canBeCanceledByAdmin()) {
+        if (!$order->canBeCanceledByAdmin()) {
             abort(403);
         }
 
@@ -797,7 +800,7 @@ class OrderController extends BaseController
         }
 
         $payment = $order->payment;
-        if (! $payment) {
+        if (!$payment) {
             return $response
                 ->setError()
                 ->setMessage(trans('plugins/ecommerce::order.cannot_found_payment_for_this_order'));
@@ -836,9 +839,9 @@ class OrderController extends BaseController
             $response->setData($refundData);
 
             $refundData['_data_request'] = $request->except(['_token']) + [
-                    'currency' => $payment->currency,
-                    'created_at' => Carbon::now(),
-                ];
+                'currency' => $payment->currency,
+                'created_at' => Carbon::now(),
+            ];
             $metadata = $payment->metadata;
             $refunds = Arr::get($metadata, 'refunds', []);
             $refunds[] = $refundData;
@@ -979,7 +982,7 @@ class OrderController extends BaseController
      */
     public function getReorder(Request $request, BaseHttpResponse $response)
     {
-        if (! $request->input('order_id')) {
+        if (!$request->input('order_id')) {
             return $response
                 ->setError()
                 ->setNextUrl(route('orders.index'))
@@ -990,7 +993,7 @@ class OrderController extends BaseController
 
         $order = $this->orderRepository->findById($request->input('order_id'));
 
-        if (! $order) {
+        if (!$order) {
             return $response
                 ->setError()
                 ->setNextUrl(route('orders.index'))
@@ -1123,7 +1126,7 @@ class OrderController extends BaseController
 
         $email = $order->user->email ?: $order->address->email;
 
-        if (! $email) {
+        if (!$email) {
             return $response
                 ->setError()
                 ->setMessage(trans('plugins/ecommerce::order.error_when_sending_email'));
@@ -1143,5 +1146,68 @@ class OrderController extends BaseController
                 ->setError()
                 ->setMessage(trans('plugins/ecommerce::order.error_when_sending_email'));
         }
+    }
+    public function pickrrCreateShipment(
+        $id,
+        BaseHttpResponse $response,
+        ShipmentHistoryInterface $shipmentHistoryRepository
+    ) {
+        $orderProduct = $this->orderProductRepository->findOrFail($id);
+
+        $pickrr = new  Pickrr();
+        $result = $pickrr->createShipment($orderProduct);
+       
+        if (!$result['error']) {
+            $id = $orderProduct->order_id;
+            $this->orderRepository->createOrUpdate([
+                'status' => OrderStatusEnum::PROCESSING,
+                'shipping_method' => 'Pickrr',
+                'shipping_option' => 'Pickrr',
+            ], compact('id'));
+           
+            $shipment = $this->shipmentRepository->createOrUpdate($result['shipment']);
+
+            $mailer = EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+            if ($mailer->templateEnabled('customer_delivery_order')) {
+                OrderHelper::setEmailVariables($orderProduct->order);
+                $mailer->sendUsingTemplate(
+                    'customer_delivery_order',
+                    $orderProduct->order->user->email ?: $orderProduct->order->address->email
+                );
+            }
+            if (is_plugin_active('sms')) {
+                $sms = new  SmsHandler;
+                $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+                if ($sms->templateEnabled(SmsEnum::DELIVERING_CONFIRMATION())) {
+                    //$orderHelper = new OrderHelper;
+                    OrderHelper::setSmsVariables($orderProduct->order, $sms);
+                    $sms->sendUsingTemplate(
+                        SmsEnum::DELIVERING_CONFIRMATION(),
+                        $orderProduct->order->user->phone ?: $orderProduct->order->address->phone
+                    );
+                }
+            }
+
+            $this->orderHistoryRepository->createOrUpdate([
+                'action' => 'create_shipment',
+                'description' => $result['message']. ' ' . trans('plugins/ecommerce::order.by_username'),
+                'order_id' => $orderProduct->order_id,
+                'user_id' => Auth::id(),
+            ]);
+
+            $shipmentHistoryRepository->createOrUpdate([
+                'action' => 'create_from_order',
+                'description' => trans('plugins/ecommerce::order.shipping_was_created_from'),
+                'shipment_id' => $shipment->id,
+                'order_id' => $orderProduct->order_id,
+                'user_id' => Auth::id(),
+            ]);
+            return $response->setMessage($result['message']);
+        }else{
+            return $response
+            ->setError()
+            ->setMessage($result['message']);
+        }
+        
     }
 }

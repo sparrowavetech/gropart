@@ -1,0 +1,9 @@
+{
+    "name": "Pickrr",
+    "namespace": "Botble\\Pickrr\\",
+    "provider": "Botble\\Pickrr\\Providers\\PickrrServiceProvider",
+    "author": "Vikram Singh Rathore",
+    "url": "https://www.linkedin.com/in/vikram-singh-rathore-999bb7134/",
+    "version": "1.0",
+    "description": "Shipping pickrr"
+}

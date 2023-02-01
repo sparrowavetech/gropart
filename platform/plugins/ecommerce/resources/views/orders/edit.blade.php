@@ -163,6 +163,11 @@
                                                     <span>{{ $orderProduct->qty }}</span>
                                                 </td>
                                                 <td class="pl5 text-end">{{ format_price($orderProduct->price * $orderProduct->qty) }}</td>
+                                                <td class="pl5 p-r5 text-end">
+                                                <a href="{{ route('orders.pickrr-create-shipment',$orderProduct->id) }}"
+                                                                               class="bold-light"
+                                                                               target="_blank">Create Shipment</a>
+                                                </td>
                                             </tr>
                                         @endforeach
                                         </tbody>
