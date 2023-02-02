@@ -39,6 +39,11 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
                 'uses' => 'OrderController@pickrrCreateShipment',
                 'permission' => 'orders.edit',
             ]);
+            Route::get('cancel-shipment-pickrr/{id}', [
+                'as' => 'pickrr-cancel-shipment',
+                'uses' => 'OrderController@postPickrrCancelShipment',
+                'permission' => 'orders.edit',
+            ]);
             Route::post('create-shipment/{id}', [
                 'as' => 'create-shipment',
                 'uses' => 'OrderController@postCreateShipment',

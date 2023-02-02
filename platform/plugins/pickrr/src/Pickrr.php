@@ -48,28 +48,28 @@ class Pickrr
             'from_name' =>  $store->name,
             'from_phone_number' => $store->phone,
             'from_address' => $store->full_address,
-            'from_pincode' => $store->zip_code ,
+            'from_pincode' => $store->zip_code,
             'pickup_gstin' => '',
             'to_name' => $inParams->order->address->zip_code,
             'to_phone_number' => $inParams->order->address->phone,
             'to_pincode' => $inParams->order->address->zip_code,
             'to_address' => $inParams->order->fullAddress,
             'quantity' => $inParams->qty,
-            'invoice_value' => $inParams->price+$inParams->tax_amount,
+            'invoice_value' => $inParams->price + $inParams->tax_amount,
             'cod_amount' => $inParams->order->payment->status != PaymentStatusEnum::COMPLETED ? $order->amount : 0,
-            'client_order_id' => $inParams->order->id.'/'.$inParams->id,
+            'client_order_id' => $inParams->order->id . '/' . $inParams->id,
             'item_breadth' => $inParams->product->wide,
             'item_length' => $inParams->product->length,
             'item_height' => $inParams->product->height,
             'item_weight' => $inParams->product->weight,
             'item_tax_percentage' => $inParams->product->total_taxes_percentage,
             'is_reverse' => False
-                );
-               
+        );
+
         return $params;
     }
-   
-   
+
+
     public function createShipment($orderProduct)
     {
         try {
@@ -87,29 +87,58 @@ class Pickrr
             $response = json_decode($result);
             //close connection
             curl_close($ch);
-            if( $response->success == true){
-                $shipment['order_id']	= $orderProduct->order_id;
-                $shipment['user_id']	= Auth::id();
-                $shipment['weight']	= $orderProduct->product->weight;
-                $shipment['shipment_id']	= $response->order_id;
-                $shipment['cod_amount']= $orderProduct->order->payment->status != PaymentStatusEnum::COMPLETED ? $orderProduct->order->amount : 0;
-                $shipment['cod_status']= $orderProduct->order->payment->status != PaymentStatusEnum::COMPLETED ? 'complete' : 'pending';
+            if ($response->success == true) {
+                $shipment['order_id']    = $orderProduct->order_id;
+                $shipment['user_id']    = Auth::id();
+                $shipment['weight']    = $orderProduct->product->weight;
+                $shipment['shipment_id']    = $response->order_id;
+                $shipment['cod_amount'] = $orderProduct->order->payment->status != PaymentStatusEnum::COMPLETED ? $orderProduct->order->amount : 0;
+                $shipment['cod_status'] = $orderProduct->order->payment->status != PaymentStatusEnum::COMPLETED ? 'complete' : 'pending';
                 $shipment['type'] = 'Pickrr';
                 $shipment['status'] = ShippingStatusEnum::DELIVERING;
-                $shipment['price']	= $orderProduct->order->shipping_amount;
-                $shipment['store_id']	= $orderProduct->order->store_id;
-                $shipment['tracking_id']	= $response->tracking_id;
+                $shipment['price']    = $orderProduct->order->shipping_amount;
+                $shipment['store_id']    = $orderProduct->order->store_id;
+                $shipment['tracking_id']    = $response->tracking_id;
                 $shipment['shipping_company_name'] = $response->courier;
-                $shipment['tracking_link']	= 'https://www.pickrr.com/tracking/#/?tracking_id='.$response->tracking_id;
-                $shipment['label_url'] =  'https://pickrr.com/order/generate-user-order-manifest-png/'.$this->liveApiToken.'/'.$response->order_id;
-                $shipment['metadata']	 = $result;
-                return ['error'=>false,'message'=>'success','shipment'=>$shipment];
-            }else{
-                return ['error'=>true,'message'=>$response->err,];
+                $shipment['tracking_link']    = 'https://www.pickrr.com/tracking/#/?tracking_id=' . $response->tracking_id;
+                $shipment['label_url'] =  'https://pickrr.com/order/generate-user-order-manifest-png/' . $this->liveApiToken . '/' . $response->order_id;
+                $shipment['metadata']     = $result;
+                return ['error' => false, 'message' => 'success', 'shipment' => $shipment];
+            } else {
+                return ['error' => true, 'message' => $response->err,];
             }
-          
         } catch (\Exception $e) {
-            return ['error'=>true,'message'=>$e->getMessage()];
+            return ['error' => true, 'message' => $e->getMessage()];
+        }
+    }
+    public function cancelShipment($shipment)
+    {
+        try {
+            $json_params =  json_encode(array(
+                'auth_token' => $this->liveApiToken,
+                'tracking_id' => $shipment->tracking_id
+            ));
+            $url = 'https://www.pickrr.com/api/order-cancellation/';
+            //open connection
+            $ch = curl_init();
+            //set the url, number of POST vars, POST data
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $json_params);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            //execute post
+            $result = curl_exec($ch);
+            $response = json_decode($result);
+            //close connection
+            curl_close($ch);
+            if ($response->success == true) {
+
+                return ['error' => false, 'message' => 'success'];
+            } else {
+                return ['error' => true, 'message' => $response->err,];
+            }
+        } catch (\Exception $e) {
+            return ['error' => true, 'message' => $e->getMessage()];
         }
     }
 }

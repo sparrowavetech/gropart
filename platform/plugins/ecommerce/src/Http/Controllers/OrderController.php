@@ -1166,7 +1166,8 @@ class OrderController extends BaseController
             ], compact('id'));
            
             $shipment = $this->shipmentRepository->createOrUpdate($result['shipment']);
-
+            $orderProduct->shipment_id =  $shipment->id;
+            $orderProduct->save();
             $mailer = EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME);
             if ($mailer->templateEnabled('customer_delivery_order')) {
                 OrderHelper::setEmailVariables($orderProduct->order);
@@ -1209,5 +1210,36 @@ class OrderController extends BaseController
             ->setMessage($result['message']);
         }
         
+    }
+     /**
+     * @param int $id
+     * @param BaseHttpResponse $response
+     * @return BaseHttpResponse
+     */
+    public function postPickrrCancelShipment($id, BaseHttpResponse $response)
+    {
+        $orderProduct = $this->orderProductRepository->findOrFail($id);
+        $id = $orderProduct->order->shipment->id;
+        $shipment = $this->shipmentRepository->createOrUpdate(
+            ['status' => ShippingStatusEnum::CANCELED],
+            compact('id')
+        );
+        $pickrr = new  Pickrr();
+        $result = $pickrr->cancelShipment($shipment);
+        $orderProduct->shipment_id =  null;
+        $orderProduct->save();
+        $this->orderHistoryRepository->createOrUpdate([
+            'action' => 'cancel_shipment',
+            'description' => trans('plugins/ecommerce::order.shipping_was_canceled_by'),
+            'order_id' => $shipment->order_id,
+            'user_id' => Auth::id(),
+        ]);
+
+        return $response
+            ->setData([
+                'status' => ShippingStatusEnum::CANCELED,
+                'status_text' => ShippingStatusEnum::CANCELED()->label(),
+            ])
+            ->setMessage(trans('plugins/ecommerce::order.shipping_was_canceled_success'));
     }
 }

@@ -10,7 +10,6 @@ use Html;
  * @method static SmsEnum ORDER_CONFIRMATION()
  * @method static SmsEnum ORDER_CANCELLATION()
  * @method static SmsEnum DELIVERING_CONFIRMATION()
- * @method static SmsEnum DELIVERING_CONFIRMATION()
  * @method static SmsEnum ADMIN_ORDER_CONFIRMATION()
  * @method static SmsEnum PAYMENT_CONFIRMATION()
  * @method static SmsEnum INCOMPLETE_ORDER()

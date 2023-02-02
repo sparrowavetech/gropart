@@ -23,6 +23,7 @@ class OrderProduct extends BaseModel
         'product_options',
         'restock_quantity',
         'product_type',
+        'shipment_id'
     ];
 
     protected $casts = [
@@ -53,5 +54,9 @@ class OrderProduct extends BaseModel
     public function productFiles(): HasMany
     {
         return $this->hasMany(ProductFile::class, 'product_id');
+    }
+    public function shipment(): BelongsTo
+    {
+        return $this->belongsTo(Shipment::class, 'shipment_id');
     }
 }

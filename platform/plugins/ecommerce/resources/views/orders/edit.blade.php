@@ -148,9 +148,30 @@
                                                                                target="_blank">{{ $order->store->name }}</a>
                                                                         </li>
                                                                     @endif
+                                                                    
                                                                 </ul>
                                                             </li>
                                                         </ul>
+                                                    @endif
+                                                    @if (is_plugin_active('pickrr'))
+                                                        @if (isset($orderProduct->shipment) && $orderProduct->shipment->id && $orderProduct->shipment->status != \Botble\Ecommerce\Enums\ShippingStatusEnum::CANCELED)
+                                                            <li class="ws-nm">
+                                                                <a href="{{ route('orders.pickrr-cancel-shipment',$orderProduct->id) }}"
+                                                                class="btn btn-primary"
+                                                                target="_blank">Cancel Shipment</a>
+                                                            </li>
+                                                        @elseif(isset($orderProduct->shipment) && $orderProduct->shipment->status == \Botble\Ecommerce\Enums\ShippingStatusEnum::CANCELED)
+                                                            <li class="ws-nm">
+                                                                <a href="{{ route('orders.pickrr-create-shipment',$orderProduct->id) }}"
+                                                                class="btn btn-primary">Create Shipment</a>
+                                                            </li>
+                                                        @else
+                                                            <li class="ws-nm">
+                                                                <a href="{{ route('orders.pickrr-create-shipment',$orderProduct->id) }}"
+                                                                class="btn btn-primary" >Create Shipment</a>
+                                                            </li>
+
+                                                        @endif
                                                     @endif
                                                 </td>
                                                 <td class="pl5 p-r5 text-end">
@@ -163,11 +184,7 @@
                                                     <span>{{ $orderProduct->qty }}</span>
                                                 </td>
                                                 <td class="pl5 text-end">{{ format_price($orderProduct->price * $orderProduct->qty) }}</td>
-                                                <td class="pl5 p-r5 text-end">
-                                                <a href="{{ route('orders.pickrr-create-shipment',$orderProduct->id) }}"
-                                                                               class="bold-light"
-                                                                               target="_blank">Create Shipment</a>
-                                                </td>
+                                               
                                             </tr>
                                         @endforeach
                                         </tbody>
