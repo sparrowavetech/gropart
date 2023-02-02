@@ -2,6 +2,7 @@
 return [
     'customer_name' => "Customer Name",
     'customer_phone' => 'Customer Phone',
+    'customer_email' => 'Customer Email',
     'customer_address' => 'Customer Address',
     'shipping_method' => 'Shipping Method',
     'payment_method' => 'Payment Method',
