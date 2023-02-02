@@ -61,7 +61,7 @@ class PickrrServiceProvider extends ServiceProvider
         //         'permissions' => ['pickrr.index'],
         //     ]);
         // });
-        add_filter('handle_shipping_fee', [$this, 'handleShippingFee'], 11, 3);
+      //  add_filter('handle_shipping_fee', [$this, 'handleShippingFee'], 11, 3);
 
         add_filter(SHIPPING_METHODS_SETTINGS_PAGE, [$this, 'addSettings'], 2);
 
@@ -82,23 +82,6 @@ class PickrrServiceProvider extends ServiceProvider
         }, 2, 2);
 
        
-    }
-    
-    /**
-     * @param array $result
-     * @param array $data
-     * @return array
-     *
-     * @throws Throwable
-     */
-    public function handleShippingFee($result, $data): array
-    {
-        if (setting('shipping_pickrr_status') == 1) {
-            $results = app(PickrrShippment::class)->getRates($data);
-            $result['pickkr'] = Arr::get($results, 'pickkr.rates') ?: [];
-        }
-
-        return $result;
     }
 
     /**

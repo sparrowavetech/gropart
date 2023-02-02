@@ -105,7 +105,7 @@ class Pickrr
                 $shipment['metadata']     = $result;
                 return ['error' => false, 'message' => 'success', 'shipment' => $shipment];
             } else {
-                return ['error' => true, 'message' => $response->err,];
+                return ['error' => true, 'message' => $response->err];
             }
         } catch (\Exception $e) {
             return ['error' => true, 'message' => $e->getMessage()];
@@ -135,7 +135,31 @@ class Pickrr
 
                 return ['error' => false, 'message' => 'success'];
             } else {
-                return ['error' => true, 'message' => $response->err,];
+                return ['error' => true, 'message' => $response->err];
+            }
+        } catch (\Exception $e) {
+            return ['error' => true, 'message' => $e->getMessage()];
+        }
+    }
+    public function checkpincode($to,$from)
+    {
+        try {
+            $url = 'https://www.pickrr.com/api/check-pincode-service/?from_pincode='.$from.'&to_pincode='.$to.'&auth_token='.$this->liveApiToken;
+            //open connection
+            $ch = curl_init();
+            //set the url, number of POST vars, POST data
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            //execute post
+            $result = curl_exec($ch);
+            $response = json_decode($result);
+            //close connection
+            curl_close($ch);
+            if ($response->err) {
+                return ['error' => true, 'message' => $response->err];
+            } else {
+                return ['error' => false, 'message' => 'success'];
             }
         } catch (\Exception $e) {
             return ['error' => true, 'message' => $e->getMessage()];
