@@ -8,7 +8,7 @@
     <tbody>
         <tr>
             <td>Site Title</td>
-            <td> &#123;&#123;  site_title  &#125;&#125;</td>
+            <td> &#123;&#123; site_title &#125;&#125;</td>
         </tr>
         <tr>
             <td>Site Url</td>
