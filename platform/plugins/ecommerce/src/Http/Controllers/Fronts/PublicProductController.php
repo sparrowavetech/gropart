@@ -106,7 +106,7 @@ class PublicProductController
 
         $condition = ['is_enquiry' => 0];
         if ($query && ! $request->ajax()) {
-            $products = $productService->getProduct($request, null, null, $with, $condition);
+            $products = $productService->getProduct($request, null, null, $with,[], $condition);
 
             SeoHelper::setTitle(__('Search result for ":query"', compact('query')));
 
@@ -122,9 +122,10 @@ class PublicProductController
                 'plugins/ecommerce::themes.search'
             )->render();
         }
-
-        $products = $productService->getProduct($request, null, null, $with);
-
+       
+        $products = $productService->getProduct($request, null, null, $with,[],$condition);
+        // dd($condition,$products);
+        // die;
         if ($request->ajax()) {
             return $this->ajaxFilterProductsResponse($products, $request, $response);
         }
@@ -787,7 +788,7 @@ class PublicProductController
                 'productLabels',
                 'variationAttributeSwatchesForProductList',
                 'productCollections',
-            ], $condition
+            ],[], $condition
         );
 
         if ($request->ajax()) {

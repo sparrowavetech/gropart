@@ -3,7 +3,9 @@
     $products->loadMissing('defaultVariation');
 @endphp
 
+@if($condition['is_enquiry'] == 0)
 {!! $widgets = dynamic_sidebar('products_list_sidebar') !!}
+@endif
 
 @if (empty($widgets))
     {!! Theme::partial('page-header', ['size' => 'xxxl', 'withTitle' => false]) !!}
