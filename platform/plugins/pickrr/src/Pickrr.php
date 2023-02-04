@@ -153,16 +153,11 @@ class Pickrr
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             //execute post
             $result = curl_exec($ch);
-            $response = json_decode($result);
+            return $response = json_decode($result)->has_cod;
             //close connection
-            curl_close($ch);
-            if ($response->err) {
-                return ['error' => true, 'message' => $response->err];
-            } else {
-                return ['error' => false, 'message' => 'success'];
-            }
+            
         } catch (\Exception $e) {
-            return ['error' => true, 'message' => $e->getMessage()];
+            return false;
         }
     }
 }

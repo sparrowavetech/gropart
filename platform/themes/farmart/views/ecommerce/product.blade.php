@@ -88,7 +88,13 @@
                         @endif
                         {!! Theme::partial('ecommerce.product-cart-form',
                             compact('product', 'selectedAttrs') + ['withButtons' => true, 'withVariations' => true, 'wishlistIds' => [], 'withBuyNow' => true]) !!}
-                        <div class="meta-sku @if (!$product->sku) d-none @endif">
+                       
+                            @if (is_plugin_active('pickrr'))
+                            <hr>
+                        {!! Theme::partial('ecommerce.product-pincode-form', compact('product')) !!}
+                        <hr>
+                        @endif
+                            <div class="meta-sku @if (!$product->sku) d-none @endif">
                             <span class="meta-label d-inline-block">{{ __('SKU') }}:</span>
                             <span class="meta-value">{{ $product->sku }}</span>
                         </div>

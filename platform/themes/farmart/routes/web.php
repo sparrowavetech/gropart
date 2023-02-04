@@ -85,6 +85,11 @@ Route::group(['namespace' => 'Theme\Farmart\Http\Controllers', 'middleware' => [
                     'uses' => 'ajaxGetComboPrice',
                     'as'   => 'get-combo-price',
                 ]);
+                Route::get('check-pincode/{from?}/{to?}', [
+                    'uses' => 'ajaxCheckPincode',
+                    'as'   => 'check-pincode',
+                ]);
+              
             });
         });
     });

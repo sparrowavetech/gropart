@@ -586,4 +586,9 @@ class FarmartController extends PublicController
     {
         return format_price($amt);
     }
+    public function ajaxCheckPincode($formPincode, $toPincode)
+    {
+        $pickrr = new  \Botble\Pickrr\Pickrr();
+        return $pickrr->checkpincode($formPincode,$toPincode);
+    }
 }

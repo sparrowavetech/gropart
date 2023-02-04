@@ -307,6 +307,10 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Fronts', 'middle
             'as'   => 'public.enquiry.success',
             'uses' => 'PublicProductController@EnquirySuccess',
         ]);
+        Route::get('product/pincode', [
+            'as'   => 'public.pincode.check',
+            'uses' => 'PublicProductController@ajaxCheckPincode',
+        ]);
 
     });
 });

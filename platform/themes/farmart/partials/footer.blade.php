@@ -403,6 +403,28 @@
                 });
 
         }
+        function checkPincode(formPincode){
+           var toPincode = $('#pincodetext').val();
+           if(toPincode !=''){
+            $.ajax({
+                    type: "GET",
+                    url: "{{ route('public.ajax.check-pincode')}}/"+formPincode+"/"+toPincode,
+                    success: function(data) {
+                        if(data){
+                            $('.picodetext').text('Delivery available at your location').css('color','green').show();
+                        }else{
+                            $('.picodetext').text('Delivery not available at your location').css('color','red').show();
+                        }
+                        
+                    },
+                    error: function(data) {
+                        $('.picodetext').text('error in check pincode').css('color','red').show();
+                    }
+                });
+            }else{
+                $('.picodetext').text('Please enter pincode').css('color','red').show();
+            }
+        }
     </script>
     </body>
 </html>
