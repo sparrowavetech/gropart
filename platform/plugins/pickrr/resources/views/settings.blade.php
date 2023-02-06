@@ -4,10 +4,13 @@
             <td class="border-pay-col">
                 <i class="fas fa-shipping-fast"></i>
             </td>
+            <td style="width: 20%;">
+                <img class="filter-black" src="{{ url('vendor/core/plugins/pickrr/images/logo.svg') }}" alt="Pickrr Logo">
+            </td>
             <td class="border-right">
                 <ul>
                     <li>
-                        <a href="https://goshippo.com/" target="_blank">Pickrr</a>
+                        <a href="https://www.pickrr.com/" target="_blank">Pickrr Shipping API Configuration</a>
                         <p>{{ trans('plugins/pickrr::pickrr.description') }}</p>
                     </li>
                 </ul>

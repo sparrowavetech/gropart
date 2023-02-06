@@ -2,7 +2,7 @@
 
 return [
     'name' => 'Pickkr',
-    'description' => 'All of the Carriers and Stores You Need',
+    'description' => 'Please Click edit to configure pickrr gateway',
     'enabled'=>'Enabled',
     'save_settings'=>'Save',
     'saved_shipping_settings_success'=>'Saved settings successfully!',
