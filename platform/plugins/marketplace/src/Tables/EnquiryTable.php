@@ -2,15 +2,22 @@
 
 namespace Botble\Marketplace\Tables;
 
-use BaseHelper;
-use Botble\Ecommerce\Repositories\Interfaces\EnquiryInterface;
-use Botble\Table\Abstracts\TableAbstract;
-use EcommerceHelper;
-use Botble\Ecommerce\Enums\EnquiryStatusEnum;
 use Html;
-use Illuminate\Contracts\Routing\UrlGenerator;
+use BaseHelper;
+use EcommerceHelper;
 use MarketplaceHelper;
 use Yajra\DataTables\DataTables;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Auth;
+use Botble\Table\Abstracts\TableAbstract;
+use Illuminate\Database\Eloquent\Builder;
+use Botble\Ecommerce\Enums\EnquiryStatusEnum;
+use Illuminate\Contracts\Routing\UrlGenerator;
+use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Botble\Ecommerce\Repositories\Interfaces\EnquiryInterface;
 
 class EnquiryTable extends TableAbstract
 {
@@ -44,7 +51,7 @@ class EnquiryTable extends TableAbstract
      /**
      * {@inheritDoc}
      */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
@@ -82,7 +89,7 @@ class EnquiryTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
         $query = $this->repository->getModel()
             ->select([
@@ -103,7 +110,7 @@ class EnquiryTable extends TableAbstract
      /**
      * {@inheritDoc}
      */
-    public function columns()
+    public function columns(): array
     {
         return [
             'id'          => [
