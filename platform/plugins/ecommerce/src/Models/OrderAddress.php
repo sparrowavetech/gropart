@@ -4,7 +4,6 @@ namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Supports\Avatar;
-use Botble\Base\Traits\EnumCastable;
 use Botble\Ecommerce\Enums\OrderAddressTypeEnum;
 use Botble\Ecommerce\Traits\LocationTrait;
 use Exception;
@@ -15,7 +14,6 @@ use RvMedia;
 class OrderAddress extends BaseModel
 {
     use LocationTrait;
-    use EnumCastable;
 
     protected $table = 'ec_order_addresses';
 

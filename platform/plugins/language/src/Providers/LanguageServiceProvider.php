@@ -27,9 +27,11 @@ use Illuminate\Foundation\AliasLoader;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\Router;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 use Language;
 use MetaBox;
 use Route;
@@ -40,7 +42,7 @@ class LanguageServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function register()
+    public function register(): void
     {
         $this->setNamespace('plugins/language')
             ->loadAndPublishConfigurations(['general']);
@@ -64,7 +66,7 @@ class LanguageServiceProvider extends ServiceProvider
         $router->aliasMiddleware('localeSessionRedirect', LocaleSessionRedirect::class);
     }
 
-    public function boot()
+    public function boot(): void
     {
         $this
             ->setNamespace('plugins/language')
@@ -132,9 +134,10 @@ class LanguageServiceProvider extends ServiceProvider
             });
 
             add_action(BASE_ACTION_META_BOXES, [$this, 'addLanguageBox'], 50, 2);
-            add_filter(FILTER_SLUG_PREFIX, [$this, 'setSlugPrefix'], 500);
             add_action(BASE_ACTION_TOP_FORM_CONTENT_NOTIFICATION, [$this, 'addCurrentLanguageEditingAlert'], 55, 2);
             add_action(BASE_ACTION_BEFORE_EDIT_CONTENT, [$this, 'getCurrentAdminLanguage'], 55, 2);
+
+            add_filter(FILTER_SLUG_PREFIX, [$this, 'setSlugPrefix'], 500);
             add_filter(BASE_FILTER_GET_LIST_DATA, [$this, 'addLanguageColumn'], 50, 2);
             add_filter(BASE_FILTER_TABLE_HEADINGS, [$this, 'addLanguageTableHeading'], 50, 2);
             add_filter(LANGUAGE_FILTER_SWITCHER, [$this, 'languageSwitcher'], 50, 2);
@@ -168,6 +171,10 @@ class LanguageServiceProvider extends ServiceProvider
             add_filter(MENU_FILTER_NODE_URL, [$this, 'updateMenuNodeUrl'], 1);
 
             add_filter(BASE_FILTER_BEFORE_RENDER_FORM, [$this, 'changeDataBeforeRenderingForm'], 1134, 2);
+
+            add_filter('cms_site_editor_locale', function () {
+                return Language::getCurrentAdminLocale();
+            }, 1134, 0);
 
             Language::setRoutesCachePath();
         }
@@ -218,6 +225,10 @@ class LanguageServiceProvider extends ServiceProvider
         if ($currentLocale && (! setting('language_hide_default') || $currentLocale != Language::getDefaultLocale())) {
             if (! $prefix) {
                 return $currentLocale;
+            }
+
+            if (Str::contains($prefix, $currentLocale . '/')) {
+                return $prefix;
             }
 
             return $currentLocale . '/' . $prefix;
@@ -504,7 +515,7 @@ class LanguageServiceProvider extends ServiceProvider
         return $this->getDataByCurrentLanguageCode($data, Language::getCurrentLocaleCode());
     }
 
-    protected function getDataByCurrentLanguageCode(Builder|Model $data, string $languageCode): Builder|Model
+    protected function getDataByCurrentLanguageCode(Builder|Model $data, ?string $languageCode): Builder|Model
     {
         $model = $data->getModel();
 
@@ -593,13 +604,20 @@ class LanguageServiceProvider extends ServiceProvider
 
     public function addLanguageMiddlewareToPublicRoute(array $data): array
     {
-        return array_merge_recursive(array_filter($data), [
-            'prefix' => Language::setLocale(),
-            'middleware' => [
-                'localeSessionRedirect',
-                'localizationRedirect',
-            ],
+        $locale = Language::setLocale();
+
+        if (! isset($data['prefix'])) {
+            $data['prefix'] = trim((string)$locale);
+        }
+
+        $data['middleware'] = array_merge(Arr::get($data, 'middleware', []), [
+            'localeSessionRedirect',
+            'localizationRedirect',
         ]);
+
+        $data['middleware'] = array_unique($data['middleware']);
+
+        return $data;
     }
 
     public function addLanguageSwitcherToTable(array $buttons, string $model): array

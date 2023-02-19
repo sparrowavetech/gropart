@@ -47,7 +47,7 @@
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label for="shop-email" class="required">{{ __('Shop Email') }}</label>
-                                <input class="form-control" name="email" id="shop-email" type="email" value="{{ old('email', $store->email) }}" placeholder="{{ __('Shop Email') }}">
+                                <input class="form-control" name="email" id="shop-email" type="email" value="{{ old('email', $store->email ?: $store->customer->email) }}" placeholder="{{ __('Shop Email') }}">
                                 @if ($errors->has('email'))
                                     <span class="text-danger">{{ $errors->first('email') }}</span>
                                 @endif

@@ -2,6 +2,7 @@
 
 namespace Botble\Blog\Models;
 
+use Botble\Base\Casts\SafeContent;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -20,6 +21,8 @@ class Tag extends BaseModel
 
     protected $casts = [
         'status' => BaseStatusEnum::class,
+        'name' => SafeContent::class,
+        'description' => SafeContent::class,
     ];
 
     public function posts(): BelongsToMany

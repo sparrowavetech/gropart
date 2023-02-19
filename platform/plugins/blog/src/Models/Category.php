@@ -2,6 +2,7 @@
 
 namespace Botble\Blog\Models;
 
+use Botble\Base\Casts\SafeContent;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -31,6 +32,8 @@ class Category extends BaseModel
 
     protected $casts = [
         'status' => BaseStatusEnum::class,
+        'name' => SafeContent::class,
+        'description' => SafeContent::class,
     ];
 
     public function posts(): BelongsToMany
@@ -47,7 +50,7 @@ class Category extends BaseModel
     {
         return Attribute::make(
             get: function (): Collection {
-                $parents = collect([]);
+                $parents = collect();
 
                 $parent = $this->parent;
 

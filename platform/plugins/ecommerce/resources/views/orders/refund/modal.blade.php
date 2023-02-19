@@ -43,7 +43,7 @@
                             <tr>
                                 <td class="text-start width-300-px">
                                     <a class="text-underline wordwrap"
-                                       href="{{ route('products.edit', $product->original_product->id) }}" target="_blank" title="{{ $orderProduct->product_name }}">{{ $orderProduct->product_name }}</a>
+                                       href="{{ $product->original_product->id ? route('products.edit', $product->original_product->id) : '#' }}" target="_blank" title="{{ $orderProduct->product_name }}">{{ $orderProduct->product_name }}</a>
                                 </td>
                                 <td class="text-center">
                                     <span>{{ format_price($orderProduct->price) }}</span>

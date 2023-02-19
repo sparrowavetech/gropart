@@ -17,6 +17,10 @@ class GlobalOptionValue extends BaseModel
         'order',
     ];
 
+    protected $casts = [
+        'affect_price' => 'float',
+    ];
+
     public function option(): BelongsTo
     {
         return $this->belongsTo(GlobalOption::class, 'option_id');

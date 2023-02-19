@@ -3,7 +3,6 @@
 namespace Botble\Analytics;
 
 use Botble\Analytics\Abstracts\AnalyticsAbstract;
-use Carbon\Carbon;
 use Google\Service\Analytics\GaData;
 use Google_Service_Analytics;
 use Illuminate\Support\Collection;
@@ -19,24 +18,6 @@ class Analytics extends AnalyticsAbstract
         $this->propertyId = $propertyId;
     }
 
-    public function fetchVisitorsAndPageViews(Period $period): Collection
-    {
-        $response = $this->performQuery(
-            $period,
-            'ga:users,ga:pageviews',
-            ['dimensions' => 'ga:date,ga:pageTitle']
-        );
-
-        return collect($response['rows'] ?? [])->map(function (array $dateRow) {
-            return [
-                'date' => Carbon::createFromFormat('Ymd', $dateRow[0]),
-                'pageTitle' => $dateRow[1],
-                'visitors' => (int)$dateRow[2],
-                'pageViews' => (int)$dateRow[3],
-            ];
-        });
-    }
-
     /**
      * Call the query method on the authenticated client.
      */
@@ -49,23 +30,6 @@ class Analytics extends AnalyticsAbstract
             $metrics,
             $others
         );
-    }
-
-    public function fetchTotalVisitorsAndPageViews(Period $period): Collection
-    {
-        $response = $this->performQuery(
-            $period,
-            'ga:users,ga:pageviews',
-            ['dimensions' => 'ga:date']
-        );
-
-        return collect($response['rows'] ?? [])->map(function (array $dateRow) {
-            return [
-                'date' => Carbon::createFromFormat('Ymd', $dateRow[0]),
-                'visitors' => (int)$dateRow[1],
-                'pageViews' => (int)$dateRow[2],
-            ];
-        });
     }
 
     public function fetchMostVisitedPages(Period $period, int $maxResults = 20): Collection

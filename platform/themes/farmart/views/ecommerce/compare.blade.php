@@ -37,7 +37,7 @@
                             <tr>
                                 <th>{{ __('Title') }}</th>
                                 @foreach($products as $product)
-                                    <td>{{ $product->name }}</td>
+                                    <td>{!! BaseHelper::clean($product->name) !!}</td>
                                 @endforeach
                             </tr>
                             <tr class="price">

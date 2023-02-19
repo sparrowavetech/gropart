@@ -36,7 +36,7 @@
                                                 <i class="icon icon-telephone"></i> <a href="tel:{{ $store->phone }}">{{ $store->phone }}</a>
                                             </div>
                                         @endif
-                                        @if ($store->email)
+                                        @if (!MarketplaceHelper::hideStoreEmail() && $store->email)
                                             <div class="vendor-store-email mb-1">
                                                 <i class="icon icon-envelope"></i> <a href="mailto:{{ $store->email }}">{{ $store->email }}</a>
                                             </div>

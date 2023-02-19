@@ -4,7 +4,6 @@ namespace Botble\Marketplace\Models;
 
 use Botble\ACL\Models\User;
 use Botble\Base\Models\BaseModel;
-use Botble\Base\Traits\EnumCastable;
 use Botble\Ecommerce\Models\Currency;
 use Botble\Ecommerce\Models\Customer;
 use Botble\Ecommerce\Models\Order;
@@ -14,8 +13,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Revenue extends BaseModel
 {
-    use EnumCastable;
-
     protected $table = 'mp_customer_revenues';
 
     protected $fillable = [

@@ -5,13 +5,13 @@ namespace Botble\Widget\Providers;
 use BaseHelper;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Widget\Factories\WidgetFactory;
-use Botble\Widget\Misc\LaravelApplicationWrapper;
 use Botble\Widget\Models\Widget;
 use Botble\Widget\Repositories\Caches\WidgetCacheDecorator;
 use Botble\Widget\Repositories\Eloquent\WidgetRepository;
 use Botble\Widget\Repositories\Interfaces\WidgetInterface;
 use Botble\Widget\WidgetGroupCollection;
 use Botble\Widget\Widgets\Text;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\File;
@@ -29,12 +29,12 @@ class WidgetServiceProvider extends ServiceProvider
             return new WidgetCacheDecorator(new WidgetRepository(new Widget()));
         });
 
-        $this->app->bind('botble.widget', function () {
-            return new WidgetFactory(new LaravelApplicationWrapper());
+        $this->app->bind('botble.widget', function (Application $app) {
+            return new WidgetFactory($app);
         });
 
-        $this->app->singleton('botble.widget-group-collection', function () {
-            return new WidgetGroupCollection(new LaravelApplicationWrapper());
+        $this->app->singleton('botble.widget-group-collection', function (Application $app) {
+            return new WidgetGroupCollection($app);
         });
 
         $this->setNamespace('packages/widget')

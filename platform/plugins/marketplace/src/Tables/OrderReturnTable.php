@@ -22,8 +22,12 @@ class OrderReturnTable extends TableAbstract
 
     protected OrderReturnItemInterface $orderReturnItemRepository;
 
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, OrderReturnInterface $orderReturnRepository, OrderReturnItemInterface $orderReturnItemRepository)
-    {
+    public function __construct(
+        DataTables $table,
+        UrlGenerator $urlGenerator,
+        OrderReturnInterface $orderReturnRepository,
+        OrderReturnItemInterface $orderReturnItemRepository
+    ) {
         parent::__construct($table, $urlGenerator);
 
         $this->repository = $orderReturnRepository;

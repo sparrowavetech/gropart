@@ -33,6 +33,10 @@ class UploadsManager
 
     public function fileMimeType(string $path): ?string
     {
+        if (File::extension($path) == 'jfif') {
+            return 'image/jpeg';
+        }
+
         return $this->mimeType->getMimeType(File::extension(RvMedia::getRealPath($path)));
     }
 

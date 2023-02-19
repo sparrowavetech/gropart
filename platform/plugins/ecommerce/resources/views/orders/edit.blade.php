@@ -82,14 +82,12 @@
                                             @endphp
 
                                             <tr>
-                                                @if ($product)
-                                                    <td class="width-60-px min-width-60-px vertical-align-t">
-                                                        <div class="wrap-img"><img
-                                                                class="thumb-image thumb-image-cartorderlist"
-                                                                src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}"
-                                                                alt="{{ $orderProduct->product_name }}"></div>
-                                                    </td>
-                                                @endif
+                                                <td class="width-60-px min-width-60-px vertical-align-t">
+                                                    <div class="wrap-img"><img
+                                                            class="thumb-image thumb-image-cartorderlist"
+                                                            src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}"
+                                                            alt="{{ $orderProduct->product_name }}"></div>
+                                                </td>
                                                 <td class="pl5 p-r5 min-width-200-px">
                                                     <a class="text-underline hover-underline pre-line" target="_blank"
                                                        href="{{ $product ? route('products.edit', $product->original_product->id) : '#' }}"
@@ -148,7 +146,6 @@
                                                                                target="_blank">{{ $order->store->name }}</a>
                                                                         </li>
                                                                     @endif
-                                                                    
                                                                 </ul>
                                                             </li>
                                                         </ul>
@@ -184,7 +181,6 @@
                                                     <span>{{ $orderProduct->qty }}</span>
                                                 </td>
                                                 <td class="pl5 text-end">{{ format_price($orderProduct->price * $orderProduct->qty) }}</td>
-                                               
                                             </tr>
                                         @endforeach
                                         </tbody>

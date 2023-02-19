@@ -3,24 +3,12 @@
 namespace Botble\Ecommerce\Repositories\Interfaces;
 
 use Botble\Support\Repositories\Interfaces\RepositoryInterface;
-use Illuminate\Database\Eloquent\Builder;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Collection;
 
 interface OrderInterface extends RepositoryInterface
 {
-    /**
-     * @param string $startDate
-     * @param string $endDate
-     * @param array $select
-     * @return Builder[]|Collection
-     */
-    public function getRevenueData($startDate, $endDate, $select = ['*']);
+    public function getRevenueData(CarbonInterface $startDate, CarbonInterface $endDate, array $select = []): Collection;
 
-    /**
-     * @param string $startDate
-     * @param string $endDate
-     * @param array $select
-     * @return Builder[]|Collection
-     */
-    public function countRevenueByDateRange($startDate, $endDate);
+    public function countRevenueByDateRange(CarbonInterface $startDate, CarbonInterface $endDate): float;
 }

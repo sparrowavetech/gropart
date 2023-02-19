@@ -10,10 +10,7 @@ use MarketplaceHelper;
 
 class VendorWithdrawalForm extends FormAbstract
 {
-    /**
-     * {@inheritDoc}
-     */
-    public function buildForm()
+    public function buildForm(): void
     {
         $fee = MarketplaceHelper::getSetting('fee_withdrawal', 0);
 

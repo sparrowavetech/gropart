@@ -12,7 +12,7 @@ use Throwable;
 
 class HookServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         add_filter('handle_shipping_fee', [$this, 'handleShippingFee'], 11, 3);
 

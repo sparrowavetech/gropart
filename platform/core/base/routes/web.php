@@ -58,12 +58,50 @@ Route::group(['namespace' => 'Botble\Base\Http\Controllers', 'middleware' => ['w
             'middleware' => 'preventDemo',
         ]);
 
-        Route::match(['get', 'post'], 'system/cleanup', [
+        Route::get('system/cleanup', [
             'as' => 'system.cleanup',
+            'uses' => 'SystemController@getCleanup',
+            'permission' => 'superuser',
+        ]);
+
+        Route::post('system/cleanup', [
+            'as' => 'system.cleanup.process',
             'uses' => 'SystemController@getCleanup',
             'permission' => 'superuser',
             'middleware' => 'preventDemo',
         ]);
+
+        Route::group(['prefix' => 'notifications', 'as' => 'notifications.', 'permission' => false], function () {
+            Route::get('get-notifications', [
+                'as' => 'get-notification',
+                'uses' => 'NotificationController@getNotification',
+            ]);
+
+            Route::delete('destroy-notification/{id}', [
+                'as' => 'destroy-notification',
+                'uses' => 'NotificationController@delete',
+            ])->where('id', '[0-9]+');
+
+            Route::get('read-notification/{id}', [
+                'as' => 'read-notification',
+                'uses' => 'NotificationController@read',
+            ])->where('id', '[0-9]+');
+
+            Route::put('read-all-notification', [
+                'as' => 'read-all-notification',
+                'uses' => 'NotificationController@readAll',
+            ]);
+
+            Route::delete('destroy-all-notification', [
+                'as' => 'destroy-all-notification',
+                'uses' => 'NotificationController@deleteAll',
+            ]);
+
+            Route::get('update-notifications-count', [
+                'as' => 'update-notifications-count',
+                'uses' => 'NotificationController@countNotification',
+            ]);
+        });
     });
 
     Route::get('settings-language/{alias}', [SystemController::class, 'getLanguage'])->name('settings.language');

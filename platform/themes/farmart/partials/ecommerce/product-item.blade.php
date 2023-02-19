@@ -7,21 +7,24 @@
                 data-src="{{ RvMedia::getImageUrl($product->image, 'small', false, RvMedia::getDefaultImage()) }}"
                 alt="{{ $product->name }}">
         </div>
-        <span class="ribbons">
-            @if ($product->isOutOfStock())
+        @if ($product->isOutOfStock())
+            <div class="ribbons">
                 <span class="ribbon out-stock">{{ __('Out Of Stock') }}</span>
-            @else
-                @if ($product->productLabels->count())
+            </div>
+        @else
+            @if ($product->productLabels->count())
+                <div class="ribbons product-lable">
                     @foreach ($product->productLabels as $label)
-                        <span class="ribbon" @if ($label->color) style="background-color: {{ $label->color }}" @endif>{{ $label->name }}</span>
+                        <span class="ribbon" @if ($label->color) style="background-color: {{ $label->color }}" @endif><i class="lable-prop" @if ($label->color) style="border-color: transparent transparent rgb(255, 255, 255) {{ $label->color }}" @endif></i>{{ $label->name }}</span>
                     @endforeach
-                @else
-                    @if ($product->front_sale_price !== $product->price)
-                        <div class="featured ribbon" dir="ltr">{{ get_sale_percentage($product->price, $product->front_sale_price) }}</div>
-                    @endif
-                @endif
+                </div>
             @endif
-        </span>
+            @if ($product->front_sale_price !== $product->price)
+                <div class="ribbons sale-ribbon">
+                    <span class="featured ribbon" dir="ltr">{{ get_sale_percentage($product->price, $product->front_sale_price) }}</span>
+                </div>
+            @endif
+        @endif
     </a>
     {!! Theme::partial('ecommerce.product-loop-buttons', compact('product') + (!empty($wishlistIds) ? compact('wishlistIds') : [])) !!}
 </div>
@@ -37,7 +40,7 @@
             </div>
         @endif
         <h3 class="product__title">
-            <a href="{{ $product->url }}" tabindex="0">{{ $product->name }}</a>
+            <a href="{{ $product->url }}" tabindex="0">{!! BaseHelper::clean($product->name) !!}</a>
         </h3>
         @if (EcommerceHelper::isReviewEnabled())
             {!! Theme::partial('star-rating', ['avg' => $product->reviews_avg, 'count' => $product->reviews_count]) !!}

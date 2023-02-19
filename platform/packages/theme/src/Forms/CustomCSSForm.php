@@ -11,7 +11,7 @@ use Theme;
 
 class CustomCSSForm extends FormAbstract
 {
-    public function buildForm()
+    public function buildForm(): void
     {
         $css = null;
         $file = Theme::getStyleIntegrationPath();

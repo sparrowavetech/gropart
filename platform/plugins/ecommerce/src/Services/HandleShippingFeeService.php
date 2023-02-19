@@ -232,17 +232,12 @@ class HandleShippingFeeService
 
                 if (EcommerceHelper::isZipCodeEnabled()) {
                     $rules = $rules
-                        ->orWhere(function (Builder $query) use ($city, $state, $zipCode, $shipping) {
+                        ->orWhere(function (Builder $query) use ($zipCode, $shipping) {
                             $query
                                 ->where('shipping_id', $shipping->id)
                                 ->where('type', ShippingRuleTypeEnum::BASED_ON_ZIPCODE)
-                                ->whereHas('items', function (Builder $sub) use ($city, $state, $zipCode) {
-                                    $sub
-                                        ->where([
-                                            'state' => $state,
-                                            'city' => $city,
-                                            'zip_code' => $zipCode,
-                                        ]);
+                                ->whereHas('items', function (Builder $sub) use ($zipCode) {
+                                    $sub->where(['zip_code' => $zipCode]);
                                 });
                         });
                 }
@@ -262,8 +257,6 @@ class HandleShippingFeeService
                         case ShippingRuleTypeEnum::BASED_ON_ZIPCODE:
                             $ruleItem = $rule
                                 ->items
-                                ->where('state', $state)
-                                ->where('city', $city)
                                 ->where('zip_code', $zipCode)
                                 ->first();
 

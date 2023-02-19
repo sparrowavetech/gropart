@@ -2,21 +2,21 @@
 
 namespace Botble\Ecommerce\Tables;
 
-use Html;
 use BaseHelper;
-use Yajra\DataTables\DataTables;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Contracts\View\Factory;
-use Botble\Table\Abstracts\TableAbstract;
-use Illuminate\Database\Eloquent\Builder;
 use Botble\Ecommerce\Enums\EnquiryStatusEnum;
+use Botble\Ecommerce\Repositories\Interfaces\EnquiryInterface;
+use Botble\Table\Abstracts\TableAbstract;
+use Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
-use Botble\Ecommerce\Repositories\Interfaces\EnquiryInterface;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
+use Yajra\DataTables\DataTables;
 
 class EnquiryTable extends TableAbstract
 {

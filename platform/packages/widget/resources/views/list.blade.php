@@ -26,7 +26,7 @@
                                             <button class="btn btn-danger widget-control-delete">{{ trans('packages/widget::widget.delete') }}</button>
                                         </div>
                                         <div class="float-end text-end">
-                                            <button class="btn btn-primary widget_save">{{ trans('core/base::forms.save') }}</button>
+                                            <button class="btn btn-primary widget_save">{{ trans('core/base::forms.save_and_continue') }}</button>
                                         </div>
                                     </div>
                                 </form>

@@ -13,7 +13,7 @@ class RemoveUnusedTranslationsCommand extends Command
 {
     public function handle(Manager $manager): int
     {
-        $this->info('Remove unused translations in resource/lang...');
+        $this->components->info('Remove unused translations in resource/lang...');
 
         foreach (File::directories(lang_path('vendor/packages')) as $package) {
             if (! File::isDirectory(package_path(File::basename($package)))) {
@@ -29,7 +29,7 @@ class RemoveUnusedTranslationsCommand extends Command
 
         $manager->removeUnusedThemeTranslations();
 
-        $this->info('Importing...');
+        $this->components->info('Importing...');
         $manager->importTranslations();
 
         $groups = Translation::groupBy('group')->pluck('group');
@@ -48,8 +48,8 @@ class RemoveUnusedTranslationsCommand extends Command
 
         $manager->exportAllTranslations();
 
-        $this->info('Exporting...');
-        $this->info('Done! Deleted ' . $counter . ' items!');
+        $this->components->info('Exporting...');
+        $this->components->info('Done! Deleted ' . $counter . ' items!');
 
         return self::SUCCESS;
     }

@@ -44,7 +44,7 @@ class MediaServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function register()
+    public function register(): void
     {
         $this->app->bind(MediaFileInterface::class, function () {
             return new MediaFileCacheDecorator(
@@ -70,7 +70,7 @@ class MediaServiceProvider extends ServiceProvider
         AliasLoader::getInstance()->alias('RvMedia', RvMediaFacade::class);
     }
 
-    public function boot()
+    public function boot(): void
     {
         $this->setNamespace('core/media')
             ->loadHelpers()

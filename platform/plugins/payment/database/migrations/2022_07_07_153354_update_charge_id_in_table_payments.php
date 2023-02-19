@@ -6,24 +6,14 @@ use Illuminate\Support\Facades\Schema;
 
 class UpdateChargeIdInTablePayments extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('payments', function (Blueprint $table) {
             $table->string('charge_id', 255)->nullable()->change();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('payments', function (Blueprint $table) {
             $table->string('charge_id', 60)->nullable()->change();

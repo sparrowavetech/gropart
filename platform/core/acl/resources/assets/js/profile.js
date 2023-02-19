@@ -59,7 +59,7 @@ class CropAvatar {
     initPreview() {
         let url = this.$avatar.prop('src');
 
-        this.$avatarPreview.empty().html('<img src="' + url + '">');
+        this.$avatarPreview.empty().html('<img src="' + url + '" alt="avatar">');
     }
 
     initIframe() {
@@ -161,7 +161,7 @@ class CropAvatar {
         if (this.active) {
             this.$img.cropper('replace', this.url);
         } else {
-            this.$img = $('<img src="' + this.url + '">');
+            this.$img = $('<img src="' + this.url + '" alt="avatar">');
             this.$avatarWrapper.empty().html(this.$img);
             this.$img.cropper({
                 aspectRatio: 1,

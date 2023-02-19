@@ -21,10 +21,6 @@ use Yajra\DataTables\DataTables;
 
 class ProductTable extends TableAbstract
 {
-    protected $hasActions = false;
-
-    protected $hasFilter = false;
-
     protected $hasCheckbox = false;
 
     protected string $exportClass = ProductExport::class;
@@ -216,7 +212,7 @@ class ProductTable extends TableAbstract
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type' => 'date',
+                'type' => 'datePicker',
             ],
         ];
     }

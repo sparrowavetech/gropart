@@ -9,15 +9,9 @@ use Botble\Page\Models\Page;
 
 class PageForm extends FormAbstract
 {
-    /**
-     * @var string
-     */
     protected $template = 'core/base::forms.form-tabs';
 
-    /**
-     * {@inheritDoc}
-     */
-    public function buildForm()
+    public function buildForm(): void
     {
         $this
             ->setupModel(new Page())

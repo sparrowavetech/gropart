@@ -5,6 +5,9 @@ namespace Botble\Widget\Facades;
 use Botble\Widget\WidgetGroup;
 use Illuminate\Support\Facades\Facade;
 
+/**
+ * @see \Botble\Widget\Factories\WidgetFactory
+ */
 class WidgetFacade extends Facade
 {
     protected static function getFacadeAccessor(): string

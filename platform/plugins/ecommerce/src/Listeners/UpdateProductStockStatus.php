@@ -17,6 +17,10 @@ class UpdateProductStockStatus
 
         $parentProduct = $product->original_product;
 
+        if (! $parentProduct || ! $parentProduct->id || $parentProduct->is_variation) {
+            return;
+        }
+
         $variations = $parentProduct->variations()->with('product')->get();
 
         $quantity = 0;

@@ -9,7 +9,7 @@ use Botble\Location\Models\Country;
 
 class CountryForm extends FormAbstract
 {
-    public function buildForm()
+    public function buildForm(): void
     {
         $this
             ->setupModel(new Country())

@@ -17,31 +17,31 @@ use Theme;
 use Throwable;
 use ZipArchive;
 
-class Core
+final class Core
 {
-    protected string $productId;
+    private string $productId;
 
-    protected string $apiUrl;
+    private string $apiUrl;
 
-    protected string $apiKey;
+    private string $apiKey;
 
-    protected string $verifyType;
+    private string $verifyType;
 
-    protected string $verificationPeriod;
+    private string $verificationPeriod;
 
-    protected string $currentVersion;
+    private string $currentVersion;
 
-    protected string $rootPath;
+    private string $rootPath;
 
-    protected string $licenseFile;
+    private string $licenseFile;
 
-    protected bool $showUpdateProcess = true;
+    private bool $showUpdateProcess = true;
 
-    protected bool $runningInConsole = false;
+    private bool $runningInConsole;
 
-    protected string $sessionKey = '44622179e10cab6';
+    private string $sessionKey = '44622179e10cab6';
 
-    protected string $coreFilePath;
+    private string $coreFilePath;
 
     public function __construct()
     {
@@ -81,10 +81,10 @@ class Core
 
     public function checkConnection(): array
     {
-        return $this->callApi($this->apiUrl . '/api/check_connection_ext', []);
+        return $this->callApi($this->apiUrl . '/api/check_connection_ext');
     }
 
-    protected function callApi(string $url, array $data = []): array
+    private function callApi(string $url, array $data = []): array
     {
         if (! extension_loaded('curl')) {
             return [
@@ -516,7 +516,7 @@ class Core
         }
     }
 
-    protected function clearCache(): bool
+    private function clearCache(): void
     {
         try {
             Helper::clearCache();
@@ -530,14 +530,12 @@ class Core
             foreach (File::glob(storage_path('app/purifier') . '/*') as $view) {
                 File::delete($view);
             }
-
-            return true;
-        } catch (Throwable) {
-            return false;
+        } catch (Throwable $exception) {
+            info($exception->getMessage());
         }
     }
 
-    protected function getSiteURL(): string
+    private function getSiteURL(): string
     {
         $request = request();
 
@@ -546,15 +544,19 @@ class Core
         $thisHttpOrHttps = $request->server('HTTPS') == 'on' || $request->server('HTTP_X_FORWARDED_PROTO') == 'https'
             ? 'https://' : 'http://';
 
+        if (false === filter_var($thisServerName, FILTER_VALIDATE_URL)) {
+            $thisServerName = $request->getHost();
+        }
+
         return $thisHttpOrHttps . $thisServerName . $request->server('REQUEST_URI');
     }
 
-    protected function getSiteIP(): string
+    private function getSiteIP(): string
     {
         return request()->server('SERVER_ADDR') ?: Helper::getIpFromThirdParty() ?: gethostbyname(gethostname());
     }
 
-    protected function getRemoteFileSize(string $url): float|int|string
+    private function getRemoteFileSize(string $url): float|int|string
     {
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_HEADER, true);
@@ -622,7 +624,7 @@ class Core
         ob_flush();
     }
 
-    protected function validateUpdateFile(string $filePath): bool
+    private function validateUpdateFile(string $filePath): bool
     {
         if (! class_exists('ZipArchive', false)) {
             return true;

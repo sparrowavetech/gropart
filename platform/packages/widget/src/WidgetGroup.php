@@ -2,8 +2,8 @@
 
 namespace Botble\Widget;
 
-use Botble\Widget\Contracts\ApplicationWrapperContract;
 use Botble\Widget\Misc\ViewExpressionTrait;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Arr;
 use stdClass;
 
@@ -17,7 +17,7 @@ class WidgetGroup
 
     protected ?string $description = null;
 
-    protected ApplicationWrapperContract $app;
+    protected Application $app;
 
     protected array $widgets = [];
 
@@ -27,7 +27,7 @@ class WidgetGroup
 
     protected int $count = 0;
 
-    public function __construct(array $args, ApplicationWrapperContract $app)
+    public function __construct(array $args, Application $app)
     {
         $this->id = $args['id'];
         $this->name = $args['name'];

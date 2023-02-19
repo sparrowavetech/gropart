@@ -21,7 +21,7 @@
                 </div>
             @endforeach
         </div>
-    
+
         @include('plugins/ecommerce::products.partials.general', ['product' => $product, 'originalProduct' => $originalProduct, 'isVariation' => true])
         <div class="variation-images">
             @include('core/base::forms.partials.images', ['name' => 'images[]', 'values' => isset($product) ? $product->images : []])
@@ -48,7 +48,7 @@
             </div>
             <div class="custom-image-box image-box">
                 <input type="hidden" name="__name__" class="image-data">
-                <img src="{{ RvMedia::getDefaultImage(false) }}" alt="{{ trans('core/base::base.preview_image') }}" class="preview_image">
+                <img src="{{ RvMedia::getDefaultImage() }}" alt="{{ trans('core/base::base.preview_image') }}" class="preview_image">
                 <div class="image-box-actions">
                     <a class="btn-images" data-result="images[]" data-action="select-image">
                         {{ trans('core/base::forms.choose_image') }}

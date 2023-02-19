@@ -58,6 +58,14 @@ class ShippingRuleItemForm extends FormAbstract
 
         $choices = [0 => trans('plugins/ecommerce::shipping.rule.item.forms.no_shipping_rule')] + $choices;
 
+        $isRequiredState = false;
+        if ($shippingRuleId) {
+            $rule = $rules->firstWhere('id', $shippingRuleId);
+            if ($rule) {
+                $isRequiredState = $rule->type->getValue() == ShippingRuleTypeEnum::BASED_ON_LOCATION;
+            }
+        }
+
         $this
             ->setupModel(new ShippingRuleItem())
             ->setValidatorClass(ShippingRuleItemRequest::class)
@@ -100,7 +108,7 @@ class ShippingRuleItemForm extends FormAbstract
                 ])
                 ->add('state', 'customSelect', [
                     'label' => trans('plugins/ecommerce::shipping.rule.item.forms.state'),
-                    'label_attr' => ['class' => 'control-label required'],
+                    'label_attr' => ['class' => 'control-label ' . ($isRequiredState ? 'required' : '')],
                     'attr' => [
                         'class' => 'form-control select-search-full',
                         'data-type' => 'state',
@@ -133,7 +141,7 @@ class ShippingRuleItemForm extends FormAbstract
                 ])
                 ->add('state', 'text', [
                     'label' => trans('plugins/ecommerce::shipping.rule.item.forms.state'),
-                    'label_attr' => ['class' => 'control-label required'],
+                    'label_attr' => ['class' => 'control-label ' . ($isRequiredState ? 'required' : '')],
                     'attr' => [
                         'placeholder' => trans('plugins/ecommerce::shipping.rule.item.forms.state_placeholder'),
                     ],

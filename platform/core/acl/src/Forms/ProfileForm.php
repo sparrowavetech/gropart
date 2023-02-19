@@ -8,7 +8,7 @@ use Botble\Base\Forms\FormAbstract;
 
 class ProfileForm extends FormAbstract
 {
-    public function buildForm()
+    public function buildForm(): void
     {
         $this
             ->setupModel(new User())

@@ -50,7 +50,9 @@ class OrderTable extends TableAbstract
                 return BaseHelper::clean($item->status->toHtml());
             })
             ->editColumn('payment_status', function ($item) {
-                return $item->payment->status->label() ? BaseHelper::clean($item->payment->status->toHtml()) : '&mdash;';
+                return $item->payment->status->label() ? BaseHelper::clean(
+                    $item->payment->status->toHtml()
+                ) : '&mdash;';
             })
             ->editColumn('payment_method', function ($item) {
                 return BaseHelper::clean($item->payment->payment_channel->label() ?: '&mdash;');
@@ -87,7 +89,8 @@ class OrderTable extends TableAbstract
                         })
                         ->orWhereHas('user', function ($subQuery) use ($keyword) {
                             return $subQuery->where('name', 'LIKE', '%' . $keyword . '%');
-                        });
+                        })
+                        ->orWhere('code', 'LIKE', '%' . $keyword . '%');
                 }
 
                 return $query;
@@ -190,7 +193,7 @@ class OrderTable extends TableAbstract
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type' => 'date',
+                'type' => 'datePicker',
             ],
         ];
     }

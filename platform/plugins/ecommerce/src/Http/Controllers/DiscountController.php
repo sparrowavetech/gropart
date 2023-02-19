@@ -14,11 +14,9 @@ use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Ecommerce\Tables\DiscountTable;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Illuminate\View\View;
 
 class DiscountController extends BaseController
 {
@@ -29,10 +27,6 @@ class DiscountController extends BaseController
         $this->discountRepository = $discountRepository;
     }
 
-    /**
-     * @param DiscountTable $dataTable
-     * @return Factory|View
-     */
     public function index(DiscountTable $dataTable)
     {
         page_title()->setTitle(trans('plugins/ecommerce::discount.name'));
@@ -42,9 +36,6 @@ class DiscountController extends BaseController
         return $dataTable->renderTable();
     }
 
-    /**
-     * @return string
-     */
     public function create()
     {
         page_title()->setTitle(trans('plugins/ecommerce::discount.create'));
@@ -60,12 +51,6 @@ class DiscountController extends BaseController
         return view('plugins/ecommerce::discounts.create');
     }
 
-    /**
-     * @param DiscountRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function store(DiscountRequest $request, BaseHttpResponse $response)
     {
         if (! $request->has('can_use_with_promotion')) {
@@ -174,13 +159,7 @@ class DiscountController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    /**
-     * @param Request $request
-     * @param int $id
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function destroy(Request $request, $id, BaseHttpResponse $response)
+    public function destroy(Request $request, int $id, BaseHttpResponse $response)
     {
         try {
             $discount = $this->discountRepository->findOrFail($id);
@@ -195,12 +174,6 @@ class DiscountController extends BaseController
         }
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function deletes(Request $request, BaseHttpResponse $response)
     {
         $ids = $request->input('ids');
@@ -219,10 +192,6 @@ class DiscountController extends BaseController
         return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
-    /**
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function postGenerateCoupon(BaseHttpResponse $response)
     {
         do {

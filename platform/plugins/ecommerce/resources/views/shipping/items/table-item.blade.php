@@ -15,7 +15,7 @@
         @endif
     </td>
     <td>{{ BaseHelper::formatDate($item->created_at) }}</td>
-    @if (Auth::user()->hasAnyPermission(['ecommerce.shipping-rule-items.edit', 'ecommerce.shipping-rule-items.destroy']))
+    @if ($hasOperations)
         <td class="text-center">
             @if (Auth::user()->hasPermission('ecommerce.shipping-rule-items.edit'))
                 <button class="btn btn-icon btn-sm btn-primary px-2 py-1 btn-shipping-rule-item-trigger" type="button"

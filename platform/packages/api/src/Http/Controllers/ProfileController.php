@@ -20,11 +20,6 @@ class ProfileController extends Controller
      *
      * @group Profile
      * @authenticated
-     *
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     *
-     * @return BaseHttpResponse
      */
     public function getProfile(Request $request, BaseHttpResponse $response)
     {
@@ -38,10 +33,6 @@ class ProfileController extends Controller
      *
      * @group Profile
      * @authenticated
-     *
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
      */
     public function updateAvatar(Request $request, BaseHttpResponse $response)
     {
@@ -87,10 +78,6 @@ class ProfileController extends Controller
      *
      * @group Profile
      * @authenticated
-     *
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
      */
     public function updateProfile(Request $request, BaseHttpResponse $response)
     {
@@ -133,10 +120,6 @@ class ProfileController extends Controller
      *
      * @group Profile
      * @authenticated
-     *
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
      */
     public function updatePassword(Request $request, BaseHttpResponse $response)
     {

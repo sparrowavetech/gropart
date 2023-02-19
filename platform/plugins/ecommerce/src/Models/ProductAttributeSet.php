@@ -4,13 +4,10 @@ namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
-use Botble\Base\Traits\EnumCastable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProductAttributeSet extends BaseModel
 {
-    use EnumCastable;
-
     protected $table = 'ec_product_attribute_sets';
 
     protected $fillable = [

@@ -18,6 +18,7 @@ class Plugin extends PluginOperationAbstract
                 'newsletter_mailchimp_list_id',
                 'newsletter_sendgrid_api_key',
                 'newsletter_sendgrid_list_id',
+                'enable_newsletter_contacts_list_api',
             ])
             ->delete();
     }

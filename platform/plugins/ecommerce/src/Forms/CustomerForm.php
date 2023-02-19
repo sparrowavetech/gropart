@@ -42,7 +42,7 @@ class CustomerForm extends FormAbstract
                     'data-counter' => 20,
                 ],
             ])
-            ->add('dob', 'date', [
+            ->add('dob', 'datePicker', [
                 'label' => trans('plugins/ecommerce::customer.dob'),
                 'label_attr' => ['class' => 'control-label'],
                 'attr' => [

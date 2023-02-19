@@ -29,7 +29,7 @@
                         <tr>
                             <td>
                                 <a class="hover-underline a-detail-template"
-                                   href="{{ route('setting.email.template.edit', ['type' => $type, 'name' => $module, 'template_file' => $key]) }}">
+                                   href="{{ route('setting.email.template.edit', [$type, $module, $key]) }}">
                                     {{ trans($template['title']) }}
                                 </a>
                             </td>
@@ -44,7 +44,11 @@
                                         ) !!}
                                     </div>
                                 @elseif ($type !== 'core')
-                                    &mdash;
+                                    <div class="form-group mb-3">
+                                        {!! Form::onOff(get_setting_email_status_key($type, $module, $key), 1,
+                                            ['disabled' => true, 'readonly' => true]
+                                        ) !!}
+                                    </div>
                                 @endif
                             </td>
                         </tr>

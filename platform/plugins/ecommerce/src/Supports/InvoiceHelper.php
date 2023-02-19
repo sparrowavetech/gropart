@@ -5,14 +5,21 @@ namespace Botble\Ecommerce\Supports;
 use ArPHP\I18N\Arabic;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Barryvdh\DomPDF\PDF as PDFHelper;
+use BaseHelper;
+use Botble\Base\Supports\TwigCompiler;
+use Botble\Ecommerce\Enums\InvoiceStatusEnum;
+use EcommerceHelper as EcommerceHelperFacade;
 use Botble\Ecommerce\Models\Invoice;
+use Botble\Ecommerce\Models\InvoiceItem;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\Product;
+use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Payment\Enums\PaymentStatusEnum;
-use EcommerceHelper as EcommerceHelperFacade;
+use Botble\Payment\Models\Payment;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
+use RvMedia;
 
 class InvoiceHelper
 {
@@ -79,30 +86,29 @@ class InvoiceHelper
     public function makeInvoicePDF(Invoice $invoice): PDFHelper
     {
         $fontsPath = storage_path('fonts');
+
         if (! File::isDirectory($fontsPath)) {
             File::makeDirectory($fontsPath);
         }
 
-        $template = 'plugins/ecommerce::invoices.template';
-        if (view()->exists('plugins/ecommerce/invoice::template')) {
-            $template = 'plugins/ecommerce/invoice::template';
-        }
+        $content = $this->getInvoiceTemplate();
 
-        if (get_ecommerce_setting('invoice_support_arabic_language', 0) == 1) {
-            $templateHtml = view($template, compact('invoice'))->render();
+        if ($content) {
+            $twigCompiler = (new TwigCompiler())->addExtension(new TwigExtension());
+            $content = $twigCompiler->compile($content, $this->getDataForInvoiceTemplate($invoice));
 
-            $arabic = new Arabic();
-            $p = $arabic->arIdentify($templateHtml);
+            if (setting('job_board_invoice_support_arabic_language', 0) == 1) {
+                $arabic = new Arabic();
+                $p = $arabic->arIdentify($content);
 
-            for ($i = count($p) - 1; $i >= 0; $i -= 2) {
-                $utf8ar = $arabic->utf8Glyphs(substr($templateHtml, $p[$i - 1], $p[$i] - $p[$i - 1]));
-                $templateHtml = substr_replace($templateHtml, $utf8ar, $p[$i - 1], $p[$i] - $p[$i - 1]);
+                for ($i = count($p) - 1; $i >= 0; $i -= 2) {
+                    $utf8ar = $arabic->utf8Glyphs(substr($content, $p[$i - 1], $p[$i] - $p[$i - 1]));
+                    $content = substr_replace($content, $utf8ar, $p[$i - 1], $p[$i] - $p[$i - 1]);
+                }
             }
-
-            $pdf = Pdf::loadHTML($templateHtml, 'UTF-8');
-        } else {
-            $pdf = Pdf::loadView($template, compact('invoice'), [], 'UTF-8');
         }
+
+        $pdf = Pdf::loadHTML($content, 'UTF-8');
 
         return $pdf
             ->setPaper('a4')
@@ -138,5 +144,107 @@ class InvoiceHelper
     public function streamInvoice(Invoice $invoice): Response
     {
         return $this->makeInvoicePDF($invoice)->stream();
+    }
+
+    public function getInvoiceTemplate(): string
+    {
+        $defaultPath = platform_path('plugins/ecommerce/resources/templates/invoice.tpl');
+        $storagePath = storage_path('app/templates/invoice.tpl');
+
+        if ($storagePath && File::exists($storagePath)) {
+            $templateHtml = BaseHelper::getFileData($storagePath, false);
+        } else {
+            $templateHtml = File::exists($defaultPath) ? BaseHelper::getFileData($defaultPath, false) : '';
+        }
+
+        return (string)$templateHtml;
+    }
+
+    protected function getDataForInvoiceTemplate(Invoice $invoice): array
+    {
+        $logo = get_ecommerce_setting('company_logo_for_invoicing') ?: (theme_option(
+            'logo_in_invoices'
+        ) ?: theme_option('logo'));
+
+        return [
+            'invoice' => $invoice->loadMissing('items')->toArray(),
+            'logo' => $logo,
+            'logo_full_path' => RvMedia::getRealPath($logo),
+            'site_title' => theme_option('site_title'),
+            'company_logo_full_path' => RvMedia::getRealPath($logo),
+            'payment_method' => $invoice->payment->payment_channel->label(),
+            'payment_status' => $invoice->payment->status->label(),
+            'payment_description' => ($invoice->payment->payment_channel == PaymentMethodEnum::BANK_TRANSFER && $invoice->payment->status == PaymentStatusEnum::PENDING)
+                ? BaseHelper::clean(get_payment_setting('description', $invoice->payment->payment_channel))
+                : null,
+            'is_tax_enabled' => EcommerceHelperFacade::isTaxEnabled(),
+            'settings' => [
+                'using_custom_font_for_invoice' => (bool) get_ecommerce_setting('using_custom_font_for_invoice'),
+                'custom_font_family' => get_ecommerce_setting('invoice_font_family'),
+                'font_family' => get_ecommerce_setting('invoice_font_family', 0) == 1
+                    ? get_ecommerce_setting('invoice_font_family', 'DejaVu Sans')
+                    : 'DejaVu Sans',
+                'enable_invoice_stamp' => get_ecommerce_setting('enable_invoice_stamp'),
+            ],
+            'invoice_header_filter' => apply_filters('ecommerce_invoice_header', null, $invoice),
+            'invoice_body_filter' => apply_filters('ecommerce_invoice_body', null, $invoice),
+            'ecommerce_invoice_footer' => apply_filters('ecommerce_invoice_footer', null, $invoice),
+        ];
+    }
+
+    public function getDataForPreview(): Invoice
+    {
+        $invoice = new Invoice([
+            'code' => 'INV-1',
+            'customer_name' => 'Odie Miller',
+            'store_name' => 'LinkedIn',
+            'store_address' => '701 Norman Street Los Angeles California 90008',
+            'customer_email' => 'contact@example.com',
+            'customer_phone' => '+0123456789',
+            'customer_address' => ' 14059 Triston Crossroad South Lillie, NH 84777-1634',
+            'status' => InvoiceStatusEnum::PENDING,
+            'created_at' => '2022-12-23 08:14:09',
+        ]);
+
+        $items = [];
+
+        foreach (range(1, 3) as $i) {
+            $amount = rand(10, 1000);
+            $qty = rand(1, 10);
+
+            $items[] = new InvoiceItem([
+                'name' => "Item $i",
+                'description' => "Description of item $i",
+                'sub_total' => $amount * $qty,
+                'amount' => $amount,
+                'qty' => $qty,
+            ]);
+
+            $invoice->amount += $amount * $qty;
+            $invoice->sub_total = $invoice->amount;
+        }
+
+        $payment = new Payment([
+            'payment_channel' => PaymentMethodEnum::BANK_TRANSFER,
+            'status' => PaymentStatusEnum::PENDING,
+        ]);
+
+        $invoice->setRelation('payment', $payment);
+        $invoice->setRelation('items', collect($items));
+
+        return $invoice;
+    }
+
+    public function getVariables(): array
+    {
+        return [
+            'invoice.*' => __('Invoice information from database, ex: invoice.code, invoice.amount, ...'),
+            'logo_full_path' => __('The site logo with full url'),
+            'company_logo_full_path' => __('The company logo of invoice with full url'),
+            'payment_method' => __('Payment method'),
+            'payment_status' => __('Payment status'),
+            'payment_description' => __('Payment description'),
+            'get_ecommerce_setting(\'key\')' => __('Get the ecommerce setting from database'),
+        ];
     }
 }

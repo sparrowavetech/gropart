@@ -17,36 +17,36 @@ class AnalyticsServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function register()
+    public function register(): void
     {
         $this->app->bind(AnalyticsClient::class, function () {
             return AnalyticsClientFactory::createForConfig(config('plugins.analytics.general'));
         });
 
         $this->app->bind(AnalyticsAbstract::class, function () {
-            $propertyId = setting('analytics_view_id') ?: setting('analytics_property_id');
-
-            if (empty($propertyId)) {
-                throw InvalidConfiguration::propertyIdNotSpecified();
-            }
-
             $credentials = setting('analytics_service_account_credentials');
 
             if (! $credentials) {
                 throw InvalidConfiguration::credentialsIsNotValid();
             }
 
-            if (setting('analytics_property_id')) {
+            if (config('plugins.analytics.general.ga4_enabled', false) && $propertyId = setting('analytics_property_id')) {
                 return new AnalyticsGA4($propertyId, $credentials);
             }
 
-            return new Analytics($this->app->make(AnalyticsClient::class), $propertyId);
+            $viewId = setting('analytics_view_id');
+
+            if (empty($viewId)) {
+                throw InvalidConfiguration::propertyIdNotSpecified();
+            }
+
+            return new Analytics($this->app->make(AnalyticsClient::class), $viewId);
         });
 
         AliasLoader::getInstance()->alias('Analytics', AnalyticsFacade::class);
     }
 
-    public function boot()
+    public function boot(): void
     {
         $this->setNamespace('plugins/analytics')
             ->loadAndPublishConfigurations(['general', 'permissions'])

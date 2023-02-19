@@ -1,5 +1,7 @@
 <?php
 
+use Botble\Ecommerce\Models\Product;
+
 Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' => ['web', 'core']], function () {
     Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {
         Route::group(['prefix' => 'reviews', 'as' => 'reviews.'], function () {
@@ -24,9 +26,15 @@ Route::group([
             'uses' => 'ReviewController@store',
         ]);
 
-        Route::get('review/delete/{id}', [
+        Route::delete('review/delete/{id}', [
             'as' => 'public.reviews.destroy',
             'uses' => 'ReviewController@destroy',
+        ]);
+
+        Route::get(SlugHelper::getPrefix(Product::class, 'products') . '/{slug}/review', [
+            'uses' => 'ReviewController@getProductReview',
+            'as' => 'public.product.review',
+            'middleware' => 'customer',
         ]);
     });
 });

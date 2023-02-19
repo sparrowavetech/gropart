@@ -15,12 +15,12 @@ class ApiServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function register()
+    public function register(): void
     {
         AliasLoader::getInstance()->alias('ApiHelper', ApiHelperFacade::class);
     }
 
-    public function boot()
+    public function boot(): void
     {
         $this
             ->setNamespace('packages/api')

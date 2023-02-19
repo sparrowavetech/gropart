@@ -54,7 +54,7 @@ class DiscountSupport
     public function getAvailablePromotions(): Collection
     {
         if (! $this->promotions instanceof Collection) {
-            $this->promotions = collect([]);
+            $this->promotions = collect();
         }
 
         if ($this->promotions->count() == 0) {

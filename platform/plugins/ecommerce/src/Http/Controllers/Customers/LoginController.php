@@ -7,49 +7,24 @@ use Botble\ACL\Traits\AuthenticatesUsers;
 use Botble\ACL\Traits\LogoutGuardTrait;
 use Botble\Ecommerce\Enums\CustomerStatusEnum;
 use EcommerceHelper;
-use Illuminate\Contracts\Auth\StatefulGuard;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use SeoHelper;
-use Symfony\Component\HttpFoundation\Response;
 use Theme;
 
 class LoginController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Login Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller handles authenticating users for the application and
-    | redirecting them to your home screen. The controller uses a trait
-    | to conveniently provide its functionality to your applications.
-    |
-    */
-
     use AuthenticatesUsers, LogoutGuardTrait {
         AuthenticatesUsers::attemptLogin as baseAttemptLogin;
     }
 
-    /**
-     * Where to redirect users after login / registration.
-     */
     public string $redirectTo = '/';
 
-    /**
-     * Create a new controller instance.
-     */
     public function __construct()
     {
         $this->middleware('customer.guest', ['except' => 'logout']);
     }
 
-    /**
-     * Show the application's login form.
-     *
-     * @return \Response
-     */
     public function showLoginForm()
     {
         SeoHelper::setTitle(__('Login'));
@@ -65,22 +40,11 @@ class LoginController extends Controller
         return Theme::scope('ecommerce.customers.login', [], 'plugins/ecommerce::themes.customers.login')->render();
     }
 
-    /**
-     * Get the guard to be used during authentication.
-     *
-     * @return StatefulGuard
-     */
     protected function guard()
     {
         return auth('customer');
     }
 
-    /**
-     * @param Request $request
-     * @return Response|void
-     * @throws ValidationException
-     * @throws ValidationException
-     */
     public function login(Request $request)
     {
         $this->validateLogin($request);
@@ -106,12 +70,6 @@ class LoginController extends Controller
         $this->sendFailedLoginResponse();
     }
 
-    /**
-     * Log the user out of the application.
-     *
-     * @param Request $request
-     * @return RedirectResponse
-     */
     public function logout(Request $request)
     {
         $this->guard()->logout();
@@ -119,13 +77,6 @@ class LoginController extends Controller
         return $this->loggedOut($request) ?: redirect('/');
     }
 
-    /**
-     * Attempt to log the user into the application.
-     *
-     * @param Request $request
-     * @return bool
-     * @throws ValidationException
-     */
     protected function attemptLogin(Request $request)
     {
         if ($this->guard()->validate($this->credentials($request))) {

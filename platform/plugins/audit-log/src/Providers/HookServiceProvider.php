@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 
 class HookServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         add_action(AUTH_ACTION_AFTER_LOGOUT_SYSTEM, [$this, 'handleLogout'], 45, 2);
 
@@ -29,12 +29,12 @@ class HookServiceProvider extends ServiceProvider
         add_filter(DASHBOARD_FILTER_ADMIN_LIST, [$this, 'registerDashboardWidgets'], 28, 2);
     }
 
-    public function handleLogout(Request $request, Model $data)
+    public function handleLogout(Request $request, Model $data): void
     {
         event(new AuditHandlerEvent(
             'of the system',
             'logged out',
-            $data->id,
+            $data->getKey(),
             $data->name,
             'info'
         ));
@@ -45,7 +45,7 @@ class HookServiceProvider extends ServiceProvider
         event(new AuditHandlerEvent(
             $screen,
             'updated profile',
-            $data->id,
+            $data->getKey(),
             AuditLog::getReferenceName($screen, $data),
             'info'
         ));
@@ -56,7 +56,7 @@ class HookServiceProvider extends ServiceProvider
         event(new AuditHandlerEvent(
             $screen,
             'changed password',
-            $data->id,
+            $data->getKey(),
             AuditLog::getReferenceName($screen, $data),
             'danger'
         ));

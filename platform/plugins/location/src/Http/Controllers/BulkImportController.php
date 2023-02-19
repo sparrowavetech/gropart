@@ -14,12 +14,8 @@ use Botble\Location\Imports\LocationImport;
 use Botble\Location\Imports\ValidateLocationImport;
 use Botble\Location\Location;
 use Botble\Location\Repositories\Interfaces\CountryInterface;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Excel;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class BulkImportController extends BaseController
 {
@@ -33,9 +29,6 @@ class BulkImportController extends BaseController
         $this->validateLocationImport = $validateLocationImport;
     }
 
-    /**
-     * @return Application|Factory|View
-     */
     public function index()
     {
         page_title()->setTitle(trans('plugins/location::bulk-import.name'));
@@ -45,11 +38,6 @@ class BulkImportController extends BaseController
         return view('plugins/location::bulk-import.index');
     }
 
-    /**
-     * @param BulkImportRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function postImport(BulkImportRequest $request, BaseHttpResponse $response)
     {
         BaseHelper::maximumExecutionTimeAndMemoryLimit();
@@ -99,10 +87,6 @@ class BulkImportController extends BaseController
         return $response->setData($data)->setMessage($message . ' ' . $result);
     }
 
-    /**
-     * @param Request $request
-     * @return BinaryFileResponse
-     */
     public function downloadTemplate(Request $request)
     {
         $extension = $request->input('extension');
@@ -114,12 +98,6 @@ class BulkImportController extends BaseController
         return (new TemplateLocationExport($extension))->download($fileName, $writeType, $contentType);
     }
 
-    /**
-     * @param Location $location
-     * @param BaseHttpResponse $response
-     * @param CountryInterface $countryRepository
-     * @return BaseHttpResponse
-     */
     public function ajaxGetAvailableRemoteLocations(Location $location, BaseHttpResponse $response, CountryInterface $countryRepository)
     {
         $remoteLocations = $location->getRemoteAvailableLocations();
@@ -150,12 +128,6 @@ class BulkImportController extends BaseController
             ->setData(view('plugins/location::partials.available-remote-locations', compact('locations'))->render());
     }
 
-    /**
-     * @param string $countryCode
-     * @param Location $location
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function importLocationData(string $countryCode, Location $location, BaseHttpResponse $response)
     {
         $result = $location->downloadRemoteLocation($countryCode);

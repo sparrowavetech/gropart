@@ -123,6 +123,7 @@ $(document).ready(function () {
                     const option = res.data.data;
 
                     self.productOptions.push({
+                        id: option.id,
                         name: option.name,
                         option_type: option.option_type,
                         option_value: option.option_value,
@@ -186,6 +187,7 @@ $(document).ready(function () {
                     const selectedPercent = (values[0].affect_type === 1) ? 'selected' : ''
                     html += template.replace(/__priceLabel__/g, price)
                         .replace(/__priceTypeLabel__/g, priceType)
+                        .replace(/__id__/g, values[0].id)
                         .replace(/__index__/g, index)
                         .replace(/__affectPrice__/g, values[0].affect_price)
                         .replace(/__affectPriceLabel__/g, productOptionLang.affect_price_label)
@@ -208,6 +210,7 @@ $(document).ready(function () {
                             const selectedPercent = (value.affect_type === 1) ? 'selected' : ''
                             valuesResult += valueTemplate
                                 .replace(/__key__/g, key)
+                                .replace(/__id__/g, value.id)
                                 .replace(/__order__/g, order)
                                 .replace(/__index__/g, index)
                                 .replace(/__labelPlaceholder__/g, productOptionLang.label_placeholder)

@@ -12,10 +12,10 @@ class ImportCommand extends Command
 {
     public function handle(Manager $manager): int
     {
-        $this->info('Importing...');
+        $this->components->info('Importing...');
         $replace = $this->option('replace');
         $counter = $manager->importTranslations($replace);
-        $this->info('Done importing, processed ' . $counter . ' items!');
+        $this->components->info('Done importing, processed ' . $counter . ' items!');
 
         return self::SUCCESS;
     }

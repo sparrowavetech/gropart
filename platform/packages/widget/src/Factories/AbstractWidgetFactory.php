@@ -3,11 +3,11 @@
 namespace Botble\Widget\Factories;
 
 use Botble\Widget\AbstractWidget;
-use Botble\Widget\Contracts\ApplicationWrapperContract;
 use Botble\Widget\Misc\InvalidWidgetClassException;
 use Botble\Widget\Misc\ViewExpressionTrait;
 use Botble\Widget\WidgetId;
 use Exception;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Str;
 
 abstract class AbstractWidgetFactory
@@ -24,11 +24,11 @@ abstract class AbstractWidgetFactory
 
     public array $widgetFullParams;
 
-    public ApplicationWrapperContract $app;
+    public Application $app;
 
     public static bool $skipWidgetContainer = false;
 
-    public function __construct(ApplicationWrapperContract $app)
+    public function __construct(Application $app)
     {
         $this->app = $app;
     }

@@ -45,11 +45,6 @@ class CustomerController extends BaseController
         $this->addressRepository = $addressRepository;
     }
 
-    /**
-     * @param CustomerTable $dataTable
-     * @return Factory|View
-     * @throws Throwable
-     */
     public function index(CustomerTable $dataTable)
     {
         page_title()->setTitle(trans('plugins/ecommerce::customer.name'));
@@ -57,10 +52,6 @@ class CustomerController extends BaseController
         return $dataTable->renderTable();
     }
 
-    /**
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
     public function create(FormBuilder $formBuilder)
     {
         page_title()->setTitle(trans('plugins/ecommerce::customer.create'));
@@ -70,11 +61,6 @@ class CustomerController extends BaseController
         return $formBuilder->create(CustomerForm::class)->remove('is_change_password')->renderForm();
     }
 
-    /**
-     * @param CustomerCreateRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function store(CustomerCreateRequest $request, BaseHttpResponse $response)
     {
         $customer = $this->customerRepository->getModel();
@@ -92,11 +78,7 @@ class CustomerController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    /**
-     * @param int $id
-     * @return string
-     */
-    public function edit($id, FormBuilder $formBuilder)
+    public function edit(int $id, FormBuilder $formBuilder)
     {
         Assets::addScriptsDirectly('vendor/core/plugins/ecommerce/js/customer.js');
 
@@ -109,13 +91,7 @@ class CustomerController extends BaseController
         return $formBuilder->create(CustomerForm::class, ['model' => $customer])->renderForm();
     }
 
-    /**
-     * @param int $id
-     * @param CustomerEditRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function update($id, CustomerEditRequest $request, BaseHttpResponse $response)
+    public function update(int $id, CustomerEditRequest $request, BaseHttpResponse $response)
     {
         $customer = $this->customerRepository->findOrFail($id);
 
@@ -136,13 +112,7 @@ class CustomerController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param Request $request
-     * @param int $id
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function destroy(Request $request, $id, BaseHttpResponse $response)
+    public function destroy(Request $request, int $id, BaseHttpResponse $response)
     {
         try {
             $customer = $this->customerRepository->findOrFail($id);
@@ -157,12 +127,6 @@ class CustomerController extends BaseController
         }
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function deletes(Request $request, BaseHttpResponse $response)
     {
         $ids = $request->input('ids');
@@ -181,10 +145,27 @@ class CustomerController extends BaseController
         return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
-    /**
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
+    public function verifyEmail(int $id, Request $request, BaseHttpResponse $response)
+    {
+        $customer = $this->customerRepository->getFirstBy([
+            'id' => $id,
+            'confirmed_at' => null,
+        ]);
+
+        if (! $customer) {
+            abort(404);
+        }
+
+        $customer->confirmed_at = Carbon::now();
+        $customer->save();
+
+        event(new UpdatedContentEvent(CUSTOMER_MODULE_SCREEN_NAME, $request, $customer));
+
+        return $response
+            ->setPreviousUrl(route('customers.index'))
+            ->setMessage(trans('core/base::notices.update_success_message'));
+    }
+
     public function getListCustomerForSelect(BaseHttpResponse $response)
     {
         $customers = $this->customerRepository
@@ -194,11 +175,6 @@ class CustomerController extends BaseController
         return $response->setData($customers);
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function getListCustomerForSearch(Request $request, BaseHttpResponse $response)
     {
         $customers = $this->customerRepository
@@ -213,12 +189,6 @@ class CustomerController extends BaseController
         return $response->setData($customers);
     }
 
-    /**
-     * @param int $id
-     * @param CustomerUpdateEmailRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function postUpdateEmail($id, CustomerUpdateEmailRequest $request, BaseHttpResponse $response)
     {
         $this->customerRepository->createOrUpdate(['email' => $request->input('email')], ['id' => $id]);
@@ -226,11 +196,6 @@ class CustomerController extends BaseController
         return $response->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param int $id
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function getCustomerAddresses($id, BaseHttpResponse $response)
     {
         $addresses = $this->addressRepository->allBy(['customer_id' => $id]);
@@ -238,26 +203,16 @@ class CustomerController extends BaseController
         return $response->setData(CustomerAddressResource::collection($addresses));
     }
 
-    /**
-     * @param int $id
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function getCustomerOrderNumbers($id, BaseHttpResponse $response)
     {
         $customer = $this->customerRepository->findById($id);
-        if (!$customer) {
+        if (! $customer) {
             return $response->setData(0);
         }
 
         return $response->setData($customer->orders()->count());
     }
 
-    /**
-     * @param AddCustomerWhenCreateOrderRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function postCreateCustomerWhenCreatingOrder(
         AddCustomerWhenCreateOrderRequest $request,
         BaseHttpResponse $response

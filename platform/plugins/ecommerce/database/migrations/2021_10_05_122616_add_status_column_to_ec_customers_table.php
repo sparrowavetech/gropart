@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 use Botble\Ecommerce\Enums\CustomerStatusEnum;
 
 return new class () extends Migration {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         if (! Schema::hasColumn('ec_customers', 'status')) {
             Schema::table('ec_customers', function (Blueprint $table) {
@@ -20,12 +15,7 @@ return new class () extends Migration {
         }
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         if (Schema::hasColumn('ec_customers', 'status')) {
             Schema::table('ec_customers', function (Blueprint $table) {

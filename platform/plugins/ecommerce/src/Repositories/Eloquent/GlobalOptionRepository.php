@@ -2,21 +2,17 @@
 
 namespace Botble\Ecommerce\Repositories\Eloquent;
 
+use Botble\Ecommerce\Enums\GlobalOptionEnum;
+use Botble\Ecommerce\Models\GlobalOption;
 use Botble\Ecommerce\Models\GlobalOptionValue;
 use Botble\Ecommerce\Repositories\Interfaces\GlobalOptionInterface;
 use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 
 class GlobalOptionRepository extends RepositoriesAbstract implements GlobalOptionInterface
 {
-    /**
-     * Create a new model.
-     *
-     * @param Model|array $data
-     * @param array $condition
-     * @return false|Model
-     */
-    public function createOrUpdate($data, array $condition = [])
+    public function createOrUpdate($data, array $condition = []): Model|bool
     {
         $optionValues = [];
         if (is_array($data)) {
@@ -31,7 +27,7 @@ class GlobalOptionRepository extends RepositoriesAbstract implements GlobalOptio
             }
 
             $optionData = [
-                'name' => $data['option_name'],
+                'name' => $data['name'],
                 'option_type' => $data['option_type'],
                 'required' => $data['required'],
             ];
@@ -47,7 +43,10 @@ class GlobalOptionRepository extends RepositoriesAbstract implements GlobalOptio
         $this->resetModel();
 
         if ($item->save()) {
-            $item->values()->delete();
+            $item->values()->whereNotIn('id', collect($optionValues)->pluck('id')->all())->delete();
+            /**
+             * @var GlobalOption $item
+             */
             $item->values()->saveMany($optionValues);
 
             return $item;
@@ -56,7 +55,7 @@ class GlobalOptionRepository extends RepositoriesAbstract implements GlobalOptio
         return false;
     }
 
-    protected function formatOptionValue($data): array
+    protected function formatOptionValue(array $data): array
     {
         $type = explode('\\', $data['option_type']);
         $type = end($type);
@@ -68,9 +67,17 @@ class GlobalOptionRepository extends RepositoriesAbstract implements GlobalOptio
             /**
              * Only type text save 1-1 to db
              */
-            $globalOptionValue = new GlobalOptionValue();
-            $item['affect_price'] = $data['affect_price'];
-            $item['affect_type'] = $data['affect_type'];
+            $globalOptionValue = null;
+            if (! empty($item['id'])) {
+                $globalOptionValue = GlobalOptionValue::find($item['id']);
+            }
+
+            if (! $globalOptionValue) {
+                $globalOptionValue = new GlobalOptionValue();
+            }
+
+            $item['affect_price'] = $data['affect_price'] ?? 0;
+            $item['affect_type'] = $data['affect_type'] ?? GlobalOptionEnum::TYPE_PERCENT;
             $item['option_value'] = 'n/a';
             $globalOptionValue->fill($item);
             $values[] = $globalOptionValue;
@@ -78,10 +85,17 @@ class GlobalOptionRepository extends RepositoriesAbstract implements GlobalOptio
             /**
              * Other type save many option value to db
              */
-            foreach ($data['options'] as $item) {
-                $globalOptionValue = new GlobalOptionValue();
-                $item['affect_price'] = (! empty($item['affect_price'])) ? $item['affect_price'] : 0;
-                $item['option_value'] = $item['label'];
+            foreach (Arr::get($data, 'options', []) as $item) {
+                $globalOptionValue = null;
+                if (! empty($item['id'])) {
+                    $globalOptionValue = GlobalOptionValue::find($item['id']);
+                }
+
+                if (! $globalOptionValue) {
+                    $globalOptionValue = new GlobalOptionValue();
+                }
+
+                $item['affect_price'] = ! empty($item['affect_price']) ? $item['affect_price'] : 0;
                 $globalOptionValue->fill($item);
                 $values[] = $globalOptionValue;
             }

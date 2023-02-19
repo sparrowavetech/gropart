@@ -9,7 +9,7 @@ use Botble\Blog\Models\Tag;
 
 class TagForm extends FormAbstract
 {
-    public function buildForm()
+    public function buildForm(): void
     {
         $this
             ->setupModel(new Tag())

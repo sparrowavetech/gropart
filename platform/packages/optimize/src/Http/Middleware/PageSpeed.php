@@ -10,9 +10,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 abstract class PageSpeed
 {
-    /**
-     * Apply rules.
-     */
     abstract public function apply(string $buffer): string;
 
     public function handle(Request $request, Closure $next): Response
@@ -42,25 +39,16 @@ abstract class PageSpeed
         return $response;
     }
 
-    /**
-     * Replace content response.
-     */
     protected function replace(array $replace, string $buffer): string
     {
         return preg_replace(array_keys($replace), array_values($replace), $buffer);
     }
 
-    /**
-     * Check Page Speed is enabled or not
-     */
     protected function isEnable(): bool
     {
         return (bool)setting('optimize_page_speed_enable', false);
     }
 
-    /**
-     * Should Process
-     */
     protected function shouldProcessPageSpeed(Request $request): bool
     {
         if (! $this->isEnable()) {

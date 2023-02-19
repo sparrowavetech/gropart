@@ -14,7 +14,7 @@ class PostForm extends FormAbstract
 {
     protected $template = 'core/base::forms.form-tabs';
 
-    public function buildForm()
+    public function buildForm(): void
     {
         $selectedCategories = [];
         if ($this->getModel()) {

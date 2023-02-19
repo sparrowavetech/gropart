@@ -2,6 +2,7 @@
 
 namespace Botble\Backup\Providers;
 
+use Botble\Backup\Commands\BackupCleanCommand;
 use Botble\Backup\Commands\BackupCreateCommand;
 use Botble\Backup\Commands\BackupListCommand;
 use Botble\Backup\Commands\BackupRemoveCommand;
@@ -10,7 +11,7 @@ use Illuminate\Support\ServiceProvider;
 
 class CommandServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
@@ -18,6 +19,7 @@ class CommandServiceProvider extends ServiceProvider
                 BackupRestoreCommand::class,
                 BackupRemoveCommand::class,
                 BackupListCommand::class,
+                BackupCleanCommand::class,
             ]);
         }
     }

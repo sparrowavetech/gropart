@@ -14,7 +14,7 @@
             @endphp
             <div class="container-{{ $size }}">
                 <div class="row">
-                    <div class="my-5">
+                    <div class="my-4">
                         {!! BaseHelper::clean($image) !!}
                     </div>
                 </div>

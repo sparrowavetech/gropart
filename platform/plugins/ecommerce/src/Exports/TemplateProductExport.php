@@ -89,16 +89,16 @@ class TemplateProductExport implements
             'name' => $productName,
             'description' => $descriptions->random(),
             'sku' => Str::upper(Str::random(7)),
-            'categories' => $categories->pluck('name')->implode(','),
+            'categories' => implode(',', $categories->pluck('name')->all()),
             'status' => BaseStatusEnum::PUBLISHED,
             'is_featured' => Arr::random(['Yes', 'No']),
             'brand' => $this->brands->count() ? $this->brands->random() : null,
-            'taxes' => $taxes->pluck('title')->implode(','),
+            'taxes' => implode(',', $taxes->pluck('title')->all()),
             'images' => 'products/1.jpg',
             'price' => $price,
-            'product_attributes' => $attributeSets->pluck('title')->implode(','),
+            'product_attributes' => implode(',', $attributeSets->pluck('title')->all()),
             'import_type' => 'product',
-            'tags' => $productTags->pluck('name')->implode(','),
+            'tags' => implode(',', $productTags->pluck('name')->all()),
         ]);
 
         if ($this->enabledDigital) {

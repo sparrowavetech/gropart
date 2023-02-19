@@ -24,12 +24,6 @@ class StoreTable extends TableAbstract
 
     protected bool $canEditWalletBalance = false;
 
-    /**
-     * StoreTable constructor.
-     * @param DataTables $table
-     * @param UrlGenerator $urlGenerator
-     * @param StoreInterface $storeRepository
-     */
     public function __construct(DataTables $table, UrlGenerator $urlGenerator, StoreInterface $storeRepository)
     {
         $this->repository = $storeRepository;
@@ -204,7 +198,7 @@ class StoreTable extends TableAbstract
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type' => 'date',
+                'type' => 'datePicker',
             ],
         ];
     }

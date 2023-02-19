@@ -47,10 +47,10 @@ class AdsTable extends TableAbstract
             })
             ->editColumn('name', function ($item) {
                 if (! Auth::user()->hasPermission('ads.edit')) {
-                    return $item->name;
+                    return BaseHelper::clean($item->name);
                 }
 
-                return Html::link(route('ads.edit', $item->id), $item->name);
+                return Html::link(route('ads.edit', $item->id), BaseHelper::clean($item->name));
             })
             ->editColumn('checkbox', function ($item) {
                 return $this->getCheckbox($item->id);
@@ -164,7 +164,7 @@ class AdsTable extends TableAbstract
             ],
             'ads.expired_at' => [
                 'title' => trans('plugins/ads::ads.expired_at'),
-                'type' => 'date',
+                'type' => 'datePicker',
             ],
         ];
     }

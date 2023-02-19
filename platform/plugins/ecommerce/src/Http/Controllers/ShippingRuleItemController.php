@@ -21,11 +21,9 @@ use Botble\Ecommerce\Repositories\Interfaces\ShippingRuleInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ShippingRuleItemInterface;
 use Botble\Ecommerce\Tables\ShippingRuleItemTable;
 use Exception;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Excel;
-use Throwable;
 
 class ShippingRuleItemController extends BaseController
 {
@@ -49,11 +47,6 @@ class ShippingRuleItemController extends BaseController
         $this->validateItemImport = $validateItemImport;
     }
 
-    /**
-     * @param ShippingRuleItemTable $dataTable
-     * @return Factory|View
-     * @throws Throwable
-     */
     public function index(ShippingRuleItemTable $dataTable)
     {
         page_title()->setTitle(trans('plugins/ecommerce::shipping.rule.item.name'));
@@ -61,12 +54,6 @@ class ShippingRuleItemController extends BaseController
         return $dataTable->renderTable();
     }
 
-    /**
-     * @param Request $request
-     * @param FormBuilder $formBuilder
-     * @param BaseHttpResponse $response
-     * @return string|BaseHttpResponse
-     */
     public function create(Request $request, FormBuilder $formBuilder, BaseHttpResponse $response)
     {
         if ($request->ajax() && ($shippingRuleId = $request->input('shipping_rule_id'))) {
@@ -85,11 +72,6 @@ class ShippingRuleItemController extends BaseController
         return $formBuilder->create(ShippingRuleItemForm::class)->renderForm();
     }
 
-    /**
-     * @param ShippingRuleItemRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function store(ShippingRuleItemRequest $request, BaseHttpResponse $response)
     {
         $ruleId = $request->input('shipping_rule_id');
@@ -102,25 +84,20 @@ class ShippingRuleItemController extends BaseController
 
         event(new CreatedContentEvent(SHIPPING_RULE_ITEM_MODULE_SCREEN_NAME, $request, $item));
 
+        $hasOperations = Auth::user()->hasAnyPermission(['ecommerce.shipping-rule-items.edit', 'ecommerce.shipping-rule-items.destroy']);
+
         return $response
             ->setPreviousUrl(route('ecommerce.shipping-rule-items.index'))
             ->setNextUrl(route('ecommerce.shipping-rule-items.edit', $item->id))
             ->setData([
                 'id' => $item->id,
                 'shipping_rule_id' => $rule->id,
-                'html' => view('plugins/ecommerce::shipping.items.table-item', compact('item'))->render(),
+                'html' => view('plugins/ecommerce::shipping.items.table-item', compact('item', 'hasOperations'))->render(),
             ])
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    /**
-     * @param int $id
-     * @param Request $request
-     * @param FormBuilder $formBuilder
-     * @param BaseHttpResponse $response
-     * @return string|BaseHttpResponse
-     */
-    public function edit($id, FormBuilder $formBuilder, Request $request, BaseHttpResponse $response)
+    public function edit(int $id, FormBuilder $formBuilder, Request $request, BaseHttpResponse $response)
     {
         $item = $this->itemRepository->findOrFail($id);
 
@@ -140,13 +117,7 @@ class ShippingRuleItemController extends BaseController
         return $formBuilder->create(ShippingRuleItemForm::class, ['model' => $item])->renderForm();
     }
 
-    /**
-     * @param int $id
-     * @param ShippingRuleItemRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function update($id, ShippingRuleItemRequest $request, BaseHttpResponse $response)
+    public function update(int $id, ShippingRuleItemRequest $request, BaseHttpResponse $response)
     {
         $item = $this->itemRepository->findOrFail($id);
         $request->merge([
@@ -159,23 +130,19 @@ class ShippingRuleItemController extends BaseController
 
         event(new UpdatedContentEvent(SHIPPING_RULE_ITEM_MODULE_SCREEN_NAME, $request, $item));
 
+        $hasOperations = Auth::user()->hasAnyPermission(['ecommerce.shipping-rule-items.edit', 'ecommerce.shipping-rule-items.destroy']);
+
         return $response
             ->setPreviousUrl(route('ecommerce.shipping-rule-items.index'))
             ->setData([
                 'id' => $item->id,
                 'shipping_rule_id' => $item->shipping_rule_id,
-                'html' => view('plugins/ecommerce::shipping.items.table-item', compact('item'))->render(),
+                'html' => view('plugins/ecommerce::shipping.items.table-item', compact('item', 'hasOperations'))->render(),
             ])
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param int $id
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function destroy(Request $request, $id, BaseHttpResponse $response)
+    public function destroy(Request $request, int $id, BaseHttpResponse $response)
     {
         try {
             $item = $this->itemRepository->findOrFail($id);
@@ -196,12 +163,6 @@ class ShippingRuleItemController extends BaseController
         }
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function deletes(Request $request, BaseHttpResponse $response)
     {
         $ids = $request->input('ids');
@@ -220,9 +181,6 @@ class ShippingRuleItemController extends BaseController
         return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
-    /**
-     * @return Factory|Application|View
-     */
     public function import()
     {
         page_title()->setTitle(trans('plugins/ecommerce::shipping.rule.item.bulk-import.menu'));
@@ -237,11 +195,6 @@ class ShippingRuleItemController extends BaseController
         return view('plugins/ecommerce::shipping.bulk-import.index', compact('data', 'headings', 'rules'));
     }
 
-    /**
-     * @param ShippingRuleItemImportRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function postImport(ShippingRuleItemImportRequest $request, BaseHttpResponse $response)
     {
         BaseHelper::maximumExecutionTimeAndMemoryLimit();
@@ -290,10 +243,6 @@ class ShippingRuleItemController extends BaseController
         return $response->setData($data)->setMessage($message . ' ' . $result);
     }
 
-    /**
-     * @param Request $request
-     * @return BinaryFileResponse
-     */
     public function downloadTemplate(Request $request)
     {
         $extension = $request->input('extension');
@@ -303,5 +252,43 @@ class ShippingRuleItemController extends BaseController
         $fileName = 'template_shipping_rule_items_import.' . $extension;
 
         return (new TemplateShippingRuleItemExport($extension))->download($fileName, $writeType, $contentType);
+    }
+
+    public function items($ruleId, Request $request, BaseHttpResponse $response)
+    {
+        $html = '';
+        $rule = $this->ruleRepository->findOrFail($ruleId);
+
+        $orderBy = $request->input('order_by');
+        $orderDir = $request->input('order_dir');
+        if ($orderBy) {
+            $fillable = array_merge($this->itemRepository->getModel()->getFillable(), ['id', 'created_at', 'updated_at']);
+            if (in_array($orderBy, $fillable)) {
+                if ($orderDir != 'DESC') {
+                    $orderDir = 'ASC';
+                }
+            } else {
+                $orderBy = '';
+            }
+        }
+        $perPage = (int) $request->input('per_page', 12);
+        $items = $this->itemRepository
+            ->getModel()
+            ->where('shipping_rule_id', $ruleId);
+
+        if ($orderBy) {
+            $items = $items->orderBy($orderBy, $orderDir);
+        }
+        if (! in_array($orderBy, ['created_at', 'id'])) {
+            $items = $items
+                ->orderBy('created_at', 'desc')
+                ->orderBy('id', 'desc');
+        }
+
+        $items = $items->paginate($perPage ?: 12);
+
+        $html = view('plugins/ecommerce::shipping.items.table', compact('items', 'rule') + ['total' => $items->total()])->render();
+
+        return $response->setData(compact('html'));
     }
 }

@@ -7,6 +7,9 @@ use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Enums\ShippingCodStatusEnum;
 use Botble\Ecommerce\Enums\ShippingStatusEnum;
+use Botble\Ecommerce\Events\ShippingStatusChanged;
+use Botble\Ecommerce\Http\Requests\UpdateShipmentCodStatusRequest;
+use Botble\Ecommerce\Http\Requests\UpdateShipmentStatusRequest;
 use Botble\Ecommerce\Repositories\Interfaces\OrderHistoryInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ShipmentHistoryInterface;
@@ -14,13 +17,9 @@ use Botble\Ecommerce\Repositories\Interfaces\ShipmentInterface;
 use Botble\Ecommerce\Tables\ShipmentTable;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use OrderHelper;
-use Throwable;
 
 class ShipmentController extends BaseController
 {
@@ -44,12 +43,6 @@ class ShipmentController extends BaseController
         $this->shipmentHistoryRepository = $shipmentHistoryRepository;
     }
 
-    /**
-     * @param ShipmentTable $dataTable
-     * @return View|JsonResponse
-     *
-     * @throws Throwable
-     */
     public function index(ShipmentTable $dataTable)
     {
         page_title()->setTitle(trans('plugins/ecommerce::shipping.shipments'));
@@ -57,11 +50,7 @@ class ShipmentController extends BaseController
         return $dataTable->renderTable();
     }
 
-    /**
-     * @param int $id
-     * @return Factory|View
-     */
-    public function edit($id)
+    public function edit(int $id)
     {
         Assets::addStylesDirectly('vendor/core/plugins/ecommerce/css/ecommerce.css')
             ->addScriptsDirectly('vendor/core/plugins/ecommerce/js/shipment.js');
@@ -72,28 +61,23 @@ class ShipmentController extends BaseController
         return view('plugins/ecommerce::shipments.edit', compact('shipment'));
     }
 
-    /**
-     * @param int $id
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function postUpdateStatus($id, Request $request, BaseHttpResponse $response)
+    public function postUpdateStatus(int $id, UpdateShipmentStatusRequest $request, BaseHttpResponse $response)
     {
         $shipment = $this->shipmentRepository->findOrFail($id);
-        $this->shipmentRepository->createOrUpdate(['status' => $request->input('status')], compact('id'));
+        $shipment->status = $request->input('status');
+        $shipment->save();
 
         $this->shipmentHistoryRepository->createOrUpdate([
             'action' => 'update_status',
             'description' => trans('plugins/ecommerce::shipping.changed_shipping_status', [
-                'status' => ShippingStatusEnum::getLabel($request->input('status')),
+                'status' => $shipment->status->label(),
             ]),
             'shipment_id' => $id,
             'order_id' => $shipment->order_id,
             'user_id' => Auth::id() ?? 0,
         ]);
 
-        switch ($request->input('status')) {
+        switch ($shipment->status) {
             case ShippingStatusEnum::DELIVERED:
                 $shipment->date_shipped = Carbon::now();
                 $shipment->save();
@@ -113,29 +97,25 @@ class ShipmentController extends BaseController
                 break;
         }
 
+        event(new ShippingStatusChanged($shipment));
+
         return $response->setMessage(trans('plugins/ecommerce::shipping.update_shipping_status_success'));
     }
 
-    /**
-     * @param int $id
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function postUpdateCodStatus($id, Request $request, BaseHttpResponse $response)
+    public function postUpdateCodStatus(int $id, UpdateShipmentCodStatusRequest $request, BaseHttpResponse $response)
     {
         $shipment = $this->shipmentRepository->findOrFail($id);
+        $shipment->cod_status = $request->input('status');
+        $shipment->save();
 
-        $this->shipmentRepository->createOrUpdate(['cod_status' => $request->input('status')], compact('id'));
-
-        if ($request->input('status') == ShippingCodStatusEnum::COMPLETED) {
+        if ($shipment->cod_status == ShippingCodStatusEnum::COMPLETED) {
             OrderHelper::confirmPayment($shipment->order);
         }
 
         $this->shipmentHistoryRepository->createOrUpdate([
             'action' => 'update_cod_status',
             'description' => trans('plugins/ecommerce::shipping.updated_cod_status_by', [
-                'status' => ShippingCodStatusEnum::getLabel($request->input('status')),
+                'status' => $shipment->cod_status->label(),
             ]),
             'shipment_id' => $id,
             'order_id' => $shipment->order_id,
@@ -145,13 +125,7 @@ class ShipmentController extends BaseController
         return $response->setMessage(trans('plugins/ecommerce::shipping.update_cod_status_success'));
     }
 
-    /**
-     * @param int $id
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function update($id, Request $request, BaseHttpResponse $response)
+    public function update(int $id, Request $request, BaseHttpResponse $response)
     {
         $shipment = $this->shipmentRepository->findOrFail($id);
 
@@ -172,12 +146,7 @@ class ShipmentController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param int $id
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function destroy($id, BaseHttpResponse $response)
+    public function destroy(int $id, BaseHttpResponse $response)
     {
         try {
             $review = $this->shipmentRepository->findOrFail($id);
@@ -191,12 +160,6 @@ class ShipmentController extends BaseController
         }
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function deletes(Request $request, BaseHttpResponse $response)
     {
         $ids = $request->input('ids');

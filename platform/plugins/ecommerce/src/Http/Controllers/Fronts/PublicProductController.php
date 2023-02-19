@@ -10,15 +10,18 @@ use SeoHelper;
 use Throwable;
 use BaseHelper;
 use SlugHelper;
+use Carbon\Carbon;
 use EcommerceHelper;
 use ProductCategoryHelper;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use Botble\Base\Supports\Helper;
+use Botble\Ecommerce\Events\ProductViewed;
 use Botble\Ecommerce\Models\Brand;
 use Botble\SeoHelper\SeoOpenGraph;
 use Illuminate\Support\Facades\URL;
 use Botble\Ecommerce\Models\Product;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Botble\Base\Enums\BaseStatusEnum;
 use Illuminate\Http\RedirectResponse;
@@ -77,20 +80,13 @@ class PublicProductController
         $this->enquiryRepository = $enquiryRepository;
     }
 
-    /**
-     * @param Request $request
-     * @param GetProductService $productService
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse|Response
-     * @throws Throwable
-     */
     public function getProducts(Request $request, GetProductService $productService, BaseHttpResponse $response)
     {
         if (! EcommerceHelper::productFilterParamsValidated($request)) {
             return $response->setNextUrl(route('public.products'));
         }
 
-        $query = $request->input('q');
+        $query = BaseHelper::stringify($request->input('q'));
 
         $with = [
             'slugable',
@@ -122,17 +118,18 @@ class PublicProductController
                 'plugins/ecommerce::themes.search'
             )->render();
         }
-       
+
+
+        Theme::breadcrumb()
+            ->add(__('Home'), route('public.index'))
+            ->add(__('Products'), route('public.products'));
+
         $products = $productService->getProduct($request, null, null, $with,[],$condition);
         // dd($condition,$products);
         // die;
         if ($request->ajax()) {
             return $this->ajaxFilterProductsResponse($products, $request, $response);
         }
-
-        Theme::breadcrumb()
-            ->add(__('Home'), route('public.index'))
-            ->add(__('Products'), route('public.products'));
 
         SeoHelper::setTitle(__('Products'))->setDescription(__('Products'));
 
@@ -207,11 +204,6 @@ class PublicProductController
         // )->render();
     }
 
-    /**
-     * @param string $slug
-     * @param Request $request
-     * @return Response|RedirectResponse
-     */
     public function getProduct($slug, Request $request)
     {
         $slug = $this->slugRepository->getFirstBy([
@@ -243,9 +235,8 @@ class PublicProductController
                     'categories',
                     'categories.slugable',
                     'frequentlyBoughtTogether',
-                    'options' => function ($query) {
-                        return $query->with('values');
-                    },
+                    'options',
+                    'options.values',
                 ],
             ], EcommerceHelper::withReviewsParams()));
 
@@ -271,8 +262,11 @@ class PublicProductController
 
         SeoHelper::meta()->setUrl($product->url);
 
-        Helper::handleViewCount($product, 'viewed_product');
-        EcommerceHelper::handleCustomerRecentlyViewedProduct($product);
+        if (Helper::handleViewCount($product, 'viewed_product')) {
+            event(new ProductViewed($product, Carbon::now()));
+
+            EcommerceHelper::handleCustomerRecentlyViewedProduct($product);
+        }
 
         Theme::breadcrumb()
             ->add(__('Home'), route('public.index'))
@@ -368,14 +362,6 @@ class PublicProductController
         )->render();
     }
 
-    /**
-     * @param string $slug
-     * @param Request $request
-     * @param ProductTagInterface $tagRepository
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse|RedirectResponse|Response
-     * @throws Throwable
-     */
     public function getProductTag(
         $slug,
         Request $request,
@@ -462,15 +448,6 @@ class PublicProductController
         )->render();
     }
 
-    /**
-     * @param string $slug
-     * @param Request $request
-     * @param ProductCategoryInterface $categoryRepository
-     * @param GetProductService $getProductService
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse|RedirectResponse|Response
-     * @throws Throwable
-     */
     public function getProductCategory(
         $slug,
         Request $request,
@@ -523,11 +500,22 @@ class PublicProductController
             $with = array_merge($with, ['store', 'store.slugable']);
         }
 
-        $request->merge(['categories' => array_merge([$category->id], $category->activeChildren->pluck('id')->all())]);
+        $request->merge([
+            'categories' => array_merge(
+                [$category->id],
+                $category->activeChildren->pluck('id')->all()
+            ),
+        ]);
+
         $condition = ['is_enquiry' => 0];
         $products = $getProductService->getProduct($request, null, null, $with,$condition);
 
-        $request->request->remove('categories');
+        $request->merge([
+            'categories' => array_merge(
+                $category->parents->pluck('id')->all(),
+                $request->input('categories')
+            ),
+        ]);
 
         SeoHelper::setTitle($category->name)->setDescription($category->description);
 
@@ -558,7 +546,7 @@ class PublicProductController
         do_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, PRODUCT_CATEGORY_MODULE_SCREEN_NAME, $category);
 
         if ($request->ajax()) {
-            return $this->ajaxFilterProductsResponse($products, $request, $response);
+            return $this->ajaxFilterProductsResponse($products, $request, $response, $category);
         }
 
         return Theme::scope(
@@ -568,12 +556,6 @@ class PublicProductController
         )->render();
     }
 
-    /**
-     * @param int $id
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function getProductVariation($id, Request $request, BaseHttpResponse $response)
     {
         $attributes = $request->input('attributes', []);
@@ -744,14 +726,6 @@ class PublicProductController
             ->setData(new ProductVariationResource($product));
     }
 
-    /**
-     * @param string $slug
-     * @param Request $request
-     * @param GetProductService $getProductService
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse|RedirectResponse|Response
-     * @throws Throwable
-     */
     public function getBrand($slug, Request $request, GetProductService $getProductService, BaseHttpResponse $response)
     {
         $slug = $this->slugRepository->getFirstBy([
@@ -817,14 +791,7 @@ class PublicProductController
             ->render();
     }
 
-    /**
-     * @param mixed $products
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Throwable
-     */
-    protected function ajaxFilterProductsResponse($products, Request $request, BaseHttpResponse $response)
+    protected function ajaxFilterProductsResponse($products, Request $request, BaseHttpResponse $response, ?ProductCategory $category = null)
     {
         $total = $products->total();
         $message = $total > 1 ? __(':total Products found', compact('total')) : __(
@@ -847,6 +814,17 @@ class PublicProductController
 
         if (view()->exists($categoryTree)) {
             $categoriesRequest = $request->input('categories', []);
+
+            if ($category && ! $category->activeChildren->count() && $category->parent_id) {
+                $category = $category->parent()->with(['activeChildren'])->first();
+
+                if ($category) {
+                    $categoriesRequest = array_merge(
+                        [$category->id, $category->parent_id],
+                        $category->activeChildren->pluck('id')->all()
+                    );
+                }
+            }
 
             if ($categoriesRequest) {
                 $categories = $this->productCategoryRepository
@@ -877,38 +855,40 @@ class PublicProductController
             ->setMessage($message);
     }
 
-    /**
-     * @param Request $request
-     * @param OrderInterface $orderRepository
-     * @return Response
-     */
     public function getOrderTracking(Request $request, OrderInterface $orderRepository)
     {
         if (! EcommerceHelper::isOrderTrackingEnabled()) {
             abort(404);
         }
 
-        $code = BaseHelper::removeSpecialCharacters(str_replace('#', '', $request->input('order_id')));
+        $code = $request->input('order_id');
+        $email = $request->input('email');
 
-        SeoHelper::setTitle(__('Order tracking :code', ['code' => $code ? ' #' . $code : '']));
+        $order = $orderRepository
+            ->getModel()
+            ->where(function (Builder $query) use ($code) {
+                $query
+                    ->where('ec_orders.code', $code)
+                    ->orWhere('ec_orders.code', '#' . $code);
+            })
+            ->where(function (Builder $query) use ($email) {
+                $query
+                    ->whereHas('address', function ($subQuery) use ($email) {
+                        return $subQuery->where('email', $email);
+                    })
+                    ->orWhereHas('user', function ($subQuery) use ($email) {
+                        return $subQuery->where('email', $email);
+                    });
+            })
+            ->with(['address', 'payment', 'products'])
+            ->select('ec_orders.*')
+            ->first();
+
+        SeoHelper::setTitle(__('Order tracking :code', ['code' => $code]));
 
         Theme::breadcrumb()
             ->add(__('Home'), route('public.index'))
-            ->add(__('Order tracking :code', ['code' => $code ? ' #' . $code : '']), route('public.orders.tracking', $code));
-
-        $orderId = get_order_id_from_order_code('#' . $code);
-
-        $order = null;
-        if ($orderId) {
-            $order = $orderRepository
-                ->getModel()
-                ->where('ec_orders.id', $orderId)
-                ->join('ec_order_addresses', 'ec_order_addresses.order_id', '=', 'ec_orders.id')
-                ->where('ec_order_addresses.email', $request->input('email'))
-                ->with(['address', 'payment', 'products'])
-                ->select('ec_orders.*')
-                ->first();
-        }
+            ->add(__('Order tracking :code', ['code' => $code]), route('public.orders.tracking', $code));
 
         return Theme::scope('ecommerce.order-tracking', compact('order'), 'plugins/ecommerce::themes.order-tracking')
             ->render();

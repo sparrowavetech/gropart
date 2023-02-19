@@ -11,7 +11,7 @@ use Illuminate\Support\Arr;
 
 class RoleForm extends FormAbstract
 {
-    public function buildForm()
+    public function buildForm(): void
     {
         Assets::addStyles(['jquery-ui', 'jqueryTree'])
             ->addScripts(['jquery-ui', 'jqueryTree'])

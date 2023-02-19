@@ -120,6 +120,22 @@
 
                         <div class="form-group mb-3">
                             <label class="text-title-field"
+                                   for="order_auto_confirmed">{{ trans('plugins/ecommerce::ecommerce.setting.enable_order_auto_confirmed') }}
+                            </label>
+                            <label class="me-2">
+                                <input type="radio" name="order_auto_confirmed"
+                                       value="1"
+                                       @if (EcommerceHelper::isOrderAutoConfirmedEnabled()) checked @endif>{{ trans('core/setting::setting.general.yes') }}
+                            </label>
+                            <label>
+                                <input type="radio" name="order_auto_confirmed"
+                                       value="0"
+                                       @if (!EcommerceHelper::isOrderAutoConfirmedEnabled()) checked @endif>{{ trans('core/setting::setting.general.no') }}
+                            </label>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="text-title-field"
                                    for="review_enabled">{{ trans('plugins/ecommerce::ecommerce.setting.enable_review') }}
                             </label>
                             <label class="me-2">
@@ -149,6 +165,19 @@
                             <div class="form-group mb-3">
                                 <label class="text-title-field" for="review_max_file_number">{{ trans('plugins/ecommerce::ecommerce.setting.review.max_file_number') }}</label>
                                 <input type="number" min="1" max="100" name="review_max_file_number" class="next-input input-mask-number next-input--invisible" value="{{ EcommerceHelper::reviewMaxFileNumber() }}">
+                            </div>
+                            <div class="form-group mb-3">
+                                <label class="text-title-field"
+                                       for="only_allow_customers_purchased_to_review">{{ trans('plugins/ecommerce::ecommerce.setting.only_allow_customers_purchased_to_review') }}
+                                </label>
+                                <label class="me-2">
+                                    <input type="radio" name="only_allow_customers_purchased_to_review"value="1"
+                                        @if (EcommerceHelper::onlyAllowCustomersPurchasedToReview()) checked @endif>{{ trans('core/setting::setting.general.yes') }}
+                                </label>
+                                <label>
+                                    <input type="radio" name="only_allow_customers_purchased_to_review"value="0"
+                                        @if (!EcommerceHelper::onlyAllowCustomersPurchasedToReview()) checked @endif>{{ trans('core/setting::setting.general.no') }}
+                                </label>
                             </div>
                         </div>
 

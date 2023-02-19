@@ -4,6 +4,7 @@ namespace Botble\Revision;
 
 use DateTime;
 use Exception;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
@@ -14,58 +15,28 @@ use Illuminate\Support\Facades\DB;
  */
 trait RevisionableTrait
 {
-    /**
-     * @var array
-     */
-    protected $originalData = [];
+    protected array $originalData = [];
 
-    /**
-     * @var array
-     */
-    protected $updatedData = [];
+    protected array $updatedData = [];
 
-    /**
-     * @var boolean
-     */
-    protected $updating = false;
+    protected bool $updating = false;
 
-    /**
-     * @var array
-     */
-    protected $dontKeep = [];
+    protected array $dontKeep = [];
 
-    /**
-     * @var array
-     */
-    protected $doKeep = [];
+    protected array $doKeep = [];
 
-    /**
-     * Keeps the list of values that have been updated
-     *
-     * @var array
-     */
-    protected $dirtyData = [];
+    protected array $dirtyData = [];
 
-    /**
-     * Ensure that the bootRevisionableTrait is called only
-     * if the current installation is a laravel 4 installation
-     * Laravel 5 will call bootRevisionableTrait() automatically
-     */
-    public static function boot()
-    {
-        parent::boot();
+    protected array $revisionFormattedFields = [];
 
-        if (! method_exists(get_called_class(), 'bootTraits')) {
-            static::bootRevisionableTrait();
-        }
-    }
+    protected array $revisionFormattedFieldNames = [];
 
     /**
      * Create the event listeners for the saving and saved events
      * This lets us save revisions whenever a save is made, no matter the
      * http method.
      */
-    public static function bootRevisionableTrait()
+    public static function bootRevisionableTrait(): void
     {
         static::saving(function ($model) {
             $model->preSave();
@@ -87,12 +58,8 @@ trait RevisionableTrait
 
     /**
      * Generates a list of the last $limit revisions made to any objects of the class it is being called from.
-     *
-     * @param int $limit
-     * @param string $order
-     * @return mixed
      */
-    public static function classRevisionHistory($limit = 100, $order = 'desc')
+    public static function classRevisionHistory(int $limit = 100, string $order = 'desc')
     {
         return Revision::where('revisionable_type', get_called_class())
             ->orderBy('updated_at', $order)->limit($limit)->get();
@@ -100,10 +67,8 @@ trait RevisionableTrait
 
     /**
      * Invoked before a model is saved. Return false to abort the operation.
-     *
-     * @return bool
      */
-    public function preSave()
+    public function preSave(): bool
     {
         if (! isset($this->revisionEnabled) || $this->revisionEnabled) {
             // if there's no revisionEnabled. Or if there is, if it's true
@@ -117,7 +82,7 @@ trait RevisionableTrait
                 if (gettype($val) == 'object' && ! method_exists($val, '__toString')) {
                     unset($this->originalData[$key]);
                     unset($this->updatedData[$key]);
-                    array_push($this->dontKeep, $key);
+                    $this->dontKeep[] = $key;
                 }
             }
 
@@ -143,11 +108,8 @@ trait RevisionableTrait
 
     /**
      * Called after a model is successfully saved.
-     *
-     * @return void
-     * @throws Exception
      */
-    public function postSave()
+    public function postSave(): void
     {
         if (isset($this->historyLimit) && $this->revisionHistory()->count() >= $this->historyLimit) {
             $limitReached = true;
@@ -155,11 +117,7 @@ trait RevisionableTrait
             $limitReached = false;
         }
 
-        if (isset($this->revisionCleanup)) {
-            $revisionCleanup = $this->revisionCleanup;
-        } else {
-            $revisionCleanup = false;
-        }
+        $revisionCleanup = $this->revisionCleanup ?? false;
 
         // check if the model already exists
         if (((! isset($this->revisionEnabled) || $this->revisionEnabled) && $this->updating) && (! $limitReached || $revisionCleanup)) {
@@ -184,7 +142,7 @@ trait RevisionableTrait
 
             if (count($revisions) > 0) {
                 if ($limitReached && $revisionCleanup) {
-                    $toDelete = $this->revisionHistory()->orderBy('id', 'asc')->limit(count($revisions))->get();
+                    $toDelete = $this->revisionHistory()->orderBy('id')->limit(count($revisions))->get();
                     foreach ($toDelete as $delete) {
                         $delete->delete();
                     }
@@ -196,21 +154,18 @@ trait RevisionableTrait
         }
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
-     */
-    public function revisionHistory()
+    public function revisionHistory(): MorphMany
     {
         return $this->morphMany(Revision::class, 'revisionable');
     }
 
     /**
-     * Get all of the changes that have been made, that are also supposed
+     * Get all the changes that have been made, that are also supposed
      * to have their changes recorded
      *
      * @return array fields with new data, that should be recorded
      */
-    protected function changedRevisionableFields()
+    protected function changedRevisionableFields(): array
     {
         $changesToRecord = [];
         foreach ($this->dirtyData as $key => $value) {
@@ -233,12 +188,8 @@ trait RevisionableTrait
 
     /**
      * Check if this field should have a revision kept
-     *
-     * @param string $key
-     *
-     * @return bool
      */
-    protected function isRevisionable($key)
+    protected function isRevisionable(string $key): bool
     {
         // If the field is explicitly revisionable, then return true.
         // If it's explicitly not revisionable, return false.
@@ -258,13 +209,13 @@ trait RevisionableTrait
     /**
      * Attempt to find the user id of the currently logged in user
      **/
-    public function getSystemUserId()
+    public function getSystemUserId(): int|string|null
     {
         try {
             if (Auth::check()) {
                 return Auth::id();
             }
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return null;
         }
 
@@ -273,9 +224,8 @@ trait RevisionableTrait
 
     /**
      * Called after record successfully created
-     * @throws Exception
      */
-    public function postCreate()
+    public function postCreate(): bool
     {
         // Check if we should store creations in our revision history
         // Set this value to true in your model if you want to
@@ -306,9 +256,8 @@ trait RevisionableTrait
 
     /**
      * If soft deletes are enabled, store the deleted time
-     * @throws Exception
      */
-    public function postDelete()
+    public function postDelete(): void
     {
         if ((! isset($this->revisionEnabled) || $this->revisionEnabled)
             && $this->isSoftDelete()
@@ -332,10 +281,8 @@ trait RevisionableTrait
 
     /**
      * Check if soft deletes are currently enabled on this model
-     *
-     * @return bool
      */
-    protected function isSoftDelete()
+    protected function isSoftDelete(): bool
     {
         // check flag variable used in laravel 4.2+
         if (isset($this->forceDeleting)) {
@@ -350,18 +297,12 @@ trait RevisionableTrait
         return false;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getRevisionFormattedFields()
+    public function getRevisionFormattedFields(): ?array
     {
         return $this->revisionFormattedFields;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getRevisionFormattedFieldNames()
+    public function getRevisionFormattedFieldNames(): ?array
     {
         return $this->revisionFormattedFieldNames;
     }
@@ -375,7 +316,7 @@ trait RevisionableTrait
      *
      * @return string an identifying name for the model
      */
-    public function identifiableName()
+    public function identifiableName(): string
     {
         return $this->getKey();
     }
@@ -389,7 +330,7 @@ trait RevisionableTrait
      *
      * @return string an identifying name for the model
      */
-    public function getRevisionNullString()
+    public function getRevisionNullString(): string
     {
         return $this->revisionNullString ?? 'nothing';
     }
@@ -402,7 +343,7 @@ trait RevisionableTrait
      *
      * @return string an identifying name for the model
      */
-    public function getRevisionUnknownString()
+    public function getRevisionUnknownString(): string
     {
         return $this->revisionUnknownString ?? 'unknown';
     }
@@ -413,10 +354,8 @@ trait RevisionableTrait
      * PHP bug https://bugs.php.net/bug.php?id=42030
      *
      * @param mixed $field
-     *
-     * @return void
      */
-    public function disableRevisionField($field)
+    public function disableRevisionField($field): void
     {
         if (! isset($this->dontKeepRevisionOf)) {
             $this->dontKeepRevisionOf = [];

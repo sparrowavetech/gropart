@@ -19,7 +19,7 @@ class ThemeServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function register()
+    public function register(): void
     {
         $this->setNamespace('packages/theme')
             ->loadHelpers();
@@ -36,7 +36,7 @@ class ThemeServiceProvider extends ServiceProvider
         ]);
     }
 
-    public function boot()
+    public function boot(): void
     {
         $this
             ->loadAndPublishConfigurations(['general', 'permissions'])

@@ -530,7 +530,7 @@ class AssetContainer
     protected function attributeElement(string $key, ?string $value): ?string
     {
         if (is_numeric($key)) {
-            $key = $value;
+            return $value;
         }
 
         if (! empty($value)) {

@@ -7,9 +7,6 @@ use BaseHelper;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\PluginManagement\Services\PluginService;
 use Exception;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
@@ -17,11 +14,6 @@ use Illuminate\Support\Facades\File;
 
 class PluginManagementController extends Controller
 {
-    /**
-     * Show all plugins in system
-     * @return Application|Factory
-     * @throws FileNotFoundException
-     */
     public function index()
     {
         page_title()->setTitle(trans('packages/plugin-management::plugin.plugins'));
@@ -69,14 +61,6 @@ class PluginManagementController extends Controller
         return view('packages/plugin-management::index', compact('list'));
     }
 
-    /**
-     * Activate or Deactivate plugin
-     *
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @param PluginService $pluginService
-     * @return BaseHttpResponse
-     */
     public function update(Request $request, BaseHttpResponse $response, PluginService $pluginService)
     {
         $plugin = strtolower($request->input('name'));
@@ -144,15 +128,7 @@ class PluginManagementController extends Controller
         }
     }
 
-    /**
-     * Remove plugin
-     *
-     * @param string $plugin
-     * @param BaseHttpResponse $response
-     * @param PluginService $pluginService
-     * @return BaseHttpResponse
-     */
-    public function destroy($plugin, BaseHttpResponse $response, PluginService $pluginService)
+    public function destroy(string $plugin, BaseHttpResponse $response, PluginService $pluginService)
     {
         $plugin = strtolower($plugin);
 

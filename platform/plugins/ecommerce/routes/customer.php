@@ -50,6 +50,12 @@ Route::group(
                     'uses' => 'CustomerController@postCreateCustomerWhenCreatingOrder',
                     'permission' => ['customers.index', 'orders.index'],
                 ]);
+
+                Route::post('verify-email/{id}', [
+                    'as' => 'verify-email',
+                    'uses' => 'CustomerController@verifyEmail',
+                    'permission' => 'customers.index',
+                ]);
             });
         });
     }
@@ -224,6 +230,11 @@ if (defined('THEME_MODULE_SCREEN_NAME')) {
                 Route::get('{id}', 'InvoiceController@show')->name('show');
                 Route::get('{id}/generate-invoice', 'InvoiceController@getGenerateInvoice')->name('generate_invoice');
             });
+
+            Route::get('product-reviews', [
+                'as' => 'product-reviews',
+                'uses' => 'PublicController@getProductReviews',
+            ]);
         });
     });
 }

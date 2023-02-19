@@ -1,6 +1,8 @@
 import {RecentItems} from '../Config/MediaConfig';
 import {Helpers} from '../Helpers/Helpers';
 import {MessageService} from './MessageService';
+import Cropper from 'cropperjs';
+import scrollspy from "bootstrap/js/src/scrollspy";
 
 export class ActionsService {
     static handleDropdown() {
@@ -33,6 +35,63 @@ export class ActionsService {
             Helpers.storeRecentItems();
         } else {
             this.handleGlobalAction('download');
+        }
+    }
+
+    static renderCropImage() {
+        const html = $('#rv_media_crop_image').html()
+        const modal = $('#modal_crop_image .crop-image').empty()
+        const item = Helpers.getSelectedItems()[0]
+        const form = $('#modal_crop_image .form-crop')
+        let cropData;
+
+        const el = html.replace(/__src__/gi, item.full_url)
+        modal.append(el)
+
+        const image = modal.find('img')[0]
+
+        const options = {
+            minContainerWidth: 550,
+            minContainerHeight: 550,
+            dragMode: 'move',
+            crop(event) {
+                cropData = event.detail
+                form.find('input[name="image_id"]').val(item.id)
+                form.find('input[name="crop_data"]').val(JSON.stringify(cropData))
+                setHeight(cropData.height)
+                setWidth(cropData.width)
+            }
+        }
+        let cropper = new Cropper(image, options)
+
+        form.find('#aspectRatio').on('click', function () {
+            cropper.destroy()
+            if ($(this).is(':checked')) {
+                options.aspectRatio = cropData.width/cropData.height
+            } else {
+                options.aspectRatio = null
+            }
+            cropper = new Cropper(image, options)
+        })
+
+        form.find('#dataHeight').on('change', function () {
+            cropData.height = parseFloat($(this).val())
+            cropper.setData(cropData)
+            setHeight(cropData.height)
+        })
+
+        form.find('#dataWidth').on('change', function () {
+            cropData.width = parseFloat($(this).val())
+            cropper.setData(cropData)
+            setWidth(cropData.width)
+        })
+
+        const setHeight = (height) => {
+            form.find('#dataHeight').val(parseInt(height))
+        }
+
+        const setWidth = (width) => {
+            form.find('#dataWidth').val(parseInt(width))
         }
     }
 
@@ -75,6 +134,9 @@ export class ActionsService {
             case 'preview':
                 ActionsService.handlePreview();
                 break;
+            case 'crop':
+                $('#modal_crop_image').modal('show').find('form.rv-form').data('action', type);
+                break;
             case 'trash':
                 $('#modal_trash_items').modal('show').find('form.rv-form').data('action', type);
                 break;
@@ -85,16 +147,18 @@ export class ActionsService {
                 $('#modal_empty_trash').modal('show').find('form.rv-form').data('action', type);
                 break;
             case 'download':
-                let downloadLink = RV_MEDIA_URL.download;
-                let count = 0;
+                let files = []
                 _.each(Helpers.getSelectedItems(), value => {
                     if (!_.includes(Helpers.getConfigs().denied_download, value.mime_type)) {
-                        downloadLink += (count === 0 ? '?' : '&') + 'selected[' + count + '][is_folder]=' + value.is_folder + '&selected[' + count + '][id]=' + value.id;
-                        count++;
+                        files.push({
+                            id: value.id,
+                            is_folder: value.is_folder,
+                        })
                     }
                 });
-                if (downloadLink !== RV_MEDIA_URL.download) {
-                    window.open(downloadLink, '_blank');
+
+                if (files.length) {
+                    ActionsService.handleDownload(files)
                 } else {
                     MessageService.showMessage('error', RV_MEDIA_CONFIG.translations.download.error, RV_MEDIA_CONFIG.translations.message.error_header);
                 }
@@ -169,6 +233,9 @@ export class ActionsService {
             actionsList.basic = _.reject(actionsList.basic, item => {
                 return item.action === 'preview';
             });
+            actionsList.basic = _.reject(actionsList.basic, item => {
+                return item.action === 'crop';
+            });
             actionsList.file = _.reject(actionsList.file, item => {
                 return item.action === 'copy_link';
             });
@@ -220,6 +287,16 @@ export class ActionsService {
             });
         }
 
+        let canCropImage = _.filter(selectedFiles, function (value) {
+            return value.type === 'image';
+        }).length;
+
+        if (! canCropImage) {
+            actionsList.basic = _.reject(actionsList.basic, item => {
+                return item.action === 'crop';
+            });
+        }
+
         if (selectedFiles.length > 0) {
             if (!_.includes(RV_MEDIA_CONFIG.permissions, 'files.create')) {
                 actionsList.file = _.reject(actionsList.file, item => {
@@ -248,6 +325,12 @@ export class ActionsService {
             if (!_.includes(RV_MEDIA_CONFIG.permissions, 'files.favorite')) {
                 actionsList.other = _.reject(actionsList.other, item => {
                     return _.includes(['favorite', 'remove_favorite'], item.action);
+                });
+            }
+
+            if (selectedFiles.length > 1) {
+                actionsList.basic = _.reject(actionsList.basic, item => {
+                    return item.action === 'crop';
                 });
             }
         }
@@ -293,5 +376,41 @@ export class ActionsService {
                 initializedItem++;
             }
         });
+    }
+
+    static handleDownload(files) {
+        const html = $('.media-download-popup')
+        let downloadTimeout = null
+        $.ajax({
+            url: RV_MEDIA_URL.download,
+            method: 'POST',
+            data: {selected: files},
+            xhrFields: {
+                responseType: 'blob'
+            },
+            beforeSend: () => {
+                downloadTimeout = setTimeout(() => {
+                    html.show()
+                }, 1000)
+            },
+            success: (response, status, xhr) => {
+                const downloadUrl = URL.createObjectURL(response);
+                const a = document.createElement('a');
+                const fileName = xhr.getResponseHeader('Content-Disposition').split('filename=')[1].split(';')[0];
+                a.href = downloadUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click()
+                a.remove()
+                window.URL.revokeObjectURL(downloadUrl);
+            },
+            complete: () => {
+                html.hide()
+                clearTimeout(downloadTimeout)
+            },
+            error: (data) => {
+                MessageService.handleError(data)
+            }
+        })
     }
 }

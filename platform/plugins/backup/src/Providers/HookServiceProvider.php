@@ -6,7 +6,7 @@ use Illuminate\Support\ServiceProvider;
 
 class HookServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         if (app()->environment('demo')) {
             add_filter(DASHBOARD_FILTER_ADMIN_NOTIFICATIONS, [$this, 'registerAdminAlert'], 5);

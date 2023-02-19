@@ -16,15 +16,16 @@ class BackupCreateCommand extends Command
     public function handle(Backup $backupService): int
     {
         try {
-            $this->info('Generating backup...');
+            $this->components->info('Generating backup...');
+
             $data = $backupService->createBackupFolder($this->argument('name'), $this->option('description'));
             $backupService->backupDb();
             $backupService->backupFolder(Storage::path(''));
             do_action(BACKUP_ACTION_AFTER_BACKUP, BACKUP_MODULE_SCREEN_NAME, request());
 
-            $this->info('Done! The backup folder is located in ' . $backupService->getBackupPath($data['key']) . '!');
+            $this->components->info('Done! The backup folder is located in ' . $backupService->getBackupPath($data['key']) . '!');
         } catch (Exception $exception) {
-            $this->error($exception->getMessage());
+            $this->components->error($exception->getMessage());
         }
 
         return self::SUCCESS;

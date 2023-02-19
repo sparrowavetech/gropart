@@ -10,12 +10,6 @@ use Illuminate\Routing\Controller;
 
 class PaypalController extends Controller
 {
-    /**
-     * @param PayPalPaymentCallbackRequest $request
-     * @param PayPalPaymentService $payPalPaymentService
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function getCallback(
         PayPalPaymentCallbackRequest $request,
         PayPalPaymentService $payPalPaymentService,

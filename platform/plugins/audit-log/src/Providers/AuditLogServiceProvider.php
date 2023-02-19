@@ -21,7 +21,7 @@ class AuditLogServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function register()
+    public function register(): void
     {
         $this->app->bind(AuditLogInterface::class, function () {
             return new AuditLogCacheDecorator(new AuditLogRepository(new AuditHistory()));
@@ -30,7 +30,7 @@ class AuditLogServiceProvider extends ServiceProvider
         AliasLoader::getInstance()->alias('AuditLog', AuditLogFacade::class);
     }
 
-    public function boot()
+    public function boot(): void
     {
         $this->app->register(EventServiceProvider::class);
         $this->app->register(CommandServiceProvider::class);

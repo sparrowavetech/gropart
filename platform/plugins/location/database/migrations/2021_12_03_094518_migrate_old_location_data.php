@@ -2,11 +2,8 @@
 
 use Botble\Language\Models\LanguageMeta;
 use Botble\Location\Models\City;
-use Botble\Location\Models\CityTranslation;
 use Botble\Location\Models\Country;
-use Botble\Location\Models\CountryTranslation;
 use Botble\Location\Models\State;
-use Botble\Location\Models\StateTranslation;
 use Illuminate\Database\Migrations\Migration;
 
 return new class () extends Migration {
@@ -49,7 +46,7 @@ return new class () extends Migration {
                     continue;
                 }
 
-                CityTranslation::insertOrIgnore([
+                DB::table('cities_translations')->insertOrIgnore([
                     'cities_id' => $originalId,
                     'lang_code' => $item->lang_meta_code,
                     'name' => $originalItem->name,
@@ -82,7 +79,7 @@ return new class () extends Migration {
                     continue;
                 }
 
-                StateTranslation::insertOrIgnore([
+                DB::table('states_translations')->insertOrIgnore([
                     'states_id' => $originalId,
                     'lang_code' => $item->lang_meta_code,
                     'name' => $originalItem->name,
@@ -114,7 +111,7 @@ return new class () extends Migration {
                     continue;
                 }
 
-                CountryTranslation::insertOrIgnore([
+                DB::table('countries_translations')->insertOrIgnore([
                     'countries_id' => $originalId,
                     'lang_code' => $item->lang_meta_code,
                     'name' => $originalItem->name,
@@ -130,9 +127,15 @@ return new class () extends Migration {
             DB::statement('CREATE TABLE IF NOT EXISTS language_meta_backup LIKE language_meta');
             DB::statement('TRUNCATE TABLE language_meta_backup');
 
-            DB::table('language_meta_backup')->insert(LanguageMeta::where('reference_type', State::class)->get()->toArray());
-            DB::table('language_meta_backup')->insert(LanguageMeta::where('reference_type', City::class)->get()->toArray());
-            DB::table('language_meta_backup')->insert(LanguageMeta::where('reference_type', Country::class)->get()->toArray());
+            DB::table('language_meta_backup')->insert(
+                LanguageMeta::where('reference_type', State::class)->get()->toArray()
+            );
+            DB::table('language_meta_backup')->insert(
+                LanguageMeta::where('reference_type', City::class)->get()->toArray()
+            );
+            DB::table('language_meta_backup')->insert(
+                LanguageMeta::where('reference_type', Country::class)->get()->toArray()
+            );
 
             LanguageMeta::where('reference_type', State::class)->delete();
             LanguageMeta::where('reference_type', City::class)->delete();

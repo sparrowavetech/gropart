@@ -7,12 +7,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class () extends Migration {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         if (! Schema::hasColumn('ec_orders', 'code')) {
             Schema::table('ec_orders', function (Blueprint $table) {
@@ -37,12 +32,7 @@ return new class () extends Migration {
         }
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('ec_orders', function (Blueprint $table) {
             $table->dropColumn('code');

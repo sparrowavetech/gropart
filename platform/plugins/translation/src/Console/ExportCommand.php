@@ -15,14 +15,14 @@ class ExportCommand extends Command
         $group = $this->argument('group');
 
         if (empty($group)) {
-            $this->warn('You must either specify a group argument');
+            $this->components->warn('You must either specify a group argument');
 
             return self::FAILURE;
         }
 
         $manager->exportTranslations($group);
 
-        $this->info('Done writing language files for ' . ($group == '*' ? 'ALL groups' : $group . ' group'));
+        $this->components->info('Done writing language files for ' . ($group == '*' ? 'ALL groups' : $group . ' group'));
 
         return self::SUCCESS;
     }

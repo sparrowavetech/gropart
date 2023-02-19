@@ -47,10 +47,10 @@ class SimpleSliderItemTable extends TableAbstract
             })
             ->editColumn('title', function ($item) {
                 if (! Auth::user()->hasPermission('simple-slider-item.edit')) {
-                    return $item->title;
+                    return BaseHelper::clean($item->title);
                 }
 
-                return Html::link('#', $item->title, [
+                return Html::link('#', BaseHelper::clean($item->title), [
                     'data-fancybox' => true,
                     'data-type' => 'ajax',
                     'data-src' => route('simple-slider-item.edit', $item->id),

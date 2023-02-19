@@ -43,9 +43,9 @@ class PageTable extends TableAbstract
             ->eloquent($this->query())
             ->editColumn('name', function ($item) {
                 if (! Auth::user()->hasPermission('posts.edit')) {
-                    $name = $item->name;
+                    $name = BaseHelper::clean($item->name);
                 } else {
-                    $name = Html::link(route('pages.edit', $item->id), $item->name);
+                    $name = Html::link(route('pages.edit', $item->id), BaseHelper::clean($item->name));
                 }
 
                 if (function_exists('theme_option') && BaseHelper::isHomepage($item->id)) {
@@ -60,7 +60,7 @@ class PageTable extends TableAbstract
                 return $this->getCheckbox($item->id);
             })
             ->editColumn('template', function ($item) use ($pageTemplates) {
-                return Arr::get($pageTemplates, $item->template);
+                return Arr::get($pageTemplates, $item->template ?: 'default');
             })
             ->editColumn('created_at', function ($item) {
                 return BaseHelper::formatDate($item->created_at);
@@ -148,7 +148,7 @@ class PageTable extends TableAbstract
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type' => 'date',
+                'type' => 'datePicker',
             ],
         ];
     }

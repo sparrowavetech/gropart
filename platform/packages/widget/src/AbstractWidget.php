@@ -3,26 +3,18 @@
 namespace Botble\Widget;
 
 use Botble\Widget\Repositories\Interfaces\WidgetInterface;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Theme;
 
 abstract class AbstractWidget
 {
-    /**
-     * The configuration array.
-     *
-     * @var array
-     */
     protected $config = [];
 
-    /**
-     * @var string
-     */
     protected $frontendTemplate = 'frontend';
 
-    /**
-     * @var string
-     */
     protected $backendTemplate = 'backend';
 
     /**
@@ -30,15 +22,9 @@ abstract class AbstractWidget
      */
     protected $widgetDirectory;
 
-    /**
-     * @var bool
-     */
     protected $isCore = false;
 
-    /**
-     * @var WidgetInterface
-     */
-    protected mixed $widgetRepository;
+    protected WidgetInterface $widgetRepository;
 
     protected ?string $theme = null;
 
@@ -64,7 +50,7 @@ abstract class AbstractWidget
      * Treat this method as a controller action.
      * Return view() or other content to display.
      */
-    public function run()
+    public function run(): View|Factory|string|Application|null
     {
         $widgetGroup = app('botble.widget-group-collection');
         $widgetGroup->load();
@@ -104,7 +90,7 @@ abstract class AbstractWidget
         return get_class($this);
     }
 
-    public function form(?string $sidebarId = null, int $position = 0)
+    public function form(?string $sidebarId = null, int $position = 0): View|Factory|string|Application|null
     {
         Theme::uses(Theme::getThemeName());
         if (! empty($sidebarId)) {

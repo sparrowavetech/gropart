@@ -16,7 +16,7 @@
                 <ul>
                     @foreach ($categories as $category)
                         <li class="cat-item">
-                            <a href="{{ $category->url }}">{{ $category->name }}</a>
+                            <a href="{{ $category->url }}">{!! BaseHelper::clean($category->name) !!}</a>
                         </li>
                     @endforeach
                 </ul>

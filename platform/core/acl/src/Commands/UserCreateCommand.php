@@ -16,7 +16,7 @@ class UserCreateCommand extends Command
 {
     public function handle(UserInterface $userRepository, ActivateUserService $activateUserService): int
     {
-        $this->info('Creating a super user...');
+        $this->components->info('Creating a super user...');
 
         try {
             $user = $userRepository->getModel();
@@ -31,13 +31,13 @@ class UserCreateCommand extends Command
             $userRepository->createOrUpdate($user);
 
             if ($activateUserService->activate($user)) {
-                $this->info('Super user is created.');
+                $this->components->info('Super user is created.');
             }
 
             return self::SUCCESS;
         } catch (Exception $exception) {
-            $this->error('User could not be created.');
-            $this->error($exception->getMessage());
+            $this->components->error('User could not be created.');
+            $this->components->error($exception->getMessage());
 
             return self::FAILURE;
         }
@@ -58,7 +58,7 @@ class UserCreateCommand extends Command
 
             $validate = $this->validate(compact('input'), ['input' => $rules]);
             if ($validate['error']) {
-                $this->error($validate['message']);
+                $this->components->error($validate['message']);
             }
         } while ($validate['error']);
 

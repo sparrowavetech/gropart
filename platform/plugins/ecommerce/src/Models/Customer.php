@@ -4,7 +4,6 @@ namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Supports\Avatar;
-use Botble\Base\Traits\EnumCastable;
 use Botble\Ecommerce\Enums\CustomerStatusEnum;
 use Botble\Ecommerce\Notifications\ConfirmEmailNotification;
 use Botble\Ecommerce\Notifications\ResetPasswordNotification;
@@ -39,7 +38,6 @@ class Customer extends BaseModel implements
     use CanResetPassword;
     use MustVerifyEmail;
     use HasApiTokens;
-    use EnumCastable;
     use Notifiable;
 
     protected $table = 'ec_customers';

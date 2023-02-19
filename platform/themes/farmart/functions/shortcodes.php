@@ -339,6 +339,16 @@ app()->booted(function () {
         return Theme::partial('shortcodes.newsletter-home-admin-config', compact('attributes'));
     });
 
+    if (is_plugin_active('faq')) {
+        add_shortcode('faq-by-group', __('Group FAQs'), __('Group FAQs'), function ($shortcode) {
+            return Theme::partial('shortcodes.faq-by-group', compact('shortcode'));
+        });
+
+        shortcode()->setAdminConfig('faq-by-group', function ($attributes) {
+            return Theme::partial('shortcodes.faq-by-group-admin-config', compact('attributes'));
+        });
+    }
+
     if (is_plugin_active('testimonial')) {
         add_shortcode('testimonials', __('Testimonials'), __('Testimonials'), function ($shortcode) {
             $testimonials = app(TestimonialInterface::class)->advancedGet([

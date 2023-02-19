@@ -7,7 +7,7 @@ use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
 
 class StoreCacheDecorator extends CacheAbstractDecorator implements StoreInterface
 {
-    public function handleCommissionEachCategory($data): array
+    public function handleCommissionEachCategory(array $data): array
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }

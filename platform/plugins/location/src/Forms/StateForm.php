@@ -19,7 +19,7 @@ class StateForm extends FormAbstract
         $this->countryRepository = $countryRepository;
     }
 
-    public function buildForm()
+    public function buildForm(): void
     {
         $countries = $this->countryRepository->pluck('countries.name', 'countries.id');
 

@@ -23,24 +23,25 @@ use Yajra\DataTables\EloquentDataTable;
 
 class HookServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         add_action(BASE_ACTION_META_BOXES, [$this, 'addLanguageBox'], 1134, 2);
         add_action(BASE_ACTION_TOP_FORM_CONTENT_NOTIFICATION, [$this, 'addCurrentLanguageEditingAlert'], 1134, 3);
         add_action(BASE_ACTION_BEFORE_EDIT_CONTENT, [$this, 'getCurrentAdminLanguage'], 1134, 2);
+        add_action(BASE_ACTION_META_BOXES, [$this, 'customizeMetaBoxes'], 10, 2);
+
         add_filter(BASE_FILTER_BEFORE_GET_ADMIN_SINGLE_ITEM, [$this, 'getDataLanguageBeforeShow'], 1135, 4);
         add_filter(BASE_FILTER_TABLE_HEADINGS, [$this, 'addLanguageTableHeading'], 1134, 2);
         add_filter(BASE_FILTER_GET_LIST_DATA, [$this, 'addLanguageColumn'], 1134, 2);
         add_filter(BASE_FILTER_BEFORE_GET_FRONT_PAGE_ITEM, [$this, 'checkItemLanguageBeforeGetListItem'], 1134, 2);
         add_filter(BASE_FILTER_BEFORE_RENDER_FORM, [$this, 'changeFormDataBeforeRendering'], 1134, 2);
-        add_action(BASE_ACTION_META_BOXES, [$this, 'customizeMetaBoxes'], 10, 2);
         add_filter(BASE_FILTER_SLUG_AREA, [$this, 'changeSlugField'], 25, 2);
         add_filter('stored_meta_box_key', [$this, 'storeMetaBoxKey'], 1134, 2);
     }
 
-    public function addLanguageBox(string $priority, Model|string|null $object)
+    public function addLanguageBox(string $priority, Model|string|null $object): void
     {
-        if ($priority == 'top' && ! empty($object) && $object->id && LanguageAdvancedManager::isSupported($object) && Language::getActiveLanguage([
+        if ($priority == 'top' && ! empty($object) && $object->getKey() && LanguageAdvancedManager::isSupported($object) && Language::getActiveLanguage([
                 'lang_code',
                 'lang_flag',
                 'lang_name',
@@ -275,13 +276,9 @@ class HookServiceProvider extends ServiceProvider
             return $query;
         }
 
-        $table = $model->getTable();
-
-        $translationTable = $table . '_translations';
-
         return $query->with([
-            'translations' => function ($query) use ($translationTable, $currentLocale) {
-                $query->where($translationTable . '.lang_code', $currentLocale);
+            'translations' => function ($query) use ($model, $currentLocale) {
+                $query->where($model->getTable() . '_translations' . '.lang_code', $currentLocale);
             },
         ]);
     }
@@ -318,7 +315,7 @@ class HookServiceProvider extends ServiceProvider
         return $form;
     }
 
-    public function customizeMetaBoxes(string $context, Model|string|null $object)
+    public function customizeMetaBoxes(string $context, Model|string|null $object): void
     {
         if (is_in_admin() && request()->input('ref_lang') && Language::getCurrentAdminLocaleCode() != Language::getDefaultLocaleCode() && LanguageAdvancedManager::isSupported($object)) {
             foreach (MetaBox::getMetaBoxes() as $reference => $metaBox) {

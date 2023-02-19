@@ -9,56 +9,33 @@ use Botble\Media\Models\MediaFolder;
 use Botble\Media\Repositories\Interfaces\MediaFileInterface;
 use Botble\Media\Repositories\Interfaces\MediaFolderInterface;
 use Botble\Media\Repositories\Interfaces\MediaSettingInterface;
+use Botble\Media\Services\ThumbnailService;
 use Botble\Media\Services\UploadsManager;
 use Botble\Media\Supports\Zipper;
 use Carbon\Carbon;
 use Eloquent;
 use Exception;
 use Illuminate\Support\Facades\File;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use RvMedia;
 use Storage;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Throwable;
 
 /**
  * @since 19/08/2015 08:05 AM
  */
 class MediaController extends Controller
 {
-    /**
-     * @var MediaFileInterface
-     */
-    protected $fileRepository;
+    protected MediaFileInterface $fileRepository;
 
-    /**
-     * @var MediaFolderInterface
-     */
-    protected $folderRepository;
+    protected MediaFolderInterface $folderRepository;
 
-    /**
-     * @var UploadsManager
-     */
-    protected $uploadManager;
+    protected UploadsManager $uploadManager;
 
-    /**
-     * @var MediaSettingInterface
-     */
-    protected $mediaSettingRepository;
+    protected MediaSettingInterface $mediaSettingRepository;
 
-    /**
-     * MediaController constructor.
-     * @param MediaFileInterface $fileRepository
-     * @param MediaFolderInterface $folderRepository
-     * @param MediaSettingInterface $mediaSettingRepository
-     * @param UploadsManager $uploadManager
-     */
     public function __construct(
         MediaFileInterface $fileRepository,
         MediaFolderInterface $folderRepository,
@@ -71,9 +48,6 @@ class MediaController extends Controller
         $this->mediaSettingRepository = $mediaSettingRepository;
     }
 
-    /**
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
-     */
     public function getMedia()
     {
         page_title()->setTitle(trans('core/media::media.menu_name'));
@@ -81,28 +55,21 @@ class MediaController extends Controller
         return view('core/media::index');
     }
 
-    /**
-     * @return string
-     * @throws Throwable
-     */
     public function getPopup()
     {
         return view('core/media::popup')->render();
     }
 
-    /**
-     * Get list files & folders
-     *
-     * @param Request $request
-     * @return JsonResponse
-     */
     public function getList(Request $request)
     {
         $files = [];
         $folders = [];
         $breadcrumbs = [];
 
-        if ($request->has('is_popup') && $request->has('selected_file_id') && $request->input('selected_file_id') != null) {
+        if ($request->has('is_popup')
+            && $request->has('selected_file_id')
+            && $request->input('selected_file_id') != null
+        ) {
             $currentFile = $this->fileRepository->getFirstBy(
                 ['id' => $request->input('selected_file_id')],
                 ['folder_id']
@@ -137,11 +104,11 @@ class MediaController extends Controller
 
         if ($search) {
             $paramsFolder['condition'] = [
-                ['media_folders.name', 'LIKE', '%' . $search . '%', ],
+                ['media_folders.name', 'LIKE', '%' . $search . '%'],
             ];
 
             $paramsFile['condition'] = [
-                ['media_files.name', 'LIKE', '%' . $search . '%', ],
+                ['media_files.name', 'LIKE', '%' . $search . '%'],
             ];
         }
 
@@ -200,9 +167,12 @@ class MediaController extends Controller
                     break;
                 }
 
-                $queried = $this->fileRepository->getFilesByFolderId(0, array_merge($paramsFile, [
-                    'recent_items' => $request->input('recent_items', []),
-                ]), false, $paramsFolder);
+                $queried = $this->fileRepository->getFilesByFolderId(
+                    0,
+                    array_merge($paramsFile, ['recent_items' => $request->input('recent_items', [])]),
+                    false,
+                    $paramsFolder
+                );
 
                 $files = FileResource::collection($queried);
 
@@ -271,10 +241,6 @@ class MediaController extends Controller
         ]);
     }
 
-    /**
-     * @param string $orderBy
-     * @return array
-     */
     protected function transformOrderBy(?string $orderBy): array
     {
         $result = explode('-', $orderBy);
@@ -285,10 +251,6 @@ class MediaController extends Controller
         return $result;
     }
 
-    /**
-     * @param Request $request
-     * @return array
-     */
     protected function getBreadcrumbs(Request $request): array
     {
         $folderId = $request->input('folder_id');
@@ -324,15 +286,12 @@ class MediaController extends Controller
         return $breadcrumbs;
     }
 
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function postGlobalActions(Request $request)
+    public function postGlobalActions(Request $request, ThumbnailService $thumbnailService)
     {
         $response = RvMedia::responseError(trans('core/media::media.invalid_action'));
 
         $type = $request->input('action');
+
         switch ($type) {
             case 'trash':
                 $error = false;
@@ -540,6 +499,53 @@ class MediaController extends Controller
 
                 break;
 
+            case 'crop':
+                $validated = Validator::validate($request->input(), [
+                    'imageId' => ['required', 'numeric', 'exists:media_files,id'],
+                    'cropData' => ['required', 'json'],
+                ]);
+
+                $data = json_decode($validated['cropData'], true);
+
+                $cropData = Validator::validate($data, [
+                    'x' => ['required', 'numeric'],
+                    'y' => ['required', 'numeric'],
+                    'width' => ['required', 'numeric'],
+                    'height' => ['required', 'numeric'],
+                ]);
+
+                $file = $this->fileRepository->findOrFail($validated['imageId']);
+
+                if (! $file->canGenerateThumbnails()) {
+                    $response = RvMedia::responseError(trans('core/media::media.failed_to_crop_image'));
+
+                    break;
+                }
+
+                $fileUrl = $file->url;
+                $parsedUrl = parse_url($fileUrl);
+
+                if (isset($parsedUrl['query'])) {
+                    $fileUrl = str_replace('?' . $parsedUrl['query'], '', $fileUrl);
+                }
+
+                $thumbnailService
+                    ->setImage(RvMedia::getRealPath($fileUrl))
+                    ->setSize((int)$cropData['width'], (int)$cropData['height'])
+                    ->setCoordinates((int)$cropData['x'], (int)$cropData['y'])
+                    ->setDestinationPath(File::dirname($fileUrl))
+                    ->setFileName(File::name($fileUrl) . '.' . File::extension($fileUrl))
+                    ->save('crop');
+
+                $file->url = $fileUrl . '?v=' . time();
+                $file->save();
+
+                RvMedia::generateThumbnails($file);
+
+                $response = RvMedia::responseSuccess([], trans('core/media::media.crop_success'));
+
+                break;
+
             case 'rename':
                 foreach ($request->input('selected') as $item) {
                     if (! $item['id'] || ! $item['name']) {
@@ -581,12 +587,6 @@ class MediaController extends Controller
         return $response;
     }
 
-    /**
-     * @param MediaFile $file
-     * @param int|null $newFolderId
-     * @return false|Model
-     * @throws FileNotFoundException
-     */
     protected function copyFile(MediaFile $file, ?int $newFolderId = null)
     {
         $file = $file->replicate();
@@ -630,11 +630,6 @@ class MediaController extends Controller
         return $this->fileRepository->createOrUpdate($file);
     }
 
-    /**
-     * @param Request $request
-     * @return JsonResponse|Response|BinaryFileResponse
-     * @throws Exception
-     */
     public function download(Request $request)
     {
         $items = $request->input('selected', []);
@@ -648,7 +643,7 @@ class MediaController extends Controller
                         return RvMedia::responseError(trans('core/media::media.file_not_exists'));
                     }
 
-                    return response()->download($filePath);
+                    return response()->download($filePath, $file->name);
                 }
 
                 return response()->make(file_get_contents(str_replace('https://', 'http://', $filePath)), 200, [
@@ -657,7 +652,7 @@ class MediaController extends Controller
                 ]);
             }
         } else {
-            $fileName = RvMedia::getRealPath('download-' . Carbon::now()->format('Y-m-d-h-i-s') . '.zip');
+            $fileName = Storage::disk('local')->path('download-' . Carbon::now()->format('Y-m-d-h-i-s') . '.zip');
             $zip = new Zipper();
             $zip->make($fileName);
             foreach ($items as $item) {
@@ -705,7 +700,9 @@ class MediaController extends Controller
             }
 
             if (File::exists($fileName)) {
-                return response()->download($fileName)->deleteFileAfterSend();
+                return response()
+                    ->download($fileName, File::name($fileName))
+                    ->deleteFileAfterSend();
             }
 
             return RvMedia::responseError(trans('core/media::media.download_file_error'));

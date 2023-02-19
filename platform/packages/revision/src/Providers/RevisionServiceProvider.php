@@ -9,7 +9,7 @@ class RevisionServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function boot()
+    public function boot(): void
     {
         $this->setNamespace('packages/revision')
             ->loadAndPublishViews()

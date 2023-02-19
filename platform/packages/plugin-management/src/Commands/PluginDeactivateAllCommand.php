@@ -16,7 +16,7 @@ class PluginDeactivateAllCommand extends Command
             $pluginService->deactivate($plugin);
         }
 
-        $this->info('Deactivated successfully!');
+        $this->components->info('Deactivated successfully!');
 
         return self::SUCCESS;
     }

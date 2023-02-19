@@ -12,11 +12,6 @@ use Botble\SslCommerz\Library\SslCommerz\SslCommerzNotification;
 
 class SslCommerzPaymentController extends BaseController
 {
-    /**
-     * @param PaymentRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function success(PaymentRequest $request, BaseHttpResponse $response)
     {
         $transactionId = $request->input('tran_id');
@@ -54,11 +49,6 @@ class SslCommerzPaymentController extends BaseController
             ->setMessage(__('Checkout successfully!'));
     }
 
-    /**
-     * @param PaymentRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function fail(PaymentRequest $request, BaseHttpResponse $response)
     {
         $checkoutToken = $request->input('value_b');
@@ -69,11 +59,6 @@ class SslCommerzPaymentController extends BaseController
             ->setMessage(__('Payment failed!'));
     }
 
-    /**
-     * @param PaymentRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function cancel(PaymentRequest $request, BaseHttpResponse $response)
     {
         $checkoutToken = $request->input('value_b');
@@ -84,11 +69,6 @@ class SslCommerzPaymentController extends BaseController
             ->setMessage(__('Payment failed!'));
     }
 
-    /**
-     * @param PaymentRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function ipn(PaymentRequest $request, BaseHttpResponse $response)
     {
         // Received all the payment information from the gateway

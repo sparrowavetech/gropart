@@ -150,7 +150,8 @@ class ShippingManagement {
         $(document).on('change', '.select-rule-type', event => {
             event.preventDefault();
             let _self = $(event.currentTarget);
-            const $box = _self.closest('.box-table-shipping');
+
+            const $box = _self.closest('form');
             const $option = _self.find('option:selected');
 
             if ($option.data('show-from-to')) {
@@ -200,7 +201,7 @@ class ShippingManagement {
             }
 
             $modal.find('input[name=name]').val('');
-            $modal.find('select[name=type]').val('base_on_price').trigger('change');
+            $modal.find('select[name=type]').val('').trigger('change');
             $modal.find('input[name=from]').val('0');
             $modal.find('input[name=to]').val('');
             $modal.find('input[name=price]').val('0');
@@ -393,9 +394,86 @@ class ShippingManagement {
                 }
             }
         });
+
+        $(document).on('click', '.table-shipping-rule-items .shipping-rule-load-items', event => {
+            event.preventDefault();
+
+            let $this = $(event.currentTarget);
+            const $table = $this.closest('.table-shipping-rule-items');
+            loadRuleItems($this.attr('href'), $table, $this)
+
+        });
+
+        $(document).on('click', '.table-shipping-rule-items a.page-link', event => {
+            event.preventDefault();
+
+            let $this = $(event.currentTarget);
+            const $table = $this.closest('.table-shipping-rule-items');
+            loadRuleItems($this.attr('href'), $table, $this);
+        });
+
+        $(document).on('change', '.table-shipping-rule-items .number-record .numb', e => {
+            e.preventDefault();
+            const $this = $(e.currentTarget);
+            let per_page = $this.val();
+
+            if (!isNaN(per_page) && per_page > 0) {
+                const $table = $this.closest('.table-shipping-rule-items');
+                const $th = $table.find('thead tr th[data-column][data-dir]');
+                let data = {per_page};
+
+                if ($th.length) {
+                    data.order_by = $th.data('column');
+                    data.order_dir = $th.data('dir') || 'DESC';
+                }
+                loadRuleItems($table.data('url'), $table, $this, data);
+            } else {
+                $this.val($this.attr('min') || 12).trigger('change');
+            }
+        });
+
+        $(document).on('click', '.table-shipping-rule-items thead tr th[data-column]', e => {
+            e.preventDefault();
+            const $this = $(e.currentTarget);
+            let order_by = $this.data('column');
+            let order_dir = $this.data('dir') || 'ASC';
+            order_dir = order_dir == 'ASC' ? 'DESC' : 'ASC';
+
+            const $table = $this.closest('.table-shipping-rule-items');
+
+            const $numb = $table.find('.number-record .numb');
+            let per_page = $numb.val();
+
+            loadRuleItems($table.data('url'), $table, $this, {order_by, order_dir, per_page});
+        });
+
+        function loadRuleItems(url, $table, $button, data = {}) {
+            $.ajax({
+                type: 'GET',
+                url: url,
+                data: data,
+                beforeSend: () => {
+                    $button && $button.addClass('button-loading');
+                    $table.addClass('table-loading');
+                },
+                success: res => {
+                    if (! res.error) {
+                        $table.replaceWith(res.data.html);
+                    } else {
+                        Botble.showError(res.message);
+                    }
+                },
+                error: error => {
+                    Botble.handleError(error);
+                },
+                complete: () => {
+                    $button && $button.removeClass('button-loading');
+                },
+            });
+        }
     }
 }
 
-$(document).ready(() => {
+$(() => {
     new ShippingManagement().init();
 });

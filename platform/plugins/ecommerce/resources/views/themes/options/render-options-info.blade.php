@@ -20,7 +20,7 @@
                 }
             @endphp
 
-            {{ $value['option_value'] }}
+            <strong>{{ $value['option_value'] }}</strong>
             @if ($key + 1 < $totalOptionValue) , @endif
         @endforeach
 

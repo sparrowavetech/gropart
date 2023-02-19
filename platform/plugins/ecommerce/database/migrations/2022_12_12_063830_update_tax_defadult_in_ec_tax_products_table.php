@@ -8,20 +8,24 @@ return new class () extends Migration {
     public function up(): void
     {
         if (Schema::hasTable('ec_tax_products')) {
-            DB::table('ec_tax_products')->where('tax_id', 0)->delete();
+            try {
+                DB::table('ec_tax_products')->where('tax_id', 0)->delete();
 
-            $defaultTaxRate = get_ecommerce_setting('default_tax_rate');
+                $defaultTaxRate = get_ecommerce_setting('default_tax_rate');
 
-            if ($defaultTaxRate) {
-                foreach (Product::where('is_variation', 0)->withCount(['taxes'])->get() as $product) {
-                    $taxId = $product->tax_id ?: $defaultTaxRate;
-                    if ($taxId && ! $product->taxes_count) {
-                        DB::table('ec_tax_products')->insertOrIgnore([
-                            'product_id' => $product->id,
-                            'tax_id' => $taxId,
-                        ]);
+                if ($defaultTaxRate) {
+                    foreach (Product::where('is_variation', 0)->withCount(['taxes'])->get() as $product) {
+                        $taxId = $product->tax_id ?: $defaultTaxRate;
+                        if ($taxId && ! $product->taxes_count) {
+                            DB::table('ec_tax_products')->insertOrIgnore([
+                                'product_id' => $product->id,
+                                'tax_id' => $taxId,
+                            ]);
+                        }
                     }
                 }
+            } catch (Throwable $exception) {
+                info($exception->getMessage());
             }
         }
     }

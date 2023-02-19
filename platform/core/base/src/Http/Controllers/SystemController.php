@@ -14,31 +14,18 @@ use Botble\Base\Supports\MembershipAuthorization;
 use Botble\Base\Supports\SystemManagement;
 use Botble\Base\Tables\InfoTable;
 use Botble\Table\TableBuilder;
-use Exception;
-use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Filesystem\Filesystem;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 use Menu;
-use Throwable;
 
 class SystemController extends Controller
 {
-    /**
-     * @param Request $request
-     * @param TableBuilder $tableBuilder
-     * @return Factory|View
-     * @throws Throwable
-     * @throws BindingResolutionException
-     */
     public function getInfo(Request $request, TableBuilder $tableBuilder)
     {
         page_title()->setTitle(trans('core/base::system.info.title'));
@@ -77,9 +64,6 @@ class SystemController extends Controller
         );
     }
 
-    /**
-     * @return Factory|Application|View
-     */
     public function getCacheManagement()
     {
         page_title()->setTitle(trans('core/base::cache.cache_management'));
@@ -89,19 +73,17 @@ class SystemController extends Controller
         return view('core/base::system.cache');
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @param Filesystem $files
-     * @param Application $app
-     * @return BaseHttpResponse
-     */
     public function postClearCache(Request $request, BaseHttpResponse $response, Filesystem $files, Application $app)
     {
         switch ($request->input('type')) {
             case 'clear_cms_cache':
                 Helper::clearCache();
                 Menu::clearCacheMenuItems();
+                $pluginCachePath = $app->bootstrapPath('cache/plugins.php');
+
+                if ($files->exists($pluginCachePath)) {
+                    $files->delete($pluginCachePath);
+                }
 
                 break;
             case 'refresh_compiled_views':
@@ -131,11 +113,6 @@ class SystemController extends Controller
         return $response->setMessage(trans('core/base::cache.commands.' . $request->input('type') . '.success_msg'));
     }
 
-    /**
-     * @param MembershipAuthorization $authorization
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function authorize(MembershipAuthorization $authorization, BaseHttpResponse $response)
     {
         $authorization->authorize();
@@ -143,13 +120,7 @@ class SystemController extends Controller
         return $response;
     }
 
-    /**
-     * @param string $lang
-     * @param Request $request
-     * @return RedirectResponse
-     * @throws Exception
-     */
-    public function getLanguage($lang, Request $request)
+    public function getLanguage(string $lang, Request $request)
     {
         if ($lang && array_key_exists($lang, Language::getAvailableLocales())) {
             if (Auth::check()) {
@@ -161,10 +132,6 @@ class SystemController extends Controller
         return redirect()->back();
     }
 
-    /**
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function getMenuItemsCount(BaseHttpResponse $response)
     {
         $data = apply_filters(BASE_FILTER_MENU_ITEMS_COUNT, []);
@@ -172,9 +139,6 @@ class SystemController extends Controller
         return $response->setData($data);
     }
 
-    /**
-     * @return BaseHttpResponse
-     */
     public function getCheckUpdate(BaseHttpResponse $response)
     {
         if (! config('core.base.general.enable_system_updater')) {
@@ -198,22 +162,10 @@ class SystemController extends Controller
         return $response;
     }
 
-    /**
-     * @return BaseHttpResponse|Application|Factory|View
-     */
-    public function getUpdater(Request $request, BaseHttpResponse $response)
+    public function getUpdater()
     {
         if (! config('core.base.general.enable_system_updater')) {
             abort(404);
-        }
-
-        if ($request->isMethod('POST') &&
-            ! version_compare(phpversion(), '8.0.2', '>=') > 0 &&
-            ! config('core.base.general.upgrade_php_require_disabled')
-        ) {
-            return $response
-                ->setError()
-                ->setMessage(trans('core/base::system.upgrade_php_version_required', ['version' => phpversion()]));
         }
 
         header('Cache-Control: no-cache');
@@ -235,14 +187,6 @@ class SystemController extends Controller
         return view('core/base::system.updater', compact('api', 'updateData'));
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @param CleanDatabaseService $cleanDatabaseService
-     * @return BaseHttpResponse|View
-     * @throws \Doctrine\DBAL\Exception
-     * @throws ValidationException
-     */
     public function getCleanup(
         Request $request,
         BaseHttpResponse $response,

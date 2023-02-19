@@ -44,7 +44,7 @@ if (! function_exists('get_customer_addresses')) {
     function get_customer_addresses(): Collection
     {
         if (! auth('customer')->check()) {
-            return collect([]);
+            return collect();
         }
 
         return app(AddressInterface::class)->advancedGet([

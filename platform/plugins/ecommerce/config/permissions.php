@@ -434,9 +434,11 @@ return [
         'flag' => 'ecommerce.invoice.destroy',
         'parent_flag' => 'ecommerce.invoice.index',
     ],
-    /**
-     * Products Enquires
-     */
+    [
+        'name' => 'Invoice Template',
+        'flag' => 'ecommerce.invoice-template.index',
+        'parent_flag' => 'plugins.ecommerce',
+    ],
     [
         'name' => 'Enquiry',
         'flag' => 'ecommerce.enquires.index',

@@ -16,9 +16,9 @@ class Post extends BaseModel
 
     protected $table = 'posts';
 
-    protected mixed $revisionEnabled = true;
+    protected bool $revisionEnabled = true;
 
-    protected mixed $revisionCleanup = true;
+    protected bool $revisionCleanup = true;
 
     protected int $historyLimit = 20;
 
@@ -42,6 +42,8 @@ class Post extends BaseModel
     protected $casts = [
         'status' => BaseStatusEnum::class,
         'content' => SafeContent::class,
+        'name' => SafeContent::class,
+        'description' => SafeContent::class,
     ];
 
     public function tags(): BelongsToMany

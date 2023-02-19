@@ -28,6 +28,7 @@ class MarketplaceController extends Controller
         $request->merge([
             'type' => 'plugin',
             'per_page' => 12,
+            'core_version' => get_core_version(),
         ]);
 
         $response = $marketplaceService->callApi('get', '/products', $request->input());
@@ -64,6 +65,14 @@ class MarketplaceController extends Controller
     public function install(string $id, MarketplaceService $marketplaceService): JsonResponse
     {
         $detail = $this->detail($id, $marketplaceService);
+
+        $version = $detail['data']['minimum_core_version'];
+        if (version_compare($version, get_core_version(), '>')) {
+            return response()->json([
+                'error' => true,
+                'message' => trans('packages/plugin-management::marketplace.minimum_core_version_error', compact('version')),
+            ]);
+        }
 
         $name = Str::afterLast($detail['data']['package_name'], '/');
 

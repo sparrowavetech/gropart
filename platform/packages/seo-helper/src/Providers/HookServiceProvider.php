@@ -4,32 +4,25 @@ namespace Botble\SeoHelper\Providers;
 
 use Assets;
 use BaseHelper;
-use Botble\Base\Models\BaseModel;
 use Botble\Page\Models\Page;
-use Illuminate\Contracts\View\Factory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Contracts\View\View;
 use MetaBox;
 use SeoHelper;
 
 class HookServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         add_action(BASE_ACTION_META_BOXES, [$this, 'addMetaBox'], 12, 2);
         add_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, [$this, 'setSeoMeta'], 56, 2);
     }
 
-    /**
-     * @param string $priority
-     * @param BaseModel|null $data
-     * @return bool
-     */
-    public function addMetaBox(string $priority, $data): bool
+    public function addMetaBox(string $priority, ?Model $data): void
     {
         if ($priority == 'advanced' && ! empty($data) && in_array(get_class($data), config('packages.seo-helper.general.supported', []))) {
             if (get_class($data) == Page::class && BaseHelper::isHomepage($data->id)) {
-                return false;
+                return;
             }
 
             Assets::addScriptsDirectly('vendor/core/packages/seo-helper/js/seo-helper.js')
@@ -43,17 +36,10 @@ class HookServiceProvider extends ServiceProvider
                 'advanced',
                 'low'
             );
-
-            return true;
         }
-
-        return false;
     }
 
-    /**
-     * @return Factory|View
-     */
-    public function seoMetaBox()
+    public function seoMetaBox(): string
     {
         $meta = [
             'seo_title' => null,
@@ -74,12 +60,7 @@ class HookServiceProvider extends ServiceProvider
         return view('packages/seo-helper::meta-box', compact('meta', 'object'));
     }
 
-    /**
-     * @param string $screen
-     * @param BaseModel|null $object
-     * @return bool
-     */
-    public function setSeoMeta(string $screen, $object): bool
+    public function setSeoMeta(string $screen, ?Model $object): bool
     {
         if (get_class($object) == Page::class && BaseHelper::isHomepage($object->id)) {
             return false;

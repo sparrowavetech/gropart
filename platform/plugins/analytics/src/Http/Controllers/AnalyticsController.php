@@ -35,13 +35,13 @@ class AnalyticsController extends BaseController
 
             $visitorData = [];
 
-            $answer = Analytics::performQuery($period, 'ga:visits,ga:pageviews', ['dimensions' => 'ga:' . $dimensions]);
+            $queryData = Analytics::performQuery($period, 'ga:visits,ga:pageviews', ['dimensions' => 'ga:' . $dimensions]);
 
-            if ($answer->rows == null) {
-                $answer->rows = [];
-            }
+            $queryRows = property_exists($queryData, 'rows') ? (array)$queryData->rows : $queryData->toArray();
 
-            foreach ($answer->rows as $dateRow) {
+            foreach ($queryRows as $dateRow) {
+                $dateRow = array_values($dateRow);
+
                 $visitorData[] = [
                     'axis' => $this->getAxisByDimensions($dateRow[0], $dimensions),
                     'visitors' => $dateRow[1],
@@ -50,20 +50,48 @@ class AnalyticsController extends BaseController
             }
 
             $stats = collect($visitorData);
-            $country_stats = Analytics::performQuery(
+            $countryStatsQuery = Analytics::performQuery(
                 $period,
                 'ga:sessions',
                 ['dimensions' => 'ga:countryIsoCode']
-            )->rows;
-            $total = Analytics::performQuery(
-                $period,
-                'ga:sessions, ga:users, ga:pageviews, ga:percentNewSessions, ga:bounceRate, ga:pageviewsPerVisit, ga:avgSessionDuration, ga:newUsers'
-            )->totalsForAllResults;
+            );
+
+            $countryStats = property_exists($countryStatsQuery, 'rows') ? (array)$countryStatsQuery->rows : $countryStatsQuery->toArray();
+
+            $metrics = 'ga:sessions, ga:users, ga:pageviews, ga:percentNewSessions, ga:bounceRate, ga:pageviewsPerVisit, ga:avgSessionDuration, ga:newUsers';
+
+            $totalQuery = Analytics::performQuery($period, $metrics);
+
+            $total = [];
+
+            if (property_exists($totalQuery, 'totalsForAllResults')) {
+                $total = $totalQuery->totalsForAllResults;
+            } else {
+                foreach (explode(', ', $metrics) as $metric) {
+                    $total[$metric] = 0;
+                }
+
+                foreach ($totalQuery->toArray() as $item) {
+                    $total['ga:sessions'] += $item['sessions'];
+                    $total['ga:users'] += $item['totalUsers'];
+                    $total['ga:pageviews'] += $item['screenPageViews'];
+                    $total['ga:percentNewSessions'] += 0;
+                    $total['ga:bounceRate'] += $item['bounceRate'];
+                    $total['ga:pageviewsPerVisit'] += 0;
+                    $total['ga:avgSessionDuration'] += 0;
+                    $total['ga:newUsers'] += $item['newUsers'] ?? 0;
+                }
+            }
+
+            foreach ($countryStats as $key => $item) {
+                unset($item['countryIsoCode']);
+                $countryStats[$key] = array_values($item);
+            }
 
             return $response->setData(
                 view(
                     'plugins/analytics::widgets.general',
-                    compact('stats', 'country_stats', 'total')
+                    compact('stats', 'countryStats', 'total')
                 )->render()
             );
         } catch (InvalidConfiguration) {
@@ -116,7 +144,17 @@ class AnalyticsController extends BaseController
 
         try {
             $period = Period::create($startDate, $endDate);
-            $pages = Analytics::fetchMostVisitedPages($period, 10);
+            $query = Analytics::fetchMostVisitedPages($period, 10);
+
+            $pages = [];
+
+            foreach ($query as $item) {
+                $pages[] = [
+                    'pageTitle' => $item['pageTitle'],
+                    'url' => $item['fullPageUrl'] ?? $item['url'],
+                    'pageViews' => $item['screenPageViews'] ?? $item['pageViews'],
+                ];
+            }
 
             return $response->setData(view('plugins/analytics::widgets.page', compact('pages'))->render());
         } catch (InvalidConfiguration) {
@@ -150,10 +188,6 @@ class AnalyticsController extends BaseController
             $browsers = Analytics::fetchTopBrowsers($period);
 
             return $response->setData(view('plugins/analytics::widgets.browser', compact('browsers'))->render());
-        } catch (InvalidConfiguration) {
-            return $response
-                ->setError()
-                ->setMessage(trans('plugins/analytics::analytics.wrong_configuration'));
         } catch (Exception $exception) {
             return $response
                 ->setError()
@@ -178,13 +212,18 @@ class AnalyticsController extends BaseController
 
         try {
             $period = Period::create($startDate, $endDate);
-            $referrers = Analytics::fetchTopReferrers($period, 10);
+            $query = Analytics::fetchTopReferrers($period, 10);
+
+            $referrers = [];
+
+            foreach ($query as $item) {
+                $referrers[] = [
+                    'url' => $item['sessionSource'] ?? $item['url'],
+                    'pageViews' => $item['screenPageViews'] ?? $item['pageViews'],
+                ];
+            }
 
             return $response->setData(view('plugins/analytics::widgets.referrer', compact('referrers'))->render());
-        } catch (InvalidConfiguration) {
-            return $response
-                ->setError()
-                ->setMessage(trans('plugins/analytics::analytics.wrong_configuration'));
         } catch (Exception $exception) {
             return $response
                 ->setError()

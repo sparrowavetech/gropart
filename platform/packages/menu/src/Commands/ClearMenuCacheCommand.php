@@ -13,7 +13,7 @@ class ClearMenuCacheCommand extends Command
     {
         Menu::clearCacheMenuItems();
 
-        $this->info('Menu cache URLs cleared!');
+        $this->components->info('Menu cache URLs cleared!');
 
         return self::SUCCESS;
     }

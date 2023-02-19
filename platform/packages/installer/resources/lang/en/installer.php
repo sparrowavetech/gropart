@@ -81,6 +81,12 @@ return [
                 'buttons' => [
                     'install' => 'Install',
                 ],
+                'db_host_helper' => 'If you use Laravel Sail, just change DB_HOST to DB_HOST=mysql. On some hosting DB_HOST can be localhost instead of 127.0.0.1',
+                'db_connections' => [
+                    'mysql' => 'MySQL',
+                    'sqlite' => 'SQLite',
+                    'pgsql' => 'PostgreSQL',
+                ],
             ],
         ],
         'success' => 'Your .env file settings have been saved.',

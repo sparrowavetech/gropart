@@ -3,7 +3,6 @@
 namespace Botble\Base\Supports;
 
 use Botble\Base\Events\SendMailEvent;
-use Botble\Base\Jobs\SendMailJob;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Arr;
@@ -214,11 +213,7 @@ class EmailHandler
             $content = $this->prepareData($content);
             $title = $this->prepareData($title);
 
-            if (setting('using_queue_to_send_mail', config('core.base.general.send_mail_using_job_queue'))) {
-                dispatch(new SendMailJob($content, $title, $to, $args, $debug));
-            } else {
-                event(new SendMailEvent($content, $title, $to, $args, $debug));
-            }
+            event(new SendMailEvent($content, $title, $to, $args, $debug));
         } catch (Exception $exception) {
             if ($debug) {
                 throw $exception;

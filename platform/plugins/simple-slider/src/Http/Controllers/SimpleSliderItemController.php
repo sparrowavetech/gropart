@@ -25,20 +25,11 @@ class SimpleSliderItemController extends BaseController
         $this->simpleSliderItemRepository = $simpleSliderItemRepository;
     }
 
-    /**
-     * @param SimpleSliderItemTable $dataTable
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Symfony\Component\HttpFoundation\Response
-     * @throws \Throwable
-     */
     public function index(SimpleSliderItemTable $dataTable)
     {
         return $dataTable->renderTable();
     }
 
-    /**
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
     public function create(FormBuilder $formBuilder)
     {
         return $formBuilder->create(SimpleSliderItemForm::class)
@@ -47,11 +38,6 @@ class SimpleSliderItemController extends BaseController
             ->renderForm();
     }
 
-    /**
-     * @param SimpleSliderItemRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function store(SimpleSliderItemRequest $request, BaseHttpResponse $response)
     {
         $simpleSlider = $this->simpleSliderItemRepository->createOrUpdate($request->input());
@@ -61,13 +47,7 @@ class SimpleSliderItemController extends BaseController
         return $response->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    /**
-     * @param $id
-     * @param FormBuilder $formBuilder
-     * @param Request $request
-     * @return string
-     */
-    public function edit($id, FormBuilder $formBuilder, Request $request)
+    public function edit(int $id, FormBuilder $formBuilder, Request $request)
     {
         $simpleSliderItem = $this->simpleSliderItemRepository->findOrFail($id);
 
@@ -79,13 +59,7 @@ class SimpleSliderItemController extends BaseController
             ->renderForm();
     }
 
-    /**
-     * @param $id
-     * @param SimpleSliderItemRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function update($id, SimpleSliderItemRequest $request, BaseHttpResponse $response)
+    public function update(int $id, SimpleSliderItemRequest $request, BaseHttpResponse $response)
     {
         $simpleSlider = $this->simpleSliderItemRepository->findOrFail($id);
         $simpleSlider->fill($request->input());
@@ -97,23 +71,13 @@ class SimpleSliderItemController extends BaseController
         return $response->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @return string
-     * @throws \Throwable
-     */
-    public function destroy($id)
+    public function destroy(int $id)
     {
         $slider = $this->simpleSliderItemRepository->findOrFail($id);
 
         return view('plugins/simple-slider::partials.delete', compact('slider'))->render();
     }
 
-    /**
-     * @param Request $request
-     * @param $id
-     * @param BaseHttpResponse $response
-     * @return array|BaseHttpResponse
-     */
     public function postDelete(Request $request, $id, BaseHttpResponse $response)
     {
         try {

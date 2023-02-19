@@ -12,15 +12,10 @@ use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
 use Botble\SeoHelper\SeoOpenGraph;
 use Botble\Slug\Repositories\Interfaces\SlugInterface;
 use EcommerceHelper;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-use Response;
 use RvMedia;
 use SeoHelper;
 use SlugHelper;
@@ -28,31 +23,16 @@ use Theme;
 
 class PublicStoreController
 {
-    /**
-     * @var StoreInterface
-     */
-    protected $storeRepository;
+    protected StoreInterface $storeRepository;
 
-    /**
-     * @var SlugInterface
-     */
-    protected $slugRepository;
+    protected SlugInterface $slugRepository;
 
-    /**
-     * PublicStoreController constructor.
-     * @param StoreInterface $storeRepository
-     * @param SlugInterface $slugRepository
-     */
     public function __construct(StoreInterface $storeRepository, SlugInterface $slugRepository)
     {
         $this->storeRepository = $storeRepository;
         $this->slugRepository = $slugRepository;
     }
 
-    /**
-     * @param Request $request
-     * @return Application|Factory|View|Response|Theme|void
-     */
     public function getStores(Request $request)
     {
         Theme::breadcrumb()->add(__('Home'), route('public.index'))
@@ -95,15 +75,8 @@ class PublicStoreController
         return Theme::scope('marketplace.stores', compact('stores'), 'plugins/marketplace::themes.stores')->render();
     }
 
-    /**
-     * @param string $slug
-     * @param Request $request
-     * @param GetProductService $productService
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse|Application|Factory|View|RedirectResponse|Response
-     */
     public function getStore(
-        $slug,
+        string $slug,
         Request $request,
         GetProductService $productService,
         BaseHttpResponse $response
@@ -186,11 +159,6 @@ class PublicStoreController
         return Theme::scope('marketplace.store', compact('store', 'products'), 'plugins/marketplace::themes.store')->render();
     }
 
-    /**
-     * @param CheckStoreUrlRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function checkStoreUrl(CheckStoreUrlRequest $request, BaseHttpResponse $response)
     {
         if (! $request->ajax()) {
@@ -199,7 +167,7 @@ class PublicStoreController
         $slug = $request->input('url');
         $slug = Str::slug($slug, '-', ! SlugHelper::turnOffAutomaticUrlTranslationIntoLatin() ? 'en' : false);
 
-        $existing = SlugHelper::getSlug($slug, SlugHelper::getPrefix(Store::class), Store::class);
+        $existing = SlugHelper::getSlug($slug, null, Store::class);
 
         $response->setData(['slug' => $slug]);
 

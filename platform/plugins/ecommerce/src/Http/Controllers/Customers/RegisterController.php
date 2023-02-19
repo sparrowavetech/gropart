@@ -26,23 +26,8 @@ use Botble\Sms\Enums\SmsEnum;
 
 class RegisterController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Register Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller handles the registration of new users as well as their
-    | validation and creation. By default this controller uses a trait to
-    | provide this functionality without requiring any additional code.
-    |
-    */
-
     use RegistersUsers;
 
-    /**
-     * Where to redirect users after login / registration.
-     *
-     */
     protected string $redirectTo = '/';
 
     protected CustomerInterface $customerRepository;
@@ -53,19 +38,14 @@ class RegisterController extends Controller
         $this->customerRepository = $customerRepository;
     }
 
-    /**
-     * Show the application registration form.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function showRegistrationForm()
     {
         SeoHelper::setTitle(__('Register'));
 
         Theme::breadcrumb()->add(__('Home'), route('public.index'))->add(__('Register'), route('customer.register'));
 
-        if (!session()->has('url.intended')) {
-            if (!in_array(url()->previous(), [route('customer.login'), route('customer.register')])) {
+        if (! session()->has('url.intended')) {
+            if (! in_array(url()->previous(), [route('customer.login'), route('customer.register')])) {
                 session(['url.intended' => url()->previous()]);
             }
         }
@@ -74,13 +54,6 @@ class RegisterController extends Controller
             ->render();
     }
 
-    /**
-     * Handle a registration request for the application.
-     *
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function register(Request $request, BaseHttpResponse $response)
     {
         $this->validator($request->input())->validate();
@@ -126,12 +99,6 @@ class RegisterController extends Controller
         return $response->setNextUrl($this->redirectPath())->setMessage(__('Registered successfully!'));
     }
 
-    /**
-     * Get a validator for an incoming registration request.
-     *
-     * @param array $data
-     * @return \Illuminate\Contracts\Validation\Validator
-     */
     protected function validator(array $data)
     {
         $rules = [
@@ -167,12 +134,6 @@ class RegisterController extends Controller
         ], $attributes);
     }
 
-    /**
-     * Create a new user instance after a valid registration.
-     *
-     * @param array $data
-     * @return Customer
-     */
     protected function create(array $data)
     {
         return $this->customerRepository->create([
@@ -183,43 +144,14 @@ class RegisterController extends Controller
         ]);
     }
 
-    /**
-     * Send the confirmation code to a user.
-     *
-     * @param Customer $customer
-     */
-    protected function sendConfirmationToUser($customer)
-    {
-        // Notify the user
-        $notificationConfig = config('plugins.ecommerce.general.customer.notification');
-        if ($notificationConfig) {
-            $notification = app($notificationConfig);
-            $customer->notify($notification);
-        }
-    }
-
-    /**
-     * Get the guard to be used during registration.
-     *
-     * @return StatefulGuard
-     */
     protected function guard()
     {
         return auth('customer');
     }
 
-    /**
-     * Confirm a user with a given confirmation code.
-     *
-     * @param int $id
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @param CustomerInterface $customerRepository
-     * @return BaseHttpResponse
-     */
-    public function confirm($id, Request $request, BaseHttpResponse $response, CustomerInterface $customerRepository)
+    public function confirm(int $id, Request $request, BaseHttpResponse $response, CustomerInterface $customerRepository)
     {
-        if (!URL::hasValidSignature($request)) {
+        if (! URL::hasValidSignature($request)) {
             abort(404);
         }
 
@@ -235,14 +167,6 @@ class RegisterController extends Controller
             ->setMessage(__('You successfully confirmed your email address.'));
     }
 
-    /**
-     * Resend a confirmation code to a user.
-     *
-     * @param Request $request
-     * @param CustomerInterface $customerRepository
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function resendConfirmation(
         Request $request,
         CustomerInterface $customerRepository,
@@ -250,21 +174,18 @@ class RegisterController extends Controller
     ) {
         $customer = $customerRepository->getFirstBy(['email' => $request->input('email')]);
 
-        if (!$customer) {
+        if (! $customer) {
             return $response
                 ->setError()
                 ->setMessage(__('Cannot find this customer!'));
         }
 
-        $this->sendConfirmationToUser($customer);
+        $customer->sendEmailVerificationNotification();
 
         return $response
             ->setMessage(__('We sent you another confirmation email. You should receive it shortly.'));
     }
 
-    /**
-     * @return Factory|Application|View
-     */
     public function getVerify()
     {
         return view('plugins/ecommerce::themes.customers.verify');

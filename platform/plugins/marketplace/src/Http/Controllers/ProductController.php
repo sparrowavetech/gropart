@@ -11,15 +11,7 @@ use MarketplaceHelper;
 
 class ProductController extends BaseController
 {
-    /**
-     * @param int $id
-     * @param ProductInterface $productRepository
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
-     * @throws \Throwable
-     */
-    public function approveProduct($id, ProductInterface $productRepository, BaseHttpResponse $response)
+    public function approveProduct(int $id, ProductInterface $productRepository, BaseHttpResponse $response)
     {
         $product = $productRepository->findOrFail($id);
 

@@ -23,13 +23,9 @@ use Botble\Marketplace\Forms\ProductForm;
 use Botble\Marketplace\Tables\ProductTable;
 use EcommerceHelper;
 use EmailHandler;
-use Exception;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\View\View;
 use MarketplaceHelper;
-use Throwable;
 
 class ProductController extends BaseController
 {
@@ -39,11 +35,6 @@ class ProductController extends BaseController
         ProductActionsTrait::deleteVersionItem as baseDeleteVersionItem;
     }
 
-    /**
-     * @param ProductTable $table
-     * @return Factory|View
-     * @throws Throwable
-     */
     public function index(ProductTable $table)
     {
         page_title()->setTitle(__('Products'));
@@ -51,11 +42,6 @@ class ProductController extends BaseController
         return $table->render(MarketplaceHelper::viewPath('dashboard.table.base'));
     }
 
-    /**
-     * @param FormBuilder $formBuilder
-     * @param Request $request
-     * @return string
-     */
     public function create(FormBuilder $formBuilder, Request $request)
     {
         if (EcommerceHelper::isEnabledSupportDigitalProducts()) {
@@ -71,18 +57,6 @@ class ProductController extends BaseController
         return $formBuilder->create(ProductForm::class)->renderForm();
     }
 
-    /**
-     * @param ProductRequest $request
-     * @param StoreProductService $service
-     * @param BaseHttpResponse $response
-     * @param ProductVariationInterface $variationRepository
-     * @param ProductVariationItemInterface $productVariationItemRepository
-     * @param GroupedProductInterface $groupedProductRepository
-     * @param StoreAttributesOfProductService $storeAttributesOfProductService
-     * @param StoreProductTagService $storeProductTagService
-     * @return BaseHttpResponse
-     * @throws Exception|Throwable
-     */
     public function store(
         ProductRequest $request,
         StoreProductService $service,
@@ -171,12 +145,7 @@ class ProductController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    /**
-     * @param int $id
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
-    public function edit($id, FormBuilder $formBuilder)
+    public function edit(int $id, FormBuilder $formBuilder)
     {
         $product = $this->productRepository->findOrFail($id);
 
@@ -191,19 +160,8 @@ class ProductController extends BaseController
             ->renderForm();
     }
 
-    /**
-     * @param int $id
-     * @param ProductRequest $request
-     * @param StoreProductService $service
-     * @param GroupedProductInterface $groupedProductRepository
-     * @param BaseHttpResponse $response
-     * @param ProductVariationInterface $variationRepository
-     * @param ProductVariationItemInterface $productVariationItemRepository
-     * @param StoreProductTagService $storeProductTagService
-     * @return BaseHttpResponse
-     */
     public function update(
-        $id,
+        int $id,
         ProductRequest $request,
         StoreProductService $service,
         GroupedProductInterface $groupedProductRepository,
@@ -285,10 +243,6 @@ class ProductController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param Request $request
-     * @return Request
-     */
     protected function processRequestData(Request $request): Request
     {
         $shortcodeCompiler = shortcode()->getCompiler();
@@ -310,9 +264,6 @@ class ProductController extends BaseController
         return $request;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getRelationBoxes($id, BaseHttpResponse $response)
     {
         $product = null;
@@ -331,9 +282,6 @@ class ProductController extends BaseController
         )->render());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function postAddVersion(
         ProductVersionRequest $request,
         ProductVariationInterface $productVariation,
@@ -347,9 +295,6 @@ class ProductController extends BaseController
         return $this->basePostAddVersion($request, $productVariation, $id, $response);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function postUpdateVersion(
         ProductVersionRequest $request,
         ProductVariationInterface $productVariation,
@@ -363,9 +308,6 @@ class ProductController extends BaseController
         return $this->basePostUpdateVersion($request, $productVariation, $id, $response);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getVersionForm(
         $id,
         Request $request,
@@ -405,9 +347,6 @@ class ProductController extends BaseController
             );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     protected function deleteVersionItem(
         ProductVariationInterface $productVariation,
         ProductVariationItemInterface $productVariationItem,
@@ -424,9 +363,6 @@ class ProductController extends BaseController
         return $this->baseDeleteVersionItem($productVariation, $productVariationItem, $variationId);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getListProductForSearch(Request $request, BaseHttpResponse $response)
     {
         $availableProducts = $this->productRepository

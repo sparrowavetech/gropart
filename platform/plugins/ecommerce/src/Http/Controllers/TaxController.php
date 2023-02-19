@@ -13,10 +13,7 @@ use Botble\Ecommerce\Http\Requests\TaxRequest;
 use Botble\Ecommerce\Repositories\Interfaces\TaxInterface;
 use Botble\Ecommerce\Tables\TaxTable;
 use Exception;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
-use Throwable;
 
 class TaxController extends BaseController
 {
@@ -27,12 +24,6 @@ class TaxController extends BaseController
         $this->taxRepository = $taxRepository;
     }
 
-    /**
-     * @param TaxTable $dataTable
-     * @return Factory|View
-     *
-     * @throws Throwable
-     */
     public function index(TaxTable $dataTable)
     {
         page_title()->setTitle(trans('plugins/ecommerce::tax.name'));
@@ -40,10 +31,6 @@ class TaxController extends BaseController
         return $dataTable->renderTable();
     }
 
-    /**
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
     public function create(FormBuilder $formBuilder)
     {
         page_title()->setTitle(trans('plugins/ecommerce::tax.create'));
@@ -51,11 +38,6 @@ class TaxController extends BaseController
         return $formBuilder->create(TaxForm::class)->renderForm();
     }
 
-    /**
-     * @param TaxRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function store(TaxRequest $request, BaseHttpResponse $response)
     {
         $tax = $this->taxRepository->createOrUpdate($request->input());
@@ -68,11 +50,7 @@ class TaxController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    /**
-     * @param int $id
-     * @return string
-     */
-    public function edit($id, FormBuilder $formBuilder)
+    public function edit(int $id, FormBuilder $formBuilder)
     {
         $tax = $this->taxRepository->findOrFail($id);
 
@@ -81,13 +59,7 @@ class TaxController extends BaseController
         return $formBuilder->create(TaxForm::class, ['model' => $tax])->renderForm();
     }
 
-    /**
-     * @param int $id
-     * @param TaxRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function update($id, TaxRequest $request, BaseHttpResponse $response)
+    public function update(int $id, TaxRequest $request, BaseHttpResponse $response)
     {
         $tax = $this->taxRepository->createOrUpdate($request->input(), ['id' => $id]);
 
@@ -98,13 +70,7 @@ class TaxController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param Request $request
-     * @param int $id
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function destroy(Request $request, $id, BaseHttpResponse $response)
+    public function destroy(Request $request, int $id, BaseHttpResponse $response)
     {
         try {
             $tax = $this->taxRepository->findOrFail($id);
@@ -119,13 +85,6 @@ class TaxController extends BaseController
         }
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     *
-     * @throws Exception
-     */
     public function deletes(Request $request, BaseHttpResponse $response)
     {
         $ids = $request->input('ids');

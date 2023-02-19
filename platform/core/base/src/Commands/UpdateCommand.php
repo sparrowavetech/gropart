@@ -6,7 +6,6 @@ use BaseHelper;
 use Botble\Base\Supports\Core;
 use DOMDocument;
 use Illuminate\Console\Command;
-use Illuminate\Console\ConfirmableTrait;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -15,23 +14,15 @@ use Symfony\Component\Process\Process;
 #[AsCommand('cms:update', 'Update core')]
 class UpdateCommand extends Command
 {
-    use ConfirmableTrait;
-
     public function handle(): int
     {
         if (! config('core.base.general.enable_system_updater')) {
-            $this->error('Please enable system updater');
+            $this->components->error('Please enable system updater');
 
             return self::FAILURE;
         }
 
-        if (! version_compare(phpversion(), '8.0.2', '>=') > 0 && ! config('core.base.general.upgrade_php_require_disabled')) {
-            $this->error(trans('core/base::system.upgrade_php_version_required', ['version' => phpversion()]));
-
-            return self::FAILURE;
-        }
-
-        $this->info('Checking for the latest version...');
+        $this->components->info('Checking for the latest version...');
 
         BaseHelper::maximumExecutionTimeAndMemoryLimit();
 
@@ -41,7 +32,7 @@ class UpdateCommand extends Command
         $verifyLicense = $api->verifyLicense();
 
         if (! $verifyLicense['status']) {
-            $this->error('Your license is invalid. Please activate your license first!');
+            $this->components->error('Your license is invalid. Please activate your license first!');
 
             return self::FAILURE;
         }
@@ -51,7 +42,7 @@ class UpdateCommand extends Command
         if ($updateData['status']) {
             $updateData['message'] = 'A new version (' . $updateData['version'] . ' / released on ' . $updateData['release_date'] . ') is available to update!';
 
-            $this->linePrimary($updateData['message']);
+            $this->components->info($updateData['message']);
 
             $this->newLine();
 
@@ -69,16 +60,13 @@ class UpdateCommand extends Command
             $this->alertBox($changelogs, 'Changelog', 'lineWarning');
             $this->newLine();
 
-            if ($this->confirmToProceed('Do you want download & install Update CMS?', true)) {
+            if ($this->components->confirm('Do you want download & install Update CMS?', true)) {
                 ob_start();
                 $api->downloadUpdate($updateData['update_id'], $updateData['version']);
                 $this->newLine();
 
-                if ($this->confirmToProceed('Do you want run composer?', true)) {
-                    $composer = $this->choice(
-                        'Do you want run:',
-                        ['install', 'update']
-                    );
+                if ($this->components->confirm('Do you want run composer?', true)) {
+                    $composer = $this->components->choice('Do you want run:', ['install', 'update']);
 
                     $process = new Process(['composer', $composer]);
                     $process->start();
@@ -86,7 +74,7 @@ class UpdateCommand extends Command
                         $this->line($buffer);
                     });
 
-                    $this->info('Updated successfully!');
+                    $this->components->info('Updated successfully!');
 
                     return self::SUCCESS;
                 }
@@ -95,7 +83,7 @@ class UpdateCommand extends Command
             }
         }
 
-        $this->info('The system is up-to-date. There are no new versions to update!');
+        $this->components->info('The system is up-to-date. There are no new versions to update!');
 
         return self::SUCCESS;
     }

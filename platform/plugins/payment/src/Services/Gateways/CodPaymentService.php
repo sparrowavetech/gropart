@@ -8,11 +8,7 @@ use Illuminate\Support\Str;
 
 class CodPaymentService
 {
-    /**
-     * @param array $data
-     * @return string
-     */
-    public function execute(array $data)
+    public function execute(array $data): string
     {
         $chargeId = Str::upper(Str::random(10));
 

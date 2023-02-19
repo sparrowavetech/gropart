@@ -233,7 +233,7 @@
 </div>
 
 <link
-    href="https://fonts.googleapis.com/css?family={{ implode('|', array_map('urlencode', config('core.base.general.google_fonts', []))) }}"
+    href="{{ BaseHelper::getGoogleFontsURL() }}/css?family={{ implode('|', array_map('urlencode', config('core.base.general.google_fonts', []))) }}"
     rel="stylesheet" type="text/css">
 <script>
     'use strict';

@@ -37,3 +37,12 @@
         <div class="invalid-feedback">{{ $errors->first('shop_category') }}</div>
     @endif
 </div>
+
+<div class="mb-3">
+    <label class="form-label required" for="shop-phone-register">{{ __('Phone Number') }}</label>
+    <input class="form-control @if ($errors->has('shop_phone')) is-invalid @endif" id="shop-phone-register" type="text" name="shop_phone"
+        placeholder="{{ __('Ex: 0943243332') }}">
+    @if ($errors->has('shop_phone'))
+        <div class="invalid-feedback">{{ $errors->first('shop_phone') }}</div>
+    @endif
+</div>

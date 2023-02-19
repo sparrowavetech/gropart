@@ -4,13 +4,11 @@ namespace Botble\Menu\Repositories\Eloquent;
 
 use Botble\Menu\Repositories\Interfaces\MenuNodeInterface;
 use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
+use Illuminate\Database\Eloquent\Collection;
 
 class MenuNodeRepository extends RepositoriesAbstract implements MenuNodeInterface
 {
-    /**
-     * {@inheritDoc}
-     */
-    public function getByMenuId($menuId, $parentId, $select = ['*'], array $with = ['child'])
+    public function getByMenuId(int $menuId, ?int $parentId, array $select = ['*'], array $with = ['child']): Collection
     {
         $data = $this->model
             ->with($with)
@@ -23,8 +21,7 @@ class MenuNodeRepository extends RepositoriesAbstract implements MenuNodeInterfa
             $data = $data->select($select);
         }
 
-        $data = $data->orderBy('position', 'asc')
-            ->get();
+        $data = $data->orderBy('position')->get();
 
         $this->resetModel();
 

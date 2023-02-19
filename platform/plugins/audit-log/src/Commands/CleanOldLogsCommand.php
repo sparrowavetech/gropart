@@ -11,11 +11,11 @@ class CleanOldLogsCommand extends Command
 {
     public function handle(): int
     {
-        $this->info('Processing...');
+        $this->components->info('Processing...');
 
         $this->call('model:prune', ['--model' => AuditHistory::class]);
 
-        $this->info('Done!');
+        $this->components->info('Done!');
 
         return self::SUCCESS;
     }

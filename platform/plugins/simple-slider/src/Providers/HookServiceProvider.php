@@ -13,7 +13,7 @@ use Theme;
 
 class HookServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         if (function_exists('shortcode')) {
             add_shortcode(

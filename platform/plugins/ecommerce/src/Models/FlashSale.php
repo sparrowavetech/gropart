@@ -2,17 +2,15 @@
 
 namespace Botble\Ecommerce\Models;
 
+use Botble\Base\Casts\SafeContent;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
-use Botble\Base\Traits\EnumCastable;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class FlashSale extends BaseModel
 {
-    use EnumCastable;
-
     protected $table = 'ec_flash_sales';
 
     protected $fillable = [
@@ -24,6 +22,7 @@ class FlashSale extends BaseModel
     protected $casts = [
         'status' => BaseStatusEnum::class,
         'end_date' => 'datetime',
+        'name' => SafeContent::class,
     ];
 
     public function products(): BelongsToMany

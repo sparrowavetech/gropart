@@ -13,7 +13,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Throwable;
 
 class TableController extends Controller
 {
@@ -70,11 +69,6 @@ class TableController extends Controller
         return $data;
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function postSaveBulkChange(Request $request, BaseHttpResponse $response)
     {
         $ids = $request->input('ids');
@@ -121,11 +115,6 @@ class TableController extends Controller
         return $response->setMessage(trans('core/table::table.save_bulk_change_success'));
     }
 
-    /**
-     * @param FilterRequest $request
-     * @return array
-     * @throws Throwable
-     */
     public function getFilterInput(FilterRequest $request)
     {
         $class = $request->input('class');

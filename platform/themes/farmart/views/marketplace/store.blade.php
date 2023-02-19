@@ -89,7 +89,7 @@
                     <div class="form-group">
                         <form action="{{ URL::current() }}" method="GET" class="products-filter-form-vendor">
                             <div class="input-group">
-                                <input type="text" class="form-control" name="q" value="{{ request()->input('q') }}" form="products-filter-form" placeholder="{{ __('Search in this store...') }}">
+                                <input type="text" class="form-control" name="q" value="{{ BaseHelper::stringify(request()->query('q')) }}" form="products-filter-form" placeholder="{{ __('Search in this store...') }}">
                                 <button type="submit" class="btn btn-primary px-3 justify-content-center">
                                     <span class="svg-icon me-2 d-block text-center w-100">
                                         <svg>

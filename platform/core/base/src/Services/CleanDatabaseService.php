@@ -14,9 +14,14 @@ class CleanDatabaseService
     {
         return [
             'migrations',
+            'pages',
             'users',
             'activations',
             'settings',
+            'translations',
+            'widgets',
+            'menus',
+            'menu_nodes',
         ];
     }
 

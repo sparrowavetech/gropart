@@ -195,9 +195,6 @@ add_filter(BASE_FILTER_BEFORE_RENDER_FORM, function ($form, $data) {
 }, 127, 3);
 
 if (! function_exists('theme_get_autoplay_speed_options')) {
-    /**
-     * @return int[]
-     */
     function theme_get_autoplay_speed_options(): array
     {
         return array_combine([2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000], [2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]);
@@ -225,9 +222,6 @@ add_action('init', function () {
 }, 125);
 
 if (! function_exists('get_store_list_layouts')) {
-    /**
-     * @return string[]
-     */
     function get_store_list_layouts(): array
     {
         return [

@@ -76,7 +76,7 @@ class MarketplaceService
         ]);
     }
 
-    public function beginInstall(string $id, string $type, string $name): bool
+    public function beginInstall(string $id, string $type, string $name): bool|JsonResponse
     {
         $core = new Core();
 
@@ -86,6 +86,7 @@ class MarketplaceService
             [
                 'site_url' => rtrim(url('')),
                 'product_id' => $this->productId,
+                'core_version' => get_core_version(),
                 'license_url' => $this->licenseUrl,
                 'license_api_key' => $this->licenseApiKey,
                 'license_file' => $core->checkLocalLicenseExist() ? file_get_contents(

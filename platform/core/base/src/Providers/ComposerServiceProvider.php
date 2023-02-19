@@ -12,7 +12,7 @@ use RvMedia;
 
 class ComposerServiceProvider extends ServiceProvider
 {
-    public function boot(Factory $view)
+    public function boot(Factory $view): void
     {
         $view->composer(['core/base::layouts.partials.top-header', 'core/acl::auth.master'], function (View $view) {
             $themes = Assets::getThemes();

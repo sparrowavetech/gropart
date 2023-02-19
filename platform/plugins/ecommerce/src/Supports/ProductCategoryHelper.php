@@ -18,7 +18,7 @@ class ProductCategoryHelper
     public function getAllProductCategories(array $params = [], bool $onlyParent = false): Collection
     {
         if (! $this->allCategories instanceof Collection) {
-            $this->allCategories = collect([]);
+            $this->allCategories = collect();
         }
 
         if ($this->allCategories->count() == 0) {
@@ -122,7 +122,7 @@ class ProductCategoryHelper
     public function getActiveTreeCategories(): Collection
     {
         if (! $this->treeCategories instanceof Collection) {
-            $this->treeCategories = collect([]);
+            $this->treeCategories = collect();
         }
 
         if ($this->treeCategories->count() == 0) {

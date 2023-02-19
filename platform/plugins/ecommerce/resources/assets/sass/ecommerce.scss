@@ -94,23 +94,6 @@
     border-radius: 4px;
 }
 
-table.box-table-shipping .border-top-shipping-detail:first-child {
-    border-top: none;
-}
-
-.wrapper-content {
-    .box-table-shipping {
-        td {
-            border: none;
-        }
-    }
-
-    table.box-table-shipping td {
-        border: none !important;
-        padding: 5px 0 0 !important;
-    }
-}
-
 .carrier-card .carrier-icon div.carrier-icon-container {
     width: 80px;
     height: 80px;
@@ -892,5 +875,94 @@ Product option
 #product-option {
     .product-option {
         margin-bottom:10px;
+    }
+}
+
+
+@keyframes table-loading {
+    0% {
+        background-position: 0;
+    }
+    50% {
+        background-position: -30%;
+    }
+    80% {
+        background-position: -100%;
+    }
+    100% {
+        background-position: -200%;
+    }
+}
+.table-shipping-rule-items {
+    tbody {
+        tr + tr.tr-no-data {
+            display: none;
+        }
+    }
+
+    thead {
+        tr th[scope=col][data-column] {
+            cursor: pointer;
+            position: relative;
+            padding-right: 1.5em;
+
+            &::before, &::after {
+                position: absolute;
+                bottom: 7px;
+                display: block;
+                opacity: .3;
+            }
+
+            &::before {
+                right: 7px;
+                content: "\2191";
+            }
+            &::after {
+                right: 2px;
+                content: "\2193";
+            }
+
+            &[data-dir=ASC] {
+                &::after {
+                    opacity: 1;
+                }
+            }
+
+            &[data-dir=DESC] {
+                &::before {
+                    opacity: 1;
+                }
+            }
+        }
+    }
+
+    &.table-loading {
+        table {
+            border-collapse: collapse;
+            tbody {
+                > tr {
+                    &:nth-of-type(odd) {
+                        background-image: linear-gradient(to right, transparent 50%, rgba(0, 0, 0, .05) 50%);
+                        background-size: 200% 100%;
+                        animation: table-loading 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+                    }
+                }
+            }
+        
+            tr th, tr td {
+                opacity: .45;
+                pointer-events: none;
+            }
+        }
+    }
+
+    input.numb {
+        min-width: 4em;
+    }
+
+    .pagination {
+        .page-link {
+            --bs-pagination-focus-box-shadow: 0;
+        }
     }
 }

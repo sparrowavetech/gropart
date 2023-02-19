@@ -18,7 +18,7 @@
                     @include('plugins/ecommerce::components.form.image', [
                         'name' => '',
                         'value' => '__image__',
-                        'thumb' => RvMedia::getDefaultImage(false),
+                        'thumb' => RvMedia::getDefaultImage(),
                     ])
                 </div>
             </div>
@@ -76,7 +76,7 @@
                                 @include('plugins/ecommerce::components.form.image', [
                                     'name' => '',
                                     'value' => $attribute->image,
-                                    'thumb' => $attribute->image ? RvMedia::getImageUrl($attribute->image, 'thumb') : RvMedia::getDefaultImage(false),
+                                    'thumb' => $attribute->image ? RvMedia::getImageUrl($attribute->image, 'thumb') : RvMedia::getDefaultImage(),
                                 ])
                             </div>
                         </div>

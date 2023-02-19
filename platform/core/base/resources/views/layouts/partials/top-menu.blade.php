@@ -50,3 +50,4 @@
         @endauth
     </ul>
 </div>
+<div id="sidebar-notification-backdrop"></div>

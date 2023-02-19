@@ -8,7 +8,7 @@ use Botble\Theme\Http\Requests\CustomJsRequest;
 
 class CustomJSForm extends FormAbstract
 {
-    public function buildForm()
+    public function buildForm(): void
     {
         $this
             ->setupModel(new BaseModel())

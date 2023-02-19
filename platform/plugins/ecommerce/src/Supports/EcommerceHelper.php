@@ -57,6 +57,11 @@ class EcommerceHelper
         return get_ecommerce_setting('order_tracking_enabled', 1) == 1;
     }
 
+    public function isOrderAutoConfirmedEnabled(): bool
+    {
+        return get_ecommerce_setting('order_auto_confirmed', 0) == 1;
+    }
+
     public function reviewMaxFileSize(bool $isConvertToKB = false): int
     {
         $size = (int)get_ecommerce_setting('review_max_file_size', 2);
@@ -88,10 +93,10 @@ class EcommerceHelper
         if ($reviewsCount) {
             $reviews = app(ReviewInterface::class)->getGroupedByProductId($productId);
         } else {
-            $reviews = collect([]);
+            $reviews = collect();
         }
 
-        $results = collect([]);
+        $results = collect();
         for ($i = 5; $i >= 1; $i--) {
             if ($reviewsCount) {
                 $review = $reviews->firstWhere('star', $i);
@@ -282,10 +287,7 @@ class EcommerceHelper
         if ($request->input('date_from')) {
             try {
                 $startDate = Carbon::now()->createFromFormat('Y-m-d', $request->input('date_from'));
-            } catch (Exception $exception) {
-            }
-
-            if (! $startDate) {
+            } catch (Exception) {
                 $startDate = Carbon::now()->subDays(29);
             }
         }
@@ -294,9 +296,6 @@ class EcommerceHelper
             try {
                 $endDate = Carbon::now()->createFromFormat('Y-m-d', $request->input('date_to'));
             } catch (Exception) {
-            }
-
-            if (! $endDate) {
                 $endDate = Carbon::now();
             }
         }
@@ -362,7 +361,7 @@ class EcommerceHelper
 
         $reviews = app(ReviewInterface::class)
             ->getModel()
-            ->select(['ec_reviews.*', 'ec_orders.created_at as order_created_at'])
+            ->select(['ec_reviews.*'])
             ->where($condition);
 
         if ($product->variations->count()) {
@@ -375,17 +374,14 @@ class EcommerceHelper
         }
 
         return $reviews
-            ->leftJoin('ec_orders', function ($join) use ($ids) {
-                $join
-                    ->on('ec_orders.user_id', 'ec_reviews.customer_id')
+            ->with(['user', 'user.orders' => function ($query) use ($ids) {
+                $query
                     ->where('ec_orders.status', OrderStatusEnum::COMPLETED)
-                    ->join('ec_order_product', function ($join) use ($ids) {
-                        $join
-                            ->on('ec_order_product.order_id', 'ec_orders.id')
-                            ->whereIn('ec_order_product.product_id', $ids);
-                    });
-            })
-            ->with(['user'])
+                    ->whereHas('products', function ($query) use ($ids) {
+                        $query->where('product_id', $ids);
+                    })
+                    ->orderBy('ec_orders.created_at', 'desc');
+            }])
             ->orderBy('created_at', 'desc')
             ->paginate($perPage)
             ->onEachSide(1)
@@ -793,8 +789,13 @@ class EcommerceHelper
         ];
     }
 
-    public function getShippingData(array|Collection $products, array $session, array $origin, float $orderTotal, ?string $paymentMethod = null): array
-    {
+    public function getShippingData(
+        array|Collection $products,
+        array $session,
+        array $origin,
+        float $orderTotal,
+        ?string $paymentMethod = null
+    ): array {
         $weight = 0;
         $items = [];
         foreach ($products as $product) {
@@ -845,5 +846,10 @@ class EcommerceHelper
         }
 
         return $data;
+    }
+
+    public function onlyAllowCustomersPurchasedToReview(): bool
+    {
+        return get_ecommerce_setting('only_allow_customers_purchased_to_review', '0') == '1';
     }
 }

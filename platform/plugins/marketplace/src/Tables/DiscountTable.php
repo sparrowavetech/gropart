@@ -18,10 +18,6 @@ use Yajra\DataTables\DataTables;
 
 class DiscountTable extends TableAbstract
 {
-    protected $hasActions = false;
-
-    protected $hasFilter = false;
-
     protected $hasCheckbox = false;
 
     public function __construct(DataTables $table, UrlGenerator $urlGenerator, DiscountInterface $discountRepository)

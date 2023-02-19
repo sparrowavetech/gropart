@@ -46,7 +46,7 @@
             <label for="database_connection">
                 {{ trans('packages/installer::installer.environment.wizard.form.db_connection_label') }}
             </label>
-            <select name="database_connection" id="database_connection">
+            <select name="database_connection" id="database_connection" class="form-select">
                 <option value="mysql"
                         @if (old('database_connection', config('database.default')) === 'mysql') selected @endif>{{ trans('packages/installer::installer.environment.wizard.form.db_connection_label_mysql') }}</option>
                 <option value="sqlite"
@@ -66,8 +66,11 @@
             <label for="database_hostname">
                 {{ trans('packages/installer::installer.environment.wizard.form.db_host_label') }}
             </label>
-            <input type="text" name="database_hostname" id="database_hostname" value="{{ old('database_hostname', config('database.connections.mysql.port')) }}"
+            <input type="text" name="database_hostname" id="database_hostname" value="{{ old('database_hostname', config('database.connections.mysql.host')) }}"
                    placeholder="{{ trans('packages/installer::installer.environment.wizard.form.db_host_placeholder') }}"/>
+            <span class="helper-block">
+                {{ trans('packages/installer::installer.environment.wizard.form.db_host_helper') }}
+            </span>
             @if ($errors->has('database_hostname'))
                 <span class="error-block">
                     <i class="fa fa-fw fa-exclamation-triangle" aria-hidden="true"></i>

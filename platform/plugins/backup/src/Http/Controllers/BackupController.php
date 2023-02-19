@@ -12,7 +12,6 @@ use Botble\Base\Supports\Helper;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Throwable;
 
 class BackupController extends BaseController
 {
@@ -23,9 +22,6 @@ class BackupController extends BaseController
         $this->backup = $backup;
     }
 
-    /**
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
-     */
     public function getIndex()
     {
         page_title()->setTitle(trans('plugins/backup::backup.menu_name'));
@@ -40,12 +36,6 @@ class BackupController extends BaseController
         return view('plugins/backup::index', compact('backups', 'backupManager'));
     }
 
-    /**
-     * @param BackupRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Throwable
-     */
     public function store(BackupRequest $request, BaseHttpResponse $response)
     {
         try {
@@ -69,12 +59,7 @@ class BackupController extends BaseController
         }
     }
 
-    /**
-     * @param string $folder
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function destroy($folder, BaseHttpResponse $response)
+    public function destroy(string $folder, BaseHttpResponse $response)
     {
         try {
             $this->backup->deleteFolderBackup($this->backup->getBackupPath($folder));
@@ -87,13 +72,7 @@ class BackupController extends BaseController
         }
     }
 
-    /**
-     * @param string $folder
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function getRestore($folder, Request $request, BaseHttpResponse $response)
+    public function getRestore(string $folder, Request $request, BaseHttpResponse $response)
     {
         try {
             $path = $this->backup->getBackupPath($folder);
@@ -135,11 +114,7 @@ class BackupController extends BaseController
         }
     }
 
-    /**
-     * @param string $folder
-     * @return BaseHttpResponse|\Symfony\Component\HttpFoundation\BinaryFileResponse
-     */
-    public function getDownloadDatabase($folder, BaseHttpResponse $response)
+    public function getDownloadDatabase(string $folder, BaseHttpResponse $response)
     {
         $path = $this->backup->getBackupPath($folder);
 
@@ -154,11 +129,7 @@ class BackupController extends BaseController
             ->setMessage(trans('plugins/backup::backup.database_backup_not_existed'));
     }
 
-    /**
-     * @param string $folder
-     * @return BaseHttpResponse|\Symfony\Component\HttpFoundation\BinaryFileResponse
-     */
-    public function getDownloadUploadFolder($folder, BaseHttpResponse $response)
+    public function getDownloadUploadFolder(string $folder, BaseHttpResponse $response)
     {
         $path = $this->backup->getBackupPath($folder);
 

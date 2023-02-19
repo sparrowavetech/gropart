@@ -13,7 +13,7 @@ class CleanCommand extends Command
     {
         $manager->cleanTranslations();
 
-        $this->info('Done cleaning translations');
+        $this->components->info('Done cleaning translations');
 
         return self::SUCCESS;
     }

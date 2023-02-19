@@ -18,7 +18,7 @@
                 @endforeach
                 <th>{{ trans('plugins/ecommerce::products.form.price') }}</th>
                 <th>{{ trans('plugins/ecommerce::products.form.is_default') }}</th>
-                @if (EcommerceHelper::isEnabledSupportDigitalProducts() && $product->isTypeDigital())
+                @if (EcommerceHelper::isEnabledSupportDigitalProducts() && $product && $product->isTypeDigital())
                     <th>{{ $product->product_type->label() }}</th>
                 @endif
                 <th class="text-center">{{ trans('plugins/ecommerce::products.form.action') }}</th>
@@ -63,7 +63,7 @@
                                    value="{{ $variation->id }}">
                         </label>
                     </td>
-                    @if (EcommerceHelper::isEnabledSupportDigitalProducts() && $currentRelatedProduct->isTypeDigital())
+                    @if (EcommerceHelper::isEnabledSupportDigitalProducts() && $currentRelatedProduct && $currentRelatedProduct->isTypeDigital())
                         <td>
                             <span>{{ $currentRelatedProduct->productFiles->count() }}</span>
                             <span><i class="fas fa-paperclip"></i></span>

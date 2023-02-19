@@ -16,6 +16,10 @@
             'label'  => __('Orders'),
             'routes' => ['customer.orders.view']
         ],
+        'customer.product-reviews' => [
+            'label'  => __('Product Reviews'),
+            'routes' => ['customer.product-reviews']
+        ],
         'customer.downloads' => [
             'label' => __('Downloads'),
         ],
@@ -37,8 +41,12 @@
 
     $routeName = Route::currentRouteName();
 
-    if (!EcommerceHelper::isEnabledSupportDigitalProducts()) {
-        unset($menus[3]);
+    if (! EcommerceHelper::isEnabledSupportDigitalProducts()) {
+        unset($menus['customer.downloads']);
+    }
+
+    if (! EcommerceHelper::isReviewEnabled()) {
+        unset($menus['customer.product-reviews']);
     }
 @endphp
 <div class="container-xxxl">

@@ -26,10 +26,6 @@ class WishlistController extends Controller
         $this->wishlistRepository = $wishlistRepository;
     }
 
-    /**
-     * @param Request $request
-     * @return \Illuminate\Http\Response
-     */
     public function index(Request $request)
     {
         if (! EcommerceHelper::isWishlistEnabled()) {
@@ -66,12 +62,7 @@ class WishlistController extends Controller
         return Theme::scope('ecommerce.wishlist', compact('products'), 'plugins/ecommerce::themes.wishlist')->render();
     }
 
-    /**
-     * @param int $productId
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function store($productId, BaseHttpResponse $response)
+    public function store(int $productId, BaseHttpResponse $response)
     {
         if (! EcommerceHelper::isWishlistEnabled()) {
             abort(404);
@@ -114,13 +105,7 @@ class WishlistController extends Controller
             ->setData(['count' => auth('customer')->user()->wishlist()->count()]);
     }
 
-    /**
-     * @param int $productId
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws \Exception
-     */
-    public function destroy($productId, BaseHttpResponse $response)
+    public function destroy(int $productId, BaseHttpResponse $response)
     {
         if (! EcommerceHelper::isWishlistEnabled()) {
             abort(404);

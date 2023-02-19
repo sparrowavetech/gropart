@@ -3,6 +3,7 @@
 namespace Botble\Ecommerce\Repositories\Eloquent;
 
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Models\Option;
 use Botble\Ecommerce\Models\OptionValue;
 use Botble\Ecommerce\Models\Product;
@@ -58,7 +59,7 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
 
             return $this->applyBeforeExecuteQuery($data)->get();
         } catch (Exception) {
-            return collect([]);
+            return collect();
         }
     }
 
@@ -803,7 +804,9 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
                     ->delete();
 
                 OptionValue::whereNotIn('option_id', $existsOptionIds)
-                    ->where('product_id', $product->id)
+                    ->whereHas('option', function ($query) use ($product) {
+                        $query->where('product_id', $product->id);
+                    })
                     ->delete();
             } else {
                 foreach ($product->options()->get() as $option) {
@@ -828,5 +831,42 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
         }
 
         return $values;
+    }
+
+    public function productsNeedToReviewByCustomer(int $customerId, int $limit = 12, array $orderIds = [])
+    {
+        $data = $this->model
+            ->select([
+                'ec_products.id',
+                'ec_products.name',
+                'ec_products.image',
+                DB::raw('MAX(ec_orders.id) as ec_orders_id'),
+                DB::raw('MAX(ec_orders.completed_at) as order_completed_at'),
+                DB::raw('MAX(ec_order_product.product_name) as order_product_name'),
+                DB::raw('MAX(ec_order_product.product_image) as order_product_image'),
+            ])
+            ->where('ec_products.is_variation', 0)
+            ->leftJoin('ec_product_variations', 'ec_product_variations.configurable_product_id', 'ec_products.id')
+            ->leftJoin('ec_order_product', function ($query) {
+                $query
+                    ->on('ec_order_product.product_id', 'ec_products.id')
+                    ->orOn('ec_order_product.product_id', 'ec_product_variations.product_id');
+            })
+            ->join('ec_orders', function ($query) use ($customerId, $orderIds) {
+                $query
+                    ->on('ec_orders.id', 'ec_order_product.order_id')
+                    ->where('ec_orders.user_id', $customerId)
+                    ->where('ec_orders.status', OrderStatusEnum::COMPLETED);
+                if ($orderIds) {
+                    $query->whereIn('ec_orders.id', $orderIds);
+                }
+            })
+            ->whereDoesntHave('reviews', function ($query) use ($customerId) {
+                $query->where('ec_reviews.customer_id', $customerId);
+            })
+            ->orderBy('order_completed_at', 'desc')
+            ->groupBy('ec_products.id', 'ec_products.name', 'ec_products.image');
+
+        return $data->limit($limit)->get();
     }
 }

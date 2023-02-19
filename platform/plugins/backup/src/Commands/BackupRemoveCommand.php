@@ -21,7 +21,7 @@ class BackupRemoveCommand extends Command
             $backup = $this->argument('backup');
 
             if (! File::isDirectory($backupService->getBackupPath($backup))) {
-                $this->error('Cannot found backup folder!');
+                $this->components->error('Cannot found backup folder!');
 
                 return self::FAILURE;
             }
@@ -32,9 +32,9 @@ class BackupRemoveCommand extends Command
 
             $backupService->deleteFolderBackup($backupService->getBackupPath($backup));
 
-            $this->info('Remove a backup successfully!');
+            $this->components->info('Remove a backup successfully!');
         } catch (Exception $exception) {
-            $this->error($exception->getMessage());
+            $this->components->error($exception->getMessage());
         }
 
         return self::SUCCESS;

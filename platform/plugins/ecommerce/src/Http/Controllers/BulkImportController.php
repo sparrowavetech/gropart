@@ -11,12 +11,8 @@ use Botble\Ecommerce\Http\Requests\BulkImportRequest;
 use Botble\Ecommerce\Http\Requests\ProductRequest;
 use Botble\Ecommerce\Imports\ProductImport;
 use Botble\Ecommerce\Imports\ValidateProductImport;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Excel;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class BulkImportController extends BaseController
 {
@@ -30,9 +26,6 @@ class BulkImportController extends BaseController
         $this->validateProductImport = $validateProductImport;
     }
 
-    /**
-     * @return Factory|Application|View
-     */
     public function index()
     {
         page_title()->setTitle(trans('plugins/ecommerce::bulk-import.name'));
@@ -47,11 +40,6 @@ class BulkImportController extends BaseController
         return view('plugins/ecommerce::bulk-import.index', compact('data', 'headings', 'rules'));
     }
 
-    /**
-     * @param BulkImportRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function postImport(BulkImportRequest $request, BaseHttpResponse $response)
     {
         BaseHelper::maximumExecutionTimeAndMemoryLimit();
@@ -80,7 +68,7 @@ class BulkImportController extends BaseController
         $this->productImport
             ->setValidatorClass(new ProductRequest())
             ->setImportType($request->input('type'))
-            ->import($file); // Start import
+            ->import($file);
 
         $data = [
             'total_success' => $this->productImport->successes()->count(),
@@ -100,10 +88,6 @@ class BulkImportController extends BaseController
         return $response->setData($data)->setMessage($message . ' ' . $result);
     }
 
-    /**
-     * @param Request $request
-     * @return BinaryFileResponse
-     */
     public function downloadTemplate(Request $request)
     {
         $extension = $request->input('extension');

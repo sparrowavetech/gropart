@@ -36,13 +36,8 @@ return [
     'date_format' => [
         'date' => env('CMS_DATE_FORMAT', 'Y-m-d'),
         'date_time' => env('CMS_DATE_TIME_FORMAT', 'Y-m-d H:i:s'),
-        'js' => [
-            'date' => env('CMS_JS_DATE_FORMAT', 'yyyy-mm-dd'),
-            'date_time' => env('CMS_JS_DATE_TIME_FORMAT', 'yyyy-mm-dd H:i:s'),
-        ],
     ],
     'public_single_ending_url' => env('PUBLIC_SINGLE_ENDING_URL'),
-    'send_mail_using_job_queue' => env('SEND_MAIL_USING_JOB_QUEUE', false),
     'locale' => env('APP_LOCALE', 'en'),
     'demo' => [
         'account' => [
@@ -550,7 +545,7 @@ return [
     'purifier' => [
         'default' => [
             'HTML.Doctype' => 'HTML 4.01 Transitional',
-            'HTML.Allowed' => 'div,b,strong,i,em,u,a[href|title|rel|style|target],ul,ol,li,p[style],br,span[style],img[width|height|alt|src|style],button,ins[style|data-ad-client|data-ad-slot|data-ad-format|data-full-width-responsive],video[src|type|width|height|preload|controls|autoplay|autostart|poster|id|class,muted],meta[name|content|property],link[media|type|rel|href]',
+            'HTML.Allowed' => 'div,b,strong,i,em,u,a[href|title|rel|style|target],ul,ol,li,p[style],br,span[style],img[width|height|alt|src|style|loading],button,ins[style|data-ad-client|data-ad-slot|data-ad-format|data-full-width-responsive],video[src|type|width|height|preload|controls|autoplay|autostart|poster|id|class,muted],meta[name|content|property],link[media|type|rel|href]',
             'HTML.AllowedElements' => [
                 'a',
                 'b',
@@ -641,6 +636,10 @@ return [
                 'margin-left',
                 'margin-right',
                 'margin-top',
+                'padding',
+                'height',
+                'line-height',
+                'border-collapse',
             ],
             'CSS.MaxImgLength' => null,
             'AutoFormat.AutoParagraph' => false,
@@ -663,6 +662,7 @@ return [
             ['ins', 'data-ad-format', 'Text'],
             ['ins', 'data-ad-full-width-responsive', 'Text'],
             ['img', 'data-src', 'Text'],
+            ['img', 'loading', 'Text'],
             ['video', 'autoplay', 'Text'],
             ['meta', 'name', 'Text'],
             ['meta', 'content', 'Text'],
@@ -684,4 +684,5 @@ return [
     'upgrade_php_require_disabled' => env('CMS_UPGRADE_PHP_REQUIRE_DISABLED', false),
     'enabled_cleanup_database' => env('CMS_ENABLED_CLEANUP_DATABASE', true),
     'google_fonts_url' => env('CMS_GOOGLE_FONTS_URL', 'https://fonts.bunny.net'),
+    'google_fonts_enabled_cache' => env('CMS_GOOGLE_FONTS_ENABLED_CACHE', true),
 ];

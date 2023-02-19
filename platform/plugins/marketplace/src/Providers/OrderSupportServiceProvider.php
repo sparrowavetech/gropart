@@ -8,6 +8,7 @@ use Botble\Ecommerce\Enums\ShippingCodStatusEnum;
 use Botble\Ecommerce\Enums\ShippingMethodEnum;
 use Botble\Ecommerce\Enums\ShippingStatusEnum;
 use Botble\Ecommerce\Events\OrderPlacedEvent;
+use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\Order as OrderModel;
 use Botble\Ecommerce\Repositories\Interfaces\DiscountInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderHistoryInterface;
@@ -28,21 +29,14 @@ use Cart;
 use EcommerceHelper;
 use EmailHandler;
 use Exception;
-use Illuminate\Contracts\Container\BindingResolutionException;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
-use Illuminate\Database\Query\Builder;
-use Illuminate\Foundation\Application;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Redirector;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
-use Illuminate\View\Factory;
 use Log;
 use MarketplaceHelper;
 use OrderHelper;
@@ -55,7 +49,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         $this->app->booted(function () {
             add_filter(HANDLE_PROCESS_ORDER_DATA_ECOMMERCE, [$this, 'handleProcessOrder'], 100, 4);
             add_filter(HANDLE_PROCESS_POST_CHECKOUT_ORDER_DATA_ECOMMERCE, [$this, 'processPostCheckoutOrder'], 100, 5);
-            add_filter(PROCESS_GET_CHECKOUT_SUCCESS_IN_ORDER, [$this, 'processGetCheckoutSuccess'], 100, 2);
+            add_filter(PROCESS_GET_CHECKOUT_SUCCESS_IN_ORDER, [$this, 'processGetCheckoutSuccess'], 100);
             add_filter(PROCESS_GET_PAYMENT_STATUS_ORDER, [$this, 'processGetPaymentStatus'], 100, 2);
             add_filter(SEND_MAIL_AFTER_PROCESS_ORDER_MULTI_DATA, [$this, 'sendMailAfterProcessOrder'], 100);
             add_filter(PROCESS_CHECKOUT_ORDER_DATA_ECOMMERCE, [$this, 'processShippingDiscountOrderData'], 100, 4);
@@ -70,11 +64,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         });
     }
 
-    /**
-     * @param Collection $products
-     * @return string
-     */
-    public function renderProductsInCheckoutPage($products)
+    public function renderProductsInCheckoutPage(array|string|Collection $products): string|array|Collection
     {
         if ($products instanceof Collection) {
             $groupedProducts = $this->cartGroupByStore($products);
@@ -90,11 +80,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         return $products;
     }
 
-    /**
-     * @param Collection $products
-     * @return array|Collection
-     */
-    protected function cartGroupByStore(Collection $products)
+    protected function cartGroupByStore(Collection $products): array|Collection
     {
         if (! $products->count()) {
             return $products;
@@ -122,16 +108,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         return $groupedProducts;
     }
 
-    /**
-     * @param Collection $products
-     * @param Request $request
-     * @param string $token
-     * @param array $sessionCheckoutData
-     * @param BaseHttpResponse $response
-     * @return \Illuminate\Contracts\Foundation\Application|RedirectResponse|Redirector|mixed
-     * @throws BindingResolutionException
-     */
-    public function processPostCheckoutOrder($products, $request, $token, $sessionCheckoutData, $response)
+    public function processPostCheckoutOrder(array|Collection $products, Request $request, string $token, array $sessionCheckoutData, BaseHttpResponse $response)
     {
         $groupedProducts = $this->cartGroupByStore($products);
 
@@ -218,10 +195,7 @@ class OrderSupportServiceProvider extends ServiceProvider
                 ->where('code', $couponCode)
                 ->where('type', 'coupon')
                 ->where('start_date', '<=', Carbon::now())
-                ->where(function ($query) {
-                    /**
-                     * @var Builder $query
-                     */
+                ->where(function (Builder $query) {
                     return $query
                         ->whereNull('end_date')
                         ->orWhere('end_date', '>', Carbon::now());
@@ -261,13 +235,7 @@ class OrderSupportServiceProvider extends ServiceProvider
             ->setMessage(__('Checkout successfully!'));
     }
 
-    /**
-     * @param array $result
-     * @param Request $request
-     * @return array
-     * @throws BindingResolutionException
-     */
-    public function processApplyCouponCode($result, $request)
+    public function processApplyCouponCode(array $result, Request $request): array
     {
         $products = Cart::instance('cart')->products();
         $groupedProducts = $this->cartGroupByStore($products);
@@ -394,35 +362,19 @@ class OrderSupportServiceProvider extends ServiceProvider
         return $successData;
     }
 
-    /**
-     * @param array $sessionCheckoutData
-     * @param array $products
-     * @param string $token
-     * @param array $sessionStoreData
-     * @param Request $request
-     * @param int $currentUserId
-     * @param OrderModel $order
-     * @param int $storeId
-     * @param array|Collection $discounts
-     * @param HandleApplyPromotionsService $promotionService
-     * @param HandleShippingFeeService $shippingFeeService
-     * @param HandleApplyCouponService $applyCouponService
-     * @return mixed
-     * @throws BindingResolutionException
-     */
     public function handleCheckoutOrderByStore(
-        $sessionCheckoutData,
-        $products,
-        $token,
-        $sessionStoreData,
-        $request,
-        $currentUserId,
-        $order,
-        $storeId,
-        &$discounts,
-        $promotionService,
-        $shippingFeeService,
-        $applyCouponService
+        array $sessionCheckoutData,
+        array|Collection $products,
+        string $token,
+        array $sessionStoreData,
+        Request $request,
+        ?int $currentUserId,
+        Order $order,
+        ?int $storeId,
+        array|Collection &$discounts,
+        HandleApplyPromotionsService $promotionService,
+        HandleShippingFeeService $shippingFeeService,
+        HandleApplyCouponService $applyCouponService
     ) {
         $shippingAmount = 0;
 
@@ -549,14 +501,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         return $order;
     }
 
-    /**
-     * @param array $session
-     * @param int|float $orderTotal
-     * @param array $products
-     * @param string $paymentMethod
-     * @return array
-     */
-    public function getShippingData(array $session, $orderTotal, $products, ?string $paymentMethod = null)
+    public function getShippingData(array $session, int|float $orderTotal, array|Collection $products, ?string $paymentMethod = null): array
     {
         if ($products['store'] && $products['store']->id) {
             $keys = ['name', 'company', 'address', 'country', 'state', 'city', 'zip_code', 'email', 'phone'];
@@ -571,12 +516,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         return EcommerceHelper::getShippingData($products['products'], $session, $origin, $orderTotal, $paymentMethod);
     }
 
-    /**
-     * @param Request $request
-     * @param int $totalAmount
-     * @return array|mixed
-     */
-    public function processPaymentMethodPostCheckout($request, $totalAmount)
+    public function processPaymentMethodPostCheckout(Request $request, int|float $totalAmount): array
     {
         $paymentData = [
             'error' => false,
@@ -590,12 +530,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         return apply_filters(FILTER_ECOMMERCE_PROCESS_PAYMENT, $paymentData, $request);
     }
 
-    /**
-     * @param string $token
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse|\Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
-     */
-    public function processGetCheckoutSuccess($token, $response)
+    public function processGetCheckoutSuccess(string $token)
     {
         $orders = $this->app->make(OrderInterface::class)->allBy([
             'token' => $token,
@@ -621,11 +556,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         return view('plugins/marketplace::orders.thank-you', compact('orders'));
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     */
-    public function processGetPaymentStatus($request, $response)
+    public function processGetPaymentStatus(Request $request, BaseHttpResponse $response)
     {
         $token = session('tracked_start_checkout');
 
@@ -640,33 +571,26 @@ class OrderSupportServiceProvider extends ServiceProvider
             ->setMessage(__('Checkout successfully!'));
     }
 
-    /**
-     * @param Collection $orders
-     * @return Collection
-     * @throws Throwable
-     * @throws FileNotFoundException
-     */
-    public function sendMailAfterProcessOrder($orders)
+    public function sendMailAfterProcessOrder(Collection $orders): Collection
     {
-        $mailer = EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME);
-        if ($mailer->templateEnabled('admin_new_order')) {
-            $this->setEmailVariables($orders);
-            $mailer->sendUsingTemplate('admin_new_order');
-        }
+        try {
+            $mailer = EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+            if ($mailer->templateEnabled('admin_new_order')) {
+                $this->setEmailVariables($orders);
+                $mailer->sendUsingTemplate('admin_new_order');
+            }
 
-        $this->sendOrderConfirmationEmail($orders, true);
+            $this->sendOrderConfirmationEmail($orders, true);
+        } catch (Throwable $exception) {
+            info($exception->getMessage());
+        }
 
         MarketplaceHelper::sendMailToVendorAfterProcessingOrder($orders);
 
         return $orders;
     }
 
-    /**
-     * @param Collection $orders
-     * @return \Botble\Base\Supports\EmailHandler
-     * @throws Throwable
-     */
-    public function setEmailVariables($orders)
+    public function setEmailVariables(Collection $orders): \Botble\Base\Supports\EmailHandler
     {
         $theFirst = $orders->first();
 
@@ -689,13 +613,7 @@ class OrderSupportServiceProvider extends ServiceProvider
             ]);
     }
 
-    /**
-     * @param $orders
-     * @param bool $saveHistory
-     * @return boolean
-     * @throws Throwable
-     */
-    public function sendOrderConfirmationEmail($orders, bool $saveHistory = false)
+    public function sendOrderConfirmationEmail(Collection $orders, bool $saveHistory = false): bool
     {
         try {
             $theFirst = $orders->first();
@@ -728,21 +646,13 @@ class OrderSupportServiceProvider extends ServiceProvider
         return false;
     }
 
-    /**
-     * @param Collection $products
-     * @param string $token
-     * @param array $sessionCheckoutData
-     * @param Request $request
-     * @return array
-     * @throws BindingResolutionException
-     */
-    public function processShippingDiscountOrderData($products, $token, $sessionCheckoutData, $request)
+    public function processShippingDiscountOrderData(array|Collection $products, string $token, array $sessionCheckoutData, Request $request): array
     {
         $groupedProducts = $this->cartGroupByStore($products);
 
         $mpSessionCheckoutData = Arr::get($sessionCheckoutData, 'marketplace');
 
-        $couponCode = session()->get('applied_coupon_code');
+        $couponCode = session('applied_coupon_code');
         if ($couponCode) {
             $this->processApplyCouponCode([], $request);
             $sessionCheckoutData = OrderHelper::getOrderSessionData($token);
@@ -912,11 +822,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         ];
     }
 
-    /**
-     * @param Collection $products
-     * @return array
-     */
-    public function processRemoveCouponCode($products)
+    public function processRemoveCouponCode(array|Collection $products): array
     {
         $groupedProducts = $this->cartGroupByStore($products);
 
@@ -954,13 +860,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         return $successData;
     }
 
-    /**
-     * @param array $sessionCheckoutData
-     * @param Request $request
-     * @param string $token
-     * @return array
-     */
-    public function processPostSaveInformation($sessionCheckoutData, $request, $token): array
+    public function processPostSaveInformation(array $sessionCheckoutData, Request $request, string $token): array
     {
         if (session()->has('applied_coupon_code')) {
             $discounts = collect([]);
@@ -996,12 +896,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         return $sessionCheckoutData;
     }
 
-    /**
-     * @param string $token
-     * @param Request $request
-     * @return Application|Factory|View
-     */
-    public function processGetCheckoutRecover($token, $request)
+    public function processGetCheckoutRecover(string $token, Request $request)
     {
         $orders = $this->app->make(OrderInterface::class)
             ->allBy([
@@ -1080,14 +975,7 @@ class OrderSupportServiceProvider extends ServiceProvider
             ->setMessage(__('You have recovered from previous orders!'));
     }
 
-    /**
-     * @param Collection $products
-     * @param string $token
-     * @param array $sessionData
-     * @param Request $request
-     * @return array|array[]|\ArrayAccess[]
-     */
-    public function handleProcessOrder(Collection $products, string $token, array $sessionData, Request $request)
+    public function handleProcessOrder(Collection $products, string $token, array $sessionData, Request $request): array
     {
         $groupedProducts = $this->cartGroupByStore($products);
 
@@ -1144,23 +1032,14 @@ class OrderSupportServiceProvider extends ServiceProvider
         return $sessionData;
     }
 
-    /**
-     * @param Collection $products
-     * @param string $token
-     * @param array $sessionData
-     * @param Request $request
-     * @param int $currentUserId
-     * @param OrderModel $order
-     * @return array
-     */
     public function handleOrderStore(
-        Collection $products,
+        array|Collection $products,
         string $token,
         array $sessionData,
         Request $request,
-        $currentUserId,
-        $order
-    ) {
+        ?int $currentUserId,
+        ?Order $order
+    ): array {
         $store = $products['store'];
         $cartItems = $products['products']->pluck('cartItem');
 
@@ -1189,13 +1068,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         return OrderHelper::processOrderProductData($products, $sessionData);
     }
 
-    /**
-     * Append validation rules that apply to the request.
-     *
-     * @param array $rules
-     * @return array
-     */
-    public function processCheckoutRulesRequest($rules)
+    public function processCheckoutRulesRequest(array $rules): array
     {
         unset($rules['shipping_method']);
         [$stores, $groupedProducts] = $this->getStoresInCart(true);
@@ -1210,12 +1083,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         return $rules;
     }
 
-    /**
-     * Get all stores in cart, including products without stores
-     *
-     * @return Collection|array
-     */
-    protected function getStoresInCart($includeProducts = false)
+    protected function getStoresInCart($includeProducts = false): array|Collection
     {
         $originalProducts = Cart::instance('cart')->products()->pluck('original_product');
         $storeIdsInCart = $originalProducts->pluck('store_id');
@@ -1241,10 +1109,6 @@ class OrderSupportServiceProvider extends ServiceProvider
         return $storesInCart;
     }
 
-    /**
-     * @param array $messages
-     * @return array
-     */
     public function processCheckoutMessagesRequest(array $messages): array
     {
         $stores = $this->getStoresInCart();
@@ -1266,11 +1130,6 @@ class OrderSupportServiceProvider extends ServiceProvider
         return $messages;
     }
 
-    /**
-     * @param OrderModel $order
-     * @return BaseHttpResponse|OrderModel
-     * @throws Throwable
-     */
     public function afterOrderStatusCompleted(OrderModel $order)
     {
         $order->loadMissing(['store', 'store.customer']);
@@ -1343,11 +1202,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         return $order;
     }
 
-    /**
-     * @param $orderProducts
-     * @return float
-     */
-    protected function calculatorCommissionFeeByProduct($orderProducts)
+    protected function calculatorCommissionFeeByProduct(Collection $orderProducts): float|int
     {
         $totalFee = 0;
         foreach ($orderProducts as $orderProduct) {
@@ -1360,7 +1215,10 @@ class OrderSupportServiceProvider extends ServiceProvider
             $listCategories = $product->categories()->pluck('category_id')->all();
 
             $commissionFeePercentage = MarketplaceHelper::getSetting('fee_per_order', 0);
-            $commissionSetting = CategoryCommission::whereIn('product_category_id', $listCategories)->orderBy('commission_percentage', 'desc')->first(); // lay commission setting cao nhat
+            $commissionSetting = CategoryCommission::whereIn('product_category_id', $listCategories)
+                ->orderBy('commission_percentage', 'desc')
+                ->first();
+
             if (! empty($commissionSetting)) {
                 $commissionFeePercentage = $commissionSetting->commission_percentage;
             }

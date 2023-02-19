@@ -15,30 +15,17 @@ use EcommerceHelper;
 
 class StoreForm extends FormAbstract
 {
-    /**
-     * @var string
-     */
     protected $template = 'core/base::forms.form-tabs';
 
-    /**
-     * @var CustomerInterface
-     */
-    protected $customerRepository;
+    protected CustomerInterface $customerRepository;
 
-    /**
-     * StoreForm constructor.
-     * @param CustomerInterface $customerRepository
-     */
     public function __construct(CustomerInterface $customerRepository)
     {
         parent::__construct();
         $this->customerRepository = $customerRepository;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function buildForm()
+    public function buildForm(): void
     {
         Assets::addScriptsDirectly('vendor/core/plugins/location/js/location.js');
 

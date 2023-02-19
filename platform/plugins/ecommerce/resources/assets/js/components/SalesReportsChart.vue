@@ -66,32 +66,7 @@ export default {
     mounted: function () {
         this.setFiltering();
 
-        if (this.url) {
-            axios.get(this.url)
-                .then(res => {
-                    if (res.data.error) {
-                        Botble.showError(res.data.message);
-                    } else {
-                        this.earningSales = res.data.data.earningSales;
-                        this.chart = new ApexCharts(this.$el.querySelector('.sales-reports-chart'), {
-                            series: res.data.data.series,
-                            chart: {height: 350, type: 'area', toolbar: {show: false}},
-                            dataLabels: {enabled: false},
-                            stroke: {curve: 'smooth'},
-                            colors: res.data.data.colors,
-                            xaxis: {
-                                type: 'datetime',
-                                categories: res.data.data.dates
-                            },
-                            tooltip: {x: {format: this.format}},
-                            noData: {
-                                text: BotbleVariables.languages.tables.no_data,
-                            }
-                        });
-                        this.chart.render();
-                    }
-                });
-        }
+        this.renderChart();
     },
     methods: {
         setFiltering: function (f = '') {
@@ -105,6 +80,35 @@ export default {
                 } else {
                     this.filtering = f;
                 }
+            }
+        },
+        renderChart: function () {
+            if (this.url) {
+                axios.get(this.url)
+                    .then(res => {
+                        if (res.data.error) {
+                            Botble.showError(res.data.message);
+                        } else {
+                            this.earningSales = res.data.data.earningSales;
+                            this.chart = new ApexCharts(this.$el.querySelector('.sales-reports-chart'), {
+                                series: res.data.data.series,
+                                chart: {height: 350, type: 'area', toolbar: {show: false}},
+                                dataLabels: {enabled: false},
+                                stroke: {curve: 'smooth'},
+                                colors: res.data.data.colors,
+                                xaxis: {
+                                    type: 'datetime',
+                                    categories: res.data.data.dates
+                                },
+                                tooltip: {x: {format: this.format}},
+                                noData: {
+                                    text: BotbleVariables.languages.tables.no_data,
+                                }
+                            });
+
+                            this.chart.render();
+                        }
+                    });
             }
         },
         clickFilter: function (filter, event) {

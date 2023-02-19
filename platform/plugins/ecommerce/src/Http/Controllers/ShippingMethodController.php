@@ -14,12 +14,8 @@ use Botble\Ecommerce\Repositories\Interfaces\ShippingInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ShippingRuleInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ShippingRuleItemInterface;
 use EcommerceHelper;
-use Exception;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Illuminate\View\View;
-use Throwable;
 
 class ShippingMethodController extends BaseController
 {
@@ -43,10 +39,6 @@ class ShippingMethodController extends BaseController
         $this->shippingRuleItemRepository = $shippingRuleItemRepository;
     }
 
-    /**
-     * @return Factory|View
-     * @throws Throwable
-     */
     public function index()
     {
         page_title()->setTitle(trans('plugins/ecommerce::shipping.shipping_methods'));
@@ -59,22 +51,16 @@ class ShippingMethodController extends BaseController
             ->addScriptsDirectly(['vendor/core/plugins/ecommerce/js/shipping.js'])
             ->addScripts(['input-mask']);
 
-        $shipping = $this->shippingRepository->allBy([], [
-            'rules',
-            'rules.items' => function ($query) {
-                $query->orderBy('created_at', 'desc')
-                    ->orderBy('id', 'desc');
-            },
-        ]);
+        $shipping = $this->shippingRepository
+            ->allBy([], [
+                'rules' => function ($query) {
+                    $query->withCount(['items']);
+                },
+            ]);
 
         return view('plugins/ecommerce::shipping.methods', compact('shipping'));
     }
 
-    /**
-     * @param AddShippingRegionRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function postCreateRegion(AddShippingRegionRequest $request, BaseHttpResponse $response)
     {
         $country = $request->input('region');
@@ -118,12 +104,6 @@ class ShippingMethodController extends BaseController
         return $response->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function deleteRegion(Request $request, BaseHttpResponse $response)
     {
         $shipping = $this->shippingRepository->findOrFail($request->input('id'));
@@ -136,12 +116,6 @@ class ShippingMethodController extends BaseController
         return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function deleteRegionRule(Request $request, BaseHttpResponse $response)
     {
         $rule = $this->shippingRuleRepository->findOrFail($request->input('id'));
@@ -161,14 +135,7 @@ class ShippingMethodController extends BaseController
         ]);
     }
 
-    /**
-     * @param int $id
-     * @param ShippingRuleRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
-    public function putUpdateRule($id, ShippingRuleRequest $request, BaseHttpResponse $response)
+    public function putUpdateRule(int $id, ShippingRuleRequest $request, BaseHttpResponse $response)
     {
         $rule = $this->shippingRuleRepository->findOrFail($id);
 
@@ -200,12 +167,6 @@ class ShippingMethodController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param ShippingRuleRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Throwable
-     */
     public function postCreateRule(ShippingRuleRequest $request, BaseHttpResponse $response)
     {
         $rule = $this->shippingRuleRepository->createOrUpdate($request->input());

@@ -191,13 +191,13 @@ if (! function_exists('get_blog_page_url')) {
         $blogPageId = (int)theme_option('blog_page_id', setting('blog_page_id'));
 
         if (! $blogPageId) {
-            return url('/');
+            return route('public.index');
         }
 
         $blogPage = app(PageInterface::class)->findById($blogPageId);
 
         if (! $blogPage) {
-            return url('/');
+            return route('public.index');
         }
 
         return $blogPage->url;

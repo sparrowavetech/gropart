@@ -19,7 +19,7 @@ class PluginManagementServiceProvider extends ServiceProvider
      * @throws InvalidArgumentException
      * @throws Exception
      */
-    public function boot()
+    public function boot(): void
     {
         $this->setNamespace('packages/plugin-management')
             ->loadAndPublishConfigurations(['permissions', 'general'])
@@ -65,5 +65,7 @@ class PluginManagementServiceProvider extends ServiceProvider
         $this->app->booted(function () {
             $this->app->register(HookServiceProvider::class);
         });
+
+        $this->app->register(EventServiceProvider::class);
     }
 }

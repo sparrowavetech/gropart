@@ -22,10 +22,6 @@ class StoreRevenueTable extends TableAbstract
 
     protected $view = 'core/table::simple-table';
 
-    protected $hasActions = false;
-
-    protected $hasFilter = false;
-
     protected $hasCheckbox = false;
 
     protected $hasOperations = false;

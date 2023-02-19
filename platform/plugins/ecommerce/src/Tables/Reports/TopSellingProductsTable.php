@@ -52,7 +52,7 @@ class TopSellingProductsTable extends TableAbstract
                         ->toHtml() . ' ' . Html::tag('small', $attributeText);
             });
 
-        return $this->toJson($data);
+        return $data->escapeColumns([])->make();
     }
 
     public function query(): Relation|Builder|QueryBuilder
@@ -76,6 +76,11 @@ class TopSellingProductsTable extends TableAbstract
             ->limit(10);
 
         return $this->applyScopes($query);
+    }
+
+    public function getColumns(): array
+    {
+        return $this->columns();
     }
 
     public function columns(): array

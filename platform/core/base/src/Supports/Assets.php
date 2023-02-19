@@ -59,7 +59,7 @@ class Assets extends BaseAssets
         return $themes;
     }
 
-    public function renderHeader(array $lastStyles = []): string
+    public function renderHeader($lastStyles = []): string
     {
         do_action(BASE_ACTION_ENQUEUE_SCRIPTS);
 

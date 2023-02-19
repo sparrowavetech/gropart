@@ -37,10 +37,7 @@ class ChunkSave extends AbstractSave
      */
     protected $fullChunkFile;
 
-    /**
-     * @var ChunkStorage
-     */
-    protected $chunkStorage;
+    protected ChunkStorage $chunkStorage;
 
     /**
      * {@inheritDoc}
@@ -62,10 +59,6 @@ class ChunkSave extends AbstractSave
 
     /**
      * Returns the chunk file path in the current disk instance.
-     *
-     * @param bool $absolutePath
-     *
-     * @return string
      */
     public function getChunkFilePath(bool $absolutePath = false): string
     {
@@ -74,10 +67,6 @@ class ChunkSave extends AbstractSave
 
     /**
      * Returns the folder for the chunks in the storage path on current disk instance.
-     *
-     * @param bool $absolutePath
-     *
-     * @return string
      */
     public function getChunkDirectory(bool $absolutePath = false): string
     {
@@ -94,8 +83,6 @@ class ChunkSave extends AbstractSave
 
     /**
      * Returns the current chunk storage.
-     *
-     * @return ChunkStorage
      */
     public function chunkStorage(): ChunkStorage
     {
@@ -131,8 +118,6 @@ class ChunkSave extends AbstractSave
 
     /**
      * Checks if the current chunk is last.
-     *
-     * @return $this
      */
     protected function tryToBuildFullFileFromChunks(): self
     {
@@ -158,18 +143,12 @@ class ChunkSave extends AbstractSave
 
     /**
      * Returns the full file path.
-     *
-     * @return string|null
      */
     public function getChunkFullFilePath(): ?string
     {
         return $this->chunkFullFilePath;
     }
 
-    /**
-     * @param string|null $finalPath
-     * @return UploadedFile
-     */
     protected function createFullChunkFile(?string $finalPath): UploadedFile
     {
         return new UploadedFile(
@@ -205,25 +184,17 @@ class ChunkSave extends AbstractSave
 
     /**
      * Returns the disk adapter for the chunk.
-     *
-     * @return FilesystemAdapter
      */
     public function chunkDisk(): FilesystemAdapter
     {
         return $this->chunkStorage()->disk();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function isFinished(): bool
     {
         return parent::isFinished() && $this->isLastChunk;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getFile(): UploadedFile
     {
         if ($this->isLastChunk) {

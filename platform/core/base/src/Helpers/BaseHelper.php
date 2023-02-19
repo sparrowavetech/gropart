@@ -4,6 +4,7 @@ namespace Botble\Base\Helpers;
 
 use Carbon\Carbon;
 use Exception;
+use Html;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
@@ -171,9 +172,25 @@ class BaseHelper
         return false;
     }
 
+    public function availableRichEditors(): array
+    {
+        return apply_filters(BASE_FILTER_AVAILABLE_EDITORS, [
+            'ckeditor' => 'CKEditor',
+            'tinymce' => 'TinyMCE',
+        ]);
+    }
+
     public function getRichEditor(): string
     {
-        return setting('rich_editor', config('core.base.general.editor.primary'));
+        $richEditor = setting('rich_editor', config('core.base.general.editor.primary'));
+
+        if (array_key_exists($richEditor, $this->availableRichEditors())) {
+            return $richEditor;
+        }
+
+        setting()->set(['rich_editor' => 'ckeditor'])->save();
+
+        return 'ckeditor';
     }
 
     public function removeQueryStringVars(?string $url, array|string $key): ?string
@@ -348,5 +365,24 @@ class BaseHelper
     public function getGoogleFontsURL(): string
     {
         return config('core.base.general.google_fonts_url', 'https://fonts.bunny.net');
+    }
+
+    public function googleFonts(string $font, bool $inline = true)
+    {
+        if (! config('core.base.general.google_fonts_enabled_cache')) {
+            $font = str_replace('https://fonts.googleapis.com', $this->getGoogleFontsURL(), $font);
+
+            return Html::style($font);
+        }
+
+        $font = str_replace($this->getGoogleFontsURL(), 'https://fonts.googleapis.com', $font);
+
+        $font = app('core:google-fonts')->load($font);
+
+        if (! $inline) {
+            return $font->link();
+        }
+
+        return $font->toHtml();
     }
 }

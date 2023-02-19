@@ -8,34 +8,19 @@ use EcommerceHelper;
 use Botble\Marketplace\Repositories\Interfaces\RevenueInterface;
 use Botble\Marketplace\Tables\RevenueTable;
 use Carbon\CarbonPeriod;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\View;
 use MarketplaceHelper;
 
 class RevenueController
 {
-    /**
-     * @var RevenueInterface
-     */
-    protected $revenueRepository;
+    protected RevenueInterface $revenueRepository;
 
-    /**
-     * RevenueController constructor.
-     * @param RevenueInterface $revenueRepository
-     */
     public function __construct(RevenueInterface $revenueRepository)
     {
         $this->revenueRepository = $revenueRepository;
     }
 
-    /**
-     * @param RevenueTable $table
-     * @return JsonResponse|View|Response
-     * @throws \Throwable
-     */
     public function index(RevenueTable $table)
     {
         page_title()->setTitle(__('Revenues'));
@@ -43,11 +28,6 @@ class RevenueController
         return $table->render(MarketplaceHelper::viewPath('dashboard.table.base'));
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function getMonthChart(Request $request, BaseHttpResponse $response)
     {
         [$startDate, $endDate] = EcommerceHelper::getDateRangeInReport($request);

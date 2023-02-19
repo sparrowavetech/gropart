@@ -3,7 +3,6 @@
 namespace Botble\Marketplace\Models;
 
 use Botble\Base\Models\BaseModel;
-use Botble\Base\Traits\EnumCastable;
 use Botble\Ecommerce\Models\Customer;
 use Botble\Marketplace\Enums\WithdrawalStatusEnum;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,8 +11,6 @@ use Illuminate\Support\Facades\Lang;
 
 class Withdrawal extends BaseModel
 {
-    use EnumCastable;
-
     protected $table = 'mp_customer_withdrawals';
 
     protected $fillable = [

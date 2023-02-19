@@ -1,7 +1,7 @@
 @php
     $brands = get_all_brands(['status' => \Botble\Base\Enums\BaseStatusEnum::PUBLISHED], [], ['products'=>function($query) use($condition){
-            return $query->where('is_enquiry',$condition['is_enquiry']);
-        }]);
+        return $query->where('is_enquiry',$condition['is_enquiry']);
+    }]);
     $tags = app(\Botble\Ecommerce\Repositories\Interfaces\ProductTagInterface::class)->advancedGet([
         'condition' => ['status' => \Botble\Base\Enums\BaseStatusEnum::PUBLISHED],
         'with'      => [],
@@ -23,7 +23,7 @@
 
 <input type="hidden" name="sort-by" class="product-filter-item" value="{{ request()->input('sort-by') }}">
 <input type="hidden" name="layout" class="product-filter-item" value="{{ request()->input('layout') }}">
-<input type="hidden" name="q" value="{{ request()->input('q') }}">
+<input type="hidden" name="q" value="{{ BaseHelper::stringify(request()->query('q')) }}">
 
 <aside class="catalog-primary-sidebar catalog-sidebar" data-toggle-target="product-categories-primary-sidebar">
     <div class="backdrop"></div>

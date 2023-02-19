@@ -13,7 +13,7 @@ $(() => {
 
     moment.locale($('html').attr('lang'));
 
-    let $dateRange = $('.date-range-picker');
+    let $dateRange = $(document).find('.date-range-picker');
     let dateFormat = $dateRange.data('format') || 'YYYY-MM-DD';
     let startDate = $dateRange.data('start-date') || moment().subtract(29, 'days');
 
@@ -62,10 +62,20 @@ $(() => {
                     if (data.error) {
                         Botble.showError(data.message);
                     } else {
-                        $('.report-chart-content').html(data.data.html);
-                        new Vue({
-                            el: '#report-chart'
-                        });
+                        $('.widget-item').each((key, widget) => {
+                            const widgetEl = $(widget).prop('id')
+                            $(`#${widgetEl}`).replaceWith($(data.data).find(`#${widgetEl}`))
+                        })
+
+                        if ($('.report-chart-content').length) {
+                            $('.report-chart-content').html(data.data.html);
+                            window.vueApp.vue.component('sales-reports-chart', SalesReportsChart);
+
+                            new window.vueApp.vue({
+                                el: '#report-chart'
+                            });
+                        }
+
                         if (window.LaravelDataTables) {
                             Object.keys(window.LaravelDataTables).map(
                                 (key) => {
@@ -103,5 +113,4 @@ $(() => {
             .replace('__to__', picker.endDate.format(dateFormat));
         $this.find('span').text(value);
     });
-
 });

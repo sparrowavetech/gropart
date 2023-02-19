@@ -39,7 +39,7 @@ class ThemeOptionCheckMissingCommand extends Command
             : $this->missingKeys($fields, $existsOptions);
 
         if ($missingKeys->isEmpty()) {
-            $this->info('No missing option found!');
+            $this->components->info('No missing option found!');
 
             return self::SUCCESS;
         }

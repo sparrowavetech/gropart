@@ -9,15 +9,11 @@ use Botble\Widget\Factories\AbstractWidgetFactory;
 use Botble\Widget\Repositories\Interfaces\WidgetInterface;
 use Botble\Widget\WidgetId;
 use Exception;
-use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Language;
 use Theme;
-use Throwable;
 use WidgetGroup;
 
 class WidgetController extends BaseController
@@ -32,10 +28,6 @@ class WidgetController extends BaseController
         $this->theme = Theme::getThemeName() . $this->getCurrentLocaleCode();
     }
 
-    /**
-     * @return Application|Factory|View
-     * @since 24/09/2016 2:10 PM
-     */
     public function index()
     {
         page_title()->setTitle(trans('packages/widget::widget.name'));
@@ -57,13 +49,6 @@ class WidgetController extends BaseController
         return view('packages/widget::list');
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Throwable
-     * @since 24/09/2016 3:14 PM
-     */
     public function postSaveWidgetToSidebar(Request $request, BaseHttpResponse $response)
     {
         try {
@@ -102,11 +87,6 @@ class WidgetController extends BaseController
         }
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function postDelete(Request $request, BaseHttpResponse $response)
     {
         try {
@@ -125,15 +105,6 @@ class WidgetController extends BaseController
         }
     }
 
-    /**
-     * The action to show widget output via ajax.
-     *
-     * @param Request $request
-     *
-     * @param Application $application
-     * @return mixed
-     * @throws BindingResolutionException
-     */
     public function showWidget(Request $request, Application $application)
     {
         $this->prepareGlobals($request);
@@ -145,20 +116,12 @@ class WidgetController extends BaseController
         return call_user_func_array([$factory, $widgetName], $widgetParams);
     }
 
-    /**
-     * Set some specials variables to modify the workflow of the widget factory.
-     *
-     * @param Request $request
-     */
     protected function prepareGlobals(Request $request)
     {
         WidgetId::set($request->input('id', 1) - 1);
         AbstractWidgetFactory::$skipWidgetContainer = true;
     }
 
-    /**
-     * @return null|string
-     */
     protected function getCurrentLocaleCode(): ?string
     {
         $languageCode = null;

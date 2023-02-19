@@ -16,17 +16,21 @@ return new class () extends Migration {
             });
         }
 
-        $products = Product::where('is_variation', 0)->withCount(['taxes'])->get();
-        $defaultTaxRate = get_ecommerce_setting('default_tax_rate');
+        try {
+            $products = Product::where('is_variation', 0)->withCount(['taxes'])->get();
+            $defaultTaxRate = get_ecommerce_setting('default_tax_rate');
 
-        foreach ($products as $product) {
-            $taxId = $product->tax_id ?: $defaultTaxRate;
-            if ($taxId && ! $product->taxes_count) {
-                DB::table('ec_tax_products')->insertOrIgnore([
-                    'product_id' => $product->id,
-                    'tax_id' => $taxId,
-                ]);
+            foreach ($products as $product) {
+                $taxId = $product->tax_id ?: $defaultTaxRate;
+                if ($taxId && ! $product->taxes_count) {
+                    DB::table('ec_tax_products')->insertOrIgnore([
+                        'product_id' => $product->id,
+                        'tax_id' => $taxId,
+                    ]);
+                }
             }
+        } catch (Throwable $exception) {
+            info($exception->getMessage());
         }
     }
 

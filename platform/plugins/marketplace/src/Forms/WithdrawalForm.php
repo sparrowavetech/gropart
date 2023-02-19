@@ -9,10 +9,7 @@ use Botble\Marketplace\Models\Withdrawal;
 
 class WithdrawalForm extends FormAbstract
 {
-    /**
-     * {@inheritDoc}
-     */
-    public function buildForm()
+    public function buildForm(): void
     {
         $symbol = ' (' . get_application_currency()->symbol . ')';
 

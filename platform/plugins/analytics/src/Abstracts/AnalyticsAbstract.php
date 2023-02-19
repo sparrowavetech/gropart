@@ -25,15 +25,9 @@ abstract class AnalyticsAbstract
         return $this;
     }
 
-    abstract public function fetchVisitorsAndPageViews(Period $period): Collection;
-
-    abstract public function fetchTotalVisitorsAndPageViews(Period $period): Collection;
-
     abstract public function fetchMostVisitedPages(Period $period, int $maxResults = 20): Collection;
 
     abstract public function fetchTopReferrers(Period $period, int $maxResults = 20): Collection;
-
-    abstract public function fetchUserTypes(Period $period): Collection;
 
     abstract public function fetchTopBrowsers(Period $period, int $maxResults = 10): Collection;
 }

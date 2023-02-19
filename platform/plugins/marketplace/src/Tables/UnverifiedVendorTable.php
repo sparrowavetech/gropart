@@ -127,9 +127,4 @@ class UnverifiedVendorTable extends TableAbstract
             ],
         ];
     }
-
-    public function getBulkChanges(): array
-    {
-        return [];
-    }
 }

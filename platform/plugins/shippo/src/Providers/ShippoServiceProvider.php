@@ -11,7 +11,7 @@ class ShippoServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function register()
+    public function register(): void
     {
         if (! is_plugin_active('ecommerce')) {
             return;
@@ -20,7 +20,7 @@ class ShippoServiceProvider extends ServiceProvider
         $this->setNamespace('plugins/shippo')->loadHelpers();
     }
 
-    public function boot()
+    public function boot(): void
     {
         if (! is_plugin_active('ecommerce')) {
             return;

@@ -24,7 +24,7 @@ class UpdateThemeTranslationCommand extends Command
 
         BaseHelper::saveFileData(theme_path(Theme::getThemeName() . '/lang/en.json'), $data, false);
 
-        $this->info('Found ' . count($keys) . ' keys');
+        $this->components->info('Found ' . count($keys) . ' keys');
 
         return self::SUCCESS;
     }

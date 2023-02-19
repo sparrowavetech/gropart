@@ -95,7 +95,7 @@ class CurrencySupport
     public function currencies(): Collection
     {
         if (! $this->currencies instanceof Collection) {
-            $this->currencies = collect([]);
+            $this->currencies = collect();
         }
 
         if ($this->currencies->count() == 0) {

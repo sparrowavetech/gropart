@@ -5,7 +5,7 @@
 <div class="image-box">
     <input type="hidden" name="{{ $name }}" value="{{ $value }}" class="image-data">
     <div class="preview-image-wrapper @if (!$allowThumb) preview-image-wrapper-not-allow-thumb @endif">
-        <img src="{{ RvMedia::getImageUrl($value, $allowThumb == true ? 'thumb' : null, false, $defaultImage) }}"
+        <img src="{{ RvMedia::getImageUrl($value, $allowThumb ? 'thumb' : null, false, $defaultImage) }}"
             data-default="{{ $defaultImage }}"
             alt="{{ trans('core/base::base.preview_image') }}"
             class="preview_image" @if ($allowThumb) width="150" @endif>

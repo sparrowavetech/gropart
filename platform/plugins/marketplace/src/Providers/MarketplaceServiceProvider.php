@@ -38,6 +38,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\ServiceProvider;
 use MacroableModels;
 use MarketplaceHelper;
+use Route;
 use SeoHelper;
 use SlugHelper;
 
@@ -84,8 +85,6 @@ class MarketplaceServiceProvider extends ServiceProvider
             $loader = AliasLoader::getInstance();
             $loader->alias('MarketplaceHelper', MarketplaceHelperFacade::class);
         }
-
-        add_filter(IS_IN_ADMIN_FILTER, [$this, 'setInAdmin'], 128);
     }
 
     public function boot()
@@ -163,6 +162,8 @@ class MarketplaceServiceProvider extends ServiceProvider
                 }
 
                 EmailHandler::addTemplateSettings(MARKETPLACE_MODULE_SCREEN_NAME, config('plugins.marketplace.email', []));
+
+                add_filter(IS_IN_ADMIN_FILTER, [$this, 'setInAdmin'], 128);
             });
 
             SlugHelper::registerModule(Store::class, 'Stores');
@@ -262,6 +263,6 @@ class MarketplaceServiceProvider extends ServiceProvider
 
     public function setInAdmin(bool $isInAdmin): bool
     {
-        return request()->segment(1) === 'vendor' || $isInAdmin;
+        return in_array('vendor', Route::current()->middleware()) || $isInAdmin;
     }
 }

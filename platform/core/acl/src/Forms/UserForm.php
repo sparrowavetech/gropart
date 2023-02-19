@@ -17,7 +17,7 @@ class UserForm extends FormAbstract
         parent::__construct();
     }
 
-    public function buildForm()
+    public function buildForm(): void
     {
         $roles = $this->roleRepository->pluck('name', 'id');
 

@@ -10,10 +10,7 @@ use Botble\Menu\Models\Menu;
 
 class MenuForm extends FormAbstract
 {
-    /**
-     * {@inheritDoc}
-     */
-    public function buildForm()
+    public function buildForm(): void
     {
         Assets::addScriptsDirectly([
             'vendor/core/packages/menu/libraries/jquery-nestable/jquery.nestable.js',

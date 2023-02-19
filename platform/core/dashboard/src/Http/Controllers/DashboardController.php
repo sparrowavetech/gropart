@@ -9,12 +9,8 @@ use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Dashboard\Repositories\Interfaces\DashboardWidgetInterface;
 use Botble\Dashboard\Repositories\Interfaces\DashboardWidgetSettingInterface;
 use Exception;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 
 class DashboardController extends BaseController
 {
@@ -34,10 +30,6 @@ class DashboardController extends BaseController
         $this->userRepository = $userRepository;
     }
 
-    /**
-     * @param Request $request
-     * @return Factory|Application|View
-     */
     public function getDashboard(Request $request)
     {
         page_title()->setTitle(trans('core/dashboard::dashboard.title'));
@@ -49,9 +41,6 @@ class DashboardController extends BaseController
 
         do_action(DASHBOARD_ACTION_REGISTER_SCRIPTS);
 
-        /**
-         * @var Collection $widgets
-         */
         $widgets = $this->widgetRepository->getModel()
             ->with([
                 'settings' => function (HasMany $query) use ($request) {
@@ -78,11 +67,6 @@ class DashboardController extends BaseController
         return view('core/dashboard::list', compact('widgets', 'userWidgets', 'statWidgets'));
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function postEditWidgetSettingItem(Request $request, BaseHttpResponse $response)
     {
         try {
@@ -115,11 +99,6 @@ class DashboardController extends BaseController
         return $response;
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function postUpdateWidgetOrder(Request $request, BaseHttpResponse $response)
     {
         foreach ($request->input('items', []) as $key => $item) {
@@ -137,11 +116,6 @@ class DashboardController extends BaseController
         return $response->setMessage(trans('core/dashboard::dashboard.update_position_success'));
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function getHideWidget(Request $request, BaseHttpResponse $response)
     {
         $widget = $this->widgetRepository->getFirstBy([
@@ -161,11 +135,6 @@ class DashboardController extends BaseController
         return $response->setMessage(trans('core/dashboard::dashboard.hide_success'));
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function postHideWidgets(Request $request, BaseHttpResponse $response)
     {
         $widgets = $this->widgetRepository->all();
@@ -175,7 +144,7 @@ class DashboardController extends BaseController
                 'user_id' => $request->user()->getKey(),
             ]);
 
-            if (array_key_exists($widget->name, $request->input('widgets', [])) &&
+            if ($request->has('widgets.' . $widget->name) &&
                 $request->input('widgets.' . $widget->name) == 1
             ) {
                 $widgetSetting->status = 1;

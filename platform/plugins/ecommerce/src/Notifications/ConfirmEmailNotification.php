@@ -19,7 +19,7 @@ class ConfirmEmailNotification extends Notification implements ShouldQueue
      *
      * @param mixed $notifiable
      */
-    public function via($notifiable): array
+    public function via($notifiable)
     {
         return ['mail'];
     }

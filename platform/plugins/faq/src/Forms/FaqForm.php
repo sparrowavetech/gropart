@@ -10,7 +10,7 @@ use Botble\Faq\Repositories\Interfaces\FaqCategoryInterface;
 
 class FaqForm extends FormAbstract
 {
-    public function buildForm()
+    public function buildForm(): void
     {
         $this
             ->setupModel(new Faq())

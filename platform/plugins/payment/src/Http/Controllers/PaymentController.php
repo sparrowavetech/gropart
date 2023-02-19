@@ -12,34 +12,19 @@ use Botble\Payment\Repositories\Interfaces\PaymentInterface;
 use Botble\Payment\Tables\PaymentTable;
 use Botble\Setting\Supports\SettingStore;
 use Exception;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
-use Illuminate\View\View;
-use Throwable;
 
 class PaymentController extends Controller
 {
-    /**
-     * @var PaymentInterface
-     */
-    protected $paymentRepository;
+    protected PaymentInterface $paymentRepository;
 
-    /**
-     * PaymentController constructor.
-     * @param PaymentInterface $paymentRepository
-     */
     public function __construct(PaymentInterface $paymentRepository)
     {
         $this->paymentRepository = $paymentRepository;
     }
 
-    /**
-     * @param PaymentTable $table
-     * @return Factory|View
-     * @throws Throwable
-     */
     public function index(PaymentTable $table)
     {
         page_title()->setTitle(trans('plugins/payment::payment.name'));
@@ -47,12 +32,6 @@ class PaymentController extends Controller
         return $table->renderTable();
     }
 
-    /**
-     * @param Request $request
-     * @param int $id
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function destroy(Request $request, $id, BaseHttpResponse $response)
     {
         try {
@@ -70,12 +49,6 @@ class PaymentController extends Controller
         }
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function deletes(Request $request, BaseHttpResponse $response)
     {
         $ids = $request->input('ids');
@@ -94,12 +67,6 @@ class PaymentController extends Controller
         return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
-    /**
-     * @param int $id
-     * @return Factory|View
-     * @throws Exception
-     * @throws Throwable
-     */
     public function show($id)
     {
         $payment = $this->paymentRepository->findOrFail($id);
@@ -119,9 +86,6 @@ class PaymentController extends Controller
         return view('plugins/payment::show', compact('payment', 'detail', 'paymentStatuses'));
     }
 
-    /**
-     * @return Factory|View
-     */
     public function methods()
     {
         page_title()->setTitle(trans('plugins/payment::payment.payment_methods'));
@@ -132,12 +96,6 @@ class PaymentController extends Controller
         return view('plugins/payment::settings.index');
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @param SettingStore $settingStore
-     * @return BaseHttpResponse
-     */
     public function updateSettings(Request $request, BaseHttpResponse $response, SettingStore $settingStore)
     {
         $data = $request->except(['_token']);
@@ -151,12 +109,6 @@ class PaymentController extends Controller
         return $response->setMessage(trans('plugins/payment::payment.saved_payment_settings_success'));
     }
 
-    /**
-     * @param PaymentMethodRequest $request
-     * @param BaseHttpResponse $response
-     * @param SettingStore $settingStore
-     * @return BaseHttpResponse
-     */
     public function updateMethods(PaymentMethodRequest $request, BaseHttpResponse $response, SettingStore $settingStore)
     {
         $type = $request->input('type');
@@ -173,12 +125,6 @@ class PaymentController extends Controller
         return $response->setMessage(trans('plugins/payment::payment.saved_payment_method_success'));
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @param SettingStore $settingStore
-     * @return BaseHttpResponse
-     */
     public function updateMethodStatus(Request $request, BaseHttpResponse $response, SettingStore $settingStore)
     {
         $settingStore
@@ -188,12 +134,6 @@ class PaymentController extends Controller
         return $response->setMessage(trans('plugins/payment::payment.turn_off_success'));
     }
 
-    /**
-     * @param $id
-     * @param UpdatePaymentRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function update($id, UpdatePaymentRequest $request, BaseHttpResponse $response)
     {
         $payment = $this->paymentRepository->findOrFail($id);
@@ -209,12 +149,6 @@ class PaymentController extends Controller
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param int $id
-     * @param string $refundId
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function getRefundDetail($id, $refundId, BaseHttpResponse $response)
     {
         $data = [];

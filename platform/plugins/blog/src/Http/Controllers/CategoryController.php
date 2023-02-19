@@ -104,7 +104,7 @@ class CategoryController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit($id, FormBuilder $formBuilder, Request $request, BaseHttpResponse $response)
+    public function edit(int $id, FormBuilder $formBuilder, Request $request, BaseHttpResponse $response)
     {
         $category = $this->categoryRepository->findOrFail($id);
 
@@ -119,7 +119,7 @@ class CategoryController extends BaseController
         return $formBuilder->create(CategoryForm::class, ['model' => $category])->renderForm();
     }
 
-    public function update($id, CategoryRequest $request, BaseHttpResponse $response)
+    public function update(int $id, CategoryRequest $request, BaseHttpResponse $response)
     {
         $category = $this->categoryRepository->findOrFail($id);
 
@@ -152,7 +152,7 @@ class CategoryController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(Request $request, $id, BaseHttpResponse $response)
+    public function destroy(Request $request, int $id, BaseHttpResponse $response)
     {
         try {
             $category = $this->categoryRepository->findOrFail($id);

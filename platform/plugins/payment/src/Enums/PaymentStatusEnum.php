@@ -4,6 +4,7 @@ namespace Botble\Payment\Enums;
 
 use Botble\Base\Supports\Enum;
 use Html;
+use Illuminate\Support\HtmlString;
 
 /**
  * @method static PaymentStatusEnum PENDING()
@@ -22,37 +23,24 @@ class PaymentStatusEnum extends Enum
     public const FRAUD = 'fraud';
     public const FAILED = 'failed';
 
-    /**
-     * @var string
-     */
     public static $langPath = 'plugins/payment::payment.statuses';
 
-    /**
-     * @return string
-     */
-    public function toHtml()
+    public function toHtml(): HtmlString|string
     {
-        switch ($this->value) {
-            case self::PENDING:
-                return Html::tag('span', self::PENDING()->label(), ['class' => 'label-warning status-label'])
-                    ->toHtml();
-            case self::COMPLETED:
-                return Html::tag('span', self::COMPLETED()->label(), ['class' => 'label-success status-label'])
-                    ->toHtml();
-            case self::REFUNDING:
-                return Html::tag('span', self::REFUNDING()->label(), ['class' => 'label-warning status-label'])
-                    ->toHtml();
-            case self::REFUNDED:
-                return Html::tag('span', self::REFUNDED()->label(), ['class' => 'label-info status-label'])
-                    ->toHtml();
-            case self::FRAUD:
-                return Html::tag('span', self::FRAUD()->label(), ['class' => 'label-danger status-label'])
-                    ->toHtml();
-            case self::FAILED:
-                return Html::tag('span', self::FAILED()->label(), ['class' => 'label-danger status-label'])
-                    ->toHtml();
-            default:
-                return parent::toHtml();
-        }
+        return match ($this->value) {
+            self::PENDING => Html::tag('span', self::PENDING()->label(), ['class' => 'label-warning status-label'])
+                ->toHtml(),
+            self::COMPLETED => Html::tag('span', self::COMPLETED()->label(), ['class' => 'label-success status-label'])
+                ->toHtml(),
+            self::REFUNDING => Html::tag('span', self::REFUNDING()->label(), ['class' => 'label-warning status-label'])
+                ->toHtml(),
+            self::REFUNDED => Html::tag('span', self::REFUNDED()->label(), ['class' => 'label-info status-label'])
+                ->toHtml(),
+            self::FRAUD => Html::tag('span', self::FRAUD()->label(), ['class' => 'label-danger status-label'])
+                ->toHtml(),
+            self::FAILED => Html::tag('span', self::FAILED()->label(), ['class' => 'label-danger status-label'])
+                ->toHtml(),
+            default => parent::toHtml(),
+        };
     }
 }

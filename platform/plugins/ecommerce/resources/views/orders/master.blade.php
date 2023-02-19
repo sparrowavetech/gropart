@@ -53,7 +53,7 @@
 
     @if (session()->has('success_msg') || session()->has('error_msg') || isset($errors))
         <script type="text/javascript">
-            window.onload = function () {
+            $(document).ready(function () {
                 @if (session()->has('success_msg'))
                     MainCheckout.showNotice('success', '{{ session('success_msg') }}');
                 @endif
@@ -65,7 +65,7 @@
                         MainCheckout.showNotice('error', '{{ $error }}');
                     @endforeach
                 @endif
-            };
+            });
         </script>
     @endif
 

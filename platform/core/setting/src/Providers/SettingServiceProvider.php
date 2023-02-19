@@ -23,7 +23,7 @@ class SettingServiceProvider extends ServiceProvider
 
     protected bool $defer = true;
 
-    public function register()
+    public function register(): void
     {
         $this->setNamespace('core/setting')
             ->loadAndPublishConfigurations(['general']);
@@ -47,7 +47,7 @@ class SettingServiceProvider extends ServiceProvider
         $this->loadHelpers();
     }
 
-    public function boot()
+    public function boot(): void
     {
         $this
             ->loadRoutes()

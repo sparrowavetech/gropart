@@ -53,6 +53,37 @@
             </div>
         </div>
     </div>
+    <div class="row">
+       <div class="col-md-6">
+           <div class="form-group mb-3">
+               <label class="text-title-field">{{ trans('plugins/ecommerce::products.form.cost_per_item') }}</label>
+               <div class="next-input--stylized">
+                   <span class="next-input-add-on next-input__add-on--before">{{ get_application_currency()->symbol }}</span>
+                   <input name="cost_per_item"
+                          class="next-input input-mask-number regular-price next-input--invisible"
+                          step="any"
+                          value="{{ old('cost_per_item', $product ? $product->cost_per_item : ($originalProduct->cost_per_item ?? 0)) }}"
+                          type="text"
+                          placeholder="{{ trans('plugins/ecommerce::products.form.cost_per_item_placeholder') }}">
+               </div>
+               {!! Form::helper(trans('plugins/ecommerce::products.form.cost_per_item_helper')) !!}
+           </div>
+       </div>
+        <input type="hidden" value="{{ $product->id ?? null }}" name="product_id">
+        <div class="col-md-6">
+            <div class="form-group mb-3">
+                <label class="text-title-field">{{ trans('plugins/ecommerce::products.form.barcode') }}</label>
+                <div class="next-input--stylized">
+                    <input name="barcode"
+                           class="next-input next-input--invisible"
+                           step="any"
+                           value="{{ old('barcode', $product ? $product->barcode : ($originalProduct->barcode ?? null)) }}"
+                           type="text"
+                           placeholder="{{ trans('plugins/ecommerce::products.form.barcode_placeholder') }}">
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="col-md-6 scheduled-time @if (old('sale_type', $product ? $product->sale_type : ($originalProduct->sale_type ?? 0)) == 0) hidden @endif">
         <div class="form-group mb-3">
             <label class="text-title-field">{{ trans('plugins/ecommerce::products.form.date.start') }}</label>

@@ -32,6 +32,7 @@ use Cart;
 use EcommerceHelper;
 use EmailHandler;
 use Exception;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\File;
 use Form;
 use Html;
@@ -53,7 +54,7 @@ use Botble\Sms\Enums\SmsEnum;
 
 class HookServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         if (defined('MENU_ACTION_SIDEBAR_OPTIONS')) {
             Menu::addMenuOptionModel(Brand::class);
@@ -70,7 +71,6 @@ class HookServiceProvider extends ServiceProvider
         add_filter(BASE_FILTER_TOP_HEADER_LAYOUT, [$this, 'registerTopHeaderNotification'], 121);
         add_filter(BASE_FILTER_APPEND_MENU_NAME, [$this, 'getPendingOrders'], 130, 2);
         add_filter(BASE_FILTER_MENU_ITEMS_COUNT, [$this, 'getMenuItemCount'], 120);
-
         add_filter(RENDER_PRODUCTS_IN_CHECKOUT_PAGE, [$this, 'renderProductsInCheckoutPage'], 1000);
 
         $this->app->booted(function () {
@@ -395,7 +395,7 @@ class HookServiceProvider extends ServiceProvider
 
         add_action(BASE_ACTION_TOP_FORM_CONTENT_NOTIFICATION, function ($request, $data = null) {
             if (! $data instanceof Product || Route::currentRouteName() != 'products.edit') {
-                return false;
+                return;
             }
 
             $flashSale = null;
@@ -430,12 +430,29 @@ class HookServiceProvider extends ServiceProvider
             }
 
             if ($flashSale || $discount) {
-                echo view('plugins/ecommerce::products.partials.product-price-warning', compact('flashSale', 'discount', 'data'))
-                    ->render();
+                echo view(
+                    'plugins/ecommerce::products.partials.product-price-warning',
+                    compact('flashSale', 'discount', 'data')
+                )->render();
+            }
+        }, 145, 2);
+
+        add_action(BASE_ACTION_TOP_FORM_CONTENT_NOTIFICATION, function (Request $request, Model|string|null $data = null) {
+            if (! EcommerceHelper::isEnableEmailVerification()) {
+                return;
             }
 
-            return true;
-        }, 145, 2);
+            if (! $data instanceof Customer || Route::currentRouteName() !== 'customers.edit') {
+                return;
+            }
+
+            if (Auth::user()->hasPermission('customers.edit')) {
+                echo view(
+                    'plugins/ecommerce::customers.notification',
+                    compact('data')
+                )->render();
+            }
+        }, 45, 2);
 
         if (function_exists('add_shortcode')) {
             add_shortcode('recently-viewed-products', __('Customer Recently Viewed Products'), __('Customer Recently Viewed Products'), function () {

@@ -7,40 +7,21 @@ use Botble\Marketplace\Repositories\Interfaces\RevenueInterface;
 use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
 use Botble\Marketplace\Tables\StoreRevenueTable;
 use Botble\Table\Abstracts\TableAbstract;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 use MarketplaceHelper;
-use Throwable;
 
 class StatementController extends BaseController
 {
-    /**
-     * @var StoreInterface
-     */
-    protected $storeRepository;
+    protected StoreInterface $storeRepository;
 
-    /**
-     * @var RevenueInterface
-     */
-    protected $revenueRepository;
+    protected RevenueInterface $revenueRepository;
 
-    /**
-     * @param StoreInterface $storeRepository
-     * @param RevenueInterface $revenueRepository
-     */
     public function __construct(StoreInterface $storeRepository, RevenueInterface $revenueRepository)
     {
         $this->storeRepository = $storeRepository;
         $this->revenueRepository = $revenueRepository;
     }
 
-    /**
-     * @param StoreRevenueTable $table
-     * @param Request $request
-     * @return JsonResponse|View
-     * @throws Throwable
-     */
     public function index(StoreRevenueTable $table, Request $request)
     {
         page_title()->setTitle(__('Statements'));

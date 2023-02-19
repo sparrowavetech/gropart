@@ -759,6 +759,7 @@ h4.modal-title {
     .colorpicker-popup.colorpicker-bs-popover-content {
         display: block;
         width: 100%;
+
         &.colorpicker-hidden {
             display: none;
         }
@@ -767,4 +768,40 @@ h4.modal-title {
 
 .iti.iti--allow-dropdown {
     width: 100%;
+}
+
+.onoffswitch-checkbox:checked[disabled] + .onoffswitch-label {
+    cursor: not-allowed;
+
+    .onoffswitch-switch {
+        background-color: #a4716b;
+    }
+}
+
+.datepicker {
+    .active {
+        background-color: transparent !important;
+    }
+
+    a.input-button {
+        text-decoration: none;
+        border: 1px solid #bbb;
+        display: block;
+        padding: 9px 12px;
+        border-left: 0;
+        cursor: pointer;
+        align-self: center;
+        justify-content: center;
+        line-height: 1;
+
+        svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        &.text-danger {
+            color: #f64747 !important;
+            fill: #f64747 !important;
+        }
+    }
 }

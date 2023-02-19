@@ -2,25 +2,14 @@
 
 namespace Botble\Setting\Supports;
 
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Filesystem\Filesystem;
 
 class JsonSettingStore extends SettingStore
 {
-    /**
-     * @var Filesystem
-     */
-    protected $files;
+    protected Filesystem $files;
 
-    /**
-     * @var null
-     */
-    protected $path = null;
+    protected ?string $path = null;
 
-    /**
-     * @param Filesystem $files
-     * @param string|null $path
-     */
     public function __construct(Filesystem $files, ?string $path = null)
     {
         $this->files = $files;
@@ -29,8 +18,6 @@ class JsonSettingStore extends SettingStore
 
     /**
      * Set the path for the JSON file.
-     *
-     * @param string $path
      */
     public function setPath(string $path)
     {
@@ -49,18 +36,11 @@ class JsonSettingStore extends SettingStore
         $this->path = $path;
     }
 
-    /**
-     * @return string
-     */
     public function getPath(): string
     {
         return $this->path;
     }
 
-    /**
-     * {@inheritDoc}
-     * @throws FileNotFoundException
-     */
     protected function read(): array
     {
         $contents = $this->files->get($this->path);
@@ -76,10 +56,7 @@ class JsonSettingStore extends SettingStore
         return $data;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    protected function write(array $data)
+    protected function write(array $data): void
     {
         $contents = '{}';
         if ($data) {

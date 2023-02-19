@@ -33,17 +33,11 @@ class ShippoWebhookController extends BaseController
         $this->shippo = $shippo;
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function index(Request $request, BaseHttpResponse $response)
     {
         $event = $request->input('event');
         $data = (array) $request->input('data', []);
 
-        $condition = [];
         $transactionId = null;
 
         switch ($event) {
@@ -91,19 +85,12 @@ class ShippoWebhookController extends BaseController
         return $response;
     }
 
-    /**
-     * @param Shipment $shipment
-     * @param array $data
-     */
     protected function transactionUpdated(Shipment $shipment, array $data)
     {
         $status = Arr::get($data, 'status');
-        switch ($status) {
-            case 'REFUNDED':
-                $shipment->status = ShippingStatusEnum::CANCELED;
-                $shipment->save();
-
-                break;
+        if ($status == 'REFUNDED') {
+            $shipment->status = ShippingStatusEnum::CANCELED;
+            $shipment->save();
         }
 
         $this->shipmentHistoryRepository->createOrUpdate([
@@ -117,10 +104,6 @@ class ShippoWebhookController extends BaseController
         ]);
     }
 
-    /**
-     * @param Shipment $shipment
-     * @param array $data
-     */
     protected function trackUpdated(Shipment $shipment, array $data)
     {
         $status = Arr::get($data, 'tracking_status.status');

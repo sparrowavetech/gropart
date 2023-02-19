@@ -23,13 +23,13 @@ class MenuServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function register()
+    public function register(): void
     {
         $this->setNamespace('packages/menu')
             ->loadHelpers();
     }
 
-    public function boot()
+    public function boot(): void
     {
         $this->app->bind(MenuInterface::class, function () {
             return new MenuCacheDecorator(

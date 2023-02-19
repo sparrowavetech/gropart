@@ -28,7 +28,7 @@ class RouteCacheCommand extends BaseRouteCacheCommand
 
         $this->cacheRoutesPerLocale();
 
-        $this->info('Routes cached successfully!');
+        $this->components->info('Routes cached successfully!');
 
         return self::SUCCESS;
     }
@@ -49,7 +49,7 @@ class RouteCacheCommand extends BaseRouteCacheCommand
             $routes = $this->getFreshApplicationRoutesForLocale($locale);
 
             if (count($routes) == 0) {
-                $this->error("Your application doesn't have any routes.");
+                $this->components->error("Your application doesn't have any routes.");
 
                 return self::FAILURE;
             }

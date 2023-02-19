@@ -26,6 +26,8 @@ class Page extends BaseModel
     protected $casts = [
         'status' => BaseStatusEnum::class,
         'content' => SafeContent::class,
+        'name' => SafeContent::class,
+        'description' => SafeContent::class,
     ];
 
     protected $fillable = [

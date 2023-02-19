@@ -6,7 +6,6 @@ use Botble\Base\Supports\Helper;
 use Botble\Setting\Models\Setting;
 use Exception;
 use Illuminate\Support\Facades\File;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -14,14 +13,8 @@ use UnexpectedValueException;
 
 class DatabaseSettingStore extends SettingStore
 {
-    /**
-     * @var bool
-     */
-    protected $connectedDatabase = false;
+    protected bool $connectedDatabase = false;
 
-    /**
-     * {@inheritDoc}
-     */
     public function forget($key): SettingStore
     {
         parent::forget($key);
@@ -47,10 +40,7 @@ class DatabaseSettingStore extends SettingStore
         return $this;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    protected function write(array $data)
+    protected function write(array $data): void
     {
         $keys = Setting::pluck('key');
 
@@ -96,8 +86,6 @@ class DatabaseSettingStore extends SettingStore
      * into this method!
      *
      * @param array $data Call array_dot on a multidimensional array before passing it into this method!
-     *
-     * @return array
      */
     protected function prepareInsertData(array $data): array
     {
@@ -110,10 +98,6 @@ class DatabaseSettingStore extends SettingStore
         return apply_filters(SETTINGS_PREPARE_INSERT_DATA, $dbData);
     }
 
-    /**
-     * {@inheritDoc}
-     * @throws FileNotFoundException
-     */
     protected function read(): array
     {
         if (! $this->connectedDatabase) {
@@ -151,12 +135,8 @@ class DatabaseSettingStore extends SettingStore
 
     /**
      * Parse data coming from the database.
-     *
-     * @param Collection|array $data
-     *
-     * @return array
      */
-    public function parseReadData($data): array
+    public function parseReadData(Collection|array $data): array
     {
         $results = [];
 

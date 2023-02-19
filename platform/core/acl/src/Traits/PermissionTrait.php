@@ -6,18 +6,8 @@ use Illuminate\Support\Str;
 
 trait PermissionTrait
 {
-    /**
-     * An array of cached, prepared permissions.
-     *
-     * @var array
-     */
-    protected $preparedPermissions;
+    protected array|null $preparedPermissions = null;
 
-    /**
-     * Create a new permissions instance.
-     *
-     * @param array|null $permissions
-     */
     public function __construct(array $permissions = null)
     {
         if (isset($permissions)) {
@@ -25,13 +15,7 @@ trait PermissionTrait
         }
     }
 
-    /**
-     * @param string $permission
-     * @param bool $value
-     * @param bool $create
-     * @return $this
-     */
-    public function updatePermission(string $permission, $value = true, $create = false): self
+    public function updatePermission(string $permission, bool $value = true, bool $create = false): self
     {
         if (array_key_exists($permission, (array)$this->permissions)) {
             $permissions = $this->permissions;
@@ -46,12 +30,7 @@ trait PermissionTrait
         return $this;
     }
 
-    /**
-     * @param string $permission
-     * @param bool $value
-     * @return $this
-     */
-    public function addPermission(string $permission, $value = true): self
+    public function addPermission(string $permission, bool $value = true): self
     {
         if (! array_key_exists($permission, (array)$this->permissions)) {
             $this->permissions = array_merge($this->permissions, [$permission => $value]);
@@ -60,10 +39,6 @@ trait PermissionTrait
         return $this;
     }
 
-    /**
-     * @param string $permission
-     * @return $this
-     */
     public function removePermission(string $permission): self
     {
         if (array_key_exists($permission, (array)$this->permissions)) {
@@ -77,11 +52,7 @@ trait PermissionTrait
         return $this;
     }
 
-    /**
-     * @param array|string $permissions
-     * @return bool
-     */
-    public function hasAccess($permissions): bool
+    public function hasAccess(string|array $permissions): bool
     {
         if (is_string($permissions)) {
             $permissions = func_get_args();
@@ -98,11 +69,6 @@ trait PermissionTrait
         return true;
     }
 
-    /**
-     * Lazily grab the prepared permissions.
-     *
-     * @return array
-     */
     protected function getPreparedPermissions(): array
     {
         if ($this->preparedPermissions === null) {
@@ -112,9 +78,6 @@ trait PermissionTrait
         return $this->preparedPermissions;
     }
 
-    /**
-     * @return array
-     */
     protected function createPreparedPermissions(): array
     {
         $prepared = [];
@@ -126,13 +89,6 @@ trait PermissionTrait
         return $prepared;
     }
 
-    /**
-     * Does the heavy lifting of preparing permissions.
-     *
-     * @param array $prepared
-     * @param array $permissions
-     * @return void
-     */
     protected function preparePermissions(array &$prepared, array $permissions): void
     {
         foreach ($permissions as $keys => $value) {
@@ -146,7 +102,7 @@ trait PermissionTrait
 
                 // If our value is in the array and equals false, it will override
                 if ($value === false) {
-                    $prepared[$key] = $value;
+                    $prepared[$key] = false;
                 }
             }
         }
@@ -155,11 +111,8 @@ trait PermissionTrait
     /**
      * Takes the given permission key and inspects it for a class & method. If
      * it exists, methods may be comma-separated, e.g. Class@method1,method2.
-     *
-     * @param string $key
-     * @return array
      */
-    protected function extractClassPermissions($key): array
+    protected function extractClassPermissions(string $key): array
     {
         if (! Str::contains($key, '@')) {
             return (array)$key;
@@ -178,10 +131,6 @@ trait PermissionTrait
 
     /**
      * Checks a permission in the prepared array, including wildcard checks and permissions.
-     *
-     * @param array $prepared
-     * @param string $permission
-     * @return bool
      */
     protected function checkPermission(array $prepared, string $permission): bool
     {
@@ -198,11 +147,7 @@ trait PermissionTrait
         return false;
     }
 
-    /**
-     * @param array|string $permissions
-     * @return bool
-     */
-    public function hasAnyAccess($permissions): bool
+    public function hasAnyAccess(array|string $permissions): bool
     {
         if (is_string($permissions)) {
             $permissions = func_get_args();

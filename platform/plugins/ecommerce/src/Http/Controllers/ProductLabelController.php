@@ -14,10 +14,7 @@ use Botble\Ecommerce\Http\Requests\ProductLabelRequest;
 use Botble\Ecommerce\Repositories\Interfaces\ProductLabelInterface;
 use Botble\Ecommerce\Tables\ProductLabelTable;
 use Exception;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
-use Throwable;
 
 class ProductLabelController extends BaseController
 {
@@ -28,11 +25,6 @@ class ProductLabelController extends BaseController
         $this->productLabelRepository = $productLabelRepository;
     }
 
-    /**
-     * @param ProductLabelTable $table
-     * @return Factory|View
-     * @throws Throwable
-     */
     public function index(ProductLabelTable $table)
     {
         page_title()->setTitle(trans('plugins/ecommerce::product-label.name'));
@@ -40,10 +32,6 @@ class ProductLabelController extends BaseController
         return $table->renderTable();
     }
 
-    /**
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
     public function create(FormBuilder $formBuilder)
     {
         page_title()->setTitle(trans('plugins/ecommerce::product-label.create'));
@@ -51,11 +39,6 @@ class ProductLabelController extends BaseController
         return $formBuilder->create(ProductLabelForm::class)->renderForm();
     }
 
-    /**
-     * @param ProductLabelRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function store(ProductLabelRequest $request, BaseHttpResponse $response)
     {
         $productLabel = $this->productLabelRepository->createOrUpdate($request->input());
@@ -68,13 +51,7 @@ class ProductLabelController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    /**
-     * @param int $id
-     * @param Request $request
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
-    public function edit($id, FormBuilder $formBuilder, Request $request)
+    public function edit(int $id, FormBuilder $formBuilder, Request $request)
     {
         $productLabel = $this->productLabelRepository->findOrFail($id);
 
@@ -85,13 +62,7 @@ class ProductLabelController extends BaseController
         return $formBuilder->create(ProductLabelForm::class, ['model' => $productLabel])->renderForm();
     }
 
-    /**
-     * @param int $id
-     * @param ProductLabelRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function update($id, ProductLabelRequest $request, BaseHttpResponse $response)
+    public function update(int $id, ProductLabelRequest $request, BaseHttpResponse $response)
     {
         $productLabel = $this->productLabelRepository->findOrFail($id);
 
@@ -106,13 +77,7 @@ class ProductLabelController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param int $id
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function destroy(Request $request, $id, BaseHttpResponse $response)
+    public function destroy(Request $request, int $id, BaseHttpResponse $response)
     {
         try {
             $productLabel = $this->productLabelRepository->findOrFail($id);
@@ -129,12 +94,6 @@ class ProductLabelController extends BaseController
         }
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function deletes(Request $request, BaseHttpResponse $response)
     {
         $ids = $request->input('ids');

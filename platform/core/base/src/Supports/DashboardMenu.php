@@ -170,7 +170,7 @@ class DashboardMenu
                 continue;
             }
 
-           $link['children'] = collect($link['children'])
+            $link['children'] = collect($link['children'])
                 ->unique(fn ($item) => $item['id'])
                 ->sortBy('priority')
                 ->toArray();

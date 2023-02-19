@@ -411,18 +411,18 @@
                     url: "{{ route('public.ajax.check-pincode')}}/"+formPincode+"/"+toPincode,
                     success: function(data) {
                         if(data){
-                            $('.picodetext').text('Delivery available at your location').css('color','green').show();
+                            $('.picodetext').text('Delivery available at your location').addClass('alert alert-success').show();
                         }else{
-                            $('.picodetext').text('Delivery not available at your location').css('color','red').show();
+                            $('.picodetext').text('Delivery not available at your location').addClass('alert alert-danger').show();
                         }
-                        
+
                     },
                     error: function(data) {
-                        $('.picodetext').text('error in check pincode').css('color','red').show();
+                        $('.picodetext').text('Error in check pincode').addClass('alert alert-danger').show();
                     }
                 });
             }else{
-                $('.picodetext').text('Please enter pincode').css('color','red').show();
+                $('.picodetext').text('Please enter pincode').addClass('alert alert-danger').show();
             }
         }
     </script>

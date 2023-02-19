@@ -13,7 +13,7 @@
                         - {{ trans('core/base::system.cms_version') }}: {{ get_cms_version() }}
                         - {{ trans('core/base::system.framework_version') }}: {{ $systemEnv['version'] }}
                         - {{ trans('core/base::system.timezone') }}: {{ $systemEnv['timezone'] }}
-                        - {{ trans('core/base::system.debug_mode') }}: {!! $systemEnv['debug_mode'] ? '&#10004;' : '&#10008;' !!}
+                        - {{ trans('core/base::system.debug_mode_off') }}: {!! ! $systemEnv['debug_mode'] ? '&#10004;' : '&#10008;' !!}
                         - {{ trans('core/base::system.storage_dir_writable') }}: {!! $systemEnv['storage_dir_writable'] ? '&#10004;' : '&#10008;' !!}
                         - {{ trans('core/base::system.cache_dir_writable') }}: {!! $systemEnv['cache_dir_writable'] ? '&#10004;' : '&#10008;' !!}
                         - {{ trans('core/base::system.app_size') }}: {{ $systemEnv['app_size'] }}
@@ -79,7 +79,7 @@
                     <li class="list-group-item">{{ trans('core/base::system.cms_version') }}: {{ get_cms_version() }}</li>
                     <li class="list-group-item">{{ trans('core/base::system.framework_version') }}: {{ $systemEnv['version'] }}</li>
                     <li class="list-group-item">{{ trans('core/base::system.timezone') }}: {{ $systemEnv['timezone'] }}</li>
-                    <li class="list-group-item">{{ trans('core/base::system.debug_mode') }}: {!! $systemEnv['debug_mode'] ? '<span class="fas fa-check"></span>' : '<span class="fas fa-times"></span>' !!}</li>
+                    <li class="list-group-item">{{ trans('core/base::system.debug_mode_off') }}: {!! ! $systemEnv['debug_mode'] ? '<span class="fas fa-check"></span>' : '<span class="fas fa-times"></span>' !!}</li>
                     <li class="list-group-item">{{ trans('core/base::system.storage_dir_writable') }}: {!! $systemEnv['storage_dir_writable'] ? '<span class="fas fa-check"></span>' : '<span class="fas fa-times"></span>' !!}</li>
                     <li class="list-group-item">{{ trans('core/base::system.cache_dir_writable') }}: {!! $systemEnv['cache_dir_writable'] ? '<span class="fas fa-check"></span>' : '<span class="fas fa-times"></span>' !!}</li>
                     <li class="list-group-item">{{ trans('core/base::system.app_size') }}: {{ $systemEnv['app_size'] }}</li>

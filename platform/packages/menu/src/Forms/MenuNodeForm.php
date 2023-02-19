@@ -7,15 +7,9 @@ use Botble\Menu\Models\MenuNode;
 
 class MenuNodeForm extends FormAbstract
 {
-    /**
-     * @var string
-     */
     protected $template = 'core/base::forms.form-content-only';
 
-    /**
-     * {@inheritDoc}
-     */
-    public function buildForm()
+    public function buildForm(): void
     {
         $this->setupModel(new MenuNode());
 

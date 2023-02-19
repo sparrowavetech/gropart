@@ -20,9 +20,6 @@ class ParallelSave extends ChunkSave
      */
     protected bool $isFileValid;
 
-    /**
-     * {@inheritDoc}
-     */
     public function __construct(UploadedFile $file, AbstractHandler $handler, ChunkStorage $chunkStorage)
     {
         // Get current file validation - the file instance is changed
@@ -32,17 +29,11 @@ class ParallelSave extends ChunkSave
         parent::__construct($file, $handler, $chunkStorage);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function isValid(): bool
     {
         return $this->isFileValid;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     protected function handleChunkFile($file): ChunkSave
     {
         // Move the uploaded file to chunk folder
@@ -51,17 +42,11 @@ class ParallelSave extends ChunkSave
         return $this;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     protected function tryToBuildFullFileFromChunks(): ChunkSave
     {
         return parent::tryToBuildFullFileFromChunks();
     }
 
-    /**
-     * @return Collection
-     */
     protected function getSavedChunksFiles(): Collection
     {
         $chunkFileName = preg_replace(
@@ -76,7 +61,6 @@ class ParallelSave extends ChunkSave
     }
 
     /**
-     * {@inheritDoc}
      * @throws ChunkSaveException
      * @throws MissingChunkFilesException
      */

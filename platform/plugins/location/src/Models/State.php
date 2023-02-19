@@ -2,6 +2,7 @@
 
 namespace Botble\Location\Models;
 
+use Botble\Base\Casts\SafeContent;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -22,6 +23,8 @@ class State extends BaseModel
 
     protected $casts = [
         'status' => BaseStatusEnum::class,
+        'name' => SafeContent::class,
+        'abbreviation' => SafeContent::class,
     ];
 
     public function country(): BelongsTo

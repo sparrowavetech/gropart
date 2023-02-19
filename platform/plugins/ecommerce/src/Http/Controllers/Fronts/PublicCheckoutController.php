@@ -14,6 +14,7 @@ use Botble\Ecommerce\Http\Requests\ApplyCouponRequest;
 use Botble\Ecommerce\Http\Requests\CheckoutRequest;
 use Botble\Ecommerce\Http\Requests\SaveCheckoutInformationRequest;
 use Botble\Ecommerce\Models\Order;
+use Botble\Ecommerce\Models\OrderHistory;
 use Botble\Ecommerce\Repositories\Interfaces\AddressInterface;
 use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
 use Botble\Ecommerce\Repositories\Interfaces\DiscountInterface;
@@ -35,22 +36,14 @@ use Botble\Payment\Supports\PaymentHelper;
 use Carbon\Carbon;
 use Cart;
 use EcommerceHelper;
-use Exception;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
-use Illuminate\View\View;
 use OptimizerHelper;
 use OrderHelper;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use Theme;
 use Validator;
 
@@ -102,18 +95,8 @@ class PublicCheckoutController
         OptimizerHelper::disable();
     }
 
-    /**
-     * @param string $token
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @param HandleShippingFeeService $shippingFeeService
-     * @param HandleApplyCouponService $applyCouponService
-     * @param HandleRemoveCouponService $removeCouponService
-     * @param HandleApplyPromotionsService $applyPromotionsService
-     * @return BaseHttpResponse|Application|Factory|\Illuminate\Contracts\View\View
-     */
     public function getCheckout(
-        $token,
+        string $token,
         Request $request,
         BaseHttpResponse $response,
         HandleShippingFeeService $shippingFeeService,
@@ -281,15 +264,6 @@ class PublicCheckoutController
         return view('plugins/ecommerce::orders.checkout', $data);
     }
 
-    /**
-     * @param string $token
-     * @param array $sessionData
-     * @param Request $request
-     * @param bool $finished
-     * @return array
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     */
     protected function processOrderData(string $token, array $sessionData, Request $request, bool $finished = false): array
     {
         if ($request->has('billing_address_same_as_shipping_address')) {
@@ -367,8 +341,12 @@ class PublicCheckoutController
         if (Arr::get($sessionData, 'address_id') && Arr::get($sessionData, 'address_id') !== 'new') {
             $address = $this->addressRepository->findById(Arr::get($sessionData, 'address_id'));
 
-            $address->fill($request->input('address', []));
-            $address->save();
+            if ($address) {
+                $address->fill($request->input('address', []));
+                $address->save();
+            } else {
+                $address = $this->addressRepository->createOrUpdate($request->input('address', []));
+            }
         }
 
         $addressData = [
@@ -526,11 +504,6 @@ class PublicCheckoutController
         return $sessionData;
     }
 
-    /**
-     * @param array $data
-     * @param int|null $orderId
-     * @return false|Model|mixed
-     */
     protected function createOrderAddress(array $data, ?int $orderId = null)
     {
         if ($orderId) {
@@ -550,11 +523,6 @@ class PublicCheckoutController
         return $this->orderAddressRepository->create($data);
     }
 
-    /**
-     * @param array $data
-     * @param int|null $orderId
-     * @return void
-     */
     protected function storeOrderBillingAddress(array $data, ?int $orderId = null)
     {
         if (isset($data['billing_address_same_as_shipping_address']) && ! $data['billing_address_same_as_shipping_address']) {
@@ -571,17 +539,8 @@ class PublicCheckoutController
         }
     }
 
-    /**
-     * @param string $token
-     * @param SaveCheckoutInformationRequest $request
-     * @param BaseHttpResponse $response
-     * @param HandleApplyCouponService $applyCouponService
-     * @param HandleRemoveCouponService $removeCouponService
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function postSaveInformation(
-        $token,
+        string $token,
         SaveCheckoutInformationRequest $request,
         BaseHttpResponse $response,
         HandleApplyCouponService $applyCouponService,
@@ -628,19 +587,8 @@ class PublicCheckoutController
         return $response->setData($sessionData);
     }
 
-    /**
-     * @param string $token
-     * @param CheckoutRequest $request
-     * @param BaseHttpResponse $response
-     * @param HandleShippingFeeService $shippingFeeService
-     * @param HandleApplyCouponService $applyCouponService
-     * @param HandleRemoveCouponService $removeCouponService
-     * @param HandleApplyPromotionsService $handleApplyPromotionsService
-     * @return BaseHttpResponse|Application|RedirectResponse|\Illuminate\Routing\Redirector|mixed
-     * @throws Exception
-     */
     public function postCheckout(
-        $token,
+        string $token,
         CheckoutRequest $request,
         BaseHttpResponse $response,
         HandleShippingFeeService $shippingFeeService,
@@ -888,12 +836,7 @@ class PublicCheckoutController
             ->setMessage(__('Checkout successfully!'));
     }
 
-    /**
-     * @param string $token
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse|Application|Factory|RedirectResponse|View
-     */
-    public function getCheckoutSuccess($token, BaseHttpResponse $response)
+    public function getCheckoutSuccess(string $token, BaseHttpResponse $response)
     {
         if (! EcommerceHelper::isCartEnabled()) {
             abort(404);
@@ -920,14 +863,28 @@ class PublicCheckoutController
             event(new OrderPlacedEvent($order));
 
             $order->is_finished = true;
+
+            if (EcommerceHelper::isOrderAutoConfirmedEnabled()) {
+                $order->is_confirmed = true;
+            }
+
             $order->save();
 
             OrderHelper::decreaseProductQuantity($order);
 
             OrderHelper::clearSessions($token);
+
+            if (EcommerceHelper::isOrderAutoConfirmedEnabled()) {
+                OrderHistory::create([
+                    'action' => 'confirm_order',
+                    'description' => trans('plugins/ecommerce::order.order_was_verified_by'),
+                    'order_id' => $order->id,
+                    'user_id' => 0,
+                ]);
+            }
         }
 
-        $products = collect([]);
+        $products = collect();
 
         $productsIds = $order->products->pluck('product_id')->all();
 
@@ -959,12 +916,6 @@ class PublicCheckoutController
         return view('plugins/ecommerce::orders.thank-you', compact('order', 'products'));
     }
 
-    /**
-     * @param ApplyCouponRequest $request
-     * @param HandleApplyCouponService $handleApplyCouponService
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function postApplyCoupon(
         ApplyCouponRequest $request,
         HandleApplyCouponService $handleApplyCouponService,
@@ -996,12 +947,6 @@ class PublicCheckoutController
             ->setMessage(__('Applied coupon ":code" successfully!', ['code' => $couponCode]));
     }
 
-    /**
-     * @param Request $request
-     * @param HandleRemoveCouponService $removeCouponService
-     * @param BaseHttpResponse $response
-     * @return array|BaseHttpResponse
-     */
     public function postRemoveCoupon(
         Request $request,
         HandleRemoveCouponService $removeCouponService,
@@ -1033,14 +978,7 @@ class PublicCheckoutController
             ->setMessage(__('Removed coupon :code successfully!', ['code' => session('applied_coupon_code')]));
     }
 
-    /**
-     * @param string $token
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse|Application|Factory|View
-     * @throws Exception
-     */
-    public function getCheckoutRecover($token, Request $request, BaseHttpResponse $response)
+    public function getCheckoutRecover(string $token, Request $request, BaseHttpResponse $response)
     {
         if (! EcommerceHelper::isCartEnabled()) {
             abort(404);
@@ -1099,7 +1037,7 @@ class PublicCheckoutController
             ->setMessage(__('You have recovered from previous orders!'));
     }
 
-    protected function createOrderFromData(array $data, ?Order $order): ?Order
+    protected function createOrderFromData(array $data, ?Order $order): Order|null|false
     {
         $data['is_finished'] = false;
 

@@ -1,4 +1,5 @@
 {
+    "id": "botble/stripe",
     "name": "Stripe Payment Gateway",
     "namespace": "Botble\\Stripe\\",
     "provider": "Botble\\Stripe\\Providers\\StripeServiceProvider",

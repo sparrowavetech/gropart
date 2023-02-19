@@ -343,14 +343,18 @@ trait ProductActionsTrait
 
         $productVariationItem->deleteBy(['variation_id' => $variationId]);
         $productRelatedToVariation = $this->productRepository->findById($variation->product_id);
+
         if ($productRelatedToVariation) {
             event(new DeletedContentEvent(PRODUCT_MODULE_SCREEN_NAME, request(), $productRelatedToVariation));
         }
+
         $this->productRepository->deleteBy(['id' => $variation->product_id]);
         $result = $productVariation->delete($variation);
+
+        $originProduct = $this->productRepository->findById($variation->configurable_product_id);
+
         if ($variation->is_default) {
             $latestVariation = $productVariation->getFirstBy(['configurable_product_id' => $variation->configurable_product_id]);
-            $originProduct = $this->productRepository->findById($variation->configurable_product_id);
             if ($latestVariation) {
                 $latestVariation->is_default = 1;
                 $productVariation->createOrUpdate($latestVariation);
@@ -434,7 +438,7 @@ trait ProductActionsTrait
     ) {
         $product = null;
         $variation = null;
-        $productVariationsInfo = collect([]);
+        $productVariationsInfo = collect();
 
         if ($id) {
             $variation = $productVariation->findOrFail($id);

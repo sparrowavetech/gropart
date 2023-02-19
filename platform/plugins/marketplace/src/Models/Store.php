@@ -2,6 +2,7 @@
 
 namespace Botble\Marketplace\Models;
 
+use Botble\Base\Casts\SafeContent;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Marketplace\Enums\ShopTypeEnum;
 use Botble\Base\Models\BaseModel;
@@ -47,6 +48,10 @@ class Store extends BaseModel
     protected $casts = [
         'status' => BaseStatusEnum::class,
         'shop_category' => ShopTypeEnum::class,
+        'name' => SafeContent::class,
+        'description' => SafeContent::class,
+        'content' => SafeContent::class,
+        'address' => SafeContent::class,
     ];
 
     protected static function boot()

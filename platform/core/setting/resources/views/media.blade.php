@@ -287,7 +287,7 @@
                                 <div class="multi-choices-widget list-item-checkbox">
                                     <ul>
                                         @php $folderIds = json_decode(setting('media_folders_can_add_watermark'), true); @endphp
-                                        @foreach (app(\Botble\Media\Repositories\Interfaces\MediaFolderInterface::class)->pluck('name', 'id') as $key => $item)
+                                        @foreach (app(\Botble\Media\Repositories\Interfaces\MediaFolderInterface::class)->pluck('name', 'id', ['parent_id' => 0]) as $key => $item)
                                             <li>
                                                 <input type="checkbox"
                                                        class="styled media-folder"

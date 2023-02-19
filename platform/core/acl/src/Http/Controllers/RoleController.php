@@ -15,11 +15,7 @@ use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Supports\Helper;
-use Exception;
-use Illuminate\Contracts\View\View;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Throwable;
 
 class RoleController extends BaseController
 {
@@ -33,11 +29,6 @@ class RoleController extends BaseController
         $this->userRepository = $userRepository;
     }
 
-    /**
-     * @param RoleTable $dataTable
-     * @return JsonResponse|View
-     * @throws Throwable
-     */
     public function index(RoleTable $dataTable)
     {
         page_title()->setTitle(trans('core/acl::permissions.role_permission'));
@@ -45,12 +36,7 @@ class RoleController extends BaseController
         return $dataTable->renderTable();
     }
 
-    /**
-     * @param int $id
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function destroy($id, BaseHttpResponse $response)
+    public function destroy(int $id, BaseHttpResponse $response)
     {
         $role = $this->roleRepository->findOrFail($id);
 
@@ -61,12 +47,6 @@ class RoleController extends BaseController
         return $response->setMessage(trans('core/acl::permissions.delete_success'));
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function deletes(Request $request, BaseHttpResponse $response)
     {
         $ids = $request->input('ids');
@@ -86,13 +66,7 @@ class RoleController extends BaseController
         return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
-    /**
-     * @param int $id
-     * @param FormBuilder $formBuilder
-     * @param Request $request
-     * @return string
-     */
-    public function edit($id, FormBuilder $formBuilder, Request $request)
+    public function edit(int $id, FormBuilder $formBuilder, Request $request)
     {
         $role = $this->roleRepository->findOrFail($id);
 
@@ -103,14 +77,7 @@ class RoleController extends BaseController
         return $formBuilder->create(RoleForm::class, ['model' => $role])->renderForm();
     }
 
-    /**
-     * @param int $id
-     * @param RoleCreateRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
-    public function update($id, RoleCreateRequest $request, BaseHttpResponse $response)
+    public function update(int $id, RoleCreateRequest $request, BaseHttpResponse $response)
     {
         if ($request->input('is_default')) {
             $this->roleRepository->getModel()->where('id', '!=', $id)->update(['is_default' => 0]);
@@ -135,11 +102,6 @@ class RoleController extends BaseController
             ->setMessage(trans('core/acl::permissions.modified_success'));
     }
 
-    /**
-     * Return a correct type cast permissions array
-     * @param array $permissions
-     * @return array
-     */
     protected function cleanPermission(array $permissions): array
     {
         if (! $permissions) {
@@ -154,10 +116,6 @@ class RoleController extends BaseController
         return $cleanedPermissions;
     }
 
-    /**
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
     public function create(FormBuilder $formBuilder)
     {
         page_title()->setTitle(trans('core/acl::permissions.create_role'));
@@ -165,11 +123,6 @@ class RoleController extends BaseController
         return $formBuilder->create(RoleForm::class)->renderForm();
     }
 
-    /**
-     * @param RoleCreateRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function store(RoleCreateRequest $request, BaseHttpResponse $response)
     {
         if ($request->input('is_default')) {
@@ -192,12 +145,7 @@ class RoleController extends BaseController
             ->setMessage(trans('core/acl::permissions.create_success'));
     }
 
-    /**
-     * @param int $id
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function getDuplicate($id, BaseHttpResponse $response)
+    public function getDuplicate(int $id, BaseHttpResponse $response)
     {
         $baseRole = $this->roleRepository->findOrFail($id);
 
@@ -216,9 +164,6 @@ class RoleController extends BaseController
             ->setMessage(trans('core/acl::permissions.duplicated_success'));
     }
 
-    /**
-     * @return array
-     */
     public function getJson(): array
     {
         $pl = [];
@@ -232,11 +177,6 @@ class RoleController extends BaseController
         return $pl;
     }
 
-    /**
-     * @param AssignRoleRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function postAssignMember(AssignRoleRequest $request, BaseHttpResponse $response): BaseHttpResponse
     {
         $user = $this->userRepository->findOrFail($request->input('pk'));

@@ -10,28 +10,15 @@ use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Repositories\Interfaces\InvoiceInterface;
 use Botble\Ecommerce\Tables\InvoiceTable;
 use Exception;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use InvoiceHelper;
-use Throwable;
 
 class InvoiceController extends BaseController
 {
-    protected InvoiceInterface $invoiceRepository;
-
-    public function __construct(InvoiceInterface $invoiceRepository)
+    public function __construct(protected InvoiceInterface $invoiceRepository)
     {
-        $this->invoiceRepository = $invoiceRepository;
     }
 
-    /**
-     * @param InvoiceTable $table
-     * @return JsonResponse|View
-     * @throws Throwable
-     */
     public function index(InvoiceTable $table)
     {
         page_title()->setTitle(trans('plugins/ecommerce::invoice.name'));
@@ -39,12 +26,7 @@ class InvoiceController extends BaseController
         return $table->renderTable();
     }
 
-    /**
-     * @param int $id
-     * @param Request $request
-     * @return Application|Factory|View
-     */
-    public function edit($id, Request $request)
+    public function edit(string $id, Request $request)
     {
         $invoice = $this->invoiceRepository->findOrFail($id);
 
@@ -57,13 +39,7 @@ class InvoiceController extends BaseController
         return view('plugins/ecommerce::invoices.edit', compact('invoice'));
     }
 
-    /**
-     * @param int $id
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function destroy(Request $request, $id, BaseHttpResponse $response)
+    public function destroy(Request $request, string $id, BaseHttpResponse $response)
     {
         try {
             $invoice = $this->invoiceRepository->findOrFail($id);
@@ -80,12 +56,6 @@ class InvoiceController extends BaseController
         }
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function deletes(Request $request, BaseHttpResponse $response)
     {
         $ids = $request->input('ids');
@@ -104,12 +74,7 @@ class InvoiceController extends BaseController
         return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
-    /**
-     * @param int $invoiceId
-     * @param Request $request
-     * @return \Response
-     */
-    public function getGenerateInvoice(int $invoiceId, Request $request)
+    public function getGenerateInvoice(string $invoiceId, Request $request)
     {
         $invoice = $this->invoiceRepository->findOrFail($invoiceId);
 

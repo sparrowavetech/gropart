@@ -39,7 +39,7 @@ class TagTable extends TableAbstract
             ->eloquent($this->query())
             ->editColumn('name', function ($item) {
                 if (! Auth::user()->hasPermission('tags.edit')) {
-                    return $item->name;
+                    return BaseHelper::clean($item->name);
                 }
 
                 return Html::link(route('tags.edit', $item->id), BaseHelper::clean($item->name));
@@ -124,7 +124,7 @@ class TagTable extends TableAbstract
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type' => 'date',
+                'type' => 'datePicker',
             ],
         ];
     }

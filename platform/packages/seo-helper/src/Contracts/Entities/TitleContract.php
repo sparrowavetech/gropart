@@ -6,20 +6,9 @@ use Botble\SeoHelper\Contracts\RenderableContract;
 
 interface TitleContract extends RenderableContract
 {
-    /**
-     * Get title only (without site name or separator).
-     *
-     * @return string
-     */
-    public function getTitleOnly();
+    public function getTitleOnly(): ?string;
 
-    /**
-     * Set title.
-     *
-     * @param string $title
-     * @return $this
-     */
-    public function set($title);
+    public function set(?string $title);
 
     /**
      * Get site name.

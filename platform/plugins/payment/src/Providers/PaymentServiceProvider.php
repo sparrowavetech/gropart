@@ -15,7 +15,7 @@ class PaymentServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function register()
+    public function register(): void
     {
         $this
             ->setNamespace('plugins/payment')
@@ -26,7 +26,7 @@ class PaymentServiceProvider extends ServiceProvider
         });
     }
 
-    public function boot()
+    public function boot(): void
     {
         $this
             ->loadAndPublishConfigurations(['payment', 'permissions'])

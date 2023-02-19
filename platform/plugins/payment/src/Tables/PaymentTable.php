@@ -4,11 +4,13 @@ namespace Botble\Payment\Tables;
 
 use BaseHelper;
 use Botble\Payment\Enums\PaymentStatusEnum;
+use Botble\Payment\Models\Payment;
 use Botble\Payment\Repositories\Interfaces\PaymentInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
@@ -151,8 +153,21 @@ class PaymentTable extends TableAbstract
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type' => 'date',
+                'type' => 'datePicker',
             ],
         ];
+    }
+
+    public function saveBulkChangeItem(Model|Payment $item, string $inputKey, ?string $inputValue): Model|bool
+    {
+        if ($inputKey === 'status') {
+            $request = request();
+
+            $request->merge(['status' => $inputValue]);
+
+            do_action(ACTION_AFTER_UPDATE_PAYMENT, $request, $item);
+        }
+
+        return parent::saveBulkChangeItem($item, $inputKey, $inputValue);
     }
 }

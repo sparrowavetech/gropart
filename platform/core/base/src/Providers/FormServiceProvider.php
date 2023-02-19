@@ -7,7 +7,7 @@ use Illuminate\Support\ServiceProvider;
 
 class FormServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         Form::component('mediaImage', 'core/base::forms.partials.image', [
             'name',
@@ -147,6 +147,12 @@ class FormServiceProvider extends ServiceProvider
         ]);
 
         Form::component('phoneNumber', 'core/base::forms.partials.phone-number', [
+            'name',
+            'value' => null,
+            'attributes' => [],
+        ]);
+
+        Form::component('datePicker', 'core/base::forms.partials.date-picker', [
             'name',
             'value' => null,
             'attributes' => [],

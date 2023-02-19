@@ -24,7 +24,7 @@ class CityForm extends FormAbstract
         $this->stateRepository = $stateRepository;
     }
 
-    public function buildForm()
+    public function buildForm(): void
     {
         Assets::addScriptsDirectly('vendor/core/plugins/location/js/location.js');
 

@@ -27,7 +27,7 @@
                             </a>
                         </td>
                         <td class="product-name d-md-table-cell d-block" data-title="Product">
-                            <a href="{{ $product->original_product->url }}">{{ $product->name }}</a>
+                            <a href="{{ $product->original_product->url }}">{!! BaseHelper::clean($product->name) !!}</a>
                             @if (is_plugin_active('marketplace') && $product->original_product->store->id)
                                 <div class="variation-group">
                                     <span class="text-secondary">{{ __('Vendor') }}:</span>

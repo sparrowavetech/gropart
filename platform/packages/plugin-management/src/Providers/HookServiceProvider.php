@@ -6,22 +6,15 @@ use BaseHelper;
 use Botble\Dashboard\Supports\DashboardWidgetInstance;
 use Illuminate\Support\Collection;
 use Illuminate\Support\ServiceProvider;
-use Throwable;
 
 class HookServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         add_filter(DASHBOARD_FILTER_ADMIN_LIST, [$this, 'addStatsWidgets'], 15, 2);
     }
 
-    /**
-     * @param array $widgets
-     * @param Collection $widgetSettings
-     * @return array
-     * @throws Throwable
-     */
-    public function addStatsWidgets($widgets, $widgetSettings)
+    public function addStatsWidgets(array $widgets, Collection $widgetSettings): array
     {
         $plugins = count(BaseHelper::scanFolder(plugin_path()));
 

@@ -16,26 +16,30 @@ class DeleteThumbnailCommand extends Command
     {
         $files = $fileRepository->allBy([], [], ['url', 'mime_type', 'folder_id']);
 
-        $this->info('Processing ' . $files->count() . ' ' . Str::plural('file', $files->count()) . '...');
-
         $errors = [];
 
-        foreach ($files as $file) {
-            if (! $file->canGenerateThumbnails()) {
-                continue;
+        $description = 'Processing ' . $files->count() . ' ' . Str::plural('file', $files->count()) . '...';
+
+        $this->newLine();
+        $this->components->task($description, function () use ($files, &$errors) {
+            $this->newLine(2);
+            foreach ($files as $file) {
+                if (! $file->canGenerateThumbnails()) {
+                    continue;
+                }
+
+                $this->components->info('Processing ' . $file->url);
+
+                try {
+                    RvMedia::deleteThumbnails($file);
+                } catch (Exception $exception) {
+                    $errors[] = $file->url;
+                    $this->components->error($exception->getMessage());
+                }
             }
+        });
 
-            $this->info('Processing ' . $file->url);
-
-            try {
-                RvMedia::deleteThumbnails($file);
-            } catch (Exception $exception) {
-                $errors[] = $file->url;
-                $this->error($exception->getMessage());
-            }
-        }
-
-        $this->info('Thumbnails deleted');
+        $this->components->info('Thumbnails deleted');
 
         $errors = array_unique($errors);
 
@@ -44,7 +48,7 @@ class DeleteThumbnailCommand extends Command
         }, $errors);
 
         if ($errors) {
-            $this->info('We are unable to regenerate thumbnail for these files:');
+            $this->components->info('We are unable to regenerate thumbnail for these files:');
 
             $this->table(['File directory'], $errors);
 

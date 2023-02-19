@@ -8,7 +8,7 @@ use Botble\SimpleSlider\Models\SimpleSliderItem;
 
 class SimpleSliderItemForm extends FormAbstract
 {
-    public function buildForm()
+    public function buildForm(): void
     {
         $this
             ->setFormOption('template', 'core/base::forms.form-modal')

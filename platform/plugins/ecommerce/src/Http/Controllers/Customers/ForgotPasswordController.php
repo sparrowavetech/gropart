@@ -11,30 +11,13 @@ use Theme;
 
 class ForgotPasswordController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Password Reset Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller is responsible for handling password reset emails and
-    | includes a trait which assists in sending these notifications from
-    | your application to your users. Feel free to explore this trait.
-    |
-    */
-
     use SendsPasswordResetEmails;
 
-    /**
-     * Create a new controller instance.
-     */
     public function __construct()
     {
         $this->middleware('customer.guest');
     }
 
-    /**
-     * Display the form to request a password reset link.
-     */
     public function showLinkRequestForm()
     {
         SeoHelper::setTitle(__('Forgot Password'));
@@ -51,9 +34,6 @@ class ForgotPasswordController extends Controller
             ->render();
     }
 
-    /**
-     * Get the broker to be used during password reset.
-     */
     public function broker(): PasswordBroker
     {
         return Password::broker('customers');

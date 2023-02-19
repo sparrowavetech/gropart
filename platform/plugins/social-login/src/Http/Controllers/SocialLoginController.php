@@ -9,9 +9,6 @@ use Botble\Setting\Supports\SettingStore;
 use Botble\SocialLogin\Http\Requests\SocialLoginRequest;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
@@ -24,14 +21,6 @@ use SocialService;
 
 class SocialLoginController extends BaseController
 {
-    /**
-     * Redirect the user to the {provider} authentication page.
-     *
-     * @param string $provider
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return mixed
-     */
     public function redirectToProvider(string $provider, Request $request, BaseHttpResponse $response)
     {
         $guard = $this->guard($request);
@@ -49,11 +38,6 @@ class SocialLoginController extends BaseController
         return Socialite::driver($provider)->redirect();
     }
 
-    /**
-     *
-     * @param Request|null $request
-     * @return bool|string
-     */
     protected function guard(Request $request = null)
     {
         if ($request) {
@@ -86,12 +70,6 @@ class SocialLoginController extends BaseController
         return true;
     }
 
-    /**
-     * Obtain the user information from {provider}.
-     * @param string $provider
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function handleProviderCallback(string $provider, BaseHttpResponse $response)
     {
         $guard = $this->guard();
@@ -175,9 +153,6 @@ class SocialLoginController extends BaseController
             ->setMessage(trans('core/acl::auth.login.success'));
     }
 
-    /**
-     * @return Application|Factory|View
-     */
     public function getSettings()
     {
         page_title()->setTitle(trans('plugins/social-login::social-login.settings.title'));
@@ -187,12 +162,6 @@ class SocialLoginController extends BaseController
         return view('plugins/social-login::settings');
     }
 
-    /**
-     * @param SocialLoginRequest $request
-     * @param BaseHttpResponse $response
-     * @param SettingStore $setting
-     * @return BaseHttpResponse
-     */
     public function postSettings(SocialLoginRequest $request, BaseHttpResponse $response, SettingStore $setting)
     {
         $prefix = 'social_login_';

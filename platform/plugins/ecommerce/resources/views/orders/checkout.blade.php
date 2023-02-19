@@ -1,3 +1,15 @@
+<style>
+.btn.payment-checkout-btn-step.payment-checkout-btn {
+    width: 100%;
+    font-size: 1.25rem;
+    padding: 10px 0;
+    font-weight: 600;
+    text-transform: uppercase;
+    background-color: #198754;
+}
+.back-to-cart-btn { font-size: 1.25rem; font-weight: 600; }
+.remove-coupon-code { width: 100%; }
+</style>
 @extends('plugins/ecommerce::orders.master')
 @section('title')
     {{ __('Checkout') }}
@@ -5,10 +17,7 @@
 @section('content')
 
     @if (Cart::instance('cart')->count() > 0)
-        <link rel="stylesheet" href="{{ asset('vendor/core/plugins/payment/css/payment.css') }}?v=1.1.0">
-        <script src="{{ asset('vendor/core/plugins/payment/js/payment.js') }}?v=1.1.0"></script>
-
-        {!! apply_filters(PAYMENT_FILTER_HEADER_ASSETS, null) !!}
+        @include('plugins/payment::partials.header')
 
         {!! Form::open(['route' => ['public.checkout.process', $token], 'class' => 'checkout-form payment-checkout-form', 'id' => 'checkout-form']) !!}
         <input type="hidden" name="checkout-token" id="checkout-token" value="{{ $token }}">
@@ -27,76 +36,75 @@
                             </div>
                         </div>
 
-                        <!---------------------- RENDER PRODUCTS IN HERE ---------------- -->
                         {!! apply_filters(RENDER_PRODUCTS_IN_CHECKOUT_PAGE, $products) !!}
 
-                        <div class="mt-2 p-2">
+                        <div class="mt-2 p-2 pricing-data">
                             <div class="row">
-                                <div class="col-6">
-                                    <p>{{ __('Subtotal') }}:</p>
+                                <div class="col-8">
+                                    <p class="price-text-label mt-0">{{ __('Subtotal') }}:</p>
                                 </div>
-                                <div class="col-6">
-                                    <p class="price-text sub-total-text text-end"> {{ format_price(Cart::instance('cart')->rawSubTotal()) }} </p>
+                                <div class="col-4">
+                                    <p class="price-text sub-total-text text-end mt-0"> {{ format_price(Cart::instance('cart')->rawSubTotal()) }} </p>
                                 </div>
                             </div>
                             @if (session('applied_coupon_code'))
-                                <div class="row coupon-information">
-                                    <div class="col-6">
-                                        <p>{{ __('Coupon code') }}:</p>
-                                    </div>
-                                    <div class="col-6">
-                                        <p class="price-text coupon-code-text"> {{ session('applied_coupon_code') }} </p>
-                                    </div>
+                            <div class="row coupon-information">
+                                <div class="col-8">
+                                    <p class="price-text-label text-success m-0">{{ __('Coupon code') }}:</p>
                                 </div>
+                                <div class="col-4">
+                                    <p class="price-text coupon-code-text text-success m-0"> {{ session('applied_coupon_code') }} </p>
+                                </div>
+                            </div>
                             @endif
                             @if ($couponDiscountAmount > 0)
-                                <div class="row price discount-amount">
-                                    <div class="col-6">
-                                        <p>{{ __('Coupon code discount amount') }}:</p>
-                                    </div>
-                                    <div class="col-6">
-                                        <p class="price-text total-discount-amount-text"> {{ format_price($couponDiscountAmount) }} </p>
-                                    </div>
+                            <div class="row price discount-amount">
+                                <div class="col-8">
+                                    <p class="price-text-label mt-0 text-success">{{ __('Coupon code discount amount') }}:</p>
                                 </div>
+                                <div class="col-4">
+                                    <p class="price-text total-discount-amount-text mt-0 text-success"> {{ format_price($couponDiscountAmount) }} </p>
+                                </div>
+                            </div>
                             @endif
                             @if ($promotionDiscountAmount > 0)
-                                <div class="row">
-                                    <div class="col-6">
-                                        <p>{{ __('Promotion discount amount') }}:</p>
-                                    </div>
-                                    <div class="col-6">
-                                        <p class="price-text"> {{ format_price($promotionDiscountAmount) }} </p>
-                                    </div>
+                            <div class="row">
+                                <div class="col-8">
+                                    <p class="price-text-label mt-0 text-success">{{ __('Promotion discount amount') }}:</p>
                                 </div>
+                                <div class="col-4">
+                                    <p class="price-text text-success mt-0"> {{ format_price($promotionDiscountAmount) }} </p>
+                                </div>
+                            </div>
                             @endif
                             @if (!empty($shipping) && Arr::get($sessionCheckoutData, 'is_available_shipping', true))
-                                <div class="row">
-                                    <div class="col-6">
-                                        <p>{{ __('Shipping fee') }}:</p>
-                                    </div>
-                                    <div class="col-6 float-end">
-                                        <p class="price-text shipping-price-text">{{ format_price($shippingAmount) }}</p>
-                                    </div>
+                            <div class="row">
+                                <div class="col-8">
+                                    <p class="price-text-label text-warning mt-0">{{ __('Shipping fee') }}:</p>
                                 </div>
+                                <div class="col-4 float-end">
+                                    <p class="price-text shipping-price-text mt-0 text-warning">{{ format_price($shippingAmount) }}</p>
+                                </div>
+                            </div>
                             @endif
 
                             @if (EcommerceHelper::isTaxEnabled())
-                                <div class="row">
-                                    <div class="col-6">
-                                        <p>{{ __('Tax') }}:</p>
-                                    </div>
-                                    <div class="col-6 float-end">
-                                        <p class="price-text tax-price-text">{{ format_price(Cart::instance('cart')->rawTax()) }}</p>
-                                    </div>
+                            <div class="row">
+                                <div class="col-8">
+                                    <p class="price-text-label mt-0 text-warning">{{ __('Tax') }}:</p>
                                 </div>
+                                <div class="col-4 float-end">
+                                    <p class="price-text tax-price-text mt-0 text-warning">{{ format_price(Cart::instance('cart')->rawTax()) }}</p>
+                                </div>
+                            </div>
                             @endif
 
                             <div class="row">
-                                <div class="col-6">
-                                    <p><strong>{{ __('Total') }}</strong>:</p>
+                                <div class="col-8">
+                                    <p class="total-text float-start mb-0">{{ __('Total') }}:</p>
                                 </div>
-                                <div class="col-6 float-end">
-                                    <p class="total-text raw-total-text"
+                                <div class="col-4 float-end">
+                                    <p class="total-text raw-total-text mb-0"
                                        data-price="{{ format_price(Cart::instance('cart')->rawTotal(), null, true) }}"> {{ ($promotionDiscountAmount + $couponDiscountAmount - $shippingAmount) > Cart::instance('cart')->rawTotal() ? format_price(0) : format_price(Cart::instance('cart')->rawTotal() - $promotionDiscountAmount - $couponDiscountAmount + $shippingAmount) }} </p>
                                 </div>
                             </div>
@@ -218,7 +226,8 @@
                                     <li class="list-group-item">
                                         <input class="magic-radio js_payment_method" type="radio" name="payment_method" id="payment_bank_transfer"
                                             @if ($selecting == \Botble\Payment\Enums\PaymentMethodEnum::BANK_TRANSFER) checked @endif
-                                            value="bank_transfer" data-bs-toggle="collapse" data-bs-target=".payment_bank_transfer_wrap" data-parent=".list_payment_method">
+                                            value="bank_transfer"
+                                            data-bs-toggle="collapse" data-bs-target=".payment_bank_transfer_wrap" data-parent=".list_payment_method">
                                         <label for="payment_bank_transfer" class="text-start">{{ setting('payment_bank_transfer_name', trans('plugins/payment::payment.payment_via_bank_transfer')) }}</label>
                                         <div class="payment_bank_transfer_wrap payment_collapse_wrap collapse @if ($selecting == \Botble\Payment\Enums\PaymentMethodEnum::BANK_TRANSFER) show @endif" style="padding: 15px 0;">
                                             {!! BaseHelper::clean(setting('payment_bank_transfer_description')) !!}
@@ -246,7 +255,7 @@
                         <div class="form-group mb-3">
                             <div class="row">
                                 <div class="col-md-6 d-none d-md-block" style="line-height: 53px">
-                                    <a class="text-info" href="{{ route('public.cart') }}"><i class="fas fa-long-arrow-alt-left"></i> <span class="d-inline-block back-to-cart">{{ __('Back to cart') }}</span></a>
+                                    <a class="back-to-cart-btn text-warning" href="{{ route('public.cart') }}"><i class="fas fa-long-arrow-alt-left"></i> <span class="d-inline-block back-to-cart">{{ __('Back to cart') }}</span></a>
                                 </div>
                                 <div class="col-md-6 checkout-button-group">
                                     <button type="submit" @if (EcommerceHelper::getMinimumOrderAmount() > Cart::instance('cart')->rawSubTotal()) disabled @endif class="btn payment-checkout-btn payment-checkout-btn-step float-end" data-processing-text="{{ __('Processing. Please wait...') }}" data-error-header="{{ __('Error') }}">
@@ -255,7 +264,7 @@
                                 </div>
                             </div>
                             <div class="d-block d-md-none back-to-cart-button-group">
-                                <a class="text-info" href="{{ route('public.cart') }}"><i class="fas fa-long-arrow-alt-left"></i> <span class="d-inline-block">{{ __('Back to cart') }}</span></a>
+                                <a class="back-to-cart-btn text-warning" href="{{ route('public.cart') }}"><i class="fas fa-long-arrow-alt-left"></i> <span class="d-inline-block">{{ __('Back to cart') }}</span></a>
                             </div>
                         </div>
 
@@ -264,7 +273,7 @@
             </div>
         </div>
 
-        {!! apply_filters(PAYMENT_FILTER_FOOTER_ASSETS, null) !!}
+        @include('plugins/payment::partials.footer')
     @else
         <div class="container">
             <div class="row">

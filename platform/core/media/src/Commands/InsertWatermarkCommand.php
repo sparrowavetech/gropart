@@ -16,10 +16,10 @@ class InsertWatermarkCommand extends Command
 {
     public function handle(MediaFileInterface $fileRepository): int
     {
-        $this->info('Starting to insert watermark...');
+        $this->components->info('Starting to insert watermark...');
 
         if (! setting('media_watermark_enabled', RvMedia::getConfig('watermark.enabled'))) {
-            $this->error('Watermark is not enabled!');
+            $this->components->error('Watermark is not enabled!');
 
             return self::FAILURE;
         }
@@ -27,7 +27,7 @@ class InsertWatermarkCommand extends Command
         $watermarkImage = setting('media_watermark_source', RvMedia::getConfig('watermark.source'));
 
         if (! $watermarkImage) {
-            $this->error('Path to watermark image is not correct!');
+            $this->components->error('Path to watermark image is not correct!');
 
             return self::FAILURE;
         }
@@ -35,7 +35,7 @@ class InsertWatermarkCommand extends Command
         $watermarkPath = RvMedia::getRealPath($watermarkImage);
 
         if (! File::exists($watermarkPath)) {
-            $this->error('Path to watermark image is not correct!');
+            $this->components->error('Path to watermark image is not correct!');
 
             return self::FAILURE;
         }
@@ -50,7 +50,7 @@ class InsertWatermarkCommand extends Command
             $files = $fileRepository->allBy([], [], ['url', 'mime_type', 'folder_id']);
         }
 
-        $this->info('Processing ' . $files->count() . ' ' . Str::plural('file', $files->count()) . '...');
+        $this->components->info('Processing ' . $files->count() . ' ' . Str::plural('file', $files->count()) . '...');
 
         $errors = [];
 
@@ -73,11 +73,11 @@ class InsertWatermarkCommand extends Command
                 }
             } catch (Exception $exception) {
                 $errors[] = $file->url;
-                $this->error($exception->getMessage());
+                $this->components->error($exception->getMessage());
             }
         }
 
-        $this->info('Inserted watermark successfully!');
+        $this->components->info('Inserted watermark successfully!');
 
         $errors = array_unique($errors);
 
@@ -86,7 +86,7 @@ class InsertWatermarkCommand extends Command
         }, $errors);
 
         if ($errors) {
-            $this->info('We are unable to insert watermark for these files:');
+            $this->components->info('We are unable to insert watermark for these files:');
 
             $this->table(['File directory'], $errors);
 

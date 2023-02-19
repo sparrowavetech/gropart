@@ -9,7 +9,7 @@ use Botble\Blog\Models\Category;
 
 class CategoryForm extends FormAbstract
 {
-    public function buildForm()
+    public function buildForm(): void
     {
         $list = get_categories(['condition' => []]);
 

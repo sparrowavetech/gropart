@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\Relation as EloquentRelation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Request;
@@ -607,8 +608,12 @@ abstract class TableAbstract extends DataTable
                     break;
                 }
 
-                $value = BaseHelper::formatDate($value);
-                $query = $query->whereDate($column, $operator, $value);
+                $validator = Validator::make([$key => $value], [$key => 'date']);
+
+                if (! $validator->fails()) {
+                    $value = BaseHelper::formatDate($value);
+                    $query = $query->whereDate($column, $operator, $value);
+                }
 
                 break;
 
@@ -669,6 +674,7 @@ abstract class TableAbstract extends DataTable
                     'multiple' => Arr::get($data, 'multiple', false),
                     'data-placeholder' => Arr::get($data, 'placeholder', $attributes['placeholder']),
                 ];
+
                 $html = Form::customSelect($inputName, Arr::get($data, 'selected', []), $value, $attributes)->toHtml();
 
                 break;
@@ -679,10 +685,12 @@ abstract class TableAbstract extends DataTable
                 break;
 
             case 'date':
-                $attributes['class'] = $attributes['class'] . ' datepicker';
-                $attributes['data-date-format'] = config('core.base.general.date_format.js.date');
-                $content = Form::text($inputName, $value, $attributes)->toHtml();
-                $html = view('core/table::partials.date-field', compact('content'))->render();
+                $html = Form::date($inputName, $value, $attributes)->toHtml();
+
+                break;
+
+            case 'datePicker':
+                $html = Form::datePicker($inputName, $value, $attributes)->toHtml();
 
                 break;
 

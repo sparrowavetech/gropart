@@ -5,24 +5,14 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class () extends Migration {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('mp_customer_withdrawals', function (Blueprint $table) {
             $table->string('transaction_id', 60)->nullable();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('mp_customer_withdrawals', function (Blueprint $table) {
             $table->dropColumn('transaction_id');

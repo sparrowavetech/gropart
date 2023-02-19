@@ -2,6 +2,7 @@
 
 namespace Botble\Location\Models;
 
+use Botble\Base\Casts\SafeContent;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -21,6 +22,9 @@ class Country extends BaseModel
 
     protected $casts = [
         'status' => BaseStatusEnum::class,
+        'name' => SafeContent::class,
+        'nationality' => SafeContent::class,
+        'code' => SafeContent::class,
     ];
 
     public function states(): HasMany

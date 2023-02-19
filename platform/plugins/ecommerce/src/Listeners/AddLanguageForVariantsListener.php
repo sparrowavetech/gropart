@@ -5,7 +5,6 @@ namespace Botble\Ecommerce\Listeners;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Ecommerce\Models\Product;
-use Botble\Ecommerce\Models\ProductTranslation;
 use Illuminate\Support\Facades\DB;
 use Language;
 
@@ -32,13 +31,13 @@ class AddLanguageForVariantsListener
                         'ec_products_id' => $variation->product->id,
                     ];
 
-                    $existing = ProductTranslation::where($condition)->count();
+                    $existing = DB::table('ec_products_translations')->where($condition)->count();
 
                     if ($existing) {
                         continue;
                     }
 
-                    $parentTranslation = ProductTranslation::where([
+                    $parentTranslation = DB::table('ec_products_translations')->where([
                         'lang_code' => $language->lang_code,
                         'ec_products_id' => $event->data->id,
                     ])->first();
@@ -56,7 +55,7 @@ class AddLanguageForVariantsListener
                 }
             }
 
-            ProductTranslation::insertOrIgnore($records);
+            DB::table('ec_products_translations')->insertOrIgnore($records);
         }
     }
 }

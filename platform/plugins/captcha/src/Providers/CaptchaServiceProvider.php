@@ -20,7 +20,7 @@ class CaptchaServiceProvider extends ServiceProvider
 
     protected bool $defer = false;
 
-    public function register()
+    public function register(): void
     {
         config([
             'plugins.captcha.general.secret' => setting('captcha_secret'),
@@ -43,7 +43,7 @@ class CaptchaServiceProvider extends ServiceProvider
         AliasLoader::getInstance()->alias('Captcha', CaptchaFacade::class);
     }
 
-    public function boot()
+    public function boot(): void
     {
         $this->setNamespace('plugins/captcha')
             ->loadAndPublishConfigurations(['general'])

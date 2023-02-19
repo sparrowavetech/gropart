@@ -70,15 +70,7 @@ if (! function_exists('get_cms_version')) {
 if (! function_exists('get_core_version')) {
     function get_core_version(): string
     {
-        $version = '...';
-
-        try {
-            $core = BaseHelper::getFileData(core_path('core.json'));
-
-            return Arr::get($core, 'coreVersion', $version);
-        } catch (Exception) {
-            return $version;
-        }
+        return '6.3.0';
     }
 }
 

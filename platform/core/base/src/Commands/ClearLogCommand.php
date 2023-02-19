@@ -14,12 +14,15 @@ class ClearLogCommand extends Command
         $logPath = storage_path('logs');
 
         if ($filesystem->isDirectory($logPath)) {
-            foreach ($filesystem->allFiles($logPath) as $file) {
-                $filesystem->delete($file->getPathname());
-            }
+            $this->components->task('Clearing log files', function () use ($filesystem, $logPath) {
+                foreach ($filesystem->allFiles($logPath) as $file) {
+                    $this->components->info(sprintf('Deleting [%s]', $file->getPathname()));
+                    $filesystem->delete($file->getPathname());
+                }
+            });
         }
 
-        $this->info('Clear log files successfully!');
+        $this->components->info('Clear log files successfully!');
 
         return self::SUCCESS;
     }

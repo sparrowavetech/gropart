@@ -52,10 +52,10 @@ class CityTable extends TableAbstract
             ->eloquent($this->query())
             ->editColumn('name', function ($item) {
                 if (! Auth::user()->hasPermission('city.edit')) {
-                    return $item->name;
+                    return BaseHelper::clean($item->name);
                 }
 
-                return Html::link(route('city.edit', $item->id), $item->name);
+                return Html::link(route('city.edit', $item->id), BaseHelper::clean($item->name));
             })
             ->editColumn('state_id', function ($item) {
                 if (! $item->state_id || ! $item->state->name) {
@@ -167,7 +167,7 @@ class CityTable extends TableAbstract
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type' => 'date',
+                'type' => 'datePicker',
             ],
         ];
     }

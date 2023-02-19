@@ -7,10 +7,7 @@ use MarketplaceHelper;
 
 class CustomImagesField extends FormField
 {
-    /**
-     * @return string
-     */
-    protected function getTemplate()
+    protected function getTemplate(): string
     {
         return MarketplaceHelper::viewPath('dashboard.forms.fields.custom-images');
     }

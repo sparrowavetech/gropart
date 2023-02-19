@@ -9,9 +9,4 @@ return new class () extends Migration {
             File::moveDirectory(resource_path('lang'), base_path('lang'));
         }
     }
-
-    public function down(): void
-    {
-        //
-    }
 };

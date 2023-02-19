@@ -35,11 +35,6 @@ class SimpleSliderController extends BaseController
         $this->simpleSliderItemRepository = $simpleSliderItemRepository;
     }
 
-    /**
-     * @param SimpleSliderTable $dataTable
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Symfony\Component\HttpFoundation\Response
-     * @throws \Throwable
-     */
     public function index(SimpleSliderTable $dataTable)
     {
         page_title()->setTitle(trans('plugins/simple-slider::simple-slider.menu'));
@@ -47,10 +42,6 @@ class SimpleSliderController extends BaseController
         return $dataTable->renderTable();
     }
 
-    /**
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
     public function create(FormBuilder $formBuilder)
     {
         page_title()->setTitle(trans('plugins/simple-slider::simple-slider.create'));
@@ -61,11 +52,6 @@ class SimpleSliderController extends BaseController
             ->renderForm();
     }
 
-    /**
-     * @param SimpleSliderRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function store(SimpleSliderRequest $request, BaseHttpResponse $response)
     {
         $simpleSlider = $this->simpleSliderRepository->createOrUpdate($request->input());
@@ -78,13 +64,7 @@ class SimpleSliderController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    /**
-     * @param int $id
-     * @param FormBuilder $formBuilder
-     * @param Request $request
-     * @return string
-     */
-    public function edit($id, FormBuilder $formBuilder, Request $request)
+    public function edit(int $id, FormBuilder $formBuilder, Request $request)
     {
         Assets::addScripts(['blockui', 'sortable'])
             ->addScriptsDirectly(['vendor/core/plugins/simple-slider/js/simple-slider-admin.js']);
@@ -100,13 +80,7 @@ class SimpleSliderController extends BaseController
             ->renderForm();
     }
 
-    /**
-     * @param $id
-     * @param SimpleSliderRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function update($id, SimpleSliderRequest $request, BaseHttpResponse $response)
+    public function update(int $id, SimpleSliderRequest $request, BaseHttpResponse $response)
     {
         $simpleSlider = $this->simpleSliderRepository->findOrFail($id);
         $simpleSlider->fill($request->input());
@@ -120,13 +94,7 @@ class SimpleSliderController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param Request $request
-     * @param $id
-     * @param BaseHttpResponse $response
-     * @return array|BaseHttpResponse
-     */
-    public function destroy(Request $request, $id, BaseHttpResponse $response)
+    public function destroy(Request $request, int $id, BaseHttpResponse $response)
     {
         try {
             $simpleSlider = $this->simpleSliderRepository->findOrFail($id);
@@ -142,22 +110,11 @@ class SimpleSliderController extends BaseController
         }
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function deletes(Request $request, BaseHttpResponse $response)
     {
         return $this->executeDeleteItems($request, $response, $this->simpleSliderRepository, SIMPLE_SLIDER_MODULE_SCREEN_NAME);
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function postSorting(Request $request, BaseHttpResponse $response)
     {
         foreach ($request->input('items', []) as $key => $id) {

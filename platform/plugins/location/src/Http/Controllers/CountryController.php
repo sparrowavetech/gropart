@@ -18,8 +18,6 @@ use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Location\Forms\CountryForm;
 use Botble\Base\Forms\FormBuilder;
-use Illuminate\Contracts\View\View;
-use Throwable;
 
 class CountryController extends BaseController
 {
@@ -30,11 +28,6 @@ class CountryController extends BaseController
         $this->countryRepository = $countryRepository;
     }
 
-    /**
-     * @param CountryTable $table
-     * @return \Illuminate\Contracts\View\Factory|\Symfony\Component\HttpFoundation\Response|View
-     * @throws Throwable
-     */
     public function index(CountryTable $table)
     {
         page_title()->setTitle(trans('plugins/location::country.name'));
@@ -42,10 +35,6 @@ class CountryController extends BaseController
         return $table->renderTable();
     }
 
-    /**
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
     public function create(FormBuilder $formBuilder)
     {
         page_title()->setTitle(trans('plugins/location::country.create'));
@@ -53,11 +42,6 @@ class CountryController extends BaseController
         return $formBuilder->create(CountryForm::class)->renderForm();
     }
 
-    /**
-     * @param CountryRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function store(CountryRequest $request, BaseHttpResponse $response)
     {
         $country = $this->countryRepository->createOrUpdate($request->input());
@@ -70,13 +54,7 @@ class CountryController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    /**
-     * @param $id
-     * @param Request $request
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
-    public function edit($id, FormBuilder $formBuilder, Request $request)
+    public function edit(int $id, FormBuilder $formBuilder, Request $request)
     {
         $country = $this->countryRepository->findOrFail($id);
 
@@ -87,13 +65,7 @@ class CountryController extends BaseController
         return $formBuilder->create(CountryForm::class, ['model' => $country])->renderForm();
     }
 
-    /**
-     * @param $id
-     * @param CountryRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function update($id, CountryRequest $request, BaseHttpResponse $response)
+    public function update(int $id, CountryRequest $request, BaseHttpResponse $response)
     {
         $country = $this->countryRepository->findOrFail($id);
 
@@ -108,13 +80,7 @@ class CountryController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param Request $request
-     * @param $id
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function destroy(Request $request, $id, BaseHttpResponse $response)
+    public function destroy(Request $request, int $id, BaseHttpResponse $response)
     {
         try {
             $country = $this->countryRepository->findOrFail($id);
@@ -131,12 +97,6 @@ class CountryController extends BaseController
         }
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function deletes(Request $request, BaseHttpResponse $response)
     {
         $ids = $request->input('ids');
@@ -155,11 +115,6 @@ class CountryController extends BaseController
         return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function getList(Request $request, BaseHttpResponse $response)
     {
         $keyword = BaseHelper::stringify($request->input('q'));

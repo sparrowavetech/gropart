@@ -18,7 +18,7 @@ $(document).ready(function () {
             $('.add-new-row').click(function () {
                 let table = $(this).parent().find('table tbody');
                 let tr = table.find('tr').last().clone();
-                let labelName = 'options[' + table.find('tr').length + '][label]',
+                let labelName = 'options[' + table.find('tr').length + '][option_value]',
                     affectName = 'options[' + table.find('tr').length + '][affect_price]',
                     affectTypeName = 'options[' + table.find('tr').length + '][affect_type]';
                 tr.find('.option-label').attr('name', labelName);

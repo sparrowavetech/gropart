@@ -9,7 +9,7 @@ use Botble\Location\Fields\SelectLocationField;
 
 class HookServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         add_filter('form_custom_fields', function (FormAbstract $form, FormHelper $formHelper) {
             if (! $formHelper->hasCustomField('selectLocation')) {

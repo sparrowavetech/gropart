@@ -120,7 +120,7 @@ class MarketplaceHelper
     {
         return MarketplaceHelper::getSetting('enable_commission_fee_for_each_category') == 1;
     }
-     /**
+    /**
      * @param Collection $orders
      * @return Collection
      * @throws FileNotFoundException

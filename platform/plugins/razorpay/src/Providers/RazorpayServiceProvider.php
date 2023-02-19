@@ -13,7 +13,7 @@ class RazorpayServiceProvider extends ServiceProvider
     /**
      * @throws FileNotFoundException
      */
-    public function boot()
+    public function boot(): void
     {
         if (is_plugin_active('payment')) {
             $this->setNamespace('plugins/razorpay')

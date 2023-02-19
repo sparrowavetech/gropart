@@ -9,7 +9,7 @@ class PaypalServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function boot()
+    public function boot(): void
     {
         if (is_plugin_active('payment')) {
             $this->setNamespace('plugins/paypal')

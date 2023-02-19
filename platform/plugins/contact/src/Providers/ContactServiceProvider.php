@@ -20,7 +20,7 @@ class ContactServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function register()
+    public function register(): void
     {
         $this->app->bind(ContactInterface::class, function () {
             return new ContactCacheDecorator(new ContactRepository(new Contact()));
@@ -31,7 +31,7 @@ class ContactServiceProvider extends ServiceProvider
         });
     }
 
-    public function boot()
+    public function boot(): void
     {
         $this
             ->setNamespace('plugins/contact')

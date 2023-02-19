@@ -33,7 +33,7 @@ class BlogServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function register()
+    public function register(): void
     {
         $this->app->bind(PostInterface::class, function () {
             return new PostCacheDecorator(new PostRepository(new Post()));
@@ -48,7 +48,7 @@ class BlogServiceProvider extends ServiceProvider
         });
     }
 
-    public function boot()
+    public function boot(): void
     {
         SlugHelper::registerModule(Post::class, 'Blog Posts');
         SlugHelper::registerModule(Category::class, 'Blog Categories');

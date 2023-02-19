@@ -5,15 +5,13 @@ namespace Botble\Shippo\Commands;
 use Botble\Ecommerce\Models\Address;
 use Botble\Ecommerce\Models\StoreLocator;
 use Botble\Location\Models\City;
-use Botble\Location\Models\CityTranslation;
 use Botble\Location\Models\Country;
-use Botble\Location\Models\CountryTranslation;
 use Botble\Location\Models\State;
-use Botble\Location\Models\StateTranslation;
 use Botble\Marketplace\Models\Store;
 use Botble\Setting\Models\Setting;
 use Illuminate\Console\Command;
 use Illuminate\Console\ConfirmableTrait;
+use Illuminate\Support\Facades\DB;
 use Location;
 use Throwable;
 
@@ -64,9 +62,9 @@ class InitShippoCommand extends Command
         }
 
         if ($city) {
-            $countryId = (string) $city->country_id;
-            $stateId = (string) $city->state_id;
-            $cityId = (string) $city->id;
+            $countryId = (string)$city->country_id;
+            $stateId = (string)$city->state_id;
+            $cityId = (string)$city->id;
             $zipCode = '94117';
             $address = '215 Clayton St.';
             $phone = '+1 555 341 9393';
@@ -156,9 +154,9 @@ class InitShippoCommand extends Command
             City::truncate();
             State::truncate();
             Country::truncate();
-            CityTranslation::truncate();
-            StateTranslation::truncate();
-            CountryTranslation::truncate();
+            DB::table('cities_translations')->truncate();
+            DB::table('states_translations')->truncate();
+            DB::table('countries_translations')->truncate();
 
             try {
                 Location::downloadRemoteLocation('us');

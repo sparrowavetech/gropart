@@ -29,7 +29,7 @@ use Theme;
 
 class HookServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         if (defined('MENU_ACTION_SIDEBAR_OPTIONS')) {
             Menu::addMenuOptionModel(Category::class);
@@ -178,7 +178,7 @@ class HookServiceProvider extends ServiceProvider
     /**
      * Register sidebar options in menu
      */
-    public function registerMenuOptions()
+    public function registerMenuOptions(): void
     {
         if (Auth::user()->hasPermission('categories.index')) {
             Menu::registerMenuOptions(Category::class, trans('plugins/blog::categories.menu'));

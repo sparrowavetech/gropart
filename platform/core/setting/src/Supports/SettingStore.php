@@ -8,34 +8,27 @@ abstract class SettingStore
 {
     /**
      * The settings data.
-     *
-     * @var array
      */
-    protected $data = [];
+    protected array $data = [];
 
     /**
      * Whether the store has changed since it was last loaded.
-     *
-     * @var boolean
      */
-    protected $unsaved = false;
+    protected bool $unsaved = false;
 
     /**
      * Whether the settings data are loaded.
-     *
-     * @var boolean
      */
-    protected $loaded = false;
+    protected bool $loaded = false;
 
     /**
      * Get a specific key from the settings data.
      *
-     * @param string|array $key
      * @param mixed $default Optional default value.
      *
      * @return mixed
      */
-    public function get($key, $default = null)
+    public function get(string|array $key, $default = null)
     {
         $this->load();
 
@@ -44,10 +37,6 @@ abstract class SettingStore
 
     /**
      * Determine if a key exists in the settings data.
-     *
-     * @param string $key
-     *
-     * @return boolean
      */
     public function has(string $key): bool
     {
@@ -63,7 +52,7 @@ abstract class SettingStore
      * @param mixed $value Optional only if the first argument is an array
      * @return $this
      */
-    public function set($key, $value = null): self
+    public function set(string|array $key, $value = null): self
     {
         $this->load();
         $this->unsaved = true;
@@ -81,9 +70,6 @@ abstract class SettingStore
 
     /**
      * Unset a key in the settings data.
-     *
-     * @param string $key
-     * @return $this
      */
     public function forget(string $key): self
     {
@@ -98,8 +84,6 @@ abstract class SettingStore
 
     /**
      * Unset all keys in the settings data.
-     *
-     * @return $this
      */
     public function forgetAll(): self
     {
@@ -111,8 +95,6 @@ abstract class SettingStore
 
     /**
      * Get all settings data.
-     *
-     * @return array
      */
     public function all(): array
     {
@@ -123,8 +105,6 @@ abstract class SettingStore
 
     /**
      * Save any changes done to the settings data.
-     *
-     * @return false
      */
     public function save(): bool
     {
@@ -142,10 +122,8 @@ abstract class SettingStore
 
     /**
      * Make sure data is loaded.
-     *
-     * @param boolean $force Force a reload of data. Default false.
      */
-    public function load(bool $force = false)
+    public function load(bool $force = false): void
     {
         if (! $this->loaded || $force) {
             $this->data = $this->read();
@@ -155,17 +133,11 @@ abstract class SettingStore
 
     /**
      * Read the data from the store.
-     *
-     * @return array
      */
     abstract protected function read(): array;
 
     /**
      * Write the data into the store.
-     *
-     * @param array $data
-     *
-     * @return void
      */
-    abstract protected function write(array $data);
+    abstract protected function write(array $data): void;
 }

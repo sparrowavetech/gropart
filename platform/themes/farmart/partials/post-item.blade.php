@@ -12,7 +12,7 @@
             <div class="col-md-8 post-item__content ps-md-4">
                 <div>
                     <div class="entry-title">
-                        <h4><a href="{{ $post->url }}">{{ $post->name }}</a></h4>
+                        <h4><a href="{{ $post->url }}">{!! BaseHelper::clean($post->name) !!}</a></h4>
                     </div>
 
                     <div class="entry-meta mb-2">
@@ -25,7 +25,7 @@
                             <div class="entry-meta-categories">
                                 <span class="d-inline-block">{{ __('in') }}</span>
                                 @foreach($post->categories as $category)
-                                    <a href="{{ $category->url }}">{{ $category->name }}</a>@if (!$loop->last), @endif
+                                    <a href="{{ $category->url }}">{!! BaseHelper::clean($category->name) !!}</a>@if (!$loop->last), @endif
                                 @endforeach
                             </div>
                         @endif
@@ -35,7 +35,7 @@
                         </div>
                     </div>
                     <div class="entry-description">
-                        <p>{{ Str::limit($post->description, 120) }}</p>
+                        <p>{{ Str::limit($post->description, 280) }}</p>
                     </div>
                 </div>
             </div>

@@ -43,20 +43,12 @@ abstract class StripePaymentAbstract
     /**
      * For Stripe, after make charge successfully, it will return a charge ID for tracking purpose
      * We will store this Charge ID in our DB for tracking purpose
-     *
-     * @var string
      */
-    protected $chargeId;
+    protected string $chargeId;
 
-    /**
-     * @var bool
-     */
-    protected $supportRefundOnline = true;
+    protected bool $supportRefundOnline = true;
 
-    /**
-     * @return bool
-     */
-    public function getSupportRefundOnline()
+    public function getSupportRefundOnline(): bool
     {
         return $this->supportRefundOnline;
     }
@@ -125,14 +117,11 @@ abstract class StripePaymentAbstract
 
         try {
             return Charge::retrieve($chargeId);
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return null;
         }
     }
 
-    /**
-     * @return bool
-     */
     public function setClient(): bool
     {
         $secret = setting('payment_stripe_secret');

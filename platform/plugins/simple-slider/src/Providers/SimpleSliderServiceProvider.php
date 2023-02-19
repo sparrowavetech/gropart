@@ -20,7 +20,7 @@ class SimpleSliderServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function register()
+    public function register(): void
     {
         $this->app->bind(SimpleSliderInterface::class, function () {
             return new SimpleSliderCacheDecorator(new SimpleSliderRepository(new SimpleSlider()));
@@ -31,7 +31,7 @@ class SimpleSliderServiceProvider extends ServiceProvider
         });
     }
 
-    public function boot()
+    public function boot(): void
     {
         $this
             ->setNamespace('plugins/simple-slider')

@@ -6,10 +6,14 @@ use Botble\Base\Events\SendMailEvent;
 use Botble\Base\Supports\EmailAbstract;
 use Exception;
 use Illuminate\Contracts\Mail\Mailer;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
 use Log;
 
-class SendMailListener
+class SendMailListener implements ShouldQueue
 {
+    use InteractsWithQueue;
+
     protected Mailer $mailer;
 
     public function __construct(Mailer $mailer)

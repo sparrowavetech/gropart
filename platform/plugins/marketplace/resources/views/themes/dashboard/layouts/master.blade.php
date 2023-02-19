@@ -43,9 +43,7 @@
 
     @include('core/base::layouts.partials.svg-icon')
 
-    <div id="app">
-        @yield('body', view(MarketplaceHelper::viewPath('dashboard.layouts.body')))
-    </div>
+    @yield('body', view(MarketplaceHelper::viewPath('dashboard.layouts.body')))
 
     @stack('pre-footer')
 

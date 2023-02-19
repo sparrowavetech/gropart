@@ -49,10 +49,6 @@ class AuthenticationController extends Controller
      * }
      *
      * @group Authentication
-     *
-     * @param RegisterRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
      */
     public function register(RegisterRequest $request, BaseHttpResponse $response)
     {
@@ -100,11 +96,6 @@ class AuthenticationController extends Controller
      * }
      *
      * @group Authentication
-     *
-     * @param LoginRequest $request
-     * @param BaseHttpResponse $response
-     *
-     * @return BaseHttpResponse
      */
     public function login(LoginRequest $request, BaseHttpResponse $response)
     {
@@ -129,10 +120,6 @@ class AuthenticationController extends Controller
      *
      * @group Authentication
      * @authenticated
-     *
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
      */
     public function logout(Request $request, BaseHttpResponse $response)
     {

@@ -10,6 +10,10 @@ class UpdateDefaultProductService
     {
         $parent = $product->original_product;
 
+        if (! $parent->id) {
+            return null;
+        }
+
         $data = [
             'sku',
             'sale_type',

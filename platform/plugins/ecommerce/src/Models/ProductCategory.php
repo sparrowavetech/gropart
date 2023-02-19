@@ -4,7 +4,6 @@ namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
-use Botble\Base\Traits\EnumCastable;
 use Botble\Ecommerce\Tables\ProductTable;
 use Html;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -17,8 +16,6 @@ use Illuminate\Support\Str;
 
 class ProductCategory extends BaseModel
 {
-    use EnumCastable;
-
     protected $table = 'ec_product_categories';
 
     protected $fillable = [
@@ -56,7 +53,7 @@ class ProductCategory extends BaseModel
     {
         return Attribute::make(
             get: function (): Collection {
-                $parents = collect([]);
+                $parents = collect();
 
                 $parent = $this->parent;
 

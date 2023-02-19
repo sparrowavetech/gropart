@@ -4,34 +4,17 @@ namespace Botble\Support\Services\Cache;
 
 use BaseHelper;
 use Illuminate\Cache\CacheManager;
-use Illuminate\Cache\Repository;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
-use Psr\SimpleCache\InvalidArgumentException;
 
 class Cache implements CacheInterface
 {
-    /**
-     * @var string
-     */
-    protected $cacheGroup;
+    protected ?string $cacheGroup;
 
-    /**
-     * @var CacheManager
-     */
-    protected $cache;
+    protected CacheManager $cache;
 
-    /**
-     * @var array
-     */
-    protected $config;
+    protected array $config;
 
-    /**
-     * Cache constructor.
-     * @param Repository|CacheManager $cache
-     * @param string|null $cacheGroup
-     * @param array $config
-     */
     public function __construct(CacheManager $cache, ?string $cacheGroup, array $config = [])
     {
         $this->cache = $cache;
@@ -42,12 +25,6 @@ class Cache implements CacheInterface
         ];
     }
 
-    /**
-     * Retrieve data from cache.
-     *
-     * @param string $key Cache item key
-     * @return mixed
-     */
     public function get(string $key)
     {
         if (! file_exists($this->config['stored_keys'])) {
@@ -57,23 +34,11 @@ class Cache implements CacheInterface
         return $this->cache->get($this->generateCacheKey($key));
     }
 
-    /**
-     * @param string $key
-     * @return string
-     */
     public function generateCacheKey(string $key): string
     {
         return md5($this->cacheGroup) . $key;
     }
 
-    /**
-     * Add data to the cache.
-     *
-     * @param string $key Cache item key
-     * @param mixed $value The data to store
-     * @param boolean $minutes The number of minutes to store the item
-     * @return bool
-     */
     public function put(string $key, $value, $minutes = false): bool
     {
         if (! $minutes) {
@@ -89,12 +54,6 @@ class Cache implements CacheInterface
         return true;
     }
 
-    /**
-     * Store cache key to file
-     *
-     * @param string $key
-     * @return bool
-     */
     public function storeCacheKey(string $key): bool
     {
         if (file_exists($this->config['stored_keys'])) {
@@ -112,15 +71,6 @@ class Cache implements CacheInterface
         return true;
     }
 
-    /**
-     * Test if item exists in cache
-     * Only returns true if exists && is not expired.
-     *
-     * @param string $key Cache item key
-     * @return bool If cache item exists
-     *
-     * @throws InvalidArgumentException
-     */
     public function has(string $key): bool
     {
         if (! file_exists($this->config['stored_keys'])) {
@@ -132,11 +82,6 @@ class Cache implements CacheInterface
         return $this->cache->has($key);
     }
 
-    /**
-     * Clear cache of an object
-     *
-     * @return bool
-     */
     public function flush(): bool
     {
         $cacheKeys = [];

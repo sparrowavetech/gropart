@@ -29,6 +29,7 @@ return [
     'folder_name' => 'Folder name',
     'create' => 'Create',
     'rename' => 'Rename',
+    'crop' => 'Crop',
     'close' => 'Close',
     'save_changes' => 'Save changes',
     'move_to_trash' => 'Move items to trash',
@@ -54,6 +55,7 @@ return [
     'remove_favorite_success' => 'Remove selected item(s) from favorites successfully!',
     'rename_error' => 'Error when rename item(s)',
     'rename_success' => 'Rename selected item(s) successfully!',
+    'crop_success' => 'Crop image successfully!',
     'empty_trash_success' => 'Empty trash successfully!',
     'invalid_action' => 'Invalid action!',
     'file_not_exists' => 'File is not exists!',
@@ -66,7 +68,7 @@ return [
     'file_too_big_readable_size' => 'File too big. Max file upload is :size.',
     'can_not_detect_file_type' => 'File type is not allowed or can not detect file type!',
     'upload_failed' => 'The file is NOT uploaded completely. The server allows max upload file size is :size . Please check your file size OR try to upload again in case of having network errors',
-
+    'failed_to_crop_image' => 'The file cropping must be image type',
     'menu_name' => 'Media',
     'add' => 'Add media',
 
@@ -125,6 +127,7 @@ return [
         'actions_list' => [
             'basic' => [
                 'preview' => 'Preview',
+                'crop' => 'Crop',
             ],
             'file' => [
                 'copy_link' => 'Copy link',
@@ -154,4 +157,11 @@ return [
     'url' => 'URL',
     'download_explain' => 'Enter one URL per line.',
     'downloading' => 'Downloading...',
+    'prepare_file_to_download' => 'Preparing file to download...',
+
+    'cropper' => [
+        'height' => 'Height',
+        'width' => 'Width',
+        'aspect_ratio' => 'Aspect ratio?',
+    ],
 ];

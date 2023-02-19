@@ -15,13 +15,7 @@ class PublicEcommerceController
         $this->currencyRepository = $currencyRepository;
     }
 
-    /**
-     * @param string $title
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function changeCurrency(Request $request, BaseHttpResponse $response, $title = null)
+    public function changeCurrency(Request $request, BaseHttpResponse $response, ?string $title = null)
     {
         if (empty($title)) {
             $title = $request->input('currency');

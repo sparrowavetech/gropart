@@ -10,14 +10,11 @@ use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Forms\GlobalOptionForm;
-use Botble\Ecommerce\Http\Requests\ProductOptionRequest;
+use Botble\Ecommerce\Http\Requests\GlobalOptionRequest;
 use Botble\Ecommerce\Repositories\Interfaces\GlobalOptionInterface;
 use Botble\Ecommerce\Tables\GlobalOptionTable;
 use Exception;
-use Illuminate\Contracts\View\View;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Throwable;
 
 class ProductOptionController extends BaseController
 {
@@ -28,10 +25,6 @@ class ProductOptionController extends BaseController
         $this->globalOptionRepository = $globalOptionRepository;
     }
 
-    /**
-     * @return View|JsonResponse
-     * @throws Throwable
-     */
     public function index(GlobalOptionTable $table)
     {
         page_title()->setTitle(trans('plugins/ecommerce::product-option.name'));
@@ -39,10 +32,6 @@ class ProductOptionController extends BaseController
         return $table->renderTable();
     }
 
-    /**
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
     public function create(FormBuilder $formBuilder)
     {
         page_title()->setTitle(trans('plugins/ecommerce::product-option.create'));
@@ -50,12 +39,7 @@ class ProductOptionController extends BaseController
         return $formBuilder->create(GlobalOptionForm::class)->renderForm();
     }
 
-    /**
-     * @param ProductOptionRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function store(ProductOptionRequest $request, BaseHttpResponse $response)
+    public function store(GlobalOptionRequest $request, BaseHttpResponse $response)
     {
         $option = $this->globalOptionRepository->createOrUpdate($request->input());
 
@@ -67,30 +51,18 @@ class ProductOptionController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    /**
-     * @param int $id
-     * @param Request $request
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
-    public function edit($id, FormBuilder $formBuilder, Request $request)
+    public function edit(int $id, FormBuilder $formBuilder, Request $request)
     {
         $option = $this->globalOptionRepository->findOrFail($id, ['values']);
 
         event(new BeforeEditContentEvent($request, $option));
 
-        page_title()->setTitle(trans('plugins/ecommerce::product-option.edit') . ' "' . $option->name . '"');
+        page_title()->setTitle(trans('plugins/ecommerce::product-option.edit', ['name' => $option->name]));
 
         return $formBuilder->create(GlobalOptionForm::class, ['model' => $option])->renderForm();
     }
 
-    /**
-     * @param int $id
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function destroy(Request $request, $id, BaseHttpResponse $response)
+    public function destroy(Request $request, int $id, BaseHttpResponse $response)
     {
         try {
             $option = $this->globalOptionRepository->findOrFail($id);
@@ -107,13 +79,7 @@ class ProductOptionController extends BaseController
         }
     }
 
-    /**
-     * @param int $id
-     * @param ProductOptionRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function update($id, ProductOptionRequest $request, BaseHttpResponse $response)
+    public function update(int $id, GlobalOptionRequest $request, BaseHttpResponse $response)
     {
         $option = $this->globalOptionRepository->findOrFail($id);
 
@@ -126,12 +92,6 @@ class ProductOptionController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function deletes(Request $request, BaseHttpResponse $response)
     {
         $ids = $request->input('ids');

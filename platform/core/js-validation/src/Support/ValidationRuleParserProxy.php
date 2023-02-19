@@ -3,6 +3,8 @@
 namespace Botble\JsValidation\Support;
 
 use Closure;
+use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Validation\NestedRules;
 use Illuminate\Validation\ValidationRuleParser;
 
 class ValidationRuleParserProxy
@@ -19,7 +21,7 @@ class ValidationRuleParserProxy
         $this->parserMethod = $this->createProtectedCaller($this->parser);
     }
 
-    public function parse(array|string $rules): array
+    public function parse(array|string|Rule|NestedRules $rules): array
     {
         return $this->parser->parse($rules);
     }

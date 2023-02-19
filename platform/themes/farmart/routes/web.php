@@ -89,7 +89,7 @@ Route::group(['namespace' => 'Theme\Farmart\Http\Controllers', 'middleware' => [
                     'uses' => 'ajaxCheckPincode',
                     'as'   => 'check-pincode',
                 ]);
-              
+
             });
         });
     });

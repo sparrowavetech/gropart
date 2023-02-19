@@ -47,9 +47,6 @@ class ChunkFile
 
     /**
      * Moves the chunk file to given relative path (within the disk).
-     *
-     * @param string $pathTo
-     * @return bool
      */
     public function move(string $pathTo): bool
     {
@@ -58,35 +55,22 @@ class ChunkFile
 
     /**
      * Deletes the chunk file.
-     *
-     * @return bool
      */
     public function delete(): bool
     {
         return $this->storage->disk()->delete($this->path);
     }
 
-    /**
-     * The __toString method allows a class to decide how it will react when it is converted to a string.
-     *
-     * @return string
-     */
     public function __toString()
     {
         return sprintf('ChunkFile %s uploaded at %s', $this->getPath(), date('Y-m-d H:i:s', $this->getModifiedTime()));
     }
 
-    /**
-     * @return string relative to the disk
-     */
     public function getPath(): string
     {
         return $this->path;
     }
 
-    /**
-     * @return int
-     */
     public function getModifiedTime(): int
     {
         return $this->modifiedTime;

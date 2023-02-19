@@ -96,8 +96,9 @@ class PluginService
                 }
             }
 
-            Setting::set('activated_plugins', json_encode(array_values(array_merge($activatedPlugins, [$plugin]))))
-                ->save();
+            $activatedPlugins = array_merge($activatedPlugins, [$plugin]);
+
+            $this->saveActivatedPlugins($activatedPlugins);
 
             if (class_exists($content['namespace'] . 'Plugin')) {
                 call_user_func([$content['namespace'] . 'Plugin', 'activated']);
@@ -279,8 +280,7 @@ class PluginService
                 unset($activatedPlugins[$key]);
             }
 
-            Setting::set('activated_plugins', json_encode(array_values($activatedPlugins)))
-                ->save();
+            $this->saveActivatedPlugins($activatedPlugins);
 
             if (class_exists($content['namespace'] . 'Plugin')) {
                 call_user_func([$content['namespace'] . 'Plugin', 'deactivated']);
@@ -305,5 +305,18 @@ class PluginService
     public function getPluginNamespace(string $plugin): string
     {
         return $this->app['config']->get('core.base.general.plugin_namespaces.' . $plugin, $plugin);
+    }
+
+    protected function saveActivatedPlugins(array $plugins): array
+    {
+        $plugins = array_values($plugins);
+
+        $availablePlugins = BaseHelper::scanFolder(plugin_path());
+
+        $plugins = array_intersect($plugins, $availablePlugins);
+
+        Setting::set('activated_plugins', json_encode($plugins))->save();
+
+        return $plugins;
     }
 }

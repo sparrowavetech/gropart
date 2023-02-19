@@ -10,7 +10,7 @@ use Botble\Contact\Models\Contact;
 
 class ContactForm extends FormAbstract
 {
-    public function buildForm()
+    public function buildForm(): void
     {
         Assets::addScriptsDirectly('vendor/core/plugins/contact/js/contact.js')
             ->addStylesDirectly('vendor/core/plugins/contact/css/contact.css');

@@ -67,12 +67,22 @@ Route::group(['namespace' => 'Botble\Setting\Http\Controllers', 'middleware' => 
                     'uses' => 'SettingController@getEmailConfig',
                 ]);
 
+                Route::match(['POST', 'GET'], 'templates/preview/{type}/{module}/{template}', [
+                    'as' => 'setting.email.preview',
+                    'uses' => 'SettingController@previewEmailTemplate',
+                ]);
+
+                Route::get('templates/preview/{type}/{module}/{template}/iframe', [
+                    'as' => 'setting.email.preview.iframe',
+                    'uses' => 'SettingController@previewEmailTemplateIframe',
+                ]);
+
                 Route::post('edit', [
                     'as' => 'settings.email.edit',
                     'uses' => 'SettingController@postEditEmailConfig',
                 ]);
 
-                Route::get('templates/edit/{type}/{name}/{template_file}', [
+                Route::get('templates/edit/{type}/{module}/{template}', [
                     'as' => 'setting.email.template.edit',
                     'uses' => 'SettingController@getEditEmailTemplate',
                 ]);
@@ -80,11 +90,13 @@ Route::group(['namespace' => 'Botble\Setting\Http\Controllers', 'middleware' => 
                 Route::post('template/edit', [
                     'as' => 'setting.email.template.store',
                     'uses' => 'SettingController@postStoreEmailTemplate',
+                    'middleware' => 'preventDemo',
                 ]);
 
                 Route::post('template/reset-to-default', [
                     'as' => 'setting.email.template.reset-to-default',
                     'uses' => 'SettingController@postResetToDefault',
+                    'middleware' => 'preventDemo',
                 ]);
 
                 Route::post('status', [

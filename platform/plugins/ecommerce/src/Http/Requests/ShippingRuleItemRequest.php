@@ -20,15 +20,15 @@ class ShippingRuleItemRequest extends Request
                 }),
             ],
             'country' => 'required',
-            'state' => 'required',
-            'city' => [
+            'state' => [
                 Rule::requiredIf(function () {
                     return app(ShippingRuleInterface::class)->count([
                         'id' => $this->input('shipping_rule_id'),
-                        'type' => ShippingRuleTypeEnum::BASED_ON_ZIPCODE,
+                        'type' => ShippingRuleTypeEnum::BASED_ON_LOCATION,
                     ]);
                 }),
             ],
+            'city' => 'nullable',
             'zip_code' => [
                 'max:20',
                 Rule::requiredIf(function () {

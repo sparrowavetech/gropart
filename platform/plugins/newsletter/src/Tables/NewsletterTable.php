@@ -44,7 +44,7 @@ class NewsletterTable extends TableAbstract
                 return $this->getCheckbox($item->id);
             })
             ->editColumn('name', function ($item) {
-                return trim($item->name) ?: '&mdash;';
+                return BaseHelper::clean(trim($item->name)) ?: '&mdash;';
             })
             ->editColumn('created_at', function ($item) {
                 return BaseHelper::formatDate($item->created_at);
@@ -124,7 +124,7 @@ class NewsletterTable extends TableAbstract
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type' => 'date',
+                'type' => 'datePicker',
             ],
         ];
     }

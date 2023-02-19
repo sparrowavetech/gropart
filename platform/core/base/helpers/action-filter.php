@@ -5,45 +5,27 @@ use Botble\Base\Facades\ActionFacade as Action;
 use Botble\Base\Facades\FilterFacade as Filter;
 
 if (! function_exists('add_filter')) {
-    /**
-     * @param string | array $hook
-     * @param $callback
-     * @param int $priority
-     * @param int $arguments
-     */
-    function add_filter($hook, $callback, int $priority = 20, int $arguments = 1)
+    function add_filter(string|array|null $hook, string|array|Closure $callback, int $priority = 20, int $arguments = 1): void
     {
         Filter::addListener($hook, $callback, $priority, $arguments);
     }
 }
 
 if (! function_exists('remove_filter')) {
-    /**
-     * @param string $hook
-     */
-    function remove_filter(string $hook)
+    function remove_filter(string $hook): void
     {
         Filter::removeListener($hook);
     }
 }
 
 if (! function_exists('add_action')) {
-    /**
-     * @param string|array $hook
-     * @param $callback
-     * @param int $priority
-     * @param int $arguments
-     */
-    function add_action($hook, $callback, int $priority = 20, int $arguments = 1)
+    function add_action(string|array|null $hook, string|array|Closure $callback, int $priority = 20, int $arguments = 1): void
     {
         Action::addListener($hook, $callback, $priority, $arguments);
     }
 }
 
 if (! function_exists('apply_filters')) {
-    /**
-     * @return mixed
-     */
     function apply_filters()
     {
         $args = func_get_args();
@@ -53,7 +35,7 @@ if (! function_exists('apply_filters')) {
 }
 
 if (! function_exists('do_action')) {
-    function do_action()
+    function do_action(): void
     {
         $args = func_get_args();
 
@@ -62,11 +44,6 @@ if (! function_exists('do_action')) {
 }
 
 if (! function_exists('get_hooks')) {
-    /**
-     * @param string|null $name
-     * @param bool $isFilter
-     * @return array
-     */
     function get_hooks(?string $name = null, bool $isFilter = true): array
     {
         if ($isFilter) {

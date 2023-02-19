@@ -15,11 +15,8 @@ use Botble\Ecommerce\Models\FlashSale;
 use Botble\Ecommerce\Repositories\Interfaces\FlashSaleInterface;
 use Botble\Ecommerce\Tables\FlashSaleTable;
 use Exception;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Illuminate\View\View;
-use Throwable;
 
 class FlashSaleController extends BaseController
 {
@@ -30,11 +27,6 @@ class FlashSaleController extends BaseController
         $this->flashSaleRepository = $flashSaleRepository;
     }
 
-    /**
-     * @param FlashSaleTable $table
-     * @return Factory|View
-     * @throws Throwable
-     */
     public function index(FlashSaleTable $table)
     {
         page_title()->setTitle(trans('plugins/ecommerce::flash-sale.name'));
@@ -42,10 +34,6 @@ class FlashSaleController extends BaseController
         return $table->renderTable();
     }
 
-    /**
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
     public function create(FormBuilder $formBuilder)
     {
         page_title()->setTitle(trans('plugins/ecommerce::flash-sale.create'));
@@ -53,11 +41,6 @@ class FlashSaleController extends BaseController
         return $formBuilder->create(FlashSaleForm::class)->renderForm();
     }
 
-    /**
-     * @param FlashSaleRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function store(FlashSaleRequest $request, BaseHttpResponse $response)
     {
         $flashSale = $this->flashSaleRepository->createOrUpdate($request->input());
@@ -72,11 +55,6 @@ class FlashSaleController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    /**
-     * @param FlashSaleRequest $request
-     * @param FlashSale $flashSale
-     * @return int
-     */
     protected function storeProducts(FlashSaleRequest $request, FlashSale $flashSale)
     {
         $products = array_filter(explode(',', $request->input('products')));
@@ -107,13 +85,7 @@ class FlashSaleController extends BaseController
         return count($products);
     }
 
-    /**
-     * @param $id
-     * @param Request $request
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
-    public function edit($id, FormBuilder $formBuilder, Request $request)
+    public function edit(int $id, FormBuilder $formBuilder, Request $request)
     {
         $flashSale = $this->flashSaleRepository->findOrFail($id);
 
@@ -124,17 +96,8 @@ class FlashSaleController extends BaseController
         return $formBuilder->create(FlashSaleForm::class, ['model' => $flashSale])->renderForm();
     }
 
-    /**
-     * @param int $id
-     * @param FlashSaleRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function update($id, FlashSaleRequest $request, BaseHttpResponse $response)
+    public function update(int $id, FlashSaleRequest $request, BaseHttpResponse $response)
     {
-        /**
-         * @var FlashSale
-         */
         $flashSale = $this->flashSaleRepository->findOrFail($id);
 
         $flashSale->fill($request->input());
@@ -150,13 +113,7 @@ class FlashSaleController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param $id
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function destroy(Request $request, $id, BaseHttpResponse $response)
+    public function destroy(Request $request, int $id, BaseHttpResponse $response)
     {
         try {
             $flashSale = $this->flashSaleRepository->findOrFail($id);
@@ -173,12 +130,6 @@ class FlashSaleController extends BaseController
         }
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function deletes(Request $request, BaseHttpResponse $response)
     {
         $ids = $request->input('ids');

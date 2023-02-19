@@ -23,17 +23,11 @@ use EcommerceHelper;
 use Exception;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Contracts\Config\Repository;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use MarketplaceHelper;
-use Response;
 use RvMedia;
 use SeoHelper;
 use SlugHelper;
@@ -41,57 +35,22 @@ use Theme;
 
 class DashboardController
 {
-    /**
-     * @var Repository
-     */
-    protected $config;
+    protected Repository $config;
 
-    /**
-     * @var CustomerInterface
-     */
-    protected $customerRepository;
+    protected CustomerInterface $customerRepository;
 
-    /**
-     * @var StoreInterface
-     */
-    protected $storeRepository;
+    protected StoreInterface $storeRepository;
 
-    /**
-     * @var VendorInfoInterface
-     */
-    protected $vendorInfoRepository;
+    protected VendorInfoInterface $vendorInfoRepository;
 
-    /**
-     * @var RevenueInterface
-     */
-    protected $revenueRepository;
+    protected RevenueInterface $revenueRepository;
 
-    /**
-     * @var OrderInterface
-     */
-    protected $orderRepository;
+    protected OrderInterface $orderRepository;
 
-    /**
-     * @var ProductInterface
-     */
-    protected $productRepository;
+    protected ProductInterface $productRepository;
 
-    /**
-     * @var WithdrawalInterface
-     */
-    protected $withdrawalRepository;
+    protected WithdrawalInterface $withdrawalRepository;
 
-    /**
-     * DashboardController constructor.
-     * @param Repository $config
-     * @param CustomerInterface $customerRepository
-     * @param StoreInterface $storeRepository
-     * @param VendorInfoInterface $vendorInfoRepository
-     * @param RevenueInterface $revenueRepository
-     * @param ProductInterface $productRepository
-     * @param WithdrawalInterface $withdrawalRepository
-     * @param OrderInterface $orderRepository
-     */
     public function __construct(
         Repository $config,
         CustomerInterface $customerRepository,
@@ -122,9 +81,6 @@ class DashboardController
             ->add('avatar-js', 'vendor/core/plugins/ecommerce/js/avatar.js', ['jquery']);
     }
 
-    /**
-     * @return BaseHttpResponse|Application|Factory|View
-     */
     public function index(Request $request, BaseHttpResponse $response)
     {
         page_title()->setTitle(__('Dashboard'));
@@ -256,11 +212,6 @@ class DashboardController
         return MarketplaceHelper::view('dashboard.index', $compact);
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse|JsonResponse
-     */
     public function postUpload(Request $request, BaseHttpResponse $response)
     {
         if (setting('media_chunk_enabled') != '1') {
@@ -275,7 +226,7 @@ class DashboardController
             $result = RvMedia::handleUpload(Arr::first($request->file('file')), 0, 'customers');
 
             if ($result['error']) {
-                return $response->setError(true)->setMessage($result['message']);
+                return $response->setError()->setMessage($result['message']);
             }
 
             return $response->setData($result['data']);
@@ -298,7 +249,7 @@ class DashboardController
                     return $response->setData($result['data']);
                 }
 
-                return $response->setError(true)->setMessage($result['message']);
+                return $response->setError()->setMessage($result['message']);
             }
             // We are in chunk mode, lets send the current progress
             $handler = $save->handler();
@@ -308,23 +259,15 @@ class DashboardController
                 'status' => true,
             ]);
         } catch (Exception $exception) {
-            return $response->setError(true)->setMessage($exception->getMessage());
+            return $response->setError()->setMessage($exception->getMessage());
         }
     }
 
-    /**
-     * @param Request $request
-     * @return mixed
-     * @throws FileNotFoundException
-     */
     public function postUploadFromEditor(Request $request)
     {
         return RvMedia::uploadFromEditor($request);
     }
 
-    /**
-     * @return Application|Factory|View|\Illuminate\Http\RedirectResponse|Response
-     */
     public function getBecomeVendor()
     {
         $customer = auth('customer')->user();
@@ -353,11 +296,6 @@ class DashboardController
             ->render();
     }
 
-    /**
-     * @param BecomeVendorRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function postBecomeVendor(BecomeVendorRequest $request, BaseHttpResponse $response)
     {
         $customer = auth('customer')->user();

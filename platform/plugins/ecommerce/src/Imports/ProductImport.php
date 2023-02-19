@@ -22,7 +22,6 @@ use Botble\Ecommerce\Repositories\Interfaces\ProductVariationInterface;
 use Botble\Ecommerce\Repositories\Interfaces\TaxInterface;
 use Botble\Ecommerce\Services\Products\StoreProductService;
 use Botble\Ecommerce\Services\StoreProductTagService;
-use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
@@ -146,10 +145,6 @@ class ProductImport implements
         $this->productAttributeRepository = $productAttributeRepository;
         $this->productVariationRepository = $productVariationRepository;
         $this->allTaxes = $this->taxRepository->all();
-
-        if (is_plugin_active('marketplace')) {
-            $this->stores = collect();
-        }
     }
 
     public function setImportType(string $importType): self
@@ -164,11 +159,7 @@ class ProductImport implements
         return $this->importType;
     }
 
-    /**
-     * @return Product|ProductVariation
-     * @throws Exception
-     */
-    public function model(array $row)
+    public function model(array $row): ProductVariation|Product|null
     {
         $importType = $this->getImportType();
 
@@ -213,7 +204,7 @@ class ProductImport implements
     protected function getProduct(string $name, ?string $slug): Model|\Eloquent|Builder|null
     {
         if ($slug) {
-            $slug = SlugHelper::getSlug($slug, SlugHelper::getPrefix(Product::class), Product::class);
+            $slug = SlugHelper::getSlug($slug, null, Product::class);
 
             if ($slug) {
                 return $this->productRepository->getFirstBy([
@@ -480,9 +471,7 @@ class ProductImport implements
         $row = $this->setProductCollectionsToRow($row);
         $row = $this->setProductLabelsToRow($row);
 
-        if (is_plugin_active('marketplace')) {
-            $row = $this->setStoreToRow($row);
-        }
+        $row = apply_filters('ecommerce_import_product_row_data', $row);
 
         $this->request->merge($row);
 
@@ -524,38 +513,6 @@ class ProductImport implements
 
             return $item->title == $keyword;
         })->first();
-    }
-
-    protected function setStoreToRow(array $row): array
-    {
-        $row['store_id'] = 0;
-
-        if (! empty($row['vendor'])) {
-            $row['vendor'] = trim($row['vendor']);
-
-            $store = $this->stores->firstWhere('keyword', $row['vendor']);
-            if ($store) {
-                $storeId = $store['store_id'];
-            } else {
-                $storeRepository = app(StoreInterface::class);
-
-                if (is_numeric($row['vendor'])) {
-                    $store = $storeRepository->findById($row['vendor']);
-                } else {
-                    $store = $storeRepository->getFirstBy(['name' => $row['vendor']]);
-                }
-
-                $storeId = $store ? $store->id : 0;
-                $this->stores->push([
-                    'keyword' => $row['vendor'],
-                    'store_id' => $storeId,
-                ]);
-            }
-
-            $row['store_id'] = $storeId;
-        }
-
-        return $row;
     }
 
     protected function setBrandToRow(array $row): array

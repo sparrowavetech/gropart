@@ -707,7 +707,7 @@ class RvMedia
         return str_replace('/index.php', '', $this->getConfig('default_upload_url'));
     }
 
-    public function setUploadPathAndURLToPublic(): self
+    public function setUploadPathAndURLToPublic(): void
     {
         add_action('init', function () {
             config([
@@ -715,8 +715,6 @@ class RvMedia
                 'filesystems.disks.public.url' => $this->getUploadURL(),
             ]);
         }, 124);
-
-        return $this;
     }
 
     public function getMimeType(string $url): ?string

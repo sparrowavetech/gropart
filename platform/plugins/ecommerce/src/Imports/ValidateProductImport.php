@@ -2,12 +2,13 @@
 
 namespace Botble\Ecommerce\Imports;
 
+use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductVariation;
 use Maatwebsite\Excel\Validators\Failure;
 
 class ValidateProductImport extends ProductImport
 {
-    public function model(array $row)
+    public function model(array $row): ProductVariation|Product|null
     {
         $importType = $this->getImportType();
 

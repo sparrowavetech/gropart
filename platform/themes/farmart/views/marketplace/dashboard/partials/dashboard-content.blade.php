@@ -150,7 +150,7 @@
                             @forelse ($data['products'] as $product)
                                 <tr>
                                     <td>{{ $product->id }}</td>
-                                    <td><a href="{{ route('marketplace.vendor.products.edit', $product->id) }}"><strong>{{ $product->name }}</strong></a></td>
+                                    <td><a href="{{ route('marketplace.vendor.products.edit', $product->id) }}"><strong>{!! BaseHelper::clean($product->name) !!}</strong></a></td>
                                     <td><strong>{!! BaseHelper::clean($product->price_in_table) !!}</strong></td>
                                     <td>{!! BaseHelper::clean($product->status->toHtml()) !!}</td>
                                     <td><strong>{{ $product->created_at->translatedFormat('M d, Y') }}</strong></td>

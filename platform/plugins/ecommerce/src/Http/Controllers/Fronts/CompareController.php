@@ -21,9 +21,6 @@ class CompareController extends Controller
         $this->productRepository = $productRepository;
     }
 
-    /**
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         if (! EcommerceHelper::isCompareEnabled()) {
@@ -64,12 +61,7 @@ class CompareController extends Controller
         )->render();
     }
 
-    /**
-     * @param int $productId
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function store($productId, BaseHttpResponse $response)
+    public function store(int $productId, BaseHttpResponse $response)
     {
         if (! EcommerceHelper::isCompareEnabled()) {
             abort(404);
@@ -95,12 +87,7 @@ class CompareController extends Controller
             ->setData(['count' => Cart::instance('compare')->count()]);
     }
 
-    /**
-     * @param int $productId
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function destroy($productId, BaseHttpResponse $response)
+    public function destroy(int $productId, BaseHttpResponse $response)
     {
         if (! EcommerceHelper::isCompareEnabled()) {
             abort(404);

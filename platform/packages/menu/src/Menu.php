@@ -49,7 +49,7 @@ class Menu
         $this->html = $html;
         $this->menuNodeRepository = $menuNodeRepository;
         $this->cache = new Cache($cache, MenuRepository::class);
-        $this->data = collect([]);
+        $this->data = collect();
     }
 
     public function hasMenu(string $slug, bool $active): bool

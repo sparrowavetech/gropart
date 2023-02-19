@@ -15,8 +15,6 @@ use Yajra\DataTables\DataTables;
 
 class RevenueTable extends TableAbstract
 {
-    protected $hasActions = false;
-
     protected $hasFilter = true;
 
     protected $hasOperations = false;

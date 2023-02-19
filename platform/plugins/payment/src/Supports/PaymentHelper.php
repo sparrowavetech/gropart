@@ -11,30 +11,16 @@ use Illuminate\Support\Facades\Auth;
 
 class PaymentHelper
 {
-    /**
-     * @param null $checkoutToken
-     * @return string
-     */
-    public static function getRedirectURL($checkoutToken = null): string
+    public static function getRedirectURL(?string $checkoutToken = null): string
     {
         return apply_filters(PAYMENT_FILTER_REDIRECT_URL, $checkoutToken, route('public.index'));
     }
 
-    /**
-     * @param null $checkoutToken
-     * @return string
-     */
-    public static function getCancelURL($checkoutToken = null): string
+    public static function getCancelURL(?string $checkoutToken = null): string
     {
         return apply_filters(PAYMENT_FILTER_CANCEL_URL, $checkoutToken, route('public.index'));
     }
 
-    /**
-     * Store payment on local
-     *
-     * @param array $args
-     * @return mixed
-     */
     public static function storeLocalPayment(array $args = [])
     {
         $data = array_merge([
@@ -67,15 +53,6 @@ class PaymentHelper
         ]);
     }
 
-    /**
-     * Format Log data
-     *
-     * @param array $input
-     * @param string $line
-     * @param string $function
-     * @param string $class
-     * @return array
-     */
     public static function formatLog(array $input, string $line = '', string $function = '', string $class = ''): array
     {
         return array_merge($input, [
@@ -88,9 +65,6 @@ class PaymentHelper
         ]);
     }
 
-    /**
-     * @return string
-     */
     public static function defaultPaymentMethod(): string
     {
         return setting('default_payment_method', PaymentMethodEnum::COD);

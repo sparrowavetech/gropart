@@ -14,15 +14,11 @@ class ChangeSlugPrefixCommand extends Command
     public function handle(): int
     {
         $data = app(SlugInterface::class)->update(
-            [
-                'reference_type' => $this->argument('class'),
-            ],
-            [
-                'prefix' => $this->option('prefix') ?? '',
-            ]
+            ['reference_type' => $this->argument('class')],
+            ['prefix' => $this->option('prefix') ?? '']
         );
 
-        $this->info('Processed ' . $data . ' item(s)!');
+        $this->components->info('Processed ' . $data . ' item(s)!');
 
         return self::SUCCESS;
     }

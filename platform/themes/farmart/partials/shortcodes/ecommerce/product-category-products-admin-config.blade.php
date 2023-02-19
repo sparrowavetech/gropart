@@ -3,7 +3,7 @@
     <div class="ui-select-wrapper form-group">
         <select name="category_id" class="ui-select">
             @foreach ($categories as $category)
-                <option value="{{ $category->id }}" @if ($category->id == Arr::get($attributes, 'category_id')) selected @endif>{!! BaseHelper::clean($category->indent_text) !!} {{ $category->name }}</option>
+                <option value="{{ $category->id }}" @if ($category->id == Arr::get($attributes, 'category_id')) selected @endif>{!! BaseHelper::clean($category->indent_text) !!} {!! BaseHelper::clean($category->name) !!}</option>
             @endforeach
         </select>
         <svg class="svg-next-icon svg-next-icon-size-16">

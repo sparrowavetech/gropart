@@ -3,14 +3,11 @@
 namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Models\BaseModel;
-use Botble\Base\Traits\EnumCastable;
 use Botble\Ecommerce\Enums\OrderReturnReasonEnum;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OrderReturnItem extends BaseModel
 {
-    use EnumCastable;
-
     protected $table = 'ec_order_return_items';
 
     protected $fillable = [

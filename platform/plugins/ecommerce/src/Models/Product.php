@@ -2,6 +2,7 @@
 
 namespace Botble\Ecommerce\Models;
 
+use Botble\Base\Casts\SafeContent;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Facades\Auth;
@@ -56,7 +57,9 @@ class Product extends BaseModel
         'tax_id',
         'views',
         'stock_status',
-        'is_enquiry'
+        'is_enquiry',
+        'barcode',
+        'cost_per_item',
     ];
 
     protected $appends = [
@@ -70,6 +73,9 @@ class Product extends BaseModel
         'product_type' => ProductTypeEnum::class,
         'price' => 'float',
         'sale_price' => 'float',
+        'name' => SafeContent::class,
+        'description' => SafeContent::class,
+        'content' => SafeContent::class,
     ];
 
     protected static function boot()
@@ -100,8 +106,8 @@ class Product extends BaseModel
             $product->upSales()->detach();
             $product->groupedProduct()->detach();
             $product->taxes()->detach();
-
-            Review::where('product_id', $product->id)->delete();
+            $product->views()->delete();
+            $product->reviews()->delete();
 
             if (is_plugin_active('language') && is_plugin_active('language-advanced')) {
                 $product->translations()->delete();
@@ -303,15 +309,6 @@ class Product extends BaseModel
         }
     }
 
-    public function getOptionsAttribute(?string $value): array
-    {
-        try {
-            return json_decode($value, true) ?: [];
-        } catch (Exception) {
-            return [];
-        }
-    }
-
     protected function image(): Attribute
     {
         return Attribute::make(
@@ -490,6 +487,11 @@ class Product extends BaseModel
     public function reviews(): HasMany
     {
         return $this->hasMany(Review::class, 'product_id')->where('status', BaseStatusEnum::PUBLISHED);
+    }
+
+    public function views(): HasMany
+    {
+        return $this->hasMany(ProductView::class, 'product_id');
     }
 
     public function latestFlashSales(): BelongsToMany

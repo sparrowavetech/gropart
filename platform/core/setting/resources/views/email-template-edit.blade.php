@@ -75,6 +75,10 @@
             </div>
             <div class="flexbox-annotated-section-content">
                 <a href="{{ route('settings.email') }}" class="btn btn-secondary">{{ trans('core/setting::setting.email.back') }}</a>
+                <a href="{{ route('setting.email.preview', ['type' => $pluginData['type'], 'module' => $pluginData['name'], 'template' => $pluginData['template_file']]) }}" target="_blank" class="btn btn-success">
+                    {{ trans('core/setting::setting.preview') }}
+                    <i class="fa fa-external-link"></i>
+                </a>
                 <a class="btn btn-warning btn-trigger-reset-to-default" data-target="{{ route('setting.email.template.reset-to-default') }}">{{ trans('core/setting::setting.email.reset_to_default') }}</a>
                 <button class="btn btn-info" type="submit" name="submit">{{ trans('core/setting::setting.save_settings') }}</button>
             </div>

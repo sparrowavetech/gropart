@@ -16,7 +16,7 @@ class SyncOldDataCommand extends Command
     public function handle(): int
     {
         if (! Language::getDefaultLanguage()) {
-            $this->error('No languages in the system, please add a language!');
+            $this->components->error('No languages in the system, please add a language!');
 
             return self::FAILURE;
         }
@@ -25,13 +25,13 @@ class SyncOldDataCommand extends Command
         $table = (new $class())->getTable();
 
         if (! Schema::hasTable($table)) {
-            $this->error('That table is not existed!');
+            $this->components->error(sprintf('Table [%s] is not existed!', $table));
 
             return self::FAILURE;
         }
 
         if (! Schema::hasColumn($table, 'id')) {
-            $this->error('Table "' . $table . '" does not have ID column!');
+            $this->components->error(sprintf('Table [%s] does not have ID column!', $table));
 
             return self::FAILURE;
         }
@@ -57,7 +57,7 @@ class SyncOldDataCommand extends Command
 
         LanguageMeta::insert($data);
 
-        $this->info('Processed ' . count($data) . ' item(s)!');
+        $this->components->info('Processed ' . count($data) . ' item(s)!');
 
         return self::SUCCESS;
     }

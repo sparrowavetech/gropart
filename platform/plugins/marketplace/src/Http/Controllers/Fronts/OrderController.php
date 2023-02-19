@@ -22,44 +22,22 @@ use Botble\Payment\Repositories\Interfaces\PaymentInterface;
 use Carbon\Carbon;
 use EmailHandler;
 use Exception;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use InvoiceHelper;
 use MarketplaceHelper;
 use OrderHelper;
-use Response;
-use Throwable;
 
 class OrderController extends BaseController
 {
-    /**
-     * @var OrderInterface
-     */
-    protected $orderRepository;
+    protected OrderInterface $orderRepository;
 
-    /**
-     * @var OrderHistoryInterface
-     */
-    protected $orderHistoryRepository;
+    protected OrderHistoryInterface $orderHistoryRepository;
 
-    /**
-     * @var OrderHistoryInterface
-     */
-    protected $orderAddressRepository;
+    protected OrderAddressInterface $orderAddressRepository;
 
-    /**
-     * @var PaymentInterface
-     */
-    protected $paymentRepository;
+    protected PaymentInterface $paymentRepository;
 
-    /**
-     * @param OrderInterface $orderRepository
-     * @param OrderHistoryInterface $orderHistoryRepository
-     * @param OrderAddressInterface $orderAddressRepository
-     * @param PaymentInterface $paymentRepository
-     */
     public function __construct(
         OrderInterface $orderRepository,
         OrderHistoryInterface $orderHistoryRepository,
@@ -74,11 +52,6 @@ class OrderController extends BaseController
         Assets::setConfig(config('plugins.marketplace.assets', []));
     }
 
-    /**
-     * @param OrderTable $table
-     * @return JsonResponse|View|Response
-     * @throws Throwable
-     */
     public function index(OrderTable $table)
     {
         page_title()->setTitle(__('Orders'));
@@ -88,11 +61,7 @@ class OrderController extends BaseController
         return $table->render(MarketplaceHelper::viewPath('dashboard.table.base'), compact('orders'));
     }
 
-    /**
-     * @param int $id
-     * @return Factory|View
-     */
-    public function edit($id)
+    public function edit(int $id)
     {
         Assets::addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
             ->addScriptsDirectly([
@@ -120,13 +89,7 @@ class OrderController extends BaseController
         return MarketplaceHelper::view('dashboard.orders.edit', compact('order', 'weight', 'defaultStore'));
     }
 
-    /**
-     * @param int $id
-     * @param UpdateOrderRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function update($id, UpdateOrderRequest $request, BaseHttpResponse $response)
+    public function update(int $id, UpdateOrderRequest $request, BaseHttpResponse $response)
     {
         $order = $this->orderRepository->createOrUpdate($request->input(), ['id' => $id]);
 
@@ -137,13 +100,7 @@ class OrderController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param int $id
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function destroy($id, Request $request, BaseHttpResponse $response)
+    public function destroy(int $id, Request $request, BaseHttpResponse $response)
     {
         $order = $this->orderRepository->findOrFail($id);
 
@@ -163,12 +120,6 @@ class OrderController extends BaseController
         }
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function deletes(Request $request, BaseHttpResponse $response)
     {
         $ids = $request->input('ids');
@@ -192,11 +143,7 @@ class OrderController extends BaseController
         return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
-    /**
-     * @param int $orderId
-     * @return Response
-     */
-    public function getGenerateInvoice($orderId)
+    public function getGenerateInvoice(int $orderId)
     {
         $order = $this->orderRepository->findOrFail($orderId);
 
@@ -204,15 +151,9 @@ class OrderController extends BaseController
             abort(404);
         }
 
-        return OrderHelper::downloadInvoice($order);
+        return InvoiceHelper::downloadInvoice($order->invoice);
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Throwable
-     */
     public function postConfirm(Request $request, BaseHttpResponse $response)
     {
         $order = $this->orderRepository->findOrFail($request->input('order_id'));
@@ -254,13 +195,7 @@ class OrderController extends BaseController
         return $response->setMessage(trans('plugins/ecommerce::order.confirm_order_success'));
     }
 
-    /**
-     * @param int $id
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Throwable
-     */
-    public function postResendOrderConfirmationEmail($id, BaseHttpResponse $response)
+    public function postResendOrderConfirmationEmail(int $id, BaseHttpResponse $response)
     {
         $order = $this->orderRepository->findOrFail($id);
 
@@ -279,14 +214,7 @@ class OrderController extends BaseController
         return $response->setMessage(trans('plugins/ecommerce::order.sent_confirmation_email_success'));
     }
 
-    /**
-     * @param int $id
-     * @param AddressRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Throwable
-     */
-    public function postUpdateShippingAddress($id, AddressRequest $request, BaseHttpResponse $response)
+    public function postUpdateShippingAddress(int $id, AddressRequest $request, BaseHttpResponse $response)
     {
         $address = $this->orderAddressRepository->createOrUpdate($request->input(), compact('id'));
 
@@ -306,13 +234,7 @@ class OrderController extends BaseController
             ->setMessage(trans('plugins/ecommerce::order.update_shipping_address_success'));
     }
 
-    /**
-     * @param int $id
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Throwable
-     */
-    public function postCancelOrder($id, BaseHttpResponse $response)
+    public function postCancelOrder(int $id, BaseHttpResponse $response)
     {
         $order = $this->orderRepository->findOrFail($id);
 
@@ -336,16 +258,8 @@ class OrderController extends BaseController
         return $response->setMessage(trans('plugins/ecommerce::order.customer.messages.cancel_success'));
     }
 
-    /**
-     * @param int $id
-     * @param UpdateShippingStatusRequest $request
-     * @param BaseHttpResponse $response
-     * @param ShipmentInterface $shipmentRepository
-     * @param ShipmentHistoryInterface $shipmentHistoryRepository
-     * @return BaseHttpResponse
-     */
     public function updateShippingStatus(
-        $id,
+        int $id,
         UpdateShippingStatusRequest $request,
         BaseHttpResponse $response,
         ShipmentInterface $shipmentRepository,

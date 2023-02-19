@@ -9,9 +9,7 @@ use Botble\Slug\Http\Requests\SlugRequest;
 use Botble\Slug\Http\Requests\SlugSettingsRequest;
 use Botble\Slug\Repositories\Interfaces\SlugInterface;
 use Botble\Slug\Services\SlugService;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Support\Str;
-use Illuminate\Contracts\View\View;
 use Menu;
 
 class SlugController extends BaseController
@@ -26,10 +24,6 @@ class SlugController extends BaseController
         $this->slugService = $slugService;
     }
 
-    /**
-     * @param SlugRequest $request
-     * @return int|string
-     */
     public function store(SlugRequest $request)
     {
         return $this->slugService->create(
@@ -39,9 +33,6 @@ class SlugController extends BaseController
         );
     }
 
-    /**
-     * @return Factory|View
-     */
     public function getSettings()
     {
         page_title()->setTitle(trans('packages/slug::slug.settings.title'));
@@ -49,12 +40,6 @@ class SlugController extends BaseController
         return view('packages/slug::settings');
     }
 
-    /**
-     * @param SlugSettingsRequest $request
-     * @param BaseHttpResponse $response
-     * @param SettingStore $settingStore
-     * @return BaseHttpResponse
-     */
     public function postSettings(SlugSettingsRequest $request, BaseHttpResponse $response, SettingStore $settingStore)
     {
         foreach ($request->except(['_token']) as $settingKey => $settingValue) {

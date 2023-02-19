@@ -5,12 +5,11 @@ namespace Botble\Language;
 use Botble\Language\Models\Language;
 use Botble\Language\Repositories\Interfaces\LanguageInterface;
 use Botble\Language\Repositories\Interfaces\LanguageMetaInterface;
-use Eloquent;
-use Exception;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Contracts\Routing\UrlRoutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Arr;
@@ -87,9 +86,6 @@ class LanguageManager
         }
     }
 
-    /**
-     * Return an array of all supported Locales
-     */
     public function getSupportedLocales(): array
     {
         if (! empty($this->supportedLocales)) {
@@ -100,7 +96,7 @@ class LanguageManager
 
         $locales = [];
         foreach ($languages as $language) {
-            if (! in_array($language->lang_id, json_decode(setting('language_hide_languages', '[]'), true))) {
+            if (is_in_admin() || ! in_array($language->lang_id, json_decode(setting('language_hide_languages', '[]'), true))) {
                 $locales[$language->lang_locale] = [
                     'lang_name' => $language->lang_name,
                     'lang_locale' => $language->lang_locale,
@@ -117,9 +113,6 @@ class LanguageManager
         return $locales;
     }
 
-    /**
-     * Set and return supported locales
-     */
     public function setSupportedLocales(array $locales): void
     {
         $this->supportedLocales = $locales;
@@ -137,10 +130,7 @@ class LanguageManager
         return $this->activeLanguages;
     }
 
-    /**
-     * Returns default locale
-     */
-    public function getDefaultLocale(): string
+    public function getDefaultLocale(): ?string
     {
         if (! $this->defaultLanguage) {
             $this->setDefaultLocale();
@@ -332,11 +322,6 @@ class LanguageManager
         return $this->createUrlFromUri($url) . $urlQuery;
     }
 
-    /**
-     * Returns current language
-     *
-     * @return string current language
-     */
     public function getCurrentLocale()
     {
         if ($this->currentLocale) {
@@ -620,13 +605,6 @@ class LanguageManager
         return $this->getLocalizedURL(false, $url, [], false);
     }
 
-    /**
-     * Returns a locale from the mapping.
-     *
-     * @param string|null $locale
-     *
-     * @return string|null
-     */
     public function getLocaleFromMapping(?string $locale): ?string
     {
         return $this->getLocalesMapping()[$locale] ?? $locale;
@@ -698,35 +676,16 @@ class LanguageManager
         return $url;
     }
 
-    /**
-     * Returns true if the string given is a valid url
-     *
-     * @param string $url String to check if it is a valid url
-     *
-     * @return boolean Is the string given a valid url?
-     */
     protected function checkUrl(string $url): bool
     {
         return filter_var($url, FILTER_VALIDATE_URL);
     }
 
-    /**
-     * Returns inversed locale from the mapping.
-     *
-     * @param string|null $locale
-     *
-     * @return string|null
-     */
     public function getInversedLocaleFromMapping(?string $locale): ?string
     {
         return array_flip($this->getLocalesMapping())[$locale] ?? $locale;
     }
 
-    /**
-     * Returns current locale name
-     *
-     * @return string current locale name
-     */
     public function getCurrentLocaleName(): ?string
     {
         if (empty($this->getSupportedLocales())) {
@@ -736,12 +695,6 @@ class LanguageManager
         return Arr::get($this->getSupportedLocales(), $this->getCurrentLocale() . '.lang_name');
     }
 
-    /**
-     * Returns current text direction
-     *
-     * @return string current locale name
-     *
-     */
     public function getCurrentLocaleRTL()
     {
         if (empty($this->getSupportedLocales())) {
@@ -751,11 +704,6 @@ class LanguageManager
         return Arr::get($this->getSupportedLocales(), $this->getCurrentLocale() . '.lang_is_rtl');
     }
 
-    /**
-     * Returns current locale code
-     *
-     * @return string current locale code
-     */
     public function getCurrentLocaleCode(): ?string
     {
         if (empty($this->getSupportedLocales())) {
@@ -765,10 +713,6 @@ class LanguageManager
         return Arr::get($this->getSupportedLocales(), $this->getCurrentLocale() . '.lang_code');
     }
 
-    /**
-     * @param string $localeCode
-     * @return null|string
-     */
     public function getLocaleByLocaleCode(string $localeCode): ?string
     {
         $language = collect($this->getSupportedLocales())->where('lang_code', $localeCode)->first();
@@ -780,19 +724,11 @@ class LanguageManager
         return null;
     }
 
-    /**
-     * @param string|null $code
-     */
-    public function setCurrentAdminLocale(?string $code)
+    public function setCurrentAdminLocale(?string $code): void
     {
         $this->currentAdminLocaleCode = $code;
     }
 
-    /**
-     * Returns current admin locale code
-     *
-     * @return string current locale code
-     */
     public function getCurrentAdminLocale(): ?string
     {
         $adminLocale = $this->getCurrentAdminLocaleCode();
@@ -805,11 +741,6 @@ class LanguageManager
         return $adminLocale;
     }
 
-    /**
-     * Returns current admin locale code
-     *
-     * @return string current locale code
-     */
     public function getCurrentAdminLocaleCode(): ?string
     {
         if (empty($this->getSupportedLocales())) {
@@ -824,14 +755,9 @@ class LanguageManager
             return $this->request->input('ref_lang');
         }
 
-        return Arr::get($this->getSupportedLocales(), $this->getCurrentLocale() . '.lang_code');
+        return Arr::get($this->getSupportedLocales(), $this->getDefaultLocale() . '.lang_code');
     }
 
-    /**
-     * Returns current locale code
-     *
-     * @return string current locale code
-     */
     public function getDefaultLocaleCode(): ?string
     {
         if (empty($this->getSupportedLocales())) {
@@ -841,11 +767,6 @@ class LanguageManager
         return Arr::get($this->getSupportedLocales(), $this->getDefaultLocale() . '.lang_code', config('app.locale'));
     }
 
-    /**
-     * Returns current locale code
-     *
-     * @return string current locale code
-     */
     public function getCurrentLocaleFlag(): ?string
     {
         if (empty($this->getSupportedLocales())) {
@@ -855,20 +776,11 @@ class LanguageManager
         return Arr::get($this->getSupportedLocales(), $this->getCurrentLocale() . '.lang_flag');
     }
 
-    /**
-     * Returns supported languages language key
-     *
-     * @return array keys of supported languages
-     */
     public function getSupportedLanguagesKeys(): array
     {
         return array_keys($this->getSupportedLocales());
     }
 
-    /**
-     * Set current route name
-     * @param string $routeName current route name
-     */
     public function setRouteName(string $routeName): void
     {
         $this->routeName = $routeName;
@@ -876,10 +788,6 @@ class LanguageManager
 
     /**
      * Translate routes and save them to the translated routes array (used in the localized route filter)
-     *
-     * @param string $routeName Key of the translated string
-     *
-     * @return string Translated string
      */
     public function transRoute(string $routeName): string
     {
@@ -892,12 +800,8 @@ class LanguageManager
 
     /**
      * Returns the translation key for a given path
-     *
-     * @param string $path Path to get the key translated
-     *
-     * @return string|false Key for translation, false if not exist
      */
-    public function getRouteNameFromAPath(string $path)
+    public function getRouteNameFromAPath(string $path): bool|string
     {
         $attributes = $this->extractAttributes($path);
 
@@ -919,10 +823,6 @@ class LanguageManager
         return false;
     }
 
-    /**
-     * Sets the base url for the site
-     * @param string $url Base url for the site
-     */
     public function setBaseUrl(string $url): void
     {
         if (! str_ends_with($url, '/')) {
@@ -932,13 +832,7 @@ class LanguageManager
         $this->baseUrl = $url;
     }
 
-    /**
-     * @param string $screen
-     * @param HttpRequest $request
-     * @param Eloquent|false $data
-     * @return bool
-     */
-    public function saveLanguage(string $screen, HttpRequest $request, $data): bool
+    public function saveLanguage(string $screen, HttpRequest $request, Model|false|null $data): bool
     {
         $defaultLanguage = $this->getDefaultLanguage(['lang_id']);
         if (! empty($defaultLanguage)) {
@@ -980,11 +874,6 @@ class LanguageManager
         return false;
     }
 
-    /**
-     * @param array $select
-     * @return Language|null
-     * @since 2.2
-     */
     public function getDefaultLanguage(array $select = ['*']): ?Language
     {
         if ($this->defaultLanguage && $this->defaultLanguageSelect === $select) {
@@ -997,10 +886,6 @@ class LanguageManager
         return $this->defaultLanguage;
     }
 
-    /**
-     * @return array
-     * @since 2.0
-     */
     public function supportedModels(): array
     {
         return apply_filters(
@@ -1009,13 +894,7 @@ class LanguageManager
         );
     }
 
-    /**
-     * @param string $screen
-     * @param Eloquent|false $data
-     * @return bool
-     * @throws Exception
-     */
-    public function deleteLanguage(string $screen, $data): bool
+    public function deleteLanguage(string $screen, Model|null|false $data): bool
     {
         $defaultLanguage = $this->getDefaultLanguage(['lang_id']);
         if (! empty($defaultLanguage) && in_array(get_class($data), $this->supportedModels())) {
@@ -1030,11 +909,7 @@ class LanguageManager
         return false;
     }
 
-    /**
-     * @param string | array $model
-     * @return LanguageManager
-     */
-    public function registerModule($model): LanguageManager
+    public function registerModule(string|array $model): LanguageManager
     {
         if (! is_array($model)) {
             $model = [$model];
@@ -1054,8 +929,7 @@ class LanguageManager
      * Set and return current locale
      *
      * @param string|null $locale Locale to set the App to (optional)
-     * @return string Returns locale (if route has any) or null (if route does not have a locale)
-     * @throws Exception
+     * @return string|null Returns locale (if route has any) or null (if route does not have a locale)
      */
     public function setLocale(?string $locale = null): ?string
     {
@@ -1104,8 +978,6 @@ class LanguageManager
 
     /**
      * Returns the forced environment set route locale.
-     *
-     * @return string|null
      */
     public function getForcedLocale(): ?string
     {
@@ -1128,10 +1000,6 @@ class LanguageManager
         return (bool)setting('language_auto_detect_user_language', false);
     }
 
-    /**
-     * @param array $urls
-     * @return $this
-     */
     public function setSwitcherURLs(array $urls): self
     {
         $this->switcherURLs = $urls;
@@ -1139,12 +1007,7 @@ class LanguageManager
         return $this;
     }
 
-    /**
-     * @param string $localeCode
-     * @param string $languageCode
-     * @return Application|UrlGenerator|mixed|string
-     */
-    public function getSwitcherUrl(string $localeCode, string $languageCode)
+    public function getSwitcherUrl(string $localeCode, string $languageCode): ?string
     {
         if (count($this->switcherURLs)) {
             $url = collect($this->switcherURLs)->where('lang_code', $languageCode)->first();
@@ -1161,8 +1024,6 @@ class LanguageManager
 
     /**
      * Returns serialized translated routes for caching purposes.
-     *
-     * @return string
      */
     public function getSerializedTranslatedRoutes(): string
     {
@@ -1172,8 +1033,6 @@ class LanguageManager
     /**
      * Sets the translated routes list.
      * Only useful from a cached routes context.
-     *
-     * @param string|null $serializedRoutes
      */
     public function setSerializedTranslatedRoutes(?string $serializedRoutes)
     {
@@ -1184,10 +1043,6 @@ class LanguageManager
         $this->translatedRoutes = unserialize(base64_decode($serializedRoutes));
     }
 
-    /**
-     * @return string
-     * @throws Exception
-     */
     public function setRoutesCachePath(): string
     {
         $this->setLocale();

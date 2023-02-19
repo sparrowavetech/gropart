@@ -22,7 +22,7 @@ class SlugServiceProvider extends ServiceProvider
 
     protected bool $defer = true;
 
-    public function register()
+    public function register(): void
     {
         $this->app->bind(SlugInterface::class, function () {
             return new SlugCacheDecorator(new SlugRepository(new Slug()));
@@ -36,7 +36,7 @@ class SlugServiceProvider extends ServiceProvider
             ->loadHelpers();
     }
 
-    public function boot()
+    public function boot(): void
     {
         $this
             ->loadAndPublishConfigurations(['general'])

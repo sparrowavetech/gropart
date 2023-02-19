@@ -2,6 +2,7 @@
 
 namespace Botble\Location\Http\Controllers;
 
+use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\CreatedContentEvent;
@@ -18,8 +19,6 @@ use Botble\Location\Repositories\Interfaces\StateInterface;
 use Botble\Location\Tables\StateTable;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Contracts\View\View;
-use Throwable;
 
 class StateController extends BaseController
 {
@@ -30,11 +29,6 @@ class StateController extends BaseController
         $this->stateRepository = $stateRepository;
     }
 
-    /**
-     * @param StateTable $table
-     * @return \Illuminate\Contracts\View\Factory|\Symfony\Component\HttpFoundation\Response|View
-     * @throws Throwable
-     */
     public function index(StateTable $table)
     {
         page_title()->setTitle(trans('plugins/location::state.name'));
@@ -42,10 +36,6 @@ class StateController extends BaseController
         return $table->renderTable();
     }
 
-    /**
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
     public function create(FormBuilder $formBuilder)
     {
         page_title()->setTitle(trans('plugins/location::state.create'));
@@ -53,11 +43,6 @@ class StateController extends BaseController
         return $formBuilder->create(StateForm::class)->renderForm();
     }
 
-    /**
-     * @param StateRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function store(StateRequest $request, BaseHttpResponse $response)
     {
         $state = $this->stateRepository->createOrUpdate($request->input());
@@ -70,13 +55,7 @@ class StateController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    /**
-     * @param $id
-     * @param Request $request
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
-    public function edit($id, FormBuilder $formBuilder, Request $request)
+    public function edit(int $id, FormBuilder $formBuilder, Request $request)
     {
         $state = $this->stateRepository->findOrFail($id);
 
@@ -87,13 +66,7 @@ class StateController extends BaseController
         return $formBuilder->create(StateForm::class, ['model' => $state])->renderForm();
     }
 
-    /**
-     * @param $id
-     * @param StateRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function update($id, StateRequest $request, BaseHttpResponse $response)
+    public function update(int $id, StateRequest $request, BaseHttpResponse $response)
     {
         $state = $this->stateRepository->findOrFail($id);
 
@@ -108,13 +81,7 @@ class StateController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param Request $request
-     * @param $id
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function destroy(Request $request, $id, BaseHttpResponse $response)
+    public function destroy(Request $request, int $id, BaseHttpResponse $response)
     {
         try {
             $state = $this->stateRepository->findOrFail($id);
@@ -131,12 +98,6 @@ class StateController extends BaseController
         }
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function deletes(Request $request, BaseHttpResponse $response)
     {
         $ids = $request->input('ids');
@@ -155,14 +116,9 @@ class StateController extends BaseController
         return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function getList(Request $request, BaseHttpResponse $response)
     {
-        $keyword = $request->input('q');
+        $keyword = BaseHelper::stringify($request->input('q'));
 
         if (! $keyword) {
             return $response->setData([]);
@@ -182,11 +138,6 @@ class StateController extends BaseController
         return $response->setData(StateResource::collection($data));
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function ajaxGetStates(Request $request, BaseHttpResponse $response)
     {
         $params = [

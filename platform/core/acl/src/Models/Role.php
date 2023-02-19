@@ -3,6 +3,7 @@
 namespace Botble\ACL\Models;
 
 use Botble\ACL\Traits\PermissionTrait;
+use Botble\Base\Casts\SafeContent;
 use Botble\Base\Models\BaseModel;
 use Exception;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -27,6 +28,8 @@ class Role extends BaseModel
 
     protected $casts = [
         'permissions' => 'json',
+        'name' => SafeContent::class,
+        'description' => SafeContent::class,
     ];
 
     protected function permissions(): Attribute

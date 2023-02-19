@@ -5,9 +5,7 @@ namespace Botble\Paystack\Providers;
 use Botble\Ecommerce\Repositories\Interfaces\OrderAddressInterface;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Paystack\Services\Gateways\PaystackPaymentService;
-use Exception;
 use Html;
-use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
 use Paystack;
@@ -16,7 +14,7 @@ use Illuminate\Support\Arr;
 
 class HookServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         add_filter(PAYMENT_FILTER_ADDITIONAL_PAYMENT_METHODS, [$this, 'registerPaystackMethod'], 16, 2);
         $this->app->booted(function () {
@@ -94,31 +92,16 @@ class HookServiceProvider extends ServiceProvider
         }, 20, 3);
     }
 
-    /**
-     * @param string $settings
-     * @return string
-     * @throws Throwable
-     */
-    public function addPaymentSettings($settings)
+    public function addPaymentSettings(?string $settings): string
     {
         return $settings . view('plugins/paystack::settings')->render();
     }
 
-    /**
-     * @param string $html
-     * @param array $data
-     * @return string
-     */
-    public function registerPaystackMethod($html, array $data)
+    public function registerPaystackMethod(?string $html, array $data): string
     {
         return $html . view('plugins/paystack::methods', $data)->render();
     }
 
-    /**
-     * @param Request $request
-     * @param array $data
-     * @throws BindingResolutionException
-     */
     public function checkoutWithPaystack(array $data, Request $request)
     {
         if ($request->input('payment_method') == PAYSTACK_PAYMENT_METHOD_NAME) {
@@ -126,7 +109,11 @@ class HookServiceProvider extends ServiceProvider
 
             if (! in_array($data['currency'], $supportedCurrencies)) {
                 $data['error'] = true;
-                $data['message'] = __(":name doesn't support :currency. List of currencies supported by :name: :currencies.", ['name' => 'Paystack', 'currency' => $data['currency'], 'currencies' => implode(', ', $supportedCurrencies)]);
+                $data['message'] = __(":name doesn't support :currency. List of currencies supported by :name: :currencies.", [
+                    'name' => 'Paystack',
+                    'currency' => $data['currency'],
+                    'currencies' => implode(', ', $supportedCurrencies),
+                ]);
 
                 return $data;
             }
@@ -142,7 +129,12 @@ class HookServiceProvider extends ServiceProvider
                     'currency' => $data['currency'],
                     'amount' => (int)$data['amount'] * 100,
                     'email' => $orderAddress ? $orderAddress->email : 'no-email@domain.com',
-                    'metadata' => json_encode(['order_id' => $orderIds]),
+                    'callback_url' => route('paystack.payment.callback'),
+                    'metadata' => json_encode([
+                        'order_id' => $orderIds,
+                        'customer_id' => $request->input('customer_id'),
+                        'customer_type' => $request->input('customer_type'),
+                    ]),
                 ]);
 
                 if ($response['status']) {
@@ -152,7 +144,7 @@ class HookServiceProvider extends ServiceProvider
 
                 $data['error'] = true;
                 $data['message'] = __('Payment failed!');
-            } catch (Exception $exception) {
+            } catch (Throwable $exception) {
                 $data['error'] = true;
                 $data['message'] = json_encode($exception->getMessage());
             }

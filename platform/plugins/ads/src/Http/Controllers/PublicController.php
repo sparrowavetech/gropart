@@ -15,12 +15,7 @@ class PublicController extends BaseController
         $this->adsRepository = $adsRepository;
     }
 
-    /**
-     * @param string $key
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function getAdsClick($key, BaseHttpResponse $response)
+    public function getAdsClick(string $key, BaseHttpResponse $response)
     {
         $ads = $this->adsRepository->getFirstBy(compact('key'));
 

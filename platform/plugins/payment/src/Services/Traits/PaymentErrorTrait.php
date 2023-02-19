@@ -10,34 +10,19 @@ use Stripe\Exception\ApiErrorException;
 
 trait PaymentErrorTrait
 {
-    /**
-     * @var string
-     */
-    protected $errorMessage = null;
+    protected ?string $errorMessage = null;
 
-    /**
-     * @return string|null
-     */
     public function getErrorMessage(): ?string
     {
         return $this->errorMessage;
     }
 
-    /**
-     * @param null $message
-     */
-    public function setErrorMessage($message = null)
+    public function setErrorMessage(?string $message = null): void
     {
         $this->errorMessage = $message;
     }
 
-    /**
-     * Set error message and logging that error
-     *
-     * @param Exception $exception
-     * @param integer $case
-     */
-    protected function setErrorMessageAndLogging($exception, $case)
+    protected function setErrorMessageAndLogging(Exception $exception, int $case): void
     {
         try {
             $error = [];

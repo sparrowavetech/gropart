@@ -32,9 +32,6 @@ class EcommerceController extends BaseController
         $this->currencyRepository = $currencyRepository;
     }
 
-    /**
-     * @return Factory|View
-     */
     public function getSettings()
     {
         page_title()->setTitle(trans('plugins/ecommerce::ecommerce.basic_settings'));
@@ -63,9 +60,6 @@ class EcommerceController extends BaseController
         return view('plugins/ecommerce::settings.index', compact('currencies', 'storeLocators'));
     }
 
-    /**
-     * @return Factory|Application|View
-     */
     public function getAdvancedSettings()
     {
         page_title()->setTitle(trans('plugins/ecommerce::ecommerce.advanced_settings'));
@@ -82,9 +76,6 @@ class EcommerceController extends BaseController
         return view('plugins/ecommerce::settings.advanced-settings');
     }
 
-    /**
-     * @return Factory|Application|View
-     */
     public function getTrackingSettings()
     {
         page_title()->setTitle(trans('plugins/ecommerce::ecommerce.setting.tracking_settings'));
@@ -108,14 +99,6 @@ class EcommerceController extends BaseController
         return view('plugins/ecommerce::settings.tracking-settings');
     }
 
-    /**
-     * @param UpdateSettingsRequest $request
-     * @param BaseHttpResponse $response
-     * @param StoreCurrenciesService $service
-     * @param SettingStore $settingStore
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function postSettings(
         UpdateSettingsRequest $request,
         BaseHttpResponse $response,
@@ -178,12 +161,6 @@ class EcommerceController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @param SettingStore $settingStore
-     * @return BaseHttpResponse
-     */
     public function postAdvancedSettings(
         Request $request,
         BaseHttpResponse $response,
@@ -208,12 +185,6 @@ class EcommerceController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @param SettingStore $settingStore
-     * @return BaseHttpResponse
-     */
     public function postTrackingSettings(
         Request $request,
         BaseHttpResponse $response,
@@ -232,13 +203,7 @@ class EcommerceController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param int $id
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Throwable
-     */
-    public function getStoreLocatorForm(BaseHttpResponse $response, $id = null)
+    public function getStoreLocatorForm(BaseHttpResponse $response, ?int $id = null)
     {
         $locator = null;
         if ($id) {
@@ -248,15 +213,8 @@ class EcommerceController extends BaseController
         return $response->setData(view('plugins/ecommerce::settings.store-locator-item', compact('locator'))->render());
     }
 
-    /**
-     * @param int $id
-     * @param StoreLocatorRequest $request
-     * @param BaseHttpResponse $response
-     * @param SettingStore $settingStore
-     * @return BaseHttpResponse
-     */
     public function postUpdateStoreLocator(
-        $id,
+        int $id,
         StoreLocatorRequest $request,
         BaseHttpResponse $response,
         SettingStore $settingStore
@@ -284,11 +242,6 @@ class EcommerceController extends BaseController
         return $response->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param StoreLocatorRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function postCreateStoreLocator(StoreLocatorRequest $request, BaseHttpResponse $response)
     {
         $request->merge([
@@ -301,24 +254,13 @@ class EcommerceController extends BaseController
         return $response->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    /**
-     * @param int $id
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
-    public function postDeleteStoreLocator($id, BaseHttpResponse $response)
+    public function postDeleteStoreLocator(int $id, BaseHttpResponse $response)
     {
         $this->storeLocatorRepository->deleteBy(compact('id'));
 
         return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
-    /**
-     * @param UpdatePrimaryStoreRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function postUpdatePrimaryStore(UpdatePrimaryStoreRequest $request, BaseHttpResponse $response)
     {
         $this->storeLocatorRepository->update([['id', '!=', 0]], ['is_primary' => false]);
@@ -334,10 +276,6 @@ class EcommerceController extends BaseController
         return $response->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function ajaxGetCountries(BaseHttpResponse $response)
     {
         return $response->setData(EcommerceHelper::getAvailableCountries());

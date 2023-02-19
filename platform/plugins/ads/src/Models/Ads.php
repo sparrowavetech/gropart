@@ -4,14 +4,11 @@ namespace Botble\Ads\Models;
 
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
-use Botble\Base\Traits\EnumCastable;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 
 class Ads extends BaseModel
 {
-    use EnumCastable;
-
     protected $table = 'ads';
 
     protected $fillable = [

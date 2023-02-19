@@ -2,11 +2,13 @@
 
 namespace Botble\Base\Providers;
 
+use Botble\Base\Events\AdminNotificationEvent;
 use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\SendMailEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Listeners\AdminNotificationListener;
 use Botble\Base\Listeners\BeforeEditContentListener;
 use Botble\Base\Listeners\CreatedContentListener;
 use Botble\Base\Listeners\DeletedContentListener;
@@ -34,9 +36,12 @@ class EventServiceProvider extends ServiceProvider
         BeforeEditContentEvent::class => [
             BeforeEditContentListener::class,
         ],
+        AdminNotificationEvent::class => [
+            AdminNotificationListener::class,
+        ],
     ];
 
-    public function boot()
+    public function boot(): void
     {
         parent::boot();
 

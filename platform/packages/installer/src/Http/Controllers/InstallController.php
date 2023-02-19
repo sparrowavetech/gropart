@@ -14,11 +14,7 @@ use Botble\Installer\Supports\RequirementsChecker;
 use Carbon\Carbon;
 use Exception;
 use File;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
 use Illuminate\Database\QueryException;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
@@ -38,22 +34,11 @@ class InstallController extends Controller
         $this->environmentManager = $environmentManager;
     }
 
-    /**
-     * Display the installer welcome page.
-     *
-     * @return Factory|Application|View
-     */
     public function getWelcome()
     {
         return view('packages/installer::welcome');
     }
 
-    /**
-     * Display the requirements page.
-     *
-     * @param Request $request
-     * @return Application|Factory|View|RedirectResponse
-     */
     public function getRequirements(Request $request)
     {
         if (! URL::hasValidSignature($request)) {
@@ -66,12 +51,6 @@ class InstallController extends Controller
         return view('packages/installer::.requirements', compact('requirements', 'phpSupportInfo'));
     }
 
-    /**
-     * Display the Environment page.
-     *
-     * @param Request $request
-     * @return Application|Factory|View|RedirectResponse
-     */
     public function getEnvironment(Request $request)
     {
         if (! URL::hasValidSignature($request)) {
@@ -81,12 +60,6 @@ class InstallController extends Controller
         return view('packages/installer::environment');
     }
 
-    /**
-     * Processes the newly saved environment configuration (Form Wizard).
-     *
-     * @param SaveEnvironmentRequest $request
-     * @return RedirectResponse
-     */
     public function postSaveEnvironment(SaveEnvironmentRequest $request)
     {
         $driverName = $request->input('database_connection');
@@ -130,19 +103,11 @@ class InstallController extends Controller
             ->with('install_message', $results);
     }
 
-    /**
-     * @return Application|Factory|View
-     */
     public function getCreateAccount()
     {
         return view('packages/installer::account');
     }
 
-    /**
-     * @param SaveAccountRequest $request
-     * @param ActivateUserService $activateUserService
-     * @return RedirectResponse
-     */
     public function postSaveAccount(SaveAccountRequest $request, ActivateUserService $activateUserService)
     {
         try {
@@ -171,12 +136,6 @@ class InstallController extends Controller
         }
     }
 
-    /**
-     * Update installed file and display finished view.
-     *
-     * @param Request $request
-     * @return Application|Factory|View|RedirectResponse
-     */
     public function getFinish(Request $request)
     {
         if (! URL::hasValidSignature($request)) {

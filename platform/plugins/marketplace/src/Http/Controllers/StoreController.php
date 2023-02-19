@@ -15,38 +15,20 @@ use Botble\Marketplace\Repositories\Interfaces\RevenueInterface;
 use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
 use Botble\Marketplace\Tables\StoreTable;
 use Exception;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
-use Throwable;
 
 class StoreController extends BaseController
 {
-    /**
-     * @var StoreInterface
-     */
-    protected $storeRepository;
+    protected StoreInterface $storeRepository;
 
-    /**
-     * @var RevenueInterface
-     */
-    protected $revenueRepository;
+    protected RevenueInterface $revenueRepository;
 
-    /**
-     * @param StoreInterface $storeRepository
-     * @param RevenueInterface $revenueRepository
-     */
     public function __construct(StoreInterface $storeRepository, RevenueInterface $revenueRepository)
     {
         $this->storeRepository = $storeRepository;
         $this->revenueRepository = $revenueRepository;
     }
 
-    /**
-     * @param StoreTable $table
-     * @return Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\JsonResponse|View
-     * @throws Throwable
-     */
     public function index(StoreTable $table)
     {
         page_title()->setTitle(trans('plugins/marketplace::store.name'));
@@ -54,10 +36,6 @@ class StoreController extends BaseController
         return $table->renderTable();
     }
 
-    /**
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
     public function create(FormBuilder $formBuilder)
     {
         page_title()->setTitle(trans('plugins/marketplace::store.create'));
@@ -65,11 +43,6 @@ class StoreController extends BaseController
         return $formBuilder->create(StoreForm::class)->renderForm();
     }
 
-    /**
-     * @param StoreRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function store(StoreRequest $request, BaseHttpResponse $response)
     {
         $store = $this->storeRepository->createOrUpdate($request->input());
@@ -82,13 +55,7 @@ class StoreController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    /**
-     * @param int $id
-     * @param Request $request
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
-    public function edit($id, FormBuilder $formBuilder, Request $request)
+    public function edit(int $id, FormBuilder $formBuilder, Request $request)
     {
         $store = $this->storeRepository->findOrFail($id);
 
@@ -99,13 +66,7 @@ class StoreController extends BaseController
         return $formBuilder->create(StoreForm::class, ['model' => $store])->renderForm();
     }
 
-    /**
-     * @param int $id
-     * @param StoreRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function update($id, StoreRequest $request, BaseHttpResponse $response)
+    public function update(int $id, StoreRequest $request, BaseHttpResponse $response)
     {
         $store = $this->storeRepository->findOrFail($id);
 
@@ -129,13 +90,7 @@ class StoreController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param int $id
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function destroy(Request $request, $id, BaseHttpResponse $response)
+    public function destroy(Request $request, int $id, BaseHttpResponse $response)
     {
         try {
             $store = $this->storeRepository->findOrFail($id);
@@ -152,12 +107,6 @@ class StoreController extends BaseController
         }
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function deletes(Request $request, BaseHttpResponse $response)
     {
         $ids = $request->input('ids');

@@ -20,7 +20,7 @@ class PluginRemoveCommand extends Command
         }
 
         if (! preg_match('/^[a-z0-9\-]+$/i', $this->argument('name'))) {
-            $this->error('Only alphabetic characters are allowed.');
+            $this->components->error('Only alphabetic characters are allowed.');
 
             return self::FAILURE;
         }
@@ -29,12 +29,12 @@ class PluginRemoveCommand extends Command
         $result = $pluginService->remove($plugin);
 
         if ($result['error']) {
-            $this->error($result['message']);
+            $this->components->error($result['message']);
 
             return self::FAILURE;
         }
 
-        $this->info($result['message']);
+        $this->components->info($result['message']);
 
         return self::SUCCESS;
     }

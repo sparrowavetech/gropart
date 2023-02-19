@@ -23,7 +23,7 @@ class CsvProductExport implements FromCollection, WithHeadings
 
     public function __construct()
     {
-        $this->results = collect([]);
+        $this->results = collect();
 
         $this->isMarketplaceActive = is_plugin_active('marketplace');
         $this->enabledDigital = EcommerceHelper::isEnabledSupportDigitalProducts();
@@ -51,7 +51,7 @@ class CsvProductExport implements FromCollection, WithHeadings
             ->where('is_variation', 0)
             ->with($with)
             ->chunk(400, function ($products) {
-                $this->results = $this->results->concat(collect($this->productResults($products)));
+                $this->results = $this->results->concat($this->productResults($products));
             });
     }
 
@@ -69,13 +69,13 @@ class CsvProductExport implements FromCollection, WithHeadings
                 'description' => $product->description,
                 'slug' => $product->slug,
                 'sku' => $product->sku,
-                'categories' => $product->categories->pluck('name')->implode(','),
+                'categories' => implode(',', $product->categories->pluck('name')->all()),
                 'status' => $product->status->getValue(),
                 'is_featured' => $product->is_featured,
                 'brand' => $product->brand->name,
-                'product_collections' => $product->productCollections->pluck('name')->implode(','),
-                'labels' => $product->productLabels->pluck('name')->implode(','),
-                'taxes' => $product->taxes->pluck('title')->implode(','),
+                'product_collections' => implode(',', $product->productCollections->pluck('name')->all()),
+                'labels' => implode(',', $product->productLabels->pluck('name')->all()),
+                'taxes' => implode(',', $product->taxes->pluck('title')->all()),
                 'images' => implode(',', $product->images),
                 'price' => $product->price,
                 'product_attributes' => implode(',', $productAttributes),
@@ -93,7 +93,7 @@ class CsvProductExport implements FromCollection, WithHeadings
                 'wide' => $product->wide,
                 'height' => $product->height,
                 'content' => $product->content,
-                'tags' => $product->tags->pluck('name')->implode(','),
+                'tags' => implode(',', $product->tags->pluck('name')->all()),
             ];
 
             if ($this->enabledDigital) {

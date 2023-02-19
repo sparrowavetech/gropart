@@ -5,12 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class () extends Migration {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('ec_orders', function (Blueprint $table) {
             $table->decimal('tax_amount', 15)->nullable()->change();
@@ -18,12 +13,7 @@ return new class () extends Migration {
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('ec_orders', function (Blueprint $table) {
             $table->decimal('tax_amount')->nullable()->change();

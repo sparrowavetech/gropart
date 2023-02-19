@@ -2,7 +2,7 @@
 
 namespace Botble\Base\Events;
 
-use Eloquent;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Queue\SerializesModels;
 
@@ -14,10 +14,7 @@ class CreatedContentEvent extends Event
 
     public Request $request;
 
-    /**
-     * @var Eloquent|false
-     */
-    public $data;
+    public false|Model|null $data;
 
     public function __construct($screen, $request, $data)
     {

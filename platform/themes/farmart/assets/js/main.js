@@ -801,6 +801,10 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl';
                             $('.widget-product-categories .widget-layered-nav-list').html(res.additional?.category_tree);
                         }
 
+                        if (res.additional?.breadcrumb) {
+                            $('.page-breadcrumbs div').html(res.additional.breadcrumb);
+                        }
+
                         if (nextHref != window.location.href) {
                             window.history.pushState(
                                 data,

@@ -10,39 +10,22 @@ use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Marketplace\Http\Requests\DiscountRequest;
 use Botble\Ecommerce\Models\Discount;
 use Botble\Ecommerce\Repositories\Interfaces\DiscountInterface;
-use Botble\Marketplace\Models\Store;
 use Botble\Marketplace\Tables\DiscountTable;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\View\View;
 use MarketplaceHelper;
-use Response;
-use Throwable;
 
 class DiscountController extends BaseController
 {
-    /**
-     * @var DiscountInterface
-     */
-    protected $discountRepository;
+    protected DiscountInterface $discountRepository;
 
-    /**
-     * @param DiscountInterface $discountRepository
-     */
     public function __construct(DiscountInterface $discountRepository)
     {
         $this->discountRepository = $discountRepository;
     }
 
-    /**
-     * @param Request $request
-     * @param DiscountTable $table
-     * @return JsonResponse|View|Response
-     * @throws Throwable
-     */
     public function index(DiscountTable $table)
     {
         page_title()->setTitle(__('Coupons'));
@@ -50,9 +33,6 @@ class DiscountController extends BaseController
         return $table->render(MarketplaceHelper::viewPath('dashboard.table.base'));
     }
 
-    /**
-     * @return string
-     */
     public function create()
     {
         page_title()->setTitle(__('Create coupon'));
@@ -68,20 +48,11 @@ class DiscountController extends BaseController
         return MarketplaceHelper::view('dashboard.discounts.create');
     }
 
-    /**
-     * @return Store
-     */
-    private function getStore()
+    protected function getStore()
     {
         return auth('customer')->user()->store;
     }
 
-    /**
-     * @param DiscountRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function store(DiscountRequest $request, BaseHttpResponse $response)
     {
         $request->merge([
@@ -123,13 +94,7 @@ class DiscountController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    /**
-     * @param Request $request
-     * @param int $id
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function destroy(Request $request, $id, BaseHttpResponse $response)
+    public function destroy(Request $request, int $id, BaseHttpResponse $response)
     {
         try {
             $discount = $this->discountRepository->findOrFail($id);
@@ -150,12 +115,6 @@ class DiscountController extends BaseController
         }
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function deletes(Request $request, BaseHttpResponse $response)
     {
         $ids = $request->input('ids');
@@ -179,10 +138,6 @@ class DiscountController extends BaseController
         return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
-    /**
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function postGenerateCoupon(BaseHttpResponse $response)
     {
         do {

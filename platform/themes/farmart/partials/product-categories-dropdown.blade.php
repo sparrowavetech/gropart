@@ -6,7 +6,7 @@
             @elseif ($category->getMetaData('icon', true))
                 <i class="{{ $category->getMetaData('icon', true) }}"></i>
             @endif
-            <span class="ms-1">{{ $category->name }}</span>
+            <span class="ms-1">{!! BaseHelper::clean($category->name) !!}</span>
             @if ($category->activeChildren->count())
                 <span class="sub-toggle">
                     <span class="svg-icon">

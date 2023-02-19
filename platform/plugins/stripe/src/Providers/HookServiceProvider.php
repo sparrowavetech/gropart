@@ -5,14 +5,12 @@ namespace Botble\Stripe\Providers;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Stripe\Services\Gateways\StripePaymentService;
 use Html;
-use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
-use Throwable;
 
 class HookServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         add_filter(PAYMENT_FILTER_ADDITIONAL_PAYMENT_METHODS, [$this, 'registerStripeMethod'], 1, 2);
 
@@ -80,32 +78,16 @@ class HookServiceProvider extends ServiceProvider
         }
     }
 
-    /**
-     * @param string|null $settings
-     * @return string
-     * @throws Throwable
-     */
     public function addPaymentSettings(?string $settings): string
     {
         return $settings . view('plugins/stripe::settings')->render();
     }
 
-    /**
-     * @param string|null $html
-     * @param array $data
-     * @return string
-     */
     public function registerStripeMethod(?string $html, array $data): string
     {
         return $html . view('plugins/stripe::methods', $data)->render();
     }
 
-    /**
-     * @param array $data
-     * @param Request $request
-     * @return array
-     * @throws BindingResolutionException
-     */
     public function checkoutWithStripe(array $data, Request $request): array
     {
         if ($request->input('payment_method') == STRIPE_PAYMENT_METHOD_NAME) {

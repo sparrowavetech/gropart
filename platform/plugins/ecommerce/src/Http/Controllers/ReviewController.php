@@ -9,10 +9,7 @@ use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Repositories\Interfaces\ReviewInterface;
 use Botble\Ecommerce\Tables\ReviewTable;
 use Exception;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
-use Throwable;
 
 class ReviewController extends BaseController
 {
@@ -23,11 +20,6 @@ class ReviewController extends BaseController
         $this->reviewRepository = $reviewRepository;
     }
 
-    /**
-     * @param ReviewTable $dataTable
-     * @return Factory|View
-     * @throws Throwable
-     */
     public function index(ReviewTable $dataTable)
     {
         page_title()->setTitle(trans('plugins/ecommerce::review.name'));
@@ -37,13 +29,7 @@ class ReviewController extends BaseController
         return $dataTable->renderTable();
     }
 
-    /**
-     * @param Request $request
-     * @param int $id
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function destroy(Request $request, $id, BaseHttpResponse $response)
+    public function destroy(Request $request, int $id, BaseHttpResponse $response)
     {
         try {
             $review = $this->reviewRepository->findOrFail($id);
@@ -59,12 +45,6 @@ class ReviewController extends BaseController
         }
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function deletes(Request $request, BaseHttpResponse $response)
     {
         $ids = $request->input('ids');

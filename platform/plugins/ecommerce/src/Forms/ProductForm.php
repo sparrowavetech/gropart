@@ -71,7 +71,9 @@ class ProductForm extends FormAbstract
             $productVariations = app(ProductVariationInterface::class)->allBy([
                 'configurable_product_id' => $productId,
             ]);
-            $tags = $this->getModel()->tags()->pluck('name')->implode(',');
+
+            $tags = $this->getModel()->tags()->pluck('name')->all();
+            $tags = implode(',', $tags);
         }
 
         $productAttributeSets = app(ProductAttributeSetInterface::class)->getAllWithSelected($productId);
@@ -189,6 +191,14 @@ class ProductForm extends FormAbstract
             ]);
         }
 
+        $globalOptions = app(GlobalOptionInterface::class)->select(['name', 'id'])->get();
+
+        $globalOptionArray = [];
+
+        foreach ($globalOptions as $globalOption) {
+            $globalOptionArray[$globalOption->id] = $globalOption->name;
+        }
+
         $this
             ->add('tag', 'tags', [
                 'label' => trans('plugins/ecommerce::products.form.tags'),
@@ -201,11 +211,11 @@ class ProductForm extends FormAbstract
             ])
             ->setBreakFieldPoint('status')
             ->addMetaBoxes([
-                'options' => [
+                'product_options_box' => [
                     'title' => trans('plugins/ecommerce::product-option.name'),
                     'content' => view('plugins/ecommerce::products.partials.product-option-form', [
                         'options' => GlobalOptionEnum::options(),
-                        'globalOptions' => app(GlobalOptionInterface::class)->pluck('name', 'id'),
+                        'globalOptions' => $globalOptionArray,
                         'product' => $this->getModel(),
                         'routes' => [
                             'ajax_option_info' => route('global-option.ajaxInfo'),

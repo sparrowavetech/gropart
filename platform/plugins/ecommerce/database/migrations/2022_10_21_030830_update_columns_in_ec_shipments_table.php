@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class () extends Migration {
-    public function up()
+    public function up(): void
     {
         if (! Schema::hasColumn('ec_shipments', 'label_url')) {
             Schema::table('ec_shipments', function (Blueprint $table) {
@@ -15,7 +15,7 @@ return new class () extends Migration {
         }
     }
 
-    public function down()
+    public function down(): void
     {
         Schema::table('ec_shipments', function (Blueprint $table) {
             $table->dropColumn(['label_url', 'transaction']);

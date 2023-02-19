@@ -19,7 +19,7 @@ class SimpleSliderForm extends FormAbstract
         $this->tableBuilder = $tableBuilder;
     }
 
-    public function buildForm()
+    public function buildForm(): void
     {
         $this
             ->setupModel(new SimpleSlider())

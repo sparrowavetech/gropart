@@ -8,11 +8,7 @@ use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 
 class StoreRepository extends RepositoriesAbstract implements StoreInterface
 {
-    /**
-     * @param $data
-     * @return array
-     */
-    public function handleCommissionEachCategory($data): array
+    public function handleCommissionEachCategory(array $data): array
     {
         $commissions = [];
         CategoryCommission::truncate();
@@ -45,9 +41,6 @@ class StoreRepository extends RepositoriesAbstract implements StoreInterface
         return $commissions;
     }
 
-    /**
-     * @return array
-     */
     public function getCommissionEachCategory(): array
     {
         $commissions = CategoryCommission::with(['category'])->get();

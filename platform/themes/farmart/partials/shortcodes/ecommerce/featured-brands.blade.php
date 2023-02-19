@@ -14,7 +14,7 @@
             [
                 'breakpoint' => 1024,
                 'settings'   => [
-                    'slidesToShow' => 2,
+                    'slidesToShow' => 4,
                 ],
             ],
             [
@@ -30,7 +30,7 @@
     ];
     $brands = get_featured_brands();
 @endphp
-<div class="widget-featured-brands py-5">
+<div class="widget-featured-brands py-5 pb-0">
     <div class="container-xxxl">
         <div class="row">
             <div class="col-12">
@@ -59,7 +59,7 @@
                                                 />
                                             </div>
                                         </div>
-                                        <div class="brand__text py-3">
+                                        <div class="brand__text">
                                             <h4 class="h6 fw-bold text-secondary text-uppercase brand__name">
                                                 {{ $brand->name }}
                                             </h4>

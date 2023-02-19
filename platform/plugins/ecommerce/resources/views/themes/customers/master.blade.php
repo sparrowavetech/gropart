@@ -44,6 +44,12 @@
                                     <a href="{{ route('customer.orders') }}" class="collection-item @if (Route::currentRouteName() == 'customer.orders') active @endif">{{ __('Orders') }}</a>
                                     <i class="fa fa-first-order" aria-hidden="true"></i>
                                 </li>
+                                @if (EcommerceHelper::isReviewEnabled())
+                                    <li class="list-group-item">
+                                        <a href="{{ route('customer.product-reviews') }}" class="collection-item @if (Route::currentRouteName() == 'customer.product-reviews') active @endif">{{ __('Product Reviews') }}</a>
+                                        <i class="fa fa-star"></i>
+                                    </li>
+                                @endif
                                 @if (EcommerceHelper::isEnabledSupportDigitalProducts())
                                     <li class="list-group-item">
                                         <a href="{{ route('customer.downloads') }}" class="collection-item @if (Route::currentRouteName() == 'customer.downloads') active @endif">{{ __('Downloads') }}</a>

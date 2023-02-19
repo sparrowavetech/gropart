@@ -20,7 +20,7 @@ class SeoHelperServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function register()
+    public function register(): void
     {
         $this->app->bind(SeoMetaContract::class, SeoMeta::class);
         $this->app->bind(SeoHelperContract::class, SeoHelper::class);
@@ -31,7 +31,7 @@ class SeoHelperServiceProvider extends ServiceProvider
             ->loadHelpers();
     }
 
-    public function boot()
+    public function boot(): void
     {
         $this
             ->loadAndPublishConfigurations(['general'])

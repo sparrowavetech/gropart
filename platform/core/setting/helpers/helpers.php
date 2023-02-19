@@ -25,7 +25,7 @@ if (! function_exists('get_admin_email')) {
         $email = setting('admin_email');
 
         if (! $email) {
-            return collect([]);
+            return collect();
         }
 
         $email = is_array($email) ? $email : (array)json_decode($email, true);

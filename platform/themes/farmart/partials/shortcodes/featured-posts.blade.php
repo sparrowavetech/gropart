@@ -59,7 +59,7 @@
                                         <a class="img-fluid-eq" href="{{ $post->url }}">
                                             <div class="img-fluid-eq__dummy"></div>
                                             <div class="img-fluid-eq__wrap">
-                                                <img class="lazyload" alt="{{ $post->name }}" src="{{ image_placeholder($post->image) }}" data-src="{{ RvMedia::getImageUrl($post->image, null, false, RvMedia::getDefaultImage()) }}">
+                                                <img class="lazyload" alt="{!! BaseHelper::clean($post->name) !!}" src="{{ image_placeholder($post->image) }}" data-src="{{ RvMedia::getImageUrl($post->image, null, false, RvMedia::getDefaultImage()) }}">
                                             </div>
                                         </a></div>
                                     <div class="col-md-8 post-item__content">
@@ -83,7 +83,7 @@
                                                 </div>
                                             </div>
                                             <div class="entry-title mb-3 mt-2">
-                                                <h4><a href="{{ $post->url }}">{{ $post->name }}</a></h4>
+                                                <h4><a href="{{ $post->url }}">{!! BaseHelper::clean($post->name) !!}</a></h4>
                                             </div>
                                             <div class="entry-description">
                                                 <p>{{ Str::words($post->description, 20) }}</p>

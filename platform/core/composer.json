@@ -34,7 +34,9 @@
         "symfony/http-client": "^6.0",
         "symfony/postmark-mailer": "^6.0",
         "symfony/mailgun-mailer": "^6.0",
-        "twig/twig": "^3.0"
+        "twig/twig": "^3.0",
+        "doctrine/dbal": "^3.2",
+        "league/flysystem-aws-s3-v3": "^3.0"
     },
     "autoload": {
         "psr-4": {

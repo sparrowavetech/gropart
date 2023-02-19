@@ -10,38 +10,21 @@ use Botble\Ecommerce\Repositories\Interfaces\ProductCategoryInterface;
 use Botble\Marketplace\Http\Requests\MarketPlaceSettingFormRequest;
 use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
 use Botble\Setting\Supports\SettingStore;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
 use MarketplaceHelper;
 
 class MarketplaceController extends BaseController
 {
-    /**
-     * @var SettingStore
-     */
-    protected $settingStore;
-    /**
-     * @var StoreInterface
-     */
-    private $storeRepository;
+    protected SettingStore $settingStore;
 
-    /**
-     * MarketplaceController constructor.
-     * @param SettingStore $settingStore
-     * @param StoreInterface $storeRepository
-     */
+    protected StoreInterface $storeRepository;
+
     public function __construct(SettingStore $settingStore, StoreInterface $storeRepository)
     {
         $this->settingStore = $settingStore;
         $this->storeRepository = $storeRepository;
     }
 
-    /**
-     * @param ProductCategoryInterface $productCategoryRepository
-     * @return BaseHttpResponse|Factory|Application|View
-     */
     public function getSettings(ProductCategoryInterface $productCategoryRepository)
     {
         Assets::addScriptsDirectly('vendor/core/core/setting/js/setting.js')
@@ -66,11 +49,6 @@ class MarketplaceController extends BaseController
         return view('plugins/marketplace::settings.index', compact('productCategories', 'commissionEachCategory'));
     }
 
-    /**
-     * @param MarketPlaceSettingFormRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function postSettings(MarketPlaceSettingFormRequest $request, BaseHttpResponse $response)
     {
         $settingKey = MarketplaceHelper::getSettingKey();

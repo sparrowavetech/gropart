@@ -59,6 +59,12 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
                     'permission' => 'ecommerce.shipping-rule-items.destroy',
                 ]);
 
+                Route::get('items/{rule_id}', [
+                    'as' => 'items',
+                    'uses' => 'ShippingRuleItemController@items',
+                    'permission' => 'ecommerce.shipping-rule-items.index',
+                ]);
+
                 Route::group([
                     'as' => 'bulk-import.',
                     'prefix' => 'bulk-import',

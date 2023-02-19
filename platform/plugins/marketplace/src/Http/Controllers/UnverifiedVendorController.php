@@ -10,32 +10,18 @@ use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
 use Botble\Marketplace\Tables\UnverifiedVendorTable;
 use Carbon\Carbon;
 use EmailHandler;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 use MarketplaceHelper;
-use Throwable;
 
 class UnverifiedVendorController extends BaseController
 {
-    /**
-     * @var CustomerInterface
-     */
-    protected $customerRepository;
+    protected CustomerInterface $customerRepository;
 
-    /**
-     * @param CustomerInterface $customerRepository
-     */
     public function __construct(CustomerInterface $customerRepository)
     {
         $this->customerRepository = $customerRepository;
     }
 
-    /**
-     * @param UnverifiedVendorTable $table
-     * @return Factory|View
-     * @throws Throwable
-     */
     public function index(UnverifiedVendorTable $table)
     {
         page_title()->setTitle(trans('plugins/marketplace::unverified-vendor.name'));
@@ -43,11 +29,7 @@ class UnverifiedVendorController extends BaseController
         return $table->renderTable();
     }
 
-    /**
-     * @param int $id
-     * @return string
-     */
-    public function view($id)
+    public function view(int $id)
     {
         $vendor = $this->customerRepository->getFirstBy([
             'id' => $id,
@@ -66,13 +48,7 @@ class UnverifiedVendorController extends BaseController
         return view('plugins/marketplace::customers.verify-vendor', compact('vendor'));
     }
 
-    /**
-     * @param int $id
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function approveVendor($id, Request $request, BaseHttpResponse $response)
+    public function approveVendor(int $id, Request $request, BaseHttpResponse $response)
     {
         $vendor = $this->customerRepository
             ->getFirstBy([

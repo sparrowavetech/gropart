@@ -90,16 +90,6 @@
                                    name="payment_{{ PAYSTACK_PAYMENT_METHOD_NAME }}_secret"
                                    value="{{ get_payment_setting('secret', PAYSTACK_PAYMENT_METHOD_NAME) }}" placeholder="sk_****">
                         </div>
-                        <div class="form-group mb-3">
-                            <label class="text-title-field" for="{{ PAYSTACK_PAYMENT_METHOD_NAME }}_merchant_email">{{ __('Merchant Email') }}</label>
-                            <input type="email" class="next-input" placeholder="{{ __('Email') }}" id="{{ PAYSTACK_PAYMENT_METHOD_NAME }}_merchant_email"
-                                   name="payment_{{ PAYSTACK_PAYMENT_METHOD_NAME }}_merchant_email"
-                                   value="{{ get_payment_setting('merchant_email', PAYSTACK_PAYMENT_METHOD_NAME) }}">
-                        </div>
-
-                        <p class="payment-note">
-                            {{ __('You will need to set Callback URL on') }} <a href="https://dashboard.paystack.com/#/settings/developer">https://dashboard.paystack.com/#/settings/developer</a> {{ __('to') }} <strong><code>{{ route('paystack.payment.callback') }}</code></strong>
-                        </p>
 
                         {!! apply_filters(PAYMENT_METHOD_SETTINGS_CONTENT, null, PAYSTACK_PAYMENT_METHOD_NAME) !!}
                     </div>

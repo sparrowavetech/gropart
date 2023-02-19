@@ -2,8 +2,6 @@
 
 namespace Botble\LanguageAdvanced\Supports;
 
-use Botble\LanguageAdvanced\Models\PageTranslation;
-use Botble\Page\Models\Page;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -109,23 +107,6 @@ class LanguageAdvancedManager
         }
 
         return Arr::get(LanguageAdvancedManager::getSupported(), $model, []);
-    }
-
-    public static function getTranslationModel(Model|string|null $model): ?string
-    {
-        if (! $model) {
-            return null;
-        }
-
-        if (is_object($model)) {
-            $model = get_class($model);
-        }
-
-        if ($model == Page::class) {
-            return PageTranslation::class;
-        }
-
-        return $model . 'Translation';
     }
 
     public static function registerModule(string $model, array $columns): bool

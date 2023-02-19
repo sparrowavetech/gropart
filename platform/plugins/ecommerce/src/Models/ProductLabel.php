@@ -2,14 +2,12 @@
 
 namespace Botble\Ecommerce\Models;
 
+use Botble\Base\Casts\SafeContent;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
-use Botble\Base\Traits\EnumCastable;
 
 class ProductLabel extends BaseModel
 {
-    use EnumCastable;
-
     protected $table = 'ec_product_labels';
 
     protected $fillable = [
@@ -20,5 +18,6 @@ class ProductLabel extends BaseModel
 
     protected $casts = [
         'status' => BaseStatusEnum::class,
+        'name' => SafeContent::class,
     ];
 }

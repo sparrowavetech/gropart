@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\URL;
 
 class BreadcrumbsServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         Breadcrumbs::register('dashboard.index', function (BreadcrumbsGenerator $breadcrumbs) {
             $breadcrumbs->push(trans('core/base::layouts.dashboard'), route('dashboard.index'));

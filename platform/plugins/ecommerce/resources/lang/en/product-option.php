@@ -1,10 +1,10 @@
 <?php
 
 return [
-    'name' => 'Product Options',
+    'name' => 'Product options',
     'options' => 'Options',
     'create' => 'New option',
-    'edit' => 'Edit option',
+    'edit' => 'Edit option :name',
     'required' => 'Is required?',
     'option_value' => 'Option value',
     'option_type' => 'Type',

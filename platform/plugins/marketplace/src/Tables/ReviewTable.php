@@ -17,10 +17,6 @@ use RvMedia;
 
 class ReviewTable extends TableAbstract
 {
-    protected $hasActions = false;
-
-    protected $hasFilter = false;
-
     protected $hasOperations = false;
 
     protected $hasCheckbox = false;

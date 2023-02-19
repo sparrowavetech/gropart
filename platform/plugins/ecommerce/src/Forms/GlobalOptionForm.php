@@ -20,7 +20,7 @@ class GlobalOptionForm extends FormAbstract
             ->setupModel(new GlobalOption())
             ->setValidatorClass(GlobalOptionRequest::class)
             ->withCustomFields()
-            ->add('option_name', 'text', [
+            ->add('name', 'text', [
                 'label' => trans('core/base::forms.name'),
                 'label_attr' => ['class' => 'control-label required'],
                 'attr' => [
@@ -41,11 +41,12 @@ class GlobalOptionForm extends FormAbstract
             ])
             ->setBreakFieldPoint('option_type')
             ->addMetaBoxes([
-                'option_value' => [
+                'product_options_box' => [
+                    'id' => 'product_options_box',
                     'title' => trans('plugins/ecommerce::product-option.option_value'),
                     'content' => view(
                         'plugins/ecommerce::product-options.option-admin',
-                        ['option' => $this->getModel()->toArray()]
+                        ['values' => $this->model->values->sortBy('order')]
                     )->render(),
                 ],
             ]);

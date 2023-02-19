@@ -32,7 +32,7 @@ class LocationServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function register()
+    public function register(): void
     {
         $this->app->bind(CountryInterface::class, function () {
             return new CountryCacheDecorator(new CountryRepository(new Country()));
@@ -49,7 +49,7 @@ class LocationServiceProvider extends ServiceProvider
         AliasLoader::getInstance()->alias('Location', LocationFacade::class);
     }
 
-    public function boot()
+    public function boot(): void
     {
         $this->setNamespace('plugins/location')
             ->loadHelpers()

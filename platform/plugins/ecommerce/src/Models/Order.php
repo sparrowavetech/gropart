@@ -3,7 +3,6 @@
 namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Models\BaseModel;
-use Botble\Base\Traits\EnumCastable;
 use Botble\Ecommerce\Enums\OrderAddressTypeEnum;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Enums\ShippingMethodEnum;
@@ -21,8 +20,6 @@ use OrderHelper;
 
 class Order extends BaseModel
 {
-    use EnumCastable;
-
     protected $table = 'ec_orders';
 
     protected $fillable = [

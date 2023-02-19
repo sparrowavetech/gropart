@@ -13,12 +13,6 @@ use Illuminate\Support\Str;
 
 class ShippingMethodSettingController extends BaseController
 {
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @param SettingStore $settingStore
-     * @return BaseHttpResponse
-     */
     public function update(Request $request, BaseHttpResponse $response, SettingStore $settingStore)
     {
         $data = Arr::where($request->except(['_token']), function ($value, $key) {

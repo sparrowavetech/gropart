@@ -2,8 +2,8 @@
 
 namespace Botble\Widget;
 
-use Botble\Widget\Contracts\ApplicationWrapperContract;
 use Botble\Widget\Repositories\Interfaces\WidgetInterface;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Language;
@@ -13,13 +13,13 @@ class WidgetGroupCollection
 {
     protected array $groups;
 
-    protected ApplicationWrapperContract $app;
+    protected Application $app;
 
     protected Collection|array $data = [];
 
     protected bool $loaded = false;
 
-    public function __construct(ApplicationWrapperContract $app)
+    public function __construct(Application $app)
     {
         $this->app = $app;
     }

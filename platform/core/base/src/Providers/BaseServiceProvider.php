@@ -10,6 +10,7 @@ use Botble\Base\Http\Middleware\CoreMiddleware;
 use Botble\Base\Http\Middleware\DisableInDemoModeMiddleware;
 use Botble\Base\Http\Middleware\HttpsProtocolMiddleware;
 use Botble\Base\Http\Middleware\LocaleMiddleware;
+use Botble\Base\Models\AdminNotification;
 use Botble\Base\Models\MetaBox as MetaBoxModel;
 use Botble\Base\Repositories\Caches\MetaBoxCacheDecorator;
 use Botble\Base\Repositories\Eloquent\MetaBoxRepository;
@@ -18,13 +19,18 @@ use Botble\Base\Supports\Action;
 use Botble\Base\Supports\BreadcrumbsManager;
 use Botble\Base\Supports\CustomResourceRegistrar;
 use Botble\Base\Supports\Filter;
+use Botble\Base\Supports\GoogleFonts;
 use Botble\Base\Supports\Helper;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
+use Botble\Base\Widgets\AdminWidget;
+use Botble\Base\Widgets\Contracts\AdminWidget as AdminWidgetContract;
 use Botble\Setting\Providers\SettingServiceProvider;
 use Botble\Setting\Supports\SettingStore;
 use Botble\Support\Http\Middleware\BaseMiddleware;
 use DateTimeZone;
 use Illuminate\Contracts\Debug\ExceptionHandler;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Filesystem\FilesystemManager;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\ResourceRegistrar;
@@ -34,6 +40,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use MetaBox;
+use Throwable;
 
 class BaseServiceProvider extends ServiceProvider
 {
@@ -104,6 +111,17 @@ class BaseServiceProvider extends ServiceProvider
         $this->app->singleton('core:filter', function () {
             return new Filter();
         });
+
+        $this->app->singleton(AdminWidgetContract::class, AdminWidget::class);
+
+        $this->app->singleton('core:google-fonts', function (Application $app) {
+            return new GoogleFonts(
+                filesystem: $app->make(FilesystemManager::class)->disk('public'),
+                path: 'fonts',
+                inline: true,
+                userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15',
+            );
+        });
     }
 
     public function boot(): void
@@ -128,6 +146,18 @@ class BaseServiceProvider extends ServiceProvider
             do_action(BASE_ACTION_INIT);
             add_action(BASE_ACTION_META_BOXES, [MetaBox::class, 'doMetaBoxes'], 8, 2);
             add_filter(BASE_FILTER_AFTER_SETTING_EMAIL_CONTENT, [EmailSettingHooks::class, 'addEmailTemplateSettings'], 99);
+
+            add_filter(BASE_FILTER_TOP_HEADER_LAYOUT, function ($options) {
+                try {
+                    $countNotificationUnread = AdminNotification::query()
+                        ->whereNull('read_at')
+                        ->count();
+                } catch (Throwable) {
+                    $countNotificationUnread = 0;
+                }
+
+                return $options . view('core/base::notification.notification', compact('countNotificationUnread'));
+            });
 
             $setting = $this->app[SettingStore::class];
             $timezone = $setting->get('time_zone', $config->get('app.timezone'));
@@ -262,25 +292,20 @@ class BaseServiceProvider extends ServiceProvider
 
         $memoryLimit = $this->app['config']->get('core.base.general.memory_limit');
 
-        // Define memory limits.
         if (! $memoryLimit) {
             if (false === Helper::isIniValueChangeable('memory_limit')) {
                 $memoryLimit = $currentLimit;
             } else {
-                $memoryLimit = '64M';
+                $memoryLimit = '128M';
             }
         }
 
-        // Set memory limits.
         $limitInt = Helper::convertHrToBytes($memoryLimit);
         if (-1 !== $currentLimitInt && (-1 === $limitInt || $limitInt > $currentLimitInt)) {
             BaseHelper::iniSet('memory_limit', $memoryLimit);
         }
     }
 
-    /**
-     * @return array|string[]
-     */
     public function provides(): array
     {
         return [BreadcrumbsManager::class];

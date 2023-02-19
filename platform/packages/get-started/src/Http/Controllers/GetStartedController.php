@@ -13,11 +13,6 @@ use ThemeOption;
 
 class GetStartedController extends BaseController
 {
-    /**
-     * @param GetStartedRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function save(GetStartedRequest $request, BaseHttpResponse $response): BaseHttpResponse
     {
         $step = $request->input('step');

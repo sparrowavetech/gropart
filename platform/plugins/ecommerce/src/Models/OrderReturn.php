@@ -3,7 +3,6 @@
 namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Models\BaseModel;
-use Botble\Base\Traits\EnumCastable;
 use Botble\Ecommerce\Enums\OrderReturnReasonEnum;
 use Botble\Ecommerce\Enums\OrderReturnStatusEnum;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
@@ -12,8 +11,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class OrderReturn extends BaseModel
 {
-    use EnumCastable;
-
     protected $table = 'ec_order_returns';
 
     protected $fillable = [

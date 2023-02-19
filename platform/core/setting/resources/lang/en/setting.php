@@ -196,4 +196,8 @@ return [
     'generate_thumbnails_description' => 'Are you sure you want to re-generate thumbnails for all images? It will take time so please DO NOT leave this page, wait until it is finished.',
     'enable_chunk_description' => 'Chunk size upload is used to upload large file size.',
     'watermark_description' => 'WARNING: Watermark is just added to new uploaded images, it won\'t be added to existing images. Disable watermark won\'t remove watermark from existing images.',
+    'submit' => 'Submit',
+    'back' => 'Back',
+    'enter_sample_value' => 'Enter sample values for testing',
+    'preview' => 'Preview',
 ];

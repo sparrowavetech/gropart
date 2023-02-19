@@ -23,8 +23,11 @@ use Botble\Ecommerce\Models\Enquiry;
 use Botble\Ecommerce\Models\Discount;
 use Botble\Ecommerce\Models\FlashSale;
 use Botble\Ecommerce\Models\GlobalOption;
+use Botble\Ecommerce\Models\GlobalOptionValue;
 use Botble\Ecommerce\Models\GroupedProduct;
 use Botble\Ecommerce\Models\Invoice;
+use Botble\Ecommerce\Models\Option;
+use Botble\Ecommerce\Models\OptionValue;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\OrderAddress;
 use Botble\Ecommerce\Models\OrderHistory;
@@ -181,7 +184,7 @@ class EcommerceServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function register()
+    public function register(): void
     {
         config([
             'auth.guards.customer' => [
@@ -441,7 +444,7 @@ class EcommerceServiceProvider extends ServiceProvider
         $loader->alias('InvoiceHelper', InvoiceHelperFacade::class);
     }
 
-    public function boot()
+    public function boot(): void
     {
         SlugHelper::registerModule(Product::class, 'Products');
         SlugHelper::registerModule(Brand::class, 'Brands');
@@ -469,6 +472,7 @@ class EcommerceServiceProvider extends ServiceProvider
                 'wishlist',
                 'compare',
                 'invoice',
+                'invoice-template',
             ])
             ->loadAndPublishConfigurations([
                 'general',
@@ -554,6 +558,24 @@ class EcommerceServiceProvider extends ServiceProvider
                 'name',
             ]);
 
+            LanguageAdvancedManager::registerModule(GlobalOption::class, [
+                'name',
+            ]);
+
+            LanguageAdvancedManager::registerModule(Option::class, [
+                'name',
+            ]);
+
+            LanguageAdvancedManager::registerModule(GlobalOptionValue::class, [
+                'option_value',
+            ]);
+
+            LanguageAdvancedManager::registerModule(OptionValue::class, [
+                'option_value',
+            ]);
+
+            LanguageAdvancedManager::addTranslatableMetaBox('product_options_box');
+
             add_action(LANGUAGE_ADVANCED_ACTION_SAVED, function ($data, $request) {
                 switch (get_class($data)) {
                     case Product::class:
@@ -565,6 +587,52 @@ class EcommerceServiceProvider extends ServiceProvider
                             }
 
                             LanguageAdvancedManager::save($variation->product, $request);
+                        }
+
+                        $options = $request->input('options', []) ?: [];
+
+                        if (! $options) {
+                            return;
+                        }
+
+                        $newRequest = new Request();
+
+                        $newRequest->replace([
+                            'language' => $request->input('language'),
+                            'ref_lang' => $request->input('ref_lang'),
+                        ]);
+
+                        foreach ($options as $item) {
+                            $option = Option::find($item['id']);
+
+                            $newRequest->merge(['name' => $item['name']]);
+
+                            if ($option) {
+                                LanguageAdvancedManager::save($option, $newRequest);
+                            }
+
+                            $newRequest = new Request();
+
+                            $newRequest->replace([
+                                'language' => $request->input('language'),
+                                'ref_lang' => $request->input('ref_lang'),
+                            ]);
+
+                            foreach ($item['values'] as $value) {
+                                if (! $value['id']) {
+                                    continue;
+                                }
+
+                                $optionValue = OptionValue::find($value['id']);
+
+                                $newRequest->merge([
+                                    'option_value' => $value['option_value'],
+                                ]);
+
+                                if ($optionValue) {
+                                    LanguageAdvancedManager::save($optionValue, $newRequest);
+                                }
+                            }
                         }
 
                         break;
@@ -591,6 +659,44 @@ class EcommerceServiceProvider extends ServiceProvider
 
                             if ($attribute) {
                                 LanguageAdvancedManager::save($attribute, $request);
+                            }
+                        }
+
+                        break;
+                    case GlobalOption::class:
+
+                        $option = GlobalOption::find($request->input('id'));
+
+                        if ($option) {
+                            LanguageAdvancedManager::save($option, $request);
+                        }
+
+                        $options = $request->input('options', []) ?: [];
+
+                        if (! $options) {
+                            return;
+                        }
+
+                        $newRequest = new Request();
+
+                        $newRequest->replace([
+                            'language' => $request->input('language'),
+                            'ref_lang' => $request->input('ref_lang'),
+                        ]);
+
+                        foreach ($options as $value) {
+                            if (! $value['id']) {
+                                continue;
+                            }
+
+                            $optionValue = GlobalOptionValue::find($value['id']);
+
+                            $newRequest->merge([
+                                'option_value' => $value['option_value'],
+                            ]);
+
+                            if ($optionValue) {
+                                LanguageAdvancedManager::save($optionValue, $newRequest);
                             }
                         }
 
@@ -658,6 +764,15 @@ class EcommerceServiceProvider extends ServiceProvider
                     'icon' => 'fas fa-book',
                     'url' => route('ecommerce.invoice.index'),
                     'permissions' => ['ecommerce.invoice.index'],
+                ])
+                ->registerItem([
+                    'id' => 'cms-plugins-invoice-template',
+                    'priority' => 2,
+                    'parent_id' => 'cms-plugins-ecommerce',
+                    'name' => 'plugins/ecommerce::invoice-template.name',
+                    'icon' => 'fas fa-book',
+                    'url' => route('invoice-template.index'),
+                    'permissions' => ['ecommerce.invoice-template.index'],
                 ])
                 ->registerItem([
                     'id' => 'cms-plugins-ecommerce-incomplete-order',

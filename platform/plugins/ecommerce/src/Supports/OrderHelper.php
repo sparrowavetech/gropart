@@ -400,7 +400,7 @@ class OrderHelper
          */
         Cart::instance('cart')->add(
             $product->id,
-            BaseHelper::clean($parentProduct->name),
+            BaseHelper::clean($parentProduct->name ?: $product->name),
             $request->input('qty', 1),
             $product->original_price,
             [
@@ -560,13 +560,7 @@ class OrderHelper
         return app(OrderAddressInterface::class)->create($data);
     }
 
-    /**
-     * @param array $products
-     * @param array $sessionData
-     *
-     * @return array
-     */
-    public function processOrderProductData($products, array $sessionData): array
+    public function processOrderProductData(array|Collection $products, array $sessionData): array
     {
         $createdOrderProduct = Arr::get($sessionData, 'created_order_product');
 

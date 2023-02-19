@@ -7,7 +7,7 @@ use Illuminate\Support\ServiceProvider;
 
 class FormServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         Form::component('permalink', 'packages/slug::permalink', [
             'name',

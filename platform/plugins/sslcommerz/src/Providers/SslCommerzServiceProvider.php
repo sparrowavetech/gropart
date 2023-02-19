@@ -11,7 +11,7 @@ class SslCommerzServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function register()
+    public function register(): void
     {
         Helper::autoload(__DIR__ . '/../../helpers');
     }
@@ -20,7 +20,7 @@ class SslCommerzServiceProvider extends ServiceProvider
      * @return void
      * @throws BindingResolutionException
      */
-    public function boot()
+    public function boot(): void
     {
         if (is_plugin_active('payment')) {
             $this->setNamespace('plugins/sslcommerz')

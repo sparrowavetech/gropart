@@ -4,14 +4,11 @@ namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
-use Botble\Base\Traits\EnumCastable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Tax extends BaseModel
 {
-    use EnumCastable;
-
     protected $table = 'ec_taxes';
 
     protected $fillable = [

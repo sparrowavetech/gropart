@@ -1,8 +1,11 @@
 <?php
 
+use Botble\Base\Forms\FormAbstract;
 use Botble\Menu\Models\MenuNode;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request as IlluminateRequest;
 
-add_filter(BASE_FILTER_BEFORE_RENDER_FORM, function ($form, $data) {
+add_filter(BASE_FILTER_BEFORE_RENDER_FORM, function (FormAbstract $form, Model $data): FormAbstract {
     if (get_class($data) == MenuNode::class) {
         $iconImage = $data->icon_image ?: $data->getMetaData('icon_image', true);
 
@@ -36,7 +39,7 @@ add_filter(BASE_FILTER_BEFORE_RENDER_FORM, function ($form, $data) {
     return $form;
 }, 124, 3);
 
-add_action([BASE_ACTION_AFTER_CREATE_CONTENT, BASE_ACTION_AFTER_UPDATE_CONTENT], function ($type, $request, $object) {
+add_action([BASE_ACTION_AFTER_CREATE_CONTENT, BASE_ACTION_AFTER_UPDATE_CONTENT], function (string $type, IlluminateRequest $request, Model $object): void {
     if (get_class($object) == MenuNode::class) {
         if ($request->has('data.icon_image')) {
             if ($iconImage = $request->input('data.icon_image')) {
@@ -45,7 +48,7 @@ add_action([BASE_ACTION_AFTER_CREATE_CONTENT, BASE_ACTION_AFTER_UPDATE_CONTENT],
                 MetaBox::deleteMetaData($object, 'icon_image');
             }
 
-            return true;
+            return;
         }
 
         $menuNodes = json_decode($request->input('menu_nodes'), true);
@@ -64,7 +67,7 @@ add_action([BASE_ACTION_AFTER_CREATE_CONTENT, BASE_ACTION_AFTER_UPDATE_CONTENT],
     }
 }, 170, 3);
 
-add_filter('menu_nodes_item_data', function ($data) {
+add_filter('menu_nodes_item_data', function (MenuNode $data): MenuNode {
     $data->icon_image = $data->getMetaData('icon_image', true);
 
     return $data;

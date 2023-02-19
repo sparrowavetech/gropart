@@ -29,7 +29,7 @@ class BackupListCommand extends Command
 
             $this->table($header, $backups);
         } catch (Exception $exception) {
-            $this->error($exception->getMessage());
+            $this->components->error($exception->getMessage());
         }
 
         return self::SUCCESS;

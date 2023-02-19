@@ -3,7 +3,6 @@
 namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Models\BaseModel;
-use Botble\Base\Traits\EnumCastable;
 use Botble\Ecommerce\Enums\InvoiceStatusEnum;
 use Botble\Payment\Models\Payment;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,8 +11,6 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Invoice extends BaseModel
 {
-    use EnumCastable;
-
     protected $table = 'ec_invoices';
 
     protected $fillable = [
@@ -43,11 +40,11 @@ class Invoice extends BaseModel
     ];
 
     protected $casts = [
-        'sub_total' => 'decimal:2',
-        'tax_amount' => 'decimal:2',
-        'shipping_amount' => 'decimal:2',
-        'discount_amount' => 'decimal:2',
-        'amount' => 'decimal:2',
+        'sub_total' => 'float',
+        'tax_amount' => 'float',
+        'shipping_amount' => 'float',
+        'discount_amount' => 'float',
+        'amount' => 'float',
         'status' => InvoiceStatusEnum::class,
         'paid_at' => 'datetime',
     ];

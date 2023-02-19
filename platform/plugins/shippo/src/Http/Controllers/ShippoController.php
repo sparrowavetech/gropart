@@ -40,12 +40,7 @@ class ShippoController extends BaseController
         }
     }
 
-    /**
-     * @param int $id
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function show($id, BaseHttpResponse $response)
+    public function show(int $id, BaseHttpResponse $response)
     {
         $shipment = $this->shipmentRepository->findOrFail($id);
         $this->check($shipment);
@@ -108,12 +103,7 @@ class ShippoController extends BaseController
             ->setMessage($errors ? Arr::first($errors) : '');
     }
 
-    /**
-     * @param int $id
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function createTransaction($id, BaseHttpResponse $response)
+    public function createTransaction(int $id, BaseHttpResponse $response)
     {
         $shipment = $this->shipmentRepository->findOrFail($id);
 
@@ -133,7 +123,7 @@ class ShippoController extends BaseController
             if (Arr::get($transaction, 'status') == 'SUCCESS') {
                 $shipment->tracking_link = Arr::get($transaction, 'tracking_url_provider');
                 $shipment->label_url = Arr::get($transaction, 'label_url');
-                $shipment->tracking_id = Arr::get($transaction, 'object_id'); // transaction_id
+                $shipment->tracking_id = Arr::get($transaction, 'object_id');
                 $shipment->metadata = json_encode($transaction);
                 $shipment->status = ShippingStatusEnum::READY_TO_BE_SHIPPED_OUT;
                 $shipment->save();
@@ -174,11 +164,6 @@ class ShippoController extends BaseController
             ->setData($responseData);
     }
 
-    /**
-     * @param array $shipmentShippo
-     * @param Order $order
-     * @return array
-     */
     protected function refreshShipment(array $shipmentShippo, Order $order)
     {
         if (! Arr::has($shipmentShippo, 'extra.reference_2')) {
@@ -203,12 +188,7 @@ class ShippoController extends BaseController
         return $this->shippo->createShipment($params);
     }
 
-    /**
-     * @param int $id
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function getRates($id, BaseHttpResponse $response)
+    public function getRates(int $id, BaseHttpResponse $response)
     {
         $shipment = $this->shipmentRepository->findOrFail($id);
 
@@ -249,13 +229,7 @@ class ShippoController extends BaseController
             ->setMessage($errors ? Arr::first($errors) : '');
     }
 
-    /**
-     * @param int $id
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function updateRate($id, Request $request, BaseHttpResponse $response)
+    public function updateRate(int $id, Request $request, BaseHttpResponse $response)
     {
         $shipment = $this->shipmentRepository->findOrFail($id);
 
@@ -307,11 +281,7 @@ class ShippoController extends BaseController
             ->setMessage($errors ? Arr::first($errors) : trans('plugins/shippo::shippo.updated_rate_success'));
     }
 
-    /**
-     * @param Shipment $shipment
-     * @return bool
-     */
-    protected function check(Shipment $shipment)
+    protected function check(Shipment $shipment): bool
     {
         $order = $shipment->order;
 

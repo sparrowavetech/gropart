@@ -9,12 +9,7 @@ use Tests\TestCase;
 
 class BaseTest extends TestCase
 {
-    /**
-     * A basic feature test example.
-     *
-     * @return void
-     */
-    public function testRoutes()
+    public function testRoutes(): void
     {
         $this->withoutEvents();
 

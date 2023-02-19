@@ -158,8 +158,6 @@ class ChunkStorage
 
     /**
      * The current chunk's directory.
-     *
-     * @return string
      */
     public function directory(): string
     {

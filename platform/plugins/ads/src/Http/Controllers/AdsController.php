@@ -14,10 +14,7 @@ use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Exception;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
-use Throwable;
 
 class AdsController extends BaseController
 {
@@ -28,11 +25,6 @@ class AdsController extends BaseController
         $this->adsRepository = $adsRepository;
     }
 
-    /**
-     * @param AdsTable $table
-     * @return Factory|View
-     * @throws Throwable
-     */
     public function index(AdsTable $table)
     {
         page_title()->setTitle(trans('plugins/ads::ads.name'));
@@ -40,10 +32,6 @@ class AdsController extends BaseController
         return $table->renderTable();
     }
 
-    /**
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
     public function create(FormBuilder $formBuilder)
     {
         page_title()->setTitle(trans('plugins/ads::ads.create'));
@@ -51,11 +39,6 @@ class AdsController extends BaseController
         return $formBuilder->create(AdsForm::class)->renderForm();
     }
 
-    /**
-     * @param AdsRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function store(AdsRequest $request, BaseHttpResponse $response)
     {
         $ads = $this->adsRepository->createOrUpdate($request->input());
@@ -68,13 +51,7 @@ class AdsController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    /**
-     * @param $id
-     * @param Request $request
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
-    public function edit($id, FormBuilder $formBuilder, Request $request)
+    public function edit(int $id, FormBuilder $formBuilder, Request $request)
     {
         $ads = $this->adsRepository->findOrFail($id);
 
@@ -85,13 +62,7 @@ class AdsController extends BaseController
         return $formBuilder->create(AdsForm::class, ['model' => $ads])->renderForm();
     }
 
-    /**
-     * @param int $id
-     * @param AdsRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function update($id, AdsRequest $request, BaseHttpResponse $response)
+    public function update(int $id, AdsRequest $request, BaseHttpResponse $response)
     {
         $ads = $this->adsRepository->findOrFail($id);
 
@@ -106,13 +77,7 @@ class AdsController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param $id
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function destroy(Request $request, $id, BaseHttpResponse $response)
+    public function destroy(Request $request, int $id, BaseHttpResponse $response)
     {
         try {
             $ads = $this->adsRepository->findOrFail($id);
@@ -129,12 +94,6 @@ class AdsController extends BaseController
         }
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function deletes(Request $request, BaseHttpResponse $response)
     {
         $ids = $request->input('ids');

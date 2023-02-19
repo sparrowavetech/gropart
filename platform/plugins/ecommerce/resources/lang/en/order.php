@@ -264,4 +264,9 @@ return [
     ],
     'order_return' => 'Order returns',
     'order_return_items_count' => 'Product item(s)',
+    'notifications' => [
+        'new_order' => 'New order',
+        'view' => 'View',
+        'description' => ':customer ordered :quantity :product',
+    ],
 ];

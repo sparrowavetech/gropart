@@ -39,7 +39,7 @@ class FlashSaleSupport
     public function getAvailableFlashSales(): Collection
     {
         if (! $this->flashSales instanceof Collection) {
-            $this->flashSales = collect([]);
+            $this->flashSales = collect();
         }
 
         if ($this->flashSales->count() == 0) {

@@ -3,21 +3,10 @@
 namespace Botble\ACL\Http\Middleware;
 
 use Closure;
-use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Middleware\Authenticate as BaseAuthenticate;
-use Illuminate\Http\Request;
 
 class Authenticate extends BaseAuthenticate
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param Request $request
-     * @param Closure $next
-     * @param array $guards
-     * @return mixed
-     * @throws AuthenticationException
-     */
     public function handle($request, Closure $next, ...$guards)
     {
         $this->authenticate($request, $guards);
@@ -44,12 +33,6 @@ class Authenticate extends BaseAuthenticate
         return $next($request);
     }
 
-    /**
-     * Get the path the user should be redirected to when they are not authenticated.
-     *
-     * @param Request $request
-     * @return string|null
-     */
     protected function redirectTo($request)
     {
         if (! $request->expectsJson()) {

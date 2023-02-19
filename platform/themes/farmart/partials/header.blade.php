@@ -6,8 +6,7 @@
         <meta content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, user-scalable=1" name="viewport"/>
         <meta name="csrf-token" content="{{ csrf_token() }}" />
 
-        <link rel="preconnect" href="{{ $fontURL = config('core.base.general.google_fonts_url', 'https://fonts.bunny.net') }}" />
-        <link href="{{ $fontURL }}/css2?family={{ urlencode(theme_option('primary_font', 'Muli')) }}:wght@400;600;700&display=swap" rel="stylesheet" />
+        {!! BaseHelper::googleFonts('https://fonts.googleapis.com/css2?family=' . urlencode(theme_option('primary_font', 'Muli')) . ':wght@400;600;700&display=swap') !!}
         <link rel="stylesheet" href="{{ url('/') }}/themes/gropart/plugins/font-awesome/css/font-awesome.min.css" />
         <style>
             :root {
@@ -26,6 +25,23 @@
                 --footer-heading-color: {{ theme_option('footer_heading_color', '#555') }};
                 --footer-hover-color: {{ theme_option('footer_hover_color', '#fab528') }};
                 --footer-border-color: {{ theme_option('footer_border_color', '#dee2e6') }};
+            }
+            nav.navigation .navigation__right .d-sticky-header.header-middle {
+                display: none;
+            }
+            .header.header--sticky nav.navigation .navigation__right .d-sticky-header.header-middle {
+                display: block;
+                border-bottom: 0;
+                margin-top: 7px;
+            }
+            .header.header--sticky nav.navigation .navigation__right .header-recently-viewed {
+                display: none;
+            }
+            .header.header--sticky nav.navigation .navigation__right {
+                min-width:20%;
+            }
+            .header.header--sticky nav.navigation .navigation__right .header-middle.d-sticky-header .header__right {
+                width:100%;
             }
         </style>
 
@@ -60,7 +76,7 @@
                         <div class="col-6">
                             <div class="header-info header-info-right">
                                 <ul>
-                                @if (is_plugin_active('marketplace'))
+                                    @if (is_plugin_active('marketplace'))
                                          @if (auth('customer')->check())
                                             @if (auth('customer')->user()->is_vendor)
                                                 <li>
@@ -276,6 +292,66 @@
                                                 </div>
                                                 <div class="recently-viewed-products"></div>
                                             </div>
+                                        </div>
+                                    </div>
+                                @endif
+                                @if (is_plugin_active('ecommerce'))
+                                    <div class="header-middle d-sticky-header">
+                                        <div class="header-items header__right">
+                                            @if (EcommerceHelper::isCompareEnabled())
+                                                <div class="header__extra header-compare">
+                                                    <a class="btn-compare" href="{{ route('public.compare') }}">
+                                                        <i class="icon-repeat"></i>
+                                                        <span class="header-item-counter">{{ Cart::instance('compare')->count() }}</span>
+                                                    </a>
+                                                </div>
+                                            @endif
+                                            @if (EcommerceHelper::isWishlistEnabled())
+                                                <div class="header__extra header-wishlist">
+                                                    <a class="btn-wishlist" href="{{ route('public.wishlist') }}">
+                                                        <span class="svg-icon">
+                                                            <svg>
+                                                                <use href="#svg-icon-wishlist" xlink:href="#svg-icon-wishlist"></use>
+                                                            </svg>
+                                                        </span>
+                                                        <span class="header-item-counter">
+                                                            {{ auth('customer')->check() ? auth('customer')->user()->wishlist()->count() : Cart::instance('wishlist')->count() }}
+                                                        </span>
+                                                    </a>
+                                                </div>
+                                            @endif
+                                            @if (EcommerceHelper::isCartEnabled())
+                                                <div class="header__extra cart--mini" tabindex="0" role="button">
+                                                    <div class="header__extra">
+                                                        <a class="btn-shopping-cart" href="{{ route('public.cart') }}">
+                                                            <span class="svg-icon">
+                                                                <svg>
+                                                                    <use href="#svg-icon-cart" xlink:href="#svg-icon-cart"></use>
+                                                                </svg>
+                                                            </span>
+                                                            <span class="header-item-counter">{{ Cart::instance('cart')->count() }}</span>
+                                                        </a>
+                                                        <span class="cart-text">
+                                                            <span class="cart-title">{{ __('Your Cart') }}</span>
+                                                            <span class="cart-price-total">
+                                                                <span class="cart-amount">
+                                                                    <bdi>
+                                                                        <span>{{ format_price(Cart::instance('cart')->rawSubTotal() + Cart::instance('cart')->rawTax()) }}</span>
+                                                                    </bdi>
+                                                                </span>
+                                                            </span>
+                                                        </span>
+                                                    </div>
+                                                    <div class="cart__content" id="cart-mobile">
+                                                        <div class="backdrop"></div>
+                                                        <div class="mini-cart-content">
+                                                            <div class="widget-shopping-cart-content">
+                                                                {!! Theme::partial('cart-mini.list') !!}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
                                 @endif

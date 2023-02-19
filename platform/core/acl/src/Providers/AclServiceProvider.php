@@ -28,7 +28,7 @@ class AclServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function register()
+    public function register(): void
     {
         $this->app->bind(UserInterface::class, function () {
             return new UserRepository(new User());
@@ -46,7 +46,7 @@ class AclServiceProvider extends ServiceProvider
     /**
      * @throws BindingResolutionException
      */
-    public function boot()
+    public function boot(): void
     {
         $this->app->register(CommandServiceProvider::class);
         $this->app->register(EventServiceProvider::class);

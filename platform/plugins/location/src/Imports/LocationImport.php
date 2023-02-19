@@ -80,8 +80,8 @@ class LocationImport implements
         $this->countryRepository = $countryRepository;
         $this->slugRepository = $slugRepository;
         $this->request = $request;
-        $this->countries = collect([]);
-        $this->states = collect([]);
+        $this->countries = collect();
+        $this->states = collect();
 
         if (defined('LANGUAGE_MODULE_SCREEN_NAME')) {
             $this->getActiveLanguage = Language::getActiveLanguage(['lang_code', 'lang_is_default']);

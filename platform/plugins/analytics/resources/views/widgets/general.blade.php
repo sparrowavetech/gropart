@@ -111,6 +111,6 @@
 <div class="clearfix"></div>
 
 <div data-stats='{{ json_encode($stats, JSON_HEX_APOS) }}'></div>
-<div data-country-stats='{{ json_encode($country_stats, JSON_HEX_APOS) }}'></div>
-<div data-lang-pageviews='{{ trans("plugins/analytics::analytics.pageviews") }}'></div>
-<div data-lang-visits='{{ trans("plugins/analytics::analytics.visitors") }}'></div>
+<div data-country-stats='{{ json_encode($countryStats, JSON_HEX_APOS) }}'></div>
+<div data-lang-pageviews='{{ trans('plugins/analytics::analytics.pageviews') }}'></div>
+<div data-lang-visits='{{ trans('plugins/analytics::analytics.visitors') }}'></div>

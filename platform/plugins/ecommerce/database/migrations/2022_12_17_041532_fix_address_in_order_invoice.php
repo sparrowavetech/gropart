@@ -4,7 +4,7 @@ use Botble\Ecommerce\Models\Invoice;
 use Illuminate\Database\Migrations\Migration;
 
 return new class () extends Migration {
-    public function up()
+    public function up(): void
     {
         try {
             foreach (Invoice::with('reference')->get() as $invoice) {

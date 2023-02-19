@@ -23,13 +23,13 @@ class ThemeRenameCommand extends Command
         $newName = $this->argument('newName');
 
         if ($theme == $newName) {
-            $this->error('Theme name are the same!');
+            $this->components->error('Theme name are the same!');
 
             return self::FAILURE;
         }
 
         if ($files->isDirectory(theme_path($newName))) {
-            $this->error('Theme "' . $theme . '" is already exists.');
+            $this->components->error('Theme "' . $theme . '" is already exists.');
 
             return self::FAILURE;
         }
@@ -54,7 +54,7 @@ class ThemeRenameCommand extends Command
             $widget->save();
         }
 
-        $this->info('Theme "' . $theme . '" has been renamed to ' . $newName . '!');
+        $this->components->info('Theme "' . $theme . '" has been renamed to ' . $newName . '!');
 
         return self::SUCCESS;
     }

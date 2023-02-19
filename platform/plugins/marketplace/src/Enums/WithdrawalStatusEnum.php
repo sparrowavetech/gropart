@@ -4,6 +4,7 @@ namespace Botble\Marketplace\Enums;
 
 use Botble\Base\Supports\Enum;
 use Html;
+use Illuminate\Support\HtmlString;
 
 /**
  * @method static WithdrawalStatusEnum PENDING()
@@ -20,34 +21,26 @@ class WithdrawalStatusEnum extends Enum
     public const CANCELED = 'canceled';
     public const REFUSED = 'refused';
 
-    /**
-     * @var string
-     */
     public static $langPath = 'plugins/marketplace::withdrawal.statuses';
 
-    /**
-     * @return string
-     */
-    public function toHtml()
+    public function toHtml(): HtmlString|string
     {
-        switch ($this->value) {
-            case self::PENDING:
-                return Html::tag('span', self::PENDING()->label(), ['class' => 'label-info status-label'])
-                    ->toHtml();
-            case self::PROCESSING:
-                return Html::tag('span', self::PROCESSING()->label(), ['class' => 'label-primary status-label'])
-                    ->toHtml();
-            case self::COMPLETED:
-                return Html::tag('span', self::COMPLETED()->label(), ['class' => 'label-success status-label'])
-                    ->toHtml();
-            case self::CANCELED:
-                return Html::tag('span', self::CANCELED()->label(), ['class' => 'label-warning status-label'])
-                    ->toHtml();
-            case self::REFUSED:
-                return Html::tag('span', self::REFUSED()->label(), ['class' => 'label-danger status-label'])
-                    ->toHtml();
-            default:
-                return parent::toHtml();
-        }
+        return match ($this->value) {
+            self::PENDING => Html::tag('span', self::PENDING()->label(), ['class' => 'label-info status-label'])
+                ->toHtml(),
+            self::PROCESSING => Html::tag(
+                'span',
+                self::PROCESSING()->label(),
+                ['class' => 'label-primary status-label']
+            )
+                ->toHtml(),
+            self::COMPLETED => Html::tag('span', self::COMPLETED()->label(), ['class' => 'label-success status-label'])
+                ->toHtml(),
+            self::CANCELED => Html::tag('span', self::CANCELED()->label(), ['class' => 'label-warning status-label'])
+                ->toHtml(),
+            self::REFUSED => Html::tag('span', self::REFUSED()->label(), ['class' => 'label-danger status-label'])
+                ->toHtml(),
+            default => parent::toHtml(),
+        };
     }
 }

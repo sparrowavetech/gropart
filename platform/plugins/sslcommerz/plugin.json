@@ -1,4 +1,5 @@
 {
+    "id": "botble/sslcommerz",
     "name": "SslCommerz Payment Gateway",
     "namespace": "Botble\\SslCommerz\\",
     "provider": "Botble\\SslCommerz\\Providers\\SslCommerzServiceProvider",

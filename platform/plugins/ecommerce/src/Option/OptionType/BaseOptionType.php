@@ -2,12 +2,13 @@
 
 namespace Botble\Ecommerce\Option\OptionType;
 
+use Botble\Ecommerce\Models\Option;
 use Botble\Ecommerce\Models\Product;
 use Theme;
 
 abstract class BaseOptionType
 {
-    public string|array|null $option = null;
+    public Option|array|null $option = null;
 
     public ?Product $product = null;
 

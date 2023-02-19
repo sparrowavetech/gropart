@@ -350,15 +350,38 @@ class MediaManagement {
 
     handleModals() {
         let _self = this;
+
         /*Rename files*/
         _self.$body.on('show.bs.modal', '#modal_rename_items', () => {
             ActionsService.renderRenameItems();
+        });
+
+        _self.$body.on('show.bs.modal', '#modal_crop_image', () => {
+            ActionsService.renderCropImage();
         });
 
         _self.$body.on('hidden.bs.modal', '#modal_download_url', () => {
             let $el = $('#modal_download_url');
             $el.find('textarea').val('');
             $el.find('#modal-notice').empty();
+        })
+
+        _self.$body.off('submit', '#modal_crop_image .form-crop').on('submit', '#modal_crop_image .form-crop', event => {
+            event.preventDefault()
+
+            const $form = $(event.currentTarget);
+            const imageId = $form.find('input[name="image_id"]').val()
+            const cropData = $form.find('input[name="crop_data"]').val()
+            ActionsService.processAction({
+                action: $form.data('action'),
+                imageId,
+                cropData
+            }, response => {
+                if (! response.error) {
+                    $form.closest('.modal').modal('hide');
+                    _self.MediaService.getMedia(true);
+                }
+            })
         })
 
         _self.$body.off('submit', '#modal_rename_items .form-rename').on('submit', '#modal_rename_items .form-rename', event => {

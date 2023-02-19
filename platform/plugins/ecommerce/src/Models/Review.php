@@ -4,13 +4,11 @@ namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
-use Botble\Base\Traits\EnumCastable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Review extends BaseModel
 {
-    use EnumCastable;
-
     protected $table = 'ec_reviews';
 
     protected $fillable = [
@@ -45,6 +43,17 @@ class Review extends BaseModel
     public function getUserNameAttribute(): ?string
     {
         return $this->user->name;
+    }
+
+    protected function orderCreatedAt(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $order = $this->user->orders->first();
+
+                return $order?->created_at;
+            }
+        );
     }
 
     protected static function boot()

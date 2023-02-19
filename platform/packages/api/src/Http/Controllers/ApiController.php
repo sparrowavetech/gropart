@@ -4,16 +4,11 @@ namespace Botble\Api\Http\Controllers;
 
 use Assets;
 use Botble\Base\Http\Responses\BaseHttpResponse;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 
 class ApiController extends Controller
 {
-    /**
-     * @return Factory|View
-     */
     public function settings()
     {
         page_title()->setTitle(trans('packages/api::api.settings'));
@@ -24,11 +19,6 @@ class ApiController extends Controller
         return view('packages/api::settings');
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function storeSettings(Request $request, BaseHttpResponse $response)
     {
         $this->saveSettings($request->except([
@@ -40,9 +30,6 @@ class ApiController extends Controller
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param array $data
-     */
     protected function saveSettings(array $data)
     {
         foreach ($data as $settingKey => $settingValue) {

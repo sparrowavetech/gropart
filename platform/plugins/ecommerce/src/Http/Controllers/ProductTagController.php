@@ -14,10 +14,7 @@ use Botble\Ecommerce\Http\Requests\ProductTagRequest;
 use Botble\Ecommerce\Repositories\Interfaces\ProductTagInterface;
 use Botble\Ecommerce\Tables\ProductTagTable;
 use Exception;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
-use Throwable;
 
 class ProductTagController extends BaseController
 {
@@ -28,11 +25,6 @@ class ProductTagController extends BaseController
         $this->productTagRepository = $productTagRepository;
     }
 
-    /**
-     * @param ProductTagTable $table
-     * @return Factory|View
-     * @throws Throwable
-     */
     public function index(ProductTagTable $table)
     {
         page_title()->setTitle(trans('plugins/ecommerce::product-tag.name'));
@@ -40,10 +32,6 @@ class ProductTagController extends BaseController
         return $table->renderTable();
     }
 
-    /**
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
     public function create(FormBuilder $formBuilder)
     {
         page_title()->setTitle(trans('plugins/ecommerce::product-tag.create'));
@@ -51,11 +39,6 @@ class ProductTagController extends BaseController
         return $formBuilder->create(ProductTagForm::class)->renderForm();
     }
 
-    /**
-     * @param ProductTagRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function store(ProductTagRequest $request, BaseHttpResponse $response)
     {
         $productTag = $this->productTagRepository->createOrUpdate($request->input());
@@ -68,13 +51,7 @@ class ProductTagController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    /**
-     * @param int $id
-     * @param Request $request
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
-    public function edit($id, FormBuilder $formBuilder, Request $request)
+    public function edit(int $id, FormBuilder $formBuilder, Request $request)
     {
         $productTag = $this->productTagRepository->findOrFail($id);
 
@@ -85,13 +62,7 @@ class ProductTagController extends BaseController
         return $formBuilder->create(ProductTagForm::class, ['model' => $productTag])->renderForm();
     }
 
-    /**
-     * @param int $id
-     * @param ProductTagRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function update($id, ProductTagRequest $request, BaseHttpResponse $response)
+    public function update(int $id, ProductTagRequest $request, BaseHttpResponse $response)
     {
         $productTag = $this->productTagRepository->findOrFail($id);
 
@@ -106,13 +77,7 @@ class ProductTagController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param int $id
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function destroy(Request $request, $id, BaseHttpResponse $response)
+    public function destroy(Request $request, int $id, BaseHttpResponse $response)
     {
         try {
             $productTag = $this->productTagRepository->findOrFail($id);
@@ -129,12 +94,6 @@ class ProductTagController extends BaseController
         }
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function deletes(Request $request, BaseHttpResponse $response)
     {
         $ids = $request->input('ids');
@@ -153,11 +112,6 @@ class ProductTagController extends BaseController
         return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
-    /**
-     * Get list tags in db
-     *
-     * @return array
-     */
     public function getAllTags()
     {
         return $this->productTagRepository->pluck('name');

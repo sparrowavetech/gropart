@@ -9,18 +9,16 @@ use Botble\Page\Repositories\Interfaces\PageInterface;
 use Botble\Page\Services\PageService;
 use Eloquent;
 use Html;
-use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 use Menu;
 use RvMedia;
-use Throwable;
 
 class HookServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         if (defined('MENU_ACTION_SIDEBAR_OPTIONS')) {
             Menu::addMenuOptionModel(Page::class);
@@ -35,8 +33,8 @@ class HookServiceProvider extends ServiceProvider
         }
 
         if (defined('THEME_FRONT_HEADER')) {
-            add_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, function ($screen, $page) {
-                add_filter(THEME_FRONT_HEADER, function ($html) use ($page) {
+            add_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, function ($screen, $page): void {
+                add_filter(THEME_FRONT_HEADER, function (?string $html) use ($page): ?string {
                     if (get_class($page) != Page::class) {
                         return $html;
                     }
@@ -59,7 +57,7 @@ class HookServiceProvider extends ServiceProvider
         }
     }
 
-    public function addThemeOptions()
+    public function addThemeOptions(): void
     {
         $pages = $this->app->make(PageInterface::class)
             ->pluck('name', 'id', ['status' => BaseStatusEnum::PUBLISHED]);
@@ -89,24 +87,13 @@ class HookServiceProvider extends ServiceProvider
             ]);
     }
 
-    /**
-     * Register sidebar options in menu
-     * @throws Throwable
-     */
-    public function registerMenuOptions()
+    public function registerMenuOptions(): void
     {
         if (Auth::user()->hasPermission('pages.index')) {
             Menu::registerMenuOptions(Page::class, trans('packages/page::pages.menu'));
         }
     }
 
-    /**
-     * @param array $widgets
-     * @param Collection $widgetSettings
-     * @return array
-     * @throws BindingResolutionException
-     * @throws Throwable
-     */
     public function addPageStatsWidget(array $widgets, Collection $widgetSettings): array
     {
         $pages = $this->app->make(PageInterface::class)->count(['status' => BaseStatusEnum::PUBLISHED]);

@@ -12,17 +12,17 @@ class DownloadLocaleCommand extends Command
 {
     public function handle(Manager $manager): int
     {
-        $this->info('Downloading...');
+        $this->components->info('Downloading...');
 
         $result = $manager->downloadRemoteLocale($this->argument('locale'));
 
         if ($result['error']) {
-            $this->error($result['message']);
+            $this->components->error($result['message']);
 
             return self::FAILURE;
         }
 
-        $this->info($result['message']);
+        $this->components->info($result['message']);
 
         return self::SUCCESS;
     }

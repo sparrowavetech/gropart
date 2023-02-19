@@ -29,7 +29,7 @@ use ProductCategoryHelper;
 
 class ProductForm extends BaseProductForm
 {
-    public function buildForm()
+    public function buildForm(): void
     {
         Assets::addStyles(['datetimepicker'])
             ->addScripts([

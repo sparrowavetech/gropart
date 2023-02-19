@@ -12,50 +12,28 @@ use Botble\Marketplace\Repositories\Interfaces\RevenueInterface;
 use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
 use Botble\Marketplace\Tables\StoreRevenueTable;
 use Exception;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\View\View;
 use Throwable;
 
 class StoreRevenueController extends BaseController
 {
-    /**
-     * @var StoreInterface
-     */
-    protected $storeRepository;
+    protected StoreInterface $storeRepository;
 
-    /**
-     * @var RevenueInterface
-     */
-    protected $revenueRepository;
+    protected RevenueInterface $revenueRepository;
 
-    /**
-     * @param StoreInterface $storeRepository
-     * @param RevenueInterface $revenueRepository
-     */
     public function __construct(StoreInterface $storeRepository, RevenueInterface $revenueRepository)
     {
         $this->storeRepository = $storeRepository;
         $this->revenueRepository = $revenueRepository;
     }
 
-    /**
-     * @param StoreRevenueTable $table
-     * @return Factory|View
-     * @throws Throwable
-     */
     public function index(StoreRevenueTable $table)
     {
         return $table->renderTable();
     }
 
-    /**
-     * @param int $id
-     * @param StoreRevenueTable $table
-     * @return string
-     */
-    public function view($id, StoreRevenueTable $table)
+    public function view(int $id, StoreRevenueTable $table)
     {
         $store = $this->storeRepository->findOrFail($id);
         $customer = $store->customer;
@@ -71,13 +49,7 @@ class StoreRevenueController extends BaseController
         return view('plugins/marketplace::stores.index', compact('table', 'store', 'customer'))->render();
     }
 
-    /**
-     * @param int $id
-     * @param StoreRevenueRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function store($id, StoreRevenueRequest $request, BaseHttpResponse $response)
+    public function store(int $id, StoreRevenueRequest $request, BaseHttpResponse $response)
     {
         $store = $this->storeRepository->findOrFail($id);
 
@@ -112,9 +84,9 @@ class StoreRevenueController extends BaseController
             $vendorInfo->balance -= $amount;
         }
 
-        DB::beginTransaction();
-
         try {
+            DB::beginTransaction();
+
             $revenue->fill($data);
             $revenue->save();
             $vendorInfo->save();

@@ -3,14 +3,11 @@
 namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Models\BaseModel;
-use Botble\Base\Traits\EnumCastable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Option extends BaseModel
 {
-    use EnumCastable;
-
     protected $table = 'ec_options';
 
     protected $fillable = [

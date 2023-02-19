@@ -152,7 +152,8 @@ class ReviewTable extends TableAbstract
                             })
                             ->orWhereHas('user', function ($subQuery) use ($keyword) {
                                 return $subQuery->where('ec_customers.name', 'LIKE', '%' . $keyword . '%');
-                            });
+                            })
+                            ->orWhere('comment', 'LIKE', '%' . $keyword . '%');
                     });
                 }
 
@@ -254,7 +255,7 @@ class ReviewTable extends TableAbstract
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type' => 'date',
+                'type' => 'datePicker',
             ],
         ];
     }

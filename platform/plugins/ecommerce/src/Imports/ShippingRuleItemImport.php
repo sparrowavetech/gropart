@@ -79,8 +79,8 @@ class ShippingRuleItemImport implements
         $this->availableCountries = EcommerceHelper::getAvailableCountries();
         $this->isLoadFromLocation = EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation();
 
-        $this->countries = collect([]);
-        $this->shippingRules = collect([]);
+        $this->countries = collect();
+        $this->shippingRules = collect();
     }
 
     public function setImportType(string $importType): self

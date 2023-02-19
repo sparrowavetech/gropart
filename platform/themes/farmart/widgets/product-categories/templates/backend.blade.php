@@ -17,7 +17,7 @@
                                name="categories[]"
                                value="{{ $category->id }}"
                                @if (in_array($category->id, $config['categories'])) checked="checked" @endif>
-                        {{ $category->name }}
+                        {!! BaseHelper::clean($category->name) !!}
                     </label>
                     @if ($category->activeChildren->count())
                         <ul style="padding-left: 20px">

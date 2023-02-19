@@ -42,7 +42,7 @@
 
                         @if ($rule && $rule->type->allowRuleItems() &&
                             Auth::user()->hasPermission('ecommerce.shipping-rule-items.index'))
-                            @include('plugins/ecommerce::shipping.items.index')
+                            @include('plugins/ecommerce::shipping.items.index', ['total' => $rule->items_count])
                         @endif
                     </div>
                 </div>

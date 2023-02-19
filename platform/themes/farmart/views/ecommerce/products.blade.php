@@ -12,11 +12,11 @@
 @endif
 
 <div class="container-xxxl">
-    <div class="row my-5">
+    <div class="row mt-4 mb-3">
         <div class="col-12">
             <div class="row catalog-header justify-content-between">
                 <div class="col-auto catalog-header__left d-flex align-items-center">
-                    <h1 class="h2 catalog-header__title d-none d-lg-block">{{ __('Shop') }}</h1>
+                    <h1 class="h2 catalog-header__title d-none d-lg-block">{{ __('Products') }}</h1>
                     <a class="d-lg-none sidebar-filter-mobile" href="#">
                         <span class="svg-icon me-2">
                             <svg>

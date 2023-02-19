@@ -100,7 +100,7 @@ class ProductRequest extends Request
             $optionRules = [];
 
             if (isset($option['values'])) {
-                $optionRules = $this->getRulesOfProductOptionValues(sprintf('options.%s', $key), $option['option_type'], $option['values']);
+                $optionRules = $this->getRulesOfProductOptionValues(sprintf('options.%s', $key), $option['option_type'], array_filter($option['values']));
             }
 
             $rules = array_merge($rules, $optionRules);
@@ -115,7 +115,7 @@ class ProductRequest extends Request
 
         foreach ($values as $key => $value) {
             $rules[$baseName . '.values.' . $key . '.affect_price'] = 'numeric|min:0';
-            if ($value['affect_type'] == GlobalOptionEnum::TYPE_PERCENT) {
+            if (isset($value['affect_type']) && $value['affect_type'] == GlobalOptionEnum::TYPE_PERCENT) {
                 $rules[$baseName . '.values.' . $key . '.affect_price'] = 'numeric|between:1,100';
             }
 

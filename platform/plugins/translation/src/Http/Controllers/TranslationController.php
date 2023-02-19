@@ -13,15 +13,11 @@ use Botble\Translation\Http\Requests\TranslationRequest;
 use Botble\Translation\Manager;
 use Botble\Translation\Models\Translation;
 use Illuminate\Support\Facades\File;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use RvMedia;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Theme;
 use ZipArchive;
 
@@ -34,10 +30,6 @@ class TranslationController extends BaseController
         $this->manager = $manager;
     }
 
-    /**
-     * @param Request $request
-     * @return Application|Factory|View
-     */
     public function getIndex(Request $request)
     {
         page_title()->setTitle(trans('plugins/translation::translation.translations'));
@@ -96,11 +88,6 @@ class TranslationController extends BaseController
         return array_unique($locales);
     }
 
-    /**
-     * @param TranslationRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function update(TranslationRequest $request, BaseHttpResponse $response)
     {
         $group = $request->input('group');
@@ -123,11 +110,6 @@ class TranslationController extends BaseController
         return $response;
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function postImport(Request $request, BaseHttpResponse $response)
     {
         $counter = $this->manager->importTranslations($request->input('replace', false));
@@ -135,12 +117,6 @@ class TranslationController extends BaseController
         return $response->setMessage(trans('plugins/translation::translation.import_done', compact('counter')));
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws \Symfony\Component\VarExporter\Exception\ExceptionInterface
-     */
     public function postPublish(Request $request, BaseHttpResponse $response)
     {
         if (! File::isWritable(lang_path()) || ! File::isWritable(lang_path('vendor'))) {
@@ -156,9 +132,6 @@ class TranslationController extends BaseController
         return $response->setMessage(trans('plugins/translation::translation.done_publishing'));
     }
 
-    /**
-     * @return Application|Factory
-     */
     public function getLocales()
     {
         page_title()->setTitle(trans('plugins/translation::translation.locales'));
@@ -174,11 +147,6 @@ class TranslationController extends BaseController
         return view('plugins/translation::locales', compact('existingLocales', 'locales', 'flags'));
     }
 
-    /**
-     * @param LocaleRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function postLocales(LocaleRequest $request, BaseHttpResponse $response)
     {
         if (! File::isWritable(lang_path()) || ! File::isWritable(lang_path('vendor'))) {
@@ -224,11 +192,6 @@ class TranslationController extends BaseController
         return count($folders);
     }
 
-    /**
-     * @param $locale
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function deleteLocale($locale, BaseHttpResponse $response)
     {
         if ($locale !== 'en') {
@@ -272,9 +235,6 @@ class TranslationController extends BaseController
         return count($folders);
     }
 
-    /**
-     * @return Application|Factory|View
-     */
     public function getThemeTranslations(Request $request)
     {
         page_title()->setTitle(trans('plugins/translation::translation.theme-translations'));
@@ -341,11 +301,6 @@ class TranslationController extends BaseController
         );
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function postThemeTranslations(Request $request, BaseHttpResponse $response)
     {
         if (! File::isWritable(lang_path())) {
@@ -400,10 +355,6 @@ class TranslationController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param string $locale
-     * @return BinaryFileResponse
-     */
     public function downloadLocale(string $locale)
     {
         $file = RvMedia::getUploadPath() . '/locale-' . $locale . '.zip';
@@ -465,11 +416,6 @@ class TranslationController extends BaseController
         return response()->download($file)->deleteFileAfterSend();
     }
 
-    /**
-     * @param string $src
-     * @param ZipArchive $zip
-     * @param string $pathLength
-     */
     protected function recurseZip($src, &$zip, $pathLength): void
     {
         if (File::isDirectory($src)) {
@@ -499,11 +445,6 @@ class TranslationController extends BaseController
         }
     }
 
-    /**
-     * @param Manager $manager
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function ajaxGetAvailableRemoteLocales(Manager $manager, BaseHttpResponse $response)
     {
         $remoteLocales = $manager->getRemoteAvailableLocales();
@@ -547,13 +488,7 @@ class TranslationController extends BaseController
             ->setData(view('plugins/translation::partials.available-remote-locales', compact('locales'))->render());
     }
 
-    /**
-     * @param string $locale
-     * @param Manager $manager
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function ajaxDownloadRemoteLocale($locale, Manager $manager, BaseHttpResponse $response)
+    public function ajaxDownloadRemoteLocale(string $locale, Manager $manager, BaseHttpResponse $response)
     {
         $result = $manager->downloadRemoteLocale($locale);
 

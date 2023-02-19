@@ -44,6 +44,7 @@ use MarketplaceHelper;
 use Route;
 use SlugHelper;
 use Throwable;
+use Yajra\DataTables\CollectionDataTable;
 use Yajra\DataTables\EloquentDataTable;
 
 class HookServiceProvider extends ServiceProvider
@@ -73,8 +74,7 @@ class HookServiceProvider extends ServiceProvider
 
             if (is_plugin_active('language') && is_plugin_active('language-advanced')) {
                 add_filter(BASE_FILTER_BEFORE_RENDER_FORM, function ($form, $data) {
-                    if (is_in_admin() &&
-                        request()->segment(1) === 'vendor' &&
+                    if (in_array('vendor', Route::current()->middleware()) &&
                         auth('customer')->check() &&
                         auth('customer')->user()->is_vendor &&
                         Language::getCurrentAdminLocaleCode() != Language::getDefaultLocaleCode() &&
@@ -136,16 +136,12 @@ class HookServiceProvider extends ServiceProvider
                     }
                 }
             }, 45, 2);
+
+            add_filter('ecommerce_import_product_row_data', [$this, 'setStoreToRow'], 45);
         });
     }
 
-    /**
-     * @param BaseHttpResponse $response
-     * @param Order $order
-     * @param Request $request
-     * @return BaseHttpResponse
-     */
-    public function beforeOrderRefund(BaseHttpResponse $response, Order $order, Request $request)
+    public function beforeOrderRefund(BaseHttpResponse $response, Order $order, Request $request): BaseHttpResponse
     {
         $refundAmount = $request->input('refund_amount');
         if ($refundAmount) {
@@ -157,9 +153,11 @@ class HookServiceProvider extends ServiceProvider
                     if ($vendorInfo->balance < $refundAmount) {
                         $response
                             ->setError()
-                            ->setMessage(trans('plugins/marketplace::order.refund.insufficient_balance', [
-                                'balance' => format_price($vendorInfo->balance),
-                            ]));
+                            ->setMessage(
+                                trans('plugins/marketplace::order.refund.insufficient_balance', [
+                                    'balance' => format_price($vendorInfo->balance),
+                                ])
+                            );
                     }
                 }
             }
@@ -168,14 +166,7 @@ class HookServiceProvider extends ServiceProvider
         return $response;
     }
 
-    /**
-     * @param BaseHttpResponse $response
-     * @param Order $order
-     * @param Request $request
-     * @return BaseHttpResponse
-     * @throws Throwable
-     */
-    public function afterOrderRefunded(BaseHttpResponse $response, Order $order, Request $request)
+    public function afterOrderRefunded(BaseHttpResponse $response, Order $order, Request $request): BaseHttpResponse
     {
         $refundAmount = $request->input('refund_amount');
         if ($refundAmount) {
@@ -207,15 +198,15 @@ class HookServiceProvider extends ServiceProvider
                             'sub_amount' => $refundAmount,
                         ];
 
-                        DB::beginTransaction();
-
                         try {
+                            DB::beginTransaction();
+
                             $revenue->fill($data);
                             $revenue->save();
                             $vendorInfo->save();
 
                             DB::commit();
-                        } catch (Throwable | Exception $th) {
+                        } catch (Throwable|Exception $th) {
                             DB::rollBack();
 
                             return $response
@@ -225,9 +216,11 @@ class HookServiceProvider extends ServiceProvider
                     } else {
                         $response
                             ->setError()
-                            ->setMessage(trans('plugins/marketplace::order.refund.insufficient_balance', [
-                                'balance' => format_price($vendorInfo->balance),
-                            ]));
+                            ->setMessage(
+                                trans('plugins/marketplace::order.refund.insufficient_balance', [
+                                    'balance' => format_price($vendorInfo->balance),
+                                ])
+                            );
                     }
                 }
             }
@@ -236,7 +229,7 @@ class HookServiceProvider extends ServiceProvider
         return $response;
     }
 
-    public function addThemeOptions()
+    public function addThemeOptions(): void
     {
         theme_option()
             ->setSection([
@@ -262,12 +255,7 @@ class HookServiceProvider extends ServiceProvider
             ]);
     }
 
-    /**
-     * @param FormAbstract $form
-     * @param BaseModel $data
-     * @throws BindingResolutionException
-     */
-    public function registerAdditionalData($form, $data)
+    public function registerAdditionalData(FormAbstract $form, Model|string|null $data): FormAbstract
     {
         if (get_class($data) == Product::class && request()->segment(1) === BaseHelper::getAdminPrefix()) {
             $stores = $this->app->make(StoreInterface::class)->pluck('name', 'id');
@@ -278,7 +266,7 @@ class HookServiceProvider extends ServiceProvider
                 'choices' => [0 => trans('plugins/marketplace::store.forms.select_store')] + $stores,
             ]);
         } elseif (get_class($data) == Customer::class) {
-            if ($data && $data->is_vendor && $form->has('status')) {
+            if ($data->is_vendor && $form->has('status')) {
                 $statusOptions = $form->getField('status')->getOptions();
                 $statusOptions['help_block'] = [
                     'text' => trans('plugins/marketplace::marketplace.helpers.customer_status', [
@@ -300,14 +288,7 @@ class HookServiceProvider extends ServiceProvider
         return $form;
     }
 
-    /**
-     * @param string $type
-     * @param Request $request
-     * @param BaseModel $object
-     * @return bool
-     * @throws BindingResolutionException
-     */
-    public function saveAdditionalData($type, $request, $object)
+    public function saveAdditionalData(string $type, Request $request, Model|string|null $object): bool
     {
         if (! is_in_admin()) {
             return false;
@@ -324,11 +305,16 @@ class HookServiceProvider extends ServiceProvider
 
                 $customer->save();
             }
-        } elseif ($type == PRODUCT_MODULE_SCREEN_NAME && $request->has('store_id') && request()->segment(1) !== 'vendor') {
+        } elseif ($type == PRODUCT_MODULE_SCREEN_NAME && $request->has('store_id') && request()->segment(
+            1
+        ) !== 'vendor') {
             $object->store_id = $request->input('store_id');
             $object->save();
         } elseif (in_array($type, [CUSTOMER_MODULE_SCREEN_NAME, (new Customer())->getTable()])
-            && in_array(Route::currentRouteName(), ['customers.create', 'customers.create.store', 'customers.edit', 'customers.edit.update'])
+            && in_array(
+                Route::currentRouteName(),
+                ['customers.create', 'customers.create.store', 'customers.edit', 'customers.edit.update']
+            )
         ) {
             if ($request->has('is_vendor')) {
                 $object->is_vendor = $request->input('is_vendor');
@@ -381,146 +367,120 @@ class HookServiceProvider extends ServiceProvider
         return true;
     }
 
-    /**
-     * @param EloquentDataTable $data
-     * @param string|Model $model
-     * @return EloquentDataTable
-     */
-    public function addColumnToEcommerceTable($data, $model)
+    public function addColumnToEcommerceTable(EloquentDataTable|CollectionDataTable $data, Model|string|null $model)
     {
         if (! $model || ! is_in_admin(true)) {
             return $data;
         }
 
-        switch (get_class($model)) {
-            case Customer::class:
-                return $data->addColumn('is_vendor', function ($item) {
-                    if (! $item->is_vendor) {
-                        return trans('core/base::base.no');
+        return match (get_class($model)) {
+            Customer::class => $data->addColumn('is_vendor', function ($item) {
+                if (! $item->is_vendor) {
+                    return trans('core/base::base.no');
+                }
+
+                return Html::tag('span', trans('core/base::base.yes'), ['class' => 'text-success']);
+            }),
+            Order::class, Discount::class => $data
+                ->addColumn('store_id', function ($item) {
+                    $store = $item->original_product && $item->original_product->store->name ? $item->original_product->store : $item->store;
+
+                    if (! $store->name) {
+                        return '&mdash;';
                     }
 
-                    return Html::tag('span', trans('core/base::base.yes'), ['class' => 'text-success']);
-                });
+                    return Html::link($store->url, $store->name, ['target' => '_blank']);
+                })
+                ->filter(function ($query) use ($model) {
+                    $keyword = request()->input('search.value');
+                    if ($keyword) {
+                        $query = $query
+                            ->whereHas('store', function ($subQuery) use ($keyword) {
+                                return $subQuery->where('name', 'LIKE', '%' . $keyword . '%');
+                            });
 
-            case Order::class:
-            case Discount::class:
-                return $data
-                    ->addColumn('store_id', function ($item) {
-                        $store = $item->original_product && $item->original_product->store->name ? $item->original_product->store : $item->store;
-
-                        if (! $store->name) {
-                            return '&mdash;';
-                        }
-
-                        return Html::link($store->url, $store->name, ['target' => '_blank']);
-                    })
-                    ->filter(function ($query) use ($model) {
-                        $keyword = request()->input('search.value');
-                        if ($keyword) {
+                        if (get_class($model) == Order::class) {
                             $query = $query
-                                ->whereHas('store', function ($subQuery) use ($keyword) {
+                                ->whereHas('address', function ($subQuery) use ($keyword) {
                                     return $subQuery->where('name', 'LIKE', '%' . $keyword . '%');
-                                });
+                                })
+                                ->orWhereHas('user', function ($subQuery) use ($keyword) {
+                                    return $subQuery->where('name', 'LIKE', '%' . $keyword . '%');
+                                })
+                                ->orWhere('code', 'LIKE', '%' . $keyword . '%');
+                        }
 
-                            if (get_class($model) == Order::class) {
-                                $query = $query
-                                    ->whereHas('address', function ($subQuery) use ($keyword) {
-                                        return $subQuery->where('name', 'LIKE', '%' . $keyword . '%');
-                                    })
-                                    ->orWhereHas('user', function ($subQuery) use ($keyword) {
-                                        return $subQuery->where('name', 'LIKE', '%' . $keyword . '%');
+                        return $query;
+                    }
+
+                    return $query;
+                }),
+            Product::class => $data
+                ->addColumn('store_id', function ($item) {
+                    $store = $item->original_product && $item->original_product->store->name ? $item->original_product->store : $item->store;
+
+                    if (! $store->name) {
+                        return '&mdash;';
+                    }
+
+                    return Html::link($store->url, $store->name, ['target' => '_blank']);
+                })
+                ->filter(function ($query) use ($model) {
+                    $keyword = request()->input('search.value');
+                    if ($keyword) {
+                        $query
+                            ->where('name', 'LIKE', '%' . $keyword . '%')
+                            ->where('is_variation', 0)
+                            ->orWhere(function ($query) use ($keyword) {
+                                $query
+                                    ->where('is_variation', 0)
+                                    ->where(function ($query) use ($keyword) {
+                                        $query
+                                            ->orWhere('sku', 'LIKE', '%' . $keyword . '%')
+                                            ->orWhere('created_at', 'LIKE', '%' . $keyword . '%')
+                                            ->orWhereHas('store', function ($subQuery) use ($keyword) {
+                                                return $subQuery->where('name', 'LIKE', '%' . $keyword . '%');
+                                            });
                                     });
-                            }
-
-                            return $query;
-                        }
+                            });
 
                         return $query;
-                    });
+                    }
 
-            case Product::class:
-                return $data
-                    ->addColumn('store_id', function ($item) {
-                        $store = $item->original_product && $item->original_product->store->name ? $item->original_product->store : $item->store;
-
-                        if (! $store->name) {
-                            return '&mdash;';
-                        }
-
-                        return Html::link($store->url, $store->name, ['target' => '_blank']);
-                    })
-                    ->filter(function ($query) use ($model) {
-                        $keyword = request()->input('search.value');
-                        if ($keyword) {
-                            $query
-                                ->where('name', 'LIKE', '%' . $keyword . '%')
-                                ->where('is_variation', 0)
-                                ->orWhere(function ($query) use ($keyword) {
-                                    $query
-                                        ->where('is_variation', 0)
-                                        ->where(function ($query) use ($keyword) {
-                                            $query
-                                                ->orWhere('sku', 'LIKE', '%' . $keyword . '%')
-                                                ->orWhere('created_at', 'LIKE', '%' . $keyword . '%')
-                                                ->orWhereHas('store', function ($subQuery) use ($keyword) {
-                                                    return $subQuery->where('name', 'LIKE', '%' . $keyword . '%');
-                                                });
-                                        });
-                                });
-
-                            return $query;
-                        }
-
-                        return $query;
-                    });
-        }
-
-        return $data;
+                    return $query;
+                }),
+            default => $data,
+        };
     }
 
-    /**
-     * @param array $headings
-     * @param string|Model $model
-     * @return array
-     */
-    public function addHeadingToEcommerceTable(array $headings, $model): array
+    public function addHeadingToEcommerceTable(array $headings, Model|string|null $model): array
     {
         if (! $model || ! is_in_admin(true) || Route::is('marketplace.vendors.index')) {
             return $headings;
         }
 
-        switch (get_class($model)) {
-            case Customer::class:
-                return array_merge($headings, [
-                    'is_vendor' => [
-                        'name' => 'is_vendor',
-                        'title' => trans('plugins/marketplace::store.forms.is_vendor'),
-                        'class' => 'text-center',
-                        'width' => '100px',
-                    ],
-                ]);
-
-            case Order::class:
-            case Product::class:
-            case Discount::class:
-                return array_merge($headings, [
-                    'store_id' => [
-                        'name' => 'store_id',
-                        'title' => trans('plugins/marketplace::store.forms.store'),
-                        'class' => 'text-start no-sort',
-                        'orderable' => false,
-                    ],
-                ]);
-        }
-
-        return $headings;
+        return match (get_class($model)) {
+            Customer::class => array_merge($headings, [
+                'is_vendor' => [
+                    'name' => 'is_vendor',
+                    'title' => trans('plugins/marketplace::store.forms.is_vendor'),
+                    'class' => 'text-center',
+                    'width' => '100px',
+                ],
+            ]),
+            Order::class, Product::class, Discount::class => array_merge($headings, [
+                'store_id' => [
+                    'name' => 'store_id',
+                    'title' => trans('plugins/marketplace::store.forms.store'),
+                    'class' => 'text-start no-sort',
+                    'orderable' => false,
+                ],
+            ]),
+            default => $headings,
+        };
     }
 
-    /**
-     * @param Builder $query
-     * @return mixed
-     */
-    public function modifyQueryInCustomerTable($query)
+    public function modifyQueryInCustomerTable(Builder|EloquentBuilder|null $query): Builder|EloquentBuilder|null
     {
         $model = null;
 
@@ -528,25 +488,16 @@ class HookServiceProvider extends ServiceProvider
             $model = $query->getModel();
         }
 
-        switch (get_class($model)) {
-            case Customer::class:
-                return $query->addSelect('is_vendor');
-
-            case Order::class:
-            case Product::class:
-            case Discount::class:
-                return $query->addSelect($model->getTable() . '.store_id')->with(['store']);
-        }
-
-        return $query;
+        return match (get_class($model)) {
+            Customer::class => $query->addSelect('is_vendor'),
+            Order::class, Product::class, Discount::class => $query->addSelect($model->getTable() . '.store_id')->with(
+                ['store']
+            ),
+            default => $query,
+        };
     }
 
-    /**
-     * @param string $tabs
-     * @param BaseModel $data
-     * @return string
-     */
-    public function addBankInfoTab($tabs, $data = null)
+    public function addBankInfoTab(?string $tabs, Model|string|null $data = null): ?string
     {
         if (! empty($data) && get_class($data) == Store::class && $data->customer->is_vendor) {
             return $tabs .
@@ -557,12 +508,7 @@ class HookServiceProvider extends ServiceProvider
         return $tabs;
     }
 
-    /**
-     * @param string $tabs
-     * @param BaseModel $data
-     * @return string
-     */
-    public function addBankInfoContent($tabs, $data = null)
+    public function addBankInfoContent(?string $tabs, Model|string|null $data = null): ?string
     {
         if (! empty($data) && get_class($data) == Store::class) {
             $customer = $data->customer;
@@ -576,12 +522,7 @@ class HookServiceProvider extends ServiceProvider
         return $tabs;
     }
 
-    /**
-     * @param int $number
-     * @param string $menuId
-     * @return string
-     */
-    public function getUnverifiedVendors($number, $menuId)
+    public function getUnverifiedVendors(string|int|null $number, string $menuId): int|string|null
     {
         switch ($menuId) {
             case 'cms-plugins-marketplace-unverified-vendor':
@@ -643,10 +584,6 @@ class HookServiceProvider extends ServiceProvider
         return $number;
     }
 
-    /**
-     * @param array $data
-     * @return array
-     */
     public function getMenuItemCount(array $data = []): array
     {
         if (! Auth::check()) {
@@ -716,12 +653,7 @@ class HookServiceProvider extends ServiceProvider
         return $data;
     }
 
-    /**
-     * @param Request $request
-     * @param null $data
-     * @return bool
-     */
-    public function createdByVendorNotification($request, $data = null)
+    public function createdByVendorNotification(Request $request, Model|string|null $data = null): bool
     {
         if (! MarketplaceHelper::getSetting('enable_product_approval', 1)) {
             return false;
@@ -749,14 +681,9 @@ class HookServiceProvider extends ServiceProvider
         return false;
     }
 
-    /**
-     * @param Request $request
-     * @param null $data
-     * @return bool
-     */
-    public function withdrawalVendorNotification($request, $data = null)
+    public function withdrawalVendorNotification(Request $request, Model|string|null $data = null): bool
     {
-        if (! $data instanceof Withdrawal || ! in_array(Route::currentRouteName(), ['marketplace.withdrawal.edit'])) {
+        if (! $data instanceof Withdrawal || Route::currentRouteName() != 'marketplace.withdrawal.edit') {
             return false;
         }
 
@@ -768,5 +695,26 @@ class HookServiceProvider extends ServiceProvider
             ->render();
 
         return true;
+    }
+
+    public function setStoreToRow(array $row): array
+    {
+        $row['store_id'] = 0;
+
+        if (! empty($row['vendor'])) {
+            $row['vendor'] = trim($row['vendor']);
+
+            $storeRepository = app(StoreInterface::class);
+
+            if (is_numeric($row['vendor'])) {
+                $store = $storeRepository->findById($row['vendor']);
+            } else {
+                $store = $storeRepository->getFirstBy(['name' => $row['vendor']]);
+            }
+
+            $row['store_id'] = $store ? $store->id : 0;
+        }
+
+        return $row;
     }
 }

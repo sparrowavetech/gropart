@@ -1,4 +1,5 @@
 {
+    "id": "botble/paypal",
     "name": "PayPal Payment Gateway",
     "namespace": "Botble\\Paypal\\",
     "provider": "Botble\\Paypal\\Providers\\PaypalServiceProvider",

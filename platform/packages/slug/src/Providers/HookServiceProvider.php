@@ -3,20 +3,15 @@
 namespace Botble\Slug\Providers;
 
 use Assets;
-use Eloquent;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Query\Builder;
-use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\ServiceProvider;
 use SlugHelper;
 
 class HookServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         add_filter(BASE_FILTER_SLUG_AREA, [$this, 'addSlugBox'], 17, 2);
-
-        add_filter(BASE_FILTER_BEFORE_GET_FRONT_PAGE_ITEM, [$this, 'getItemSlug'], 3, 2);
     }
 
     public function addSlugBox(?string $html = null, ?Model $object = null): ?string
@@ -31,49 +26,5 @@ class HookServiceProvider extends ServiceProvider
         }
 
         return $html;
-    }
-
-    /**
-     * @param Builder $data
-     * @param Model $model
-     * @return Builder
-     */
-    public function getItemSlug($data, $model)
-    {
-        if ($data && SlugHelper::isSupportedModel(get_class($data))) {
-            $table = $model->getTable();
-            $select = [$table . '.*'];
-            /**
-             * @var Eloquent $data
-             */
-            $rawBindings = $data->getRawBindings();
-            /**
-             * @var Eloquent $rawBindings
-             */
-            $query = $rawBindings->getQuery();
-            if ($query instanceof Builder) {
-                $querySelect = $data->getQuery()->columns;
-                if (! empty($querySelect)) {
-                    $select = $querySelect;
-                }
-            }
-
-            foreach ($select as &$column) {
-                if (! str_contains($column, '.')) {
-                    $column = $table . '.' . $column;
-                }
-            }
-
-            $select = array_merge($select, ['slugs.key']);
-
-            return $data
-                ->leftJoin('slugs', function (JoinClause $join) use ($table) {
-                    $join->on('slugs.reference_id', '=', $table . '.id');
-                })
-                ->select($select)
-                ->where('slugs.reference_type', get_class($model));
-        }
-
-        return $data;
     }
 }

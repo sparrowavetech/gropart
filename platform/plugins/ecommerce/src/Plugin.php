@@ -100,5 +100,6 @@ class Plugin extends PluginOperationAbstract
         Schema::dropIfExists('ec_invoice_items');
         Schema::dropIfExists('ec_invoices');
         Schema::dropIfExists('ec_tax_products');
+        Schema::dropIfExists('ec_product_views');
     }
 }

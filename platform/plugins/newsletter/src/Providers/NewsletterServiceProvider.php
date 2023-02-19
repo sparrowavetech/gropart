@@ -20,7 +20,7 @@ class NewsletterServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function register()
+    public function register(): void
     {
         $this->app->singleton(NewsletterInterface::class, function () {
             return new NewsletterCacheDecorator(
@@ -29,7 +29,7 @@ class NewsletterServiceProvider extends ServiceProvider
         });
     }
 
-    public function boot()
+    public function boot(): void
     {
         $this
             ->setNamespace('plugins/newsletter')

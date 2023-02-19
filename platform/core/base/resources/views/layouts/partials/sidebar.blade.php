@@ -15,7 +15,7 @@
                         <a href="{{ $item['url'] }}" class="nav-link">
                             <i class="{{ $item['icon'] }}"></i>
                             {{ trans($item['name']) }}
-                            {!! apply_filters(BASE_FILTER_APPEND_MENU_NAME, null, $item['id']) !!}</span>
+                            {!! apply_filters(BASE_FILTER_APPEND_MENU_NAME, null, $item['id']) !!}
                         </a>
                     </li>
                 @endforeach

@@ -11,28 +11,13 @@ use Session;
 
 abstract class AbstractHandler
 {
-    /**
-     * @var Request
-     */
-    protected $request;
+    protected Request $request;
 
-    /**
-     * @var UploadedFile
-     */
-    protected $file;
+    protected UploadedFile $file;
 
-    /**
-     * @var array
-     */
-    protected $config;
+    protected mixed $config;
 
-    /**
-     * AbstractReceiver constructor.
-     *
-     * @param Request $request
-     * @param UploadedFile $file
-     */
-    public function __construct(Request $request, $file)
+    public function __construct(Request $request, UploadedFile $file)
     {
         $this->request = $request;
         $this->file = $file;
@@ -41,8 +26,6 @@ abstract class AbstractHandler
 
     /**
      * Checks the current setup if session driver was booted - if not, it will generate random hash.
-     *
-     * @return bool
      */
     public static function canUseSession(): bool
     {

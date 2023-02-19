@@ -5,8 +5,12 @@ namespace Botble\LanguageAdvanced\Providers;
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Language\Models\Language as LanguageModel;
+use Botble\LanguageAdvanced\Models\TranslationResolver;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Botble\Page\Models\Page;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -17,7 +21,7 @@ class LanguageAdvancedServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function boot()
+    public function boot(): void
     {
         if (is_plugin_active('language')) {
             $this->setNamespace('plugins/language-advanced')
@@ -40,9 +44,27 @@ class LanguageAdvancedServiceProvider extends ServiceProvider
                      * @var BaseModel $item
                      */
                     $item::resolveRelationUsing('translations', function ($model) {
-                        return $model->hasMany(
-                            LanguageAdvancedManager::getTranslationModel($model),
-                            $model->getTable() . '_id'
+                        $instance = tap(
+                            new TranslationResolver(),
+                            function ($instance) {
+                                if (! $instance->getConnectionName()) {
+                                    $instance->setConnection(DB::getDefaultConnection());
+                                }
+                            }
+                        );
+
+                        $instance->setTable($model->getTable() . '_translations');
+
+                        $instance->fillable(array_merge([
+                            'lang_code',
+                            $model->getTable() . '_id',
+                        ], LanguageAdvancedManager::getTranslatableColumns(get_class($model))));
+
+                        return new HasMany(
+                            $instance->newQuery(),
+                            $model,
+                            $model->getTable() . '_translations.' . $model->getTable() . '_id',
+                            $model->getKeyName()
                         );
                     });
 
@@ -91,13 +113,21 @@ class LanguageAdvancedServiceProvider extends ServiceProvider
 
             Event::listen('eloquent.deleted: ' . LanguageModel::class, function (LanguageModel $language) {
                 foreach (LanguageAdvancedManager::getSupported() as $model => $columns) {
-                    $model = LanguageAdvancedManager::getTranslationModel($model);
-
                     if (class_exists($model)) {
-                        (new $model())->where('lang_code', $language->lang_code)->delete();
+                        DB::table((new $model())->getTable() . '_translations')
+                            ->where('lang_code', $language->lang_code)
+                            ->delete();
                     }
                 }
             });
+
+            foreach (LanguageAdvancedManager::getSupported() as $model => $columns) {
+                Event::listen('eloquent.deleted: ' . $model, function (Model $model) {
+                    DB::table($model->getTable() . '_translations')
+                        ->where($model->getTable() . '_id', $model->getKey())
+                        ->delete();
+                });
+            }
         }
     }
 }

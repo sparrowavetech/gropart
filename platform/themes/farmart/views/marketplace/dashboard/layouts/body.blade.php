@@ -96,7 +96,9 @@
         </header>
 
         <div id="main">
-            @yield('content')
+            <div id="app">
+                @yield('content')
+            </div>
         </div>
     </div>
 </main>

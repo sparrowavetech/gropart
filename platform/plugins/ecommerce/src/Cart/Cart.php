@@ -13,6 +13,7 @@ use EcommerceHelper;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Connection;
 use Illuminate\Database\DatabaseManager;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Session\SessionManager;
 use Illuminate\Support\Collection;
 
@@ -100,7 +101,7 @@ class Cart
      */
     protected function isMulti($item)
     {
-        if (!is_array($item)) {
+        if (! is_array($item)) {
             return false;
         }
 
@@ -122,7 +123,7 @@ class Cart
     protected function createCartItem($id, $name, $qty, $price, array $options)
     {
         $basePrice = $price;
-        if (!empty($options['options'])) {
+        if (! empty($options['options'])) {
             foreach ($options['options']['optionCartValue'] as $value) {
                 if (is_array($value)) {
                     foreach ($value as $valueItem) {
@@ -246,7 +247,7 @@ class Cart
     {
         $content = $this->getContent();
 
-        if (!$content->has($rowId)) {
+        if (! $content->has($rowId)) {
             return null;
         }
 
@@ -311,8 +312,12 @@ class Cart
     {
         $content = $this->getContent();
 
-        return $content->reduce(function ($total, CartItem $cartItem) {
-            if (!EcommerceHelper::isTaxEnabled()) {
+        return $content->reduce(function ($total, ?CartItem $cartItem) {
+            if (! $cartItem) {
+                return 0;
+            }
+
+            if (! EcommerceHelper::isTaxEnabled()) {
                 return $total + $cartItem->qty * $cartItem->price;
             }
 
@@ -325,8 +330,12 @@ class Cart
      */
     public function rawTotalByItems($content)
     {
-        return $content->reduce(function ($total, CartItem $cartItem) {
-            if (!EcommerceHelper::isTaxEnabled()) {
+        return $content->reduce(function ($total, ?CartItem $cartItem) {
+            if (! $cartItem) {
+                return 0;
+            }
+
+            if (! EcommerceHelper::isTaxEnabled()) {
                 return $total + $cartItem->qty * $cartItem->price;
             }
 
@@ -341,7 +350,7 @@ class Cart
      */
     public function rawTaxByItems($content)
     {
-        if (!EcommerceHelper::isTaxEnabled()) {
+        if (! EcommerceHelper::isTaxEnabled()) {
             return 0;
         }
 
@@ -394,7 +403,7 @@ class Cart
      */
     public function associate($rowId, $model)
     {
-        if (is_string($model) && !class_exists($model)) {
+        if (is_string($model) && ! class_exists($model)) {
             throw new UnknownModelException('The supplied model ' . $model . ' does not exist.');
         }
 
@@ -515,7 +524,7 @@ class Cart
      */
     public function restore($identifier)
     {
-        if (!$this->storedCartWithIdentifierExists($identifier)) {
+        if (! $this->storedCartWithIdentifierExists($identifier)) {
             return;
         }
 
@@ -576,7 +585,11 @@ class Cart
     {
         $content = $this->getContent();
 
-        $total = $content->reduce(function ($total, CartItem $cartItem) {
+        $total = $content->reduce(function ($total, ?CartItem $cartItem) {
+            if (! $cartItem) {
+                return 0;
+            }
+
             return $total + ($cartItem->qty * ($cartItem->priceTax == 0 ? $cartItem->price : $cartItem->priceTax));
         }, 0);
 
@@ -590,7 +603,7 @@ class Cart
      */
     public function tax()
     {
-        if (!EcommerceHelper::isTaxEnabled()) {
+        if (! EcommerceHelper::isTaxEnabled()) {
             return 0;
         }
 
@@ -604,7 +617,7 @@ class Cart
      */
     public function rawTax()
     {
-        if (!EcommerceHelper::isTaxEnabled()) {
+        if (! EcommerceHelper::isTaxEnabled()) {
             return 0;
         }
 
@@ -644,7 +657,7 @@ class Cart
 
         $cartContent = $this->instance('cart')->content();
         $productIds = $cartContent->pluck('id')->toArray();
-        $products = collect([]);
+        $products = collect();
         $weight = 0;
         if ($productIds) {
             $with = [
@@ -669,13 +682,17 @@ class Cart
             ]);
         }
 
+        $productsInCart = new EloquentCollection();
+
         if ($products->count()) {
             foreach ($cartContent as $cartItem) {
                 $product = $products->firstWhere('id', $cartItem->id);
-                if (!$product || $product->original_product->status != BaseStatusEnum::PUBLISHED) {
+                if (! $product || $product->original_product->status != BaseStatusEnum::PUBLISHED) {
                     $this->remove($cartItem->rowId);
                 } else {
-                    $product->cartItem = $cartItem;
+                    $productInCart = clone $product;
+                    $productInCart->cartItem = $cartItem;
+                    $productsInCart->push($productInCart);
                     $weight += $product->weight * $cartItem->qty;
                 }
             }
@@ -683,7 +700,7 @@ class Cart
 
         $weight = EcommerceHelper::validateOrderWeight($weight);
 
-        $this->products = $products;
+        $this->products = $productsInCart;
         $this->weight = $weight;
 
         if ($this->products->count() == 0) {
@@ -701,7 +718,7 @@ class Cart
     public function content()
     {
         if (empty($this->session->get($this->instance))) {
-            return collect([]);
+            return collect();
         }
 
         return $this->session->get($this->instance);

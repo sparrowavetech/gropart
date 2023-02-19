@@ -31,6 +31,9 @@
                         case 'tinymce':
                             handleForTinyMce(files);
                             break;
+                        default:
+                            const coreInsertMediaEvent = new CustomEvent('core-insert-media', { detail: { files: files, element: $el } })
+                            document.dispatchEvent(coreInsertMediaEvent)
                     }
                 }
             }
@@ -73,7 +76,7 @@
         let s = '';
         for (let i = 0; i < files.length; i++) {
             if (files[i].type === 'image') {
-                s += '<img src="' + files[i].full_url + '" alt="' + files[i].name + '">';
+                s += '<img src="' + files[i].full_url + '" alt="' + files[i].name + '" loading="lazy">';
             } else {
                 s += '<a href="' + files[i].full_url + '">' + files[i].full_url + '</a>';
             }
@@ -100,7 +103,7 @@
         $.each(files, (index, file) => {
             let link = file.full_url;
             if (file.type === 'image') {
-                content += '<img src="' + link + '" alt="' + file.name + '" /><br />';
+                content += '<img src="' + link + '" alt="' + file.name + '" loading="lazy"/><br />';
             } else {
                 content += '<a href="' + link + '">' + file.name + '</a><br />';
             }
@@ -117,7 +120,7 @@
         $.each(files, (index, file) => {
             let link = file.full_url;
             if (file.type === 'image') {
-                html += '<img src="' + link + '" alt="' + file.name + '" /><br />';
+                html += '<img src="' + link + '" alt="' + file.name + '" loading="lazy" /><br />';
             } else {
                 html += '<a href="' + link + '">' + file.name + '</a><br />';
             }

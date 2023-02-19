@@ -7,12 +7,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class () extends Migration {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('ec_customers', function (Blueprint $table) {
             $table->dateTime('confirmed_at')->nullable();
@@ -22,12 +17,7 @@ return new class () extends Migration {
         Customer::whereNull('confirmed_at')->update(['confirmed_at' => Carbon::now()]);
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('ec_customers', function (Blueprint $table) {
             $table->dropColumn(['confirmed_at', 'email_verify_token']);

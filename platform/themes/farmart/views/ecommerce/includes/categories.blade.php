@@ -37,9 +37,9 @@
                             @elseif ($category->getMetaData('icon', true))
                                 <i class="{{ $category->getMetaData('icon', true) }}"></i>
                             @endif
-                            <span class="ms-1">{{ $category->name }}</span>
+                            <span class="ms-1">{!! BaseHelper::clean($category->name) !!}</span>
                         @else
-                            <span>{{ $category->name }}</span>
+                            <span>{!! BaseHelper::clean($category->name) !!}</span>
                         @endif
                     </a>
                 </div>
@@ -53,9 +53,9 @@
             </div>
             @if ($category->activeChildren->count())
                 @include(Theme::getThemeNamespace() . '::views.ecommerce.includes.categories', compact('urlCurrent') + [
-                        'categories'        => $category->activeChildren,
-                        'categoriesRequest' => [],
-                    ])
+                    'categories' => $category->activeChildren,
+                    'categoriesRequest' => [],
+                ])
             @endif
         </li>
     @endforeach

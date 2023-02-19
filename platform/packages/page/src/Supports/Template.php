@@ -7,9 +7,6 @@ use Theme;
 
 class Template
 {
-    /**
-     * @since 16-09-2016
-     */
     public static function registerPageTemplate(array $templates = []): void
     {
         $validTemplates = [];
@@ -27,9 +24,6 @@ class Template
         ]);
     }
 
-    /**
-     * @since 16-09-2016
-     */
     protected static function getExistsTemplate(): array
     {
         $files = BaseHelper::scanFolder(theme_path(Theme::getThemeName() . DIRECTORY_SEPARATOR . config('packages.theme.general.containerDir.layout')));
@@ -40,9 +34,6 @@ class Template
         return $files;
     }
 
-    /**
-     * @since 16-09-2016
-     */
     public static function getPageTemplates(): array
     {
         return (array)config('packages.page.general.templates', []);

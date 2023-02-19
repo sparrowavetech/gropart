@@ -3,12 +3,13 @@
 namespace Botble\Analytics\GA4;
 
 use Google\Analytics\Data\V1beta\RunReportResponse;
+use Illuminate\Support\Collection;
 
 class AnalyticsResponse
 {
     public RunReportResponse $googleResponse;
 
-    public array $table;
+    public Collection $table;
 
     public array $metricAggregationsTable;
 
@@ -21,7 +22,7 @@ class AnalyticsResponse
 
     public function setTable(array $table): self
     {
-        $this->table = $table;
+        $this->table = collect($table);
 
         return $this;
     }

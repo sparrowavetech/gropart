@@ -3,7 +3,7 @@
     <p class="default-seo-description @if (!empty($object->id)) hidden @endif">{{ trans('packages/seo-helper::seo-helper.default_description') }}</p>
     <div class="existed-seo-meta @if (empty($object->id)) hidden @endif">
         <span class="page-title-seo">
-             {{ $meta['seo_title'] ?? (!empty($object->id) ? $object->name ?? $object->title : null) }}
+             {!! BaseHelper::clean($meta['seo_title'] ?? (!empty($object->id) ? $object->name ?? $object->title : null)) !!}
         </span>
 
         <div class="page-url-seo ws-nm">
@@ -11,7 +11,7 @@
         </div>
 
         <div class="ws-nm">
-            <span style="color: #70757a;">{{ !empty($object->id) && $object->created_at ? $object->created_at->format('M d, Y')  :Carbon\Carbon::now()->format('M d, Y') }} - </span>
+            <span style="color: #70757a;">{{ !empty($object->id) && $object->created_at ? $object->created_at->format('M d, Y') : Carbon\Carbon::now()->format('M d, Y') }} - </span>
             <span class="page-description-seo">
                 {{ strip_tags((string)$meta['seo_description'] ?? (!empty($object->id) ? $object->description : (!empty($object->id) && $object->content ? Str::limit($object->content, 250) : old('seo_meta.seo_description')))) }}
             </span>

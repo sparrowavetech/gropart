@@ -40,10 +40,10 @@ class MenuTable extends TableAbstract
             ->eloquent($this->query())
             ->editColumn('name', function ($item) {
                 if (! Auth::user()->hasPermission('menus.edit')) {
-                    return $item->name;
+                    return BaseHelper::clean($item->name);
                 }
 
-                return Html::link(route('menus.edit', $item->id), $item->name);
+                return Html::link(route('menus.edit', $item->id), BaseHelper::clean($item->name));
             })
             ->editColumn('checkbox', function ($item) {
                 return $this->getCheckbox($item->id);
@@ -122,7 +122,7 @@ class MenuTable extends TableAbstract
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type' => 'date',
+                'type' => 'datePicker',
             ],
         ];
     }

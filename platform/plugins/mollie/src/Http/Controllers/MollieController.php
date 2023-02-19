@@ -10,16 +10,9 @@ use Illuminate\Http\Request;
 use Mollie;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Types\PaymentStatus;
-use Throwable;
 
 class MollieController extends BaseController
 {
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Throwable
-     */
     public function paymentCallback(Request $request, BaseHttpResponse $response)
     {
         try {

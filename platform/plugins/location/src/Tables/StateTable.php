@@ -47,10 +47,10 @@ class StateTable extends TableAbstract
             ->eloquent($this->query())
             ->editColumn('name', function ($item) {
                 if (! Auth::user()->hasPermission('state.edit')) {
-                    return $item->name;
+                    return BaseHelper::clean($item->name);
                 }
 
-                return Html::link(route('state.edit', $item->id), $item->name);
+                return Html::link(route('state.edit', $item->id), BaseHelper::clean($item->name));
             })
             ->editColumn('country_id', function ($item) {
                 if (! $item->country_id && $item->country->name) {
@@ -145,7 +145,7 @@ class StateTable extends TableAbstract
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type' => 'date',
+                'type' => 'datePicker',
             ],
         ];
     }

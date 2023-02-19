@@ -9,27 +9,17 @@ use Botble\Marketplace\Http\Requests\SettingRequest;
 use Botble\Marketplace\Models\Store;
 use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
 use Illuminate\Contracts\Config\Repository;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
 use MarketplaceHelper;
 use RvMedia;
 use SlugHelper;
 
 class SettingController
 {
-    /**
-     * DashboardController constructor.
-     * @param Repository $config
-     */
     public function __construct(Repository $config)
     {
         Assets::setConfig($config->get('plugins.marketplace.assets', []));
     }
 
-    /**
-     * @return Application|Factory|View
-     */
     public function index()
     {
         page_title()->setTitle(__('Settings'));
@@ -41,12 +31,6 @@ class SettingController
         return MarketplaceHelper::view('dashboard.settings', compact('store'));
     }
 
-    /**
-     * @param SettingRequest $request
-     * @param StoreInterface $storeRepository
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function saveSettings(SettingRequest $request, StoreInterface $storeRepository, BaseHttpResponse $response)
     {
         $store = auth('customer')->user()->store;

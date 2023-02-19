@@ -57,6 +57,7 @@ class SaveVendorInformationListener
                     'name' => BaseHelper::clean($this->request->input('shop_name')),
                     'phone' => BaseHelper::clean($this->request->input('shop_phone')),
                     'shop_category' => $shop_category,
+                    'email' => BaseHelper::clean($this->request->input('email')),
                     'customer_id' => $customer->getAuthIdentifier(),
                 ]);
             }

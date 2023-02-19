@@ -197,5 +197,16 @@ return [
                 'enquiry_description' => 'plugins/ecommerce::ecommerce.enquiry_description',
             ],
         ],
+        'review_products' => [
+            'title' => 'Review Products',
+            'description' => 'Send a notification to the customer to review the products when the order is completed',
+            'subject' => 'Order completed, you can review the product',
+            'can_off' => true,
+            'enabled' => false,
+            'variables' => [
+                'customer_name' => 'plugins/ecommerce::ecommerce.customer_name',
+                'product_review_list' => 'plugins/ecommerce::ecommerce.product_review_list',
+            ],
+        ],
     ],
 ];

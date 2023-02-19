@@ -22,7 +22,7 @@ class DashboardServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function register()
+    public function register(): void
     {
         $this->app->bind(DashboardWidgetInterface::class, function () {
             return new DashboardWidgetCacheDecorator(
@@ -37,7 +37,7 @@ class DashboardServiceProvider extends ServiceProvider
         });
     }
 
-    public function boot()
+    public function boot(): void
     {
         $this->setNamespace('core/dashboard')
             ->loadHelpers()

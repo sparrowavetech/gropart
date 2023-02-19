@@ -7,10 +7,8 @@ use Botble\Media\Chunks\Handler\DropZoneUploadHandler;
 use Botble\Media\Chunks\Receiver\FileReceiver;
 use Botble\Media\Repositories\Interfaces\MediaFileInterface;
 use Exception;
-use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
 use RvMedia;
@@ -22,23 +20,13 @@ use Validator;
  */
 class MediaFileController extends Controller
 {
-    /**
-     * @var MediaFileInterface
-     */
-    protected $fileRepository;
+    protected MediaFileInterface $fileRepository;
 
-    /**
-     * @param MediaFileInterface $fileRepository
-     */
     public function __construct(MediaFileInterface $fileRepository)
     {
         $this->fileRepository = $fileRepository;
     }
 
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
     public function postUpload(Request $request)
     {
         if (! RvMedia::isChunkUploadEnabled()) {
@@ -74,10 +62,6 @@ class MediaFileController extends Controller
         }
     }
 
-    /**
-     * @param array $result
-     * @return JsonResponse
-     */
     protected function handleUploadResponse(array $result): JsonResponse
     {
         if (! $result['error']) {
@@ -90,19 +74,11 @@ class MediaFileController extends Controller
         return RvMedia::responseError($result['message']);
     }
 
-    /**
-     * @param Request $request
-     * @return ResponseFactory|JsonResponse|Response
-     */
     public function postUploadFromEditor(Request $request)
     {
         return RvMedia::uploadFromEditor($request);
     }
 
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
     public function postDownloadUrl(Request $request)
     {
         $validator = Validator::make($request->input(), [

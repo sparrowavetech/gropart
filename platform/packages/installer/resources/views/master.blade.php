@@ -9,11 +9,10 @@
 
     <link rel="icon" href="{{ asset('vendor/core/core/base/images/favicon.png') }}">
     <link href="{{ asset('vendor/core/core/base/libraries/font-awesome/css/fontawesome.min.css') }}" rel="stylesheet"/>
-    <link href="{{ asset('vendor/core/packages/installer/css/style.css') }}" rel="stylesheet"/>
+    <link href="{{ asset('vendor/core/packages/installer/css/style.css') }}?v={{ get_cms_version() }}" rel="stylesheet"/>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="//fonts.googleapis.com/css?family=Lato:400,700%7cPoppins:200,400,500,700" rel="stylesheet">
+    <link rel="preconnect" href="{{ BaseHelper::getGoogleFontsURL() }}">
+    <link href="{{ BaseHelper::getGoogleFontsURL() }}/css?family=Lato:400,700%7cPoppins:200,400,500,700" rel="stylesheet">
 
     @yield('style')
 </head>
@@ -93,7 +92,7 @@
             </div>
         </div>
     </div>
-    <script src="{{ asset('vendor/core/packages/installer/js/script.js') }}"></script>
+    <script src="{{ asset('vendor/core/packages/installer/js/script.js') }}?v={{ get_cms_version() }}"></script>
 
     @yield('scripts')
 </body>

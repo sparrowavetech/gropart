@@ -9,14 +9,9 @@ use Illuminate\Http\Request;
 use InvoiceHelper;
 use SeoHelper;
 use Theme;
-use Throwable;
 
 class InvoiceController extends Controller
 {
-    /**
-     * @return string
-     * @throws Throwable
-     */
     public function index()
     {
         SeoHelper::setTitle(__('Invoices'));
@@ -29,11 +24,6 @@ class InvoiceController extends Controller
         return '';
     }
 
-    /**
-     * @param $id
-     * @param InvoiceInterface $invoiceRepository
-     * @return \Response
-     */
     public function show($id, InvoiceInterface $invoiceRepository)
     {
         $invoice = $invoiceRepository->findOrFail($id);
@@ -53,12 +43,6 @@ class InvoiceController extends Controller
         )->render();
     }
 
-    /**
-     * @param int $invoiceId
-     * @param Request $request
-     * @param InvoiceInterface $invoiceRepository
-     * @return \Illuminate\Http\Response
-     */
     public function getGenerateInvoice(int $invoiceId, Request $request, InvoiceInterface $invoiceRepository)
     {
         $invoice = $invoiceRepository->findOrFail($invoiceId);

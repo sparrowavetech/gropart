@@ -32,7 +32,7 @@ class FileMerger
      * @return $this
      * @throws ChunkSaveException
      */
-    public function appendFile(string $sourceFilePath): FileMerger
+    public function appendFile(string $sourceFilePath): self
     {
         // Open the new uploaded chunk
         if (! $in = @fopen($sourceFilePath, 'rb')) {
@@ -54,7 +54,7 @@ class FileMerger
     /**
      * Closes the connection to the file.
      */
-    public function close()
+    public function close(): void
     {
         @fclose($this->destinationFile);
     }

@@ -238,7 +238,7 @@ class SeoHelper implements SeoHelperContract
                 }
 
                 return true;
-            } catch (Exception $exception) {
+            } catch (Exception) {
                 return false;
             }
         }
@@ -259,7 +259,7 @@ class SeoHelper implements SeoHelperContract
             }
 
             return true;
-        } catch (Exception $ex) {
+        } catch (Exception) {
             return false;
         }
     }

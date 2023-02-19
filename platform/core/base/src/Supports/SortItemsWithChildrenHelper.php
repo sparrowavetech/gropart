@@ -2,7 +2,6 @@
 
 namespace Botble\Base\Supports;
 
-use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
@@ -18,19 +17,15 @@ class SortItemsWithChildrenHelper
 
     protected array $result = [];
 
-    public function setItems(array|Collection $items): SortItemsWithChildrenHelper
+    public function setItems(array|Collection $items): self
     {
-        if (is_array($items)) {
-            $this->items = collect($items);
-
-            return $this;
-        } elseif ($items instanceof Collection) {
-            $this->items = $items;
-
-            return $this;
+        if (! $items instanceof Collection) {
+            $items = collect($items);
         }
 
-        throw new Exception('Items must be array or collection');
+        $this->items = $items;
+
+        return $this;
     }
 
     public function setParentField(string $string): self

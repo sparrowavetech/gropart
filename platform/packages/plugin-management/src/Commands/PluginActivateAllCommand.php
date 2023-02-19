@@ -16,7 +16,7 @@ class PluginActivateAllCommand extends Command
             $pluginService->activate($plugin);
         }
 
-        $this->info('Activated successfully!');
+        $this->components->info('Activated successfully!');
 
         return self::SUCCESS;
     }

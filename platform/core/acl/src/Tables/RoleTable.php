@@ -46,19 +46,22 @@ class RoleTable extends TableAbstract
             ->eloquent($this->query())
             ->editColumn('name', function ($item) {
                 if (! Auth::user()->hasPermission('roles.edit')) {
-                    return $item->name;
+                    return BaseHelper::clean($item->name);
                 }
 
-                return Html::link(route('roles.edit', $item->id), $item->name);
+                return Html::link(route('roles.edit', $item->id), BaseHelper::clean($item->name));
             })
             ->editColumn('checkbox', function ($item) {
                 return $this->getCheckbox($item->id);
+            })
+            ->editColumn('description', function ($item) {
+                return $item->description;
             })
             ->editColumn('created_at', function ($item) {
                 return BaseHelper::formatDate($item->created_at);
             })
             ->editColumn('created_by', function ($item) {
-                return $item->author->name;
+                return BaseHelper::clean($item->author->name);
             })
             ->addColumn('operations', function ($item) {
                 return $this->getOperations('roles.edit', 'roles.destroy', $item);

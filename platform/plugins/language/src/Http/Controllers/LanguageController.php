@@ -19,18 +19,13 @@ use Botble\Setting\Models\Setting;
 use Botble\Setting\Supports\SettingStore;
 use Botble\Translation\Manager;
 use Botble\Widget\Models\Widget;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
 use Exception;
 use Illuminate\Support\Facades\File;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Language as LanguageFacade;
 use Theme;
-use Throwable;
 
 class LanguageController extends BaseController
 {
@@ -44,9 +39,6 @@ class LanguageController extends BaseController
         $this->languageMetaRepository = $languageMetaRepository;
     }
 
-    /**
-     * @return Factory|Application|View
-     */
     public function index()
     {
         page_title()->setTitle(trans('plugins/language::language.name'));
@@ -60,13 +52,6 @@ class LanguageController extends BaseController
         return view('plugins/language::index', compact('languages', 'flags', 'activeLanguages'));
     }
 
-    /**
-     * @param LanguageRequest $request
-     * @param BaseHttpResponse $response
-     * @param LanguageManager $languageManager
-     * @return BaseHttpResponse
-     * @throws Throwable
-     */
     public function postStore(LanguageRequest $request, BaseHttpResponse $response, LanguageManager $languageManager)
     {
         try {
@@ -174,12 +159,6 @@ class LanguageController extends BaseController
         }
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Throwable
-     */
     public function update(Request $request, BaseHttpResponse $response)
     {
         try {
@@ -205,11 +184,6 @@ class LanguageController extends BaseController
         }
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function postChangeItemLanguage(Request $request, BaseHttpResponse $response)
     {
         $referenceId = $request->input('reference_id') ?: $request->input('lang_meta_created_from');
@@ -257,13 +231,7 @@ class LanguageController extends BaseController
         return $response->setData($data);
     }
 
-    /**
-     * @param Request $request
-     * @param int $id
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function destroy(Request $request, $id, BaseHttpResponse $response)
+    public function destroy(Request $request, int $id, BaseHttpResponse $response)
     {
         try {
             $language = $this->languageRepository->getFirstBy(['lang_id' => $id]);
@@ -294,11 +262,6 @@ class LanguageController extends BaseController
         }
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function getSetDefault(Request $request, BaseHttpResponse $response)
     {
         $defaultLanguage = LanguageFacade::getDefaultLanguage(['lang_id', 'lang_code']);
@@ -367,11 +330,6 @@ class LanguageController extends BaseController
         return $response->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function getLanguage(Request $request, BaseHttpResponse $response)
     {
         $language = $this->languageRepository->getFirstBy(['lang_id' => $request->input('lang_id')]);
@@ -379,12 +337,6 @@ class LanguageController extends BaseController
         return $response->setData($language);
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @param SettingStore $settingStore
-     * @return BaseHttpResponse
-     */
     public function postEditSettings(Request $request, BaseHttpResponse $response, SettingStore $settingStore)
     {
         $settingStore
@@ -402,12 +354,6 @@ class LanguageController extends BaseController
         return $response->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param string $code
-     * @param LanguageManager $language
-     * @return RedirectResponse
-     * @since 2.2
-     */
     public function getChangeDataLanguage($code, LanguageManager $language)
     {
         $previousUrl = strtok(app('url')->previous(), '?');
@@ -420,11 +366,6 @@ class LanguageController extends BaseController
         return redirect()->to($previousUrl . $queryString);
     }
 
-    /**
-     * @param string $path
-     * @param string $locale
-     * @return int
-     */
     protected function createLocaleInPath(string $path, string $locale): int
     {
         $folders = File::directories($path);

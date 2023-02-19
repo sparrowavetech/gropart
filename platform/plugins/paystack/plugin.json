@@ -1,4 +1,5 @@
 {
+    "id": "botble/paystack",
     "name": "Paystack Payment Gateway",
     "namespace": "Botble\\Paystack\\",
     "provider": "Botble\\Paystack\\Providers\\PaystackServiceProvider",

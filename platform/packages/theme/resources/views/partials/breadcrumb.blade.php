@@ -4,14 +4,16 @@
             @if ($i != (count($crumbs) - 1))
                 <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem" class="breadcrumb-item">
                     <a href="{{ $crumb['url'] }}" itemprop="item" title="{{ $crumb['label'] }}">
-                        {{ $crumb['label'] }}
+                        {!! BaseHelper::clean($crumb['label']) !!}
                         <meta itemprop="name" content="{{ $crumb['label'] }}" />
                     </a>
                     <meta itemprop="position" content="{{ $i + 1}}" />
                 </li>
             @else
                 <li class="breadcrumb-item active" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                    {!! $crumb['label'] !!}
+                    <span itemprop="item">
+                        {!! BaseHelper::clean($crumb['label']) !!}
+                    </span>
                     <meta itemprop="name" content="{{ $crumb['label'] }}" />
                     <meta itemprop="position" content="{{ $i + 1}}" />
                 </li>

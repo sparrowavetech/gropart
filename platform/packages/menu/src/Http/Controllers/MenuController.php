@@ -21,12 +21,9 @@ use Botble\Menu\Tables\MenuTable;
 use Botble\Support\Services\Cache\Cache;
 use Exception;
 use Illuminate\Cache\CacheManager;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Contracts\View\View;
 use Menu;
 use stdClass;
-use Throwable;
 
 class MenuController extends BaseController
 {
@@ -50,11 +47,6 @@ class MenuController extends BaseController
         $this->cache = new Cache($cache, MenuRepository::class);
     }
 
-    /**
-     * @param MenuTable $table
-     * @return JsonResponse|View
-     * @throws Throwable
-     */
     public function index(MenuTable $table)
     {
         page_title()->setTitle(trans('packages/menu::menu.name'));
@@ -62,10 +54,6 @@ class MenuController extends BaseController
         return $table->renderTable();
     }
 
-    /**
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
     public function create(FormBuilder $formBuilder)
     {
         page_title()->setTitle(trans('packages/menu::menu.create'));
@@ -73,12 +61,6 @@ class MenuController extends BaseController
         return $formBuilder->create(MenuForm::class)->renderForm();
     }
 
-    /**
-     * @param MenuRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function store(MenuRequest $request, BaseHttpResponse $response)
     {
         $menu = $this->menuRepository->getModel();
@@ -99,12 +81,6 @@ class MenuController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    /**
-     * @param MenuModel $menu
-     * @param Request $request
-     * @return bool
-     * @throws Exception
-     */
     protected function saveMenuLocations(MenuModel $menu, Request $request): bool
     {
         $locations = $request->input('locations', []);
@@ -126,13 +102,7 @@ class MenuController extends BaseController
         return true;
     }
 
-    /**
-     * @param int $id
-     * @param Request $request
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
-    public function edit($id, FormBuilder $formBuilder, Request $request)
+    public function edit(int $id, FormBuilder $formBuilder, Request $request)
     {
         page_title()->setTitle(trans('packages/menu::menu.edit'));
 
@@ -152,14 +122,7 @@ class MenuController extends BaseController
         return $formBuilder->create(MenuForm::class, ['model' => $menu])->renderForm();
     }
 
-    /**
-     * @param MenuRequest $request
-     * @param int $id
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
-    public function update(MenuRequest $request, $id, BaseHttpResponse $response)
+    public function update(MenuRequest $request, int $id, BaseHttpResponse $response)
     {
         $menu = $this->menuRepository->firstOrNew(compact('id'));
 
@@ -189,13 +152,7 @@ class MenuController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param Request $request
-     * @param int $id
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function destroy(Request $request, $id, BaseHttpResponse $response)
+    public function destroy(Request $request, int $id, BaseHttpResponse $response)
     {
         try {
             $menu = $this->menuRepository->findOrFail($id);
@@ -212,12 +169,6 @@ class MenuController extends BaseController
         }
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function deletes(Request $request, BaseHttpResponse $response)
     {
         $ids = $request->input('ids');
@@ -238,11 +189,6 @@ class MenuController extends BaseController
         return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
-    /**
-     * @param MenuNodeRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function getNode(MenuNodeRequest $request, BaseHttpResponse $response)
     {
         $data = (array)$request->input('data', []);

@@ -1,4 +1,14 @@
 .rp-card-report-statics {
+    .bg-white-opacity {
+        .block-content {
+            color: black !important;
+
+            h5 {
+                font-size: 1.3rem;
+            }
+        }
+    }
+
     .rp-card-content {
         .block-content {
             color: #fff;

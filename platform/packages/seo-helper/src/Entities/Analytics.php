@@ -6,54 +6,27 @@ use Botble\SeoHelper\Contracts\Entities\AnalyticsContract;
 
 class Analytics implements AnalyticsContract
 {
-    /**
-     * Google Analytics code.
-     *
-     * @var string
-     */
-    protected $google = '';
+    protected ?string $google = '';
 
-    /**
-     * Set Google Analytics code.
-     *
-     * @param string $code
-     *
-     * @return Analytics
-     */
-    public function setGoogle($code)
+    public function setGoogle($code): static
     {
         $this->google = $code;
 
         return $this;
     }
 
-    /**
-     * Render the tag.
-     *
-     * @return string
-     */
-    public function render()
+    public function render(): string
     {
         return implode(PHP_EOL, array_filter([
             $this->renderGoogleScript(),
         ]));
     }
 
-    /**
-     * Render the tag.
-     *
-     * @return string
-     */
     public function __toString()
     {
         return $this->render();
     }
 
-    /**
-     * Render the Google Analytics tracking script.
-     *
-     * @return string
-     */
     protected function renderGoogleScript(): string
     {
         if (empty($this->google)) {
@@ -62,9 +35,8 @@ class Analytics implements AnalyticsContract
 
         return <<<EOT
 <!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=$this->google"></script>
+<script async defer src="https://www.googletagmanager.com/gtag/js?id=$this->google"></script>
 <script>
- "use strict";
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());

@@ -2,6 +2,7 @@
 
 namespace Botble\SeoHelper\Helpers;
 
+use BaseHelper;
 use Botble\SeoHelper\Contracts\Helpers\MetaContract;
 use Botble\SeoHelper\Exceptions\InvalidArgumentException;
 use Illuminate\Support\Str;
@@ -241,7 +242,7 @@ class Meta implements MetaContract
      */
     public function clean($value)
     {
-        return e(strip_tags((string)$value));
+        return BaseHelper::html(strip_tags((string)$value));
     }
 
     /**

@@ -16,7 +16,7 @@
             </div>
 
             @auth
-                <a href="javascript:;" class="menu-toggler responsive-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
+                <a href="javascript:" class="menu-toggler responsive-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
                     <span></span>
                 </a>
             @endauth

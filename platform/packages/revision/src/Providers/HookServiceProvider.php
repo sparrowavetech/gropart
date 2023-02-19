@@ -3,24 +3,18 @@
 namespace Botble\Revision\Providers;
 
 use Assets;
-use Botble\Base\Models\BaseModel;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 
 class HookServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         add_filter(BASE_FILTER_REGISTER_CONTENT_TABS, [$this, 'addHistoryTab'], 55, 3);
         add_filter(BASE_FILTER_REGISTER_CONTENT_TAB_INSIDE, [$this, 'addHistoryContent'], 55, 3);
     }
 
-    /**
-     * @param string|null $tabs
-     * @param BaseModel|null|mixed $data
-     * @return string
-     * @since 2.0
-     */
-    public function addHistoryTab(?string $tabs, $data = null): string
+    public function addHistoryTab(?string $tabs, string|Model|null $data = null): string
     {
         if (! empty($data) && $this->isSupported($data)) {
             Assets::addScriptsDirectly([
@@ -35,11 +29,7 @@ class HookServiceProvider extends ServiceProvider
         return $tabs;
     }
 
-    /**
-     * @param string|BaseModel $model
-     * @return bool
-     */
-    protected function isSupported($model): bool
+    protected function isSupported(string|Model $model): bool
     {
         if (is_object($model)) {
             $model = get_class($model);
@@ -48,13 +38,7 @@ class HookServiceProvider extends ServiceProvider
         return in_array($model, config('packages.revision.general.supported', []));
     }
 
-    /**
-     * @param string|null $tabs
-     * @param BaseModel|mixed|null $data
-     * @return string
-     * @since 2.0
-     */
-    public function addHistoryContent(?string $tabs, $data = null): string
+    public function addHistoryContent(?string $tabs, string|Model|null $data = null): string
     {
         if (! empty($data) && $this->isSupported($data)) {
             return $tabs . view('packages/revision::history-content', ['model' => $data])->render();

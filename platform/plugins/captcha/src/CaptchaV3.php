@@ -62,7 +62,7 @@ class CaptchaV3
 
         $name = Arr::get($options, 'name', 'g-recaptcha-response');
 
-        $fieldId = uniqid($name . '-', false);
+        $fieldId = uniqid($name . '-');
         $action = Arr::get($attributes, 'action', 'form');
 
         $input = '<input type="hidden" name="' . $name . '" id="' . $fieldId . '">';
@@ -71,9 +71,9 @@ class CaptchaV3
             $this->initJs($fieldId, $action);
         }
 
-        $html = "grecaptcha.ready(function() { refreshRecaptcha('" . $fieldId . "'); });";
+        $html = "var onloadCallback = function() { grecaptcha.ready(function() { refreshRecaptcha('" . $fieldId . "'); }); };";
 
-        Theme::asset()->container('footer')->writeScript('google-recaptcha-' . $fieldId, $html, ['google-recaptcha']);
+        Theme::asset()->container('after_footer')->writeScript('google-recaptcha-' . $fieldId, $html, ['google-recaptcha']);
 
         $this->rendered = true;
 
@@ -99,12 +99,12 @@ class CaptchaV3
                };";
 
             Theme::asset()
-                ->container('footer')
+                ->container('after_footer')
                 ->writeScript('google-recaptcha-script-' . $fieldId, $script, ['google-recaptcha']);
         }
 
         Theme::asset()
-            ->container('footer')
-            ->add('google-recaptcha', $this->origin . '/api.js?render=' . $this->siteKey . '&hl=' . app()->getLocale());
+            ->container('after_footer')
+            ->add('google-recaptcha', $this->origin . '/api.js?onload=onloadCallback&render=' . $this->siteKey . '&hl=' . app()->getLocale(), [], ['async', 'defer']);
     }
 }

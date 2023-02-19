@@ -281,6 +281,11 @@ class SeoMeta implements SeoMetaContract
         return $this;
     }
 
+    public function getAnalytics(): AnalyticsContract
+    {
+        return $this->analytics;
+    }
+
     /**
      * Render all seo tags.
      *
@@ -303,7 +308,6 @@ class SeoMeta implements SeoMetaContract
             $this->description->render(),
             $this->misc->render(),
             $this->webmasters->render(),
-            $this->analytics->render(),
         ]));
     }
 }

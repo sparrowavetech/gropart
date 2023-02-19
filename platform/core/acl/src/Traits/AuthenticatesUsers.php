@@ -62,13 +62,7 @@ trait AuthenticatesUsers
         return $this->sendFailedLoginResponse();
     }
 
-    /**
-     * Validate the user login request.
-     *
-     * @param Request $request
-     * @return void
-     */
-    protected function validateLogin(Request $request)
+    protected function validateLogin(Request $request): void
     {
         $request->validate([
             $this->username() => 'required|string',
@@ -76,23 +70,12 @@ trait AuthenticatesUsers
         ]);
     }
 
-    /**
-     * Get the login username to be used by the controller.
-     *
-     * @return string
-     */
-    public function username()
+    public function username(): string
     {
         return 'email';
     }
 
-    /**
-     * Attempt to log the user into the application.
-     *
-     * @param Request $request
-     * @return bool
-     */
-    protected function attemptLogin(Request $request)
+    protected function attemptLogin(Request $request): bool
     {
         return $this->guard()->attempt(
             $this->credentials($request),
@@ -100,23 +83,12 @@ trait AuthenticatesUsers
         );
     }
 
-    /**
-     * Get the guard to be used during authentication.
-     *
-     * @return StatefulGuard
-     */
-    protected function guard()
+    protected function guard(): StatefulGuard
     {
         return Auth::guard();
     }
 
-    /**
-     * Get the needed authorization credentials from the request.
-     *
-     * @param Request $request
-     * @return array
-     */
-    protected function credentials(Request $request)
+    protected function credentials(Request $request): array
     {
         return $request->only($this->username(), 'password');
     }

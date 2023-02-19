@@ -22,7 +22,7 @@ class BackupRestoreCommand extends Command
                 $backup = $this->option('backup');
 
                 if (! File::isDirectory($backupService->getBackupPath($backup))) {
-                    $this->error('Cannot found backup folder!');
+                    $this->components->error('Cannot found backup folder!');
 
                     return self::FAILURE;
                 }
@@ -30,7 +30,7 @@ class BackupRestoreCommand extends Command
                 $backups = BaseHelper::scanFolder($backupService->getBackupPath());
 
                 if (empty($backups)) {
-                    $this->error('No backup found to restore!');
+                    $this->components->error('No backup found to restore!');
 
                     return self::FAILURE;
                 }
@@ -38,17 +38,17 @@ class BackupRestoreCommand extends Command
                 $backup = Arr::first($backups);
             }
 
-            $this->info('Restoring backup...');
+            $this->components->info('Restoring backup...');
 
             $path = $backupService->getBackupPath($backup);
             foreach (BaseHelper::scanFolder($path) as $file) {
                 if (Str::contains(basename($file), 'database')) {
-                    $this->info('Restoring database...');
+                    $this->components->info('Restoring database...');
                     $backupService->restoreDatabase($path . DIRECTORY_SEPARATOR . $file, $path);
                 }
 
                 if (Str::contains(basename($file), 'storage')) {
-                    $this->info('Restoring uploaded files...');
+                    $this->components->info('Restoring uploaded files...');
                     $pathTo = config('filesystems.disks.public.root');
                     $backupService->cleanDirectory($pathTo);
                     $backupService->extractFileTo($path . DIRECTORY_SEPARATOR . $file, $pathTo);
@@ -59,9 +59,9 @@ class BackupRestoreCommand extends Command
 
             do_action(BACKUP_ACTION_AFTER_RESTORE, BACKUP_MODULE_SCREEN_NAME, request());
 
-            $this->info(trans('plugins/backup::backup.restore_backup_success'));
+            $this->components->info(trans('plugins/backup::backup.restore_backup_success'));
         } catch (Exception $exception) {
-            $this->error($exception->getMessage());
+            $this->components->error($exception->getMessage());
         }
 
         return self::SUCCESS;

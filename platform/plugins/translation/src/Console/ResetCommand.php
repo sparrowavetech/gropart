@@ -12,7 +12,7 @@ class ResetCommand extends Command
     public function handle(Manager $manager): int
     {
         $manager->truncateTranslations();
-        $this->info('All translations are deleted');
+        $this->components->info('All translations are deleted');
 
         return self::SUCCESS;
     }

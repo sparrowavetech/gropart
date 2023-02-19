@@ -47,4 +47,5 @@ return [
     'unzip_success' => 'Download file extracted',
     'install_success' => 'Installed plugin successfully!',
     'update_success' => 'Updated plugin successfully!',
+    'minimum_core_version_error' => 'Cannot install this plugin. Minimum core version is :version.',
 ];

@@ -43,14 +43,6 @@ class RemoveQuotes extends PageSpeed
         ];
     }
 
-    /**
-     * Match all occurrences of the html tags given
-     *
-     * @param array $tags Html tags to match in the given buffer
-     * @param string $buffer Middleware response buffer
-     *
-     * @return array $matches Html tags found in the buffer
-     */
     protected function matchAllHtmlTag(array $tags, string $buffer): array
     {
         $voidTags = array_intersect($tags, $this->voidElements());
@@ -75,16 +67,6 @@ class RemoveQuotes extends PageSpeed
         return $matches[0];
     }
 
-    /**
-     * Replace occurrences of regex pattern inside of given HTML tags
-     *
-     * @param array $tags Html tags to match and run regex to replace occurrences
-     * @param string $regex Regex rule to match on the given HTML tags
-     * @param string $replace Content to replace
-     * @param string $buffer Middleware response buffer
-     *
-     * @return string $buffer Middleware response buffer
-     */
     protected function replaceInsideHtmlTags(array $tags, string $regex, string $replace, string $buffer): string
     {
         foreach ($this->matchAllHtmlTag($tags, $buffer) as $tagMatched) {

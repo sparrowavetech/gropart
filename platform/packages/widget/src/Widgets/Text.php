@@ -6,8 +6,6 @@ use Botble\Widget\AbstractWidget;
 
 class Text extends AbstractWidget
 {
-    protected $config = [];
-
     protected $frontendTemplate = 'packages/widget::widgets.text.frontend';
 
     protected $backendTemplate = 'packages/widget::widgets.text.backend';

@@ -144,14 +144,6 @@
                     </div>
 
                     <div class="form-group mb-3">
-                        <input type="hidden" name="using_queue_to_send_mail" value="0">
-                        <label>
-                            <input type="checkbox"  value="1" @if (setting('using_queue_to_send_mail')) checked @endif name="using_queue_to_send_mail">
-                            {{ trans('core/setting::setting.email.using_queue_to_send_mail') }}
-                        </label>
-                    </div>
-
-                    <div class="form-group mb-3">
                         <button class="btn btn-info send-test-email-trigger-button" type="button" data-saving="{{ trans('core/setting::setting.saving') }}">{{ trans('core/setting::setting.test_send_mail') }}</button>
                     </div>
 

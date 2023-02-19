@@ -51,7 +51,7 @@ class EditorManagement {
                             key: name,
                             href: route('short-codes.ajax-get-admin-config', name),
                             data: {
-                                code: encodeURIComponent(shortcode),
+                                code: shortcode,
                             },
                             description: description,
                             previewImage: '',
@@ -113,7 +113,11 @@ class EditorManagement {
                         'codeBlock',
                     ]
                 },
-                language: 'en',
+                language: {
+                    ui: 'en',
+
+                    content: window.siteEditorLocale || 'en',
+                },
                 image: {
                     toolbar: [
                         'imageTextAlternative',
@@ -385,7 +389,7 @@ class EditorManagement {
             $('.short_code_modal .modal-title strong').text(description);
         }
 
-        if (previewImage != null && previewImage != '') {
+        if (previewImage != null && previewImage !== '') {
             $('.short_code_modal .shortcode-preview-image-link').attr('href', previewImage).show();
         } else {
             $('.short_code_modal .shortcode-preview-image-link').hide();
@@ -395,7 +399,7 @@ class EditorManagement {
         $('.half-circle-spinner').show();
 
         $.ajax({
-            type: 'GET',
+            type: 'POST',
             data: data,
             url: href,
             success: res => {
@@ -438,7 +442,7 @@ class EditorManagement {
 
                 if ($('.editor-ckeditor').length > 0) {
                     self.CKEDITOR[editorInstance].commands.execute('shortcode', shortcode);
-                } else {
+                } else if ($('.editor-tinymce').length > 0) {
                     tinymce.get(editorInstance).execCommand('mceInsertContent', false, shortcode);
                 }
             }
@@ -493,8 +497,11 @@ class EditorManagement {
 
             if ($('.editor-ckeditor').length > 0) {
                 self.CKEDITOR[editorInstance].commands.execute('shortcode', shortcode);
-            } else {
+            } else if ($('.editor-tinymce').length > 0) {
                 tinymce.get(editorInstance).execCommand('mceInsertContent', false, shortcode);
+            } else {
+                const coreInsertShortCodeEvent = new CustomEvent('core-insert-shortcode', { detail: { shortcode: shortcode } })
+                document.dispatchEvent(coreInsertShortCodeEvent)
             }
 
             $(this).closest('.modal').modal('hide');

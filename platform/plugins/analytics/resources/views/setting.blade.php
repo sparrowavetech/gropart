@@ -16,12 +16,21 @@
                 <input data-counter="120" type="text" class="next-input" name="google_analytics" id="google_analytics"
                        value="{{ setting('google_analytics') }}" placeholder="{{ trans('plugins/analytics::analytics.settings.tracking_code_placeholder') }}">
             </div>
-            <div class="form-group mb-3">
-                <label class="text-title-field"
-                       for="analytics_property_id">{{ trans('plugins/analytics::analytics.settings.property_id') }}</label>
-                <input data-counter="120" type="text" class="next-input" name="analytics_view_id" id="analytics_property_id"
-                       value="{{ setting('analytics_property_id') ?: setting('analytics_view_id') }}" placeholder="{{ trans('plugins/analytics::analytics.settings.property_id_description') }}">
-            </div>
+            @if (config('plugins.analytics.general.ga4_enabled', false))
+                <div class="form-group mb-3">
+                    <label class="text-title-field"
+                           for="analytics_property_id">{{ trans('plugins/analytics::analytics.settings.analytics_property_id') }}</label>
+                    <input data-counter="120" type="text" class="next-input" name="analytics_property_id" id="analytics_property_id"
+                           value="{{ setting('analytics_property_id') }}" placeholder="{{ trans('plugins/analytics::analytics.settings.analytics_property_id_description') }}">
+                </div>
+            @else
+                <div class="form-group mb-3">
+                    <label class="text-title-field"
+                           for="analytics_view_id">{{ trans('plugins/analytics::analytics.settings.view_id') }}</label>
+                    <input data-counter="120" type="text" class="next-input" name="analytics_view_id" id="analytics_view_id"
+                           value="{{ setting('analytics_view_id') }}" placeholder="{{ trans('plugins/analytics::analytics.settings.view_id_description') }}">
+                </div>
+            @endif
             @if (!app()->environment('demo'))
                 <div class="form-group mb-3">
                     <label class="text-title-field"

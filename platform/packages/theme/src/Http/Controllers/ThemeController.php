@@ -15,8 +15,6 @@ use Botble\Theme\Http\Requests\CustomHtmlRequest;
 use Botble\Theme\Http\Requests\CustomJsRequest;
 use Botble\Theme\Services\ThemeService;
 use Exception;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
@@ -25,9 +23,6 @@ use ThemeOption;
 
 class ThemeController extends BaseController
 {
-    /**
-     * @return Factory|Application|\Illuminate\Contracts\View\View
-     */
     public function index()
     {
         if (! config('packages.theme.general.display_theme_manager_in_admin_panel', true)) {
@@ -45,9 +40,6 @@ class ThemeController extends BaseController
         return view('packages/theme::list');
     }
 
-    /**
-     * @return Application|Factory|\Illuminate\Contracts\View\View
-     */
     public function getOptions()
     {
         page_title()->setTitle(trans('packages/theme::theme.theme_options'));
@@ -66,11 +58,6 @@ class ThemeController extends BaseController
         return view('packages/theme::options');
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function postUpdate(Request $request, BaseHttpResponse $response)
     {
         foreach ($request->except(['_token', 'ref_lang']) as $key => $value) {
@@ -92,12 +79,6 @@ class ThemeController extends BaseController
         return $response->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @param ThemeService $themeService
-     * @return BaseHttpResponse
-     */
     public function postActivateTheme(Request $request, BaseHttpResponse $response, ThemeService $themeService)
     {
         if (! config('packages.theme.general.display_theme_manager_in_admin_panel', true)) {
@@ -114,10 +95,6 @@ class ThemeController extends BaseController
             ->setMessage(trans('packages/theme::theme.active_success'));
     }
 
-    /**
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
     public function getCustomCss(FormBuilder $formBuilder)
     {
         page_title()->setTitle(trans('packages/theme::theme.custom_css'));
@@ -139,11 +116,6 @@ class ThemeController extends BaseController
         return $formBuilder->create(CustomCSSForm::class)->renderForm();
     }
 
-    /**
-     * @param CustomCssRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function postCustomCss(CustomCssRequest $request, BaseHttpResponse $response)
     {
         File::delete(theme_path(Theme::getThemeName() . '/public/css/style.integration.css'));
@@ -169,10 +141,6 @@ class ThemeController extends BaseController
         return $response->setMessage(trans('packages/theme::theme.update_custom_css_success'));
     }
 
-    /**
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
     public function getCustomJs(FormBuilder $formBuilder)
     {
         if (! config('packages.theme.general.enable_custom_js')) {
@@ -198,11 +166,6 @@ class ThemeController extends BaseController
         return $formBuilder->create(CustomJSForm::class)->renderForm();
     }
 
-    /**
-     * @param CustomJsRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function postCustomJs(CustomJsRequest $request, BaseHttpResponse $response)
     {
         if (! config('packages.theme.general.enable_custom_js')) {
@@ -218,14 +181,6 @@ class ThemeController extends BaseController
         return $response->setMessage(trans('packages/theme::theme.update_custom_js_success'));
     }
 
-    /**
-     * Remove theme
-     *
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @param ThemeService $themeService
-     * @return mixed
-     */
     public function postRemoveTheme(Request $request, BaseHttpResponse $response, ThemeService $themeService)
     {
         if (! config('packages.theme.general.display_theme_manager_in_admin_panel', true)) {
@@ -255,10 +210,6 @@ class ThemeController extends BaseController
             ->setMessage(trans('packages/theme::theme.theme_is_not_existed'));
     }
 
-    /**
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
     public function getCustomHtml(FormBuilder $formBuilder)
     {
         if (! config('packages.theme.general.enable_custom_html')) {
@@ -284,11 +235,6 @@ class ThemeController extends BaseController
         return $formBuilder->create(CustomHTMLForm::class)->renderForm();
     }
 
-    /**
-     * @param CustomHtmlRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function postCustomHtml(CustomHtmlRequest $request, BaseHttpResponse $response)
     {
         if (! config('packages.theme.general.enable_custom_html')) {

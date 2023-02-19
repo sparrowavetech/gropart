@@ -14,10 +14,7 @@ use Botble\Ecommerce\Http\Requests\ProductCollectionRequest;
 use Botble\Ecommerce\Repositories\Interfaces\ProductCollectionInterface;
 use Botble\Ecommerce\Tables\ProductCollectionTable;
 use Exception;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
-use Throwable;
 
 class ProductCollectionController extends BaseController
 {
@@ -28,11 +25,6 @@ class ProductCollectionController extends BaseController
         $this->productCollectionRepository = $productCollectionRepository;
     }
 
-    /**
-     * @param ProductCollectionTable $dataTable
-     * @return Factory|View
-     * @throws Throwable
-     */
     public function index(ProductCollectionTable $dataTable)
     {
         page_title()->setTitle(trans('plugins/ecommerce::product-collections.name'));
@@ -40,10 +32,6 @@ class ProductCollectionController extends BaseController
         return $dataTable->renderTable();
     }
 
-    /**
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
     public function create(FormBuilder $formBuilder)
     {
         page_title()->setTitle(trans('plugins/ecommerce::product-collections.create'));
@@ -51,11 +39,6 @@ class ProductCollectionController extends BaseController
         return $formBuilder->create(ProductCollectionForm::class)->renderForm();
     }
 
-    /**
-     * @param ProductCollectionRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function store(ProductCollectionRequest $request, BaseHttpResponse $response)
     {
         $productCollection = $this->productCollectionRepository->getModel();
@@ -73,13 +56,7 @@ class ProductCollectionController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    /**
-     * @param int $id
-     * @param FormBuilder $formBuilder
-     * @param Request $request
-     * @return string
-     */
-    public function edit($id, FormBuilder $formBuilder, Request $request)
+    public function edit(int $id, FormBuilder $formBuilder, Request $request)
     {
         $productCollection = $this->productCollectionRepository->findOrFail($id);
 
@@ -93,13 +70,7 @@ class ProductCollectionController extends BaseController
             ->renderForm();
     }
 
-    /**
-     * @param int $id
-     * @param ProductCollectionRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function update($id, ProductCollectionRequest $request, BaseHttpResponse $response)
+    public function update(int $id, ProductCollectionRequest $request, BaseHttpResponse $response)
     {
         $productCollection = $this->productCollectionRepository->findOrFail($id);
         $productCollection->fill($request->input());
@@ -113,13 +84,7 @@ class ProductCollectionController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param int $id
-     * @param BaseHttpResponse $response
-     * @param Request $request
-     * @return BaseHttpResponse
-     */
-    public function destroy($id, BaseHttpResponse $response, Request $request)
+    public function destroy(int $id, BaseHttpResponse $response, Request $request)
     {
         $productCollection = $this->productCollectionRepository->findOrFail($id);
 
@@ -136,12 +101,6 @@ class ProductCollectionController extends BaseController
         }
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function deletes(Request $request, BaseHttpResponse $response)
     {
         $ids = $request->input('ids');
@@ -160,10 +119,6 @@ class ProductCollectionController extends BaseController
         return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
-    /**
-     * @param BaseHttpResponse $response
-     * @return mixed
-     */
     public function getListForSelect(BaseHttpResponse $response)
     {
         $productCollections = $this->productCollectionRepository

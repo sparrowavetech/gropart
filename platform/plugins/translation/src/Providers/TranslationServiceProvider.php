@@ -19,7 +19,7 @@ class TranslationServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function register()
+    public function register(): void
     {
         $this->app->bind('translation-manager', Manager::class);
 
@@ -39,7 +39,7 @@ class TranslationServiceProvider extends ServiceProvider
         }
     }
 
-    public function boot()
+    public function boot(): void
     {
         $this->setNamespace('plugins/translation')
             ->loadAndPublishConfigurations(['general', 'permissions'])

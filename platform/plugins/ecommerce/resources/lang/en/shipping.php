@@ -133,6 +133,7 @@ return [
             'create' => 'Create new item',
             'delete' => 'Delete shipping rule item',
             'confirmation' => 'Are you sure you want to delete shipping rule item <strong class="item-label"></strong>?',
+            'load_data_table' => 'Load data table (:total)',
             'tables' => [
                 'shipping_rule' => 'Shipping rule',
                 'country' => 'Country',

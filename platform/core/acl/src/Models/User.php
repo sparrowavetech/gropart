@@ -4,6 +4,7 @@ namespace Botble\ACL\Models;
 
 use Botble\ACL\Notifications\ResetPasswordNotification;
 use Botble\ACL\Traits\PermissionTrait;
+use Botble\Base\Casts\SafeContent;
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Supports\Avatar;
 use Botble\Media\Models\MediaFile;
@@ -55,21 +56,24 @@ class User extends BaseModel implements
 
     protected $casts = [
         'permissions' => 'json',
+        'username' => SafeContent::class,
+        'first_name' => SafeContent::class,
+        'last_name' => SafeContent::class,
     ];
 
     protected function firstName(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => ucfirst($value),
-            set: fn ($value) => ucfirst($value),
+            get: fn ($value) => ucfirst((string)$value),
+            set: fn ($value) => ucfirst((string)$value),
         );
     }
 
     protected function lastName(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => ucfirst($value),
-            set: fn ($value) => ucfirst($value),
+            get: fn ($value) => ucfirst((string)$value),
+            set: fn ($value) => ucfirst((string)$value),
         );
     }
 

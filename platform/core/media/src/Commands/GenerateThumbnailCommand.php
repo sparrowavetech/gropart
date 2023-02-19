@@ -14,11 +14,11 @@ class GenerateThumbnailCommand extends Command
 {
     public function handle(MediaFileInterface $fileRepository): int
     {
-        $this->info('Starting to generate thumbnails...');
+        $this->components->info('Starting to generate thumbnails...');
 
         $files = $fileRepository->allBy([], [], ['url', 'mime_type', 'folder_id']);
 
-        $this->info('Processing ' . $files->count() . ' ' . Str::plural('file', $files->count()) . '...');
+        $this->components->info('Processing ' . $files->count() . ' ' . Str::plural('file', $files->count()) . '...');
 
         $errors = [];
 
@@ -27,11 +27,11 @@ class GenerateThumbnailCommand extends Command
                 RvMedia::generateThumbnails($file);
             } catch (Exception $exception) {
                 $errors[] = $file->url;
-                $this->error($exception->getMessage());
+                $this->components->error($exception->getMessage());
             }
         }
 
-        $this->info('Generated media thumbnails successfully!');
+        $this->components->info('Generated media thumbnails successfully!');
 
         $errors = array_unique($errors);
 
@@ -40,7 +40,7 @@ class GenerateThumbnailCommand extends Command
         }, $errors);
 
         if ($errors) {
-            $this->info('We are unable to regenerate thumbnail for these files:');
+            $this->components->info('We are unable to regenerate thumbnail for these files:');
 
             $this->table(['File directory'], $errors);
 

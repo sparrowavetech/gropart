@@ -10,35 +10,20 @@ use Botble\Marketplace\Http\Requests\VendorEditWithdrawalRequest;
 use Botble\Marketplace\Http\Requests\VendorWithdrawalRequest;
 use Botble\Marketplace\Repositories\Interfaces\WithdrawalInterface;
 use Botble\Marketplace\Tables\VendorWithdrawalTable;
-use Botble\Marketplace\Tables\WithdrawalTable;
 use Exception;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\View;
 use MarketplaceHelper;
 use Throwable;
 
 class WithdrawalController
 {
-    /**
-     * @var WithdrawalInterface
-     */
-    protected $withdrawalRepository;
+    protected WithdrawalInterface $withdrawalRepository;
 
-    /**
-     * WithdrawalController constructor.
-     * @param WithdrawalInterface $withdrawalRepository
-     */
     public function __construct(WithdrawalInterface $withdrawalRepository)
     {
         $this->withdrawalRepository = $withdrawalRepository;
     }
 
-    /**
-     * @param WithdrawalTable $table
-     * @return JsonResponse|View|Response
-     */
     public function index(VendorWithdrawalTable $table)
     {
         page_title()->setTitle(__('Withdrawals'));
@@ -46,11 +31,6 @@ class WithdrawalController
         return $table->render(MarketplaceHelper::viewPath('dashboard.table.base'));
     }
 
-    /**
-     * @param FormBuilder $formBuilder
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse|string
-     */
     public function create(FormBuilder $formBuilder, BaseHttpResponse $response)
     {
         $user = auth('customer')->user();
@@ -68,12 +48,6 @@ class WithdrawalController
         return $formBuilder->create(VendorWithdrawalForm::class)->renderForm();
     }
 
-    /**
-     * @param VendorWithdrawalRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Throwable
-     */
     public function store(VendorWithdrawalRequest $request, BaseHttpResponse $response)
     {
         $fee = MarketplaceHelper::getSetting('fee_withdrawal', 0);
@@ -111,12 +85,7 @@ class WithdrawalController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    /**
-     * @param int $id
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
-    public function edit($id, FormBuilder $formBuilder)
+    public function edit(int $id, FormBuilder $formBuilder)
     {
         $withdrawal = $this->withdrawalRepository->getFirstBy([
             'id' => $id,
@@ -133,13 +102,7 @@ class WithdrawalController
         return $formBuilder->create(VendorWithdrawalForm::class, ['model' => $withdrawal])->renderForm();
     }
 
-    /**
-     * @param int $id
-     * @param VendorEditWithdrawalRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function update($id, VendorEditWithdrawalRequest $request, BaseHttpResponse $response)
+    public function update(int $id, VendorEditWithdrawalRequest $request, BaseHttpResponse $response)
     {
         $withdrawal = $this->withdrawalRepository->getFirstBy([
             'id' => $id,
@@ -169,12 +132,7 @@ class WithdrawalController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param int $id
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
-    public function show($id, FormBuilder $formBuilder)
+    public function show(int $id, FormBuilder $formBuilder)
     {
         $withdrawal = $this->withdrawalRepository
             ->getFirstBy([

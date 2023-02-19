@@ -447,6 +447,49 @@
                 </div>
             </div>
         </div>
+        <div class="modal fade" tabindex="-1" role="dialog" id="modal_crop_image">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <form class="rv-form form-crop">
+                        <div class="modal-header">
+                            <h4 class="modal-title">
+                                <i class="fas fa-crop"></i> {{ trans('core/media::media.crop') }}
+                            </h4>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ trans('core/media::media.close') }}"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="image_id">
+                            <input type="hidden" name="crop_data">
+                            <div class="row">
+                                <div class="col-lg-9">
+                                    <div class="crop-image"></div>
+                                </div>
+                                <div class="col-lg-3">
+                                    <div class="mt-3">
+                                        <div class="form-group">
+                                            <label class="form-label">{{ trans('core/media::media.cropper.height') }}</label>
+                                            <input type="text" class="form-control" id="dataHeight">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">{{ trans('core/media::media.cropper.width') }}</label>
+                                            <input type="text" class="form-control" id="dataWidth">
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="checkbox" class="custom-control-input" id="aspectRatio">
+                                            <label for="aspectRatio">{{ trans('core/media::media.cropper.aspect_ratio') }}</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ trans('core/media::media.close') }}</button>
+                            <button type="submit" class="btn btn-primary">{{ trans('core/media::media.crop') }}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 
     <button class="hidden js-rv-clipboard-temp"></button>
@@ -582,3 +625,14 @@
         </div>
     </div>
 </script>
+
+<script type="text/x-custom-template" id="rv_media_crop_image">
+    <img src="__src__" style="display: block;max-width: 100%">
+</script>
+
+<div class="media-download-popup">
+    <div class="alert alert-success">
+        <i class="fas fa-circle-notch fa-spin me-2"></i>
+        {{ trans('core/media::media.prepare_file_to_download') }}
+    </div>
+</div>

@@ -103,7 +103,9 @@ class StoreProductService
 
             if ($request->has('related_products')) {
                 $product->products()->detach();
-                $product->products()->attach(array_filter(explode(',', $request->input('related_products', ''))));
+                if ($relatedProducts = $request->input('related_products', '')) {
+                    $product->products()->attach(array_filter(explode(',', $relatedProducts)));
+                }
             }
 
             if ($request->has('frequently_bought_together')) {
@@ -113,12 +115,16 @@ class StoreProductService
 
             if ($request->has('cross_sale_products')) {
                 $product->crossSales()->detach();
-                $product->crossSales()->attach(array_filter(explode(',', $request->input('cross_sale_products', ''))));
+                if ($crossSaleProducts = $request->input('cross_sale_products', '')) {
+                    $product->crossSales()->attach(array_filter(explode(',', $crossSaleProducts)));
+                }
             }
 
             if ($request->has('up_sale_products')) {
                 $product->upSales()->detach();
-                $product->upSales()->attach(array_filter(explode(',', $request->input('up_sale_products', ''))));
+                if ($upSaleProducts = $request->input('up_sale_products', '')) {
+                    $product->upSales()->attach(array_filter(explode(',', $upSaleProducts)));
+                }
             }
 
             if (EcommerceHelper::isEnabledSupportDigitalProducts() && $product->isTypeDigital()) {

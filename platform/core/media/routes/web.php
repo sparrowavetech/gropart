@@ -28,7 +28,7 @@ Route::group(['namespace' => 'Botble\Media\Http\Controllers', 'middleware' => ['
                 'uses' => 'MediaController@postGlobalActions',
             ]);
 
-            Route::get('download', [
+            Route::post('download', [
                 'as' => 'download',
                 'uses' => 'MediaController@download',
             ]);

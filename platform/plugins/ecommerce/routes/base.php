@@ -189,6 +189,12 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
                 'permission' => 'ecommerce.report.index',
             ]);
 
+            Route::post('trending-products', [
+                'as' => 'ecommerce.report.trending-products',
+                'uses' => 'ReportController@getTrendingProducts',
+                'permission' => 'ecommerce.report.index',
+            ]);
+
             Route::get('dashboard-general-report', [
                 'as' => 'ecommerce.report.dashboard-widget.general',
                 'uses' => 'ReportController@getDashboardWidgetGeneral',

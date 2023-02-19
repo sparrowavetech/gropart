@@ -302,17 +302,14 @@ class Botble {
     }
 
     static initDatePicker(element) {
-        if (jQuery().bootstrapDP) {
+        if (jQuery().flatpickr) {
             let format = $(document).find(element).data('date-format');
             if (!format) {
-                format = 'yyyy-mm-dd';
+                format = 'Y-m-d';
             }
-            $(document).find(element).bootstrapDP({
-                maxDate: 0,
-                changeMonth: true,
-                changeYear: true,
-                autoclose: true,
+            $(document).find(element).flatpickr({
                 dateFormat: format,
+                wrap: true
             });
         }
     }
@@ -696,9 +693,9 @@ class Botble {
                                     let link = file.full_url;
                                     if (file.type === 'youtube') {
                                         link = link.replace('watch?v=', 'embed/');
-                                        content += '<iframe width="420" height="315" src="' + link + '" frameborder="0" allowfullscreen></iframe><br />';
+                                        content += '<iframe width="420" height="315" src="' + link + '" frameborder="0" allowfullscreen loading="lazy"></iframe><br />';
                                     } else if (file.type === 'image') {
-                                        content += '<img src="' + link + '" alt="' + file.name + '" /><br />';
+                                        content += '<img src="' + link + '" alt="' + file.name + '" loading="lazy"/><br />';
                                     } else {
                                         content += '<a href="' + link + '">' + file.name + '</a><br />';
                                     }
@@ -713,9 +710,9 @@ class Botble {
                                     let link = file.full_url;
                                     if (file.type === 'youtube') {
                                         link = link.replace('watch?v=', 'embed/');
-                                        html += '<iframe width="420" height="315" src="' + link + '" frameborder="0" allowfullscreen></iframe><br />';
+                                        html += '<iframe width="420" height="315" src="' + link + '" frameborder="0" allowfullscreen loading="lazy"></iframe><br />';
                                     } else if (file.type === 'image') {
-                                        html += '<img src="' + link + '" alt="' + file.name + '" /><br />';
+                                        html += '<img src="' + link + '" alt="' + file.name + '" loading="lazy"/><br />';
                                     } else {
                                         html += '<a href="' + link + '">' + file.name + '</a><br />';
                                     }
@@ -735,6 +732,9 @@ class Botble {
                                 $el.closest('.attachment-wrapper').find('.attachment-url').val(firstAttachment.url);
                                 $el.closest('.attachment-wrapper').find('.attachment-details').html('<a href="' + firstAttachment.full_url + '" target="_blank">' + firstAttachment.url + '</a>');
                                 break;
+                            default:
+                                const coreInsertMediaEvent = new CustomEvent('core-insert-media', { detail: { files: files, element: $el } })
+                                document.dispatchEvent(coreInsertMediaEvent)
                         }
                     }
                 });
@@ -944,10 +944,6 @@ class Botble {
             });
         }
     }
-}
-
-if (jQuery().datepicker && jQuery().datepicker.noConflict) {
-    $.fn.bootstrapDP = $.fn.datepicker.noConflict();
 }
 
 $(document).ready(() => {

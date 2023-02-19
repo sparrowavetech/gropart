@@ -5,7 +5,6 @@ namespace Botble\Base\Tables;
 use Botble\Base\Supports\SystemManagement;
 use Botble\Table\Abstracts\TableAbstract;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Collection;
 
 class InfoTable extends TableAbstract
 {

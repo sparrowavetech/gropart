@@ -10,7 +10,6 @@ use EmailHandler;
 use Exception;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;
-use Throwable;
 
 class PublicController extends Controller
 {
@@ -21,12 +20,6 @@ class PublicController extends Controller
         $this->contactRepository = $contactRepository;
     }
 
-    /**
-     * @param ContactRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Throwable
-     */
     public function postSendContact(ContactRequest $request, BaseHttpResponse $response)
     {
         $blacklistDomains = setting('blacklist_email_domains');

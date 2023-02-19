@@ -18,6 +18,8 @@ trait DimensionTrait
 
     public function dimensions(string ...$items): self
     {
+        $this->dimensions = [];
+
         foreach ($items as $item) {
             $this->dimension($item);
         }

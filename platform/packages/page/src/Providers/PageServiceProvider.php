@@ -19,13 +19,13 @@ class PageServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function register()
+    public function register(): void
     {
         $this->setNamespace('packages/page')
             ->loadHelpers();
     }
 
-    public function boot()
+    public function boot(): void
     {
         $this->app->bind(PageInterface::class, function () {
             return new PageCacheDecorator(new PageRepository(new Page()));

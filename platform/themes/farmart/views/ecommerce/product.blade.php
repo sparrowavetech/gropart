@@ -11,20 +11,28 @@
                 <div class="col-lg-5 col-md-12 mb-md-5 pb-md-5 mb-3">
                     {!! Theme::partial('ecommerce.product-gallery', compact('product', 'productImages')) !!}
                 </div>
-                <div class="col-lg-4 col-md-8 ps-4 product-details-content">
+                <div class="col-lg-4 col-md-12 ps-4 product-details-content">
                     <div class="product-details js-product-content">
                         <div class="entry-product-header">
                             <div class="product-header-left">
-                                <h1 class="fs-5 fw-normal product_title entry-title">{{ $product->name }}</h1>
+                                <h1 class="fs-5 fw-normal product_title entry-title">{!! BaseHelper::clean($product->name) !!}</h1>
+                                @if ($product->categories->count())
+                                    <div class="meta-categories">
+                                        <span class="meta-label d-inline-block">{{ __('Categories') }}: </span>
+                                        @foreach($product->categories as $category)
+                                            <a href="{{ $category->url }}">{!! BaseHelper::clean($category->name) !!}</a>@if (!$loop->last), @endif
+                                        @endforeach
+                                    </div>
+                                @endif
                                 <div class="product-entry-meta">
-                                    @if ($product->brand_id)
-                                        <p class="mb-0 me-2 pe-2 text-secondary">{{ __('Brand') }}: <a href="{{ $product->brand->url }}">{{ $product->brand->name }}</a></p>
-                                    @endif
-
                                     @if (EcommerceHelper::isReviewEnabled())
                                         <a href="#product-reviews-tab" class="anchor-link">
                                             {!! Theme::partial('star-rating', ['avg' => $product->reviews_avg, 'count' => $product->reviews_count]) !!}
                                         </a>
+                                    @endif
+
+                                    @if ($product->brand_id)
+                                        <p class="mb-0 me-2 pe-2 text-secondary">{{ __('Brand') }}: <a href="{{ $product->brand->url }}">{{ $product->brand->name }}</a></p>
                                     @endif
                                 </div>
                             </div>
@@ -34,13 +42,20 @@
                         @if (is_plugin_active('marketplace') && $product->store_id)
                             <div class="product-meta-sold-by my-2">
                                 <span class="d-inline-block">{{ __('Sold By') }}: </span>
-                                <a href="{{ $product->store->url }}">{{ $product->store->name }} </a>
+                                <a href="{{ $product->store->url }}">
+                                    {{ $product->store->name }}
+                                </a>
                                 @if($product->store->is_verified)
                                     <img class="verified-store-main" src="{{ asset('/storage/stores/verified.png')}}"alt="Verified">
                                 @endif
                                 <small class="badge bg-warning text-dark">{{ $product->store->shop_category->label() }}</small>
                             </div>
                         @endif
+
+                        <div class="meta-sku @if (!$product->sku) d-none @endif">
+                            <span class="meta-label d-inline-block">{{ __('SKU') }}:</span>
+                            <span class="meta-value">{{ $product->sku }}</span>
+                        </div>
 
                         <div class="ps-list--dot">
                             {!! apply_filters('ecommerce_before_product_description', null, $product) !!}
@@ -50,7 +65,7 @@
 
                         {!! Theme::partial('ecommerce.product-availability', compact('product', 'productVariation')) !!}
                         @if ($flashSale = $product->latestFlashSales()->first())
-                            <div class="deal-expire-date p-4 bg-light mb-2">
+                            <div class="deal-expire-date p-4 bg-light mb-2 mt-4">
                                 <div class="row">
                                     <div class="col-xxl-5 d-md-flex justify-content-center align-items-center">
                                         <div class="deal-expire-text mb-2">
@@ -86,34 +101,23 @@
                                 </div>
                             </div>
                         @endif
-                        {!! Theme::partial('ecommerce.product-cart-form',
-                            compact('product', 'selectedAttrs') + ['withButtons' => true, 'withVariations' => true, 'wishlistIds' => [], 'withBuyNow' => true]) !!}
-                       
-                            @if (is_plugin_active('pickrr'))
-                            <hr>
-                        {!! Theme::partial('ecommerce.product-pincode-form', compact('product')) !!}
-                        <hr>
-                        @endif
-                            <div class="meta-sku @if (!$product->sku) d-none @endif">
-                            <span class="meta-label d-inline-block">{{ __('SKU') }}:</span>
-                            <span class="meta-value">{{ $product->sku }}</span>
-                        </div>
-                        @if ($product->categories->count())
-                            <div class="meta-categories">
-                                <span class="meta-label d-inline-block">{{ __('Categories') }}: </span>
-                                @foreach($product->categories as $category)
-                                    <a href="{{ $category->url }}">{{ $category->name }}</a>@if (!$loop->last), @endif
-                                @endforeach
-                            </div>
-                        @endif
+
                         @if ($product->tags->count())
-                            <div class="meta-categories">
+                            <div class="meta-categories mt-4">
                                 <span class="meta-label d-inline-block">{{ __('Tags') }}: </span>
                                 @foreach($product->tags as $tag)
                                     <a href="{{ $tag->url }}">{{ $tag->name }}</a>@if (!$loop->last), @endif
                                 @endforeach
                             </div>
                         @endif
+
+                        {!! Theme::partial('ecommerce.product-cart-form',
+                            compact('product', 'selectedAttrs') + ['withButtons' => true, 'withVariations' => true, 'wishlistIds' => [], 'withBuyNow' => true]) !!}
+
+                        @if (is_plugin_active('pickrr'))
+                            {!! Theme::partial('ecommerce.product-pincode-form', compact('product')) !!}
+                        @endif
+
                         @if (theme_option('social_share_enabled', 'yes') == 'yes')
                             <div class="my-4">
                                 {!! Theme::partial('share-socials', compact('product')) !!}
@@ -121,15 +125,18 @@
                         @endif
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-4">
+                <div class="col-lg-3 col-md-4 d-block d-sm-block d-md-none d-lg-block d-xl-block">
                     {!! dynamic_sidebar('product_detail_sidebar') !!}
                 </div>
             </div>
         </div>
     </div>
+    @if($product->frequentlyBoughtTogether->count())
+        @include(Theme::getThemeNamespace() . '::views.ecommerce.includes.frequently-bought-together', ['products' => $product->frequentlyBoughtTogether,'product'=>$product])
+    @endif
     <div class="container-xxxl">
         <div class="row product-detail-tabs mt-3 mb-4">
-            <div class="col-md-3">
+            <div class="col-md-12 col-lg-3">
                 <div class="nav flex-column nav-pills me-3" id="product-detail-tabs" role="tablist"
                     aria-orientation="vertical">
                     <a class="nav-link active"
@@ -180,7 +187,7 @@
                     @endif
                 </div>
             </div>
-            <div class="col-md-9">
+            <div class="col-md-12 col-lg-9">
                 <div class="tab-content" id="product-detail-tabs-content">
                     <div class="tab-pane fade show active" id="product-description" role="tabpanel"
                         aria-labelledby="product-description-tab">
@@ -387,17 +394,12 @@
         </div>
     </div>
 </div>
-
-@if($product->frequentlyBoughtTogether->count())
-    @include(Theme::getThemeNamespace() . '::views.ecommerce.includes.frequently-bought-together', ['products' => $product->frequentlyBoughtTogether,'product'=>$product])
-@endif
-
-<div class="widget-products-with-category py-5 bg-light">
+<div class="widget-products-with-category pt-4 pb-5 bg-light">
     <div class="container-xxxl">
         <div class="row">
             <div class="col-12">
                 <div class="row align-items-center mb-2 widget-header">
-                    <h2 class="col-auto mb-0 py-2">{{ __('Related products') }}</h2>
+                    <h2 class="col-auto mb-3 py-2">{{ __('Related products') }}</h2>
                 </div>
                 <related-products-component
                     limit="6"
@@ -418,19 +420,19 @@
                             [
                                 'breakpoint' => 1400,
                                 'settings' => [
-                                    'slidesToShow' => 5,
+                                    'slidesToShow' => 6,
                                 ],
                             ],
                             [
                                 'breakpoint' => 1199,
                                 'settings' => [
-                                    'slidesToShow' => 4,
+                                    'slidesToShow' => 6,
                                 ],
                             ],
                             [
                                 'breakpoint' => 1024,
                                 'settings' => [
-                                    'slidesToShow' => 3,
+                                    'slidesToShow' => 4,
                                 ],
                             ],
                             [
@@ -460,7 +462,7 @@
                         <img src="{{ RvMedia::getImageUrl($product->image, 'small', false, RvMedia::getDefaultImage()) }}" alt="{{ $product->name }}">
                     </div>
                     <div class="ps-product__wrapper">
-                        <div class="ps-product__content"><a class="ps-product__title" href="{{ $product->url }}">{{ $product->name }}</a>
+                        <div class="ps-product__content"><a class="ps-product__title" href="{{ $product->url }}">{!! BaseHelper::clean($product->name) !!}</a>
                             <ul>
                                 <li class="active"><a href="#product-description-tab">{{ __('Description') }}</a></li>
                                 @if (EcommerceHelper::isReviewEnabled())
@@ -475,7 +477,7 @@
                                 <span class="add-to-cart-text ms-2">{{ __('Enquiry Now') }}</span>
                             </a>
                             @else
-                                @if (EcommerceHelper::isCartEnabled() )
+                                @if (EcommerceHelper::isCartEnabled())
                                     <button type="button" name="add_to_cart" value="1" class="btn btn-primary ms-2 add-to-cart-button @if ($product->isOutOfStock()) disabled @endif" @if ($product->isOutOfStock()) disabled @endif title="{{ __('Add to cart') }}">
                                         <span class="svg-icon">
                                             <svg>

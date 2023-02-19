@@ -6,10 +6,6 @@ use ApiHelper;
 use App\Http\Controllers\Controller;
 use Botble\ACL\Traits\SendsPasswordResetEmails;
 use Botble\Api\Http\Requests\ForgotPasswordRequest;
-use Illuminate\Contracts\Auth\PasswordBroker;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Validation\ValidationException;
 use Password;
 
 class ForgotPasswordController extends Controller
@@ -24,10 +20,6 @@ class ForgotPasswordController extends Controller
      * @bodyParam email string required The email of the user.
      *
      * @group Authentication
-     *
-     * @param ForgotPasswordRequest $request
-     * @return JsonResponse|RedirectResponse
-     * @throws ValidationException
      */
     public function sendResetLinkEmail(ForgotPasswordRequest $request)
     {
@@ -45,11 +37,6 @@ class ForgotPasswordController extends Controller
             : $this->sendResetLinkFailedResponse($request, $response);
     }
 
-    /**
-     * Get the broker to be used during password reset.
-     *
-     * @return PasswordBroker
-     */
     public function broker()
     {
         return Password::broker(ApiHelper::passwordBroker());

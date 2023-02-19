@@ -7,7 +7,7 @@ use Botble\Base\Forms\Fields\AutocompleteField;
 use Botble\Base\Forms\Fields\ColorField;
 use Botble\Base\Forms\Fields\CustomRadioField;
 use Botble\Base\Forms\Fields\CustomSelectField;
-use Botble\Base\Forms\Fields\DateField;
+use Botble\Base\Forms\Fields\DatePickerField;
 use Botble\Base\Forms\Fields\EditorField;
 use Botble\Base\Forms\Fields\HtmlField;
 use Botble\Base\Forms\Fields\MediaFileField;
@@ -16,6 +16,7 @@ use Botble\Base\Forms\Fields\MediaImagesField;
 use Botble\Base\Forms\Fields\OnOffField;
 use Botble\Base\Forms\Fields\RepeaterField;
 use Botble\Base\Forms\Fields\TimeField;
+use Botble\JsValidation\Javascript\JavascriptValidator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use JsValidator;
@@ -40,9 +41,6 @@ abstract class FormAbstract extends Form
 
     protected string $wrapperClass = 'form-body';
 
-    /**
-     * @var string
-     */
     protected $template = 'core/base::forms.form';
 
     public function __construct()
@@ -191,7 +189,7 @@ abstract class FormAbstract extends Form
             'mediaFile' => MediaFileField::class,
             'customColor' => ColorField::class,
             'time' => TimeField::class,
-            'date' => DateField::class,
+            'datePicker' => DatePickerField::class,
             'autocomplete' => AutocompleteField::class,
             'html' => HtmlField::class,
             'repeater' => RepeaterField::class,
@@ -266,7 +264,7 @@ abstract class FormAbstract extends Form
         return parent::renderForm($options, $showStart, $showFields, $showEnd);
     }
 
-    public function renderValidatorJs(): string
+    public function renderValidatorJs(): string|JavascriptValidator
     {
         $element = null;
         if ($this->getFormOption('id')) {

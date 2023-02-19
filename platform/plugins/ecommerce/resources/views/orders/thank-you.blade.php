@@ -23,14 +23,12 @@
 
                 <a href="{{ route('public.index') }}" class="btn payment-checkout-btn"> {{ __('Continue shopping') }} </a>
             </div>
-            <!---------------------- start right column ------------------>
             <div class="col-lg-5 col-md-6 d-none d-md-block right">
 
                 @include('plugins/ecommerce::orders.thank-you.order-info')
 
                 <hr>
 
-                <!-- total info -->
                 @include('plugins/ecommerce::orders.thank-you.total-info', ['order' => $order])
             </div>
         </div>
