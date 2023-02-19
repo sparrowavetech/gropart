@@ -1,8 +1,8 @@
 node_modules
 #public/hot
-public/storage
+#public/storage
 #storage/*.key
-vendor
+#vendor
 #.DS_Store
 #Thumbs.db
 bower_components
