@@ -107,7 +107,6 @@ class InvoiceHelper
                 }
             }
         }
-
         $pdf = Pdf::loadHTML($content, 'UTF-8');
 
         return $pdf
@@ -168,6 +167,10 @@ class InvoiceHelper
 
         return [
             'invoice' => $invoice->loadMissing('items')->toArray(),
+            'toState' => $invoice->reference->address->state,
+            'fromState'=> $invoice->reference->store->state,
+            'colspan'=>$invoice->reference->address->state !== $invoice->reference->store->state ?7:8 ,
+            'isIgst'=>$invoice->reference->address->state !== $invoice->reference->store->state ?true:false ,
             'logo' => $logo,
             'logo_full_path' => RvMedia::getRealPath($logo),
             'site_title' => theme_option('site_title'),

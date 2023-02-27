@@ -402,6 +402,7 @@ class PublicController extends Controller
             abort(404);
         }
 
+        return InvoiceHelper::streamInvoice($order->invoice);
         if ($request->input('type') == 'print') {
             return InvoiceHelper::streamInvoice($order->invoice);
         }

@@ -1,6 +1,6 @@
 <div class="pt-3 mb-4">
-    <div class="align-items-center">
-        <h6 class="d-inline-block">{{ __('Order number') }}: {{ $order->code }}</h6>
+    <div class="align-items-center order-number-data">
+        <h6 class="d-block od-no">{{ __('Order number') }}: {{ $order->code }}</h6>
     </div>
 
     <div class="checkout-success-products">
@@ -46,7 +46,7 @@
 
                 @if ($product)
                     <div class="row cart-item">
-                    <div class="col-lg-3 col-md-3">
+                    <div class="col-lg-2 col-md-3 col-12">
                         <div class="checkout-product-img-wrapper">
                             <img class="item-thumb img-thumbnail img-rounded"
                                  src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}"
@@ -54,10 +54,10 @@
                             <span class="checkout-quantity">{{ $orderProduct->qty }}</span>
                         </div>
                     </div>
-                    <div class="col-lg-5 col-md-5">
-                        <p class="mb-0">{{ $product->name }}</p>
+                    <div class="col-lg-7 col-md-6 col-8">
+                        <p class="mb-0 fw-bold">{{ $product->name }}</p>
                         <p class="mb-0">
-                            <small>{{ $product->variation_attributes }}</small>
+                            <small><em>{{ $product->variation_attributes }}</em></small>
                         </p>
                         @if (!empty($orderProduct->product_options) && is_array($orderProduct->product_options))
                             {!! render_product_options_info($orderProduct->product_options, $product, true) !!}
@@ -72,8 +72,12 @@
                             @endforeach
                         @endif
                     </div>
-                    <div class="col-lg-4 col-md-4 col-4 float-end text-end">
-                        <p>{{ format_price($orderProduct->price) }}</p>
+                    <div class="col-lg-3 col-md-3 col-4 float-end text-end">
+                        @if(setting('ecommerce_display_product_price_including_taxes') == 1)
+                            <p>{{ format_price($orderProduct->price + $orderProduct->tax_amount) }}</p>
+                        @else
+                            <p>{{ format_price($orderProduct->price) }}</p>
+                        @endif
                     </div>
                 </div> <!--  /item -->
                 @endif

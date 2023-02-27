@@ -239,6 +239,9 @@ class CartItem implements Arrayable, Jsonable
      */
     public function __get($attribute)
     {
+
+
+
         if (property_exists($this, $attribute)) {
             return $this->{$attribute};
         }
@@ -247,12 +250,21 @@ class CartItem implements Arrayable, Jsonable
             if (! EcommerceHelper::isTaxEnabled()) {
                 return 0;
             }
+            if(setting('ecommerce_display_product_price_including_taxes') == 1){
+                return $this->price;
+            }else{
+                return $this->price + $this->tax;
+            }
 
-            return $this->price + $this->tax;
         }
 
         if ($attribute === 'subtotal') {
-            return $this->qty * $this->price;
+            if(setting('ecommerce_display_product_price_including_taxes') == 1){
+                return $this->qty * ($this->price - $this->tax);
+            }else{
+                return $this->qty * $this->price;
+            }
+
         }
 
         if ($attribute === 'total') {
@@ -263,8 +275,11 @@ class CartItem implements Arrayable, Jsonable
             if (! EcommerceHelper::isTaxEnabled()) {
                 return 0;
             }
-
-            return $this->price * ($this->taxRate / 100);
+            if(setting('ecommerce_display_product_price_including_taxes') == 1){
+                return $this->price - ($this->price * (100/(100 + $this->taxRate)));
+            }else{
+                return $this->price * ($this->taxRate / 100);
+            }
         }
 
         if ($attribute === 'taxTotal') {

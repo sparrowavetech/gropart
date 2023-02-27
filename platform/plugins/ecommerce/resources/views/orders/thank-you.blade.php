@@ -3,7 +3,6 @@
     {{ __('Order successfully. Order number :id', ['id' => $order->code]) }}
 @stop
 @section('content')
-
     <div class="container">
         <div class="row">
             <div class="col-lg-7 col-md-6 col-12 left">
@@ -17,6 +16,10 @@
                         </h3>
                         <p>{{ __('Thank you for purchasing our products!') }}</p>
                     </div>
+                </div>
+
+                <div class="thank-you-links mb-4">
+                    <span class="link-text"><a href="{{ route('customer.overview') }}">{{ __('Customer dashboard') }}</a></span>
                 </div>
 
                 @include('plugins/ecommerce::orders.thank-you.customer-info', compact('order'))

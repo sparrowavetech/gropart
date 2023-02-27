@@ -20,6 +20,10 @@
                     </div>
                 </div>
 
+                <div class="thank-you-links mb-4">
+                    <span class="link-text"><a href="{{ route('customer.overview') }}">{{ __('Customer dashboard') }}</a></span>
+                </div>
+
                 @include('plugins/ecommerce::orders.thank-you.customer-info', ['order' => Arr::first($orders), 'isShowShipping' => false])
 
                 <a href="{{ route('public.index') }}" class="btn payment-checkout-btn"> {{ __('Continue shopping') }} </a>

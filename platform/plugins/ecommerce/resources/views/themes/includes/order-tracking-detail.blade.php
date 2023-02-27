@@ -75,6 +75,7 @@
                         <th class="text-center">{{ __('Image') }}</th>
                         <th>{{ __('Product') }}</th>
                         <th class="text-center">{{ __('Amount') }}</th>
+                        <th class="text-center">{{ __('Tax') }}</th>
                         <th class="text-end" style="width: 100px">{{ __('Quantity') }}</th>
                         <th class="price text-end">{{ __('Total') }}</th>
                     </tr>
@@ -150,10 +151,11 @@
                                 @endif
                             </td>
                             <td>{{ format_price($orderProduct->price) }}</td>
+                            <td>{{ format_price($orderProduct->tax_amount) }}</td>
                             <td class="text-center">{{ $orderProduct->qty }}</td>
                             <td class="money text-end">
                                 <strong>
-                                    {{ format_price($orderProduct->price * $orderProduct->qty) }}
+                                    {{ format_price(($orderProduct->price * $orderProduct->qty)+$orderProduct->tax_amount) }}
                                 </strong>
                             </td>
                         </tr>

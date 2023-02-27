@@ -157,6 +157,7 @@
                                                 </svg>
                                             </span>
                                         </div>
+
                                         <select class="form-control product-category-select" name="categories[]">
                                             <option value="0">{{ __('All Categories') }}</option>
                                             {!! Theme::partial('product-categories-select', ['categories' => $categories, 'indent' => null]) !!}
