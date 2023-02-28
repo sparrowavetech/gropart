@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('ec_product_categories', function (Blueprint $table) {
-            $table->int('is_enquiry')->nullable();
+            $table->integer('is_enquiry')->nullable();
         });
     }
 
