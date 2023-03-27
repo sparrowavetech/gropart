@@ -411,20 +411,59 @@
                     url: "{{ route('public.ajax.check-pincode')}}/"+formPincode+"/"+toPincode,
                     success: function(data) {
                         if(data){
+                            $('.picodetext').removeClass('alert alert-danger');
                             $('.picodetext').text('Delivery available at your location').addClass('alert alert-success').show();
                         }else{
+                            $('.picodetext').removeClass('alert alert-success');
                             $('.picodetext').text('Delivery not available at your location').addClass('alert alert-danger').show();
                         }
 
                     },
                     error: function(data) {
+                        $('.picodetext').removeClass('alert alert-success');
                         $('.picodetext').text('Error in check pincode').addClass('alert alert-danger').show();
                     }
                 });
             }else{
+                $('.picodetext').removeClass('alert alert-success');
                 $('.picodetext').text('Please enter pincode').addClass('alert alert-danger').show();
             }
         }
     </script>
+    @if (EcommerceHelper::isZipCodeEnabled())
+        <script type="text/javascript">
+            $(document).ready(function () {
+                $(document).on("keyup","#zip_code",function(){
+                    var toPincode = $(this).val();
+                    var formPincode = $(this).data('pincode');
+                    if(toPincode !=''){
+                        $.ajax({
+                            type: "GET",
+                            url: "{{ route('public.ajax.check-pincode')}}/"+formPincode+"/"+toPincode,
+                            success: function(data) {
+                                $(".picodetext.customer-panel").remove();
+                                if(data) {
+                                    $(".customer-address-button").removeAttr('disabled');
+                                    $("#zip_code").after("<p class='picodetext customer-panel alert alert-success mt-2'><i class='fa fa-check-circle'></i> Congratulations! Delivery is available on your location.").show();
+                                } else {
+                                    $(".customer-address-button").attr('disabled','disabled');
+                                    $("#zip_code").after("<p class='picodetext customer-panel alert alert-danger mt-2'><i class='fa fa-times-circle'></i> Sorry! Delivery not available at your location.").show();
+                                }
+                            },
+                            error: function(data) {
+                                $(".picodetext.customer-panel").remove();
+                                $(".customer-address-button").attr('disabled','disabled');
+                                $("#zip_code").after("<p class='picodetext customer-panel alert alert-danger mt-2'><i class='fa fa-times-circle'></i> Error in checking pincode! Please try later.").show();
+                            }
+                        });
+                    } else {
+                        $(".picodetext.customer-panel").remove();
+                        $(".customer-address-button").attr('disabled','disabled');
+                        $(this).after("<p class='picodetext customer-panel alert alert-warning mt-2'><i class='fa fa-circle-info'></i> Please enter pincode!").show();
+                    }
+                });
+            });
+        </script>
+    @endif
     </body>
 </html>

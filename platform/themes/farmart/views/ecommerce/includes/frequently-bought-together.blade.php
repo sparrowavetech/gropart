@@ -45,7 +45,7 @@ $slick =
 <div class="widget-frequently-bought-products pt-2 pb-4 bg-light">
     <div class="container-xxxl rounded-7 bg-white py-4 px-5">
         <div class="row">
-            <div class="col-sm-9">
+            <div class="col-md-8 col-lg-9">
                 <div class="row align-items-center mb-2 widget-header">
                     <h2 class="col-auto mb-3">{{ __('Frequently Bought Together')}}</h2>
                 </div>
@@ -147,7 +147,7 @@ $slick =
                     <div class="arrows-wrapper"></div>
                 </div>
             </div>
-            <div class="col-sm-3">
+            <div class="col-md-4 col-lg-3">
                 <div class="frequently-bought-products__price-box text-center">
                     <h2>{{ __('Combo Price')}}</h2>
                     <p class="product-price">

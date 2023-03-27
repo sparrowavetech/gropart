@@ -5,6 +5,7 @@ namespace Botble\Base\Supports;
 use BaseHelper;
 use Botble\Base\Events\UpdatedEvent;
 use Botble\Base\Events\UpdatingEvent;
+use Botble\PluginManagement\Services\PluginService;
 use Botble\Theme\Services\ThemeService;
 use Exception;
 use GuzzleHttp\Client;
@@ -455,6 +456,8 @@ final class Core
                 plugin_path(),
             ];
 
+            $pluginService = app(PluginService::class);
+
             foreach ($paths as $path) {
                 foreach (BaseHelper::scanFolder($path) as $module) {
                     if ($path == plugin_path() && ! is_plugin_active($module)) {
@@ -475,6 +478,13 @@ final class Core
 
                     if (File::isDirectory($modulePath . '/public')) {
                         File::copyDirectory($modulePath . '/public', $publishedPath . '/' . $module);
+                    }
+
+                    if (File::isDirectory($modulePath . '/resources/lang')) {
+                        File::copyDirectory(
+                            $modulePath . '/resources/lang',
+                            lang_path('vendor') . '/' . File::basename($path) . '/' . $module
+                        );
                     }
 
                     if (File::isDirectory($modulePath . '/database/migrations')) {
@@ -524,9 +534,9 @@ final class Core
 
             File::delete(app()->getCachedConfigPath());
             File::delete(app()->getCachedRoutesPath());
-            File::delete(base_path('bootstrap/cache/packages.php'));
-            File::delete(base_path('bootstrap/cache/services.php'));
-            File::delete(base_path('bootstrap/cache/plugins.php'));
+            File::delete(app()->bootstrapPath('cache/packages.php'));
+            File::delete(app()->bootstrapPath('cache/services.php'));
+            File::delete(app()->bootstrapPath('cache/plugins.php'));
             foreach (File::glob(storage_path('app/purifier') . '/*') as $view) {
                 File::delete($view);
             }

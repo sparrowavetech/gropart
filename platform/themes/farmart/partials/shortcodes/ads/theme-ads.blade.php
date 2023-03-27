@@ -1,5 +1,5 @@
 @if (count($ads))
-    <div class="widget-featured-banners theme-short-ad py-5">
+    <div class="widget-featured-banners theme-short-ad py-1">
         <div class="container-xxxl">
             @if (count($ads)<=2)
                 <div class="row row-cols-md-2 row-cols-1 justify-content-center">

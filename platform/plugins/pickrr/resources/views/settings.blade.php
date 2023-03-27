@@ -32,7 +32,7 @@
                     <div class="flexbox-annotated-section-content">
                         <div class="wrapper-content pd-all-20">
                             <div class="form-group mb-3">
-                                <label class="text-title-field" for="sms_url">{{ trans('plugins/pickrr::pickrr.settings.auth_token') }}</label>
+                                <label class="text-title-field" for="shipping_pickrr_auth_token">{{ trans('plugins/pickrr::pickrr.settings.auth_token') }}</label>
                                 <input data-counter="500" type="text" class="next-input" name="shipping_pickrr_auth_token" id="shipping_pickrr_auth_token" value="{{ setting('shipping_pickrr_auth_token') }}" placeholder="{{ trans('plugins/pickrr::pickrr.settings.auth_token') }}">
                             </div>
                         </div>

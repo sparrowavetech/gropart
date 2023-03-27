@@ -3,12 +3,9 @@
 @endphp
 
 @if ($logo)
-    <div class="checkout-logo">
-        <div class="container">
-            <a href="{{ route('public.index') }}" title="{{ theme_option('site_title') }}">
-                <img src="{{ RvMedia::getImageUrl($logo) }}" class="img-fluid" width="150" alt="{{ theme_option('site_title') }}" />
-            </a>
-        </div>
+    <div class="checkout-logo m-0">
+        <a href="{{ route('public.index') }}" title="{{ theme_option('site_title') }}">
+            <img src="{{ RvMedia::getImageUrl($logo) }}" class="img-fluid" width="150" alt="{{ theme_option('site_title') }}" />
+        </a>
     </div>
-    <hr>
 @endif

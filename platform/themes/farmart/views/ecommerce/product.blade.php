@@ -125,15 +125,24 @@
                         @endif
                     </div>
                 </div>
+
+                <div class="col-12 d-block d-sm-none d-md-none d-lg-none d-xl-none">
+                    @if($product->frequentlyBoughtTogether->count())
+                        @include(Theme::getThemeNamespace() . '::views.ecommerce.includes.frequently-bought-together', ['products' => $product->frequentlyBoughtTogether,'product'=>$product])
+                    @endif
+                </div>
+
                 <div class="col-lg-3 col-md-4 d-block d-sm-block d-md-none d-lg-block d-xl-block">
                     {!! dynamic_sidebar('product_detail_sidebar') !!}
                 </div>
             </div>
         </div>
     </div>
-    @if($product->frequentlyBoughtTogether->count())
-        @include(Theme::getThemeNamespace() . '::views.ecommerce.includes.frequently-bought-together', ['products' => $product->frequentlyBoughtTogether,'product'=>$product])
-    @endif
+    <div class="d-none d-sm-block d-md-block d-lg-block d-xl-block">
+        @if($product->frequentlyBoughtTogether->count())
+            @include(Theme::getThemeNamespace() . '::views.ecommerce.includes.frequently-bought-together', ['products' => $product->frequentlyBoughtTogether,'product'=>$product])
+        @endif
+    </div>
     <div class="container-xxxl">
         <div class="row product-detail-tabs mt-3 mb-4">
             <div class="col-md-12 col-lg-3">
@@ -473,9 +482,9 @@
                         <div class="ps-product__shopping">
                             {!! Theme::partial('ecommerce.product-price', compact('product')) !!}
                             @if($product->is_enquiry == 1)
-                            <a href="{{ route('public.enquiry.get',$product->id) }}" class="btn btn-primary btn-black mb-2 " title="{{ __('Enquiry Now') }}">
-                                <span class="add-to-cart-text ms-2">{{ __('Enquiry Now') }}</span>
-                            </a>
+                                <a href="{{ route('public.enquiry.get',$product->id) }}" class="btn btn-primary btn-black mb-2 " title="{{ __('Enquiry Now') }}">
+                                    <span class="add-to-cart-text ms-2">{{ __('Enquiry Now') }}</span>
+                                </a>
                             @else
                                 @if (EcommerceHelper::isCartEnabled())
                                     <button type="button" name="add_to_cart" value="1" class="btn btn-primary ms-2 add-to-cart-button @if ($product->isOutOfStock()) disabled @endif" @if ($product->isOutOfStock()) disabled @endif title="{{ __('Add to cart') }}">
@@ -491,9 +500,45 @@
                                             <span class="add-to-cart-text">{{ __('Buy Now') }}</span>
                                         </button>
                                     @endif
+
+                                    <div class="header">
+                                        <div class="header-middle" style="border:none">
+                                            <div class="header__right" style="width: auto; padding: 0; border: none;">
+                                                <div class="header__extra cart--mini" tabindex="0" role="button">
+                                                    <div class="header__extra">
+                                                        <a class="btn-shopping-cart" href="{{ route('public.cart') }}">
+                                                            <span class="svg-icon">
+                                                                <svg>
+                                                                    <use href="#svg-icon-cart" xlink:href="#svg-icon-cart"></use>
+                                                                </svg>
+                                                            </span>
+                                                            <span class="header-item-counter">{{ Cart::instance('cart')->count() }}</span>
+                                                        </a>
+                                                        <span class="cart-text">
+                                                            <span class="cart-title">{{ __('Your Cart') }}</span>
+                                                            <span class="cart-price-total">
+                                                                <span class="cart-amount">
+                                                                    <bdi>
+                                                                        <span>{{ format_price(Cart::instance('cart')->rawSubTotal() + Cart::instance('cart')->rawTax()) }}</span>
+                                                                    </bdi>
+                                                                </span>
+                                                            </span>
+                                                        </span>
+                                                    </div>
+                                                    <div class="cart__content" id="cart-mobile">
+                                                        <div class="backdrop"></div>
+                                                        <div class="mini-cart-content">
+                                                            <div class="widget-shopping-cart-content">
+                                                                {!! Theme::partial('cart-mini.list') !!}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 @endif
                             @endif
-
                         </div>
                     </div>
                 </article>

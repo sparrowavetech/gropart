@@ -620,7 +620,9 @@ class PublicCheckoutController
                 ->setMessage(__('Your shopping cart has digital product(s), so you need to sign in to continue!'));
         }
 
-        if (EcommerceHelper::getMinimumOrderAmount() > Cart::instance('cart')->rawSubTotal()) {
+        $cartTotalValue = Cart::instance('cart')->rawSubTotal() + Cart::instance('cart')->rawTax();
+
+        if (EcommerceHelper::getMinimumOrderAmount() > $cartTotalValue) {
             return $response
                 ->setError()
                 ->setMessage(__('Minimum order amount is :amount, you need to buy more :more to place an order!', [

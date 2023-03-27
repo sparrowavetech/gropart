@@ -1,4 +1,4 @@
-<div class="row cart-page-content py-5 mt-3">
+<div class="row cart-page-content py-md-5 mt-md-3">
     <div class="col-12">
         <form class="form--shopping-cart cart-form" method="post" action="{{ route('public.cart.update') }}">
             @csrf
@@ -102,7 +102,7 @@
                             @endforeach
                         </tbody>
                     </table>
-                    <div class="actions my-4 pb-4 border-bottom">
+                    <div class="actions my-4 pb-4 border-bottom d-none d-sm-block d-md-block d-lg-block d-xl-block">
                         <div class="actions__button-wrapper row justify-content-between">
                             <div class="col-sm-12">
                                 <div class="actions__left d-grid d-md-block">
@@ -126,17 +126,34 @@
                     </div>
                 </div>
                 <div class="col-sm-3">
-                    <div class="col-coupon form-coupon-wrapper">
-                        <div class="coupon">
-                            <label for="coupon_code">
-                                <h6>{{ __('Using A Promo Code?') }}</h6>
-                            </label>
-                            <div class="coupon-input input-group mt-2 mb-3">
-                                <input class="form-control coupon-code" type="text" name="coupon_code" value="{{ old('coupon_code') }}" placeholder="{{ __('Enter coupon code') }}">
-                                <button class="btn btn-primary lh-1 btn-apply-coupon-code" type="button" data-url="{{ route('public.coupon.apply') }}">{{ __('Apply') }}</button>
+                    @if ($couponDiscountAmount > 0 && session('applied_coupon_code'))
+                        <div class="alert alert-success d-flex justify-content-around" role="alert">
+                            <svg fill="#198754" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+                            xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 300 300" xml:space="preserve"
+                            style="height: 40px; width: 40px; margin-right:10px"><g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                            <g id="SVGRepo_iconCarrier"> <g> <g> <g> <rect x="107.563" y="119.408" width="10.375"
+                            height="12.281"></rect>
+                            <path d="M170.944,134.285c0-8.997-7.467-16.376-16.381-16.376c-8.995,0-16.376,7.291-16.376,16.376 c0,9.181,7.381,16.376,16.376,16.376C163.476,150.661,170.944,143.376,170.944,134.285z M147.456,134.285 c0-3.958,3.239-7.109,7.107-7.109c3.87,0,7.107,3.149,7.107,7.109c0,3.96-3.237,7.109-7.107,7.109 C150.695,141.394,147.456,138.246,147.456,134.285z"></path> <rect x="107.563" y="168.531" width="10.375" height="12.278"></rect> <rect x="138.38" y="145.544" transform="matrix(0.4696 -0.8829 0.8829 0.4696 -40.0464 234.8049)" width="74.035" height="10.375"></rect> <rect x="107.563" y="143.967" width="10.375" height="12.278"></rect> <path d="M196.828,150.124c-8.997-0.034-16.407,7.231-16.438,16.319c-0.036,9.179,7.319,16.407,16.322,16.444 c8.912,0.031,16.402-7.234,16.438-16.322C213.181,157.563,205.74,150.156,196.828,150.124z M196.768,173.615 c-3.865,0-7.107-3.151-7.107-7.112c0-3.96,3.242-7.107,7.107-7.107c3.87,0,7.112,3.146,7.112,7.107 S200.638,173.615,196.768,173.615z"></path> <path d="M149.997,0C67.157,0,0,67.157,0,150c0,82.841,67.157,150,149.997,150C232.841,300,300,232.838,300,150 C300,67.157,232.841,0,149.997,0z M238.489,185.004c0,8.045-7.462,14.568-16.661,14.568h-103.89v-6.484h-10.375v6.484H78.175 c-9.202,0-16.664-6.526-16.664-14.568v-69.795c0-8.043,7.462-14.566,16.664-14.566h29.388v6.484h10.375v-6.484h103.89 c9.2,0,16.661,6.523,16.661,14.566V185.004z"></path>
+                            </g> </g> </g> </g></svg>
+                            <span class="fw-bold text-success">{{ __('Applied coupon ":code" successfully!', ['code' => session('applied_coupon_code')]) }}</span>
+                            <span>(<small><a class="btn-remove-coupon-code text-danger" data-url="{{ route('public.coupon.remove') }}"
+                                href="#" data-processing-text="{{ __('Removing...') }}">{{ __('Remove') }}</a>
+                            </small>)</span>
+                        </div>
+                    @else
+                        <div class="col-coupon form-coupon-wrapper">
+                            <div class="coupon">
+                                <label for="coupon_code">
+                                    <h6>{{ __('Using A Promo Code?') }}</h6>
+                                </label>
+                                <div class="coupon-input input-group mt-2 mb-3">
+                                    <input class="form-control coupon-code" type="text" name="coupon_code" value="{{ old('coupon_code') }}" placeholder="{{ __('Enter coupon code') }}">
+                                    <button class="btn btn-primary lh-1 btn-apply-coupon-code" type="button" data-url="{{ route('public.coupon.apply') }}">{{ __('Apply') }}</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    @endif
                     <div class="cart_totals bg-light p-4 rounded">
                         <h5 class="mb-3">{{ __('Cart totals') }}</h5>
                         <div class="cart_totals-table">
@@ -146,7 +163,7 @@
                                     <span class="price-current">{{ format_price(Cart::instance('cart')->rawSubTotal()) }}</span>
                                 </span>
                             </div>
-                            @if (EcommerceHelper::isTaxEnabled())
+                            @if (EcommerceHelper::isTaxEnabled() && Cart::instance('cart')->rawTax() > 0)
                                 <div class="cart-subtotal d-flex justify-content-between border-bottom pb-3 mb-3">
                                     <span class="title fw-bold">{{ __('Tax') }}:</span>
                                     <span class="amount fw-bold">
@@ -157,34 +174,34 @@
                             @if ($couponDiscountAmount > 0 && session('applied_coupon_code'))
                                 <div class="cart-subtotal d-flex justify-content-between border-bottom pb-3 mb-3">
                                     <span class="title">
-                                        <span class="fw-bold">{{ __('Coupon code: :code', ['code' => session('applied_coupon_code')]) }}</span>
+                                        <span class="fw-bold text-success">{{ __('Coupon code: :code', ['code' => session('applied_coupon_code')]) }}</span>
                                         (<small>
                                             <a class="btn-remove-coupon-code text-danger" data-url="{{ route('public.coupon.remove') }}"
                                             href="#" data-processing-text="{{ __('Removing...') }}">{{ __('Remove') }}</a>
                                         </small>)
                                     </span>
 
-                                    <span class="amount fw-bold">{{ format_price($couponDiscountAmount) }}</span>
+                                    <span class="amount fw-bold text-danger">-{{ format_price($couponDiscountAmount) }}</span>
                                 </div>
                             @endif
                             @if ($promotionDiscountAmount)
                                 <div class="ps-block__header">
-                                    <p>{{ __('Discount promotion') }} <span> {{ format_price($promotionDiscountAmount) }}</span></p>
+                                    <p class="text-danger">{{ __('Discount promotion') }} <span> -{{ format_price($promotionDiscountAmount) }}</span></p>
                                 </div>
                             @endif
                             <div class="order-total d-flex justify-content-between mb-3">
                                 <span class="title">
                                     <h6 class="mb-0">{{ __('Total') }} :</h6>
                                 </span>
-                                <span class="amount fw-bold fs-6 text-green">
+                                <span class="amount fw-bold fs-6">
                                     <span class="price-current">{{ ($promotionDiscountAmount + $couponDiscountAmount) > Cart::instance('cart')->rawTotal() ? format_price(0) : format_price(Cart::instance('cart')->rawTotal() - $promotionDiscountAmount - $couponDiscountAmount) }}</span>
                                 </span>
                             </div>
                             <div class="cart-shipping-text d-flex justify-content-between mb-3">
                                 <span class="title">
-                                    <h6 class="mb-0 text-warning">{{ __('Shipping fee') }} :</h6>
+                                    <h6 class="mb-0">{{ __('Shipping fee') }} :</h6>
                                 </span>
-                                <span class="amount fw-bold fs-7 text-green">
+                                <span class="amount fw-bold fs-7">
                                     <span class="cart-shipping-price">{{ __('(Shipping fees not included)') }}</span>
                                 </span>
                             </div>
@@ -197,6 +214,28 @@
                             </div>
                         @endif
                     </div>
+                    <div class="actions my-4 py-4 border-bottom border-top d-block d-sm-none d-md-none d-lg-none d-xl-none">
+                        <div class="actions__button-wrapper row justify-content-between">
+                            <div class="col-sm-12">
+                                <div class="actions__left d-grid d-md-block">
+                                    <a class="btn btn-secondary mb-2" href="{{ route('public.products') }}">
+                                        <span class="svg-icon">
+                                            <svg>
+                                                <use href="#svg-icon-arrow-left" xlink:href="#svg-icon-arrow-left"></use>
+                                            </svg>
+                                        </span> {{ __('Continue Shopping') }}
+                                    </a>
+                                    <a class="btn btn-secondary mb-2 ms-md-2" href="{{ route('public.index') }}">
+                                        <span class="svg-icon">
+                                            <svg>
+                                                <use href="#svg-icon-home" xlink:href="#svg-icon-home"></use>
+                                            </svg>
+                                        </span> {{ __('Back to Home') }}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             @else
@@ -205,8 +244,8 @@
         </form>
 
         @if (count($crossSellProducts) > 0)
-            <div class="row align-items-center mb-2 widget-header">
-                <h2 class="col-auto mb-0 py-2">{{ __('Customers who bought this item also bought') }}</h2>
+            <div class="row align-items-center mb-2 widget-header cross-sale-products">
+                <h2 class="col-auto mb-3">{{ __('Customers who bought this item also bought') }}</h2>
             </div>
 
             @php

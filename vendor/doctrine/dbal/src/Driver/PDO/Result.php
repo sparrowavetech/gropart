@@ -91,9 +91,7 @@ final class Result implements ResultInterface
     }
 
     /**
-     * @psalm-param PDO::FETCH_* $mode
-     *
-     * @return mixed
+     * @return mixed|false
      *
      * @throws Exception
      */
@@ -107,8 +105,6 @@ final class Result implements ResultInterface
     }
 
     /**
-     * @psalm-param PDO::FETCH_* $mode
-     *
      * @return list<mixed>
      *
      * @throws Exception

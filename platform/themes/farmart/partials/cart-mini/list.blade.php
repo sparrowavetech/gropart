@@ -53,7 +53,8 @@
             @endif
         <div class="mini-cart__buttons row g-0">
             <div class="col me-2">
-                <a class="btn btn-light" href="{{ route('public.cart') }}">{{ __('View Cart') }}</a></div>
+                <a class="btn btn-light" href="{{ route('public.cart') }}">{{ __('View Cart') }}</a>
+            </div>
             <div class="col ms-2">
                 @if (session('tracked_start_checkout'))
                     <a class="btn btn-primary checkout"

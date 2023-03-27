@@ -13,7 +13,6 @@ namespace Barryvdh\LaravelIdeHelper\Console;
 
 use Barryvdh\LaravelIdeHelper\Factories;
 use Illuminate\Console\Command;
-use RuntimeException;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -96,11 +95,6 @@ class MetaCommand extends Command
 
             try {
                 $concrete = $this->laravel->make($abstract);
-
-                if ($concrete === null) {
-                    throw new RuntimeException("Cannot create instance for '$abstract', received 'null'");
-                }
-
                 $reflectionClass = new \ReflectionClass($concrete);
                 if (is_object($concrete) && !$reflectionClass->isAnonymous()) {
                     $bindings[$abstract] = get_class($concrete);

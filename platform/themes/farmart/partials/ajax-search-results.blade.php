@@ -3,7 +3,7 @@
         @foreach($products as $product)
             <div class="col-12 py-2">
                 <div class="row">
-                    <div class="p-0 col-1 product__thumbnail">
+                    <div class="p-0 col-3 col-sm-1 product__thumbnail">
                         <a href="{{ $product->url }}" class="img-fluid-eq">
                             <div class="img-fluid-eq__dummy dummy-mt-8"></div>
                             <div class="img-fluid-eq__wrap">
@@ -13,7 +13,7 @@
                             </div>
                         </a>
                     </div>
-                    <div class="col-11 product__content">
+                    <div class="col-9 col-sm-11 product__content">
                         <a class="product__title" href="{{ $product->url }}">{!! BaseHelper::clean($product->name) !!}</a>
                         @if (EcommerceHelper::isReviewEnabled() && $product->reviews_avg > 0)
                             {!! Theme::partial('star-rating', ['avg' => $product->reviews_avg, 'count' => $product->reviews_count]) !!}

@@ -29,10 +29,6 @@ class SimpleArrayType extends Type
 
     /**
      * {@inheritdoc}
-     *
-     * @param mixed $value
-     *
-     * @return string|null
      */
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {
@@ -45,10 +41,6 @@ class SimpleArrayType extends Type
 
     /**
      * {@inheritdoc}
-     *
-     * @param mixed $value
-     *
-     * @return list<string>
      */
     public function convertToPHPValue($value, AbstractPlatform $platform)
     {

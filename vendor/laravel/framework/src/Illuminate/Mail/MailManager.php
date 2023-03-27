@@ -3,14 +3,12 @@
 namespace Illuminate\Mail;
 
 use Aws\Ses\SesClient;
-use Aws\SesV2\SesV2Client;
 use Closure;
 use Illuminate\Contracts\Mail\Factory as FactoryContract;
 use Illuminate\Log\LogManager;
 use Illuminate\Mail\Transport\ArrayTransport;
 use Illuminate\Mail\Transport\LogTransport;
 use Illuminate\Mail\Transport\SesTransport;
-use Illuminate\Mail\Transport\SesV2Transport;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
@@ -156,8 +154,7 @@ class MailManager implements FactoryContract
             return call_user_func($this->customCreators[$transport], $config);
         }
 
-        if (trim($transport ?? '') === '' ||
-            ! method_exists($this, $method = 'create'.ucfirst(Str::camel($transport)).'Transport')) {
+        if (trim($transport ?? '') === '' || ! method_exists($this, $method = 'create'.ucfirst($transport).'Transport')) {
             throw new InvalidArgumentException("Unsupported mail transport [{$transport}].");
         }
 
@@ -174,16 +171,8 @@ class MailManager implements FactoryContract
     {
         $factory = new EsmtpTransportFactory;
 
-        $scheme = $config['scheme'] ?? null;
-
-        if (! $scheme) {
-            $scheme = ! empty($config['encryption']) && $config['encryption'] === 'tls'
-                ? (($config['port'] == 465) ? 'smtps' : 'smtp')
-                : '';
-        }
-
         $transport = $factory->create(new Dsn(
-            $scheme,
+            ! empty($config['encryption']) && $config['encryption'] === 'tls' ? (($config['port'] == 465) ? 'smtps' : 'smtp') : '',
             $config['host'],
             $config['username'] ?? null,
             $config['password'] ?? null,
@@ -254,28 +243,6 @@ class MailManager implements FactoryContract
     }
 
     /**
-     * Create an instance of the Symfony Amazon SES V2 Transport driver.
-     *
-     * @param  array  $config
-     * @return \Illuminate\Mail\Transport\Se2VwTransport
-     */
-    protected function createSesV2Transport(array $config)
-    {
-        $config = array_merge(
-            $this->app['config']->get('services.ses', []),
-            ['version' => 'latest'],
-            $config
-        );
-
-        $config = Arr::except($config, ['transport']);
-
-        return new SesV2Transport(
-            new SesV2Client($this->addSesCredentials($config)),
-            $config['options'] ?? []
-        );
-    }
-
-    /**
      * Add the SES credentials to the configuration array.
      *
      * @param  array  $config
@@ -304,7 +271,7 @@ class MailManager implements FactoryContract
      * Create an instance of the Symfony Mailgun Transport driver.
      *
      * @param  array  $config
-     * @return \Symfony\Component\Mailer\Transport\TransportInterface
+     * @return \Symfony\Component\Mailer\Bridge\Mailgun\Transport\MailgunApiTransport
      */
     protected function createMailgunTransport(array $config)
     {

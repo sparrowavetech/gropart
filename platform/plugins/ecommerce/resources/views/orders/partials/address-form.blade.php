@@ -160,9 +160,17 @@
             </div>
 
             @if (EcommerceHelper::isZipCodeEnabled())
+                @php
+                    $fromZipcode  = EcommerceHelper::isZipCodeEnabled() ? get_ecommerce_setting('store_zip_code') : '313001';
+                @endphp
                 <div class="col-12">
                     <div class="form-group mb-3 @if ($errors->has('address.zip_code')) has-error @endif">
-                        <input id="address_zip_code" type="text" class="form-control address-control-item address-control-item-required checkout-input" placeholder="{{ __('Zip code') }}" name="address[zip_code]" value="{{ old('address.zip_code', Arr::get($sessionCheckoutData, 'zip_code')) }}">
+                        @if (is_plugin_active('marketplace'))
+                            <!--input id="address_zip_code" minlength="6" maxlength="6" data-pincode="$product->store->zip_code" type="text" class="form-control address-control-item address-control-item-required checkout-input" placeholder="{{ __('Zip code') }}" name="address[zip_code]" value="{{ old('address.zip_code', Arr::get($sessionCheckoutData, 'zip_code')) }}"-->
+                            <input id="address_zip_code" minlength="6" maxlength="6" data-pincode="{{ $fromZipcode }}" type="text" class="form-control address-control-item address-control-item-required checkout-input" placeholder="{{ __('Zip code') }}" name="address[zip_code]" value="{{ old('address.zip_code', Arr::get($sessionCheckoutData, 'zip_code')) }}">
+                        @else
+                            <input id="address_zip_code" minlength="6" maxlength="6" data-pincode="{{ $fromZipcode }}" type="text" class="form-control address-control-item address-control-item-required checkout-input" placeholder="{{ __('Zip code') }}" name="address[zip_code]" value="{{ old('address.zip_code', Arr::get($sessionCheckoutData, 'zip_code')) }}">
+                        @endif
                         {!! Form::error('address.zip_code', $errors) !!}
                     </div>
                 </div>

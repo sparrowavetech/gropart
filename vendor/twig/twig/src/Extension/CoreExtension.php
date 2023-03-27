@@ -1021,19 +1021,19 @@ function twig_compare($a, $b)
 
 /**
  * @param string $pattern
- * @param string|null $subject
+ * @param string $subject
  *
  * @return int
  *
  * @throws RuntimeError When an invalid pattern is used
  */
-function twig_matches(string $regexp, ?string $str)
+function twig_matches(string $regexp, string $str)
 {
     set_error_handler(function ($t, $m) use ($regexp) {
         throw new RuntimeError(sprintf('Regexp "%s" passed to "matches" is not valid', $regexp).substr($m, 12));
     });
     try {
-        return preg_match($regexp, $str ?? '');
+        return preg_match($regexp, $str);
     } finally {
         restore_error_handler();
     }
@@ -1703,21 +1703,20 @@ function twig_array_reduce(Environment $env, $array, $arrow, $initial = null)
 {
     twig_check_arrow_in_sandbox($env, $arrow, 'reduce', 'filter');
 
-    if (!\is_array($array) && !$array instanceof \Traversable) {
-        throw new RuntimeError(sprintf('The "reduce" filter only works with arrays or "Traversable", got "%s" as first argument.', \gettype($array)));
+    if (!\is_array($array)) {
+        if (!$array instanceof \Traversable) {
+            throw new RuntimeError(sprintf('The "reduce" filter only works with arrays or "Traversable", got "%s" as first argument.', \gettype($array)));
+        }
+
+        $array = iterator_to_array($array);
     }
 
-    $accumulator = $initial;
-    foreach ($array as $key => $value) {
-        $accumulator = $arrow($accumulator, $value, $key);
-    }
-
-    return $accumulator;
+    return array_reduce($array, $arrow, $initial);
 }
 
 function twig_array_some(Environment $env, $array, $arrow)
 {
-    twig_check_arrow_in_sandbox($env, $arrow, 'has some', 'operator');
+    twig_check_arrow_in_sandbox($env, $arrow, 'some', 'filter');
 
     foreach ($array as $k => $v) {
         if ($arrow($v, $k)) {
@@ -1730,7 +1729,7 @@ function twig_array_some(Environment $env, $array, $arrow)
 
 function twig_array_every(Environment $env, $array, $arrow)
 {
-    twig_check_arrow_in_sandbox($env, $arrow, 'has every', 'operator');
+    twig_check_arrow_in_sandbox($env, $arrow, 'every', 'filter');
 
     foreach ($array as $k => $v) {
         if (!$arrow($v, $k)) {

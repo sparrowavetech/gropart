@@ -11,18 +11,17 @@
 
 namespace Barryvdh\LaravelIdeHelper\Console;
 
+use Barryvdh\LaravelIdeHelper\ClassMapGenerator;
 use Barryvdh\LaravelIdeHelper\Contracts\ModelHookInterface;
 use Barryvdh\Reflection\DocBlock;
 use Barryvdh\Reflection\DocBlock\Context;
 use Barryvdh\Reflection\DocBlock\Serializer as DocBlockSerializer;
 use Barryvdh\Reflection\DocBlock\Tag;
-use Composer\ClassMapGenerator\ClassMapGenerator;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\Types\Type;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Database\Eloquent\Castable;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
-use Illuminate\Contracts\Database\Eloquent\CastsInboundAttributes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Model;
@@ -430,9 +429,6 @@ class ModelsCommand extends Command
             if (!isset($this->properties[$name])) {
                 continue;
             }
-            if ($this->isInboundCast($realType)) {
-                continue;
-            }
 
             $realType = $this->checkForCastableCasts($realType, $params);
             $realType = $this->checkForCustomLaravelCasts($realType);
@@ -467,7 +463,6 @@ class ModelsCommand extends Command
      */
     public function getPropertiesFromTable($model)
     {
-        $database = $model->getConnection()->getDatabaseName();
         $table = $model->getConnection()->getTablePrefix() . $model->getTable();
         $schema = $model->getConnection()->getDoctrineSchemaManager();
         $databasePlatform = $schema->getDatabasePlatform();
@@ -485,6 +480,11 @@ class ModelsCommand extends Command
                 throw $exception;
             }
             $databasePlatform->registerDoctrineTypeMapping($yourTypeName, $doctrineTypeName);
+        }
+
+        $database = null;
+        if (strpos($table, '.')) {
+            [$database, $table] = explode('.', $table);
         }
 
         $columns = $schema->listTableColumns($table, $database);
@@ -702,10 +702,7 @@ class ModelsCommand extends Command
                                     get_class($relationObj->getRelated())
                                 );
 
-                                if (
-                                    strpos(get_class($relationObj), 'Many') !== false ||
-                                    ($this->getRelationReturnTypes()[$relation] ?? '') === 'many'
-                                ) {
+                                if (strpos(get_class($relationObj), 'Many') !== false) {
                                     //Collection or array of models (because Collection is Arrayable)
                                     $relatedClass = '\\' . get_class($relationObj->getRelated());
                                     $collectionClass = $this->getCollectionClass($relatedClass);
@@ -713,10 +710,9 @@ class ModelsCommand extends Command
                                         $model,
                                         $collectionClass
                                     );
-                                    $collectionTypeHint = $this->getCollectionTypeHint($collectionClassNameInModel, $relatedModel);
                                     $this->setProperty(
                                         $method,
-                                        $collectionTypeHint,
+                                        $collectionClassNameInModel . '|' . $relatedModel . '[]',
                                         true,
                                         null,
                                         $comment
@@ -730,10 +726,7 @@ class ModelsCommand extends Command
                                         // What kind of comments should be added to the relation count here?
                                         );
                                     }
-                                } elseif (
-                                    $relation === 'morphTo' ||
-                                    ($this->getRelationReturnTypes()[$relation] ?? '') === 'morphTo'
-                                ) {
+                                } elseif ($relation === 'morphTo') {
                                     // Model isn't specified because relation is polymorphic
                                     $this->setProperty(
                                         $method,
@@ -931,19 +924,10 @@ class ModelsCommand extends Command
             $phpdoc->appendTag($tag);
         }
 
-        if ($this->write) {
+        if ($this->write && !$phpdoc->getTagsByName('mixin')) {
             $eloquentClassNameInModel = $this->getClassNameInDestinationFile($reflection, 'Eloquent');
-
-            // remove the already existing tag to prevent duplicates
-            foreach ($phpdoc->getTagsByName('mixin') as $tag) {
-                if ($tag->getContent() === $eloquentClassNameInModel) {
-                    $phpdoc->deleteTag($tag);
-                }
-            }
-
             $phpdoc->appendTag(Tag::createInstance('@mixin ' . $eloquentClassNameInModel, $phpdoc));
         }
-
         if ($this->phpstorm_noinspections) {
             /**
              * Facades, Eloquent API
@@ -1082,37 +1066,12 @@ class ModelsCommand extends Command
     }
 
     /**
-     * Determine a model classes' collection type hint.
-     *
-     * @param string $collectionClassNameInModel
-     * @param string $relatedModel
-     * @return string
-     */
-    protected function getCollectionTypeHint(string $collectionClassNameInModel, string $relatedModel): string
-    {
-        $useGenericsSyntax = $this->laravel['config']->get('ide-helper.use_generics_annotations', true);
-        if ($useGenericsSyntax) {
-            return $collectionClassNameInModel . '<int, ' . $relatedModel . '>';
-        } else {
-            return $collectionClassNameInModel . '|' . $relatedModel . '[]';
-        }
-    }
-
-    /**
      * Returns the available relation types
      */
     protected function getRelationTypes(): array
     {
         $configuredRelations = $this->laravel['config']->get('ide-helper.additional_relation_types', []);
         return array_merge(self::RELATION_TYPES, $configuredRelations);
-    }
-
-    /**
-     * Returns the return types of relations
-     */
-    protected function getRelationReturnTypes(): array
-    {
-        return $this->laravel['config']->get('ide-helper.additional_relation_return_types', []);
     }
 
     /**
@@ -1239,7 +1198,7 @@ class ModelsCommand extends Command
         $traits = class_uses_recursive($model);
         if (in_array('Illuminate\\Database\\Eloquent\\SoftDeletes', $traits)) {
             $modelName = $this->getClassNameInDestinationFile($model, get_class($model));
-            $builder = $this->getClassNameInDestinationFile($model, \Illuminate\Database\Eloquent\Builder::class);
+            $builder = $this->getClassNameInDestinationFile($model, \Illuminate\Database\Query\Builder::class);
             $this->setMethod('withTrashed', $builder . '|' . $modelName, []);
             $this->setMethod('withoutTrashed', $builder . '|' . $modelName, []);
             $this->setMethod('onlyTrashed', $builder . '|' . $modelName, []);
@@ -1277,11 +1236,7 @@ class ModelsCommand extends Command
             return;
         }
 
-        if (version_compare($this->laravel->version(), '9', '>=')) {
-            $this->setMethod('factory', $factory, ['$count = null, $state = []']);
-        } else {
-            $this->setMethod('factory', $factory, ['...$parameters']);
-        }
+        $this->setMethod('factory', $factory, ['...$parameters']);
     }
 
     /**
@@ -1295,9 +1250,8 @@ class ModelsCommand extends Command
         if ($collectionClass !== '\\' . \Illuminate\Database\Eloquent\Collection::class) {
             $collectionClassInModel = $this->getClassNameInDestinationFile($model, $collectionClass);
 
-            $collectionTypeHint = $this->getCollectionTypeHint($collectionClassInModel, 'static');
-            $this->setMethod('get', $collectionTypeHint, ['$columns = [\'*\']']);
-            $this->setMethod('all', $collectionTypeHint, ['$columns = [\'*\']']);
+            $this->setMethod('get', $collectionClassInModel . '|static[]', ['$columns = [\'*\']']);
+            $this->setMethod('all', $collectionClassInModel . '|static[]', ['$columns = [\'*\']']);
         }
     }
 
@@ -1316,11 +1270,6 @@ class ModelsCommand extends Command
         }
 
         return $keyword;
-    }
-
-    protected function isInboundCast(string $type): bool
-    {
-        return class_exists($type) && is_subclass_of($type, CastsInboundAttributes::class);
     }
 
     protected function checkForCastableCasts(string $type, array $params = []): string
@@ -1347,7 +1296,7 @@ class ModelsCommand extends Command
 
         return $this->getReturnTypeFromReflection($methodReflection) ??
             $this->getReturnTypeFromDocBlock($methodReflection, $reflection) ??
-            $type;
+            'mixed';
     }
 
     /**

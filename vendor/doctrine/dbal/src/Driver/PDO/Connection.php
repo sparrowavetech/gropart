@@ -2,7 +2,6 @@
 
 namespace Doctrine\DBAL\Driver\PDO;
 
-use Doctrine\DBAL\Driver\PDO\PDOException as DriverPDOException;
 use Doctrine\DBAL\Driver\Result as ResultInterface;
 use Doctrine\DBAL\Driver\ServerInfoAwareConnection;
 use Doctrine\DBAL\Driver\Statement as StatementInterface;
@@ -81,7 +80,7 @@ final class Connection implements ServerInfoAwareConnection
      */
     public function quote($value, $type = ParameterType::STRING)
     {
-        return $this->connection->quote($value, ParameterTypeMap::convertParamType($type));
+        return $this->connection->quote($value, $type);
     }
 
     /**
@@ -108,29 +107,17 @@ final class Connection implements ServerInfoAwareConnection
 
     public function beginTransaction(): bool
     {
-        try {
-            return $this->connection->beginTransaction();
-        } catch (PDOException $exception) {
-            throw DriverPDOException::new($exception);
-        }
+        return $this->connection->beginTransaction();
     }
 
     public function commit(): bool
     {
-        try {
-            return $this->connection->commit();
-        } catch (PDOException $exception) {
-            throw DriverPDOException::new($exception);
-        }
+        return $this->connection->commit();
     }
 
     public function rollBack(): bool
     {
-        try {
-            return $this->connection->rollBack();
-        } catch (PDOException $exception) {
-            throw DriverPDOException::new($exception);
-        }
+        return $this->connection->rollBack();
     }
 
     public function getNativeConnection(): PDO

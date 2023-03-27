@@ -107,6 +107,7 @@ class InvoiceHelper
                 }
             }
         }
+
         $pdf = Pdf::loadHTML($content, 'UTF-8');
 
         return $pdf

@@ -30,12 +30,6 @@ class BooleanType extends Type
 
     /**
      * {@inheritdoc}
-     *
-     * @param T $value
-     *
-     * @return (T is null ? null : bool)
-     *
-     * @template T
      */
     public function convertToPHPValue($value, AbstractPlatform $platform)
     {

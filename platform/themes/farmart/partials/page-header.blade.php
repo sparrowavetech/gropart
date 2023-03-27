@@ -9,10 +9,9 @@
             Theme::set('breadcrumbRendered', true);
         @endphp
     @endif
-
     @if (!empty($withTitle) && !Theme::get('titleRendered', false))
         <div class="page-title text-center">
-            <div class="container py-2 my-4">
+            <div class="container-fluid pt-5">
                 <h1>{{ $title ?? SeoHelper::getTitle() }}</h1>
             </div>
         </div>

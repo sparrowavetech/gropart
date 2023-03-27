@@ -239,9 +239,6 @@ class CartItem implements Arrayable, Jsonable
      */
     public function __get($attribute)
     {
-
-
-
         if (property_exists($this, $attribute)) {
             return $this->{$attribute};
         }

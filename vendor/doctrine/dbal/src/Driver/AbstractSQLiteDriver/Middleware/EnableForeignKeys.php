@@ -6,7 +6,6 @@ use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Driver\Connection;
 use Doctrine\DBAL\Driver\Middleware;
 use Doctrine\DBAL\Driver\Middleware\AbstractDriverMiddleware;
-use SensitiveParameter;
 
 class EnableForeignKeys implements Middleware
 {
@@ -16,10 +15,8 @@ class EnableForeignKeys implements Middleware
             /**
              * {@inheritDoc}
              */
-            public function connect(
-                #[SensitiveParameter]
-                array $params
-            ): Connection {
+            public function connect(array $params): Connection
+            {
                 $connection = parent::connect($params);
 
                 $connection->exec('PRAGMA foreign_keys=ON');

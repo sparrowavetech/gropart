@@ -11,7 +11,7 @@
                         <div class="col-lg-7">
                             <div class="vendor-info-content px-3">
                                 <div class="vendor-store-information row align-items-center">
-                                    <div class="vendor-avatar col-3">
+                                    <div class="vendor-avatar col-12 col-sm-3">
                                         <img class="rounded-circle" src="{{ $store->logo_url }}" alt="avatar">
                                     </div>
                                     <div class="vendor-store-info col">

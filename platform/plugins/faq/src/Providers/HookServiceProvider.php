@@ -11,19 +11,19 @@ use MetaBox;
 
 class HookServiceProvider extends ServiceProvider
 {
-    public function boot(): void
+    public function boot()
     {
-        add_action(BASE_ACTION_META_BOXES, function ($context, $object): void {
+        add_action(BASE_ACTION_META_BOXES, function ($context, $object) {
             if (! $object || $context != 'advanced') {
-                return;
+                return false;
             }
 
             if (! in_array(get_class($object), config('plugins.faq.general.schema_supported', []))) {
-                return;
+                return false;
             }
 
             if (! setting('enable_faq_schema', 0)) {
-                return;
+                return false;
             }
 
             Assets::addStylesDirectly(['vendor/core/plugins/faq/css/faq.css'])
@@ -55,10 +55,12 @@ class HookServiceProvider extends ServiceProvider
                 get_class($object),
                 $context
             );
+
+            return true;
         }, 39, 2);
 
-        add_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, function ($screen, $object): void {
-            add_filter(THEME_FRONT_HEADER, function ($html) use ($object): ?string {
+        add_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, function ($screen, $object) {
+            add_filter(THEME_FRONT_HEADER, function ($html) use ($object) {
                 if (! in_array(get_class($object), config('plugins.faq.general.schema_supported', []))) {
                     return $html;
                 }

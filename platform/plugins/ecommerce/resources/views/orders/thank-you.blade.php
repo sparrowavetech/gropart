@@ -3,6 +3,7 @@
     {{ __('Order successfully. Order number :id', ['id' => $order->code]) }}
 @stop
 @section('content')
+
     <div class="container">
         <div class="row">
             <div class="col-lg-7 col-md-6 col-12 left">

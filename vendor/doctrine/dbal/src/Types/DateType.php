@@ -29,12 +29,6 @@ class DateType extends Type
 
     /**
      * {@inheritdoc}
-     *
-     * @psalm-param T $value
-     *
-     * @return (T is null ? null : string)
-     *
-     * @template T
      */
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {
@@ -51,12 +45,6 @@ class DateType extends Type
 
     /**
      * {@inheritdoc}
-     *
-     * @param T $value
-     *
-     * @return (T is null ? null : DateTimeInterface)
-     *
-     * @template T
      */
     public function convertToPHPValue($value, AbstractPlatform $platform)
     {

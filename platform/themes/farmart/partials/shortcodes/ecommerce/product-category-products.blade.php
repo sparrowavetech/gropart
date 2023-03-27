@@ -1,6 +1,6 @@
 
 @if ($category)
-    <div class="widget-products-with-category pt-2 pb-4 mb-5 bg-light">
+    <div class="widget-products-with-category py-5 pt-3 bg-light">
         <div class="container-xxxl">
             <div class="row">
                 <div class="col-12">

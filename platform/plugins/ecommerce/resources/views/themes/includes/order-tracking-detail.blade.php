@@ -116,7 +116,8 @@
                             </td>
                             <td>
                                 @if ($product)
-                                    {{ $product->original_product->name }} @if ($product->sku)
+                                    <a class="fw-bold" href="{{ $product->original_product->url }}" target="_BLANK" title="{{ $product->original_product->name }}">{{ $product->original_product->name }}</a>
+                                    @if ($product->sku)
                                         ({{ $product->sku }})
                                     @endif
                                     @if ($product->is_variation)

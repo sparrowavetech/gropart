@@ -3499,11 +3499,9 @@ abstract class AbstractPlatform
      *
      * The default conversion tries to convert value into bool "(bool)$item"
      *
-     * @param T $item
+     * @param mixed $item
      *
-     * @return (T is null ? null : bool)
-     *
-     * @template T
+     * @return bool|null
      */
     public function convertFromBoolean($item)
     {

@@ -54,7 +54,7 @@ abstract class AbstractOracleDriver implements Driver
     /**
      * Returns an appropriate Easy Connect String for the given parameters.
      *
-     * @param array<string, mixed> $params The connection parameters to return the Easy Connect String for.
+     * @param mixed[] $params The connection parameters to return the Easy Connect String for.
      *
      * @return string
      */

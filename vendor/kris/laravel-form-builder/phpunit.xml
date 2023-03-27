@@ -14,7 +14,9 @@
     <testsuites>
         <testsuite name="Package Test Suite">
             <directory suffix=".php">./tests/</directory>
-            <exclude>./tests/resources/views/</exclude>
+            <exclude>
+                <directory>./tests/resources/views</directory>
+            </exclude>
         </testsuite>
     </testsuites>
     <coverage>

@@ -1,14 +1,20 @@
-<style>
-.btn.payment-checkout-btn-step.payment-checkout-btn {
-    width: 100%;
-    font-size: 1.25rem;
-    padding: 10px 0;
-    font-weight: 600;
-    text-transform: uppercase;
-    background-color: #198754;
-}
-.back-to-cart-btn { font-size: 1.25rem; font-weight: 600; }
-.remove-coupon-code { width: 100%; }
+<style type="text/css">
+    @media screen and (max-width: 768px) {
+        .container, .left, .page-wrap, .right, body, html { height: auto !important; min-height: auto !important; }
+        #main-checkout-product-info .coupon-wrapper, .accepted-payments { margin-bottom: 15px !important; }
+        #main-checkout-product-info .checkout-discount-section { text-align: center; font-size: 1.15rem; }
+        .checkout-logo { text-align: center; }
+        .back-to-cart-button-group { margin-bottom: 20px !important; }
+        .checkout-form, .checkout-content-wrap { margin:0 !important; }
+    }
+    .form-group .iti.iti--allow-dropdown { width: 100%; }
+    .text-right { text-align: right; }
+    .btn.payment-checkout-btn-step.payment-checkout-btn { width: 100%; font-size: 1.25rem; color: #fff; padding: 10px 0; font-weight: 600; text-transform: uppercase; background-color: #198754; }
+    .back-to-cart-btn { font-size: 1.25rem; font-weight: 600; }
+    .remove-coupon-code { width: 100%; }
+    .picodetext.alert { padding: 5px 10px; font-size: 1rem; font-weight: 600; }
+    .accepted-payments { max-width: 420px; margin: auto; }
+    .btn.payment-checkout-btn-step.payment-checkout-btn:hover { background-color: #00b460!important; }
 </style>
 @extends('plugins/ecommerce::orders.master')
 @section('title')
@@ -50,7 +56,7 @@
                             @if (session('applied_coupon_code'))
                             <div class="row coupon-information">
                                 <div class="col-8">
-                                    <p class="price-text-label text-success m-0">{{ __('Coupon code') }}:</p>
+                                    <p class="price-text-label m-0">{{ __('Coupon code') }}:</p>
                                 </div>
                                 <div class="col-4">
                                     <p class="price-text coupon-code-text text-success m-0"> {{ session('applied_coupon_code') }} </p>
@@ -60,41 +66,41 @@
                             @if ($couponDiscountAmount > 0)
                             <div class="row price discount-amount">
                                 <div class="col-8">
-                                    <p class="price-text-label mt-0 text-success">{{ __('Coupon code discount amount') }}:</p>
+                                    <p class="price-text-label mt-0">{{ __('Coupon code discount amount') }}:</p>
                                 </div>
                                 <div class="col-4">
-                                    <p class="price-text total-discount-amount-text mt-0 text-success"> {{ format_price($couponDiscountAmount) }} </p>
+                                    <p class="price-text total-discount-amount-text mt-0 text-danger"> -{{ format_price($couponDiscountAmount) }} </p>
                                 </div>
                             </div>
                             @endif
                             @if ($promotionDiscountAmount > 0)
                             <div class="row">
                                 <div class="col-8">
-                                    <p class="price-text-label mt-0 text-success">{{ __('Promotion discount amount') }}:</p>
+                                    <p class="price-text-label mt-0">{{ __('Promotion discount amount') }}:</p>
                                 </div>
                                 <div class="col-4">
-                                    <p class="price-text text-success mt-0"> {{ format_price($promotionDiscountAmount) }} </p>
+                                    <p class="price-text text-danger mt-0"> -{{ format_price($promotionDiscountAmount) }} </p>
                                 </div>
                             </div>
                             @endif
                             @if (!empty($shipping) && Arr::get($sessionCheckoutData, 'is_available_shipping', true))
                             <div class="row">
                                 <div class="col-8">
-                                    <p class="price-text-label text-warning mt-0">{{ __('Shipping fee') }}:</p>
+                                    <p class="price-text-label mt-0">{{ __('Shipping fee') }}:</p>
                                 </div>
                                 <div class="col-4 float-end">
-                                    <p class="price-text shipping-price-text mt-0 text-warning">{{ format_price($shippingAmount) }}</p>
+                                    <p class="price-text shipping-price-text mt-0">{{ format_price($shippingAmount) }}</p>
                                 </div>
                             </div>
                             @endif
 
-                            @if (EcommerceHelper::isTaxEnabled())
+                            @if (EcommerceHelper::isTaxEnabled() && Cart::instance('cart')->rawTax() > 0)
                             <div class="row">
                                 <div class="col-8">
-                                    <p class="price-text-label mt-0 text-warning">{{ __('Tax') }}:</p>
+                                    <p class="price-text-label mt-0">{{ __('Tax') }}:</p>
                                 </div>
                                 <div class="col-4 float-end">
-                                    <p class="price-text tax-price-text mt-0 text-warning">{{ format_price(Cart::instance('cart')->rawTax()) }}</p>
+                                    <p class="price-text tax-price-text mt-0">{{ format_price(Cart::instance('cart')->rawTax()) }}</p>
                                 </div>
                             </div>
                             @endif
@@ -113,13 +119,39 @@
 
                     <hr>
 
-                    <div class="mt-3 mb-5">
+                    <div class="mt-3">
                         @include('plugins/ecommerce::themes.discounts.partials.form')
                     </div>
+                    @if (theme_option('payment_methods_image'))
+                        <hr/>
+                        <div class="accepted-payments">
+                            @if (theme_option('payment_methods_link'))
+                                <a href="{{ url(theme_option('payment_methods_link')) }}" target="_blank">
+                            @endif
+
+                            <img class="img-fluid" src="{{ RvMedia::getImageUrl(theme_option('payment_methods_image')) }}" alt="payments accepted">
+
+                            @if (theme_option('payment_methods_link'))
+                                </a>
+                            @endif
+                        </div>
+                    @endif
                 </div>
                 <div class="col-lg-7 col-md-6 left">
                     <div class="d-none d-sm-block">
-                        @include('plugins/ecommerce::orders.partials.logo')
+                        <div class="container g-0">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    @include('plugins/ecommerce::orders.partials.logo')
+                                </div>
+                                <div class="col-sm-6 text-right">
+                                    <div class="back-to-cart-button-group mt-3">
+                                        <a class="back-to-cart-btn text-danger" href="{{ route('public.cart') }}"><i class="fas fa-long-arrow-alt-left"></i> <span class="d-inline-block">{{ __('Back to cart') }}</span></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
                     </div>
                     <div class="form-checkout">
                         @if (Arr::get($sessionCheckoutData, 'is_available_shipping', true))
@@ -245,8 +277,11 @@
                             <textarea name="description" id="description" rows="3" class="form-control" placeholder="{{ __('Notes about your order, e.g. special notes for delivery.') }}">{{ old('description') }}</textarea>
                             {!! Form::error('description', $errors) !!}
                         </div>
+                        @php
+                            $cartTotalValue = Cart::instance('cart')->rawSubTotal() + Cart::instance('cart')->rawTax();
+                        @endphp
 
-                        @if (EcommerceHelper::getMinimumOrderAmount() > Cart::instance('cart')->rawSubTotal())
+                        @if (EcommerceHelper::getMinimumOrderAmount() > $cartTotalValue)
                             <div class="alert alert-warning">
                                 {{ __('Minimum order amount is :amount, you need to buy more :more to place an order!', ['amount' => format_price(EcommerceHelper::getMinimumOrderAmount()), 'more' => format_price(EcommerceHelper::getMinimumOrderAmount() - Cart::instance('cart')->rawSubTotal())]) }}
                             </div>
@@ -255,7 +290,7 @@
                         <div class="form-group mb-3">
                             <div class="row">
                                 <div class="col-md-6 d-none d-md-block" style="line-height: 53px">
-                                    <a class="back-to-cart-btn text-warning" href="{{ route('public.cart') }}"><i class="fas fa-long-arrow-alt-left"></i> <span class="d-inline-block back-to-cart">{{ __('Back to cart') }}</span></a>
+                                    <a class="back-to-cart-btn text-danger" href="{{ route('public.cart') }}"><i class="fas fa-long-arrow-alt-left"></i> <span class="d-inline-block back-to-cart">{{ __('Back to cart') }}</span></a>
                                 </div>
                                 <div class="col-md-6 checkout-button-group">
                                     <button type="submit" @if (EcommerceHelper::getMinimumOrderAmount() > Cart::instance('cart')->rawSubTotal()) disabled @endif class="btn payment-checkout-btn payment-checkout-btn-step float-end" data-processing-text="{{ __('Processing. Please wait...') }}" data-error-header="{{ __('Error') }}">
@@ -264,7 +299,7 @@
                                 </div>
                             </div>
                             <div class="d-block d-md-none back-to-cart-button-group">
-                                <a class="back-to-cart-btn text-warning" href="{{ route('public.cart') }}"><i class="fas fa-long-arrow-alt-left"></i> <span class="d-inline-block">{{ __('Back to cart') }}</span></a>
+                                <a class="back-to-cart-btn text-danger" href="{{ route('public.cart') }}"><i class="fas fa-long-arrow-alt-left"></i> <span class="d-inline-block">{{ __('Back to cart') }}</span></a>
                             </div>
                         </div>
 
@@ -284,5 +319,41 @@
                 </div>
             </div>
         </div>
+    @endif
+
+    @if (EcommerceHelper::isZipCodeEnabled())
+        <script defer>
+            $(document).ready(function () {
+                $(document).on("keyup","#address_zip_code",function(){
+                    var toPincode = $(this).val();
+                    var formPincode = $(this).data('pincode');
+                    if(toPincode !=''){
+                        $.ajax({
+                            type: "GET",
+                            url: "{{ route('public.ajax.check-pincode')}}/"+formPincode+"/"+toPincode,
+                            success: function(data) {
+                                $(".picodetext").remove();
+                                if(data) {
+                                    $(".payment-checkout-btn").removeAttr('disabled');
+                                    $("#address_zip_code").after("<p class='picodetext alert alert-success mt-2'><i class='fa fa-check-circle'></i> Congratulations! Delivery is available on your location.").show();
+                                } else {
+                                    $(".payment-checkout-btn").attr('disabled','disabled');
+                                    $("#address_zip_code").after("<p class='picodetext alert alert-danger mt-2'><i class='fa fa-times-circle'></i> Sorry! Delivery not available at your location.").show();
+                                }
+                            },
+                            error: function(data) {
+                                $(".picodetext").remove();
+                                $(".payment-checkout-btn").attr('disabled','disabled');
+                                $("#address_zip_code").after("<p class='picodetext alert alert-danger mt-2'><i class='fa fa-times-circle'></i> Error in checking pincode! Please try later.").show();
+                            }
+                        });
+                    } else {
+                        $(".picodetext").remove();
+                        $(".payment-checkout-btn").attr('disabled','disabled');
+                        $(this).after("<p class='picodetext alert alert-warning mt-2'><i class='fa fa-circle-info'></i> Please enter pincode!").show();
+                    }
+                });
+            });
+        </script>
     @endif
 @stop

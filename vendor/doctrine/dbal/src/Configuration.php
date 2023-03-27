@@ -7,7 +7,6 @@ use Doctrine\Common\Cache\Psr6\CacheAdapter;
 use Doctrine\Common\Cache\Psr6\DoctrineProvider;
 use Doctrine\DBAL\Driver\Middleware;
 use Doctrine\DBAL\Logging\SQLLogger;
-use Doctrine\DBAL\Schema\SchemaManagerFactory;
 use Doctrine\Deprecations\Deprecation;
 use Psr\Cache\CacheItemPoolInterface;
 
@@ -55,8 +54,6 @@ class Configuration
      * @var bool
      */
     protected $autoCommit = true;
-
-    private ?SchemaManagerFactory $schemaManagerFactory = null;
 
     public function __construct()
     {
@@ -227,18 +224,5 @@ class Configuration
     public function getMiddlewares(): array
     {
         return $this->middlewares;
-    }
-
-    public function getSchemaManagerFactory(): ?SchemaManagerFactory
-    {
-        return $this->schemaManagerFactory;
-    }
-
-    /** @return $this */
-    public function setSchemaManagerFactory(SchemaManagerFactory $schemaManagerFactory): self
-    {
-        $this->schemaManagerFactory = $schemaManagerFactory;
-
-        return $this;
     }
 }

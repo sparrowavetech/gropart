@@ -10,7 +10,6 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * A Laravel wrapper for Dompdf
@@ -175,15 +174,8 @@ class PDF
     /**
      * Save the PDF to a file
      */
-    public function save(string $filename, string $disk = null): self
+    public function save(string $filename): self
     {
-        $disk = $disk ?: $this->config->get('dompdf.disk');
-
-        if (! is_null($disk)) {
-            Storage::disk($disk)->put($filename, $this->output());
-            return $this;
-        }
-
         $this->files->put($filename, $this->output());
         return $this;
     }

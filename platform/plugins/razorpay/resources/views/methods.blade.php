@@ -157,8 +157,8 @@
 
                         callRazorPayScript();
 
-                        _self.removeAttr('disabled');
-                        _self.html(submitInitialText);
+                        //_self.removeAttr('disabled');
+                        //_self.html(submitInitialText);
                     } else {
                         form.submit();
                     }

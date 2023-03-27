@@ -21,7 +21,7 @@ class FaqServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function register(): void
+    public function register()
     {
         $this->app->bind(FaqCategoryInterface::class, function () {
             return new FaqCategoryCacheDecorator(new FaqCategoryRepository(new FaqCategory()));
@@ -32,7 +32,7 @@ class FaqServiceProvider extends ServiceProvider
         });
     }
 
-    public function boot(): void
+    public function boot()
     {
         $this
             ->setNamespace('plugins/faq')

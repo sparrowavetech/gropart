@@ -2,7 +2,7 @@
 
 {!! Theme::partial('page-header', ['withTitle' => false, 'size' => 'xl']) !!}
 <div class="container">
-    <div class="row customer-auth-page py-5 mt-5 justify-content-center">
+    <div class="row customer-auth-page py-md-5 mt-md-5 justify-content-center">
         <div class="col-sm-9 col-md-6 col-lg-5 col-xl-4">
             <div class="customer-auth-form bg-light pt-1 py-3 px-4">
                 <nav>
@@ -74,7 +74,7 @@
                             <div class="form-check mb-3">
                                 <input type="hidden" name="agree_terms_and_policy" value="0">
                                 <input class="form-check-input" type="checkbox" name="agree_terms_and_policy" id="agree-terms-and-policy" value="1" @if (old('agree_terms_and_policy') == 1) checked @endif>
-                                <label for="agree-terms-and-policy">{{ __('I agree to terms & Policy.') }}</label> <a target="_BLANK" href="/gropart-policy" style="color:var(--primary-color);text-decoration: underline"><strong>{{ __('Read policy') }}</strong></a>
+                                <label for="agree-terms-and-policy">{{ __('I agree to terms & Policy.') }}</label> <a target="_BLANK" href="/privacy-policy" style="color:var(--primary-color);text-decoration: underline"><strong>{{ __('Read policy') }}</strong></a>
                                 @if ($errors->has('agree_terms_and_policy'))
                                     <div class="mt-1">
                                         <span class="text-danger small">{{ $errors->first('agree_terms_and_policy') }}</span>

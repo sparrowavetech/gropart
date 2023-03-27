@@ -31,12 +31,6 @@ class DateTimeType extends Type implements PhpDateTimeMappingType
 
     /**
      * {@inheritdoc}
-     *
-     * @param T $value
-     *
-     * @return (T is null ? null : string)
-     *
-     * @template T
      */
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {
@@ -53,12 +47,6 @@ class DateTimeType extends Type implements PhpDateTimeMappingType
 
     /**
      * {@inheritdoc}
-     *
-     * @param T $value
-     *
-     * @return (T is null ? null : DateTimeInterface)
-     *
-     * @template T
      */
     public function convertToPHPValue($value, AbstractPlatform $platform)
     {

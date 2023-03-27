@@ -104,7 +104,7 @@ class Dompdf
     /**
      * Desired paper size ('letter', 'legal', 'A4', etc.)
      *
-     * @var string|float[]
+     * @var string|array
      */
     private $paperSize;
 
@@ -965,7 +965,7 @@ class Dompdf
      * @param string $orientation 'portrait' or 'landscape'
      * @return $this
      */
-    public function setPaper($size, string $orientation = "portrait"): self
+    public function setPaper($size, $orientation = "portrait")
     {
         $this->paperSize = $size;
         $this->paperOrientation = $orientation;
@@ -977,7 +977,7 @@ class Dompdf
      *
      * @return float[] A four-element float array
      */
-    public function getPaperSize(): array
+    public function getPaperSize()
     {
         $paper = $this->paperSize;
         $orientation = $this->paperOrientation;
@@ -1001,7 +1001,7 @@ class Dompdf
      *
      * @return string Either "portrait" or "landscape"
      */
-    public function getPaperOrientation(): string
+    public function getPaperOrientation()
     {
         return $this->paperOrientation;
     }

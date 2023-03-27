@@ -51,8 +51,6 @@ class SocketPost implements RequestMethod
      */
     private $socket;
 
-    private $siteVerifyUrl;
-
     /**
      * Only needed if you want to override the defaults
      *

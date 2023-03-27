@@ -9,7 +9,7 @@ use Barryvdh\Debugbar\Twig\Node\StopwatchNode;
  *
  * @author Wouter J <wouter@wouterj.nl>
  */
-class StopwatchTokenParser extends TokenParser
+class StopwatchTokenParser extends \Twig_TokenParser
 {
     protected $debugbarAvailable;
 
@@ -18,10 +18,7 @@ class StopwatchTokenParser extends TokenParser
         $this->debugbarAvailable = $debugbarAvailable;
     }
 
-    /**
-     * @param \Twig_Token|\Twig\Token $token
-     */
-    public function parse($token)
+    public function parse(\Twig_Token $token)
     {
         $lineno = $token->getLine();
         $stream = $this->parser->getStream();
@@ -29,31 +26,17 @@ class StopwatchTokenParser extends TokenParser
         // {% stopwatch 'bar' %}
         $name = $this->parser->getExpressionParser()->parseExpression();
 
-        // Maintain compatibility with Twig 2 and 3.
-        if (class_exists("\Twig_Token")) {
-            $blockEndType = \Twig_Token::BLOCK_END_TYPE;
-        } else {
-            $blockEndType = \Twig\Token::BLOCK_END_TYPE;
-        }
-
-        $stream->expect($blockEndType);
+        $stream->expect(\Twig_Token::BLOCK_END_TYPE);
 
         // {% endstopwatch %}
         $body = $this->parser->subparse([$this, 'decideStopwatchEnd'], true);
-        $stream->expect($blockEndType);
-
-        // Maintain compatibility with Twig 2 and 3.
-        if (class_exists("\Twig_Node_Expression_AssignName")) {
-            $assignNameExpression = new \Twig_Node_Expression_AssignName($this->parser->getVarName(), $token->getLine());
-        } else {
-            $assignNameExpression = new \Twig\Node\Expression\AssignNameExpression($this->parser->getVarName(), $token->getLine());
-        }
+        $stream->expect(\Twig_Token::BLOCK_END_TYPE);
 
         if ($this->debugbarAvailable) {
             return new StopwatchNode(
                 $name,
                 $body,
-                $assignNameExpression,
+                new \Twig_Node_Expression_AssignName($this->parser->getVarName(), $token->getLine()),
                 $lineno,
                 $this->getTag()
             );
@@ -67,10 +50,7 @@ class StopwatchTokenParser extends TokenParser
         return 'stopwatch';
     }
 
-    /**
-     * @param \Twig_Token|\Twig\Token $token
-     */
-    public function decideStopwatchEnd($token)
+    public function decideStopwatchEnd(\Twig_Token $token)
     {
         return $token->test('endstopwatch');
     }

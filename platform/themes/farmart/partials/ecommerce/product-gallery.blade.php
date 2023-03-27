@@ -10,7 +10,7 @@
                     @if ($product->productLabels->count())
                         <div class="ribbons product-lable">
                             @foreach ($product->productLabels as $label)
-                                <span class="ribbon" @if ($label->color) style="background-color: {{ $label->color }}" @endif><i class="lable-prop" @if ($label->color) style="border-color: transparent transparent {{ $label->color }} #ffffff;" @endif></i>{{ $label->name }}</span>
+                                <span class="ribbon" @if ($label->color) style="background-color: {{ $label->color }}" @endif><i class="lable-prop" @if ($label->color) style="border-color: transparent transparent {{ $label->color }} transparent;" @endif></i>{{ $label->name }}</span>
                             @endforeach
                         </div>
                     @endif
@@ -28,18 +28,6 @@
                     <div class="img-fluid-eq__wrap">
                         <img class="mx-auto" title="{{ $product->name }}" src="{{ image_placeholder() }}">
                     </div>
-                    @if ($product->productLabels->count())
-                        <div class="ribbons product-lable">
-                            @foreach ($product->productLabels as $label)
-                                <span class="ribbon" @if ($label->color) style="background-color: {{ $label->color }}" @endif><i class="lable-prop" @if ($label->color) style="border-color: transparent transparent {{ $label->color }} #ffffff;" @endif></i>{{ $label->name }}</span>
-                            @endforeach
-                        </div>
-                    @endif
-                    @if ($product->front_sale_price !== $product->price)
-                        <div class="ribbons sale-ribbon">
-                            <span class="featured ribbon" dir="ltr">{{ get_sale_percentage($product->price, $product->front_sale_price) }}</span>
-                        </div>
-                    @endif
                 </a>
             </div>
         @endforelse

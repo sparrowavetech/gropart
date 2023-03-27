@@ -173,22 +173,19 @@ trait EndpointV2SerializerTrait
 
     private function selectAuthScheme($authSchemes)
     {
-        $validAuthSchemes = ['sigv4', 'sigv4a', 'none', 'bearer'];
-        $invalidAuthSchemes = [];
+        $validAuthSchemes = ['sigv4', 'sigv4a' ];
 
         foreach($authSchemes as $authScheme) {
             if (in_array($authScheme['name'], $validAuthSchemes)) {
                 return $this->normalizeAuthScheme($authScheme);
             } else {
-                $invalidAuthSchemes[] = "`{$authScheme['name']}`";
+                $unsupportedScheme = $authScheme['name'];
             }
         }
 
-        $invalidAuthSchemesString = implode(', ', $invalidAuthSchemes);
-        $validAuthSchemesString = '`' . implode('`, `', $validAuthSchemes) . '`';
         throw new \InvalidArgumentException(
-            "This operation requests {$invalidAuthSchemesString}"
-            . " auth schemes, but the client only supports {$validAuthSchemesString}."
+            "This operation requests {$unsupportedScheme} 
+            . but the client only supports sigv4 and sigv4a"
         );
     }
 
@@ -203,24 +200,17 @@ trait EndpointV2SerializerTrait
 
         if (isset($authScheme['disableDoubleEncoding'])
             && $authScheme['disableDoubleEncoding'] === true
-            && $authScheme['name'] !== 'sigv4a'
         ) {
             $normalizedAuthScheme['version'] = 's3v4';
-        } elseif ($authScheme['name'] === 'none') {
-            $normalizedAuthScheme['version'] = 'anonymous';
-        }
-        else {
+        } else {
             $normalizedAuthScheme['version'] = str_replace(
                 'sig', '', $authScheme['name']
             );
         }
-
         $normalizedAuthScheme['name'] = isset($authScheme['signingName']) ?
             $authScheme['signingName'] : null;
         $normalizedAuthScheme['region'] = isset($authScheme['signingRegion']) ?
             $authScheme['signingRegion'] : null;
-        $normalizedAuthScheme['signingRegionSet'] = isset($authScheme['signingRegionSet']) ?
-            $authScheme['signingRegionSet'] : null;
 
         return $normalizedAuthScheme;
     }

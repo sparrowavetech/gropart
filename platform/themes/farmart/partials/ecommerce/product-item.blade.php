@@ -15,7 +15,7 @@
             @if ($product->productLabels->count())
                 <div class="ribbons product-lable">
                     @foreach ($product->productLabels as $label)
-                        <span class="ribbon" @if ($label->color) style="background-color: {{ $label->color }}" @endif><i class="lable-prop" @if ($label->color) style="border-color: transparent transparent rgb(255, 255, 255) {{ $label->color }}" @endif></i>{{ $label->name }}</span>
+                        <span class="ribbon" @if ($label->color) style="background-color: {{ $label->color }}" @endif><i class="lable-prop" @if ($label->color) style="border-color: transparent transparent transparent {{ $label->color }}" @endif></i>{{ $label->name }}</span>
                     @endforeach
                 </div>
             @endif

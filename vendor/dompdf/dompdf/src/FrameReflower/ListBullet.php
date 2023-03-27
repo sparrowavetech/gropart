@@ -31,10 +31,6 @@ class ListBullet extends AbstractFrameReflower
      */
     function reflow(BlockFrameDecorator $block = null)
     {
-        if ($block === null) {
-            return;
-        }
-
         /** @var ListBulletFrameDecorator */
         $frame = $this->_frame;
         $style = $frame->get_style();
