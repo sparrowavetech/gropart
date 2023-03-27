@@ -6,7 +6,7 @@ if (! function_exists('table_checkbox')) {
     /**
      * @deprecated
      */
-    function table_checkbox(int $id): string
+    function table_checkbox(int|string $id): string
     {
         return view('core/table::partials.checkbox', compact('id'))->render();
     }

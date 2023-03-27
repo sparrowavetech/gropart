@@ -27,6 +27,7 @@ class MediaFile extends BaseModel
         'options',
         'folder_id',
         'user_id',
+        'alt',
     ];
 
     protected $casts = [
@@ -45,7 +46,7 @@ class MediaFile extends BaseModel
 
     public function folder(): BelongsTo
     {
-        return $this->belongsTo(MediaFolder::class, 'id', 'folder_id');
+        return $this->belongsTo(MediaFolder::class, 'folder_id')->withDefault();
     }
 
     protected function type(): Attribute
@@ -103,6 +104,12 @@ class MediaFile extends BaseModel
 
                         break;
                     case 'document':
+                        if ($this->mime_type === 'application/pdf') {
+                            $preview = RvMedia::url($this->url);
+
+                            break;
+                        }
+
                         $config = config('core.media.media.preview.document', []);
                         if (Arr::get($config, 'enabled') &&
                             Request::ip() !== '127.0.0.1' &&

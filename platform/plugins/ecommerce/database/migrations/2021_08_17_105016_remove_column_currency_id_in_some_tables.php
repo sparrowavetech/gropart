@@ -19,11 +19,11 @@ return new class () extends Migration {
     public function down(): void
     {
         Schema::table('ec_orders', function (Blueprint $table) {
-            $table->integer('currency_id')->unsigned()->nullable();
+            $table->foreignId('currency_id')->nullable();
         });
 
         Schema::table('ec_shipping_rules', function (Blueprint $table) {
-            $table->integer('currency_id')->unsigned()->nullable();
+            $table->foreignId('currency_id')->nullable();
         });
     }
 };

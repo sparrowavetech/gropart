@@ -13,14 +13,22 @@ class NotificationController extends BaseController
             ->latest()
             ->paginate(10);
 
+        $notificationCollection = $notifications->getCollection();
+
+        foreach ($notificationCollection as $key => $notification) {
+            if (! $notification->isAbleToAccess()) {
+                $notificationCollection->forget($key);
+            }
+        }
+
+        $notifications->setCollection($notificationCollection);
+
         return view('core/base::notification.partials.notification-item', compact('notifications'));
     }
 
     public function countNotification()
     {
-        $countNotificationUnread = AdminNotification::query()
-            ->whereNull('read_at')
-            ->count();
+        $countNotificationUnread = AdminNotification::countUnread();
 
         return view('core/base::notification.partials.count-notification-unread', compact('countNotificationUnread'));
     }

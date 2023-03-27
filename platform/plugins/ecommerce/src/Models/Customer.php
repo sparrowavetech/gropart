@@ -10,6 +10,7 @@ use Botble\Ecommerce\Notifications\ResetPasswordNotification;
 use Botble\Marketplace\Models\Revenue;
 use Botble\Marketplace\Models\VendorInfo;
 use Botble\Marketplace\Models\Withdrawal;
+use Botble\Payment\Models\Payment;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Auth\Authenticatable;
@@ -23,6 +24,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 use RvMedia;
 use MacroableModels;
@@ -95,7 +98,17 @@ class Customer extends BaseModel implements
 
     public function addresses(): HasMany
     {
-        return $this->hasMany(Address::class, 'customer_id', 'id');
+        $with = [];
+        if (is_plugin_active('location')) {
+            $with = ['locationCountry', 'locationState', 'locationCity'];
+        }
+
+        return $this->hasMany(Address::class, 'customer_id', 'id')->with($with);
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class, 'customer_id', 'id');
     }
 
     public function discounts(): BelongsToMany
@@ -114,6 +127,7 @@ class Customer extends BaseModel implements
 
         self::deleting(function (Customer $customer) {
             $customer->discounts()->detach();
+            $customer->usedCoupons()->detach();
             Review::where('customer_id', $customer->id)->delete();
             Wishlist::where('customer_id', $customer->id)->delete();
             Address::where('customer_id', $customer->id)->delete();
@@ -123,6 +137,13 @@ class Customer extends BaseModel implements
                 Revenue::where('customer_id', $customer->id)->delete();
                 Withdrawal::where('customer_id', $customer->id)->delete();
                 VendorInfo::where('customer_id', $customer->id)->delete();
+            }
+        });
+
+        static::deleted(function (Customer $customer) {
+            $folder = Storage::path($customer->upload_folder);
+            if (File::isDirectory($folder) && Str::endsWith($customer->upload_folder, '/' . $customer->id)) {
+                File::deleteDirectory($folder);
             }
         });
     }
@@ -162,5 +183,21 @@ class Customer extends BaseModel implements
     public function viewedProducts(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'ec_customer_recently_viewed_products');
+    }
+
+    public function usedCoupons(): BelongsToMany
+    {
+        return $this->belongsToMany(Discount::class, 'ec_customer_used_coupons');
+    }
+
+    protected function uploadFolder(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $folder = $this->id ? 'customers/' . $this->id : 'customers';
+
+                return apply_filters('ecommerce_customer_upload_folder', $folder, $this);
+            }
+        );
     }
 }

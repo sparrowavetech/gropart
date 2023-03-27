@@ -16,7 +16,7 @@
         @if ($shortcode->background) data-bg="{{ RvMedia::getImageUrl($shortcode->background) }}" @endif>
         <div class="container-xxxl">
             <div class="row gx-0 gx-md-4">
-                <div class="@if (is_plugin_active('ads') && $shortcode->ads) col-lg-8 col-sm-7 @else col-md-12 @endif">
+                <div class="@if (is_plugin_active('ads') && $shortcode->ads) col-md-8 @else col-md-12 @endif">
                     <div class="section-slides-wrapper my-3">
                         <div class="slide-body slick-slides-carousel" data-slick="{{ json_encode($slick) }}">
                             @foreach($sliders as $slider)
@@ -42,7 +42,7 @@
                     </div>
                 </div>
                 @if (is_plugin_active('ads') && $shortcode->ads)
-                    <div class="col-lg-4 col-sm-5">
+                    <div class="col-md-4">
                         <div class="section-banner-wrapper my-3">
                             <div class="banner-medium">
                                 <div class="banner-item__image">

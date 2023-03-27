@@ -8,9 +8,10 @@ use Botble\Ecommerce\Enums\ShippingCodStatusEnum;
 use Botble\Ecommerce\Enums\ShippingMethodEnum;
 use Botble\Ecommerce\Enums\ShippingStatusEnum;
 use Botble\Ecommerce\Events\OrderPlacedEvent;
+use Botble\Ecommerce\Facades\DiscountFacade;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\Order as OrderModel;
-use Botble\Ecommerce\Repositories\Interfaces\DiscountInterface;
+use Botble\Ecommerce\Models\OrderReturn;
 use Botble\Ecommerce\Repositories\Interfaces\OrderHistoryInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ShipmentInterface;
@@ -18,18 +19,18 @@ use Botble\Ecommerce\Services\HandleApplyCouponService;
 use Botble\Ecommerce\Services\HandleApplyPromotionsService;
 use Botble\Ecommerce\Services\HandleRemoveCouponService;
 use Botble\Ecommerce\Services\HandleShippingFeeService;
+use Botble\Marketplace\Enums\RevenueTypeEnum;
 use Botble\Marketplace\Models\CategoryCommission;
 use Botble\Marketplace\Repositories\Interfaces\RevenueInterface;
 use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
 use Botble\Marketplace\Repositories\Interfaces\VendorInfoInterface;
 use Botble\Payment\Enums\PaymentStatusEnum;
+use Botble\Payment\Supports\PaymentHelper;
 use Botble\PayPal\Services\Gateways\PayPalPaymentService;
-use Carbon\Carbon;
 use Cart;
 use EcommerceHelper;
 use EmailHandler;
 use Exception;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -61,6 +62,7 @@ class OrderSupportServiceProvider extends ServiceProvider
             add_filter(PROCESS_CHECKOUT_RULES_REQUEST_ECOMMERCE, [$this, 'processCheckoutRulesRequest'], 100);
             add_filter(PROCESS_CHECKOUT_MESSAGES_REQUEST_ECOMMERCE, [$this, 'processCheckoutMessagesRequest'], 100);
             add_action(ACTION_AFTER_ORDER_STATUS_COMPLETED_ECOMMERCE, [$this, 'afterOrderStatusCompleted'], 12);
+            add_filter(ACTION_AFTER_ORDER_RETURN_STATUS_COMPLETED, [$this, 'afterReturnOrderCompleted'], 12, 2);
         });
     }
 
@@ -92,7 +94,7 @@ class OrderSupportServiceProvider extends ServiceProvider
             'variationInfo.configurableProduct.store',
         ]);
 
-        $groupedProducts = collect([]);
+        $groupedProducts = collect();
         foreach ($products as $product) {
             $storeId = ($product->original_product && $product->original_product->store_id) ? $product->original_product->store_id : 0;
             if (! Arr::has($groupedProducts, $storeId)) {
@@ -117,12 +119,12 @@ class OrderSupportServiceProvider extends ServiceProvider
             $currentUserId = auth('customer')->id();
         }
 
-        $orders = collect([]);
+        $orders = collect();
 
-        $discounts = collect([]);
+        $discounts = collect();
         $couponCode = session('applied_coupon_code');
 
-        $preOrders = collect([]);
+        $preOrders = collect();
 
         $mpSessionData = Arr::get($sessionCheckoutData, 'marketplace', []);
 
@@ -190,22 +192,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         }
 
         if ($couponCode && $discounts->count()) {
-            $discount = $this->app->make(DiscountInterface::class)
-                ->getModel()
-                ->where('code', $couponCode)
-                ->where('type', 'coupon')
-                ->where('start_date', '<=', Carbon::now())
-                ->where(function (Builder $query) {
-                    return $query
-                        ->whereNull('end_date')
-                        ->orWhere('end_date', '>', Carbon::now());
-                })
-                ->first();
-
-            if (! empty($discount)) {
-                $discount->total_used++;
-                $this->app->make(DiscountInterface::class)->createOrUpdate($discount);
-            }
+            DiscountFacade::getFacadeRoot()->afterOrderPlaced($couponCode);
         }
 
         $totalAmount = format_price($orders->pluck('amount')->sum(), null, true); // Calculator in here
@@ -216,22 +203,21 @@ class OrderSupportServiceProvider extends ServiceProvider
             return $response
                 ->setError($paymentData['error'])
                 ->setNextUrl($checkoutUrl)
-                ->withInput()
                 ->setData(['checkoutUrl' => $checkoutUrl])
+                ->withInput()
                 ->setMessage($paymentData['message']);
         }
 
         if ($paymentData['error'] || ! $paymentData['charge_id']) {
             return $response
                 ->setError()
-                ->setNextUrl(route('public.checkout.information', $token))
+                ->setNextUrl(PaymentHelper::getCancelURL($token))
+                ->withInput()
                 ->setMessage($paymentData['message'] ?: __('Checkout error!'));
         }
 
-        OrderHelper::processOrder($orders->pluck('id')->toArray(), $paymentData['charge_id']);
-
         return $response
-            ->setNextUrl(route('public.checkout.success', $token))
+            ->setNextUrl(PaymentHelper::getRedirectURL($token))
             ->setMessage(__('Checkout successfully!'));
     }
 
@@ -247,7 +233,7 @@ class OrderSupportServiceProvider extends ServiceProvider
 
         $sessionCheckoutData = OrderHelper::getOrderSessionData($token);
         $sessionMarketplaceData = Arr::get($sessionCheckoutData, 'marketplace', []);
-        $results = collect([]);
+        $results = collect();
         $couponCode = $request->input('coupon_code');
 
         if (! $couponCode) {
@@ -255,13 +241,14 @@ class OrderSupportServiceProvider extends ServiceProvider
         }
 
         foreach ($groupedProducts as $storeId => $groupedProduct) {
-            $cartItems = $groupedProduct['products']->pluck('cartItem');
+            $productItems = $groupedProduct['products'];
+            $cartItems = $productItems->pluck('cartItem');
             $rawTotal = Cart::instance('cart')->rawTotalByItems($cartItems);
             $countCart = Cart::instance('cart')->countByItems($cartItems);
             $sessionData = Arr::get($sessionMarketplaceData, $storeId, []);
             $prefix = "marketplace.$storeId.";
             $result = $this->app->make(HandleApplyCouponService::class)
-                ->execute($couponCode, $sessionData, compact('cartItems', 'rawTotal', 'countCart'), $prefix);
+                ->execute($couponCode, $sessionData, compact('cartItems', 'rawTotal', 'countCart', 'productItems'), $prefix);
             $results[$storeId] = $result;
         }
 
@@ -309,49 +296,6 @@ class OrderSupportServiceProvider extends ServiceProvider
             return compact('error', 'message');
         }
 
-        $isFreeShipping = Arr::get($successData, 'data.is_free_shipping', false);
-        $discountTypeOption = Arr::get($successData, 'data.discount_type_option');
-
-        if (! $isFreeShipping && ! in_array($discountTypeOption, ['percentage', 'same-price'])) {
-            $validRawTotals = 0;
-
-            foreach ($groupedProducts as $storeId => $groupedProduct) {
-                $result = Arr::get($results, $storeId, []);
-                if (! Arr::get($result, 'error') && Arr::get($result, 'data.discount_amount')) {
-                    $discount = Arr::get($result, 'data.discount');
-                    if ($discount && (! $discount->store_id || $discount->store_id == $storeId)) {
-                        $cartItems = $groupedProduct['products']->pluck('cartItem');
-                        $rawTotal = Cart::instance('cart')->rawTotalByItems($cartItems);
-                        $validRawTotals += $rawTotal;
-                    }
-                }
-            }
-            $totalDiscountAmount = Arr::get($successData, 'data.discount_amount', 0);
-            if ($validRawTotals) {
-                foreach ($groupedProducts as $storeId => $groupedProduct) {
-                    $result = Arr::get($results, $storeId, []);
-                    $sessionData = Arr::get($sessionMarketplaceData, $storeId, []);
-                    $discountAmount = 0;
-                    if (Arr::get($result, 'error') || ! Arr::get($result, 'data.discount_amount')) {
-                        Arr::set($sessionData, 'coupon_discount_amount', $discountAmount);
-                        Arr::set($sessionData, 'applied_coupon_code', null);
-                    } else {
-                        $discount = Arr::get($result, 'data.discount');
-                        if ($discount && (! $discount->store_id || $discount->store_id == $storeId)) {
-                            $cartItems = $groupedProduct['products']->pluck('cartItem');
-                            $rawTotal = Cart::instance('cart')->rawTotalByItems($cartItems);
-                            $discountAmount = round($totalDiscountAmount / $validRawTotals * $rawTotal, 2);
-                            Arr::set($sessionData, 'applied_coupon_code', $couponCode);
-                        } else {
-                            Arr::set($sessionData, 'applied_coupon_code', null);
-                        }
-                        Arr::set($sessionData, 'coupon_discount_amount', $discountAmount);
-                    }
-                    Arr::set($sessionMarketplaceData, $storeId, $sessionData);
-                }
-            }
-        }
-
         $couponDiscountAmount = collect($sessionMarketplaceData)->sum('coupon_discount_amount');
 
         OrderHelper::setOrderSessionData($token, [
@@ -395,13 +339,12 @@ class OrderSupportServiceProvider extends ServiceProvider
         }
 
         $paymentMethod = session('selected_payment_method');
+        $orderAmount = max($rawTotal - $promotionDiscountAmount - $couponDiscountAmount, 0);
 
         $shippingData = [];
         $shippingMethod = [];
         if ($isAvailableShipping) {
-            $orderTotal = $rawTotal - $promotionDiscountAmount - $couponDiscountAmount;
-
-            $shippingData = $this->getShippingData($sessionStoreData, $orderTotal, $products, $paymentMethod);
+            $shippingData = $this->getShippingData($sessionStoreData, $orderAmount, $products, $paymentMethod);
 
             $shippingMethodData = $shippingFeeService
                 ->execute(
@@ -434,11 +377,7 @@ class OrderSupportServiceProvider extends ServiceProvider
             }
         }
 
-        if (($promotionDiscountAmount + $couponDiscountAmount - (float)$shippingAmount) > $rawTotal) {
-            $orderAmount = 0;
-        } else {
-            $orderAmount = $rawTotal + (float)$shippingAmount - $promotionDiscountAmount - $couponDiscountAmount;
-        }
+        $orderAmount += (float)$shippingAmount;
 
         $data = array_merge($request->input(), [
             'amount' => $orderAmount,
@@ -480,7 +419,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         }
 
         // Address Order in here
-        $addressKeys = ['name', 'phone', 'email', 'country', 'state', 'city', 'address', 'zip_code', 'address_id'];
+        $addressKeys = ['name', 'phone', 'email', 'country', 'state', 'city', 'address', 'zip_code', 'address_id', 'billing_address_same_as_shipping_address', 'billing_address'];
         $addressData = Arr::only((array)$sessionCheckoutData, $addressKeys);
         $sessionStoreData = array_merge($sessionStoreData, $addressData);
         $sessionStoreData['created_order_id'] = $order->id;
@@ -670,9 +609,9 @@ class OrderSupportServiceProvider extends ServiceProvider
         }
 
         $mpSessionCheckoutData = Arr::get($sessionCheckoutData, 'marketplace');
-        $discounts = collect([]);
+        $discounts = collect();
 
-        $marketplaceData = collect([]);
+        $marketplaceData = collect();
 
         $promotionService = $this->app->make(HandleApplyPromotionsService::class);
         $shippingFeeService = $this->app->make(HandleShippingFeeService::class);
@@ -688,6 +627,7 @@ class OrderSupportServiceProvider extends ServiceProvider
 
         foreach ($groupedProducts as $storeId => $productsByStore) {
             $cartItems = $productsByStore['products']->pluck('cartItem');
+            $productItems = $productsByStore['products'];
             $vendorSessionData = Arr::get($mpSessionCheckoutData, $storeId);
 
             $rawTotal = Cart::instance('cart')->rawTotalByItems($cartItems);
@@ -696,7 +636,7 @@ class OrderSupportServiceProvider extends ServiceProvider
             $prefixPromotion = "marketplace.$storeId.";
             $promotionDiscountAmount = $promotionService->execute(
                 $token,
-                compact('cartItems', 'rawTotal', 'countCart'),
+                compact('cartItems', 'rawTotal', 'countCart', 'productItems'),
                 $prefixPromotion
             );
 
@@ -826,7 +766,7 @@ class OrderSupportServiceProvider extends ServiceProvider
     {
         $groupedProducts = $this->cartGroupByStore($products);
 
-        $results = collect([]);
+        $results = collect();
 
         foreach ($groupedProducts as $storeId => $groupedProduct) {
             $prefix = "marketplace.$storeId.";
@@ -863,7 +803,7 @@ class OrderSupportServiceProvider extends ServiceProvider
     public function processPostSaveInformation(array $sessionCheckoutData, Request $request, string $token): array
     {
         if (session()->has('applied_coupon_code')) {
-            $discounts = collect([]);
+            $discounts = collect();
             $mpSessionData = Arr::get($sessionCheckoutData, 'marketplace', []);
             foreach ($mpSessionData as $storeId => $sessionStoreData) {
                 $discount = $this->app->make(HandleApplyCouponService::class)
@@ -884,7 +824,7 @@ class OrderSupportServiceProvider extends ServiceProvider
 
         $mpSessionData = Arr::get($sessionCheckoutData, 'marketplace', []);
 
-        $addressKeys = ['name', 'phone', 'email', 'country', 'state', 'city', 'address', 'zip_code', 'address_id'];
+        $addressKeys = ['name', 'phone', 'email', 'country', 'state', 'city', 'address', 'zip_code', 'address_id', 'billing_address_same_as_shipping_address', 'billing_address'];
         $addressData = Arr::only((array)$request->input('address', []), $addressKeys);
 
         foreach ($mpSessionData as $storeId => $sessionStoreData) {
@@ -983,7 +923,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         if (auth('customer')->check()) {
             $currentUserId = auth('customer')->id();
         }
-        $preOrders = collect([]);
+        $preOrders = collect();
         $mpSessionData = Arr::get($sessionData, 'marketplace', []);
 
         $orderIds = collect($mpSessionData ?: [])->pluck('created_order_id');
@@ -993,7 +933,7 @@ class OrderSupportServiceProvider extends ServiceProvider
 
         $foundOrderIds = [];
 
-        $addressKeys = ['name', 'phone', 'email', 'country', 'state', 'city', 'address', 'zip_code', 'address_id'];
+        $addressKeys = ['name', 'phone', 'email', 'country', 'state', 'city', 'address', 'zip_code', 'address_id', 'billing_address_same_as_shipping_address', 'billing_address'];
         $addressData = Arr::only($sessionData, $addressKeys);
 
         foreach ($groupedProducts as $key => $productsByStore) {
@@ -1002,6 +942,7 @@ class OrderSupportServiceProvider extends ServiceProvider
             if ($order) {
                 $foundOrderIds[] = $key;
             }
+
             $sessionDataInStore = array_merge($sessionDataInStore, $addressData);
             $mpSessionData[$key] = $this->handleOrderStore(
                 $productsByStore,
@@ -1018,9 +959,6 @@ class OrderSupportServiceProvider extends ServiceProvider
             foreach ($preOrders as $order) {
                 if (! in_array($order->store_id, $foundOrderIds)) {
                     $order->delete();
-                    if ($order->address && $order->address->id) {
-                        $order->address->delete();
-                    }
                 }
             }
         }
@@ -1059,6 +997,7 @@ class OrderSupportServiceProvider extends ServiceProvider
             $generalData
         );
 
+        Arr::set($sessionData, 'is_save_order_shipping_address', EcommerceHelper::isSaveOrderShippingAddress($products['products']));
         Arr::set($sessionData, 'created_order_id', $order->id);
         $sessionData = OrderHelper::processAddressOrder($currentUserId, $sessionData, $request);
 
@@ -1088,7 +1027,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         $originalProducts = Cart::instance('cart')->products()->pluck('original_product');
         $storeIdsInCart = $originalProducts->pluck('store_id');
         $stores = $this->app->make(StoreInterface::class)->allBy([['id', 'IN', $storeIdsInCart]]);
-        $storesInCart = collect([]);
+        $storesInCart = collect();
         $groupedProducts = [];
         foreach ($originalProducts as $original) {
             if ($original->store_id) {
@@ -1227,5 +1166,56 @@ class OrderSupportServiceProvider extends ServiceProvider
         }
 
         return $totalFee;
+    }
+
+    public function afterReturnOrderCompleted(OrderReturn $orderReturn, $data)
+    {
+        $order = $orderReturn->order;
+        if ($order && $order->store->id && $order->store->customer->id) {
+            $customer = $order->store->customer;
+            $vendorInfo = $customer->vendorInfo;
+            if (! $vendorInfo->id) {
+                $vendorInfo = $this->app->make(VendorInfoInterface::class)
+                    ->createOrUpdate([
+                        'customer_id' => $customer->id,
+                    ]);
+            }
+
+            if ($vendorInfo->id) {
+                $refundAmount = $orderReturn->items->sum('refund_amount');
+                if (! MarketplaceHelper::isCommissionCategoryFeeBasedEnabled()) {
+                    $feePercentage = MarketplaceHelper::getSetting('fee_per_order', 0);
+                    $fee = $refundAmount * ($feePercentage / 100);
+                } else {
+                    $products = $orderReturn->items->map(fn ($item) => $item->product);
+                    $fee = $this->calculatorCommissionFeeByProduct($products);
+                }
+                $fee = $fee * -1;
+                $refundAmount = $refundAmount * -1;
+                $amount = $refundAmount - $fee;
+                $currentBalance = $customer->balance;
+
+                $data = [
+                    'sub_amount' => $refundAmount,
+                    'fee' => $fee,
+                    'amount' => $amount,
+                    'currency' => get_application_currency()->title,
+                    'current_balance' => $currentBalance,
+                    'customer_id' => $customer->getKey(),
+                    'order_id' => $order->id,
+                    'type' => RevenueTypeEnum::ORDER_RETURN,
+                    'description' => trans('plugins/marketplace::order.return.description', [
+                        'order' => $order->code,
+                    ]),
+                ];
+
+                $this->app->make(RevenueInterface::class)->createOrUpdate($data);
+
+                $vendorInfo->total_revenue += $amount;
+                $vendorInfo->balance += $amount;
+                $vendorInfo->total_fee += $fee;
+                $vendorInfo->save();
+            }
+        }
     }
 }

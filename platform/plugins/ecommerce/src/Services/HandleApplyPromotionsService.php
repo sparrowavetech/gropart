@@ -2,47 +2,52 @@
 
 namespace Botble\Ecommerce\Services;
 
-use Botble\Ecommerce\Models\Discount;
-use Botble\Ecommerce\Repositories\Interfaces\DiscountInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
+use Botble\Ecommerce\Facades\DiscountFacade;
 use Cart;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 use OrderHelper;
 
 class HandleApplyPromotionsService
 {
-    protected DiscountInterface $discountRepository;
-
-    protected ProductInterface $productRepository;
-
-    protected ?Collection $promotions = null;
-
-    public function __construct(DiscountInterface $discountRepository, ProductInterface $productRepository)
-    {
-        $this->discountRepository = $discountRepository;
-        $this->productRepository = $productRepository;
-    }
-
     public function execute($token = null, array $data = [], ?string $prefix = ''): float|int
     {
-        if (empty($this->promotions)) {
-            $promotions = $this->discountRepository->getAvailablePromotions();
-            $this->promotions = $promotions;
-        } else {
-            $promotions = $this->promotions;
+        $promotionDiscountAmount = $this->getPromotionDiscountAmount($data);
+
+        if (! $token) {
+            $token = OrderHelper::getOrderSessionToken();
         }
 
+        $sessionData = OrderHelper::getOrderSessionData($token);
+        Arr::set($sessionData, $prefix . 'promotion_discount_amount', $promotionDiscountAmount);
+        OrderHelper::setOrderSessionData($token, $sessionData);
+
+        return $promotionDiscountAmount;
+    }
+
+    public function getPromotionDiscountAmount(array $data = [])
+    {
         $promotionDiscountAmount = 0;
 
         $rawTotal = Arr::get($data, 'rawTotal', Cart::instance('cart')->rawTotal());
         $cartItems = Arr::get($data, 'cartItems', Cart::instance('cart')->content());
         $countCart = Arr::get($data, 'countCart', Cart::instance('cart')->count());
+        $productItems = Arr::get($data, 'productItems', Cart::instance('cart')->products());
 
-        foreach ($promotions as $promotion) {
-            /**
-             * @var Discount $promotion
-             */
+        $availablePromotions = collect();
+        foreach ($productItems as $product) {
+            if (! $product->is_variation) {
+                $productCollections = $product->productCollections;
+            } else {
+                $productCollections = $product->original_product->productCollections;
+            }
+
+            $promotion = DiscountFacade::promotionForProduct([$product->id], $productCollections->pluck('id')->all());
+            if ($promotion) {
+                $availablePromotions = $availablePromotions->push($promotion);
+            }
+        }
+
+        foreach ($availablePromotions as $promotion) {
             switch ($promotion->type_option) {
                 case 'amount':
                     switch ($promotion->target) {
@@ -94,7 +99,7 @@ class HandleApplyPromotionsService
                                     in_array($item->id, $promotion->products()->pluck('product_id')->all())
                                 ) {
                                     $promotionDiscountAmount += ($item->price - $promotion->value) * $item->qty;
-                                } elseif ($product = $this->productRepository->findById($item->id)) {
+                                } elseif ($product = $productItems->firstWhere('id', $item->id)) {
                                     $productCollections = $product
                                         ->productCollections()
                                         ->pluck('ec_product_collections.id')->all();
@@ -118,14 +123,6 @@ class HandleApplyPromotionsService
                     break;
             }
         }
-
-        if (! $token) {
-            $token = OrderHelper::getOrderSessionToken();
-        }
-
-        $sessionData = OrderHelper::getOrderSessionData($token);
-        Arr::set($sessionData, $prefix . 'promotion_discount_amount', $promotionDiscountAmount);
-        OrderHelper::setOrderSessionData($token, $sessionData);
 
         return $promotionDiscountAmount;
     }

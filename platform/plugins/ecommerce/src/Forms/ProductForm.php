@@ -140,11 +140,6 @@ class ProductForm extends FormAbstract
                 'label_attr' => ['class' => 'control-label'],
                 'default_value' => false,
             ])
-            ->add('is_enquiry', 'onOff', [
-                'label'         => trans('plugins/ecommerce::products.form.is_enquiry'),
-                'label_attr'    => ['class' => 'control-label'],
-                'default_value' => false,
-            ])
             ->add('categories[]', 'categoryMulti', [
                 'label' => trans('plugins/ecommerce::products.form.categories'),
                 'label_attr' => ['class' => 'control-label'],
@@ -286,7 +281,7 @@ class ProductForm extends FormAbstract
         }
     }
 
-    public function getProductAttributes(?int $attributeSetId): Collection
+    public function getProductAttributes(int|string|null $attributeSetId): Collection
     {
         $params = ['order_by' => ['order' => 'ASC']];
 

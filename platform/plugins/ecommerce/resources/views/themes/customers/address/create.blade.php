@@ -80,12 +80,9 @@
             {!! Form::error('address', $errors) !!}
 
             @if (EcommerceHelper::isZipCodeEnabled())
-                @php
-                    $fromZipcode  = EcommerceHelper::isZipCodeEnabled() ? get_ecommerce_setting('store_zip_code') : '313001';
-                @endphp
                 <div class="form-group mb-3">
                     <label>{{ __('Zip code') }}:</label>
-                    <input id="zip_code" minlength="6" maxlength="6" data-pincode="{{ $fromZipcode }}" type="text" class="form-control @if ($errors->has('zip_code')) is-invalid @endif" name="zip_code" value="{{ old('zip_code') }}" placeholder="{{ __('Enter Zip code') }}">
+                    <input id="zip_code" type="text" class="form-control" name="zip_code" value="{{ old('zip_code') }}">
                     {!! Form::error('zip_code', $errors) !!}
                 </div>
             @endif
@@ -100,7 +97,7 @@
              {!! Form::error('is_default', $errors) !!}
 
             <div class="form-group text-center">
-                <button class="btn btn-primary customer-address-button" type="submit">{{ __('Add a new address') }}</button>
+                <button class="btn btn-primary" type="submit">{{ __('Add a new address') }}</button>
             </div>
         {!! Form::close() !!}
     </div>

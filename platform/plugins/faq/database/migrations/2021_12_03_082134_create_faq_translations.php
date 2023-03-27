@@ -10,7 +10,7 @@ return new class () extends Migration {
         if (! Schema::hasTable('faq_categories_translations')) {
             Schema::create('faq_categories_translations', function (Blueprint $table) {
                 $table->string('lang_code');
-                $table->integer('faq_categories_id');
+                $table->foreignId('faq_categories_id');
                 $table->string('name', 120)->nullable();
 
                 $table->primary(['lang_code', 'faq_categories_id'], 'faq_categories_translations_primary');
@@ -20,7 +20,7 @@ return new class () extends Migration {
         if (! Schema::hasTable('faqs_translations')) {
             Schema::create('faqs_translations', function (Blueprint $table) {
                 $table->string('lang_code');
-                $table->integer('faqs_id');
+                $table->foreignId('faqs_id');
                 $table->text('question')->nullable();
                 $table->text('answer')->nullable();
 

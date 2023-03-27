@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Collection;
 use OrderHelper;
 
 class Order extends BaseModel
@@ -56,7 +57,10 @@ class Order extends BaseModel
             OrderHistory::where('order_id', $order->id)->delete();
             OrderProduct::where('order_id', $order->id)->delete();
             OrderAddress::where('order_id', $order->id)->delete();
-            app(PaymentInterface::class)->deleteBy(['order_id' => $order->id]);
+
+            if (is_plugin_active('payment')) {
+                app(PaymentInterface::class)->deleteBy(['order_id' => $order->id]);
+            }
         });
 
         static::creating(function (Order $order) {
@@ -223,6 +227,10 @@ class Order extends BaseModel
 
     public function canBeReturned(): bool
     {
+        if (! EcommerceHelper::isOrderReturnEnabled()) {
+            return false;
+        }
+
         if ($this->status != OrderStatusEnum::COMPLETED || ! $this->completed_at) {
             return false;
         }
@@ -244,7 +252,7 @@ class Order extends BaseModel
 
     public static function generateUniqueCode(): string
     {
-        $nextInsertId = static::query()->max('id') + 1;
+        $nextInsertId = BaseModel::determineIfUsingUuidsForId() ? static::query()->count() + 1 : static::query()->max('id') + 1;
 
         do {
             $code = get_order_code($nextInsertId);
@@ -252,5 +260,10 @@ class Order extends BaseModel
         } while (static::query()->where('code', $code)->exists());
 
         return $code;
+    }
+
+    public function digitalProducts(): Collection
+    {
+        return $this->products->filter(fn ($item) => $item->isTypeDigital());
     }
 }

@@ -10,6 +10,7 @@ use Botble\Ecommerce\Models\Customer;
 use Botble\Ecommerce\Models\Discount;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\Product;
+use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Botble\Marketplace\Facades\MarketplaceHelperFacade;
 use Botble\Marketplace\Http\Middleware\RedirectIfNotVendor;
 use Botble\Marketplace\Models\Revenue;
@@ -38,8 +39,10 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\ServiceProvider;
 use MacroableModels;
 use MarketplaceHelper;
+use OptimizerHelper;
 use Route;
 use SeoHelper;
+use SiteMapManager;
 use SlugHelper;
 
 class MarketplaceServiceProvider extends ServiceProvider
@@ -98,8 +101,27 @@ class MarketplaceServiceProvider extends ServiceProvider
                 ->publishAssets()
                 ->loadRoutes(['base', 'fronts']);
 
+            if (defined('LANGUAGE_MODULE_SCREEN_NAME') && defined('LANGUAGE_ADVANCED_MODULE_SCREEN_NAME')) {
+                LanguageAdvancedManager::registerModule(Store::class, [
+                    'name',
+                    'description',
+                    'content',
+                    'address',
+                    'company',
+                ]);
+            }
+
             Event::listen(RouteMatched::class, function () {
                 dashboard_menu()
+                    ->registerItem([
+                        'id' => 'cms-plugins-marketplace-settings',
+                        'priority' => 999,
+                        'parent_id' => 'cms-plugins-marketplace',
+                        'name' => 'plugins/marketplace::marketplace.settings.name',
+                        'icon' => null,
+                        'url' => route('marketplace.settings'),
+                        'permissions' => ['marketplace.settings'],
+                    ])
                     ->registerItem([
                         'id' => 'cms-plugins-marketplace',
                         'priority' => 9,
@@ -126,15 +148,6 @@ class MarketplaceServiceProvider extends ServiceProvider
                         'icon' => null,
                         'url' => route('marketplace.withdrawal.index'),
                         'permissions' => ['marketplace.withdrawal.index'],
-                    ])
-                    ->registerItem([
-                        'id' => 'cms-plugins-marketplace-settings',
-                        'priority' => 3,
-                        'parent_id' => 'cms-plugins-marketplace',
-                        'name' => 'plugins/marketplace::marketplace.settings.name',
-                        'icon' => null,
-                        'url' => route('marketplace.settings'),
-                        'permissions' => ['marketplace.settings'],
                     ])
                     ->registerItem([
                         'id' => 'cms-plugins-marketplace-vendors',
@@ -170,6 +183,7 @@ class MarketplaceServiceProvider extends ServiceProvider
             SlugHelper::setPrefix(Store::class, 'stores');
 
             SeoHelper::registerModule([Store::class]);
+            SiteMapManager::registerKey('stores');
 
             $this->app->register(EventServiceProvider::class);
             $this->app->register(HookServiceProvider::class);
@@ -263,6 +277,12 @@ class MarketplaceServiceProvider extends ServiceProvider
 
     public function setInAdmin(bool $isInAdmin): bool
     {
-        return in_array('vendor', Route::current()->middleware()) || $isInAdmin;
+        $isInAdmin = in_array('vendor', Route::current()->middleware()) || $isInAdmin;
+
+        if ($isInAdmin) {
+            OptimizerHelper::disable();
+        }
+
+        return $isInAdmin;
     }
 }

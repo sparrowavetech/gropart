@@ -6,11 +6,7 @@ use Botble\Ecommerce\Models\DiscountProduct;
 use Botble\Ecommerce\Models\DiscountProductCollection;
 
 if (! function_exists('get_discount_description')) {
-    /**
-     * @param Discount $discount
-     * @return string
-     */
-    function get_discount_description(Discount $discount)
+    function get_discount_description(Discount $discount): string|null
     {
         switch ($discount->type_option) {
             case 'shipping':
@@ -99,6 +95,10 @@ if (! function_exists('get_discount_description')) {
                             ->all();
 
                         $description .= __('for product(s) variant') . ' ' . implode(', ', array_unique($products));
+
+                        break;
+                    case 'once-per-customer':
+                        $description .= __('limited to use coupon code per customer. This coupon can only be used once per customer!');
 
                         break;
                     default:

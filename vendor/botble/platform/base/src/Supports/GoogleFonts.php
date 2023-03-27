@@ -5,6 +5,7 @@ namespace Botble\Base\Supports;
 use Exception;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class GoogleFonts
@@ -52,6 +53,11 @@ class GoogleFonts
 
         $localizedCss = $this->filesystem->get($this->path($url, 'fonts.css'));
 
+        if (! str_contains($localizedCss, Storage::url('fonts'))) {
+            $localizedCss = preg_replace('/(http|https):\/\/.*?\/storage\/fonts\//i', Storage::url('fonts/'), $localizedCss);
+            $this->filesystem->put($this->path($url, 'fonts.css'), $localizedCss);
+        }
+
         return new Fonts(
             googleFontsUrl: $url,
             localizedUrl: $this->filesystem->url($this->path($url, 'fonts.css')),
@@ -64,6 +70,7 @@ class GoogleFonts
     protected function fetch(string $url, ?string $nonce): Fonts
     {
         $css = Http::withHeaders(['User-Agent' => $this->userAgent])
+            ->timeout(300)
             ->get($url)
             ->body();
 

@@ -36,12 +36,14 @@
             <span class="order-customer-info-meta">{{ $order->shipping_method_name }} - {{ format_price($order->shipping_amount) }}</span>
         </p>
     @endif
-    <p>
-        <span class="d-inline-block">{{ __('Payment method') }}:</span>
-        <span class="order-customer-info-meta">{{ $order->payment->payment_channel->label() }}</span>
-    </p>
-    <p>
-        <span class="d-inline-block">{{ __('Payment status') }}:</span>
-        <span class="order-customer-info-meta" style="text-transform: uppercase">{!! $order->payment->status->toHtml() !!}</span>
-    </p>
+    @if (is_plugin_active('payment'))
+        <p>
+            <span class="d-inline-block">{{ __('Payment method') }}:</span>
+            <span class="order-customer-info-meta">{{ $order->payment->payment_channel->label() }}</span>
+        </p>
+        <p>
+            <span class="d-inline-block">{{ __('Payment status') }}:</span>
+            <span class="order-customer-info-meta" style="text-transform: uppercase">{!! $order->payment->status->toHtml() !!}</span>
+        </p>
+    @endif
 </div>

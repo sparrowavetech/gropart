@@ -48,13 +48,13 @@ Route::group(['namespace' => 'Botble\ACL\Http\Controllers', 'middleware' => ['we
                     'uses' => 'UserController@postUpdateProfile',
                     'permission' => false,
                     'middleware' => 'preventDemo',
-                ])->where('id', '[0-9]+');
+                ])->where('id', BaseHelper::routeIdRegex());
 
                 Route::post('modify-profile-image/{id}', [
                     'as' => 'profile.image',
                     'uses' => 'UserController@postAvatar',
                     'permission' => false,
-                ])->where('id', '[0-9]+');
+                ])->where('id', BaseHelper::routeIdRegex());
 
                 Route::post('change-password/{id}', [
                     'as' => 'change-password',
@@ -67,20 +67,20 @@ Route::group(['namespace' => 'Botble\ACL\Http\Controllers', 'middleware' => ['we
                     'as' => 'profile.view',
                     'uses' => 'UserController@getUserProfile',
                     'permission' => false,
-                ])->where('id', '[0-9]+');
+                ])->where('id', BaseHelper::routeIdRegex());
 
                 Route::get('make-super/{id}', [
                     'as' => 'make-super',
                     'uses' => 'UserController@makeSuper',
                     'permission' => ACL_ROLE_SUPER_USER,
-                ])->where('id', '[0-9]+');
+                ])->where('id', BaseHelper::routeIdRegex());
 
                 Route::get('remove-super/{id}', [
                     'as' => 'remove-super',
                     'uses' => 'UserController@removeSuper',
                     'permission' => ACL_ROLE_SUPER_USER,
                     'middleware' => 'preventDemo',
-                ])->where('id', '[0-9]+');
+                ])->where('id', BaseHelper::routeIdRegex());
             });
 
             Route::group(['prefix' => 'roles', 'as' => 'roles.'], function () {
@@ -96,7 +96,7 @@ Route::group(['namespace' => 'Botble\ACL\Http\Controllers', 'middleware' => ['we
                     'as' => 'duplicate',
                     'uses' => 'RoleController@getDuplicate',
                     'permission' => 'roles.create',
-                ])->where('id', '[0-9]+');
+                ])->where('id', BaseHelper::routeIdRegex());
 
                 Route::get('json', [
                     'as' => 'list.json',

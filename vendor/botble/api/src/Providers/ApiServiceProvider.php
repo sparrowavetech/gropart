@@ -7,7 +7,6 @@ use Botble\Api\Facades\ApiHelperFacade;
 use Botble\Api\Http\Middleware\ForceJsonResponseMiddleware;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 
@@ -34,7 +33,7 @@ class ApiServiceProvider extends ServiceProvider
             $this->loadRoutes(['api']);
         }
 
-        Event::listen(RouteMatched::class, function () {
+        $this->app['events']->listen(RouteMatched::class, function () {
             if (ApiHelper::enabled()) {
                 $this->app['router']->pushMiddlewareToGroup('api', ForceJsonResponseMiddleware::class);
             }

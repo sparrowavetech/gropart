@@ -78,23 +78,5 @@ return [
                 'withdrawal_amount' => 'plugins/marketplace::marketplace.withdrawal_amount',
             ],
         ],
-        'store_new_enquiry'          => [
-            'title'       => 'plugins/marketplace::marketplace.email.store_new_enquiry_title',
-            'description' => 'plugins/marketplace::marketplace.email.store_new_enquiry_description',
-            'subject'     => 'New order(s) at {{ site_title }}',
-            'can_off'     => true,
-            'enabled'     => true,
-            'variables'   => [
-                'product_list'     => 'plugins/ecommerce::ecommerce.product_list',
-                'shipping_method'  => 'plugins/ecommerce::ecommerce.shipping_method',
-                'payment_method'   => 'plugins/ecommerce::ecommerce.payment_method',
-                'customer_name'    => 'plugins/ecommerce::ecommerce.customer_name',
-                'customer_phone'   => 'plugins/ecommerce::ecommerce.customer_phone',
-                'customer_address' => 'plugins/ecommerce::ecommerce.customer_address',
-                'store_name'       => 'plugins/marketplace::marketplace.store_name',
-                'enquiry_id'       => 'plugins/marketplace::marketplace.enquiry_id',
-                'enquiry_description' => 'plugins/marketplace::marketplace.enquiry_description',
-            ],
-        ],
     ],
 ];

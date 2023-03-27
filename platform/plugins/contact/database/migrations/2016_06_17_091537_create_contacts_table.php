@@ -24,7 +24,7 @@ return new class () extends Migration {
         Schema::create('contact_replies', function (Blueprint $table) {
             $table->id();
             $table->longText('message');
-            $table->integer('contact_id');
+            $table->foreignId('contact_id');
             $table->timestamps();
         });
     }

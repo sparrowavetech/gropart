@@ -12,7 +12,7 @@
                 <div class="page-sidebar navbar-collapse collapse">
                     <div class="sidebar">
                         <div class="sidebar-content">
-                            <ul class="page-sidebar-menu page-header-fixed {{ session()->get('sidebar-menu-toggle') ? 'page-sidebar-menu-closed' : '' }}" data-keep-expanded="false" data-auto-scroll="true" data-slide-speed="200">
+                            <ul class="page-sidebar-menu page-header-fixed {{ session()->get('sidebar-menu-toggle') ? 'page-sidebar-menu-closed' : '' }}" data-keep-expanded="false" data-auto-scroll="false" data-slide-speed="200">
                                 @include('core/base::layouts.partials.sidebar')
                             </ul>
                         </div>

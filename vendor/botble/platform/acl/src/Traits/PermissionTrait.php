@@ -8,13 +8,6 @@ trait PermissionTrait
 {
     protected array|null $preparedPermissions = null;
 
-    public function __construct(array $permissions = null)
-    {
-        if (isset($permissions)) {
-            $this->permissions = $permissions;
-        }
-    }
-
     public function updatePermission(string $permission, bool $value = true, bool $create = false): self
     {
         if (array_key_exists($permission, (array)$this->permissions)) {

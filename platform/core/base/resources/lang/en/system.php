@@ -77,6 +77,7 @@ return [
     'imagick_or_gd_ext' => 'Imagick/GD Ext',
     'updater' => 'System Updater',
     'zip' => 'Zip Ext',
+    'iconv' => 'Iconv Ext',
     'memory_limit' => 'Memory limit',
     'max_execution_time' => 'Max execution time (s)',
     'cleanup' => [

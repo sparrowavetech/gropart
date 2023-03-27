@@ -39,7 +39,7 @@ class InvoiceController extends BaseController
         return view('plugins/ecommerce::invoices.edit', compact('invoice'));
     }
 
-    public function destroy(Request $request, string $id, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
             $invoice = $this->invoiceRepository->findOrFail($id);

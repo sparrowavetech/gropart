@@ -8,7 +8,7 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::create('languages', function (Blueprint $table) {
-            $table->increments('lang_id');
+            $table->id('lang_id');
             $table->string('lang_name', 120);
             $table->string('lang_locale', 20);
             $table->string('lang_code', 20);
@@ -19,10 +19,10 @@ return new class () extends Migration {
         });
 
         Schema::create('language_meta', function (Blueprint $table) {
-            $table->increments('lang_meta_id');
+            $table->id('lang_meta_id');
             $table->text('lang_meta_code')->nullable();
             $table->string('lang_meta_origin', 255);
-            $table->integer('reference_id')->unsigned()->index();
+            $table->foreignId('reference_id')->index();
             $table->string('reference_type', 120);
         });
     }

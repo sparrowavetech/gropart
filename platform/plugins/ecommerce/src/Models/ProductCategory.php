@@ -26,7 +26,6 @@ class ProductCategory extends BaseModel
         'status',
         'image',
         'is_featured',
-        'is_enquiry',
     ];
 
     protected $casts = [

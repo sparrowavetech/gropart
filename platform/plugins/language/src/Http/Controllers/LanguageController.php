@@ -29,14 +29,8 @@ use Theme;
 
 class LanguageController extends BaseController
 {
-    protected LanguageInterface $languageRepository;
-
-    protected LanguageMetaInterface $languageMetaRepository;
-
-    public function __construct(LanguageInterface $languageRepository, LanguageMetaInterface $languageMetaRepository)
+    public function __construct(protected LanguageInterface $languageRepository, protected LanguageMetaInterface $languageMetaRepository)
     {
-        $this->languageRepository = $languageRepository;
-        $this->languageMetaRepository = $languageMetaRepository;
     }
 
     public function index()
@@ -231,7 +225,7 @@ class LanguageController extends BaseController
         return $response->setData($data);
     }
 
-    public function destroy(Request $request, int $id, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
             $language = $this->languageRepository->getFirstBy(['lang_id' => $id]);

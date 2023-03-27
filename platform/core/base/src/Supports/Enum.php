@@ -7,10 +7,11 @@ use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\HtmlString;
+use JsonSerializable;
 use ReflectionClass;
 use ReflectionException;
 
-abstract class Enum implements CastsAttributes
+abstract class Enum implements CastsAttributes, JsonSerializable
 {
     /**
      * Store existing constants in a static cache per object.
@@ -186,7 +187,10 @@ abstract class Enum implements CastsAttributes
      */
     public function jsonSerialize(): array
     {
-        return $this->getValue();
+        return [
+            'value' => $this->getValue(),
+            'label' => $this->label(),
+        ];
     }
 
     public function label(): ?string

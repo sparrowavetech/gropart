@@ -39,10 +39,6 @@ class ChunkSave extends AbstractSave
 
     protected ChunkStorage $chunkStorage;
 
-    /**
-     * {@inheritDoc}
-     * @throws ChunkSaveException
-     */
     public function __construct(UploadedFile $file, AbstractHandler $handler, $chunkStorage)
     {
         parent::__construct($file, $handler);

@@ -17,7 +17,7 @@
                     <a href="{{ route('notifications.read-notification', $notification->id) }}" class="action-view">{{ $notification->action_label ? __($notification->action_label) : trans('core/base::notifications.view') }}</a>
                 @endif
             </div>
-            <a href="#" data-href="{{ route('notifications.destroy-notification', $notification->id) }}" class="close-notification btn-delete-notification">x</a>
+            <a href="#" data-href="{{ route('notifications.destroy-notification', $notification->id) }}" class="close-notification btn-delete-notification text-danger"><i class="fa fa-times"></i></a>
         </div>
     </li>
 

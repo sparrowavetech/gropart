@@ -17,20 +17,11 @@ use OrderHelper;
 
 class ShippoWebhookController extends BaseController
 {
-    protected ShipmentInterface $shipmentRepository;
-
-    protected ShipmentHistoryInterface $shipmentHistoryRepository;
-
-    protected Shippo $shippo;
-
     public function __construct(
-        ShipmentInterface $shipmentRepository,
-        ShipmentHistoryInterface $shipmentHistoryRepository,
-        Shippo $shippo
+        protected ShipmentInterface $shipmentRepository,
+        protected ShipmentHistoryInterface $shipmentHistoryRepository,
+        protected Shippo $shippo
     ) {
-        $this->shipmentRepository = $shipmentRepository;
-        $this->shipmentHistoryRepository = $shipmentHistoryRepository;
-        $this->shippo = $shippo;
     }
 
     public function index(Request $request, BaseHttpResponse $response)

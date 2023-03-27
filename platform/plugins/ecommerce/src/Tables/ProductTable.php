@@ -271,6 +271,7 @@ class ProductTable extends TableAbstract
         return [
             'url' => route('product-categories.search'),
             'selected' => $categorySelected,
+            'minimum-input' => 1,
         ];
     }
 

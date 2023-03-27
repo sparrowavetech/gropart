@@ -1,50 +1,36 @@
 <div class="customer-address-payment-form">
 
-    @if (EcommerceHelper::isEnabledGuestCheckout() && !auth('customer')->check())
+    @if (EcommerceHelper::isEnabledGuestCheckout() && ! auth('customer')->check())
         <div class="form-group mb-3">
             <p>{{ __('Already have an account?') }} <a href="{{ route('customer.login') }}">{{ __('Login') }}</a></p>
         </div>
     @endif
 
     @if (auth('customer')->check())
-        @php
-            $addresses = get_customer_addresses();
-            $isAvailableAddress = !$addresses->isEmpty();
-            $sessionAddressId = Arr::get($sessionCheckoutData, 'address_id', $isAvailableAddress ? $addresses->first()->id : null);
-        @endphp
         <div class="form-group mb-3">
-
             @if ($isAvailableAddress)
                 <label class="control-label mb-2" for="address_id">{{ __('Select available addresses') }}:</label>
             @endif
-
-            <div class="list-customer-address @if (!$isAvailableAddress) d-none @endif">
+            @php
+                $oldSessionAddressId = old('address.address_id', $sessionAddressId);
+            @endphp
+            <div class="list-customer-address @if (! $isAvailableAddress) d-none @endif">
                 <div class="select--arrow">
                     <select name="address[address_id]" class="form-control address-control-item" id="address_id">
-                        <option value="new" @if (old('address.address_id', $sessionAddressId) == 'new') selected @endif>{{ __('Add new address...') }}</option>
+                        <option value="new" @selected ($oldSessionAddressId == 'new')>{{ __('Add new address...') }}</option>
                         @if ($isAvailableAddress)
                             @foreach ($addresses as $address)
-                                <option
-                                    value="{{ $address->id }}"
-                                    @if (
-                                        ($address->is_default && !$sessionAddressId) ||
-                                        ($sessionAddressId == $address->id) ||
-                                        (!old('address.address_id', $sessionAddressId) && $loop->first)
-                                    )
-                                        selected="selected"
-                                    @endif
-                                >
-                                    {{ $address->address }}, {{ $address->city_name }}, {{ $address->state_name }}@if (EcommerceHelper::isUsingInMultipleCountries()), {{ $address->country_name }} @endif @if (EcommerceHelper::isZipCodeEnabled() && $address->zip_code), {{ $address->zip_code }} @endif</option>
+                                <option value="{{ $address->id }}" @selected ($oldSessionAddressId == $address->id)>{{ $address->full_address }}</option>
                             @endforeach
                         @endif
                     </select>
                     <i class="fas fa-angle-down"></i>
                 </div>
                 <br>
-                <div class="address-item-selected @if ($sessionAddressId == 'new') d-none @endif">
-                    @if ($isAvailableAddress)
-                        @if ($sessionAddressId && $addresses->contains('id', $sessionAddressId))
-                            @include('plugins/ecommerce::orders.partials.address-item', ['address' => $addresses->firstWhere('id', $sessionAddressId)])
+                <div class="address-item-selected @if (! $sessionAddressId) d-none @endif">
+                    @if ($isAvailableAddress && $oldSessionAddressId != 'new')
+                        @if ($oldSessionAddressId && $addresses->contains('id', $oldSessionAddressId))
+                            @include('plugins/ecommerce::orders.partials.address-item', ['address' => $addresses->firstWhere('id', $oldSessionAddressId)])
                         @elseif ($defaultAddress = get_default_customer_address())
                             @include('plugins/ecommerce::orders.partials.address-item', ['address' => $defaultAddress])
                         @else
@@ -65,12 +51,13 @@
         </div>
     @endif
 
-    <div class="address-form-wrapper @if (auth('customer')->check() && $isAvailableAddress && (!empty($sessionAddressId) && $sessionAddressId !== 'new' || empty(Arr::get($sessionCheckoutData, 'state')))) d-none @endif">
+    <div class="address-form-wrapper @if (auth('customer')->check() && $oldSessionAddressId !== 'new' && $isAvailableAddress) d-none @endif">
         <div class="row">
             <div class="col-12">
-                <div class="form-group mb-3 @if ($errors->has('address.name')) has-error @endif">
-                    <input type="text" name="address[name]" id="address_name" placeholder="{{ __('Full Name') }}" class="form-control address-control-item address-control-item-required checkout-input"
-                           value="{{ old('address.name', Arr::get($sessionCheckoutData, 'name')) }}">
+                <div class="form-group mb-3 @error('address.name') has-error @enderror">
+                    <input type="text" name="address[name]" id="address_name" placeholder="{{ __('Full Name') }}"
+                        class="form-control address-control-item address-control-item-required checkout-input"
+                        value="{{ old('address.name', Arr::get($sessionCheckoutData, 'name')) }}">
                     {!! Form::error('address.name', $errors) !!}
                 </div>
             </div>
@@ -78,13 +65,15 @@
 
         <div class="row">
             <div class="col-lg-8 col-12">
-                <div class="form-group  @if ($errors->has('address.email')) has-error @endif">
-                    <input type="text" name="address[email]" id="address_email" placeholder="{{ __('Email') }}" class="form-control address-control-item address-control-item-required checkout-input" value="{{ old('address.email', Arr::get($sessionCheckoutData, 'email')) }}">
+                <div class="form-group  @error('address.email') has-error @enderror">
+                    <input type="email" name="address[email]" id="address_email" placeholder="{{ __('Email') }}"
+                        class="form-control address-control-item address-control-item-required checkout-input"
+                        value="{{ old('address.email', Arr::get($sessionCheckoutData, 'email')) }}">
                     {!! Form::error('address.email', $errors) !!}
                 </div>
             </div>
             <div class="col-lg-4 col-12">
-                <div class="form-group  @if ($errors->has('address.phone')) has-error @endif">
+                <div class="form-group  @error('address.phone') has-error @enderror">
                     {!! Form::phoneNumber('address[phone]', old('address.phone', Arr::get($sessionCheckoutData, 'phone')), ['id' => 'address_phone', 'class' => 'form-control address-control-item ' . (!EcommerceHelper::isPhoneFieldOptionalAtCheckout() ? 'address-control-item-required' : '') . ' checkout-input']) !!}
                     {!! Form::error('address.phone', $errors) !!}
                 </div>
@@ -92,29 +81,31 @@
         </div>
 
         <div class="row">
-            @if (EcommerceHelper::isUsingInMultipleCountries())
-                <div class="col-12">
-                    <div class="form-group mb-3 @if ($errors->has('address.country')) has-error @endif">
+            <div class="col-12">
+                <div class="form-group mb-3 @error('address.country') has-error @enderror">
+                    @if (EcommerceHelper::isUsingInMultipleCountries())
                         <div class="select--arrow">
-                            <select name="address[country]" class="form-control address-control-item address-control-item-required" id="address_country" data-type="country">
+                            <select name="address[country]" class="form-control address-control-item address-control-item-required"
+                                data-form-parent=".customer-address-payment-form" id="address_country" data-type="country">
                                 @foreach(EcommerceHelper::getAvailableCountries() as $countryCode => $countryName)
                                     <option value="{{ $countryCode }}" @if (old('address.country', Arr::get($sessionCheckoutData, 'country')) == $countryCode) selected @endif>{{ $countryName }}</option>
                                 @endforeach
                             </select>
                             <i class="fas fa-angle-down"></i>
                         </div>
-                        {!! Form::error('address.country', $errors) !!}
-                    </div>
+                    @else
+                        <input type="hidden" name="address[country]" id="address_country" value="{{ EcommerceHelper::getFirstCountryId() }}">
+                    @endif
+                    {!! Form::error('address.country', $errors) !!}
                 </div>
-            @else
-                <input type="hidden" name="address[country]" id="address_country" value="{{ EcommerceHelper::getFirstCountryId() }}">
-            @endif
+            </div>
 
             <div class="col-sm-6 col-12">
-                <div class="form-group mb-3 @if ($errors->has('address.state')) has-error @endif">
+                <div class="form-group mb-3 @error('address.state') has-error @enderror">
                     @if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation())
                         <div class="select--arrow">
-                            <select name="address[state]" class="form-control address-control-item address-control-item-required" id="address_state" data-type="state" data-url="{{ route('ajax.states-by-country') }}">
+                            <select name="address[state]" class="form-control address-control-item address-control-item-required"
+                                data-form-parent=".customer-address-payment-form" id="address_state" data-type="state" data-url="{{ route('ajax.states-by-country') }}">
                                 <option value="">{{ __('Select state...') }}</option>
                                 @if (old('address.country', Arr::get($sessionCheckoutData, 'country')) || !EcommerceHelper::isUsingInMultipleCountries())
                                     @foreach(EcommerceHelper::getAvailableStatesByCountry(old('address.country', Arr::get($sessionCheckoutData, 'country'))) as $stateId => $stateName)
@@ -132,7 +123,7 @@
             </div>
 
             <div class="col-sm-6 col-12">
-                <div class="form-group  @if ($errors->has('address.city')) has-error @endif">
+                <div class="form-group  @error('address.city') has-error @enderror">
                     @if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation())
                         <div class="select--arrow">
                             <select name="address[city]" class="form-control address-control-item address-control-item-required" id="address_city" data-type="city" data-url="{{ route('ajax.cities-by-state') }}">
@@ -153,24 +144,19 @@
             </div>
 
             <div class="col-12">
-                <div class="form-group mb-3 @if ($errors->has('address.address')) has-error @endif">
+                <div class="form-group mb-3 @error('address.address') has-error @enderror">
                     <input id="address_address" type="text" class="form-control address-control-item address-control-item-required checkout-input" placeholder="{{ __('Address') }}" name="address[address]" value="{{ old('address.address', Arr::get($sessionCheckoutData, 'address')) }}">
                     {!! Form::error('address.address', $errors) !!}
                 </div>
             </div>
 
             @if (EcommerceHelper::isZipCodeEnabled())
-                @php
-                    $fromZipcode  = EcommerceHelper::isZipCodeEnabled() ? get_ecommerce_setting('store_zip_code') : '313001';
-                @endphp
                 <div class="col-12">
-                    <div class="form-group mb-3 @if ($errors->has('address.zip_code')) has-error @endif">
-                        @if (is_plugin_active('marketplace'))
-                            <!--input id="address_zip_code" minlength="6" maxlength="6" data-pincode="$product->store->zip_code" type="text" class="form-control address-control-item address-control-item-required checkout-input" placeholder="{{ __('Zip code') }}" name="address[zip_code]" value="{{ old('address.zip_code', Arr::get($sessionCheckoutData, 'zip_code')) }}"-->
-                            <input id="address_zip_code" minlength="6" maxlength="6" data-pincode="{{ $fromZipcode }}" type="text" class="form-control address-control-item address-control-item-required checkout-input" placeholder="{{ __('Zip code') }}" name="address[zip_code]" value="{{ old('address.zip_code', Arr::get($sessionCheckoutData, 'zip_code')) }}">
-                        @else
-                            <input id="address_zip_code" minlength="6" maxlength="6" data-pincode="{{ $fromZipcode }}" type="text" class="form-control address-control-item address-control-item-required checkout-input" placeholder="{{ __('Zip code') }}" name="address[zip_code]" value="{{ old('address.zip_code', Arr::get($sessionCheckoutData, 'zip_code')) }}">
-                        @endif
+                    <div class="form-group mb-3 @error('address.zip_code') has-error @enderror">
+                        <input id="address_zip_code" type="text"
+                            class="form-control address-control-item address-control-item-required checkout-input"
+                            placeholder="{{ __('Zip code') }}" name="address[zip_code]"
+                            value="{{ old('address.zip_code', Arr::get($sessionCheckoutData, 'zip_code')) }}">
                         {!! Form::error('address.zip_code', $errors) !!}
                     </div>
                 </div>
@@ -178,23 +164,23 @@
         </div>
     </div>
 
-    @if (!auth('customer')->check())
+    @if (! auth('customer')->check())
         <div class="form-group mb-3">
-            <input type="checkbox" name="create_account" value="1" id="create_account" @if (empty($errors) && old('create_account') == 1) checked @endif>
-            <label for="create_account" class="control-label" style="padding-left: 5px">{{ __('Register an account with above information?') }}</label>
+            <input type="checkbox" name="create_account" value="1" id="create_account" @if (old('create_account') == 1) checked @endif>
+            <label for="create_account" class="control-label ps-2">{{ __('Register an account with above information?') }}</label>
         </div>
 
-        <div class="password-group @if (!$errors->has('password') && !$errors->has('password_confirmation')) d-none @endif">
+        <div class="password-group @if (! $errors->has('password') && ! $errors->has('password_confirmation')) d-none @endif">
             <div class="row">
                 <div class="col-md-6 col-12">
-                    <div class="form-group{{ $errors->has('password') ? ' has-error' : '' }}">
+                    <div class="form-group  @error('password') has-error @enderror">
                         <input id="password" type="password" class="form-control checkout-input" name="password" autocomplete="password" placeholder="{{ __('Password') }}">
                         {!! Form::error('password', $errors) !!}
                     </div>
                 </div>
 
                 <div class="col-md-6 col-12">
-                    <div class="form-group{{ $errors->has('password_confirmation') ? ' has-error' : '' }}">
+                    <div class="form-group @error('password_confirmation') has-error @enderror">
                         <input id="password-confirm" type="password" class="form-control checkout-input" autocomplete="password-confirmation" placeholder="{{ __('Password confirmation') }}" name="password_confirmation">
                         {!! Form::error('password_confirmation', $errors) !!}
                     </div>
@@ -203,12 +189,3 @@
         </div>
     @endif
 </div>
-
-@push('header')
-    <link rel="stylesheet" href="{{ asset('vendor/core/core/base/libraries/intl-tel-input/css/intlTelInput.min.css') }}">
-@endpush
-
-@push('footer')
-    <script src="{{ asset('vendor/core/core/base/libraries/intl-tel-input/js/intlTelInput.min.js') }}"></script>
-    <script src="{{ asset('vendor/core/core/base/js/phone-number-field.js') }}"></script>
-@endpush

@@ -80,12 +80,12 @@ Route::group(['namespace' => 'Botble\Base\Http\Controllers', 'middleware' => ['w
             Route::delete('destroy-notification/{id}', [
                 'as' => 'destroy-notification',
                 'uses' => 'NotificationController@delete',
-            ])->where('id', '[0-9]+');
+            ])->where('id', BaseHelper::routeIdRegex());
 
             Route::get('read-notification/{id}', [
                 'as' => 'read-notification',
                 'uses' => 'NotificationController@read',
-            ])->where('id', '[0-9]+');
+            ])->where('id', BaseHelper::routeIdRegex());
 
             Route::put('read-all-notification', [
                 'as' => 'read-all-notification',

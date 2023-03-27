@@ -1,9 +1,9 @@
 @php
     $attributes['class'] = Arr::get($attributes, 'class', '') . str_replace(Arr::get($attributes, 'class'), '', ' form-control');
-    $attributes['data-date-format'] = config('core.base.general.date_format.date');
+    $attributes['data-date-format'] = $attributes['data-date-format'] ?? config('core.base.general.date_format.date');
     $attributes['placeholder'] = $attributes['data-date-format'];
     $attributes['data-input'] = '';
-    $attributes['readonly'] = 'readonly';
+    $attributes['readonly'] = $attributes['readonly'] ?? 'readonly';
 @endphp
 <div class="input-group datepicker">
     {!! Form::text($name, $value, $attributes) !!}

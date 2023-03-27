@@ -21,12 +21,12 @@
         "symfony/cache-implementation": "1.1|2.0|3.0"
     },
     "require": {
-        "php": ">=8.1",
+        "php": ">=8.0.2",
         "psr/cache": "^2.0|^3.0",
         "psr/log": "^1.1|^2|^3",
         "symfony/cache-contracts": "^1.1.7|^2|^3",
         "symfony/service-contracts": "^1.1|^2|^3",
-        "symfony/var-exporter": "^6.2"
+        "symfony/var-exporter": "^5.4|^6.0"
     },
     "require-dev": {
         "cache/integration-tests": "dev-master",
@@ -48,9 +48,6 @@
     },
     "autoload": {
         "psr-4": { "Symfony\\Component\\Cache\\": "" },
-        "classmap": [
-            "Traits/ValueWrapper.php"
-        ],
         "exclude-from-classmap": [
             "/Tests/"
         ]

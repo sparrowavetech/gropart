@@ -31,9 +31,6 @@ class Title implements TitleContract
         $this->title = theme_option('site_title');
         if (theme_option('show_site_name', false)) {
             $this->setSiteName(theme_option('site_title'));
-            if (theme_option('seo_title')) {
-                $this->setSiteName(theme_option('seo_title'));
-            }
         }
         $this->setSeparator(config('packages.seo-helper.general.title.separator', '-'));
         $this->switchPosition(config('packages.seo-helper.general.title.first', true));

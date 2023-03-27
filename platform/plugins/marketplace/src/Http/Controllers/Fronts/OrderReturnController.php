@@ -19,20 +19,11 @@ use OrderReturnHelper;
 
 class OrderReturnController extends BaseController
 {
-    protected OrderReturnInterface $orderReturnRepository;
-
-    protected OrderReturnInterface $orderReturnItemRepository;
-
-    protected ProductInterface $productRepository;
-
     public function __construct(
-        OrderReturnInterface $orderReturnRepository,
-        OrderReturnInterface $orderReturnItemRepository,
-        ProductInterface $productRepository
+        protected OrderReturnInterface $orderReturnRepository,
+        protected OrderReturnInterface $orderReturnItemRepository,
+        protected ProductInterface $productRepository
     ) {
-        $this->orderReturnRepository = $orderReturnRepository;
-        $this->orderReturnItemRepository = $orderReturnItemRepository;
-        $this->productRepository = $productRepository;
     }
 
     public function index(OrderReturnTable $orderReturnTable)
@@ -42,8 +33,19 @@ class OrderReturnController extends BaseController
         return $orderReturnTable->render(MarketplaceHelper::viewPath('dashboard.table.base'));
     }
 
-    public function edit(int $id)
+    protected function getStore()
     {
+        return auth('customer')->user()->store;
+    }
+
+    public function edit(int|string $id)
+    {
+        $returnRequest = $this->orderReturnRepository->findOrFail($id, ['items', 'customer', 'order']);
+
+        if ($returnRequest->store_id != $this->getStore()->id) {
+            abort(404);
+        }
+
         Assets::addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
             ->addScriptsDirectly([
                 'vendor/core/plugins/ecommerce/libraries/jquery.textarea_autosize.js',
@@ -55,18 +57,20 @@ class OrderReturnController extends BaseController
             Assets::addScriptsDirectly('vendor/core/plugins/location/js/location.js');
         }
 
-        $returnRequest = $this->orderReturnRepository->findOrFail($id, ['items', 'customer', 'order']);
-
-        page_title()->setTitle(trans('plugins/ecommerce::order.edit_order', ['code' => get_order_code($id)]));
+        page_title()->setTitle(trans('plugins/ecommerce::order.edit_order_return', ['code' => get_order_code($id)]));
 
         $defaultStore = get_primary_store_locator();
 
         return MarketplaceHelper::view('dashboard.order-returns.edit', compact('returnRequest', 'defaultStore'));
     }
 
-    public function update(int $id, UpdateOrderReturnRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, UpdateOrderReturnRequest $request, BaseHttpResponse $response)
     {
-        $returnRequest = $this->orderReturnRepository->findOrFail($id);
+        $returnRequest = $this->orderReturnRepository->findOrFail($id, ['items', 'customer', 'order']);
+
+        if ($returnRequest->store_id != $this->getStore()->id) {
+            abort(404);
+        }
 
         $data['return_status'] = $request->input('return_status');
 
@@ -91,13 +95,17 @@ class OrderReturnController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(int $id, Request $request, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
-        $order = $this->orderReturnRepository->findOrFail($id);
+        $orderReturn = $this->orderReturnRepository->findOrFail($id);
+
+        if ($orderReturn->store_id != $this->getStore()->id) {
+            abort(404);
+        }
 
         try {
             $this->orderReturnRepository->deleteBy(['id' => $id]);
-            event(new DeletedContentEvent(ORDER_RETURN_MODULE_SCREEN_NAME, $request, $order));
+            event(new DeletedContentEvent(ORDER_RETURN_MODULE_SCREEN_NAME, $request, $orderReturn));
 
             return $response->setMessage(trans('core/base::notices.delete_success_message'));
         } catch (Exception $exception) {
@@ -117,10 +125,14 @@ class OrderReturnController extends BaseController
         }
 
         foreach ($ids as $id) {
-            $order = $this->orderReturnRepository->findOrFail($id);
+            $orderReturn = $this->orderReturnRepository->findOrFail($id);
 
-            $this->orderReturnRepository->delete($order);
-            event(new DeletedContentEvent(ORDER_RETURN_MODULE_SCREEN_NAME, $request, $order));
+            if ($orderReturn->store_id != $this->getStore()->id) {
+                continue;
+            }
+
+            $this->orderReturnRepository->delete($orderReturn);
+            event(new DeletedContentEvent(ORDER_RETURN_MODULE_SCREEN_NAME, $request, $orderReturn));
         }
 
         return $response->setMessage(trans('core/base::notices.delete_success_message'));

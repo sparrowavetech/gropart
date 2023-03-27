@@ -32,6 +32,8 @@ use Theme;
 
 class EcommerceHelper
 {
+    protected array $availableCountries = [];
+
     public function isCartEnabled(): bool
     {
         return get_ecommerce_setting('shopping_cart_enabled', 1) == 1;
@@ -88,7 +90,7 @@ class EcommerceHelper
         return $number;
     }
 
-    public function getReviewsGroupedByProductId(int $productId, int $reviewsCount = 0): Collection
+    public function getReviewsGroupedByProductId(int|string $productId, int $reviewsCount = 0): Collection
     {
         if ($reviewsCount) {
             $reviews = app(ReviewInterface::class)->getGroupedByProductId($productId);
@@ -154,6 +156,10 @@ class EcommerceHelper
 
     public function getAvailableCountries(): array
     {
+        if (count($this->availableCountries)) {
+            return $this->availableCountries;
+        }
+
         $countries = ['' => __('Select country...')];
 
         if ($this->loadCountriesStatesCitiesFromPluginLocation()) {
@@ -166,7 +172,9 @@ class EcommerceHelper
                 ->all();
 
             if (! empty($selectedCountries)) {
-                return $countries + $selectedCountries;
+                $this->availableCountries = $countries + $selectedCountries;
+
+                return $this->availableCountries;
             }
         }
 
@@ -177,7 +185,9 @@ class EcommerceHelper
         }
 
         if (empty($selectedCountries)) {
-            return $countries + Helper::countries();
+            $this->availableCountries = $countries + Helper::countries();
+
+            return $this->availableCountries;
         }
 
         foreach (Helper::countries() as $key => $item) {
@@ -185,8 +195,9 @@ class EcommerceHelper
                 $countries[$key] = $item;
             }
         }
+        $this->availableCountries = $countries;
 
-        return $countries;
+        return $this->availableCountries;
     }
 
     public function getAvailableStatesByCountry(int|string|null $countryId): array
@@ -716,9 +727,14 @@ class EcommerceHelper
         return $this->allowPartialReturn();
     }
 
-    public function allowPartialReturn(): int
+    public function isOrderReturnEnabled(): bool
     {
-        return get_ecommerce_setting('can_custom_return_product_quantity', 0);
+        return get_ecommerce_setting('is_enabled_order_return', 1) == 1;
+    }
+
+    public function allowPartialReturn(): bool
+    {
+        return get_ecommerce_setting('can_custom_return_product_quantity', 0) == 1;
     }
 
     public function isAvailableShipping(Collection $products): bool
@@ -741,9 +757,30 @@ class EcommerceHelper
         return $products->where('product_type', ProductTypeEnum::DIGITAL)->count();
     }
 
+    public function canCheckoutForDigitalProducts(Collection $products): bool
+    {
+        $digitalProducts = $this->countDigitalProducts($products);
+
+        if ($digitalProducts && ! auth('customer')->check() && ! $this->allowGuestCheckoutForDigitalProducts()) {
+            return false;
+        }
+
+        return true;
+    }
+
     public function isEnabledSupportDigitalProducts(): bool
     {
         return ! ! get_ecommerce_setting('is_enabled_support_digital_products', 0);
+    }
+
+    public function allowGuestCheckoutForDigitalProducts(): bool
+    {
+        return (bool) get_ecommerce_setting('allow_guest_checkout_for_digital_products', 0);
+    }
+
+    public function isSaveOrderShippingAddress(Collection $products): bool
+    {
+        return $this->isAvailableShipping($products) || (! auth('customer')->check() && $this->allowGuestCheckoutForDigitalProducts());
     }
 
     public function productFilterParamsValidated(Request $request): bool
@@ -836,9 +873,10 @@ class EcommerceHelper
             'extra' => [
                 'order_token' => session('tracked_start_checkout'),
             ],
+            'payment_method' => $paymentMethod,
         ];
 
-        if ($paymentMethod == PaymentMethodEnum::COD) {
+        if (is_plugin_active('payment') && $paymentMethod == PaymentMethodEnum::COD) {
             $data['extra']['COD'] = [
                 'amount' => max($orderTotal, 0),
                 'currency' => get_application_currency()->title,
@@ -851,5 +889,10 @@ class EcommerceHelper
     public function onlyAllowCustomersPurchasedToReview(): bool
     {
         return get_ecommerce_setting('only_allow_customers_purchased_to_review', '0') == '1';
+    }
+
+    public function isValidToProcessCheckout(): bool
+    {
+        return Cart::instance('cart')->rawSubTotal() >= $this->getMinimumOrderAmount();
     }
 }

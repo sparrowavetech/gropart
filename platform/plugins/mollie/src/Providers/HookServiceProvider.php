@@ -10,7 +10,7 @@ use Html;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
 use Mollie;
-use Throwable;
+use PaymentMethods;
 
 class HookServiceProvider extends ServiceProvider
 {
@@ -69,7 +69,7 @@ class HookServiceProvider extends ServiceProvider
                     if ($paymentDetail) {
                         $data = view('plugins/mollie::detail', ['payment' => $paymentDetail])->render();
                     }
-                } catch (Exception $exception) {
+                } catch (Exception) {
                     return $data;
                 }
             }
@@ -78,30 +78,20 @@ class HookServiceProvider extends ServiceProvider
         }, 20, 2);
     }
 
-    /**
-     * @param string $settings
-     * @return string
-     * @throws Throwable
-     */
-    public function addPaymentSettings($settings)
+    public function addPaymentSettings(string|null $settings): string
     {
         return $settings . view('plugins/mollie::settings')->render();
     }
 
-    /**
-     * @param string $html
-     * @param array $data
-     * @return string
-     */
-    public function registerMollieMethod($html, array $data)
+    public function registerMollieMethod(string|null $html, array $data): string|null
     {
-        return $html . view('plugins/mollie::methods', $data)->render();
+        PaymentMethods::method(MOLLIE_PAYMENT_METHOD_NAME, [
+            'html' => view('plugins/mollie::methods', $data)->render(),
+        ]);
+
+        return $html;
     }
 
-    /**
-     * @param Request $request
-     * @param array $data
-     */
     public function checkoutWithMollie(array $data, Request $request)
     {
         if ($request->input('payment_method') == MOLLIE_PAYMENT_METHOD_NAME) {

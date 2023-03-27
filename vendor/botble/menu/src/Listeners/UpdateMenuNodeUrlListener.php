@@ -9,11 +9,8 @@ use Menu;
 
 class UpdateMenuNodeUrlListener
 {
-    protected MenuNodeInterface $menuNodeRepository;
-
-    public function __construct(MenuNodeInterface $menuNodeRepository)
+    public function __construct(protected MenuNodeInterface $menuNodeRepository)
     {
-        $this->menuNodeRepository = $menuNodeRepository;
     }
 
     public function handle(UpdatedSlugEvent $event): void

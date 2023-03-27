@@ -5,6 +5,7 @@ namespace Botble\Base\Supports;
 use Assets;
 use BaseHelper;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\App;
 
 class Editor
 {
@@ -14,6 +15,10 @@ class Editor
             config('core.base.general.editor.' . BaseHelper::getRichEditor() . '.js')
         )
             ->addScriptsDirectly('vendor/core/core/base/js/editor.js');
+
+        if (BaseHelper::getRichEditor() == 'ckeditor' && App::getLocale() != 'en') {
+            Assets::addScriptsDirectly('https://cdn.ckeditor.com/ckeditor5/36.0.1/classic/translations/' . App::getLocale() . '.js');
+        }
 
         return $this;
     }

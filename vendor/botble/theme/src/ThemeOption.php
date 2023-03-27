@@ -467,4 +467,15 @@ class ThemeOption
     {
         return $this->fields;
     }
+
+    public function hasField(string $id): bool
+    {
+        $this->checkOptName();
+
+        if (! empty($this->optName)) {
+            return isset($this->fields[$this->optName][$id]);
+        }
+
+        return false;
+    }
 }

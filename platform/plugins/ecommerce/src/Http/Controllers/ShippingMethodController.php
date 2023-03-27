@@ -19,24 +19,12 @@ use Illuminate\Support\Arr;
 
 class ShippingMethodController extends BaseController
 {
-    protected ShippingInterface $shippingRepository;
-
-    protected ShippingRuleInterface $shippingRuleRepository;
-
-    protected OrderInterface $orderRepository;
-
-    protected ShippingRuleItemInterface $shippingRuleItemRepository;
-
     public function __construct(
-        ShippingInterface $shippingRepository,
-        ShippingRuleInterface $shippingRuleRepository,
-        OrderInterface $orderRepository,
-        ShippingRuleItemInterface $shippingRuleItemRepository
+        protected ShippingInterface $shippingRepository,
+        protected ShippingRuleInterface $shippingRuleRepository,
+        protected OrderInterface $orderRepository,
+        protected ShippingRuleItemInterface $shippingRuleItemRepository
     ) {
-        $this->shippingRepository = $shippingRepository;
-        $this->shippingRuleRepository = $shippingRuleRepository;
-        $this->orderRepository = $orderRepository;
-        $this->shippingRuleItemRepository = $shippingRuleItemRepository;
     }
 
     public function index()
@@ -135,7 +123,7 @@ class ShippingMethodController extends BaseController
         ]);
     }
 
-    public function putUpdateRule(int $id, ShippingRuleRequest $request, BaseHttpResponse $response)
+    public function putUpdateRule(int|string $id, ShippingRuleRequest $request, BaseHttpResponse $response)
     {
         $rule = $this->shippingRuleRepository->findOrFail($id);
 
@@ -169,6 +157,14 @@ class ShippingMethodController extends BaseController
 
     public function postCreateRule(ShippingRuleRequest $request, BaseHttpResponse $response)
     {
+        $shipping = $this->shippingRepository->findOrFail($request->input('shipping_id'));
+
+        if (! $shipping->country && in_array($request->input('type'), [ShippingRuleTypeEnum::BASED_ON_ZIPCODE, ShippingRuleTypeEnum::BASED_ON_LOCATION])) {
+            return $response
+                ->setError()
+                ->setMessage(trans('plugins/ecommerce::shipping.rule.cannot_create_rule_type_for_this_location', ['type' => ShippingRuleTypeEnum::getLabel($request->input('type'))]));
+        }
+
         $rule = $this->shippingRuleRepository->createOrUpdate($request->input());
         $data = view('plugins/ecommerce::shipping.rules.item', compact('rule'))->render();
 

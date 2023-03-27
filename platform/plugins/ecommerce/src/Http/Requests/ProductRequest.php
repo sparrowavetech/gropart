@@ -29,6 +29,12 @@ class ProductRequest extends Request
             'product_files_input' => 'nullable|array',
             'product_files_input.*' => 'nullable|file|mimes:' . config('plugins.ecommerce.general.digital_products.allowed_mime_types'),
             'taxes' => 'nullable|array',
+            'cost_per_item' => 'numeric|nullable|min:0|max:100000000000',
+            'barcode' => [
+                'nullable',
+                'max:50',
+                Rule::unique('ec_products')->ignore($this->route('product')),
+            ],
         ];
 
         $options = $this->input('options');

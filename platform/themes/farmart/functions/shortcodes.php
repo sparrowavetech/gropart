@@ -1,11 +1,12 @@
 <?php
 
+use Botble\Ads\Models\Ads;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Ecommerce\Repositories\Interfaces\FlashSaleInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductCategoryInterface;
 use Botble\Faq\Repositories\Interfaces\FaqCategoryInterface;
 use Botble\Theme\Supports\ThemeSupport;
-use Botble\Testimonial\Repositories\Interfaces\TestimonialInterface;
+use Illuminate\Support\Str;
 use Theme\Farmart\Http\Resources\ProductCategoryResource;
 use Theme\Farmart\Http\Resources\ProductCollectionResource;
 
@@ -13,14 +14,13 @@ app()->booted(function () {
     ThemeSupport::registerGoogleMapsShortcode();
     ThemeSupport::registerYoutubeShortcode();
 
-    /**
-     * @param string|null $default
-     * @param string|null $size
-     * @return string
-     */
     function image_placeholder(?string $default = null, ?string $size = null): string
     {
         if (theme_option('lazy_load_image_enabled', 'yes') != 'yes' && $default) {
+            if (Str::contains($default, 'https://') || Str::contains($default, 'http://')) {
+                return $default;
+            }
+
             return RvMedia::getImageUrl($default, $size);
         }
 
@@ -50,11 +50,7 @@ app()->booted(function () {
     }
 
     if (is_plugin_active('ads')) {
-        /**
-         * @param string|null $key
-         * @return mixed|null
-         */
-        function get_ads_from_key(?string $key)
+        function get_ads_from_key(string|null $key): Ads|null
         {
             if (! $key) {
                 return null;
@@ -69,11 +65,6 @@ app()->booted(function () {
             return $ads;
         }
 
-        /**
-         * @param string|null $key
-         * @param array $attributes
-         * @return string|null
-         */
         function display_ads_advanced(?string $key, array $attributes = []): ?string
         {
             $ads = get_ads_from_key($key);
@@ -85,7 +76,7 @@ app()->booted(function () {
             $image = Html::image(image_placeholder($ads->image), $ads->name, ['class' => 'lazyload', 'data-src' => RvMedia::getImageUrl($ads->image)])->toHtml();
 
             if ($ads->url) {
-                $image = Html::link(route('public.ads-click', $ads->key), $image, array_merge($attributes, ['target' => '_SELF']), null, false)
+                $image = Html::link(route('public.ads-click', $ads->key), $image, array_merge($attributes, ['target' => '_blank']), null, false)
                     ->toHtml();
             } elseif ($attributes) {
                 $image = Html::tag('div', $image, $attributes)->toHtml();
@@ -120,12 +111,6 @@ app()->booted(function () {
     }
 
     if (is_plugin_active('ecommerce')) {
-        add_shortcode('all-brands', __('All Brands'), __('All Brands'), function($shortcode){
-            return Theme::partial('shortcodes.ecommerce.all-brands', compact('shortcode'));
-        });
-        shortcode()->setAdminConfig('all-brands', function ($attributes) {
-            return Theme::partial('shortcodes.ecommerce.all-brands-admin-config', compact('attributes'));
-        });
         add_shortcode(
             'featured-product-categories',
             __('Featured Product Categories'),
@@ -262,16 +247,6 @@ app()->booted(function () {
         });
     }
 
-    if (is_plugin_active('blog')) {
-        add_shortcode('blog-posts-by-category', __('Blog Posts by Category'), __('Blog Posts by Category'), function ($shortcode) {
-            return Theme::partial('shortcodes.blog-posts-by-category', compact('shortcode'));
-        });
-
-        shortcode()->setAdminConfig('blog-posts-by-category', function ($attributes) {
-            return Theme::partial('shortcodes.blog-posts-by-category-admin-config', compact('attributes'));
-        });
-    }
-
     if (is_plugin_active('contact')) {
         add_filter(CONTACT_FORM_TEMPLATE_VIEW, function () {
             return Theme::getThemeNamespace() . '::partials.shortcodes.contact-form';
@@ -322,58 +297,4 @@ app()->booted(function () {
     shortcode()->setAdminConfig('coming-soon', function ($attributes) {
         return Theme::partial('shortcodes.coming-soon-admin-config', compact('attributes'));
     });
-
-    add_shortcode('site-features', __('Site Features'), __('Site Features'), function ($shortcode) {
-        return Theme::partial('shortcodes.site-features', compact('shortcode'));
-    });
-
-    shortcode()->setAdminConfig('site-features', function ($attributes) {
-        return Theme::partial('shortcodes.site-features-admin-config', compact('attributes'));
-    });
-
-    add_shortcode('newsletter-home', __('Newsletter Form'), __('Newsletter Form'), function ($shortcode) {
-        return Theme::partial('shortcodes.newsletter-home', compact('shortcode'));
-    });
-
-    shortcode()->setAdminConfig('newsletter-home', function ($attributes) {
-        return Theme::partial('shortcodes.newsletter-home-admin-config', compact('attributes'));
-    });
-
-    if (is_plugin_active('faq')) {
-        add_shortcode('faq-by-group', __('Group FAQs'), __('Group FAQs'), function ($shortcode) {
-            return Theme::partial('shortcodes.faq-by-group', compact('shortcode'));
-        });
-
-        shortcode()->setAdminConfig('faq-by-group', function ($attributes) {
-            return Theme::partial('shortcodes.faq-by-group-admin-config', compact('attributes'));
-        });
-    }
-
-    if (is_plugin_active('testimonial')) {
-        add_shortcode('testimonials', __('Testimonials'), __('Testimonials'), function ($shortcode) {
-            $testimonials = app(TestimonialInterface::class)->advancedGet([
-                'condition' => [
-                    'status' => BaseStatusEnum::PUBLISHED,
-                ],
-                'take' => (int)$shortcode->number_of_displays,
-            ]);
-
-            return Theme::partial('shortcodes.testimonials.index', compact('shortcode', 'testimonials'));
-        });
-
-        shortcode()->setAdminConfig('testimonials', function ($attributes) {
-            return Theme::partial('shortcodes.testimonials.admin-config', compact('attributes'));
-        });
-    }
-
-    if (is_plugin_active('faq')) {
-
-        add_shortcode('faq-by-category', __('FAQs by Category'), __('FAQs by Category'), function ($shortcode) {
-            return Theme::partial('shortcodes.faq-by-category', compact('shortcode'));
-        });
-
-        shortcode()->setAdminConfig('faq-by-category', function ($attributes) {
-            return Theme::partial('shortcodes.faq-by-category-admin-config', compact('attributes'));
-        });
-    }
 });

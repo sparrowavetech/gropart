@@ -20,4 +20,7 @@ return [
     'invalid_currency_name' => 'Invalid currency code, it must be in :currencies.',
     'instruction' => 'Please check list currency code here: https://en.wikipedia.org/wiki/ISO_4217',
     'code' => 'Code',
+    'api_key' => 'API Exchange Rates Key',
+    'update_currency_rates' => 'Update currency rates',
+    'no_api_key' => 'No API key',
 ];

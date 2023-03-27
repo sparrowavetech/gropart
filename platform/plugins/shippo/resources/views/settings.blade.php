@@ -4,6 +4,7 @@
     $prodKey = setting('shipping_shippo_production_key') ?: '';
     $test = setting('shipping_shippo_sandbox', 1) ?: 0;
     $logging = setting('shipping_shippo_logging', 1) ?: 0;
+    $cacheResponse = setting('shipping_shippo_cache_response', 1) ?: 0;
     $webhook = setting('shipping_shippo_webhooks', 1) ?: 0;
 @endphp
 <table class="table mt-4 bg-white">
@@ -131,6 +132,12 @@
                                     <label class="control-label" for="shipping_shippo_logging">
                                         {!! Form::onOff('shipping_shippo_logging', $logging) !!}
                                         {{ trans('plugins/shippo::shippo.logging') }}
+                                    </label>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label class="control-label" for="shipping_shippo_cache_response">
+                                        {!! Form::onOff('shipping_shippo_cache_response', $cacheResponse) !!}
+                                        {{ trans('plugins/shippo::shippo.cache_response') }}
                                     </label>
                                 </div>
                                 <div class="form-group mb-3">

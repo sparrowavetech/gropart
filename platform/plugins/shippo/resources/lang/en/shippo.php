@@ -56,5 +56,6 @@ return [
     'order_amount' => 'Order amount',
     'logging' => 'Logging?',
     'webhooks' => 'Webhooks?',
+    'cache_response' => 'Cache response?',
     'note_6' => 'COD payment method refer <a href=":link" target="_blank" rel="noopener noreferrer">here</a>',
 ];

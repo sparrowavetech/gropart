@@ -8,7 +8,6 @@ use Botble\AuditLog\Repositories\Caches\AuditLogCacheDecorator;
 use Botble\AuditLog\Repositories\Eloquent\AuditLogRepository;
 use Botble\AuditLog\Repositories\Interfaces\AuditLogInterface;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
@@ -44,7 +43,7 @@ class AuditLogServiceProvider extends ServiceProvider
             ->loadMigrations()
             ->publishAssets();
 
-        Event::listen(RouteMatched::class, function () {
+        $this->app['events']->listen(RouteMatched::class, function () {
             dashboard_menu()
                 ->registerItem([
                     'id' => 'cms-plugin-audit-log',

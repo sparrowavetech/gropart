@@ -57,6 +57,8 @@ class PluginService
             ];
         }
 
+        $this->clearCache();
+
         $activatedPlugins = get_active_plugins();
         if (! in_array($plugin, $activatedPlugins)) {
             if (! empty(Arr::get($content, 'require'))) {
@@ -94,6 +96,8 @@ class PluginService
                 if ($published['error']) {
                     return $published;
                 }
+
+                $this->publishTranslations($plugin);
             }
 
             $activatedPlugins = array_merge($activatedPlugins, [$plugin]);
@@ -104,7 +108,7 @@ class PluginService
                 call_user_func([$content['namespace'] . 'Plugin', 'activated']);
             }
 
-            Helper::clearCache();
+            $this->clearCache();
 
             $this->pluginManifest->generateManifest();
 
@@ -146,6 +150,14 @@ class PluginService
         ];
     }
 
+    public function publishTranslations(string $plugin): void
+    {
+        if ($this->files->isDirectory(plugin_path($plugin . '/resources/lang'))) {
+            $publishedPath = lang_path('vendor') . '/' . $this->getPluginNamespace($plugin);
+            $this->files->copyDirectory(plugin_path($plugin . '/resources/lang'), $publishedPath);
+        }
+    }
+
     public function publishAssets(string $plugin): array
     {
         $validate = $this->validate($plugin);
@@ -170,9 +182,16 @@ class PluginService
             ];
         }
 
+        $publishedPath = public_path('vendor/core') . '/' . $this->getPluginNamespace($plugin);
+
+        $this->files->ensureDirectoryExists($publishedPath);
+
         if ($this->files->isDirectory(plugin_path($plugin . '/public'))) {
-            $publishedPath = public_path('vendor/core') . '/' . $this->getPluginNamespace($plugin);
             $this->files->copyDirectory(plugin_path($plugin . '/public'), $publishedPath);
+        }
+
+        if ($this->files->exists(plugin_path($plugin . '/screenshot.png'))) {
+            $this->files->copy(plugin_path($plugin . '/screenshot.png'), $publishedPath . '/screenshot.png');
         }
 
         return [
@@ -188,6 +207,8 @@ class PluginService
         if ($validate['error']) {
             return $validate;
         }
+
+        $this->clearCache();
 
         $this->deactivate($plugin);
 
@@ -238,7 +259,7 @@ class PluginService
             call_user_func([$content['namespace'] . 'Plugin', 'removed']);
         }
 
-        Helper::clearCache();
+        $this->clearCache();
 
         $this->pluginManifest->generateManifest();
 
@@ -264,6 +285,8 @@ class PluginService
             ];
         }
 
+        $this->clearCache();
+
         if (! class_exists($content['provider'])) {
             $loader = new ClassLoader();
             $loader->setPsr4($content['namespace'], plugin_path($plugin . '/src'));
@@ -286,7 +309,7 @@ class PluginService
                 call_user_func([$content['namespace'] . 'Plugin', 'deactivated']);
             }
 
-            Helper::clearCache();
+            $this->clearCache();
 
             $this->pluginManifest->generateManifest();
 
@@ -318,5 +341,14 @@ class PluginService
         Setting::set('activated_plugins', json_encode($plugins))->save();
 
         return $plugins;
+    }
+
+    public function clearCache(): void
+    {
+        Helper::clearCache();
+
+        foreach ($this->files->glob(app()->bootstrapPath('cache/*')) as $cacheFile) {
+            $this->files->delete($cacheFile);
+        }
     }
 }

@@ -21,7 +21,9 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Menu;
 
 class SystemController extends Controller
@@ -85,6 +87,10 @@ class SystemController extends Controller
                     $files->delete($pluginCachePath);
                 }
 
+                if (config('core.base.general.google_fonts_enabled_cache') && $files->isDirectory(Storage::path('fonts'))) {
+                    $files->deleteDirectory(Storage::path('fonts'));
+                }
+
                 break;
             case 'refresh_compiled_views':
                 foreach ($files->glob(config('view.compiled') . '/*') as $view) {
@@ -97,7 +103,11 @@ class SystemController extends Controller
 
                 break;
             case 'clear_route_cache':
-                $files->delete($app->getCachedRoutesPath());
+                foreach ($files->glob(app()->bootstrapPath('cache/*')) as $cacheFile) {
+                    if (Str::contains($cacheFile, 'cache/routes-v7')) {
+                        $files->delete($cacheFile);
+                    }
+                }
 
                 break;
             case 'clear_log':

@@ -24,11 +24,8 @@ class ContactController extends BaseController
 {
     use HasDeleteManyItemsTrait;
 
-    protected ContactInterface $contactRepository;
-
-    public function __construct(ContactInterface $contactRepository)
+    public function __construct(protected ContactInterface $contactRepository)
     {
-        $this->contactRepository = $contactRepository;
     }
 
     public function index(ContactTable $dataTable)
@@ -38,7 +35,7 @@ class ContactController extends BaseController
         return $dataTable->renderTable();
     }
 
-    public function edit(int $id, FormBuilder $formBuilder, Request $request)
+    public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
     {
         page_title()->setTitle(trans('plugins/contact::contact.edit'));
 
@@ -49,7 +46,7 @@ class ContactController extends BaseController
         return $formBuilder->create(ContactForm::class, ['model' => $contact])->renderForm();
     }
 
-    public function update(int $id, EditContactRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, EditContactRequest $request, BaseHttpResponse $response)
     {
         $contact = $this->contactRepository->findOrFail($id);
 
@@ -64,7 +61,7 @@ class ContactController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(int $id, Request $request, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
             $contact = $this->contactRepository->findOrFail($id);
@@ -85,7 +82,7 @@ class ContactController extends BaseController
     }
 
     public function postReply(
-        int $id,
+        int|string $id,
         ContactReplyRequest $request,
         BaseHttpResponse $response,
         ContactReplyInterface $contactReplyRepository

@@ -3,65 +3,29 @@
 namespace Botble\Blog\Repositories\Interfaces;
 
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Blog\Models\Category;
 use Botble\Support\Repositories\Interfaces\RepositoryInterface;
+use Eloquent;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 interface CategoryInterface extends RepositoryInterface
 {
-    /**
-     * @return array
-     */
-    public function getDataSiteMap();
+    public function getDataSiteMap(): Collection;
 
-    /**
-     * @param int $limit
-     * @param array $with
-     */
-    public function getFeaturedCategories($limit, array $with = []);
+    public function getFeaturedCategories(?int $limit, array $with = []): Collection;
 
-    /**
-     * @param array $condition
-     * @param array $with
-     * @return array
-     */
-    public function getAllCategories(array $condition = [], array $with = []);
+    public function getAllCategories(array $condition = [], array $with = []): Collection;
 
-    /**
-     * @param int $id
-     * @return mixed
-     */
-    public function getCategoryById($id);
+    public function getCategoryById(int|string|null $id): ?Category;
 
-    /**
-     * @param array $select
-     * @param array $orderBy
-     * @return Collection
-     */
-    public function getCategories(array $select, array $orderBy, array $conditions = ['status' => BaseStatusEnum::PUBLISHED]);
+    public function getCategories(array $select, array $orderBy, array $conditions = ['status' => BaseStatusEnum::PUBLISHED]): Collection;
 
-    /**
-     * @param int $id
-     * @return array|null
-     */
-    public function getAllRelatedChildrenIds($id);
+    public function getAllRelatedChildrenIds(int|string|null|Eloquent $id): array;
 
-    /**
-     * @param array $condition
-     * @param array $with
-     * @param array $select
-     * @return mixed
-     */
-    public function getAllCategoriesWithChildren(array $condition = [], array $with = [], array $select = ['*']);
+    public function getAllCategoriesWithChildren(array $condition = [], array $with = [], array $select = ['*']): Collection;
 
-    /**
-     * @param array $filters
-     * @return mixed
-     */
-    public function getFilters($filters);
+    public function getFilters(array $filters): LengthAwarePaginator;
 
-    /**
-     * @param int $limit
-     * @return mixed
-     */
-    public function getPopularCategories(int $limit, array $with = ['slugable'], array $withCount = ['posts']);
+    public function getPopularCategories(int $limit, array $with = ['slugable'], array $withCount = ['posts']): Collection;
 }

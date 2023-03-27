@@ -2,8 +2,10 @@
     <div class="container">
         <div class="customer-body">
             <div class="row body-border">
-                <div class="col-lg-3 col-md-4">
+
+                <div class="col-md-3">
                     <div class="profile-sidebar">
+
                         <form id="avatar-upload-form" enctype="multipart/form-data" action="javascript:void(0)" onsubmit="return false">
                             <div class="avatar-upload-container">
                                 <div class="form-group mb-3">
@@ -73,7 +75,7 @@
                     </div>
                 </div>
 
-                <div class="col-lg-9 col-md-8">
+                <div class="col-md-9">
                     <div class="profile-content">
                         @yield('content')
                     </div>

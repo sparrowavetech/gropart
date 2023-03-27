@@ -2,6 +2,7 @@
 
 namespace Botble\Ecommerce\Forms;
 
+use Assets;
 use BaseHelper;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Enums\CustomerStatusEnum;
@@ -10,10 +11,13 @@ use Botble\Ecommerce\Models\Customer;
 
 class CustomerForm extends FormAbstract
 {
-    protected $template = 'core/base::forms.form-tabs';
+    protected $template = 'plugins/ecommerce::customers.form';
 
     public function buildForm()
     {
+        Assets::addScriptsDirectly('vendor/core/plugins/ecommerce/js/address.js')
+            ->addScriptsDirectly('vendor/core/plugins/location/js/location.js');
+
         $this
             ->setupModel(new Customer())
             ->setValidatorClass(CustomerCreateRequest::class)
@@ -62,7 +66,8 @@ class CustomerForm extends FormAbstract
                     'data-counter' => 60,
                 ],
                 'wrapper' => [
-                    'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ($this->getModel()->id ? ' hidden' : null),
+                    'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ($this->getModel(
+                    )->id ? ' hidden' : null),
                 ],
             ])
             ->add('password_confirmation', 'password', [
@@ -72,7 +77,8 @@ class CustomerForm extends FormAbstract
                     'data-counter' => 60,
                 ],
                 'wrapper' => [
-                    'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ($this->getModel()->id ? ' hidden' : null),
+                    'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ($this->getModel(
+                    )->id ? ' hidden' : null),
                 ],
             ])
             ->add('status', 'customSelect', [
@@ -85,5 +91,27 @@ class CustomerForm extends FormAbstract
                 'label_attr' => ['class' => 'control-label'],
             ])
             ->setBreakFieldPoint('status');
+
+        if ($this->getModel()->id) {
+            $this
+                ->addMetaBoxes([
+                    'addresses' => [
+                        'title' => trans('plugins/ecommerce::addresses.addresses'),
+                        'content' => view('plugins/ecommerce::customers.addresses.addresses', [
+                            'addresses' => $this->model->addresses()->get(),
+                        ])->render(),
+                        'wrap' => true,
+                    ],
+                ])
+                ->addMetaBoxes([
+                    'payments' => [
+                        'title' => trans('plugins/ecommerce::payment.name'),
+                        'content' => view('plugins/ecommerce::customers.payments.payments', [
+                            'payments' => $this->model->payments()->get(),
+                        ])->render(),
+                        'wrap' => true,
+                    ],
+                ]);
+        }
     }
 }

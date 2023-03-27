@@ -27,24 +27,12 @@ use Maatwebsite\Excel\Excel;
 
 class ShippingRuleItemController extends BaseController
 {
-    protected ShippingRuleInterface $ruleRepository;
-
-    protected ShippingRuleItemInterface $itemRepository;
-
-    protected ShippingRuleItemImport $itemImport;
-
-    protected ValidateShippingRuleItemImport $validateItemImport;
-
     public function __construct(
-        ShippingRuleInterface $ruleRepository,
-        ShippingRuleItemInterface $itemRepository,
-        ShippingRuleItemImport $itemImport,
-        ValidateShippingRuleItemImport $validateItemImport
+        protected ShippingRuleInterface $ruleRepository,
+        protected ShippingRuleItemInterface $itemRepository,
+        protected ShippingRuleItemImport $itemImport,
+        protected ValidateShippingRuleItemImport $validateItemImport
     ) {
-        $this->ruleRepository = $ruleRepository;
-        $this->itemRepository = $itemRepository;
-        $this->itemImport = $itemImport;
-        $this->validateItemImport = $validateItemImport;
     }
 
     public function index(ShippingRuleItemTable $dataTable)
@@ -97,7 +85,7 @@ class ShippingRuleItemController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int $id, FormBuilder $formBuilder, Request $request, BaseHttpResponse $response)
+    public function edit(int|string $id, FormBuilder $formBuilder, Request $request, BaseHttpResponse $response)
     {
         $item = $this->itemRepository->findOrFail($id);
 
@@ -117,7 +105,7 @@ class ShippingRuleItemController extends BaseController
         return $formBuilder->create(ShippingRuleItemForm::class, ['model' => $item])->renderForm();
     }
 
-    public function update(int $id, ShippingRuleItemRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, ShippingRuleItemRequest $request, BaseHttpResponse $response)
     {
         $item = $this->itemRepository->findOrFail($id);
         $request->merge([
@@ -142,7 +130,7 @@ class ShippingRuleItemController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(Request $request, int $id, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
             $item = $this->itemRepository->findOrFail($id);

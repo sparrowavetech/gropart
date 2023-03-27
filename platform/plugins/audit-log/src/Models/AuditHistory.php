@@ -4,6 +4,7 @@ namespace Botble\AuditLog\Models;
 
 use Botble\ACL\Models\User;
 use Botble\Base\Models\BaseModel;
+use Botble\Base\Models\BaseQueryBuilder;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -33,7 +34,7 @@ class AuditHistory extends BaseModel
         return $this->belongsTo(User::class)->withDefault();
     }
 
-    public function prunable(): Builder
+    public function prunable(): Builder|BaseQueryBuilder
     {
         return $this->whereDate('created_at', '>', Carbon::now()->subDays(30)->toDateString());
     }

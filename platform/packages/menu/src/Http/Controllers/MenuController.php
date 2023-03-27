@@ -27,23 +27,14 @@ use stdClass;
 
 class MenuController extends BaseController
 {
-    protected MenuInterface $menuRepository;
-
-    protected MenuNodeInterface $menuNodeRepository;
-
-    protected MenuLocationInterface $menuLocationRepository;
-
     protected Cache $cache;
 
     public function __construct(
-        MenuInterface $menuRepository,
-        MenuNodeInterface $menuNodeRepository,
-        MenuLocationInterface $menuLocationRepository,
+        protected MenuInterface $menuRepository,
+        protected MenuNodeInterface $menuNodeRepository,
+        protected MenuLocationInterface $menuLocationRepository,
         CacheManager $cache
     ) {
-        $this->menuRepository = $menuRepository;
-        $this->menuNodeRepository = $menuNodeRepository;
-        $this->menuLocationRepository = $menuLocationRepository;
         $this->cache = new Cache($cache, MenuRepository::class);
     }
 
@@ -102,10 +93,8 @@ class MenuController extends BaseController
         return true;
     }
 
-    public function edit(int $id, FormBuilder $formBuilder, Request $request)
+    public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
     {
-        page_title()->setTitle(trans('packages/menu::menu.edit'));
-
         $oldInputs = old();
         if ($oldInputs && $id == 0) {
             $oldObject = new stdClass();
@@ -117,12 +106,14 @@ class MenuController extends BaseController
             $menu = $this->menuRepository->findOrFail($id);
         }
 
+        page_title()->setTitle(trans('core/base::forms.edit_item', ['name' => $menu->name]));
+
         event(new BeforeEditContentEvent($request, $menu));
 
         return $formBuilder->create(MenuForm::class, ['model' => $menu])->renderForm();
     }
 
-    public function update(MenuRequest $request, int $id, BaseHttpResponse $response)
+    public function update(int|string $id, Request $request, BaseHttpResponse $response)
     {
         $menu = $this->menuRepository->firstOrNew(compact('id'));
 
@@ -152,7 +143,7 @@ class MenuController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(Request $request, int $id, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
             $menu = $this->menuRepository->findOrFail($id);

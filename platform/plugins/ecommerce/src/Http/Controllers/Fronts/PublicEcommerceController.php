@@ -8,11 +8,8 @@ use Illuminate\Http\Request;
 
 class PublicEcommerceController
 {
-    protected CurrencyInterface $currencyRepository;
-
-    public function __construct(CurrencyInterface $currencyRepository)
+    public function __construct(protected CurrencyInterface $currencyRepository)
     {
-        $this->currencyRepository = $currencyRepository;
     }
 
     public function changeCurrency(Request $request, BaseHttpResponse $response, ?string $title = null)

@@ -43,13 +43,13 @@ class StoreRevenueTable extends TableAbstract
         $data = $this->table
             ->eloquent($this->query())
             ->editColumn('amount', function ($item) {
-                return Html::tag('span', format_price($item->amount), ['class' => 'text-success']);
+                return Html::tag('span', ($item->sub_amount < 0 ? '-' : '') . format_price($item->amount), ['class' => 'text-success']);
             })
             ->editColumn('sub_amount', function ($item) {
-                return format_price($item->sub_amount);
+                return ($item->sub_amount < 0 ? '-' : '') . format_price($item->sub_amount);
             })
             ->editColumn('fee', function ($item) {
-                return Html::tag('span', format_price($item->fee), ['class' => 'text-danger']);
+                return Html::tag('span', ($item->sub_amount < 0 ? '-' : '') . format_price($item->fee), ['class' => 'text-danger']);
             })
             ->editColumn('order_id', function ($item) {
                 if (! $item->order->id) {
@@ -59,6 +59,9 @@ class StoreRevenueTable extends TableAbstract
                 $url = Route::currentRouteName() == 'marketplace.vendor.statements.index' ? route('marketplace.vendor.orders.edit', $item->order->id) : route('orders.edit', $item->order->id);
 
                 return Html::link($url, $item->order->code, ['target' => '_blank']);
+            })
+            ->editColumn('type', function ($item) {
+                return $item->type->toHtml();
             })
             ->editColumn('created_at', function ($item) {
                 return BaseHelper::formatDate($item->created_at);
@@ -109,6 +112,10 @@ class StoreRevenueTable extends TableAbstract
             ],
             'amount' => [
                 'title' => trans('plugins/ecommerce::order.amount'),
+                'class' => 'text-start',
+            ],
+            'type' => [
+                'title' => trans('plugins/marketplace::revenue.forms.type'),
                 'class' => 'text-start',
             ],
             'created_at' => [

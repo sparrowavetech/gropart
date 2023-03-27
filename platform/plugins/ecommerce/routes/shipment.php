@@ -17,13 +17,13 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
                 'as' => 'update-status',
                 'uses' => 'ShipmentController@postUpdateStatus',
                 'permission' => 'ecommerce.shipments.edit',
-            ]);
+            ])->where('id', BaseHelper::routeIdRegex());
 
             Route::post('update-cod-status/{id}', [
                 'as' => 'update-cod-status',
                 'uses' => 'ShipmentController@postUpdateCodStatus',
                 'permission' => 'ecommerce.shipments.edit',
-            ]);
+            ])->where('id', BaseHelper::routeIdRegex());
         });
     });
 });

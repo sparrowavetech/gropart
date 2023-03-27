@@ -17,7 +17,7 @@ return new class () extends Migration {
 
         Schema::create('simple_slider_items', function (Blueprint $table) {
             $table->id();
-            $table->integer('simple_slider_id')->unsigned();
+            $table->foreignId('simple_slider_id');
             $table->string('title', 255)->nullable();
             $table->string('image', 255);
             $table->string('link', 255)->nullable();

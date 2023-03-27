@@ -40,14 +40,18 @@
             @if (is_plugin_active('captcha'))
                 @if (setting('enable_captcha'))
                     <div class="col-12">
-                        {!! Captcha::display() !!}
+                        <div class="mb-3">
+                            {!! Captcha::display() !!}
+                        </div>
                     </div>
                 @endif
 
                 @if (setting('enable_math_captcha_for_contact_form', 0))
                     <div class="col-12">
-                        <label for="math-group">{{ app('math-captcha')->label() }}</label>
-                        {!! app('math-captcha')->input(['class' => 'form-control', 'id' => 'math-group', 'placeholder' => app('math-captcha')->getMathLabelOnly() . ' = ?']) !!}
+                        <div class="mb-3">
+                            <label for="math-group">{{ app('math-captcha')->label() }}</label>
+                            {!! app('math-captcha')->input(['class' => 'form-control', 'id' => 'math-group', 'placeholder' => app('math-captcha')->getMathLabelOnly() . ' = ?']) !!}
+                        </div>
                     </div>
                 @endif
             @endif
@@ -56,7 +60,7 @@
 
             <div class="col-12">
                 <div class="mt-4">
-                    <button class="btn btn-primary btn-submit" type="submit">{{ __('Send Message') }}</button>
+                    <button class="btn btn-primary" type="submit">{{ __('Send Message') }}</button>
                 </div>
             </div>
             <div class="col-12">

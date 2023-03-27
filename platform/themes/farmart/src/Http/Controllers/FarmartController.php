@@ -54,34 +54,6 @@ class FarmartController extends PublicController
         ]);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function getIndex()
-    {
-        return parent::getIndex();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getView($key = null)
-    {
-        return parent::getView($key);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getSiteMap()
-    {
-        return parent::getSiteMap();
-    }
-
-    /**
-     * @param array $productIds
-     * @return array
-     */
     protected function getWishlistIds(array $productIds = []): array
     {
         if (! EcommerceHelper::isWishlistEnabled()) {
@@ -99,10 +71,6 @@ class FarmartController extends PublicController
             ->all();
     }
 
-    /**
-     * @param Request $request
-     * @return BaseHttpResponse
-     */
     public function ajaxGetProducts(Request $request)
     {
         $products = get_products_by_collections([
@@ -129,9 +97,6 @@ class FarmartController extends PublicController
         return $this->httpResponse->setData($data);
     }
 
-    /**
-     * @return BaseHttpResponse
-     */
     public function ajaxGetFeaturedProductCategories()
     {
         $categories = get_featured_product_categories(['take' => null]);
@@ -139,9 +104,6 @@ class FarmartController extends PublicController
         return $this->httpResponse->setData(ProductCategoryResource::collection($categories));
     }
 
-    /**
-     * @return BaseHttpResponse
-     */
     public function ajaxGetFeaturedBrands()
     {
         $brands = get_featured_brands();
@@ -149,12 +111,7 @@ class FarmartController extends PublicController
         return $this->httpResponse->setData(BrandResource::collection($brands));
     }
 
-    /**
-     * @param int $id
-     * @param FlashSaleInterface $flashSaleRepository
-     * @return BaseHttpResponse
-     */
-    public function ajaxGetFlashSale($id, FlashSaleInterface $flashSaleRepository)
+    public function ajaxGetFlashSale(int|string $id, FlashSaleInterface $flashSaleRepository)
     {
         $flashSale = $flashSaleRepository->getModel()
             ->notExpired()
@@ -194,10 +151,6 @@ class FarmartController extends PublicController
         return $this->httpResponse->setData($data);
     }
 
-    /**
-     * @param Request $request
-     * @return BaseHttpResponse
-     */
     public function ajaxGetFeaturedProducts(Request $request)
     {
         $data = [];
@@ -221,12 +174,6 @@ class FarmartController extends PublicController
         return $this->httpResponse->setData($data);
     }
 
-    /**
-     * @param Request $request
-     * @param ProductInterface $productRepository
-     * @param ProductCategoryInterface $productCategoryRepository
-     * @return BaseHttpResponse
-     */
     public function ajaxGetProductsByCategoryId(
         Request $request,
         ProductInterface $productRepository,
@@ -258,9 +205,6 @@ class FarmartController extends PublicController
         return $this->httpResponse->setData($data);
     }
 
-    /**
-     * @return BaseHttpResponse
-     */
     public function ajaxCart()
     {
         return $this->httpResponse->setData([
@@ -270,12 +214,7 @@ class FarmartController extends PublicController
         ]);
     }
 
-    /**
-     * @param Request $request
-     * @param $id
-     * @return BaseHttpResponse
-     */
-    public function ajaxGetQuickView(Request $request, $id = null)
+    public function ajaxGetQuickView(Request $request, int|string|null $id = null)
     {
         if (! $id) {
             $id = (int)$request->input('product_id');
@@ -314,14 +253,6 @@ class FarmartController extends PublicController
             ->setData(Theme::partial('ecommerce.quick-view', compact('product', 'selectedAttrs', 'productImages', 'productVariation', 'wishlistIds')));
     }
 
-    /**
-     * @param Request $request
-     * @param ProductInterface $productRepository
-     * @param WishlistInterface $wishlistRepository
-     * @param $productId
-     * @return BaseHttpResponse
-     * @throws \Exception
-     */
     public function ajaxAddProductToWishlist(Request $request, ProductInterface $productRepository, WishlistInterface $wishlistRepository, $productId = null)
     {
         if (! EcommerceHelper::isWishlistEnabled()) {
@@ -394,14 +325,8 @@ class FarmartController extends PublicController
             ]);
     }
 
-    /**
-     * @param int $id
-     * @param Request $request
-     * @param ProductInterface $productRepository
-     * @return BaseHttpResponse
-     */
     public function ajaxGetRelatedProducts(
-        $id,
+        int|string $id,
         Request $request,
         ProductInterface $productRepository
     ) {
@@ -417,11 +342,6 @@ class FarmartController extends PublicController
         return $this->httpResponse->setData($data);
     }
 
-    /**
-     * @param Request $request
-     * @param GetProductService $productService
-     * @return BaseHttpResponse
-     */
     public function ajaxSearchProducts(Request $request, GetProductService $productService)
     {
         $request->merge(['num' => 12]);
@@ -450,14 +370,8 @@ class FarmartController extends PublicController
             ->setMessage($message);
     }
 
-    /**
-     * @param int $id
-     * @param Request $request
-     * @param ProductInterface $productRepository
-     * @return BaseHttpResponse
-     */
     public function ajaxGetProductReviews(
-        $id,
+        int|string $id,
         Request $request,
         ProductInterface $productRepository
     ) {
@@ -495,12 +409,6 @@ class FarmartController extends PublicController
             ->toApiResponse();
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @param ProductCategoryInterface $productCategoryRepository
-     * @return BaseHttpResponse
-     */
     public function ajaxGetProductCategories(
         Request $request,
         BaseHttpResponse $response,
@@ -522,9 +430,6 @@ class FarmartController extends PublicController
         return $response->setData(ProductCategoryResource::collection($categories));
     }
 
-    /**
-     * @return BaseHttpResponse
-     */
     public function ajaxGetRecentlyViewedProducts(ProductInterface $productRepository)
     {
         if (! EcommerceHelper::isEnabledCustomerRecentlyViewedProducts()) {
@@ -556,12 +461,6 @@ class FarmartController extends PublicController
             ->setData(Theme::partial('ecommerce.recently-viewed-products', compact('products')));
     }
 
-    /**
-     * @param Theme\Farmart\Http\Requests\ContactSellerRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws \Throwable
-     */
     public function ajaxContactSeller(Theme\Farmart\Http\Requests\ContactSellerRequest $request, BaseHttpResponse $response)
     {
         $name = $request->input('name');
@@ -581,14 +480,5 @@ class FarmartController extends PublicController
             ->sendUsingTemplate('contact-seller', $email, [], false, 'themes');
 
         return $response->setMessage(__('Send message successfully!'));
-    }
-    public function ajaxGetComboPrice($amt)
-    {
-        return format_price($amt);
-    }
-    public function ajaxCheckPincode($formPincode, $toPincode)
-    {
-        $pickrr = new  \Botble\Pickrr\Pickrr();
-        return $pickrr->checkpincode($formPincode, $toPincode);
     }
 }

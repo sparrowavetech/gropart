@@ -2,6 +2,7 @@
 
 namespace Botble\Revision;
 
+use Botble\Base\Models\BaseModel;
 use DateTime;
 use Exception;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -123,12 +124,13 @@ trait RevisionableTrait
         if (((! isset($this->revisionEnabled) || $this->revisionEnabled) && $this->updating) && (! $limitReached || $revisionCleanup)) {
             // if it does, it means we're updating
 
-            $changes_to_record = $this->changedRevisionableFields();
+            $changesToRecord = $this->changedRevisionableFields();
 
             $revisions = [];
 
-            foreach ($changes_to_record as $key => $change) {
+            foreach ($changesToRecord as $key => $change) {
                 $revisions[] = [
+                    'id' => BaseModel::determineIfUsingUuidsForId() ? BaseModel::newUniqueId() : null,
                     'revisionable_type' => $this->getMorphClass(),
                     'revisionable_id' => $this->getKey(),
                     'key' => $key,
@@ -176,7 +178,7 @@ trait RevisionableTrait
                     $changesToRecord[$key] = $value;
                 }
             } else {
-                // we don't need these any more, and they could
+                // we don't need these anymore, and they could
                 // contain a lot of data, so lets trash them.
                 unset($this->updatedData[$key]);
                 unset($this->originalData[$key]);

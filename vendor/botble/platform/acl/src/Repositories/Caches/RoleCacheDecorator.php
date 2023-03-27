@@ -7,10 +7,7 @@ use Botble\Support\Repositories\Caches\CacheAbstractDecorator;
 
 class RoleCacheDecorator extends CacheAbstractDecorator implements RoleInterface
 {
-    /**
-     * {@inheritDoc}
-     */
-    public function createSlug($name, $id)
+    public function createSlug(string $name, int|string $id): string
     {
         return $this->flushCacheAndUpdateData(__FUNCTION__, func_get_args());
     }

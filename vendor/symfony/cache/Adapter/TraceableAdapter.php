@@ -35,6 +35,9 @@ class TraceableAdapter implements AdapterInterface, CacheInterface, PruneableInt
         $this->pool = $pool;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function get(string $key, callable $callback, float $beta = null, array &$metadata = null): mixed
     {
         if (!$this->pool instanceof CacheInterface) {
@@ -64,6 +67,9 @@ class TraceableAdapter implements AdapterInterface, CacheInterface, PruneableInt
         return $value;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getItem(mixed $key): CacheItem
     {
         $event = $this->start(__FUNCTION__);
@@ -81,6 +87,9 @@ class TraceableAdapter implements AdapterInterface, CacheInterface, PruneableInt
         return $item;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function hasItem(mixed $key): bool
     {
         $event = $this->start(__FUNCTION__);
@@ -91,6 +100,9 @@ class TraceableAdapter implements AdapterInterface, CacheInterface, PruneableInt
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function deleteItem(mixed $key): bool
     {
         $event = $this->start(__FUNCTION__);
@@ -101,6 +113,9 @@ class TraceableAdapter implements AdapterInterface, CacheInterface, PruneableInt
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function save(CacheItemInterface $item): bool
     {
         $event = $this->start(__FUNCTION__);
@@ -111,6 +126,9 @@ class TraceableAdapter implements AdapterInterface, CacheInterface, PruneableInt
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function saveDeferred(CacheItemInterface $item): bool
     {
         $event = $this->start(__FUNCTION__);
@@ -121,6 +139,9 @@ class TraceableAdapter implements AdapterInterface, CacheInterface, PruneableInt
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getItems(array $keys = []): iterable
     {
         $event = $this->start(__FUNCTION__);
@@ -144,6 +165,9 @@ class TraceableAdapter implements AdapterInterface, CacheInterface, PruneableInt
         return $f();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function clear(string $prefix = ''): bool
     {
         $event = $this->start(__FUNCTION__);
@@ -158,6 +182,9 @@ class TraceableAdapter implements AdapterInterface, CacheInterface, PruneableInt
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function deleteItems(array $keys): bool
     {
         $event = $this->start(__FUNCTION__);
@@ -169,6 +196,9 @@ class TraceableAdapter implements AdapterInterface, CacheInterface, PruneableInt
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function commit(): bool
     {
         $event = $this->start(__FUNCTION__);
@@ -179,6 +209,9 @@ class TraceableAdapter implements AdapterInterface, CacheInterface, PruneableInt
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function prune(): bool
     {
         if (!$this->pool instanceof PruneableInterface) {
@@ -192,6 +225,9 @@ class TraceableAdapter implements AdapterInterface, CacheInterface, PruneableInt
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function reset()
     {
         if ($this->pool instanceof ResetInterface) {
@@ -201,6 +237,9 @@ class TraceableAdapter implements AdapterInterface, CacheInterface, PruneableInt
         $this->clearCalls();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function delete(string $key): bool
     {
         $event = $this->start(__FUNCTION__);
@@ -219,11 +258,6 @@ class TraceableAdapter implements AdapterInterface, CacheInterface, PruneableInt
     public function clearCalls()
     {
         $this->calls = [];
-    }
-
-    public function getPool(): AdapterInterface
-    {
-        return $this->pool;
     }
 
     protected function start(string $name)

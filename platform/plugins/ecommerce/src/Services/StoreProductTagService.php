@@ -9,11 +9,8 @@ use Illuminate\Http\Request;
 
 class StoreProductTagService
 {
-    public ProductTagInterface $productTagRepository;
-
-    public function __construct(ProductTagInterface $productTagRepository)
+    public function __construct(protected ProductTagInterface $productTagRepository)
     {
-        $this->productTagRepository = $productTagRepository;
     }
 
     public function execute(Request $request, Product $product): void

@@ -16,7 +16,7 @@
                     <div class="app-item app-{{ $plugin->path }}">
                         <div class="app-icon">
                             @if ($plugin->image)
-                                <img src="data:image/png;base64,{{ $plugin->image }}" alt="{{ $plugin->name }}">
+                                <img src="{{ $plugin->image }}" alt="{{ $plugin->name }}">
                             @endif
                         </div>
                         <div class="app-details">

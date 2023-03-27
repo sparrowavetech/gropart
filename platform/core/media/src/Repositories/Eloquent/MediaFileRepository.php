@@ -32,7 +32,7 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
         return $name;
     }
 
-    protected function checkIfExistsName(?string $name, ?int $folder): bool
+    protected function checkIfExistsName(?string $name, int|string|null $folder): bool
     {
         $count = $this->model
             ->where('name', $name)
@@ -68,6 +68,7 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
             'select' => [
                 'media_files.id as id',
                 'media_files.name as name',
+                'media_files.alt as alt',
                 'media_files.url as url',
                 'media_files.mime_type as mime_type',
                 'media_files.size as size',
@@ -101,6 +102,7 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
                     DB::raw('NULL as url'),
                     DB::raw('NULL as mime_type'),
                     DB::raw('NULL as size'),
+                    DB::raw('NULL as alt'),
                     'media_folders.created_at as created_at',
                     'media_folders.updated_at as updated_at',
                     DB::raw('NULL as options'),

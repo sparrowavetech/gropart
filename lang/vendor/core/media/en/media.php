@@ -29,6 +29,7 @@ return [
     'folder_name' => 'Folder name',
     'create' => 'Create',
     'rename' => 'Rename',
+    'crop' => 'Crop',
     'close' => 'Close',
     'save_changes' => 'Save changes',
     'move_to_trash' => 'Move items to trash',
@@ -40,8 +41,11 @@ return [
     'empty_trash_description' => 'Your request cannot rollback. Are you sure you wanna remove all items in trash?',
     'up_level' => 'Up one level',
     'upload_progress' => 'Upload progress',
+    'alt_text' => 'Alt text',
+
     'folder_created' => 'Folder is created successfully!',
     'gallery' => 'Media gallery',
+
     'trash_error' => 'Error when delete selected item(s)',
     'trash_success' => 'Moved selected item(s) to trash successfully!',
     'restore_error' => 'Error when restore selected item(s)',
@@ -52,6 +56,7 @@ return [
     'remove_favorite_success' => 'Remove selected item(s) from favorites successfully!',
     'rename_error' => 'Error when rename item(s)',
     'rename_success' => 'Rename selected item(s) successfully!',
+    'crop_success' => 'Crop image successfully!',
     'empty_trash_success' => 'Empty trash successfully!',
     'invalid_action' => 'Invalid action!',
     'file_not_exists' => 'File is not exists!',
@@ -64,18 +69,22 @@ return [
     'file_too_big_readable_size' => 'File too big. Max file upload is :size.',
     'can_not_detect_file_type' => 'File type is not allowed or can not detect file type!',
     'upload_failed' => 'The file is NOT uploaded completely. The server allows max upload file size is :size . Please check your file size OR try to upload again in case of having network errors',
+    'failed_to_crop_image' => 'The file cropping must be image type',
     'menu_name' => 'Media',
     'add' => 'Add media',
+
     'javascript' => [
         'name' => 'Name',
         'url' => 'URL',
         'full_url' => 'Full URL',
+        'alt' => 'Alt text',
         'size' => 'Size',
         'mime_type' => 'Type',
         'created_at' => 'Uploaded at',
         'updated_at' => 'Modified at',
         'nothing_selected' => 'Nothing is selected',
         'visit_link' => 'Open link',
+
         'no_item' => [
             'all_media' => [
                 'icon' => 'fas fa-cloud-upload-alt',
@@ -103,19 +112,24 @@ return [
                 'message' => 'This directory has no item',
             ],
         ],
+
         'clipboard' => [
             'success' => 'These file links has been copied to clipboard',
         ],
+
         'message' => [
             'error_header' => 'Error',
             'success_header' => 'Success',
         ],
+
         'download' => [
             'error' => 'No files selected or cannot download these files',
         ],
+
         'actions_list' => [
             'basic' => [
                 'preview' => 'Preview',
+                'crop' => 'Crop',
             ],
             'file' => [
                 'copy_link' => 'Copy link',
@@ -145,4 +159,12 @@ return [
     'url' => 'URL',
     'download_explain' => 'Enter one URL per line.',
     'downloading' => 'Downloading...',
+    'prepare_file_to_download' => 'Preparing file to download...',
+    'update_alt_text_success' => 'Update alt text successfully!',
+
+    'cropper' => [
+        'height' => 'Height',
+        'width' => 'Width',
+        'aspect_ratio' => 'Aspect ratio?',
+    ],
 ];

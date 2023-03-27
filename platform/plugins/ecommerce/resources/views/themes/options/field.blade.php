@@ -8,21 +8,12 @@
         </div>
         <div class="product-option-item-values">
             <div class="form-radio">
-                @php
-                    $price = 0;
-                    if (!empty($value->affect_price) && doubleval($value->affect_price) > 0) {
-                        $price = $value->affect_type == 0 ? $value->affect_price : (floatval($value->affect_price) * $product->front_sale_price_with_taxes) / 100;
-                    }
-                @endphp
-                <input type="hidden" name="options[{{ $option->id }}][option_type]" value="field" />
-                <input data-extra-price="{{ $price }}" {{ ($option->required) ? 'required' : '' }} type="text"
-                       class="form-control" name="options[{{ $option->id }}][values]"
-                       id="option-{{ $option->id }}-value-{{ Str::slug($option->values[0]['option_value']) }}">
-                <label for="option-{{ $option->id }}-value-{{ Str::slug($option->values[0]['option_value']) }}">
-                    @if ($price > 0)
-                        <strong class="extra-price">+ {{ format_price($price) }}</strong>
-                    @endif
-                </label>
+                @foreach($option->values as $value)
+                    <input type="hidden" name="options[{{ $option->id }}][option_type]" value="field" />
+                    <input data-extra-price="0" {{ ($option->required) ? 'required' : '' }} type="text"
+                        class="form-control" name="options[{{ $option->id }}][values]"
+                        id="option-{{ $option->id }}-value-{{ Str::slug($option->values[0]['option_value']) }}">
+                @endforeach
             </div>
         </div>
     </div>

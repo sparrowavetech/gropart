@@ -13,23 +13,13 @@ use Botble\Ecommerce\Repositories\Interfaces\StoreLocatorInterface;
 use Botble\Ecommerce\Services\StoreCurrenciesService;
 use Botble\Setting\Supports\SettingStore;
 use EcommerceHelper;
-use Exception;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
-use Throwable;
+use Illuminate\Support\Facades\Http;
 
 class EcommerceController extends BaseController
 {
-    protected StoreLocatorInterface $storeLocatorRepository;
-
-    protected CurrencyInterface $currencyRepository;
-
-    public function __construct(StoreLocatorInterface $storeLocatorRepository, CurrencyInterface $currencyRepository)
+    public function __construct(protected StoreLocatorInterface $storeLocatorRepository, protected CurrencyInterface $currencyRepository)
     {
-        $this->storeLocatorRepository = $storeLocatorRepository;
-        $this->currencyRepository = $currencyRepository;
     }
 
     public function getSettings()
@@ -203,7 +193,7 @@ class EcommerceController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function getStoreLocatorForm(BaseHttpResponse $response, ?int $id = null)
+    public function getStoreLocatorForm(BaseHttpResponse $response, int|string|null $id = null)
     {
         $locator = null;
         if ($id) {
@@ -214,7 +204,7 @@ class EcommerceController extends BaseController
     }
 
     public function postUpdateStoreLocator(
-        int $id,
+        int|string $id,
         StoreLocatorRequest $request,
         BaseHttpResponse $response,
         SettingStore $settingStore
@@ -254,7 +244,7 @@ class EcommerceController extends BaseController
         return $response->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function postDeleteStoreLocator(int $id, BaseHttpResponse $response)
+    public function postDeleteStoreLocator(int|string $id, BaseHttpResponse $response)
     {
         $this->storeLocatorRepository->deleteBy(compact('id'));
 
@@ -279,5 +269,63 @@ class EcommerceController extends BaseController
     public function ajaxGetCountries(BaseHttpResponse $response)
     {
         return $response->setData(EcommerceHelper::getAvailableCountries());
+    }
+
+    public function updateCurrenciesFromExchangeApi(BaseHttpResponse $response)
+    {
+        $currencies = $this->currencyRepository
+            ->getModel()
+            ->where('is_default', 0)
+            ->get();
+
+        if (! $currencies->count()) {
+            return $response;
+        }
+
+        $apiKey = get_ecommerce_setting('currencies_api_key');
+
+        if (! $apiKey) {
+            return $response
+                ->setError()
+                ->setMessage(trans('plugins/ecommerce::currency.no_api_key'));
+        }
+
+        $api = Http::withHeaders([
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
+            'apikey' => $apiKey,
+        ]);
+
+        $defaultCurrency = get_application_currency();
+
+        if ($defaultCurrency->exchange_rate != 1) {
+            $defaultCurrency->update(['exchange_rate' => 1]);
+        }
+
+        foreach ($currencies as $currency) {
+            $params = [
+                'amount' => 1,
+                'from' => strtoupper($defaultCurrency->title),
+                'to' => strtoupper($currency->title),
+            ];
+
+            $result = $api->get('https://api.apilayer.com/exchangerates_data/convert?' . http_build_query($params));
+
+            if (! $result->ok()) {
+                return $response
+                    ->setError()
+                    ->setMessage($result->status() . ': ' . $result->reason());
+            }
+
+            $data = $result->json();
+
+            $currency->update(['exchange_rate' => number_format($data['result'], 8, '.', '')]);
+        }
+
+        $currencyUpdated = $this->currencyRepository->getAllCurrencies();
+
+        return $response
+            ->setData(json_encode($currencyUpdated))
+            ->setMessage(trans('core/base::notices.update_success_message'));
     }
 }

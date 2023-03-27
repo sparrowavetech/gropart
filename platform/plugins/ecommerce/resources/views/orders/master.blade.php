@@ -28,23 +28,6 @@
     {!! apply_filters('ecommerce_checkout_header', null) !!}
 
     @stack('header')
-
-    <style type="text/css">
-        .checkout-product-img-wrapper .img-thumbnail { width: 100%; }
-        .btn.payment-checkout-btn { vertical-align: bottom; font-size: 1rem; padding: 10px 30px; font-weight: 600; text-transform: uppercase; background-color: #198754; display: block; }
-        .btn.payment-checkout-btn:hover { background-color: #00b460!important; }
-        .thank-you i { margin-bottom: 10px; color: #198754; vertical-align: middle; }
-        .thank-you .thank-you-sentence, .thank-you p { line-height: 1; margin:0 }
-        .order-customer-info .h3, .order-customer-info h3 { font-weight: 700; text-transform: uppercase; font-size: 1rem; }
-        .order-customer-info p span:first-child { min-width: 100px; font-weight: 600; text-transform: capitalize; }
-        .order-customer-info { background: #f5f5f5; margin: 0 0 10px; padding: 15px; }
-        .thank-you { margin-bottom: 20px; text-align: center; }
-        .order-customer-info p { color: #000; font-size: .75rem; margin-bottom: 3px; display: flex; }
-        .order-number-data .od-no {font-size: 1.5rem;text-transform: capitalize; text-decoration: underline; text-align: center; margin-bottom: 50px;}
-        .price-text, .total-text { color: #000000;font-weight: 400; }
-        .thank-you-links { text-align: center; }
-        .thank-you-links .link-text a { line-height: 1; font-size: 1rem; color: #888; padding: 10px; border-radius: 5px; text-transform: capitalize; text-decoration: underline; font-weight: 600; border: 2px solid rgb(173 173 173); }
-    </style>
 </head>
 <body class="checkout-page" @if (BaseHelper::siteLanguageDirection() == 'rtl') dir="rtl" @endif>
     {!! apply_filters('ecommerce_checkout_body', null) !!}

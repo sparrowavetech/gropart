@@ -61,14 +61,14 @@ interface RepositoryInterface
     /**
      * Retrieve model by id regardless of status.
      *
-     * @param int $id
+     * @param int|string $id
      * @param array $with
      * @return mixed
      */
     public function findById($id, array $with = []);
 
     /**
-     * @param int $id
+     * @param int|string $id
      * @param array $with
      * @return mixed
      */

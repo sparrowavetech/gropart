@@ -19,12 +19,16 @@
                         </div>
                     </div>
                     <p class="note note-warning">{{ trans('plugins/translation::translation.theme_translations_instruction') }}</p>
+
+                    {!! apply_filters('translation_theme_translation_header', null) !!}
+
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
                             <tr>
                                 <th>{{ $defaultLanguage ? $defaultLanguage['name'] : 'en' }}</th>
                                 <th>{{ $group['name'] }}</th>
+                                {!! apply_filters('translation_theme_translation_table_header', null) !!}
                             </tr>
                             </thead>
                             <tbody>
@@ -39,6 +43,7 @@
                                            data-type="textarea" data-pk="{{ $group['locale'] }}" data-url="{{ route('translations.theme-translations') }}"
                                            data-title="{{ trans('plugins/translation::translation.edit_title') }}">{!! htmlentities($translation, ENT_QUOTES, 'UTF-8', false) !!}</a>
                                     </td>
+                                    {!! apply_filters('translation_theme_translation_table_body', null) !!}
                                 </tr>
                             @endforeach
                             </tbody>

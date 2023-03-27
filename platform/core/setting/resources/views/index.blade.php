@@ -228,11 +228,11 @@
                                 <label class="text-title-field" for="disable_cache_in_the_admin_panel">{{ trans('core/setting::setting.general.disable_cache_in_the_admin_panel') }}
                                 </label>
                                 <label class="me-2">
-                                    <input type="radio" name="disable_cache_in_the_admin_panel" value="1" @checked(setting('disable_cache_in_the_admin_panel')) class="setting-selection-option" data-target="#cache-settings">
+                                    <input type="radio" name="disable_cache_in_the_admin_panel" value="1" @checked(setting('disable_cache_in_the_admin_panel', 1))>
                                     {{ trans('core/setting::setting.general.yes') }}
                                 </label>
                                 <label>
-                                    <input type="radio" name="disable_cache_in_the_admin_panel" value="0" @checked(! setting('disable_cache_in_the_admin_panel')) class="setting-selection-option" data-target="#cache-settings">
+                                    <input type="radio" name="disable_cache_in_the_admin_panel" value="0" @checked(! setting('disable_cache_in_the_admin_panel', 1))>
                                     {{ trans('core/setting::setting.general.no') }}
                                 </label>
                             </div>

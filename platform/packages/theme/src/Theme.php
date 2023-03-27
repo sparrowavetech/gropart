@@ -746,6 +746,25 @@ class Theme implements ThemeContract
 
     public function header(): string
     {
+        $schema = [
+            '@context' => 'https://schema.org',
+            '@type' => 'BreadcrumbList',
+            'itemListElement' => [],
+        ];
+
+        foreach ($this->breadcrumb->crumbs as $index => $item) {
+            $schema['itemListElement'][] = [
+                '@type' => 'ListItem',
+                'position' => $index + 1,
+                'name' => BaseHelper::clean($item['label']),
+                'item' => $item['url'],
+            ];
+        }
+
+        $schema = json_encode($schema);
+
+        $this->asset()->container('header')->writeScript('breadcrumb-schema', $schema, attributes: ['type' => 'application/ld+json']);
+
         return $this->view->make('packages/theme::partials.header')->render();
     }
 
@@ -773,7 +792,7 @@ class Theme implements ThemeContract
 
     public function routes()
     {
-        return File::requireOnce(package_path('theme/routes/public.php'));
+        require package_path('theme/routes/public.php');
     }
 
     public function loadView(string $view): string

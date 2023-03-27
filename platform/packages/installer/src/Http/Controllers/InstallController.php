@@ -24,14 +24,8 @@ use URL;
 
 class InstallController extends Controller
 {
-    protected RequirementsChecker $requirements;
-
-    protected EnvironmentManager $environmentManager;
-
-    public function __construct(RequirementsChecker $requirementsChecker, EnvironmentManager $environmentManager)
+    public function __construct(protected RequirementsChecker $requirements, protected EnvironmentManager $environmentManager)
     {
-        $this->requirements = $requirementsChecker;
-        $this->environmentManager = $environmentManager;
     }
 
     public function getWelcome()

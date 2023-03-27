@@ -23,11 +23,8 @@ use ZipArchive;
 
 class TranslationController extends BaseController
 {
-    protected Manager $manager;
-
-    public function __construct(Manager $manager)
+    public function __construct(protected Manager $manager)
     {
-        $this->manager = $manager;
     }
 
     public function getIndex(Request $request)
@@ -155,23 +152,30 @@ class TranslationController extends BaseController
                 ->setMessage(trans('plugins/translation::translation.folder_is_not_writeable', ['lang_path' => lang_path()]));
         }
 
-        $defaultLocale = lang_path('en');
         $locale = $request->input('locale');
-        if (File::exists($defaultLocale)) {
-            File::copyDirectory($defaultLocale, lang_path($locale));
-        }
 
-        $this->createLocaleInPath(lang_path('vendor/core'), $locale);
-        $this->createLocaleInPath(lang_path('vendor/packages'), $locale);
-        $this->createLocaleInPath(lang_path('vendor/plugins'), $locale);
+        if (! File::isDirectory(lang_path($locale))) {
+            $result = app(Manager::class)->downloadRemoteLocale($locale);
 
-        $themeLocale = Arr::first(BaseHelper::scanFolder(theme_path(Theme::getThemeName() . '/lang')));
+            if ($result['error']) {
+                $defaultLocale = lang_path('en');
+                if (File::exists($defaultLocale)) {
+                    File::copyDirectory($defaultLocale, lang_path($locale));
+                }
 
-        if ($themeLocale) {
-            File::copy(
-                theme_path(Theme::getThemeName() . '/lang/' . $themeLocale),
-                lang_path($locale . '.json')
-            );
+                $this->createLocaleInPath(lang_path('vendor/core'), $locale);
+                $this->createLocaleInPath(lang_path('vendor/packages'), $locale);
+                $this->createLocaleInPath(lang_path('vendor/plugins'), $locale);
+
+                $themeLocale = Arr::first(BaseHelper::scanFolder(theme_path(Theme::getThemeName() . '/lang')));
+
+                if ($themeLocale) {
+                    File::copy(
+                        theme_path(Theme::getThemeName() . '/lang/' . $themeLocale),
+                        lang_path($locale . '.json')
+                    );
+                }
+            }
         }
 
         return $response->setMessage(trans('core/base::notices.create_success_message'));

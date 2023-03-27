@@ -303,10 +303,12 @@ class Botble {
 
     static initDatePicker(element) {
         if (jQuery().flatpickr) {
-            let format = $(document).find(element).data('date-format');
-            if (!format) {
+            let format = $(document).find(element).find('input').data('date-format');
+
+            if (! format) {
                 format = 'Y-m-d';
             }
+
             $(document).find(element).flatpickr({
                 dateFormat: format,
                 wrap: true
@@ -323,9 +325,11 @@ class Botble {
                     allowClear: true,
                 };
 
-                let parent = $(element).closest('.modal');
+                let parent = $(element).closest('div[data-select2-dropdown-parent]') || $(element).closest('.modal');
                 if (parent.length) {
                     options.dropdownParent = parent;
+                    options.width = '100%';
+                    options.minimumResultsForSearch = -1;
                 }
 
                 $(element).select2(options);
@@ -336,9 +340,10 @@ class Botble {
                     width: '100%',
                 };
 
-                let parent = $(element).closest('.modal');
+                let parent = $(element).closest('div[data-select2-dropdown-parent]') || $(element).closest('.modal');
                 if (parent.length) {
                     options.dropdownParent = parent;
+                    options.minimumResultsForSearch = -1;
                 }
 
                 $(element).select2(options);
@@ -350,7 +355,7 @@ class Botble {
                     minimumResultsForSearch: -1
                 };
 
-                let parent = $(element).closest('.modal');
+                let parent = $(element).closest('div[data-select2-dropdown-parent]') || $(element).closest('.modal');
                 if (parent.length) {
                     options.dropdownParent = parent;
                 }
@@ -415,7 +420,7 @@ class Botble {
                         allowClear: true
                     };
 
-                    let parent = $(element).closest('.modal');
+                    let parent = $(element).closest('div[data-select2-dropdown-parent]') || $(element).closest('.modal');
                     if (parent.length) {
                         options.dropdownParent = parent;
                     }
@@ -543,16 +548,30 @@ class Botble {
 
         $('.select2_google_fonts_picker').each(function (i, obj) {
             if (!$(obj).hasClass('select2-hidden-accessible')) {
-                $(obj).select2({
+                let options = {
                     templateResult: function (opt) {
                         if (!opt.id) {
                             return opt.text;
                         }
+
                         return $('<span style="font-family:\'' + opt.id + '\';"> ' + opt.text + '</span>');
                     },
-                })
+                };
+
+                let parent = $(obj).closest('div[data-select2-dropdown-parent]') || $(obj).closest('.modal');
+                if (parent.length) {
+                    options.dropdownParent = parent;
+                    options.width = '100%';
+                    options.minimumResultsForSearch = -1;
+                }
+
+                $(obj).select2(options);
             }
         });
+
+        $(document).on('submit', '.js-base-form', (event) => {
+            $(event.currentTarget).find('button[type=submit]').addClass('disabled');
+        })
 
         document.dispatchEvent(new CustomEvent('core-init-resources'));
     }
@@ -695,7 +714,8 @@ class Botble {
                                         link = link.replace('watch?v=', 'embed/');
                                         content += '<iframe width="420" height="315" src="' + link + '" frameborder="0" allowfullscreen loading="lazy"></iframe><br />';
                                     } else if (file.type === 'image') {
-                                        content += '<img src="' + link + '" alt="' + file.name + '" loading="lazy"/><br />';
+                                        const alt = file.alt ? file.alt : file.name;
+                                        content += '<img src="' + link + '" alt="' + alt + '" loading="lazy"/><br />';
                                     } else {
                                         content += '<a href="' + link + '">' + file.name + '</a><br />';
                                     }
@@ -712,7 +732,8 @@ class Botble {
                                         link = link.replace('watch?v=', 'embed/');
                                         html += '<iframe width="420" height="315" src="' + link + '" frameborder="0" allowfullscreen loading="lazy"></iframe><br />';
                                     } else if (file.type === 'image') {
-                                        html += '<img src="' + link + '" alt="' + file.name + '" loading="lazy"/><br />';
+                                        const alt = file.alt ? file.alt : file.name;
+                                        html += '<img src="' + link + '" alt="' + alt + '" loading="lazy"/><br />';
                                     } else {
                                         html += '<a href="' + link + '">' + file.name + '</a><br />';
                                     }

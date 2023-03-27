@@ -2,7 +2,6 @@ import {RecentItems} from '../Config/MediaConfig';
 import {Helpers} from '../Helpers/Helpers';
 import {MessageService} from './MessageService';
 import Cropper from 'cropperjs';
-import scrollspy from "bootstrap/js/src/scrollspy";
 
 export class ActionsService {
     static handleDropdown() {
@@ -134,6 +133,9 @@ export class ActionsService {
             case 'preview':
                 ActionsService.handlePreview();
                 break;
+            case 'alt_text':
+                $('#modal_alt_text_items').modal('show').find('form.rv-form').data('action', type);
+                break;
             case 'crop':
                 $('#modal_crop_image').modal('show').find('form.rv-form').data('action', type);
                 break;
@@ -219,6 +221,23 @@ export class ActionsService {
         });
     }
 
+    static renderAltTextItems() {
+        let VIEW = $('#rv_media_alt_text_item').html();
+        let $itemsWrapper = $('#modal_alt_text_items .alt-text-items').empty();
+
+        _.each(Helpers.getSelectedItems(), (value) => {
+            let item = VIEW
+                .replace(/__icon__/gi, value.icon || 'fa fa-file')
+                .replace(/__placeholder__/gi, 'Input file alt')
+                .replace(/__value__/gi, value.alt === null ? '' : value.alt)
+            ;
+            let $item = $(item);
+            $item.data('id', value.id);
+            $item.data('alt', value.alt);
+            $itemsWrapper.append($item);
+        });
+    }
+
     static renderActions() {
         let hasFolderSelected = Helpers.getSelectedFolder().length > 0;
 
@@ -235,6 +254,9 @@ export class ActionsService {
             });
             actionsList.basic = _.reject(actionsList.basic, item => {
                 return item.action === 'crop';
+            });
+            actionsList.file = _.reject(actionsList.file, item => {
+                return item.action === 'alt_text';
             });
             actionsList.file = _.reject(actionsList.file, item => {
                 return item.action === 'copy_link';
@@ -287,13 +309,17 @@ export class ActionsService {
             });
         }
 
-        let canCropImage = _.filter(selectedFiles, function (value) {
+        let fileIsImage = _.filter(selectedFiles, function (value) {
             return value.type === 'image';
         }).length;
 
-        if (! canCropImage) {
+        if (! fileIsImage) {
             actionsList.basic = _.reject(actionsList.basic, item => {
                 return item.action === 'crop';
+            });
+
+            actionsList.file = _.reject(actionsList.file, item => {
+                return item.action === 'alt_text';
             });
         }
 
@@ -394,6 +420,12 @@ export class ActionsService {
                 }, 1000)
             },
             success: (response, status, xhr) => {
+                if (response.error) {
+                    MessageService.showMessage('error', response.message);
+
+                    return;
+                }
+
                 const downloadUrl = URL.createObjectURL(response);
                 const a = document.createElement('a');
                 const fileName = xhr.getResponseHeader('Content-Disposition').split('filename=')[1].split(';')[0];

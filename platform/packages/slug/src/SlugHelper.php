@@ -11,6 +11,10 @@ class SlugHelper
 {
     protected array $canEmptyPrefixes = [Page::class];
 
+    public function __construct(protected SlugCompiler $translator)
+    {
+    }
+
     public function registerModule(string|array $model, ?string $name = null): self
     {
         $supported = $this->supportedModels();
@@ -121,18 +125,20 @@ class SlugHelper
         return app(SlugInterface::class)->getFirstBy($condition);
     }
 
-    public function getPrefix(string $model, string $default = ''): ?string
+    public function getPrefix(string $model, string $default = '', bool $translate = true): ?string
     {
-        $permalink = setting($this->getPermalinkSettingKey($model));
+        $prefix = setting($this->getPermalinkSettingKey($model));
 
-        if ($permalink !== null) {
-            return $permalink;
+        if (! $prefix) {
+            $prefix = Arr::get(config('packages.slug.general.prefixes', []), $model);
         }
 
-        $config = Arr::get(config('packages.slug.general.prefixes', []), $model);
+        if ($prefix !== null) {
+            if ($translate) {
+                $prefix = $this->translator->compile($prefix, $model);
+            }
 
-        if ($config !== null) {
-            return (string)$config;
+            $default = $prefix;
         }
 
         return $default;
@@ -166,5 +172,10 @@ class SlugHelper
     public function getCanEmptyPrefixes(): array
     {
         return $this->canEmptyPrefixes;
+    }
+
+    public function getTranslator(): SlugCompiler
+    {
+        return $this->translator;
     }
 }

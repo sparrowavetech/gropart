@@ -34,11 +34,11 @@ interface ProductInterface extends RepositoryInterface
 
     public function getProductsByIds(array $ids, array $params = []);
 
-    public function getProductsWishlist(int $customerId, array $params = []);
+    public function getProductsWishlist(int|string $customerId, array $params = []);
 
-    public function getProductsRecentlyViewed(int $customerId, array $params = []);
+    public function getProductsRecentlyViewed(int|string $customerId, array $params = []);
 
     public function saveProductOptions(array $options, Product $product);
 
-    public function productsNeedToReviewByCustomer(int $customerId, int $limit = 12, array $orderIds = []);
+    public function productsNeedToReviewByCustomer(int|string $customerId, int $limit = 12, array $orderIds = []);
 }

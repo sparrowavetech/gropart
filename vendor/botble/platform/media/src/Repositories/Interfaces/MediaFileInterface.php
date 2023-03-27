@@ -20,7 +20,7 @@ interface MediaFileInterface extends RepositoryInterface
     public function createSlug($name, $extension, $folderPath): string;
 
     /**
-     * @param int $folderId
+     * @param int|string $folderId
      * @param array $params
      * @param bool $withFolders
      * @param array $folderParams
@@ -29,7 +29,7 @@ interface MediaFileInterface extends RepositoryInterface
     public function getFilesByFolderId($folderId, array $params = [], $withFolders = true, $folderParams = []);
 
     /**
-     * @param int $folderId
+     * @param int|string $folderId
      * @param array $params
      * @param bool $withFolders
      * @param array $folderParams

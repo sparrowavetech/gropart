@@ -17,8 +17,8 @@ class DiscountRequest extends Request
             'target' => 'required',
             'type_option' => 'required|' . Rule::in(DiscountTypeOptionEnum::values()),
             'quantity' => 'required_without:is_unlimited|numeric|min:1',
-            'start_date' => 'nullable|date|date_format:d-m-Y',
-            'end_date' => 'nullable|date|date_format:d-m-Y|after:start_date',
+            'start_date' => 'nullable|date|date_format:' . config('core.base.general.date_format.date'),
+            'end_date' => 'nullable|date|date_format:' . config('core.base.general.date_format.date') . '|after:start_date',
         ];
     }
 

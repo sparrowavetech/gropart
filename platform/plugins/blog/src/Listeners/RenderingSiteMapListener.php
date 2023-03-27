@@ -2,47 +2,78 @@
 
 namespace Botble\Blog\Listeners;
 
+use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Blog\Repositories\Interfaces\CategoryInterface;
 use Botble\Blog\Repositories\Interfaces\PostInterface;
 use Botble\Blog\Repositories\Interfaces\TagInterface;
+use Botble\Theme\Events\RenderingSiteMapEvent;
 use SiteMapManager;
 
 class RenderingSiteMapListener
 {
-    protected PostInterface $postRepository;
-
-    protected CategoryInterface $categoryRepository;
-
-    protected TagInterface $tagRepository;
-
     public function __construct(
-        PostInterface $postRepository,
-        CategoryInterface $categoryRepository,
-        TagInterface $tagRepository
+        protected PostInterface $postRepository,
+        protected CategoryInterface $categoryRepository,
+        protected TagInterface $tagRepository
     ) {
-        $this->postRepository = $postRepository;
-        $this->categoryRepository = $categoryRepository;
-        $this->tagRepository = $tagRepository;
     }
 
-    public function handle(): void
+    public function handle(RenderingSiteMapEvent $event): void
     {
-        $posts = $this->postRepository->getDataSiteMap();
+        if ($key = $event->key) {
+            switch ($key) {
+                case 'blog-posts':
+                    $posts = $this->postRepository->getDataSiteMap();
 
-        foreach ($posts as $post) {
-            SiteMapManager::add($post->url, $post->updated_at, '0.8');
+                    foreach ($posts as $post) {
+                        SiteMapManager::add($post->url, $post->updated_at, '0.8');
+                    }
+
+                    break;
+
+                case 'blog-categories':
+                    $categories = $this->categoryRepository->getDataSiteMap();
+
+                    foreach ($categories as $category) {
+                        SiteMapManager::add($category->url, $category->updated_at, '0.8');
+                    }
+
+                    break;
+                case 'blog-tags':
+                    $tags = $this->tagRepository->getDataSiteMap();
+
+                    foreach ($tags as $tag) {
+                        SiteMapManager::add($tag->url, $tag->updated_at, '0.3', 'weekly');
+                    }
+
+                    break;
+            }
+
+            return;
         }
 
-        $categories = $this->categoryRepository->getDataSiteMap();
+        $postLastUpdated = $this->postRepository
+            ->getModel()
+            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->latest('updated_at')
+            ->value('updated_at');
 
-        foreach ($categories as $category) {
-            SiteMapManager::add($category->url, $category->updated_at, '0.8');
-        }
+        SiteMapManager::addSitemap(SiteMapManager::route('blog-posts'), $postLastUpdated);
 
-        $tags = $this->tagRepository->getDataSiteMap();
+        $categoryLastUpdated = $this->categoryRepository
+            ->getModel()
+            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->latest('updated_at')
+            ->value('updated_at');
 
-        foreach ($tags as $tag) {
-            SiteMapManager::add($tag->url, $tag->updated_at, '0.3', 'weekly');
-        }
+        SiteMapManager::addSitemap(SiteMapManager::route('blog-categories'), $categoryLastUpdated);
+
+        $tagLastUpdated = $this->tagRepository
+            ->getModel()
+            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->latest('updated_at')
+            ->value('updated_at');
+
+        SiteMapManager::addSitemap(SiteMapManager::route('blog-tags'), $tagLastUpdated);
     }
 }

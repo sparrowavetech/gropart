@@ -7,67 +7,75 @@
                 </div>
                 <div class="pd-all-10-20 border-top-title-main">
                     <div class="clearfix">
-                        <div class="table-wrapper p-none mb20 ps-relative z-index-4" v-if="child_products.length">
-                            <table class="table-normal">
+                        <div class="table-wrapper p-none mb20 ps-relative z-index-4" :class="{'loading-skeleton': checking}" v-if="child_products.length">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>{{ __('order.product_name') }}</th>
+                                        <th>{{ __('order.price') }}</th>
+                                        <th width="90">{{ __('order.quantity') }}</th>
+                                        <th>{{ __('order.total') }}</th>
+                                        <th>{{ __('order.action') }}</th>
+                                    </tr>
+                                </thead>
                                 <tbody>
-                                <tr v-for="variant in child_products">
-                                    <td class="width-60-px min-width-60-px">
-                                        <div class="wrap-img vertical-align-m-i">
-                                            <img class="thumb-image" :src="variant.image_url"
-                                                 :alt="variant.product_name">
-                                        </div>
-                                    </td>
-                                    <td class="pl5 p-r5 min-width-200-px">
-                                        <a class="hover-underline pre-line" :href="variant.product_link"
-                                           target="_blank">{{ variant.product_name }}</a>
-                                        <p class="type-subdued"
-                                           v-if="variant.variation_items && variant.variation_items.length">
-                                            <span v-for="(productItem, index) in variant.variation_items">
-                                                {{ productItem.attribute_title }}
-                                                <span v-if="index !== variant.variation_items.length - 1">/</span>
-                                            </span>
-                                        </p>
-                                    </td>
-                                    <td class="pl5 p-r5 width-100-px min-width-100-px text-center">
-                                        <div class="dropup dropdown-priceOrderNew">
-                                            <div class="inline_block dropdown">
-                                                <a class="wordwrap hide-print">{{ variant.price }} {{ currency }}</a>
+                                    <tr v-for="(variant, vKey) in child_products" v-bind:key="variant.id + '-' + vKey">
+                                        <td>
+                                            <div class="wrap-img vertical-align-m-i">
+                                                <img class="thumb-image" :src="variant.image_url" :alt="variant.name" width="50">
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td class="pl5 p-r5 width-20-px min-width-20-px text-center"> x</td>
-                                    <td class="pl5 p-r5 width-100-px min-width-100-px">
-                                        <input class="next-input p-none-r" v-model="variant.select_qty" type="number"
-                                               min="1" @change="handleChangeQuantity()">
-                                    </td>
-                                    <td class="pl5 p-r5 width-100-px min-width-100-px text-center">{{ variant.price }}
-                                        {{ currency }}
-                                    </td>
-                                    <td class="pl5 p-r5 text-end width-20-px min-width-20-px">
-                                        <a href="#" @click="handleRemoveVariant($event, variant)">
-                                            <svg class="svg-next-icon svg-next-icon-size-12">
-                                                <use xmlns:xlink="http://www.w3.org/1999/xlink"
-                                                     xlink:href="#next-remove"></use>
-                                            </svg>
-                                        </a>
-                                    </td>
-                                </tr>
+                                        </td>
+                                        <td>
+                                            <a class="hover-underline pre-line" :href="variant.product_link" target="_blank">{{ variant.name }}</a>
+                                            <p class="type-subdued" v-if="variant.variation_attributes">
+                                                <span class="small">{{ variant.variation_attributes }}</span>
+                                            </p>
+                                            <ul v-if="variant.option_values && Object.keys(variant.option_values).length" class="small">
+                                                <li>
+                                                    <span>{{ __('order.price') }}:</span>
+                                                    <span>{{ variant.original_price_label }}</span>    
+                                                </li>
+                                                <li v-for="option in variant.option_values" v-bind:key="option.id">
+                                                    <span>{{ option.title }}:</span>
+                                                    <span v-for="value in option.values" v-bind:key="value.id">
+                                                        {{ value.value }} <strong>+{{ value.price_label }}</strong>
+                                                    </span>
+                                                </li>
+                                            </ul>
+                                        </td>
+                                        <td>
+                                            <span>{{ variant.price_label }}</span>
+                                        </td>
+                                        <td>
+                                            <input class="form-control" :value="variant.select_qty" type="number" min="1" @input="handleChangeQuantity($event, variant, vKey)">
+                                        </td>
+                                        <td class="text-center">
+                                            {{ variant.total_price_label }}
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="#" @click="handleRemoveVariant($event, variant, vKey)">
+                                                <svg class="svg-next-icon svg-next-icon-size-12">
+                                                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#next-remove"></use>
+                                                </svg>
+                                            </a>
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
                         <div class="box-search-advance product">
                             <div>
                                 <input type="text" class="next-input textbox-advancesearch product"
-                                       :placeholder="__('order.search_or_create_new_product')"
-                                       @click="loadListProductsAndVariations()"
-                                       @keyup="handleSearchProduct($event.target.value)">
+                                    :placeholder="__('order.search_or_create_new_product')"
+                                    @click="loadListProductsAndVariations()"
+                                    @keyup="handleSearchProduct($event.target.value)">
                             </div>
                             <div class="panel panel-default"
                                  :class="{ active: list_products, hidden : hidden_product_search_panel }">
                                 <div class="panel-body">
                                     <div class="box-search-advance-head" v-b-modal.add-product-item>
-                                        <img width="30"
-                                             src="/vendor/core/plugins/ecommerce/images/next-create-custom-line-item.svg" alt="icon">
+                                        <img width="30" src="/vendor/core/plugins/ecommerce/images/next-create-custom-line-item.svg" alt="icon">
                                         <span class="ml10">{{ __('order.create_a_new_product') }}</span>
                                     </div>
                                     <div class="list-search-data">
@@ -76,36 +84,23 @@
                                         </div>
                                         <ul class="clearfix" v-show="!loading">
                                             <li v-for="product_item in list_products.data"
-                                                :class="{ 'item-selectable' : !product_item.variations.length, 'item-not-selectable' : product_item.variations.length }"
-                                                v-on="!product_item.variations.length ? { click : () => selectProductVariant(product_item) } : {}">
+                                                :class="{
+                                                    'item-selectable' : !product_item.variations.length,
+                                                    'item-not-selectable' : product_item.variations.length,
+                                                }"
+                                                v-bind:key="product_item.id">
                                                 <div class="wrap-img inline_block vertical-align-t float-start">
-                                                    <img class="thumb-image"
-                                                         :src="product_item.image_url"
-                                                         :title="product_item.name" :alt="product_item.name">
+                                                    <img class="thumb-image" :src="product_item.image_url" :alt="product_item.name">
                                                 </div>
-                                                <label class="inline_block ml10 mt10 ws-nm"
-                                                       style="width:calc(100% - 50px);">{{
-                                                    product_item.name }}
-                                                    <span v-if="!product_item.variations.length">
-                                                        <span v-if="product_item.is_out_of_stock" class="text-danger"><small>&nbsp;({{ __('order.out_of_stock') }})</small></span>
-                                                        <span v-if="!product_item.is_out_of_stock && product_item.quantity > 0"><small>&nbsp;({{ product_item.quantity }} {{ __('order.products_available') }})</small></span>
-                                                    </span>
-                                                </label>
+                                                <div class="inline_block ml10 mt10 ws-nm" style="width: calc(100% - 50px);">
+                                                    <ProductAction :product="product_item" @select-product="selectProductVariant"></ProductAction>
+                                                </div>
                                                 <div v-if="product_item.variations.length">
-                                                    <div class="clear"></div>
                                                     <ul>
-                                                        <li class="clearfix product-variant"
+                                                        <li class="product-variant"
                                                             v-for="variation in product_item.variations"
-                                                            @click="selectProductVariant(product_item, variation)"
-                                                            v-if="variation.variation_items.length">
-                                                            <a class="color_green float-start">
-                                                                <span v-for="(productItem, index) in variation.variation_items">
-                                                                    {{ productItem.attribute_title }}
-                                                                    <span v-if="index !== variation.variation_items.length - 1">/</span>
-                                                                </span>
-                                                            </a>
-                                                            <span v-if="variation.is_out_of_stock" class="text-danger"><small>&nbsp;({{ __('order.out_of_stock') }})</small></span>
-                                                            <span v-if="!variation.is_out_of_stock && variation.quantity > 0"><small>&nbsp;({{ variation.quantity }} {{ __('order.products_available') }})</small></span>
+                                                            v-bind:key="variation.id">
+                                                            <ProductAction :product="variation" @select-product="selectProductVariant"></ProductAction>
                                                         </li>
                                                     </ul>
                                                 </div>
@@ -118,25 +113,23 @@
                                 </div>
 
                                 <div class="panel-footer"
-                                     v-if="list_products.next_page_url || list_products.prev_page_url">
+                                     v-if="(list_products.links && list_products.links.next) || (list_products.links && list_products.links.prev)">
                                     <div class="btn-group float-end">
                                         <button type="button"
-                                                @click="loadListProductsAndVariations((list_products.prev_page_url ? list_products.current_page - 1 : list_products.current_page), true)"
-                                                :class="{ 'btn btn-secondary': list_products.current_page !== 1, 'btn btn-secondary disable': list_products.current_page === 1}"
-                                                :disabled="list_products.current_page === 1">
+                                            @click="loadListProductsAndVariations((list_products.links.prev ? list_products.meta.current_page - 1 : list_products.meta.current_page), true)"
+                                            :class="{ 'btn btn-secondary': list_products.meta.current_page !== 1, 'btn btn-secondary disable': list_products.meta.current_page === 1}"
+                                            :disabled="list_products.meta.current_page === 1">
                                             <svg role="img"
-                                                 class="svg-next-icon svg-next-icon-size-16 svg-next-icon-rotate-180">
-                                                <use xmlns:xlink="http://www.w3.org/1999/xlink"
-                                                     xlink:href="#next-chevron"></use>
+                                                class="svg-next-icon svg-next-icon-size-16 svg-next-icon-rotate-180">
+                                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#next-chevron"></use>
                                             </svg>
                                         </button>
                                         <button type="button"
-                                                @click="loadListProductsAndVariations((list_products.next_page_url ? list_products.current_page + 1 : list_products.current_page), true)"
-                                                :class="{ 'btn btn-secondary': list_products.next_page_url, 'btn btn-secondary disable': !list_products.next_page_url }"
-                                                :disabled="!list_products.next_page_url">
+                                            @click="loadListProductsAndVariations((list_products.links.next ? list_products.meta.current_page + 1 : list_products.meta.current_page), true)"
+                                            :class="{ 'btn btn-secondary': list_products.links.next, 'btn btn-secondary disable': !list_products.links.next }"
+                                            :disabled="!list_products.links.next">
                                             <svg role="img" class="svg-next-icon svg-next-icon-size-16">
-                                                <use xmlns:xlink="http://www.w3.org/1999/xlink"
-                                                     xlink:href="#next-chevron"></use>
+                                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#next-chevron"></use>
                                             </svg>
                                         </button>
                                     </div>
@@ -153,45 +146,101 @@
                             <div class="form-group mb-3">
                                 <label class="text-title-field" for="txt-note">{{ __('order.note') }}</label>
                                 <textarea class="ui-text-area textarea-auto-height" id="txt-note" rows="2"
-                                          :placeholder="__('order.note_for_order')" v-model="note"></textarea>
+                                    :placeholder="__('order.note_for_order')" v-model="note"></textarea>
                             </div>
                         </div>
                         <div class="col-sm-6">
                             <div class="table-wrap">
                                 <table class="table-normal table-none-border table-color-gray-text text-end">
+                                    <thead>
+                                        <tr>
+                                            <td></td>
+                                            <td width="120"></td>
+                                        </tr>
+                                    </thead>
                                     <tbody>
-                                    <tr>
-                                        <td class="color-subtext">{{ __('order.amount') }}</td>
-                                        <td class="pl10">{{ child_sub_amount | formatPrice }} {{ currency }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <a href="#" v-b-modal.add-discounts class="hover-underline">
-                                                <span v-if="!has_applied_discount"><i class="fa fa-plus-circle"></i> {{ __('order.add_discount') }}</span>
-                                                <span v-if="has_applied_discount">{{ __('order.discount')}}</span>
-                                            </a>
-                                            <p class="mb0 font-size-12px"
-                                               v-if="child_discount_description && has_applied_discount">{{
-                                                child_discount_description }}</p>
-                                        </td>
-                                        <td class="pl10">{{ has_applied_discount ? child_discount_amount : 0 | formatPrice }} {{ currency }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <a href="#" v-b-modal.add-shipping class="hover-underline">
-                                                <span v-if="!child_is_selected_shipping"><i
-                                                        class="fa fa-plus-circle"></i> {{ __('order.add_shipping_fee') }}</span>
-                                                <span v-if="child_is_selected_shipping">{{ __('order.shipping') }}</span>
-                                            </a>
-                                            <p class="mb0 font-size-12px" v-if="child_shipping_method_name">{{
-                                                child_shipping_method_name }}</p>
-                                        </td>
-                                        <td class="pl10">{{ child_shipping_amount | formatPrice }} {{ currency }}</td>
-                                    </tr>
-                                    <tr class="text-no-bold">
-                                        <td>{{ __('order.total_amount') }}</td>
-                                        <td class="pl10">{{ child_total_amount | formatPrice }} {{ currency }}</td>
-                                    </tr>
+                                        <tr>
+                                            <td class="color-subtext">{{ __('order.sub_amount') }}</td>
+                                            <td>
+                                                <div>
+                                                    <span v-if="checking" class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                                                    <span class="fw-bold fs-6">{{ child_sub_amount_label }}</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="color-subtext">{{ __('order.tax_amount') }}</td>
+                                            <td>
+                                                <div>
+                                                    <span v-if="checking" class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                                                    <span class="fw-bold">{{ child_tax_amount_label }}</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="color-subtext">{{ __('order.promotion_discount_amount') }}</td>
+                                            <td>
+                                                <div>
+                                                    <span v-show="checking" class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                                                    <span class="fw-bold" :class="{'text-success': child_promotion_amount}">{{ child_promotion_amount_label }}</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <button type="button" v-b-modal.add-discounts class="btn btn text-primary p-0">
+                                                    <span v-if="!has_applied_discount">
+                                                        <i class="fa fa-plus-circle"></i> {{ __('order.add_discount') }}</span>
+                                                    <span v-else>{{ __('order.discount')}}</span>
+                                                </button>
+                                                <span class="d-block small fw-bold" v-if="has_applied_discount">{{ child_coupon_code || child_discount_description }}</span>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <span v-show="checking" class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                                                    <span :class="{'text-success fw-bold': child_discount_amount}">{{ child_discount_amount_label }}</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <button type="button" v-b-modal.add-shipping class="btn btn text-primary p-0">
+                                                    <span v-if="!child_is_selected_shipping">
+                                                        <i class="fa fa-plus-circle"></i> {{ __('order.add_shipping_fee') }}</span>
+                                                    <span v-else>{{ __('order.shipping') }}</span>
+                                                </button>
+                                                <span class="d-block small fw-bold" v-if="child_shipping_method_name">{{ child_shipping_method_name }}</span>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <span v-show="checking" class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                                                    <span :class="{'fw-bold': child_shipping_amount}">{{ child_shipping_amount_label }}</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr class="text-no-bold">
+                                            <td>{{ __('order.total_amount') }}</td>
+                                            <td>
+                                                <span>
+                                                    <span v-show="checking" class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                                                    <span class="fs-5">{{ child_total_amount_label }}</span>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr class="text-no-bold">
+                                            <td colspan="2">
+                                                <div>{{ __('order.payment_method') }}</div>
+                                                <div class="ui-select-wrapper">
+                                                    <select class="ui-select" v-model="child_payment_method">
+                                                        <option value="cod">{{ __('order.cash_on_delivery_cod') }}</option>
+                                                        <option value="bank_transfer">{{ __('order.bank_transfer') }}</option>
+                                                    </select>
+                                                    <svg class="svg-next-icon svg-next-icon-size-16">
+                                                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#select-chevron"></use>
+                                                    </svg>
+                                                </div>
+                                            </td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -211,11 +260,11 @@
                             </div>
                         </div>
                         <div class="col-12 col-sm-6 col-md-12 col-lg-6 text-end">
-                            <button class="btn btn-primary" v-b-modal.make-paid
-                                    :disabled="!child_product_ids.length">{{ __('order.paid') }}
+                            <button class="btn btn-success" v-b-modal.make-paid
+                                :disabled="!child_product_ids.length || child_payment_method == 'cod'">{{ __('order.paid') }}
                             </button>
                             <button class="btn btn-primary ml15" v-b-modal.make-pending
-                                    :disabled="!child_product_ids.length || child_total_amount === 0">{{ __('order.pay_later') }}
+                                :disabled="!child_product_ids.length || child_total_amount === 0">{{ __('order.pay_later') }}
                             </button>
                         </div>
                     </div>
@@ -235,9 +284,9 @@
                             <div class="box-search-advance customer">
                                 <div>
                                     <input type="text" class="next-input textbox-advancesearch customer"
-                                           @click="loadListCustomersForSearch()"
-                                           @keyup="handleSearchCustomer($event.target.value)"
-                                           :placeholder="__('order.search_or_create_new_customer')">
+                                        @click="loadListCustomersForSearch()"
+                                        @keyup="handleSearchCustomer($event.target.value)"
+                                        :placeholder="__('order.search_or_create_new_customer')">
                                 </div>
                                 <div class="panel panel-default"
                                      :class="{ active: customers, hidden : hidden_customer_search_panel }">
@@ -245,8 +294,7 @@
                                         <div class="box-search-advance-head" v-b-modal.add-customer>
                                             <div class="flexbox-grid-default flexbox-align-items-center">
                                                 <div class="flexbox-auto-40">
-                                                    <img width="30"
-                                                         src="/vendor/core/plugins/ecommerce/images/next-create-customer.svg" alt="icon">
+                                                    <img width="30" src="/vendor/core/plugins/ecommerce/images/next-create-customer.svg" alt="icon">
                                                 </div>
                                                 <div class="flexbox-auto-content-right">
                                                     <span>{{ __('order.create_new_customer') }}</span>
@@ -258,20 +306,19 @@
                                                 <i class="fa fa-spinner fa-spin"></i>
                                             </div>
                                             <ul class="clearfix" v-show="!loading">
-                                                <li class="row" v-for="customer in customers.data"
+                                                <li class="row" v-for="customer in customers.data" v-bind:key="customer.id"
                                                     @click="selectCustomer(customer)">
                                                     <div class="flexbox-grid-default flexbox-align-items-center">
                                                         <div class="flexbox-auto-40">
                                                             <div class="wrap-img inline_block vertical-align-t radius-cycle">
-                                                                <img class="thumb-image radius-cycle"
-                                                                     :src="customer.avatar_url" :alt="customer.name">
+                                                                <img class="thumb-image radius-cycle" :src="customer.avatar_url" :alt="customer.name">
                                                             </div>
                                                         </div>
                                                         <div class="flexbox-auto-content-right">
                                                             <div class="overflow-ellipsis">{{ customer.name }}</div>
                                                             <div class="overflow-ellipsis">
                                                                 <a :href="'mailto:' + customer.email">
-                                                                    <span>{{ customer.email ? customer.email : '-' }}</span>
+                                                                    <span>{{ customer.email || '-' }}</span>
                                                                 </a>
                                                             </div>
                                                         </div>
@@ -288,22 +335,19 @@
                                          v-if="customers.next_page_url || customers.prev_page_url">
                                         <div class="btn-group float-end">
                                             <button type="button"
-                                                    @click="loadListCustomersForSearch((customers.prev_page_url ? customers.current_page - 1 : customers.current_page), true)"
-                                                    :class="{ 'btn btn-secondary': customers.current_page !== 1, 'btn btn-secondary disable': customers.current_page === 1}"
-                                                    :disabled="customers.current_page === 1">
-                                                <svg role="img"
-                                                     class="svg-next-icon svg-next-icon-size-16 svg-next-icon-rotate-180">
-                                                    <use xmlns:xlink="http://www.w3.org/1999/xlink"
-                                                         xlink:href="#next-chevron"></use>
+                                                @click="loadListCustomersForSearch((customers.prev_page_url ? customers.current_page - 1 : customers.current_page), true)"
+                                                :class="{ 'btn btn-secondary': customers.current_page !== 1, 'btn btn-secondary disable': customers.current_page === 1}"
+                                                :disabled="customers.current_page === 1">
+                                                <svg role="img" class="svg-next-icon svg-next-icon-size-16 svg-next-icon-rotate-180">
+                                                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#next-chevron"></use>
                                                 </svg>
                                             </button>
                                             <button type="button"
-                                                    @click="loadListCustomersForSearch((customers.next_page_url ? customers.current_page + 1 : customers.current_page), true)"
-                                                    :class="{ 'btn btn-secondary': customers.next_page_url, 'btn btn-secondary disable': !customers.next_page_url }"
-                                                    :disabled="!customers.next_page_url">
+                                                @click="loadListCustomersForSearch((customers.next_page_url ? customers.current_page + 1 : customers.current_page), true)"
+                                                :class="{ 'btn btn-secondary': customers.next_page_url, 'btn btn-secondary disable': !customers.next_page_url }"
+                                                :disabled="!customers.next_page_url">
                                                 <svg role="img" class="svg-next-icon svg-next-icon-size-16">
-                                                    <use xmlns:xlink="http://www.w3.org/1999/xlink"
-                                                         xlink:href="#next-chevron"></use>
+                                                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#next-chevron"></use>
                                                 </svg>
                                             </button>
                                         </div>
@@ -334,7 +378,7 @@
                         <ul class="ws-nm">
                             <li>
                                 <img v-if="child_customer.avatar_url" class="width-60-px radius-cycle" :alt="child_customer.name"
-                                     :src="child_customer.avatar_url">
+                                    :src="child_customer.avatar_url">
                                 <div class="pull-right color_darkblue mt20">
                                     <i class="fas fa-inbox"></i>
                                     <span>
@@ -350,16 +394,14 @@
                                 <div class="flexbox-grid-default">
                                     <div class="flexbox-auto-content-left overflow-ellipsis">
                                         <a :href="'mailto:' + child_customer.email">
-                                            <span>{{ child_customer.email ? child_customer.email : '-' }}</span>
+                                            <span>{{ child_customer.email || '-' }}</span>
                                         </a>
                                     </div>
                                     <div class="flexbox-auto-left">
                                         <a v-b-modal.edit-email>
-                                            <span data-placement="top" data-bs-toggle="tooltip"
-                                                  data-bs-original-title="Edit email">
+                                            <span data-placement="top" data-bs-toggle="tooltip" data-bs-original-title="Edit email">
                                                 <svg class="svg-next-icon svg-next-icon-size-12">
-                                                    <use xmlns:xlink="http://www.w3.org/1999/xlink"
-                                                         xlink:href="#next-edit"></use>
+                                                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#next-edit"></use>
                                                 </svg>
                                             </span>
                                         </a>
@@ -377,13 +419,11 @@
                                     </div>
                                     <div class="flexbox-auto-left">
                                         <a v-b-modal.edit-address>
-                                                <span data-placement="top" title="Update address"
-                                                      data-bs-toggle="tooltip">
-                                                    <svg class="svg-next-icon svg-next-icon-size-12">
-                                                        <use xmlns:xlink="http://www.w3.org/1999/xlink"
-                                                             xlink:href="#next-edit"></use>
-                                                    </svg>
-                                                </span>
+                                            <span data-placement="top" title="Update address" data-bs-toggle="tooltip">
+                                                <svg class="svg-next-icon svg-next-icon-size-12">
+                                                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#next-edit"></use>
+                                                </svg>
+                                            </span>
                                         </a>
                                     </div>
                                 </div>
@@ -393,34 +433,31 @@
                                     <div class="ui-select-wrapper">
                                         <select class="ui-select" @change="selectCustomerAddress($event)">
                                             <option v-for="address_item in child_customer_addresses"
-                                                    :value="address_item.id"
-                                                    :selected="parseInt(address_item.id) === parseInt(customer_address.email)">
-                                                {{ address_item.address + ', ' + address_item.city_name + ', ' +
-                                                address_item.state_name + ', ' +
-                                                address_item.country_name + (zip_code_enabled ? ', ' +
-                                            address_item.zip_code : '') }}
+                                                :value="address_item.id"
+                                                :selected="parseInt(address_item.id) === parseInt(customer_address.email)"
+                                                v-bind:key="address_item.id">
+                                                {{ address_item.full_address }}
                                             </option>
                                         </select>
                                         <svg class="svg-next-icon svg-next-icon-size-16">
-                                            <use xmlns:xlink="http://www.w3.org/1999/xlink"
-                                                 xlink:href="#select-chevron"></use>
+                                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#select-chevron"></use>
                                         </svg>
                                     </div>
                                     <br>
                                 </div>
                                 <div>{{ child_customer_address.name }}</div>
                                 <div>{{ child_customer_address.phone }}</div>
-                                <div><a :href="'mailto:' + child_customer_address.email">{{ child_customer_address.email
-                                    }}</a>
+                                <div>
+                                    <a :href="'mailto:' + child_customer_address.email">{{ child_customer_address.email }}</a>
                                 </div>
                                 <div>{{ child_customer_address.address }}</div>
                                 <div>{{ child_customer_address.city_name }}</div>
                                 <div>{{ child_customer_address.state_name }}</div>
                                 <div>{{ child_customer_address.country_name }}</div>
                                 <div v-if="zip_code_enabled">{{ child_customer_address.zip_code }}</div>
-                                <div>
+                                <div v-if="child_customer_address.full_address">
                                     <a target="_blank" class="hover-underline"
-                                       :href="'https://maps.google.com/?q=' + child_customer_address.address + ', ' + child_customer_address.city_name + ', ' + child_customer_address.state_name + ', ' + child_customer_address.country_name + (zip_code_enabled ? ', ' + child_customer_address.zip_code : '')">{{ __('order.see_on_maps') }}</a>
+                                       :href="'https://maps.google.com/?q=' + child_customer_address.full_address">{{ __('order.see_on_maps') }}</a>
                                 </div>
                             </li>
                         </ul>
@@ -430,128 +467,10 @@
             </div>
         </div>
 
-        <b-modal id="add-product-item" title="Add product" ok-title="Save" cancel-title="Cancel"
-                 @shown="resetProductData()"
-                 @ok="createProduct($event)">
-            <div class="form-group mb15">
-                <label class="text-title-field">{{ __('order.name') }}</label>
-                <input type="text" class="next-input" v-model="product.name">
-            </div>
-            <div class="form-group mb15 row">
-                <div class="col-6">
-                    <label class="text-title-field">{{ __('order.price') }}</label>
-                    <input type="text" class="next-input" v-model="product.price">
-                </div>
-                <div class="col-6">
-                    <label class="text-title-field">{{ __('order.sku_optional') }}</label>
-                    <input type="text" class="next-input" v-model="product.sku">
-                </div>
-            </div>
-            <div class="form-group mb-3">
-                <label class="next-label">
-                    <input type="checkbox" class="hrv-checkbox" v-model="product.with_storehouse_management" value="1">
-                    {{ __('order.with_storehouse_management') }}
-                    </label>
-            </div>
-            <div class="row" v-show="product.with_storehouse_management">
-                <div class="col-8">
-                    <div class="form-group mb-3">
-                        <label class="text-title-field">{{ __('order.quantity') }}</label>
-                        <input type="number" min="1" class="next-input"
-                               v-model="product.quantity">
-                    </div>
-                    <div class="form-group mb-3">
-                        <label class="next-label">
-                            <input type="checkbox" class="hrv-checkbox"
-                                   v-model="product.allow_checkout_when_out_of_stock"
-                                   value="1">
-                            {{ __('order.allow_customer_checkout_when_this_product_out_of_stock') }}</label>
-                    </div>
-                </div>
-            </div>
-        </b-modal>
-
-        <b-modal id="add-customer" :title="__('order.create_new_customer')" :ok-title="__('order.save')" :cancel-title="__('order.cancel')"
-                 @shown="loadCountries()" @ok="createNewCustomer($event)">
-            <div class="next-form-section">
-                <div class="next-form-grid">
-                    <div class="next-form-grid-cell">
-                        <label class="text-title-field">{{ __('order.name') }}</label>
-                        <input type="text" class="next-input" v-model="child_customer_address.name">
-                    </div>
-                    <div class="next-form-grid-cell">
-                        <label class="text-title-field">{{ __('order.phone') }}</label>
-                        <input type="text" class="next-input" v-model="child_customer_address.phone">
-                    </div>
-                </div>
-                <div class="next-form-grid">
-                    <div class="next-form-grid-cell">
-                        <label class="text-title-field">{{ __('order.address') }}</label>
-                        <input type="text" class="next-input" v-model="child_customer_address.address">
-                    </div>
-                    <div class="next-form-grid-cell">
-                        <label class="text-title-field">{{ __('order.email') }}</label>
-                        <input type="text" class="next-input" v-model="child_customer_address.email">
-                    </div>
-                </div>
-                <div class="next-form-grid">
-                    <div class="next-form-grid-cell">
-                        <label class="text-title-field">{{ __('order.country') }}</label>
-                        <div class="ui-select-wrapper">
-                            <select class="ui-select" v-model="child_customer_address.country" @change="loadStates($event)">
-                                <option v-for="(countryName, countryCode) in countries" :value="countryCode">
-                                    {{ countryName }}
-                                </option>
-                            </select>
-                            <svg class="svg-next-icon svg-next-icon-size-16">
-                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#select-chevron"></use>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-                <div class="next-form-grid">
-                    <div class="next-form-grid-cell">
-                        <label class="text-title-field">{{ __('order.state')}}</label>
-                        <div class="ui-select-wrapper" v-if="use_location_data">
-                            <select class="ui-select customer-address-state" v-model="child_customer_address.state" @change="loadCities($event)">
-                                <option v-for="state in states" :value="state.id">
-                                    {{ state.name }}
-                                </option>
-                            </select>
-                            <svg class="svg-next-icon svg-next-icon-size-16">
-                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#select-chevron"></use>
-                            </svg>
-                        </div>
-                        <input type="text" class="next-input customer-address-state" v-if="!use_location_data"
-                               v-model="child_customer_address.state">
-                    </div>
-                    <div class="next-form-grid-cell">
-                        <label class="text-title-field">{{ __('order.city') }}</label>
-                        <div class="ui-select-wrapper" v-if="use_location_data">
-                            <select class="ui-select customer-address-city" v-model="child_customer_address.city">
-                                <option v-for="city in cities" :value="city.id">
-                                    {{ city.name }}
-                                </option>
-                            </select>
-                            <svg class="svg-next-icon svg-next-icon-size-16">
-                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#select-chevron"></use>
-                            </svg>
-                        </div>
-                        <input type="text" class="next-input customer-address-city" v-if="!use_location_data"
-                               v-model="child_customer_address.city">
-                    </div>
-                </div>
-                <div class="next-form-grid" v-if="zip_code_enabled">
-                    <div class="next-form-grid-cell">
-                        <label class="text-title-field">{{ __('order.zip_code') }}</label>
-                        <input type="text" class="next-input" v-model="child_customer_address.zip_code">
-                    </div>
-                </div>
-            </div>
-        </b-modal>
+        <AddProductModal @create-product="createProduct" :store="store"></AddProductModal>
 
         <b-modal id="add-discounts" title="Add discount" :ok-title="__('order.add_discount')" :cancel-title="__('order.close')"
-                 @ok="handleAddDiscount($event)">
+            @ok="handleAddDiscount($event)">
             <div class="next-form-section">
                 <div class="next-form-grid">
                     <div class="next-form-grid-cell">
@@ -560,22 +479,21 @@
                             <div class="flexbox-auto-left">
                                 <div class="flexbox-input-group">
                                     <button value="amount" class="item-group btn btn-secondary btn-active"
-                                            :class="{ active : discount_type === 'amount' }"
-                                            @click="changeDiscountType($event)">
-                                        {{ currency ? currency : '$' }}
+                                        :class="{ active : discount_type === 'amount' }"
+                                        @click="changeDiscountType($event)">
+                                        {{ currency || '$' }}
                                     </button>&nbsp;
                                     <button value="percentage"
-                                            class="item-group border-radius-right-none btn btn-secondary btn-active"
-                                            :class="{ active : discount_type === 'percentage' }"
-                                            @click="changeDiscountType($event)">
+                                        class="item-group border-radius-right-none btn btn-secondary btn-active"
+                                        :class="{ active : discount_type === 'percentage' }"
+                                        @click="changeDiscountType($event)">
                                         %
                                     </button>&nbsp;
                                 </div>
                             </div>
                             <div class="flexbox-auto-content">
                                 <div class="next-input--stylized border-radius-left-none">
-                                    <input class="next-input next-input--invisible"
-                                           v-model="discount_custom_value">
+                                    <input class="next-input next-input--invisible" v-model="discount_custom_value">
                                     <span class="next-input-add-on next-input__add-on--after">{{ discount_type_unit }}</span>
                                 </div>
                             </div>
@@ -586,7 +504,7 @@
                     <div class="next-form-grid-cell">
                         <label class="text-title-field">{{ __('order.or_coupon_code') }}</label>
                         <div class="next-input--stylized" :class="{ 'field-has-error' : has_invalid_coupon }">
-                            <input class="next-input next-input--invisible" v-model="coupon_code">
+                            <input class="next-input next-input--invisible coupon-code-input" :value="child_coupon_code">
                         </div>
                     </div>
                 </div>
@@ -594,14 +512,14 @@
                     <div class="next-form-grid-cell">
                         <label class="text-title-field">{{ __('order.description') }}</label>
                         <input :placeholder="__('order.discount_description')" class="next-input"
-                               v-model="child_discount_description">
+                            v-model="child_discount_description">
                     </div>
                 </div>
             </div>
         </b-modal>
 
         <b-modal id="add-shipping" :title="__('order.shipping_fee')" :ok-title="__('order.update')" :cancel-title="__('order.close')"
-                 @shown="loadAvailableShippingMethods()" @ok="selectShippingMethod($event)">
+            @ok="selectShippingMethod($event)">
             <div class="next-form-section">
                 <div class="ui-layout__item mb15 p-none-important" v-if="!child_customer_id">
                     <div class="ui-banner ui-banner--status-info">
@@ -621,174 +539,82 @@
                     <div class="next-form-grid-cell">
                         <label class="next-label">
                             <input type="radio" class=" hrv-radio" value="free-shipping" name="shipping_type"
-                                   v-model="shipping_type">
-                            {{ __('order.free_shipping') }}</label>
+                                v-model="shipping_type">
+                            {{ __('order.free_shipping') }}
+                        </label>
                     </div>
                 </div>
                 <div class="next-form-grid">
                     <div class="next-form-grid-cell">
                         <label class="next-label">
                             <input type="radio" class=" hrv-radio" value="custom" name="shipping_type"
-                                   v-model="shipping_type" checked="checked">
-                            {{ __('order.custom') }}</label>
+                                v-model="shipping_type" checked="checked">
+                            {{ __('order.custom') }}
+                        </label>
                     </div>
                 </div>
                 <div class="next-form-grid">
                     <div class="next-form-grid-cell">
                         <div class="ui-select-wrapper">
                             <select class="ui-select">
-                                <option :value="shipping_method_key"
-                                        v-for="(shipping_method, shipping_method_key) in shipping_methods"
-                                        :selected="shipping_method_key === (shipping_method + ';' + shipping_option + ';' + shipping_amount)">
-                                    {{ shipping_method.name + ' - ' + shipping_method.price }}
+                                <option
+                                    v-for="(shipping, shipping_key) in shipping_methods"
+                                    :value="shipping_key"
+                                    :selected="shipping_key === (child_shipping_method + ';' + child_shipping_option)"
+                                    v-bind:key="shipping_key"
+                                    :data-shipping-method="shipping.method"
+                                    :data-shipping-option="shipping.option">
+                                    {{ shipping.title }}
                                 </option>
                             </select>
                             <svg class="svg-next-icon svg-next-icon-size-16">
                                 <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#select-chevron"></use>
                             </svg>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </b-modal>
-
-        <b-modal id="edit-email" :title="__('order.update_email')" :ok-title="__('order.update')" :cancel-title="__('order.close')"
-                 @ok="updateCustomerEmail($event)">
-            <div class="next-form-section">
-                <div class="next-form-grid">
-                    <div class="next-form-grid-cell">
-                        <label class="text-title-field">{{ __('order.email') }}</label>
-                        <input class="next-input" v-model="customer.email">
-                    </div>
-                </div>
-            </div>
-        </b-modal>
-
-        <b-modal id="edit-address" :title="__('order.update_address')" :ok-title="__('order.save')" :cancel-title="__('order.cancel')"
-                 @shown="loadCountries()" @ok="updateOrderAddress($event)">
-            <div class="next-form-section">
-                <div class="next-form-grid">
-                    <div class="next-form-grid-cell">
-                        <label class="text-title-field">{{ __('order.name') }}</label>
-                        <input type="text" class="next-input customer-address-name"
-                               v-model="child_customer_address.name">
-                    </div>
-                    <div class="next-form-grid-cell">
-                        <label class="text-title-field">{{ __('order.phone') }}</label>
-                        <input type="text" class="next-input customer-address-phone"
-                               v-model="child_customer_address.phone">
-                    </div>
-                </div>
-                <div class="next-form-grid">
-                    <div class="next-form-grid-cell">
-                        <label class="text-title-field">{{ __('order.address') }}</label>
-                        <input type="text" class="next-input customer-address-address"
-                               v-model="child_customer_address.address">
-                    </div>
-                    <div class="next-form-grid-cell">
-                        <label class="text-title-field">{{ __('order.email') }}</label>
-                        <input type="text" class="next-input customer-address-email"
-                               v-model="child_customer_address.email">
-                    </div>
-                </div>
-                <div class="next-form-grid">
-                    <div class="next-form-grid-cell">
-                        <label class="text-title-field">{{ __('order.country') }}</label>
-                        <div class="ui-select-wrapper">
-                            <select class="ui-select customer-address-country" v-model="child_customer_address.country" @change="loadStates($event)">
-                                <option v-for="(countryName, countryCode) in countries" :value="countryCode">
-                                    {{ countryName }}
-                                </option>
-                            </select>
-                            <svg class="svg-next-icon svg-next-icon-size-16">
-                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#select-chevron"></use>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-                <div class="next-form-grid">
-                    <div class="next-form-grid-cell">
-                        <label class="text-title-field">{{ __('order.state')}}</label>
-                        <div class="ui-select-wrapper" v-if="use_location_data">
-                            <select class="ui-select customer-address-state" v-model="child_customer_address.state" @change="loadCities($event)">
-                                <option v-for="state in states" :value="state.id">
-                                    {{ state.name }}
-                                </option>
-                            </select>
-                            <svg class="svg-next-icon svg-next-icon-size-16">
-                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#select-chevron"></use>
-                            </svg>
-                        </div>
-                        <input type="text" class="next-input customer-address-state" v-if="!use_location_data"
-                               v-model="child_customer_address.state">
-                    </div>
-                    <div class="next-form-grid-cell">
-                        <label class="text-title-field">{{ __('order.city') }}</label>
-                        <div class="ui-select-wrapper" v-if="use_location_data">
-                            <select class="ui-select customer-address-city" v-model="child_customer_address.city">
-                                <option v-for="city in cities" :value="city.id">
-                                    {{ city.name }}
-                                </option>
-                            </select>
-                            <svg class="svg-next-icon svg-next-icon-size-16">
-                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#select-chevron"></use>
-                            </svg>
-                        </div>
-                        <input type="text" class="next-input customer-address-city" v-if="!use_location_data"
-                               v-model="child_customer_address.city">
-                    </div>
-                </div>
-                <div class="next-form-grid" v-if="zip_code_enabled">
-                    <div class="next-form-grid-cell">
-                        <label class="text-title-field">{{ __('order.zip_code')}}</label>
-                        <input type="text" class="next-input customer-address-zip-code"
-                               v-model="child_customer_address.zip_code">
                     </div>
                 </div>
             </div>
         </b-modal>
 
         <b-modal id="make-paid" :title="__('order.confirm_payment_is_paid_for_this_order')" :ok-title="__('order.create_order')" :cancel-title="__('order.close')"
-                 @ok="createOrder($event, true)">
+            @ok="createOrder($event, true)">
             <div class="note note-warning">
                 {{ __('order.payment_status_of_the_order_is_paid_once_the_order_has_been_created_you_cannot_change_the_payment_method_or_status') }}.
             </div>
-            <p>{{ __('order.select_payment_method') }}</p>
-            <div class="ui-select-wrapper mb15 next-input--is-focused">
-                <select class="ui-select" v-model="child_payment_method">
-                    <option value="cod">{{ __('order.cash_on_delivery_cod') }}</option>
-                    <option value="bank_transfer">{{ __('order.bank_transfer') }}</option>
-                </select>
-                <svg class="svg-next-icon svg-next-icon-size-16">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#select-chevron"></use>
-                </svg>
-            </div>
             <br/>
-            <p>{{ __('order.paid_amount') }} : <span>{{ child_total_amount | formatPrice }} {{ currency }}</span></p>
+            <p>
+                <span>{{ __('order.paid_amount') }}:</span>
+                <span class="fs-5">{{ child_total_amount_label }}</span>
+            </p>
         </b-modal>
 
-        <b-modal id="make-pending" :title="__('order.confirm_that_payment_for_this_order_will_be_paid_later')" :ok-title="__('order.create_order')" :cancel-title="__('order.close')"
-                 @ok="createOrder($event)">
+        <b-modal id="make-pending" :title="__('order.confirm_that_payment_for_this_order_will_be_paid_later')" :ok-title="__('order.create_order')"
+            :cancel-title="__('order.close')" @ok="createOrder($event)">
             <div class="note note-warning">
                 {{ __('order.payment_status_of_the_order_is_pending_once_the_order_has_been_created_you_cannot_change_the_payment_method_or_status') }}.
             </div>
-            <div class="ui-select-wrapper mb15 next-input--is-focused">
-                <select class="ui-select" v-model="child_payment_method">
-                    <option value="cod">{{ __('order.cash_on_delivery_cod') }}</option>
-                    <option value="bank_transfer">{{ __('order.bank_transfer') }}</option>
-                </select>
-                <svg class="svg-next-icon svg-next-icon-size-16">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#select-chevron"></use>
-                </svg>
-            </div>
             <br/>
-            <p>{{ __('order.pending_amount') }} : <span>{{ child_total_amount | formatPrice }} {{ currency }}</span></p>
+            <p>
+                <span>{{ __('order.pending_amount') }}:</span>
+                <span class="fs-5">{{ child_total_amount_label }}</span>
+            </p>
         </b-modal>
 
+        <OrderCustomerAddress
+            :child_customer_address="child_customer_address"
+            :zip_code_enabled="zip_code_enabled"
+            :use_location_data="use_location_data"
+            @update-order-address="updateOrderAddress"
+            @update-customer-email="updateCustomerEmail"
+            @create-new-customer="createNewCustomer"></OrderCustomerAddress>
     </div>
 </template>
 
 <script>
+    import ProductAction from './partials/ProductActionComponent.vue';
+    import OrderCustomerAddress from './partials/OrderCustomerAddressComponent.vue';
+    import AddProductModal from './partials/AddProductModalComponent.vue';
+
     export default {
         props: {
             products: {
@@ -805,11 +631,9 @@
             },
             customer: {
                 type: Object,
-                default: () => {
-                    return {
-                        email: 'guest@example.com',
-                    };
-                },
+                default: () => ({
+                    email: 'guest@example.com',
+                }),
             },
             customer_addresses: {
                 type: Array,
@@ -822,7 +646,7 @@
                     email: null,
                     address: null,
                     phone: null,
-                    country: 'AF',
+                    country: null,
                     state: null,
                     city: null,
                     zip_code: null,
@@ -836,13 +660,45 @@
                 type: Number,
                 default: () => 0,
             },
+            sub_amount_label: {
+                type: String,
+                default: () => '',
+            },
+            tax_amount: {
+                type: Number,
+                default: () => 0,
+            },
+            tax_amount_label: {
+                type: String,
+                default: () => '',
+            },
             total_amount: {
                 type: Number,
                 default: () => 0,
             },
+            total_amount_label: {
+                type: String,
+                default: () => '',
+            },
+            coupon_code: {
+                type: String,
+                default: () => '',
+            },
+            promotion_amount: {
+                type: Number,
+                default: () => 0,
+            },
+            promotion_amount_label: {
+                type: String,
+                default: () => '',
+            },
             discount_amount: {
                 type: Number,
                 default: () => 0,
+            },
+            discount_amount_label: {
+                type: String,
+                default: () => '',
             },
             discount_description: {
                 type: String,
@@ -851,6 +707,10 @@
             shipping_amount: {
                 type: Number,
                 default: () => 0,
+            },
+            shipping_amount_label: {
+                type: String,
+                default: () => '',
             },
             shipping_method: {
                 type: String,
@@ -886,6 +746,10 @@
                 type: Number,
                 default: () => 0,
             },
+            is_tax_enabled: {
+                type: Number,
+                default: () => true,
+            },
         },
         data: function () {
             return {
@@ -894,37 +758,28 @@
                 },
                 hidden_product_search_panel: true,
                 loading: false,
+                checking: false,
                 note: null,
                 customers: {
                     data: [],
                 },
                 hidden_customer_search_panel: true,
                 customer_keyword: null,
-                countries: [],
-                states: [],
-                cities: [],
                 shipping_type: 'custom',
-                product: {
-                    name: null,
-                    price: 0,
-                    sku: null,
-                    with_storehouse_management: false,
-                    allow_checkout_when_out_of_stock: false,
-                    quantity: 0,
-                },
                 shipping_methods: {
                     'default': {
                         name: 'Default',
                         price: 0,
+                        title: 'Default - 0',
                     }
                 },
                 discount_type_unit: this.currency,
                 discount_type: 'amount',
-                coupon_code: null,
                 child_discount_description: this.discount_description,
                 has_invalid_coupon: false,
                 has_applied_discount: this.discount_amount > 0,
                 discount_custom_value: 0,
+                child_coupon_code: this.coupon_code,
                 child_customer: this.customer,
                 child_customer_id: this.customer_id,
                 child_customer_order_numbers: this.customer_order_numbers,
@@ -933,15 +788,36 @@
                 child_products: this.products,
                 child_product_ids: this.product_ids,
                 child_sub_amount: this.sub_amount,
+                child_sub_amount_label: this.sub_amount_label,
+                child_tax_amount: this.tax_amount,
+                child_tax_amount_label: this.tax_amount_label,
                 child_total_amount: this.total_amount,
+                child_total_amount_label: this.total_amount_label,
+                child_promotion_amount: this.promotion_amount,
+                child_promotion_amount_label: this.promotion_amount_label,
                 child_discount_amount: this.discount_amount,
+                child_discount_amount_label: this.discount_amount_label,
                 child_shipping_amount: this.shipping_amount,
+                child_shipping_amount_label: this.shipping_amount_label,
                 child_shipping_method: this.shipping_method,
                 child_shipping_option: this.shipping_option,
                 child_shipping_method_name: this.shipping_method_name,
                 child_is_selected_shipping: this.is_selected_shipping,
                 child_payment_method: this.payment_method,
+                productSearchRequest: null,
+                timeoutProductRequest: null,
+                customerSearchRequest: null,
+                checkDataOrderRequest: null,
+                store: {
+                    id: 0,
+                    name: null,
+                },
             }
+        },
+        components: {
+            ProductAction,
+            OrderCustomerAddress,
+            AddProductModal,
         },
         mounted: function () {
             let context = this;
@@ -961,17 +837,26 @@
                 $('.textbox-advancesearch.customer').closest('.box-search-advance.customer').find('.panel').addClass('active');
                 if (_.isEmpty(context.customers.data) || force) {
                     context.loading = true;
+                    if (context.customerSearchRequest) {
+                        context.customerSearchRequest.abort();
+                    }
+
+                    context.customerSearchRequest = new AbortController();
+
                     axios
                         .get(route('customers.get-list-customers-for-search', {
                             keyword: context.customer_keyword,
                             page: page
-                        }))
+                        }), {signal: context.customerSearchRequest.signal})
                         .then(res => {
                             context.customers = res.data.data;
                             context.loading = false;
                         })
-                        .catch(res => {
-                            Botble.handleError(res.response.data);
+                        .catch(error => {
+                            if (!axios.isCancel(error)) {
+                                context.loading = false;
+                                Botble.handleError(error.response.data);
+                            }
                         });
                 }
             },
@@ -984,63 +869,92 @@
                     }, 500);
                 }
             },
-            loadListProductsAndVariations: function (page = 1, force = false) {
+            loadListProductsAndVariations: function (page = 1, force = false, show_panel = true) {
                 let context = this;
-                context.hidden_product_search_panel = false;
-                $('.textbox-advancesearch.product').closest('.box-search-advance.product').find('.panel').addClass('active');
+                if (show_panel) {
+                    context.hidden_product_search_panel = false;
+                    $('.textbox-advancesearch.product').closest('.box-search-advance.product').find('.panel').addClass('active');
+                } else {
+                    context.hidden_product_search_panel = true;
+                }
+
                 if (_.isEmpty(context.list_products.data) || force) {
                     context.loading = true;
+                    if (context.productSearchRequest) {
+                        context.productSearchRequest.abort();
+                    }
+
+                    context.productSearchRequest = new AbortController();
+
                     axios
                         .get(route('products.get-all-products-and-variations', {
                             keyword: context.product_keyword,
-                            page: page
-                        }))
+                            page: page,
+                            product_ids: context.child_product_ids,
+                        }), {signal: context.productSearchRequest.signal})
                         .then(res => {
                             context.list_products = res.data.data;
                             context.loading = false;
                         })
-                        .catch(res => {
-                            Botble.handleError(res.response.data);
+                        .catch(error => {
+                            if (! axios.isCancel(error)) {
+                                Botble.handleError(error.response.data);
+                                context.loading = false;
+                            }
                         });
                 }
             },
             handleSearchProduct: function (value) {
                 if (value !== this.product_keyword) {
                     let context = this;
-                    this.product_keyword = value;
-                    setTimeout(() => {
+                    context.product_keyword = value;
+                    if (context.timeoutProductRequest) {
+                        clearTimeout(context.timeoutProductRequest);
+                    }
+
+                    context.timeoutProductRequest = setTimeout(() => {
                         context.loadListProductsAndVariations(1, true);
-                    }, 500);
+                    }, 1000);
                 }
             },
-            selectProductVariant: function (product, variation = null) {
-                if ((!_.isEmpty(variation) && variation.is_out_of_stock) || (_.isEmpty(variation) && product.is_out_of_stock)) {
-                    Botble.showError(__('order.cant_select_out_of_stock_product'));
+            selectProductVariant: function (product, refOptions) {
+                let context = this;
+                if (_.isEmpty(product) && product.is_out_of_stock) {
+                    Botble.showError(context.__('order.cant_select_out_of_stock_product'));
                     return false;
                 }
 
-                if (!_.isEmpty(variation)) {
-                    if (!_.includes(this.child_product_ids, variation.product_id)) {
-                        let productItem = variation;
-                        productItem.product_name = product.name;
-                        productItem.image_url = product.image_url;
-                        productItem.price = variation.price;
-                        productItem.product_link = product.product_link;
-                        productItem.select_qty = 1;
-                        this.child_products.push(productItem);
-                        this.child_product_ids.push(variation.product_id);
+                const requiredOptions = product.product_options.filter((item) => item.required);
+                let productOptions = refOptions.values;
+
+                if (requiredOptions.length) {
+                    let errorMessage = [];
+                    requiredOptions.forEach(item => {
+                        if (! productOptions[item.id]) {
+                            errorMessage.push(context.__('order.please_choose_product_option') + ': ' + item.name);
+                        }
+                    });
+
+                    if (errorMessage && errorMessage.length) {
+                        errorMessage.forEach(message => {
+                            Botble.showError(message);
+                        });
+                        return;
                     }
-                } else if (!_.includes(this.child_product_ids, product.id)) {
-                    let productItem = product;
-                    productItem.product_name = product.name;
-                    productItem.image_url = product.image_url;
-                    productItem.price = product.price;
-                    productItem.product_link = product.product_link;
-                    productItem.select_qty = 1;
-                    this.child_products.push(productItem);
-                    this.child_product_ids.push(product.id);
                 }
-                this.hidden_product_search_panel = true;
+
+                let options = [];
+
+                product.product_options.map((item) => {
+                    options[item.id] = {
+                        option_type: item.option_type,
+                        values: productOptions[item.id],
+                    };
+                });
+                context.child_products.push({id: product.id, quantity: 1, options});
+                context.checkDataBeforeCreateOrder();
+
+                context.hidden_product_search_panel = true;
             },
             selectCustomer: function (customer) {
                 this.child_customer = customer;
@@ -1049,6 +963,102 @@
                 this.loadCustomerAddress(this.child_customer_id);
 
                 this.getOrderNumbers();
+            },
+            checkDataBeforeCreateOrder: function(data = {}, onSuccess = null, onError = null) {
+                let context = this;
+                let formData = {...context.getOrderFormData(), ...data};
+
+                context.checking = true;
+                if (context.checkDataOrderRequest) {
+                    context.checkDataOrderRequest.abort();
+                }
+
+                context.checkDataOrderRequest = new AbortController();
+
+                axios
+                    .post(route('orders.check-data-before-create-order'), formData, {signal: context.checkDataOrderRequest.signal})
+                    .then(res => {
+                        let data = res.data.data;
+
+                        if (data.update_context_data) {
+                            context.child_products = data.products;
+                            context.child_product_ids = _.map(data.products, 'id');
+
+                            context.child_sub_amount = data.sub_amount;
+                            context.child_sub_amount_label = data.sub_amount_label;
+
+                            context.child_tax_amount = data.tax_amount;
+                            context.child_tax_amount_label = data.tax_amount_label;
+
+                            context.child_promotion_amount = data.promotion_amount;
+                            context.child_promotion_amount_label = data.promotion_amount_label;
+
+                            context.child_discount_amount = data.discount_amount;
+                            context.child_discount_amount_label = data.discount_amount_label;
+
+                            context.child_shipping_amount = data.shipping_amount;
+                            context.child_shipping_amount_label = data.shipping_amount_label;
+
+                            context.child_total_amount = data.total_amount;
+                            context.child_total_amount_label = data.total_amount_label;
+
+                            context.shipping_methods = data.shipping_methods;
+
+                            context.child_shipping_method_name = data.shipping_method_name;
+                            context.child_shipping_method = data.shipping_method;
+                            context.child_shipping_option = data.shipping_option;
+
+                            context.store = data.store && data.store.id ? data.store : {id: 0, name: null};
+                        }
+
+                        if (res.data.error) {
+                            Botble.showError(res.data.message);
+                            if (onError) {
+                                onError();
+                            }
+                        } else {
+                            if (onSuccess) {
+                                onSuccess();
+                            }
+                        }
+                        context.checking = false;
+                    })
+                    .catch(error => {
+                        if (! axios.isCancel(error)) {
+                            context.checking = false;
+                            Botble.handleError(error.response.data);
+                        }
+                    });
+            },
+            getOrderFormData: function () {
+                let products = [];
+                _.each(this.child_products, function (item) {
+                    products.push({
+                        id: item.id,
+                        quantity: item.select_qty,
+                        options: item.options
+                    });
+                });
+
+                return {
+                    products,
+                    payment_method: this.child_payment_method,
+                    shipping_method: this.child_shipping_method,
+                    shipping_option: this.child_shipping_option,
+                    shipping_amount: this.child_shipping_amount,
+                    discount_amount: this.child_discount_amount,
+                    discount_description: this.child_discount_description,
+                    coupon_code: this.child_coupon_code,
+                    customer_id: this.child_customer_id,
+                    note: this.note,
+                    sub_amount: this.child_sub_amount,
+                    tax_amount: this.child_tax_amount,
+                    amount: this.child_total_amount,
+                    customer_address: this.child_customer_address,
+                    discount_type: this.discount_type,
+                    discount_custom_value: this.discount_custom_value,
+                    shipping_type: this.shipping_type,
+                };
             },
             removeCustomer: function () {
                 this.child_customer = this.customer;
@@ -1059,110 +1069,37 @@
                     email: null,
                     address: null,
                     phone: null,
-                    country: 'AF',
+                    country: null,
                     state: null,
                     city: null,
                     zip_code: null,
+                    full_address: null,
                 };
                 this.child_customer_order_numbers = 0;
+
+                this.checkDataBeforeCreateOrder();
             },
-            handleRemoveVariant: function ($event, variant) {
+            handleRemoveVariant: function ($event, variant, vKey) {
                 $event.preventDefault();
-                if (variant.product_id) {
-                    this.child_product_ids = _.reject(this.child_product_ids, item => {
-                        return item === variant.product_id;
-                    });
+                this.child_product_ids = this.child_product_ids.filter((item, k) => k != vKey);
+                this.child_products = this.child_products.filter((item, k) => k != vKey);
 
-                    this.child_products = _.reject(this.child_products, item => {
-                        return item.product_id === variant.product_id;
-                    });
-                } else {
-                    this.child_product_ids = _.reject(this.child_product_ids, item => {
-                        return item === variant.id;
-                    });
-
-                    this.child_products = _.reject(this.child_products, item => {
-                        return item.id === variant.id;
-                    });
-                }
-            },
-            loadCountries: function () {
-                let context = this;
-                if (_.isEmpty(context.countries)) {
-                    axios
-                        .get(route('ajax.countries.list'))
-                        .then(res => {
-                            context.countries = res.data.data;
-                        })
-                        .catch(res => {
-                            Botble.handleError(res.response.data);
-                        });
-                }
-            },
-            loadStates: function ($event) {
-                if (!this.use_location_data) {
-                    return false;
-                }
-
-                let context = this;
-                axios
-                    .get(route('ajax.states-by-country', {country_id: $event.target.value}))
-                    .then(res => {
-                        context.states = res.data.data;
-                    })
-                    .catch(res => {
-                        Botble.handleError(res.response.data);
-                    });
-            },
-            loadCities: function ($event) {
-                if (!this.use_location_data) {
-                    return false;
-                }
-
-                let context = this;
-                axios
-                    .get(route('ajax.cities-by-state', {state_id: $event.target.value}))
-                    .then(res => {
-                        context.cities = res.data.data;
-                    })
-                    .catch(res => {
-                        Botble.handleError(res.response.data);
-                    });
+                this.checkDataBeforeCreateOrder();
             },
             createOrder: function ($event, paid = false) {
                 $event.preventDefault();
                 $($event.target).find('.btn-primary').addClass('button-loading');
                 let context = this;
 
-                let products = [];
-                _.each(this.child_products, function (item) {
-                    products.push({
-                        id: (item.configurable_product_id ? item.product_id : item.id),
-                        quantity: item.select_qty
-                    });
-                });
+                let formData = this.getOrderFormData();
+                formData.payment_status = paid ? 'completed' : 'pending';
 
                 axios
-                    .post(route('orders.create'), {
-                        products: products,
-                        payment_status: paid ? 'completed' : 'pending',
-                        payment_method: this.child_payment_method,
-                        shipping_method: this.child_shipping_method,
-                        shipping_option: this.child_shipping_option,
-                        shipping_amount: this.child_shipping_amount,
-                        discount_amount: this.child_discount_amount,
-                        discount_description: this.child_discount_description,
-                        coupon_code: this.coupon_code,
-                        customer_id: this.child_customer_id,
-                        note: this.note,
-                        amount: this.child_sub_amount,
-                        customer_address: this.child_customer_address,
-                    })
+                    .post(route('orders.create'), formData)
                     .then(res => {
                         let data = res.data.data;
                         if (res.data.error) {
                             Botble.showError(res.data.message);
-                            $($event.target).find('.btn-primary').removeClass('button-loading');
                         } else {
                             Botble.showSuccess(res.data.message);
                             if (paid) {
@@ -1178,6 +1115,8 @@
                     })
                     .catch(res => {
                         Botble.handleError(res.response.data);
+                    })
+                    .then(() => {
                         $($event.target).find('.btn-primary').removeClass('button-loading');
                     });
             },
@@ -1185,13 +1124,15 @@
                 $event.preventDefault();
                 $($event.target).find('.btn-primary').addClass('button-loading');
                 let context = this;
+                if (context.store && context.store.id) {
+                    context.product.store_id = context.store.id;
+                }
 
                 axios
                     .post(route('products.create-product-when-creating-order'), context.product)
                     .then(res => {
                         if (res.data.error) {
                             Botble.showError(res.data.message);
-                            $($event.target).find('.btn-primary').removeClass('button-loading');
                         } else {
 
                             context.product = res.data.data;
@@ -1201,10 +1142,7 @@
                             };
 
                             let productItem = context.product;
-                            productItem.product_name = context.product.name;
-                            productItem.image_url = context.product.image_url;
-                            productItem.price = context.product.price;
-                            productItem.product_link = context.product.product_link;
+                            productItem.select_qty = 1;
 
                             context.child_products.push(productItem);
                             context.child_product_ids.push(context.product.id);
@@ -1214,11 +1152,15 @@
                             Botble.showSuccess(res.data.message);
 
                             context.$root.$emit('bv::hide::modal', 'add-product-item');
+
+                            context.checkDataBeforeCreateOrder();
                         }
                     })
                     .catch(res => {
-                        $($event.target).find('.btn-primary').removeClass('button-loading');
                         Botble.handleError(res.response.data);
+                    })
+                    .then(() => {
+                        $($event.target).find('.btn-primary').removeClass('button-loading');
                     });
             },
             updateCustomerEmail: function ($event) {
@@ -1234,43 +1176,36 @@
                     .then(res => {
                         if (res.data.error) {
                             Botble.showError(res.data.message);
-                            $($event.target).find('.btn-primary').removeClass('button-loading');
                         } else {
                             Botble.showSuccess(res.data.message);
 
                             context.$root.$emit('bv::hide::modal', 'edit-email')
                         }
-                        $($event.target).find('.btn-primary').removeClass('button-loading');
                     })
                     .catch(res => {
                         Botble.handleError(res.response.data);
+                    })
+                    .then(() => {
                         $($event.target).find('.btn-primary').removeClass('button-loading');
                     });
             },
             updateOrderAddress: function ($event) {
                 $event.preventDefault();
-
                 if (this.customer) {
-
-                    let $modal = $(event.target).closest('.modal-dialog');
-
                     $($event.target).find('.btn-primary').addClass('button-loading');
-
-                    this.child_customer_address.name = $modal.find('.customer-address-name').val();
-                    this.child_customer_address.email = $modal.find('.customer-address-email').val();
-                    this.child_customer_address.phone = $modal.find('.customer-address-phone').val();
-                    this.child_customer_address.address = $modal.find('.customer-address-address').val();
-                    this.child_customer_address.city = $modal.find('.customer-address-city').val();
-                    this.child_customer_address.state = $modal.find('.customer-address-state').val();
-                    this.child_customer_address.country = $modal.find('.customer-address-country').val();
-                    this.child_customer_address.zip_code = $modal.find('.customer-address-zip-code').val();
 
                     let context = this;
 
-                    setTimeout(() => {
-                        $($event.target).find('.btn-primary').removeClass('button-loading');
-                        context.$root.$emit('bv::hide::modal', 'edit-address');
-                    }, 500);
+                    this.checkDataBeforeCreateOrder({}, () => {
+                        setTimeout(() => {
+                            $($event.target).find('.btn-primary').removeClass('button-loading');
+                            context.$root.$emit('bv::hide::modal', 'edit-address');
+                        }, 500);
+                    }, () => {
+                        setTimeout(() => {
+                            $($event.target).find('.btn-primary').removeClass('button-loading');
+                        }, 500);
+                    });
                 }
             },
             createNewCustomer: function ($event) {
@@ -1294,7 +1229,6 @@
                     .then(res => {
                         if (res.data.error) {
                             Botble.showError(res.data.message);
-                            $($event.target).find('.btn-primary').removeClass('button-loading');
                         } else {
                             context.child_customer_address = res.data.data.address;
                             context.child_customer = res.data.data.customer;
@@ -1305,14 +1239,15 @@
                             };
 
                             Botble.showSuccess(res.data.message);
+                            context.checkDataBeforeCreateOrder();
 
                             context.$root.$emit('bv::hide::modal', 'add-customer');
                         }
-
-                        $($event.target).find('.btn-primary').removeClass('button-loading');
                     })
                     .catch(res => {
                         Botble.handleError(res.response.data);
+                    })
+                    .then(() => {
                         $($event.target).find('.btn-primary').removeClass('button-loading');
                     });
             },
@@ -1323,6 +1258,8 @@
                         context.child_customer_address = item;
                     }
                 });
+
+                this.checkDataBeforeCreateOrder();
             },
             getOrderNumbers: function () {
                 let context = this;
@@ -1344,6 +1281,7 @@
                         if (!_.isEmpty(context.child_customer_addresses)) {
                             context.child_customer_address = _.first(context.child_customer_addresses);
                         }
+                        this.checkDataBeforeCreateOrder();
                     })
                     .catch(res => {
                         Botble.handleError(res.response.data);
@@ -1352,46 +1290,33 @@
             selectShippingMethod: function ($event) {
                 $event.preventDefault();
                 let context = this;
-                $($event.target).find('.btn-primary').addClass('button-loading');
+                let $button = $($event.target).find('.btn-primary');
+                $button.addClass('button-loading');
 
                 context.child_is_selected_shipping = true;
 
                 if (context.shipping_type === 'free-shipping') {
-                    context.child_shipping_method_name = 'Free shipping';
+                    context.child_shipping_method_name = context.__('order.free_shipping');
                     context.child_shipping_amount = 0;
                 } else {
                     let selected_shipping = $($event.target).find('.ui-select').val();
                     if (!_.isEmpty(selected_shipping)) {
-                        selected_shipping = selected_shipping.split(';');
-                        context.child_shipping_method = selected_shipping[0].trim();
-                        context.child_shipping_option = selected_shipping[1].trim();
-                        context.child_shipping_amount = parseFloat(selected_shipping[2].trim());
-                        context.child_shipping_method_name = $($event.target).find('.ui-select option:selected').data('name')
+                        let option = $($event.target).find('.ui-select option:selected');
+                        context.child_shipping_method = option.data('shipping-method');
+                        context.child_shipping_option = option.data('shipping-option');
                     }
                 }
 
-                setTimeout(function () {
-                    $($event.target).find('.btn-primary').removeClass('button-loading');
-                    context.$root.$emit('bv::hide::modal', 'add-shipping');
-                }, 500);
-            },
-            loadAvailableShippingMethods: function () {
-                let context = this;
-                axios
-                    .get(route('orders.get-available-shipping-methods', {
-                        address: context.child_customer_address.address,
-                        country: context.child_customer_address.country,
-                        state: context.child_customer_address.state,
-                        city: context.child_customer_address.city,
-                        zip_code: context.child_customer_address.zip_code,
-                        products: context.child_product_ids,
-                    }))
-                    .then(res => {
-                        context.shipping_methods = res.data.data;
-                    })
-                    .catch(res => {
-                        Botble.handleError(res.response.data);
-                    });
+                this.checkDataBeforeCreateOrder({}, () => {
+                    setTimeout(function () {
+                        $button.removeClass('button-loading');
+                        context.$root.$emit('bv::hide::modal', 'add-shipping');
+                    }, 500);
+                }, () => {
+                    setTimeout(function () {
+                        $button.removeClass('button-loading');
+                    }, 500);
+                })
             },
             changeDiscountType: function (event) {
                 if ($(event.target).val() === 'amount') {
@@ -1401,103 +1326,97 @@
                 }
                 this.discount_type = $(event.target).val();
             },
-            handleAddDiscount: function (event) {
-                event.preventDefault();
+            handleAddDiscount: function ($event) {
+                $event.preventDefault();
+                let $target = $($event.target);
                 let context = this;
 
                 context.has_applied_discount = true;
-
                 context.has_invalid_coupon = false;
 
-                let button = $(event.target).find('.btn-primary');
+                let $button = $target.find('.btn-primary');
 
-                button.addClass('button-loading').prop('disabled', true);
+                $button.addClass('button-loading').prop('disabled', true);
+                context.child_coupon_code = $target.find('.coupon-code-input').val();
 
-                if (!_.isEmpty(context.coupon_code)) {
-                    axios
-                        .post(route('orders.apply-coupon-when-creating-order'), {
-                            coupon_code: context.coupon_code,
-                            country: context.child_customer_address.country,
-                            shipping_amount: context.child_shipping_amount,
-                            product_ids: context.child_product_ids,
-                            customer_id: context.child_customer_id,
-                            sub_total: context.child_sub_amount,
-                        })
-                        .then(res => {
-                            if (res.data.error) {
-                                Botble.showError(res.data.message);
-                                button.removeClass('button-loading');
-                                context.has_invalid_coupon = true;
-                            } else {
-                                context.child_discount_amount = res.data.data.discount_amount;
-                                if (res.data.data.is_free_shipping) {
-                                    context.child_shipping_amount = 0;
-                                }
-                                Botble.showSuccess(res.data.message);
-                            }
-                            button.removeClass('button-loading');
-
-                            context.$root.$emit('bv::hide::modal', 'add-discounts');
-                        })
-                        .catch(res => {
-                            Botble.handleError(res.response.data);
-                            button.removeClass('button-loading');
-                        });
+                if (context.child_coupon_code) {
+                    context.discount_custom_value = 0;
                 } else {
-                    if (this.discount_type === 'percentage') {
-                        context.child_discount_amount = context.child_total_amount * context.discount_custom_value / 100;
-                    } else {
-                        context.child_discount_amount = context.discount_custom_value;
+                    context.discount_custom_value = Math.max(parseFloat(context.discount_custom_value), 0);
+                    if (context.discount_type == 'percentage') {
+                        context.discount_custom_value = Math.min(context.discount_custom_value, 100);
                     }
+                }
 
+                context.checkDataBeforeCreateOrder({}, () => {
                     setTimeout(function () {
-                        button.removeClass('button-loading').prop('disabled', false);
+                        if (!context.child_coupon_code && !context.discount_custom_value) {
+                            context.has_applied_discount = false;
+                        }
+                        $button.removeClass('button-loading').prop('disabled', false);
                         context.$root.$emit('bv::hide::modal', 'add-discounts');
                     }, 500);
-                }
-            },
-            calculateAmount: function (products) {
-                let context = this;
-                context.child_sub_amount = 0;
-                _.each(products, function (item) {
-                    context.child_sub_amount += parseFloat(item.price) * parseInt(item.select_qty);
+                }, () => {
+                    if (context.child_coupon_code) {
+                        context.has_invalid_coupon = true;
+                    }
+                    $button.removeClass('button-loading').prop('disabled', false);
                 });
-                context.child_total_amount = parseFloat(context.child_sub_amount) - parseFloat(context.child_discount_amount) + parseFloat(context.child_shipping_amount);
-                if (context.child_total_amount < 0) {
-                    context.child_total_amount = 0;
+            },
+            handleChangeQuantity: function ($event, variant, vKey) {
+                $event.preventDefault();
+                let context = this;
+                const value = parseInt($event.target.value);
+                variant.select_qty = value;
+
+                _.each(context.child_products, function (item, key) {
+                    if (vKey === key) {
+                        if (variant.with_storehouse_management && parseInt(variant.select_qty) > variant.quantity) {
+                            variant.select_qty = variant.quantity;
+                        }
+                        context.child_products[key] = variant;
+                    }
+                });
+
+                if (context.timeoutChangeQuantity) {
+                    clearTimeout(context.timeoutChangeQuantity);
                 }
+
+                context.timeoutChangeQuantity = setTimeout(() => {
+                    context.checkDataBeforeCreateOrder();
+                }, 1500);
             },
-            handleChangeQuantity: function () {
-                this.calculateAmount(this.child_products);
-            },
-            resetProductData: function () {
-                this.product = {
-                    name: null,
-                    price: 0,
-                    sku: null,
-                    with_storehouse_management: false,
-                    allow_checkout_when_out_of_stock: false,
-                    quantity: 0,
-                };
-            }
         },
         watch: {
-            'child_products': function (value) {
-                this.calculateAmount(value);
-            },
-            'child_discount_amount': function (value) {
-                let context = this;
-                context.child_total_amount = parseFloat(context.child_sub_amount) - parseFloat(value) + parseFloat(context.child_shipping_amount);
-            },
-            'child_shipping_amount': function (value) {
-                let context = this;
-                context.child_total_amount = parseFloat(context.child_sub_amount) - parseFloat(context.child_discount_amount) + parseFloat(value);
-            },
-            'shipping_type': function (value) {
-                if (value === 'free-shipping') {
-                    this.child_shipping_amount = 0;
-                }
-            },
+            // child_products: function (value) {
+            //     this.calculateAmount(value);
+            //     if (value.length) {
+            //         let product = value.filter((item) => item.store_id);
+            //         if (product.length) {
+            //             this.store = product[0].store;
+            //         } else {
+            //             this.resetStoreData();
+            //         }
+            //     } else {
+            //         this.resetStoreData();
+            //     }
+            // },
+            // child_discount_amount: function (value) {
+            //     let context = this;
+            //     context.child_total_amount = parseFloat(context.child_sub_amount) + parseFloat(context.child_tax_amount) - parseFloat(value) + parseFloat(context.child_shipping_amount);
+            // },
+            // child_shipping_amount: function (value) {
+            //     let context = this;
+            //     context.child_total_amount = parseFloat(context.child_sub_amount) + parseFloat(context.child_tax_amount) - parseFloat(context.child_discount_amount) + parseFloat(value);
+            // },
+            // shipping_type: function (value) {
+            //     if (value === 'free-shipping') {
+            //         this.child_shipping_amount = 0;
+            //     }
+            // },
+            child_payment_method: function (value) {
+                this.checkDataBeforeCreateOrder();
+            }
         }
     }
 </script>

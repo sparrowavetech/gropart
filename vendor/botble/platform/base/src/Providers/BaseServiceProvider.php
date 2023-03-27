@@ -5,6 +5,7 @@ namespace Botble\Base\Providers;
 use App\Http\Middleware\VerifyCsrfToken;
 use BaseHelper;
 use Botble\Base\Exceptions\Handler;
+use Botble\Base\Facades\BaseHelperFacade;
 use Botble\Base\Hooks\EmailSettingHooks;
 use Botble\Base\Http\Middleware\CoreMiddleware;
 use Botble\Base\Http\Middleware\DisableInDemoModeMiddleware;
@@ -18,6 +19,7 @@ use Botble\Base\Repositories\Interfaces\MetaBoxInterface;
 use Botble\Base\Supports\Action;
 use Botble\Base\Supports\BreadcrumbsManager;
 use Botble\Base\Supports\CustomResourceRegistrar;
+use Botble\Base\Supports\Database\Blueprint;
 use Botble\Base\Supports\Filter;
 use Botble\Base\Supports\GoogleFonts;
 use Botble\Base\Supports\Helper;
@@ -30,12 +32,14 @@ use Botble\Support\Http\Middleware\BaseMiddleware;
 use DateTimeZone;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Database\Schema\Builder;
 use Illuminate\Filesystem\FilesystemManager;
+use Illuminate\Foundation\AliasLoader;
+use Illuminate\Foundation\Console\AboutCommand;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\ResourceRegistrar;
 use Illuminate\Routing\Router;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
@@ -122,6 +126,8 @@ class BaseServiceProvider extends ServiceProvider
                 userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15',
             );
         });
+
+        AliasLoader::getInstance()->alias('BaseHelper', BaseHelperFacade::class);
     }
 
     public function boot(): void
@@ -149,9 +155,7 @@ class BaseServiceProvider extends ServiceProvider
 
             add_filter(BASE_FILTER_TOP_HEADER_LAYOUT, function ($options) {
                 try {
-                    $countNotificationUnread = AdminNotification::query()
-                        ->whereNull('read_at')
-                        ->count();
+                    $countNotificationUnread = AdminNotification::countUnread();
                 } catch (Throwable) {
                     $countNotificationUnread = 0;
                 }
@@ -175,7 +179,7 @@ class BaseServiceProvider extends ServiceProvider
             }
         });
 
-        Event::listen(RouteMatched::class, function () {
+        $this->app['events']->listen(RouteMatched::class, function () {
             $this->registerDefaultMenus();
 
             /**
@@ -222,6 +226,21 @@ class BaseServiceProvider extends ServiceProvider
                 ],
             ]);
         }
+
+        if ($this->app->runningInConsole()) {
+            AboutCommand::add('Core Information', fn () => [
+                'CMS Version' => get_cms_version(),
+                'Core Version' => get_core_version(),
+            ]);
+        }
+
+        $this->app->extend('db.schema', function (Builder $schema) {
+            $schema->blueprintResolver(function ($table, $callback, $prefix) {
+                return new Blueprint($table, $callback, $prefix);
+            });
+
+            return $schema;
+        });
     }
 
     /**

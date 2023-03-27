@@ -11,7 +11,6 @@ use Botble\Ecommerce\Repositories\Interfaces\OrderReturnInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderReturnItemInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Carbon\Carbon;
-use EcommerceHelper as EcommerceHelperFacade;
 use Illuminate\Support\Facades\DB;
 use EmailHandler;
 use Illuminate\Support\Facades\Log;
@@ -46,10 +45,6 @@ class OrderReturnHelper
                     continue;
                 }
 
-                if (! EcommerceHelperFacade::allowPartialReturn()) {
-                    $returnItem['qty'] = $orderProduct->qty;
-                }
-
                 $orderReturnItemData[] = [
                     'order_return_id' => $orderReturn->id,
                     'order_product_id' => $returnItem['order_item_id'],
@@ -59,6 +54,7 @@ class OrderReturnHelper
                     'price' => $orderProduct->price,
                     'qty' => $returnItem['qty'],
                     'reason' => $returnItem['reason'] ?? null,
+                    'refund_amount' => $returnItem['refund_amount'] ?? null,
                     'created_at' => Carbon::now(),
                 ];
 
@@ -128,20 +124,23 @@ class OrderReturnHelper
             $orderReturn->save();
 
             if ($orderReturn->return_status == OrderReturnStatusEnum::COMPLETED) {
-                $orderReturnItems = $orderReturn->load('items')->items;
-                foreach ($orderReturnItems as $item) {
+                foreach ($orderReturn->items as $item) {
                     $product = app(ProductInterface::class)->findById($item->product_id);
-                    $product->quantity += $item->qty;
-                    $product->save();
+                    if ($product) {
+                        $product->quantity += $item->qty;
+                        $product->save();
 
-                    if ($product->is_variation) {
-                        $originalProduct = $product->original_product;
-                        if ($originalProduct->id != $product->id) {
-                            $originalProduct->quantity += $item->qty;
-                            $originalProduct->save();
+                        if ($product->is_variation) {
+                            $originalProduct = $product->original_product;
+                            if ($originalProduct->id != $product->id) {
+                                $originalProduct->quantity += $item->qty;
+                                $originalProduct->save();
+                            }
                         }
                     }
                 }
+
+                do_action(ACTION_AFTER_ORDER_RETURN_STATUS_COMPLETED, $orderReturn, $data);
             }
 
             DB::commit();

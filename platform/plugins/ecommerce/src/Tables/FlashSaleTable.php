@@ -47,6 +47,9 @@ class FlashSaleTable extends TableAbstract
             ->editColumn('checkbox', function ($item) {
                 return $this->getCheckbox($item->id);
             })
+            ->editColumn('end_date', function ($item) {
+                return Html::tag('span', BaseHelper::formatDate($item->end_date), ['class' => $item->expired ? 'text-danger' : 'text-success']);
+            })
             ->editColumn('created_at', function ($item) {
                 return BaseHelper::formatDate($item->created_at);
             })
@@ -65,6 +68,7 @@ class FlashSaleTable extends TableAbstract
         $query = $this->repository->getModel()->select([
             'id',
             'name',
+            'end_date',
             'created_at',
             'status',
         ]);
@@ -82,6 +86,10 @@ class FlashSaleTable extends TableAbstract
             'name' => [
                 'title' => trans('core/base::tables.name'),
                 'class' => 'text-start',
+            ],
+            'end_date' => [
+                'title' => __('End date'),
+                'width' => '100px',
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),

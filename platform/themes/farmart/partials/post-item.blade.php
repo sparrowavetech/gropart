@@ -35,7 +35,7 @@
                         </div>
                     </div>
                     <div class="entry-description">
-                        <p>{{ Str::limit($post->description, 280) }}</p>
+                        <p>{{ Str::limit($post->description, 120) }}</p>
                     </div>
                 </div>
             </div>

@@ -3,9 +3,9 @@
 namespace Botble\PluginManagement;
 
 use BaseHelper;
-use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
+use Throwable;
 
 class PluginManifest
 {
@@ -23,6 +23,10 @@ class PluginManifest
 
     public function getManifest(): array
     {
+        if (! config('packages.plugin-management.general.enable_plugin_list_cache', true)) {
+            return $this->getPluginInfo();
+        }
+
         try {
             if (File::isFile($this->manifestPath)) {
                 $data = File::getRequire($this->manifestPath);
@@ -38,7 +42,7 @@ class PluginManifest
             $this->generateManifest($data);
 
             return $data;
-        } catch (Exception) {
+        } catch (Throwable) {
             return $this->getPluginInfo();
         }
     }

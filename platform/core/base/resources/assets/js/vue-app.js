@@ -2,10 +2,12 @@ import Vue from 'vue';
 import sanitizeHTML from 'sanitize-html';
 import _ from 'lodash';
 import emitter from 'tiny-emitter/instance';
+import {BootstrapVue} from 'bootstrap-vue'
 
 class VueApp {
     constructor() {
         this.vue = Vue;
+        this.vue.use(BootstrapVue);
 
         this.vue.prototype.__ = key => {
             if (typeof window.trans === 'undefined') {

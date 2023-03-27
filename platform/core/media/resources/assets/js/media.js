@@ -356,6 +356,10 @@ class MediaManagement {
             ActionsService.renderRenameItems();
         });
 
+        _self.$body.on('show.bs.modal', '#modal_alt_text_items', () => {
+            ActionsService.renderAltTextItems();
+        });
+
         _self.$body.on('show.bs.modal', '#modal_crop_image', () => {
             ActionsService.renderCropImage();
         });
@@ -415,6 +419,39 @@ class MediaManagement {
                 }
             });
         });
+
+        _self.$body.off('submit', '#modal_alt_text_items .form-alt-text').on('submit', '#modal_alt_text_items .form-alt-text', event => {
+            event.preventDefault()
+
+            let items = [];
+            let $form = $(event.currentTarget);
+
+            $('#modal_alt_text_items .form-control').each((index, el) => {
+                let $current = $(el);
+                let data = $current.closest('.form-group').data();
+                data.alt = $current.val();
+                items.push(data);
+            });
+
+            ActionsService.processAction({
+                action: $form.data('action'),
+                selected: items
+            }, res => {
+                if (!res.error) {
+                    $form.closest('.modal').modal('hide');
+                    _self.MediaService.getMedia(true);
+                } else {
+                    $('#modal_alt_text_items .form-group').each((index, el) => {
+                        let $current = $(el);
+                        if (_.includes(res.data, $current.data('id'))) {
+                            $current.addClass('has-error');
+                        } else {
+                            $current.removeClass('has-error');
+                        }
+                    });
+                }
+            });
+        })
 
         /*Delete files*/
         _self.$body.off('submit', '.form-delete-items').on('submit', '.form-delete-items', event => {

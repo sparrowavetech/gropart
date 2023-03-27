@@ -13,7 +13,6 @@ use Botble\Contact\Models\Contact;
 use Botble\Contact\Repositories\Caches\ContactCacheDecorator;
 use Botble\Contact\Repositories\Eloquent\ContactRepository;
 use Botble\Contact\Repositories\Interfaces\ContactReplyInterface;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class ContactServiceProvider extends ServiceProvider
@@ -43,7 +42,7 @@ class ContactServiceProvider extends ServiceProvider
             ->loadMigrations()
             ->publishAssets();
 
-        Event::listen(RouteMatched::class, function () {
+        $this->app['events']->listen(RouteMatched::class, function () {
             dashboard_menu()->registerItem([
                 'id' => 'cms-plugins-contact',
                 'priority' => 120,

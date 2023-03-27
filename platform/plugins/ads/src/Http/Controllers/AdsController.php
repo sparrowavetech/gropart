@@ -18,11 +18,8 @@ use Illuminate\Http\Request;
 
 class AdsController extends BaseController
 {
-    protected AdsInterface $adsRepository;
-
-    public function __construct(AdsInterface $adsRepository)
+    public function __construct(protected AdsInterface $adsRepository)
     {
-        $this->adsRepository = $adsRepository;
     }
 
     public function index(AdsTable $table)

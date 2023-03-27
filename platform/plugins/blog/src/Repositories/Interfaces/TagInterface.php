@@ -3,25 +3,13 @@
 namespace Botble\Blog\Repositories\Interfaces;
 
 use Botble\Support\Repositories\Interfaces\RepositoryInterface;
+use Illuminate\Support\Collection;
 
 interface TagInterface extends RepositoryInterface
 {
-    /**
-     * @return array
-     */
-    public function getDataSiteMap();
+    public function getDataSiteMap(): Collection;
 
-    /**
-     * @param int $limit
-     * @param array|string[] $with
-     * @param array $withCount
-     * @return mixed
-     */
-    public function getPopularTags($limit, array $with = ['slugable'], array $withCount = ['posts']);
+    public function getPopularTags(int $limit, array $with = ['slugable'], array $withCount = ['posts']): Collection;
 
-    /**
-     * @param bool $active
-     * @return array
-     */
-    public function getAllTags($active = true);
+    public function getAllTags(bool $active = true): Collection;
 }

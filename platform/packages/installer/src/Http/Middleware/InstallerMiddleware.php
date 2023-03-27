@@ -9,6 +9,10 @@ abstract class InstallerMiddleware
 {
     public function alreadyInstalled(): bool
     {
+        if (! config('packages.installer.installer.enabled')) {
+            return true;
+        }
+
         if (Helper::isConnectedDatabase() && ! File::exists(storage_path('installing'))) {
             return true;
         }

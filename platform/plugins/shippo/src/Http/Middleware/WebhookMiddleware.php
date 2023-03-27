@@ -4,17 +4,9 @@ namespace Botble\Shippo\Http\Middleware;
 
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Closure;
-use Illuminate\Http\Request;
 
 class WebhookMiddleware
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param Request $request
-     * @param Closure $next
-     * @return mixed
-     */
     public function handle($request, Closure $next)
     {
         if (setting('shipping_shippo_webhooks', 1) == 1 && ($token = $request->input('_token'))) {

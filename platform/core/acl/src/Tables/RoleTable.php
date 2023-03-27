@@ -21,18 +21,15 @@ class RoleTable extends TableAbstract
 
     protected $hasFilter = true;
 
-    protected UserInterface $userRepository;
-
     public function __construct(
         DataTables $table,
         UrlGenerator $urlGenerator,
-        RoleInterface $roleRepository,
-        UserInterface $userRepository
+        RoleInterface $repository,
+        protected UserInterface $userRepository
     ) {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $roleRepository;
-        $this->userRepository = $userRepository;
+        $this->repository = $repository;
 
         if (! Auth::user()->hasAnyPermission(['roles.edit', 'roles.destroy'])) {
             $this->hasOperations = false;

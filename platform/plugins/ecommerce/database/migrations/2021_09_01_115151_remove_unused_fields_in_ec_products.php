@@ -29,7 +29,7 @@ return new class () extends Migration {
             $table->tinyInteger('is_searchable')->default(0);
             $table->tinyInteger('is_show_on_list')->default(0);
             $table->string('barcode')->nullable();
-            $table->integer('category_id')->unsigned()->nullable();
+            $table->foreignId('category_id')->nullable();
             $table->string('length_unit', 20)->nullable();
             $table->string('wide_unit', 20)->nullable();
             $table->string('height_unit', 20)->nullable();

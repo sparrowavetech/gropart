@@ -28,9 +28,9 @@ class ProductAttribute extends BaseModel
         'status' => BaseStatusEnum::class,
     ];
 
-    public function getAttributeSetIdAttribute(?int $value): int
+    public function getAttributeSetIdAttribute(int|string|null $value): int|string|null
     {
-        return (int)$value;
+        return $value;
     }
 
     public function productAttributeSet(): BelongsTo
@@ -38,9 +38,9 @@ class ProductAttribute extends BaseModel
         return $this->belongsTo(ProductAttributeSet::class, 'attribute_set_id');
     }
 
-    public function getGroupIdAttribute(?int $value): int
+    public function getGroupIdAttribute(int|string|null $value): int|string|null
     {
-        return (int)$value;
+        return $value;
     }
 
     protected static function boot()

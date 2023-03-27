@@ -293,7 +293,7 @@ abstract class PayPalPaymentAbstract
             'application_context' => [
                 'return_url' => $this->returnUrl,
                 'cancel_url' => $this->cancelUrl ?: $this->returnUrl,
-                'brand_name' => theme_option('site_name'),
+                'brand_name' => theme_option('site_title'),
             ],
             'purchase_units' => [
                 0 => [

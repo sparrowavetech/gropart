@@ -63,14 +63,14 @@ if (! function_exists('get_ecommerce_attribute_set')) {
 }
 
 if (! function_exists('get_parent_product')) {
-    function get_parent_product(int $variationId, array $with = ['slugable']): ?Product
+    function get_parent_product(int|string $variationId, array $with = ['slugable']): ?Product
     {
         return app(ProductVariationInterface::class)->getParentOfVariation($variationId, $with);
     }
 }
 
 if (! function_exists('get_parent_product_id')) {
-    function get_parent_product_id(int $variationId): ?int
+    function get_parent_product_id(int|string $variationId): ?int
     {
         $parent = get_parent_product($variationId);
 
@@ -79,14 +79,14 @@ if (! function_exists('get_parent_product_id')) {
 }
 
 if (! function_exists('get_product_info')) {
-    function get_product_info(int $variationId): Collection
+    function get_product_info(int|string $variationId): Collection
     {
         return app(ProductVariationItemInterface::class)->getVariationsInfo([$variationId]);
     }
 }
 
 if (! function_exists('get_product_attributes')) {
-    function get_product_attributes(int $productId): Collection
+    function get_product_attributes(int|string $productId): Collection
     {
         return app(ProductVariationItemInterface::class)->getProductAttributes($productId);
     }

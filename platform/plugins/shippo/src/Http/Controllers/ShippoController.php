@@ -19,22 +19,13 @@ use Throwable;
 
 class ShippoController extends BaseController
 {
-    protected ShipmentInterface $shipmentRepository;
-
-    protected ShipmentHistoryInterface $shipmentHistoryRepository;
-
-    protected Shippo $shippo;
-
     protected string|int|null $userId = 0;
 
     public function __construct(
-        ShipmentInterface $shipmentRepository,
-        ShipmentHistoryInterface $shipmentHistoryRepository,
-        Shippo $shippo
+        protected ShipmentInterface $shipmentRepository,
+        protected ShipmentHistoryInterface $shipmentHistoryRepository,
+        protected Shippo $shippo
     ) {
-        $this->shipmentRepository = $shipmentRepository;
-        $this->shipmentHistoryRepository = $shipmentHistoryRepository;
-        $this->shippo = $shippo;
         if (is_in_admin(true) && Auth::check()) {
             $this->userId = Auth::id();
         }

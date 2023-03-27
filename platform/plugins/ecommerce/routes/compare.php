@@ -10,11 +10,11 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Fronts', 'middle
         Route::post('compare/{productId}', [
             'as' => 'public.compare.add',
             'uses' => 'CompareController@store',
-        ]);
+        ])->where('productId', BaseHelper::routeIdRegex());
 
         Route::delete('compare/{productId}', [
             'as' => 'public.compare.remove',
             'uses' => 'CompareController@destroy',
-        ]);
+        ])->where('productId', BaseHelper::routeIdRegex());
     });
 });

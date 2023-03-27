@@ -35,7 +35,7 @@ class SettingController
     {
         $store = auth('customer')->user()->store;
 
-        $existing = SlugHelper::getSlug($request->input('slug'), SlugHelper::getPrefix(Store::class), Store::class);
+        $existing = SlugHelper::getSlug($request->input('slug'), SlugHelper::getPrefix(Store::class));
 
         if ($existing && $existing->reference_id != $store->id) {
             return $response->setError()->setMessage(__('Shop URL is existing. Please choose another one!'));
@@ -62,6 +62,8 @@ class SettingController
             $vendorInfo->tax_info = $request->input('tax_info', []);
             $vendorInfo->save();
         }
+
+        $request->merge(['is_slug_editable' => 1]);
 
         event(new UpdatedContentEvent(STORE_MODULE_SCREEN_NAME, $request, $store));
 

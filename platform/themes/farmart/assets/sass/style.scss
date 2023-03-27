@@ -1542,6 +1542,16 @@ body.show-admin-bar {
     }
 }
 
+.menu--product-categories {
+    .menu--dropdown {
+        > li {
+            > a {
+                padding-right: 25px;
+            }
+        }
+    }
+}
+
 @media (max-width: 768px) {
     .product-gallery {
         .product-gallery__variants {

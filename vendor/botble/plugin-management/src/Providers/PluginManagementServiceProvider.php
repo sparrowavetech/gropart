@@ -7,7 +7,6 @@ use Botble\PluginManagement\PluginManifest;
 use Composer\Autoload\ClassLoader;
 use Exception;
 use Illuminate\Routing\Events\RouteMatched;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Psr\SimpleCache\InvalidArgumentException;
 
@@ -49,7 +48,7 @@ class PluginManagementServiceProvider extends ServiceProvider
 
         $this->app->register(CommandServiceProvider::class);
 
-        Event::listen(RouteMatched::class, function () {
+        $this->app['events']->listen(RouteMatched::class, function () {
             dashboard_menu()
                 ->registerItem([
                     'id' => 'cms-core-plugins',

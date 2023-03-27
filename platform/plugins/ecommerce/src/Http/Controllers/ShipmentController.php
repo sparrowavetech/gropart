@@ -23,24 +23,12 @@ use OrderHelper;
 
 class ShipmentController extends BaseController
 {
-    protected OrderInterface $orderRepository;
-
-    protected ShipmentInterface $shipmentRepository;
-
-    protected OrderHistoryInterface $orderHistoryRepository;
-
-    protected ShipmentHistoryInterface $shipmentHistoryRepository;
-
     public function __construct(
-        OrderInterface $orderRepository,
-        ShipmentInterface $shipmentRepository,
-        OrderHistoryInterface $orderHistoryRepository,
-        ShipmentHistoryInterface $shipmentHistoryRepository
+        protected OrderInterface $orderRepository,
+        protected ShipmentInterface $shipmentRepository,
+        protected OrderHistoryInterface $orderHistoryRepository,
+        protected ShipmentHistoryInterface $shipmentHistoryRepository
     ) {
-        $this->orderRepository = $orderRepository;
-        $this->shipmentRepository = $shipmentRepository;
-        $this->orderHistoryRepository = $orderHistoryRepository;
-        $this->shipmentHistoryRepository = $shipmentHistoryRepository;
     }
 
     public function index(ShipmentTable $dataTable)
@@ -50,7 +38,7 @@ class ShipmentController extends BaseController
         return $dataTable->renderTable();
     }
 
-    public function edit(int $id)
+    public function edit(int|string $id)
     {
         Assets::addStylesDirectly('vendor/core/plugins/ecommerce/css/ecommerce.css')
             ->addScriptsDirectly('vendor/core/plugins/ecommerce/js/shipment.js');
@@ -61,9 +49,10 @@ class ShipmentController extends BaseController
         return view('plugins/ecommerce::shipments.edit', compact('shipment'));
     }
 
-    public function postUpdateStatus(int $id, UpdateShipmentStatusRequest $request, BaseHttpResponse $response)
+    public function postUpdateStatus(int|string $id, UpdateShipmentStatusRequest $request, BaseHttpResponse $response)
     {
         $shipment = $this->shipmentRepository->findOrFail($id);
+        $previousShipment = $shipment->toArray();
         $shipment->status = $request->input('status');
         $shipment->save();
 
@@ -97,12 +86,12 @@ class ShipmentController extends BaseController
                 break;
         }
 
-        event(new ShippingStatusChanged($shipment));
+        event(new ShippingStatusChanged($shipment, $previousShipment));
 
         return $response->setMessage(trans('plugins/ecommerce::shipping.update_shipping_status_success'));
     }
 
-    public function postUpdateCodStatus(int $id, UpdateShipmentCodStatusRequest $request, BaseHttpResponse $response)
+    public function postUpdateCodStatus(int|string $id, UpdateShipmentCodStatusRequest $request, BaseHttpResponse $response)
     {
         $shipment = $this->shipmentRepository->findOrFail($id);
         $shipment->cod_status = $request->input('status');
@@ -125,7 +114,7 @@ class ShipmentController extends BaseController
         return $response->setMessage(trans('plugins/ecommerce::shipping.update_cod_status_success'));
     }
 
-    public function update(int $id, Request $request, BaseHttpResponse $response)
+    public function update(int|string $id, Request $request, BaseHttpResponse $response)
     {
         $shipment = $this->shipmentRepository->findOrFail($id);
 
@@ -146,7 +135,7 @@ class ShipmentController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(int $id, BaseHttpResponse $response)
+    public function destroy(int|string $id, BaseHttpResponse $response)
     {
         try {
             $review = $this->shipmentRepository->findOrFail($id);

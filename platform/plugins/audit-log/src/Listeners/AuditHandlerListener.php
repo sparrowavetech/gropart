@@ -9,14 +9,8 @@ use Illuminate\Http\Request;
 
 class AuditHandlerListener
 {
-    public AuditLogInterface $auditLogRepository;
-
-    protected Request $request;
-
-    public function __construct(AuditLogInterface $auditLogRepository, Request $request)
+    public function __construct(protected AuditLogInterface $auditLogRepository, protected Request $request)
     {
-        $this->auditLogRepository = $auditLogRepository;
-        $this->request = $request;
     }
 
     public function handle(AuditHandlerEvent $event): void

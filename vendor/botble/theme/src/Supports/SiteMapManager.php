@@ -9,34 +9,94 @@ use Illuminate\Http\Response;
 
 class SiteMapManager
 {
-    protected Sitemap $siteMap;
+    protected array $keys = ['sitemap', 'pages'];
 
-    public function __construct()
+    protected string $extension = 'xml';
+
+    protected string $defaultDate = '2023-03-05 00:00';
+
+    public function __construct(protected Sitemap $siteMap)
+    {
+    }
+
+    public function init(?string $prefix = null, string $extension = 'xml'): self
     {
         // create new site map object
         $this->siteMap = app('sitemap');
-
         // set cache (key (string), duration in minutes (Carbon|Datetime|int), turn on/off (boolean))
         // by default cache is disabled
-        $this->siteMap->setCache('cache_site_map_key', setting('cache_time_site_map', 60), setting('enable_cache_site_map', true));
+        $this->siteMap->setCache('cache_site_map_key' . $prefix . $extension, setting('cache_time_site_map', 60), setting('enable_cache_site_map', true));
 
-        if (! BaseHelper::getHomepageId()) {
-            $this->siteMap->add(route('public.index'), Carbon::now()->toDateTimeString(), '1.0', 'daily');
+        if ($prefix == 'pages' && ! BaseHelper::getHomepageId()) {
+            $this->add(route('public.index'), Carbon::now()->toDateTimeString());
         }
-    }
 
-    public function add(string $url, ?string $date, string $priority = '1.0', string $sequence = 'daily'): self
-    {
-        if (! $this->siteMap->isCached()) {
-            $this->siteMap->add($url, $date, $priority, $sequence);
+        $this->extension = $extension;
+
+        if (! $prefix) {
+            $this->addSitemap($this->route('pages'));
         }
 
         return $this;
+    }
+
+    public function addSitemap(string $loc, ?string $lastModified = null): self
+    {
+        if (! $this->isCached()) {
+            $this->siteMap->addSitemap($loc, $lastModified ?: $this->defaultDate);
+        }
+
+        return $this;
+    }
+
+    public function route(?string $key = null): string
+    {
+        return route('public.sitemap.index', [$key, $this->extension]);
+    }
+
+    public function add(string $url, ?string $date = null, string $priority = '1.0', string $sequence = 'daily'): self
+    {
+        if (! $this->isCached()) {
+            $this->siteMap->add($url, $date ?: $this->defaultDate, $priority, $sequence);
+        }
+
+        return $this;
+    }
+
+    public function isCached(): bool
+    {
+        return $this->siteMap->isCached();
+    }
+
+    public function getSiteMap(): Sitemap
+    {
+        return $this->siteMap;
     }
 
     public function render(string $type = 'xml'): Response
     {
         // show your site map (options: 'xml' (default), 'html', 'txt', 'ror-rss', 'ror-rdf')
         return $this->siteMap->render($type);
+    }
+
+    public function getKeys(): array
+    {
+        return $this->keys;
+    }
+
+    public function registerKey(string|array $key, ?string $value = null): self
+    {
+        if (is_array($key)) {
+            $this->keys = array_merge($this->keys, $key);
+        } else {
+            $this->keys[$key] = $value ?: $key;
+        }
+
+        return $this;
+    }
+
+    public function allowedExtensions(): array
+    {
+        return ['xml', 'html', 'txt', 'ror-rss', 'ror-rdf'];
     }
 }

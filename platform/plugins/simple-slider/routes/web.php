@@ -27,18 +27,18 @@ Route::group(['namespace' => 'Botble\SimpleSlider\Http\Controllers', 'middleware
             Route::match(['GET', 'POST'], 'list/{id}', [
                 'as' => 'index',
                 'uses' => 'SimpleSliderItemController@index',
-            ])->where('id', '[0-9]+');
+            ])->where('id', BaseHelper::routeIdRegex());
 
             Route::get('delete/{id}', [
                 'as' => 'destroy',
                 'uses' => 'SimpleSliderItemController@destroy',
-            ])->where('id', '[0-9]+');
+            ])->where('id', BaseHelper::routeIdRegex());
 
             Route::delete('delete/{id}', [
                 'as' => 'delete.post',
                 'uses' => 'SimpleSliderItemController@postDelete',
                 'permission' => 'simple-slider-item.destroy',
-            ])->where('id', '[0-9]+');
+            ])->where('id', BaseHelper::routeIdRegex());
         });
     });
 });

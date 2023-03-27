@@ -43,12 +43,6 @@ class ShippingRuleItemImport implements
     use SkipsErrors;
     use ImportTrait;
 
-    protected ShippingInterface $shippingRepository;
-
-    protected ShippingRuleInterface $shippingRuleRepository;
-
-    protected ShippingRuleItemInterface $shippingRuleItemRepository;
-
     protected string $importType = 'overwrite';
 
     protected array $availableCountries;
@@ -61,21 +55,14 @@ class ShippingRuleItemImport implements
 
     protected int $rowCurrent = 1; // include header
 
-    protected Request $request;
-
     protected Request $validatorClass;
 
     public function __construct(
-        ShippingInterface $shippingRepository,
-        ShippingRuleInterface $shippingRuleRepository,
-        ShippingRuleItemInterface $shippingRuleItemRepository,
-        Request $request
+        protected ShippingInterface $shippingRepository,
+        protected ShippingRuleInterface $shippingRuleRepository,
+        protected ShippingRuleItemInterface $shippingRuleItemRepository,
+        protected Request $request
     ) {
-        $this->shippingRepository = $shippingRepository;
-        $this->shippingRuleRepository = $shippingRuleRepository;
-        $this->shippingRuleItemRepository = $shippingRuleItemRepository;
-        $this->request = $request;
-
         $this->availableCountries = EcommerceHelper::getAvailableCountries();
         $this->isLoadFromLocation = EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation();
 

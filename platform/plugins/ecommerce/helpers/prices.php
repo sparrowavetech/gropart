@@ -4,10 +4,6 @@ use Carbon\Carbon;
 use Illuminate\Support\Arr;
 
 if (! function_exists('get_product_price')) {
-    /**
-     * @param array $priceData
-     * @return array
-     */
     function get_product_price(array $priceData): array
     {
         $defaultSaleType = Arr::get($priceData, 'default_sale_type', 'none');
@@ -56,14 +52,7 @@ if (! function_exists('get_product_price')) {
 }
 
 if (! function_exists('get_sale_percentage')) {
-    /**
-     * @param float|int $price
-     * @param float|int $salePrice
-     * @param bool $abs
-     * @param bool $appendSymbol
-     * @return string
-     */
-    function get_sale_percentage($price, $salePrice, bool $abs = false, bool $appendSymbol = true): string
+    function get_sale_percentage(float|null $price, float|null $salePrice, bool $abs = false, bool $appendSymbol = true): string
     {
         $symbol = $appendSymbol ? '%' : '';
 
@@ -87,13 +76,7 @@ if (! function_exists('get_sale_percentage')) {
 }
 
 if (! function_exists('is_product_on_sale')) {
-    /**
-     * @param string $saleStatus
-     * @param null $startDate
-     * @param null $endDate
-     * @return bool
-     */
-    function is_product_on_sale(string $saleStatus, $startDate = null, $endDate = null): bool
+    function is_product_on_sale(string $saleStatus, string|null $startDate = null, string|null $endDate = null): bool
     {
         if ($saleStatus == 'none' || ! $endDate) {
             return false;

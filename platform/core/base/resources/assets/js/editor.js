@@ -114,7 +114,7 @@ class EditorManagement {
                     ]
                 },
                 language: {
-                    ui: 'en',
+                    ui: window.siteEditorLocale || 'en',
 
                     content: window.siteEditorLocale || 'en',
                 },

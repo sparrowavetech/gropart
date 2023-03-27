@@ -5,10 +5,11 @@ namespace Botble\Blog\Repositories\Eloquent;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Blog\Repositories\Interfaces\TagInterface;
 use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
+use Illuminate\Support\Collection;
 
 class TagRepository extends RepositoriesAbstract implements TagInterface
 {
-    public function getDataSiteMap()
+    public function getDataSiteMap(): Collection
     {
         $data = $this->model
             ->with('slugable')
@@ -19,7 +20,7 @@ class TagRepository extends RepositoriesAbstract implements TagInterface
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    public function getPopularTags($limit, array $with = ['slugable'], array $withCount = ['posts'])
+    public function getPopularTags(int $limit, array $with = ['slugable'], array $withCount = ['posts']): Collection
     {
         $data = $this->model
             ->with($with)
@@ -30,7 +31,7 @@ class TagRepository extends RepositoriesAbstract implements TagInterface
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    public function getAllTags($active = true)
+    public function getAllTags($active = true): Collection
     {
         $data = $this->model;
         if ($active) {

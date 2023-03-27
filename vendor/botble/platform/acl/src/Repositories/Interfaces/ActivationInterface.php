@@ -7,52 +7,15 @@ use Botble\ACL\Models\User;
 
 interface ActivationInterface
 {
-    /**
-     * Create a new activation record and code.
-     *
-     * @param User $user
-     * @return Activation
-     */
-    public function createUser(User $user);
+    public function createUser(User $user): Activation;
 
-    /**
-     * Checks if a valid activation for the given user exists.
-     *
-     * @param User $user
-     * @param string $code
-     * @return Activation|bool
-     */
-    public function exists(User $user, $code = null);
+    public function exists(User $user, string|null $code = null): Activation|bool;
 
-    /**
-     * Completes the activation for the given user.
-     *
-     * @param User $user
-     * @param string $code
-     * @return bool
-     */
-    public function complete(User $user, $code);
+    public function complete(User $user, string $code): bool;
 
-    /**
-     * Checks if a valid activation has been completed.
-     *
-     * @param User $user
-     * @return Activation|bool
-     */
-    public function completed(User $user);
+    public function completed(User $user): Activation|bool;
 
-    /**
-     * Remove an existing activation (deactivate).
-     *
-     * @param User $user
-     * @return bool|null
-     */
     public function remove(User $user);
 
-    /**
-     * Remove expired activation codes.
-     *
-     * @return int
-     */
     public function removeExpired();
 }

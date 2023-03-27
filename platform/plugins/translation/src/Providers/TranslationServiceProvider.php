@@ -12,7 +12,6 @@ use Botble\Translation\Console\ExportCommand;
 use Botble\Translation\Console\ImportCommand;
 use Botble\Translation\Console\ResetCommand;
 use Botble\Translation\Manager;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class TranslationServiceProvider extends ServiceProvider
@@ -49,7 +48,7 @@ class TranslationServiceProvider extends ServiceProvider
             ->loadAndPublishTranslations()
             ->publishAssets();
 
-        Event::listen(RouteMatched::class, function () {
+        $this->app['events']->listen(RouteMatched::class, function () {
             dashboard_menu()
                 ->registerItem([
                     'id' => 'cms-plugin-translation',

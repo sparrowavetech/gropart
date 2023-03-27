@@ -27,6 +27,8 @@
                     <a href="{{ route('translations.index') }}" class="btn btn-secondary translation-back">{{ trans('plugins/translation::translation.back') }}</a>
                 </form>
                 <p class="text-info">{{ trans('plugins/translation::translation.export_warning', ['lang_path' => lang_path()]) }}</p>
+
+                {!! apply_filters('translation_other_translation_header', null) !!}
             @endif
             {!! Form::open(['role' => 'form']) !!}
                 <div class="ui-select-wrapper">
@@ -50,22 +52,24 @@
                             @foreach($locales as $locale)
                                 <th>{{ $locale }}</th>
                             @endforeach
+                            {!! apply_filters('translation_other_translation_table_header', null) !!}
                         </tr>
                         </thead>
-                        <tbody>
-                        @foreach ($translations as $key => $translation)
-                            <tr id="{{ $key }}">
-                                @foreach($locales as $locale)
-                                    @php $item = $translation[$locale] ?? null @endphp
-                                    <td class="text-start">
-                                        <a href="#edit" class="editable status-{{ $item ? $item->status : 0 }} locale-{{ $locale }}"
-                                           data-locale="{{ $locale }}" data-name="{{ $locale . '|' . $key }}"
-                                           data-type="textarea" data-pk="{{ $item ? $item->id : 0 }}" data-url="{{ $editUrl }}"
-                                           data-title="{{ trans('plugins/translation::translation.edit_title') }}">{!! ($item ? htmlentities($item->value, ENT_QUOTES, 'UTF-8', false) : '') !!}</a>
-                                    </td>
-                                @endforeach
-                            </tr>
-                        @endforeach
+                            <tbody>
+                            @foreach ($translations as $key => $translation)
+                                <tr id="{{ $key }}">
+                                    @foreach($locales as $locale)
+                                        @php $item = $translation[$locale] ?? null @endphp
+                                        <td class="text-start">
+                                            <a href="#edit" class="editable status-{{ $item ? $item->status : 0 }} locale-{{ $locale }}"
+                                               data-locale="{{ $locale }}" data-name="{{ $locale . '|' . $key }}"
+                                               data-type="textarea" data-pk="{{ $item ? $item->id : 0 }}" data-url="{{ $editUrl }}"
+                                               data-title="{{ trans('plugins/translation::translation.edit_title') }}">{!! ($item ? htmlentities($item->value, ENT_QUOTES, 'UTF-8', false) : '') !!}</a>
+                                        </td>
+                                    @endforeach
+                                </tr>
+                            @endforeach
+                            {!! apply_filters('translation_other_translation_table_body', null) !!}
                         </tbody>
                     </table>
                 </div>

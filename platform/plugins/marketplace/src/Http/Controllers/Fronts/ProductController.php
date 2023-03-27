@@ -145,7 +145,7 @@ class ProductController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int $id, FormBuilder $formBuilder)
+    public function edit(int|string $id, FormBuilder $formBuilder)
     {
         $product = $this->productRepository->findOrFail($id);
 
@@ -161,7 +161,7 @@ class ProductController extends BaseController
     }
 
     public function update(
-        int $id,
+        int|string $id,
         ProductRequest $request,
         StoreProductService $service,
         GroupedProductInterface $groupedProductRepository,

@@ -16,14 +16,8 @@ use Theme;
 
 class WishlistController extends Controller
 {
-    protected ProductInterface $productRepository;
-
-    protected WishlistInterface $wishlistRepository;
-
-    public function __construct(WishlistInterface $wishlistRepository, ProductInterface $productRepository)
+    public function __construct(protected WishlistInterface $wishlistRepository, protected ProductInterface $productRepository)
     {
-        $this->productRepository = $productRepository;
-        $this->wishlistRepository = $wishlistRepository;
     }
 
     public function index(Request $request)
@@ -62,7 +56,7 @@ class WishlistController extends Controller
         return Theme::scope('ecommerce.wishlist', compact('products'), 'plugins/ecommerce::themes.wishlist')->render();
     }
 
-    public function store(int $productId, BaseHttpResponse $response)
+    public function store(int|string $productId, BaseHttpResponse $response)
     {
         if (! EcommerceHelper::isWishlistEnabled()) {
             abort(404);
@@ -105,7 +99,7 @@ class WishlistController extends Controller
             ->setData(['count' => auth('customer')->user()->wishlist()->count()]);
     }
 
-    public function destroy(int $productId, BaseHttpResponse $response)
+    public function destroy(int|string $productId, BaseHttpResponse $response)
     {
         if (! EcommerceHelper::isWishlistEnabled()) {
             abort(404);

@@ -13,7 +13,11 @@ class RouteServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->app->booted(function () {
-            $this->loadRoutesFrom(theme_path(Theme::getThemeName() . '/routes/web.php'));
+            $routeFilePath = theme_path(Theme::getThemeName() . '/routes/web.php');
+
+            if ($this->app['files']->exists($routeFilePath)) {
+                $this->loadRoutesFrom($routeFilePath);
+            }
         });
     }
 }

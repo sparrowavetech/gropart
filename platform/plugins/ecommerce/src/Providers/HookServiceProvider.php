@@ -16,7 +16,6 @@ use Botble\Ecommerce\Models\Invoice;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductCategory;
 use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
-use Botble\Ecommerce\Repositories\Interfaces\EnquiryInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderReturnInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
@@ -49,8 +48,6 @@ use OrderHelper;
 use Route;
 use RvMedia;
 use Theme;
-use Botble\Sms\Supports\SmsHandler;
-use Botble\Sms\Enums\SmsEnum;
 
 class HookServiceProvider extends ServiceProvider
 {
@@ -557,7 +554,9 @@ class HookServiceProvider extends ServiceProvider
                             'id' => $product->product_id,
                             'name' => $product->product_name,
                             'price' => $product->price,
-                            'price_per_order' => $product->price * $product->qty + $order->tax_amount / $order->products->count() - $order->discount_amount / $order->products->count(),
+                            'price_per_order' => ($product->price * $product->qty)
+                                + ($order->tax_amount / $order->products->count())
+                                - ($order->discount_amount / $order->products->count()),
                             'qty' => $product->qty,
                         ];
                     }
@@ -613,21 +612,7 @@ class HookServiceProvider extends ServiceProvider
                             ->sendUsingTemplate('invoice-payment-created', $customer->email, [
                                 'attachments' => [$localDisk->path($invoiceName)],
                             ]);
-                            if (is_plugin_active('sms')) {
-                                $sms = new  SmsHandler;
-                                $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
-                                if ($sms->templateEnabled(SmsEnum::INVOICE_PAYMENT_DETAIL())) {
-                                    $sms->setVariableValues([
-                                        'customer_name' => $customer->name,
-                                        'invoice_code' => $invoice->code,
-                                        'invoice_link' => route('customer.invoices.show', $invoice->id),
-                                    ]);
-                                    $sms->sendUsingTemplate(
-                                        SmsEnum::INVOICE_PAYMENT_DETAIL(),
-                                        $customer->phone
-                                    );
-                                }
-                            }
+
                         $localDisk->delete($invoiceName);
                     } catch (Exception $exception) {
                         info($exception->getMessage());
@@ -729,6 +714,10 @@ class HookServiceProvider extends ServiceProvider
     public function registerDashboardWidgets(array $widgets, Collection $widgetSettings): array
     {
         if (! Auth::user()->hasPermission('ecommerce.report.index')) {
+            return $widgets;
+        }
+
+        if (! is_plugin_active('payment')) {
             return $widgets;
         }
 

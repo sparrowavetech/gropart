@@ -29,8 +29,8 @@ class CouchbaseCollectionAdapter extends AbstractAdapter
 {
     private const MAX_KEY_LENGTH = 250;
 
-    private Collection $connection;
-    private MarshallerInterface $marshaller;
+    private $connection;
+    private $marshaller;
 
     public function __construct(Collection $connection, string $namespace = '', int $defaultLifetime = 0, MarshallerInterface $marshaller = null)
     {
@@ -70,7 +70,7 @@ class CouchbaseCollectionAdapter extends AbstractAdapter
             $password = $options['password'] ?? '';
 
             foreach ($dsn as $server) {
-                if (!str_starts_with($server, 'couchbase:')) {
+                if (0 !== strpos($server, 'couchbase:')) {
                     throw new InvalidArgumentException(sprintf('Invalid Couchbase DSN: "%s" does not start with "couchbase:".', $server));
                 }
 
@@ -131,13 +131,16 @@ class CouchbaseCollectionAdapter extends AbstractAdapter
         return $results;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function doFetch(array $ids): array
     {
         $results = [];
         foreach ($ids as $id) {
             try {
                 $resultCouchbase = $this->connection->get($id);
-            } catch (DocumentNotFoundException) {
+            } catch (DocumentNotFoundException $exception) {
                 continue;
             }
 
@@ -149,16 +152,25 @@ class CouchbaseCollectionAdapter extends AbstractAdapter
         return $results;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function doHave($id): bool
     {
         return $this->connection->exists($id)->exists();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function doClear($namespace): bool
     {
         return false;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function doDelete(array $ids): bool
     {
         $idsErrors = [];
@@ -169,13 +181,16 @@ class CouchbaseCollectionAdapter extends AbstractAdapter
                 if (null === $result->mutationToken()) {
                     $idsErrors[] = $id;
                 }
-            } catch (DocumentNotFoundException) {
+            } catch (DocumentNotFoundException $exception) {
             }
         }
 
         return 0 === \count($idsErrors);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function doSave(array $values, $lifetime): array|bool
     {
         if (!$values = $this->marshaller->marshall($values, $failed)) {
@@ -189,7 +204,7 @@ class CouchbaseCollectionAdapter extends AbstractAdapter
         foreach ($values as $key => $value) {
             try {
                 $this->connection->upsert($key, $value, $upsertOptions);
-            } catch (\Exception) {
+            } catch (\Exception $exception) {
                 $ko[$key] = '';
             }
         }

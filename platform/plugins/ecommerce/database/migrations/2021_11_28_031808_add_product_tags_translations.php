@@ -10,7 +10,7 @@ return new class () extends Migration {
         if (! Schema::hasTable('ec_product_tags_translations')) {
             Schema::create('ec_product_tags_translations', function (Blueprint $table) {
                 $table->string('lang_code');
-                $table->integer('ec_product_tags_id');
+                $table->foreignId('ec_product_tags_id');
                 $table->string('name')->nullable();
 
                 $table->primary(['lang_code', 'ec_product_tags_id'], 'ec_product_tags_translations_primary');

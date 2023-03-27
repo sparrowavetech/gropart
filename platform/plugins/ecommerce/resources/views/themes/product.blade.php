@@ -159,7 +159,6 @@
                             </div>
                         </div>
                     </div>
-
                     <!-- End Accordion Content -->
                 </div>
 

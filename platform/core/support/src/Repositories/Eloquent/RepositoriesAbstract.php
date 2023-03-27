@@ -6,7 +6,6 @@ use Botble\Base\Supports\RepositoryHelper;
 use Botble\Support\Repositories\Interfaces\RepositoryInterface;
 use Closure;
 use Eloquent;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -30,17 +29,11 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         $this->originalModel = $model;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getModel()
     {
         return $this->model;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function setModel(string $model): self
     {
         $this->model = $model;
@@ -48,17 +41,11 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         return $this;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getTable(): string
     {
         return $this->model->getTable();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function findById($id, array $with = [])
     {
         $data = $this->make($with)->where('id', $id);
@@ -66,9 +53,6 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         return $this->applyBeforeExecuteQuery($data, true)->first();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function make(array $with = [])
     {
         if (! empty($with)) {
@@ -78,9 +62,6 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         return $this->model;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function applyBeforeExecuteQuery($data, bool $isSingle = false)
     {
         $data = RepositoryHelper::applyBeforeExecuteQuery($data, $this->originalModel, $isSingle);
@@ -90,9 +71,6 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         return $data;
     }
 
-    /**
-     * @return $this
-     */
     public function resetModel(): self
     {
         $this->model = new $this->originalModel();
@@ -100,9 +78,6 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         return $this;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function findOrFail($id, array $with = [])
     {
         $data = $this->make($with)->where('id', $id);
@@ -116,9 +91,6 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         throw (new ModelNotFoundException())->setModel(get_class($this->originalModel), $id);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function all(array $with = [])
     {
         $data = $this->make($with);
@@ -126,9 +98,6 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function pluck(string $column, $key = null, array $condition = []): array
     {
         $this->applyConditions($condition);
@@ -143,9 +112,6 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         return $this->applyBeforeExecuteQuery($data)->pluck($column, $key)->all();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function allBy(array $condition, array $with = [], array $select = ['*'])
     {
         $this->applyConditions($condition);
@@ -155,10 +121,6 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    /**
-     * @param array $where
-     * @param null|Eloquent|Builder $model
-     */
     protected function applyConditions(array $where, &$model = null)
     {
         if (! $model) {
@@ -202,9 +164,6 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function create(array $data)
     {
         $data = $this->model->create($data);
@@ -214,9 +173,6 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         return $data;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function createOrUpdate($data, array $condition = [])
     {
         /**
@@ -249,9 +205,6 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         return false;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getFirstBy(array $condition = [], array $select = ['*'], array $with = [])
     {
         $this->make($with);
@@ -267,17 +220,11 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         return $this->applyBeforeExecuteQuery($data, true)->first();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function delete(Model $model): bool
     {
         return $model->delete();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function firstOrCreate(array $data, array $with = [])
     {
         $data = $this->model->firstOrCreate($data, $with);
@@ -287,9 +234,6 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         return $data;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function update(array $condition, array $data)
     {
         $this->applyConditions($condition);
@@ -301,9 +245,6 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         return $data;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function select(array $select = ['*'], array $condition = [])
     {
         $this->applyConditions($condition);
@@ -313,9 +254,6 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         return $this->applyBeforeExecuteQuery($data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function deleteBy(array $condition = [])
     {
         $this->applyConditions($condition);
@@ -335,9 +273,6 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         return true;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function count(array $condition = []): int
     {
         $this->applyConditions($condition);
@@ -349,9 +284,6 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         return $data;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getByWhereIn($column, array $value = [], array $args = [])
     {
         $data = $this->model->whereIn($column, $value);
@@ -371,9 +303,6 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         return $data->get();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function advancedGet(array $params = [])
     {
         $params = array_merge([
@@ -445,9 +374,6 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         return $result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function forceDelete(array $condition = [])
     {
         $this->applyConditions($condition);
@@ -458,9 +384,6 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function restoreBy(array $condition = [])
     {
         $this->applyConditions($condition);
@@ -471,9 +394,6 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getFirstByWithTrash(array $condition = [], array $select = [])
     {
         $this->applyConditions($condition);
@@ -487,17 +407,11 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         return $this->applyBeforeExecuteQuery($query, true)->first();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function insert(array $data): bool
     {
         return $this->model->insert($data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function firstOrNew(array $condition)
     {
         $this->applyConditions($condition);

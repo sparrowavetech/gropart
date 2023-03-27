@@ -19,14 +19,8 @@ use Illuminate\Http\Request;
 
 class RoleController extends BaseController
 {
-    protected RoleInterface $roleRepository;
-
-    protected UserInterface $userRepository;
-
-    public function __construct(RoleInterface $roleRepository, UserInterface $userRepository)
+    public function __construct(protected RoleInterface $roleRepository, protected UserInterface $userRepository)
     {
-        $this->roleRepository = $roleRepository;
-        $this->userRepository = $userRepository;
     }
 
     public function index(RoleTable $dataTable)
@@ -36,7 +30,7 @@ class RoleController extends BaseController
         return $dataTable->renderTable();
     }
 
-    public function destroy(int $id, BaseHttpResponse $response)
+    public function destroy(int|string $id, BaseHttpResponse $response)
     {
         $role = $this->roleRepository->findOrFail($id);
 
@@ -66,7 +60,7 @@ class RoleController extends BaseController
         return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
-    public function edit(int $id, FormBuilder $formBuilder, Request $request)
+    public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
     {
         $role = $this->roleRepository->findOrFail($id);
 
@@ -77,7 +71,7 @@ class RoleController extends BaseController
         return $formBuilder->create(RoleForm::class, ['model' => $role])->renderForm();
     }
 
-    public function update(int $id, RoleCreateRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, RoleCreateRequest $request, BaseHttpResponse $response)
     {
         if ($request->input('is_default')) {
             $this->roleRepository->getModel()->where('id', '!=', $id)->update(['is_default' => 0]);
@@ -145,7 +139,7 @@ class RoleController extends BaseController
             ->setMessage(trans('core/acl::permissions.create_success'));
     }
 
-    public function getDuplicate(int $id, BaseHttpResponse $response)
+    public function getDuplicate(int|string $id, BaseHttpResponse $response)
     {
         $baseRole = $this->roleRepository->findOrFail($id);
 

@@ -11,6 +11,19 @@
                     <div class="annotated-section-description pd-all-20 p-none-t">
                         <p class="color-note">{{ trans('packages/slug::slug.settings.description') }}</p>
                     </div>
+
+                    @if (config('packages.slug.general.enable_slug_translator'))
+                        <div class="pd-all-20">
+                            <p>{{ trans('packages/slug::slug.settings.available_variables') }}:</p>
+                            @foreach(SlugHelper::getTranslator()->getVariables() as $key => $item)
+                                <p>
+                                    <code class="p-1">
+                                        <strong>{{ $key }}</strong> - {{ $item['label'] }}
+                                    </code>
+                                </p>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
 
                 <div class="flexbox-annotated-section-content">
@@ -18,8 +31,13 @@
                         @foreach(SlugHelper::supportedModels() as $model => $name)
                             <div class="form-group mb-3">
                                 <label class="text-title-field" for="{{ SlugHelper::getPermalinkSettingKey($model) }}">{{ trans('packages/slug::slug.prefix_for', ['name' => $name]) }}</label>
-                                <input type="text" class="next-input form-control {{ $errors->has(SlugHelper::getPermalinkSettingKey($model)) ? 'is-invalid' : ''}}" name="{{ SlugHelper::getPermalinkSettingKey($model) }}" id="{{ SlugHelper::getPermalinkSettingKey($model) }}"
-                                       value="{{ ltrim(rtrim(old(SlugHelper::getPermalinkSettingKey($model), setting(SlugHelper::getPermalinkSettingKey($model), SlugHelper::getPrefix($model))), '/'), '/') }}">
+                                <input
+                                    type="text"
+                                    @class(['next-input form-control', 'is-invalid' => $errors->has(SlugHelper::getPermalinkSettingKey($model))])
+                                    name="{{ SlugHelper::getPermalinkSettingKey($model) }}"
+                                    id="{{ SlugHelper::getPermalinkSettingKey($model) }}"
+                                    value="{{ ltrim(rtrim(old(SlugHelper::getPermalinkSettingKey($model), SlugHelper::getPrefix($model, '', false)), '/'), '/') }}"
+                                >
                                 <input type="hidden" name="{{ SlugHelper::getPermalinkSettingKey($model) }}-model-key" value="{{ $model }}">
                                 @if ($errors->has(SlugHelper::getPermalinkSettingKey($model)))
                                     <span class="invalid-feedback">
@@ -27,7 +45,7 @@
                                     </span>
                                 @endif
                                 <span class="help-ts">
-                                    {{ trans('packages/slug::slug.settings.preview') }}: <a href="javascript:void(0)">{{ url((string)setting(SlugHelper::getPermalinkSettingKey($model), SlugHelper::getPrefix($model))) }}/{{ Str::slug('your url here') }}</a>
+                                    {{ trans('packages/slug::slug.settings.preview') }}: <a href="javascript:void(0)">{{ url((string)SlugHelper::getPrefix($model)) }}/{{ Str::slug('your url here') }}</a>
                                 </span>
                             </div>
                         @endforeach

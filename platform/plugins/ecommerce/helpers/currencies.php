@@ -7,15 +7,12 @@ use Botble\Ecommerce\Supports\CurrencySupport;
 use Illuminate\Support\Collection;
 
 if (! function_exists('format_price')) {
-    /**
-     * @param float|int|null $price
-     * @param Currency|null|string $currency
-     * @param bool $withoutCurrency
-     * @param bool $useSymbol
-     * @return string
-     */
-    function format_price($price, $currency = null, bool $withoutCurrency = false, bool $useSymbol = true): string
-    {
+    function format_price(
+        float|null $price,
+        Currency|null|string $currency = null,
+        bool $withoutCurrency = false,
+        bool $useSymbol = true
+    ): string {
         if ($currency) {
             if (! $currency instanceof Currency) {
                 $currency = app(CurrencyInterface::class)->getFirstBy(['id' => $currency]);
@@ -63,13 +60,7 @@ if (! function_exists('format_price')) {
 }
 
 if (! function_exists('human_price_text')) {
-    /**
-     * @param float|null|mixed $price
-     * @param Currency|null|string $currency
-     * @param string $priceUnit
-     * @return string
-     */
-    function human_price_text($price, $currency, string $priceUnit = ''): string
+    function human_price_text(float|null $price, Currency|null|string $currency, string $priceUnit = ''): string
     {
         $numberAfterDot = ($currency instanceof Currency) ? $currency->decimals : 0;
 
@@ -102,7 +93,7 @@ if (! function_exists('human_price_text')) {
         }
 
         $price = number_format(
-            $price,
+            (float)$price,
             (int)$numberAfterDot,
             $decimalSeparator,
             $thousandSeparator
@@ -115,10 +106,7 @@ if (! function_exists('human_price_text')) {
 }
 
 if (! function_exists('get_current_exchange_rate')) {
-    /**
-     * @param null $currency
-     */
-    function get_current_exchange_rate($currency = null)
+    function get_current_exchange_rate($currency = null): float|null
     {
         if (! $currency) {
             $currency = get_application_currency();
@@ -135,9 +123,6 @@ if (! function_exists('get_current_exchange_rate')) {
 }
 
 if (! function_exists('cms_currency')) {
-    /**
-     * @return CurrencySupport
-     */
     function cms_currency(): CurrencySupport
     {
         return CurrencyFacade::getFacadeRoot();
@@ -145,9 +130,6 @@ if (! function_exists('cms_currency')) {
 }
 
 if (! function_exists('get_all_currencies')) {
-    /**
-     * @return Collection
-     */
     function get_all_currencies(): Collection
     {
         return cms_currency()->currencies();
@@ -155,9 +137,6 @@ if (! function_exists('get_all_currencies')) {
 }
 
 if (! function_exists('get_application_currency')) {
-    /**
-     * @return Currency|null
-     */
     function get_application_currency(): ?Currency
     {
         $currency = cms_currency()->getApplicationCurrency();
@@ -171,10 +150,7 @@ if (! function_exists('get_application_currency')) {
 }
 
 if (! function_exists('get_application_currency_id')) {
-    /**
-     * @return int|null
-     */
-    function get_application_currency_id(): ?int
+    function get_application_currency_id(): int|string|null
     {
         return get_application_currency()->id;
     }

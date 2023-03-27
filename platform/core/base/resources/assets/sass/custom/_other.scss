@@ -805,3 +805,42 @@ h4.modal-title {
         }
     }
 }
+
+.form-control-disabled {
+    background-color: #e9ecef !important;
+    cursor: not-allowed;
+
+    &:focus {
+        background-color: #e9ecef !important;
+    }
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__rendered .select2-selection__choice .select2-selection__choice__remove {
+    font-size: 1rem !important;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__rendered .select2-selection__choice {
+    border-radius: 0 !important;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__rendered .select2-selection__choice {
+    float: none !important;
+    margin-left: 7px !important;
+
+    &:first-child {
+        margin-top: 5px !important;
+    }
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__rendered {
+    padding: 0 !important;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__display {
+    font-size: 13px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__clear {
+    height: 34px;
+    margin-right: 10px;
+}

@@ -7,7 +7,7 @@
     <div class="col-md-4">
         <div class="form-group mb-3 @if ($errors->has('sku')) has-error @endif">
             <label class="text-title-field">{{ trans('plugins/ecommerce::products.sku') }}</label>
-            {!! Form::text('sku', old('sku', $product ? $product->sku : null), ['class' => 'next-input', 'id' => 'sku', 'data-counter' => 30]) !!}
+            {!! Form::text('sku', old('sku', $product ? $product->sku : null), ['class' => 'next-input', 'id' => 'sku']) !!}
         </div>
         @if (($isVariation && !$product) || ($product && $product->is_variation && !$product->sku))
             <div class="form-group mb-3">

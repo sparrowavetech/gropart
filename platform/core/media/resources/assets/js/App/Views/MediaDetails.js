@@ -8,6 +8,7 @@ export class MediaDetails {
 
         this.onlyFields = [
             'name',
+            'alt',
             'full_url',
             'size',
             'mime_type',
@@ -23,7 +24,7 @@ export class MediaDetails {
         let description = '';
         let useClipboard = false;
         _.forEach(data, (val, index) => {
-            if (_.includes(_self.onlyFields, index)) {
+            if (_.includes(_self.onlyFields, index) && val) {
                 if (!_.includes(['size', 'mime_type'], index)) {
                     description += _self.descriptionItemTemplate
                         .replace(/__title__/gi, RV_MEDIA_CONFIG.translations[index])

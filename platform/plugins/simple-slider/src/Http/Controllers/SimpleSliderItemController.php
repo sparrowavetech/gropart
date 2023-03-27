@@ -18,11 +18,8 @@ use Botble\SimpleSlider\Tables\SimpleSliderItemTable;
 
 class SimpleSliderItemController extends BaseController
 {
-    protected SimpleSliderItemInterface $simpleSliderItemRepository;
-
-    public function __construct(SimpleSliderItemInterface $simpleSliderItemRepository)
+    public function __construct(protected SimpleSliderItemInterface $simpleSliderItemRepository)
     {
-        $this->simpleSliderItemRepository = $simpleSliderItemRepository;
     }
 
     public function index(SimpleSliderItemTable $dataTable)
@@ -47,7 +44,7 @@ class SimpleSliderItemController extends BaseController
         return $response->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int $id, FormBuilder $formBuilder, Request $request)
+    public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
     {
         $simpleSliderItem = $this->simpleSliderItemRepository->findOrFail($id);
 
@@ -59,7 +56,7 @@ class SimpleSliderItemController extends BaseController
             ->renderForm();
     }
 
-    public function update(int $id, SimpleSliderItemRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, SimpleSliderItemRequest $request, BaseHttpResponse $response)
     {
         $simpleSlider = $this->simpleSliderItemRepository->findOrFail($id);
         $simpleSlider->fill($request->input());
@@ -71,14 +68,14 @@ class SimpleSliderItemController extends BaseController
         return $response->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(int $id)
+    public function destroy(int|string $id)
     {
         $slider = $this->simpleSliderItemRepository->findOrFail($id);
 
         return view('plugins/simple-slider::partials.delete', compact('slider'))->render();
     }
 
-    public function postDelete(Request $request, $id, BaseHttpResponse $response)
+    public function postDelete(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
             $simpleSlider = $this->simpleSliderItemRepository->findOrFail($id);

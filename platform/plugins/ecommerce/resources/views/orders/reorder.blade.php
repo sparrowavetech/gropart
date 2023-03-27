@@ -11,7 +11,7 @@
                 :customer_addresses="{{ json_encode($customerAddresses) }}"
                 :customer_address="{{ $customerAddress }}"
                 :sub_amount="{{ $order->amount }}"
-                :total_amount="{{ $order->payment->amount ?? $order->amount }}"
+                :total_amount="{{ is_plugin_active('payment') && $order->payment->amount ? $order->payment->amount : $order->amount }}"
                 :discount_amount="{{ $order->discount_amount }}"
                 @if ($order->coupon_code) :discount_coupon_code="'{{ $order->coupon_code }}'" @endif
                 @if ($order->discount_description) :discount_description="'{{ $order->discount_description }}'" @endif

@@ -17,7 +17,7 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
                 'as' => 'generate-invoice',
                 'uses' => 'InvoiceController@getGenerateInvoice',
                 'permission' => 'ecommerce.invoice.edit',
-            ]);
+            ])->where('id', BaseHelper::routeIdRegex());
         });
     });
 });

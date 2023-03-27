@@ -14,11 +14,8 @@ use Theme;
 
 class CompareController extends Controller
 {
-    protected ProductInterface $productRepository;
-
-    public function __construct(ProductInterface $productRepository)
+    public function __construct(protected ProductInterface $productRepository)
     {
-        $this->productRepository = $productRepository;
     }
 
     public function index()
@@ -61,7 +58,7 @@ class CompareController extends Controller
         )->render();
     }
 
-    public function store(int $productId, BaseHttpResponse $response)
+    public function store(int|string $productId, BaseHttpResponse $response)
     {
         if (! EcommerceHelper::isCompareEnabled()) {
             abort(404);
@@ -87,7 +84,7 @@ class CompareController extends Controller
             ->setData(['count' => Cart::instance('compare')->count()]);
     }
 
-    public function destroy(int $productId, BaseHttpResponse $response)
+    public function destroy(int|string $productId, BaseHttpResponse $response)
     {
         if (! EcommerceHelper::isCompareEnabled()) {
             abort(404);

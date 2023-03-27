@@ -9,7 +9,7 @@ class CartRequest extends Request
     public function rules(): array
     {
         return [
-            'id' => 'required|min:1|integer',
+            'id' => 'required|min:1',
             'qty' => 'min:1|integer',
         ];
     }
@@ -18,7 +18,6 @@ class CartRequest extends Request
     {
         return [
             'id.required' => __('Product ID is required'),
-            'id.integer' => __('Product ID must be a number'),
         ];
     }
 }

@@ -7,6 +7,7 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class FlashSale extends BaseModel
@@ -49,6 +50,15 @@ class FlashSale extends BaseModel
     public function scopeExpired(Builder $query): Builder
     {
         return $query->whereDate('end_date', '=<', Carbon::now()->toDateString());
+    }
+
+    protected function expired(): Attribute
+    {
+        return Attribute::make(
+            get: function (): bool {
+                return Carbon::parse($this->end_date)->lessThan(Carbon::now());
+            },
+        );
     }
 
     protected static function boot()

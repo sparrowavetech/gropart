@@ -68,12 +68,12 @@ class ProductCacheDecorator extends CacheAbstractDecorator implements ProductInt
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }
 
-    public function getProductsWishlist(int $customerId, array $params = [])
+    public function getProductsWishlist(int|string $customerId, array $params = [])
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }
 
-    public function getProductsRecentlyViewed(int $customerId, array $params = [])
+    public function getProductsRecentlyViewed(int|string $customerId, array $params = [])
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }
@@ -83,7 +83,7 @@ class ProductCacheDecorator extends CacheAbstractDecorator implements ProductInt
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }
 
-    public function productsNeedToReviewByCustomer(int $customerId, int $limit = 12, array $orderIds = [])
+    public function productsNeedToReviewByCustomer(int|string $customerId, int $limit = 12, array $orderIds = [])
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }

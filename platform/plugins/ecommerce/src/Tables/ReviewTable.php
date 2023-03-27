@@ -42,7 +42,7 @@ class ReviewTable extends TableAbstract
         $data = $this->table
             ->eloquent($this->query())
             ->editColumn('product_id', function ($item) {
-                if (! empty($item->product)) {
+                if (! empty($item->product) && $item->product->url) {
                     return Html::link(
                         $item->product->url,
                         BaseHelper::clean($item->product_name),
@@ -53,6 +53,10 @@ class ReviewTable extends TableAbstract
                 return null;
             })
             ->editColumn('customer_id', function ($item) {
+                if (! $item->user->id) {
+                    return null;
+                }
+
                 return Html::link(route('customers.edit', $item->user->id), BaseHelper::clean($item->user->name))->toHtml();
             })
             ->editColumn('star', function ($item) {

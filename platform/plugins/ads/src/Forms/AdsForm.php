@@ -5,12 +5,19 @@ namespace Botble\Ads\Forms;
 use AdsManager;
 use Botble\Ads\Http\Requests\AdsRequest;
 use Botble\Ads\Models\Ads;
+use Botble\Ads\Repositories\Interfaces\AdsInterface;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Forms\FormAbstract;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class AdsForm extends FormAbstract
 {
+    public function __construct(protected AdsInterface $adsRepository)
+    {
+        parent::__construct();
+    }
+
     public function buildForm(): void
     {
         $this
@@ -32,7 +39,7 @@ class AdsForm extends FormAbstract
                     'placeholder' => trans('plugins/ads::ads.key'),
                     'data-counter' => 255,
                 ],
-                'default_value' => generate_ads_key(),
+                'default_value' => $this->generateAdsKey(),
             ])
             ->add('url', 'text', [
                 'label' => trans('plugins/ads::ads.url'),
@@ -79,5 +86,14 @@ class AdsForm extends FormAbstract
                 'label_attr' => ['class' => 'control-label'],
             ])
             ->setBreakFieldPoint('status');
+    }
+
+    protected function generateAdsKey(): string
+    {
+        do {
+            $key = strtoupper(Str::random(12));
+        } while ($this->adsRepository->count(compact('key')) > 0);
+
+        return $key;
     }
 }

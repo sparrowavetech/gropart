@@ -12,6 +12,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Removed
 
+# 4.16.0 (16 February 2023)
+## Added
+- Support for Laravel enum validation rule in line validators ([#616](https://github.com/knuckleswtf/scribe/pull/616))
+
+
+# 4.15.0 (14 February 2023)
+## Added
+- Support for Laravel enum validation rule ([#614](https://github.com/knuckleswtf/scribe/pull/614))
+
+
+# 4.14.0 (07 February 2023)
+## Added
+- Support for Laravel 10 ([#610](https://github.com/knuckleswtf/scribe/pull/610))
+- Support extracting docs from custom validation rules ([#611](https://github.com/knuckleswtf/scribe/pull/611))
+
+
 # 4.13.0 (22 January 2023)
 ## Added
 - Support for Laravel Actions package ([#606](https://github.com/knuckleswtf/scribe/pull/606))

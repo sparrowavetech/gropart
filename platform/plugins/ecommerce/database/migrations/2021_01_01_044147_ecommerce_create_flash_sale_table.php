@@ -15,8 +15,8 @@ return new class () extends Migration {
         });
 
         Schema::create('ec_flash_sale_products', function (Blueprint $table) {
-            $table->integer('flash_sale_id')->unsigned();
-            $table->integer('product_id')->unsigned();
+            $table->foreignId('flash_sale_id');
+            $table->foreignId('product_id');
             $table->double('price')->unsigned()->nullable();
             $table->integer('quantity')->unsigned()->nullable();
             $table->integer('sold')->unsigned()->default(0);

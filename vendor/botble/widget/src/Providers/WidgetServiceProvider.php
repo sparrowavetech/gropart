@@ -13,8 +13,6 @@ use Botble\Widget\WidgetGroupCollection;
 use Botble\Widget\Widgets\Text;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Routing\Events\RouteMatched;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
 use Theme;
 use WidgetGroup;
@@ -65,14 +63,14 @@ class WidgetServiceProvider extends ServiceProvider
             if (! empty($widgets) && is_array($widgets)) {
                 foreach ($widgets as $widget) {
                     $registration = $widgetPath . '/' . $widget . '/registration.php';
-                    if (File::exists($registration)) {
-                        File::requireOnce($registration);
+                    if ($this->app['files']->exists($registration)) {
+                        $this->app['files']->requireOnce($registration);
                     }
                 }
             }
         });
 
-        Event::listen(RouteMatched::class, function () {
+        $this->app['events']->listen(RouteMatched::class, function () {
             dashboard_menu()
                 ->registerItem([
                     'id' => 'cms-core-widget',

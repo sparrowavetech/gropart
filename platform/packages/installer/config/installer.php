@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'enabled' => env('CMS_ENABLE_INSTALLER', true),
     'core' => [
         'php_version' => '8.0.2',
     ],

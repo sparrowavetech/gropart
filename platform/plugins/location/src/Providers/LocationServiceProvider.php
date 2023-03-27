@@ -19,7 +19,6 @@ use Botble\Location\Repositories\Eloquent\StateRepository;
 use Botble\Location\Repositories\Interfaces\StateInterface;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Event;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Routing\Events\RouteMatched;
@@ -76,7 +75,7 @@ class LocationServiceProvider extends ServiceProvider
             ]);
         }
 
-        Event::listen(RouteMatched::class, function () {
+        $this->app['events']->listen(RouteMatched::class, function () {
             dashboard_menu()
                 ->registerItem([
                     'id' => 'cms-plugins-location',
@@ -175,15 +174,15 @@ class LocationServiceProvider extends ServiceProvider
                  * @var Blueprint $this
                  */
                 if ($columnName = Arr::get($keys, 'country')) {
-                    $this->integer($columnName)->unsigned()->default(1)->nullable();
+                    $this->foreignId($columnName)->default(1)->nullable();
                 }
 
                 if ($columnName = Arr::get($keys, 'state')) {
-                    $this->integer($columnName)->unsigned()->nullable();
+                    $this->foreignId($columnName)->nullable();
                 }
 
                 if ($columnName = Arr::get($keys, 'city')) {
-                    $this->integer($columnName)->unsigned()->nullable();
+                    $this->foreignId($columnName)->nullable();
                 }
 
                 return true;

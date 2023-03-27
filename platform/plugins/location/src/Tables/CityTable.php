@@ -23,22 +23,16 @@ class CityTable extends TableAbstract
 
     protected $hasFilter = true;
 
-    protected CountryInterface $countryRepository;
-
-    protected StateInterface $stateRepository;
-
     public function __construct(
         DataTables $table,
         UrlGenerator $urlGenerator,
         CityInterface $cityRepository,
-        CountryInterface $countryRepository,
-        StateInterface $stateRepository
+        protected CountryInterface $countryRepository,
+        protected StateInterface $stateRepository
     ) {
         parent::__construct($table, $urlGenerator);
 
         $this->repository = $cityRepository;
-        $this->countryRepository = $countryRepository;
-        $this->stateRepository = $stateRepository;
 
         if (! Auth::user()->hasAnyPermission(['city.edit', 'city.destroy'])) {
             $this->hasOperations = false;

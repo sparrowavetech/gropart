@@ -4,71 +4,21 @@ namespace Botble\SeoHelper\Contracts;
 
 interface SeoHelperContract extends RenderableContract
 {
-    /**
-     * Get SeoMeta instance.
-     *
-     * @return SeoMetaContract
-     */
-    public function meta();
+    public function meta(): SeoMetaContract;
 
-    /**
-     * Set SeoMeta instance.
-     *
-     * @param SeoMetaContract $seoMeta
-     * @return $this
-     */
-    public function setSeoMeta(SeoMetaContract $seoMeta);
+    public function setSeoMeta(SeoMetaContract $seoMeta): self;
 
-    /**
-     * Get SeoOpenGraph instance.
-     *
-     * @return SeoOpenGraphContract
-     */
-    public function openGraph();
+    public function openGraph(): SeoOpenGraphContract;
 
-    /**
-     * Get SeoOpenGraph instance.
-     *
-     * @param SeoOpenGraphContract $seoOpenGraph
-     * @return $this
-     */
-    public function setSeoOpenGraph(SeoOpenGraphContract $seoOpenGraph);
+    public function setSeoOpenGraph(SeoOpenGraphContract $seoOpenGraph): self;
 
-    /**
-     * Get SeoTwitter instance.
-     *
-     * @return SeoTwitterContract
-     */
-    public function twitter();
+    public function twitter(): SeoTwitterContract;
 
-    /**
-     * Set SeoTwitter instance.
-     *
-     * @param SeoTwitterContract $seoTwitter
-     * @return $this
-     */
-    public function setSeoTwitter(SeoTwitterContract $seoTwitter);
+    public function setSeoTwitter(SeoTwitterContract $seoTwitter): self;
 
-    /**
-     * Set title.
-     *
-     * @param string $title
-     * @param string|null $siteName
-     * @param string|null $separator
-     * @return $this
-     */
-    public function setTitle($title, $siteName = null, $separator = null);
+    public function setTitle(string|null $title, string|null $siteName = null, string|null $separator = null): self;
 
-    /**
-     * @return string
-     */
-    public function getTitle();
+    public function getTitle(): string|null;
 
-    /**
-     * Set description.
-     *
-     * @param string $description
-     * @return $this
-     */
-    public function setDescription($description);
+    public function setDescription(string|null $description): self;
 }

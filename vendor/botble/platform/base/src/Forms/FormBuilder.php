@@ -6,7 +6,7 @@ use Kris\LaravelFormBuilder\FormBuilder as BaseFormBuilder;
 
 class FormBuilder extends BaseFormBuilder
 {
-    public function create($formClass, array $options = [], array $data = [])
+    public function create($formClass, array $options = [], array $data = []): FormAbstract
     {
         $form = parent::create($formClass, $options, $data);
 

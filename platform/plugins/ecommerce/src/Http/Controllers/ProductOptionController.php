@@ -18,11 +18,8 @@ use Illuminate\Http\Request;
 
 class ProductOptionController extends BaseController
 {
-    protected GlobalOptionInterface $globalOptionRepository;
-
-    public function __construct(GlobalOptionInterface $globalOptionRepository)
+    public function __construct(protected GlobalOptionInterface $globalOptionRepository)
     {
-        $this->globalOptionRepository = $globalOptionRepository;
     }
 
     public function index(GlobalOptionTable $table)
@@ -51,7 +48,7 @@ class ProductOptionController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int $id, FormBuilder $formBuilder, Request $request)
+    public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
     {
         $option = $this->globalOptionRepository->findOrFail($id, ['values']);
 
@@ -62,7 +59,7 @@ class ProductOptionController extends BaseController
         return $formBuilder->create(GlobalOptionForm::class, ['model' => $option])->renderForm();
     }
 
-    public function destroy(Request $request, int $id, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
             $option = $this->globalOptionRepository->findOrFail($id);
@@ -79,7 +76,7 @@ class ProductOptionController extends BaseController
         }
     }
 
-    public function update(int $id, GlobalOptionRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, GlobalOptionRequest $request, BaseHttpResponse $response)
     {
         $option = $this->globalOptionRepository->findOrFail($id);
 

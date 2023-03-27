@@ -13,15 +13,12 @@ class WidgetGroupCollection
 {
     protected array $groups;
 
-    protected Application $app;
-
     protected Collection|array $data = [];
 
     protected bool $loaded = false;
 
-    public function __construct(Application $app)
+    public function __construct(protected Application $app)
     {
-        $this->app = $app;
     }
 
     public function group(string $sidebarId): WidgetGroup

@@ -51,7 +51,7 @@ class Manager
 
         foreach ($this->files->directories($this->app['path.lang']) as $langPath) {
             $locale = basename($langPath);
-            foreach ($this->files->allfiles($langPath) as $file) {
+            foreach ($this->files->allFiles($langPath) as $file) {
                 $info = pathinfo($file);
                 $group = $info['filename'];
                 if (in_array($group, $this->config['exclude_groups'])) {

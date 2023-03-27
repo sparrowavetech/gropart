@@ -10,7 +10,7 @@ return new class () extends Migration {
         if (! Schema::hasTable('ads_translations')) {
             Schema::create('ads_translations', function (Blueprint $table) {
                 $table->string('lang_code');
-                $table->integer('ads_id');
+                $table->foreignId('ads_id');
                 $table->string('name', 255)->nullable();
                 $table->string('image', 255)->nullable();
                 $table->string('url', 255)->nullable();

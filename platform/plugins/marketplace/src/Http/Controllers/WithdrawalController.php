@@ -20,11 +20,8 @@ use Illuminate\Support\Facades\Auth;
 
 class WithdrawalController extends BaseController
 {
-    protected WithdrawalInterface $withdrawalRepository;
-
-    public function __construct(WithdrawalInterface $withdrawalRepository)
+    public function __construct(protected WithdrawalInterface $withdrawalRepository)
     {
-        $this->withdrawalRepository = $withdrawalRepository;
     }
 
     public function index(WithdrawalTable $table)
@@ -34,7 +31,7 @@ class WithdrawalController extends BaseController
         return $table->renderTable();
     }
 
-    public function edit(int $id, FormBuilder $formBuilder, Request $request)
+    public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
     {
         $withdrawal = $this->withdrawalRepository->findOrFail($id);
 
@@ -45,7 +42,7 @@ class WithdrawalController extends BaseController
         return $formBuilder->create(WithdrawalForm::class, ['model' => $withdrawal])->renderForm();
     }
 
-    public function update(int $id, WithdrawalRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, WithdrawalRequest $request, BaseHttpResponse $response)
     {
         $withdrawal = $this->withdrawalRepository->findOrFail($id);
 
@@ -85,7 +82,7 @@ class WithdrawalController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(Request $request, int $id, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
             $withdrawal = $this->withdrawalRepository->findOrFail($id);

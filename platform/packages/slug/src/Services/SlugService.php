@@ -8,11 +8,8 @@ use SlugHelper;
 
 class SlugService
 {
-    protected SlugInterface $slugRepository;
-
-    public function __construct(SlugInterface $slugRepository)
+    public function __construct(protected SlugInterface $slugRepository)
     {
-        $this->slugRepository = $slugRepository;
     }
 
     public function create(?string $name, ?int $slugId = 0, $model = null): ?string
@@ -38,7 +35,7 @@ class SlugService
         return apply_filters(FILTER_SLUG_STRING, $slug, $model);
     }
 
-    protected function checkIfExistedSlug(?string $slug, ?int $slugId, ?string $prefix): bool
+    protected function checkIfExistedSlug(?string $slug, int|string|null $slugId, ?string $prefix): bool
     {
         return $this->slugRepository
             ->getModel()

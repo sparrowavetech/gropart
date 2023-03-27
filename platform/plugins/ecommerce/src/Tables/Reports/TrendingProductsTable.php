@@ -52,17 +52,14 @@ class TrendingProductsTable extends TableAbstract
             ->select([
                 'ec_products.id',
                 'ec_products.name',
-            ])
-            ->addSelect([
                 'views_count' => ProductView::query()
-                    ->selectRaw('SUM(ec_product_views.views) as views_count')
-                    ->whereColumn('ec_product_views.product_id', 'ec_products.id')
-                    ->whereDate('ec_product_views.date', '>=', $startDate)
-                    ->whereDate('ec_product_views.date', '<=', $endDate)
-                    ->groupBy('ec_product_views.product_id'),
+                    ->selectRaw('SUM(views) as views_count')
+                    ->whereColumn('product_id', 'ec_products.id')
+                    ->whereDate('date', '>=', $startDate)
+                    ->whereDate('date', '<=', $endDate)
+                    ->groupBy('product_id'),
             ])
             ->orderByDesc('views_count')
-            ->having('views_count', '>', 0)
             ->limit(5);
 
         return $this->applyScopes($query);

@@ -23,6 +23,14 @@ class GetStartedController extends BaseController
             case 1:
                 break;
             case 2:
+                if (! theme_option()->hasField('primary_color')) {
+                    $request->request->remove('primary_color');
+                }
+
+                if (! theme_option()->hasField('primary_font')) {
+                    $request->request->remove('primary_font');
+                }
+
                 foreach ($request->except(['_token', 'step']) as $key => $value) {
                     if ($value === null) {
                         continue;

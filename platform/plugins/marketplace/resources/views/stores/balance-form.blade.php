@@ -5,7 +5,7 @@
     </div>
     <div class="form-group mb-3">
         <label class="control-label required">{{ trans('plugins/marketplace::revenue.forms.type') }}</label>
-        {!! Form::customSelect('type', Botble\Marketplace\Enums\RevenueTypeEnum::labels()) !!}
+        {!! Form::customSelect('type', Botble\Marketplace\Enums\RevenueTypeEnum::adjustLabels()) !!}
     </div>
     <div class="form-group mb-3">
         <label class="control-label">{{ trans('core/base::forms.description') }}</label>

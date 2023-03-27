@@ -9,6 +9,7 @@ return [
     'setting_general' => 'General',
     'setting_email' => 'Email',
     'system_information' => 'System information',
+
     'theme' => 'Theme',
     'copyright' => 'Copyright :year &copy; :company. Version: <span>:version</span>',
     'profile' => 'Profile',

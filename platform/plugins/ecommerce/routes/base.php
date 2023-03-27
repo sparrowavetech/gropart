@@ -18,6 +18,12 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
             'permission' => 'ecommerce.settings',
         ]);
 
+        Route::post('update-currencies-from-exchange-api', [
+            'as' => 'ecommerce.setting.update-currencies-from-exchange-api',
+            'uses' => 'EcommerceController@updateCurrenciesFromExchangeApi',
+            'permission' => 'ecommerce.settings',
+        ]);
+
         Route::get('advanced-settings', [
             'as' => 'ecommerce.advanced-settings',
             'uses' => 'EcommerceController@getAdvancedSettings',
@@ -58,7 +64,7 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
             'as' => 'ecommerce.store-locators.edit.post',
             'uses' => 'EcommerceController@postUpdateStoreLocator',
             'permission' => 'ecommerce.settings',
-        ]);
+        ])->where('id', BaseHelper::routeIdRegex());
 
         Route::post('store-locators/create', [
             'as' => 'ecommerce.store-locators.create',
@@ -70,7 +76,7 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
             'as' => 'ecommerce.store-locators.destroy',
             'uses' => 'EcommerceController@postDeleteStoreLocator',
             'permission' => 'ecommerce.settings',
-        ]);
+        ])->where('id', BaseHelper::routeIdRegex());
 
         Route::post('store-locators/update-primary-store', [
             'as' => 'ecommerce.store-locators.update-primary-store',
@@ -169,12 +175,6 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
             Route::get('', [
                 'as' => 'ecommerce.report.index',
                 'uses' => 'ReportController@getIndex',
-            ]);
-
-            Route::get('revenue', [
-                'as' => 'ecommerce.report.revenue',
-                'uses' => 'ReportController@getRevenue',
-                'permission' => 'ecommerce.report.index',
             ]);
 
             Route::post('top-selling-products', [
@@ -291,61 +291,11 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Fronts', 'middle
         Route::get('product-variation/{id}', [
             'as' => 'public.web.get-variation-by-attributes',
             'uses' => 'PublicProductController@getProductVariation',
-        ]);
+        ])->where('id', BaseHelper::routeIdRegex());
 
         Route::get('orders/tracking', [
             'as' => 'public.orders.tracking',
             'uses' => 'PublicProductController@getOrderTracking',
-        ]);
-        Route::get('enquiry-for-equipments', [
-            'as'   => 'public.product.enquiry',
-            'uses' => 'PublicProductController@getEnquiryProduct',
-        ]);
-        Route::get('product/enquiry/{product}', [
-            'as'   => 'public.enquiry.get',
-            'uses' => 'PublicProductController@EnquiryFrom',
-        ]);
-        Route::post('product/enquiry/', [
-            'as'   => 'public.enquiry.form',
-            'uses' => 'PublicProductController@EnquiryFromSubmit',
-        ]);
-        Route::get('product/enquiry/success/{id}', [
-            'as'   => 'public.enquiry.success',
-            'uses' => 'PublicProductController@EnquirySuccess',
-        ]);
-        Route::get('product/pincode', [
-            'as'   => 'public.pincode.check',
-            'uses' => 'PublicProductController@ajaxCheckPincode',
-        ]);
-
-    });
-});
-Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' => ['web', 'core']], function () {
-    Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {
-        Route::group(['prefix' => 'enquires', 'as' => 'enquires.'], function () {
-            Route::resource('', 'EnquiryController')
-                ->parameters(['' => 'enquiry']);
-
-            Route::delete('items/destroy', [
-                'as'         => 'deletes',
-                'uses'       => 'EnquiryController@deletes',
-                'permission' => 'enquires.destroy',
-            ]);
-            Route::get('not_available/{id}', [
-                'as'         => 'not_available',
-                'uses'       => 'EnquiryController@not_available',
-                'permission' => 'enquires.edit',
-            ]);
-            Route::get('contacted/{id}', [
-                'as'         => 'contacted',
-                'uses'       => 'EnquiryController@contacted',
-                'permission' => 'enquires.edit',
-            ]);
-            Route::get('rejected/{id}', [
-                'as'         => 'rejected',
-                'uses'       => 'EnquiryController@rejected',
-                'permission' => 'enquires.edit',
-            ]);
-        });
+        ])->where('id', BaseHelper::routeIdRegex());
     });
 });

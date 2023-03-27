@@ -48,9 +48,17 @@ class RecentOrdersTable extends TableAbstract
                 return BaseHelper::clean($item->status->toHtml());
             })
             ->editColumn('payment_status', function ($item) {
+                if (! is_plugin_active('payment')) {
+                    return '&mdash;';
+                }
+
                 return BaseHelper::clean($item->payment->status->label() ?: '&mdash;');
             })
             ->editColumn('payment_method', function ($item) {
+                if (! is_plugin_active('payment')) {
+                    return '&mdash;';
+                }
+
                 return BaseHelper::clean($item->payment->payment_channel->label() ?: '&mdash;');
             })
             ->editColumn('amount', function ($item) {
@@ -73,6 +81,12 @@ class RecentOrdersTable extends TableAbstract
     {
         [$startDate, $endDate] = EcommerceHelper::getDateRangeInReport(request());
 
+        $with = ['user'];
+
+        if (is_plugin_active('payment')) {
+            $with[] = 'payment';
+        }
+
         $query = $this->repository->getModel()
             ->select([
                 'id',
@@ -85,7 +99,7 @@ class RecentOrdersTable extends TableAbstract
                 'shipping_amount',
                 'payment_id',
             ])
-            ->with(['user', 'payment'])
+            ->with($with)
             ->where('is_finished', 1)
             ->whereDate('created_at', '>=', $startDate)
             ->whereDate('created_at', '<=', $endDate)

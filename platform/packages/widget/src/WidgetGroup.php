@@ -17,8 +17,6 @@ class WidgetGroup
 
     protected ?string $description = null;
 
-    protected Application $app;
-
     protected array $widgets = [];
 
     protected int $position = 100;
@@ -27,13 +25,11 @@ class WidgetGroup
 
     protected int $count = 0;
 
-    public function __construct(array $args, Application $app)
+    public function __construct(array $args, protected Application $app)
     {
         $this->id = $args['id'];
         $this->name = $args['name'];
         $this->description = Arr::get($args, 'description');
-
-        $this->app = $app;
     }
 
     /**

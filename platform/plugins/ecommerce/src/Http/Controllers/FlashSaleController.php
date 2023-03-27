@@ -20,11 +20,8 @@ use Illuminate\Support\Arr;
 
 class FlashSaleController extends BaseController
 {
-    protected FlashSaleInterface $flashSaleRepository;
-
-    public function __construct(FlashSaleInterface $flashSaleRepository)
+    public function __construct(protected FlashSaleInterface $flashSaleRepository)
     {
-        $this->flashSaleRepository = $flashSaleRepository;
     }
 
     public function index(FlashSaleTable $table)
@@ -85,7 +82,7 @@ class FlashSaleController extends BaseController
         return count($products);
     }
 
-    public function edit(int $id, FormBuilder $formBuilder, Request $request)
+    public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
     {
         $flashSale = $this->flashSaleRepository->findOrFail($id);
 
@@ -96,7 +93,7 @@ class FlashSaleController extends BaseController
         return $formBuilder->create(FlashSaleForm::class, ['model' => $flashSale])->renderForm();
     }
 
-    public function update(int $id, FlashSaleRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, FlashSaleRequest $request, BaseHttpResponse $response)
     {
         $flashSale = $this->flashSaleRepository->findOrFail($id);
 
@@ -113,7 +110,7 @@ class FlashSaleController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(Request $request, int $id, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
             $flashSale = $this->flashSaleRepository->findOrFail($id);

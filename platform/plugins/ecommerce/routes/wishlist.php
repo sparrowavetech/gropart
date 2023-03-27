@@ -10,11 +10,11 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Fronts', 'middle
         Route::post('wishlist/{productId}', [
             'as' => 'public.wishlist.add',
             'uses' => 'WishlistController@store',
-        ]);
+        ])->where('productId', BaseHelper::routeIdRegex());
 
         Route::delete('wishlist/{productId}', [
             'as' => 'public.wishlist.remove',
             'uses' => 'WishlistController@destroy',
-        ]);
+        ])->where('productId', BaseHelper::routeIdRegex());
     });
 });

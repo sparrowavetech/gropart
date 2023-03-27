@@ -10,7 +10,6 @@ use Botble\Newsletter\Repositories\Interfaces\NewsletterInterface;
 use EmailHandler;
 use Exception;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\ServiceProvider;
 use Newsletter as MailchimpNewsletter;
@@ -42,7 +41,7 @@ class NewsletterServiceProvider extends ServiceProvider
 
         $this->app->register(EventServiceProvider::class);
 
-        Event::listen(RouteMatched::class, function () {
+        $this->app['events']->listen(RouteMatched::class, function () {
             dashboard_menu()->registerItem([
                 'id' => 'cms-plugins-newsletter',
                 'priority' => 6,
@@ -57,16 +56,6 @@ class NewsletterServiceProvider extends ServiceProvider
         });
 
         add_filter(BASE_FILTER_AFTER_SETTING_CONTENT, [$this, 'addSettings'], 249);
-
-        $this->app->booted(function () {
-            $mailchimpApiKey = setting('newsletter_mailchimp_api_key');
-            $mailchimpListId = setting('newsletter_mailchimp_list_id');
-
-            config([
-                'newsletter.apiKey' => $mailchimpApiKey,
-                'newsletter.lists.subscribers.id' => $mailchimpListId,
-            ]);
-        });
     }
 
     public function addSettings(?string $data = null): string
@@ -79,6 +68,10 @@ class NewsletterServiceProvider extends ServiceProvider
                 $list = MailchimpNewsletter::getApi()->get('lists');
 
                 $results = Arr::get($list, 'lists');
+
+                if (! setting('newsletter_mailchimp_list_id')) {
+                    setting()->set(['newsletter_mailchimp_list_id' => Arr::first($results, 'id')])->save();
+                }
 
                 foreach ($results as $result) {
                     $mailchimpContactList[$result['id']] = $result['name'];
@@ -98,6 +91,10 @@ class NewsletterServiceProvider extends ServiceProvider
                 $list = $sg->client->marketing()->lists()->get();
 
                 $results = Arr::get(json_decode($list->body(), true), 'result');
+
+                if (! setting('newsletter_sendgrid_list_id')) {
+                    setting()->set(['newsletter_sendgrid_list_id' => Arr::first($results, 'id')])->save();
+                }
 
                 foreach ($results as $result) {
                     $sendGridContactList[$result['id']] = $result['name'];

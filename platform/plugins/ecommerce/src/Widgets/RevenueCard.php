@@ -13,6 +13,10 @@ class RevenueCard extends Card
 {
     public function getOptions(): array
     {
+        if (! is_plugin_active('payment')) {
+            return [];
+        }
+
         $data = app(OrderInterface::class)
             ->getModel()
             ->whereDate('created_at', '>=', $this->startDate)
@@ -36,6 +40,10 @@ class RevenueCard extends Card
 
     public function getViewData(): array
     {
+        if (! is_plugin_active('payment')) {
+            return parent::getViewData();
+        }
+
         $revenue = app(OrderInterface::class)
             ->getModel()
             ->select([

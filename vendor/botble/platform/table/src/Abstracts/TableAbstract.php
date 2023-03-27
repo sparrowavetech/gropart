@@ -5,6 +5,7 @@ namespace Botble\Table\Abstracts;
 use Assets;
 use BaseHelper;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Models\BaseModel;
 use Botble\Support\Repositories\Interfaces\RepositoryInterface;
 use Botble\Table\Supports\Builder as CustomTableBuilder;
 use Botble\Table\Supports\TableExportHandler;
@@ -18,6 +19,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation as EloquentRelation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\HtmlString;
@@ -239,16 +241,16 @@ abstract class TableAbstract extends DataTable
             $column['class'] = Arr::get($column, 'class') . ' column-key-' . $key;
         }
 
+        if ($this->hasCheckbox) {
+            $columns = array_merge($this->getCheckboxColumnHeading(), $columns);
+        }
+
         if ($this->repository) {
             $columns = apply_filters(BASE_FILTER_TABLE_HEADINGS, $columns, $this->repository->getModel());
         }
 
         if ($this->hasOperations) {
             $columns = array_merge($columns, $this->getOperationsHeading());
-        }
-
-        if ($this->hasCheckbox) {
-            $columns = array_merge($this->getCheckboxColumnHeading(), $columns);
         }
 
         return $columns;
@@ -304,7 +306,7 @@ abstract class TableAbstract extends DataTable
         ];
     }
 
-    protected function getCheckbox(int $id): string
+    protected function getCheckbox(int|string $id): string
     {
         return view('core/table::partials.checkbox', compact('id'))->render();
     }
@@ -555,14 +557,14 @@ abstract class TableAbstract extends DataTable
     }
 
     protected function applyScopes(
-        EloquentBuilder|QueryBuilder|EloquentRelation $query
-    ): EloquentBuilder|QueryBuilder|EloquentRelation {
+        EloquentBuilder|QueryBuilder|EloquentRelation|Collection $query
+    ): EloquentBuilder|QueryBuilder|EloquentRelation|Collection {
         $request = request();
 
         $requestFilters = [];
 
-        if ($request->has('filter_columns') && ($request->input('filter_table_id') == $this->getOption('id'))) {
-            foreach ($request->input('filter_columns') as $key => $item) {
+        if (($request->input('filter_table_id') == $this->getOption('id'))) {
+            foreach ($this->getFilterColumns() as $key => $item) {
                 $operator = $request->input('filter_operators.' . $key);
 
                 $value = $request->input('filter_values.' . $key);
@@ -591,6 +593,16 @@ abstract class TableAbstract extends DataTable
         }
 
         return parent::applyScopes(apply_filters(BASE_FILTER_TABLE_QUERY, $query));
+    }
+
+    public function getFilterColumns(): array
+    {
+        $columns = $this->getFilters();
+        $columnKeys = array_keys($columns);
+
+        return Arr::where((array) $this->request->input('filter_columns', []), function ($item) use ($columnKeys) {
+            return in_array($item, $columnKeys);
+        });
     }
 
     public function applyFilterCondition(EloquentBuilder|QueryBuilder|EloquentRelation $query, string $key, string $operator, ?string $value)
@@ -705,7 +717,7 @@ abstract class TableAbstract extends DataTable
 
     public function saveBulkChanges(array $ids, string $inputKey, ?string $inputValue): bool
     {
-        if (! in_array($inputKey, array_keys($this->getFilters()))) {
+        if (! in_array($inputKey, array_keys($this->getBulkChanges()))) {
             return false;
         }
 
@@ -722,7 +734,7 @@ abstract class TableAbstract extends DataTable
 
     public function saveBulkChangeItem(Model $item, string $inputKey, ?string $inputValue)
     {
-        $item->fill([$inputKey => $this->prepareBulkChangeValue($inputKey, $inputValue)]);
+        $item->{auth()->check() ? 'forceFill' : 'fill'}([$inputKey => $this->prepareBulkChangeValue($inputKey, $inputValue)]);
 
         return $this->repository->createOrUpdate($item);
     }
@@ -759,9 +771,11 @@ abstract class TableAbstract extends DataTable
             ],
         ];
 
-        if ($request->input('filter_columns')) {
+        $filterColumns = $this->getFilterColumns();
+
+        if ($filterColumns) {
             $requestFilters = [];
-            foreach ($request->input('filter_columns', []) as $key => $item) {
+            foreach ($filterColumns as $key => $item) {
                 $operator = $request->input('filter_operators.' . $key);
 
                 $value = $request->input('filter_values.' . $key);
@@ -820,6 +834,12 @@ abstract class TableAbstract extends DataTable
     {
         if ($this->repository && $this->repository->getModel()) {
             $data = apply_filters(BASE_FILTER_GET_LIST_DATA, $data, $this->repository->getModel());
+        }
+
+        if (BaseModel::determineIfUsingUuidsForId()) {
+            $data = $data->editColumn('id', function ($item) {
+                return Str::limit($item->id, 5);
+            });
         }
 
         return $data

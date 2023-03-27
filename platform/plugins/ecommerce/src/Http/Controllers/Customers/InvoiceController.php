@@ -43,7 +43,7 @@ class InvoiceController extends Controller
         )->render();
     }
 
-    public function getGenerateInvoice(int $invoiceId, Request $request, InvoiceInterface $invoiceRepository)
+    public function getGenerateInvoice(int|string $invoiceId, Request $request, InvoiceInterface $invoiceRepository)
     {
         $invoice = $invoiceRepository->findOrFail($invoiceId);
 

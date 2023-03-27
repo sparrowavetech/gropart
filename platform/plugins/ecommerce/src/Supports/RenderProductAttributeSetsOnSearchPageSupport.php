@@ -3,16 +3,12 @@
 namespace Botble\Ecommerce\Supports;
 
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Ecommerce\Repositories\Eloquent\ProductAttributeSetRepository;
 use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeSetInterface;
 
 class RenderProductAttributeSetsOnSearchPageSupport
 {
-    protected ProductAttributeSetInterface|ProductAttributeSetRepository $productAttributeSetRepository;
-
-    public function __construct(ProductAttributeSetInterface $productAttributeSetRepository)
+    public function __construct(protected ProductAttributeSetInterface $productAttributeSetRepository)
     {
-        $this->productAttributeSetRepository = $productAttributeSetRepository;
     }
 
     public function render(array $params = []): string

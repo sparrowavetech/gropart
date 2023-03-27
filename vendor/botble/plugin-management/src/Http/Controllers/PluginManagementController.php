@@ -50,9 +50,15 @@ class PluginManagementController extends Controller
 
                     $content['path'] = $plugin;
                     $content['image'] = null;
-                    if (File::exists($pluginPath . '/screenshot.png')) {
-                        $content['image'] = base64_encode(File::get($pluginPath . '/screenshot.png'));
+
+                    $screenshot = 'vendor/core/plugins/' . $plugin . '/screenshot.png';
+
+                    if (File::exists(public_path($screenshot))) {
+                        $content['image'] = asset($screenshot);
+                    } elseif (File::exists($pluginPath . '/screenshot.png')) {
+                        $content['image'] = 'data:image/png;base64,' . base64_encode(File::get($pluginPath . '/screenshot.png'));
                     }
+
                     $list[] = (object)$content;
                 }
             }

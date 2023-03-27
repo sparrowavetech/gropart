@@ -3,7 +3,6 @@
 return [
     'name' => 'Countries',
     'create' => 'New country',
-    'edit' => 'Edit country',
     'nationality' => 'Nationality',
     'code' => 'Country ISO code',
     'code_placeholder' => 'ISO country code, uppercase. Ex: US.',

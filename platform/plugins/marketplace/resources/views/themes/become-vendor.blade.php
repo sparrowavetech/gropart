@@ -29,21 +29,7 @@
                     <span class="text-danger">{{ $errors->first('shop_phone') }}</span>
                 @endif
             </div>
-            <div class="form-group">
-                <label for="shop-phone" class="required">{{ __('Are You A ?') }}</label>
-                @php
-                $shoptype = \Botble\Marketplace\Enums\ShopTypeEnum::labels();
-                @endphp
-                <select class="form-control form-select " id="shop_category" name="shop_category">
-                    <option value="">Select Your Type</option>
-                    @foreach($shoptype as $index => $type)
-                    <option value="{{ $index }}" {{ old('shop_category') == $index?'selected':''}}>{{ $type }}</option>
-                    @endforeach
-                </select>
-                @if ($errors->has('shop_category'))
-                <span class="text-danger">{{ $errors->first('shop_category') }}</span>
-                @endif
-            </div>
+
             <div class="form-group text-center">
                 <div class="form-group submit">
                     <button class="submit submit-auto-width">{{ __('Register') }}</button>

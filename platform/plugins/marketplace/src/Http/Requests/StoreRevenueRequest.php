@@ -12,7 +12,7 @@ class StoreRevenueRequest extends Request
     public function rules(): array
     {
         $rules = [
-            'type' => Rule::in(RevenueTypeEnum::values()),
+            'type' => Rule::in(RevenueTypeEnum::adjustValues()),
             'amount' => 'required|numeric|min:0|not_in:0',
             'description' => 'nullable|max:400',
         ];

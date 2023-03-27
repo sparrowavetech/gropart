@@ -3,6 +3,7 @@
 namespace Botble\Theme;
 
 use Exception;
+use Html;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use Theme as ThemeFacade;
@@ -178,9 +179,9 @@ class AssetContainer
     /**
      * Write a script to the container.
      */
-    public function writeScript(string $name, string $source, array $dependencies = []): self
+    public function writeScript(string $name, string $source, array $dependencies = [], array $attributes = []): self
     {
-        $source = '<script>' . $source . '</script>';
+        $source = '<script' . ($attributes ? Html::attributes($attributes) : '') . '>' . $source . '</script>';
 
         return $this->write($name, 'script', $source, $dependencies);
     }

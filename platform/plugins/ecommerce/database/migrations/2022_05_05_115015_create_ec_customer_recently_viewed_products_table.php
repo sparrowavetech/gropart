@@ -11,8 +11,8 @@ return new class () extends Migration {
 
         Schema::create('ec_customer_recently_viewed_products', function (Blueprint $table) {
             $table->id();
-            $table->integer('customer_id')->unsigned();
-            $table->integer('product_id')->unsigned();
+            $table->foreignId('customer_id');
+            $table->foreignId('product_id');
         });
     }
 

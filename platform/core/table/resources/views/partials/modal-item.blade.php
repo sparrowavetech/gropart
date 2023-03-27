@@ -6,7 +6,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
             </div>
 
-            <div class="modal-body with-padding">
+            <div class="modal-body with-padding" data-select2-dropdown-parent>
                 <div>{!! $content !!}</div>
             </div>
 

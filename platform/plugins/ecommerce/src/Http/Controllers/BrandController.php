@@ -17,11 +17,8 @@ use Illuminate\Http\Request;
 
 class BrandController extends BaseController
 {
-    protected BrandInterface $brandRepository;
-
-    public function __construct(BrandInterface $brandRepository)
+    public function __construct(protected BrandInterface $brandRepository)
     {
-        $this->brandRepository = $brandRepository;
     }
 
     public function index(BrandTable $dataTable)
@@ -50,7 +47,7 @@ class BrandController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int $id, FormBuilder $formBuilder)
+    public function edit(int|string $id, FormBuilder $formBuilder)
     {
         $brand = $this->brandRepository->findOrFail($id);
         page_title()->setTitle(trans('plugins/ecommerce::brands.edit') . ' "' . $brand->name . '"');
@@ -58,7 +55,7 @@ class BrandController extends BaseController
         return $formBuilder->create(BrandForm::class, ['model' => $brand])->renderForm();
     }
 
-    public function update(int $id, BrandRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, BrandRequest $request, BaseHttpResponse $response)
     {
         $brand = $this->brandRepository->findOrFail($id);
         $brand->fill($request->input());
@@ -72,7 +69,7 @@ class BrandController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(Request $request, int $id, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
             $brand = $this->brandRepository->findOrFail($id);

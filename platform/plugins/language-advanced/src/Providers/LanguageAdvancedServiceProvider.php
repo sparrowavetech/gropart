@@ -11,7 +11,6 @@ use Botble\Page\Models\Page;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Language;
@@ -111,7 +110,7 @@ class LanguageAdvancedServiceProvider extends ServiceProvider
                 $config->set(['plugins.language.general.supported' => $supportedModels]);
             }
 
-            Event::listen('eloquent.deleted: ' . LanguageModel::class, function (LanguageModel $language) {
+            $this->app['events']->listen('eloquent.deleted: ' . LanguageModel::class, function (LanguageModel $language) {
                 foreach (LanguageAdvancedManager::getSupported() as $model => $columns) {
                     if (class_exists($model)) {
                         DB::table((new $model())->getTable() . '_translations')
@@ -122,7 +121,7 @@ class LanguageAdvancedServiceProvider extends ServiceProvider
             });
 
             foreach (LanguageAdvancedManager::getSupported() as $model => $columns) {
-                Event::listen('eloquent.deleted: ' . $model, function (Model $model) {
+                $this->app['events']->listen('eloquent.deleted: ' . $model, function (Model $model) {
                     DB::table($model->getTable() . '_translations')
                         ->where($model->getTable() . '_id', $model->getKey())
                         ->delete();

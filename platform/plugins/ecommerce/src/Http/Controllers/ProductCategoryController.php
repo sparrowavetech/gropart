@@ -21,11 +21,8 @@ use Illuminate\Support\Facades\Auth;
 
 class ProductCategoryController extends BaseController
 {
-    protected ProductCategoryInterface $productCategoryRepository;
-
-    public function __construct(ProductCategoryInterface $productCategoryRepository)
+    public function __construct(protected ProductCategoryInterface $productCategoryRepository)
     {
-        $this->productCategoryRepository = $productCategoryRepository;
     }
 
     public function index(FormBuilder $formBuilder, Request $request, BaseHttpResponse $response)
@@ -88,7 +85,7 @@ class ProductCategoryController extends BaseController
                 ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int $id, FormBuilder $formBuilder, Request $request, BaseHttpResponse $response)
+    public function edit(int|string $id, FormBuilder $formBuilder, Request $request, BaseHttpResponse $response)
     {
         $productCategory = $this->productCategoryRepository->findOrFail($id);
 
@@ -101,7 +98,7 @@ class ProductCategoryController extends BaseController
         return $formBuilder->create(ProductCategoryForm::class, ['model' => $productCategory])->renderForm();
     }
 
-    public function update(int $id, ProductCategoryRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, ProductCategoryRequest $request, BaseHttpResponse $response)
     {
         $productCategory = $this->productCategoryRepository->findOrFail($id);
         $productCategory->fill($request->input());
@@ -128,7 +125,7 @@ class ProductCategoryController extends BaseController
                 ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(Request $request, int $id, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
             $productCategory = $this->productCategoryRepository->findOrFail($id);

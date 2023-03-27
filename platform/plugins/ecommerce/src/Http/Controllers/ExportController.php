@@ -12,16 +12,10 @@ use Maatwebsite\Excel\Excel;
 
 class ExportController extends BaseController
 {
-    protected ProductInterface $productRepository;
-
-    protected ProductVariationInterface $productVariationRepository;
-
     public function __construct(
-        ProductInterface $productRepository,
-        ProductVariationInterface $productVariationRepository
+        protected ProductInterface $productRepository,
+        protected ProductVariationInterface $productVariationRepository
     ) {
-        $this->productRepository = $productRepository;
-        $this->productVariationRepository = $productVariationRepository;
     }
 
     public function products()

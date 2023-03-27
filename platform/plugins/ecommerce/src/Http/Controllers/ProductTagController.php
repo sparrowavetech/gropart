@@ -18,11 +18,8 @@ use Illuminate\Http\Request;
 
 class ProductTagController extends BaseController
 {
-    protected ProductTagInterface $productTagRepository;
-
-    public function __construct(ProductTagInterface $productTagRepository)
+    public function __construct(protected ProductTagInterface $productTagRepository)
     {
-        $this->productTagRepository = $productTagRepository;
     }
 
     public function index(ProductTagTable $table)
@@ -51,7 +48,7 @@ class ProductTagController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int $id, FormBuilder $formBuilder, Request $request)
+    public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
     {
         $productTag = $this->productTagRepository->findOrFail($id);
 
@@ -62,7 +59,7 @@ class ProductTagController extends BaseController
         return $formBuilder->create(ProductTagForm::class, ['model' => $productTag])->renderForm();
     }
 
-    public function update(int $id, ProductTagRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, ProductTagRequest $request, BaseHttpResponse $response)
     {
         $productTag = $this->productTagRepository->findOrFail($id);
 
@@ -77,7 +74,7 @@ class ProductTagController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(Request $request, int $id, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
             $productTag = $this->productTagRepository->findOrFail($id);

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Collection;
 
 class MenuNodeRepository extends RepositoriesAbstract implements MenuNodeInterface
 {
-    public function getByMenuId(int $menuId, ?int $parentId, array $select = ['*'], array $with = ['child']): Collection
+    public function getByMenuId(int|string $menuId, int|string|null $parentId, array $select = ['*'], array $with = ['child']): Collection
     {
         $data = $this->model
             ->with($with)

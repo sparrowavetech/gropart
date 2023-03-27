@@ -16,28 +16,13 @@ use Theme;
 
 class ThemeService
 {
-    protected Filesystem $files;
-
-    protected SettingStore $settingStore;
-
-    protected PluginService $pluginService;
-
-    protected WidgetInterface $widgetRepository;
-
-    protected SettingInterface $settingRepository;
-
     public function __construct(
-        Filesystem $files,
-        SettingStore $settingStore,
-        PluginService $pluginService,
-        WidgetInterface $widgetRepository,
-        SettingInterface $settingRepository
+        protected Filesystem $files,
+        protected SettingStore $settingStore,
+        protected PluginService $pluginService,
+        protected WidgetInterface $widgetRepository,
+        protected SettingInterface $settingRepository
     ) {
-        $this->files = $files;
-        $this->settingStore = $settingStore;
-        $this->pluginService = $pluginService;
-        $this->widgetRepository = $widgetRepository;
-        $this->settingRepository = $settingRepository;
     }
 
     public function activate(string $theme): array

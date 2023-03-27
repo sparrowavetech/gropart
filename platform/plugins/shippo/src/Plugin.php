@@ -15,6 +15,9 @@ class Plugin extends PluginOperationAbstract
                 'shipping_shippo_test_key',
                 'shipping_shippo_production_key',
                 'shipping_shippo_sandbox',
+                'shipping_shippo_logging',
+                'shipping_shippo_cache_response',
+                'shipping_shippo_webhooks',
             ])
             ->delete();
     }

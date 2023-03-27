@@ -95,7 +95,7 @@
                             </div>
                         @endif
                         <div class="form-group mb0">
-                            <label class="text-title-field" for="store_vat_number">{{ trans('plugins/ecommerce::ecommerce.setting.vat_number') }}</label>
+                            <label class="text-title-field" for="store_vat_number">{{ trans('plugins/ecommerce::ecommerce.setting.tax_id') }}</label>
                             <input type="text" class="next-input" name="store_vat_number" id="store_vat_number" value="{{ get_ecommerce_setting('store_vat_number') }}">
                         </div>
                     </div>
@@ -129,17 +129,6 @@
                         </div>
                         <div class="form-group mb-3">
                             <p class="setting-note mb0">{{ trans('plugins/ecommerce::ecommerce.order_will_be_shown') }} <span class="sample-order-code">#<span class="sample-order-code-prefix">{{ get_ecommerce_setting('store_order_prefix') ? get_ecommerce_setting('store_order_prefix') . '-' : '' }}</span>{{ config('plugins.ecommerce.order.default_order_start_number') }}<span class="sample-order-code-suffix">{{ get_ecommerce_setting('store_order_suffix') ? '-' . get_ecommerce_setting('store_order_suffix') : '' }}</span></span> </p>
-                        </div>
-
-                        <label class="next-label">{{ trans('plugins/ecommerce::ecommerce.change_enquiry_format') }}</label>
-                        <div class="form-group mb-3 row">
-                            <div class="col-sm-6">
-                                <label class="text-title-field" for="enquiry_code_prefix">{{ trans('plugins/ecommerce::ecommerce.start_with') }}</label>
-                                <div class="next-input--stylized">
-                                    <span class="next-input-add-on next-input__add-on--before">#</span>
-                                    <input type="text" class="next-input next-input--invisible" name="enquiry_code_prefix" id="enquiry_code_prefix" value="{{ get_ecommerce_setting('enquiry_code_prefix') }}">
-                                </div>
-                            </div>
                         </div>
 
                         <div class="form-group mb-3 row">
@@ -244,7 +233,22 @@
                                 </div>
                             </div>
                         </div>
-
+                    <div class="form-group mb-3">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <label class="text-title-field" for="add_space_between_price_and_currency">{{ trans('plugins/ecommerce::currency.api_key') }}</label>
+                                <input name="currencies_api_key" class="form-control" value="{{ get_ecommerce_setting('currencies_api_key') }}">
+                            </div>
+                            @if (get_ecommerce_setting('currencies_api_key'))
+                                <div class="col-sm-6">
+                                    <button id="btn-update-currencies" data-url="{{ route('ecommerce.setting.update-currencies-from-exchange-api') }}" class="btn btn-primary">
+                                        <i class="fa fa-download"></i>
+                                        {{ trans('plugins/ecommerce::currency.update_currency_rates') }}
+                                    </button>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
                     <textarea name="currencies"
                               id="currencies"
                               class="hidden">{!! json_encode($currencies) !!}</textarea>
@@ -274,7 +278,10 @@
                                 <div class="remove-item">{{ trans('plugins/ecommerce::currency.remove') }}</div>
                             </div>
                             <ul class="swatches-list">
-
+                                <div id="loading-update-currencies" style="display: none;">
+                                    <div class="currency-loading-backdrop"></div>
+                                    <div class="currency-loading-loader"></div>
+                                </div>
                             </ul>
                             <div class="clearfix"></div>
                             {!! Form::helper(trans('plugins/ecommerce::currency.instruction')) !!}
@@ -371,6 +378,10 @@
     {!! Form::modalAction('delete-store-locator-modal', trans('plugins/ecommerce::ecommerce.setting.delete_location'), 'info', trans('plugins/ecommerce::ecommerce.setting.delete_location_confirmation'), 'delete-store-locator-button', trans('plugins/ecommerce::ecommerce.setting.accept')) !!}
     {!! Form::modalAction('change-primary-store-locator-modal', trans('plugins/ecommerce::ecommerce.setting.change_primary_location'), 'info', view('plugins/ecommerce::settings.store-locator-change-primary', compact('storeLocators'))->render(), 'change-primary-store-locator-button', trans('plugins/ecommerce::ecommerce.setting.accept'), 'modal-sm') !!}
     <script id="currency_template" type="text/x-custom-template">
+        <div id="loading-update-currencies" style="display: none;">
+            <div class="currency-loading-backdrop"></div>
+            <div class="currency-loading-loader"></div>
+        </div>
         <li data-id="__id__" class="clearfix">
             <div class="swatch-item" data-type="title">
                 <input type="text" class="form-control" value="__title__">

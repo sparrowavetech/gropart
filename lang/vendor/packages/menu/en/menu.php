@@ -18,7 +18,6 @@ return [
     'self_open_link' => 'Open link directly',
     'blank_open_link' => 'Open link in new tab',
     'create' => 'Create menu',
-    'edit' => 'Edit menu',
     'menu_settings' => 'Menu settings',
     'display_location' => 'Display location',
     'title_placeholder' => 'Title',

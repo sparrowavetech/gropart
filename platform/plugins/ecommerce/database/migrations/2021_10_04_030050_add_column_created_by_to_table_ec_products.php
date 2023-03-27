@@ -9,7 +9,7 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::table('ec_products', function (Blueprint $table) {
-            $table->integer('created_by_id')->nullable()->default(0);
+            $table->foreignId('created_by_id')->nullable()->default(0);
             $table->string('created_by_type', 255)->default(addslashes(User::class));
         });
     }

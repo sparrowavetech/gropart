@@ -13,8 +13,8 @@ class UpdateSettingsRequest extends Request
             'store_name' => 'required',
             'store_address' => 'required',
             'store_phone' => 'required|' . BaseHelper::getPhoneValidationRule(),
-            'store_state' => 'required',
-            'store_city' => 'required',
+            'store_state' => 'nullable',
+            'store_city' => 'nullable',
         ];
     }
 }

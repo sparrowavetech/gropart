@@ -25,7 +25,7 @@
                         <strong>
                             {{ $phpSupportInfo['current'] }}
                         </strong>
-                        <i class="fa fa-fw fa-{{ $phpSupportInfo['supported'] ? 'check-circle-o' : 'exclamation-circle' }} row-icon"
+                        <i class="fa fa-fw fa-{{ $phpSupportInfo['supported'] ? 'check-circle' : 'exclamation-circle' }} row-icon"
                            aria-hidden="true"></i>
                     </span>
                 @endif
@@ -33,7 +33,7 @@
             @foreach ($requirements['requirements'][$type] as $extension => $enabled)
                 <li class="list__item {{ $enabled ? 'success' : 'error' }}">
                     {{ $type !== 'permissions' ? ucfirst($extension) : $extension }}
-                    <i class="fa fa-fw fa-{{ $enabled ? 'check-circle-o' : 'exclamation-circle' }} row-icon"
+                    <i class="fa fa-fw fa-{{ $enabled ? 'check-circle' : 'exclamation-circle' }} row-icon"
                        aria-hidden="true"></i>
                 </li>
             @endforeach

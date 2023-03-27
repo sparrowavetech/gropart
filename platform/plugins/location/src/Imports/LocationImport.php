@@ -5,19 +5,16 @@ namespace Botble\Location\Imports;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Location\Events\ImportedCityEvent;
 use Botble\Location\Models\City;
-use Botble\Location\Models\CityTranslation;
 use Botble\Location\Models\Country;
-use Botble\Location\Models\CountryTranslation;
 use Botble\Location\Models\State;
-use Botble\Location\Models\StateTranslation;
 use Botble\Location\Repositories\Interfaces\CityInterface;
 use Botble\Location\Repositories\Interfaces\CountryInterface;
 use Botble\Location\Repositories\Interfaces\StateInterface;
-use Botble\Slug\Repositories\Interfaces\SlugInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Language;
 use Maatwebsite\Excel\Concerns\Importable;
@@ -46,10 +43,6 @@ class LocationImport implements
     use SkipsErrors;
     use ImportTrait;
 
-    protected CityInterface $cityRepository;
-
-    protected Request $request;
-
     protected string|null $validatorClass;
 
     protected string $importType = 'all';
@@ -58,28 +51,16 @@ class LocationImport implements
 
     protected array|Collection $getActiveLanguage;
 
-    protected StateInterface $stateRepository;
-
-    protected CountryInterface $countryRepository;
-
-    protected SlugInterface $slugRepository;
-
     protected Collection $countries;
 
     protected Collection $states;
 
     public function __construct(
-        CityInterface $cityRepository,
-        StateInterface $stateRepository,
-        CountryInterface $countryRepository,
-        SlugInterface $slugRepository,
-        Request $request
+        protected CityInterface $cityRepository,
+        protected StateInterface $stateRepository,
+        protected CountryInterface $countryRepository,
+        protected Request $request
     ) {
-        $this->cityRepository = $cityRepository;
-        $this->stateRepository = $stateRepository;
-        $this->countryRepository = $countryRepository;
-        $this->slugRepository = $slugRepository;
-        $this->request = $request;
         $this->countries = collect();
         $this->states = collect();
 
@@ -184,7 +165,7 @@ class LocationImport implements
                     continue;
                 }
 
-                CityTranslation::insertOrIgnore([
+                DB::table('cities_translations')->insertOrIgnore([
                     'cities_id' => $city->id,
                     'lang_code' => $language->lang_code,
                     'name' => Arr::get($row, 'name_' . $language->lang_code) ?: Arr::get($row, 'name'),
@@ -218,7 +199,7 @@ class LocationImport implements
                     continue;
                 }
 
-                StateTranslation::insertOrIgnore([
+                DB::table('states_translations')->insertOrIgnore([
                     'states_id' => $state->id,
                     'lang_code' => $language->lang_code,
                     'name' => Arr::get($row, 'name_' . $language->lang_code) ?: Arr::get($row, 'name'),
@@ -267,7 +248,7 @@ class LocationImport implements
                     continue;
                 }
 
-                CountryTranslation::insertOrIgnore([
+                DB::table('countries_translations')->insertOrIgnore([
                     'countries_id' => $country->id,
                     'lang_code' => $language->lang_code,
                     'name' => Arr::get($row, 'name_' . $language->lang_code) ?: Arr::get($row, 'name'),
@@ -331,7 +312,7 @@ class LocationImport implements
     public function mapLocalization(array $row): array
     {
         $row['status'] = strtolower(Arr::get($row, 'status'));
-        if (! in_array($row['status'], BaseStatusEnum::values())) {
+        if (! in_array($row['status'], BaseStatusEnum::toArray())) {
             $row['status'] = BaseStatusEnum::PUBLISHED;
         }
 
@@ -362,7 +343,7 @@ class LocationImport implements
         return $row;
     }
 
-    public function getCountryId(int|string|null $value): ?int
+    public function getCountryId(int|string|null $value): int|string|null
     {
         $country = $this->countries->where('keyword', $value)->first();
 

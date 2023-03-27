@@ -3,7 +3,9 @@
 namespace Botble\Payment\Providers;
 
 use Botble\Base\Traits\LoadAndPublishDataTrait;
+use Botble\Payment\Facades\PaymentMethodsFacade;
 use Botble\Payment\Models\Payment;
+use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\ServiceProvider;
@@ -24,6 +26,9 @@ class PaymentServiceProvider extends ServiceProvider
         $this->app->singleton(PaymentInterface::class, function () {
             return new PaymentCacheDecorator(new PaymentRepository(new Payment()));
         });
+
+        $loader = AliasLoader::getInstance();
+        $loader->alias('PaymentMethods', PaymentMethodsFacade::class);
     }
 
     public function boot(): void

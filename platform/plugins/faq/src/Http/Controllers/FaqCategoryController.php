@@ -15,23 +15,13 @@ use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Faq\Forms\FaqCategoryForm;
 use Botble\Base\Forms\FormBuilder;
-use Illuminate\Contracts\View\View;
-use Throwable;
 
 class FaqCategoryController extends BaseController
 {
-    protected FaqCategoryInterface $faqCategoryRepository;
-
-    public function __construct(FaqCategoryInterface $faqCategoryRepository)
+    public function __construct(protected FaqCategoryInterface $faqCategoryRepository)
     {
-        $this->faqCategoryRepository = $faqCategoryRepository;
     }
 
-    /**
-     * @param FaqCategoryTable $table
-     * @return \Illuminate\Contracts\View\Factory|\Symfony\Component\HttpFoundation\Response|View
-     * @throws Throwable
-     */
     public function index(FaqCategoryTable $table)
     {
         page_title()->setTitle(trans('plugins/faq::faq-category.name'));
@@ -39,10 +29,6 @@ class FaqCategoryController extends BaseController
         return $table->renderTable();
     }
 
-    /**
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
     public function create(FormBuilder $formBuilder)
     {
         page_title()->setTitle(trans('plugins/faq::faq-category.create'));
@@ -50,11 +36,6 @@ class FaqCategoryController extends BaseController
         return $formBuilder->create(FaqCategoryForm::class)->renderForm();
     }
 
-    /**
-     * @param FaqCategoryRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
     public function store(FaqCategoryRequest $request, BaseHttpResponse $response)
     {
         $faqCategory = $this->faqCategoryRepository->createOrUpdate($request->input());
@@ -67,30 +48,18 @@ class FaqCategoryController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    /**
-     * @param $id
-     * @param Request $request
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
-    public function edit($id, FormBuilder $formBuilder, Request $request)
+    public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
     {
         $faqCategory = $this->faqCategoryRepository->findOrFail($id);
 
         event(new BeforeEditContentEvent($request, $faqCategory));
 
-        page_title()->setTitle(trans('plugins/faq::faq-category.edit') . ' "' . $faqCategory->name . '"');
+        page_title()->setTitle(trans('core/base::forms.edit_item', ['name' => $faqCategory->name]));
 
         return $formBuilder->create(FaqCategoryForm::class, ['model' => $faqCategory])->renderForm();
     }
 
-    /**
-     * @param $id
-     * @param FaqCategoryRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function update($id, FaqCategoryRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, FaqCategoryRequest $request, BaseHttpResponse $response)
     {
         $faqCategory = $this->faqCategoryRepository->findOrFail($id);
 
@@ -105,13 +74,7 @@ class FaqCategoryController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param Request $request
-     * @param $id
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function destroy(Request $request, $id, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
             $faqCategory = $this->faqCategoryRepository->findOrFail($id);
@@ -128,12 +91,6 @@ class FaqCategoryController extends BaseController
         }
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function deletes(Request $request, BaseHttpResponse $response)
     {
         $ids = $request->input('ids');

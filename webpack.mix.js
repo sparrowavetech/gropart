@@ -10,6 +10,8 @@ mix.options({
     manifest: false
 });
 
+mix.disableSuccessNotifications();
+
 // Run all webpack.mix.js in app
 glob.sync('./platform/*/*/webpack.mix.js').forEach(item => require(item));
 
@@ -21,4 +23,3 @@ glob.sync('./platform/*/*/webpack.mix.js').forEach(item => require(item));
 
 // Run only for themes, you shouldn't modify below config, just uncomment if you want to compile only theme's assets
 // glob.sync('./platform/themes/*/webpack.mix.js').forEach(item => require(item));
-

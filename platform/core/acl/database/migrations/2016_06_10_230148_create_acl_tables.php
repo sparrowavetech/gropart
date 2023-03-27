@@ -15,7 +15,7 @@ return new class () extends Migration {
             $table->string('last_name')->nullable();
             $table->string('username', 60)->unique()->nullable();
             $table->string('password')->nullable()->change();
-            $table->integer('avatar_id')->unsigned()->nullable();
+            $table->foreignId('avatar_id')->nullable();
             $table->boolean('super_user')->default(0);
             $table->boolean('manage_supers')->default(0);
             $table->text('permissions')->nullable();
@@ -24,7 +24,7 @@ return new class () extends Migration {
 
         Schema::create('activations', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id')->unsigned()->index();
+            $table->foreignId('user_id')->index();
             $table->string('code', 120);
             $table->boolean('completed')->default(0);
             $table->timestamp('completed_at')->nullable();
@@ -38,15 +38,15 @@ return new class () extends Migration {
             $table->text('permissions')->nullable();
             $table->string('description', 255)->nullable();
             $table->tinyInteger('is_default')->unsigned()->default(0);
-            $table->integer('created_by')->unsigned()->index();
-            $table->integer('updated_by')->unsigned()->index();
+            $table->foreignId('created_by')->index();
+            $table->foreignId('updated_by')->index();
             $table->timestamps();
         });
 
         Schema::create('role_users', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id')->unsigned()->index();
-            $table->integer('role_id')->unsigned()->index();
+            $table->foreignId('user_id')->index();
+            $table->foreignId('role_id')->index();
             $table->nullableTimestamps();
         });
 
@@ -54,7 +54,7 @@ return new class () extends Migration {
             $table->id();
             $table->string('key')->nullable();
             $table->string('value')->nullable();
-            $table->integer('user_id')->unsigned()->index();
+            $table->foreignId('user_id')->index();
             $table->timestamps();
         });
     }

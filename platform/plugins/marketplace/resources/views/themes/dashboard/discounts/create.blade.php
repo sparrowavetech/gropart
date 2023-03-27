@@ -7,7 +7,8 @@
                 <discount-vendor-component
                     currency="{{ get_application_currency()->symbol }}"
                     generate-url={{ route('marketplace.vendor.discounts.generate-coupon') }}
-                    cancle-url={{ route('marketplace.vendor.discounts.index') }}
+                    cancel-url={{ route('marketplace.vendor.discounts.index') }}
+                     date-format="{{ config('core.base.general.date_format.date') }}"
                     >
                 </discount-vendor-component>
             </div>

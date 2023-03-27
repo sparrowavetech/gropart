@@ -90,7 +90,7 @@ class CropAvatar {
             } else if (firstLoad) {
                 firstLoad = false;
             } else {
-                _this.submitFail('Image upload failed!');
+                Botble.showError('Image upload failed!')
             }
 
             _this.submitEnd();
@@ -210,8 +210,8 @@ class CropAvatar {
                 _this.submitDone(data);
             },
 
-            error: (XMLHttpRequest, textStatus, errorThrown) => {
-                _this.submitFail(XMLHttpRequest.responseJSON, textStatus || errorThrown);
+            error: (errors) => {
+                Botble.handleError(errors);
             },
 
             complete: () => {
@@ -257,10 +257,6 @@ class CropAvatar {
         } else {
             Botble.showError(data.message);
         }
-    }
-
-    static submitFail(errors) {
-        Botble.handleError(errors);
     }
 
     submitEnd() {

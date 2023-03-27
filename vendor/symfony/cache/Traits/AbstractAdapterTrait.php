@@ -87,6 +87,9 @@ trait AbstractAdapterTrait
      */
     abstract protected function doSave(array $values, int $lifetime): array|bool;
 
+    /**
+     * {@inheritdoc}
+     */
     public function hasItem(mixed $key): bool
     {
         $id = $this->getId($key);
@@ -104,6 +107,9 @@ trait AbstractAdapterTrait
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function clear(string $prefix = ''): bool
     {
         $this->deferred = [];
@@ -140,11 +146,17 @@ trait AbstractAdapterTrait
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function deleteItem(mixed $key): bool
     {
         return $this->deleteItems([$key]);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function deleteItems(array $keys): bool
     {
         $ids = [];
@@ -158,7 +170,7 @@ trait AbstractAdapterTrait
             if ($this->doDelete($ids)) {
                 return true;
             }
-        } catch (\Exception) {
+        } catch (\Exception $e) {
         }
 
         $ok = true;
@@ -180,6 +192,9 @@ trait AbstractAdapterTrait
         return $ok;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getItem(mixed $key): CacheItem
     {
         $id = $this->getId($key);
@@ -204,6 +219,9 @@ trait AbstractAdapterTrait
         return (self::$createCacheItem)($key, null, false);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getItems(array $keys = []): iterable
     {
         $ids = [];
@@ -229,6 +247,9 @@ trait AbstractAdapterTrait
         return $this->generateItems($items, $ids);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function save(CacheItemInterface $item): bool
     {
         if (!$item instanceof CacheItem) {
@@ -239,6 +260,9 @@ trait AbstractAdapterTrait
         return $this->commit();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function saveDeferred(CacheItemInterface $item): bool
     {
         if (!$item instanceof CacheItem) {
@@ -269,6 +293,9 @@ trait AbstractAdapterTrait
         return $wasEnabled;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function reset()
     {
         if ($this->deferred) {

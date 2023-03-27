@@ -11,7 +11,6 @@ use Botble\Blog\Models\Post;
 use Botble\Blog\Repositories\Caches\PostCacheDecorator;
 use Botble\Blog\Repositories\Eloquent\PostRepository;
 use Botble\Blog\Repositories\Interfaces\PostInterface;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Botble\Blog\Models\Category;
 use Botble\Blog\Repositories\Caches\CategoryCacheDecorator;
@@ -24,6 +23,7 @@ use Botble\Blog\Repositories\Interfaces\TagInterface;
 use Language;
 use Note;
 use SeoHelper;
+use SiteMapManager;
 use SlugHelper;
 
 /**
@@ -72,8 +72,9 @@ class BlogServiceProvider extends ServiceProvider
         }
 
         $this->app->register(EventServiceProvider::class);
+        SiteMapManager::registerKey(['blog-posts', 'blog-categories', 'blog-tags']);
 
-        Event::listen(RouteMatched::class, function () {
+        $this->app['events']->listen(RouteMatched::class, function () {
             dashboard_menu()
                 ->registerItem([
                     'id' => 'cms-plugins-blog',

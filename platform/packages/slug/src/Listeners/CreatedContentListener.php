@@ -11,11 +11,8 @@ use SlugHelper;
 
 class CreatedContentListener
 {
-    protected SlugInterface $slugRepository;
-
-    public function __construct(SlugInterface $slugRepository)
+    public function __construct(protected SlugInterface $slugRepository)
     {
-        $this->slugRepository = $slugRepository;
     }
 
     public function handle(CreatedContentEvent $event): void

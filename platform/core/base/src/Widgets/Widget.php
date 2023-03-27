@@ -24,11 +24,13 @@ abstract class Widget
     {
         [$this->startDate, $this->endDate] = ChartHelper::getDateRange();
 
+        $diffInDays = $this->startDate->diffInDays($this->endDate);
+
         $this->dateFormat = match (true) {
-            ($this->startDate->diffInDays($this->endDate)) < 1 => '%h %d',
-            ($this->startDate->diffInDays($this->endDate)) < 30 => '%d %b',
-            ($this->startDate->diffInDays($this->endDate)) > 30 => '%b %Y',
-            ($this->startDate->diffInDays($this->endDate)) > 365 => '%Y',
+            $diffInDays < 1 => '%h %d',
+            $diffInDays <= 30 => '%d %b',
+            $diffInDays > 30 => '%b %Y',
+            $diffInDays > 365 => '%Y',
         };
     }
 

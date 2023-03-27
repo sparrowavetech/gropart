@@ -1,4 +1,4 @@
-@if ($cookieConsentConfig['enabled'] && !$alreadyConsentedWithCookies)
+@if (Arr::get($cookieConsentConfig, 'enabled') && ! $alreadyConsentedWithCookies)
 
     <div class="js-cookie-consent cookie-consent cookie-consent-{{ theme_option('cookie_consent_style', 'full-width') }}" style="background-color: {{ theme_option('cookie_consent_background_color', '#000') }} !important; color: {{ theme_option('cookie_consent_text_color', '#fff') }} !important;">
         <div class="cookie-consent-body" style="max-width: {{ theme_option('cookie_consent_max_width', 1170) }}px;">

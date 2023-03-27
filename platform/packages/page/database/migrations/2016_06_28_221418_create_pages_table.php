@@ -10,7 +10,7 @@ return new class () extends Migration {
             $table->id();
             $table->string('name', 120);
             $table->longText('content')->nullable();
-            $table->integer('user_id')->index();
+            $table->foreignId('user_id')->index();
             $table->string('image', 255)->nullable();
             $table->string('template', 60)->nullable();
             $table->tinyInteger('is_featured')->default(0);

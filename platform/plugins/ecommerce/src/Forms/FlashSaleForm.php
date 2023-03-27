@@ -40,13 +40,9 @@ class FlashSaleForm extends FormAbstract
                 ],
                 'choices' => BaseStatusEnum::labels(),
             ])
-            ->add('end_date', 'text', [
+            ->add('end_date', 'datePicker', [
                 'label' => __('End date'),
                 'label_attr' => ['class' => 'control-label required'],
-                'attr' => [
-                    'class' => 'form-control datepicker',
-                    'data-date-format' => 'yyyy/mm/dd',
-                ],
                 'default_value' => Carbon::now()->addDay()->format('Y/m/d'),
             ])
             ->addMetaBoxes([

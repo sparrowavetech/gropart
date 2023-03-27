@@ -7,6 +7,7 @@ class Currencies {
 
         this.initData();
         this.handleForm();
+        this.updateCurrency();
     }
 
     initData() {
@@ -98,6 +99,68 @@ class Currencies {
 
                 $item.remove();
             });
+    }
+
+    updateCurrency() {
+        $(document).on('click', '#btn-update-currencies', function (event) {
+            event.preventDefault()
+            let _self = $(event.currentTarget);
+
+            const form = $('.main-setting-form');
+
+            $.ajax({
+                type:'POST',
+                url: form.prop('url'),
+                data: form.serialize(),
+                success:function(res) {
+                    if (res.error) {
+                        Botble.showNotice('error', res.message);
+                    }
+                },
+            });
+
+            $.ajax({
+                type:'POST',
+                url: _self.data('url'),
+                beforeSend: function () {
+                    _self.addClass('button-loading');
+                },
+                success:function(res) {
+                    if (! res.error) {
+                        Botble.showNotice('success', res.message);
+                        const data = $.parseJSON(res.data);
+                        const template = $('#currency_template').html()
+                        let html = '';
+                        $('#loading-update-currencies').show();
+                        $.each(data, (index, item) => {
+                            html += template
+                                .replace(/__id__/gi, item.id)
+                                .replace(/__position__/gi, item.order)
+                                .replace(/__isPrefixSymbolChecked__/gi, (item.is_prefix_symbol == 1 ? 'selected' : ''))
+                                .replace(/__notIsPrefixSymbolChecked__/gi, (item.is_prefix_symbol == 0 ? 'selected' : ''))
+                                .replace(/__isDefaultChecked__/gi, (item.is_default == 1 ? 'checked' : ''))
+                                .replace(/__title__/gi, item.title)
+                                .replace(/__decimals__/gi, item.decimals)
+                                .replace(/__exchangeRate__/gi, item.exchange_rate)
+                                .replace(/__symbol__/gi, item.symbol);
+
+                        });
+                        setTimeout(() => {
+                            $('.swatches-container .swatches-list').html(html);
+                        }, 1000)
+                    } else {
+                        Botble.showNotice('error', res.message);
+                    }
+                },
+                error: (res) => {
+                    Botble.handleError(res);
+                    _self.removeClass('button-loading');
+                },
+                complete: function () {
+                    _self.removeClass('button-loading');
+                },
+            });
+        })
     }
 }
 

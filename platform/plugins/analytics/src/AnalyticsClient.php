@@ -9,17 +9,10 @@ use Illuminate\Contracts\Cache\Repository;
 
 class AnalyticsClient
 {
-    protected Google_Service_Analytics $service;
-
-    protected Repository $cache;
-
     protected int $cacheLifeTimeInMinutes = 0;
 
-    public function __construct(Google_Service_Analytics $service, Repository $cache)
+    public function __construct(protected Google_Service_Analytics $service, protected Repository $cache)
     {
-        $this->service = $service;
-
-        $this->cache = $cache;
     }
 
     public function setCacheLifeTimeInMinutes(int $cacheLifeTimeInMinutes): self

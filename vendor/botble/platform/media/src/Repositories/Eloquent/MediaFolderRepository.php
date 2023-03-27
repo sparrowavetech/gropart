@@ -57,7 +57,7 @@ class MediaFolderRepository extends RepositoriesAbstract implements MediaFolderI
         return $newName;
     }
 
-    protected function checkIfExists(string $key, string $value, ?int $parentId): bool
+    protected function checkIfExists(string $key, string $value, int|string|null $parentId): bool
     {
         return $this->model->where($key, $value)->where('parent_id', $parentId)->withTrashed()->exists();
     }

@@ -17,15 +17,6 @@
             'order' => 2,
         ],
         [
-            'key'    => 'marketplace.vendor.enquiries.index',
-            'icon'   => 'icon-database',
-            'name'   => __('Enquiry'),
-            'routes' => [
-                'marketplace.vendor.enquiries.edit',
-            ],
-            'order' => 2,
-        ],
-        [
             'key'    => 'marketplace.vendor.orders.index',
             'icon'   => 'icon-bag2',
             'name'   => __('Orders'),

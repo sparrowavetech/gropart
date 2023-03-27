@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use PaymentMethods;
 use Razorpay\Api\Api;
 use Razorpay\Api\Errors\SignatureVerificationError;
 
@@ -128,7 +129,11 @@ class HookServiceProvider extends ServiceProvider
             $data['errorMessage'] = $exception->getMessage();
         }
 
-        return $html . view('plugins/razorpay::methods', $data)->render();
+        PaymentMethods::method(RAZORPAY_PAYMENT_METHOD_NAME, [
+            'html' => view('plugins/razorpay::methods', $data)->render(),
+        ]);
+
+        return $html;
     }
 
     public function checkoutWithRazorpay(array $data, Request $request): array

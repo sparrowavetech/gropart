@@ -310,7 +310,7 @@ class EmailHandler
                     config('core.base.general.error_reporting.to') :
                     get_admin_email()->toArray()
             );
-        } catch (Exception $ex) {
+        } catch (Throwable $ex) {
             info($ex->getMessage());
         }
     }

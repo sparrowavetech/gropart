@@ -27,6 +27,7 @@ class CustomerAddressResource extends JsonResource
             'zip_code' => $this->zip_code,
             'is_default' => $this->is_default,
             'customer_id' => $this->customer_id,
+            'full_address' => $this->full_address,
         ];
     }
 }

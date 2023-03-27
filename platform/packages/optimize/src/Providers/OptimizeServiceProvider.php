@@ -14,7 +14,6 @@ use Botble\Optimize\Http\Middleware\RemoveQuotes;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\Router;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use OptimizerHelper;
 
@@ -31,7 +30,7 @@ class OptimizeServiceProvider extends ServiceProvider
 
         AliasLoader::getInstance()->alias('OptimizerHelper', OptimizerFacade::class);
 
-        Event::listen(RouteMatched::class, function () {
+        $this->app['events']->listen(RouteMatched::class, function () {
             if (OptimizerHelper::isEnabled()) {
                 /**
                  * @var Router $router

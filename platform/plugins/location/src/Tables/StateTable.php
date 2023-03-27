@@ -22,13 +22,11 @@ class StateTable extends TableAbstract
 
     protected $hasFilter = true;
 
-    protected CountryInterface $countryRepository;
-
     public function __construct(
         DataTables $table,
         UrlGenerator $urlGenerator,
         StateInterface $stateRepository,
-        CountryInterface $countryRepository
+        protected CountryInterface $countryRepository
     ) {
         parent::__construct($table, $urlGenerator);
 

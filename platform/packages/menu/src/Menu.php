@@ -21,15 +21,7 @@ use Theme;
 
 class Menu
 {
-    protected MenuInterface $menuRepository;
-
-    protected HtmlBuilder $html;
-
-    protected MenuNodeInterface $menuNodeRepository;
-
     protected Cache $cache;
-
-    protected Repository $config;
 
     protected array $menuOptionModels = [];
 
@@ -38,16 +30,12 @@ class Menu
     protected bool $loaded = false;
 
     public function __construct(
-        MenuInterface $menuRepository,
-        HtmlBuilder $html,
-        MenuNodeInterface $menuNodeRepository,
+        protected MenuInterface $menuRepository,
+        protected HtmlBuilder $html,
+        protected MenuNodeInterface $menuNodeRepository,
         CacheManager $cache,
-        Repository $config
+        protected Repository $config
     ) {
-        $this->config = $config;
-        $this->menuRepository = $menuRepository;
-        $this->html = $html;
-        $this->menuNodeRepository = $menuNodeRepository;
         $this->cache = new Cache($cache, MenuRepository::class);
         $this->data = collect();
     }
@@ -57,7 +45,7 @@ class Menu
         return $this->menuRepository->findBySlug($slug, $active);
     }
 
-    public function recursiveSaveMenu(array $menuNodes, int $menuId, int $parentId): array
+    public function recursiveSaveMenu(array $menuNodes, int|string $menuId, int|string $parentId): array
     {
         try {
             foreach ($menuNodes as &$row) {
@@ -82,7 +70,7 @@ class Menu
         }
     }
 
-    protected function saveMenuNode(array $menuItem, int $menuId, int $parentId, bool $hasChild = false): array
+    protected function saveMenuNode(array $menuItem, int|string $menuId, int|string $parentId, bool $hasChild = false): array
     {
         $item = $this->menuNodeRepository->findById(Arr::get($menuItem, 'id'));
 

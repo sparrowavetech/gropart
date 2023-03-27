@@ -10,7 +10,6 @@ use Botble\Marketplace\Http\Requests\CheckStoreUrlRequest;
 use Botble\Marketplace\Models\Store;
 use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
 use Botble\SeoHelper\SeoOpenGraph;
-use Botble\Slug\Repositories\Interfaces\SlugInterface;
 use EcommerceHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -23,14 +22,8 @@ use Theme;
 
 class PublicStoreController
 {
-    protected StoreInterface $storeRepository;
-
-    protected SlugInterface $slugRepository;
-
-    public function __construct(StoreInterface $storeRepository, SlugInterface $slugRepository)
+    public function __construct(protected StoreInterface $storeRepository)
     {
-        $this->storeRepository = $storeRepository;
-        $this->slugRepository = $slugRepository;
     }
 
     public function getStores(Request $request)
@@ -76,16 +69,12 @@ class PublicStoreController
     }
 
     public function getStore(
-        string $slug,
+        string $key,
         Request $request,
         GetProductService $productService,
         BaseHttpResponse $response
     ) {
-        $slug = $this->slugRepository->getFirstBy([
-            'key' => $slug,
-            'reference_type' => Store::class,
-            'prefix' => SlugHelper::getPrefix(Store::class),
-        ]);
+        $slug = SlugHelper::getSlug($key, SlugHelper::getPrefix(Store::class));
 
         if (! $slug) {
             abort(404);
@@ -164,10 +153,11 @@ class PublicStoreController
         if (! $request->ajax()) {
             abort(404);
         }
+
         $slug = $request->input('url');
         $slug = Str::slug($slug, '-', ! SlugHelper::turnOffAutomaticUrlTranslationIntoLatin() ? 'en' : false);
 
-        $existing = SlugHelper::getSlug($slug, null, Store::class);
+        $existing = SlugHelper::getSlug($slug, SlugHelper::getPrefix(Store::class));
 
         $response->setData(['slug' => $slug]);
 

@@ -117,6 +117,7 @@ class TemplateProductExport implements
             $attributes1[] = $set->title . ':' . ($set->attributes->count() ? $set->attributes->random()->title : null);
         }
 
+        $salePrice = $price - rand(2, 5);
         $productVariation1 = array_replace($this->getTempProductData(), [
             'name' => $productName,
             'auto_generate_sku' => 'Yes',
@@ -130,13 +131,15 @@ class TemplateProductExport implements
             'stock_status' => StockStatusEnum::IN_STOCK,
             'with_storehouse_management' => 'Yes',
             'quantity' => rand(20, 300),
-            'sale_price' => $price - rand(2, 5),
+            'sale_price' => $salePrice,
             'start_date_sale_price' => Carbon::now()->startOfDay()->format('Y-m-d H:i:s'),
             'end_date_sale_price' => Carbon::now()->addDays(20)->endOfDay()->format('Y-m-d H:i:s'),
             'weight' => rand(20, 300),
             'length' => rand(20, 300),
             'wide' => rand(20, 300),
             'height' => rand(20, 300),
+            'cost_per_item' => $salePrice - rand(2, 3),
+            'barcode' => mt_rand(1000000000, 9999999999),
         ]);
 
         $attributes2 = [];
@@ -167,6 +170,8 @@ class TemplateProductExport implements
             'length' => rand(20, 300),
             'wide' => rand(20, 300),
             'height' => rand(20, 300),
+            'cost_per_item' => $price - rand(2, 3),
+            'barcode' => mt_rand(1000000000, 9999999999),
         ]);
 
         $this->results = collect([
@@ -214,6 +219,8 @@ class TemplateProductExport implements
             'length' => 'Length',
             'wide' => 'Wide',
             'height' => 'Height',
+            'cost_per_item' => 'Cost per item',
+            'barcode' => 'Barcode',
             'content' => 'Content',
             'tags' => 'Tags',
         ];
@@ -239,7 +246,7 @@ class TemplateProductExport implements
         $key = array_search($column, array_keys($this->headings()));
 
         if ($key !== false) {
-            return Coordinate::stringFromColumnIndex($key);
+            return Coordinate::stringFromColumnIndex($key + 1);
         }
 
         return '';
@@ -267,6 +274,7 @@ class TemplateProductExport implements
                 $lengthColumn = $this->stringFromColumnIndex('length');
                 $wideColumn = $this->stringFromColumnIndex('wide');
                 $heightColumn = $this->stringFromColumnIndex('height');
+                $costPerItemColumn = $this->stringFromColumnIndex('cost_per_item');
                 $productTypeColumn = $this->stringFromColumnIndex('product_type');
 
                 // set dropdown list for first data row
@@ -303,6 +311,7 @@ class TemplateProductExport implements
                     $event->sheet->getCell($heightColumn . $index)->setDataValidation($decimalValidation);
                     $event->sheet->getCell($saleColumn . $index)->setDataValidation($decimalValidation);
                     $event->sheet->getCell($priceColumn . $index)->setDataValidation($decimalValidation);
+                    $event->sheet->getCell($costPerItemColumn . $index)->setDataValidation($decimalValidation);
 
                     if ($this->enabledDigital) {
                         $event->sheet->getCell($productTypeColumn . $index)->setDataValidation($productTypeValidation);
@@ -439,6 +448,7 @@ class TemplateProductExport implements
             'length' => NumberFormat::FORMAT_GENERAL,
             'wide' => NumberFormat::FORMAT_GENERAL,
             'height' => NumberFormat::FORMAT_GENERAL,
+            'cost_per_item' => NumberFormat::FORMAT_NUMBER_00,
         ];
 
         $formatted = [];
@@ -489,6 +499,8 @@ class TemplateProductExport implements
             'length' => 'nullable|number',
             'wide' => 'nullable|number',
             'height' => 'nullable|number',
+            'cost_per_item' => 'nullable|numeric|min:0|max:100000000000',
+            'barcode' => 'nullable|max:50|unique:products',
             'content' => 'nullable',
             'tags' => 'nullable|[Product tag name]|multiple',
         ];

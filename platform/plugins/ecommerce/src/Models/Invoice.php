@@ -76,7 +76,7 @@ class Invoice extends BaseModel
     public static function generateUniqueCode(): string
     {
         $prefix = get_ecommerce_setting('invoice_code_prefix', 'INV-');
-        $nextInsertId = static::query()->max('id') + 1;
+        $nextInsertId = BaseModel::determineIfUsingUuidsForId() ? static::query()->count() + 1 : static::query()->max('id') + 1;
 
         do {
             $code = sprintf('%s%d', $prefix, $nextInsertId);

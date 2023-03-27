@@ -7,7 +7,7 @@ use Botble\Support\Repositories\Interfaces\RepositoryInterface;
 interface MediaFolderInterface extends RepositoryInterface
 {
     /**
-     * @param int $folderId
+     * @param int|string $folderId
      * @param array $params
      * @param bool $withTrash
      * @return mixed
@@ -16,53 +16,53 @@ interface MediaFolderInterface extends RepositoryInterface
 
     /**
      * @param string $name
-     * @param int $parentId
+     * @param int|string $parentId
      * @return string
      */
     public function createSlug($name, $parentId);
 
     /**
      * @param string $name
-     * @param int $parentId
+     * @param int|string $parentId
      */
     public function createName($name, $parentId);
 
     /**
-     * @param int $parentId
+     * @param int|string $parentId
      * @param array $breadcrumbs
      * @return array
      */
     public function getBreadcrumbs($parentId, $breadcrumbs = []);
 
     /**
-     * @param int $parentId
+     * @param int|string $parentId
      * @param array $params
      * @return mixed
      */
     public function getTrashed($parentId, array $params = []);
 
     /**
-     * @param int $folderId
+     * @param int|string $folderId
      * @param bool $force
      */
     public function deleteFolder($folderId, $force = false);
 
     /**
-     * @param int $parentId
+     * @param int|string $parentId
      * @param array $child
      * @return array
      */
     public function getAllChildFolders($parentId, $child = []);
 
     /**
-     * @param int $folderId
+     * @param int|string $folderId
      * @param string $path
      * @return string
      */
     public function getFullPath($folderId, $path = '');
 
     /**
-     * @param int $folderId
+     * @param int|string $folderId
      */
     public function restoreFolder($folderId);
 

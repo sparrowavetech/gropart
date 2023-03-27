@@ -14,13 +14,6 @@ use MarketplaceHelper;
 
 class RevenueController
 {
-    protected RevenueInterface $revenueRepository;
-
-    public function __construct(RevenueInterface $revenueRepository)
-    {
-        $this->revenueRepository = $revenueRepository;
-    }
-
     public function index(RevenueTable $table)
     {
         page_title()->setTitle(__('Revenues'));
@@ -28,13 +21,13 @@ class RevenueController
         return $table->render(MarketplaceHelper::viewPath('dashboard.table.base'));
     }
 
-    public function getMonthChart(Request $request, BaseHttpResponse $response)
+    public function getMonthChart(Request $request, BaseHttpResponse $response, RevenueInterface $revenueRepository)
     {
         [$startDate, $endDate] = EcommerceHelper::getDateRangeInReport($request);
 
         $customerId = auth('customer')->id();
 
-        $revenues = $this->revenueRepository
+        $revenues = $revenueRepository
             ->getModel()
             ->selectRaw(
                 'SUM(CASE WHEN type IS NULL OR type = ? THEN amount WHEN type = ? THEN amount * -1 ELSE 0 END) as amount,
@@ -52,7 +45,7 @@ class RevenueController
         $series = [];
         $dates = [];
         $revenuesGrouped = $revenues->groupBy('currency');
-        $earningSales = collect([]);
+        $earningSales = collect();
         $period = CarbonPeriod::create($startDate, $endDate);
 
         $colors = ['#fcb800', '#80bc00'];
@@ -60,7 +53,7 @@ class RevenueController
         foreach ($revenuesGrouped as $key => $revenues) {
             $data = [
                 'name' => $key,
-                'data' => collect([]),
+                'data' => collect(),
             ];
 
             foreach ($period as $date) {

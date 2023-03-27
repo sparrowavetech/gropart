@@ -120,7 +120,8 @@ return [
                 'use_cdn' => false,
                 'location' => 'footer',
                 'src' => [
-                    'local' => '/vendor/core/core/base/libraries/bootstrap-datepicker/js/bootstrap-datepicker.min.js',
+                    'local' => '/vendor/core/core/base/libraries/flatpickr/flatpickr.min.js',
+                    'cdn' => '//cdn.jsdelivr.net/npm/flatpickr',
                 ],
             ],
             'moment' => [
@@ -219,7 +220,8 @@ return [
                 'use_cdn' => false,
                 'location' => 'header',
                 'src' => [
-                    'local' => '/vendor/core/core/base/libraries/bootstrap-datepicker/css/bootstrap-datepicker3.min.css',
+                    'local' => '/vendor/core/core/base/libraries/flatpickr/flatpickr.min.css',
+                    'cdn' => '//cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css',
                 ],
             ],
             'select2' => [

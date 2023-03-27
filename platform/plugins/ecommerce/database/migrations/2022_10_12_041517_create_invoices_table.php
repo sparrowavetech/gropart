@@ -32,7 +32,7 @@ return new class () extends Migration {
             $table->string('discount_description', 255)->nullable();
             $table->unsignedDecimal('amount', 15);
             $table->text('description')->nullable();
-            $table->unsignedInteger('payment_id')->nullable()->index();
+            $table->foreignId('payment_id')->nullable()->index();
             $table->string('status')->index()->default('pending');
             $table->timestamp('paid_at')->nullable();
             $table->timestamps();
@@ -40,7 +40,7 @@ return new class () extends Migration {
 
         Schema::create('ec_invoice_items', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('invoice_id');
+            $table->foreignId('invoice_id');
             $table->morphs('reference');
             $table->string('name');
             $table->string('description')->nullable();

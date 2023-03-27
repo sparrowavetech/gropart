@@ -41,6 +41,7 @@ return [
     'empty_trash_description' => 'Your request cannot rollback. Are you sure you wanna remove all items in trash?',
     'up_level' => 'Up one level',
     'upload_progress' => 'Upload progress',
+    'alt_text' => 'Alt text',
 
     'folder_created' => 'Folder is created successfully!',
     'gallery' => 'Media gallery',
@@ -76,6 +77,7 @@ return [
         'name' => 'Name',
         'url' => 'URL',
         'full_url' => 'Full URL',
+        'alt' => 'Alt text',
         'size' => 'Size',
         'mime_type' => 'Type',
         'created_at' => 'Uploaded at',
@@ -158,6 +160,7 @@ return [
     'download_explain' => 'Enter one URL per line.',
     'downloading' => 'Downloading...',
     'prepare_file_to_download' => 'Preparing file to download...',
+    'update_alt_text_success' => 'Update alt text successfully!',
 
     'cropper' => [
         'height' => 'Height',

@@ -16,13 +16,13 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
                 'as' => 'add-attribute-to-product',
                 'uses' => 'ProductController@postAddAttributeToProduct',
                 'permission' => 'products.edit',
-            ]);
+            ])->where('id', BaseHelper::routeIdRegex());
 
             Route::post('delete-version/{id}', [
                 'as' => 'delete-version',
                 'uses' => 'ProductController@deleteVersion',
                 'permission' => 'products.edit',
-            ]);
+            ])->where('id', BaseHelper::routeIdRegex());
 
             Route::delete('items/delete-versions', [
                 'as' => 'delete-versions',
@@ -34,7 +34,7 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
                 'as' => 'add-version',
                 'uses' => 'ProductController@postAddVersion',
                 'permission' => 'products.edit',
-            ]);
+            ])->where('id', BaseHelper::routeIdRegex());
 
             Route::get('get-version-form/{id?}', [
                 'as' => 'get-version-form',
@@ -46,25 +46,25 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
                 'as' => 'update-version',
                 'uses' => 'ProductController@postUpdateVersion',
                 'permission' => 'products.edit',
-            ]);
+            ])->where('id', BaseHelper::routeIdRegex());
 
             Route::post('generate-all-version/{id}', [
                 'as' => 'generate-all-versions',
                 'uses' => 'ProductController@postGenerateAllVersions',
                 'permission' => 'products.edit',
-            ]);
+            ])->where('id', BaseHelper::routeIdRegex());
 
             Route::post('store-related-attributes/{id}', [
                 'as' => 'store-related-attributes',
                 'uses' => 'ProductController@postStoreRelatedAttributes',
                 'permission' => 'products.edit',
-            ]);
+            ])->where('id', BaseHelper::routeIdRegex());
 
             Route::post('save-all-version/{id}', [
                 'as' => 'save-all-versions',
                 'uses' => 'ProductController@postSaveAllVersions',
                 'permission' => 'products.edit',
-            ]);
+            ])->where('id', BaseHelper::routeIdRegex());
 
             Route::get('get-list-product-for-search', [
                 'as' => 'get-list-product-for-search',

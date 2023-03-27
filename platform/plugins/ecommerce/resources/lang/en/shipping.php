@@ -169,5 +169,6 @@ return [
             ],
         ],
         'select_type' => 'Select type',
+        'cannot_create_rule_type_for_this_location' => 'Cannot create rule type ":type" on this location!',
     ],
 ];

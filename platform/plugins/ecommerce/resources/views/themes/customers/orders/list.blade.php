@@ -20,7 +20,7 @@
 
                         <td>#{{ config('plugins.ecommerce.order.order_code_prefix') }}{{ $order->id }}</td>
                         <td>{{ $order->created_at->format('h:m d/m/Y') }}</td>
-                        <td>{{ $order->payment->payment_channel->label() }}</td>
+                        <td>{{ is_plugin_active('payment') ? $order->payment->payment_channel->label() : '-' }}</td>
                         <td>{{ $order->status->label() }}</td>
 
                         <td>

@@ -11,22 +11,14 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 
 if (! function_exists('get_product_by_id')) {
-    /**
-     * @param int $productId
-     * @return mixed
-     */
-    function get_product_by_id(int $productId)
+    function get_product_by_id(int|string $productId): ?Product
     {
         return app(ProductInterface::class)->findById($productId);
     }
 }
 
 if (! function_exists('get_products')) {
-    /**
-     * @param array $params
-     * @return mixed
-     */
-    function get_products(array $params = [])
+    function get_products(array $params = []): Collection|LengthAwarePaginator|Product|null
     {
         $params = array_merge([
             'condition' => [
@@ -58,11 +50,7 @@ if (! function_exists('get_products')) {
 }
 
 if (! function_exists('get_products_on_sale')) {
-    /**
-     * @param array $params
-     * @return mixed
-     */
-    function get_products_on_sale(array $params = [])
+    function get_products_on_sale(array $params = []): Collection|LengthAwarePaginator
     {
         $params = array_merge([
             'condition' => [
@@ -93,11 +81,7 @@ if (! function_exists('get_products_on_sale')) {
 }
 
 if (! function_exists('get_featured_products')) {
-    /**
-     * @param array $params
-     * @return mixed
-     */
-    function get_featured_products(array $params = [])
+    function get_featured_products(array $params = []): Collection|LengthAwarePaginator
     {
         $params = array_merge([
             'condition' => [
@@ -117,18 +101,12 @@ if (! function_exists('get_featured_products')) {
             'with' => [],
         ], $params);
 
-        return app(ProductInterface::class)->advancedGet($params);
+        return app(ProductInterface::class)->getProducts($params);
     }
 }
 
 if (! function_exists('get_top_rated_products')) {
-    /**
-     * @param int $limit
-     * @param array $with
-     * @param array $withCount
-     * @return mixed
-     */
-    function get_top_rated_products(int $limit = 10, array $with = [], array $withCount = [])
+    function get_top_rated_products(int $limit = 10, array $with = [], array $withCount = []): Collection|LengthAwarePaginator
     {
         $topProductIds = get_top_rated_product_ids($limit);
 
@@ -161,11 +139,7 @@ if (! function_exists('get_top_rated_products')) {
 }
 
 if (! function_exists('get_top_rated_product_ids')) {
-    /**
-     * @param int $limit
-     * @return mixed
-     */
-    function get_top_rated_product_ids(int $limit = 10)
+    function get_top_rated_product_ids(int $limit = 10): array
     {
         return app(ReviewInterface::class)->getModel()
             ->where([
@@ -181,11 +155,7 @@ if (! function_exists('get_top_rated_product_ids')) {
 }
 
 if (! function_exists('get_trending_products')) {
-    /**
-     * @param array $params
-     * @return mixed
-     */
-    function get_trending_products(array $params = [])
+    function get_trending_products(array $params = []): Collection|LengthAwarePaginator
     {
         $params = array_merge([
             'condition' => [
@@ -203,17 +173,12 @@ if (! function_exists('get_trending_products')) {
             'with' => [],
         ], $params);
 
-        return app(ProductInterface::class)->advancedGet($params);
+        return app(ProductInterface::class)->getProducts($params);
     }
 }
 
 if (! function_exists('get_featured_product_categories')) {
-    /**
-     * Get featured product categories
-     * @param array $args
-     * @return mixed
-     */
-    function get_featured_product_categories(array $args = [])
+    function get_featured_product_categories(array $args = []): Collection|LengthAwarePaginator
     {
         $params = array_merge([
             'condition' => [
@@ -235,12 +200,6 @@ if (! function_exists('get_featured_product_categories')) {
 }
 
 if (! function_exists('get_product_collections')) {
-    /**
-     * @param array $condition
-     * @param array $with
-     * @param array $select
-     * @return Collection
-     */
     function get_product_collections(
         array $condition = ['status' => BaseStatusEnum::PUBLISHED],
         array $with = [],
@@ -251,10 +210,6 @@ if (! function_exists('get_product_collections')) {
 }
 
 if (! function_exists('get_products_by_collections')) {
-    /**
-     * @param array $params
-     * @return Collection
-     */
     function get_products_by_collections(array $params = []): Collection
     {
         return app(ProductInterface::class)->getProductsByCollections($params);
@@ -262,11 +217,7 @@ if (! function_exists('get_products_by_collections')) {
 }
 
 if (! function_exists('get_default_product_variation')) {
-    /**
-     * @param int $configurableId
-     * @return Product|Collection
-     */
-    function get_default_product_variation(int $configurableId)
+    function get_default_product_variation(int|string $configurableId): Product|null
     {
         return app(ProductInterface::class)
             ->getProductVariations($configurableId, [
@@ -283,22 +234,13 @@ if (! function_exists('get_default_product_variation')) {
 }
 
 if (! function_exists('get_product_by_brand')) {
-    /**
-     * @param array $params
-     * @return LengthAwarePaginator|EloquentCollection|Collection|mixed
-     */
-    function get_product_by_brand(array $params)
+    function get_product_by_brand(array $params): Collection|LengthAwarePaginator
     {
         return app(ProductInterface::class)->getProductByBrands($params);
     }
 }
 
 if (! function_exists('the_product_price')) {
-    /**
-     * @param Product $product
-     * @param array $htmlWrap
-     * @return string
-     */
     function the_product_price(Product $product, array $htmlWrap = []): string
     {
         $htmlWrapParams = array_merge([
@@ -318,13 +260,7 @@ if (! function_exists('the_product_price')) {
 }
 
 if (! function_exists('get_related_products')) {
-    /**
-     * Get related products of $product
-     * @param Product $product
-     * @param int $limit
-     * @return array|Collection
-     */
-    function get_related_products(Product $product, int $limit = 4)
+    function get_related_products(Product $product, int $limit = 4): Collection|LengthAwarePaginator
     {
         $params = [
             'condition' => [
@@ -383,32 +319,6 @@ if (! function_exists('get_cross_sale_products')) {
             ->notOutOfStock()
             ->withCount($reviewParams['withCount'])
             ->withAvg($reviewParams['withAvg'][0], $reviewParams['withAvg'][1])
-            ->get();
-    }
-}
-
-if (!function_exists('get_frequently_bought_together')) {
-    /**
-     * @param Product $product
-     * @param int $limit
-     * @param array $with
-     * @return Collection|\Illuminate\Database\Eloquent\Collection
-     */
-    function get_frequently_bought_together(Product $product, int $limit = 4, array $with = []): EloquentCollection
-    {
-        $with = array_merge([
-            'slugable',
-            'variations',
-            'productCollections',
-            'variationAttributeSwatchesForProductList',
-        ], $with);
-
-        return $product
-            ->frequentlyBoughtTogether()
-            ->limit($limit)
-            ->with($with)
-            ->notOutOfStock()
-            ->withCount(EcommerceHelper::withReviewsCount())
             ->get();
     }
 }
@@ -473,7 +383,7 @@ if (! function_exists('get_cart_cross_sale_products')) {
 }
 
 if (! function_exists('get_product_attributes_with_set')) {
-    function get_product_attributes_with_set(Product $product, int $setId): array
+    function get_product_attributes_with_set(Product $product, int|string $setId): array
     {
         $productAttributes = app(ProductInterface::class)->getRelatedProductAttributes($product);
 
@@ -490,25 +400,14 @@ if (! function_exists('get_product_attributes_with_set')) {
 }
 
 if (! function_exists('handle_next_attributes_in_product')) {
-    /**
-     * @param $productAttributes
-     * @param $productVariationsInfo
-     * @param $setId
-     * @param $selectedAttributes
-     * @param $key
-     * @param $variationNextIds
-     * @param null $variationInfo
-     * @param array $unavailableAttributeIds
-     * @return array
-     */
     function handle_next_attributes_in_product(
-        $productAttributes,
-        $productVariationsInfo,
-        $setId,
-        $selectedAttributes,
-        $key,
-        $variationNextIds,
-        $variationInfo = null,
+        Collection $productAttributes,
+        Collection $productVariationsInfo,
+        int|string|null $setId,
+        array $selectedAttributes,
+        string|null $key,
+        array $variationNextIds,
+        Collection|null $variationInfo = null,
         array $unavailableAttributeIds = []
     ): array {
         foreach ($productAttributes as $attribute) {
@@ -521,6 +420,7 @@ if (! function_exists('handle_next_attributes_in_product')) {
                     ->where('id', $attribute->id)
                     ->pluck('variation_id')
                     ->toArray();
+
                 if ($key == 0) {
                     $variationNextIds = $variationIds;
                 } else {

@@ -140,7 +140,7 @@ class BaseHelper
         return apply_filters(BASE_FILTER_ADMIN_LANGUAGE_DIRECTION, $direction);
     }
 
-    public function isHomepage(?int $pageId = null): bool
+    public function isHomepage(int|string|null $pageId = null): bool
     {
         $homepageId = $this->getHomepageId();
 
@@ -370,19 +370,26 @@ class BaseHelper
     public function googleFonts(string $font, bool $inline = true)
     {
         if (! config('core.base.general.google_fonts_enabled_cache')) {
-            $font = str_replace('https://fonts.googleapis.com', $this->getGoogleFontsURL(), $font);
-
-            return Html::style($font);
+            return Html::style(str_replace('https://fonts.googleapis.com', $this->getGoogleFontsURL(), $font));
         }
 
-        $font = str_replace($this->getGoogleFontsURL(), 'https://fonts.googleapis.com', $font);
+        try {
+            $fontUrl = str_replace($this->getGoogleFontsURL(), 'https://fonts.googleapis.com', $font);
 
-        $font = app('core:google-fonts')->load($font);
+            $googleFont = app('core:google-fonts')->load($fontUrl);
 
-        if (! $inline) {
-            return $font->link();
+            if (! $inline) {
+                return $googleFont->link();
+            }
+
+            return $googleFont->toHtml();
+        } catch (Exception) {
+            return Html::style(str_replace('https://fonts.googleapis.com', $this->getGoogleFontsURL(), $font));
         }
+    }
 
-        return $font->toHtml();
+    public function routeIdRegex(): string
+    {
+        return config('core.base.general.route_id_regex', '^\d+|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$');
     }
 }

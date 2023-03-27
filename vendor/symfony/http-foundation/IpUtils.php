@@ -72,7 +72,7 @@ class IpUtils
             [$address, $netmask] = explode('/', $ip, 2);
 
             if ('0' === $netmask) {
-                return self::$checkedIps[$cacheKey] = filter_var($address, \FILTER_VALIDATE_IP, \FILTER_FLAG_IPV4);
+                return self::$checkedIps[$cacheKey] = false !== filter_var($address, \FILTER_VALIDATE_IP, \FILTER_FLAG_IPV4);
             }
 
             if ($netmask < 0 || $netmask > 32) {
@@ -168,7 +168,7 @@ class IpUtils
     public static function anonymize(string $ip): string
     {
         $wrappedIPv6 = false;
-        if (str_starts_with($ip, '[') && str_ends_with($ip, ']')) {
+        if ('[' === substr($ip, 0, 1) && ']' === substr($ip, -1, 1)) {
             $wrappedIPv6 = true;
             $ip = substr($ip, 1, -1);
         }

@@ -39,6 +39,7 @@
                         - {{ trans('core/base::system.tokenizer_ext') }}: {!! $serverEnv['tokenizer']  ? '&#10004;' : '&#10008;'!!}
                         - {{ trans('core/base::system.imagick_or_gd_ext') }}: {!! $serverEnv['imagick_or_gd']  ? '&#10004;' : '&#10008;'!!}
                         - {{ trans('core/base::system.zip') }}: {!! $serverEnv['zip']  ? '&#10004;' : '&#10008;'!!}
+                        - {{ trans('core/base::system.iconv') }}: {!! $serverEnv['iconv']  ? '&#10004;' : '&#10008;'!!}
 
                         ### {{ trans('core/base::system.installed_packages') }}
 
@@ -113,6 +114,7 @@
                     <li class="list-group-item">{{ trans('core/base::system.tokenizer_ext') }}: {!! $serverEnv['tokenizer']  ? '<span class="fas fa-check"></span>' : '<span class="fas fa-times"></span>'!!}</li>
                     <li class="list-group-item">{{ trans('core/base::system.imagick_or_gd_ext') }}: {!! $serverEnv['imagick_or_gd']  ? '<span class="fas fa-check"></span>' : '<span class="fas fa-times"></span>'!!}</li>
                     <li class="list-group-item">{{ trans('core/base::system.zip') }}: {!! $serverEnv['zip']  ? '<span class="fas fa-check"></span>' : '<span class="fas fa-times"></span>'!!}</li>
+                    <li class="list-group-item">{{ trans('core/base::system.iconv') }}: {!! $serverEnv['zip']  ? '<span class="fas fa-check"></span>' : '<span class="fas fa-times"></span>'!!}</li>
                 </ul>
             </div>
         </div> <!-- / Server Environment column -->

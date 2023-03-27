@@ -29,14 +29,14 @@ class StripeController extends Controller
 
                 $charge = PaymentIntent::retrieve($session->payment_intent);
 
-                if (! $charge->charges) {
+                if (! $charge->latest_charge && ! $charge->charges) {
                     return $response
                         ->setError()
                         ->setNextUrl(PaymentHelper::getCancelURL())
-                        ->setMessage(__('Payment failed!'));
+                        ->setMessage(__('No payment charge. Please try again!'));
                 }
 
-                $chargeId = $charge->charges->first()->id;
+                $chargeId = $charge->latest_charge ?: $charge->charges->first()->id;
 
                 do_action(PAYMENT_ACTION_PAYMENT_PROCESSED, [
                     'amount' => $metadata['amount'],

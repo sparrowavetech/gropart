@@ -15,8 +15,8 @@ return new class () extends Migration {
         });
 
         Schema::create('ec_product_label_products', function (Blueprint $table) {
-            $table->integer('product_label_id')->unsigned()->index();
-            $table->integer('product_id')->unsigned()->index();
+            $table->foreignId('product_label_id')->index();
+            $table->foreignId('product_id')->index();
             $table->primary(['product_label_id', 'product_id']);
         });
     }

@@ -72,7 +72,6 @@
             ],
             "aliases": {
                 "Assets": "Botble\\Base\\Facades\\AssetsFacade",
-                "BaseHelper": "Botble\\Base\\Facades\\BaseHelperFacade",
                 "MetaBox": "Botble\\Base\\Facades\\MetaBoxFacade",
                 "Action": "Botble\\Base\\Facades\\ActionFacade",
                 "Filter": "Botble\\Base\\Facades\\FilterFacade",

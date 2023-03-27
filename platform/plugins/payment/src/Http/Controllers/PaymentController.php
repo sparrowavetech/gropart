@@ -32,7 +32,7 @@ class PaymentController extends Controller
         return $table->renderTable();
     }
 
-    public function destroy(Request $request, $id, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
             $payment = $this->paymentRepository->findOrFail($id);

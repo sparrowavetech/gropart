@@ -20,11 +20,8 @@ use Validator;
  */
 class MediaFileController extends Controller
 {
-    protected MediaFileInterface $fileRepository;
-
-    public function __construct(MediaFileInterface $fileRepository)
+    public function __construct(protected MediaFileInterface $fileRepository)
     {
-        $this->fileRepository = $fileRepository;
     }
 
     public function postUpload(Request $request)

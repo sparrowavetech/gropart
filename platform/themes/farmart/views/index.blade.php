@@ -9,7 +9,7 @@
 
         <div style="margin: 20px 0;">
             <div>- Content:</div>
-            <div style="border: 1px solid rgba(0,0,0,.1); padding: 10px; margin-top: 10px;">
+            <div style="border: 1px solid rgba(0,0,0,.1); padding: 10px; margin-top: 10px;direction: ltr;">
                 <div>[simple-slider key="home-slider" ads="VC2C8Q1UGCBG" background="general/slider-bg.jpg"][/simple-slider]</div>
                 <div>[featured-product-categories title="Browse by Category"][/featured-product-categories]</div>
                 <div>[featured-brands title="Featured Brands"][/featured-brands]</div>
