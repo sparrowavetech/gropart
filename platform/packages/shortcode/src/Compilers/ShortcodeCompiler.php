@@ -4,6 +4,7 @@ namespace Botble\Shortcode\Compilers;
 
 use Botble\Shortcode\View\View;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class ShortcodeCompiler
@@ -12,9 +13,11 @@ class ShortcodeCompiler
 
     protected bool $strip = false;
 
-    protected array $matches;
+    protected array $matches = [];
 
     protected array $registered = [];
+
+    protected string $editLink;
 
     public function enable(): self
     {
@@ -30,8 +33,33 @@ class ShortcodeCompiler
         return $this;
     }
 
-    public function add(string $key, ?string $name, ?string $description = null, string|null|callable|array $callback = null, string $previewImage = ''): void
+    public function setEditLink(string $editLink, string $permission): void
     {
+        if ($permission && (! Auth::check() || ! Auth::user()->hasPermission($permission))) {
+            return;
+        }
+
+        $this->editLink = $editLink;
+    }
+
+    public function getEditLink(): string|null
+    {
+        if (! isset($this->editLink)) {
+            return null;
+        }
+
+        do_action('shortcode_set_edit_link', $this, $this->editLink);
+
+        return $this->editLink;
+    }
+
+    public function add(
+        string $key,
+        string|null $name,
+        string|null $description = null,
+        string|null|callable|array $callback = null,
+        string $previewImage = ''
+    ): void {
         $this->registered[$key] = compact('key', 'name', 'description', 'callback', 'previewImage');
     }
 
@@ -91,12 +119,18 @@ class ShortcodeCompiler
         $callback = apply_filters('shortcode_get_callback', $this->getCallback($name), $name);
 
         // Render the shortcode through the callback
-        return apply_filters('shortcode_content_compiled', call_user_func_array($callback, [
-            $compiled,
-            $compiled->getContent(),
-            $this,
+        return apply_filters(
+            'shortcode_content_compiled',
+            call_user_func_array($callback, [
+                $compiled,
+                $compiled->getContent(),
+                $this,
+                $name,
+            ]),
             $name,
-        ]), $name, $callback);
+            $callback,
+            $this
+        );
     }
 
     protected function compileShortcode($matches): Shortcode
@@ -119,12 +153,12 @@ class ShortcodeCompiler
         $this->matches = $matches;
     }
 
-    public function getName(): ?string
+    public function getName(): string|null
     {
         return $this->matches[2];
     }
 
-    public function getContent(): ?string
+    public function getContent(): string|null
     {
         if (! $this->matches) {
             return null;
@@ -155,7 +189,7 @@ class ShortcodeCompiler
         return $callback;
     }
 
-    protected function parseAttributes(?string $text): array
+    protected function parseAttributes(string|null $text): array
     {
         // decode attribute values
         $text = htmlspecialchars_decode($text, ENT_QUOTES);
@@ -202,7 +236,7 @@ class ShortcodeCompiler
     /**
      * Remove all shortcode tags from the given content.
      */
-    public function strip(?string $content, array $except = []): ?string
+    public function strip(string|null $content, array $except = []): string|null
     {
         if (empty($this->registered)) {
             return $content;
@@ -223,7 +257,7 @@ class ShortcodeCompiler
         $this->strip = $strip;
     }
 
-    protected function stripTag(array $match): ?string
+    protected function stripTag(array $match): string|null
     {
         if ($match[1] == '[' && $match[6] == ']') {
             return substr($match[0], 1, -1);
@@ -252,10 +286,8 @@ class ShortcodeCompiler
             return [];
         }
 
-        // Set matches
         $this->setMatches($matches);
 
-        // pars the attributes
         return $this->parseAttributes($this->matches[3]);
     }
 

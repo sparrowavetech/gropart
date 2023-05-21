@@ -2,8 +2,8 @@
 
 namespace Botble\Installer\Supports;
 
-use Exception;
 use Illuminate\Http\Request;
+use Throwable;
 
 class EnvironmentManager
 {
@@ -16,7 +16,7 @@ class EnvironmentManager
         $replacements = [
             'APP_NAME' => [
                 'default' => '"Your App"',
-                'value' => '"' . $request->input('app_name') . '"',
+                'value' => '"' . str_replace('"', '', $request->input('app_name')) . '"',
             ],
             'APP_URL' => [
                 'default' => 'http:\/\/localhost',
@@ -36,15 +36,15 @@ class EnvironmentManager
             ],
             'DB_DATABASE' => [
                 'default' => '"laravel"',
-                'value' => '"' . $request->input('database_name') . '"',
+                'value' => '"' . str_replace('"', '', $request->input('database_name')) . '"',
             ],
             'DB_USERNAME' => [
                 'default' => '"root"',
-                'value' => '"' . $request->input('database_username') . '"',
+                'value' => '"' . str_replace('"', '', $request->input('database_username')) . '"',
             ],
             'DB_PASSWORD' => [
                 'default' => '"your_db_password"',
-                'value' => '"' . $request->input('database_password') . '"',
+                'value' => '"' . str_replace('"', '', $request->input('database_password')) . '"',
             ],
         ];
 
@@ -58,10 +58,22 @@ class EnvironmentManager
 
         try {
             file_put_contents(base_path('.env'), $content);
-        } catch (Exception) {
+        } catch (Throwable) {
             $results = trans('packages/installer::installer.environment.errors');
         }
 
         return $results;
+    }
+
+    public function turnOffDebugMode(): void
+    {
+        $content = file_get_contents(base_path('.env'));
+
+        $content = preg_replace('/^APP_DEBUG=true/m', 'APP_DEBUG=false', $content);
+
+        try {
+            file_put_contents(base_path('.env'), $content);
+        } catch (Throwable) {
+        }
     }
 }

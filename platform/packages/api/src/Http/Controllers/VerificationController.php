@@ -2,11 +2,12 @@
 
 namespace Botble\Api\Http\Controllers;
 
-use ApiHelper;
+use Botble\Api\Facades\ApiHelper;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Api\Http\Requests\ResendEmailVerificationRequest;
-use Hash;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class VerificationController extends Controller
@@ -31,6 +32,9 @@ class VerificationController extends Controller
                 ->setCode(404);
         }
 
+        /**
+         * @var User $user
+         */
         if ($user->hasVerifiedEmail()) {
             return $response
                 ->setError()

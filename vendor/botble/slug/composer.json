@@ -16,7 +16,7 @@
                 "Botble\\Slug\\Providers\\SlugServiceProvider"
             ],
             "aliases": {
-                "SlugHelper": "Botble\\Slug\\Facades\\SlugHelperFacade"
+                "SlugHelper": "Botble\\Slug\\Facades\\SlugHelper"
             }
         }
     }

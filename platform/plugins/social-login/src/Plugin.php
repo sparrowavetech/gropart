@@ -3,13 +3,13 @@
 namespace Botble\SocialLogin;
 
 use Botble\PluginManagement\Abstracts\PluginOperationAbstract;
-use Botble\Setting\Models\Setting;
+use Botble\Setting\Facades\Setting;
 
 class Plugin extends PluginOperationAbstract
 {
-    public static function remove()
+    public static function remove(): void
     {
-        Setting::whereIn('key', [
+        Setting::delete([
             'social_login_enable',
             'social_login_facebook_enable',
             'social_login_facebook_app_id',
@@ -23,6 +23,6 @@ class Plugin extends PluginOperationAbstract
             'social_login_linkedin_enable',
             'social_login_linkedin_app_id',
             'social_login_linkedin_app_secret',
-        ])->delete();
+        ]);
     }
 }

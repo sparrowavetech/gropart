@@ -48,25 +48,6 @@
         }
     }
 
-    .btn-add-plugin {
-        display: inline-block;
-        color: #fff;
-        padding: 10px 20px;
-        font-size: 14px;
-        font-weight: 400;
-        border: 1px dashed #1d7aa3;
-        border-radius: 2px;
-        margin-bottom: 15px;
-        max-width: 200px;
-        background-color: #1d7aa3;
-
-        &:hover {
-            text-decoration: none;
-            background-color: #0181b9;
-            border: 1px solid #0181b9;
-        }
-    }
-
     .app-grid--blank-slate {
 
         .app-card-item {
@@ -92,7 +73,10 @@
                 align-items: center;
                 margin: 0 auto;
                 height: 120px;
-                background-color: #fdcd09;
+                background-color: #7fc8d6;
+                background-repeat: no-repeat;
+                background-size: cover;
+                background-position: center;
                 border-radius: 3px 3px 0 0;
                 overflow: hidden;
 

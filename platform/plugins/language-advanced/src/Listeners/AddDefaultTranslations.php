@@ -5,7 +5,7 @@ namespace Botble\LanguageAdvanced\Listeners;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Illuminate\Support\Facades\DB;
-use Language;
+use Botble\Language\Facades\Language;
 
 class AddDefaultTranslations
 {

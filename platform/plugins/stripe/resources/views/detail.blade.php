@@ -33,7 +33,7 @@
                 @endphp
                 <p>{{ trans('plugins/payment::payment.amount') }}: {{ $item->amount }} {{ strtoupper($item->currency) }}</p>
                 <p>{{ trans('plugins/payment::payment.refunds.status') }}: {{ strtoupper($item->status) }}</p>
-                <p>{{ trans('plugins/payment::payment.refunds.create_time') }}: {{ now()->parse($item->created) }}</p>
+                <p>{{ trans('plugins/payment::payment.refunds.create_time') }}: {{ Carbon\Carbon::now()->parse($item->created) }}</p>
             </div>
             <br />
         @endforeach

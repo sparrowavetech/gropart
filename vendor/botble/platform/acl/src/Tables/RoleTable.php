@@ -2,8 +2,9 @@
 
 namespace Botble\ACL\Tables;
 
-use BaseHelper;
-use Html;
+use Botble\ACL\Models\Role;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -13,7 +14,7 @@ use Botble\ACL\Repositories\Interfaces\RoleInterface;
 use Botble\ACL\Repositories\Interfaces\UserInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Illuminate\Contracts\Routing\UrlGenerator;
-use Yajra\DataTables\DataTables;
+use Botble\Table\DataTables;
 
 class RoleTable extends TableAbstract
 {
@@ -21,18 +22,15 @@ class RoleTable extends TableAbstract
 
     protected $hasFilter = true;
 
-    protected UserInterface $userRepository;
-
     public function __construct(
         DataTables $table,
         UrlGenerator $urlGenerator,
-        RoleInterface $roleRepository,
-        UserInterface $userRepository
+        RoleInterface $repository,
+        protected UserInterface $userRepository
     ) {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $roleRepository;
-        $this->userRepository = $userRepository;
+        $this->repository = $repository;
 
         if (! Auth::user()->hasAnyPermission(['roles.edit', 'roles.destroy'])) {
             $this->hasOperations = false;
@@ -44,26 +42,26 @@ class RoleTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('name', function ($item) {
+            ->editColumn('name', function (Role $item) {
                 if (! Auth::user()->hasPermission('roles.edit')) {
                     return BaseHelper::clean($item->name);
                 }
 
                 return Html::link(route('roles.edit', $item->id), BaseHelper::clean($item->name));
             })
-            ->editColumn('checkbox', function ($item) {
+            ->editColumn('checkbox', function (Role $item) {
                 return $this->getCheckbox($item->id);
             })
-            ->editColumn('description', function ($item) {
+            ->editColumn('description', function (Role $item) {
                 return $item->description;
             })
-            ->editColumn('created_at', function ($item) {
+            ->editColumn('created_at', function (Role $item) {
                 return BaseHelper::formatDate($item->created_at);
             })
-            ->editColumn('created_by', function ($item) {
+            ->editColumn('created_by', function (Role $item) {
                 return BaseHelper::clean($item->author->name);
             })
-            ->addColumn('operations', function ($item) {
+            ->addColumn('operations', function (Role $item) {
                 return $this->getOperations('roles.edit', 'roles.destroy', $item);
             });
 

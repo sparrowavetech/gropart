@@ -4,7 +4,7 @@ namespace Botble\Installer\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Route;
+use Illuminate\Support\Facades\Route;
 
 class RedirectIfNotInstalledMiddleware extends InstallerMiddleware
 {

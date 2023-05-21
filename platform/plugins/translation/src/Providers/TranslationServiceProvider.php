@@ -2,17 +2,21 @@
 
 namespace Botble\Translation\Providers;
 
-use Botble\Translation\Console\DownloadLocaleCommand;
-use Botble\Translation\Console\RemoveUnusedTranslationsCommand;
-use Botble\Translation\Console\UpdateThemeTranslationCommand;
-use Illuminate\Routing\Events\RouteMatched;
+use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Translation\Console\CleanCommand;
+use Botble\Translation\Console\DownloadLocaleCommand;
 use Botble\Translation\Console\ExportCommand;
 use Botble\Translation\Console\ImportCommand;
+use Botble\Translation\Console\RemoveUnusedTranslationsCommand;
 use Botble\Translation\Console\ResetCommand;
+use Botble\Translation\Console\UpdateThemeTranslationCommand;
 use Botble\Translation\Manager;
-use Illuminate\Support\Facades\Event;
+use Botble\Translation\Models\Translation;
+use Botble\Translation\Repositories\Caches\TranslationCacheDecorator;
+use Botble\Translation\Repositories\Eloquent\TranslationRepository;
+use Botble\Translation\Repositories\Interfaces\TranslationInterface;
+use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\ServiceProvider;
 
 class TranslationServiceProvider extends ServiceProvider
@@ -21,6 +25,10 @@ class TranslationServiceProvider extends ServiceProvider
 
     public function register(): void
     {
+        $this->app->bind(TranslationInterface::class, function () {
+            return new TranslationCacheDecorator(new TranslationRepository(new Translation()));
+        });
+
         $this->app->bind('translation-manager', Manager::class);
 
         $this->commands([
@@ -49,17 +57,16 @@ class TranslationServiceProvider extends ServiceProvider
             ->loadAndPublishTranslations()
             ->publishAssets();
 
-        Event::listen(RouteMatched::class, function () {
-            dashboard_menu()
-                ->registerItem([
-                    'id' => 'cms-plugin-translation',
-                    'priority' => 997,
-                    'parent_id' => null,
-                    'name' => 'plugins/translation::translation.translations',
-                    'icon' => 'fas fa-language',
-                    'url' => route('translations.index'),
-                    'permissions' => ['translations.index'],
-                ])
+        $this->app['events']->listen(RouteMatched::class, function () {
+            DashboardMenu::registerItem([
+                'id' => 'cms-plugin-translation',
+                'priority' => 997,
+                'parent_id' => null,
+                'name' => 'plugins/translation::translation.translations',
+                'icon' => 'fas fa-language',
+                'url' => route('translations.index'),
+                'permissions' => ['translations.index'],
+            ])
                 ->registerItem([
                     'id' => 'cms-plugin-translation-locale',
                     'priority' => 1,

@@ -4,8 +4,10 @@
     $prodKey = setting('shipping_shippo_production_key') ?: '';
     $test = setting('shipping_shippo_sandbox', 1) ?: 0;
     $logging = setting('shipping_shippo_logging', 1) ?: 0;
+    $cacheResponse = setting('shipping_shippo_cache_response', 1) ?: 0;
     $webhook = setting('shipping_shippo_webhooks', 1) ?: 0;
 @endphp
+
 <table class="table mt-4 bg-white">
     <tbody>
         <tr class="border-pay-row">
@@ -101,20 +103,22 @@
                                     {{ trans('plugins/shippo::shippo.please_provide_information') }}
                                     <a target="_blank" href="https://goshippo.com/">Shippo</a>:
                                 </p>
-                                <div class="form-group mb-3">
-                                    <label class="control-label" for="shipping_shippo_test_key">{{ trans('plugins/shippo::shippo.test_api_token') }}</label>
-                                    <input type="text" class="form-control" placeholder="<API-KEY>" id="shipping_shippo_test_key"
-                                        name="shipping_shippo_test_key"
-                                        @env('demo') disabled value="{{ Str::mask($testKey, '*', 10) }}" @else value="{{ $testKey }}" @endenv>
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label class="control-label" for="shipping_shippo_production_key">{{ trans('plugins/shippo::shippo.live_api_token') }}</label>
-                                    <div class="input-option">
-                                        <input type="text" class="form-control" placeholder="<API-KEY>" id="shipping_shippo_production_key"
-                                            name="shipping_shippo_production_key"
-                                            @env('demo') disabled value="{{ Str::mask($prodKey, '*', 10) }}" @else value="{{ $prodKey }}" @endenv>
-                                    </div>
-                                </div>
+                                <x-core-setting::text-input
+                                    name="shipping_shippo_test_key"
+                                    :label="trans('plugins/shippo::shippo.test_api_token')"
+                                    placeholder="<API-KEY>"
+                                    :disabled="app()->environment('demo')"
+                                    :value="app()->environment('demo') ? Str::mask($testKey, '*', 10) : $testKey"
+                                />
+
+                                <x-core-setting::text-input
+                                    name="shipping_shippo_production_key"
+                                    :label="trans('plugins/shippo::shippo.live_api_token')"
+                                    placeholder="<API-KEY>"
+                                    :disabled="app()->environment('demo')"
+                                    :value="app()->environment('demo') ? Str::mask($prodKey, '*', 10) : $prodKey"
+                                />
+
                                 <div class="form-group mb-3">
                                     <label class="control-label" for="shipping_shippo_sandbox">
                                         {!! Form::onOff('shipping_shippo_sandbox', $test) !!}
@@ -134,6 +138,12 @@
                                     </label>
                                 </div>
                                 <div class="form-group mb-3">
+                                    <label class="control-label" for="shipping_shippo_cache_response">
+                                        {!! Form::onOff('shipping_shippo_cache_response', $cacheResponse) !!}
+                                        {{ trans('plugins/shippo::shippo.cache_response') }}
+                                    </label>
+                                </div>
+                                <div class="form-group mb-3">
                                     <label class="control-label" for="shipping_shippo_webhooks">
                                         {!! Form::onOff('shipping_shippo_webhooks', $webhook) !!}
                                         {{ trans('plugins/shippo::shippo.webhooks') }}
@@ -146,24 +156,41 @@
                                         <div>URL: <i>{{ route('shippo.webhooks', ['_token' => '__API_TOKEN__']) }}</i></div>
                                     </div>
                                 </div>
-                                <div class="form-group mb-3">
-                                    <label class="control-label" for="shipping_shippo_validate">
-                                        {!! Form::checkbox('shipping_shippo_validate', 1) !!}
-                                        {{ trans('plugins/shippo::shippo.check_validate_token') }}
-                                    </label>
+
+                                <x-core-setting::checkbox
+                                    name="shipping_shippo_validate"
+                                    :label="trans('plugins/shippo::shippo.check_validate_token')"
+                                    :value="setting('shipping_shippo_validate')"
+
+                                />
+
+                                @if (count($logFiles))
+                                    <div class="form-group mb-3">
+                                        <p class="mb-0">{{ __('Log files') }}: </p>
+                                        <ul>
+                                            @foreach($logFiles as $logFile)
+                                                <li><a href="{{ route('ecommerce.shipments.shippo.view-log', $logFile) }}" target="_blank"><strong>- {{ $logFile }} <i class="fa fa-external-link"></i></strong></a></li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endif
+                            </div>
+                            <div class="col-12 mb-3">
+                                <div class="note note-warning">
+                                    <strong>{{ trans('plugins/shippo::shippo.not_available_in_cod_payment_method') }}</strong>
                                 </div>
                             </div>
-                            @env('demo')
-                                <div class="col-12">
-                                    <div class="alert alert-warning">
+                            <div class="col-12 mb-3">
+                                @env('demo')
+                                    <div class="note note-danger">
                                         <strong>{{ trans('plugins/shippo::shippo.disabled_in_demo_mode') }}</strong>
                                     </div>
-                                </div>
-                            @else
-                                <div class="col-12 text-end">
-                                    <button class="btn btn-info" type="submit">{{ trans('core/base::forms.update') }}</button>
-                                </div>
-                            @endif
+                                @else
+                                    <div class="text-end">
+                                        <button class="btn btn-info" type="submit">{{ trans('core/base::forms.update') }}</button>
+                                    </div>
+                                @endenv
+                            </div>
                         </div>
                     </div>
                 {!! Form::close() !!}

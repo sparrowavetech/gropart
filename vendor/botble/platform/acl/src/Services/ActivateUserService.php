@@ -7,11 +7,8 @@ use Botble\ACL\Repositories\Interfaces\ActivationInterface;
 
 class ActivateUserService
 {
-    protected ActivationInterface $activationRepository;
-
-    public function __construct(ActivationInterface $activationRepository)
+    public function __construct(protected ActivationInterface $activationRepository)
     {
-        $this->activationRepository = $activationRepository;
     }
 
     public function activate(User $user): bool

@@ -2,20 +2,20 @@
 
 namespace Botble\Ads\Tables;
 
-use Auth;
-use BaseHelper;
+use Illuminate\Support\Facades\Auth;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Ads\Models\Ads;
 use Botble\Ads\Repositories\Interfaces\AdsInterface;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Table\Abstracts\TableAbstract;
-use Html;
+use Botble\Base\Facades\Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
-use RvMedia;
-use Yajra\DataTables\DataTables;
+use Botble\Media\Facades\RvMedia;
+use Botble\Table\DataTables;
 
 class AdsTable extends TableAbstract
 {

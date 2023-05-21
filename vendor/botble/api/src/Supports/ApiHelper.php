@@ -20,17 +20,17 @@ class ApiHelper
         return $this;
     }
 
-    public function guard(): ?string
+    public function guard(): string|null
     {
         return $this->getConfig('guard');
     }
 
-    public function passwordBroker(): ?string
+    public function passwordBroker(): string|null
     {
         return $this->getConfig('password_broker');
     }
 
-    public function getConfig(string $key, $default = null): ?string
+    public function getConfig(string $key, $default = null): string|null
     {
         return config('packages.api.api.provider.' . $key, $default);
     }
@@ -58,6 +58,6 @@ class ApiHelper
 
     public function enabled(): bool
     {
-        return setting('api_enabled', 1) == 1;
+        return setting('api_enabled', 0) == 1;
     }
 }

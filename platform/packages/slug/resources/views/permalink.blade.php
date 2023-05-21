@@ -2,11 +2,11 @@
     $prefix = apply_filters(FILTER_SLUG_PREFIX, $prefix);
     $value = $value ?: old('slug');
     $endingURL = config('core.base.general.public_single_ending_url');
-    $previewURL = str_replace('--slug--', $value, url($prefix) . '/' . config('packages.slug.general.pattern')) . $endingURL . (Auth::user() && $preview ? '?preview=true' : '');
+    $previewURL = str_replace('--slug--', (string)$value, url($prefix) . '/' . config('packages.slug.general.pattern')) . $endingURL . (Auth::user() && $preview ? '?preview=true' : '');
 @endphp
 
 <div id="edit-slug-box" @if (empty($value) && !$errors->has($name)) class="hidden" @endif data-field-name="{{ SlugHelper::getColumnNameToGenerateSlug($model) }}">
-    @if (in_array(Route::currentRouteName(), ['pages.create', 'pages.edit']) && BaseHelper::isHomepage(Route::current()->parameter('page')))
+    @if (in_array(Route::currentRouteName(), ['pages.create', 'pages.edit']) && BaseHelper::isHomepage(Route::current()->parameter('page.id')))
         <label class="control-label" for="current-slug">{{ trans('core/base::forms.permalink') }}:</label>
         <span id="sample-permalink" class="d-inline-block" dir="ltr">
             <a class="permalink" target="_blank" href="{{ route('public.index') }}">

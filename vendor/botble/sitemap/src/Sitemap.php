@@ -2,12 +2,13 @@
 
 namespace Botble\Sitemap;
 
-use Illuminate\Http\Response;
-use Illuminate\View\Factory as ViewFactory;
 use Illuminate\Cache\Repository as CacheRepository;
-use Illuminate\Filesystem\Filesystem as Filesystem;
 use Illuminate\Config\Repository as ConfigRepository;
 use Illuminate\Contracts\Routing\ResponseFactory as ResponseFactory;
+use Illuminate\Filesystem\Filesystem as Filesystem;
+use Illuminate\Http\Response;
+use Illuminate\Support\Arr;
+use Illuminate\View\Factory as ViewFactory;
 
 class Sitemap
 {
@@ -40,7 +41,7 @@ class Sitemap
         $this->model = new Model($config);
     }
 
-    public function setCache(?string $key = null, $duration = null, bool $useCache = true): void
+    public function setCache(string|null $key = null, $duration = null, bool $useCache = true): void
     {
         $this->model->setUseCache($useCache);
 
@@ -55,42 +56,29 @@ class Sitemap
 
     /**
      * Add new sitemap item to $items array.
-     *
-     * @param string $loc
-     * @param string $lastmod
-     * @param string $priority
-     * @param string $freq
-     * @param array $images
-     * @param string $title
-     * @param array $translations
-     * @param array $videos
-     * @param array $googlenews
-     * @param array $alternates
-     *
-     * @return void
      */
     public function add(
-        $loc,
-        $lastmod = null,
-        $priority = null,
-        $freq = null,
+        string $loc,
+        string|null $lastMod = null,
+        string|null $priority = null,
+        string|null $freq = null,
         array $images = [],
-        $title = null,
+        string|null $title = null,
         array $translations = [],
         array $videos = [],
-        array $googlenews = [],
+        array $googleNews = [],
         array $alternates = []
-    ) {
+    ): void {
         $params = [
             'loc' => $loc,
-            'lastmod' => $lastmod,
+            'lastmod' => $lastMod,
             'priority' => $priority,
             'freq' => $freq,
             'images' => $images,
             'title' => $title,
             'translations' => $translations,
             'videos' => $videos,
-            'googlenews' => $googlenews,
+            'googlenews' => $googleNews,
             'alternates' => $alternates,
         ];
 
@@ -99,11 +87,8 @@ class Sitemap
 
     /**
      * Add new sitemap one or multiple items to $items array.
-     *
-     * @param array $params
-     * @return void
      */
-    public function addItem(array $params = [])
+    public function addItem(array $params = []): void
     {
         // if is multidimensional
         if (array_key_exists(1, $params)) {
@@ -114,42 +99,16 @@ class Sitemap
             return;
         }
 
-        // get params
-        foreach ($params as $key => $value) {
-            $$key = $value;
-        }
-
-        // set default values
-        if (! isset($loc)) {
-            $loc = '/';
-        }
-        if (! isset($lastmod)) {
-            $lastmod = null;
-        }
-        if (! isset($priority)) {
-            $priority = null;
-        }
-        if (! isset($freq)) {
-            $freq = null;
-        }
-        if (! isset($title)) {
-            $title = null;
-        }
-        if (! isset($images)) {
-            $images = [];
-        }
-        if (! isset($translations)) {
-            $translations = [];
-        }
-        if (! isset($alternates)) {
-            $alternates = [];
-        }
-        if (! isset($videos)) {
-            $videos = [];
-        }
-        if (! isset($googlenews)) {
-            $googlenews = [];
-        }
+        $loc = Arr::get($params, 'loc', '/');
+        $lastMod = Arr::get($params, 'lastmod');
+        $priority = Arr::get($params, 'priority');
+        $freq = Arr::get($params, 'freq');
+        $images = Arr::get($params, 'images', []);
+        $title = Arr::get($params, 'title');
+        $translations = Arr::get($params, 'translations', []);
+        $videos = Arr::get($params, 'videos', []);
+        $googleNews = Arr::get($params, 'googlenews', []);
+        $alternates = Arr::get($params, 'alternates', []);
 
         // escaping
         if ($this->model->isEscaping()) {
@@ -194,38 +153,35 @@ class Sitemap
                 }
             }
 
-            if ($googlenews) {
-                if (isset($googlenews['sitename'])) {
-                    $googlenews['sitename'] = htmlentities($googlenews['sitename'], ENT_XML1);
+            if ($googleNews) {
+                if (isset($googleNews['sitename'])) {
+                    $googleNews['sitename'] = htmlentities($googleNews['sitename'], ENT_XML1);
                 }
             }
         }
 
-        $googlenews['sitename'] = isset($googlenews['sitename']) ? $googlenews['sitename'] : '';
-        $googlenews['language'] = isset($googlenews['language']) ? $googlenews['language'] : 'en';
-        $googlenews['publication_date'] = isset($googlenews['publication_date']) ? $googlenews['publication_date'] : date('Y-m-d H:i:s');
+        $googleNews['sitename'] = $googleNews['sitename'] ?? '';
+        $googleNews['language'] = $googleNews['language'] ?? 'en';
+        $googleNews['publication_date'] = $googleNews['publication_date'] ?? date('Y-m-d H:i:s');
 
         $this->model->setItems([
             'loc' => $loc,
-            'lastmod' => $lastmod,
+            'lastmod' => $lastMod,
             'priority' => $priority,
             'freq' => $freq,
             'images' => $images,
             'title' => $title,
             'translations' => $translations,
             'videos' => $videos,
-            'googlenews' => $googlenews,
+            'googlenews' => $googleNews,
             'alternates' => $alternates,
         ]);
     }
 
     /**
      * Add new sitemap to $sitemaps array.
-     *
-     * @param array $sitemaps
-     * @return void
      */
-    public function resetSitemaps(array $sitemaps = [])
+    public function resetSitemaps(array $sitemaps = []): void
     {
         $this->model->resetSitemaps($sitemaps);
     }
@@ -256,13 +212,14 @@ class Sitemap
      * Generates document with all sitemap items from $items array.
      *
      * @param string $format (options: xml, html, txt, ror-rss, ror-rdf, sitemapindex, google-news)
-     * @return array
      */
     public function generate(string $format = 'xml'): array
     {
         // check if caching is enabled, there is a cached content and its duration isn't expired
         if ($this->isCached()) {
-            ('sitemapindex' == $format) ? $this->model->resetSitemaps($this->cache->get($this->model->getCacheKey())) : $this->model->resetItems($this->cache->get($this->model->getCacheKey()));
+            ('sitemapindex' == $format) ? $this->model->resetSitemaps(
+                $this->cache->get($this->model->getCacheKey())
+            ) : $this->model->resetItems($this->cache->get($this->model->getCacheKey()));
         } elseif ($this->model->isUseCache()) {
             ('sitemapindex' == $format) ? $this->cache->put(
                 $this->model->getCacheKey(),
@@ -290,7 +247,9 @@ class Sitemap
 
         // check if styles are enabled
         if ($this->model->isUseStyles()) {
-            if (null != $this->model->getSloc() && file_exists(public_path($this->model->getSloc() . $format . '.xsl'))) {
+            if (null != $this->model->getSloc() && file_exists(
+                public_path($this->model->getSloc() . $format . '.xsl')
+            )) {
                 // use style from your custom location
                 $style = $this->model->getSloc() . $format . '.xsl';
             } else {
@@ -362,8 +321,12 @@ class Sitemap
      * @param string|null $style (path to custom xls style like '/styles/xsl/xml-sitemap.xsl')
      * @return void
      */
-    public function store(string $format = 'xml', string $filename = 'sitemap', ?string $path = null, ?string $style = null)
-    {
+    public function store(
+        string $format = 'xml',
+        string $filename = 'sitemap',
+        string|null $path = null,
+        string|null $style = null
+    ) {
         // turn off caching for this method
         $this->model->setUseCache(false);
 
@@ -401,7 +364,9 @@ class Sitemap
 
                 $data = $this->generate('sitemapindex');
             }
-        } elseif (('google-news' != $format && count($this->model->getItems()) > 50000) || ($format == 'google-news' && count($this->model->getItems()) > 1000)) {
+        } elseif (('google-news' != $format && count(
+            $this->model->getItems()
+        ) > 50000) || ($format == 'google-news' && count($this->model->getItems()) > 1000)) {
             ('google-news' != $format) ? $max = 50000 : $max = 1000;
 
             // check if limiting size of items array is enabled
@@ -459,16 +424,12 @@ class Sitemap
 
     /**
      * Add new sitemap to $sitemaps array.
-     *
-     * @param string $loc
-     * @param string|null $lastmod
-     * @return void
      */
-    public function addSitemap(string $loc, ?string $lastmod = null)
+    public function addSitemap(string $loc, string|null $lastMod = null): void
     {
         $this->model->setSitemaps([
             'loc' => $loc,
-            'lastmod' => $lastmod,
+            'lastmod' => $lastMod,
         ]);
     }
 }

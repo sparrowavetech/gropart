@@ -2,109 +2,73 @@
 
 namespace Botble\Captcha;
 
-use GuzzleHttp\Client;
-use Illuminate\Contracts\Foundation\Application;
+use Botble\Captcha\Contracts\Captcha as CaptchaContract;
 use Illuminate\Support\Arr;
-use Theme;
+use Illuminate\Support\Facades\Http;
 
-class CaptchaV3
+class CaptchaV3 extends CaptchaContract
 {
-    protected ?string $secret;
-
-    protected ?string $siteKey;
-
-    protected ?string $origin;
-
     protected bool $rendered = false;
 
-    public function __construct(Application $app)
+    public function verify(string $response, string $clientIp, array $options = []): bool
     {
-        $this->secret = $app['config']->get('plugins.captcha.general.secret');
-        $this->siteKey = $app['config']->get('plugins.captcha.general.site_key');
-        $this->origin = 'https://www.google.com/recaptcha';
-    }
+        if (! $this->isEnabled()) {
+            return true;
+        }
 
-    public function verify(string $token, string $clientIp, array $parameters = []): bool
-    {
-        $client = new Client();
-
-        $response = $client->request('POST', $this->origin . '/api/siteverify', [
-            'form_params' => [
-                'secret' => $this->secret,
-                'response' => $token,
-                'remoteip' => $clientIp,
-            ],
+        $response = Http::asForm()->post(self::RECAPTCHA_VERIFY_API_URL, [
+            'secret' => $this->secretKey,
+            'response' => $response,
+            'remoteip' => $clientIp,
         ]);
 
-        $body = json_decode($response->getBody(), true);
+        $data = $response->json();
 
-        if (! isset($body['success']) || $body['success'] !== true) {
+        if (! isset($data['success']) || ! $data['success']) {
             return false;
         }
 
-        $action = $parameters[0];
-        $minScore = isset($parameters[1]) ? (float)$parameters[1] : 0.5;
+        $action = $options[0];
+        $minScore = isset($options[1]) ? (float) $options[1] : 0.5;
 
-        if ($action && (! isset($body['action']) || $action != $body['action'])) {
+        if ($action && (! isset($data['action']) || $action != $data['action'])) {
             return false;
         }
 
-        $score = $body['score'] ?? false;
+        $score = $data['score'] ?? false;
 
         return $score && $score >= $minScore;
     }
 
-    public function display(array $attributes = ['action' => 'form'], array $options = ['name' => 'g-recaptcha-response']): ?string
+    public function display(array $attributes = ['action' => 'form'], array $options = []): string|null
     {
-        if (! $this->siteKey) {
+        if (! $this->siteKey || ! $this->isEnabled()) {
             return null;
         }
 
-        $name = Arr::get($options, 'name', 'g-recaptcha-response');
-
-        $fieldId = uniqid($name . '-');
+        $name = Arr::get($options, 'name', self::RECAPTCHA_INPUT_NAME);
+        $uniqueId = uniqid($name . '-');
         $action = Arr::get($attributes, 'action', 'form');
+        $isRendered = $this->rendered;
 
-        $input = '<input type="hidden" name="' . $name . '" id="' . $fieldId . '">';
+        add_filter(THEME_FRONT_FOOTER, function (string|null $html) use ($isRendered, $uniqueId, $action): string {
+            $url = self::RECAPTCHA_CLIENT_API_URL . '?' . http_build_query([
+                    'onload' => 'onloadCallback',
+                    'render' => $this->siteKey,
+                    'hl' => app()->getLocale(),
+                ]);
 
-        if (! $this->rendered && Arr::get($attributes, 'add-js', true)) {
-            $this->initJs($fieldId, $action);
-        }
-
-        $html = "var onloadCallback = function() { grecaptcha.ready(function() { refreshRecaptcha('" . $fieldId . "'); }); };";
-
-        Theme::asset()->container('after_footer')->writeScript('google-recaptcha-' . $fieldId, $html, ['google-recaptcha']);
+            return $html . view('plugins/captcha::v3.script', [
+                'siteKey' => $this->siteKey,
+                'id' => $uniqueId,
+                'action' => $action,
+                'url' => $url,
+                'isRendered' => $isRendered,
+            ])->render();
+        }, 99);
 
         $this->rendered = true;
 
-        return $input;
-    }
-
-    public function initJs($fieldId = null, $action = 'form'): void
-    {
-        if ($fieldId && $action) {
-            $script = "
-                var refreshRecaptcha = function (fieldId) {
-                   if (!fieldId) {
-                       fieldId = '" . $fieldId . "';
-                   }
-
-                   var field = document.getElementById(fieldId);
-
-                   if (field) {
-                      grecaptcha.execute('" . $this->siteKey . "', {action: '" . $action . "'}).then(function(token) {
-                         field.value = token;
-                      });
-                   }
-               };";
-
-            Theme::asset()
-                ->container('after_footer')
-                ->writeScript('google-recaptcha-script-' . $fieldId, $script, ['google-recaptcha']);
-        }
-
-        Theme::asset()
-            ->container('after_footer')
-            ->add('google-recaptcha', $this->origin . '/api.js?onload=onloadCallback&render=' . $this->siteKey . '&hl=' . app()->getLocale(), [], ['async', 'defer']);
+        return view('plugins/captcha::v3.html', compact('name', 'uniqueId'))->render();
     }
 }

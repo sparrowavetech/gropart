@@ -13,17 +13,7 @@
                                 @csrf
                                 <div class="form-group mb-3">
                                     <label for="locale_id" class="control-label">{{ trans('plugins/translation::translation.locale') }}</label>
-                                    <div class="ui-select-wrapper form-group">
-                                        <select id="locale_id" name="locale" class="select-search-full">
-                                            <option value="">{{ trans('plugins/translation::translation.select_locale') }}</option>
-                                            @foreach ($locales as $key => $name)
-                                                <option value="{{ $key }}"> {{ $name }} - {{ $key }}</option>
-                                            @endforeach
-                                        </select>
-                                        <svg class="svg-next-icon svg-next-icon-size-16">
-                                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#select-chevron"></use>
-                                        </svg>
-                                    </div>
+                                    {!! Form::customSelect('locale_id', ['' => trans('plugins/translation::translation.select_locale')] + collect($locales)->map(fn($item, $key) => $item . ' - ' . $key)->all(), null, ['class' => 'select-search-full']) !!}
                                 </div>
                                 <p class="submit">
                                     <button class="btn btn-primary" type="submit">{{ trans('plugins/translation::translation.add_new_locale') }}</button>
@@ -79,23 +69,13 @@
         ],
     ])
 
-    <div class="modal fade modal-confirm-import-locale" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-md">
-            <div class="modal-content">
-                <div class="modal-header bg-info">
-                    <h4 class="modal-title"><i class="til_img"></i><strong>{{ trans('plugins/translation::translation.import_available_locale_confirmation') }}</strong></h4>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
-                </div>
-
-                <div class="modal-body with-padding">
-                    <div>{!! BaseHelper::clean(trans('plugins/translation::translation.import_available_locale_confirmation_content', ['lang_path' => Html::tag('strong', lang_path())->toHtml()])) !!}</div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="float-start btn btn-secondary" data-bs-dismiss="modal">{{ trans('core/table::table.cancel') }}</button>
-                    <button class="float-end btn btn-warning button-confirm-import-locale">{{ trans('plugins/translation::translation.download_locale') }}</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <x-core-base::modal
+        class="modal-confirm-import-locale"
+        :title="trans('plugins/translation::translation.import_available_locale_confirmation')"
+        type="info"
+        button-class="button-confirm-import-locale"
+        :button-label="trans('plugins/translation::translation.download_locale')"
+    >
+        <div class="text-break">{!! BaseHelper::clean(trans('plugins/translation::translation.import_available_locale_confirmation_content', ['lang_path' => Html::tag('strong', lang_path())->toHtml()])) !!}</div>
+    </x-core-base::modal>
 @stop

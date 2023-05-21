@@ -1,19 +1,18 @@
 class SimpleSliderManagement {
     static setAnimation(_elem, _InOut) {
-        let animationEndEvent =
-            'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
+        let animationEndEvent = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend'
         _elem.each(function () {
-            let $elem = $(this);
-            let $animationType = 'animated ' + $elem.data('animation-' + _InOut);
+            let $elem = $(this)
+            let $animationType = 'animated ' + $elem.data('animation-' + _InOut)
 
             $elem.addClass($animationType).one(animationEndEvent, function () {
-                $elem.removeClass($animationType);
-            });
-        });
+                $elem.removeClass($animationType)
+            })
+        })
     }
 
     init() {
-        let target = $(document).find('.owl-slider');
+        let target = $(document).find('.owl-slider')
         if (target.length > 0) {
             target.each(function () {
                 let el = $(this),
@@ -23,12 +22,8 @@ class SimpleSliderManagement {
                     dataGap = el.data('owl-gap'),
                     dataNav = el.data('owl-nav'),
                     dataDots = el.data('owl-dots'),
-                    dataAnimateIn = el.data('owl-animate-in')
-                        ? el.data('owl-animate-in')
-                        : '',
-                    dataAnimateOut = el.data('owl-animate-out')
-                        ? el.data('owl-animate-out')
-                        : '',
+                    dataAnimateIn = el.data('owl-animate-in') ? el.data('owl-animate-in') : '',
+                    dataAnimateOut = el.data('owl-animate-out') ? el.data('owl-animate-out') : '',
                     dataDefaultItem = el.data('owl-item'),
                     dataItemXS = el.data('owl-item-xs'),
                     dataItemSM = el.data('owl-item-sm'),
@@ -43,12 +38,9 @@ class SimpleSliderManagement {
                         : '<i class="fa fa-angle-right"></i>',
                     duration = el.data('owl-duration'),
                     dataMouseDrag = el.data('owl-mousedrag') === 'on',
-                    center = el.data('owl-center');
+                    center = el.data('owl-center')
 
-                if (
-                    target.children('div, span, a, img, h1, h2, h3, h4, h5, h5').length >=
-                    1
-                ) {
+                if (target.children('div, span, a, img, h1, h2, h3, h4, h5, h5').length >= 1) {
                     el.owlCarousel({
                         rtl: $('body').prop('dir') === 'rtl',
                         animateIn: dataAnimateIn,
@@ -71,45 +63,45 @@ class SimpleSliderManagement {
                         center: Boolean(center),
                         responsive: {
                             0: {
-                                items: dataItemXS
+                                items: dataItemXS,
                             },
                             480: {
-                                items: dataItemSM
+                                items: dataItemSM,
                             },
                             768: {
-                                items: dataItemMD
+                                items: dataItemMD,
                             },
                             992: {
-                                items: dataItemLG
+                                items: dataItemLG,
                             },
                             1200: {
-                                items: dataItemXL
+                                items: dataItemXL,
                             },
                             1680: {
-                                items: dataDefaultItem
-                            }
-                        }
-                    });
+                                items: dataDefaultItem,
+                            },
+                        },
+                    })
 
                     el.on('change.owl.carousel', function (event) {
-                        let $currentItem = $('.owl-item', el).eq(event.item.index);
-                        let $elementsToAnimation = $currentItem.find('[data-animation-out]');
+                        let $currentItem = $('.owl-item', el).eq(event.item.index)
+                        let $elementsToAnimation = $currentItem.find('[data-animation-out]')
 
-                        SimpleSliderManagement.setAnimation($elementsToAnimation, 'out');
-                    });
+                        SimpleSliderManagement.setAnimation($elementsToAnimation, 'out')
+                    })
 
                     el.on('changed.owl.carousel', function (event) {
-                        let $currentItem = $('.owl-item', el).eq(event.item.index);
-                        let $elementsToAnimation = $currentItem.find('[data-animation-in]');
+                        let $currentItem = $('.owl-item', el).eq(event.item.index)
+                        let $elementsToAnimation = $currentItem.find('[data-animation-in]')
 
-                        SimpleSliderManagement.setAnimation($elementsToAnimation, 'in');
-                    });
+                        SimpleSliderManagement.setAnimation($elementsToAnimation, 'in')
+                    })
                 }
-            });
+            })
         }
     }
 }
 
 $(document).ready(() => {
-    new SimpleSliderManagement().init();
-});
+    new SimpleSliderManagement().init()
+})

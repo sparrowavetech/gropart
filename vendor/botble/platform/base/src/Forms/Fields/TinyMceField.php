@@ -3,7 +3,7 @@
 namespace Botble\Base\Forms\Fields;
 
 use Illuminate\Support\Arr;
-use Kris\LaravelFormBuilder\Fields\FormField;
+use Botble\Base\Forms\FormField;
 
 class TinyMceField extends FormField
 {

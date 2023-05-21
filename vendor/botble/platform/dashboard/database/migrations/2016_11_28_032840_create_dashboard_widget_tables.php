@@ -16,8 +16,8 @@ return new class () extends Migration {
         Schema::create('dashboard_widget_settings', function (Blueprint $table) {
             $table->id();
             $table->text('settings')->nullable();
-            $table->integer('user_id')->unsigned()->index();
-            $table->integer('widget_id')->unsigned()->index();
+            $table->foreignId('user_id')->index();
+            $table->foreignId('widget_id')->index();
             $table->tinyInteger('order')->unsigned()->default(0);
             $table->tinyInteger('status')->unsigned()->default(1);
             $table->timestamps();

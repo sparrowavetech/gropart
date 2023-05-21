@@ -6,10 +6,8 @@ trait RuleListTrait
 {
     /**
      *  Rules validated with Javascript.
-     *
-     * @var array
      */
-    protected $clientRules = [
+    protected array $clientRules = [
         'Accepted',
         'After',
         'Alpha',
@@ -62,24 +60,18 @@ trait RuleListTrait
 
     /**
      * Rules validated in Server-Side.
-     *
-     * @var array
      */
-    protected $serverRules = ['ActiveUrl', 'Exists', 'Unique'];
+    protected array $serverRules = ['ActiveUrl', 'Exists', 'Unique'];
 
     /**
      * Rules applied to files.
-     *
-     * @var array
      */
-    protected $fileRules = ['File', 'Image', 'Mimes', 'Mimetypes'];
+    protected array $fileRules = ['File', 'Image', 'Mimes', 'Mimetypes'];
 
     /**
      * Rule used to disable validations.
-     *
-     * @var string
      */
-    private $disableJsValidationRule = 'NoJsValidation';
+    private string $disableJsValidationRule = 'NoJsValidation';
 
     /**
      * Returns if rule is validated using Javascript.

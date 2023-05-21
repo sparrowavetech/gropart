@@ -2,7 +2,7 @@
 
 namespace Botble\Theme\Http\Controllers;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Page\Models\Page;
 use Botble\Page\Services\PageService;
 use Botble\Theme\Events\RenderingHomePageEvent;
@@ -10,14 +10,40 @@ use Botble\Theme\Events\RenderingSingleEvent;
 use Botble\Theme\Events\RenderingSiteMapEvent;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
-use SeoHelper;
-use SiteMapManager;
-use SlugHelper;
-use Theme;
+use Botble\SeoHelper\Facades\SeoHelper;
+use Botble\Theme\Facades\SiteMapManager;
+use Botble\Slug\Facades\SlugHelper;
+use Botble\Theme\Facades\Theme;
 
 class PublicController extends Controller
 {
-    public function getView(?string $key = null)
+    public function getIndex()
+    {
+        if (defined('PAGE_MODULE_SCREEN_NAME')) {
+            $homepageId = BaseHelper::getHomepageId();
+            if ($homepageId) {
+                $slug = SlugHelper::getSlug(null, SlugHelper::getPrefix(Page::class), Page::class, $homepageId);
+
+                if ($slug) {
+                    $data = (new PageService())->handleFrontRoutes($slug);
+
+                    event(new RenderingSingleEvent($slug));
+
+                    return Theme::scope($data['view'], $data['data'], $data['default_view'])->render();
+                }
+            }
+        }
+
+        SeoHelper::setTitle(theme_option('site_title'));
+
+        Theme::breadcrumb()->add(__('Home'), route('public.index'));
+
+        event(RenderingHomePageEvent::class);
+
+        return Theme::scope('index')->render();
+    }
+
+    public function getView(string|null $key = null)
     {
         if (empty($key)) {
             return $this->getIndex();
@@ -50,37 +76,22 @@ class PublicController extends Controller
         abort(404);
     }
 
-    public function getIndex()
-    {
-        if (defined('PAGE_MODULE_SCREEN_NAME')) {
-            $homepageId = BaseHelper::getHomepageId();
-            if ($homepageId) {
-                $slug = SlugHelper::getSlug(null, SlugHelper::getPrefix(Page::class), Page::class, $homepageId);
-
-                if ($slug) {
-                    $data = (new PageService())->handleFrontRoutes($slug);
-
-                    event(new RenderingSingleEvent($slug));
-
-                    return Theme::scope($data['view'], $data['data'], $data['default_view'])->render();
-                }
-            }
-        }
-
-        SeoHelper::setTitle(theme_option('site_title'));
-
-        Theme::breadcrumb()->add(__('Home'), route('public.index'));
-
-        event(RenderingHomePageEvent::class);
-
-        return Theme::scope('index')->render();
-    }
-
     public function getSiteMap()
     {
-        event(RenderingSiteMapEvent::class);
+        return $this->getSiteMapIndex();
+    }
+
+    public function getSiteMapIndex(string $key = null, string $extension = 'xml')
+    {
+        if ($key == 'sitemap') {
+            $key = null;
+        }
+
+        if (! SiteMapManager::init($key, $extension)->isCached()) {
+            event(new RenderingSiteMapEvent($key));
+        }
 
         // show your site map (options: 'xml' (default), 'html', 'txt', 'ror-rss', 'ror-rdf')
-        return SiteMapManager::render();
+        return SiteMapManager::render($key ? $extension : 'sitemapindex');
     }
 }

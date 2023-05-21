@@ -1,23 +1,21 @@
 <?php
 
-namespace Botble\Paypal;
+namespace Botble\PayPal;
 
 use Botble\PluginManagement\Abstracts\PluginOperationAbstract;
-use Botble\Setting\Models\Setting;
+use Botble\Setting\Facades\Setting;
 
 class Plugin extends PluginOperationAbstract
 {
-    public static function remove()
+    public static function remove(): void
     {
-        Setting::query()
-            ->whereIn('key', [
-                'payment_paypal_name',
-                'payment_paypal_description',
-                'payment_paypal_client_id',
-                'payment_paypal_client_secret',
-                'payment_paypal_mode',
-                'payment_paypal_status',
-            ])
-            ->delete();
+        Setting::delete([
+            'payment_paypal_name',
+            'payment_paypal_description',
+            'payment_paypal_client_id',
+            'payment_paypal_client_secret',
+            'payment_paypal_mode',
+            'payment_paypal_status',
+        ]);
     }
 }

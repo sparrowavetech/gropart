@@ -2,8 +2,9 @@
 
 namespace Botble\Location\Http\Controllers;
 
-use Assets;
-use BaseHelper;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Supports\Helper;
@@ -19,19 +20,13 @@ use Maatwebsite\Excel\Excel;
 
 class BulkImportController extends BaseController
 {
-    protected LocationImport $locationImport;
-
-    protected ValidateLocationImport $validateLocationImport;
-
-    public function __construct(LocationImport $locationImport, ValidateLocationImport $validateLocationImport)
+    public function __construct(protected LocationImport $locationImport, protected ValidateLocationImport $validateLocationImport)
     {
-        $this->locationImport = $locationImport;
-        $this->validateLocationImport = $validateLocationImport;
     }
 
     public function index()
     {
-        page_title()->setTitle(trans('plugins/location::bulk-import.name'));
+        PageTitle::setTitle(trans('plugins/location::bulk-import.name'));
 
         Assets::addScriptsDirectly(['vendor/core/plugins/location/js/bulk-import.js']);
 

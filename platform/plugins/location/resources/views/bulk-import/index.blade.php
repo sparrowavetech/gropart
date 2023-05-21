@@ -281,25 +281,13 @@
         </tr>
     </script>
 
-    <div class="modal fade modal-confirm-import" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-md">
-            <div class="modal-content">
-                <div class="modal-header bg-info">
-                    <h4 class="modal-title"><i class="til_img"></i><strong>{{ trans('plugins/location::bulk-import.import_available_data_confirmation') }}</strong></h4>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
-                </div>
-
-                <div class="modal-body with-padding">
-                    <div>{{ trans('plugins/location::bulk-import.import_available_data_confirmation_content') }}</div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="float-start btn btn-secondary" data-bs-dismiss="modal">{{ trans('core/table::table.cancel') }}</button>
-                    <button class="float-end btn btn-warning button-confirm-import">{{ trans('plugins/location::bulk-import.import') }}</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- end Modal -->
-
+    <x-core-base::modal
+        class="modal-confirm-import"
+        :title="trans('plugins/location::bulk-import.import_available_data_confirmation')"
+        type="info"
+        button-class="button-confirm-import"
+        :button-label="trans('plugins/location::bulk-import.import')"
+    >
+        <div>{{ trans('plugins/location::bulk-import.import_available_data_confirmation_content') }}</div>
+    </x-core-base::modal>
 @stop

@@ -3,13 +3,16 @@
 namespace Botble\Blog\Repositories\Eloquent;
 
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Models\BaseModel;
+use Botble\Blog\Models\Category;
 use Botble\Blog\Repositories\Interfaces\CategoryInterface;
 use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
-use Eloquent;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class CategoryRepository extends RepositoriesAbstract implements CategoryInterface
 {
-    public function getDataSiteMap()
+    public function getDataSiteMap(): Collection
     {
         $data = $this->model
             ->with('slugable')
@@ -20,7 +23,7 @@ class CategoryRepository extends RepositoriesAbstract implements CategoryInterfa
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    public function getFeaturedCategories($limit, array $with = [])
+    public function getFeaturedCategories(int|null $limit, array $with = []): Collection
     {
         $data = $this->model
             ->with(array_merge(['slugable'], $with))
@@ -40,7 +43,7 @@ class CategoryRepository extends RepositoriesAbstract implements CategoryInterfa
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    public function getAllCategories(array $condition = [], array $with = [])
+    public function getAllCategories(array $condition = [], array $with = []): Collection
     {
         $data = $this->model->with('slugable');
         if (! empty($condition)) {
@@ -59,7 +62,7 @@ class CategoryRepository extends RepositoriesAbstract implements CategoryInterfa
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    public function getCategoryById($id)
+    public function getCategoryById(int|string|null $id): ?Category
     {
         $data = $this->model->with('slugable')->where([
             'id' => $id,
@@ -69,7 +72,7 @@ class CategoryRepository extends RepositoriesAbstract implements CategoryInterfa
         return $this->applyBeforeExecuteQuery($data, true)->first();
     }
 
-    public function getCategories(array $select, array $orderBy, array $conditions = ['status' => BaseStatusEnum::PUBLISHED])
+    public function getCategories(array $select, array $orderBy, array $conditions = ['status' => BaseStatusEnum::PUBLISHED]): Collection
     {
         $data = $this->model
             ->with('slugable')
@@ -86,16 +89,16 @@ class CategoryRepository extends RepositoriesAbstract implements CategoryInterfa
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    public function getAllRelatedChildrenIds($id)
+    public function getAllRelatedChildrenIds(int|string|null|BaseModel $id): array
     {
-        if ($id instanceof Eloquent) {
+        if ($id instanceof BaseModel) {
             $model = $id;
         } else {
             $model = $this->getFirstBy(['id' => $id]);
         }
 
         if (! $model) {
-            return null;
+            return [];
         }
 
         $result = [];
@@ -112,7 +115,7 @@ class CategoryRepository extends RepositoriesAbstract implements CategoryInterfa
         return array_unique($result);
     }
 
-    public function getAllCategoriesWithChildren(array $condition = [], array $with = [], array $select = ['*'])
+    public function getAllCategoriesWithChildren(array $condition = [], array $with = [], array $select = ['*']): Collection
     {
         $data = $this->model
             ->where($condition)
@@ -122,20 +125,18 @@ class CategoryRepository extends RepositoriesAbstract implements CategoryInterfa
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    public function getFilters($filters)
+    public function getFilters(array $filters): LengthAwarePaginator
     {
-        $this->model = $this->originalModel;
-
         $orderBy = $filters['order_by'] ?? 'created_at';
 
         $order = $filters['order'] ?? 'desc';
 
-        $this->model = $this->model->where('status', BaseStatusEnum::PUBLISHED)->orderBy($orderBy, $order);
+        $data = $this->model->where('status', BaseStatusEnum::PUBLISHED)->orderBy($orderBy, $order);
 
-        return $this->applyBeforeExecuteQuery($this->model)->paginate((int)$filters['per_page']);
+        return $this->applyBeforeExecuteQuery($data)->paginate((int)$filters['per_page']);
     }
 
-    public function getPopularCategories(int $limit, array $with = ['slugable'], array $withCount = ['posts'])
+    public function getPopularCategories(int $limit, array $with = ['slugable'], array $withCount = ['posts']): Collection
     {
         $data = $this->model
             ->with($with)

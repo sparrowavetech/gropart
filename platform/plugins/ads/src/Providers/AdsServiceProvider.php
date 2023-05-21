@@ -2,8 +2,7 @@
 
 namespace Botble\Ads\Providers;
 
-use AdsManager;
-use Botble\Ads\Facades\AdsManagerFacade;
+use Botble\Ads\Facades\AdsManager;
 use Botble\Ads\Models\Ads;
 use Botble\Ads\Repositories\Caches\AdsCacheDecorator;
 use Botble\Ads\Repositories\Eloquent\AdsRepository;
@@ -12,7 +11,6 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Supports\Helper;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
-use Event;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Facades\Route;
@@ -30,7 +28,7 @@ class AdsServiceProvider extends ServiceProvider
 
         Helper::autoload(__DIR__ . '/../../helpers');
 
-        AliasLoader::getInstance()->alias('AdsManager', AdsManagerFacade::class);
+        AliasLoader::getInstance()->alias('AdsManager', AdsManager::class);
     }
 
     public function boot()
@@ -42,7 +40,7 @@ class AdsServiceProvider extends ServiceProvider
             ->loadRoutes()
             ->loadAndPublishViews();
 
-        Event::listen(RouteMatched::class, function () {
+        $this->app['events']->listen(RouteMatched::class, function () {
             dashboard_menu()->registerItem([
                 'id' => 'cms-plugins-ads',
                 'priority' => 5,

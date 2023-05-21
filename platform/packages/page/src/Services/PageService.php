@@ -2,25 +2,24 @@
 
 namespace Botble\Page\Services;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Page\Models\Page;
 use Botble\Page\Repositories\Interfaces\PageInterface;
 use Botble\SeoHelper\SeoOpenGraph;
-use Eloquent;
-use Html;
+use Botble\Slug\Models\Slug;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
-use RvMedia;
-use SeoHelper;
-use Theme;
+use Botble\Media\Facades\RvMedia;
+use Botble\SeoHelper\Facades\SeoHelper;
+use Botble\Theme\Facades\Theme;
 
 class PageService
 {
-    public function handleFrontRoutes(Eloquent|array $slug): Eloquent|array|Builder
+    public function handleFrontRoutes(Slug|array $slug): Slug|array|Builder
     {
-        if (! $slug instanceof Eloquent) {
+        if (! $slug instanceof Slug) {
             return $slug;
         }
 
@@ -44,6 +43,7 @@ class PageService
         }
 
         $meta = new SeoOpenGraph();
+
         if ($page->image) {
             $meta->setImage(RvMedia::getImageUrl($page->image));
         }
@@ -79,7 +79,11 @@ class PageService
 
         if (function_exists('admin_bar')) {
             admin_bar()
-                ->registerLink(trans('packages/page::pages.edit_this_page'), route('pages.edit', $page->id), 'pages.edit');
+                ->registerLink(trans('packages/page::pages.edit_this_page'), route('pages.edit', $page->id), null, 'pages.edit');
+        }
+
+        if (function_exists('shortcode')) {
+            shortcode()->getCompiler()->setEditLink(route('pages.edit', $page->id), 'pages.edit');
         }
 
         do_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, PAGE_MODULE_SCREEN_NAME, $page);
@@ -87,10 +91,6 @@ class PageService
         Theme::breadcrumb()
             ->add(__('Home'), route('public.index'))
             ->add($page->name, $page->url);
-
-        Theme::asset()->add('ckeditor-content-styles', 'vendor/core/core/base/libraries/ckeditor/content-styles.css');
-
-        $page->content = Html::tag('div', (string)$page->content, ['class' => 'ck-content'])->toHtml();
 
         return [
             'view' => 'page',

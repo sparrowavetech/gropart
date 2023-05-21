@@ -2,8 +2,8 @@
 
 namespace Botble\Backup\Providers;
 
+use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\ServiceProvider;
 
@@ -23,8 +23,8 @@ class BackupServiceProvider extends ServiceProvider
 
         $this->app->register(CommandServiceProvider::class);
 
-        Event::listen(RouteMatched::class, function () {
-            dashboard_menu()->registerItem([
+        $this->app['events']->listen(RouteMatched::class, function () {
+            DashboardMenu::registerItem([
                 'id' => 'cms-plugin-backup',
                 'priority' => 8,
                 'parent_id' => 'cms-core-platform-administration',

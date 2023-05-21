@@ -3,22 +3,21 @@
 namespace Botble\Media\Chunks\Storage;
 
 use Botble\Media\Chunks\ChunkFile;
+use Carbon\Carbon;
 use Closure;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Collection;
 use League\Flysystem\Local\LocalFilesystemAdapter;
 use RuntimeException;
-use RvMedia;
-use Storage;
+use Botble\Media\Facades\RvMedia;
+use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class ChunkStorage
 {
     public const CHUNK_EXTENSION = 'part';
 
-    /**
-     * @var array
-     */
-    protected $config;
+    protected array $config;
 
     /**
      * The disk that holds the chunk files.
@@ -28,16 +27,14 @@ class ChunkStorage
     protected $disk;
 
     /**
-     * @var LocalFilesystemAdapter
+     * @var LocalFilesystemAdapter|FilesystemAdapter
      */
     protected $diskAdapter;
 
     /**
      * Is provided disk a local drive.
-     *
-     * @var bool
      */
-    protected $isLocalDisk;
+    protected bool $isLocalDisk;
 
     /**
      * ChunkStorage constructor.
@@ -57,6 +54,7 @@ class ChunkStorage
         }
 
         // Get the disk adapter
+        // @phpstan-ignore-next-line
         $this->diskAdapter = $driver->getAdapter();
 
         // Check if its local adapter
@@ -73,10 +71,8 @@ class ChunkStorage
 
     /**
      * Returns the application instance of the chunk storage.
-     *
-     * @return ChunkStorage
      */
-    public static function storage(): ChunkStorage
+    public static function storage(): self
     {
         return app(self::class);
     }
@@ -118,7 +114,11 @@ class ChunkStorage
         // Loop all current files and filter them by the time
         $files->each(function ($file) use ($timeToCheck, $collection) {
             // get the last modified time to check if the chunk is not new
-            $modified = $this->disk()->lastModified($file);
+            try {
+                $modified = $this->disk()->lastModified($file);
+            } catch (Throwable) {
+                $modified = Carbon::now()->getTimestamp();
+            }
 
             // Delete only old chunk
             if ($modified < $timeToCheck) {

@@ -2,38 +2,28 @@
 
 namespace Botble\Theme;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
+use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Theme\Contracts\Theme as ThemeContract;
 use Botble\Theme\Exceptions\UnknownPartialFileException;
 use Botble\Theme\Exceptions\UnknownThemeException;
 use Closure;
-use Illuminate\Support\Facades\File;
 use Illuminate\Config\Repository;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\File;
 use Illuminate\View\Factory;
-use SeoHelper;
 use Symfony\Component\HttpFoundation\Cookie;
 
 class Theme implements ThemeContract
 {
     public static string $namespace = 'theme';
 
-    protected Repository $config;
-
-    protected Dispatcher $events;
-
     protected array $themeConfig = [];
 
-    protected Factory $view;
-
-    protected Asset | AssetContainer $asset;
-
-    protected Filesystem $files;
-
-    protected ?string $theme = null;
+    protected string|null $theme = null;
 
     protected string $layout;
 
@@ -47,26 +37,16 @@ class Theme implements ThemeContract
 
     protected ?Cookie $cookie = null;
 
-    protected Breadcrumb $breadcrumb;
-
     protected array $widgets = [];
 
     public function __construct(
-        Repository $config,
-        Dispatcher $events,
-        Factory $view,
-        Asset $asset,
-        Filesystem $files,
-        Breadcrumb $breadcrumb
+        protected Repository $config,
+        protected Dispatcher $events,
+        protected Factory $view,
+        protected Asset $asset,
+        protected Filesystem $files,
+        protected Breadcrumb $breadcrumb
     ) {
-        $this->config = $config;
-        $this->events = $events;
-        $this->view = $view;
-        $this->asset = $asset;
-        $this->files = $files;
-
-        $this->breadcrumb = $breadcrumb;
-
         $this->uses($this->getThemeName())->layout(setting('layout', 'default'));
 
         SeoHelper::meta()->setGoogle(setting('google_analytics'));
@@ -85,7 +65,7 @@ class Theme implements ThemeContract
     /**
      * Alias of theme method.
      */
-    public function uses(?string $theme = null): self
+    public function uses(string|null $theme = null): self
     {
         return $this->theme($theme);
     }
@@ -93,7 +73,7 @@ class Theme implements ThemeContract
     /**
      * Set up a theme name.
      */
-    public function theme(?string $theme = null): self
+    public function theme(string|null $theme = null): self
     {
         // If theme name is not set, so use default from config.
         if ($theme) {
@@ -140,14 +120,14 @@ class Theme implements ThemeContract
     /**
      * Check theme exists.
      */
-    public function exists(?string $theme): bool
+    public function exists(string|null $theme): bool
     {
         $path = platform_path($this->path($theme)) . '/';
 
         return File::isDirectory($path);
     }
 
-    public function path(?string $forceThemeName = null): string
+    public function path(string|null $forceThemeName = null): string
     {
         $themeDir = $this->getConfig('themeDir');
 
@@ -159,7 +139,7 @@ class Theme implements ThemeContract
     /**
      * Get theme config.
      */
-    public function getConfig(?string $key = null): mixed
+    public function getConfig(string|null $key = null): mixed
     {
         // Main package config.
         if (! $this->themeConfig) {
@@ -218,7 +198,7 @@ class Theme implements ThemeContract
     /**
      * Add location path to look up.
      */
-    protected function addPathLocation(string $location)
+    protected function addPathLocation(string $location): void
     {
         // First path is in the selected theme.
         $hints[] = platform_path($location);
@@ -409,7 +389,7 @@ class Theme implements ThemeContract
     /**
      * The same as "partial", but having prefix layout.
      */
-    public function partialWithLayout(string $view, array $args = []): ?string
+    public function partialWithLayout(string $view, array $args = []): string|null
     {
         $view = $this->getLayoutName() . '.' . $view;
 
@@ -424,7 +404,7 @@ class Theme implements ThemeContract
     /**
      * Set up a partial.
      */
-    public function partial(string $view, array $args = []): ?string
+    public function partial(string $view, array $args = []): string|null
     {
         $partialDir = $this->getThemeNamespace($this->getConfig('containerDir.partial'));
 
@@ -434,7 +414,7 @@ class Theme implements ThemeContract
     /**
      * Load a partial
      */
-    public function loadPartial(string $view, string $partialDir, array $args): ?string
+    public function loadPartial(string $view, string $partialDir, array $args): string|null
     {
         $path = $partialDir . '.' . $view;
 
@@ -454,7 +434,7 @@ class Theme implements ThemeContract
      * This method will first try to load the partial from current theme. If partial
      * is not found in theme then it loads it from app (i.e. app/views/partials)
      */
-    public function watchPartial(string $view, array $args = []): ?string
+    public function watchPartial(string $view, array $args = []): string|null
     {
         try {
             return $this->partial($view, $args);
@@ -468,13 +448,11 @@ class Theme implements ThemeContract
     /**
      * Hook a partial before rendering.
      */
-    public function partialComposer(string|array $view, Closure $callback, ?string $layout = null): void
+    public function partialComposer(string|array $view, Closure $callback, string|null $layout = null): void
     {
         $partialDir = $this->getConfig('containerDir.partial');
 
-        if (! is_array($view)) {
-            $view = [$view];
-        }
+        $view = (array)$view;
 
         // Partial path with namespace.
         $path = $this->getThemeNamespace($partialDir);
@@ -494,7 +472,7 @@ class Theme implements ThemeContract
     /**
      * Hook a partial before rendering.
      */
-    public function composer(string|array $view, Closure $callback, ?string $layout = null)
+    public function composer(string|array $view, Closure $callback, string|null $layout = null): void
     {
         $partialDir = $this->getConfig('containerDir.view');
 
@@ -520,7 +498,7 @@ class Theme implements ThemeContract
     /**
      * Render a region.
      */
-    public function place(string $region, ?string $default = null): ?string
+    public function place(string $region, string|null $default = null): string|null
     {
         return $this->get($region, $default);
     }
@@ -528,7 +506,7 @@ class Theme implements ThemeContract
     /**
      * Render a region.
      */
-    public function get(string $region, ?string $default = null)
+    public function get(string $region, string|null $default = null)
     {
         if ($this->has($region)) {
             return $this->regions[$region];
@@ -548,7 +526,7 @@ class Theme implements ThemeContract
     /**
      * Place content in sub-view.
      */
-    public function content(): ?string
+    public function content(): string|null
     {
         return $this->regions['content'];
     }
@@ -642,7 +620,11 @@ class Theme implements ThemeContract
         if (app()->isLocal() && app()->hasDebugModeEnabled()) {
             $path = str_replace($this->getThemeNamespace(), $this->getThemeName(), $path);
             $file = str_replace('::', '/', str_replace('.', '/', $path));
-            dd('This theme has not supported this view, please create file "' . theme_path($file) . '.blade.php" to render this page!');
+            dd(
+                'This theme has not supported this view, please create file "' . theme_path(
+                    $file
+                ) . '.blade.php" to render this page!'
+            );
         }
 
         abort(404);
@@ -696,7 +678,7 @@ class Theme implements ThemeContract
     /**
      * Find view location.
      */
-    public function location(bool $realPath = false): ?string
+    public function location(bool $realPath = false): string|null
     {
         if ($this->view->exists($this->content)) {
             return $realPath ? $this->view->getFinder()->find($this->content) : $this->content;
@@ -746,6 +728,29 @@ class Theme implements ThemeContract
 
     public function header(): string
     {
+        $schema = [
+            '@context' => 'https://schema.org',
+            '@type' => 'BreadcrumbList',
+            'itemListElement' => [],
+        ];
+
+        foreach ($this->breadcrumb->crumbs as $index => $item) {
+            $schema['itemListElement'][] = [
+                '@type' => 'ListItem',
+                'position' => $index + 1,
+                'name' => BaseHelper::clean($item['label']),
+                'item' => $item['url'],
+            ];
+        }
+
+        $schema = json_encode($schema);
+
+        $this->asset()->container('header')->writeScript(
+            'breadcrumb-schema',
+            $schema,
+            attributes: ['type' => 'application/ld+json']
+        );
+
         return $this->view->make('packages/theme::partials.header')->render();
     }
 
@@ -771,9 +776,9 @@ class Theme implements ThemeContract
         return trigger_error('Call to undefined method ' . __CLASS__ . '::' . $method . '()', E_USER_ERROR);
     }
 
-    public function routes()
+    public function routes(): void
     {
-        return File::requireOnce(package_path('theme/routes/public.php'));
+        require package_path('theme/routes/public.php');
     }
 
     public function loadView(string $view): string

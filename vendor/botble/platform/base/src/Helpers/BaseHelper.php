@@ -4,15 +4,15 @@ namespace Botble\Base\Helpers;
 
 use Carbon\Carbon;
 use Exception;
-use Html;
-use Illuminate\Database\Query\Builder;
+use Botble\Base\Facades\Html;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\HtmlString;
 
 class BaseHelper
 {
-    public function formatTime(Carbon $timestamp, ?string $format = 'j M Y H:i'): string
+    public function formatTime(Carbon $timestamp, string|null $format = 'j M Y H:i'): string
     {
         $first = Carbon::create(0000, 0, 0, 00, 00, 00);
 
@@ -23,7 +23,7 @@ class BaseHelper
         return $timestamp->format($format);
     }
 
-    public function formatDate(?string $date, ?string $format = null): ?string
+    public function formatDate(string|null $date, string|null $format = null): string|null
     {
         if (empty($format)) {
             $format = config('core.base.general.date_format.date');
@@ -36,7 +36,7 @@ class BaseHelper
         return $this->formatTime(Carbon::parse($date), $format);
     }
 
-    public function formatDateTime(?string $date, string $format = null): ?string
+    public function formatDateTime(string|null $date, string $format = null): string|null
     {
         if (empty($format)) {
             $format = config('core.base.general.date_format.date_time');
@@ -49,7 +49,7 @@ class BaseHelper
         return $this->formatTime(Carbon::parse($date), $format);
     }
 
-    public function humanFilesize(int $bytes, int $precision = 2): string
+    public function humanFilesize(float $bytes, int $precision = 2): string
     {
         $units = ['B', 'kB', 'MB', 'GB', 'TB'];
 
@@ -140,20 +140,20 @@ class BaseHelper
         return apply_filters(BASE_FILTER_ADMIN_LANGUAGE_DIRECTION, $direction);
     }
 
-    public function isHomepage(?int $pageId = null): bool
+    public function isHomepage(int|string|null $pageId = null): bool
     {
         $homepageId = $this->getHomepageId();
 
         return $pageId && $homepageId && $pageId == $homepageId;
     }
 
-    public function getHomepageId(): ?string
+    public function getHomepageId(): string|null
     {
         return theme_option('homepage_id', setting('show_on_front'));
     }
 
     /**
-     * @param Builder|\Illuminate\Database\Eloquent\Builder $query
+     * @param \Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder $query
      */
     public function isJoined($query, string $table): bool
     {
@@ -193,7 +193,7 @@ class BaseHelper
         return 'ckeditor';
     }
 
-    public function removeQueryStringVars(?string $url, array|string $key): ?string
+    public function removeQueryStringVars(string|null $url, array|string $key): string|null
     {
         if (! is_array($key)) {
             $key = [$key];
@@ -207,7 +207,7 @@ class BaseHelper
         return $url;
     }
 
-    public function cleanEditorContent(?string $value): string
+    public function cleanEditorContent(string|null $value): string
     {
         $value = str_replace('<span class="style-scope yt-formatted-string" dir="auto">', '', $value);
 
@@ -262,7 +262,7 @@ class BaseHelper
         return $formats;
     }
 
-    public function clean(array|string|null $dirty, array|string $config = null): ?string
+    public function clean(array|string|null $dirty, array|string $config = null): array|string|null
     {
         if (config('core.base.general.enable_less_secure_web', false)) {
             return $dirty;
@@ -313,7 +313,7 @@ class BaseHelper
         return $this;
     }
 
-    public function removeSpecialCharacters(?string $string): array|string|null
+    public function removeSpecialCharacters(string|null $string): array|string|null
     {
         $string = str_replace(' ', '-', $string); // Replaces all spaces with hyphens.
         $string = preg_replace('/[^A-Za-z0-9\-]/', '', $string); // Removes special chars.
@@ -332,7 +332,7 @@ class BaseHelper
         return $value;
     }
 
-    public function cleanShortcodes(?string $content): ?string
+    public function cleanShortcodes(string|null $content): string|null
     {
         if (! $content) {
             return $content;
@@ -345,7 +345,7 @@ class BaseHelper
         return $shortcodeCompiler->strip($content);
     }
 
-    public function stringify($content): ?string
+    public function stringify($content): string|null
     {
         if (empty($content)) {
             return null;
@@ -369,20 +369,39 @@ class BaseHelper
 
     public function googleFonts(string $font, bool $inline = true)
     {
-        if (! config('core.base.general.google_fonts_enabled_cache')) {
-            $font = str_replace('https://fonts.googleapis.com', $this->getGoogleFontsURL(), $font);
-
-            return Html::style($font);
+        if (! config('core.base.general.google_fonts_enabled', true)) {
+            return '';
         }
 
-        $font = str_replace($this->getGoogleFontsURL(), 'https://fonts.googleapis.com', $font);
-
-        $font = app('core:google-fonts')->load($font);
-
-        if (! $inline) {
-            return $font->link();
+        if (! config('core.base.general.google_fonts_enabled_cache', true)) {
+            return Html::style(str_replace('https://fonts.googleapis.com', $this->getGoogleFontsURL(), $font));
         }
 
-        return $font->toHtml();
+        try {
+            $fontUrl = str_replace($this->getGoogleFontsURL(), 'https://fonts.googleapis.com', $font);
+
+            $googleFont = app('core:google-fonts')->load($fontUrl);
+
+            if (! $inline) {
+                return $googleFont->link();
+            }
+
+            return $googleFont->toHtml();
+        } catch (Exception) {
+            return Html::style(str_replace('https://fonts.googleapis.com', $this->getGoogleFontsURL(), $font));
+        }
+    }
+
+    /**
+     * @deprecated
+     */
+    public function routeIdRegex(): string|null
+    {
+        return '[0-9]+';
+    }
+
+    public function hasDemoModeEnabled(): bool
+    {
+        return App::environment('demo');
     }
 }

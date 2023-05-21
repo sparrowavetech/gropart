@@ -3,11 +3,14 @@
 namespace Botble\Base\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Console\ConfirmableTrait;
 use Symfony\Component\Console\Attribute\AsCommand;
 
 #[AsCommand('cms:install', 'Install CMS')]
 class InstallCommand extends Command
 {
+    use ConfirmableTrait;
+
     public function handle(): int
     {
         $this->newLine();
@@ -18,17 +21,17 @@ class InstallCommand extends Command
         $this->call('migrate:fresh');
         $this->components->info('Migrate done!');
 
-        if ($this->components->confirm('Create a new super user?', true)) {
+        if ($this->confirmToProceed('Create a new super user?', true)) {
             $this->call('cms:user:create');
         }
 
-        if ($this->components->confirm('Do you want to activate all plugins?', true)) {
+        if ($this->confirmToProceed('Do you want to activate all plugins?', true)) {
             $this->components->info('Activating all plugins...');
             $this->call('cms:plugin:activate:all');
             $this->components->info('All plugins are activated!');
         }
 
-        if ($this->components->confirm('Do you want to install sample data?', true)) {
+        if ($this->confirmToProceed('Do you want to install sample data?', true)) {
             $this->components->info('Seeding...');
             $this->call('db:seed');
             $this->components->info('Seeding done!');

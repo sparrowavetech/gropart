@@ -30,7 +30,7 @@ class Tag extends BaseModel
         return $this->belongsToMany(Post::class, 'post_tags');
     }
 
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
 

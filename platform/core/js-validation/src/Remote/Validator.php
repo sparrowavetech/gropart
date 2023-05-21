@@ -4,7 +4,7 @@ namespace Botble\JsValidation\Remote;
 
 use Botble\JsValidation\Support\AccessProtectedTrait;
 use Botble\JsValidation\Support\RuleListTrait;
-use Illuminate\Contracts\Validation\Validator as BaseValidator;
+use Illuminate\Validation\Validator as BaseValidator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
@@ -21,14 +21,8 @@ class Validator
      */
     public const EXTENSION_NAME = 'js_validation';
 
-    protected BaseValidator $validator;
-
-    protected bool $escape;
-
-    public function __construct(BaseValidator $validator, bool $escape = false)
+    public function __construct(protected BaseValidator $validator, protected bool $escape = false)
     {
-        $this->validator = $validator;
-        $this->escape = $escape;
     }
 
     public function validate(string $field, array $parameters = []): void
@@ -43,19 +37,12 @@ class Validator
     protected function parseAttributeName($data): int|string|null
     {
         parse_str($data, $attrParts);
-        $attrParts = is_null($attrParts) ? [] : $attrParts;
         $newAttr = array_keys(Arr::dot($attrParts));
 
         return array_pop($newAttr);
     }
 
-    /**
-     *  Parse Validation parameters.
-     *
-     * @param array $parameters
-     * @return array
-     */
-    protected function parseParameters($parameters)
+    protected function parseParameters(array $parameters): array
     {
         $newParams = ['validate_all' => false];
         if (isset($parameters[0])) {
@@ -65,14 +52,7 @@ class Validator
         return $newParams;
     }
 
-    /**
-     * Validate remote Javascript Validations.
-     *
-     * @param string $attribute
-     * @param array $parameters
-     * @return array|bool
-     */
-    protected function validateJsRemoteRequest($attribute, $parameters)
+    protected function validateJsRemoteRequest(string $attribute, array $parameters): array|bool
     {
         $this->setRemoteValidation($attribute, $parameters['validate_all']);
 
@@ -130,6 +110,10 @@ class Validator
         $this->createProtectedCaller($validator);
 
         foreach ($rules as $i => $rule) {
+            if (! is_string($rule)) {
+                continue;
+            }
+
             $parsedRule = ValidationRuleParser::parse([$rule]);
             if (! $this->isRemoteRule($parsedRule[0])) {
                 unset($rules[$i]);

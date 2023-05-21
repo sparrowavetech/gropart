@@ -107,7 +107,7 @@ abstract class StripePaymentAbstract
      * Get payment details
      *
      * @param string $chargeId Stripe charge ID
-     * @return Charge
+     * @return Charge|null
      */
     public function getPaymentDetails($chargeId)
     {

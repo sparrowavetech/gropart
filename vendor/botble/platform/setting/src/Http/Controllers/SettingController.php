@@ -2,13 +2,18 @@
 
 namespace Botble\Setting\Http\Controllers;
 
-use Assets;
-use BaseHelper;
+use Botble\Base\Exceptions\LicenseIsAlreadyActivatedException;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Supports\Core;
 use Botble\Base\Supports\Language;
+use Botble\JsValidation\Facades\JsValidator;
 use Botble\Media\Repositories\Interfaces\MediaFileInterface;
+use Botble\Media\Repositories\Interfaces\MediaFolderInterface;
+use Botble\Setting\Http\Requests\EmailSettingRequest;
 use Botble\Setting\Http\Requests\EmailTemplateRequest;
 use Botble\Setting\Http\Requests\LicenseSettingRequest;
 use Botble\Setting\Http\Requests\MediaSettingRequest;
@@ -17,32 +22,33 @@ use Botble\Setting\Http\Requests\SendTestEmailRequest;
 use Botble\Setting\Http\Requests\SettingRequest;
 use Botble\Setting\Repositories\Interfaces\SettingInterface;
 use Carbon\Carbon;
-use EmailHandler;
+use Botble\Base\Facades\EmailHandler;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
-use RvMedia;
+use Botble\Media\Facades\RvMedia;
 use Throwable;
 
 class SettingController extends BaseController
 {
-    protected SettingInterface $settingRepository;
-
-    public function __construct(SettingInterface $settingRepository)
+    public function __construct(protected SettingInterface $settingRepository)
     {
-        $this->settingRepository = $settingRepository;
     }
 
     public function getOptions()
     {
-        page_title()->setTitle(trans('core/setting::setting.title'));
+        PageTitle::setTitle(trans('core/setting::setting.title'));
 
         Assets::addScriptsDirectly('vendor/core/core/setting/js/setting.js')
             ->addStylesDirectly('vendor/core/core/setting/css/setting.css')
-            ->usingVueJS();
+            ->addScripts(['jquery-validation', 'form-validation']);
 
-        return view('core/setting::index');
+        Assets::usingVueJS();
+
+        $jsValidation = JsValidator::formRequest(SettingRequest::class);
+
+        return view('core/setting::index', compact('jsValidation'));
     }
 
     public function postEdit(SettingRequest $request, BaseHttpResponse $response)
@@ -61,10 +67,10 @@ class SettingController extends BaseController
             session()->put('site-locale', $locale);
         }
 
-        $isDemoModeEnabled = app()->environment('demo');
+        $isDemoModeEnabled = BaseHelper::hasDemoModeEnabled();
 
         if (! $isDemoModeEnabled) {
-            setting()->set('locale', $locale)->save();
+            setting()->set('locale', $locale);
         }
 
         $adminTheme = $request->input('default_admin_theme');
@@ -73,7 +79,7 @@ class SettingController extends BaseController
         }
 
         if (! $isDemoModeEnabled) {
-            setting()->set('default_admin_theme', $adminTheme)->save();
+            setting()->set('default_admin_theme', $adminTheme);
         }
 
         $adminLocalDirection = $request->input('admin_locale_direction');
@@ -82,7 +88,8 @@ class SettingController extends BaseController
         }
 
         if (! $isDemoModeEnabled) {
-            setting()->set('admin_locale_direction', $adminLocalDirection)->save();
+            setting()->set('admin_locale_direction', $adminLocalDirection);
+            setting()->save();
         }
 
         return $response
@@ -105,15 +112,18 @@ class SettingController extends BaseController
 
     public function getEmailConfig()
     {
-        page_title()->setTitle(trans('core/base::layouts.setting_email'));
+        PageTitle::setTitle(trans('core/base::layouts.setting_email'));
 
         Assets::addScriptsDirectly('vendor/core/core/setting/js/setting.js')
-            ->addStylesDirectly('vendor/core/core/setting/css/setting.css');
+            ->addStylesDirectly('vendor/core/core/setting/css/setting.css')
+            ->addScripts(['jquery-validation', 'form-validation']);
 
-        return view('core/setting::email');
+        $jsValidation = JsValidator::formRequest(EmailSettingRequest::class);
+
+        return view('core/setting::email', compact('jsValidation'));
     }
 
-    public function postEditEmailConfig(SettingRequest $request, BaseHttpResponse $response)
+    public function postEditEmailConfig(EmailSettingRequest $request, BaseHttpResponse $response)
     {
         $this->saveSettings($request->except(['_token']));
 
@@ -124,7 +134,7 @@ class SettingController extends BaseController
 
     public function getEditEmailTemplate(string $type, string $module, string $template)
     {
-        page_title()->setTitle(trans(config($type . '.' . $module . '.email.templates.' . $template . '.title', '')));
+        PageTitle::setTitle(trans(config($type . '.' . $module . '.email.templates.' . $template . '.title', '')));
 
         Assets::addStylesDirectly([
             'vendor/core/core/base/libraries/codemirror/lib/codemirror.css',
@@ -172,15 +182,30 @@ class SettingController extends BaseController
 
         $templatePath = get_setting_email_template_path($request->input('module'), $request->input('template_file'));
 
-        File::delete($templatePath);
+        if (File::exists($templatePath)) {
+            File::delete($templatePath);
+        }
+
+        $shouldBeCleanedDirectories = [
+            File::dirname($templatePath),
+            storage_path('app/email-templates'),
+        ];
+
+        foreach ($shouldBeCleanedDirectories as $shouldBeCleanedDirectory) {
+            if (File::isDirectory($shouldBeCleanedDirectory) && File::isEmptyDirectory($shouldBeCleanedDirectory)) {
+                File::deleteDirectory($shouldBeCleanedDirectory);
+            }
+        }
 
         return $response->setMessage(trans('core/setting::setting.email.reset_success'));
     }
 
     public function postChangeEmailStatus(Request $request, BaseHttpResponse $response)
     {
+        $request->validate(['key' => 'string', 'value' => 'in:0,1']);
+
         setting()
-            ->set($request->input('key'), $request->input('value'))
+            ->set($request->input('key'), $request->boolean('value'))
             ->save();
 
         return $response->setMessage(trans('core/base::notices.update_success_message'));
@@ -205,14 +230,21 @@ class SettingController extends BaseController
         }
     }
 
-    public function getMediaSetting()
+    public function getMediaSetting(MediaFolderInterface $mediaFolderRepository)
     {
-        page_title()->setTitle(trans('core/setting::setting.media.title'));
+        PageTitle::setTitle(trans('core/setting::setting.media.title'));
 
         Assets::addScriptsDirectly('vendor/core/core/setting/js/setting.js')
-            ->addStylesDirectly('vendor/core/core/setting/css/setting.css');
+            ->addStylesDirectly('vendor/core/core/setting/css/setting.css')
+            ->addScripts(['jquery-validation', 'form-validation']);
 
-        return view('core/setting::media');
+        $folderIds = json_decode((string)setting('media_folders_can_add_watermark'), true);
+
+        $folders = $mediaFolderRepository->pluck('name', 'id', ['parent_id' => 0]);
+
+        $jsValidation = JsValidator::formRequest(MediaSettingRequest::class);
+
+        return view('core/setting::media', compact('folders', 'folderIds', 'jsValidation'));
     }
 
     public function postEditMediaSetting(MediaSettingRequest $request, BaseHttpResponse $response)
@@ -224,23 +256,24 @@ class SettingController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function getVerifyLicense(Core $coreApi, BaseHttpResponse $response)
+    public function getVerifyLicense(Core $core, BaseHttpResponse $response)
     {
+        $invalidMessage = 'Your license is invalid. Please activate your license!';
+
         if (! File::exists(storage_path('.license'))) {
-            return $response->setError()->setMessage('Your license is invalid. Please activate your license!');
+            return $response->setError()->setMessage($invalidMessage);
         }
 
         try {
-            $result = $coreApi->verifyLicense(true);
-
-            if (! $result['status']) {
-                return $response->setError()->setMessage($result['message']);
+            if (! $core->verifyLicense(true)) {
+                return $response->setError()->setMessage($invalidMessage);
             }
 
-            $activatedAt = Carbon::createFromTimestamp(filectime($coreApi->getLicenseFilePath()));
+            $activatedAt = Carbon::createFromTimestamp(filectime($core->getLicenseFilePath()));
+            $message = 'Your license is activated.';
         } catch (Throwable $exception) {
             $activatedAt = Carbon::now();
-            $result = ['message' => $exception->getMessage()];
+            $message = $exception->getMessage();
         }
 
         $data = [
@@ -248,10 +281,10 @@ class SettingController extends BaseController
             'licensed_to' => setting('licensed_to'),
         ];
 
-        return $response->setMessage($result['message'])->setData($data);
+        return $response->setMessage($message)->setData($data);
     }
 
-    public function activateLicense(LicenseSettingRequest $request, BaseHttpResponse $response, Core $coreApi)
+    public function activateLicense(LicenseSettingRequest $request, BaseHttpResponse $response, Core $core)
     {
         $buyer = $request->input('buyer');
         if (filter_var($buyer, FILTER_VALIDATE_URL)) {
@@ -260,49 +293,37 @@ class SettingController extends BaseController
 
             return $response
                 ->setError()
-                ->setMessage('Envato username must not a URL. Please try with username "' . $username . '"!');
+                ->setMessage(sprintf('Envato username must not a URL. Please try with username "%s"!', $username));
         }
 
+        $purchasedCode = $request->input('purchase_code');
+
         try {
-            $purchaseCode = $request->input('purchase_code');
+            if (! $core->activateLicense($purchasedCode, $buyer)) {
+                return $response->setError()->setMessage('Your license is invalid.');
+            }
 
-            $result = $coreApi->activateLicense($purchaseCode, $buyer);
+            $data = $this->saveActivatedLicense($core, $buyer);
 
-            $resetLicense = false;
-            if (! $result['status']) {
-                if (str_contains($result['message'], 'License is already active')) {
-                    $coreApi->deactivateLicense($purchaseCode, $buyer);
+            return $response->setMessage('Your license has been activated successfully!')->setData($data);
+        } catch (LicenseIsAlreadyActivatedException) {
+            try {
+                $core->revokeLicense($purchasedCode, $buyer);
 
-                    $result = $coreApi->activateLicense($purchaseCode, $buyer);
-
-                    if (! $result['status']) {
-                        return $response->setError()->setMessage($result['message']);
-                    }
-
-                    $resetLicense = true;
-                } else {
-                    return $response->setError()->setMessage($result['message']);
+                if (! $core->activateLicense($purchasedCode, $buyer)) {
+                    return $response->setError()->setMessage('Your license is invalid.');
                 }
+
+                $data = $this->saveActivatedLicense($core, $buyer);
+
+                return $response
+                    ->setMessage('Your license has been activated successfully and the license on the previous domain has been revoked!')
+                    ->setData($data);
+            } catch (LicenseIsAlreadyActivatedException) {
+                return $response
+                    ->setError()
+                    ->setMessage('Exceeded maximum number of activations, please contact our support to reset your license.');
             }
-
-            setting()
-                ->set(['licensed_to' => $request->input('buyer')])
-                ->save();
-
-            $activatedAt = Carbon::createFromTimestamp(filectime($coreApi->getLicenseFilePath()));
-
-            $data = [
-                'activated_at' => $activatedAt->format('M d Y'),
-                'licensed_to' => $request->input('buyer'),
-            ];
-
-            if ($resetLicense) {
-                return $response->setMessage(
-                    $result['message'] . ' Your license on the previous domain has been revoked!'
-                )->setData($data);
-            }
-
-            return $response->setMessage($result['message'])->setData($data);
         } catch (Throwable $exception) {
             return $response
                 ->setError()
@@ -310,35 +331,29 @@ class SettingController extends BaseController
         }
     }
 
-    public function deactivateLicense(BaseHttpResponse $response, Core $coreApi)
+    public function deactivateLicense(BaseHttpResponse $response, Core $core)
     {
         try {
-            $result = $coreApi->deactivateLicense();
-
-            if (! $result['status']) {
-                return $response->setError()->setMessage($result['message']);
-            }
+            $core->deactivateLicense();
 
             $this->settingRepository->deleteBy(['key' => 'licensed_to']);
 
-            return $response->setMessage($result['message']);
+            return $response->setMessage('Deactivated license successfully!');
         } catch (Throwable $exception) {
             return $response->setError()->setMessage($exception->getMessage());
         }
     }
 
-    public function resetLicense(LicenseSettingRequest $request, BaseHttpResponse $response, Core $coreApi)
+    public function resetLicense(LicenseSettingRequest $request, BaseHttpResponse $response, Core $core)
     {
         try {
-            $result = $coreApi->deactivateLicense($request->input('purchase_code'), $request->input('buyer'));
-
-            if (! $result['status']) {
-                return $response->setError()->setMessage($result['message']);
+            if (! $core->revokeLicense($request->input('purchase_code'), $request->input('buyer'))) {
+                return $response->setError()->setMessage('Could not reset your license.');
             }
 
             $this->settingRepository->deleteBy(['key' => 'licensed_to']);
 
-            return $response->setMessage($result['message']);
+            return $response->setMessage('Your license has been reset successfully.');
         } catch (Throwable $exception) {
             return $response->setError()->setMessage($exception->getMessage());
         }
@@ -436,5 +451,19 @@ class SettingController extends BaseController
         $content = $emailHandler->prepareData($content);
 
         return BaseHelper::clean($content);
+    }
+
+    protected function saveActivatedLicense(Core $core, string $buyer): array
+    {
+        setting()
+            ->set(['licensed_to' => $buyer])
+            ->save();
+
+        $activatedAt = Carbon::createFromTimestamp(filectime($core->getLicenseFilePath()));
+
+        return [
+            'activated_at' => $activatedAt->format('M d Y'),
+            'licensed_to' => $buyer,
+        ];
     }
 }

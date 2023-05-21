@@ -5,13 +5,9 @@ namespace Botble\Api\Http\Requests;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Concerns\InteractsWithInput;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 
-/**
- * @mixin InteractsWithInput
- */
 abstract class ApiRequest extends FormRequest
 {
     public function authorize(): bool

@@ -2,17 +2,18 @@
 
 namespace Botble\Faq\Tables;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Faq\Models\Faq;
 use Botble\Faq\Repositories\Interfaces\FaqInterface;
 use Botble\Table\Abstracts\TableAbstract;
-use Html;
+use Botble\Base\Facades\Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Yajra\DataTables\DataTables;
+use Botble\Table\DataTables;
 
 class FaqTable extends TableAbstract
 {
@@ -36,26 +37,26 @@ class FaqTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('question', function ($item) {
+            ->editColumn('question', function (Faq $item) {
                 if (! Auth::user()->hasPermission('faq.edit')) {
                     return $item->question;
                 }
 
                 return Html::link(route('faq.edit', $item->id), $item->question);
             })
-            ->editColumn('category_id', function ($item) {
+            ->editColumn('category_id', function (Faq $item) {
                 return $item->category->name;
             })
-            ->editColumn('checkbox', function ($item) {
+            ->editColumn('checkbox', function (Faq $item) {
                 return $this->getCheckbox($item->id);
             })
-            ->editColumn('created_at', function ($item) {
+            ->editColumn('created_at', function (Faq $item) {
                 return BaseHelper::formatDate($item->created_at);
             })
-            ->editColumn('status', function ($item) {
+            ->editColumn('status', function (Faq $item) {
                 return $item->status->toHtml();
             })
-            ->addColumn('operations', function ($item) {
+            ->addColumn('operations', function (Faq $item) {
                 return $this->getOperations('faq.edit', 'faq.destroy', $item);
             });
 
@@ -122,7 +123,7 @@ class FaqTable extends TableAbstract
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type' => 'date',
+                'type' => 'datePicker',
             ],
         ];
     }

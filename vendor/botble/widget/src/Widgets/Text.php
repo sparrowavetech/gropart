@@ -6,12 +6,6 @@ use Botble\Widget\AbstractWidget;
 
 class Text extends AbstractWidget
 {
-    protected $frontendTemplate = 'packages/widget::widgets.text.frontend';
-
-    protected $backendTemplate = 'packages/widget::widgets.text.backend';
-
-    protected $isCore = true;
-
     public function __construct()
     {
         parent::__construct([
@@ -19,5 +13,8 @@ class Text extends AbstractWidget
             'description' => trans('packages/widget::widget.widget_text_description'),
             'content' => null,
         ]);
+
+        $this->setFrontendTemplate('packages/widget::widgets.text.frontend');
+        $this->setBackendTemplate('packages/widget::widgets.text.backend');
     }
 }

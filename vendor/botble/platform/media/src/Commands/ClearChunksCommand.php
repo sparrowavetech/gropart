@@ -36,7 +36,7 @@ class ClearChunksCommand extends Command
             }
         }
 
-        $this->components->info('Chunks: cleared ' . $deleted . ' ' . Str::plural('file', $deleted));
+        $this->components->info(sprintf('Chunks: cleared %d %s', $deleted, Str::plural('file', $deleted)));
 
         return self::SUCCESS;
     }

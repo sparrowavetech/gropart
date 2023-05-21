@@ -12,57 +12,57 @@ export class MessageService {
             showEasing: 'swing',
             hideEasing: 'linear',
             showMethod: 'fadeIn',
-            hideMethod: 'fadeOut'
-        };
+            hideMethod: 'fadeOut',
+        }
 
-        let messageHeader = '';
+        let messageHeader = ''
 
         switch (type) {
             case 'error':
-                messageHeader = RV_MEDIA_CONFIG.translations.message.error_header;
-                break;
+                messageHeader = RV_MEDIA_CONFIG.translations.message.error_header
+                break
             case 'success':
-                messageHeader = RV_MEDIA_CONFIG.translations.message.success_header;
-                break;
+                messageHeader = RV_MEDIA_CONFIG.translations.message.success_header
+                break
         }
-        toastr[type](message, messageHeader);
+        toastr[type](message, messageHeader)
     }
 
     static handleError(data) {
-        if (typeof (data.responseJSON) !== 'undefined' && !_.isArray(data.errors)) {
-            MessageService.handleValidationError(data.responseJSON.errors);
+        if (typeof data.responseJSON !== 'undefined' && !_.isArray(data.errors)) {
+            MessageService.handleValidationError(data.responseJSON.errors)
         } else {
-            if (typeof (data.responseJSON) !== 'undefined') {
-                if (typeof (data.responseJSON.errors) !== 'undefined') {
+            if (typeof data.responseJSON !== 'undefined') {
+                if (typeof data.responseJSON.errors !== 'undefined') {
                     if (data.status === 422) {
-                        MessageService.handleValidationError(data.responseJSON.errors);
+                        MessageService.handleValidationError(data.responseJSON.errors)
                     }
-                } else if (typeof (data.responseJSON.message) !== 'undefined') {
-                    MessageService.showMessage('error', data.responseJSON.message);
+                } else if (typeof data.responseJSON.message !== 'undefined') {
+                    MessageService.showMessage('error', data.responseJSON.message)
                 } else {
                     $.each(data.responseJSON, (index, el) => {
                         $.each(el, (key, item) => {
-                            MessageService.showMessage('error', item);
-                        });
-                    });
+                            MessageService.showMessage('error', item)
+                        })
+                    })
                 }
             } else {
-                MessageService.showMessage('error', data.statusText);
+                MessageService.showMessage('error', data.statusText)
             }
         }
     }
 
     static handleValidationError(errors) {
-        let message = '';
+        let message = ''
         $.each(errors, (index, item) => {
-            message += item + '<br />';
+            message += item + '<br />'
 
-            let $input = $('*[name="' + index + '"]');
-            $input.addClass('field-has-error');
+            let $input = $('*[name="' + index + '"]')
+            $input.addClass('field-has-error')
 
-            let $input_array = $('*[name$="[' + index + ']"]');
-            $input_array.addClass('field-has-error');
-        });
-        MessageService.showMessage('error', message);
+            let $input_array = $('*[name$="[' + index + ']"]')
+            $input_array.addClass('field-has-error')
+        })
+        MessageService.showMessage('error', message)
     }
 }

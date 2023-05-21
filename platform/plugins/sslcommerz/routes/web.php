@@ -1,10 +1,15 @@
 <?php
 
-Route::group(['namespace' => 'Botble\SslCommerz\Http\Controllers', 'middleware' => ['core']], function () {
-    Route::group(['prefix' => 'sslcommerz/payment'], function () {
-        Route::post('/success', 'SslCommerzPaymentController@success');
-        Route::post('/fail', 'SslCommerzPaymentController@fail');
-        Route::post('/cancel', 'SslCommerzPaymentController@cancel');
-        Route::post('/ipn', 'SslCommerzPaymentController@ipn');
-    });
+use Botble\SslCommerz\Http\Controllers\SslCommerzPaymentController;
+use Illuminate\Support\Facades\Route;
+
+Route::group([
+    'controller' => SslCommerzPaymentController::class,
+    'middleware' => ['core'],
+    'prefix' => 'sslcommerz/payment',
+], function () {
+    Route::post('/success', 'success');
+    Route::post('/fail', 'fail');
+    Route::post('/cancel', 'cancel');
+    Route::post('/ipn', 'ipn');
 });

@@ -3,6 +3,7 @@
 use Botble\ACL\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 return new class () extends Migration {
     public function up(): void
@@ -10,10 +11,10 @@ return new class () extends Migration {
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
             $table->string('name', 120);
-            $table->integer('parent_id')->unsigned()->default(0);
+            $table->foreignId('parent_id')->default(0);
             $table->string('description', 400)->nullable();
             $table->string('status', 60)->default('published');
-            $table->integer('author_id');
+            $table->foreignId('author_id');
             $table->string('author_type', 255)->default(addslashes(User::class));
             $table->string('icon', 60)->nullable();
             $table->tinyInteger('order')->default(0);
@@ -25,7 +26,7 @@ return new class () extends Migration {
         Schema::create('tags', function (Blueprint $table) {
             $table->id();
             $table->string('name', 120);
-            $table->integer('author_id');
+            $table->foreignId('author_id');
             $table->string('author_type', 255)->default(addslashes(User::class));
             $table->string('description', 400)->nullable()->default('');
             $table->string('status', 60)->default('published');
@@ -38,7 +39,7 @@ return new class () extends Migration {
             $table->string('description', 400)->nullable();
             $table->longText('content')->nullable();
             $table->string('status', 60)->default('published');
-            $table->integer('author_id');
+            $table->foreignId('author_id');
             $table->string('author_type', 255)->default(addslashes(User::class));
             $table->tinyInteger('is_featured')->unsigned()->default(0);
             $table->string('image', 255)->nullable();
@@ -48,15 +49,13 @@ return new class () extends Migration {
         });
 
         Schema::create('post_tags', function (Blueprint $table) {
-            $table->id();
-            $table->integer('tag_id')->unsigned()->index();
-            $table->integer('post_id')->unsigned()->index();
+            $table->foreignId('tag_id')->index();
+            $table->foreignId('post_id')->index();
         });
 
         Schema::create('post_categories', function (Blueprint $table) {
-            $table->id();
-            $table->integer('category_id')->unsigned()->index();
-            $table->integer('post_id')->unsigned()->index();
+            $table->foreignId('category_id')->index();
+            $table->foreignId('post_id')->index();
         });
     }
 

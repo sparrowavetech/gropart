@@ -2,35 +2,30 @@
 
 namespace Botble\Widget\Http\Controllers;
 
-use Assets;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
-use Botble\Widget\Factories\AbstractWidgetFactory;
 use Botble\Widget\Repositories\Interfaces\WidgetInterface;
-use Botble\Widget\WidgetId;
 use Exception;
-use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Language;
-use Theme;
-use WidgetGroup;
+use Botble\Language\Facades\Language;
+use Botble\Theme\Facades\Theme;
+use Botble\Widget\Facades\WidgetGroup;
 
 class WidgetController extends BaseController
 {
-    protected WidgetInterface $widgetRepository;
+    protected string|null $theme = null;
 
-    protected ?string $theme = null;
-
-    public function __construct(WidgetInterface $widgetRepository)
+    public function __construct(protected WidgetInterface $widgetRepository)
     {
-        $this->widgetRepository = $widgetRepository;
         $this->theme = Theme::getThemeName() . $this->getCurrentLocaleCode();
     }
 
     public function index()
     {
-        page_title()->setTitle(trans('packages/widget::widget.name'));
+        PageTitle::setTitle(trans('packages/widget::widget.name'));
 
         Assets::addScripts(['sortable'])
             ->addScriptsDirectly('vendor/core/packages/widget/js/widget.js');
@@ -105,24 +100,7 @@ class WidgetController extends BaseController
         }
     }
 
-    public function showWidget(Request $request, Application $application)
-    {
-        $this->prepareGlobals($request);
-
-        $factory = $application->make('botble.widget');
-        $widgetName = $request->input('name', '');
-        $widgetParams = $factory->decryptWidgetParams($request->input('params', ''));
-
-        return call_user_func_array([$factory, $widgetName], $widgetParams);
-    }
-
-    protected function prepareGlobals(Request $request)
-    {
-        WidgetId::set($request->input('id', 1) - 1);
-        AbstractWidgetFactory::$skipWidgetContainer = true;
-    }
-
-    protected function getCurrentLocaleCode(): ?string
+    protected function getCurrentLocaleCode(): string|null
     {
         $languageCode = null;
         if (is_plugin_active('language')) {

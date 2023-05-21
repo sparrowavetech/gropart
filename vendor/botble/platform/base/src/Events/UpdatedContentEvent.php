@@ -2,9 +2,9 @@
 
 namespace Botble\Base\Events;
 
+use Botble\Base\Models\BaseModel;
 use Illuminate\Http\Request;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Database\Eloquent\Model;
 
 class UpdatedContentEvent extends Event
 {
@@ -12,18 +12,12 @@ class UpdatedContentEvent extends Event
 
     public string $screen;
 
-    public Request $request;
-
-    public false|Model|null $data;
-
-    public function __construct(string|Model $screen, Request $request, $data)
+    public function __construct(string|BaseModel $screen, public Request $request, public bool|BaseModel|null $data)
     {
-        if ($screen instanceof Model) {
+        if ($screen instanceof BaseModel) {
             $screen = $screen->getTable();
         }
 
         $this->screen = $screen;
-        $this->request = $request;
-        $this->data = $data;
     }
 }

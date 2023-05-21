@@ -4,6 +4,8 @@ use Botble\ACL\Http\Controllers\Auth\ForgotPasswordController;
 use Botble\ACL\Http\Controllers\Auth\LoginController;
 use Botble\ACL\Http\Controllers\Auth\ResetPasswordController;
 use Botble\ACL\Http\Controllers\UserController;
+use Botble\Base\Facades\BaseHelper;
+use Illuminate\Support\Facades\Route;
 
 Route::group(['namespace' => 'Botble\ACL\Http\Controllers', 'middleware' => ['web', 'core']], function () {
     Route::group(['prefix' => BaseHelper::getAdminPrefix()], function () {
@@ -48,13 +50,13 @@ Route::group(['namespace' => 'Botble\ACL\Http\Controllers', 'middleware' => ['we
                     'uses' => 'UserController@postUpdateProfile',
                     'permission' => false,
                     'middleware' => 'preventDemo',
-                ])->where('id', '[0-9]+');
+                ])->wherePrimaryKey();
 
                 Route::post('modify-profile-image/{id}', [
                     'as' => 'profile.image',
                     'uses' => 'UserController@postAvatar',
                     'permission' => false,
-                ])->where('id', '[0-9]+');
+                ])->wherePrimaryKey();
 
                 Route::post('change-password/{id}', [
                     'as' => 'change-password',
@@ -67,20 +69,20 @@ Route::group(['namespace' => 'Botble\ACL\Http\Controllers', 'middleware' => ['we
                     'as' => 'profile.view',
                     'uses' => 'UserController@getUserProfile',
                     'permission' => false,
-                ])->where('id', '[0-9]+');
+                ])->wherePrimaryKey();
 
                 Route::get('make-super/{id}', [
                     'as' => 'make-super',
                     'uses' => 'UserController@makeSuper',
                     'permission' => ACL_ROLE_SUPER_USER,
-                ])->where('id', '[0-9]+');
+                ])->wherePrimaryKey();
 
                 Route::get('remove-super/{id}', [
                     'as' => 'remove-super',
                     'uses' => 'UserController@removeSuper',
                     'permission' => ACL_ROLE_SUPER_USER,
                     'middleware' => 'preventDemo',
-                ])->where('id', '[0-9]+');
+                ])->wherePrimaryKey();
             });
 
             Route::group(['prefix' => 'roles', 'as' => 'roles.'], function () {
@@ -96,7 +98,7 @@ Route::group(['namespace' => 'Botble\ACL\Http\Controllers', 'middleware' => ['we
                     'as' => 'duplicate',
                     'uses' => 'RoleController@getDuplicate',
                     'permission' => 'roles.create',
-                ])->where('id', '[0-9]+');
+                ])->wherePrimaryKey();
 
                 Route::get('json', [
                     'as' => 'list.json',

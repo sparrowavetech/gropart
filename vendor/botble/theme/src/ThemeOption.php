@@ -2,12 +2,13 @@
 
 namespace Botble\Theme;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Exception;
-use Form;
+use Botble\Base\Facades\Form;
 use Illuminate\Support\Arr;
-use Language;
-use Setting;
+use Botble\Language\Facades\Language;
+use Botble\Setting\Facades\Setting;
+use Illuminate\Support\Facades\App;
 
 class ThemeOption
 {
@@ -176,8 +177,8 @@ class ThemeOption
             }
         }
 
-        if (! empty($this->optName) && is_array($section) && ! empty($section)) {
-            if (! isset($section['id']) && ! isset($section['title'])) {
+        if (! empty($this->optName) && is_array($section)) {
+            if (! isset($section['title'])) {
                 $this->errors[$this->optName]['section']['missing_title'] = 'Unable to create a section due to missing id and title.';
 
                 return $this;
@@ -360,7 +361,7 @@ class ThemeOption
         $this->checkOptName();
 
         if (! empty($this->optName) && ! empty($args) && is_array($args)) {
-            if (isset($this->args[$this->optName]) && isset($this->args[$this->optName]['clearArgs'])) {
+            if (isset($this->args[$this->optName]['clearArgs'])) {
                 $this->args[$this->optName] = [];
             }
 
@@ -370,7 +371,7 @@ class ThemeOption
         return $this;
     }
 
-    public function getArg(string $key = ''): ?string
+    public function getArg(string $key = ''): string|null
     {
         $this->checkOptName();
 
@@ -381,7 +382,7 @@ class ThemeOption
         return null;
     }
 
-    public function setOption(string $key, ?string $value = ''): self
+    public function setOption(string $key, array|string|null $value = ''): self
     {
         $option = Arr::get($this->fields[$this->optName], $key);
 
@@ -398,17 +399,27 @@ class ThemeOption
         return $this;
     }
 
-    protected function getOptionKey(string $key, ?string $locale = ''): string
+    public function getOptionKey(string $key, string|null $locale = '', string $theme = null): string
     {
-        $theme = setting('theme');
         if (! $theme) {
-            $theme = Arr::first(BaseHelper::scanFolder(theme_path()));
+            $theme = setting('theme');
+            if (! $theme) {
+                $theme = Arr::first(BaseHelper::scanFolder(theme_path()));
+            }
         }
+
+        $defaultLocale = App::getLocale();
+
+        if (! $locale && defined('LANGUAGE_MODULE_SCREEN_NAME')) {
+            $defaultLocale = Language::getDefaultLocaleCode();
+        }
+
+        $locale = $locale && $locale != $defaultLocale ? '-' . ltrim($locale, '-') : null;
 
         return $this->optName . '-' . $theme . $locale . '-' . $key;
     }
 
-    protected function getCurrentLocaleCode(): ?string
+    protected function getCurrentLocaleCode(): string|null
     {
         if (! defined('LANGUAGE_MODULE_SCREEN_NAME')) {
             return null;
@@ -419,7 +430,7 @@ class ThemeOption
         return $currentLocale && $currentLocale != Language::getDefaultLocaleCode() ? '-' . $currentLocale : null;
     }
 
-    public function renderField(array $field): ?string
+    public function renderField(array $field): string|null
     {
         try {
             if ($this->hasOption($field['attributes']['name'])) {
@@ -439,7 +450,7 @@ class ThemeOption
         return setting()->has($this->getOptionKey($key, $this->getCurrentLocaleCode()));
     }
 
-    public function getOption(string $key = '', string|null|array $default = ''): ?string
+    public function getOption(string $key = '', string|null|array $default = ''): string|null
     {
         if (is_array($default)) {
             $default = json_encode($default);
@@ -466,5 +477,16 @@ class ThemeOption
     public function getFields(): array
     {
         return $this->fields;
+    }
+
+    public function hasField(string $id): bool
+    {
+        $this->checkOptName();
+
+        if (! empty($this->optName)) {
+            return isset($this->fields[$this->optName][$id]);
+        }
+
+        return false;
     }
 }

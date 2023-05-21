@@ -11,8 +11,6 @@ use Illuminate\Http\Request;
 
 class RemoteValidationMiddleware
 {
-    protected ValidationFactory $factory;
-
     /**
      * Field used to detect Javascript validation.
      */
@@ -23,9 +21,8 @@ class RemoteValidationMiddleware
      */
     protected bool $escape;
 
-    public function __construct(ValidationFactory $validator, Config $config)
+    public function __construct(protected ValidationFactory $factory, Config $config)
     {
-        $this->factory = $validator;
         $this->field = $config->get('core.js-validation.js-validation.remote_validation_field');
         $this->escape = (bool)$config->get('core.js-validation.js-validation.escape', false);
     }

@@ -9,8 +9,8 @@ class VerifyEmailRequest extends Request
     public function rules(): array
     {
         return [
-            'email' => 'required|email|string',
-            'token' => 'required',
+            'email' => 'required|email',
+            'token' => 'required|string',
         ];
     }
 }

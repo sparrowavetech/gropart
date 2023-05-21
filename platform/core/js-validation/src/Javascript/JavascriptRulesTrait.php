@@ -85,7 +85,7 @@ trait JavascriptRulesTrait
      * Validate that an attribute exists when all other attributes exists.
      *
      * @param string $attribute
-     * @param mixed $parameters
+     * @param array $parameters
      * @return array
      */
     protected function ruleRequiredWithAll($attribute, array $parameters)
@@ -97,7 +97,7 @@ trait JavascriptRulesTrait
      * Validate that an attribute exists when any other attribute exists.
      *
      * @param string $attribute
-     * @param mixed $parameters
+     * @param array $parameters
      * @return array
      */
     protected function ruleRequiredWith($attribute, array $parameters)
@@ -111,7 +111,7 @@ trait JavascriptRulesTrait
      * Validate that an attribute exists when another attribute does not.
      *
      * @param string $attribute
-     * @param mixed $parameters
+     * @param array $parameters
      * @return array
      */
     protected function ruleRequiredWithout($attribute, array $parameters)
@@ -123,7 +123,7 @@ trait JavascriptRulesTrait
      * Validate that an attribute exists when all other attributes do not.
      *
      * @param string $attribute
-     * @param mixed $parameters
+     * @param array $parameters
      * @return array
      */
     protected function ruleRequiredWithoutAll($attribute, array $parameters)
@@ -135,7 +135,7 @@ trait JavascriptRulesTrait
      * Validate that an attribute exists when another attribute does not have a given value.
      *
      * @param string $attribute
-     * @param mixed $parameters
+     * @param array $parameters
      * @return array
      */
     protected function ruleRequiredUnless($attribute, array $parameters)
@@ -147,7 +147,7 @@ trait JavascriptRulesTrait
      * Validate that an attribute exists when another attribute has a given value.
      *
      * @param string $attribute
-     * @param mixed $parameters
+     * @param array $parameters
      * @return array
      */
     protected function ruleRequiredIf($attribute, array $parameters)
@@ -161,7 +161,7 @@ trait JavascriptRulesTrait
      * Validate that the values of an attribute is in another attribute.
      *
      * @param string $attribute
-     * @param mixed $parameters
+     * @param array $parameters
      * @return array
      */
     protected function ruleInArray($attribute, array $parameters)

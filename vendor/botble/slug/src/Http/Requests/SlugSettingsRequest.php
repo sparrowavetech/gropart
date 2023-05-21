@@ -4,7 +4,7 @@ namespace Botble\Slug\Http\Requests;
 
 use Botble\Support\Http\Requests\Request;
 use Illuminate\Support\Str;
-use SlugHelper;
+use Botble\Slug\Facades\SlugHelper;
 
 class SlugSettingsRequest extends Request
 {
@@ -22,9 +22,9 @@ class SlugSettingsRequest extends Request
             $prefixKey = str_replace('-model-key', '', $settingKey);
 
             if (! in_array($settingValue, $canEmptyPrefixes)) {
-                $rules[$prefixKey] = 'required|regex:/^[\pL\s\ \_\-0-9\/]+$/u';
+                $rules[$prefixKey] = 'required|regex:/^[\pL\s\ \_\%\-0-9\/]+$/u';
             } else {
-                $rules[$prefixKey] = 'nullable|regex:/^[\pL\s\ \_\-0-9\/]+$/u';
+                $rules[$prefixKey] = 'nullable|regex:/^[\pL\s\ \_\%\-0-9\/]+$/u';
             }
         }
 

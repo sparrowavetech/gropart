@@ -3,22 +3,16 @@
 namespace Botble\JsValidation\Support;
 
 use Closure;
-use Illuminate\Contracts\Validation\Validator as BaseValidator;
+use Illuminate\Validation\Validator as BaseValidator;
 
 class DelegatedValidator
 {
     use AccessProtectedTrait;
 
-    protected BaseValidator $validator;
-
-    protected ValidationRuleParserProxy $ruleParser;
-
     protected Closure $validatorMethod;
 
-    public function __construct(BaseValidator $validator, ValidationRuleParserProxy $ruleParser)
+    public function __construct(protected BaseValidator $validator, protected ValidationRuleParserProxy $ruleParser)
     {
-        $this->validator = $validator;
-        $this->ruleParser = $ruleParser;
         $this->validatorMethod = $this->createProtectedCaller($validator);
     }
 

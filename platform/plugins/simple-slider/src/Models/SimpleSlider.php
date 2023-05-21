@@ -21,6 +21,7 @@ class SimpleSlider extends BaseModel
     protected $casts = [
         'status' => BaseStatusEnum::class,
         'name' => SafeContent::class,
+        'key' => SafeContent::class,
         'description' => SafeContent::class,
     ];
 
@@ -29,7 +30,7 @@ class SimpleSlider extends BaseModel
         return $this->hasMany(SimpleSliderItem::class)->orderBy('simple_slider_items.order');
     }
 
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
 

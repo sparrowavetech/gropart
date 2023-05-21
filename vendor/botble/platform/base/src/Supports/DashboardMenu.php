@@ -2,7 +2,7 @@
 
 namespace Botble\Base\Supports;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -108,7 +108,7 @@ class DashboardMenu
         return $this;
     }
 
-    public function hasItem(string $id, ?string $parentId = null): bool
+    public function hasItem(string $id, string|null $parentId = null): bool
     {
         if ($parentId) {
             if (! isset($this->links[$parentId])) {
@@ -141,7 +141,7 @@ class DashboardMenu
                 $links = $this->links;
                 cache()->forever($cacheKey, $links);
             } else {
-                $links = cache($cacheKey);
+                $links = cache()->get($cacheKey);
             }
         } else {
             $links = $this->links;

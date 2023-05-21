@@ -8,50 +8,42 @@ use Carbon\CarbonInterface;
 
 class Period
 {
-    public CarbonInterface $startDate;
-
-    public CarbonInterface $endDate;
-
-    public function __construct(CarbonInterface $startDate, CarbonInterface $endDate)
+    public function __construct(public CarbonInterface $startDate, public CarbonInterface $endDate)
     {
         if ($startDate > $endDate) {
             throw InvalidPeriod::startDateCannotBeAfterEndDate($startDate, $endDate);
         }
-
-        $this->startDate = $startDate;
-
-        $this->endDate = $endDate;
     }
 
-    public static function create(CarbonInterface $startDate, CarbonInterface $endDate): static
+    public static function create(CarbonInterface $startDate, CarbonInterface $endDate): self
     {
-        return new static($startDate, $endDate);
+        return new self($startDate, $endDate);
     }
 
-    public static function days(int $numberOfDays): static
+    public static function days(int $numberOfDays): self
     {
         $endDate = Carbon::today();
 
         $startDate = Carbon::today()->subDays($numberOfDays)->startOfDay();
 
-        return new static($startDate, $endDate);
+        return new self($startDate, $endDate);
     }
 
-    public static function months(int $numberOfMonths): static
+    public static function months(int $numberOfMonths): self
     {
         $endDate = Carbon::today();
 
         $startDate = Carbon::today()->subMonths($numberOfMonths)->startOfDay();
 
-        return new static($startDate, $endDate);
+        return new self($startDate, $endDate);
     }
 
-    public static function years(int $numberOfYears): static
+    public static function years(int $numberOfYears): self
     {
         $endDate = Carbon::today();
 
         $startDate = Carbon::today()->subYears($numberOfYears)->startOfDay();
 
-        return new static($startDate, $endDate);
+        return new self($startDate, $endDate);
     }
 }

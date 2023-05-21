@@ -38,7 +38,7 @@ trait ImportTrait
         return collect($this->successes);
     }
 
-    public function transformDate($value, ?string $format = ''): string
+    public function transformDate($value, string|null $format = ''): string
     {
         $format = $format ?: config('core.base.general.date_format.date_time');
 
@@ -75,7 +75,7 @@ trait ImportTrait
         return $this;
     }
 
-    public function setValue(array &$row, string $key, string $type = 'array', ?string $default = null, ?string $from = null): self
+    public function setValue(array &$row, string $key, string $type = 'array', string|null $default = null, string|null $from = null): self
     {
         $value = Arr::get($row, $from ?: $key, $default);
 

@@ -41,7 +41,6 @@ class Post extends BaseModel
 
     protected $casts = [
         'status' => BaseStatusEnum::class,
-        'content' => SafeContent::class,
         'name' => SafeContent::class,
         'description' => SafeContent::class,
     ];
@@ -72,7 +71,7 @@ class Post extends BaseModel
         return $this->morphTo()->withDefault();
     }
 
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
 

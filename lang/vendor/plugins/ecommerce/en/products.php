@@ -45,6 +45,11 @@ return [
             'weight' => 'Weight',
             'wide' => 'Wide',
         ],
+        'barcode' => 'Barcode (ISBN, UPC, GTIN, etc.) ',
+        'barcode_placeholder' => 'Enter barcode',
+        'cost_per_item' => 'Cost per item',
+        'cost_per_item_placeholder' => 'Enter cost per item',
+        'cost_per_item_helper' => "Customers won't see this price.",
         'stock' => [
             'allow_order_when_out' => 'Allow customer checkout when this product out of stock',
             'in_stock' => 'In stock',
@@ -134,6 +139,7 @@ return [
     'delete_variations_confirmation' => 'Are you sure you want to delete those variations? This action cannot be undo.',
     'product_create_validate_name_required' => 'Please enter product\'s name',
     'product_create_validate_sale_price_max' => 'The discount must be less than the original price',
+    'product_create_validate_cost_per_item_max' => 'The cost per item must be less than the original price',
     'product_create_validate_sale_price_required_if' => 'Must enter a discount when you want to schedule a promotion',
     'product_create_validate_end_date_after' => 'End date must be after start date',
     'product_create_validate_start_date_required_if' => 'Discount start date cannot be left blank when scheduling is selected',
@@ -163,4 +169,7 @@ return [
         'file_size' => 'File size',
         'unsaved' => 'Unsaved',
     ],
+    'this_action_will_reload_page' => 'This action will reload the page to update the data!',
+    'select' => 'Select',
+    'set_this_variant_as_default' => 'Set this variant as default',
 ];

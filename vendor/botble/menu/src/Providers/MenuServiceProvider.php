@@ -2,6 +2,7 @@
 
 namespace Botble\Menu\Providers;
 
+use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Menu\Models\Menu as MenuModel;
 use Botble\Menu\Models\MenuLocation;
@@ -15,8 +16,8 @@ use Botble\Menu\Repositories\Eloquent\MenuRepository;
 use Botble\Menu\Repositories\Interfaces\MenuInterface;
 use Botble\Menu\Repositories\Interfaces\MenuLocationInterface;
 use Botble\Menu\Repositories\Interfaces\MenuNodeInterface;
+use Botble\Theme\Facades\AdminBar;
 use Illuminate\Routing\Events\RouteMatched;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class MenuServiceProvider extends ServiceProvider
@@ -57,33 +58,36 @@ class MenuServiceProvider extends ServiceProvider
             ->loadMigrations()
             ->publishAssets();
 
-        Event::listen(RouteMatched::class, function () {
-            dashboard_menu()
-                ->registerItem([
-                    'id' => 'cms-core-menu',
-                    'priority' => 2,
-                    'parent_id' => 'cms-core-appearance',
-                    'name' => 'packages/menu::menu.name',
-                    'icon' => null,
-                    'url' => route('menus.index'),
-                    'permissions' => ['menus.index'],
-                ]);
+        $this->app['events']->listen(RouteMatched::class, function () {
+            DashboardMenu::registerItem([
+                'id' => 'cms-core-menu',
+                'priority' => 2,
+                'parent_id' => 'cms-core-appearance',
+                'name' => 'packages/menu::menu.name',
+                'icon' => null,
+                'url' => route('menus.index'),
+                'permissions' => ['menus.index'],
+            ]);
 
             if (! defined('THEME_MODULE_SCREEN_NAME')) {
-                dashboard_menu()
-                    ->registerItem([
-                        'id' => 'cms-core-appearance',
-                        'priority' => 996,
-                        'parent_id' => null,
-                        'name' => 'packages/theme::theme.appearance',
-                        'icon' => 'fa fa-paint-brush',
-                        'url' => '#',
-                        'permissions' => [],
-                    ]);
+                DashboardMenu::registerItem([
+                    'id' => 'cms-core-appearance',
+                    'priority' => 996,
+                    'parent_id' => null,
+                    'name' => 'packages/theme::theme.appearance',
+                    'icon' => 'fa fa-paint-brush',
+                    'url' => '#',
+                    'permissions' => [],
+                ]);
             }
 
-            if (function_exists('admin_bar')) {
-                admin_bar()->registerLink(trans('packages/menu::menu.name'), route('menus.index'), 'appearance', 'menus.index');
+            if (class_exists('admin_bar')) {
+                AdminBar::registerLink(
+                    trans('packages/menu::menu.name'),
+                    route('menus.index'),
+                    'appearance',
+                    'menus.index'
+                );
             }
         });
 

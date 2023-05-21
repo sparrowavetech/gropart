@@ -11,6 +11,7 @@ return [
     'next' => 'Next Step',
     'back' => 'Previous',
     'finish' => 'Install',
+    'installation' => 'Installation',
     'forms' => [
         'errorTitle' => 'The following errors occurred:',
     ],

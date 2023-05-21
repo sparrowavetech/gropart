@@ -10,7 +10,7 @@
 
 @if ($showField)
     @php
-        Arr::set($options['attr'], 'class', 'tags form-control');
+        Arr::set($options['attr'], 'class', 'tags');
     @endphp
     {!! Form::text($name, $options['value'], $options['attr']) !!}
     @include('core/base::forms.partials.help-block')

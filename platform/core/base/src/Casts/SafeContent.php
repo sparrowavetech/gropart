@@ -2,7 +2,7 @@
 
 namespace Botble\Base\Casts;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 
 class SafeContent implements CastsAttributes
@@ -14,6 +14,6 @@ class SafeContent implements CastsAttributes
 
     public function get($model, string $key, $value, array $attributes)
     {
-        return BaseHelper::clean($value);
+        return html_entity_decode(BaseHelper::clean($value));
     }
 }

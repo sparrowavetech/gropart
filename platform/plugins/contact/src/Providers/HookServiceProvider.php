@@ -2,14 +2,14 @@
 
 namespace Botble\Contact\Providers;
 
-use Assets;
+use Botble\Base\Facades\Assets;
 use Botble\Contact\Enums\ContactStatusEnum;
 use Botble\Contact\Repositories\Interfaces\ContactInterface;
 use Botble\Shortcode\Compilers\Shortcode;
-use Html;
+use Botble\Base\Facades\Html;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
-use Theme;
+use Botble\Theme\Facades\Theme;
 
 class HookServiceProvider extends ServiceProvider
 {
@@ -32,9 +32,20 @@ class HookServiceProvider extends ServiceProvider
         }
 
         add_filter(BASE_FILTER_AFTER_SETTING_CONTENT, [$this, 'addSettings'], 93);
+
+        add_filter('cms_settings_validation_rules', [$this, 'addSettingRules'], 93);
     }
 
-    public function registerTopHeaderNotification(?string $options): ?string
+    public function addSettingRules(array $rules): array
+    {
+        return array_merge($rules, [
+            'blacklist_keywords' => 'nullable|string',
+            'blacklist_email_domains' => 'nullable|string',
+            'enable_math_captcha_for_contact_form' => 'nullable|in:0,1',
+        ]);
+    }
+
+    public function registerTopHeaderNotification(string|null $options): string|null
     {
         if (Auth::user()->hasPermission('contacts.edit')) {
             $contacts = $this->app[ContactInterface::class]
@@ -116,7 +127,7 @@ class HookServiceProvider extends ServiceProvider
         return view($view, compact('shortcode'))->render();
     }
 
-    public function addSettings(?string $data = null): string
+    public function addSettings(string|null $data = null): string
     {
         Assets::addStylesDirectly('vendor/core/core/base/libraries/tagify/tagify.css')
             ->addScriptsDirectly([

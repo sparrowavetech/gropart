@@ -1,5 +1,8 @@
 <?php
 
+use Botble\Base\Facades\BaseHelper;
+use Illuminate\Support\Facades\Route;
+
 Route::group(['namespace' => 'Botble\Translation\Http\Controllers', 'middleware' => ['web', 'core']], function () {
     Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {
         Route::group(['prefix' => 'translations'], function () {
@@ -64,12 +67,12 @@ Route::group(['namespace' => 'Botble\Translation\Http\Controllers', 'middleware'
             });
 
             Route::group(['prefix' => 'theme', 'permission' => 'translations.theme-translations'], function () {
-                Route::get('', [
+                Route::match(['GET', 'POST'], '', [
                     'as' => 'translations.theme-translations',
                     'uses' => 'TranslationController@getThemeTranslations',
                 ]);
 
-                Route::post('', [
+                Route::post('post', [
                     'as' => 'translations.theme-translations.post',
                     'uses' => 'TranslationController@postThemeTranslations',
                     'middleware' => 'preventDemo',

@@ -20,7 +20,7 @@
 </div>
 <div id="waypoint"></div>
 <div class="form-actions form-actions-fixed-top hidden">
-    {!! Breadcrumbs::render('main', page_title()->getTitle(false)) !!}
+    {!! Breadcrumbs::render('main', PageTitle::getTitle(false)) !!}
     <div class="btn-set">
         @if ($role && $role->id)
             <a href="{{ route('roles.duplicate', $role->id) }}" class="btn btn-warning"><i class="fa fa-copy"></i> {{ trans('core/acl::permissions.duplicate') }}</a>

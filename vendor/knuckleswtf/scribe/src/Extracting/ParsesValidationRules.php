@@ -3,14 +3,17 @@
 namespace Knuckles\Scribe\Extracting;
 
 use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ClosureValidationRule;
 use Knuckles\Scribe\Exceptions\CouldntProcessValidationRule;
 use Knuckles\Scribe\Exceptions\ProblemParsingValidationRules;
 use Knuckles\Scribe\Exceptions\ScribeException;
 use Knuckles\Scribe\Tools\ConsoleOutputUtils as c;
 use Knuckles\Scribe\Tools\WritingUtils as w;
+use ReflectionClass;
 use Throwable;
 
 trait ParsesValidationRules
@@ -28,7 +31,10 @@ trait ParsesValidationRules
         $dependentRules = [];
         foreach ($validationRules as $parameter => $ruleset) {
             try {
-                if (count($customParameterData) && !isset($customParameterData[$parameter])) {
+                $parameterPlusDot = $parameter . '.';
+                if (count($customParameterData) && !isset($customParameterData[$parameter])
+                    && ! Arr::first(array_keys($customParameterData), fn ($key) => str_starts_with($key, $parameterPlusDot))
+                ) {
                     c::debug($this->getMissingCustomDataMessage($parameter));
                 }
                 $userSpecifiedParameterInfo = $customParameterData[$parameter] ?? [];
@@ -85,8 +91,8 @@ trait ParsesValidationRules
                 }
 
                 // Make sure the user-specified example overwrites others.
-                if (isset($userSpecifiedParameterInfo['example'])) {
-                    if ($this->shouldCastUserExample()) {
+                if (array_key_exists('example', $userSpecifiedParameterInfo)) {
+                    if ($userSpecifiedParameterInfo['example'] != null && $this->shouldCastUserExample()) {
                         // Examples in comments are strings, we need to cast them properly
                         $parameterData['example'] = $this->castToType($userSpecifiedParameterInfo['example'], $parameterData['type'] ?? 'string');
                     } else {
@@ -164,11 +170,78 @@ trait ParsesValidationRules
      */
     protected function parseRule($rule, array &$parameterData, bool $independentOnly, array $allParameters = []): bool
     {
-        try {
-            if (!(is_string($rule) || $rule instanceof Rule)) {
-                return true;
+        // Reminders:
+        // 1. Append to the description (with a leading space); don't overwrite.
+        // 2. Avoid testing on the value of $parameterData['type'],
+        // as that may not have been set yet, since the rules can be in any order.
+        // For this reason, only deterministic rules are supported
+        // 3. All rules supported must be rules that we can generate a valid dummy value for.
+
+        if ($rule instanceof ClosureValidationRule || $rule instanceof \Closure) {
+            $reflection = new \ReflectionFunction($rule instanceof ClosureValidationRule ? $rule->callback : $rule);
+
+            if (is_string($description = $reflection->getDocComment())) {
+                $finalDescription = '';
+                // Cleanup comment block and extract just the description
+                foreach (explode("\n", $description) as $line) {
+                    $cleaned = preg_replace(['/\*+\/$/', '/^\/\*+\s*/', '/^\*+\s*/'], '', trim($line));
+                    if ($cleaned != '') $finalDescription .= ' ' . $cleaned;
+                }
+
+                $parameterData['description'] .= $finalDescription;
             }
 
+            return true;
+        }
+
+        if (function_exists('enum_exists') && $rule instanceof \Illuminate\Validation\Rules\Enum) {
+            $reflection = new \ReflectionClass($rule);
+            $property = $reflection->getProperty('type');
+            $property->setAccessible(true);
+            $type = $property->getValue($rule);
+
+            if (enum_exists($type) && method_exists($type, 'tryFrom')) {
+                $cases = array_map(fn ($case) => $case->value, $type::cases());
+                $parameterData['type'] = gettype($cases[0]);
+                $parameterData['description'] = ' Must be one of ' . w::getListOfValuesAsFriendlyHtmlString($cases) . ' ';
+                $parameterData['setter'] = fn () => Arr::random($cases);
+            }
+
+            return true;
+        }
+
+        if ($rule instanceof Rule || $rule instanceof ValidationRule) {
+            if (method_exists($rule, 'invokable')) {
+                // Laravel wraps InvokableRule instances in an InvokableValidationRule class,
+                // so we must retrieve the original rule
+                $rule = $rule->invokable();
+            }
+
+            if (method_exists($rule, 'docs')) {
+                $customData = call_user_func_array([$rule, 'docs'], []) ?: [];
+
+                if (isset($customData['description'])) {
+                    $parameterData['description'] .= ' ' . $customData['description'];
+                }
+                if (isset($customData['example'])) {
+                    $parameterData['setter'] = fn() => $customData['example'];
+                } elseif (isset($customData['setter'])) {
+                    $parameterData['setter'] = $customData['setter'];
+                }
+
+                $parameterData = array_merge($parameterData, Arr::except($customData, [
+                    'description', 'example', 'setter',
+                ]));
+            }
+
+            return true;
+        }
+
+        if (!is_string($rule)) {
+            return false;
+        }
+
+        try {
             // Convert string rules into rule + arguments (eg "in:1,2" becomes ["in", ["1", "2"]])
             $parsedRule = $this->parseStringRuleIntoRuleAndArguments($rule);
             [$rule, $arguments] = $parsedRule;
@@ -178,12 +251,6 @@ trait ParsesValidationRules
                 return false;
             }
 
-            // Reminders:
-            // 1. Append to the description (with a leading space); don't overwrite.
-            // 2. Avoid testing on the value of $parameterData['type'],
-            // as that may not have been set yet, since the rules can be in any order.
-            // For this reason, only deterministic rules are supported
-            // 3. All rules supported must be rules that we can generate a valid dummy value for.
             switch ($rule) {
                 case 'required':
                     $parameterData['required'] = true;
@@ -196,7 +263,7 @@ trait ParsesValidationRules
                     break;
 
                 /*
-                 * Primitive types. No description should be added
+                * Primitive types. No description should be added
                 */
                 case 'bool':
                 case 'boolean':
@@ -411,31 +478,40 @@ trait ParsesValidationRules
                     $parameterData['description'] .= ' Must not be one of ' . w::getListOfValuesAsFriendlyHtmlString($arguments) . ' ';
                     break;
                 case 'required_if':
-                    $parameterData['description'] .= ' ' . $this->getDescription(
-                            $rule, [':other' => "<code>{$arguments[0]}</code>", ':value' => w::getListOfValuesAsFriendlyHtmlString(array_slice($arguments, 1))]
-                        ) . ' ';
+                    $parameterData['description'] .= sprintf(
+                        " This field is required when <code>{$arguments[0]}</code> is %s. ",
+                        w::getListOfValuesAsFriendlyHtmlString(array_slice($arguments, 1))
+                    );
                     break;
                 case 'required_unless':
-                    $parameterData['description'] .= ' ' . $this->getDescription(
-                            $rule, [':other' => "<code>" . array_shift($arguments) . "</code>", ':values' => w::getListOfValuesAsFriendlyHtmlString($arguments)]
-                        ) . ' ';
+                    $parameterData['description'] .= sprintf(
+                        " This field is required unless <code>{$arguments[0]}</code> is in %s. ",
+                        w::getListOfValuesAsFriendlyHtmlString(array_slice($arguments, 1))
+                    );
                     break;
                 case 'required_with':
-                    $parameterData['description'] .= ' ' . $this->getDescription(
-                            $rule, [':values' => w::getListOfValuesAsFriendlyHtmlString($arguments)]
-                        ) . ' ';
+                    $parameterData['description'] .= sprintf(
+                        " This field is required when %s is present. ",
+                        w::getListOfValuesAsFriendlyHtmlString($arguments)
+                    );
                     break;
                 case 'required_without':
-                    $description = $this->getDescription(
-                            $rule, [':values' => w::getListOfValuesAsFriendlyHtmlString($arguments)]
-                        ) . ' ';
-                    $parameterData['description'] .= str_replace('must be present', 'is not present', $description);
+                    $parameterData['description'] .= sprintf(
+                        " This field is required when %s is not present. ",
+                        w::getListOfValuesAsFriendlyHtmlString($arguments)
+                    );
                     break;
                 case 'required_with_all':
+                    $parameterData['description'] .= sprintf(
+                        " This field is required when %s are present. ",
+                        w::getListOfValuesAsFriendlyHtmlString($arguments, "and")
+                    );
+                    break;
                 case 'required_without_all':
-                    $parameterData['description'] .= ' ' . $this->getDescription(
-                            $rule, [':values' => w::getListOfValuesAsFriendlyHtmlString($arguments, "and")]
-                        ) . ' ';
+                    $parameterData['description'] .= sprintf(
+                    " This field is required when none of %s are present. ",
+                    w::getListOfValuesAsFriendlyHtmlString($arguments, "and")
+                    );
                     break;
                 case 'accepted_if':
                     $parameterData['type'] = 'boolean';
@@ -443,21 +519,21 @@ trait ParsesValidationRules
                     $parameterData['setter'] = fn() => true;
                     break;
                 case 'same':
+                    $parameterData['description'] .= " The value and <code>{$arguments[0]}</code> must match.";
+                    break;
                 case 'different':
-                    $parameterData['description'] .= ' ' . $this->getDescription(
-                            $rule, [':other' => "<code>{$arguments[0]}</code>"]
-                        ) . ' ';
+                    $parameterData['description'] .= " The value and <code>{$arguments[0]}</code> must be different.";
                     break;
 
                 default:
                     // Other rules not supported
                     break;
             }
-
-            return true;
         } catch (Throwable $e) {
             throw CouldntProcessValidationRule::forParam($parameterData['name'], $rule, $e);
         }
+
+        return true;
     }
 
     /**
@@ -473,12 +549,6 @@ trait ParsesValidationRules
     protected function parseStringRuleIntoRuleAndArguments($rule): array
     {
         $ruleArguments = [];
-
-        // Convert any custom Rule objects to strings
-        if ($rule instanceof Rule) {
-            $className = substr(strrchr(get_class($rule), "\\"), 1);
-            return [$className, []];
-        }
 
         if (strpos($rule, ':') !== false) {
             [$rule, $argumentsString] = explode(':', $rule, 2);
@@ -658,6 +728,10 @@ trait ParsesValidationRules
                         $parentPath = substr($parentPath, 0, -2);
                         $normalisedParentPath = str_replace('.*.', '[].', $parentPath);
 
+                        if (!empty($results[$normalisedParentPath])) {
+                            break;
+                        }
+
                         $type = 'object[]';
                         $example = [[]];
                     } else {
@@ -713,12 +787,14 @@ trait ParsesValidationRules
             $description = str_replace($placeholder, $argument, $description);
         }
 
-        // For rules that validate subfields
-        $description = str_replace("The :attribute field ", "This field ", $description);
+        // Laravel 10 added `field` to its messages: https://github.com/laravel/framework/pull/45974
+        $description = str_replace("The :attribute field ", "The value ", $description);
+
+        $description = preg_replace("/(?!<\W):attribute\b/", "value", $description);
 
         return str_replace(
-            [" :attribute ", "The value must ", " 1 characters", " 1 digits", " 1 kilobytes"],
-            [" value ", "Must ", " 1 character", " 1 digit", " 1 kilobyte"],
+            ["The value must ", " 1 characters", " 1 digits", " 1 kilobytes"],
+            ["Must ", " 1 character", " 1 digit", " 1 kilobyte"],
             $description
         );
     }

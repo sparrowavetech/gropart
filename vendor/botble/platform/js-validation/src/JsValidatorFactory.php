@@ -9,7 +9,6 @@ use Botble\JsValidation\Javascript\ValidatorHandler;
 use Botble\JsValidation\Support\DelegatedValidator;
 use Botble\JsValidation\Support\ValidationRuleParserProxy;
 use Illuminate\Container\Container;
-use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Validation\Factory as ValidationFactory;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
@@ -17,37 +16,14 @@ use Illuminate\Validation\Validator;
 
 class JsValidatorFactory
 {
-    /**
-     * The application instance.
-     *
-     * @var Container
-     */
-    protected $app;
-
-    /**
-     * Configuration options.
-     *
-     * @var array
-     */
     protected array $options = [];
 
-    /**
-     * Create a new Validator factory instance.
-     *
-     * @param Container $app
-     * @param array $options
-     */
-    public function __construct($app, array $options = [])
+    public function __construct(protected Container $app, array $options = [])
     {
-        $this->app = $app;
         $this->setOptions($options);
     }
 
-    /**
-     * @param $options
-     * @return void
-     */
-    protected function setOptions($options)
+    protected function setOptions(array $options): void
     {
         $options['disable_remote_validation'] = empty($options['disable_remote_validation']) ? false : $options['disable_remote_validation'];
         $options['view'] = empty($options['view']) ? 'core/js-validation:bootstrap' : $options['view'];
@@ -58,14 +34,8 @@ class JsValidatorFactory
 
     /**
      * Creates JsValidator instance based on rules and message arrays.
-     *
-     * @param array $rules
-     * @param array $messages
-     * @param array $customAttributes
-     * @param null|string $selector
-     * @return JavascriptValidator
      */
-    public function make(array $rules, array $messages = [], array $customAttributes = [], $selector = null)
+    public function make(array $rules, array $messages = [], array $customAttributes = [], string|null $selector = null): JavascriptValidator
     {
         $validator = $this->getValidatorInstance($rules, $messages, $customAttributes);
 
@@ -74,11 +44,6 @@ class JsValidatorFactory
 
     /**
      * Get the validator instance for the request.
-     *
-     * @param array $rules
-     * @param array $messages
-     * @param array $customAttributes
-     * @return Validator
      */
     protected function getValidatorInstance(array $rules, array $messages = [], array $customAttributes = [])
     {
@@ -93,9 +58,6 @@ class JsValidatorFactory
 
     /**
      * Gets fake data when validator has wildcard rules.
-     *
-     * @param array $rules
-     * @return array
      */
     protected function getValidationData(array $rules, array $customAttributes = [])
     {
@@ -104,25 +66,18 @@ class JsValidatorFactory
         });
 
         $attributes = array_merge(array_keys($customAttributes), $attributes);
-        $data = array_reduce($attributes, function ($data, $attribute) {
+
+        return array_reduce($attributes, function ($data, $attribute) {
             Arr::set($data, $attribute, true);
 
             return $data;
         }, []);
-
-        return $data;
     }
 
     /**
      * Creates JsValidator instance based on FormRequest.
-     *
-     * @param $formRequest
-     * @param null $selector
-     * @return JavascriptValidator
-     *
-     * @throws BindingResolutionException
      */
-    public function formRequest($formRequest, $selector = null)
+    public function formRequest($formRequest, $selector = null): JavascriptValidator
     {
         if (! is_object($formRequest)) {
             $formRequest = $this->createFormRequest($formRequest);
@@ -130,16 +85,18 @@ class JsValidatorFactory
 
         $rules = method_exists($formRequest, 'rules') ? $formRequest->rules() : [];
 
-        $validator = $this->getValidatorInstance($rules, $formRequest->messages(), $formRequest->attributes());
+        $rules = apply_filters('core_request_rules', $rules, $formRequest);
+
+        $messages = apply_filters('core_request_messages', $formRequest->messages(), $formRequest);
+
+        $attributes = apply_filters('core_request_attributes', $formRequest->attributes(), $formRequest);
+
+        $validator = $this->getValidatorInstance($rules, $messages, $attributes);
 
         return $this->validator($validator, $selector);
     }
 
-    /**
-     * @param string|array $class
-     * @return array
-     */
-    protected function parseFormRequestName($class)
+    protected function parseFormRequestName(string|array $class): array
     {
         $params = [];
         if (is_array($class)) {
@@ -151,14 +108,9 @@ class JsValidatorFactory
     }
 
     /**
-     * Creates and initializes an Form Request instance.
-     *
-     * @param string $class
-     * @return FormRequest
-     *
-     * @throws BindingResolutionException
+     * Creates and initializes a Form Request instance.
      */
-    protected function createFormRequest($class)
+    protected function createFormRequest(string $class): FormRequest
     {
         /*
          * @var $formRequest \Illuminate\Foundation\Http\FormRequest
@@ -167,6 +119,7 @@ class JsValidatorFactory
         [$class, $params] = $this->parseFormRequestName($class);
 
         $request = $this->app->__get('request');
+        // @phpstan-ignore-next-line
         $formRequest = $this->app->build($class, $params);
 
         if ($session = $request->getSession()) {
@@ -182,24 +135,16 @@ class JsValidatorFactory
 
     /**
      * Creates JsValidator instance based on Validator.
-     *
-     * @param Validator $validator
-     * @param null|string $selector
-     * @return JavascriptValidator
      */
-    public function validator(Validator $validator, $selector = null)
+    public function validator(Validator $validator, string|null $selector = null): JavascriptValidator
     {
         return $this->jsValidator($validator, $selector);
     }
 
     /**
      * Creates JsValidator instance based on Validator.
-     *
-     * @param Validator $validator
-     * @param null|string $selector
-     * @return JavascriptValidator
      */
-    protected function jsValidator(Validator $validator, $selector = null)
+    protected function jsValidator(Validator $validator, string|null $selector = null): JavascriptValidator
     {
         $remote = ! $this->options['disable_remote_validation'];
         $view = $this->options['view'];
@@ -216,10 +161,8 @@ class JsValidatorFactory
 
     /**
      * Get and encrypt token from session store.
-     *
-     * @return null|string
      */
-    protected function getSessionToken(): ?string
+    protected function getSessionToken(): string|null
     {
         $token = null;
         if ($session = $this->app->__get('session')) {

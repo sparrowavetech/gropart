@@ -32,7 +32,7 @@ trait PaymentErrorTrait
             } else {
                 $body = $exception->getJsonBody();
                 $error = $body['error'];
-                if (! empty($err['message'])) {
+                if (! empty($error['message'])) {
                     $this->errorMessage = $error['message'];
                 } else {
                     $this->errorMessage = $exception->getMessage();

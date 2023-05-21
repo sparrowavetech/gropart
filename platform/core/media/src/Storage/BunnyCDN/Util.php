@@ -4,12 +4,6 @@ namespace Botble\Media\Storage\BunnyCDN;
 
 class Util
 {
-    /**
-     * Splits a path into a file and a directory
-     *
-     * @param $path
-     * @return array
-     */
     public static function splitPathIntoDirectoryAndFile($path): array
     {
         $path = self::endsWith($path, '/') ? substr($path, 0, -1) : $path;
@@ -23,11 +17,6 @@ class Util
         ];
     }
 
-    /**
-     * @param $path
-     * @param bool $isDirectory
-     * @return string|string[]
-     */
     public static function normalizePath($path, bool $isDirectory = false): array|string
     {
         $path = str_replace('\\', '/', $path);
@@ -49,21 +38,11 @@ class Util
         return $path;
     }
 
-    /**
-     * @param $haystack
-     * @param $needle
-     * @return bool
-     */
     public static function startsWith($haystack, $needle): bool
     {
         return str_starts_with($haystack, $needle);
     }
 
-    /**
-     * @param $haystack
-     * @param $needle
-     * @return bool
-     */
     public static function endsWith($haystack, $needle): bool
     {
         $length = strlen($needle);

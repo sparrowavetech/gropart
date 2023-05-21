@@ -96,6 +96,22 @@ class AdminBar
         $this->registerLink(trans('core/acl::users.users'), route('users.create'), 'add-new', 'users.create');
         $this->registerLink(trans('core/setting::setting.title'), route('settings.options'), 'appearance', 'settings.options');
 
+        foreach ($this->groups as $key => $group) {
+            if (! isset($group['items'])) {
+                continue;
+            }
+
+            foreach ($group['items'] as $itemKey => $item) {
+                if (! empty($item['permission']) && ! Auth::user()->hasPermission($item['permission'])) {
+                    unset($this->groups[$key]['items'][$itemKey]);
+                }
+            }
+
+            if (! count($group['items'])) {
+                unset($this->groups[$key]);
+            }
+        }
+
         return view('packages/theme::admin-bar')->render();
     }
 }

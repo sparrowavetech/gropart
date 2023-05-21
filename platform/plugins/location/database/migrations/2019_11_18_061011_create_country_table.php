@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 return new class () extends Migration {
     public function up(): void
@@ -22,8 +23,8 @@ return new class () extends Migration {
             Schema::create('states', function (Blueprint $table) {
                 $table->id();
                 $table->string('name', 120);
-                $table->string('abbreviation', 2)->nullable();
-                $table->integer('country_id')->unsigned()->nullable();
+                $table->string('abbreviation', 10)->nullable();
+                $table->foreignId('country_id')->nullable();
                 $table->tinyInteger('order')->default(0);
                 $table->tinyInteger('is_default')->unsigned()->default(0);
                 $table->string('status', 60)->default('published');
@@ -35,8 +36,8 @@ return new class () extends Migration {
             Schema::create('cities', function (Blueprint $table) {
                 $table->id();
                 $table->string('name', 120);
-                $table->integer('state_id')->unsigned();
-                $table->integer('country_id')->unsigned()->nullable();
+                $table->foreignId('state_id');
+                $table->foreignId('country_id')->nullable();
                 $table->string('record_id', 40)->nullable();
                 $table->tinyInteger('order')->default(0);
                 $table->tinyInteger('is_default')->unsigned()->default(0);

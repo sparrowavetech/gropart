@@ -37,7 +37,7 @@ class State extends BaseModel
         return $this->hasMany(City::class);
     }
 
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
         static::deleting(function (State $state) {

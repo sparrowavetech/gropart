@@ -18,7 +18,8 @@
         <td colspan="3">
             <div class="float-start" style="margin-top: 5px;">
                 <div class="payment-name-label-group @if ($stripeStatus == 0) hidden @endif">
-                    <span class="payment-note v-a-t">{{ trans('plugins/payment::payment.use') }}:</span> <label class="ws-nm inline-display method-name-label">{{ setting('payment_stripe_name') }}</label>
+                    <span class="payment-note v-a-t">{{ trans('plugins/payment::payment.use') }}:</span>
+                    <label class="ws-nm inline-display method-name-label">{{ setting('payment_stripe_name') }}</label>
                 </div>
             </div>
             <div class="float-end">
@@ -57,39 +58,47 @@
                 </div>
                 <div class="col-sm-6">
                     <div class="well bg-white">
-                        <div class="form-group mb-3">
-                            <label class="text-title-field" for="stripe_name">{{ trans('plugins/payment::payment.method_name') }}</label>
-                            <input type="text" class="next-input input-name" name="payment_stripe_name" id="stripe_name" data-counter="400" value="{{ setting('payment_stripe_name', trans('plugins/payment::payment.pay_online_via', ['name' => 'Stripe'])) }}">
-                        </div>
-                        <div class="form-group mb-3">
+                        <x-core-setting::text-input
+                            name="payment_stripe_name"
+                            :label="trans('plugins/payment::payment.method_name')"
+                            :value="setting('payment_stripe_name', trans('plugins/payment::payment.pay_online_via', ['name' => 'Stripe']))"
+                            data-counter="400"
+                        />
+
+                        <x-core-setting::form-group>
                             <label class="text-title-field" for="payment_stripe_description">{{ trans('core/base::forms.description') }}</label>
                             <textarea class="next-input" name="payment_stripe_description" id="payment_stripe_description">{{ get_payment_setting('description', 'stripe', __('Payment with Stripe')) }}</textarea>
-                        </div>
+                        </x-core-setting::form-group>
+
                         <p class="payment-note">
                             {{ trans('plugins/payment::payment.please_provide_information') }} <a target="_blank" href="//www.stripe.com">Stripe</a>:
                         </p>
-                        <div class="form-group mb-3">
-                            <label class="text-title-field" for="stripe_client_id">{{ trans('plugins/payment::payment.stripe_key') }}</label>
-                            <input type="text" class="next-input" name="payment_stripe_client_id" id="stripe_client_id" placeholder="pk_*************" value="{{ app()->environment('demo') ? '*******************************' : setting('payment_stripe_client_id') }}">
-                        </div>
-                        <div class="form-group mb-3">
-                            <label class="text-title-field" for="stripe_secret">{{ trans('plugins/payment::payment.stripe_secret') }}</label>
-                            <div class="input-option">
-                                <input type="password" class="next-input" id="stripe_secret" name="payment_stripe_secret" placeholder="sk_*************" value="{{ app()->environment('demo') ? '*******************************' : setting('payment_stripe_secret') }}">
-                            </div>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label class="text-title-field" for="{{ STRIPE_PAYMENT_METHOD_NAME }}_payment_type">{{ __('Payment Type') }}</label>
-                            <div class="ui-select-wrapper">
-                                <select name="payment_{{ STRIPE_PAYMENT_METHOD_NAME }}_payment_type" class="ui-select select-search-full" id="{{ STRIPE_PAYMENT_METHOD_NAME }}_payment_type">
-                                    <option value="stripe_api_charge" @if (get_payment_setting('payment_type', STRIPE_PAYMENT_METHOD_NAME, 'stripe_api_charge') == 'stripe_api_charge') selected @endif>Stripe API Charge</option>
-                                    <option value="stripe_checkout" @if (get_payment_setting('payment_type', STRIPE_PAYMENT_METHOD_NAME, 'stripe_api_charge') == 'stripe_checkout') selected @endif>Stripe Checkout</option>
-                                </select>
-                                <svg class="svg-next-icon svg-next-icon-size-16">
-                                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#select-chevron"></use>
-                                </svg>
-                            </div>
-                        </div>
+
+                        <x-core-setting::text-input
+                            name="payment_stripe_client_id"
+                            :label="trans('plugins/payment::payment.stripe_key')"
+                            :value="app()->environment('demo') ? '*******************************' : setting('payment_stripe_client_id')"
+                            placeholder="pk_*************"
+                            data-counter="400"
+                        />
+
+                        <x-core-setting::text-input
+                            name="payment_stripe_secret"
+                            type="password"
+                            :label="trans('plugins/payment::payment.stripe_secret')"
+                            :value="app()->environment('demo') ? '*******************************' : setting('payment_stripe_secret')"
+                            placeholder="sk_*************"
+                        />
+
+                        <x-core-setting::select
+                            :name="'payment_' . STRIPE_PAYMENT_METHOD_NAME . '_payment_type'"
+                            :label="__('Payment Type')"
+                            :options="[
+                                'stripe_api_charge' => __('Stripe API Charge'),
+                                'stripe_checkout' => __('Stripe Checkout'),
+                            ]"
+                            :value="get_payment_setting('payment_type', STRIPE_PAYMENT_METHOD_NAME, 'stripe_api_charge')"
+                        />
 
                         {!! apply_filters(PAYMENT_METHOD_SETTINGS_CONTENT, null, 'stripe') !!}
                     </div>

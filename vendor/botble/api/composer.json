@@ -7,14 +7,15 @@
             "Botble\\Api\\": "src"
         }
     },
-    "require": {
-        "knuckleswtf/scribe": "^4.0"
-    },
+    "require": {},
     "extra": {
         "laravel": {
             "providers": [
                 "Botble\\Api\\Providers\\ApiServiceProvider"
-            ]
+            ],
+            "aliases": {
+                "ApiHelper": "Botble\\Api\\Facades\\ApiHelper"
+            }
         }
     }
 }

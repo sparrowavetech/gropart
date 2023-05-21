@@ -2,8 +2,8 @@
 
 namespace Botble\AuditLog\Providers;
 
-use Assets;
-use AuditLog;
+use Botble\Base\Facades\Assets;
+use Botble\AuditLog\Facades\AuditLog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Botble\Dashboard\Supports\DashboardWidgetInstance;

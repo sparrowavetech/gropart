@@ -2,9 +2,13 @@
 
 namespace Botble\Blog\Http\Resources;
 
+use Botble\Blog\Models\Post;
 use Illuminate\Http\Resources\Json\JsonResource;
-use RvMedia;
+use Botble\Media\Facades\RvMedia;
 
+/**
+ * @mixin Post
+ */
 class ListPostResource extends JsonResource
 {
     public function toArray($request): array

@@ -91,6 +91,11 @@ class Refund extends BaseResource
     public $routingReversal;
 
     /**
+     * @var \stdClass|null
+     */
+    public $metadata;
+
+    /**
      * Is this refund queued?
      *
      * @return bool
@@ -138,6 +143,16 @@ class Refund extends BaseResource
     public function isFailed()
     {
         return $this->status === RefundStatus::STATUS_FAILED;
+    }
+
+    /**
+     * Is this refund canceled?
+     *
+     * @return bool
+     */
+    public function isCanceled()
+    {
+        return $this->status === RefundStatus::STATUS_CANCELED;
     }
 
     /**

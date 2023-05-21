@@ -18,3 +18,7 @@
         <p><a class="lost-pass-link" href="{{ route('access.login') }}">{{ trans('core/acl::auth.back_to_login') }}</a></p>
     {!! Form::close() !!}
 @stop
+
+@push('footer')
+    {!! $jsValidator !!}
+@endpush

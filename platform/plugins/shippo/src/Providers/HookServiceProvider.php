@@ -2,13 +2,15 @@
 
 namespace Botble\Shippo\Providers;
 
-use Assets;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Ecommerce\Enums\ShippingMethodEnum;
 use Botble\Ecommerce\Models\Shipment;
+use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Shippo\Shippo;
 use Illuminate\Support\Arr;
 use Illuminate\Support\ServiceProvider;
-use Throwable;
+use Illuminate\Support\Str;
 
 class HookServiceProvider extends ServiceProvider
 {
@@ -28,7 +30,7 @@ class HookServiceProvider extends ServiceProvider
 
         add_filter(BASE_FILTER_ENUM_LABEL, function ($value, $class) {
             if ($class == ShippingMethodEnum::class && $value == SHIPPO_SHIPPING_METHOD_NAME) {
-                $value = 'Shippo';
+                return 'Shippo';
             }
 
             return $value;
@@ -36,37 +38,44 @@ class HookServiceProvider extends ServiceProvider
 
         add_filter('shipment_buttons_detail_order', function (?string $content, Shipment $shipment) {
             Assets::addScriptsDirectly('vendor/core/plugins/shippo/js/shippo.js');
-            $content .= view('plugins/shippo::buttons', compact('shipment'))->render();
 
-            return $content;
+            return $content . view('plugins/shippo::buttons', compact('shipment'))->render();
         }, 1, 2);
     }
 
-    /**
-     * @param array $result
-     * @param array $data
-     * @return array
-     *
-     * @throws Throwable
-     */
-    public function handleShippingFee($result, $data): array
+    public function handleShippingFee(array $result, array $data): array
     {
         if (! $this->app->runningInConsole() && setting('shipping_shippo_status') == 1) {
+            Arr::forget($data, 'extra.COD');
             $results = app(Shippo::class)->getRates($data);
+            if (Arr::get($data, 'payment_method') == PaymentMethodEnum::COD) {
+                $rates = Arr::get($results, 'shipment.rates') ?: [];
+                foreach ($rates as &$rate) {
+                    $rate['disabled'] = true;
+                    $rate['error_message'] = __('Not available in COD payment option.');
+                }
+
+                Arr::set($results, 'shipment.rates', $rates);
+            }
+
             $result['shippo'] = Arr::get($results, 'shipment.rates') ?: [];
         }
 
         return $result;
     }
 
-    /**
-     * @param string|null $settings
-     * @return string
-     *
-     * @throws Throwable
-     */
     public function addSettings(?string $settings): string
     {
-        return $settings . view('plugins/shippo::settings')->render();
+        $logFiles = [];
+
+        if (setting('shipping_shippo_logging')) {
+            foreach (BaseHelper::scanFolder(storage_path('logs')) as $file) {
+                if (Str::startsWith($file, 'shippo-')) {
+                    $logFiles[] = $file;
+                }
+            }
+        }
+
+        return $settings . view('plugins/shippo::settings', compact('logFiles'))->render();
     }
 }

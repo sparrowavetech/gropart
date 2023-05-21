@@ -5,7 +5,7 @@ namespace Botble\Location\Exports;
 use Botble\Location\Repositories\Interfaces\CountryInterface;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use Language;
+use Botble\Language\Facades\Language;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;

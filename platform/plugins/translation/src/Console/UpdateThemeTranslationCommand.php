@@ -2,12 +2,12 @@
 
 namespace Botble\Translation\Console;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Finder\Finder;
-use Theme;
+use Botble\Theme\Facades\Theme;
 
 #[AsCommand('cms:translations:update-theme-translations', 'Update theme translations')]
 class UpdateThemeTranslationCommand extends Command

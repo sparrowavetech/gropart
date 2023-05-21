@@ -8,17 +8,14 @@ use Exception;
 use Illuminate\Contracts\Mail\Mailer;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
-use Log;
+use Illuminate\Support\Facades\Log;
 
 class SendMailListener implements ShouldQueue
 {
     use InteractsWithQueue;
 
-    protected Mailer $mailer;
-
-    public function __construct(Mailer $mailer)
+    public function __construct(protected Mailer $mailer)
     {
-        $this->mailer = $mailer;
     }
 
     public function handle(SendMailEvent $event): void

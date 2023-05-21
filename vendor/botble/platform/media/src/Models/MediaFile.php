@@ -2,15 +2,16 @@
 
 namespace Botble\Media\Models;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Casts\SafeContent;
 use Botble\Base\Models\BaseModel;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Request;
-use RvMedia;
+use Illuminate\Support\Facades\Request;
+use Botble\Media\Facades\RvMedia;
 
 class MediaFile extends BaseModel
 {
@@ -27,13 +28,15 @@ class MediaFile extends BaseModel
         'options',
         'folder_id',
         'user_id',
+        'alt',
     ];
 
     protected $casts = [
         'options' => 'json',
+        'name' => SafeContent::class,
     ];
 
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
         static::deleting(function (MediaFile $file) {
@@ -45,7 +48,7 @@ class MediaFile extends BaseModel
 
     public function folder(): BelongsTo
     {
-        return $this->belongsTo(MediaFolder::class, 'id', 'folder_id');
+        return $this->belongsTo(MediaFolder::class, 'folder_id')->withDefault();
     }
 
     protected function type(): Attribute
@@ -92,7 +95,7 @@ class MediaFile extends BaseModel
     protected function previewUrl(): Attribute
     {
         return Attribute::make(
-            get: function (): ?string {
+            get: function (): string|null {
                 $preview = null;
                 switch ($this->type) {
                     case 'image':
@@ -103,6 +106,12 @@ class MediaFile extends BaseModel
 
                         break;
                     case 'document':
+                        if ($this->mime_type === 'application/pdf') {
+                            $preview = RvMedia::url($this->url);
+
+                            break;
+                        }
+
                         $config = config('core.media.media.preview.document', []);
                         if (Arr::get($config, 'enabled') &&
                             Request::ip() !== '127.0.0.1' &&

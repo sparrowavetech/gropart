@@ -11,9 +11,4 @@ return new class () extends Migration {
         Schema::dropIfExists('cities_backup');
         Schema::dropIfExists('language_meta_backup');
     }
-
-    public function down(): void
-    {
-        //
-    }
 };

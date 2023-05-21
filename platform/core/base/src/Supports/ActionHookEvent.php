@@ -9,8 +9,12 @@ abstract class ActionHookEvent
 {
     protected array $listeners = [];
 
-    public function addListener(string|array|null $hook, string|array|Closure $callback, int $priority = 20, int $arguments = 1): void
-    {
+    public function addListener(
+        string|array|null $hook,
+        string|array|Closure $callback,
+        int $priority = 20,
+        int $arguments = 1
+    ): void {
         if (! is_array($hook)) {
             $hook = [$hook];
         }
@@ -42,7 +46,7 @@ abstract class ActionHookEvent
         return $this->listeners;
     }
 
-    protected function getFunction(string|array|Closure $callback): bool|array|Closure|string
+    protected function getFunction(string|array|Closure|null $callback): bool|array|Closure|string
     {
         if (is_string($callback)) {
             if (strpos($callback, '@')) {

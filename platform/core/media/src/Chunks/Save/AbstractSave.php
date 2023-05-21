@@ -7,20 +7,12 @@ use Illuminate\Http\UploadedFile;
 
 abstract class AbstractSave
 {
-    protected UploadedFile $file;
-
-    protected AbstractHandler $handler;
-
     /**
-     * AbstractUpload constructor.
-     *
      * @param UploadedFile $file the uploaded file (chunk file)
      * @param AbstractHandler $handler the handler that detected the correct save method
      */
-    public function __construct(UploadedFile $file, AbstractHandler $handler)
+    public function __construct(protected UploadedFile $file, protected AbstractHandler $handler)
     {
-        $this->file = $file;
-        $this->handler = $handler;
     }
 
     /**
@@ -44,7 +36,7 @@ abstract class AbstractSave
      *
      * @return string|null
      */
-    public function getErrorMessage(): ?string
+    public function getErrorMessage(): string|null
     {
         return $this->file->getErrorMessage();
     }

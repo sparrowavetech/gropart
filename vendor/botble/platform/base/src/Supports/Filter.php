@@ -4,12 +4,6 @@ namespace Botble\Base\Supports;
 
 class Filter extends ActionHookEvent
 {
-    /**
-     * Filters a value
-     * @param string $action Name of filter
-     * @param array $args Arguments passed to the filter
-     * @return mixed Always returns the value
-     */
     public function fire(string $action, array $args)
     {
         $value = $args[0] ?? ''; // get the value, the first argument is always the value

@@ -2,8 +2,9 @@
 
 namespace Botble\Theme\Http\Controllers;
 
-use Assets;
-use BaseHelper;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
@@ -18,8 +19,8 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
-use Theme;
-use ThemeOption;
+use Botble\Theme\Facades\Theme;
+use Botble\Theme\Facades\ThemeOption;
 
 class ThemeController extends BaseController
 {
@@ -29,7 +30,7 @@ class ThemeController extends BaseController
             abort(404);
         }
 
-        page_title()->setTitle(trans('packages/theme::theme.name'));
+        PageTitle::setTitle(trans('packages/theme::theme.name'));
 
         if (File::exists(theme_path('.DS_Store'))) {
             File::delete(theme_path('.DS_Store'));
@@ -42,7 +43,7 @@ class ThemeController extends BaseController
 
     public function getOptions()
     {
-        page_title()->setTitle(trans('packages/theme::theme.theme_options'));
+        PageTitle::setTitle(trans('packages/theme::theme.theme_options'));
 
         Assets::addScripts(['are-you-sure', 'colorpicker', 'jquery-ui'])
             ->addStyles(['colorpicker'])
@@ -97,7 +98,7 @@ class ThemeController extends BaseController
 
     public function getCustomCss(FormBuilder $formBuilder)
     {
-        page_title()->setTitle(trans('packages/theme::theme.custom_css'));
+        PageTitle::setTitle(trans('packages/theme::theme.custom_css'));
 
         Assets::addStylesDirectly([
             'vendor/core/core/base/libraries/codemirror/lib/codemirror.css',
@@ -147,7 +148,7 @@ class ThemeController extends BaseController
             abort(404);
         }
 
-        page_title()->setTitle(trans('packages/theme::theme.custom_js'));
+        PageTitle::setTitle(trans('packages/theme::theme.custom_js'));
 
         Assets::addStylesDirectly([
             'vendor/core/core/base/libraries/codemirror/lib/codemirror.css',
@@ -216,7 +217,7 @@ class ThemeController extends BaseController
             abort(404);
         }
 
-        page_title()->setTitle(trans('packages/theme::theme.custom_html'));
+        PageTitle::setTitle(trans('packages/theme::theme.custom_html'));
 
         Assets::addStylesDirectly([
             'vendor/core/core/base/libraries/codemirror/lib/codemirror.css',

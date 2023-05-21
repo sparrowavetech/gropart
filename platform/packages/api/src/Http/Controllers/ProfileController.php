@@ -2,7 +2,7 @@
 
 namespace Botble\Api\Http\Controllers;
 
-use ApiHelper;
+use Botble\Api\Facades\ApiHelper;
 use App\Http\Controllers\Controller;
 use Botble\Api\Http\Resources\UserResource;
 use Botble\Base\Http\Responses\BaseHttpResponse;
@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use RvMedia;
+use Botble\Media\Facades\RvMedia;
 
 class ProfileController extends Controller
 {
@@ -50,14 +50,19 @@ class ProfileController extends Controller
         try {
             $file = RvMedia::handleUpload($request->file('avatar'), 0, 'users');
             if (Arr::get($file, 'error') !== true) {
-                $user = $request->user()->update(['avatar' => $file['data']->url]);
+                $user = $request->user();
+                $user->update(['avatar' => $file['data']->url]);
+
+                return $response
+                    ->setData([
+                        'avatar' => $user->avatar_url,
+                    ])
+                    ->setMessage(__('Update avatar successfully!'));
             }
 
             return $response
-                ->setData([
-                    'avatar' => $user->avatar_url,
-                ])
-                ->setMessage(__('Update avatar successfully!'));
+                ->setError()
+                ->setMessage(__('Update failed!'));
         } catch (Exception $ex) {
             return $response
                 ->setError()
@@ -81,7 +86,7 @@ class ProfileController extends Controller
      */
     public function updateProfile(Request $request, BaseHttpResponse $response)
     {
-        $userId = $request->user()->id();
+        $userId = $request->user()->getKey();
 
         $validator = Validator::make($request->input(), [
             'first_name' => 'required|max:120|min:2',
@@ -101,10 +106,10 @@ class ProfileController extends Controller
         }
 
         try {
-            $user = $request->user()->update($request->input());
+            $request->user()->update($request->input());
 
             return $response
-                ->setData($user->toArray())
+                ->setData($request->user()->toArray())
                 ->setMessage(__('Update profile successfully!'));
         } catch (Exception $ex) {
             return $response

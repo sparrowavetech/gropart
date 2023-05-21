@@ -58,34 +58,40 @@
                 </div>
                 <div class="col-sm-6">
                     <div class="well bg-white">
-                        <div class="form-group mb-3">
-                            <label class="text-title-field" for="paypal_name">{{ trans('plugins/payment::payment.method_name') }}</label>
-                            <input type="text" class="next-input input-name" name="payment_paypal_name" id="paypal_name" data-counter="400" value="{{ setting('payment_paypal_name', trans('plugins/payment::payment.pay_online_via', ['name' => 'PayPal'])) }}">
-                        </div>
+                        <x-core-setting::text-input
+                            name="payment_paypal_name"
+                            :label="trans('plugins/payment::payment.method_name')"
+                            :value="setting('payment_paypal_name', trans('plugins/payment::payment.pay_online_via', ['name' => 'PayPal']))"
+                            data-counter="400"
+                        />
+
                         <div class="form-group mb-3">
                             <label class="text-title-field" for="payment_paypal_description">{{ trans('core/base::forms.description') }}</label>
                             <textarea class="next-input" name="payment_paypal_description" id="payment_paypal_description">{{ get_payment_setting('description', 'paypal', __('You will be redirected to PayPal to complete the payment.')) }}</textarea>
                         </div>
+
                         <p class="payment-note">
                             {{ trans('plugins/payment::payment.please_provide_information') }} <a target="_blank" href="//www.paypal.com">PayPal</a>:
                         </p>
-                        <div class="form-group mb-3">
-                            <label class="text-title-field" for="paypal_client_id">{{ trans('plugins/payment::payment.client_id') }}</label>
-                            <input type="text" class="next-input" name="payment_paypal_client_id" id="paypal_client_id" value="{{ app()->environment('demo') ? '*******************************' :setting('payment_paypal_client_id') }}">
-                        </div>
-                        <div class="form-group mb-3">
-                            <label class="text-title-field" for="paypal_client_secret">{{ trans('plugins/payment::payment.client_secret') }}</label>
-                            <div class="input-option">
-                                <input type="password" class="next-input" placeholder="••••••••" id="paypal_client_secret" name="payment_paypal_client_secret" value="{{ app()->environment('demo') ? '*******************************' : setting('payment_paypal_client_secret') }}">
-                            </div>
-                        </div>
-                        {!! Form::hidden('payment_paypal_mode', 1) !!}
-                        <div class="form-group mb-3">
-                            <label class="next-label">
-                                <input type="checkbox"  value="0" name="payment_paypal_mode" @if (setting('payment_paypal_mode') == 0) checked @endif>
-                                {{ trans('plugins/payment::payment.sandbox_mode') }}
-                            </label>
-                        </div>
+
+                        <x-core-setting::text-input
+                            name="payment_paypal_client_id"
+                            :label="trans('plugins/payment::payment.client_id')"
+                            :value="app()->environment('demo') ? '*******************************' :setting('payment_paypal_client_id')"
+                        />
+
+                        <x-core-setting::text-input
+                            name="payment_paypal_client_secret"
+                            type="password"
+                            :label="trans('plugins/payment::payment.client_secret')"
+                            :value="app()->environment('demo') ? '*******************************' : setting('payment_paypal_client_secret')"
+                        />
+
+                        <x-core-setting::checkbox
+                            name="payment_paypal_mode"
+                            :label="trans('plugins/payment::payment.sandbox_mode')"
+                            :value="! setting('payment_paypal_mode')"
+                        />
 
                         {!! apply_filters(PAYMENT_METHOD_SETTINGS_CONTENT, null, 'paypal') !!}
                     </div>

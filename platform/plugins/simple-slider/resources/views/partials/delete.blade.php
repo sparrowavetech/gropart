@@ -1,5 +1,5 @@
 <div class="modal-box-container">
-    <form action="{{ route('simple-slider-item.delete.post', $slider->id) }}" method="post" class="form-xs">
+    <form action="{{ route('simple-slider-item.destroy', $slider->id) }}" method="post" class="form-xs">
         @csrf
         @method('DELETE')
         <div class="modal-title">

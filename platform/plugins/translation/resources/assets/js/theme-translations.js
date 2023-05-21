@@ -1,3 +1,3 @@
 $(document).ready(function () {
-    $('.editable').editable({mode: 'inline'});
-});
+    $('.editable').editable({ mode: 'inline' })
+})

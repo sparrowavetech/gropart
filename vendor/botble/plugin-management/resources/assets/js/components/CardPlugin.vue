@@ -1,13 +1,9 @@
 <template>
-
-    <marketplace-card :data="plugin">
-    </marketplace-card>
-
+    <marketplace-card :data="plugin"></marketplace-card>
 </template>
 
 <script>
-
-import Card from '@base.marketplace/components/Card/Card.vue';
+import Card from './Card/Card.vue'
 
 export default {
     name: 'marketplace-card-plugin',
@@ -15,8 +11,7 @@ export default {
         plugin: [],
     },
     components: {
-        'marketplace-card': Card
+        'marketplace-card': Card,
     },
-
 }
 </script>

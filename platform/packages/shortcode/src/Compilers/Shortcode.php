@@ -4,20 +4,14 @@ namespace Botble\Shortcode\Compilers;
 
 class Shortcode
 {
-    protected string $name;
-
-    protected array $attributes = [];
-
-    public ?string $content;
-
-    public function __construct(string $name, array $attributes = [], ?string $content = null)
-    {
-        $this->name = $name;
-        $this->attributes = $attributes;
-        $this->content = $content;
+    public function __construct(
+        protected string $name,
+        protected array $attributes = [],
+        public string|null $content = null
+    ) {
     }
 
-    public function get(string $attribute, ?string $fallback = null): string
+    public function get(string $attribute, string|null $fallback = null): string
     {
         $value = $this->{$attribute};
 
@@ -30,12 +24,12 @@ class Shortcode
         return '';
     }
 
-    public function getName(): ?string
+    public function getName(): string|null
     {
         return $this->name;
     }
 
-    public function getContent(): ?string
+    public function getContent(): string|null
     {
         return $this->content;
     }

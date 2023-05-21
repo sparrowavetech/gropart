@@ -2,12 +2,12 @@
 
 namespace Botble\Location\Http\Controllers;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
@@ -22,23 +22,20 @@ use Illuminate\Http\Request;
 
 class CityController extends BaseController
 {
-    protected CityInterface $cityRepository;
-
-    public function __construct(CityInterface $cityRepository)
+    public function __construct(protected CityInterface $cityRepository)
     {
-        $this->cityRepository = $cityRepository;
     }
 
     public function index(CityTable $table)
     {
-        page_title()->setTitle(trans('plugins/location::city.name'));
+        PageTitle::setTitle(trans('plugins/location::city.name'));
 
         return $table->renderTable();
     }
 
     public function create(FormBuilder $formBuilder)
     {
-        page_title()->setTitle(trans('plugins/location::city.create'));
+        PageTitle::setTitle(trans('plugins/location::city.create'));
 
         return $formBuilder->create(CityForm::class)->renderForm();
     }
@@ -55,21 +52,15 @@ class CityController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int $id, FormBuilder $formBuilder, Request $request)
+    public function edit(City $city, FormBuilder $formBuilder)
     {
-        $city = $this->cityRepository->findOrFail($id);
-
-        event(new BeforeEditContentEvent($request, $city));
-
-        page_title()->setTitle(trans('plugins/location::city.edit') . ' "' . $city->name . '"');
+        PageTitle::setTitle(trans('core/base::forms.edit_item', ['name' => $city->name]));
 
         return $formBuilder->create(CityForm::class, ['model' => $city])->renderForm();
     }
 
-    public function update(int $id, CityRequest $request, BaseHttpResponse $response)
+    public function update(City $city, CityRequest $request, BaseHttpResponse $response)
     {
-        $city = $this->cityRepository->findOrFail($id);
-
         $city->fill($request->input());
 
         $this->cityRepository->createOrUpdate($city);
@@ -81,11 +72,9 @@ class CityController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(Request $request, int $id, BaseHttpResponse $response)
+    public function destroy(City $city, Request $request, BaseHttpResponse $response)
     {
         try {
-            $city = $this->cityRepository->findOrFail($id);
-
             $this->cityRepository->delete($city);
 
             event(new DeletedContentEvent(CITY_MODULE_SCREEN_NAME, $request, $city));

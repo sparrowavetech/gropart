@@ -2,8 +2,12 @@
 
 namespace Botble\Blog\Http\Resources;
 
+use Botble\Blog\Models\Category;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin Category
+ */
 class CategoryResource extends JsonResource
 {
     public function toArray($request): array

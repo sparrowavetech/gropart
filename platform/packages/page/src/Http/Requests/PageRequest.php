@@ -12,8 +12,9 @@ class PageRequest extends Request
     public function rules(): array
     {
         return [
-            'name' => 'required|max:120',
-            'description' => 'max:400',
+            'name' => 'required|string|max:120',
+            'description' => 'nullable|string|max:400',
+            'content' => 'required|string',
             'template' => Rule::in(array_keys(Template::getPageTemplates())),
             'status' => Rule::in(BaseStatusEnum::values()),
         ];

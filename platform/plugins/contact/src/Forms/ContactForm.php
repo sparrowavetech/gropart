@@ -2,7 +2,7 @@
 
 namespace Botble\Contact\Forms;
 
-use Assets;
+use Botble\Base\Facades\Assets;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Contact\Enums\ContactStatusEnum;
 use Botble\Contact\Http\Requests\EditContactRequest;

@@ -2,11 +2,11 @@
 
 namespace Botble\Base\Hooks;
 
-use EmailHandler;
+use Botble\Base\Facades\EmailHandler;
 
 class EmailSettingHooks
 {
-    public static function addEmailTemplateSettings(?string $html): string
+    public static function addEmailTemplateSettings(string|null $html): string
     {
         $templates = '';
 

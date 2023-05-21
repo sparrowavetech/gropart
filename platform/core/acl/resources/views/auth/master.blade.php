@@ -1,7 +1,7 @@
 @extends('core/base::layouts.base')
 
 @section('body-class') login @stop
-@section('body-style') background-image: url({{ get_login_background() }}); @stop
+@section('body-style') background-image: url({{ $backgroundUrl }}); @stop
 
 @section ('page')
     <div class="container-fluid">
@@ -15,7 +15,7 @@
                                 <h1>{{ setting('admin_title', config('core.base.general.base_name')) }}</h1>
                                 <p>{!! BaseHelper::clean(trans('core/base::layouts.copyright', ['year' => Carbon\Carbon::now()->format('Y'), 'company' => setting('admin_title', config('core.base.general.base_name')), 'version' => get_cms_version()])) !!}</p>
                             </div>
-                        </div> <!-- .logo-title-container -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -28,9 +28,9 @@
 
                     <div class="clearfix"></div>
 
-                </div> <!-- .login-container -->
+                </div>
 
-            </div> <!-- .login-sidebar -->
-        </div> <!-- .row -->
+            </div>
+        </div>
     </div>
 @stop

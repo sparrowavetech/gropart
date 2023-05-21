@@ -8,19 +8,10 @@ use Illuminate\Http\JsonResponse;
 
 class InfoTable extends TableAbstract
 {
-    /**
-     * @var string
-     */
     protected $view = 'core/table::simple-table';
 
-    /**
-     * @var bool
-     */
     protected $hasCheckbox = false;
 
-    /**
-     * @var bool
-     */
     protected $hasOperations = false;
 
     public function ajax(): JsonResponse
@@ -29,12 +20,11 @@ class InfoTable extends TableAbstract
         $packages = SystemManagement::getPackagesAndDependencies($composerArray['require']);
 
         return $this
-            ->toJson($this->table
-            ->of(collect($packages))
-            ->editColumn('name', function ($item) {
+            ->toJson($this->table->of(collect($packages))
+            ->editColumn('name', function (array $item) {
                 return view('core/base::system.partials.info-package-line', compact('item'))->render();
             })
-            ->editColumn('dependencies', function ($item) {
+            ->editColumn('dependencies', function (array $item) {
                 return view('core/base::system.partials.info-dependencies-line', compact('item'))->render();
             }));
     }
@@ -55,15 +45,8 @@ class InfoTable extends TableAbstract
         ];
     }
 
-    public function getBuilderParameters(): array
+    protected function getDom(): string|null
     {
-        return [
-            'stateSave' => true,
-        ];
-    }
-
-    protected function getDom(): ?string
-    {
-        return "rt<'datatables__info_wrap'pli<'clearfix'>>";
+        return $this->simpleDom();
     }
 }

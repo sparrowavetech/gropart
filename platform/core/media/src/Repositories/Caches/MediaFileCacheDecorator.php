@@ -7,42 +7,27 @@ use Botble\Support\Repositories\Caches\CacheAbstractDecorator;
 
 class MediaFileCacheDecorator extends CacheAbstractDecorator implements MediaFileInterface
 {
-    /**
-     * {@inheritDoc}
-     */
-    public function createName($name, $folder)
+    public function createName(string $name, int|string|null $folder)
     {
         return $this->flushCacheAndUpdateData(__FUNCTION__, func_get_args());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function createSlug($name, $extension, $folder): string
+    public function createSlug(string $name, string $extension, string|null $folderPath): string
     {
         return $this->flushCacheAndUpdateData(__FUNCTION__, func_get_args());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function getFilesByFolderId($folderId, array $params = [], $withFolders = true, $folderParams = [])
+    public function getFilesByFolderId(int|string $folderId, array $params = [], bool $withFolders = true, array $folderParams = [])
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function emptyTrash()
+    public function emptyTrash(): bool
     {
         return $this->flushCacheAndUpdateData(__FUNCTION__, func_get_args());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function getTrashed($folderId, array $params = [], $withFolders = true, $folderParams = [])
+    public function getTrashed(int|string $folderId, array $params = [], bool $withFolders = true, array $folderParams = [])
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }

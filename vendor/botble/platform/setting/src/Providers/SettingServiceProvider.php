@@ -2,19 +2,17 @@
 
 namespace Botble\Setting\Providers;
 
+use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
-use Botble\Setting\Facades\SettingFacade;
 use Botble\Setting\Models\Setting as SettingModel;
 use Botble\Setting\Repositories\Caches\SettingCacheDecorator;
 use Botble\Setting\Repositories\Eloquent\SettingRepository;
 use Botble\Setting\Repositories\Interfaces\SettingInterface;
-use Botble\Setting\Supports\SettingsManager;
+use Botble\Setting\Supports\DatabaseSettingStore;
 use Botble\Setting\Supports\SettingStore;
-use EmailHandler;
-use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class SettingServiceProvider extends ServiceProvider
@@ -28,21 +26,19 @@ class SettingServiceProvider extends ServiceProvider
         $this->setNamespace('core/setting')
             ->loadAndPublishConfigurations(['general']);
 
-        $this->app->singleton(SettingsManager::class, function (Application $app) {
-            return new SettingsManager($app);
+        $this->app->singleton(SettingStore::class, function () {
+            return new DatabaseSettingStore();
         });
-
-        $this->app->singleton(SettingStore::class, function (Application $app) {
-            return $app->make(SettingsManager::class)->driver();
-        });
-
-        AliasLoader::getInstance()->alias('Setting', SettingFacade::class);
 
         $this->app->bind(SettingInterface::class, function () {
             return new SettingCacheDecorator(
                 new SettingRepository(new SettingModel())
             );
         });
+
+        if (! class_exists('Setting')) {
+            AliasLoader::getInstance()->alias('Setting', Setting::class);
+        }
 
         $this->loadHelpers();
     }
@@ -52,22 +48,22 @@ class SettingServiceProvider extends ServiceProvider
         $this
             ->loadRoutes()
             ->loadAndPublishViews()
+            ->loadAnonymousComponents()
             ->loadAndPublishTranslations()
             ->loadAndPublishConfigurations(['permissions', 'email'])
             ->loadMigrations()
             ->publishAssets();
 
-        Event::listen(RouteMatched::class, function () {
-            dashboard_menu()
-                ->registerItem([
-                    'id' => 'cms-core-settings',
-                    'priority' => 998,
-                    'parent_id' => null,
-                    'name' => 'core/setting::setting.title',
-                    'icon' => 'fa fa-cogs',
-                    'url' => route('settings.options'),
-                    'permissions' => ['settings.options'],
-                ])
+        $this->app['events']->listen(RouteMatched::class, function () {
+            DashboardMenu::registerItem([
+                'id' => 'cms-core-settings',
+                'priority' => 998,
+                'parent_id' => null,
+                'name' => 'core/setting::setting.title',
+                'icon' => 'fa fa-cogs',
+                'url' => route('settings.options'),
+                'permissions' => ['settings.options'],
+            ])
                 ->registerItem([
                     'id' => 'cms-core-settings-general',
                     'priority' => 1,
@@ -103,7 +99,6 @@ class SettingServiceProvider extends ServiceProvider
     public function provides(): array
     {
         return [
-            SettingsManager::class,
             SettingStore::class,
         ];
     }

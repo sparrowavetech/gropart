@@ -4,7 +4,7 @@ namespace Botble\SeoHelper\Listeners;
 
 use Botble\Base\Events\DeletedContentEvent;
 use Exception;
-use SeoHelper;
+use Botble\SeoHelper\Facades\SeoHelper;
 
 class DeletedContentListener
 {

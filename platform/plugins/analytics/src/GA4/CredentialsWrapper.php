@@ -31,7 +31,7 @@ class CredentialsWrapper extends \Google\ApiCore\CredentialsWrapper
         $keyFile = $args['keyFile'];
         $authHttpHandler = $args['authHttpHandler'] ?: self::buildHttpHandlerFactory();
 
-        if (is_null($keyFile)) {
+        if (empty($keyFile)) {
             $loader = self::buildApplicationDefaultCredentials(
                 $args['scopes'],
                 $authHttpHandler,
@@ -51,7 +51,7 @@ class CredentialsWrapper extends \Google\ApiCore\CredentialsWrapper
 
             $loader = CredentialsLoader::makeCredentials(
                 $args['scopes'],
-                $keyFile,
+                (array)$keyFile,
                 $args['defaultScopes']
             );
         }

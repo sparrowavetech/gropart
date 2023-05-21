@@ -2,11 +2,12 @@
 
 namespace Botble\Language\Models;
 
+use Botble\Base\Casts\SafeContent;
 use Botble\Base\Models\BaseModel;
-use Botble\Setting\Models\Setting;
+use Botble\Setting\Facades\Setting;
+use Botble\Theme\Facades\ThemeOption;
 use Botble\Widget\Models\Widget;
 use Exception;
-use Theme;
 
 class Language extends BaseModel
 {
@@ -26,7 +27,13 @@ class Language extends BaseModel
         'lang_order',
     ];
 
-    protected static function boot()
+    protected $casts = [
+        'lang_name' => SafeContent::class,
+        'lang_locale' => SafeContent::class,
+        'lang_code' => SafeContent::class,
+    ];
+
+    protected static function boot(): void
     {
         parent::boot();
 
@@ -51,10 +58,8 @@ class Language extends BaseModel
 
             LanguageMeta::where('lang_meta_code', $language->lang_code)->delete();
 
-            $themeNameByLanguage = Theme::getThemeName() . '-' . $language->lang_code;
-
-            Setting::where('key', 'LIKE', 'theme-' . $themeNameByLanguage . '-%')->delete();
-            Widget::where('theme', 'LIKE', $themeNameByLanguage)->delete();
+            Setting::newQuery()->where('key', 'LIKE', ThemeOption::getOptionKey('%', $language->lang_code))->delete();
+            Widget::where('theme', 'LIKE', Widget::getThemeName($language->lang_code))->delete();
         });
     }
 }

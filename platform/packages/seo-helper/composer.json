@@ -17,7 +17,7 @@
                 "Botble\\SeoHelper\\Providers\\SeoHelperServiceProvider"
             ],
             "aliases": {
-                "SeoHelper": "Botble\\SeoHelper\\Facades\\SeoHelperFacade"
+                "SeoHelper": "Botble\\SeoHelper\\Facades\\SeoHelper"
             }
         }
     }

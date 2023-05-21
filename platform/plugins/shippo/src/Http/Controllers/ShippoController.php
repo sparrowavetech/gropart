@@ -15,26 +15,18 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Throwable;
 
 class ShippoController extends BaseController
 {
-    protected ShipmentInterface $shipmentRepository;
-
-    protected ShipmentHistoryInterface $shipmentHistoryRepository;
-
-    protected Shippo $shippo;
-
     protected string|int|null $userId = 0;
 
     public function __construct(
-        ShipmentInterface $shipmentRepository,
-        ShipmentHistoryInterface $shipmentHistoryRepository,
-        Shippo $shippo
+        protected ShipmentInterface $shipmentRepository,
+        protected ShipmentHistoryInterface $shipmentHistoryRepository,
+        protected Shippo $shippo
     ) {
-        $this->shipmentRepository = $shipmentRepository;
-        $this->shipmentHistoryRepository = $shipmentHistoryRepository;
-        $this->shippo = $shippo;
         if (is_in_admin(true) && Auth::check()) {
             $this->userId = Auth::id();
         }
@@ -285,23 +277,27 @@ class ShippoController extends BaseController
     {
         $order = $shipment->order;
 
-        if (! is_in_admin(true)) {
-            if (is_plugin_active('marketplace')) {
-                $vendor = auth('customer')->user();
-                $store = $vendor->store;
+        if (! is_in_admin(true) && is_plugin_active('marketplace')) {
+            $vendor = auth('customer')->user();
+            $store = $vendor->store;
 
-                if ($store->id != $order->store_id) {
-                    abort(403);
-                }
+            if ($store->id != $order->store_id) {
+                abort(403);
             }
         }
 
-        if (! $order || ! $order->id
+        if (! $order
+            || ! $order->id
             || $order->shipping_method->getValue() != SHIPPO_SHIPPING_METHOD_NAME
             || ! $shipment->shipment_id) {
             abort(404);
         }
 
         return true;
+    }
+
+    public function viewLog(string $logFile)
+    {
+        return nl2br(File::get(storage_path('logs/' . $logFile)));
     }
 }

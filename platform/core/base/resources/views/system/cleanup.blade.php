@@ -4,7 +4,8 @@
         <h1 class="text-center pt-5">{{ trans('core/base::system.cleanup.title') }}</h1><br>
         <div class="updater-box" dir="ltr">
             <div class="note note-warning">
-                <p>{{ trans('core/base::system.cleanup.backup_alert') }}</p>
+                <p class="text-danger"><strong>- {{ trans('core/base::system.cleanup.backup_alert') }}</strong></p>
+                <p class="text-danger"><strong>- {!! BaseHelper::clean(trans('core/base::system.cleanup.not_enabled_yet')) !!}</strong></p>
             </div>
             <div class="content">
                 <p class="fw-bold">{{ trans('core/base::system.cleanup.messenger_choose_without_table') }}:</p>
@@ -33,17 +34,24 @@
                                     <td>{{ DB::table($table)->count() }}</td>
                                 </tr>
                             @endforeach
-                            <tr>
-                                <td colspan="3">
-                                    <button class="btn btn-danger btn-trigger-cleanup" type="button">{{ trans('core/base::system.cleanup.submit_button') }}</button>
-                                </td>
-                            </tr>
                         </tbody>
                     </table>
+
+                    <div class="mt-4 mb-4">
+                        <button class="btn btn-danger btn-trigger-cleanup" type="button">{{ trans('core/base::system.cleanup.submit_button') }}</button>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
 
-    {!! Form::modalAction('cleanup-modal',trans('core/base::system.cleanup.title'), 'danger', trans('core/base::system.cleanup.messenger_confirm_cleanup'), 'cleanup-submit-action', trans('core/base::system.cleanup.submit_button')) !!}
+    <x-core-base::modal
+        id="cleanup-modal"
+        :title="trans('core/base::system.cleanup.title')"
+        type="danger"
+        button-id="cleanup-submit-action"
+        :button-label="trans('core/base::system.cleanup.submit_button')"
+    >
+        {!! trans('core/base::system.cleanup.messenger_confirm_cleanup') !!}
+    </x-core-base::modal>
 @stop

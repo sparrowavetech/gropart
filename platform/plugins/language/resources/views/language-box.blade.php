@@ -15,7 +15,7 @@
                             @endforeach
                         </select>
                         <svg class="svg-next-icon svg-next-icon-size-16">
-                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#select-chevron"></use>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M10 16l-4-4h8l-4 4zm0-12L6 8h8l-4-4z"></path></svg>
                         </svg>
                     </div>
                 </td>
@@ -65,7 +65,15 @@
 
     <div data-change-language-route="{{ route('languages.change.item.language') }}"></div>
 
-    {!! Form::modalAction('confirm-change-language-modal', trans('plugins/language::language.confirm-change-language'), 'warning', trans('plugins/language::language.confirm-change-language-message'), 'confirm-change-language-button', trans('plugins/language::language.confirm-change-language-btn')) !!}
+    <x-core-base::modal
+        id="confirm-change-language-modal"
+        :title="trans('plugins/language::language.confirm-change-language')"
+        type="warning"
+        button-id="confirm-change-language-button"
+        :button-label="trans('plugins/language::language.confirm-change-language-btn')"
+    >
+        {!! trans('plugins/language::language.confirm-change-language-message') !!}
+    </x-core-base::modal>
 @endif
 
 @push('header')

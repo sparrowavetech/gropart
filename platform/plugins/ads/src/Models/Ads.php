@@ -15,6 +15,7 @@ class Ads extends BaseModel
         'name',
         'key',
         'status',
+        'open_in_new_tab',
         'expired_at',
         'location',
         'image',
@@ -26,6 +27,7 @@ class Ads extends BaseModel
     protected $casts = [
         'status' => BaseStatusEnum::class,
         'expired_at' => 'datetime',
+        'open_in_new_tab' => 'boolean',
     ];
 
     public function scopeNotExpired(Builder $query): Builder

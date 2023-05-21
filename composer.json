@@ -5,7 +5,7 @@
     "keywords": ["framework", "laravel"],
     "license": "MIT",
     "require": {
-        "php": "^8.0|^8.1",
+        "php": "^8.0|^8.1|^8.2",
         "ext-curl": "*",
         "ext-gd": "*",
         "ext-json": "*",
@@ -28,22 +28,23 @@
         "doctrine/dbal": "^3.2",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^9.21",
-        "laravel/sanctum": "^3.0",
-        "laravel/tinker": "^2.7",
-        "league/flysystem-aws-s3-v3": "^3.0",
+        "laravel/sanctum": "^3.2",
+        "laravel/tinker": "^2.8",
         "predis/predis": "^2.0",
         "wikimedia/composer-merge-plugin": "^2.0"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.7",
-        "barryvdh/laravel-ide-helper": "^2.12",
+        "botble/git-commit-checker": "^2.0",
         "fakerphp/faker": "^1.9.1",
-        "laravel/pint": "^1.2",
-        "laravel/sail": "^1.0.1",
+        "laravel/pint": "^1.0",
+        "laravel/sail": "^1.18",
         "mockery/mockery": "^1.4.4",
-        "nunomaduro/collision": "^6.1",
+        "nunomaduro/collision": "^6.4",
+        "nunomaduro/larastan": "^2.0",
         "phpunit/phpunit": "^9.5.10",
-        "spatie/laravel-ignition": "^1.0"
+        "spatie/laravel-ignition": "^1.0",
+        "knuckleswtf/scribe": "^4.0"
     },
     "autoload": {
         "psr-4": {
@@ -64,6 +65,7 @@
         ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
+            "Aws\\Script\\Composer\\Composer::removeUnusedServices",
             "Google\\Task\\Composer::cleanup",
             "@php artisan cms:publish:assets"
         ],
@@ -93,6 +95,11 @@
         },
         "google/apiclient-services": [
             "Analytics"
+        ],
+        "aws/aws-sdk-php": [
+            "S3",
+            "Ses",
+            "Translate"
         ]
     },
     "config": {

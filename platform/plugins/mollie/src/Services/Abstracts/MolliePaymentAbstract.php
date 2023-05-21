@@ -14,24 +14,17 @@ abstract class MolliePaymentAbstract implements ProduceServiceInterface
 {
     use PaymentErrorTrait;
 
-    /**
-     * @var string
-     */
-    protected $paymentCurrency;
+    protected string $paymentCurrency;
 
     /**
      * @var object
      */
     protected $client;
 
-    /**
-     * @var bool
-     */
-    protected $supportRefundOnline;
+    protected bool $supportRefundOnline;
 
-    /**
-     * MolliePaymentAbstract constructor.
-     */
+    protected float $totalAmount;
+
     public function __construct()
     {
         $this->paymentCurrency = config('plugins.payment.payment.currency');
@@ -43,19 +36,12 @@ abstract class MolliePaymentAbstract implements ProduceServiceInterface
         $this->supportRefundOnline = true;
     }
 
-    /**
-     * @return bool
-     */
-    public function getSupportRefundOnline()
+    public function getSupportRefundOnline(): bool
     {
         return $this->supportRefundOnline;
     }
 
-    /**
-     * Set client
-     * @return self
-     */
-    public function setClient()
+    public function setClient(): self
     {
         $this->client = Mollie::api();
 
@@ -70,37 +56,19 @@ abstract class MolliePaymentAbstract implements ProduceServiceInterface
         return $this->client;
     }
 
-    /**
-     * Set payment currency
-     *
-     * @param string $currency String name of currency
-     * @return self
-     */
-    public function setCurrency($currency)
+    public function setCurrency(string $currency): self
     {
         $this->paymentCurrency = $currency;
 
         return $this;
     }
 
-    /**
-     * Get current payment currency
-     *
-     * @return string Current payment currency
-     */
-    public function getCurrency()
+    public function getCurrency(): string|null
     {
         return $this->paymentCurrency;
     }
 
-    /**
-     * Get payment details
-     *
-     * @param string $paymentId
-     * @return mixed Object payment details
-     * @throws Exception
-     */
-    public function getPaymentDetails($paymentId)
+    public function getPaymentDetails(string $paymentId)
     {
         try {
             $response  = $this->client->payments->get($paymentId); // Returns a particular payment
@@ -158,13 +126,6 @@ abstract class MolliePaymentAbstract implements ProduceServiceInterface
         }
     }
 
-    /**
-     * Execute main service
-     *
-     * @param Request $request
-     *
-     * @return mixed
-     */
     public function execute(Request $request)
     {
         try {
@@ -176,21 +137,7 @@ abstract class MolliePaymentAbstract implements ProduceServiceInterface
         }
     }
 
-    /**
-     * Make a payment
-     *
-     * @param Request $request
-     *
-     * @return mixed
-     */
     abstract public function makePayment(Request $request);
 
-    /**
-     * Use this function to perform more logic after user has made a payment
-     *
-     * @param Request $request
-     *
-     * @return mixed
-     */
     abstract public function afterMakePayment(Request $request);
 }

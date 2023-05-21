@@ -1,5 +1,8 @@
 <?php
 
+use Botble\Base\Facades\BaseHelper;
+use Illuminate\Support\Facades\Route;
+
 Route::group(['namespace' => 'Botble\Contact\Http\Controllers', 'middleware' => ['web', 'core']], function () {
     Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {
         Route::group(['prefix' => 'contacts', 'as' => 'contacts.'], function () {
@@ -15,7 +18,7 @@ Route::group(['namespace' => 'Botble\Contact\Http\Controllers', 'middleware' => 
                 'as' => 'reply',
                 'uses' => 'ContactController@postReply',
                 'permission' => 'contacts.edit',
-            ])->where('id', '[0-9]+');
+            ])->wherePrimaryKey();
         });
     });
 

@@ -2,7 +2,7 @@
 
 namespace Botble\Backup\Commands;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Backup\Supports\Backup;
 use Exception;
 use Illuminate\Console\Command;

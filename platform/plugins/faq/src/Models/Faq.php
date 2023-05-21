@@ -20,7 +20,8 @@ class Faq extends BaseModel
 
     protected $casts = [
         'status' => BaseStatusEnum::class,
-        'content' => SafeContent::class,
+        'question' => SafeContent::class,
+        'answer' => SafeContent::class,
     ];
 
     public function category(): BelongsTo

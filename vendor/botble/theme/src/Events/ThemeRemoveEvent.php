@@ -9,10 +9,7 @@ class ThemeRemoveEvent extends Event
 {
     use SerializesModels;
 
-    public string $theme;
-
-    public function __construct(string $theme)
+    public function __construct(public string $theme)
     {
-        $this->theme = $theme;
     }
 }

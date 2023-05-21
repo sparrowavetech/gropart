@@ -2,16 +2,19 @@
 
 namespace Botble\Theme\Providers;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
 use Botble\Dashboard\Supports\DashboardWidgetInstance;
+use Botble\Shortcode\Compilers\Shortcode;
+use Botble\Shortcode\Compilers\ShortcodeCompiler;
+use Botble\Theme\Facades\AdminBar;
+use Botble\Theme\Facades\Theme;
 use Botble\Theme\Supports\ThemeSupport;
 use Botble\Theme\Supports\Vimeo;
 use Botble\Theme\Supports\Youtube;
-use Html;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
-use Theme;
 
 class HookServiceProvider extends ServiceProvider
 {
@@ -131,8 +134,8 @@ class HookServiceProvider extends ServiceProvider
                 ],
             ]);
 
-        add_shortcode('media', null, null, function ($shortcode) {
-            $url = rtrim($shortcode->url, '/');
+        add_shortcode('media', null, null, function (Shortcode $shortcode) {
+            $url = rtrim($shortcode->get('url'), '/');
 
             if (! $url) {
                 return null;
@@ -172,22 +175,22 @@ class HookServiceProvider extends ServiceProvider
             return null;
         });
 
-        add_filter(THEME_FRONT_HEADER, function ($html) {
+        add_filter(THEME_FRONT_HEADER, function (string|null $html): string|null {
             $file = Theme::getStyleIntegrationPath();
-            if (File::exists($file)) {
+            if ($this->app['files']->exists($file)) {
                 $html .= "\n" . Html::style(Theme::asset()->url('css/style.integration.css?v=' . filectime($file)));
             }
 
             return $html;
         }, 15);
 
-        if (! $this->app->environment('demo')) {
+        if (! BaseHelper::hasDemoModeEnabled()) {
             if (config('packages.theme.general.enable_custom_html_shortcode')) {
-                add_shortcode('custom-html', __('Custom HTML'), __('Add custom HTML content'), function ($shortCode) {
-                    return html_entity_decode($shortCode->content);
+                add_shortcode('custom-html', __('Custom HTML'), __('Add custom HTML content'), function (Shortcode $shortcode) {
+                    return html_entity_decode($shortcode->getContent());
                 });
 
-                shortcode()->setAdminConfig('custom-html', function ($attributes, $content) {
+                shortcode()->setAdminConfig('custom-html', function (array $attributes, string|null $content) {
                     return view('packages/theme::shortcodes.custom-html-admin-config', compact('attributes', 'content'))
                         ->render();
                 });
@@ -195,19 +198,19 @@ class HookServiceProvider extends ServiceProvider
 
             if (config('packages.theme.general.enable_custom_js')) {
                 if (setting('custom_header_js')) {
-                    add_filter(THEME_FRONT_HEADER, function ($html) {
+                    add_filter(THEME_FRONT_HEADER, function (string|null $html): string {
                         return $html . ThemeSupport::getCustomJS('header');
                     }, 15);
                 }
 
                 if (setting('custom_body_js')) {
-                    add_filter(THEME_FRONT_BODY, function ($html) {
+                    add_filter(THEME_FRONT_BODY, function (string|null $html): string {
                         return $html . ThemeSupport::getCustomJS('body');
                     }, 15);
                 }
 
                 if (setting('custom_footer_js')) {
-                    add_filter(THEME_FRONT_FOOTER, function ($html) {
+                    add_filter(THEME_FRONT_FOOTER, function (string|null $html): string {
                         return $html . ThemeSupport::getCustomJS('footer');
                     }, 15);
                 }
@@ -215,32 +218,77 @@ class HookServiceProvider extends ServiceProvider
 
             if (config('packages.theme.general.enable_custom_html')) {
                 if (setting('custom_header_html')) {
-                    add_filter(THEME_FRONT_HEADER, function ($html) {
+                    add_filter(THEME_FRONT_HEADER, function (string|null $html): string {
                         return $html . ThemeSupport::getCustomHtml('header');
                     }, 16);
                 }
 
                 if (setting('custom_body_html')) {
-                    add_filter(THEME_FRONT_BODY, function ($html) {
+                    add_filter(THEME_FRONT_BODY, function (string|null $html): string {
                         return $html . ThemeSupport::getCustomHtml('body');
                     }, 16);
                 }
 
                 if (setting('custom_footer_html')) {
-                    add_filter(THEME_FRONT_FOOTER, function ($html) {
+                    add_filter(THEME_FRONT_FOOTER, function (string|null $html): string {
                         return $html . ThemeSupport::getCustomHtml('footer');
                     }, 16);
                 }
             }
+        }
 
-            add_filter(THEME_FRONT_FOOTER, function ($html) {
-                if (! auth()->check() || ! admin_bar()->isDisplay() || ! (int)setting('show_admin_bar', 1)) {
+        add_filter(THEME_FRONT_FOOTER, function (string|null $html): string|null {
+            if (! Auth::check() || ! AdminBar::isDisplay() || ! (int)setting('show_admin_bar', 1)) {
+                return $html;
+            }
+
+            return $html . Html::style('vendor/core/packages/theme/css/admin-bar.css') . AdminBar::render();
+        }, 14);
+
+        add_filter(
+            'shortcode_content_compiled',
+            function (string|null $html, string $name, $callback, ShortcodeCompiler $compiler) {
+                $editLink = $compiler->getEditLink();
+
+                if (! $editLink || ! setting('show_theme_guideline_link', false)) {
                     return $html;
                 }
 
-                return $html . Html::style('vendor/core/packages/theme/css/admin-bar.css') . admin_bar()->render();
-            }, 14);
-        }
+                Theme::asset()
+                    ->usePath(false)
+                    ->add('theme-guideline-css', asset('vendor/core/packages/theme/css/guideline.css'));
+
+                $link = view('packages/theme::guideline-link', [
+                    'html' => $html,
+                    'editLink' => $editLink . '?shortcode=' . $compiler->getName(),
+                    'editLabel' => __('Edit this shortcode'),
+                ])->render();
+
+                return ThemeSupport::insertBlockAfterTopHtmlTags($link, $html);
+            },
+            9999,
+            4
+        );
+
+        add_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, function () {
+            if (BaseHelper::getRichEditor() === 'ckeditor') {
+                Theme::asset()
+                    ->add('ckeditor-content-styles', 'vendor/core/core/base/libraries/ckeditor/content-styles.css');
+            }
+        }, 15);
+
+        add_filter('cms_settings_validation_rules', [$this, 'addSettingRules'], 15);
+    }
+
+    public function addSettingRules(array $rules): array
+    {
+        return array_merge($rules, [
+            'enable_cache_site_map' => 'nullable|in:0,1',
+            'cache_time_site_map' => 'nullable|integer|min:0',
+            'show_admin_bar' => 'nullable|in:0,1',
+            'redirect_404_to_homepage' => 'nullable|in:0,1',
+            'show_theme_guideline_link' => 'nullable|in:0,1',
+        ]);
     }
 
     public function addStatsWidgets(array $widgets, Collection $widgetSettings): array
@@ -259,7 +307,7 @@ class HookServiceProvider extends ServiceProvider
             ->init($widgets, $widgetSettings);
     }
 
-    public function addSetting(?string $data = null): string
+    public function addSetting(string|null $data = null): string
     {
         return $data . view('packages/theme::setting')->render();
     }

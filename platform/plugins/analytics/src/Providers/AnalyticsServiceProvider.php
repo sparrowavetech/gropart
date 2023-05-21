@@ -6,7 +6,7 @@ use Botble\Analytics\Analytics;
 use Botble\Analytics\AnalyticsClient;
 use Botble\Analytics\AnalyticsClientFactory;
 use Botble\Analytics\Abstracts\AnalyticsAbstract;
-use Botble\Analytics\Facades\AnalyticsFacade;
+use Botble\Analytics\Facades\Analytics as AnalyticsFacade;
 use Botble\Analytics\GA4\Analytics as AnalyticsGA4;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Illuminate\Foundation\AliasLoader;
@@ -19,6 +19,10 @@ class AnalyticsServiceProvider extends ServiceProvider
 
     public function register(): void
     {
+        if (! class_exists('Google\Service\Analytics\GaData')) {
+            return;
+        }
+
         $this->app->bind(AnalyticsClient::class, function () {
             return AnalyticsClientFactory::createForConfig(config('plugins.analytics.general'));
         });
@@ -30,7 +34,11 @@ class AnalyticsServiceProvider extends ServiceProvider
                 throw InvalidConfiguration::credentialsIsNotValid();
             }
 
-            if (config('plugins.analytics.general.ga4_enabled', false) && $propertyId = setting('analytics_property_id')) {
+            if ($propertyId = setting('analytics_property_id')) {
+                if (! is_numeric($propertyId)) {
+                    throw InvalidConfiguration::invalidPropertyId();
+                }
+
                 return new AnalyticsGA4($propertyId, $credentials);
             }
 

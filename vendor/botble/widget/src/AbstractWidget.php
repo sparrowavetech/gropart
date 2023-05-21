@@ -2,33 +2,25 @@
 
 namespace Botble\Widget;
 
-use Botble\Widget\Repositories\Interfaces\WidgetInterface;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
-use Theme;
+use Botble\Theme\Facades\Theme;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\View;
+use ReflectionClass;
 
 abstract class AbstractWidget
 {
-    protected $config = [];
+    private array $config = [];
 
-    protected $frontendTemplate = 'frontend';
+    private array $extraAdminConfig = [];
 
-    protected $backendTemplate = 'backend';
+    private string $frontendTemplate = 'frontend';
 
-    /**
-     * @var string
-     */
-    protected $widgetDirectory;
+    private string $backendTemplate = 'backend';
 
-    protected $isCore = false;
+    protected string|null $theme = null;
 
-    protected WidgetInterface $widgetRepository;
-
-    protected ?string $theme = null;
-
-    protected Collection|array $data = [];
+    protected array|Collection $data = [];
 
     protected bool $loaded = false;
 
@@ -37,8 +29,13 @@ abstract class AbstractWidget
         foreach ($config as $key => $value) {
             $this->config[$key] = $value;
         }
+    }
 
-        $this->widgetRepository = app(WidgetInterface::class);
+    public function getWidgetDirectory(): string|null
+    {
+        $reflection = new ReflectionClass($this);
+
+        return File::basename(File::dirname($reflection->getFilename()));
     }
 
     public function getConfig(): array
@@ -46,17 +43,23 @@ abstract class AbstractWidget
         return $this->config;
     }
 
+    protected function adminConfig(): array
+    {
+        return $this->extraAdminConfig;
+    }
+
     /**
      * Treat this method as a controller action.
      * Return view() or other content to display.
      */
-    public function run(): View|Factory|string|Application|null
+    public function run(): string|null
     {
         $widgetGroup = app('botble.widget-group-collection');
         $widgetGroup->load();
         $widgetGroupData = $widgetGroup->getData();
 
         Theme::uses(Theme::getThemeName());
+
         $args = func_get_args();
         $data = $widgetGroupData
             ->where('widget_id', $this->getId())
@@ -68,21 +71,26 @@ abstract class AbstractWidget
             $this->config = array_merge($this->config, $data->data);
         }
 
-        if (! $this->isCore) {
-            return Theme::loadPartial(
-                $this->frontendTemplate,
-                Theme::getThemeNamespace('/../widgets/' . $this->widgetDirectory . '/templates'),
-                [
-                    'config' => $this->config,
-                    'sidebar' => $args[0],
-                ]
-            );
-        }
-
-        return view($this->frontendTemplate, [
+        $viewData = array_merge([
             'config' => $this->config,
             'sidebar' => $args[0],
-        ]);
+        ], $this->data());
+
+        $html = null;
+
+        $widgetDirectory = $this->getWidgetDirectory();
+
+        if (View::exists(Theme::getThemeNamespace('widgets.' . $widgetDirectory . '.templates.' . $this->frontendTemplate))) {
+            $html = Theme::loadPartial(
+                $this->frontendTemplate,
+                Theme::getThemeNamespace('/../widgets/' . $widgetDirectory . '/templates'),
+                $viewData
+            );
+        } elseif (view()->exists($this->frontendTemplate)) {
+            $html = view($this->frontendTemplate, $viewData)->render();
+        }
+
+        return apply_filters('widget_rendered', $html, $this);
     }
 
     public function getId(): string
@@ -90,9 +98,10 @@ abstract class AbstractWidget
         return get_class($this);
     }
 
-    public function form(?string $sidebarId = null, int $position = 0): View|Factory|string|Application|null
+    public function form(string|null $sidebarId = null, int $position = 0): string|null
     {
         Theme::uses(Theme::getThemeName());
+
         if (! empty($sidebarId)) {
             $widgetGroup = app('botble.widget-group-collection');
             $widgetGroup->load();
@@ -109,18 +118,43 @@ abstract class AbstractWidget
             }
         }
 
-        if (! $this->isCore) {
+        $widgetDirectory = $this->getWidgetDirectory();
+
+        if (View::exists(Theme::getThemeNamespace('widgets.' . $widgetDirectory . '.templates.' . $this->backendTemplate))) {
             return Theme::loadPartial(
                 $this->backendTemplate,
-                Theme::getThemeNamespace('/../widgets/' . $this->widgetDirectory . '/templates'),
-                [
+                Theme::getThemeNamespace('/../widgets/' . $widgetDirectory . '/templates'),
+                array_merge([
                     'config' => $this->config,
-                ]
+                ], $this->adminConfig())
             );
         }
 
-        return view($this->backendTemplate, [
+        if (! view()->exists($this->backendTemplate)) {
+            return null;
+        }
+
+        return view($this->backendTemplate, array_merge([
             'config' => $this->config,
-        ]);
+        ], $this->adminConfig()))->render();
+    }
+
+    protected function data(): array|Collection
+    {
+        return [];
+    }
+
+    protected function setBackendTemplate(string $template): self
+    {
+        $this->backendTemplate = $template;
+
+        return $this;
+    }
+
+    protected function setFrontendTemplate(string $template): self
+    {
+        $this->frontendTemplate = $template;
+
+        return $this;
     }
 }

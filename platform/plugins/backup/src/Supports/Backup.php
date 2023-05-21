@@ -2,7 +2,7 @@
 
 namespace Botble\Backup\Supports;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Backup\Supports\MySql\MySqlDump;
 use Botble\Base\Supports\Zipper;
 use Carbon\Carbon;
@@ -14,19 +14,13 @@ use Symfony\Component\Process\Process;
 
 class Backup
 {
-    protected Filesystem $files;
+    protected string|null $folder = null;
 
-    protected ?string $folder = null;
-
-    protected Zipper $zipper;
-
-    public function __construct(Filesystem $file, Zipper $zipper)
+    public function __construct(protected Filesystem $files, protected Zipper $zipper)
     {
-        $this->files = $file;
-        $this->zipper = $zipper;
     }
 
-    public function createBackupFolder(string $name, ?string $description = null): array
+    public function createBackupFolder(string $name, string|null $description = null): array
     {
         $backupFolder = $this->createFolder($this->getBackupPath());
         $now = Carbon::now()->format('Y-m-d-H-i-s');
@@ -60,7 +54,7 @@ class Backup
         return $folder;
     }
 
-    public function getBackupPath(?string $path = null): string
+    public function getBackupPath(string|null $path = null): string
     {
         return storage_path('app/backup') . ($path ? '/' . $path : null);
     }

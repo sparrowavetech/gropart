@@ -2,11 +2,12 @@
 
 namespace Botble\Menu\Tables;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Menu\Models\Menu;
 use Botble\Menu\Repositories\Interfaces\MenuInterface;
 use Botble\Table\Abstracts\TableAbstract;
-use Html;
+use Botble\Base\Facades\Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -14,7 +15,7 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
-use Yajra\DataTables\DataTables;
+use Botble\Table\DataTables;
 
 class MenuTable extends TableAbstract
 {
@@ -38,23 +39,23 @@ class MenuTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('name', function ($item) {
+            ->editColumn('name', function (Menu $item) {
                 if (! Auth::user()->hasPermission('menus.edit')) {
                     return BaseHelper::clean($item->name);
                 }
 
                 return Html::link(route('menus.edit', $item->id), BaseHelper::clean($item->name));
             })
-            ->editColumn('checkbox', function ($item) {
+            ->editColumn('checkbox', function (Menu $item) {
                 return $this->getCheckbox($item->id);
             })
-            ->editColumn('created_at', function ($item) {
+            ->editColumn('created_at', function (Menu $item) {
                 return BaseHelper::formatDate($item->created_at);
             })
-            ->editColumn('status', function ($item) {
+            ->editColumn('status', function (Menu $item) {
                 return $item->status->toHtml();
             })
-            ->addColumn('operations', function ($item) {
+            ->addColumn('operations', function (Menu $item) {
                 return $this->getOperations('menus.edit', 'menus.destroy', $item);
             });
 

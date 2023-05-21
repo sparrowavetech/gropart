@@ -2,16 +2,17 @@
 
 namespace Botble\Ads\Supports;
 
+use Botble\Ads\Models\Ads;
 use Botble\Ads\Repositories\Interfaces\AdsInterface;
 use Botble\Base\Enums\BaseStatusEnum;
 use Carbon\Carbon;
-use Html;
+use Botble\Base\Facades\Html;
 use Illuminate\Support\Collection;
-use RvMedia;
+use Botble\Media\Facades\RvMedia;
 
 class AdsManager
 {
-    protected Collection|array $data = [];
+    protected Collection $data;
 
     protected bool $loaded = false;
 
@@ -22,6 +23,8 @@ class AdsManager
         $this->locations = [
             'not_set' => trans('plugins/ads::ads.not_set'),
         ];
+
+        $this->data = collect();
     }
 
     public function display(string $location, array $attributes = []): string
@@ -42,11 +45,11 @@ class AdsManager
                 continue;
             }
 
-            $image = Html::image(RvMedia::getImageUrl($item->image), $item->name, ['style' => 'width: 100%'])
+            $image = Html::image(RvMedia::getImageUrl($item->image), $item->name, ['style' => 'max-width: 100%'])
                 ->toHtml();
 
             if ($item->url) {
-                $image = Html::link(route('public.ads-click', $item->key), $image, ['target' => '_SELF'], null, false)
+                $image = Html::link(route('public.ads-click', $item->key), $image, $item->open_in_new_tab ? ['target' => '_blank'] : [], null, false)
                     ->toHtml();
             }
 
@@ -97,12 +100,10 @@ class AdsManager
             return null;
         }
 
-        $image = Html::image(RvMedia::getImageUrl($ads->image), $ads->name, ['style' => 'width: 100%'])->toHtml();
+        $image = Html::image(RvMedia::getImageUrl($ads->image), $ads->name, ['style' => 'max-width: 100%'])->toHtml();
 
         if ($ads->url) {
-            //$image = Html::link(route('public.ads-click', $ads->key), $image, $linkAttributes + ['target' => '_blank'], null, false)
-                //->toHtml();
-            $image = Html::link(route('public.ads-click', $ads->key), $image, $linkAttributes + ['target' => '_self'], null, false)
+            $image = Html::link(route('public.ads-click', $ads->key), $image, $linkAttributes + ($ads->open_in_new_tab ? ['target' => '_blank'] : []), null, false)
                 ->toHtml();
         }
 
@@ -140,5 +141,20 @@ class AdsManager
     public function getLocations(): array
     {
         return $this->locations;
+    }
+
+    public function getAds(string $key): Ads|null
+    {
+        if (! $key) {
+            return null;
+        }
+
+        $ads = $this->getData(true)->firstWhere('key', $key);
+
+        if (! $ads || ! $ads->image) {
+            return null;
+        }
+
+        return $ads;
     }
 }

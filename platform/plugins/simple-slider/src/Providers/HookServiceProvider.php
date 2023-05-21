@@ -9,7 +9,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\ServiceProvider;
-use Theme;
+use Botble\Theme\Facades\Theme;
 
 class HookServiceProvider extends ServiceProvider
 {
@@ -33,6 +33,15 @@ class HookServiceProvider extends ServiceProvider
         }
 
         add_filter(BASE_FILTER_AFTER_SETTING_CONTENT, [$this, 'addSettings'], 301);
+
+        add_filter('cms_settings_validation_rules', [$this, 'addSettingRules'], 301);
+    }
+
+    public function addSettingRules(array $rules): array
+    {
+        return array_merge($rules, [
+            'simple_slider_using_assets' => 'nullable|in:0,1',
+        ]);
     }
 
     public function render(Shortcode $shortcode): View|Factory|Application|null
@@ -66,7 +75,7 @@ class HookServiceProvider extends ServiceProvider
         ]);
     }
 
-    public function addSettings(?string $data = null): string
+    public function addSettings(string|null $data = null): string
     {
         return $data . view('plugins/simple-slider::setting')->render();
     }

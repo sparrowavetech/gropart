@@ -2,9 +2,13 @@
 
 namespace Botble\Media\Http\Resources;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Media\Models\MediaFolder;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin MediaFolder
+ */
 class FolderResource extends JsonResource
 {
     public function toArray($request): array

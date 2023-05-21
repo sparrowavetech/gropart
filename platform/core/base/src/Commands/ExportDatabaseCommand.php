@@ -17,7 +17,7 @@ class ExportDatabaseCommand extends Command
         $config = config('database.connections.mysql', []);
 
         if (! $config) {
-            return false;
+            return self::FAILURE;
         }
 
         $sqlPath = base_path('database.sql');

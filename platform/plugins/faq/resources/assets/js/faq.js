@@ -1,9 +1,9 @@
-'use strict';
+'use strict'
 
 $(document).ready(function () {
     $(document).on('click', '.add-faq-schema-items', function (event) {
-        event.preventDefault();
+        event.preventDefault()
 
-        $('.faq-schema-items').toggleClass('hidden');
-    });
-});
+        $('.faq-schema-items').toggleClass('hidden')
+    })
+})

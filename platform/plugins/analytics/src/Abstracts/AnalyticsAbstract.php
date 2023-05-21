@@ -10,8 +10,9 @@ abstract class AnalyticsAbstract
 {
     use Macroable;
 
-    public ?string $propertyId = null;
-    public ?string $credentials = null;
+    public string|null $propertyId = null;
+
+    public string|null $credentials = null;
 
     public function getPropertyId(): string
     {

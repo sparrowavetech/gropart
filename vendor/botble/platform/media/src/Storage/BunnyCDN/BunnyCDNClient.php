@@ -10,20 +10,10 @@ use GuzzleHttp\Exception\GuzzleException;
 
 class BunnyCDNClient
 {
-    public string $storageZoneName;
-
-    protected string $apiKey;
-
-    protected string $region;
-
     public Guzzle $client;
 
-    public function __construct(string $storageZoneName, string $apiKey, string $region = BunnyCDNRegion::FALKENSTEIN)
+    public function __construct(protected string $storageZoneName, protected string $apiKey, protected string $region = BunnyCDNRegion::FALKENSTEIN)
     {
-        $this->storageZoneName = $storageZoneName;
-        $this->apiKey = $apiKey;
-        $this->region = $region;
-
         $this->client = new Guzzle();
     }
 
@@ -90,7 +80,7 @@ class BunnyCDNClient
 
     /**
      * @param string $path
-     * @return mixed
+     * @return string
      *
      * @throws BunnyCDNException
      * @throws NotFoundException

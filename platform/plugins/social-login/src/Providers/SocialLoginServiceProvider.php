@@ -2,11 +2,11 @@
 
 namespace Botble\SocialLogin\Providers;
 
+use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
-use Botble\SocialLogin\Facades\SocialServiceFacade;
+use Botble\SocialLogin\Facades\SocialService;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class SocialLoginServiceProvider extends ServiceProvider
@@ -23,8 +23,8 @@ class SocialLoginServiceProvider extends ServiceProvider
             ->loadRoutes()
             ->publishAssets();
 
-        Event::listen(RouteMatched::class, function () {
-            dashboard_menu()->registerItem([
+        $this->app['events']->listen(RouteMatched::class, function () {
+            DashboardMenu::registerItem([
                 'id' => 'cms-plugins-social-login',
                 'priority' => 5,
                 'parent_id' => 'cms-core-settings',
@@ -35,7 +35,7 @@ class SocialLoginServiceProvider extends ServiceProvider
             ]);
         });
 
-        AliasLoader::getInstance()->alias('SocialService', SocialServiceFacade::class);
+        AliasLoader::getInstance()->alias('SocialService', SocialService::class);
 
         $this->app->register(HookServiceProvider::class);
     }

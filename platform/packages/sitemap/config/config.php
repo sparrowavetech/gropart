@@ -2,7 +2,7 @@
 
 return [
     'use_cache' => false,
-    'cache_key' => 'cms-sitemap.' . config('app.url'),
+    'cache_key' => 'cms-sitemap.',
     'cache_duration' => 3600,
     'escaping' => true,
     'use_limit_size' => false,

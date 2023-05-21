@@ -152,6 +152,7 @@ return [
         'Lato:bold',
         'Lato:900',
         'League Script',
+        'League Spartan',
         'Lekton',
         'Libre Baskerville',
         'Limelight',
@@ -163,6 +164,7 @@ return [
         'Luckiest Guy',
         'Maiden Orange',
         'Mako',
+        'Manrope',
         'Maven Pro',
         'Maven Pro:500',
         'Maven Pro:700',
@@ -177,6 +179,7 @@ return [
         'Miltonian',
         'Modern Antiqua',
         'Monofett',
+        'Monoton',
         'Molengo',
         'Montserrat',
         'Mountains of Christmas',
@@ -190,6 +193,7 @@ return [
         'Nobile',
         'Noto Sans',
         'Noto Sans JP',
+        'Noto Sans Bengali',
         'Nova Cut',
         'Nova Flat',
         'Nova Mono',
@@ -222,6 +226,7 @@ return [
         'Philosopher',
         'Play',
         'Playfair Display',
+        'Plus Jakarta Sans',
         'Podkova',
         'Poppins',
         'PT Sans',
@@ -242,6 +247,7 @@ return [
         'Roboto',
         'Roboto Condensed',
         'Roboto Slab',
+        'Rubik',
         'Ruslan Display',
         'Scheherazade',
         'Schoolbell',
@@ -289,6 +295,7 @@ return [
     ],
 
     'custom_google_fonts' => env('CMS_CUSTOM_GOOGLE_FONTS', ''),
+    'custom_fonts' => env('CMS_CUSTOM_FONTS', ''),
 
     'countries' => [
         'AF' => 'Afghanistan',
@@ -545,7 +552,7 @@ return [
     'purifier' => [
         'default' => [
             'HTML.Doctype' => 'HTML 4.01 Transitional',
-            'HTML.Allowed' => 'div,b,strong,i,em,u,a[href|title|rel|style|target],ul,ol,li,p[style],br,span[style],img[width|height|alt|src|style|loading],button,ins[style|data-ad-client|data-ad-slot|data-ad-format|data-full-width-responsive],video[src|type|width|height|preload|controls|autoplay|autostart|poster|id|class,muted],meta[name|content|property],link[media|type|rel|href]',
+            'HTML.Allowed' => 'div,b,strong,i,em,u,a[href|title|rel|style|target|dofollow|nofollow],ul,ol,li,p[style],br,span[style],img[width|height|alt|src|style|loading],button,ins[style|data-ad-client|data-ad-slot|data-ad-format|data-full-width-responsive],video[src|type|width|height|preload|controls|autoplay|autostart|poster|id|class,muted],meta[name|content|property],link[media|type|rel|href]',
             'HTML.AllowedElements' => [
                 'a',
                 'b',
@@ -601,11 +608,12 @@ return [
                 'source',
                 'meta',
                 'link',
+                'audio',
             ],
             'HTML.SafeIframe' => 'true',
             // Add to .env if you want to allow all.
             // CMS_IFRAME_FILTER_URL_REGEX=/^(.*)/
-            'URI.SafeIframeRegexp' => env('CMS_IFRAME_FILTER_URL_REGEX', '%^(http://|https://|//)(' . env('CMS_IFRAME_ALLOWED_URLS', 'www.youtube.com/embed/|player.vimeo.com/video/') . ')%'),
+            'URI.SafeIframeRegexp' => env('CMS_IFRAME_FILTER_URL_REGEX', '%^(http://|https://|//)(' . env('CMS_IFRAME_ALLOWED_URLS', 'www.youtube.com/embed/|player.vimeo.com/video/|maps.google.com/maps|www.google.com/maps') . ')%'),
             'Attr.AllowedFrameTargets' => ['_blank'],
             'CSS.AllowedProperties' => [
                 'font',
@@ -652,9 +660,12 @@ return [
             ['ins', 'Inline', 'Inline', 'Common'],
             ['meta', 'Inline', 'Empty', 'Common'],
             ['link', 'Inline', 'Empty', 'Common'],
+            ['audio', 'Block', 'Optional: (source, Flow) | (Flow, source) | Flow', 'Common'],
         ],
         'custom_attributes' => [
             ['a', 'rel', 'Text'],
+            ['a', 'dofollow', 'Bool'],
+            ['a', 'nofollow', 'Bool'],
             ['span', 'data-period', 'Text'],
             ['span', 'data-type', 'Text'],
             ['ins', 'data-ad-client', 'Text'],
@@ -663,7 +674,7 @@ return [
             ['ins', 'data-ad-full-width-responsive', 'Text'],
             ['img', 'data-src', 'Text'],
             ['img', 'loading', 'Text'],
-            ['video', 'autoplay', 'Text'],
+            ['video', 'autoplay', 'Bool'],
             ['meta', 'name', 'Text'],
             ['meta', 'content', 'Text'],
             ['meta', 'property', 'Text'],
@@ -672,6 +683,7 @@ return [
             ['link', 'rel', 'Text'],
             ['link', 'href', 'Text'],
             ['link', 'color', 'Text'],
+            ['audio', 'controls', 'Bool'],
         ],
     ],
     'enable_system_updater' => env('CMS_ENABLE_SYSTEM_UPDATER', true),
@@ -682,7 +694,11 @@ return [
     'db_strict_mode' => env('DB_STRICT', true),
     'enable_ini_set' => env('CMS_ENABLE_INI_SET', true),
     'upgrade_php_require_disabled' => env('CMS_UPGRADE_PHP_REQUIRE_DISABLED', false),
-    'enabled_cleanup_database' => env('CMS_ENABLED_CLEANUP_DATABASE', true),
+    'enabled_cleanup_database' => env('CMS_ENABLED_CLEANUP_DATABASE', false),
+    'hide_cleanup_system_menu' => env('CMS_HIDE_CLEANUP_SYSTEM_MENU', false),
     'google_fonts_url' => env('CMS_GOOGLE_FONTS_URL', 'https://fonts.bunny.net'),
+    'google_fonts_enabled' => env('CMS_GOOGLE_FONTS_ENABLED', true),
     'google_fonts_enabled_cache' => env('CMS_GOOGLE_FONTS_ENABLED_CACHE', true),
+    'using_uuids_for_id' => env('CMS_USING_UUIDS_FOR_ID', false),
+    'using_ulids_for_id' => env('CMS_USING_ULIDS_FOR_ID', false),
 ];

@@ -33,4 +33,8 @@ return [
     'plugins_installed' => 'Installed Plugins',
     'plugins_add_new' => 'Add new',
     'update' => 'Update',
+    'requirement_not_met' => 'Plugin :plugin requires plugin(s): :required_plugins. Do you want to install them and activate :plugin now?',
+    'install' => 'Install now',
+    'install_plugin' => 'Install Plugin',
+    'minimum_core_version_not_met' => 'Plugin :plugin requires :minimum_core_version version of core, but your core version is :current_core_version. Please upgrade your core to use this plugin!',
 ];

@@ -2,7 +2,6 @@
 
 namespace Botble\SimpleSlider\Http\Controllers;
 
-use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
@@ -18,11 +17,8 @@ use Botble\SimpleSlider\Tables\SimpleSliderItemTable;
 
 class SimpleSliderItemController extends BaseController
 {
-    protected SimpleSliderItemInterface $simpleSliderItemRepository;
-
-    public function __construct(SimpleSliderItemInterface $simpleSliderItemRepository)
+    public function __construct(protected SimpleSliderItemInterface $simpleSliderItemRepository)
     {
-        $this->simpleSliderItemRepository = $simpleSliderItemRepository;
     }
 
     public function index(SimpleSliderItemTable $dataTable)
@@ -47,11 +43,9 @@ class SimpleSliderItemController extends BaseController
         return $response->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int $id, FormBuilder $formBuilder, Request $request)
+    public function edit(int|string $id, FormBuilder $formBuilder)
     {
         $simpleSliderItem = $this->simpleSliderItemRepository->findOrFail($id);
-
-        event(new BeforeEditContentEvent($request, $simpleSliderItem));
 
         return $formBuilder->create(SimpleSliderItemForm::class, ['model' => $simpleSliderItem])
             ->setTitle(trans('plugins/simple-slider::simple-slider.edit_slide', ['id' => $simpleSliderItem->id]))
@@ -59,32 +53,32 @@ class SimpleSliderItemController extends BaseController
             ->renderForm();
     }
 
-    public function update(int $id, SimpleSliderItemRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, SimpleSliderItemRequest $request, BaseHttpResponse $response)
     {
-        $simpleSlider = $this->simpleSliderItemRepository->findOrFail($id);
-        $simpleSlider->fill($request->input());
+        $simpleSliderItem = $this->simpleSliderItemRepository->findOrFail($id);
+        $simpleSliderItem->fill($request->input());
 
-        $this->simpleSliderItemRepository->createOrUpdate($simpleSlider);
+        $this->simpleSliderItemRepository->createOrUpdate($simpleSliderItem);
 
-        event(new UpdatedContentEvent(SIMPLE_SLIDER_ITEM_MODULE_SCREEN_NAME, $request, $simpleSlider));
+        event(new UpdatedContentEvent(SIMPLE_SLIDER_ITEM_MODULE_SCREEN_NAME, $request, $simpleSliderItem));
 
         return $response->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(int $id)
+    public function getDelete(int|string $id)
     {
-        $slider = $this->simpleSliderItemRepository->findOrFail($id);
+        $simpleSliderItem = $this->simpleSliderItemRepository->findOrFail($id);
 
-        return view('plugins/simple-slider::partials.delete', compact('slider'))->render();
+        return view('plugins/simple-slider::partials.delete', ['slider' => $simpleSliderItem])->render();
     }
 
-    public function postDelete(Request $request, $id, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
-            $simpleSlider = $this->simpleSliderItemRepository->findOrFail($id);
-            $this->simpleSliderItemRepository->delete($simpleSlider);
+            $simpleSliderItem = $this->simpleSliderItemRepository->findOrFail($id);
+            $this->simpleSliderItemRepository->delete($simpleSliderItem);
 
-            event(new DeletedContentEvent(SIMPLE_SLIDER_ITEM_MODULE_SCREEN_NAME, $request, $simpleSlider));
+            event(new DeletedContentEvent(SIMPLE_SLIDER_ITEM_MODULE_SCREEN_NAME, $request, $simpleSliderItem));
 
             return $response->setMessage(trans('core/base::notices.delete_success_message'));
         } catch (Exception $exception) {

@@ -2,16 +2,14 @@
 
 namespace Botble\Dashboard\Repositories\Eloquent;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Botble\Dashboard\Repositories\Interfaces\DashboardWidgetSettingInterface;
 use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 
 class DashboardWidgetSettingRepository extends RepositoriesAbstract implements DashboardWidgetSettingInterface
 {
-    /**
-     * {@inheritDoc}
-     */
-    public function getListWidget()
+    public function getListWidget(): Collection
     {
         $data = $this->model
             ->select([

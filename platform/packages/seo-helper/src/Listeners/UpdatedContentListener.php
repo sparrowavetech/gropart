@@ -4,7 +4,7 @@ namespace Botble\SeoHelper\Listeners;
 
 use Botble\Base\Events\UpdatedContentEvent;
 use Exception;
-use SeoHelper;
+use Botble\SeoHelper\Facades\SeoHelper;
 
 class UpdatedContentListener
 {

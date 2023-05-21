@@ -32,7 +32,7 @@ class Country extends BaseModel
         return $this->hasMany(State::class);
     }
 
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
         static::deleting(function (Country $country) {

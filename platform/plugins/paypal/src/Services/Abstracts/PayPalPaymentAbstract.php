@@ -1,6 +1,6 @@
 <?php
 
-namespace Botble\Paypal\Services\Abstracts;
+namespace Botble\PayPal\Services\Abstracts;
 
 use Botble\Payment\Services\Traits\PaymentErrorTrait;
 use Exception;
@@ -18,54 +18,24 @@ abstract class PayPalPaymentAbstract
 {
     use PaymentErrorTrait;
 
-    /**
-     * @var array
-     */
-    protected $itemList;
+    protected array $itemList;
 
-    /**
-     * @var string
-     */
-    protected $paymentCurrency;
+    protected string $paymentCurrency;
 
-    /**
-     * @var int
-     */
-    protected $totalAmount;
+    protected float $totalAmount;
 
-    /**
-     * @var string
-     */
-    protected $returnUrl;
+    protected string $returnUrl;
 
-    /**
-     * @var string
-     */
-    protected $cancelUrl;
+    protected string $cancelUrl;
 
-    /**
-     * @var object
-     */
-    protected $client;
+    protected PayPalHttpClient $client;
 
-    /**
-     * @var string
-     */
-    protected $transactionDescription;
+    protected string $transactionDescription;
 
-    /**
-     * @var string
-     */
-    protected $customer;
+    protected string $customer;
 
-    /**
-     * @var bool
-     */
-    protected $supportRefundOnline;
+    protected bool $supportRefundOnline;
 
-    /**
-     * PayPalPaymentAbstract constructor.
-     */
     public function __construct()
     {
         $this->paymentCurrency = config('plugins.payment.payment.currency');
@@ -77,10 +47,7 @@ abstract class PayPalPaymentAbstract
         $this->supportRefundOnline = true;
     }
 
-    /**
-     * @return bool
-     */
-    public function getSupportRefundOnline()
+    public function getSupportRefundOnline(): bool
     {
         return $this->supportRefundOnline;
     }
@@ -97,10 +64,7 @@ abstract class PayPalPaymentAbstract
         return $this;
     }
 
-    /**
-     * @return object|PayPalHttpClient
-     */
-    public function getClient()
+    public function getClient(): PayPalHttpClient
     {
         return $this->client;
     }
@@ -110,7 +74,7 @@ abstract class PayPalPaymentAbstract
      * For demo purpose, we are using SandboxEnvironment. In production this will be
      * ProductionEnvironment.
      */
-    public function environment()
+    public function environment(): SandboxEnvironment|ProductionEnvironment
     {
         $clientId = setting('payment_paypal_client_id', '<<PAYPAL-CLIENT-ID>>');
         $clientSecret = setting('payment_paypal_client_secret', '<<PAYPAL-CLIENT-SECRET>>');
@@ -123,56 +87,31 @@ abstract class PayPalPaymentAbstract
         return new SandboxEnvironment($clientId, $clientSecret);
     }
 
-    /**
-     * Set payment currency
-     *
-     * @param string $currency String name of currency
-     * @return self
-     */
-    public function setCurrency($currency)
+    public function setCurrency(string $currency): self
     {
         $this->paymentCurrency = $currency;
 
         return $this;
     }
 
-    /**
-     * Get current payment currency
-     *
-     * @return string Current payment currency
-     */
-    public function getCurrency()
+    public function getCurrency(): string
     {
         return $this->paymentCurrency;
     }
 
-    /**
-     *
-     * @return string
-     */
-    public function getCustomer()
+    public function getCustomer(): string
     {
         return $this->customer;
     }
 
-    /**
-     * @param string $customer
-     * @return self
-     */
-    public function setCustomer($customer)
+    public function setCustomer(string $customer): self
     {
         $this->customer = $customer;
 
         return $this;
     }
 
-    /**
-     * Add item to list
-     *
-     * @param array $itemData Array item data
-     * @return self
-     */
-    public function setItem($itemData)
+    public function setItem(array $itemData): self
     {
         if (count($itemData) === count($itemData, COUNT_RECURSIVE)) {
             $itemData = [$itemData];
@@ -216,68 +155,36 @@ abstract class PayPalPaymentAbstract
         return $this;
     }
 
-    /**
-     * Get list item
-     *
-     * @return array
-     */
-    public function getItemList()
+    public function getItemList(): array
     {
         return $this->itemList;
     }
 
-    /**
-     * Get total amount
-     *
-     * @return mixed Total amount
-     */
-    public function getTotalAmount()
+    public function getTotalAmount(): float
     {
         return $this->totalAmount;
     }
 
-    /**
-     * Set return URL
-     *
-     * @param string $url Return URL for payment process complete
-     * @return self
-     */
-    public function setReturnUrl($url)
+    public function setReturnUrl(string $url): self
     {
         $this->returnUrl = $url;
 
         return $this;
     }
 
-    /**
-     * Get return URL
-     *
-     * @return string Return URL
-     */
-    public function getReturnUrl()
+    public function getReturnUrl(): string
     {
         return $this->returnUrl;
     }
 
-    /**
-     * Set cancel URL
-     *
-     * @param string $url Cancel URL for payment
-     * @return self
-     */
-    public function setCancelUrl($url)
+    public function setCancelUrl(string $url): self
     {
         $this->cancelUrl = $url;
 
         return $this;
     }
 
-    /**
-     * Get cancel URL of payment
-     *
-     * @return string Cancel URL
-     */
-    public function getCancelUrl()
+    public function getCancelUrl(): string
     {
         return $this->cancelUrl;
     }
@@ -286,14 +193,14 @@ abstract class PayPalPaymentAbstract
      * Setting up the JSON request body for creating the Order. The Intent in the
      * request body should be set as "CAPTURE" for capture intent flow.
      */
-    protected function buildRequestBody()
+    protected function buildRequestBody(): array
     {
         return [
             'intent' => 'CAPTURE',
             'application_context' => [
                 'return_url' => $this->returnUrl,
                 'cancel_url' => $this->cancelUrl ?: $this->returnUrl,
-                'brand_name' => theme_option('site_name'),
+                'brand_name' => theme_option('site_title'),
             ],
             'purchase_units' => [
                 0 => [
@@ -308,14 +215,7 @@ abstract class PayPalPaymentAbstract
         ];
     }
 
-    /**
-     * Create payment
-     *
-     * @param string $transactionDescription Description for transaction
-     * @return mixed PayPal checkout URL or false
-     * @throws Exception
-     */
-    public function createPayment($transactionDescription)
+    public function createPayment(string $transactionDescription): string|null|bool
     {
         $this->transactionDescription = $transactionDescription;
 
@@ -365,6 +265,7 @@ abstract class PayPalPaymentAbstract
         if (empty($request->input('PayerID')) || empty($request->input('token'))) {
             return false;
         }
+
         $paymentId = session('paypal_payment_id');
 
         try {
@@ -385,10 +286,9 @@ abstract class PayPalPaymentAbstract
     /**
      * Get payment details
      *
-     * @param string $paymentId PayPal payment Id
      * @return mixed Object payment details
      */
-    public function getPaymentDetails($paymentId)
+    public function getPaymentDetails(string $paymentId)
     {
         try {
             $response = $this->client->execute(new OrdersGetRequest($paymentId));
@@ -404,7 +304,7 @@ abstract class PayPalPaymentAbstract
     /**
      * Function to create a refund capture request. Payload can be updated to issue partial refund.
      */
-    public function buildRefundRequestBody($totalAmount)
+    public function buildRefundRequestBody(float|int|string $totalAmount): array
     {
         $totalAmount = round((float) $totalAmount, 2);
 
@@ -419,7 +319,7 @@ abstract class PayPalPaymentAbstract
     /**
      * This function can be used to preform refund on the capture.
      */
-    public function refundOrder($paymentId, $totalAmount)
+    public function refundOrder(string $paymentId, float|int|string $totalAmount): array
     {
         try {
             $detail = $this->getPaymentDetails($paymentId);
@@ -467,7 +367,6 @@ abstract class PayPalPaymentAbstract
     /**
      * Execute main service
      *
-     * @param array $data
      * @return mixed
      */
     public function execute(array $data)
@@ -481,10 +380,7 @@ abstract class PayPalPaymentAbstract
         }
     }
 
-    /**
-     * @return bool
-     */
-    public function isSupportedDecimals()
+    public function isSupportedDecimals(): bool
     {
         return ! in_array($this->getCurrency(), [
             'BIF',
@@ -507,7 +403,6 @@ abstract class PayPalPaymentAbstract
 
     /**
      * List currencies supported https://developer.paypal.com/docs/api/reference/currency-codes/
-     * @return string[]
      */
     public function supportedCurrencyCodes(): array
     {
@@ -543,15 +438,12 @@ abstract class PayPalPaymentAbstract
     /**
      * Make a payment
      *
-     * @param array $data
      * @return mixed
      */
     abstract public function makePayment(array $data);
 
     /**
      * Use this function to perform more logic after user has made a payment
-     *
-     * @param array $data
      *
      * @return mixed
      */

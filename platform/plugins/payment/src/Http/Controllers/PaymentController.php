@@ -2,7 +2,7 @@
 
 namespace Botble\Payment\Http\Controllers;
 
-use Assets;
+use Botble\Base\Facades\Assets;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Payment\Enums\PaymentStatusEnum;
@@ -15,24 +15,22 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
+use Botble\Base\Facades\PageTitle;
 
 class PaymentController extends Controller
 {
-    protected PaymentInterface $paymentRepository;
-
-    public function __construct(PaymentInterface $paymentRepository)
+    public function __construct(protected PaymentInterface $paymentRepository)
     {
-        $this->paymentRepository = $paymentRepository;
     }
 
     public function index(PaymentTable $table)
     {
-        page_title()->setTitle(trans('plugins/payment::payment.name'));
+        PageTitle::setTitle(trans('plugins/payment::payment.name'));
 
         return $table->renderTable();
     }
 
-    public function destroy(Request $request, $id, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
             $payment = $this->paymentRepository->findOrFail($id);
@@ -67,11 +65,11 @@ class PaymentController extends Controller
         return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
-    public function show($id)
+    public function show(int|string $id)
     {
         $payment = $this->paymentRepository->findOrFail($id);
 
-        page_title()->setTitle(trans('plugins/payment::payment.view_transaction', ['charge_id' => $payment->charge_id]));
+        PageTitle::setTitle(trans('plugins/payment::payment.view_transaction', ['charge_id' => $payment->charge_id]));
 
         $detail = apply_filters(PAYMENT_FILTER_PAYMENT_INFO_DETAIL, null, $payment);
 
@@ -88,7 +86,7 @@ class PaymentController extends Controller
 
     public function methods()
     {
-        page_title()->setTitle(trans('plugins/payment::payment.payment_methods'));
+        PageTitle::setTitle(trans('plugins/payment::payment.payment_methods'));
 
         Assets::addStylesDirectly('vendor/core/plugins/payment/css/payment-methods.css')
             ->addScriptsDirectly('vendor/core/plugins/payment/js/payment-methods.js');
@@ -134,7 +132,7 @@ class PaymentController extends Controller
         return $response->setMessage(trans('plugins/payment::payment.turn_off_success'));
     }
 
-    public function update($id, UpdatePaymentRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, UpdatePaymentRequest $request, BaseHttpResponse $response)
     {
         $payment = $this->paymentRepository->findOrFail($id);
 
@@ -149,7 +147,7 @@ class PaymentController extends Controller
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function getRefundDetail($id, $refundId, BaseHttpResponse $response)
+    public function getRefundDetail(int|string $id, int|string $refundId, BaseHttpResponse $response)
     {
         $data = [];
         $payment = $this->paymentRepository->findOrFail($id);

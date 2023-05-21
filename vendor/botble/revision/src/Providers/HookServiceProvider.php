@@ -2,7 +2,7 @@
 
 namespace Botble\Revision\Providers;
 
-use Assets;
+use Botble\Base\Facades\Assets;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 
@@ -14,7 +14,7 @@ class HookServiceProvider extends ServiceProvider
         add_filter(BASE_FILTER_REGISTER_CONTENT_TAB_INSIDE, [$this, 'addHistoryContent'], 55, 3);
     }
 
-    public function addHistoryTab(?string $tabs, string|Model|null $data = null): string
+    public function addHistoryTab(string|null $tabs, string|Model|null $data = null): string
     {
         if (! empty($data) && $this->isSupported($data)) {
             Assets::addScriptsDirectly([
@@ -38,7 +38,7 @@ class HookServiceProvider extends ServiceProvider
         return in_array($model, config('packages.revision.general.supported', []));
     }
 
-    public function addHistoryContent(?string $tabs, string|Model|null $data = null): string
+    public function addHistoryContent(string|null $tabs, string|Model|null $data = null): string
     {
         if (! empty($data) && $this->isSupported($data)) {
             return $tabs . view('packages/revision::history-content', ['model' => $data])->render();

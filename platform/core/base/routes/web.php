@@ -1,6 +1,8 @@
 <?php
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Controllers\SystemController;
+use Illuminate\Support\Facades\Route;
 
 Route::group(['namespace' => 'Botble\Base\Http\Controllers', 'middleware' => ['web', 'core']], function () {
     Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {
@@ -53,7 +55,7 @@ Route::group(['namespace' => 'Botble\Base\Http\Controllers', 'middleware' => ['w
 
         Route::post('system/updater', [
             'as' => 'system.updater.post',
-            'uses' => 'SystemController@getUpdater',
+            'uses' => 'SystemController@postUpdater',
             'permission' => 'superuser',
             'middleware' => 'preventDemo',
         ]);
@@ -80,12 +82,12 @@ Route::group(['namespace' => 'Botble\Base\Http\Controllers', 'middleware' => ['w
             Route::delete('destroy-notification/{id}', [
                 'as' => 'destroy-notification',
                 'uses' => 'NotificationController@delete',
-            ])->where('id', '[0-9]+');
+            ])->wherePrimaryKey();
 
             Route::get('read-notification/{id}', [
                 'as' => 'read-notification',
                 'uses' => 'NotificationController@read',
-            ])->where('id', '[0-9]+');
+            ])->wherePrimaryKey();
 
             Route::put('read-all-notification', [
                 'as' => 'read-all-notification',

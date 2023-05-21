@@ -2,6 +2,7 @@
 
 namespace Botble\SimpleSlider\Models;
 
+use Botble\Base\Casts\SafeContent;
 use Botble\Base\Models\BaseModel;
 
 class SimpleSliderItem extends BaseModel
@@ -15,5 +16,11 @@ class SimpleSliderItem extends BaseModel
         'image',
         'order',
         'simple_slider_id',
+    ];
+
+    protected $casts = [
+        'title' => SafeContent::class,
+        'description' => SafeContent::class,
+        'link' => SafeContent::class,
     ];
 }

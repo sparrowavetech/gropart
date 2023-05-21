@@ -9,14 +9,8 @@ use Illuminate\Http\Request;
 
 class LoginListener
 {
-    protected AuditHistory $auditHistory;
-
-    protected Request $request;
-
-    public function __construct(AuditHistory $auditHistory, Request $request)
+    public function __construct(protected Request $request)
     {
-        $this->auditHistory = $auditHistory;
-        $this->request = $request;
     }
 
     public function handle(Login $event): void
@@ -24,17 +18,17 @@ class LoginListener
         $user = $event->user;
 
         if ($user instanceof User) {
-            $this->auditHistory->user_agent = $this->request->userAgent();
-            $this->auditHistory->ip_address = $this->request->ip();
-            $this->auditHistory->module = 'to the system';
-            $this->auditHistory->action = 'logged in';
-            $this->auditHistory->user_id = $user->id;
-            $this->auditHistory->reference_user = 0;
-            $this->auditHistory->reference_id = $user->id;
-            $this->auditHistory->reference_name = $user->name;
-            $this->auditHistory->type = 'info';
-
-            $this->auditHistory->save();
+            AuditHistory::query()->create([
+                'user_agent' => $this->request->userAgent(),
+                'ip_address' => $this->request->ip(),
+                'module' => 'to the system',
+                'action' => 'logged in',
+                'user_id' => $user->getKey(),
+                'reference_user' => 0,
+                'reference_id' => $user->getKey(),
+                'reference_name' => $user->name,
+                'type' => 'info',
+            ]);
         }
     }
 }

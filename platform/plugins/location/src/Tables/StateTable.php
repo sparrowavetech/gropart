@@ -2,19 +2,20 @@
 
 namespace Botble\Location\Tables;
 
+use Botble\Location\Models\State;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Location\Repositories\Interfaces\CountryInterface;
 use Botble\Location\Repositories\Interfaces\StateInterface;
 use Botble\Table\Abstracts\TableAbstract;
-use Html;
+use Botble\Base\Facades\Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
-use Yajra\DataTables\DataTables;
+use Botble\Table\DataTables;
 
 class StateTable extends TableAbstract
 {
@@ -22,13 +23,11 @@ class StateTable extends TableAbstract
 
     protected $hasFilter = true;
 
-    protected CountryInterface $countryRepository;
-
     public function __construct(
         DataTables $table,
         UrlGenerator $urlGenerator,
         StateInterface $stateRepository,
-        CountryInterface $countryRepository
+        protected CountryInterface $countryRepository
     ) {
         parent::__construct($table, $urlGenerator);
 
@@ -45,30 +44,30 @@ class StateTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('name', function ($item) {
+            ->editColumn('name', function (State $item) {
                 if (! Auth::user()->hasPermission('state.edit')) {
                     return BaseHelper::clean($item->name);
                 }
 
                 return Html::link(route('state.edit', $item->id), BaseHelper::clean($item->name));
             })
-            ->editColumn('country_id', function ($item) {
+            ->editColumn('country_id', function (State $item) {
                 if (! $item->country_id && $item->country->name) {
                     return null;
                 }
 
                 return Html::link(route('country.edit', $item->country_id), $item->country->name);
             })
-            ->editColumn('checkbox', function ($item) {
+            ->editColumn('checkbox', function (State $item) {
                 return $this->getCheckbox($item->id);
             })
-            ->editColumn('created_at', function ($item) {
+            ->editColumn('created_at', function (State $item) {
                 return BaseHelper::formatDate($item->created_at);
             })
-            ->editColumn('status', function ($item) {
+            ->editColumn('status', function (State $item) {
                 return $item->status->toHtml();
             })
-            ->addColumn('operations', function ($item) {
+            ->addColumn('operations', function (State $item) {
                 return $this->getOperations('state.edit', 'state.destroy', $item);
             });
 

@@ -1,10 +1,13 @@
 <?php
 
+use Botble\Language\Facades\Language;
 use Botble\Language\Models\LanguageMeta;
 use Botble\Location\Models\City;
 use Botble\Location\Models\Country;
 use Botble\Location\Models\State;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class () extends Migration {
     public function up(): void
@@ -145,10 +148,5 @@ return new class () extends Migration {
             Schema::dropIfExists('states_backup');
             Schema::dropIfExists('cities_backup');
         }
-    }
-
-    public function down(): void
-    {
-        //
     }
 };

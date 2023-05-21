@@ -3,18 +3,16 @@
 namespace Botble\Shortcode;
 
 use Botble\Shortcode\Compilers\ShortcodeCompiler;
+use Illuminate\Support\Arr;
 use Illuminate\Support\HtmlString;
 
 class Shortcode
 {
-    protected ShortcodeCompiler $compiler;
-
-    public function __construct(ShortcodeCompiler $compiler)
+    public function __construct(protected ShortcodeCompiler $compiler)
     {
-        $this->compiler = $compiler;
     }
 
-    public function register(string $key, ?string $name, ?string $description = null, $callback = null, string $previewImage = ''): Shortcode
+    public function register(string $key, string|null $name, string|null $description = null, $callback = null, string $previewImage = ''): Shortcode
     {
         $this->compiler->add($key, $name, $description, $callback, $previewImage);
 
@@ -42,14 +40,14 @@ class Shortcode
         return new HtmlString($html);
     }
 
-    public function strip(?string $value): ?string
+    public function strip(string|null $value): string|null
     {
         return $this->compiler->strip($value);
     }
 
     public function getAll(): array
     {
-        return $this->compiler->getRegistered();
+        return Arr::sort($this->compiler->getRegistered());
     }
 
     public function setAdminConfig(string $key, string|null|callable|array $html): void

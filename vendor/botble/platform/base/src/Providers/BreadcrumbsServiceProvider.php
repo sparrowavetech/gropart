@@ -2,12 +2,13 @@
 
 namespace Botble\Base\Providers;
 
+use Botble\Base\Facades\Breadcrumbs;
+use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Supports\BreadcrumbsGenerator;
-use Breadcrumbs;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
-use Route;
-use Illuminate\Support\Facades\URL;
 
 class BreadcrumbsServiceProvider extends ServiceProvider
 {
@@ -24,7 +25,7 @@ class BreadcrumbsServiceProvider extends ServiceProvider
             $prefix = '/' . ltrim($this->app->make('request')->route()->getPrefix(), '/');
             $url = URL::current();
             $siteTitle = setting('admin_title', config('core.base.general.base_name'));
-            $arMenu = dashboard_menu()->getAll();
+            $arMenu = DashboardMenu::getAll();
 
             if (Route::currentRouteName() != 'dashboard.index') {
                 $breadcrumbs->parent('dashboard.index');
@@ -33,7 +34,7 @@ class BreadcrumbsServiceProvider extends ServiceProvider
             $found = false;
             foreach ($arMenu as $menuCategory) {
                 if (($url == $menuCategory['url'] || (Str::contains(
-                    (string) $menuCategory['url'],
+                    (string)$menuCategory['url'],
                     $prefix
                 ) && $prefix != '//')) && ! empty($menuCategory['name'])) {
                     $found = true;
@@ -54,7 +55,7 @@ class BreadcrumbsServiceProvider extends ServiceProvider
 
                     foreach ($menuCategory['children'] as $menuItem) {
                         if (($url == $menuItem['url'] || (Str::contains(
-                            (string) $menuItem['url'],
+                            (string)$menuItem['url'],
                             $prefix
                         ) && $prefix != '//')) && ! empty($menuItem['name'])) {
                             $found = true;

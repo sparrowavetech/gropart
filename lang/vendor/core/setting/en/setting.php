@@ -30,6 +30,7 @@ return [
         'enable' => 'Enable',
         'disable' => 'Disable',
         'enable_cache' => 'Enable cache?',
+        'disable_cache_in_the_admin_panel' => 'Disable cache in the admin panel?',
         'cache_time' => 'Cache time (minutes)',
         'enable_cache_site_map' => 'Enable cache site map?',
         'cache_time_site_map' => 'Cache Time Site map (minutes)',
@@ -87,14 +88,17 @@ return [
         'log_channel' => 'Log channel',
         'sendmail_path' => 'Sendmail Path',
         'encryption_placeholder' => 'Encryption: ssl or tls',
+
         'ses_key' => 'Key',
         'ses_key_placeholder' => 'Key',
         'ses_secret' => 'Secret',
         'ses_secret_placeholder' => 'Secret',
         'ses_region' => 'Region',
         'ses_region_placeholder' => 'Region',
+
         'postmark_token' => 'Token',
         'postmark_token_placeholder' => 'Token',
+
         'template_title' => 'Email templates',
         'template_description' => 'Base templates for all emails',
         'template_header' => 'Email template header',
@@ -163,6 +167,7 @@ return [
         'max_upload_filesize' => 'Max upload filesize (MB)',
         'max_upload_filesize_placeholder' => 'Default: :size, must less than :size.',
         'max_upload_filesize_helper' => 'Your server allows to upload files maximum :size, you can change this value to limit upload filesize.',
+        'image_processing_library' => 'Image processing library',
     ],
     'license' => [
         'purchase_code' => 'Purchase code',
@@ -191,4 +196,8 @@ return [
     'generate_thumbnails_description' => 'Are you sure you want to re-generate thumbnails for all images? It will take time so please DO NOT leave this page, wait until it is finished.',
     'enable_chunk_description' => 'Chunk size upload is used to upload large file size.',
     'watermark_description' => 'WARNING: Watermark is just added to new uploaded images, it won\'t be added to existing images. Disable watermark won\'t remove watermark from existing images.',
+    'submit' => 'Submit',
+    'back' => 'Back',
+    'enter_sample_value' => 'Enter sample values for testing',
+    'preview' => 'Preview',
 ];

@@ -1,4 +1,5 @@
-@php $mollieStatus = get_payment_setting('status', MOLLIE_PAYMENT_METHOD_NAME); @endphp
+@php($mollieStatus = get_payment_setting('status', MOLLIE_PAYMENT_METHOD_NAME))
+
 <table class="table payment-method-item">
     <tbody>
     <tr class="border-pay-row">

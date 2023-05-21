@@ -5,7 +5,7 @@ namespace Botble\Language\Http\Middleware;
 use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Language;
+use Botble\Language\Facades\Language;
 
 class LocalizationRedirectFilter extends LaravelLocalizationMiddlewareBase
 {

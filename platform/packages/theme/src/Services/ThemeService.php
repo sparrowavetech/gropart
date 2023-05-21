@@ -2,42 +2,28 @@
 
 namespace Botble\Theme\Services;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Supports\Helper;
 use Botble\PluginManagement\Services\PluginService;
 use Botble\Setting\Repositories\Interfaces\SettingInterface;
 use Botble\Setting\Supports\SettingStore;
 use Botble\Theme\Events\ThemeRemoveEvent;
+use Botble\Theme\Facades\ThemeOption;
 use Botble\Widget\Repositories\Interfaces\WidgetInterface;
 use Exception;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
-use Theme;
+use Botble\Theme\Facades\Theme;
 
 class ThemeService
 {
-    protected Filesystem $files;
-
-    protected SettingStore $settingStore;
-
-    protected PluginService $pluginService;
-
-    protected WidgetInterface $widgetRepository;
-
-    protected SettingInterface $settingRepository;
-
     public function __construct(
-        Filesystem $files,
-        SettingStore $settingStore,
-        PluginService $pluginService,
-        WidgetInterface $widgetRepository,
-        SettingInterface $settingRepository
+        protected Filesystem $files,
+        protected SettingStore $settingStore,
+        protected PluginService $pluginService,
+        protected WidgetInterface $widgetRepository,
+        protected SettingInterface $settingRepository
     ) {
-        $this->files = $files;
-        $this->settingStore = $settingStore;
-        $this->pluginService = $pluginService;
-        $this->widgetRepository = $widgetRepository;
-        $this->settingRepository = $settingRepository;
     }
 
     public function activate(string $theme): array
@@ -117,12 +103,12 @@ class ThemeService
         ];
     }
 
-    protected function getPath(string $theme, ?string $path = null): string
+    protected function getPath(string $theme, string|null $path = null): string
     {
         return rtrim(theme_path(), '/') . '/' . rtrim(ltrim(strtolower($theme), '/'), '/') . '/' . $path;
     }
 
-    public function publishAssets(?string $theme = null): array
+    public function publishAssets(string|null $theme = null): array
     {
         if ($theme) {
             $themes = [$theme];
@@ -182,7 +168,7 @@ class ThemeService
             ->orWhere('theme', 'like', $theme . '-%')
             ->delete();
         $this->settingRepository->getModel()
-            ->where('key', 'like', 'theme-' . $theme . '-%')
+            ->where('key', 'like', ThemeOption::getOptionKey('%', theme: $theme))
             ->delete();
 
         event(new ThemeRemoveEvent($theme));

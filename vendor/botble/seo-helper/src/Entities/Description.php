@@ -2,7 +2,7 @@
 
 namespace Botble\SeoHelper\Entities;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\SeoHelper\Contracts\Entities\DescriptionContract;
 use Botble\SeoHelper\Exceptions\InvalidArgumentException;
 use Botble\SeoHelper\Helpers\Meta;
@@ -109,10 +109,8 @@ class Description implements DescriptionContract
      *
      * @param string $content
      * @param int $max
-     *
-     * @return $this
      */
-    public static function make($content, $max = 386)
+    public static function make($content, $max = 386): self
     {
         return new self();
     }

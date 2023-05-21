@@ -4,7 +4,7 @@ namespace Botble\Optimize\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use OptimizerHelper;
+use Botble\Optimize\Facades\OptimizerHelper;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response;
 

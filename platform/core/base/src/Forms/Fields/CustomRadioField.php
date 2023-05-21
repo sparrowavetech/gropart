@@ -2,7 +2,7 @@
 
 namespace Botble\Base\Forms\Fields;
 
-use Kris\LaravelFormBuilder\Fields\FormField;
+use Botble\Base\Forms\FormField;
 
 class CustomRadioField extends FormField
 {

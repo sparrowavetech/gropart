@@ -2,7 +2,7 @@
 
 namespace Botble\Base\Supports;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Supports\PclZip as Zip;
 use Illuminate\Support\Facades\File;
 use ZipArchive;
@@ -18,7 +18,7 @@ class Zipper
 
     public function compress(string $src, string $destination): bool
     {
-        File::ensureDirectoryExists(File::dirname($destination));
+        $this->ensureDirectoryExists($destination);
 
         if ($this->isZipArchiveEnabled) {
             $zip = new ZipArchive();
@@ -47,7 +47,7 @@ class Zipper
 
     public function extract(string $src, string $destination): bool
     {
-        File::ensureDirectoryExists(File::dirname($destination));
+        $this->ensureDirectoryExists($destination);
 
         if ($this->isZipArchiveEnabled) {
             $zip = new ZipArchive();
@@ -81,5 +81,10 @@ class Zipper
                 $zip->add($filePath, PCLZIP_OPT_REMOVE_PATH, substr($filePath, $pathLength));
             }
         }
+    }
+
+    protected function ensureDirectoryExists(string $path): void
+    {
+        File::ensureDirectoryExists(File::isFile($path) || File::extension($path) ? File::dirname($path) : $path);
     }
 }

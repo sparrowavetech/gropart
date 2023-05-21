@@ -3,6 +3,7 @@
 namespace Botble\SeoHelper\Entities\Twitter;
 
 use Botble\SeoHelper\Contracts\Entities\MetaCollectionContract;
+use Botble\SeoHelper\Contracts\Entities\MiscTagsContract;
 use Botble\SeoHelper\Contracts\Entities\TwitterCardContract;
 use Botble\SeoHelper\Exceptions\InvalidTwitterCardException;
 use Illuminate\Support\Str;
@@ -19,7 +20,7 @@ class Card implements TwitterCardContract
     /**
      * Card meta collection.
      *
-     * @var MetaCollectionContract
+     * @var MetaCollectionContract|MiscTagsContract
      */
     protected $meta;
 

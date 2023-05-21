@@ -3,7 +3,7 @@
 namespace Botble\Contact\Enums;
 
 use Botble\Base\Supports\Enum;
-use Html;
+use Botble\Base\Facades\Html;
 use Illuminate\Support\HtmlString;
 
 /**

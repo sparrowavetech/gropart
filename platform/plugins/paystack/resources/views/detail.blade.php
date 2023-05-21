@@ -5,7 +5,7 @@
     </p>
     <p>{{ trans('plugins/payment::payment.amount') }}: {{ Arr::get($payment, 'amount') / 100 }} {{ Arr::get($payment, 'currency') }}</p>
     <p>{{ trans('plugins/payment::payment.email') }}: {{ Arr::get($payment, 'customer.email') }}</p>
-    <p>{{ trans('core/base::tables.created_at') }}: {{ now()->parse(Arr::get($payment, 'created_at')) }}</p>
+    <p>{{ trans('core/base::tables.created_at') }}: {{ Carbon\Carbon::now()->parse(Arr::get($payment, 'created_at')) }}</p>
     <hr>
 
     @if ($refunds = Arr::get($paymentModel->metadata, 'refunds', []))

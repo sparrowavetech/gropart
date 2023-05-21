@@ -2,9 +2,9 @@
 
 namespace Botble\Base\Supports;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Illuminate\Support\Facades\File;
-use Request;
+use Illuminate\Support\Facades\Request;
 
 class SystemManagement
 {
@@ -46,7 +46,7 @@ class SystemManagement
             'timezone' => config('app.timezone'),
             'debug_mode' => app()->hasDebugModeEnabled(),
             'storage_dir_writable' => File::isWritable(base_path('storage')),
-            'cache_dir_writable' => File::isReadable(base_path('bootstrap/cache')),
+            'cache_dir_writable' => File::isReadable(app()->bootstrapPath('cache')),
             'app_size' => BaseHelper::humanFilesize(self::folderSize(base_path())),
         ];
     }
@@ -74,6 +74,7 @@ class SystemManagement
             'cache_driver' => config('cache.default'),
             'session_driver' => config('session.driver'),
             'queue_connection' => config('queue.default'),
+            'allow_url_fopen_enabled' => @ini_get('allow_url_fopen'),
             'mbstring' => extension_loaded('mbstring'),
             'openssl' => extension_loaded('openssl'),
             'curl' => extension_loaded('curl'),
@@ -83,6 +84,7 @@ class SystemManagement
             'tokenizer' => extension_loaded('tokenizer'),
             'imagick_or_gd' => extension_loaded('imagick') || extension_loaded('gd'),
             'zip' => extension_loaded('zip'),
+            'iconv' => extension_loaded('iconv'),
         ];
     }
 

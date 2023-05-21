@@ -3,7 +3,7 @@
 namespace Botble\Location\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Kris\LaravelFormBuilder\FormHelper;
+use Botble\Base\Forms\FormHelper;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Location\Fields\SelectLocationField;
 

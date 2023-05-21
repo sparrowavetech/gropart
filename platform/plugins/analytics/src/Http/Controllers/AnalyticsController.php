@@ -2,7 +2,7 @@
 
 namespace Botble\Analytics\Http\Controllers;
 
-use Analytics;
+use Botble\Analytics\Facades\Analytics;
 use Botble\Analytics\Exceptions\InvalidConfiguration;
 use Botble\Analytics\Period;
 use Botble\Base\Http\Controllers\BaseController;
@@ -42,11 +42,23 @@ class AnalyticsController extends BaseController
             foreach ($queryRows as $dateRow) {
                 $dateRow = array_values($dateRow);
 
-                $visitorData[] = [
+                $visitorData[$dateRow[0]] = [
                     'axis' => $this->getAxisByDimensions($dateRow[0], $dimensions),
                     'visitors' => $dateRow[1],
                     'pageViews' => $dateRow[2],
                 ];
+            }
+
+            if ($predefinedRangeFound['key'] == 'today') {
+                for ($index = 0; $index < 24; $index++) {
+                    if (! isset($visitorData[$index])) {
+                        $visitorData[$index] = [
+                            'axis' => $index . 'h',
+                            'visitors' => 0,
+                            'pageViews' => 0,
+                        ];
+                    }
+                }
             }
 
             $stats = collect($visitorData);
@@ -81,6 +93,10 @@ class AnalyticsController extends BaseController
                     $total['ga:avgSessionDuration'] += 0;
                     $total['ga:newUsers'] += $item['newUsers'] ?? 0;
                 }
+
+                if ($totalQuery->count()) {
+                    $total['ga:bounceRate'] = $total['ga:bounceRate'] / $totalQuery->count();
+                }
             }
 
             foreach ($countryStats as $key => $item) {
@@ -94,10 +110,10 @@ class AnalyticsController extends BaseController
                     compact('stats', 'countryStats', 'total')
                 )->render()
             );
-        } catch (InvalidConfiguration) {
+        } catch (InvalidConfiguration $exception) {
             return $response
                 ->setError()
-                ->setMessage(trans('plugins/analytics::analytics.wrong_configuration'));
+                ->setMessage($exception->getMessage() ?: trans('plugins/analytics::analytics.wrong_configuration'));
         } catch (Exception $exception) {
             return $response
                 ->setError()
@@ -157,10 +173,10 @@ class AnalyticsController extends BaseController
             }
 
             return $response->setData(view('plugins/analytics::widgets.page', compact('pages'))->render());
-        } catch (InvalidConfiguration) {
+        } catch (InvalidConfiguration $exception) {
             return $response
                 ->setError()
-                ->setMessage(trans('plugins/analytics::analytics.wrong_configuration'));
+                ->setMessage($exception->getMessage() ?: trans('plugins/analytics::analytics.wrong_configuration'));
         } catch (Exception $exception) {
             return $response
                 ->setError()
@@ -188,6 +204,10 @@ class AnalyticsController extends BaseController
             $browsers = Analytics::fetchTopBrowsers($period);
 
             return $response->setData(view('plugins/analytics::widgets.browser', compact('browsers'))->render());
+        } catch (InvalidConfiguration $exception) {
+            return $response
+                ->setError()
+                ->setMessage($exception->getMessage() ?: trans('plugins/analytics::analytics.wrong_configuration'));
         } catch (Exception $exception) {
             return $response
                 ->setError()
@@ -224,6 +244,10 @@ class AnalyticsController extends BaseController
             }
 
             return $response->setData(view('plugins/analytics::widgets.referrer', compact('referrers'))->render());
+        } catch (InvalidConfiguration $exception) {
+            return $response
+                ->setError()
+                ->setMessage($exception->getMessage() ?: trans('plugins/analytics::analytics.wrong_configuration'));
         } catch (Exception $exception) {
             return $response
                 ->setError()

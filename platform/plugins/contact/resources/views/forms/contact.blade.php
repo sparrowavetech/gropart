@@ -52,7 +52,7 @@
     </div>
 
     @if (is_plugin_active('captcha'))
-        @if (setting('enable_captcha'))
+        @if (Captcha::isEnabled())
             <div class="contact-form-row">
                 <div class="contact-column-12">
                     <div class="contact-form-group">

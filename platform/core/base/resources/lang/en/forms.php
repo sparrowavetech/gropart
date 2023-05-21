@@ -49,4 +49,5 @@ return [
     'collapse_all' => 'Collapse all',
     'view_new_tab' => 'Open in new tab',
     'view_preview_image' => 'View preview image',
+    'edit_item' => 'Edit ":name"',
 ];

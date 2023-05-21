@@ -2,7 +2,7 @@
 
 namespace Botble\Location\Forms;
 
-use Assets;
+use Botble\Base\Facades\Assets;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Location\Http\Requests\CityRequest;
@@ -12,16 +12,9 @@ use Botble\Location\Repositories\Interfaces\StateInterface;
 
 class CityForm extends FormAbstract
 {
-    protected CountryInterface $countryRepository;
-
-    protected StateInterface $stateRepository;
-
-    public function __construct(CountryInterface $countryRepository, StateInterface $stateRepository)
+    public function __construct(protected CountryInterface $countryRepository, protected StateInterface $stateRepository)
     {
         parent::__construct();
-
-        $this->countryRepository = $countryRepository;
-        $this->stateRepository = $stateRepository;
     }
 
     public function buildForm(): void

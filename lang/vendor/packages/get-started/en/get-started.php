@@ -23,7 +23,7 @@ return [
     'site_ready_description' => 'Welcome to your new site! Your website has been created and populated with sample data. You are in the admin area of your site where you can set up everything else needed to complete your site.',
     'finish' => 'Finish',
     'exit_wizard_title' => 'Are you sure you want to exit the Quick Setup Wizard?',
-    'exit_wizard_confirm' => 'Yes, I\'ll finish it later',
+    'exit_wizard_confirm' => "Yes, I'll finish it later",
     'exit_wizard_cancel' => 'No, take me back to the wizard',
     'change_default_account_info_title' => 'Change default account info',
     'change_default_account_info_description' => 'The default account is using a weak password. You need to change it to a complex password for better security.',

@@ -2,16 +2,18 @@
 
 namespace Botble\Page\Http\Controllers;
 
-use Botble\Base\Events\BeforeEditContentEvent;
+use Botble\Base\Events\BeforeUpdateContentEvent;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Traits\HasDeleteManyItemsTrait;
 use Botble\Page\Forms\PageForm;
 use Botble\Page\Http\Requests\PageRequest;
+use Botble\Page\Models\Page;
 use Botble\Page\Repositories\Interfaces\PageInterface;
 use Botble\Page\Tables\PageTable;
 use Exception;
@@ -22,23 +24,20 @@ class PageController extends BaseController
 {
     use HasDeleteManyItemsTrait;
 
-    protected PageInterface $pageRepository;
-
-    public function __construct(PageInterface $pageRepository)
+    public function __construct(protected PageInterface $pageRepository)
     {
-        $this->pageRepository = $pageRepository;
     }
 
     public function index(PageTable $dataTable)
     {
-        page_title()->setTitle(trans('packages/page::pages.menu_name'));
+        PageTitle::setTitle(trans('packages/page::pages.menu_name'));
 
         return $dataTable->renderTable();
     }
 
     public function create(FormBuilder $formBuilder)
     {
-        page_title()->setTitle(trans('packages/page::pages.create'));
+        PageTitle::setTitle(trans('packages/page::pages.create'));
 
         return $formBuilder->create(PageForm::class)->renderForm();
     }
@@ -56,20 +55,17 @@ class PageController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int $id, FormBuilder $formBuilder, Request $request)
+    public function edit(Page $page, FormBuilder $formBuilder)
     {
-        $page = $this->pageRepository->findOrFail($id);
-
-        page_title()->setTitle(trans('packages/page::pages.edit') . ' "' . $page->name . '"');
-
-        event(new BeforeEditContentEvent($request, $page));
+        PageTitle::setTitle(trans('core/base::forms.edit_item', ['name' => $page->name]));
 
         return $formBuilder->create(PageForm::class, ['model' => $page])->renderForm();
     }
 
-    public function update(int $id, PageRequest $request, BaseHttpResponse $response)
+    public function update(Page $page, PageRequest $request, BaseHttpResponse $response)
     {
-        $page = $this->pageRepository->findOrFail($id);
+        event(new BeforeUpdateContentEvent($request, $page));
+
         $page->fill($request->input());
 
         $page = $this->pageRepository->createOrUpdate($page);
@@ -81,10 +77,9 @@ class PageController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(Request $request, int $id, BaseHttpResponse $response)
+    public function destroy(Page $page, Request $request, BaseHttpResponse $response)
     {
         try {
-            $page = $this->pageRepository->findOrFail($id);
             $this->pageRepository->delete($page);
 
             event(new DeletedContentEvent(PAGE_MODULE_SCREEN_NAME, $request, $page));

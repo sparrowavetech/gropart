@@ -10,21 +10,21 @@ use Botble\Blog\Models\Tag;
 use Botble\Blog\Repositories\Interfaces\CategoryInterface;
 use Botble\Blog\Repositories\Interfaces\PostInterface;
 use Botble\Blog\Repositories\Interfaces\TagInterface;
+use Botble\Media\Facades\RvMedia;
+use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\SeoHelper\SeoOpenGraph;
 use Botble\Slug\Models\Slug;
-use Eloquent;
-use Html;
+use Botble\Theme\Facades\AdminBar;
+use Botble\Theme\Facades\Theme;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
-use RvMedia;
-use SeoHelper;
-use Theme;
 
 class BlogService
 {
-    public function handleFrontRoutes(Slug|array $slug): Eloquent|array
+    public function handleFrontRoutes(Slug|array $slug): Slug|array|Builder
     {
-        if (! $slug instanceof Eloquent) {
+        if (! $slug instanceof Slug) {
             return $slug;
         }
 
@@ -68,13 +68,17 @@ class BlogService
 
                 SeoHelper::meta()->setUrl($post->url);
 
-                if (function_exists('admin_bar') && Auth::check() && Auth::user()->hasPermission('posts.edit')) {
-                    admin_bar()->registerLink(
+                if (function_exists('admin_bar')) {
+                    AdminBar::registerLink(
                         trans('plugins/blog::posts.edit_this_post'),
                         route('posts.edit', $post->id),
                         null,
                         'posts.edit'
                     );
+                }
+
+                if (function_exists('shortcode')) {
+                    shortcode()->getCompiler()->setEditLink(route('posts.edit', $post->id), 'posts.edit');
                 }
 
                 Theme::breadcrumb()->add(__('Home'), route('public.index'));
@@ -91,10 +95,6 @@ class BlogService
                 }
 
                 Theme::breadcrumb()->add($post->name, $post->url);
-
-                Theme::asset()->add('ckeditor-content-styles', 'vendor/core/core/base/libraries/ckeditor/content-styles.css');
-
-                $post->content = Html::tag('div', (string)$post->content, ['class' => 'ck-content'])->toHtml();
 
                 do_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, POST_MODULE_SCREEN_NAME, $post);
 
@@ -129,7 +129,7 @@ class BlogService
                 SeoHelper::meta()->setUrl($category->url);
 
                 if (function_exists('admin_bar')) {
-                    admin_bar()->registerLink(
+                    AdminBar::registerLink(
                         trans('plugins/blog::categories.edit_this_category'),
                         route('categories.edit', $category->id),
                         null,
@@ -182,7 +182,12 @@ class BlogService
                 SeoHelper::meta()->setUrl($tag->url);
 
                 if (function_exists('admin_bar')) {
-                    admin_bar()->registerLink(trans('plugins/blog::tags.edit_this_tag'), route('tags.edit', $tag->id), null, 'tags.edit');
+                    AdminBar::registerLink(
+                        trans('plugins/blog::tags.edit_this_tag'),
+                        route('tags.edit', $tag->id),
+                        null,
+                        'tags.edit'
+                    );
                 }
 
                 $posts = get_posts_by_tag($tag->id, (int)theme_option('number_of_posts_in_a_tag', 12));

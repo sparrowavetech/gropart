@@ -2,6 +2,7 @@
 
 namespace Botble\AuditLog\Tables;
 
+use Botble\AuditLog\Models\AuditHistory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -9,9 +10,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Botble\AuditLog\Repositories\Interfaces\AuditLogInterface;
 use Botble\Table\Abstracts\TableAbstract;
-use Html;
+use Botble\Base\Facades\Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
-use Yajra\DataTables\DataTables;
+use Botble\Table\DataTables;
 
 class AuditLogTable extends TableAbstract
 {
@@ -35,13 +36,13 @@ class AuditLogTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('checkbox', function ($item) {
+            ->editColumn('checkbox', function (AuditHistory $item) {
                 return $this->getCheckbox($item->id);
             })
-            ->editColumn('action', function ($history) {
-                return view('plugins/audit-log::activity-line', compact('history'))->render();
+            ->editColumn('action', function (AuditHistory $item) {
+                return view('plugins/audit-log::activity-line', ['history' => $item])->render();
             })
-            ->addColumn('operations', function ($item) {
+            ->addColumn('operations', function (AuditHistory $item) {
                 return $this->getOperations(null, 'audit-log.destroy', $item);
             });
 

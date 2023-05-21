@@ -3,32 +3,28 @@
 @section('content')
     <div class="user-profile row">
         <div class="col-md-3 col-sm-5 crop-avatar">
-            <!-- Profile links -->
-            <div class="block">
-                <div class="block mt-element-card mt-card-round mt-element-overlay">
-                    <div class="thumbnail">
-                        <div class="thumb">
-                            <div class="profile-userpic mt-card-item">
-                                <div class="avatar-view mt-card-avatar mt-overlay-1">
-                                    <img src="{{ $user->avatar_url }}" class="img-fluid" alt="avatar">
-                                    @if ($canChangeProfile)
-                                        <div class="mt-overlay">
-                                            <ul class="mt-info">
-                                                <li>
-                                                    <a class="btn default btn-outline" href="javascript:;">
-                                                        <i class="icon-note"></i>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    @endif
+            <div class="mt-element-card mt-card-round mt-element-overlay">
+                <div class="profile-userpic mt-card-item">
+                    <div>
+                        <div class="avatar-view mt-card-avatar mt-overlay-1">
+                            <img src="{{ $user->avatar_url }}" alt="avatar">
+                            @if ($canChangeProfile)
+                                <div class="mt-overlay">
+                                    <ul class="mt-info">
+                                        <li>
+                                            <a class="btn default btn-outline" href="javascript:;">
+                                                <i class="icon-note"></i>
+                                            </a>
+                                        </li>
+                                    </ul>
                                 </div>
-                                <div class="mt-card-content">
-                                    <h3 class="mt-card-name">{{ $user->name }}</h3>
-                                </div>
-                            </div>
+                            @endif
                         </div>
                     </div>
+                    <div class="mt-card-content">
+                        <h3 class="mt-card-name">{{ $user->name }}</h3>
+                    </div>
+                    <div class="clearfix"></div>
                 </div>
             </div>
             <!-- /profile links -->
@@ -120,3 +116,11 @@
         <div class="clearfix"></div>
     </div>
 @stop
+
+@if ($canChangeProfile)
+    @push('footer')
+        <script type="text/javascript" src="{{ asset('vendor/core/core/js-validation/js/js-validation.js')}}"></script>
+        {!! JsValidator::formRequest(\Botble\ACL\Http\Requests\UpdateProfileRequest::class, '#profile-form'); !!}
+        {!! JsValidator::formRequest(\Botble\ACL\Http\Requests\UpdatePasswordRequest::class, '#password-form'); !!}
+    @endpush
+@endif

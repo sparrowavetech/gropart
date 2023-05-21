@@ -1,5 +1,8 @@
 <?php
 
+use Botble\Base\Facades\BaseHelper;
+use Illuminate\Support\Facades\Route;
+
 Route::group(['namespace' => 'Botble\Slug\Http\Controllers', 'middleware' => ['web', 'core']], function () {
     Route::group(['prefix' => 'ajax'], function () {
         Route::group(['prefix' => 'slug'], function () {

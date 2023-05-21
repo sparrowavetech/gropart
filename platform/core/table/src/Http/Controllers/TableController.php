@@ -8,7 +8,7 @@ use Botble\Table\Http\Requests\BulkChangeRequest;
 use Botble\Table\Http\Requests\FilterRequest;
 use Botble\Table\TableBuilder;
 use Exception;
-use Form;
+use Botble\Base\Facades\Form;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -16,11 +16,8 @@ use Illuminate\Support\Str;
 
 class TableController extends Controller
 {
-    protected TableBuilder $tableBuilder;
-
-    public function __construct(TableBuilder $tableBuilder)
+    public function __construct(protected TableBuilder $tableBuilder)
     {
-        $this->tableBuilder = $tableBuilder;
     }
 
     public function getDataForBulkChanges(BulkChangeRequest $request): array

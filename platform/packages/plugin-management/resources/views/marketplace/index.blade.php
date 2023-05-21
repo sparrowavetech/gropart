@@ -24,7 +24,6 @@
             token: "{{ csrf_token() }}",
             coreVersion: "{{ get_cms_version() }}"
         };
-
     </script>
 @endpush
 

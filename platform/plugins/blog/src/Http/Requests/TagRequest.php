@@ -11,8 +11,8 @@ class TagRequest extends Request
     public function rules(): array
     {
         return [
-            'name' => 'required|max:120',
-            'description' => 'max:400',
+            'name' => 'required|string|max:120',
+            'description' => 'nullable|string|max:400',
             'status' => Rule::in(BaseStatusEnum::values()),
         ];
     }

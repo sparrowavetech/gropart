@@ -6,11 +6,6 @@ use Botble\SeoHelper\Contracts\Entities\WebmastersContract;
 
 class Webmasters implements WebmastersContract
 {
-    /**
-     * The supported webmasters.
-     *
-     * @var array
-     */
     protected $supported = [
         'google' => 'google-site-verification',
         'bing' => 'msvalidate.01',
@@ -19,10 +14,7 @@ class Webmasters implements WebmastersContract
         'yandex' => 'yandex-verification',
     ];
 
-    /**
-     * @var
-     */
-    protected $meta;
+    protected MetaCollection $meta;
 
     /**
      * Create Webmasters instance.

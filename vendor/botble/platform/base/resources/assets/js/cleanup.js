@@ -1,18 +1,19 @@
-'use strict';
+'use strict'
 $(document).ready(function () {
-    $(document).on('click', '.btn-trigger-cleanup', event => {
-        event.preventDefault();
-        $('#cleanup-modal').modal('show');
-    });
+    $(document).on('click', '.btn-trigger-cleanup', (event) => {
+        event.preventDefault()
+        $('#cleanup-modal').modal('show')
+    })
 
-    $(document).on('click', '#cleanup-submit-action', event => {
-        event.preventDefault();
-        event.stopPropagation();
-        const _self = $(event.currentTarget);
+    $(document).on('click', '#cleanup-submit-action', (event) => {
+        event.preventDefault()
+        event.stopPropagation()
+        const _self = $(event.currentTarget)
 
-        _self.addClass('button-loading');
+        _self.addClass('button-loading')
 
-        const $form = $('#form-cleanup-database');
+        const $form = $('#form-cleanup-database')
+        const $modal = $('#cleanup-modal')
 
         $.ajax({
             type: 'POST',
@@ -21,21 +22,22 @@ $(document).ready(function () {
             data: new FormData($form[0]),
             contentType: false,
             processData: false,
-            success: res => {
+            success: (res) => {
                 if (!res.error) {
-                    Botble.showSuccess(res.message);
+                    Botble.showSuccess(res.message)
                 } else {
-                    Botble.showError(res.message);
+                    Botble.showError(res.message)
                 }
 
-                _self.removeClass('button-loading');
-                $('#cleanup-modal').modal('hide');
+                _self.removeClass('button-loading')
+                $modal.modal('hide')
             },
-            error: res => {
-                _self.removeClass('button-loading');
-                Botble.handleError(res);
-            }
-        });
+            error: (res) => {
+                _self.removeClass('button-loading')
+                $modal.modal('hide')
 
-    });
+                Botble.handleError(res)
+            },
+        })
+    })
 })

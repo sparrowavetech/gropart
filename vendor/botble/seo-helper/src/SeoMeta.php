@@ -46,10 +46,7 @@ class SeoMeta implements SeoMetaContract
      */
     protected $analytics;
 
-    /**
-     * @var null
-     */
-    protected $currentUrl = null;
+    protected string|null $currentUrl = null;
 
     /**
      * Make SeoMeta instance.

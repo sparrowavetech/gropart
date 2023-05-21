@@ -11,9 +11,9 @@ class Model
 
     protected array $sitemaps = [];
 
-    protected ?string $title = null;
+    protected string|null $title = null;
 
-    protected ?string $link = null;
+    protected string|null $link = null;
 
     protected mixed $useStyles = true;
 
@@ -29,7 +29,7 @@ class Model
 
     protected bool $useLimitSize = false;
 
-    protected bool |null $maxSize = null;
+    protected bool|int|null $maxSize = null;
 
     protected bool $useGzip = false;
 
@@ -59,12 +59,12 @@ class Model
         return $this->sitemaps;
     }
 
-    public function getTitle(): ?string
+    public function getTitle(): string|null
     {
         return $this->title;
     }
 
-    public function getLink(): ?string
+    public function getLink(): string|null
     {
         return $this->link;
     }
@@ -86,7 +86,7 @@ class Model
 
     public function getCacheKey(): string
     {
-        return $this->cacheKey;
+        return $this->cacheKey . route('public.index');
     }
 
     public function getCacheDuration(): int|string

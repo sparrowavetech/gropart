@@ -30,6 +30,7 @@
                         - {{ trans('core/base::system.cache_driver') }}: {{ $serverEnv['cache_driver'] }}
                         - {{ trans('core/base::system.queue_connection') }}: {{ $serverEnv['queue_connection'] }}
                         - {{ trans('core/base::system.session_driver') }}: {{ $serverEnv['session_driver'] }}
+                        - {{ trans('core/base::system.allow_url_fopen_enabled') }}: {!! $serverEnv['allow_url_fopen_enabled'] ? '&#10004;' : '&#10008;' !!}
                         - {{ trans('core/base::system.mbstring_ext') }}: {!! $serverEnv['mbstring'] ? '&#10004;' : '&#10008;' !!}
                         - {{ trans('core/base::system.openssl_ext') }}: {!! $serverEnv['openssl'] ? '&#10004;' : '&#10008;' !!}
                         - {{ trans('core/base::system.pdo_ext') }}: {!! $serverEnv['pdo'] ? '&#10004;' : '&#10008;' !!}
@@ -39,6 +40,7 @@
                         - {{ trans('core/base::system.tokenizer_ext') }}: {!! $serverEnv['tokenizer']  ? '&#10004;' : '&#10008;'!!}
                         - {{ trans('core/base::system.imagick_or_gd_ext') }}: {!! $serverEnv['imagick_or_gd']  ? '&#10004;' : '&#10008;'!!}
                         - {{ trans('core/base::system.zip') }}: {!! $serverEnv['zip']  ? '&#10004;' : '&#10008;'!!}
+                        - {{ trans('core/base::system.iconv') }}: {!! $serverEnv['iconv']  ? '&#10004;' : '&#10008;'!!}
 
                         ### {{ trans('core/base::system.installed_packages') }}
 
@@ -104,6 +106,7 @@
                     <li class="list-group-item">{{ trans('core/base::system.cache_driver') }}: {{ $serverEnv['cache_driver'] }}</li>
                     <li class="list-group-item">{{ trans('core/base::system.session_driver') }}: {{ $serverEnv['session_driver'] }}</li>
                     <li class="list-group-item">{{ trans('core/base::system.queue_connection') }}: {{ $serverEnv['queue_connection'] }}</li>
+                    <li class="list-group-item">{{ trans('core/base::system.allow_url_fopen_enabled') }}: {!! $serverEnv['allow_url_fopen_enabled'] ? '<span class="fas fa-check"></span>' : '<span class="fas fa-times"></span>' !!}</li>
                     <li class="list-group-item">{{ trans('core/base::system.openssl_ext') }}: {!! $serverEnv['openssl'] ? '<span class="fas fa-check"></span>' : '<span class="fas fa-times"></span>' !!}</li>
                     <li class="list-group-item">{{ trans('core/base::system.mbstring_ext') }}: {!! $serverEnv['mbstring'] ? '<span class="fas fa-check"></span>' : '<span class="fas fa-times"></span>' !!}</li>
                     <li class="list-group-item">{{ trans('core/base::system.pdo_ext') }}: {!! $serverEnv['pdo'] ? '<span class="fas fa-check"></span>' : '<span class="fas fa-times"></span>' !!}</li>
@@ -113,6 +116,7 @@
                     <li class="list-group-item">{{ trans('core/base::system.tokenizer_ext') }}: {!! $serverEnv['tokenizer']  ? '<span class="fas fa-check"></span>' : '<span class="fas fa-times"></span>'!!}</li>
                     <li class="list-group-item">{{ trans('core/base::system.imagick_or_gd_ext') }}: {!! $serverEnv['imagick_or_gd']  ? '<span class="fas fa-check"></span>' : '<span class="fas fa-times"></span>'!!}</li>
                     <li class="list-group-item">{{ trans('core/base::system.zip') }}: {!! $serverEnv['zip']  ? '<span class="fas fa-check"></span>' : '<span class="fas fa-times"></span>'!!}</li>
+                    <li class="list-group-item">{{ trans('core/base::system.iconv') }}: {!! $serverEnv['zip']  ? '<span class="fas fa-check"></span>' : '<span class="fas fa-times"></span>'!!}</li>
                 </ul>
             </div>
         </div> <!-- / Server Environment column -->

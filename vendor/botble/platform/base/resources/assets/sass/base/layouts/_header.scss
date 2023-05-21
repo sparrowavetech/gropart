@@ -114,10 +114,6 @@ Page Header
                     padding: $header-top-menu-general-item-padding;
                     max-height: $header-height;
 
-                    &:last-child {
-                        padding-right: 0;
-                    }
-
                     > i {
                         font-size: $header-top-menu-icon-font-size;
 

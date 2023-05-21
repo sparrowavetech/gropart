@@ -11,14 +11,14 @@ class LocationImportRequest extends Request
     public function rules(): array
     {
         return [
-            'name' => 'required|max:120',
+            'name' => 'required|string|max:120',
             'import_type' => 'required|in:country,state,city',
             'order' => 'nullable|integer|min:0|max:127',
-            'abbreviation' => 'max:2',
-            'status' => 'required|' . Rule::in(BaseStatusEnum::values()),
+            'abbreviation' => 'nullable|string|max:10',
+            'status' => 'string|required|' . Rule::in(BaseStatusEnum::values()),
             'country' => 'required_if:import_type,state,city',
             'state' => 'required_if:import_type,city',
-            'nationality' => 'required_if:import_type,country|max:120',
+            'nationality' => 'nullable|string|max:120',
         ];
     }
 

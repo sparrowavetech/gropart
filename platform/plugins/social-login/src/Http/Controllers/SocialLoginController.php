@@ -2,7 +2,8 @@
 
 namespace Botble\SocialLogin\Http\Controllers;
 
-use Assets;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Setting\Supports\SettingStore;
@@ -15,9 +16,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Laravel\Socialite\AbstractUser;
-use RvMedia;
-use Socialite;
-use SocialService;
+use Botble\Media\Facades\RvMedia;
+use Laravel\Socialite\Facades\Socialite;
+use Botble\SocialLogin\Facades\SocialService;
 
 class SocialLoginController extends BaseController
 {
@@ -114,7 +115,9 @@ class SocialLoginController extends BaseController
                 ->setMessage(__('Cannot login, no email provided!'));
         }
 
-        $account = (new $providerData['model']())->where('email', $oAuth->getEmail())->first();
+        $model = new $providerData['model']();
+
+        $account = $model->where('email', $oAuth->getEmail())->first();
 
         if (! $account) {
             $avatarId = null;
@@ -122,7 +125,7 @@ class SocialLoginController extends BaseController
             try {
                 $url = $oAuth->getAvatar();
                 if ($url) {
-                    $result = RvMedia::uploadFromUrl($url, 0, 'accounts', 'image/png');
+                    $result = RvMedia::uploadFromUrl($url, 0, $model->upload_folder ?: 'accounts', 'image/png');
                     if (! $result['error']) {
                         $avatarId = $result['data']->id;
                     }
@@ -140,7 +143,7 @@ class SocialLoginController extends BaseController
 
             $data = apply_filters('social_login_before_saving_account', $data, $oAuth, $providerData);
 
-            $account = new $providerData['model']();
+            $account = $model;
             $account->fill($data);
             $account->confirmed_at = Carbon::now();
             $account->save();
@@ -155,7 +158,7 @@ class SocialLoginController extends BaseController
 
     public function getSettings()
     {
-        page_title()->setTitle(trans('plugins/social-login::social-login.settings.title'));
+        PageTitle::setTitle(trans('plugins/social-login::social-login.settings.title'));
 
         Assets::addScriptsDirectly('vendor/core/plugins/social-login/js/social-login.js');
 

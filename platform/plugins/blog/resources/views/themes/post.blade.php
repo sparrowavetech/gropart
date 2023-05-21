@@ -21,7 +21,9 @@
         @endif
     </div>
 </header>
-{!! BaseHelper::clean($post->content) !!}
+<div class='ck-content'>
+    {!! BaseHelper::clean($post->content) !!}
+</div>
 <br />
 {!! apply_filters(BASE_FILTER_PUBLIC_COMMENT_AREA, null) !!}
 

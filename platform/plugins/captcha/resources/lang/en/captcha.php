@@ -13,7 +13,6 @@ return [
         'v2_description' => 'V2 (Verify requests with a challenge)',
         'v3_description' => 'V3 (Verify requests with a score)',
     ],
-    'failed_validate' => 'Failed to validate the captcha.',
     'numbers' => [
         '0' => 'Zero',
         '1' => 'One',

@@ -2,10 +2,11 @@
 
 namespace Botble\Backup\Http\Controllers;
 
-use Assets;
-use BaseHelper;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Backup\Http\Requests\BackupRequest;
 use Botble\Backup\Supports\Backup;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Supports\Helper;
@@ -15,16 +16,13 @@ use Illuminate\Support\Str;
 
 class BackupController extends BaseController
 {
-    protected Backup $backup;
-
-    public function __construct(Backup $backup)
+    public function __construct(protected Backup $backup)
     {
-        $this->backup = $backup;
     }
 
     public function getIndex()
     {
-        page_title()->setTitle(trans('plugins/backup::backup.menu_name'));
+        PageTitle::setTitle(trans('plugins/backup::backup.menu_name'));
 
         Assets::addScriptsDirectly(['vendor/core/plugins/backup/js/backup.js'])
             ->addStylesDirectly(['vendor/core/plugins/backup/css/backup.css']);
@@ -100,7 +98,7 @@ class BackupController extends BaseController
                 }
             }
 
-            setting()->set('media_random_hash', md5(time()))->save();
+            setting()->set('media_random_hash', md5((string)time()))->save();
 
             Helper::clearCache();
 

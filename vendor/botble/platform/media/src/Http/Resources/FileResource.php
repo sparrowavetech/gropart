@@ -2,11 +2,11 @@
 
 namespace Botble\Media\Http\Resources;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Media\Models\MediaFile;
 use Illuminate\Support\Facades\File;
 use Illuminate\Http\Resources\Json\JsonResource;
-use RvMedia;
+use Botble\Media\Facades\RvMedia;
 
 /**
  * @mixin MediaFile
@@ -32,6 +32,7 @@ class FileResource extends JsonResource
             'folder_id' => $this->folder_id,
             'preview_url' => $this->preview_url,
             'preview_type' => $this->preview_type,
+            'alt' => $this->alt,
         ];
     }
 }

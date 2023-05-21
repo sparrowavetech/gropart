@@ -2,7 +2,7 @@
 
 namespace Botble\Blog\Http\Controllers;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Blog\Models\Category;
 use Botble\Blog\Models\Post;
 use Botble\Blog\Models\Tag;
@@ -11,9 +11,9 @@ use Botble\Blog\Services\BlogService;
 use Botble\Theme\Events\RenderingSingleEvent;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use SeoHelper;
-use SlugHelper;
-use Theme;
+use Botble\SeoHelper\Facades\SeoHelper;
+use Botble\Slug\Facades\SlugHelper;
+use Botble\Theme\Facades\Theme;
 
 class PublicController extends Controller
 {
@@ -71,8 +71,6 @@ class PublicController extends Controller
         }
 
         event(new RenderingSingleEvent($slug));
-
-        Theme::asset()->add('ckeditor-content-styles', 'vendor/core/core/base/libraries/ckeditor/content-styles.css');
 
         return Theme::scope($data['view'], $data['data'], $data['default_view'])
             ->render();

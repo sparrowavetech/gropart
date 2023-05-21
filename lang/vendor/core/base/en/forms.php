@@ -3,8 +3,8 @@
 return [
     'choose_image' => 'Choose image',
     'actions' => 'Actions',
-    'save' => 'Save',
-    'save_and_continue' => 'Save & Edit',
+    'save' => 'Save & Exit',
+    'save_and_continue' => 'Save',
     'image' => 'Image',
     'image_placeholder' => 'Insert path of image or click upload button',
     'create' => 'Create',
@@ -49,4 +49,5 @@ return [
     'collapse_all' => 'Collapse all',
     'view_new_tab' => 'Open in new tab',
     'view_preview_image' => 'View preview image',
+    'edit_item' => 'Edit ":name"',
 ];

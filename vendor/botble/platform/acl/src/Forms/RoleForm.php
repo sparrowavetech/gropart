@@ -2,8 +2,7 @@
 
 namespace Botble\ACL\Forms;
 
-use Assets;
-use BaseHelper;
+use Botble\Base\Facades\Assets;
 use Botble\ACL\Http\Requests\RoleCreateRequest;
 use Botble\ACL\Models\Role;
 use Botble\Base\Forms\FormAbstract;
@@ -17,7 +16,8 @@ class RoleForm extends FormAbstract
             ->addScripts(['jquery-ui', 'jqueryTree'])
             ->addScriptsDirectly('vendor/core/core/acl/js/role.js');
 
-        $flags = $this->getAvailablePermissions();
+        $flags = (new Role())->getAvailablePermissions();
+
         $children = $this->getPermissionTree($flags);
         $active = [];
 
@@ -58,42 +58,6 @@ class RoleForm extends FormAbstract
                 ],
             ])
             ->setActionButtons(view('core/acl::roles.actions', ['role' => $this->getModel()])->render());
-    }
-
-    protected function getAvailablePermissions(): array
-    {
-        $permissions = [];
-
-        $configuration = config(strtolower('cms-permissions'));
-        if (! empty($configuration)) {
-            foreach ($configuration as $config) {
-                $permissions[$config['flag']] = $config;
-            }
-        }
-
-        $types = ['core', 'packages', 'plugins'];
-
-        foreach ($types as $type) {
-            $permissions = array_merge($permissions, $this->getAvailablePermissionForEachType($type));
-        }
-
-        return $permissions;
-    }
-
-    protected function getAvailablePermissionForEachType(string $type): array
-    {
-        $permissions = [];
-
-        foreach (BaseHelper::scanFolder(platform_path($type)) as $module) {
-            $configuration = config(strtolower($type . '.' . $module . '.permissions'));
-            if (! empty($configuration)) {
-                foreach ($configuration as $config) {
-                    $permissions[$config['flag']] = $config;
-                }
-            }
-        }
-
-        return $permissions;
     }
 
     protected function getPermissionTree(array $permissions): array

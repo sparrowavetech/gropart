@@ -2,6 +2,7 @@
 
 namespace Botble\Base\Providers;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Setting\Supports\SettingStore;
 use Illuminate\Support\ServiceProvider;
 
@@ -17,7 +18,7 @@ class MailConfigServiceProvider extends ServiceProvider
 
             $config->set([
                 'mail' => array_merge($config->get('mail'), [
-                    'default' => $setting->get('email_driver', $this->app->environment('demo') ? $config->get('mail.default') : $defaultMailDriver),
+                    'default' => $setting->get('email_driver', BaseHelper::hasDemoModeEnabled() ? $config->get('mail.default') : $defaultMailDriver),
                     'from' => [
                         'address' => $setting->get('email_from_address', $config->get('mail.from.address')),
                         'name' => $setting->get('email_from_name', $config->get('mail.from.name')),

@@ -7,5 +7,5 @@
     "url": "https://botble.com",
     "version": "1.2.0",
     "description": "Advanced Multi-language",
-    "require": ["language"]
+    "require": ["botble/language"]
 }

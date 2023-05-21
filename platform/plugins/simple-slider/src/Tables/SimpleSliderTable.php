@@ -2,18 +2,20 @@
 
 namespace Botble\SimpleSlider\Tables;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\SimpleSlider\Models\SimpleSlider;
 use Botble\SimpleSlider\Repositories\Interfaces\SimpleSliderInterface;
 use Botble\Table\Abstracts\TableAbstract;
-use Html;
+use Botble\Base\Facades\Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
-use Yajra\DataTables\DataTables;
+use Botble\Table\DataTables;
 
 class SimpleSliderTable extends TableAbstract
 {
@@ -36,32 +38,32 @@ class SimpleSliderTable extends TableAbstract
         }
     }
 
-    public function ajax(): \Illuminate\Http\JsonResponse
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('name', function ($item) {
+            ->editColumn('name', function (SimpleSlider $item) {
                 if (! Auth::user()->hasPermission('simple-slider.edit')) {
                     return BaseHelper::clean($item->name);
                 }
 
                 return Html::link(route('simple-slider.edit', $item->id), BaseHelper::clean($item->name));
             })
-            ->editColumn('checkbox', function ($item) {
+            ->editColumn('checkbox', function (SimpleSlider $item) {
                 return $this->getCheckbox($item->id);
             })
-            ->editColumn('created_at', function ($item) {
+            ->editColumn('created_at', function (SimpleSlider $item) {
                 return BaseHelper::formatDate($item->created_at);
             })
-            ->editColumn('status', function ($item) {
+            ->editColumn('status', function (SimpleSlider $item) {
                 return $item->status->toHtml();
             })
-            ->addColumn('operations', function ($item) {
+            ->addColumn('operations', function (SimpleSlider $item) {
                 return $this->getOperations('simple-slider.edit', 'simple-slider.destroy', $item);
             });
 
         if (function_exists('shortcode')) {
-            $data = $data->editColumn('key', function ($item) {
+            $data = $data->editColumn('key', function (SimpleSlider $item) {
                 return shortcode()->generateShortcode('simple-slider', ['key' => $item->key]);
             });
         }

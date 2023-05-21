@@ -3,42 +3,24 @@
 namespace Botble\SslCommerz\Library\SslCommerz;
 
 use Illuminate\Support\Arr;
+use stdClass;
 
 class SslCommerzNotification extends AbstractSslCommerz
 {
-    /**
-     * @var array
-     */
-    protected $data = [];
+    protected array $data = [];
 
-    /**
-     * @var array|\Illuminate\Config\Repository|\Illuminate\Contracts\Foundation\Application|mixed
-     */
-    protected $config = [];
+    protected array $config = [];
 
-    /**
-     * @var string
-     */
-    protected $successUrl;
+    protected string $successUrl;
 
-    /**
-     * @var string
-     */
-    protected $cancelUrl;
+    protected string $cancelUrl;
 
-    /**
-     * @var string
-     */
-    protected $failedUrl;
+    protected string $failedUrl;
 
-    /**
-     * @var string
-     */
-    protected $error;
+    protected string $error;
 
-    /**
-     * SslCommerzNotification constructor.
-     */
+    protected stdClass $sslc_data;
+
     public function __construct()
     {
         $this->config = config('plugins.sslcommerz.sslcommerz');
@@ -47,13 +29,6 @@ class SslCommerzNotification extends AbstractSslCommerz
         $this->setStorePassword($this->config['apiCredentials']['store_password']);
     }
 
-    /**
-     * @param array $postData
-     * @param string $transactionId
-     * @param int $amount
-     * @param string $currency
-     * @return bool|mixed|string
-     */
     public function orderValidate($postData, $transactionId = '', $amount = 0, $currency = 'BDT')
     {
         if ($postData == '' && $transactionId == '' && ! is_array($postData)) {
@@ -182,10 +157,8 @@ class SslCommerzNotification extends AbstractSslCommerz
             $pre_define_key = explode(',', $postData['verify_key']);
 
             $new_data = [];
-            if (! empty($pre_define_key)) {
-                foreach ($pre_define_key as $value) {
-                    $new_data[$value] = ($postData[$value]);
-                }
+            foreach ($pre_define_key as $value) {
+                $new_data[$value] = ($postData[$value]);
             }
             // ADD MD5 OF STORE PASSWORD
             $new_data['store_passwd'] = md5($storePassword);

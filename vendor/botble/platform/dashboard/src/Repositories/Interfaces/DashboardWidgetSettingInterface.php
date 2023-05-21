@@ -3,13 +3,9 @@
 namespace Botble\Dashboard\Repositories\Interfaces;
 
 use Botble\Support\Repositories\Interfaces\RepositoryInterface;
+use Illuminate\Database\Eloquent\Collection;
 
 interface DashboardWidgetSettingInterface extends RepositoryInterface
 {
-    /**
-     * @return mixed
-     *
-     * @since 2.1
-     */
-    public function getListWidget();
+    public function getListWidget(): Collection;
 }

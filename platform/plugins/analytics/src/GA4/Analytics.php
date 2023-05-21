@@ -3,6 +3,7 @@
 namespace Botble\Analytics\GA4;
 
 use Botble\Analytics\Abstracts\AnalyticsAbstract;
+use Botble\Analytics\Abstracts\AnalyticsContract;
 use Botble\Analytics\GA4\Traits\CustomAcquisitionTrait;
 use Botble\Analytics\GA4\Traits\CustomDemographicsTrait;
 use Botble\Analytics\GA4\Traits\CustomEngagementTrait;
@@ -19,10 +20,11 @@ use Botble\Analytics\GA4\Traits\OrderByMetricTrait;
 use Botble\Analytics\GA4\Traits\ResponseTrait;
 use Botble\Analytics\GA4\Traits\RowOperationTrait;
 use Botble\Analytics\Period;
+use Google\Service\Analytics\GaData;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
-class Analytics extends AnalyticsAbstract
+class Analytics extends AnalyticsAbstract implements AnalyticsContract
 {
     use DateRangeTrait;
     use MetricTrait;
@@ -42,7 +44,7 @@ class Analytics extends AnalyticsAbstract
 
     public array $orderBys = [];
 
-    public function __construct(int $propertyId, string $credentials)
+    public function __construct(int|string $propertyId, string $credentials)
     {
         $this->propertyId = $propertyId;
         $this->credentials = $credentials;
@@ -111,7 +113,7 @@ class Analytics extends AnalyticsAbstract
             ->table;
     }
 
-    public function performQuery(Period $period, string $metrics, array $others = []): Collection
+    public function performQuery(Period $period, string $metrics, array $others = []): Collection|array|GaData|null
     {
         $metrics = str_replace('ga:', '', $metrics);
         $metrics = array_unique(explode(',', $metrics));

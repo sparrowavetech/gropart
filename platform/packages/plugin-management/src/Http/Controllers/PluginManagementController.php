@@ -2,21 +2,27 @@
 
 namespace Botble\PluginManagement\Http\Controllers;
 
-use Assets;
-use BaseHelper;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\PluginManagement\Services\MarketplaceService;
 use Botble\PluginManagement\Services\PluginService;
 use Exception;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 
 class PluginManagementController extends Controller
 {
-    public function index()
+    public function __construct(protected PluginService $pluginService)
     {
-        page_title()->setTitle(trans('packages/plugin-management::plugin.plugins'));
+    }
+
+    public function index(): View
+    {
+        PageTitle::setTitle(trans('packages/plugin-management::plugin.plugins'));
 
         Assets::addScriptsDirectly('vendor/core/packages/plugin-management/js/plugin.js')
             ->addStylesDirectly('vendor/core/packages/plugin-management/css/plugin.css');
@@ -28,6 +34,7 @@ class PluginManagementController extends Controller
         }
 
         $plugins = BaseHelper::scanFolder(plugin_path());
+
         if (! empty($plugins)) {
             $installed = get_active_plugins();
             foreach ($plugins as $plugin) {
@@ -36,6 +43,7 @@ class PluginManagementController extends Controller
                 }
 
                 $pluginPath = plugin_path($plugin);
+
                 if (! File::isDirectory($pluginPath) || ! File::exists($pluginPath . '/plugin.json')) {
                     continue;
                 }
@@ -50,10 +58,16 @@ class PluginManagementController extends Controller
 
                     $content['path'] = $plugin;
                     $content['image'] = null;
-                    if (File::exists($pluginPath . '/screenshot.png')) {
-                        $content['image'] = base64_encode(File::get($pluginPath . '/screenshot.png'));
+
+                    $screenshot = 'vendor/core/plugins/' . $plugin . '/screenshot.png';
+
+                    if (File::exists(public_path($screenshot))) {
+                        $content['image'] = asset($screenshot);
+                    } elseif (File::exists($pluginPath . '/screenshot.png')) {
+                        $content['image'] = 'data:image/png;base64,' . base64_encode(File::get($pluginPath . '/screenshot.png'));
                     }
-                    $list[] = (object)$content;
+
+                    $list[] = (object) $content;
                 }
             }
         }
@@ -61,12 +75,11 @@ class PluginManagementController extends Controller
         return view('packages/plugin-management::index', compact('list'));
     }
 
-    public function update(Request $request, BaseHttpResponse $response, PluginService $pluginService)
+    public function update(Request $request, BaseHttpResponse $response): BaseHttpResponse
     {
         $plugin = strtolower($request->input('name'));
 
-        $content = BaseHelper::getFileData(plugin_path($plugin . '/plugin.json'));
-        if (empty($content)) {
+        if (! $this->pluginService->validatePlugin($plugin)) {
             return $response
                 ->setError()
                 ->setMessage(trans('packages/plugin-management::plugin.invalid_plugin'));
@@ -75,17 +88,7 @@ class PluginManagementController extends Controller
         try {
             $activatedPlugins = get_active_plugins();
             if (! in_array($plugin, $activatedPlugins)) {
-                if (! empty(Arr::get($content, 'require'))) {
-                    if (count(array_intersect($content['require'], $activatedPlugins)) != count($content['require'])) {
-                        return $response
-                            ->setError()
-                            ->setMessage(trans('packages/plugin-management::plugin.missing_required_plugins', [
-                                'plugins' => implode(',', $content['require']),
-                            ]));
-                    }
-                }
-
-                $result = $pluginService->activate($plugin);
+                $result = $this->pluginService->activate($plugin);
 
                 $migrator = app('migrator');
                 $migrator->run(database_path('migrations'));
@@ -113,7 +116,7 @@ class PluginManagementController extends Controller
                     }
                 }
             } else {
-                $result = $pluginService->deactivate($plugin);
+                $result = $this->pluginService->deactivate($plugin);
             }
 
             if ($result['error']) {
@@ -128,12 +131,18 @@ class PluginManagementController extends Controller
         }
     }
 
-    public function destroy(string $plugin, BaseHttpResponse $response, PluginService $pluginService)
+    public function destroy(string $plugin, BaseHttpResponse $response): BaseHttpResponse
     {
         $plugin = strtolower($plugin);
 
+        if (! $this->pluginService->validatePlugin($plugin)) {
+            return $response
+                ->setError()
+                ->setMessage(trans('packages/plugin-management::plugin.invalid_plugin'));
+        }
+
         try {
-            $result = $pluginService->remove($plugin);
+            $result = $this->pluginService->remove($plugin);
 
             if ($result['error']) {
                 return $response->setError()->setMessage($result['message']);
@@ -145,5 +154,46 @@ class PluginManagementController extends Controller
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
+    }
+
+    public function checkRequirement(
+        Request $request,
+        BaseHttpResponse $response,
+        MarketplaceService $marketplaceService
+    ): BaseHttpResponse {
+        $name = strtolower($request->input('name'));
+
+        $requiredPlugins = $this->pluginService->getDependencies($name);
+
+        if (! empty($requiredPlugins)) {
+            $content = $this->pluginService->getPluginInfo($name);
+
+            $data = $marketplaceService->callApi('POST', '/products/check-update', [
+                'products' => collect($requiredPlugins)->mapWithKeys(fn ($item) => [$item => '0.0.0'])->toArray(),
+            ])->json('data');
+
+            $existingPluginsOnMarketplace = collect($data)->pluck('id')->all();
+
+            if (empty($existingPluginsOnMarketplace)) {
+                return $response
+                    ->setError()
+                    ->setMessage(trans('packages/plugin-management::plugin.missing_required_plugins', [
+                        'plugins' => implode(',', $requiredPlugins),
+                    ]));
+            }
+
+            return $response
+                ->setError()
+                ->setData([
+                    'pluginName' => $content['id'],
+                    'existing_plugins_on_marketplace' => $existingPluginsOnMarketplace,
+                ])
+                ->setMessage(__('packages/plugin-management::plugin.requirement_not_met', [
+                    'plugin' => "<strong>{$content['name']}</strong>",
+                    'required_plugins' => '<strong>' . implode(', ', $requiredPlugins) . '</strong>',
+                ]));
+        }
+
+        return $response;
     }
 }

@@ -3,7 +3,7 @@
 namespace Botble\Menu\Commands;
 
 use Illuminate\Console\Command;
-use Menu;
+use Botble\Menu\Facades\Menu;
 use Symfony\Component\Console\Attribute\AsCommand;
 
 #[AsCommand('cms:menu:clear-cache', 'Clear cache menu URLs')]

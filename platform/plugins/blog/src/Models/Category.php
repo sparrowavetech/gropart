@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Html;
+use Botble\Base\Facades\Html;
 use Illuminate\Support\Collection;
 use Illuminate\Support\HtmlString;
 
@@ -96,7 +96,7 @@ class Category extends BaseModel
             ->with(['slugable', 'activeChildren']);
     }
 
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
 

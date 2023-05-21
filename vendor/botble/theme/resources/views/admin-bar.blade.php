@@ -6,7 +6,7 @@
             </a>
         </div>
         <ul class="admin-navbar-nav">
-            @foreach (admin_bar()->getGroups() as $slug => $group)
+            @foreach (AdminBar::getGroups() as $slug => $group)
                 @if ($items = Arr::get($group, 'items', []))
                     @php ksort($items); @endphp
                     <li class="admin-bar-dropdown">
@@ -26,10 +26,10 @@
                     </li>
                 @endif
             @endforeach
-            @if ($noGroups = admin_bar()->getLinksNoGroup())
+            @if ($noGroups = AdminBar::getLinksNoGroup())
                 @php ksort($noGroups) @endphp
                 @foreach ($noGroups as $item)
-                    @continue(Arr::get($item, 'permission') && !Auth::user()->hasPermission($item['permission']))
+                    @continue(Arr::get($item, 'permission') && ! Auth::user()->hasPermission($item['permission']))
                     <li>
                         <a href="{{ Arr::get($item, 'link') }}">{{ Arr::get($item, 'title') }}</a>
                     </li>

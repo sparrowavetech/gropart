@@ -2,21 +2,26 @@
 
 namespace Botble\Analytics\Providers;
 
-use Assets;
+use Botble\Base\Facades\Assets;
 use Botble\Dashboard\Supports\DashboardWidgetInstance;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 class HookServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        if (config('plugins.analytics.general.enabled_dashboard_widgets')) {
-            add_action(DASHBOARD_ACTION_REGISTER_SCRIPTS, [$this, 'registerScripts'], 18);
-            add_filter(DASHBOARD_FILTER_ADMIN_LIST, [$this, 'addAnalyticsWidgets'], 18, 2);
-            add_filter(BASE_FILTER_AFTER_SETTING_CONTENT, [$this, 'addAnalyticsSetting'], 99);
+        if (! config('plugins.analytics.general.enabled_dashboard_widgets')) {
+            return;
         }
+
+        add_action(DASHBOARD_ACTION_REGISTER_SCRIPTS, [$this, 'registerScripts'], 18);
+        add_filter(DASHBOARD_FILTER_ADMIN_LIST, [$this, 'addAnalyticsWidgets'], 18, 2);
+        add_filter(BASE_FILTER_AFTER_SETTING_CONTENT, [$this, 'addAnalyticsSetting'], 99);
+        add_filter('cms_settings_validation_rules', [$this, 'addAnalyticsSettingRules'], 99);
+        add_filter('core_layout_before_content', [$this, 'showMissingLibraryWarning'], 99);
     }
 
     public function registerScripts(): void
@@ -94,8 +99,26 @@ class HookServiceProvider extends ServiceProvider
             ->init($widgets, $widgetSettings);
     }
 
-    public function addAnalyticsSetting(?string $data = null): string
+    public function addAnalyticsSetting(string|null $data = null): string
     {
         return $data . view('plugins/analytics::setting')->render();
+    }
+
+    public function addAnalyticsSettingRules(array $rules): array
+    {
+        $rules['google_analytics'] = 'nullable|string|starts_with:G-';
+        $rules['analytics_property_id'] = 'nullable|string|min:9|max:9';
+        $rules['analytics_service_account_credentials'] = 'nullable|json';
+
+        return $rules;
+    }
+
+    public function showMissingLibraryWarning(string|null $html): string|null
+    {
+        if (! Route::is('plugins.index') || class_exists('Google\Service\Analytics\GaData')) {
+            return $html;
+        }
+
+        return $html . view('plugins/analytics::missing-library-warning')->render();
     }
 }

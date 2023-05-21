@@ -4,13 +4,11 @@ namespace Botble\Media\Services;
 
 use Exception;
 use Intervention\Image\ImageManager;
-use Log;
-use RvMedia;
+use Illuminate\Support\Facades\Log;
+use Botble\Media\Facades\RvMedia;
 
 class ThumbnailService
 {
-    protected ImageManager $imageManager;
-
     protected string $imagePath;
 
     protected float $thumbRate;
@@ -21,29 +19,23 @@ class ThumbnailService
 
     protected string $destinationPath;
 
-    protected ?string $xCoordinate;
+    protected int|null $xCoordinate;
 
-    protected ?string $yCoordinate;
+    protected int|null $yCoordinate;
 
     protected string $fitPosition;
 
     protected string $fileName;
 
-    protected UploadsManager $uploadManager;
-
-    public function __construct(UploadsManager $uploadManager, ImageManager $imageManager)
+    public function __construct(protected UploadsManager $uploadManager, protected ImageManager $imageManager)
     {
         $this->thumbRate = 0.75;
         $this->xCoordinate = null;
         $this->yCoordinate = null;
         $this->fitPosition = 'center';
-
-        $this->imageManager = $imageManager;
-
-        $this->uploadManager = $uploadManager;
     }
 
-    public function setImage(string $imagePath): ThumbnailService
+    public function setImage(string $imagePath): self
     {
         $this->imagePath = $imagePath;
 
@@ -55,7 +47,7 @@ class ThumbnailService
         return $this->imagePath;
     }
 
-    public function setSize(int|string $width, int|string $height = 'auto'): ThumbnailService
+    public function setSize(int|string $width, int|string $height = 'auto'): self
     {
         $this->thumbWidth = $width;
         $this->thumbHeight = $height;
@@ -80,14 +72,14 @@ class ThumbnailService
         return [$this->thumbWidth, $this->thumbHeight];
     }
 
-    public function setDestinationPath(string $destinationPath): ThumbnailService
+    public function setDestinationPath(string $destinationPath): self
     {
         $this->destinationPath = $destinationPath;
 
         return $this;
     }
 
-    public function setCoordinates(int $xCoordination, int $yCoordination): ThumbnailService
+    public function setCoordinates(int $xCoordination, int $yCoordination): self
     {
         $this->xCoordinate = $xCoordination;
         $this->yCoordinate = $yCoordination;
@@ -100,7 +92,7 @@ class ThumbnailService
         return [$this->xCoordinate, $this->yCoordinate];
     }
 
-    public function setFileName(string $fileName): ThumbnailService
+    public function setFileName(string $fileName): self
     {
         $this->fileName = $fileName;
 

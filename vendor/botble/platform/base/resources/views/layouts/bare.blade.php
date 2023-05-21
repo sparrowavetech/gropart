@@ -7,7 +7,9 @@
 
         <div class="page-container">
             <div class="page-content page-content-transparent">
+                {!! apply_filters('core_layout_before_content', null) !!}
                 @yield('content')
+                {!! apply_filters('core_layout_after_content', null) !!}
             </div>
             <div class="clearfix"></div>
         </div>

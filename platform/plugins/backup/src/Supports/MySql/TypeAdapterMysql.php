@@ -353,12 +353,8 @@ class TypeAdapterMysql extends TypeAdapterFactory
 
     /**
      * Get query string to ask for names of events from current database.
-     *
-     * @param string Name of database
-     *
-     * @return string
      */
-    public function showEvents()
+    public function showEvents(): string
     {
         $this->checkParameters(func_num_args(), $expected_num_args = 1, __METHOD__);
         $args = func_get_args();

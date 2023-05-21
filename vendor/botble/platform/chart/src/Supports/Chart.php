@@ -133,7 +133,7 @@ class Chart extends Base
      */
     protected bool $resize = false;
 
-    protected ?string $rangeSelect = null;
+    protected string|null $rangeSelect = null;
 
     protected string $rangeSelectColor = '#eef';
 

@@ -2,10 +2,12 @@
 
 namespace Botble\Language\Repositories\Eloquent;
 
+use Botble\Base\Models\BaseModel;
+use Botble\Language\Models\Language;
 use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 use Botble\Language\Repositories\Interfaces\LanguageInterface;
-use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 class LanguageRepository extends RepositoriesAbstract implements LanguageInterface
 {
@@ -17,7 +19,7 @@ class LanguageRepository extends RepositoriesAbstract implements LanguageInterfa
         return $data;
     }
 
-    public function getDefaultLanguage(array $select = ['*']): ?Model
+    public function getDefaultLanguage(array $select = ['*']): BaseModel|Model|Language|null
     {
         $data = $this->model->where('lang_is_default', 1)->select($select)->first();
         $this->resetModel();

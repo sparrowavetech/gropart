@@ -2,13 +2,14 @@
 
 namespace Botble\Contact\Models;
 
+use Botble\Base\Casts\SafeContent;
 use Botble\Base\Supports\Avatar;
 use Botble\Contact\Enums\ContactStatusEnum;
 use Botble\Base\Models\BaseModel;
 use Exception;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use RvMedia;
+use Botble\Media\Facades\RvMedia;
 
 class Contact extends BaseModel
 {
@@ -26,6 +27,10 @@ class Contact extends BaseModel
 
     protected $casts = [
         'status' => ContactStatusEnum::class,
+        'name' => SafeContent::class,
+        'address' => SafeContent::class,
+        'subject' => SafeContent::class,
+        'content' => SafeContent::class,
     ];
 
     public function replies(): HasMany

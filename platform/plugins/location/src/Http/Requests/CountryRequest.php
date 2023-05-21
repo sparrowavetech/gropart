@@ -11,8 +11,9 @@ class CountryRequest extends Request
     public function rules(): array
     {
         return [
-            'name' => 'required',
-            'nationality' => 'required',
+            'name' => 'required|string|max:220',
+            'code' => 'nullable|string',
+            'nationality' => 'nullable|string',
             'order' => 'required|integer|min:0|max:127',
             'status' => Rule::in(BaseStatusEnum::values()),
         ];

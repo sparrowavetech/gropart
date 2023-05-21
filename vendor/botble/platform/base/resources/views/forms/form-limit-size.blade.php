@@ -42,27 +42,33 @@
                 @php do_action(BASE_ACTION_META_BOXES, 'advanced', $form->getModel()) @endphp
         </div>
         <div class="flexbox-content flexbox-right">
-            {!! $form->getActionButtons() !!}
-            @php do_action(BASE_ACTION_META_BOXES, 'top', $form->getModel()) @endphp
+            <div class="d-flex flex-column-reverse flex-md-column">
+                <div class="form-actions-wrapper">
+                    {!! $form->getActionButtons() !!}
+                </div>
+                <div class="form-side-meta-boxes">
+                    @php do_action(BASE_ACTION_META_BOXES, 'top', $form->getModel()) @endphp
 
-            @foreach ($fields as $field)
-                @if (!in_array($field->getName(), $exclude))
-                    @if ($field->getType() == 'hidden')
-                        {!! $field->render() !!}
-                    @else
-                        <div class="widget meta-boxes">
-                            <div class="widget-title">
-                                <h4>{!! Form::customLabel($field->getName(), $field->getOption('label'), $field->getOption('label_attr')) !!}</h4>
-                            </div>
-                            <div class="widget-body">
-                                {!! $field->render([], false) !!}
-                            </div>
-                        </div>
-                    @endif
-                @endif
-            @endforeach
+                    @foreach ($fields as $field)
+                        @if (!in_array($field->getName(), $exclude))
+                            @if ($field->getType() == 'hidden')
+                                {!! $field->render() !!}
+                            @else
+                                <div class="widget meta-boxes">
+                                    <div class="widget-title">
+                                        <h4>{!! Form::customLabel($field->getName(), $field->getOption('label'), $field->getOption('label_attr')) !!}</h4>
+                                    </div>
+                                    <div class="widget-body">
+                                        {!! $field->render([], false) !!}
+                                    </div>
+                                </div>
+                            @endif
+                        @endif
+                    @endforeach
 
-            @php do_action(BASE_ACTION_META_BOXES, 'side', $form->getModel()) @endphp
+                    @php do_action(BASE_ACTION_META_BOXES, 'side', $form->getModel()) @endphp
+                </div>
+            </div>
         </div>
     </div>
 

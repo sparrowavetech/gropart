@@ -1,6 +1,8 @@
 <?php
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Table\Http\Controllers\TableController;
+use Illuminate\Support\Facades\Route;
 
 Route::group([
     'middleware' => ['web', 'core', 'auth'],

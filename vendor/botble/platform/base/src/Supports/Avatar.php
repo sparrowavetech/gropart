@@ -13,7 +13,7 @@ use InvalidArgumentException;
 
 class Avatar
 {
-    protected ?string $name = null;
+    protected string|null $name = null;
 
     protected int $chars = 1;
 
@@ -97,7 +97,7 @@ class Avatar
         $array = array_values($array);
 
         $name = $this->name;
-        if ($name == null || strlen($name) === 0) {
+        if ($name == null) {
             $name = chr(rand(65, 90));
         }
 
@@ -251,7 +251,7 @@ class Avatar
         $this->name = $name;
     }
 
-    public function create(?string $name): self
+    public function create(string|null $name): self
     {
         $this->name = $name;
 
@@ -278,7 +278,7 @@ class Avatar
         );
     }
 
-    protected function getBorderColor(): ?string
+    protected function getBorderColor(): string|null
     {
         if ($this->borderColor == 'foreground') {
             return $this->foreground;
@@ -293,7 +293,7 @@ class Avatar
 
     protected function createSquareShape(): void
     {
-        $edge = ceil($this->borderSize / 2);
+        $edge = (int)ceil($this->borderSize / 2);
         $width = $this->width - $edge;
         $height = $this->height - $edge;
 

@@ -2,19 +2,21 @@
 
 namespace Botble\Slug\Providers;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Facades\MacroableModels;
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Page\Models\Page;
+use Botble\Slug\Facades\SlugHelper as SlugHelperFacade;
 use Botble\Slug\Models\Slug;
 use Botble\Slug\Repositories\Caches\SlugCacheDecorator;
 use Botble\Slug\Repositories\Eloquent\SlugRepository;
 use Botble\Slug\Repositories\Interfaces\SlugInterface;
+use Botble\Slug\SlugCompiler;
 use Botble\Slug\SlugHelper;
 use Illuminate\Routing\Events\RouteMatched;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
-use MacroableModels;
 
 class SlugServiceProvider extends ServiceProvider
 {
@@ -29,7 +31,7 @@ class SlugServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(SlugHelper::class, function () {
-            return new SlugHelper();
+            return new SlugHelper(new SlugCompiler());
         });
 
         $this->setNamespace('packages/slug')
@@ -49,17 +51,16 @@ class SlugServiceProvider extends ServiceProvider
         $this->app->register(EventServiceProvider::class);
         $this->app->register(CommandServiceProvider::class);
 
-        Event::listen(RouteMatched::class, function () {
-            dashboard_menu()
-                ->registerItem([
-                    'id' => 'cms-packages-slug-permalink',
-                    'priority' => 5,
-                    'parent_id' => 'cms-core-settings',
-                    'name' => 'packages/slug::slug.permalink_settings',
-                    'icon' => null,
-                    'url' => route('slug.settings'),
-                    'permissions' => ['setting.options'],
-                ]);
+        $this->app['events']->listen(RouteMatched::class, function () {
+            DashboardMenu::registerItem([
+                'id' => 'cms-packages-slug-permalink',
+                'priority' => 5,
+                'parent_id' => 'cms-core-settings',
+                'name' => 'packages/slug::slug.permalink_settings',
+                'icon' => null,
+                'url' => route('slug.settings'),
+                'permissions' => ['setting.options'],
+            ]);
         });
 
         $this->app->booted(function () {
@@ -103,17 +104,14 @@ class SlugServiceProvider extends ServiceProvider
                         /**
                          * @var BaseModel $this
                          */
-
-                        if (! $this->slug) {
-                            return url('');
-                        }
-
-                        if (get_class($this) == Page::class && BaseHelper::isHomepage($this->id)) {
-                            return url('');
+                        if (! $this->slug || (get_class($this) == Page::class && BaseHelper::isHomepage($this->id))) {
+                            return route('public.index');
                         }
 
                         $prefix = $this->slugable ? $this->slugable->prefix : null;
                         $prefix = apply_filters(FILTER_SLUG_PREFIX, $prefix);
+
+                        $prefix = SlugHelperFacade::getTranslator()->compile($prefix, $this);
 
                         return apply_filters(
                             'slug_filter_url',

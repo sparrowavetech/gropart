@@ -6,68 +6,23 @@ use Botble\Support\Repositories\Interfaces\RepositoryInterface;
 
 interface MediaFolderInterface extends RepositoryInterface
 {
-    /**
-     * @param int $folderId
-     * @param array $params
-     * @param bool $withTrash
-     * @return mixed
-     */
-    public function getFolderByParentId($folderId, array $params = [], $withTrash = false);
+    public function getFolderByParentId(int|string|null $folderId, array $params = [], bool $withTrash = false);
 
-    /**
-     * @param string $name
-     * @param int $parentId
-     * @return string
-     */
-    public function createSlug($name, $parentId);
+    public function createSlug(string $name, int|string|null $parentId);
 
-    /**
-     * @param string $name
-     * @param int $parentId
-     */
-    public function createName($name, $parentId);
+    public function createName(string $name, int|string|null $parentId);
 
-    /**
-     * @param int $parentId
-     * @param array $breadcrumbs
-     * @return array
-     */
-    public function getBreadcrumbs($parentId, $breadcrumbs = []);
+    public function getBreadcrumbs(int|string|null $parentId, array $breadcrumbs = []);
 
-    /**
-     * @param int $parentId
-     * @param array $params
-     * @return mixed
-     */
-    public function getTrashed($parentId, array $params = []);
+    public function getTrashed(int|string|null $parentId, array $params = []);
 
-    /**
-     * @param int $folderId
-     * @param bool $force
-     */
-    public function deleteFolder($folderId, $force = false);
+    public function deleteFolder(int|string|null $folderId, bool $force = false);
 
-    /**
-     * @param int $parentId
-     * @param array $child
-     * @return array
-     */
-    public function getAllChildFolders($parentId, $child = []);
+    public function getAllChildFolders(int|string|null $parentId, array $child = []);
 
-    /**
-     * @param int $folderId
-     * @param string $path
-     * @return string
-     */
-    public function getFullPath($folderId, $path = '');
+    public function getFullPath(int|string|null $folderId, string|null $path = '');
 
-    /**
-     * @param int $folderId
-     */
-    public function restoreFolder($folderId);
+    public function restoreFolder(int|string|null $folderId);
 
-    /**
-     * @return bool
-     */
-    public function emptyTrash();
+    public function emptyTrash(): bool;
 }

@@ -12,11 +12,8 @@ class CityRule implements DataAwareRule, Rule
 {
     protected array $data = [];
 
-    protected ?string $stateKey;
-
-    public function __construct(?string $stateKey = '')
+    public function __construct(protected string|null $stateKey = '')
     {
-        $this->stateKey = $stateKey;
     }
 
     public function setData($data): self
@@ -41,7 +38,7 @@ class CityRule implements DataAwareRule, Rule
             $condition['state_id'] = $stateId;
         }
 
-        return app(CityInterface::class)->count($condition);
+        return app(CityInterface::class)->getModel()->where($condition)->exists();
     }
 
     public function message(): string

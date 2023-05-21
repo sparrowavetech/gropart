@@ -2,17 +2,20 @@
 
 namespace Botble\PluginManagement\Commands;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\PluginManagement\Services\PluginService;
 use Illuminate\Console\Command;
+use Illuminate\Console\ConfirmableTrait;
 use Symfony\Component\Console\Attribute\AsCommand;
 
 #[AsCommand('cms:plugin:remove:all', 'Remove all plugins in /plugins directory')]
 class PluginRemoveAllCommand extends Command
 {
+    use ConfirmableTrait;
+
     public function handle(PluginService $pluginService): int
     {
-        if (! $this->components->confirm('Are you sure you want to remove ALL plugins?', true)) {
+        if (! $this->confirmToProceed('Are you sure you want to remove ALL plugins?', true)) {
             return self::FAILURE;
         }
 
@@ -23,5 +26,10 @@ class PluginRemoveAllCommand extends Command
         $this->components->info('Removed successfully!');
 
         return self::SUCCESS;
+    }
+
+    protected function configure(): void
+    {
+        $this->addOption('force', 'f', null, 'Force to remove ALL plugins without confirmation');
     }
 }

@@ -8,9 +8,4 @@ return new class () extends Migration {
     {
         Plugin::activated();
     }
-
-    public function down(): void
-    {
-        //
-    }
 };

@@ -13,6 +13,8 @@ class PluginDiscoverCommand extends Command
     {
         $this->components->info('Discovering plugins');
 
+        $this->laravel['files']->delete($manifest->getManifestFilePath());
+
         $manifest->generateManifest();
 
         collect(get_active_plugins())

@@ -5,7 +5,6 @@ namespace Botble\Table\Supports;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Events\BeforeSheet;
-use Maatwebsite\Excel\Events\Event;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\MemoryDrawing;
@@ -107,7 +106,7 @@ class TableExportHandler extends DataTablesExportHandler implements WithEvents
         return $letter;
     }
 
-    protected function getImageResourceFromURL(?string $imageUrl)
+    protected function getImageResourceFromURL(string|null $imageUrl)
     {
         if (! $imageUrl) {
             return null;
@@ -123,7 +122,7 @@ class TableExportHandler extends DataTablesExportHandler implements WithEvents
         return imagecreatefromstring($content);
     }
 
-    protected function drawingImage(Event $event, string $column, int $row): bool
+    protected function drawingImage(AfterSheet $event, string $column, int $row): bool
     {
         if (request()->input('action') !== 'excel') {
             return false;

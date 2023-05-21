@@ -2,9 +2,9 @@
 
 namespace Botble\ACL\Traits;
 
-use Botble\ACL\Models\User;
+use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
-use Illuminate\Contracts\Auth\CanResetPassword;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\PasswordBroker;
 use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Contracts\Foundation\Application;
@@ -65,26 +65,16 @@ trait ResetsPasswords
             : $this->sendResetFailedResponse($request, $response);
     }
 
-    /**
-     * Get the password reset validation rules.
-     *
-     * @return array
-     */
-    protected function rules()
+    protected function rules(): array
     {
         return [
-            'token' => 'required',
+            'token' => 'required|string',
             'email' => 'required|email',
-            'password' => 'required|confirmed|min:8',
+            'password' => 'required|confirmed|min:6',
         ];
     }
 
-    /**
-     * Get the password reset validation error messages.
-     *
-     * @return array
-     */
-    protected function validationErrorMessages()
+    protected function validationErrorMessages(): array
     {
         return [];
     }
@@ -99,13 +89,7 @@ trait ResetsPasswords
         return Password::broker();
     }
 
-    /**
-     * Get the password reset credentials from the request.
-     *
-     * @param Request $request
-     * @return array
-     */
-    protected function credentials(Request $request)
+    protected function credentials(Request $request): array
     {
         return $request->only(
             'email',
@@ -118,7 +102,7 @@ trait ResetsPasswords
     /**
      * Reset the given user's password.
      *
-     * @param CanResetPassword|User $user
+     * @param Authenticatable|User $user
      * @param string $password
      * @return void
      */
@@ -138,12 +122,13 @@ trait ResetsPasswords
     /**
      * Set the user's password.
      *
-     * @param CanResetPassword $user
+     * @param Authenticatable|User $user
      * @param string $password
      * @return void
      */
     protected function setUserPassword($user, $password)
     {
+        // @phpstan-ignore-next-line
         $user->password = Hash::make($password);
     }
 

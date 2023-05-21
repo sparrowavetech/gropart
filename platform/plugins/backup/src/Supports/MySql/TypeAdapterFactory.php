@@ -3,6 +3,7 @@
 namespace Botble\Backup\Supports\MySql;
 
 use Exception;
+use PDO;
 
 /**
  * TypeAdapter Factory.

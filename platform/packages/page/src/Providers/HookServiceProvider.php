@@ -7,14 +7,13 @@ use Botble\Dashboard\Supports\DashboardWidgetInstance;
 use Botble\Page\Models\Page;
 use Botble\Page\Repositories\Interfaces\PageInterface;
 use Botble\Page\Services\PageService;
-use Eloquent;
-use Html;
-use Illuminate\Database\Query\Builder;
+use Botble\Slug\Models\Slug;
+use Botble\Base\Facades\Html;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
-use Menu;
-use RvMedia;
+use Botble\Menu\Facades\Menu;
+use Botble\Media\Facades\RvMedia;
 
 class HookServiceProvider extends ServiceProvider
 {
@@ -34,7 +33,7 @@ class HookServiceProvider extends ServiceProvider
 
         if (defined('THEME_FRONT_HEADER')) {
             add_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, function ($screen, $page): void {
-                add_filter(THEME_FRONT_HEADER, function (?string $html) use ($page): ?string {
+                add_filter(THEME_FRONT_HEADER, function (string|null $html) use ($page): string|null {
                     if (get_class($page) != Page::class) {
                         return $html;
                     }
@@ -110,7 +109,7 @@ class HookServiceProvider extends ServiceProvider
             ->init($widgets, $widgetSettings);
     }
 
-    public function handleSingleView(Eloquent|array $slug): Eloquent|array|Builder
+    public function handleSingleView(Slug|array $slug): Slug|array
     {
         return (new PageService())->handleFrontRoutes($slug);
     }

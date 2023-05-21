@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 return new class () extends Migration {
     public function up(): void
@@ -10,7 +11,7 @@ return new class () extends Migration {
             $table->id();
             $table->string('meta_key', 255);
             $table->text('meta_value')->nullable();
-            $table->integer('reference_id')->unsigned()->index();
+            $table->foreignId('reference_id')->index();
             $table->string('reference_type', 120);
             $table->timestamps();
         });

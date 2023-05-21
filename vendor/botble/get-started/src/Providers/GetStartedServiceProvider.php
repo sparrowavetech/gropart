@@ -2,7 +2,8 @@
 
 namespace Botble\GetStarted\Providers;
 
-use Assets;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
@@ -41,7 +42,7 @@ class GetStartedServiceProvider extends ServiceProvider
 
     protected function shouldShowGetStartedPopup(): bool
     {
-        return ! $this->app->environment('demo') &&
+        return ! BaseHelper::hasDemoModeEnabled() &&
             is_in_admin(true) &&
             Auth::check() &&
             setting('is_completed_get_started') != '1';

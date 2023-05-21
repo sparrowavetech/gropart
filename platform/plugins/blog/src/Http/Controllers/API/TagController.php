@@ -11,11 +11,8 @@ use Illuminate\Http\Request;
 
 class TagController extends Controller
 {
-    protected TagInterface $tagRepository;
-
-    public function __construct(TagInterface $tagRepository)
+    public function __construct(protected TagInterface $tagRepository)
     {
-        $this->tagRepository = $tagRepository;
     }
 
     /**
@@ -30,8 +27,8 @@ class TagController extends Controller
                 'with' => ['slugable'],
                 'condition' => ['status' => BaseStatusEnum::PUBLISHED],
                 'paginate' => [
-                    'per_page' => (int)$request->input('per_page', 10),
-                    'current_paged' => (int)$request->input('page', 1),
+                    'per_page' => $request->integer('per_page', 10),
+                    'current_paged' => $request->integer('page', 1),
                 ],
             ]);
 

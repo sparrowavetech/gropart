@@ -2,7 +2,6 @@
 
 return [
     'create' => 'Create new page',
-    'edit' => 'Edit page',
     'form' => [
         'name' => 'Name',
         'name_placeholder' => 'Page\'s name (Maximum 120 characters)',

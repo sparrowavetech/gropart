@@ -7,50 +7,33 @@ use Botble\Ecommerce\Models\StoreLocator;
 use Botble\Location\Models\City;
 use Botble\Location\Models\Country;
 use Botble\Location\Models\State;
-use Botble\Marketplace\Models\Store;
-use Botble\Setting\Models\Setting;
+use Botble\Setting\Facades\Setting;
 use Illuminate\Console\Command;
 use Illuminate\Console\ConfirmableTrait;
 use Illuminate\Support\Facades\DB;
-use Location;
+use Botble\Location\Facades\Location;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Input\InputOption;
 use Throwable;
 
+#[AsCommand('cms:shippo:init', 'Shippo initialization')]
 class InitShippoCommand extends Command
 {
     use ConfirmableTrait;
 
-    protected $signature = 'cms:shippo:init {--key= : The Test API Token to use} {--force : Force the operation to run when in production}';
-
-    protected $description = 'Shippo Initialization';
-
-    /**
-     * Execute the console command.
-     */
-    public function handle()
+    public function handle(): int
     {
         if (! $this->confirmToProceed()) {
-            return 1;
+            return self::FAILURE;
         }
 
         $key = $this->option('key');
 
         $settings = [
-            [
-                'key' => 'ecommerce_load_countries_states_cities_from_location_plugin',
-                'value' => '1',
-            ],
-            [
-                'key' => 'ecommerce_zip_code_enabled',
-                'value' => '1',
-            ],
-            [
-                'key' => 'shipping_shippo_test_key',
-                'value' => $key,
-            ],
-            [
-                'key' => 'shipping_shippo_status',
-                'value' => $key ? '1' : '0',
-            ],
+            'ecommerce_load_countries_states_cities_from_location_plugin' => '1',
+            'ecommerce_zip_code_enabled' => '1',
+            'shipping_shippo_test_key' => $key,
+            'shipping_shippo_status' => $key ? '1' : '0',
         ];
 
         $this->loadLocation();
@@ -79,37 +62,19 @@ class InitShippoCommand extends Command
                 ]);
 
                 $settings = array_merge($settings, [
-                    [
-                        'key' => 'ecommerce_store_phone',
-                        'value' => $phone,
-                    ],
-                    [
-                        'key' => 'ecommerce_store_address',
-                        'value' => $address,
-                    ],
-                    [
-                        'key' => 'ecommerce_store_country',
-                        'value' => $countryId,
-                    ],
-                    [
-                        'key' => 'ecommerce_store_state',
-                        'value' => $stateId,
-                    ],
-                    [
-                        'key' => 'ecommerce_store_city',
-                        'value' => $cityId,
-                    ],
-                    [
-                        'key' => 'ecommerce_store_zip_code',
-                        'value' => $zipCode,
-                    ],
+                    'ecommerce_store_phone' => $phone,
+                    'ecommerce_store_address' => $address,
+                    'ecommerce_store_country' => $countryId,
+                    'ecommerce_store_state' => $stateId,
+                    'ecommerce_store_city' => $cityId,
+                    'ecommerce_store_zip_code' => $zipCode,
                 ]);
 
                 $this->info('Updated store locator id: ' . $storeLocator->id);
             }
 
             if (is_plugin_active('marketplace')) {
-                $store = Store::first();
+                $store = DB::table('mp_stores')->first();
                 if ($store) {
                     $store->update([
                         'country' => $countryId,
@@ -140,14 +105,16 @@ class InitShippoCommand extends Command
             }
         }
 
-        Setting::whereIn('key', collect($settings)->pluck('key')->all())->delete();
+        Setting::delete(array_keys($settings));
 
-        Setting::insert($settings);
+        Setting::set($settings)->save();
 
         $this->info('Shippo configuration initialized successfully!');
+
+        return self::SUCCESS;
     }
 
-    public function loadLocation()
+    public function loadLocation(): void
     {
         $country = Country::where(['code' => 'US'])->first();
         if (! $country) {
@@ -165,5 +132,11 @@ class InitShippoCommand extends Command
                 $this->warn('Cannot load location!');
             }
         }
+    }
+
+    protected function configure(): void
+    {
+        $this->addOption('key', null, InputOption::VALUE_REQUIRED, 'The Test API Token to use')
+            ->addOption('force', 'f', null, 'Force the operation to run when in production');
     }
 }

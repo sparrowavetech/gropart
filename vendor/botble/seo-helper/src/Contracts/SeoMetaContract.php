@@ -103,4 +103,10 @@ interface SeoMetaContract extends RenderableContract
     public function addMetas(array $meta);
 
     public function getAnalytics(): AnalyticsContract;
+
+    public function getTitle();
+
+    public function getDescription();
+
+    public function setGoogle($code);
 }

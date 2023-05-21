@@ -1,7 +1,7 @@
 @if (setting('payment_stripe_status') == 1)
     <li class="list-group-item">
         <input class="magic-radio js_payment_method" type="radio" name="payment_method" id="payment_stripe"
-               value="stripe" @if ($selecting == STRIPE_PAYMENT_METHOD_NAME) checked @endif data-bs-toggle="collapse" data-bs-target=".payment_stripe_wrap" data-toggle="collapse" data-target=".payment_stripe_wrap" data-parent=".list_payment_method">
+               value="stripe" @if ($selecting == STRIPE_PAYMENT_METHOD_NAME) checked @endif>
         <label for="payment_stripe" class="text-start">
             {{ setting('payment_stripe_name', trans('plugins/payment::payment.payment_via_card')) }}
         </label>

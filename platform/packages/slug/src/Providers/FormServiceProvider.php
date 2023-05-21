@@ -2,7 +2,7 @@
 
 namespace Botble\Slug\Providers;
 
-use Form;
+use Botble\Base\Facades\Form;
 use Illuminate\Support\ServiceProvider;
 
 class FormServiceProvider extends ServiceProvider

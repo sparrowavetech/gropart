@@ -22,7 +22,7 @@ class Menu extends BaseModel
         'name' => SafeContent::class,
     ];
 
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
 

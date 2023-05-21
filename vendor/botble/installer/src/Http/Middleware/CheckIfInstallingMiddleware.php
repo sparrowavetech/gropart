@@ -2,7 +2,7 @@
 
 namespace Botble\Installer\Http\Middleware;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Carbon\Carbon;
 use Closure;
 use Exception;
@@ -17,7 +17,7 @@ class CheckIfInstallingMiddleware
 
             $startingDate = Carbon::parse($content);
 
-            if (! $content || \Carbon\Carbon::now()->diffInMinutes($startingDate) > 30) {
+            if (! $content || Carbon::now()->diffInMinutes($startingDate) > 30) {
                 return redirect()->route('public.index');
             }
         } catch (Exception) {

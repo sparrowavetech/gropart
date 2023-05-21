@@ -3,10 +3,11 @@
 namespace Botble\Blog\Http\Controllers;
 
 use Botble\ACL\Models\User;
-use Botble\Base\Events\BeforeEditContentEvent;
+use Botble\Base\Events\BeforeUpdateContentEvent;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
@@ -28,32 +29,23 @@ class PostController extends BaseController
 {
     use HasDeleteManyItemsTrait;
 
-    protected PostInterface $postRepository;
-
-    protected TagInterface $tagRepository;
-
-    protected CategoryInterface $categoryRepository;
-
     public function __construct(
-        PostInterface $postRepository,
-        TagInterface $tagRepository,
-        CategoryInterface $categoryRepository
+        protected PostInterface $postRepository,
+        protected TagInterface $tagRepository,
+        protected CategoryInterface $categoryRepository
     ) {
-        $this->postRepository = $postRepository;
-        $this->tagRepository = $tagRepository;
-        $this->categoryRepository = $categoryRepository;
     }
 
     public function index(PostTable $dataTable)
     {
-        page_title()->setTitle(trans('plugins/blog::posts.menu_name'));
+        PageTitle::setTitle(trans('plugins/blog::posts.menu_name'));
 
         return $dataTable->renderTable();
     }
 
     public function create(FormBuilder $formBuilder)
     {
-        page_title()->setTitle(trans('plugins/blog::posts.create'));
+        PageTitle::setTitle(trans('plugins/blog::posts.create'));
 
         return $formBuilder->create(PostForm::class)->renderForm();
     }
@@ -88,25 +80,21 @@ class PostController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int $id, FormBuilder $formBuilder, Request $request)
+    public function edit(Post $post, FormBuilder $formBuilder)
     {
-        $post = $this->postRepository->findOrFail($id);
-
-        event(new BeforeEditContentEvent($request, $post));
-
-        page_title()->setTitle(trans('plugins/blog::posts.edit') . ' "' . $post->name . '"');
+        PageTitle::setTitle(trans('core/base::forms.edit_item', ['name' => $post->name]));
 
         return $formBuilder->create(PostForm::class, ['model' => $post])->renderForm();
     }
 
     public function update(
-        $id,
+        Post $post,
         PostRequest $request,
         StoreTagService $tagService,
         StoreCategoryService $categoryService,
         BaseHttpResponse $response
     ) {
-        $post = $this->postRepository->findOrFail($id);
+        event(new BeforeUpdateContentEvent($request, $post));
 
         $post->fill($request->input());
 
@@ -123,10 +111,9 @@ class PostController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(int $id, Request $request, BaseHttpResponse $response)
+    public function destroy(Post $post, Request $request, BaseHttpResponse $response)
     {
         try {
-            $post = $this->postRepository->findOrFail($id);
             $this->postRepository->delete($post);
 
             event(new DeletedContentEvent(POST_MODULE_SCREEN_NAME, $request, $post));
@@ -147,7 +134,7 @@ class PostController extends BaseController
 
     public function getWidgetRecentPosts(Request $request, BaseHttpResponse $response)
     {
-        $limit = (int)$request->input('paginate', 10);
+        $limit = $request->integer('paginate', 10);
         $limit = $limit > 0 ? $limit : 10;
 
         $posts = $this->postRepository->advancedGet([
@@ -155,7 +142,7 @@ class PostController extends BaseController
             'order_by' => ['created_at' => 'desc'],
             'paginate' => [
                 'per_page' => $limit,
-                'current_paged' => (int)$request->input('page', 1),
+                'current_paged' => $request->integer('page', 1),
             ],
         ]);
 

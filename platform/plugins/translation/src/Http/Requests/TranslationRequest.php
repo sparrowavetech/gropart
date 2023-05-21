@@ -9,7 +9,7 @@ class TranslationRequest extends Request
     public function rules(): array
     {
         return [
-            'name' => 'required',
+            'name' => 'required|string|max:220',
         ];
     }
 }

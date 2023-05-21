@@ -14,15 +14,17 @@ use Botble\ACL\Repositories\Eloquent\UserRepository;
 use Botble\ACL\Repositories\Interfaces\ActivationInterface;
 use Botble\ACL\Repositories\Interfaces\RoleInterface;
 use Botble\ACL\Repositories\Interfaces\UserInterface;
+use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
-use EmailHandler;
+use Botble\Media\Facades\RvMedia;
 use Exception;
-use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\View\View as IlluminateView;
 
 class AclServiceProvider extends ServiceProvider
 {
@@ -43,9 +45,6 @@ class AclServiceProvider extends ServiceProvider
         });
     }
 
-    /**
-     * @throws BindingResolutionException
-     */
     public function boot(): void
     {
         $this->app->register(CommandServiceProvider::class);
@@ -62,17 +61,16 @@ class AclServiceProvider extends ServiceProvider
 
         $this->garbageCollect();
 
-        Event::listen(RouteMatched::class, function () {
-            dashboard_menu()
-                ->registerItem([
-                    'id' => 'cms-core-role-permission',
-                    'priority' => 2,
-                    'parent_id' => 'cms-core-platform-administration',
-                    'name' => 'core/acl::permissions.role_permission',
-                    'icon' => null,
-                    'url' => route('roles.index'),
-                    'permissions' => ['roles.index'],
-                ])
+        $this->app['events']->listen(RouteMatched::class, function () {
+            DashboardMenu::registerItem([
+                'id' => 'cms-core-role-permission',
+                'priority' => 2,
+                'parent_id' => 'cms-core-platform-administration',
+                'name' => 'core/acl::permissions.role_permission',
+                'icon' => null,
+                'url' => route('roles.index'),
+                'permissions' => ['roles.index'],
+            ])
                 ->registerItem([
                     'id' => 'cms-core-user',
                     'priority' => 3,
@@ -98,13 +96,42 @@ class AclServiceProvider extends ServiceProvider
             EmailHandler::addTemplateSettings('acl', config('core.acl.email', []), 'core');
 
             $this->app->register(HookServiceProvider::class);
+
+            View::composer('core/acl::auth.master', function (IlluminateView $view) {
+                $view->with('backgroundUrl', $this->getLoginPageBackgroundUrl());
+            });
         });
+    }
+
+    protected function getLoginPageBackgroundUrl(): string
+    {
+        $default = url(Arr::random(config('core.acl.general.backgrounds', [])));
+
+        $images = setting('login_screen_backgrounds', []);
+
+        if (! $images) {
+            return $default;
+        }
+
+        $images = is_array($images) ? $images : json_decode($images, true);
+
+        $images = array_filter($images);
+
+        if (empty($images)) {
+            return $default;
+        }
+
+        $image = Arr::random($images);
+
+        if (! $image) {
+            return $default;
+        }
+
+        return RvMedia::getImageUrl($image);
     }
 
     /**
      * Garbage collect activations and reminders.
-     *
-     * @throws BindingResolutionException
      */
     protected function garbageCollect(): void
     {

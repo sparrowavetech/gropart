@@ -14,7 +14,10 @@
         "laravel": {
             "providers": [
                 "Botble\\Optimize\\Providers\\OptimizeServiceProvider"
-            ]
+            ],
+            "aliases": {
+                "OptimizerHelper": "Botble\\Optimize\\Facades\\OptimizerHelper"
+            }
         }
     }
 }

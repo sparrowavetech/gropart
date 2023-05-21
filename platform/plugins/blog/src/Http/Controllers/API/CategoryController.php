@@ -11,15 +11,12 @@ use Botble\Blog\Models\Category;
 use Botble\Blog\Repositories\Interfaces\CategoryInterface;
 use Botble\Blog\Supports\FilterCategory;
 use Illuminate\Http\Request;
-use SlugHelper;
+use Botble\Slug\Facades\SlugHelper;
 
 class CategoryController extends Controller
 {
-    protected CategoryInterface $categoryRepository;
-
-    public function __construct(CategoryInterface $categoryRepository)
+    public function __construct(protected CategoryInterface $categoryRepository)
     {
-        $this->categoryRepository = $categoryRepository;
     }
 
     /**
@@ -34,8 +31,8 @@ class CategoryController extends Controller
                 'with' => ['slugable'],
                 'condition' => ['status' => BaseStatusEnum::PUBLISHED],
                 'paginate' => [
-                    'per_page' => (int)$request->input('per_page', 10),
-                    'current_paged' => (int)$request->input('page', 1),
+                    'per_page' => $request->integer('per_page', 10),
+                    'current_paged' => $request->integer('page', 1),
                 ],
             ]);
 
@@ -67,7 +64,7 @@ class CategoryController extends Controller
      */
     public function findBySlug(string $slug, BaseHttpResponse $response)
     {
-        $slug = SlugHelper::getSlug($slug, SlugHelper::getPrefix(Category::class), Category::class);
+        $slug = SlugHelper::getSlug($slug, SlugHelper::getPrefix(Category::class));
 
         if (! $slug) {
             return $response->setError()->setCode(404)->setMessage('Not found');

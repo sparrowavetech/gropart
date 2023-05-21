@@ -2,20 +2,21 @@
 
 namespace Botble\Location\Tables;
 
+use Botble\Location\Models\City;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Location\Repositories\Interfaces\CityInterface;
 use Botble\Location\Repositories\Interfaces\CountryInterface;
 use Botble\Location\Repositories\Interfaces\StateInterface;
 use Botble\Table\Abstracts\TableAbstract;
-use Html;
+use Botble\Base\Facades\Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
-use Yajra\DataTables\DataTables;
+use Botble\Table\DataTables;
 
 class CityTable extends TableAbstract
 {
@@ -23,22 +24,16 @@ class CityTable extends TableAbstract
 
     protected $hasFilter = true;
 
-    protected CountryInterface $countryRepository;
-
-    protected StateInterface $stateRepository;
-
     public function __construct(
         DataTables $table,
         UrlGenerator $urlGenerator,
         CityInterface $cityRepository,
-        CountryInterface $countryRepository,
-        StateInterface $stateRepository
+        protected CountryInterface $countryRepository,
+        protected StateInterface $stateRepository
     ) {
         parent::__construct($table, $urlGenerator);
 
         $this->repository = $cityRepository;
-        $this->countryRepository = $countryRepository;
-        $this->stateRepository = $stateRepository;
 
         if (! Auth::user()->hasAnyPermission(['city.edit', 'city.destroy'])) {
             $this->hasOperations = false;
@@ -50,37 +45,37 @@ class CityTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('name', function ($item) {
+            ->editColumn('name', function (City $item) {
                 if (! Auth::user()->hasPermission('city.edit')) {
                     return BaseHelper::clean($item->name);
                 }
 
                 return Html::link(route('city.edit', $item->id), BaseHelper::clean($item->name));
             })
-            ->editColumn('state_id', function ($item) {
+            ->editColumn('state_id', function (City $item) {
                 if (! $item->state_id || ! $item->state->name) {
                     return '&mdash;';
                 }
 
                 return Html::link(route('state.edit', $item->state_id), $item->state->name);
             })
-            ->editColumn('country_id', function ($item) {
+            ->editColumn('country_id', function (City $item) {
                 if (! $item->country_id || ! $item->country->name) {
                     return '&mdash;';
                 }
 
                 return Html::link(route('country.edit', $item->country_id), $item->country->name);
             })
-            ->editColumn('checkbox', function ($item) {
+            ->editColumn('checkbox', function (City $item) {
                 return $this->getCheckbox($item->id);
             })
-            ->editColumn('created_at', function ($item) {
+            ->editColumn('created_at', function (City $item) {
                 return BaseHelper::formatDate($item->created_at);
             })
-            ->editColumn('status', function ($item) {
+            ->editColumn('status', function (City $item) {
                 return $item->status->toHtml();
             })
-            ->addColumn('operations', function ($item) {
+            ->addColumn('operations', function (City $item) {
                 return $this->getOperations('city.edit', 'city.destroy', $item);
             });
 

@@ -4,9 +4,13 @@ namespace Botble\Base\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * @template TModelClass of \Illuminate\Database\Eloquent\Model
+ * @extends Builder<TModelClass>
+ */
 class BaseQueryBuilder extends Builder
 {
-    public function addSearch(string $column, ?string $term, bool $isPartial = true): BaseQueryBuilder
+    public function addSearch(string $column, string|null $term, bool $isPartial = true): BaseQueryBuilder
     {
         if (! $isPartial) {
             $this->orWhere($column, 'LIKE', '%' . trim($term) . '%');

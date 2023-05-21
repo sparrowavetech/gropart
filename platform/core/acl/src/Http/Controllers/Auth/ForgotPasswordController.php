@@ -2,30 +2,29 @@
 
 namespace Botble\ACL\Http\Controllers\Auth;
 
-use Assets;
+use Botble\ACL\Http\Requests\ForgotPasswordRequest;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\ACL\Traits\SendsPasswordResetEmails;
+use Botble\JsValidation\Facades\JsValidator;
 use Illuminate\Http\Request;
 
 class ForgotPasswordController extends BaseController
 {
     use SendsPasswordResetEmails;
 
-    protected BaseHttpResponse $response;
-
-    public function __construct(BaseHttpResponse $response)
+    public function __construct(protected BaseHttpResponse $response)
     {
         $this->middleware('guest');
-        $this->response = $response;
     }
 
     public function showLinkRequestForm()
     {
-        page_title()->setTitle(trans('core/acl::auth.forgot_password.title'));
+        PageTitle::setTitle(trans('core/acl::auth.forgot_password.title'));
 
-        Assets::addScripts(['jquery-validation'])
-            ->addScriptsDirectly('vendor/core/core/acl/js/login.js')
+        Assets::addScripts(['jquery-validation', 'form-validation'])
             ->addStylesDirectly('vendor/core/core/acl/css/animate.min.css')
             ->addStylesDirectly('vendor/core/core/acl/css/login.css')
             ->removeStyles([
@@ -42,7 +41,9 @@ class ForgotPasswordController extends BaseController
                 'cookie',
             ]);
 
-        return view('core/acl::auth.forgot-password');
+        $jsValidator = JsValidator::formRequest(ForgotPasswordRequest::class);
+
+        return view('core/acl::auth.forgot-password', compact('jsValidator'));
     }
 
     protected function sendResetLinkResponse(Request $request, $response)

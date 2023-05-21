@@ -6,22 +6,16 @@ use Botble\Media\Chunks\Save\AbstractSave;
 use Botble\Media\Chunks\Storage\ChunkStorage;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
-use RvMedia;
-use Session;
+use Botble\Media\Facades\RvMedia;
+use Illuminate\Support\Facades\Session;
 
 abstract class AbstractHandler
 {
-    protected Request $request;
+    protected array $config;
 
-    protected UploadedFile $file;
-
-    protected mixed $config;
-
-    public function __construct(Request $request, UploadedFile $file)
+    public function __construct(protected Request $request, protected UploadedFile $file)
     {
-        $this->request = $request;
-        $this->file = $file;
-        $this->config = RvMedia::getConfig('chunk');
+        $this->config = RvMedia::getConfig('chunk', []);
     }
 
     /**
@@ -47,8 +41,8 @@ abstract class AbstractHandler
      * provide custom additional name at the end of the generated file name. All chunk
      * files has .part extension.
      *
-     * @param string|null $additionalName Make the name more unique (example: use id from request)
-     * @param string|null $currentChunkIndex Add the chunk index for parallel upload
+     * @param int|string|null $additionalName Make the name more unique (example: use id from request)
+     * @param int|string|null $currentChunkIndex Add the chunk index for parallel upload
      *
      * @return string
      *
@@ -142,7 +136,7 @@ abstract class AbstractHandler
     /**
      * Returns the percentage of the upload file.
      *
-     * @return int
+     * @return float
      */
     abstract public function getPercentageDone();
 }

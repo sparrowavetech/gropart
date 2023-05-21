@@ -4,6 +4,7 @@ namespace Botble\SeoHelper\Entities;
 
 use Botble\SeoHelper\Contracts\Entities\MetaCollectionContract;
 use Botble\SeoHelper\Contracts\Entities\MiscTagsContract;
+use Botble\SeoHelper\Contracts\Entities\WebmastersContract;
 
 class MiscTags implements MiscTagsContract
 {
@@ -17,7 +18,7 @@ class MiscTags implements MiscTagsContract
     /**
      * Meta collection.
      *
-     * @var MetaCollectionContract
+     * @var MetaCollectionContract|WebmastersContract
      */
     protected $meta;
 

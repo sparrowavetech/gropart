@@ -8,13 +8,6 @@ trait PermissionTrait
 {
     protected array|null $preparedPermissions = null;
 
-    public function __construct(array $permissions = null)
-    {
-        if (isset($permissions)) {
-            $this->permissions = $permissions;
-        }
-    }
-
     public function updatePermission(string $permission, bool $value = true, bool $create = false): self
     {
         if (array_key_exists($permission, (array)$this->permissions)) {
@@ -94,7 +87,7 @@ trait PermissionTrait
         foreach ($permissions as $keys => $value) {
             foreach ($this->extractClassPermissions($keys) as $key) {
                 // If the value is not in the array, we're opting in
-                if (! array_key_exists($key, $prepared)) {
+                if (! array_key_exists($key, (array)$prepared)) {
                     $prepared[$key] = $value;
 
                     continue;

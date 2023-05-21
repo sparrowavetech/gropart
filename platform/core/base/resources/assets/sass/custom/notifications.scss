@@ -1,21 +1,26 @@
 #admin-notification {
     .close-notification {
         position: absolute;
-        top: 0px;
+        top: 0;
         right: 10px;
     }
 
     .sidebar {
         height: 100%;
-        width: 0;
+        width: 350px;
         position: fixed;
-        z-index: 2000;
+        z-index: 9995;
         top: 0;
         right: 0;
         background-color: #f1f1f1;
         overflow-x: hidden;
-        transition: 0.2s;
         padding-top: 25px;
+        transform: translate3d(350px, 0, 0);
+        transition: all .5s cubic-bezier(.7, 0, .3, 1) 0s;
+
+        &.active {
+            transform: none;
+        }
 
         .title-notification-heading {
             letter-spacing: -.025em;
@@ -31,7 +36,7 @@
             margin-top: 20px;
 
             .list-group-item {
-                padding-bottom: 0px !important;
+                padding-bottom: 0 !important;
             }
         }
 
@@ -50,7 +55,7 @@
             position: absolute;
             top: 20px;
             right: 25px;
-            font-size: 36px;
+            font-size: 24px;
             margin-left: 50px;
         }
 
@@ -121,9 +126,6 @@
         .sidebar {
             padding-top: 15px;
         }
-        .sidebar a {
-            font-size: 18px;
-        }
     }
 
     .no-data-notification {
@@ -137,10 +139,7 @@
 
         .fa-bell:before {
             content: "\f0f3";
-            padding-top: 8px;
-            padding-right: 10px;
-            padding-bottom: 8px;
-            padding-left: 10px;
+            padding: 8px 10px;
             background-color: #fffbec;
             border-radius: 9999px;
         }

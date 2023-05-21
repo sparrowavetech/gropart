@@ -1,5 +1,5 @@
 @if (empty($widgetSetting) || $widgetSetting->status == 1)
-    <div class="col-6 col-sm-3">
+    <div class="col">
         <a class="dashboard-stat dashboard-stat-v2 text-white" style="background-color: {{ $widget->color }};" href="{{ $widget->route }}">
             <div class="visual">
                 <i class="{{ $widget->icon }}" style="opacity: .1;"></i>

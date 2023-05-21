@@ -6,18 +6,15 @@ use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Contact\Events\SentContactEvent;
 use Botble\Contact\Http\Requests\ContactRequest;
 use Botble\Contact\Repositories\Interfaces\ContactInterface;
-use EmailHandler;
+use Botble\Base\Facades\EmailHandler;
 use Exception;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;
 
 class PublicController extends Controller
 {
-    protected ContactInterface $contactRepository;
-
-    public function __construct(ContactInterface $contactRepository)
+    public function __construct(protected ContactInterface $contactRepository)
     {
-        $this->contactRepository = $contactRepository;
     }
 
     public function postSendContact(ContactRequest $request, BaseHttpResponse $response)

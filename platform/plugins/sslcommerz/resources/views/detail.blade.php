@@ -14,7 +14,7 @@
     @if (Arr::get($data, 'card_issuer_country'))
         <p>{{ trans('plugins/payment::payment.country') }}: {{ Arr::get($data, 'card_issuer_country') }}</p>
     @endif
-    <p>{{ trans('core/base::tables.created_at') }}: {{ now()->parse(Arr::get($data, 'tran_date')) }}</p>
+    <p>{{ trans('core/base::tables.created_at') }}: {{ Carbon\Carbon::now()->parse(Arr::get($data, 'tran_date')) }}</p>
     <hr>
     @if ($refunds = Arr::get($paymentModel->metadata, 'refunds', []))
         <h6 class="alert-heading">{{ trans('plugins/payment::payment.amount_refunded') . ':' }}

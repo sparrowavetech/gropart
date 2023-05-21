@@ -6,15 +6,8 @@
         }
     @endphp
     @if (Arr::get($settings, 'show_predefined_ranges', false) && count($predefinedRanges))
-        <div class="predefined-ranges ui-select-wrapper d-inline-block {{ $hiddenIcons }}">
-            <select name="predefined_range" class="ui-select py-0">
-                @foreach ($predefinedRanges as $key => $item)
-                    <option value="{{ $item['key'] }}" @if ($item['key'] == Arr::get($settings, 'predefined_range')) selected @endif>{{ $item['label'] }}</option>
-                @endforeach
-            </select>
-            <svg class="svg-next-icon svg-next-icon-size-16">
-                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#select-chevron"></use>
-            </svg>
+        <div class="predefined-ranges d-inline-block {{ $hiddenIcons }}">
+            {!! Form::customSelect('predefined_range', collect($predefinedRanges)->pluck('label', 'key')->all(), Arr::get($settings, 'predefined_range'), ['class' => 'py-0']) !!}
         </div>
     @endif
 

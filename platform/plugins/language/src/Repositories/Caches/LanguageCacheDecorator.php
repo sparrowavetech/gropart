@@ -2,6 +2,8 @@
 
 namespace Botble\Language\Repositories\Caches;
 
+use Botble\Base\Models\BaseModel;
+use Botble\Language\Models\Language;
 use Botble\Support\Repositories\Caches\CacheAbstractDecorator;
 use Botble\Language\Repositories\Interfaces\LanguageInterface;
 use Illuminate\Database\Eloquent\Model;
@@ -14,7 +16,7 @@ class LanguageCacheDecorator extends CacheAbstractDecorator implements LanguageI
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }
 
-    public function getDefaultLanguage(array $select = ['*']): ?Model
+    public function getDefaultLanguage(array $select = ['*']): BaseModel|Model|Language|null
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }

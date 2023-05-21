@@ -60,7 +60,7 @@ class Revision extends BaseModel
      * Grab the old value of the field, if it was a foreign key
      * attempt to get an identifying name for the model.
      */
-    public function oldValue(): ?string
+    public function oldValue(): string|null
     {
         return $this->getValue('old');
     }
@@ -71,7 +71,7 @@ class Revision extends BaseModel
      *
      * @param string $which old or new
      */
-    protected function getValue(string $which = 'new'): ?string
+    protected function getValue(string $which = 'new'): string|null
     {
         $whichValue = $which . '_value';
 
@@ -167,7 +167,7 @@ class Revision extends BaseModel
     /**
      * Format the value according to the $revisionFormattedFields array.
      */
-    public function format(string $key, ?string $value): ?string
+    public function format(string $key, string|null $value): string|null
     {
         $relatedModel = $this->revisionable_type;
         $relatedModel = new $relatedModel();
@@ -186,7 +186,7 @@ class Revision extends BaseModel
      * Grab the new value of the field, if it was a foreign key
      * attempt to get an identifying name for the model.
      */
-    public function newValue(): ?string
+    public function newValue(): string|null
     {
         return $this->getValue();
     }

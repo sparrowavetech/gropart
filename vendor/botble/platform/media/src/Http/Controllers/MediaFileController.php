@@ -11,20 +11,17 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
-use RvMedia;
-use Storage;
-use Validator;
+use Botble\Media\Facades\RvMedia;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * @since 19/08/2015 07:50 AM
  */
 class MediaFileController extends Controller
 {
-    protected MediaFileInterface $fileRepository;
-
-    public function __construct(MediaFileInterface $fileRepository)
+    public function __construct(protected MediaFileInterface $fileRepository)
     {
-        $this->fileRepository = $fileRepository;
     }
 
     public function postUpload(Request $request)
@@ -82,7 +79,7 @@ class MediaFileController extends Controller
     public function postDownloadUrl(Request $request)
     {
         $validator = Validator::make($request->input(), [
-            'url' => 'required',
+            'url' => 'required|url',
         ]);
 
         if ($validator->fails()) {

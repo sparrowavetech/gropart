@@ -10,9 +10,9 @@ class Fonts implements Htmlable
 {
     public function __construct(
         protected string $googleFontsUrl,
-        protected ?string $localizedUrl = null,
-        protected ?string $localizedCss = null,
-        protected ?string $nonce = null,
+        protected string|null $localizedUrl = null,
+        protected string|null $localizedCss = null,
+        protected string|null $nonce = null,
         protected bool $preferInline = false,
     ) {
     }
@@ -81,7 +81,7 @@ class Fonts implements Htmlable
         return $this->localizedUrl;
     }
 
-    public function toHtml(): HtmlString
+    public function toHtml()
     {
         return $this->preferInline ? $this->inline() : $this->link();
     }

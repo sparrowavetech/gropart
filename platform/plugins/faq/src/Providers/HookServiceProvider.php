@@ -2,28 +2,31 @@
 
 namespace Botble\Faq\Providers;
 
-use Assets;
-use BaseHelper;
-use Html;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Faq\Contracts\Faq as FaqContract;
+use Botble\Faq\FaqCollection;
+use Botble\Faq\FaqItem;
+use Botble\Base\Facades\Html;
 use Illuminate\Support\Arr;
 use Illuminate\Support\ServiceProvider;
-use MetaBox;
+use Botble\Base\Facades\MetaBox;
 
 class HookServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
-        add_action(BASE_ACTION_META_BOXES, function ($context, $object) {
+        add_action(BASE_ACTION_META_BOXES, function ($context, $object): void {
             if (! $object || $context != 'advanced') {
-                return false;
+                return;
             }
 
             if (! in_array(get_class($object), config('plugins.faq.general.schema_supported', []))) {
-                return false;
+                return;
             }
 
             if (! setting('enable_faq_schema', 0)) {
-                return false;
+                return;
             }
 
             Assets::addStylesDirectly(['vendor/core/plugins/faq/css/faq.css'])
@@ -55,12 +58,10 @@ class HookServiceProvider extends ServiceProvider
                 get_class($object),
                 $context
             );
-
-            return true;
         }, 39, 2);
 
-        add_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, function ($screen, $object) {
-            add_filter(THEME_FRONT_HEADER, function ($html) use ($object) {
+        add_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, function ($screen, $object): void {
+            add_filter(THEME_FRONT_HEADER, function ($html) use ($object): string|null {
                 if (! in_array(get_class($object), config('plugins.faq.general.schema_supported', []))) {
                     return $html;
                 }
@@ -75,41 +76,39 @@ class HookServiceProvider extends ServiceProvider
                     return $html;
                 }
 
-                if (! empty($value)) {
-                    foreach ($value as $key => $item) {
-                        if (! $item[0]['value'] && ! $item[1]['value']) {
-                            Arr::forget($value, $key);
-                        }
+                foreach ($value as $key => $item) {
+                    if (! $item[0]['value'] && ! $item[1]['value']) {
+                        Arr::forget($value, $key);
                     }
                 }
 
-                $schema = [
-                    '@context' => 'https://schema.org',
-                    '@type' => 'FAQPage',
-                    'mainEntity' => [],
-                ];
+                $schemaItems = new FaqCollection();
 
                 foreach ($value as $item) {
-                    $schema['mainEntity'][] = [
-                        '@type' => 'Question',
-                        'name' => BaseHelper::clean($item[0]['value']),
-                        'acceptedAnswer' => [
-                            '@type' => 'Answer',
-                            'text' => BaseHelper::clean($item[1]['value']),
-                        ],
-                    ];
+                    $schemaItems->push(
+                        new FaqItem(BaseHelper::clean($item[0]['value']), BaseHelper::clean($item[1]['value']))
+                    );
                 }
 
-                $schema = json_encode($schema);
+                app(FaqContract::class)->registerSchema($schemaItems);
 
-                return $html . Html::tag('script', $schema, ['type' => 'application/ld+json'])->toHtml();
+                return $html;
             }, 39);
         }, 39, 2);
 
         add_filter(BASE_FILTER_AFTER_SETTING_CONTENT, [$this, 'addSettings'], 59);
+
+        add_filter('cms_settings_validation_rules', [$this, 'addSettingRules'], 59);
     }
 
-    public function addSettings(?string $data = null): string
+    public function addSettingRules(array $rules): array
+    {
+        return array_merge($rules, [
+            'enable_faq_schema' => 'nullable|in:0,1',
+        ]);
+    }
+
+    public function addSettings(string|null $data = null): string
     {
         return $data . view('plugins/faq::settings')->render();
     }

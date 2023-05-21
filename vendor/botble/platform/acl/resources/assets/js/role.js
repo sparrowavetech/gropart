@@ -2,30 +2,30 @@ class Role {
     init() {
         $('#auto-checkboxes li').tree({
             onCheck: {
-                node: 'expand'
+                node: 'expand',
             },
             onUncheck: {
-                node: 'expand'
+                node: 'expand',
             },
             dnd: false,
-            selectable: false
-        });
+            selectable: false,
+        })
 
-        $('#mainNode .checker').change(event =>  {
-            let _self = $(event.currentTarget);
-            let set = _self.attr('data-set');
-            let checked = _self.is(':checked');
+        $('#mainNode .checker').change((event) => {
+            let _self = $(event.currentTarget)
+            let set = _self.attr('data-set')
+            let checked = _self.is(':checked')
             $(set).each((index, el) => {
                 if (checked) {
-                    $(el).attr('checked', true);
+                    $(el).attr('checked', true)
                 } else {
-                    $(el).attr('checked', false);
+                    $(el).attr('checked', false)
                 }
-            });
-        });
+            })
+        })
     }
 }
 
 $(document).ready(() => {
-    new Role().init();
-});
+    new Role().init()
+})

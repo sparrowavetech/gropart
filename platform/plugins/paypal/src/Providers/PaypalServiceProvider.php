@@ -1,11 +1,11 @@
 <?php
 
-namespace Botble\Paypal\Providers;
+namespace Botble\PayPal\Providers;
 
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Illuminate\Support\ServiceProvider;
 
-class PaypalServiceProvider extends ServiceProvider
+class PayPalServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 

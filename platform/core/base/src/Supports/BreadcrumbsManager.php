@@ -14,25 +14,19 @@ class BreadcrumbsManager
 {
     use Macroable;
 
-    protected BreadcrumbsGenerator $generator;
-
-    protected Router $router;
-
-    protected ViewFactory $viewFactory;
-
     protected array $callbacks = [];
 
     protected array $before = [];
 
     protected array $after = [];
 
-    protected ?array $route;
+    protected array|null $route;
 
-    public function __construct(BreadcrumbsGenerator $generator, Router $router, ViewFactory $viewFactory)
-    {
-        $this->generator = $generator;
-        $this->router = $router;
-        $this->viewFactory = $viewFactory;
+    public function __construct(
+        protected BreadcrumbsGenerator $generator,
+        protected Router $router,
+        protected ViewFactory $viewFactory
+    ) {
     }
 
     public function register(string $name, callable $callback): void
@@ -70,7 +64,7 @@ class BreadcrumbsManager
         return isset($this->callbacks[$name]);
     }
 
-    protected function getCurrentRoute(): ?array
+    protected function getCurrentRoute(): array|null
     {
         // Manually set route
         if ($this->route) {
@@ -89,7 +83,7 @@ class BreadcrumbsManager
         $name = $route->getName();
 
         if ($name === null) {
-            throw new Exception($route);
+            return ['errors.404', []];
         }
 
         $params = array_values($route->parameters());

@@ -2,8 +2,9 @@
 
 namespace Botble\Location\Http\Controllers;
 
-use Assets;
-use BaseHelper;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Location\Exports\CsvLocationExport;
 use Botble\Location\Repositories\Interfaces\CityInterface;
@@ -18,7 +19,7 @@ class ExportController extends BaseController
         StateInterface $stateRepository,
         CityInterface $cityRepository
     ) {
-        page_title()->setTitle(trans('plugins/location::location.export_location'));
+        PageTitle::setTitle(trans('plugins/location::location.export_location'));
 
         Assets::addScriptsDirectly(['vendor/core/plugins/location/js/export.js']);
 

@@ -6,13 +6,13 @@ use Botble\Blog\Models\Category;
 use Botble\Blog\Models\Tag;
 use Botble\Dashboard\Repositories\Interfaces\DashboardWidgetInterface;
 use Botble\Menu\Repositories\Interfaces\MenuNodeInterface;
-use Botble\Setting\Models\Setting;
+use Botble\Setting\Facades\Setting;
 use Illuminate\Support\Facades\Schema;
 use Botble\PluginManagement\Abstracts\PluginOperationAbstract;
 
 class Plugin extends PluginOperationAbstract
 {
-    public static function remove()
+    public static function remove(): void
     {
         Schema::disableForeignKeyConstraints();
         Schema::dropIfExists('post_tags');
@@ -29,11 +29,9 @@ class Plugin extends PluginOperationAbstract
         app(MenuNodeInterface::class)->deleteBy(['reference_type' => Category::class]);
         app(MenuNodeInterface::class)->deleteBy(['reference_type' => Tag::class]);
 
-        Setting::query()
-            ->whereIn('key', [
-                'blog_post_schema_enabled',
-                'blog_post_schema_type',
-            ])
-            ->delete();
+        Setting::delete([
+            'blog_post_schema_enabled',
+            'blog_post_schema_type',
+        ]);
     }
 }

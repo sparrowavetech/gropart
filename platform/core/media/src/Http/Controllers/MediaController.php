@@ -2,6 +2,7 @@
 
 namespace Botble\Media\Http\Controllers;
 
+use Botble\Base\Facades\PageTitle;
 use Botble\Media\Http\Resources\FileResource;
 use Botble\Media\Http\Resources\FolderResource;
 use Botble\Media\Models\MediaFile;
@@ -13,44 +14,32 @@ use Botble\Media\Services\ThumbnailService;
 use Botble\Media\Services\UploadsManager;
 use Botble\Media\Supports\Zipper;
 use Carbon\Carbon;
-use Eloquent;
 use Exception;
 use Illuminate\Support\Facades\File;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use RvMedia;
-use Storage;
+use Illuminate\Support\Str;
+use Botble\Media\Facades\RvMedia;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @since 19/08/2015 08:05 AM
  */
 class MediaController extends Controller
 {
-    protected MediaFileInterface $fileRepository;
-
-    protected MediaFolderInterface $folderRepository;
-
-    protected UploadsManager $uploadManager;
-
-    protected MediaSettingInterface $mediaSettingRepository;
-
     public function __construct(
-        MediaFileInterface $fileRepository,
-        MediaFolderInterface $folderRepository,
-        MediaSettingInterface $mediaSettingRepository,
-        UploadsManager $uploadManager
+        protected MediaFileInterface $fileRepository,
+        protected MediaFolderInterface $folderRepository,
+        protected MediaSettingInterface $mediaSettingRepository,
+        protected UploadsManager $uploadManager
     ) {
-        $this->fileRepository = $fileRepository;
-        $this->folderRepository = $folderRepository;
-        $this->uploadManager = $uploadManager;
-        $this->mediaSettingRepository = $mediaSettingRepository;
     }
 
     public function getMedia()
     {
-        page_title()->setTitle(trans('core/media::media.menu_name'));
+        PageTitle::setTitle(trans('core/media::media.menu_name'));
 
         return view('core/media::index');
     }
@@ -86,8 +75,8 @@ class MediaController extends Controller
                 'is_folder' => 'DESC',
             ],
             'paginate' => [
-                'per_page' => (int)$request->input('posts_per_page', 30),
-                'current_paged' => (int)$request->input('paged', 1),
+                'per_page' => $request->integer('posts_per_page', 30),
+                'current_paged' => $request->integer('paged', 1),
             ],
             'selected_file_id' => $request->input('selected_file_id'),
             'is_popup' => $request->input('is_popup'),
@@ -177,6 +166,7 @@ class MediaController extends Controller
                 $files = FileResource::collection($queried);
 
                 break;
+
             case 'favorites':
                 $breadcrumbs = [
                     [
@@ -241,7 +231,7 @@ class MediaController extends Controller
         ]);
     }
 
-    protected function transformOrderBy(?string $orderBy): array
+    protected function transformOrderBy(string|null $orderBy): array
     {
         $result = explode('-', $orderBy);
         if (! count($result) == 2) {
@@ -269,14 +259,12 @@ class MediaController extends Controller
             return [];
         }
 
-        if (empty($breadcrumbs)) {
-            $breadcrumbs = [
-                [
-                    'name' => $folder->name,
-                    'id' => $folder->id,
-                ],
-            ];
-        }
+        $breadcrumbs = [
+            [
+                'name' => $folder->name,
+                'id' => $folder->id,
+            ],
+        ];
 
         $child = $this->folderRepository->getBreadcrumbs($folder->parent_id);
         if (! empty($child)) {
@@ -409,7 +397,7 @@ class MediaController extends Controller
 
                             foreach ($child as $sub) {
                                 /**
-                                 * @var Eloquent $sub
+                                 * @var MediaFolder $sub
                                  */
                                 $subFiles = $this->fileRepository->getFilesByFolderId($sub->id, [], false);
 
@@ -501,7 +489,7 @@ class MediaController extends Controller
 
             case 'crop':
                 $validated = Validator::validate($request->input(), [
-                    'imageId' => ['required', 'numeric', 'exists:media_files,id'],
+                    'imageId' => ['required', 'string', 'exists:media_files,id'],
                     'cropData' => ['required', 'json'],
                 ]);
 
@@ -575,6 +563,23 @@ class MediaController extends Controller
 
                 break;
 
+            case 'alt_text':
+                foreach ($request->input('selected') as $item) {
+                    if (! $item['id']) {
+                        continue;
+                    }
+
+                    $file = $this->fileRepository->getFirstBy(['id' => $item['id']]);
+
+                    if ($file) {
+                        $file->alt = $item['alt'];
+                        $this->fileRepository->createOrUpdate($file);
+                    }
+                }
+
+                $response = RvMedia::responseSuccess([], trans('core/media::media.update_alt_text_success'));
+
+                break;
             case 'empty_trash':
                 $this->folderRepository->emptyTrash();
                 $this->fileRepository->emptyTrash();
@@ -587,7 +592,7 @@ class MediaController extends Controller
         return $response;
     }
 
-    protected function copyFile(MediaFile $file, ?int $newFolderId = null)
+    protected function copyFile(MediaFile $file, int|string|null $newFolderId = null)
     {
         $file = $file->replicate();
         $file->user_id = Auth::id();
@@ -638,12 +643,13 @@ class MediaController extends Controller
             $file = $this->fileRepository->getFirstByWithTrash(['id' => $items[0]['id']]);
             if (! empty($file) && $file->type != 'video') {
                 $filePath = RvMedia::getRealPath($file->url);
+
                 if (! RvMedia::isUsingCloud()) {
                     if (! File::exists($filePath)) {
                         return RvMedia::responseError(trans('core/media::media.file_not_exists'));
                     }
 
-                    return response()->download($filePath, $file->name);
+                    return response()->download($filePath, Str::slug($file->name));
                 }
 
                 return response()->make(file_get_contents(str_replace('https://', 'http://', $filePath)), 200, [

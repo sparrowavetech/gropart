@@ -15,7 +15,7 @@ class SimpleSliderAdminManagement {
 
                 forceFallback: false, // ignore the HTML5 DnD behaviour and force the fallback to kick in
                 fallbackClass: 'sortable-fallback', // Class name for the cloned DOM Element when using forceFallback
-                fallbackOnBody: false,  // Appends the cloned DOM Element into the Document's Body
+                fallbackOnBody: false, // Appends the cloned DOM Element into the Document's Body
 
                 scroll: true, // or HTMLElement
                 scrollSensitivity: 30, // px, how near the mouse must be to an edge to start scrolling.
@@ -23,49 +23,55 @@ class SimpleSliderAdminManagement {
 
                 // dragging ended
                 onEnd: () => {
-                    let $box = $(el).closest('.widget-body');
-                    $box.find('.btn-save-sort-order').addClass('sort-button-active').show();
+                    let $box = $(el).closest('.widget-body')
+                    $box.find('.btn-save-sort-order').addClass('sort-button-active').show()
                     $.each($box.find('tbody tr'), (index, sort) => {
-                        $(sort).find('.order-column').text(index + 1);
-                    });
-                }
-            });
-        });
+                        $(sort)
+                            .find('.order-column')
+                            .text(index + 1)
+                    })
+                },
+            })
+        })
 
-        $('.btn-save-sort-order').off('click').on('click', event => {
-            event.preventDefault();
-            let _self = $(event.currentTarget);
-            if (_self.hasClass('sort-button-active')) {
-                let $box = _self.closest('.widget-body');
-                $box.find('.btn-save-sort-order').addClass('button-loading');
-                let items = [];
-                console.log($box.find('tbody tr'));
-                $.each($box.find('tbody tr'), (index, sort) => {
-                    items.push(parseInt($(sort).find('td:first-child').text()));
-                    $(sort).find('.order-column').text(index + 1);
-                });
-                $.ajax({
-                    type: 'POST',
-                    cache: false,
-                    url: route('simple-slider.sorting'),
-                    data: {
-                        items: items
-                    },
-                    success: res => {
-                        Botble.showSuccess(res.message);
-                        $box.find('.btn-save-sort-order').removeClass('button-loading').hide();
-                        _self.removeClass('sort-button-active');
-                    },
-                    error: res => {
-                        Botble.showError(res.message);
-                        _self.removeClass('sort-button-active');
-                    }
-                });
-            }
-        });
+        $('.btn-save-sort-order')
+            .off('click')
+            .on('click', (event) => {
+                event.preventDefault()
+                let _self = $(event.currentTarget)
+                if (_self.hasClass('sort-button-active')) {
+                    let $box = _self.closest('.widget-body')
+                    $box.find('.btn-save-sort-order').addClass('button-loading')
+                    let items = []
+                    console.log($box.find('tbody tr'))
+                    $.each($box.find('tbody tr'), (index, sort) => {
+                        items.push(parseInt($(sort).find('td:first-child').text()))
+                        $(sort)
+                            .find('.order-column')
+                            .text(index + 1)
+                    })
+                    $.ajax({
+                        type: 'POST',
+                        cache: false,
+                        url: route('simple-slider.sorting'),
+                        data: {
+                            items: items,
+                        },
+                        success: (res) => {
+                            Botble.showSuccess(res.message)
+                            $box.find('.btn-save-sort-order').removeClass('button-loading').hide()
+                            _self.removeClass('sort-button-active')
+                        },
+                        error: (res) => {
+                            Botble.showError(res.message)
+                            _self.removeClass('sort-button-active')
+                        },
+                    })
+                }
+            })
     }
 }
 
 $(document).ready(() => {
-    new SimpleSliderAdminManagement().init();
-});
+    new SimpleSliderAdminManagement().init()
+})

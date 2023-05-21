@@ -6,22 +6,19 @@ use Botble\Widget\Repositories\Interfaces\WidgetInterface;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Language;
-use Theme;
+use Botble\Language\Facades\Language;
+use Botble\Theme\Facades\Theme;
 
 class WidgetGroupCollection
 {
     protected array $groups;
 
-    protected Application $app;
-
     protected Collection|array $data = [];
 
     protected bool $loaded = false;
 
-    public function __construct(Application $app)
+    public function __construct(protected Application $app)
     {
-        $this->app = $app;
     }
 
     public function group(string $sidebarId): WidgetGroup
@@ -29,6 +26,7 @@ class WidgetGroupCollection
         if (isset($this->groups[$sidebarId])) {
             return $this->groups[$sidebarId];
         }
+
         $this->groups[$sidebarId] = new WidgetGroup(['id' => $sidebarId, 'name' => $sidebarId], $this->app);
 
         return $this->groups[$sidebarId];

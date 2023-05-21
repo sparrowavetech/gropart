@@ -11,6 +11,7 @@ class AdsRepository extends RepositoriesAbstract implements AdsInterface
 {
     public function getAll(): Collection
     {
+        // @phpstan-ignore-next-line
         $data = $this->model
             ->where('status', BaseStatusEnum::PUBLISHED)
             ->notExpired()

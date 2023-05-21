@@ -5,15 +5,12 @@ namespace Botble\Menu\Listeners;
 use Botble\Menu\Repositories\Interfaces\MenuNodeInterface;
 use Botble\Slug\Events\UpdatedSlugEvent;
 use Exception;
-use Menu;
+use Botble\Menu\Facades\Menu;
 
 class UpdateMenuNodeUrlListener
 {
-    protected MenuNodeInterface $menuNodeRepository;
-
-    public function __construct(MenuNodeInterface $menuNodeRepository)
+    public function __construct(protected MenuNodeInterface $menuNodeRepository)
     {
-        $this->menuNodeRepository = $menuNodeRepository;
     }
 
     public function handle(UpdatedSlugEvent $event): void

@@ -8,15 +8,12 @@ use Botble\Slug\Repositories\Interfaces\SlugInterface;
 use Botble\Slug\Services\SlugService;
 use Exception;
 use Illuminate\Support\Str;
-use SlugHelper;
+use Botble\Slug\Facades\SlugHelper;
 
 class UpdatedContentListener
 {
-    protected SlugInterface $slugRepository;
-
-    public function __construct(SlugInterface $slugRepository)
+    public function __construct(protected SlugInterface $slugRepository)
     {
-        $this->slugRepository = $slugRepository;
     }
 
     public function handle(UpdatedContentEvent $event): void
@@ -52,7 +49,7 @@ class UpdatedContentListener
                     if ($item->key != $slug) {
                         $slugService = new SlugService(app(SlugInterface::class));
                         $item->key = $slugService->create($slug, (int)$event->data->slug_id);
-                        $item->prefix = SlugHelper::getPrefix(get_class($event->data));
+                        $item->prefix = SlugHelper::getPrefix(get_class($event->data), '', false);
                         $this->slugRepository->createOrUpdate($item);
                     }
                 } else {
@@ -60,7 +57,7 @@ class UpdatedContentListener
                         'key' => $slug,
                         'reference_type' => get_class($event->data),
                         'reference_id' => $event->data->id,
-                        'prefix' => SlugHelper::getPrefix(get_class($event->data)),
+                        'prefix' => SlugHelper::getPrefix(get_class($event->data), '', false),
                     ]);
                 }
 

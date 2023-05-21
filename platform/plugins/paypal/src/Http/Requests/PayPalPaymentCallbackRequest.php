@@ -1,6 +1,6 @@
 <?php
 
-namespace Botble\Paypal\Http\Requests;
+namespace Botble\PayPal\Http\Requests;
 
 use Botble\Support\Http\Requests\Request;
 

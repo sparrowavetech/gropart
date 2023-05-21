@@ -8,6 +8,7 @@ use Botble\Language\Models\Language;
 use Botble\Language\Models\LanguageMeta;
 use Botble\Page\Models\Page;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
@@ -64,7 +65,7 @@ class LanguageTest extends TestCase
         $user->last_name = 'Admin';
         $user->email = 'admin@botble.com';
         $user->username = 'botble';
-        $user->password = bcrypt('159357');
+        $user->password = Hash::make('159357');
         $user->super_user = 1;
         $user->manage_supers = 1;
         $user->save();
@@ -78,7 +79,7 @@ class LanguageTest extends TestCase
         return $user;
     }
 
-    protected function createLanguages()
+    protected function createLanguages(): void
     {
         $languages = [
             [

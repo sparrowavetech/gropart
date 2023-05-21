@@ -3,9 +3,11 @@
 namespace Botble\Newsletter\Http\Controllers;
 
 use Botble\Base\Events\DeletedContentEvent;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Traits\HasDeleteManyItemsTrait;
+use Botble\Newsletter\Models\Newsletter;
 use Botble\Newsletter\Repositories\Interfaces\NewsletterInterface;
 use Botble\Newsletter\Tables\NewsletterTable;
 use Exception;
@@ -15,24 +17,20 @@ class NewsletterController extends BaseController
 {
     use HasDeleteManyItemsTrait;
 
-    protected NewsletterInterface $newsletterRepository;
-
-    public function __construct(NewsletterInterface $newsletterRepository)
+    public function __construct(protected NewsletterInterface $newsletterRepository)
     {
-        $this->newsletterRepository = $newsletterRepository;
     }
 
     public function index(NewsletterTable $dataTable)
     {
-        page_title()->setTitle(trans('plugins/newsletter::newsletter.name'));
+        PageTitle::setTitle(trans('plugins/newsletter::newsletter.name'));
 
         return $dataTable->renderTable();
     }
 
-    public function destroy(Request $request, int $id, BaseHttpResponse $response)
+    public function destroy(Newsletter $newsletter, Request $request, BaseHttpResponse $response)
     {
         try {
-            $newsletter = $this->newsletterRepository->findOrFail($id);
             $this->newsletterRepository->delete($newsletter);
 
             event(new DeletedContentEvent(NEWSLETTER_MODULE_SCREEN_NAME, $request, $newsletter));

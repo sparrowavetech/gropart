@@ -4,11 +4,11 @@ namespace Botble\Analytics\GA4\Traits;
 
 trait RowOperationTrait
 {
-    public ?bool $keepEmptyRows = null;
+    public bool|null $keepEmptyRows = null;
 
-    public ?int $limit = null;
+    public int|null $limit = null;
 
-    public ?int $offset = null;
+    public int|null $offset = null;
 
     public function keepEmptyRows(bool $keepEmptyRows = false): self
     {

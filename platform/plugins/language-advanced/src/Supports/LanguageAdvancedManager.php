@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
-use Language;
+use Botble\Language\Facades\Language;
 
 class LanguageAdvancedManager
 {

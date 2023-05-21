@@ -2,161 +2,168 @@
 
 namespace Botble\Base\Commands;
 
-use BaseHelper;
+use Botble\Base\Events\UpdatedEvent;
+use Botble\Base\Events\UpdatingEvent;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Supports\Core;
-use DOMDocument;
 use Illuminate\Console\Command;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
+use Illuminate\Console\ConfirmableTrait;
+use Illuminate\Support\Composer;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Process\Process;
+use Throwable;
 
-#[AsCommand('cms:update', 'Update core')]
+#[AsCommand('cms:update', 'Update system to latest version')]
 class UpdateCommand extends Command
 {
+    use ConfirmableTrait;
+
+    public function __construct(protected Core $core, protected Composer $composer)
+    {
+        parent::__construct();
+    }
+
     public function handle(): int
     {
         if (! config('core.base.general.enable_system_updater')) {
-            $this->components->error('Please enable system updater');
+            $this->components->error('Please enable system updater first.');
 
             return self::FAILURE;
         }
-
-        $this->components->info('Checking for the latest version...');
 
         BaseHelper::maximumExecutionTimeAndMemoryLimit();
 
-        $api = new Core();
-        $updateData = $api->checkUpdate();
+        $this->components->info('Checking for the latest version...');
 
-        $verifyLicense = $api->verifyLicense();
+        $latestUpdate = $this->core->getLatestVersion();
 
-        if (! $verifyLicense['status']) {
-            $this->components->error('Your license is invalid. Please activate your license first!');
+        if (! $latestUpdate) {
+            $this->components->error('Your license is invalid. Please activate your license first.');
 
             return self::FAILURE;
         }
 
-        $this->newLine();
-
-        if ($updateData['status']) {
-            $updateData['message'] = 'A new version (' . $updateData['version'] . ' / released on ' . $updateData['release_date'] . ') is available to update!';
-
-            $this->components->info($updateData['message']);
-
-            $this->newLine();
-
-            $array = [
-                'Please backup your database and script files before upgrading',
-                'You need to activate your license before doing upgrade.',
-                'If you don\'t need this 1-click update, you can disable it in .env by adding CMS_ENABLE_SYSTEM_UPDATER=false',
-                'It will override all files in platform/core, platform/packages, all plugins developed by us in platform/plugins and theme developed by us in platform/themes.',
-            ];
-
-            $this->alertBox($array, 'Please read before update', 'lineDanger');
-            $this->newLine();
-
-            $changelogs = $this->htmlToObj($updateData['changelog']);
-            $this->alertBox($changelogs, 'Changelog', 'lineWarning');
-            $this->newLine();
-
-            if ($this->components->confirm('Do you want download & install Update CMS?', true)) {
-                ob_start();
-                $api->downloadUpdate($updateData['update_id'], $updateData['version']);
-                $this->newLine();
-
-                if ($this->components->confirm('Do you want run composer?', true)) {
-                    $composer = $this->components->choice('Do you want run:', ['install', 'update']);
-
-                    $process = new Process(['composer', $composer]);
-                    $process->start();
-                    $process->wait(function ($type, $buffer) {
-                        $this->line($buffer);
-                    });
-
-                    $this->components->info('Updated successfully!');
-
-                    return self::SUCCESS;
-                }
-            } else {
-                return self::SUCCESS;
+        if (version_compare($latestUpdate->version, $this->core->version(), '<=')) {
+            if ($this->components->confirm(
+                sprintf('Your current system version <info>%s</info> is the latest version. Do you want to reinstall this update?', $latestUpdate->version)
+            )) {
+                return $this->performUpdate($latestUpdate->updateId, $latestUpdate->version);
             }
+
+            $this->components->info('Your system is up to date.');
+
+            return self::SUCCESS;
         }
 
-        $this->components->info('The system is up-to-date. There are no new versions to update!');
+        $this->components->info(
+            sprintf('A new version (<comment>%s</comment> / released on <comment>%s</comment>) is available to update!', $latestUpdate->version, $latestUpdate->releasedDate->format('Y-m-d'))
+        );
+
+        $this->components->warn('Notice:');
+
+        array_map(fn ($line) => $this->line($line), [
+            'Please backup your database and script files before upgrading',
+            'You need to activate your license before doing upgrade.',
+            'If you don\'t need this 1-click update, you can disable it in <fg=yellow>.env</>? by adding <fg=yellow>CMS_ENABLE_SYSTEM_UPDATER=false</>',
+            'It will override all files in <fg=yellow>./platform/core</>, <fg=yellow>./platform/packages</>, all plugins developed by us in <fg=yellow>./platform/plugins</> and theme developed by us in <fg=yellow>./platform/themes</>.',
+        ]);
+
+        if ($this->components->confirm('Do you really wish to run this command?', true)) {
+            return $this->performUpdate($latestUpdate->updateId, $latestUpdate->version);
+        }
 
         return self::SUCCESS;
     }
 
-    protected function htmlToObj($html): array
+    protected function performUpdate(string $updateId, string $version): int
     {
-        $dom = new DOMDocument();
-        $dom->loadHTML($html);
+        event(new UpdatingEvent());
 
-        return Arr::flatten($this->elementToObj($dom->documentElement));
-    }
+        $progressBar = new ProgressBar($this->output, 6);
+        $progressBar->setMessage('Verifying license...');
+        $progressBar->setFormat("%current%/%max% %bar%\n%message%");
+        $progressBar->setBarCharacter('<info>█</info>');
+        $progressBar->setEmptyBarCharacter('░');
+        $progressBar->setProgressCharacter('<info>█</info>');
+        $progressBar->setBarWidth(50);
+        $progressBar->start();
 
-    protected function elementToObj($element): array
-    {
-        $obj = [];
-        foreach ($element->attributes as $attribute) {
-            $obj[] = $attribute->value;
-        }
+        try {
+            if (! $this->core->verifyLicense(true)) {
+                $this->errorWithNewLines('Your license is invalid. Please activate your license first.');
 
-        foreach ($element->childNodes as $subElement) {
-            if ($subElement->nodeType == XML_TEXT_NODE) {
-                $obj[] = $subElement->wholeText;
-            } else {
-                $obj[] = $this->elementToObj($subElement);
+                return self::FAILURE;
             }
+
+            $progressBar->setMessage('Downloading the latest update...');
+            $progressBar->advance();
+
+            if (! $this->core->downloadUpdate($updateId, $version)) {
+                $this->errorWithNewLines('Could not download updated file. Please check your license or your internet network.');
+
+                return self::FAILURE;
+            }
+
+            $progressBar->setMessage('Updating files and database...');
+            $progressBar->advance();
+
+            if (! $this->core->updateFilesAndDatabase($version)) {
+                $this->errorWithNewLines('Could not update files & database.');
+
+                return self::FAILURE;
+            }
+
+            $progressBar->setMessage('Publishing all assets...');
+            $progressBar->advance();
+            $this->core->publishUpdateAssets();
+
+            $progressBar->setMessage('Cleaning up the system...');
+            $progressBar->advance();
+            $this->core->cleanUpUpdate();
+        } catch (Throwable $exception) {
+            $this->errorWithNewLines($exception->getMessage());
+            $this->core->logError($exception);
+
+            return self::FAILURE;
         }
 
-        return $obj;
-    }
+        $progressBar->setMessage('Done.');
+        $progressBar->advance();
+        $progressBar->finish();
 
-    public function alertBox(array $array, string $title, string $type = 'linePrimary')
-    {
-        $lengths = array_map('strlen', $array);
-        $longestString = $array[array_search(max($lengths), $lengths)];
+        event(new UpdatedEvent());
 
-        $length = Str::length($longestString) + 14;
-        $stringOpen = Str::padBoth('*', $length, ' *');
-        $stringTitle = Str::padBoth(Str::padRight($title, $length - 6), $length, ' * ');
+        $this->infoWithNewLines('Your system has been updated successfully.');
 
-        /**** Open ****/
-        $this->$type($stringOpen);
-        /**** Title ****/
-        $this->$type($stringTitle, 'bold');
-        /**** Close ****/
-        $this->$type($stringOpen);
+        if ($this->confirm('Do you want run <comment>composer</comment> command?', true)) {
+            $process = new Process(array_merge($this->composer->findComposer(), [
+                $this->components->choice('Run <comment>composer install</comment> or <comment>composer update</comment>?', [
+                    'install',
+                    'update',
+                ], 'install'),
+            ]));
+            $process->start();
 
-        foreach ($array as $a) {
-            /**** Content ****/
-            $stringContent = Str::padBoth(Str::padRight($a, $length - 6), $length, ' * ');
-            $this->$type($stringContent);
+            $process->wait(function ($type, $buffer) {
+                $this->line($buffer);
+            });
         }
 
-        /**** Close ****/
-        $this->$type($stringOpen);
+        return self::SUCCESS;
     }
 
-    public function linePrimary(string $message, string $options = 'blink')
+    protected function errorWithNewLines(string $message): void
     {
-        $this->lineBase($message, 'blue', $options);
+        $this->newLine();
+        $this->newLine();
+        $this->components->error($message);
     }
 
-    public function lineWarning(string $message, string $options = 'blink')
+    protected function infoWithNewLines(string $message): void
     {
-        $this->lineBase($message, 'yellow', $options);
-    }
-
-    public function lineDanger(string $message, string $options = 'blink')
-    {
-        $this->lineBase($message, 'red', $options);
-    }
-
-    public function lineBase(string $text, string $color = 'yellow', string $options = 'blink')
-    {
-        $this->line('<options=' . $options . ';fg=' . $color . '>' . $text . '</>');
+        $this->newLine();
+        $this->newLine();
+        $this->components->info($message);
     }
 }

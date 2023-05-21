@@ -3,6 +3,7 @@
 namespace Botble\Location;
 
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Models\BaseQueryBuilder;
 use Botble\Base\Supports\PclZip as Zip;
 use Botble\Location\Models\City;
@@ -21,14 +22,8 @@ use ZipArchive;
 
 class Location
 {
-    protected StateInterface $stateRepository;
-
-    protected CityInterface $cityRepository;
-
-    public function __construct(StateInterface $stateRepository, CityInterface $cityRepository)
+    public function __construct(protected StateInterface $stateRepository, protected CityInterface $cityRepository)
     {
-        $this->stateRepository = $stateRepository;
-        $this->cityRepository = $cityRepository;
     }
 
     public function getStates(): array
@@ -64,14 +59,14 @@ class Location
         ]);
     }
 
-    public function getCityNameById($cityId): ?string
+    public function getCityNameById($cityId): string|null
     {
         $city = $this->getCityById($cityId);
 
         return $city?->name;
     }
 
-    public function getStateNameById($stateId): ?string
+    public function getStateNameById($stateId): string|null
     {
         $state = $this->stateRepository->getFirstBy([
             'id' => $stateId,
@@ -219,12 +214,16 @@ class Location
 
         $country = Country::create($country);
 
+        event(new CreatedContentEvent(COUNTRY_MODULE_SCREEN_NAME, request(), $country));
+
         $states = file_get_contents($dataPath . '/states.json');
         $states = json_decode($states, true);
         foreach ($states as $state) {
             $state['country_id'] = $country->id;
 
-            State::create($state);
+            $state = State::create($state);
+
+            event(new CreatedContentEvent(STATE_MODULE_SCREEN_NAME, request(), $state));
         }
 
         $cities = file_get_contents($dataPath . '/cities.json');
@@ -242,7 +241,9 @@ class Location
                     'country_id' => $country->id,
                 ];
 
-                City::create($city);
+                $city = City::create($city);
+
+                event(new CreatedContentEvent(CITY_MODULE_SCREEN_NAME, request(), $city));
             }
         }
 
@@ -254,7 +255,7 @@ class Location
         ];
     }
 
-    public function filter($model, int $cityId = null, string $location = null)
+    public function filter($model, int|string $cityId = null, string $location = null)
     {
         $className = get_class($model);
         if ($className == BaseQueryBuilder::class) {

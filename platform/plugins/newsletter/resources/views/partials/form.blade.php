@@ -12,7 +12,7 @@
         <input type="email" name="email" class="form-control" id="newsletter_email"
                placeholder="{{ __('Your email') }}">
     </div>
-    @if (setting('enable_captcha') && is_plugin_active('captcha'))
+    @if (is_plugin_active('captcha'))
         {!! Captcha::display() !!}
     @endif
     <button type="submit" class="btn btn-secondary">{{ __('Submit') }}</button>

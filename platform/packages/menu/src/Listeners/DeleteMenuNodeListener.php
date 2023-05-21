@@ -5,15 +5,12 @@ namespace Botble\Menu\Listeners;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Menu\Repositories\Interfaces\MenuNodeInterface;
 use Exception;
-use Menu;
+use Botble\Menu\Facades\Menu;
 
 class DeleteMenuNodeListener
 {
-    protected MenuNodeInterface $menuNodeRepository;
-
-    public function __construct(MenuNodeInterface $menuNodeRepository)
+    public function __construct(protected MenuNodeInterface $menuNodeRepository)
     {
-        $this->menuNodeRepository = $menuNodeRepository;
     }
 
     public function handle(DeletedContentEvent $event): void

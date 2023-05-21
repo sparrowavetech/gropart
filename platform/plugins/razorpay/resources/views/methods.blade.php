@@ -1,9 +1,7 @@
 @if (get_payment_setting('status', RAZORPAY_PAYMENT_METHOD_NAME) == 1)
     <li class="list-group-item">
         <input class="magic-radio js_payment_method" type="radio" name="payment_method" id="payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}"
-               value="{{ RAZORPAY_PAYMENT_METHOD_NAME }}" data-bs-toggle="collapse" data-bs-target=".payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}_wrap"
-               data-toggle="collapse" data-target=".payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}_wrap"
-               data-parent=".list_payment_method"
+               value="{{ RAZORPAY_PAYMENT_METHOD_NAME }}"
                @if ($selecting == RAZORPAY_PAYMENT_METHOD_NAME) checked @endif
         >
         <label for="payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}">{{ get_payment_setting('name', RAZORPAY_PAYMENT_METHOD_NAME) }}</label>
@@ -26,9 +24,10 @@
                     </div>
 
                     @php
-                        $currencies = get_all_currencies();
-
-                        $currencies = $currencies->filter(function ($item) use ($supportedCurrencies) { return in_array($item->title, $supportedCurrencies); });
+                        $currencies = get_all_currencies()
+                            ->filter(function ($item) use ($supportedCurrencies) {
+                                return in_array($item->title, $supportedCurrencies);
+                            });
                     @endphp
                     @if (count($currencies))
                         <div style="margin-top: 10px;">{{ __('Please switch currency to any supported currency') }}:&nbsp;&nbsp;
@@ -46,91 +45,81 @@
         <input type="hidden" id="rzp_order_id" value="{{ $orderId }}">
     </li>
 
-    <script>
-        $(document).ready(function () {
+    @if (EcommerceHelper::isValidToProcessCheckout())
+        <script>
+            $(document).ready(function () {
 
-            var validatedFormFields = () => {
-                var addressId = $('#address_id').val();
-                if (addressId && addressId !== 'new') {
-                    return true;
-                }
+                var $paymentCheckoutForm = $('.payment-checkout-form');
 
-                var validated = true;
-                $.each($(document).find('.address-control-item-required'), (index, el) => {
-                    if (!$(el).val()) {
-                        validated = false;
+                $paymentCheckoutForm.on('submit', function (e) {
+                    if ($('#checkout-form').valid() && $('input[name=payment_method]:checked').val() === 'razorpay' && !$('input[name=razorpay_payment_id]').val()) {
+                        e.preventDefault();
                     }
                 });
 
-                return validated;
-            }
+                var loadExternalScript = function(path) {
+                    var result = $.Deferred();
+                    var script = document.createElement('script');
 
-            $('.payment-checkout-form').on('submit', function (e) {
-                if (validatedFormFields() && $('input[name=payment_method]:checked').val() === 'razorpay' && !$('input[name=razorpay_payment_id]').val()) {
-                    e.preventDefault();
-                }
-            });
-
-            var loadExternalScript = function(path) {
-                var result = $.Deferred(),
-                    script = document.createElement('script');
-
-                script.async = 'async';
-                script.type = 'text/javascript';
-                script.src = path;
-                script.onload = script.onreadystatechange = function(_, isAbort) {
-                    if (!script.readyState || /loaded|complete/.test(script.readyState)) {
-                        if (isAbort) {
-                            result.reject();
+                    script.async = 'async';
+                    script.type = 'text/javascript';
+                    script.src = path;
+                    script.onload = script.onreadystatechange = function(_, isAbort) {
+                        if (!script.readyState || /loaded|complete/.test(script.readyState)) {
+                            if (isAbort) {
+                                result.reject();
+                            } else {
+                                result.resolve();
+                            }
                         }
-                        else {
-                            result.resolve();
-                        }
-                    }
-                };
-
-                script.onerror = function() {
-                    result.reject();
-                };
-
-                $('head')[0].appendChild(script);
-
-                return result.promise();
-            }
-
-            var callRazorPayScript = function() {
-                loadExternalScript('https://checkout.razorpay.com/v1/checkout.js').then(function() {
-
-                    var options = {
-                        key: '{{ get_payment_setting('key', RAZORPAY_PAYMENT_METHOD_NAME) }}',
-                        name: '{{ $name }}',
-                        description: '{{ $name }}',
-                        order_id: $('#rzp_order_id').val(),
-                        handler: function (transaction) {
-                            var form = $('.payment-checkout-form');
-                            form.append($('<input type="hidden" name="razorpay_payment_id">').val(transaction.razorpay_payment_id));
-                            form.append($('<input type="hidden" name="razorpay_order_id">').val(transaction.razorpay_order_id));
-                            form.append($('<input type="hidden" name="razorpay_signature">').val(transaction.razorpay_signature));
-                            form.submit();
-                        },
-                        'prefill': {
-                            'name': $('#address_name').val(),
-                            'email': $('#address_email').val(),
-                            'contact': $('#address_phone').val()
-                        },
                     };
 
-                    window.rzpay = new Razorpay(options);
-                    rzpay.open();
-                });
-            }
+                    script.onerror = function() {
+                        result.reject();
+                    };
 
-            $(document).off('click', '.payment-checkout-btn').on('click', '.payment-checkout-btn', function (event) {
-                event.preventDefault();
+                    $('head')[0].appendChild(script);
 
-                var _self = $(this);
-                var form = _self.closest('form');
-                if (validatedFormFields()) {
+                    return result.promise();
+                }
+
+                var callRazorPayScript = function() {
+                    loadExternalScript('https://checkout.razorpay.com/v1/checkout.js').then(function() {
+
+                        var options = {
+                            key: '{{ get_payment_setting('key', RAZORPAY_PAYMENT_METHOD_NAME) }}',
+                            name: '{{ $name }}',
+                            description: '{{ $name }}',
+                            order_id: $('#rzp_order_id').val(),
+                            handler: function (transaction) {
+                                var form = $paymentCheckoutForm;
+                                form.append($('<input type="hidden" name="razorpay_payment_id">').val(transaction.razorpay_payment_id));
+                                form.append($('<input type="hidden" name="razorpay_order_id">').val(transaction.razorpay_order_id));
+                                form.append($('<input type="hidden" name="razorpay_signature">').val(transaction.razorpay_signature));
+                                form.submit();
+                            },
+                            'prefill': {
+                                'name': $('#address_name').val(),
+                                'email': $('#address_email').val(),
+                                'contact': $('#address_phone').val()
+                            },
+                        };
+
+                        window.rzpay = new Razorpay(options);
+                        rzpay.open();
+                    });
+                }
+
+                $(document).off('click', '.payment-checkout-btn').on('click', '.payment-checkout-btn', function (event) {
+                    event.preventDefault();
+
+                    var _self = $(this);
+                    var form = _self.closest('form');
+
+                    if (form.valid && ! form.valid()) {
+                        return;
+                    }
+
                     _self.attr('disabled', 'disabled');
                     var submitInitialText = _self.html();
                     _self.html('<i class="fa fa-gear fa-spin"></i> ' + _self.data('processing-text'));
@@ -157,15 +146,13 @@
 
                         callRazorPayScript();
 
-                        //_self.removeAttr('disabled');
-                        //_self.html(submitInitialText);
+                        _self.removeAttr('disabled');
+                        _self.html(submitInitialText);
                     } else {
                         form.submit();
                     }
-                } else {
-                    form.submit();
-                }
+                });
             });
-        });
-    </script>
+        </script>
+    @endif
 @endif

@@ -5,14 +5,13 @@ namespace Botble\Captcha\Providers;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Captcha\Captcha;
 use Botble\Captcha\CaptchaV3;
-use Botble\Captcha\Facades\CaptchaFacade;
+use Botble\Captcha\Facades\Captcha as CaptchaFacade;
 use Botble\Captcha\MathCaptcha;
 use Illuminate\Foundation\AliasLoader;
-use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
-use Theme;
+use Botble\Theme\Facades\Theme;
 
 class CaptchaServiceProvider extends ServiceProvider
 {
@@ -22,18 +21,12 @@ class CaptchaServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        config([
-            'plugins.captcha.general.secret' => setting('captcha_secret'),
-            'plugins.captcha.general.site_key' => setting('captcha_site_key'),
-            'plugins.captcha.general.type' => setting('captcha_type'),
-        ]);
-
-        $this->app->singleton('captcha', function ($app) {
-            if (config('plugins.captcha.general.type') == 'v3') {
-                return new CaptchaV3($app);
+        $this->app->singleton('captcha', function () {
+            if (setting('captcha_type') === 'v3') {
+                return new CaptchaV3(setting('captcha_site_key'), setting('captcha_secret'));
             }
 
-            return new Captcha($app);
+            return new Captcha(setting('captcha_site_key'), setting('captcha_secret'));
         });
 
         $this->app->singleton('math-captcha', function ($app) {
@@ -61,10 +54,7 @@ class CaptchaServiceProvider extends ServiceProvider
         });
     }
 
-    /**
-     * Create captcha validator rule
-     */
-    public function bootValidator()
+    public function bootValidator(): void
     {
         $app = $this->app;
 
@@ -73,16 +63,7 @@ class CaptchaServiceProvider extends ServiceProvider
          */
         $validator = $app['validator'];
         $validator->extend('captcha', function ($attribute, $value, $parameters) use ($app) {
-            /**
-             * @var Captcha $captcha
-             */
-            $captcha = $app['captcha'];
-            /**
-             * @var Request $request
-             */
-            $request = $app['request'];
-
-            if (config('plugins.captcha.general.type') == 'v3') {
+            if (setting('captcha_type') === 'v3') {
                 if (empty($parameters)) {
                     $parameters = ['form', '0.6'];
                 }
@@ -90,22 +71,12 @@ class CaptchaServiceProvider extends ServiceProvider
                 $parameters = $this->mapParameterToOptions($parameters);
             }
 
-            return $captcha->verify($value, $request->getClientIp(), $parameters);
-        });
-
-        $validator->replacer('captcha', function ($message) {
-            return $message === 'validation.captcha' ? trans('plugins/captcha::captcha.failed_validate') : $message;
-        });
-
-        if ($app->bound('form')) {
-            $app['form']->macro('captcha', function ($attributes = []) use ($app) {
-                return $app['captcha']->display($attributes, ['lang' => $app->getLocale()]);
-            });
-        }
+            return $app['captcha']->verify((string)$value, $this->app['request']->getClientIp(), $parameters);
+        }, __('Captcha Verification Failed!'));
 
         $validator->extend('math_captcha', function ($attribute, $value) {
             return $this->app['math-captcha']->verify((string)$value);
-        });
+        }, __('Math Captcha Verification Failed!'));
     }
 
     public function mapParameterToOptions(array $parameters = []): array

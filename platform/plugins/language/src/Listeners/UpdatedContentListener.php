@@ -4,7 +4,7 @@ namespace Botble\Language\Listeners;
 
 use Botble\Base\Events\UpdatedContentEvent;
 use Exception;
-use Language;
+use Botble\Language\Facades\Language;
 
 class UpdatedContentListener
 {

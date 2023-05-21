@@ -3,7 +3,7 @@
 return [
     'translations' => 'Translations',
     'translations_description' => 'Translate all words in system.',
-    'export_warning' => 'Warning, translations are not visible until they are exported back to the :lang_path file, using \'php artisan cms:translations:export\' command or publish button.',
+    'export_warning' => 'Warning, translations are not visible until they are exported back to lang folder. Please use "Publish translations" button to apply changes.',
     'import_done' => 'Done importing, processed :counter items! Reload this page to refresh the groups!',
     'translation_manager' => 'Translations Manager',
     'done_publishing' => 'Done publishing the translations for group',

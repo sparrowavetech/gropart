@@ -42,12 +42,37 @@
     </table>
 
     @if (auth()->user()->hasPermission('backups.create'))
-        {!! Form::modalAction('create-backup-modal', trans('plugins/backup::backup.create'), 'info', view('plugins/backup::partials.create')->render(), 'create-backup-button', trans('plugins/backup::backup.create_btn')) !!}
+        <x-core-base::modal
+            id="create-backup-modal"
+            :title="trans('plugins/backup::backup.create')"
+            type="info"
+            button-id="create-backup-button"
+            :button-label="trans('plugins/backup::backup.create_btn')"
+        >
+            <div class="form-group mb-3">
+                <label for="name" class="control-label required">{{ trans('core/base::forms.name') }}</label>
+                {!! Form::text('name', old('name'), ['class' => 'form-control', 'id' => 'name', 'placeholder' => trans('core/base::forms.name'), 'data-counter' => 120]) !!}
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="description" class="control-label">{{ trans('core/base::forms.description') }}</label>
+                {!! Form::textarea('description', old('description'), ['class' => 'form-control', 'rows' => 4, 'id' => 'description', 'placeholder' => trans('core/base::forms.description'), 'data-counter' => 400]) !!}
+            </div>
+
+        </x-core-base::modal>
         <div data-route-create="{{ route('backups.create') }}"></div>
     @endif
 
     @if (auth()->user()->hasPermission('backups.restore'))
-        {!! Form::modalAction('restore-backup-modal', trans('plugins/backup::backup.restore'), 'info', trans('plugins/backup::backup.restore_confirm_msg'), 'restore-backup-button', trans('plugins/backup::backup.restore_btn')) !!}
+        <x-core-base::modal
+            id="restore-backup-modal"
+            :title="trans('plugins/backup::backup.restore')"
+            type="info"
+            button-id="restore-backup-button"
+            :button-label="trans('plugins/backup::backup.restore_btn')"
+        >
+            {!! trans('plugins/backup::backup.restore_confirm_msg') !!}
+        </x-core-base::modal>
     @endif
 
     @include('core/table::modal')

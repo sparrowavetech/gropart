@@ -16,6 +16,7 @@ trait HasDeleteManyItemsTrait
         string $screen
     ): BaseHttpResponse {
         $ids = $request->input('ids');
+
         if (empty($ids)) {
             return $response
                 ->setError()

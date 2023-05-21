@@ -50,7 +50,7 @@ or in bibtex format
   title={Ar-PHP, PHP library for website developers to process Arabic content},
   author={Al-Shamaa, Khaled},
   url={https://github.com/khaled-alshamaa/ar-php},
-  version = {6.3.2},
+  version = {6.3.4},
   year={2023}
 }
 ```
@@ -62,8 +62,8 @@ or in bibtex format
 * [Bagisto](https://www.bagisto.com/): Laravel package for e-commerce. [check it out [here](https://github.com/bagisto/bagisto/blob/bf1c3f21af912800ffad5dcf68b9a486af0f6c81/packages/Webkul/Admin/src/Http/Controllers/Sales/InvoiceController.php#L159)]
 
 * [LimeSurvey](https://www.limesurvey.org/): Open-source survey software. 
-[[version 3.6.0](https://github.com/LimeSurvey/LimeSurvey/tree/master/application/third_party/ar-php), check it out [here](https://github.com/LimeSurvey/LimeSurvey/blob/master/application/helpers/userstatistics_helper.php#L134) and 
-[here](https://github.com/LimeSurvey/LimeSurvey/blob/master/application/helpers/admin/statistics_helper.php#L133)]
+[check it out [here](https://github.com/LimeSurvey/LimeSurvey/blob/master/application/helpers/userstatistics_helper.php#L135) and 
+[here](https://github.com/LimeSurvey/LimeSurvey/blob/master/application/helpers/admin/statistics_helper.php#L134)]
 
 
 ### Arabic Language

@@ -4,7 +4,7 @@ namespace Botble\Language\Models;
 
 use Botble\Base\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Language as LanguageFacade;
+use Botble\Language\Facades\Language as LanguageFacade;
 
 class LanguageMeta extends BaseModel
 {
@@ -26,7 +26,7 @@ class LanguageMeta extends BaseModel
         return $this->morphTo()->withDefault();
     }
 
-    public static function saveMetaData(BaseModel $model, ?string $locale = null, ?string $originValue = null)
+    public static function saveMetaData(BaseModel $model, string|null $locale = null, string|null $originValue = null)
     {
         if (! $locale) {
             $locale = LanguageFacade::getDefaultLocaleCode();
@@ -36,7 +36,7 @@ class LanguageMeta extends BaseModel
             $originValue = md5($model->id . get_class($model) . time());
         }
 
-        LanguageMeta::insert([
+        LanguageMeta::create([
             'reference_id' => $model->id,
             'reference_type' => get_class($model),
             'lang_meta_code' => $locale,

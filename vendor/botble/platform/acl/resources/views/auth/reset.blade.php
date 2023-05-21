@@ -24,3 +24,7 @@
         <div class="clearfix"></div>
     {!! Form::close() !!}
 @stop
+
+@push('footer')
+    {!! $jsValidator !!}
+@endpush

@@ -6,7 +6,7 @@ use Botble\SeoHelper\Contracts\Entities\AnalyticsContract;
 
 class Analytics implements AnalyticsContract
 {
-    protected ?string $google = '';
+    protected string|null $google = '';
 
     public function setGoogle($code): static
     {

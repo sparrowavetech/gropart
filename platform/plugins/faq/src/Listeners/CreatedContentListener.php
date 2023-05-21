@@ -5,7 +5,7 @@ namespace Botble\Faq\Listeners;
 use Botble\Base\Events\CreatedContentEvent;
 use Exception;
 use Illuminate\Support\Arr;
-use MetaBox;
+use Botble\Base\Facades\MetaBox;
 
 class CreatedContentListener
 {

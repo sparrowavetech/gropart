@@ -10,10 +10,7 @@ class ThemeRoutingBeforeEvent extends Event
 {
     use SerializesModels;
 
-    public Router $router;
-
-    public function __construct()
+    public function __construct(public Router $router)
     {
-        $this->router = app('router');
     }
 }

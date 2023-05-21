@@ -17,6 +17,6 @@ class PaymentMethodEnum extends Enum
 
     public function getServiceClass(): ?string
     {
-        return apply_filters(PAYMENT_FILTER_GET_SERVICE_CLASS, null, $this->value);
+        return apply_filters(PAYMENT_FILTER_GET_SERVICE_CLASS, null, (string)$this->value);
     }
 }

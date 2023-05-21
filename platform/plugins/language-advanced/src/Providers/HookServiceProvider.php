@@ -2,12 +2,12 @@
 
 namespace Botble\LanguageAdvanced\Providers;
 
-use Assets;
+use Botble\Base\Facades\Assets;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Language\Repositories\Interfaces\LanguageInterface;
 use Botble\Language\Repositories\Interfaces\LanguageMetaInterface;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
-use DB;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
@@ -15,11 +15,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
-use Language;
-use MetaBox;
-use Route;
-use SlugHelper;
-use Yajra\DataTables\EloquentDataTable;
+use Botble\Language\Facades\Language;
+use Botble\Base\Facades\MetaBox;
+use Illuminate\Support\Facades\Route;
+use Botble\Slug\Facades\SlugHelper;
+use Botble\Table\CollectionDataTable;
+use Botble\Table\EloquentDataTable;
 
 class HookServiceProvider extends ServiceProvider
 {
@@ -56,7 +57,7 @@ class HookServiceProvider extends ServiceProvider
         }
     }
 
-    public function languageMetaField(): ?string
+    public function languageMetaField(): string|null
     {
         $languages = Language::getActiveLanguage([
             'lang_code',
@@ -146,7 +147,7 @@ class HookServiceProvider extends ServiceProvider
         }
     }
 
-    public function getCurrentAdminLanguage(Request $request, Model|string|null $data = null): ?string
+    public function getCurrentAdminLanguage(Request $request, Model|string|null $data = null): string|null
     {
         $code = null;
         if ($request->has('ref_lang')) {
@@ -212,7 +213,7 @@ class HookServiceProvider extends ServiceProvider
         return $data;
     }
 
-    public function addLanguageColumn(EloquentDataTable $data, Model|string|null $model): EloquentDataTable
+    public function addLanguageColumn(EloquentDataTable|CollectionDataTable $data, Model|string|null $model): EloquentDataTable|CollectionDataTable
     {
         if ($model && LanguageAdvancedManager::isSupported($model)) {
             $route = $this->getRoutes();
@@ -221,7 +222,7 @@ class HookServiceProvider extends ServiceProvider
                 return $data;
             }
 
-            return $data->addColumn('language', function ($item) use ($model, $route) {
+            return $data->addColumn('language', function ($item) use ($route) {
                 $languages = Language::getActiveLanguage();
 
                 return view('plugins/language-advanced::language-column', compact('item', 'route', 'languages'))
@@ -334,7 +335,7 @@ class HookServiceProvider extends ServiceProvider
         }
     }
 
-    public function changeSlugField(?string $html = null, Model|string|null $object = null): ?string
+    public function changeSlugField(string|null $html = null, Model|string|null $object = null): string|null
     {
         if (is_in_admin() && request()->input('ref_lang') && Language::getCurrentAdminLocaleCode() != Language::getDefaultLocaleCode() && LanguageAdvancedManager::isSupported($object) && SlugHelper::isSupportedModel(get_class($object))) {
             Assets::addStylesDirectly('vendor/core/packages/slug/css/slug.css');

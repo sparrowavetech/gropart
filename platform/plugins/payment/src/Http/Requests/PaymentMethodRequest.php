@@ -9,7 +9,7 @@ class PaymentMethodRequest extends Request
     public function rules(): array
     {
         return [
-            'type' => 'required|max:120',
+            'type' => 'required|string|max:120',
         ];
     }
 }

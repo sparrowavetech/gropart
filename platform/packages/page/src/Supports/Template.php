@@ -2,8 +2,8 @@
 
 namespace Botble\Page\Supports;
 
-use BaseHelper;
-use Theme;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Theme\Facades\Theme;
 
 class Template
 {

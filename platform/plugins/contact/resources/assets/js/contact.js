@@ -1,26 +1,26 @@
 class ContactPluginManagement {
     init() {
-        $(document).on('click', '.answer-trigger-button', event =>  {
-            event.preventDefault();
-            event.stopPropagation();
+        $(document).on('click', '.answer-trigger-button', (event) => {
+            event.preventDefault()
+            event.stopPropagation()
 
-            const answerWrapper = $('.answer-wrapper');
+            const answerWrapper = $('.answer-wrapper')
             if (answerWrapper.is(':visible')) {
-                answerWrapper.fadeOut();
+                answerWrapper.fadeOut()
             } else {
-                answerWrapper.fadeIn();
+                answerWrapper.fadeIn()
             }
-        });
+        })
 
-        $(document).on('click', '.answer-send-button', event =>  {
-            event.preventDefault();
-            event.stopPropagation();
+        $(document).on('click', '.answer-send-button', (event) => {
+            event.preventDefault()
+            event.stopPropagation()
 
-            $(event.currentTarget).addClass('button-loading');
+            $(event.currentTarget).addClass('button-loading')
 
-            let message = $('#message').val();
+            let message = $('#message').val()
             if (typeof tinymce != 'undefined') {
-                message = tinymce.get('message').getContent();
+                message = tinymce.get('message').getContent()
             }
 
             $.ajax({
@@ -28,38 +28,40 @@ class ContactPluginManagement {
                 cache: false,
                 url: route('contacts.reply', $('#input_contact_id').val()),
                 data: {
-                    message: message
+                    message: message,
                 },
-                success: res =>  {
+                success: (res) => {
                     if (!res.error) {
-                        $('.answer-wrapper').fadeOut();
+                        $('.answer-wrapper').fadeOut()
                         if (typeof tinymce != 'undefined') {
-                            tinymce.get('message').setContent('');
+                            tinymce.get('message').setContent('')
                         } else {
-                            $('#message').val('');
-                            const domEditableElement = document.querySelector('.answer-wrapper .ck-editor__editable');
-                            const editorInstance = domEditableElement.ckeditorInstance;
+                            $('#message').val('')
+                            const domEditableElement = document.querySelector('.answer-wrapper .ck-editor__editable')
+                            if (domEditableElement) {
+                                const editorInstance = domEditableElement.ckeditorInstance
 
-                            if (editorInstance) {
-                                editorInstance.setData('');
+                                if (editorInstance) {
+                                    editorInstance.setData('')
+                                }
                             }
                         }
 
-                        Botble.showSuccess(res.message);
-                        $('#reply-wrapper').load(window.location.href + ' #reply-wrapper > *');
+                        Botble.showSuccess(res.message)
+                        $('#reply-wrapper').load(window.location.href + ' #reply-wrapper > *')
                     }
 
-                    $(event.currentTarget).removeClass('button-loading');
+                    $(event.currentTarget).removeClass('button-loading')
                 },
-                error: res =>  {
-                    $(event.currentTarget).removeClass('button-loading');
-                    Botble.handleError(res);
-                }
-            });
-        });
-    };
+                error: (res) => {
+                    $(event.currentTarget).removeClass('button-loading')
+                    Botble.handleError(res)
+                },
+            })
+        })
+    }
 }
 
 $(document).ready(() => {
-    new ContactPluginManagement().init();
-});
+    new ContactPluginManagement().init()
+})

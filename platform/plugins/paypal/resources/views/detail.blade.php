@@ -53,8 +53,8 @@
                         <p>{{ trans('plugins/payment::payment.refunds.' . $k) }}: {{ $breakdown->value }} {{ $breakdown->currency_code }}</p>
                     @endforeach
                 </div>
-                <p>{{ trans('plugins/payment::payment.refunds.create_time') }}: {{ now()->parse($item->create_time) }}</p>
-                <p>{{ trans('plugins/payment::payment.refunds.update_time') }}: {{ now()->parse($item->update_time) }}</p>
+                <p>{{ trans('plugins/payment::payment.refunds.create_time') }}: {{ Carbon\Carbon::now()->parse($item->create_time) }}</p>
+                <p>{{ trans('plugins/payment::payment.refunds.update_time') }}: {{ Carbon\Carbon::now()->parse($item->update_time) }}</p>
             </div>
             <br />
         @endforeach

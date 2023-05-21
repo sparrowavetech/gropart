@@ -24,7 +24,7 @@ class Assets extends BaseAssets
         $this->styles = $this->config['styles'];
     }
 
-    public function setConfig(array $config)
+    public function setConfig(array $config): void
     {
         $this->config = $config;
     }
@@ -50,10 +50,6 @@ class Assets extends BaseAssets
             if (! Str::contains($file, '.css.map')) {
                 $themes[basename($file, '.css')] = $name;
             }
-        }
-
-        if (empty($themes)) {
-            $themes['default'] = $themeFolder . '/default.css';
         }
 
         return $themes;

@@ -2,7 +2,7 @@
 
 namespace Botble\PluginManagement\Commands;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\PluginManagement\Services\PluginService;
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Attribute\AsCommand;

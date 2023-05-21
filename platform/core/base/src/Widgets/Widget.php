@@ -3,7 +3,6 @@
 namespace Botble\Base\Widgets;
 
 use Botble\Base\Helpers\ChartHelper;
-use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
@@ -24,11 +23,14 @@ abstract class Widget
     {
         [$this->startDate, $this->endDate] = ChartHelper::getDateRange();
 
+        $diffInDays = $this->startDate->diffInDays($this->endDate);
+
         $this->dateFormat = match (true) {
-            ($this->startDate->diffInDays($this->endDate)) < 1 => '%h %d',
-            ($this->startDate->diffInDays($this->endDate)) < 30 => '%d %b',
-            ($this->startDate->diffInDays($this->endDate)) > 30 => '%b %Y',
-            ($this->startDate->diffInDays($this->endDate)) > 365 => '%Y',
+            $diffInDays < 1 => '%h %d',
+            $diffInDays <= 30 => '%d %b',
+            $diffInDays > 30 => '%b %Y',
+            $diffInDays > 365 => '%Y',
+            default => '%d %b %Y',
         };
     }
 
@@ -60,31 +62,5 @@ abstract class Widget
     public function render(): View
     {
         return view('core/base::widgets.' . $this->view, $this->getViewData());
-    }
-
-    protected function translateCategories(array $data): array
-    {
-        $categories = [];
-
-        foreach (array_keys($data) as $key => $item) {
-            $replacement = [
-                '%h %d' => '%h',
-                '%d %b' => '%d M',
-                '%b %Y' => '%M Y',
-                '%' => '',
-            ];
-
-            $displayFormat = $this->dateFormat;
-
-            foreach ($replacement as $replacementKey => $value) {
-                $displayFormat = str_replace($replacementKey, $value, $displayFormat);
-            }
-
-            $dataFormat = str_replace('%', '', str_replace('%b', '%M', $this->dateFormat));
-
-            $categories[$key] = Carbon::createFromFormat($dataFormat, $item)->translatedFormat($displayFormat);
-        }
-
-        return $categories;
     }
 }

@@ -21,7 +21,7 @@ class BaseTest extends TestCase
 
         $routeCollection = Route::getRoutes();
 
-        foreach ($routeCollection as $value) {
+        foreach ($routeCollection->getRoutes() as $value) {
             if (! in_array('GET', $value->methods())) {
                 continue;
             }

@@ -1,23 +1,22 @@
 <?php
 
-namespace Botble\Paypal\Providers;
+namespace Botble\PayPal\Providers;
 
 use Botble\Payment\Enums\PaymentMethodEnum;
-use Botble\Paypal\Services\Gateways\PayPalPaymentService;
-use Html;
-use Illuminate\Contracts\Container\BindingResolutionException;
+use Botble\PayPal\Services\Gateways\PayPalPaymentService;
+use Botble\Base\Facades\Html;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
-use Throwable;
+use Botble\Payment\Facades\PaymentMethods;
 
 class HookServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        add_filter(PAYMENT_FILTER_ADDITIONAL_PAYMENT_METHODS, [$this, 'registerPaypalMethod'], 2, 2);
+        add_filter(PAYMENT_FILTER_ADDITIONAL_PAYMENT_METHODS, [$this, 'registerPayPalMethod'], 2, 2);
 
         $this->app->booted(function () {
-            add_filter(PAYMENT_FILTER_AFTER_POST_CHECKOUT, [$this, 'checkoutWithPaypal'], 2, 2);
+            add_filter(PAYMENT_FILTER_AFTER_POST_CHECKOUT, [$this, 'checkoutWithPayPal'], 2, 2);
         });
 
         add_filter(PAYMENT_METHODS_SETTINGS_PAGE, [$this, 'addPaymentSettings'], 2);
@@ -32,7 +31,7 @@ class HookServiceProvider extends ServiceProvider
 
         add_filter(BASE_FILTER_ENUM_LABEL, function ($value, $class) {
             if ($class == PaymentMethodEnum::class && $value == PAYPAL_PAYMENT_METHOD_NAME) {
-                $value = 'Paypal';
+                $value = 'PayPal';
             }
 
             return $value;
@@ -53,7 +52,7 @@ class HookServiceProvider extends ServiceProvider
 
         add_filter(PAYMENT_FILTER_GET_SERVICE_CLASS, function ($data, $value) {
             if ($value == PAYPAL_PAYMENT_METHOD_NAME) {
-                $data = PaypalPaymentService::class;
+                $data = PayPalPaymentService::class;
             }
 
             return $data;
@@ -69,33 +68,21 @@ class HookServiceProvider extends ServiceProvider
         }, 2, 2);
     }
 
-    /**
-     * @param string|null $settings
-     * @return string
-     * @throws Throwable
-     */
     public function addPaymentSettings(?string $settings): string
     {
         return $settings . view('plugins/paypal::settings')->render();
     }
 
-    /**
-     * @param string|null $html
-     * @param array $data
-     * @return string
-     */
-    public function registerPaypalMethod(?string $html, array $data): string
+    public function registerPayPalMethod(?string $html, array $data): string
     {
-        return $html . view('plugins/paypal::methods', $data)->render();
+        PaymentMethods::method(PAYPAL_PAYMENT_METHOD_NAME, [
+            'html' => view('plugins/paypal::methods', $data)->render(),
+        ]);
+
+        return $html;
     }
 
-    /**
-     * @param array $data
-     * @param Request $request
-     * @return array
-     * @throws BindingResolutionException
-     */
-    public function checkoutWithPaypal(array $data, Request $request): array
+    public function checkoutWithPayPal(array $data, Request $request): array
     {
         if ($request->input('payment_method') == PAYPAL_PAYMENT_METHOD_NAME) {
             $currentCurrency = get_application_currency();
@@ -134,7 +121,7 @@ class HookServiceProvider extends ServiceProvider
                 if ($currentCurrency->is_default) {
                     $paymentData['amount'] = $paymentData['amount'] * $usdCurrency->exchange_rate;
                 } else {
-                    $paymentData['amount'] = format_price($paymentData['amount'], $currentCurrency, true);
+                    $paymentData['amount'] = format_price($paymentData['amount'] / $currentCurrency->exchange_rate, $currentCurrency, true);
                 }
             }
 

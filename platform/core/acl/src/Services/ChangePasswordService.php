@@ -7,37 +7,37 @@ use Illuminate\Support\Facades\Auth;
 use Botble\ACL\Repositories\Interfaces\UserInterface;
 use Botble\Support\Services\ProduceServiceInterface;
 use Exception;
-use Hash;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Throwable;
 
 class ChangePasswordService implements ProduceServiceInterface
 {
-    protected UserInterface $userRepository;
-
-    public function __construct(UserInterface $userRepository)
+    public function __construct(protected UserInterface $userRepository)
     {
-        $this->userRepository = $userRepository;
     }
 
     public function execute(Request $request): Exception|bool|User
     {
-        if (! $request->user()->isSuperUser()) {
-            if (! Hash::check($request->input('old_password'), $request->user()->getAuthPassword())) {
+        $currentUser = $request->user();
+
+        if (! $currentUser->isSuperUser()) {
+            if (! Hash::check($request->input('old_password'), $currentUser->getAuthPassword())) {
                 return new Exception(trans('core/acl::users.current_password_not_valid'));
             }
         }
 
-        $user = $this->userRepository->findOrFail($request->input('id', $request->user()->getKey()));
+        $user = $this->userRepository->findOrFail($request->input('id', $currentUser->getKey()));
 
         $password = $request->input('password');
 
         $user->password = Hash::make($password);
         $this->userRepository->createOrUpdate($user);
 
-        if ($user->id != $request->user()->getKey()) {
+        if ($user->id != $currentUser->getKey()) {
             try {
-                Auth::setUser($user)->logoutOtherDevices($password);
+                Auth::setUser($user);
+                Auth::logoutOtherDevices($password);
             } catch (Throwable $exception) {
                 info($exception->getMessage());
             }

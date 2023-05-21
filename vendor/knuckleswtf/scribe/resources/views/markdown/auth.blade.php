@@ -1,7 +1,10 @@
-# Authenticating requests
+@php
+    use Knuckles\Scribe\Tools\Utils as u;
+@endphp
+# {{ u::trans("scribe::headers.auth") }}
 
 @if(!$isAuthed)
-This API is not authenticated.
+{!! u::trans("scribe::no_auth") !!}
 @else
 {!! $authDescription !!}
 

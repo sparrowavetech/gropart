@@ -2,30 +2,30 @@
 
 namespace Botble\Blog\Providers;
 
-use Assets;
-use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
 use Botble\Blog\Models\Category;
 use Botble\Blog\Models\Post;
 use Botble\Blog\Models\Tag;
 use Botble\Blog\Services\BlogService;
 use Botble\Dashboard\Supports\DashboardWidgetInstance;
+use Botble\Media\Facades\RvMedia;
+use Botble\Menu\Facades\Menu;
 use Botble\Page\Models\Page;
 use Botble\Page\Repositories\Interfaces\PageInterface;
 use Botble\Shortcode\Compilers\Shortcode;
 use Botble\Slug\Models\Slug;
-use Eloquent;
-use Html;
+use Botble\Theme\Facades\AdminBar;
+use Botble\Theme\Facades\Theme;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
-use Menu;
-use RvMedia;
-use Theme;
+use Illuminate\Validation\Rule;
 
 class HookServiceProvider extends ServiceProvider
 {
@@ -43,9 +43,14 @@ class HookServiceProvider extends ServiceProvider
             add_filter(PAGE_FILTER_PAGE_NAME_IN_ADMIN_LIST, [$this, 'addAdditionNameToPageName'], 147, 2);
         }
 
-        Event::listen(RouteMatched::class, function () {
+        $this->app['events']->listen(RouteMatched::class, function () {
             if (function_exists('admin_bar')) {
-                admin_bar()->registerLink(trans('plugins/blog::posts.post'), route('posts.create'), 'add-new', 'posts.create');
+                AdminBar::registerLink(
+                    trans('plugins/blog::posts.post'),
+                    route('posts.create'),
+                    'add-new',
+                    'posts.create'
+                );
             }
         });
 
@@ -99,7 +104,7 @@ class HookServiceProvider extends ServiceProvider
                         'author' => [
                             '@type' => 'Person',
                             'url' => route('public.index'),
-                            'name' => $post->author->name,
+                            'name' => class_exists($post->author_type) ? $post->author->name : '',
                         ],
                         'publisher' => [
                             '@type' => 'Organization',
@@ -120,9 +125,10 @@ class HookServiceProvider extends ServiceProvider
         }
 
         add_filter(BASE_FILTER_AFTER_SETTING_CONTENT, [$this, 'addSettings'], 193);
+        add_filter('cms_settings_validation_rules', [$this, 'addSettingRules'], 193);
     }
 
-    public function addThemeOptions()
+    public function addThemeOptions(): void
     {
         $pages = $this->app->make(PageInterface::class)->pluck('name', 'id', ['status' => BaseStatusEnum::PUBLISHED]);
 
@@ -209,7 +215,7 @@ class HookServiceProvider extends ServiceProvider
             ->init($widgets, $widgetSettings);
     }
 
-    public function handleSingleView(Slug|array $slug): Eloquent|array
+    public function handleSingleView(Slug|array $slug): Slug|array
     {
         return (new BlogService())->handleFrontRoutes($slug);
     }
@@ -228,7 +234,7 @@ class HookServiceProvider extends ServiceProvider
         return view($view, compact('posts'))->render();
     }
 
-    public function renderBlogPage(?string $content, Page $page): ?string
+    public function renderBlogPage(string|null $content, Page $page): string|null
     {
         if ($page->id == theme_option('blog_page_id', setting('blog_page_id'))) {
             $view = 'plugins/blog::themes.loop';
@@ -245,7 +251,7 @@ class HookServiceProvider extends ServiceProvider
         return $content;
     }
 
-    public function addAdditionNameToPageName(?string $name, Page $page): ?string
+    public function addAdditionNameToPageName(string|null $name, Page $page): string|null
     {
         if ($page->id == theme_option('blog_page_id', setting('blog_page_id'))) {
             $subTitle = Html::tag('span', trans('plugins/blog::base.blog_page'), ['class' => 'additional-page-name'])
@@ -270,8 +276,21 @@ class HookServiceProvider extends ServiceProvider
         }
     }
 
-    public function addSettings(?string $data = null): string
+    public function addSettings(string|null $data = null): string
     {
         return $data . view('plugins/blog::settings')->render();
+    }
+
+    public function addSettingRules(array $rules): array
+    {
+        $rules['blog_post_schema_enabled'] = 'nullable|in:0,1';
+
+        $rules['blog_post_schema_type'] = [
+            'nullable',
+            'string',
+            Rule::in(['NewsArticle', 'News', 'Article', 'BlogPosting']),
+        ];
+
+        return $rules;
     }
 }

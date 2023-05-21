@@ -29,6 +29,11 @@ Route::group(['namespace' => 'Botble\Shippo\Http\Controllers', 'middleware' => [
                     'uses' => 'updateRate',
                     'permission' => 'ecommerce.shipments.edit',
                 ]);
+
+                Route::get('view-logs/{file}', [
+                    'as' => 'view-log',
+                    'uses' => 'viewLog',
+                ]);
             });
 
             Route::group(['prefix' => 'settings', 'as' => 'settings.'], function () {

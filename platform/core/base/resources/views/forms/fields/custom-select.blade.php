@@ -10,7 +10,6 @@
 
 @if ($showField)
     @php
-        Arr::set($options['attr'], 'class', Arr::get($options['attr'], 'class') . ' ui-select');
         $emptyVal = $options['empty_value'] ? ['' => $options['empty_value']] : null;
     @endphp
     {!! Form::customSelect($name, (array)$emptyVal + $options['choices'], $options['selected'], $options['attr'], Arr::get($options, 'optionAttrs', []), Arr::get($options, 'optgroupsAttributes', [])) !!}

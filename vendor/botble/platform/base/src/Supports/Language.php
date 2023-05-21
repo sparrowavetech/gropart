@@ -2,7 +2,7 @@
 
 namespace Botble\Base\Supports;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Illuminate\Support\Facades\File;
 
 class Language

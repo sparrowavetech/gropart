@@ -2,19 +2,19 @@
 
 namespace Botble\SimpleSlider\Providers;
 
-use Illuminate\Routing\Events\RouteMatched;
+use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
+use Botble\Language\Facades\Language;
 use Botble\SimpleSlider\Models\SimpleSlider;
 use Botble\SimpleSlider\Models\SimpleSliderItem;
+use Botble\SimpleSlider\Repositories\Caches\SimpleSliderCacheDecorator;
 use Botble\SimpleSlider\Repositories\Caches\SimpleSliderItemCacheDecorator;
 use Botble\SimpleSlider\Repositories\Eloquent\SimpleSliderItemRepository;
-use Botble\SimpleSlider\Repositories\Interfaces\SimpleSliderItemInterface;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\ServiceProvider;
-use Botble\SimpleSlider\Repositories\Caches\SimpleSliderCacheDecorator;
 use Botble\SimpleSlider\Repositories\Eloquent\SimpleSliderRepository;
 use Botble\SimpleSlider\Repositories\Interfaces\SimpleSliderInterface;
-use Language;
+use Botble\SimpleSlider\Repositories\Interfaces\SimpleSliderItemInterface;
+use Illuminate\Routing\Events\RouteMatched;
+use Illuminate\Support\ServiceProvider;
 
 class SimpleSliderServiceProvider extends ServiceProvider
 {
@@ -43,8 +43,8 @@ class SimpleSliderServiceProvider extends ServiceProvider
             ->loadMigrations()
             ->publishAssets();
 
-        Event::listen(RouteMatched::class, function () {
-            dashboard_menu()->registerItem([
+        $this->app['events']->listen(RouteMatched::class, function () {
+            DashboardMenu::registerItem([
                 'id' => 'cms-plugins-simple-slider',
                 'priority' => 100,
                 'parent_id' => null,

@@ -2,8 +2,9 @@
 
 namespace Botble\Theme\Commands;
 
-use Botble\Setting\Models\Setting as SettingModel;
+use Botble\Setting\Facades\Setting;
 use Botble\Theme\Commands\Traits\ThemeTrait;
+use Botble\Theme\Facades\ThemeOption;
 use Botble\Theme\Services\ThemeService;
 use Botble\Widget\Models\Widget;
 use Illuminate\Console\Command;
@@ -29,7 +30,7 @@ class ThemeRenameCommand extends Command
         }
 
         if ($files->isDirectory(theme_path($newName))) {
-            $this->components->error('Theme "' . $theme . '" is already exists.');
+            $this->components->error("Theme <info>$theme</info> is already exists.");
 
             return self::FAILURE;
         }
@@ -38,23 +39,23 @@ class ThemeRenameCommand extends Command
 
         $themeService->activate($newName);
 
-        $themeOptions = SettingModel::where('key', 'LIKE', 'theme-' . $theme . '-%')->get();
+        $themeOptions = Setting::newQuery()->where('key', 'LIKE', ThemeOption::getOptionKey('%', null, $theme))->get();
 
         foreach ($themeOptions as $option) {
-            $option->key = str_replace('theme-' . $theme, 'theme-' . $newName, $option->key);
+            $option->key = str_replace(ThemeOption::getOptionKey('', theme: $theme), ThemeOption::getOptionKey('', theme: $newName), $option->key);
             $option->save();
         }
 
-        Widget::where('theme', $theme)->update(['theme' => $newName]);
+        Widget::query()->where('theme', $theme)->update(['theme' => $newName]);
 
-        $widgets = Widget::where('theme', 'LIKE', $theme . '-%')->get();
+        $widgets = Widget::query()->where('theme', 'LIKE', $theme . '-%')->get();
 
         foreach ($widgets as $widget) {
             $widget->theme = str_replace($theme, $newName, $widget->theme);
             $widget->save();
         }
 
-        $this->components->info('Theme "' . $theme . '" has been renamed to ' . $newName . '!');
+        $this->components->info("Theme <info>$theme</info> has been renamed to <info>$newName</info>!");
 
         return self::SUCCESS;
     }

@@ -2,7 +2,7 @@
 
 namespace Botble\ACL\Notifications;
 
-use EmailHandler;
+use Botble\Base\Facades\EmailHandler;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\HtmlString;

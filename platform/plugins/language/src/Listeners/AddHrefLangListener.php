@@ -2,13 +2,13 @@
 
 namespace Botble\Language\Listeners;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Language\Models\LanguageMeta;
 use Botble\Page\Models\Page;
 use Botble\Slug\Models\Slug;
 use Botble\Theme\Events\RenderingSingleEvent;
 use Exception;
-use Language;
+use Botble\Language\Facades\Language;
 
 class AddHrefLangListener
 {

@@ -3,20 +3,14 @@
 namespace Botble\Contact\Events;
 
 use Botble\Base\Events\Event;
-use Eloquent;
+use Botble\Base\Models\BaseModel;
 use Illuminate\Queue\SerializesModels;
 
 class SentContactEvent extends Event
 {
     use SerializesModels;
 
-    /**
-     * @var Eloquent|false
-     */
-    public $data;
-
-    public function __construct($data)
+    public function __construct(public bool|BaseModel|null $data)
     {
-        $this->data = $data;
     }
 }

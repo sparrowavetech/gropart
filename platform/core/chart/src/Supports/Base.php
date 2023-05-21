@@ -2,7 +2,7 @@
 
 namespace Botble\Chart\Supports;
 
-use Assets;
+use Botble\Base\Facades\Assets;
 use Illuminate\Support\Str;
 
 class Base
@@ -82,6 +82,7 @@ class Base
     public function toArray(): array
     {
         $return = [];
+        // @phpstan-ignore-next-line
         foreach ($this as $property => $value) {
             if (str_starts_with($property, '__') || empty($value)) {
                 continue;
@@ -123,6 +124,7 @@ class Base
 
     public function __get(string $name)
     {
+        // @phpstan-ignore-next-line
         foreach ($this as $key => $value) {
             if ($name == $key) {
                 return $this->{$key};
@@ -140,6 +142,7 @@ class Base
 
     public function __call(string $name, array $arguments)
     {
+        // @phpstan-ignore-next-line
         foreach ($this as $key => $value) {
             if ($name == $key) {
                 $this->{$key} = $arguments[0];

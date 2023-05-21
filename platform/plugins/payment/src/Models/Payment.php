@@ -6,7 +6,7 @@ use Botble\ACL\Models\User;
 use Botble\Base\Models\BaseModel;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Payment\Enums\PaymentStatusEnum;
-use Html;
+use Botble\Base\Facades\Html;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 

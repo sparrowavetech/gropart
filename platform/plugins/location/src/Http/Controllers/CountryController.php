@@ -2,8 +2,8 @@
 
 namespace Botble\Location\Http\Controllers;
 
-use BaseHelper;
-use Botble\Base\Events\BeforeEditContentEvent;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\PageTitle;
 use Botble\Location\Http\Requests\CountryRequest;
 use Botble\Location\Http\Resources\CountryResource;
 use Botble\Location\Models\Country;
@@ -21,23 +21,20 @@ use Botble\Base\Forms\FormBuilder;
 
 class CountryController extends BaseController
 {
-    protected CountryInterface $countryRepository;
-
-    public function __construct(CountryInterface $countryRepository)
+    public function __construct(protected CountryInterface $countryRepository)
     {
-        $this->countryRepository = $countryRepository;
     }
 
     public function index(CountryTable $table)
     {
-        page_title()->setTitle(trans('plugins/location::country.name'));
+        PageTitle::setTitle(trans('plugins/location::country.name'));
 
         return $table->renderTable();
     }
 
     public function create(FormBuilder $formBuilder)
     {
-        page_title()->setTitle(trans('plugins/location::country.create'));
+        PageTitle::setTitle(trans('plugins/location::country.create'));
 
         return $formBuilder->create(CountryForm::class)->renderForm();
     }
@@ -54,21 +51,15 @@ class CountryController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int $id, FormBuilder $formBuilder, Request $request)
+    public function edit(Country $country, FormBuilder $formBuilder)
     {
-        $country = $this->countryRepository->findOrFail($id);
-
-        event(new BeforeEditContentEvent($request, $country));
-
-        page_title()->setTitle(trans('plugins/location::country.edit') . ' "' . $country->name . '"');
+        PageTitle::setTitle(trans('core/base::forms.edit_item', ['name' => $country->name]));
 
         return $formBuilder->create(CountryForm::class, ['model' => $country])->renderForm();
     }
 
-    public function update(int $id, CountryRequest $request, BaseHttpResponse $response)
+    public function update(Country $country, CountryRequest $request, BaseHttpResponse $response)
     {
-        $country = $this->countryRepository->findOrFail($id);
-
         $country->fill($request->input());
 
         $this->countryRepository->createOrUpdate($country);
@@ -80,11 +71,9 @@ class CountryController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(Request $request, int $id, BaseHttpResponse $response)
+    public function destroy(Country $country, Request $request, BaseHttpResponse $response)
     {
         try {
-            $country = $this->countryRepository->findOrFail($id);
-
             $this->countryRepository->delete($country);
 
             event(new DeletedContentEvent(COUNTRY_MODULE_SCREEN_NAME, $request, $country));

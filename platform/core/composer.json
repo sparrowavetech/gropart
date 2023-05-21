@@ -19,6 +19,8 @@
     ],
     "type": "project",
     "require": {
+        "ext-zip": "*",
+        "ext-gd": "*",
         "barryvdh/laravel-dompdf": "^2.0",
         "botble/assets": "^1.0",
         "intervention/image": "^2.6",
@@ -71,15 +73,21 @@
                 "Botble\\Chart\\Providers\\ChartServiceProvider"
             ],
             "aliases": {
-                "Assets": "Botble\\Base\\Facades\\AssetsFacade",
-                "BaseHelper": "Botble\\Base\\Facades\\BaseHelperFacade",
-                "MetaBox": "Botble\\Base\\Facades\\MetaBoxFacade",
-                "Action": "Botble\\Base\\Facades\\ActionFacade",
-                "Filter": "Botble\\Base\\Facades\\FilterFacade",
-                "EmailHandler": "Botble\\Base\\Facades\\EmailHandlerFacade",
-                "Breadcrumbs": "Botble\\Base\\Facades\\BreadcrumbsFacade",
-                "MacroableModels": "Botble\\Base\\Facades\\MacroableModelsFacade",
-                "JsValidator": "Botble\\JsValidation\\Facades\\JsValidatorFacade"
+                "Action": "Botble\\Base\\Facades\\Action",
+                "Assets": "Botble\\Base\\Facades\\Assets",
+                "BaseHelper": "Botble\\Base\\Facades\\BaseHelper",
+                "Breadcrumbs": "Botble\\Base\\Facades\\Breadcrumbs",
+                "DashboardMenu": "Botble\\Base\\Facades\\DashboardMenu",
+                "EmailHandler": "Botble\\Base\\Facades\\EmailHandler",
+                "Filter": "Botble\\Base\\Facades\\Filter",
+                "Form": "Botble\\Base\\Facades\\Form",
+                "Html": "Botble\\Base\\Facades\\Html",
+                "MacroableModels": "Botble\\Base\\Facades\\MacroableModels",
+                "MetaBox": "Botble\\Base\\Facades\\MetaBox",
+                "PageTitle": "Botble\\Base\\Facades\\PageTitle",
+                "JsValidator": "Botble\\JsValidation\\Facades\\JsValidator",
+                "Setting": "Botble\\Setting\\Facades\\Setting",
+                "RvMedia": "Botble\\Media\\Facades\\RvMedia"
             }
         }
     },

@@ -10,7 +10,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-    <title>{!! BaseHelper::clean(page_title()->getTitle()) !!}</title>
+    <title>{{ PageTitle::getTitle() }}</title>
 
     <meta name="robots" content="noindex,follow"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">

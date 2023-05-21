@@ -2,14 +2,15 @@
 
 namespace Botble\Table\Abstracts;
 
-use Assets;
-use BaseHelper;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Models\BaseModel;
 use Botble\Support\Repositories\Interfaces\RepositoryInterface;
 use Botble\Table\Supports\Builder as CustomTableBuilder;
 use Botble\Table\Supports\TableExportHandler;
-use Form;
-use Html;
+use Botble\Base\Facades\Form;
+use Botble\Base\Facades\Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -18,12 +19,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation as EloquentRelation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
-use Request;
-use RvMedia;
+use Illuminate\Support\Facades\Request;
+use Botble\Media\Facades\RvMedia;
 use Symfony\Component\HttpFoundation\Response;
 use Yajra\DataTables\DataTables;
 use Yajra\DataTables\Services\DataTable;
@@ -35,8 +37,6 @@ abstract class TableAbstract extends DataTable
     public const TABLE_TYPE_SIMPLE = 'simple';
 
     protected bool $bStateSave = true;
-
-    protected DataTables $table;
 
     protected string $type = self::TABLE_TYPE_ADVANCED;
 
@@ -66,13 +66,14 @@ abstract class TableAbstract extends DataTable
 
     protected int $defaultSortColumn = 1;
 
+    protected bool $hasResponsive = true;
+
     protected string $exportClass = TableExportHandler::class;
 
-    public function __construct(Datatables $table, UrlGenerator $urlGenerator)
+    public function __construct(protected DataTables $table, UrlGenerator $urlGenerator)
     {
         parent::__construct();
 
-        $this->table = $table;
         $this->ajaxUrl = $urlGenerator->current();
 
         if ($this->type == self::TABLE_TYPE_SIMPLE) {
@@ -90,7 +91,7 @@ abstract class TableAbstract extends DataTable
         $this->bulkChangeUrl = route('tables.bulk-change.save');
     }
 
-    public function getOption(string $key): ?string
+    public function getOption(string $key): string|null
     {
         return Arr::get($this->options, $key);
     }
@@ -222,7 +223,7 @@ abstract class TableAbstract extends DataTable
                         'desc',
                     ],
                 ] : [],
-                'responsive' => true,
+                'responsive' => $this->hasResponsive,
                 'autoWidth' => false,
             ]);
     }
@@ -231,33 +232,34 @@ abstract class TableAbstract extends DataTable
     {
         $columns = $this->columns();
 
-        if ($this->type == self::TABLE_TYPE_SIMPLE) {
-            return apply_filters(BASE_FILTER_TABLE_HEADINGS, $columns, $this->repository->getModel());
+        if ($this->type != self::TABLE_TYPE_SIMPLE) {
+            foreach ($columns as $key => &$column) {
+                $column['class'] = Arr::get($column, 'class') . ' column-key-' . $key;
+            }
+
+            if ($this->hasCheckbox) {
+                $columns = array_merge($this->getCheckboxColumnHeading(), $columns);
+            }
         }
 
-        foreach ($columns as $key => &$column) {
-            $column['class'] = Arr::get($column, 'class') . ' column-key-' . $key;
-        }
+        $columns = apply_filters(BASE_FILTER_TABLE_HEADINGS, $columns, $this->getModel());
 
-        if ($this->repository) {
-            $columns = apply_filters(BASE_FILTER_TABLE_HEADINGS, $columns, $this->repository->getModel());
-        }
-
-        if ($this->hasOperations) {
+        if ($this->hasOperations && $this->type != self::TABLE_TYPE_SIMPLE) {
             $columns = array_merge($columns, $this->getOperationsHeading());
-        }
-
-        if ($this->hasCheckbox) {
-            $columns = array_merge($this->getCheckboxColumnHeading(), $columns);
         }
 
         return $columns;
     }
 
-    /**
-     * @return array
-     */
-    abstract public function columns();
+    protected function getModel(): BaseModel
+    {
+        return $this->repository ? $this->repository->getModel() : new BaseModel();
+    }
+
+    public function columns()
+    {
+        return [];
+    }
 
     public function getOperationsHeading()
     {
@@ -270,11 +272,12 @@ abstract class TableAbstract extends DataTable
                 'searchable' => false,
                 'exportable' => false,
                 'printable' => false,
+                'responsivePriority' => 99,
             ],
         ];
     }
 
-    protected function getOperations(?string $edit, ?string $delete, Model $item, ?string $extra = null): string
+    protected function getOperations(string|null $edit, string|null $delete, Model $item, string|null $extra = null): string
     {
         return apply_filters(
             'table_operation_buttons',
@@ -292,7 +295,7 @@ abstract class TableAbstract extends DataTable
             'checkbox' => [
                 'width' => '10px',
                 'class' => 'text-start no-sort',
-                'title' => Form::input('checkbox', null, null, [
+                'title' => Form::input('checkbox', '', null, [
                     'class' => 'table-check-all',
                     'data-set' => '.dataTable .checkboxes',
                 ])->toHtml(),
@@ -304,7 +307,7 @@ abstract class TableAbstract extends DataTable
         ];
     }
 
-    protected function getCheckbox(int $id): string
+    protected function getCheckbox(int|string $id): string
     {
         return view('core/table::partials.checkbox', compact('id'))->render();
     }
@@ -321,7 +324,7 @@ abstract class TableAbstract extends DataTable
         return $this;
     }
 
-    protected function getDom(): ?string
+    protected function getDom(): string|null
     {
         $dom = null;
 
@@ -361,7 +364,7 @@ abstract class TableAbstract extends DataTable
 
     public function getButtons(): array
     {
-        $buttons = apply_filters(BASE_FILTER_TABLE_BUTTONS, $this->buttons(), get_class($this->repository->getModel()));
+        $buttons = apply_filters(BASE_FILTER_TABLE_BUTTONS, $this->buttons(), get_class($this->getModel()));
 
         if (! $buttons) {
             return [];
@@ -370,11 +373,15 @@ abstract class TableAbstract extends DataTable
         $data = [];
 
         foreach ($buttons as $key => $button) {
+            $buttonClass = 'action-item' . (isset($button['class']) ? ' ' . $button['class'] : ' btn-info');
+
             if (Arr::get($button, 'extend') == 'collection') {
+                $button['className'] = ($button['className'] ?? null) . $buttonClass;
+
                 $data[] = $button;
             } else {
                 $data[] = [
-                    'className' => 'action-item',
+                    'className' => $buttonClass,
                     'text' => Html::tag('span', $button['text'], [
                         'data-action' => $key,
                         'data-href' => Arr::get($button, 'link'),
@@ -436,12 +443,12 @@ abstract class TableAbstract extends DataTable
         ];
     }
 
-    public function htmlInitComplete(): ?string
+    public function htmlInitComplete(): string|null
     {
         return 'function () {' . $this->htmlInitCompleteFunction() . '}';
     }
 
-    public function htmlInitCompleteFunction(): ?string
+    public function htmlInitCompleteFunction(): string|null
     {
         return '
             if (jQuery().select2) {
@@ -461,7 +468,7 @@ abstract class TableAbstract extends DataTable
         ';
     }
 
-    public function htmlDrawCallback(): ?string
+    public function htmlDrawCallback(): string|null
     {
         if ($this->type == self::TABLE_TYPE_SIMPLE) {
             return null;
@@ -470,7 +477,7 @@ abstract class TableAbstract extends DataTable
         return 'function () {' . $this->htmlDrawCallbackFunction() . '}';
     }
 
-    public function htmlDrawCallbackFunction(): ?string
+    public function htmlDrawCallbackFunction(): string|null
     {
         return '
             var pagination = $(this).closest(".dataTables_wrapper").find(".dataTables_paginate");
@@ -555,14 +562,14 @@ abstract class TableAbstract extends DataTable
     }
 
     protected function applyScopes(
-        EloquentBuilder|QueryBuilder|EloquentRelation $query
-    ): EloquentBuilder|QueryBuilder|EloquentRelation {
+        EloquentBuilder|QueryBuilder|EloquentRelation|Collection $query
+    ): EloquentBuilder|QueryBuilder|EloquentRelation|Collection {
         $request = request();
 
         $requestFilters = [];
 
-        if ($request->has('filter_columns') && ($request->input('filter_table_id') == $this->getOption('id'))) {
-            foreach ($request->input('filter_columns') as $key => $item) {
+        if (($request->input('filter_table_id') == $this->getOption('id'))) {
+            foreach ($this->getFilterColumns() as $key => $item) {
                 $operator = $request->input('filter_operators.' . $key);
 
                 $value = $request->input('filter_values.' . $key);
@@ -580,7 +587,7 @@ abstract class TableAbstract extends DataTable
         }
 
         foreach ($requestFilters as $requestFilter) {
-            if (isset($requestFilter['column']) && ! empty($requestFilter['column'])) {
+            if (! empty($requestFilter['column'])) {
                 $query = $this->applyFilterCondition(
                     $query,
                     $requestFilter['column'],
@@ -593,13 +600,25 @@ abstract class TableAbstract extends DataTable
         return parent::applyScopes(apply_filters(BASE_FILTER_TABLE_QUERY, $query));
     }
 
-    public function applyFilterCondition(EloquentBuilder|QueryBuilder|EloquentRelation $query, string $key, string $operator, ?string $value)
+    public function getFilterColumns(): array
+    {
+        $columns = $this->getFilters();
+        $columnKeys = array_keys($columns);
+
+        return Arr::where((array) $this->request->input('filter_columns', []), function ($item) use ($columnKeys) {
+            return in_array($item, $columnKeys);
+        });
+    }
+
+    public function applyFilterCondition(EloquentBuilder|QueryBuilder|EloquentRelation $query, string $key, string $operator, string|null $value)
     {
         if (strpos($key, '.') !== -1) {
             $key = Arr::last(explode('.', $key));
         }
 
         $column = $this->repository->getTable() . '.' . $key;
+
+        $key = preg_replace('/[^A-Za-z0-9_]/', '', str_replace(' ', '', $key));
 
         switch ($key) {
             case 'created_at':
@@ -631,13 +650,14 @@ abstract class TableAbstract extends DataTable
                 if ($operator !== '=') {
                     $value = (float)$value;
                 }
+
                 $query = $query->where($column, $operator, $value);
         }
 
         return $query;
     }
 
-    public function getValueInput(?string $title, ?string $value, ?string $type, array $data = []): array
+    public function getValueInput(string|null $title, string|null $value, string|null $type, array $data = []): array
     {
         $inputName = 'value';
 
@@ -703,9 +723,9 @@ abstract class TableAbstract extends DataTable
         return compact('html', 'data');
     }
 
-    public function saveBulkChanges(array $ids, string $inputKey, ?string $inputValue): bool
+    public function saveBulkChanges(array $ids, string $inputKey, string|null $inputValue): bool
     {
-        if (! in_array($inputKey, array_keys($this->getFilters()))) {
+        if (! in_array($inputKey, array_keys($this->getBulkChanges()))) {
             return false;
         }
 
@@ -713,21 +733,21 @@ abstract class TableAbstract extends DataTable
             $item = $this->repository->findOrFail($id);
             if ($item) {
                 $this->saveBulkChangeItem($item, $inputKey, $inputValue);
-                event(new UpdatedContentEvent($this->repository->getModel(), request(), $item));
+                event(new UpdatedContentEvent($this->getModel(), request(), $item));
             }
         }
 
         return true;
     }
 
-    public function saveBulkChangeItem(Model $item, string $inputKey, ?string $inputValue)
+    public function saveBulkChangeItem(Model $item, string $inputKey, string|null $inputValue)
     {
-        $item->fill([$inputKey => $this->prepareBulkChangeValue($inputKey, $inputValue)]);
+        $item->{Auth::check() ? 'forceFill' : 'fill'}([$inputKey => $this->prepareBulkChangeValue($inputKey, $inputValue)]);
 
         return $this->repository->createOrUpdate($item);
     }
 
-    public function prepareBulkChangeValue(string $key, ?string $value): string
+    public function prepareBulkChangeValue(string $key, string|null $value): string
     {
         if (strpos($key, '.') !== -1) {
             $key = Arr::last(explode('.', $key));
@@ -759,9 +779,11 @@ abstract class TableAbstract extends DataTable
             ],
         ];
 
-        if ($request->input('filter_columns')) {
+        $filterColumns = $this->getFilterColumns();
+
+        if ($filterColumns) {
             $requestFilters = [];
-            foreach ($request->input('filter_columns', []) as $key => $item) {
+            foreach ($filterColumns as $key => $item) {
                 $operator = $request->input('filter_operators.' . $key);
 
                 $value = $request->input('filter_values.' . $key);
@@ -786,7 +808,7 @@ abstract class TableAbstract extends DataTable
         return $this->getBulkChanges();
     }
 
-    protected function addCreateButton(string $url, ?string $permission = null, array $buttons = []): array
+    protected function addCreateButton(string $url, string|null $permission = null, array $buttons = []): array
     {
         if (! $permission || Auth::user()->hasPermission($permission)) {
             $queryString = http_build_query(Request::query());
@@ -798,13 +820,14 @@ abstract class TableAbstract extends DataTable
             $buttons['create'] = [
                 'link' => $url,
                 'text' => view('core/table::partials.create')->render(),
+                'class' => 'btn-primary',
             ];
         }
 
         return $buttons;
     }
 
-    protected function addDeleteAction(string $url, ?string $permission = null, array $actions = []): array
+    protected function addDeleteAction(string $url, string|null $permission = null, array $actions = []): array
     {
         if (! $permission || Auth::user()->hasPermission($permission)) {
             $actions['delete-many'] = view('core/table::partials.delete', [
@@ -818,8 +841,16 @@ abstract class TableAbstract extends DataTable
 
     public function toJson($data, array $escapeColumn = [], bool $mDataSupport = true)
     {
-        if ($this->repository && $this->repository->getModel()) {
-            $data = apply_filters(BASE_FILTER_GET_LIST_DATA, $data, $this->repository->getModel());
+        $data = apply_filters(BASE_FILTER_GET_LIST_DATA, $data, $this->getModel());
+
+        if (BaseModel::determineIfUsingUuidsForId()) {
+            $data = $data->editColumn('id', function ($item) {
+                if (! $item instanceof BaseModel && ! is_object($item)) {
+                    return $item;
+                }
+
+                return Str::limit($item->id, 5);
+            });
         }
 
         return $data
@@ -827,7 +858,7 @@ abstract class TableAbstract extends DataTable
             ->make($mDataSupport);
     }
 
-    protected function displayThumbnail(?string $image, array $attributes = ['width' => 50]): HtmlString|string
+    protected function displayThumbnail(string|null $image, array $attributes = ['width' => 50]): HtmlString|string
     {
         if ($this->request()->input('action') == 'csv') {
             return RvMedia::getImageUrl($image, null, false, RvMedia::getDefaultImage());
@@ -847,5 +878,10 @@ abstract class TableAbstract extends DataTable
     public function htmlBuilder(): CustomTableBuilder
     {
         return app(CustomTableBuilder::class);
+    }
+
+    protected function simpleDom(): string
+    {
+        return "rt<'datatables__info_wrap'pli<'clearfix'>>";
     }
 }

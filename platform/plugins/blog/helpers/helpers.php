@@ -9,8 +9,8 @@ use Botble\Blog\Repositories\Interfaces\TagInterface;
 use Botble\Blog\Supports\PostFormat;
 use Botble\Page\Repositories\Interfaces\PageInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 
 if (! function_exists('get_featured_posts')) {
     function get_featured_posts(int $limit, array $with = []): Collection
@@ -27,14 +27,14 @@ if (! function_exists('get_latest_posts')) {
 }
 
 if (! function_exists('get_related_posts')) {
-    function get_related_posts(int $id, int $limit): Collection
+    function get_related_posts(int|string $id, int $limit): Collection
     {
         return app(PostInterface::class)->getRelated($id, $limit);
     }
 }
 
 if (! function_exists('get_posts_by_category')) {
-    function get_posts_by_category($categoryId, int $paginate = 12, int $limit = 0): Collection|LengthAwarePaginator
+    function get_posts_by_category(int|string $categoryId, int $paginate = 12, int $limit = 0): Collection|LengthAwarePaginator
     {
         return app(PostInterface::class)->getByCategory($categoryId, $paginate, $limit);
     }
@@ -48,7 +48,7 @@ if (! function_exists('get_posts_by_tag')) {
 }
 
 if (! function_exists('get_posts_by_user')) {
-    function get_posts_by_user(int $authorId, int $paginate = 12): Collection|LengthAwarePaginator
+    function get_posts_by_user(int|string $authorId, int $paginate = 12): Collection|LengthAwarePaginator
     {
         return app(PostInterface::class)->getByUserId($authorId, $paginate);
     }
@@ -120,7 +120,7 @@ if (! function_exists('get_popular_categories')) {
 }
 
 if (! function_exists('get_category_by_id')) {
-    function get_category_by_id(int $id): ?BaseModel
+    function get_category_by_id(int|string $id): ?BaseModel
     {
         return app(CategoryInterface::class)->getCategoryById($id);
     }
@@ -179,9 +179,9 @@ if (! function_exists('get_post_formats')) {
 }
 
 if (! function_exists('get_blog_page_id')) {
-    function get_blog_page_id(): int
+    function get_blog_page_id(): string|null
     {
-        return (int)theme_option('blog_page_id', setting('blog_page_id'));
+        return theme_option('blog_page_id', setting('blog_page_id'));
     }
 }
 

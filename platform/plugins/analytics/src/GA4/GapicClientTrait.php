@@ -4,6 +4,7 @@ namespace Botble\Analytics\GA4;
 
 use Google\ApiCore\AgentHeader;
 use Google\ApiCore\Call;
+use Google\ApiCore\GapicClientTrait as BaseGapicClientTrait;
 use Google\ApiCore\Middleware\CredentialsWrapperMiddleware;
 use Google\ApiCore\Middleware\FixedHeaderMiddleware;
 use Google\ApiCore\Middleware\OptionsFilterMiddleware;
@@ -23,7 +24,7 @@ use Grpc\Gcp\Config;
 
 trait GapicClientTrait
 {
-    use \Google\ApiCore\GapicClientTrait;
+    use BaseGapicClientTrait;
 
     private $transport;
     private $credentialsWrapper;
@@ -437,7 +438,7 @@ trait GapicClientTrait
         );
     }
 
-    private static function getDefaultAudience(): ?string
+    private static function getDefaultAudience(): string|null
     {
         if (! defined('self::SERVICE_ADDRESS')) {
             return null;

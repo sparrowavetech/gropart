@@ -23,7 +23,7 @@ class MessageParser
      * @param DelegatedValidator $validator
      * @param bool $escape
      */
-    public function __construct(DelegatedValidator $validator, $escape = false)
+    public function __construct(DelegatedValidator $validator, bool $escape = false)
     {
         $this->validator = $validator;
         $this->escape = $escape;

@@ -10,13 +10,7 @@ class ImportedCityEvent extends Event
 {
     use SerializesModels;
 
-    public array $row = [];
-
-    public City $city;
-
-    public function __construct(array $row, City $city)
+    public function __construct(public array $row, public City $city)
     {
-        $this->row = $row;
-        $this->city = $city;
     }
 }

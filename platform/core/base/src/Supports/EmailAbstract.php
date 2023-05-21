@@ -19,7 +19,7 @@ class EmailAbstract extends Mailable
 
     public array $data;
 
-    public function __construct(?string $content, ?string $subject, array $data = [])
+    public function __construct(string|null $content, string|null $subject, array $data = [])
     {
         $this->content = $content;
         $this->subject = $subject;

@@ -62,13 +62,12 @@
                 </div>
                 <div class="col-sm-6">
                     <div class="well bg-white">
-                        <div class="form-group mb-3">
-                            <label class="text-title-field"
-                                   for="paystack_name">{{ trans('plugins/payment::payment.method_name') }}</label>
-                            <input type="text" class="next-input" name="payment_{{ PAYSTACK_PAYMENT_METHOD_NAME }}_name"
-                                   id="paystack_name" data-counter="400"
-                                   value="{{ get_payment_setting('name', PAYSTACK_PAYMENT_METHOD_NAME, __('Online payment via :name', ['name' => 'Paystack'])) }}">
-                        </div>
+                        <x-core-setting::text-input
+                            :name="'payment_' . PAYSTACK_PAYMENT_METHOD_NAME . '_name'"
+                            :label="trans('plugins/payment::payment.method_name')"
+                            :value="get_payment_setting('name', PAYSTACK_PAYMENT_METHOD_NAME, __('Online payment via :name', ['name' => 'Paystack']))"
+                            data-counter="400"
+                        />
 
                         <div class="form-group mb-3">
                             <label class="text-title-field" for="payment_{{ PAYSTACK_PAYMENT_METHOD_NAME }}_description">{{ trans('core/base::forms.description') }}</label>
@@ -78,32 +77,30 @@
                         <p class="payment-note">
                             {{ trans('plugins/payment::payment.please_provide_information') }} <a target="_blank" href="https://paystack.com/">Paystack</a>:
                         </p>
-                        <div class="form-group mb-3">
-                            <label class="text-title-field" for="{{ PAYSTACK_PAYMENT_METHOD_NAME }}_public">{{ __('Public Key') }}</label>
-                            <input type="text" class="next-input"
-                                   name="payment_{{ PAYSTACK_PAYMENT_METHOD_NAME }}_public" id="{{ PAYSTACK_PAYMENT_METHOD_NAME }}_public"
-                                   value="{{ get_payment_setting('public', PAYSTACK_PAYMENT_METHOD_NAME) }}" placeholder="pk_****">
-                        </div>
-                        <div class="form-group mb-3">
-                            <label class="text-title-field" for="{{ PAYSTACK_PAYMENT_METHOD_NAME }}_secret">{{ __('Secret Key') }}</label>
-                            <input type="password" class="next-input" id="{{ PAYSTACK_PAYMENT_METHOD_NAME }}_secret"
-                                   name="payment_{{ PAYSTACK_PAYMENT_METHOD_NAME }}_secret"
-                                   value="{{ get_payment_setting('secret', PAYSTACK_PAYMENT_METHOD_NAME) }}" placeholder="sk_****">
-                        </div>
+
+                        <x-core-setting::text-input
+                            :name="'payment_' . PAYSTACK_PAYMENT_METHOD_NAME . '_public'"
+                            :label="__('Public Key')"
+                            :value="get_payment_setting('public', PAYSTACK_PAYMENT_METHOD_NAME)"
+                            placeholder="pk_****"
+                        />
+
+                        <x-core-setting::text-input
+                            :name="'payment_' . PAYSTACK_PAYMENT_METHOD_NAME . '_secret'"
+                            type="password"
+                            :label="__('Secret Key')"
+                            :value="get_payment_setting('secret', PAYSTACK_PAYMENT_METHOD_NAME)"
+                            placeholder="sk_****"
+                        />
 
                         {!! apply_filters(PAYMENT_METHOD_SETTINGS_CONTENT, null, PAYSTACK_PAYMENT_METHOD_NAME) !!}
                     </div>
                 </div>
             </div>
             <div class="col-12 bg-white text-end">
-                <button class="btn btn-warning disable-payment-item @if ($paystackStatus == 0) hidden @endif"
-                        type="button">{{ trans('plugins/payment::payment.deactivate') }}</button>
-                <button
-                    class="btn btn-info save-payment-item btn-text-trigger-save @if ($paystackStatus == 1) hidden @endif"
-                    type="button">{{ trans('plugins/payment::payment.activate') }}</button>
-                <button
-                    class="btn btn-info save-payment-item btn-text-trigger-update @if ($paystackStatus == 0) hidden @endif"
-                    type="button">{{ trans('plugins/payment::payment.update') }}</button>
+                <button class="btn btn-warning disable-payment-item @if ($paystackStatus == 0) hidden @endif" type="button">{{ trans('plugins/payment::payment.deactivate') }}</button>
+                <button class="btn btn-info save-payment-item btn-text-trigger-save @if ($paystackStatus == 1) hidden @endif" type="button">{{ trans('plugins/payment::payment.activate') }}</button>
+                <button class="btn btn-info save-payment-item btn-text-trigger-update @if ($paystackStatus == 0) hidden @endif" type="button">{{ trans('plugins/payment::payment.update') }}</button>
             </div>
             {!! Form::close() !!}
         </td>

@@ -74,12 +74,7 @@ class RuleParser
         return [$attribute, $jsRule, $parameters];
     }
 
-    /**
-     * Gets rules from Validator instance.
-     *
-     * @return array
-     */
-    public function getValidatorRules()
+    public function getValidatorRules(): array
     {
         return $this->validator->getRules();
     }
@@ -94,7 +89,7 @@ class RuleParser
     public function addConditionalRules($attribute, $rules = [])
     {
         foreach ((array)$attribute as $key) {
-            $current = isset($this->conditional[$key]) ? $this->conditional[$key] : [];
+            $current = $this->conditional[$key] ?? [];
             $rules = $this->validator->explodeRules((array)$rules);
             $merge = reset($rules);
             $this->conditional[$key] = array_merge($current, $merge);

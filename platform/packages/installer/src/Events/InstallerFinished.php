@@ -2,13 +2,8 @@
 
 namespace Botble\Installer\Events;
 
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Foundation\Events\Dispatchable;
-use Illuminate\Broadcasting\InteractsWithSockets;
+use Botble\Base\Events\Event;
 
-class InstallerFinished
+class InstallerFinished extends Event
 {
-    use Dispatchable;
-    use InteractsWithSockets;
-    use SerializesModels;
 }

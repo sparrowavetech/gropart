@@ -3,7 +3,7 @@
 namespace Botble\Optimize\Providers;
 
 use Botble\Base\Traits\LoadAndPublishDataTrait;
-use Botble\Optimize\Facades\OptimizerFacade;
+use Botble\Optimize\Facades\OptimizerHelper;
 use Botble\Optimize\Http\Middleware\CollapseWhitespace;
 use Botble\Optimize\Http\Middleware\DeferJavascript;
 use Botble\Optimize\Http\Middleware\ElideAttributes;
@@ -14,9 +14,7 @@ use Botble\Optimize\Http\Middleware\RemoveQuotes;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\Router;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
-use OptimizerHelper;
 
 class OptimizeServiceProvider extends ServiceProvider
 {
@@ -29,9 +27,11 @@ class OptimizeServiceProvider extends ServiceProvider
             ->loadAndPublishTranslations()
             ->loadAndPublishViews();
 
-        AliasLoader::getInstance()->alias('OptimizerHelper', OptimizerFacade::class);
+        if (! class_exists('OptimizerHelper')) {
+            AliasLoader::getInstance()->alias('OptimizerHelper', OptimizerHelper::class);
+        }
 
-        Event::listen(RouteMatched::class, function () {
+        $this->app['events']->listen(RouteMatched::class, function () {
             if (OptimizerHelper::isEnabled()) {
                 /**
                  * @var Router $router

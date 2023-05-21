@@ -2,8 +2,9 @@
 
 namespace Botble\Api\Http\Controllers;
 
-use ApiHelper;
+use Botble\Api\Facades\ApiHelper;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Api\Http\Requests\LoginRequest;
 use Botble\Api\Http\Requests\RegisterRequest;
@@ -70,6 +71,9 @@ class AuthenticationController extends Controller
 
             $user->email_verify_token = $token;
 
+            /**
+             * @var User $user
+             */
             $user->sendEmailVerificationNotification();
         } else {
             $user->confirmed_at = Carbon::now();

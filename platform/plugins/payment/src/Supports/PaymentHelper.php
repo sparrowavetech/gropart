@@ -5,7 +5,7 @@ namespace Botble\Payment\Supports;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Repositories\Interfaces\PaymentInterface;
-use Request;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 
@@ -45,7 +45,7 @@ class PaymentHelper
             'amount' => $data['amount'],
             'currency' => $data['currency'],
             'charge_id' => $data['charge_id'],
-            'order_id' => (int)Arr::first($orderIds),
+            'order_id' => Arr::first($orderIds),
             'customer_id' => Arr::get($data, 'customer_id'),
             'customer_type' => Arr::get($data, 'customer_type'),
             'payment_channel' => $paymentChannel,
@@ -53,7 +53,7 @@ class PaymentHelper
         ]);
     }
 
-    public static function formatLog(array $input, string $line = '', string $function = '', string $class = ''): array
+    public static function formatLog(array $input, string|int $line = '', string $function = '', string $class = ''): array
     {
         return array_merge($input, [
             'user_id' => Auth::check() ? Auth::id() : 0,

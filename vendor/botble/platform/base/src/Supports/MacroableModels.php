@@ -34,7 +34,7 @@ class MacroableModels
     protected function checkModelSubclass(string $model): void
     {
         if (! is_subclass_of($model, Model::class)) {
-            throw new InvalidArgumentException('$model must be a subclass of Illuminate\\Database\\Eloquent\\Model');
+            throw new InvalidArgumentException('$model must be a subclass of ' . Model::class);
         }
     }
 
@@ -48,7 +48,7 @@ class MacroableModels
             $class = get_class($this->getModel());
 
             if (! isset($models[$class])) {
-                throw new BadMethodCallException("Call to undefined method ${class}::${name}()");
+                throw new BadMethodCallException("Call to undefined method $class::$name()");
             }
 
             $closure = Closure::bind($models[$class], $this->getModel());
@@ -66,7 +66,7 @@ class MacroableModels
     {
         $this->checkModelSubclass($model);
 
-        if (isset($this->macros[$name]) && isset($this->macros[$name][$model])) {
+        if (isset($this->macros[$name][$model])) {
             unset($this->macros[$name][$model]);
             if (count($this->macros[$name]) == 0) {
                 unset($this->macros[$name]);
@@ -84,7 +84,7 @@ class MacroableModels
     {
         $this->checkModelSubclass($model);
 
-        return (isset($this->macros[$name]) && isset($this->macros[$name][$model]));
+        return isset($this->macros[$name][$model]);
     }
 
     public function modelsThatImplement(string $name): array

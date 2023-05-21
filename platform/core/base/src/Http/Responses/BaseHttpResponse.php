@@ -2,30 +2,33 @@
 
 namespace Botble\Base\Http\Responses;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\URL;
+use Symfony\Component\HttpFoundation\Response;
 
-class BaseHttpResponse implements Responsable
+class BaseHttpResponse extends Response implements Responsable
 {
     protected bool $error = false;
 
     protected mixed $data = null;
 
-    protected ?string $message = null;
+    protected string|null $message = null;
 
-    protected ?string $previousUrl = '';
+    protected string|null $previousUrl = '';
 
-    protected ?string $nextUrl = '';
+    protected string|null $nextUrl = '';
 
     protected bool $withInput = false;
 
     protected array $additional = [];
 
     protected int $code = 200;
+
+    public string $saveAction = 'save';
 
     public function setData(mixed $data): self
     {
@@ -71,7 +74,7 @@ class BaseHttpResponse implements Responsable
         return $this->message;
     }
 
-    public function setMessage(?string $message): self
+    public function setMessage(string|null $message): self
     {
         $this->message = BaseHelper::clean($message);
 
@@ -126,7 +129,7 @@ class BaseHttpResponse implements Responsable
                 ->json($data, $this->code);
         }
 
-        if ($request->input('submit') === 'save' && ! empty($this->previousUrl)) {
+        if ($request->input('submit') === $this->saveAction && ! empty($this->previousUrl)) {
             return $this->responseRedirect($this->previousUrl);
         } elseif (! empty($this->nextUrl)) {
             return $this->responseRedirect($this->nextUrl);

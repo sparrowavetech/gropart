@@ -2,7 +2,7 @@
 
 namespace Botble\Base\Providers;
 
-use Form;
+use Botble\Base\Facades\Form;
 use Illuminate\Support\ServiceProvider;
 
 class FormServiceProvider extends ServiceProvider
@@ -37,7 +37,7 @@ class FormServiceProvider extends ServiceProvider
             'modal_size' => null,
         ]);
 
-        Form::component('helper', 'core/base::forms.partials.helper', ['content']);
+        Form::component('helper', 'core/base::forms.partials.helper', ['content', 'icon']);
 
         Form::component('onOff', 'core/base::forms.partials.on-off', [
             'name',

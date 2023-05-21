@@ -16,9 +16,11 @@ class AdminNotificationItem
 
     protected array $action = [];
 
-    public static function make(): static
+    protected string $permission = '';
+
+    public static function make(): self
     {
-        return new static();
+        return new self();
     }
 
     public function title(string $title): self
@@ -41,6 +43,18 @@ class AdminNotificationItem
         $this->label = $label;
 
         return $this;
+    }
+
+    public function permission(string $permission): self
+    {
+        $this->permission = $permission;
+
+        return $this;
+    }
+
+    public function getPermission(): string
+    {
+        return $this->permission;
     }
 
     public function getLabel(): string

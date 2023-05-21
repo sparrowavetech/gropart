@@ -2,18 +2,19 @@
 
 namespace Botble\Faq\Tables;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Faq\Models\FaqCategory;
 use Botble\Faq\Repositories\Interfaces\FaqCategoryInterface;
 use Botble\Table\Abstracts\TableAbstract;
-use Html;
+use Botble\Base\Facades\Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Yajra\DataTables\DataTables;
+use Botble\Table\DataTables;
 
 class FaqCategoryTable extends TableAbstract
 {
@@ -37,23 +38,23 @@ class FaqCategoryTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('name', function ($item) {
+            ->editColumn('name', function (FaqCategory $item) {
                 if (! Auth::user()->hasPermission('faq_category.edit')) {
-                    return $item->name;
+                    return BaseHelper::clean($item->name);
                 }
 
-                return Html::link(route('faq_category.edit', $item->id), $item->name);
+                return Html::link(route('faq_category.edit', $item->id), BaseHelper::clean($item->name));
             })
-            ->editColumn('checkbox', function ($item) {
+            ->editColumn('checkbox', function (FaqCategory $item) {
                 return $this->getCheckbox($item->id);
             })
-            ->editColumn('created_at', function ($item) {
+            ->editColumn('created_at', function (FaqCategory $item) {
                 return BaseHelper::formatDate($item->created_at);
             })
-            ->editColumn('status', function ($item) {
+            ->editColumn('status', function (FaqCategory $item) {
                 return $item->status->toHtml();
             })
-            ->addColumn('operations', function ($item) {
+            ->addColumn('operations', function (FaqCategory $item) {
                 return $this->getOperations('faq_category.edit', 'faq_category.destroy', $item);
             });
 
@@ -120,7 +121,7 @@ class FaqCategoryTable extends TableAbstract
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type' => 'date',
+                'type' => 'datePicker',
             ],
         ];
     }

@@ -2,17 +2,15 @@
 
 namespace Botble\Captcha;
 
+use Botble\Base\Facades\Html;
 use Exception;
 use Illuminate\Session\SessionManager;
 use Illuminate\Session\Store;
 
 class MathCaptcha
 {
-    protected SessionManager|Store|null $session;
-
-    public function __construct(SessionManager $session = null)
+    public function __construct(protected SessionManager|Store|null $session = null)
     {
-        $this->session = $session;
     }
 
     /**
@@ -43,16 +41,20 @@ class MathCaptcha
         $default['type'] = 'text';
         $default['id'] = 'math-captcha';
         $default['name'] = 'math-captcha';
-        $default['required'] = 'required';
+        $default['required'] = 'required|string';
         $default['value'] = old('math-captcha');
 
         $attributes = array_merge($default, $attributes);
 
-        return '<input ' . $this->buildAttributes($attributes) . '>';
+        return '<input ' . Html::attributes($attributes) . '>';
     }
 
     public function verify(string $value): bool
     {
+        if (empty($value)) {
+            return false;
+        }
+
         return $value == $this->getMathResult();
     }
 
@@ -129,15 +131,5 @@ class MathCaptcha
             '-' => abs($this->getMathFirstOperator() - $this->getMathSecondOperator()),
             default => throw new Exception('Math captcha uses an unknown operand.'),
         };
-    }
-
-    protected function buildAttributes(array $attributes): string
-    {
-        $html = [];
-        foreach ($attributes as $key => $value) {
-            $html[] = $key . '="' . $value . '"';
-        }
-
-        return count($html) ? ' ' . implode(' ', $html) : '';
     }
 }

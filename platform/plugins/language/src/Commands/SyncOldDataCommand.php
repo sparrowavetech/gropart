@@ -5,7 +5,7 @@ namespace Botble\Language\Commands;
 use Botble\Language\Models\LanguageMeta;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Console\Command;
-use Language;
+use Botble\Language\Facades\Language;
 use Illuminate\Support\Facades\Schema;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;

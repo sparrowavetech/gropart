@@ -2,12 +2,12 @@
 
 namespace Botble\Location\Http\Controllers;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
@@ -22,23 +22,20 @@ use Illuminate\Http\Request;
 
 class StateController extends BaseController
 {
-    protected StateInterface $stateRepository;
-
-    public function __construct(StateInterface $stateRepository)
+    public function __construct(protected StateInterface $stateRepository)
     {
-        $this->stateRepository = $stateRepository;
     }
 
     public function index(StateTable $table)
     {
-        page_title()->setTitle(trans('plugins/location::state.name'));
+        PageTitle::setTitle(trans('plugins/location::state.name'));
 
         return $table->renderTable();
     }
 
     public function create(FormBuilder $formBuilder)
     {
-        page_title()->setTitle(trans('plugins/location::state.create'));
+        PageTitle::setTitle(trans('plugins/location::state.create'));
 
         return $formBuilder->create(StateForm::class)->renderForm();
     }
@@ -55,21 +52,15 @@ class StateController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int $id, FormBuilder $formBuilder, Request $request)
+    public function edit(State $state, FormBuilder $formBuilder)
     {
-        $state = $this->stateRepository->findOrFail($id);
-
-        event(new BeforeEditContentEvent($request, $state));
-
-        page_title()->setTitle(trans('plugins/location::state.edit') . ' "' . $state->name . '"');
+        PageTitle::setTitle(trans('core/base::forms.edit_item', ['name' => $state->name]));
 
         return $formBuilder->create(StateForm::class, ['model' => $state])->renderForm();
     }
 
-    public function update(int $id, StateRequest $request, BaseHttpResponse $response)
+    public function update(State $state, StateRequest $request, BaseHttpResponse $response)
     {
-        $state = $this->stateRepository->findOrFail($id);
-
         $state->fill($request->input());
 
         $this->stateRepository->createOrUpdate($state);
@@ -81,11 +72,9 @@ class StateController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(Request $request, int $id, BaseHttpResponse $response)
+    public function destroy(State $state, Request $request, BaseHttpResponse $response)
     {
         try {
-            $state = $this->stateRepository->findOrFail($id);
-
             $this->stateRepository->delete($state);
 
             event(new DeletedContentEvent(STATE_MODULE_SCREEN_NAME, $request, $state));

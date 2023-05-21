@@ -26,7 +26,7 @@ class DashboardWidgetInstance
 
     protected bool $isEqualHeight = true;
 
-    protected ?string $column = null;
+    protected string|null $column = null;
 
     protected string $permission;
 
@@ -170,7 +170,7 @@ class DashboardWidgetInstance
         return $this;
     }
 
-    public function isHasLoadCallback(): int
+    public function isHasLoadCallback(): bool
     {
         return $this->hasLoadCallback;
     }
@@ -308,7 +308,7 @@ class DashboardWidgetInstance
         ];
     }
 
-    public function getFilterRange(?string $filterRangeInput)
+    public function getFilterRange(string|null $filterRangeInput)
     {
         $predefinedRanges = $this->getPredefinedRanges();
         $predefinedRanges = collect($predefinedRanges);
@@ -336,7 +336,7 @@ class DashboardWidgetInstance
 
         $widgetSetting = app(DashboardWidgetSettingInterface::class)->firstOrCreate([
             'widget_id' => $widget->id,
-            'user_id' => Auth::user()->getKey(),
+            'user_id' => Auth::id(),
         ]);
 
         $widgetSetting->settings = array_merge((array)$widgetSetting->settings, $settings);

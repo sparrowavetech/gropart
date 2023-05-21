@@ -7,14 +7,12 @@ use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\HtmlString;
+use JsonSerializable;
 use ReflectionClass;
 use ReflectionException;
 
-abstract class Enum implements CastsAttributes
+abstract class Enum implements CastsAttributes, JsonSerializable
 {
-    /**
-     * Store existing constants in a static cache per object.
-     */
     protected static array $cache = [];
 
     protected static $langPath = 'core/base::enums';
@@ -30,7 +28,7 @@ abstract class Enum implements CastsAttributes
         }
 
         if ($value !== null && ! $this->isValid($value)) {
-            Log::error('Value ' . $value . ' is not part of the enum ' . get_called_class());
+            Log::error('Value ' . json_encode($value) . ' is not part of the enum ' . get_called_class());
         } else {
             $this->value = $value;
         }
@@ -126,7 +124,7 @@ abstract class Enum implements CastsAttributes
         return $result;
     }
 
-    public static function getLabel(?string $value): ?string
+    public static function getLabel(string|null $value): string|null
     {
         $key = sprintf(
             '%s.%s',
@@ -186,10 +184,13 @@ abstract class Enum implements CastsAttributes
      */
     public function jsonSerialize(): array
     {
-        return $this->getValue();
+        return [
+            'value' => $this->getValue(),
+            'label' => $this->label(),
+        ];
     }
 
-    public function label(): ?string
+    public function label(): string|null
     {
         return self::getLabel($this->getValue());
     }

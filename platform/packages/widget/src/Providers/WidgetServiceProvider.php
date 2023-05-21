@@ -2,8 +2,15 @@
 
 namespace Botble\Widget\Providers;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Facades\Html;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
+use Botble\Theme\Facades\AdminBar;
+use Botble\Theme\Facades\Theme;
+use Botble\Theme\Supports\ThemeSupport;
+use Botble\Widget\AbstractWidget;
+use Botble\Widget\Facades\WidgetGroup;
 use Botble\Widget\Factories\WidgetFactory;
 use Botble\Widget\Models\Widget;
 use Botble\Widget\Repositories\Caches\WidgetCacheDecorator;
@@ -13,11 +20,8 @@ use Botble\Widget\WidgetGroupCollection;
 use Botble\Widget\Widgets\Text;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Routing\Events\RouteMatched;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
-use Theme;
-use WidgetGroup;
 
 class WidgetServiceProvider extends ServiceProvider
 {
@@ -65,27 +69,54 @@ class WidgetServiceProvider extends ServiceProvider
             if (! empty($widgets) && is_array($widgets)) {
                 foreach ($widgets as $widget) {
                     $registration = $widgetPath . '/' . $widget . '/registration.php';
-                    if (File::exists($registration)) {
-                        File::requireOnce($registration);
+                    if ($this->app['files']->exists($registration)) {
+                        $this->app['files']->requireOnce($registration);
                     }
                 }
             }
+
+            add_filter('widget_rendered', function (string|null $html, AbstractWidget $widget) {
+                if (! setting('show_theme_guideline_link', false) || ! Auth::check() || ! Auth::user()->hasPermission('widgets.index')) {
+                    return $html;
+                }
+
+                $editLink = route('widgets.index') . '?widget=' . $widget->getId();
+                $link = view('packages/theme::guideline-link', [
+                    'html' => $html,
+                    'editLink' => $editLink,
+                    'editLabel' => __('Edit this widget'),
+                ])->render();
+
+                return ThemeSupport::insertBlockAfterTopHtmlTags($link, $html);
+            }, 9999, 2);
+
+            add_filter(THEME_FRONT_HEADER, function ($html) {
+                if (! setting('show_theme_guideline_link', false) || ! Auth::check() || ! Auth::user()->hasPermission('widgets.index')) {
+                    return $html;
+                }
+
+                return $html . Html::style('vendor/core/packages/theme/css/guideline.css');
+            }, 16);
         });
 
-        Event::listen(RouteMatched::class, function () {
-            dashboard_menu()
-                ->registerItem([
-                    'id' => 'cms-core-widget',
-                    'priority' => 3,
-                    'parent_id' => 'cms-core-appearance',
-                    'name' => 'packages/widget::widget.name',
-                    'icon' => null,
-                    'url' => route('widgets.index'),
-                    'permissions' => ['widgets.index'],
-                ]);
+        $this->app['events']->listen(RouteMatched::class, function () {
+            DashboardMenu::registerItem([
+                'id' => 'cms-core-widget',
+                'priority' => 3,
+                'parent_id' => 'cms-core-appearance',
+                'name' => 'packages/widget::widget.name',
+                'icon' => null,
+                'url' => route('widgets.index'),
+                'permissions' => ['widgets.index'],
+            ]);
 
             if (function_exists('admin_bar')) {
-                admin_bar()->registerLink(trans('packages/widget::widget.name'), route('widgets.index'), 'appearance', 'menus.index');
+                AdminBar::registerLink(
+                    trans('packages/widget::widget.name'),
+                    route('widgets.index'),
+                    'appearance',
+                    'menus.index'
+                );
             }
         });
     }

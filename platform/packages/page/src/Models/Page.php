@@ -23,13 +23,6 @@ class Page extends BaseModel
 
     protected array $dontKeepRevisionOf = ['content'];
 
-    protected $casts = [
-        'status' => BaseStatusEnum::class,
-        'content' => SafeContent::class,
-        'name' => SafeContent::class,
-        'description' => SafeContent::class,
-    ];
-
     protected $fillable = [
         'name',
         'content',
@@ -38,6 +31,13 @@ class Page extends BaseModel
         'description',
         'status',
         'user_id',
+    ];
+
+    protected $casts = [
+        'status' => BaseStatusEnum::class,
+        'name' => SafeContent::class,
+        'description' => SafeContent::class,
+        'template' => SafeContent::class,
     ];
 
     public function user(): BelongsTo

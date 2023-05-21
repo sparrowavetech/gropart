@@ -2,46 +2,44 @@
 
 namespace Botble\Language\Http\Controllers;
 
-use Assets;
-use BaseHelper;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Supports\Language;
+use Botble\Language\Facades\Language as LanguageFacade;
 use Botble\Language\Http\Requests\LanguageRequest;
 use Botble\Language\LanguageManager;
 use Botble\Language\Models\LanguageMeta;
 use Botble\Language\Repositories\Interfaces\LanguageInterface;
 use Botble\Language\Repositories\Interfaces\LanguageMetaInterface;
-use Botble\Setting\Models\Setting;
-use Botble\Setting\Supports\SettingStore;
+use Botble\Setting\Facades\Setting;
+use Botble\Theme\Facades\Theme;
+use Botble\Theme\Facades\ThemeOption;
 use Botble\Translation\Manager;
 use Botble\Widget\Models\Widget;
-use Illuminate\Support\Facades\DB;
-use Exception;
-use Illuminate\Support\Facades\File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Language as LanguageFacade;
-use Theme;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\URL;
+use Throwable;
 
 class LanguageController extends BaseController
 {
-    protected LanguageInterface $languageRepository;
-
-    protected LanguageMetaInterface $languageMetaRepository;
-
-    public function __construct(LanguageInterface $languageRepository, LanguageMetaInterface $languageMetaRepository)
-    {
-        $this->languageRepository = $languageRepository;
-        $this->languageMetaRepository = $languageMetaRepository;
+    public function __construct(
+        protected LanguageInterface $languageRepository,
+        protected LanguageMetaInterface $languageMetaRepository
+    ) {
     }
 
     public function index()
     {
-        page_title()->setTitle(trans('plugins/language::language.name'));
+        PageTitle::setTitle(trans('plugins/language::language.name'));
 
         Assets::addScriptsDirectly(['vendor/core/plugins/language/js/language.js']);
 
@@ -72,7 +70,9 @@ class LanguageController extends BaseController
             if (! File::isWritable(lang_path()) || ! File::isWritable(lang_path('vendor'))) {
                 return $response
                     ->setError()
-                    ->setMessage(trans('plugins/translation::translation.folder_is_not_writeable', ['lang_path' => lang_path()]));
+                    ->setMessage(
+                        trans('plugins/translation::translation.folder_is_not_writeable', ['lang_path' => lang_path()])
+                    );
             }
 
             $locale = $request->input('lang_locale');
@@ -99,7 +99,10 @@ class LanguageController extends BaseController
                     $themeLocale = Arr::first(BaseHelper::scanFolder(theme_path(Theme::getThemeName() . '/lang')));
 
                     if ($themeLocale) {
-                        File::copy(theme_path(Theme::getThemeName() . '/lang/' . $themeLocale), lang_path($locale . '.json'));
+                        File::copy(
+                            theme_path(Theme::getThemeName() . '/lang/' . $themeLocale),
+                            lang_path($locale . '.json')
+                        );
                     }
                 }
             }
@@ -119,7 +122,7 @@ class LanguageController extends BaseController
                             continue;
                         }
 
-                        $ids = LanguageMeta::where('reference_type', $model)
+                        $ids = LanguageMeta::query()->where('reference_type', $model)
                             ->pluck('reference_id')
                             ->all();
 
@@ -140,10 +143,10 @@ class LanguageController extends BaseController
                             ];
                         }
 
-                        LanguageMeta::insert($data);
+                        LanguageMeta::query()->insert($data);
                     }
                 }
-            } catch (Exception $exception) {
+            } catch (Throwable $exception) {
                 return $response
                     ->setData(view('plugins/language::partials.language-item', ['item' => $language])->render())
                     ->setMessage($exception->getMessage());
@@ -152,7 +155,7 @@ class LanguageController extends BaseController
             return $response
                 ->setData(view('plugins/language::partials.language-item', ['item' => $language])->render())
                 ->setMessage(trans('core/base::notices.create_success_message'));
-        } catch (Exception $exception) {
+        } catch (Throwable $exception) {
             return $response
                 ->setError()
                 ->setMessage($exception->getMessage());
@@ -177,7 +180,7 @@ class LanguageController extends BaseController
             return $response
                 ->setData(view('plugins/language::partials.language-item', ['item' => $language])->render())
                 ->setMessage(trans('core/base::notices.update_success_message'));
-        } catch (Exception $exception) {
+        } catch (Throwable $exception) {
             return $response
                 ->setError()
                 ->setMessage($exception->getMessage());
@@ -231,7 +234,7 @@ class LanguageController extends BaseController
         return $response->setData($data);
     }
 
-    public function destroy(Request $request, int $id, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
             $language = $this->languageRepository->getFirstBy(['lang_id' => $id]);
@@ -255,7 +258,7 @@ class LanguageController extends BaseController
             return $response
                 ->setData($defaultLanguageId)
                 ->setMessage(trans('core/base::notices.delete_success_message'));
-        } catch (Exception $exception) {
+        } catch (Throwable $exception) {
             return $response
                 ->setError()
                 ->setMessage($exception->getMessage());
@@ -265,67 +268,114 @@ class LanguageController extends BaseController
     public function getSetDefault(Request $request, BaseHttpResponse $response)
     {
         $defaultLanguage = LanguageFacade::getDefaultLanguage(['lang_id', 'lang_code']);
+        $currentLanguageId = $defaultLanguage->lang_id;
+        $currentLanguageCode = $defaultLanguage->lang_code;
 
-        $this->languageRepository->update(['lang_is_default' => 1], ['lang_is_default' => 0]);
+        $newLanguageId = $request->input('lang_id');
 
-        $language = $this->languageRepository->getFirstBy(['lang_id' => $request->input('lang_id')]);
-        if ($language) {
-            $language->lang_is_default = 1;
-            $this->languageRepository->createOrUpdate($language);
-        }
+        $newLanguage = $this->languageRepository->getFirstBy(['lang_id' => $newLanguageId]);
+
+        $newLanguageCode = $newLanguage->lang_code;
+
+        $themeName = Theme::getThemeName();
 
         try {
-            if ($defaultLanguage->lang_id != $request->input('lang_id')) {
-                $widgets = Widget::where('theme', 'NOT LIKE', '%-' . $language->lang_code)->get();
+            if ($currentLanguageId != $newLanguageId) {
+                if (! Widget::query()->where('theme', Widget::getThemeName($newLanguageCode))->exists()) {
+                    $widgets = Widget::query()->where('theme', $themeName)->get();
 
-                foreach ($widgets as $widget) {
-                    if (! Widget::where('theme', $widget->theme . '-' . $language->lang_code)->count()) {
-                        $widget->replicate()->save();
+                    foreach ($widgets as $widget) {
+                        $replicated = $widget->replicate();
+
+                        $widget->theme = Widget::getThemeName($currentLanguageCode);
+                        $widget->save();
+
+                        $replicated->save();
+                    }
+                } else {
+                    $currentWidgets = Widget::query()->where('theme', Widget::getThemeName($newLanguageCode))->get();
+
+                    Widget::query()->where('theme', Widget::getThemeName($newLanguageCode))->delete();
+
+                    $widgets = Widget::query()->where('theme', $themeName)->get();
+
+                    foreach ($widgets as $widget) {
+                        $widget->theme = Widget::getThemeName($currentLanguageCode);
+                        $widget->save();
                     }
 
-                    $widget->theme = $widget->theme . '-' . $defaultLanguage->lang_code;
-                    $widget->save();
+                    foreach ($currentWidgets as $widget) {
+                        $widget = $widget->replicate();
+                        $widget->theme = $themeName;
+                        $widget->save();
+                    }
                 }
 
-                $widgets = Widget::where('theme', 'LIKE', '%-' . $language->lang_code)->get();
+                $themeOptionKey = ThemeOption::getOptionKey('', $currentLanguageCode);
 
-                foreach ($widgets as $widget) {
-                    $widget->theme = str_replace('-' . $language->lang_code, '', $widget->theme);
-                    $widget->save();
-                }
+                if (! Setting::newQuery()->where('key', 'LIKE', ThemeOption::getOptionKey('%', $newLanguageCode))->exists()) {
+                    $themeOptions = Setting::newQuery()->where('key', 'LIKE', $themeOptionKey . '%')->get();
 
-                $themeName = Theme::getThemeName();
+                    foreach ($themeOptions as $themeOption) {
+                        $replicated = $themeOption->replicate();
 
-                $currentKey = 'theme-' . $themeName . '-';
-                $newKey = 'theme-' . $themeName . '-' . $language->lang_code . '-';
+                        $themeOption->key = str_replace(
+                            ThemeOption::getOption($themeOption->key, $defaultLanguage->lang_code),
+                            ThemeOption::getOption($themeOption->key),
+                            $themeOption->key
+                        );
+                        $themeOption->save();
 
-                $themeOptions = Setting::where('key', 'LIKE', $currentKey . '%')
-                    ->where('key', 'NOT LIKE', $newKey . '%')->get();
+                        $replicated->save();
+                    }
+                } else {
+                    $currentThemeOptions = Setting::newQuery()->where(
+                        'key',
+                        'LIKE',
+                        ThemeOption::getOptionKey('%', $newLanguageCode)
+                    )->get();
 
-                foreach ($themeOptions as $themeOption) {
-                    $themeOption->key = str_replace($currentKey, $currentKey . $defaultLanguage->lang_code . '-', $themeOption->key);
-                    if (! Setting::where('key', $themeOption->key)->count()) {
+                    Setting::newQuery()->where('key', 'LIKE', ThemeOption::getOptionKey('%', $newLanguageCode))->delete();
+
+                    $themeOptions = Setting::newQuery()->where('key', 'LIKE', $themeOptionKey . '%')->get();
+
+                    foreach ($themeOptions as $themeOption) {
+                        $themeOption->key = str_replace(
+                            $themeOptionKey,
+                            ThemeOption::getOptionKey('', $currentLanguageCode),
+                            $themeOption->key
+                        );
+
                         $themeOption->save();
                     }
-                }
 
-                $themeOptions = Setting::where('key', 'LIKE', $newKey . '%')->get();
+                    foreach ($currentThemeOptions as $themeOption) {
+                        $themeOption = $themeOption->replicate();
 
-                foreach ($themeOptions as $themeOption) {
-                    $themeOption->key = str_replace($newKey, $currentKey, $themeOption->key);
+                        $themeOption->key = str_replace(
+                            ThemeOption::getOptionKey('', $newLanguageCode),
+                            $themeOptionKey,
+                            $themeOption->key
+                        );
 
-                    if (! Setting::where('key', $themeOption->key)->count()) {
                         $themeOption->save();
                     }
                 }
             }
-        } catch (Exception $exception) {
+        } catch (Throwable $exception) {
             info($exception->getMessage());
+        }
+
+        $this->languageRepository->update(['lang_is_default' => 1], ['lang_is_default' => 0]);
+
+        if ($newLanguage) {
+            $newLanguage->lang_is_default = 1;
+            $newLanguage->save();
         }
 
         $this->clearRoutesCache();
 
-        event(new UpdatedContentEvent(LANGUAGE_MODULE_SCREEN_NAME, $request, $language));
+        event(new UpdatedContentEvent(LANGUAGE_MODULE_SCREEN_NAME, $request, $newLanguage));
 
         return $response->setMessage(trans('core/base::notices.update_success_message'));
     }
@@ -337,10 +387,9 @@ class LanguageController extends BaseController
         return $response->setData($language);
     }
 
-    public function postEditSettings(Request $request, BaseHttpResponse $response, SettingStore $settingStore)
+    public function postEditSettings(Request $request, BaseHttpResponse $response)
     {
-        $settingStore
-            ->set('language_hide_default', $request->input('language_hide_default', false))
+        Setting::set('language_hide_default', $request->input('language_hide_default', false))
             ->set('language_display', $request->input('language_display'))
             ->set('language_switcher_display', $request->input('language_switcher_display'))
             ->set('language_hide_languages', json_encode($request->input('language_hide_languages', [])))
@@ -356,7 +405,7 @@ class LanguageController extends BaseController
 
     public function getChangeDataLanguage($code, LanguageManager $language)
     {
-        $previousUrl = strtok(app('url')->previous(), '?');
+        $previousUrl = strtok(URL::previous(), '?');
 
         $queryString = null;
         if ($code !== $language->getDefaultLocaleCode()) {

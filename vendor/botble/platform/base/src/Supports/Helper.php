@@ -2,15 +2,17 @@
 
 namespace Botble\Base\Supports;
 
-use Eloquent;
+use Botble\Base\Models\BaseModel;
 use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
-use Request;
+use Illuminate\Support\Facades\Request;
+use Throwable;
 
 class Helper
 {
@@ -22,11 +24,11 @@ class Helper
         }
     }
 
-    public static function handleViewCount(Eloquent $object, string $sessionName): bool
+    public static function handleViewCount(BaseModel $object, string $sessionName): bool
     {
         if (! array_key_exists($object->id, session()->get($sessionName, []))) {
             try {
-                $object->increment('views');
+                $object::withoutEvents(fn () => $object::withoutTimestamps(fn () => $object->increment('views')));
                 session()->put($sessionName . '.' . $object->id, time());
 
                 return true;
@@ -102,24 +104,7 @@ class Helper
         return true;
     }
 
-    public static function isActivatedLicense(): bool
-    {
-        if (! File::exists(storage_path('.license'))) {
-            return false;
-        }
-
-        $coreApi = new Core();
-
-        $result = $coreApi->verifyLicense(true);
-
-        if (! $result['status']) {
-            return false;
-        }
-
-        return true;
-    }
-
-    public static function getCountryNameByCode(?string $countryCode): ?string
+    public static function getCountryNameByCode(string|null $countryCode): string|null
     {
         if (empty($countryCode)) {
             return null;
@@ -128,7 +113,7 @@ class Helper
         return Arr::get(self::countries(), $countryCode, $countryCode);
     }
 
-    public static function getCountryCodeByName(?string $countryName): ?string
+    public static function getCountryCodeByName(string|null $countryName): string|null
     {
         if (empty($countryName)) {
             return null;
@@ -152,23 +137,13 @@ class Helper
 
     public static function getIpFromThirdParty(): bool|string|null
     {
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, 'https://ipecho.net/plain');
-        curl_setopt($curl, CURLOPT_HEADER, 0);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 10);
-        curl_setopt($curl, CURLOPT_TIMEOUT, 10);
-        $response = curl_exec($curl);
+        $defaultIpAddress = Request::ip() ?: '127.0.0.1';
 
-        $httpStatus = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-        curl_close($curl);
-
-        if ($httpStatus == 200) {
-            return $response ?: Request::ip();
+        try {
+            return trim(Http::get('https://ipecho.net/plain')->body()) ?: $defaultIpAddress;
+        } catch (Throwable) {
+            return $defaultIpAddress;
         }
-
-        return Request::ip();
     }
 
     public static function isIniValueChangeable(string $setting): bool

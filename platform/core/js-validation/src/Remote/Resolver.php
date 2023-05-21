@@ -14,15 +14,9 @@ class Resolver
 
     protected ?Closure $resolver = null;
 
-    protected ValidationFactory $factory;
-
-    protected bool $escape;
-
-    public function __construct(ValidationFactory $factory, bool $escape = false)
+    public function __construct(protected ValidationFactory $factory, protected bool $escape = false)
     {
-        $this->factory = $factory;
         $this->resolver = $this->getProtected($factory, 'resolver');
-        $this->escape = $escape;
     }
 
     /**
@@ -55,9 +49,7 @@ class Resolver
         $validationRule = 'bail|' . Validator::EXTENSION_NAME . ':' . $validateAll;
         $rules = [$field => $validationRule] + $rules;
 
-        $validator = $this->createValidator($translator, $data, $rules, $messages, $customAttributes);
-
-        return $validator;
+        return $this->createValidator($translator, $data, $rules, $messages, $customAttributes);
     }
 
     /**

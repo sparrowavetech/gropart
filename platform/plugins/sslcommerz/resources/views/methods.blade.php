@@ -1,9 +1,7 @@
 @if (get_payment_setting('status', SSLCOMMERZ_PAYMENT_METHOD_NAME) == 1)
     <li class="list-group-item">
         <input class="magic-radio js_payment_method" type="radio" name="payment_method" id="payment_{{ SSLCOMMERZ_PAYMENT_METHOD_NAME }}"
-               value="{{ SSLCOMMERZ_PAYMENT_METHOD_NAME }}" data-bs-toggle="collapse" data-bs-target=".payment_{{ SSLCOMMERZ_PAYMENT_METHOD_NAME }}_wrap"
-               data-toggle="collapse" data-target=".payment_{{ SSLCOMMERZ_PAYMENT_METHOD_NAME }}_wrap"
-               data-parent=".list_payment_method"
+               value="{{ SSLCOMMERZ_PAYMENT_METHOD_NAME }}"
                @if ($selecting == SSLCOMMERZ_PAYMENT_METHOD_NAME) checked @endif
         >
         <label for="payment_{{ SSLCOMMERZ_PAYMENT_METHOD_NAME }}">{{ get_payment_setting('name', SSLCOMMERZ_PAYMENT_METHOD_NAME) }}</label>

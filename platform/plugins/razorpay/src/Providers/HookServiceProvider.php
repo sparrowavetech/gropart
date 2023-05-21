@@ -6,11 +6,12 @@ use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Razorpay\Services\Gateways\RazorpayPaymentService;
 use Exception;
-use Html;
+use Botble\Base\Facades\Html;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Botble\Payment\Facades\PaymentMethods;
 use Razorpay\Api\Api;
 use Razorpay\Api\Errors\SignatureVerificationError;
 
@@ -128,7 +129,11 @@ class HookServiceProvider extends ServiceProvider
             $data['errorMessage'] = $exception->getMessage();
         }
 
-        return $html . view('plugins/razorpay::methods', $data)->render();
+        PaymentMethods::method(RAZORPAY_PAYMENT_METHOD_NAME, [
+            'html' => view('plugins/razorpay::methods', $data)->render(),
+        ]);
+
+        return $html;
     }
 
     public function checkoutWithRazorpay(array $data, Request $request): array
@@ -153,7 +158,7 @@ class HookServiceProvider extends ServiceProvider
                 if (in_array($order['status'], ['created', 'paid', 'attempted', 'captured', 'authorized'])) {
                     $amount = $order['amount_paid'] / 100;
 
-                    $status = PaymentStatusEnum::COMPLETED;
+                    $status = $order['status'] === 'paid' ? PaymentStatusEnum::COMPLETED : PaymentStatusEnum::PENDING;
 
                     $data['charge_id'] = $request->input('razorpay_payment_id');
 

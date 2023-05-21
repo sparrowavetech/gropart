@@ -19,7 +19,7 @@ class PageCacheDecorator extends CacheAbstractDecorator implements PageInterface
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }
 
-    public function getSearch(?string $query, int $limit = 10): Collection|LengthAwarePaginator
+    public function getSearch(string|null $query, int $limit = 10): Collection|LengthAwarePaginator
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }

@@ -56,54 +56,57 @@
                                 <li style="list-style-type:decimal">
                                     <p>{{ __('Enter Client ID, Secret into the box in right hand') }}</p>
                                 </li>
+                                <li style="list-style-type:decimal">
+                                    <p>{!! BaseHelper::clean("Then you need to create a new webhook. To create a webhook, go to <strong>Account Settings</strong> -> <strong>API keys</strong> -> <strong>Webhooks</strong> and paste the below url to <strong>Webhook URL</strong> field. At <strong>Active Events</strong> field, check to <strong>Payment Events</strong> and <strong>Order Events</strong> checkbox.") !!}</p>
+                                    <p>
+                                        <code>{{ route('payments.razorpay.webhook') }}</code>
+                                    </p>
+                                </li>
                             </ul>
                         </li>
                     </ul>
                 </div>
                 <div class="col-sm-6">
                     <div class="well bg-white">
-                        <div class="form-group mb-3">
-                            <label class="text-title-field"
-                                   for="razorpay_name">{{ trans('plugins/payment::payment.method_name') }}</label>
-                            <input type="text" class="next-input" name="payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}_name"
-                                   id="razorpay_name" data-counter="400"
-                                   value="{{ get_payment_setting('name', RAZORPAY_PAYMENT_METHOD_NAME, __('Online payment via :name', ['name' => 'Razorpay'])) }}">
-                        </div>
+                        <x-core-setting::text-input
+                            :name="'payment_' . RAZORPAY_PAYMENT_METHOD_NAME . '_name'"
+                            :label="trans('plugins/payment::payment.method_name')"
+                            :value="get_payment_setting('name', RAZORPAY_PAYMENT_METHOD_NAME, __('Online payment via :name', ['name' => 'Razorpay']))"
+                            data-counter="400"
+                        />
+
                         <div class="form-group mb-3">
                             <label class="text-title-field" for="payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}_description">{{ trans('core/base::forms.description') }}</label>
                             <textarea class="next-input" name="payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}_description" id="payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}_description">{{ get_payment_setting('description', RAZORPAY_PAYMENT_METHOD_NAME, __('Payment with Razorpay')) }}</textarea>
                         </div>
 
                         <p class="payment-note">
-                            {{ trans('plugins/payment::payment.please_provide_information') }} <a target="_blank"
-                                                                                                  href="https://razorpay.com">Razorpay</a>:
+                            {{ trans('plugins/payment::payment.please_provide_information') }} <a target="_blank" href="https://razorpay.com">Razorpay</a>:
                         </p>
-                        <div class="form-group mb-3">
-                            <label class="text-title-field" for="razorpay_key">{{ __('Key') }}</label>
-                            <input type="text" class="next-input"
-                                   name="payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}_key" id="razorpay_key"
-                                   value="{{ get_payment_setting('key', RAZORPAY_PAYMENT_METHOD_NAME) }}" placeholder="rzp_***">
-                        </div>
-                        <div class="form-group mb-3">
-                            <label class="text-title-field" for="razorpay_secret">{{ __('Secret') }}</label>
-                            <input type="password" class="next-input" placeholder="••••••••" id="razorpay_secret"
-                                   name="payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}_secret"
-                                   value="{{ get_payment_setting('secret', RAZORPAY_PAYMENT_METHOD_NAME) }}">
-                        </div>
+
+                        <x-core-setting::text-input
+                            :name="'payment_' . RAZORPAY_PAYMENT_METHOD_NAME . '_key'"
+                            :label="__('Key')"
+                            :value="get_payment_setting('key', RAZORPAY_PAYMENT_METHOD_NAME)"
+                            placeholder="rzp_***"
+                        />
+
+                        <x-core-setting::text-input
+                            :name="'payment_' . RAZORPAY_PAYMENT_METHOD_NAME . '_secret'"
+                            type="password"
+                            :label="__('Secret')"
+                            :value="get_payment_setting('secret', RAZORPAY_PAYMENT_METHOD_NAME)"
+                            placeholder="••••••••"
+                        />
 
                         {!! apply_filters(PAYMENT_METHOD_SETTINGS_CONTENT, null, RAZORPAY_PAYMENT_METHOD_NAME) !!}
                     </div>
                 </div>
             </div>
             <div class="col-12 bg-white text-end">
-                <button class="btn btn-warning disable-payment-item @if ($razorpayStatus == 0) hidden @endif"
-                        type="button">{{ trans('plugins/payment::payment.deactivate') }}</button>
-                <button
-                    class="btn btn-info save-payment-item btn-text-trigger-save @if ($razorpayStatus == 1) hidden @endif"
-                    type="button">{{ trans('plugins/payment::payment.activate') }}</button>
-                <button
-                    class="btn btn-info save-payment-item btn-text-trigger-update @if ($razorpayStatus == 0) hidden @endif"
-                    type="button">{{ trans('plugins/payment::payment.update') }}</button>
+                <button class="btn btn-warning disable-payment-item @if ($razorpayStatus == 0) hidden @endif" type="button">{{ trans('plugins/payment::payment.deactivate') }}</button>
+                <button class="btn btn-info save-payment-item btn-text-trigger-save @if ($razorpayStatus == 1) hidden @endif" type="button">{{ trans('plugins/payment::payment.activate') }}</button>
+                <button class="btn btn-info save-payment-item btn-text-trigger-update @if ($razorpayStatus == 0) hidden @endif" type="button">{{ trans('plugins/payment::payment.update') }}</button>
             </div>
             {!! Form::close() !!}
         </td>

@@ -9,7 +9,7 @@ use Botble\Faq\Models\FaqCategory;
 
 class FaqCategoryForm extends FormAbstract
 {
-    public function buildForm()
+    public function buildForm(): void
     {
         $this
             ->setupModel(new FaqCategory())

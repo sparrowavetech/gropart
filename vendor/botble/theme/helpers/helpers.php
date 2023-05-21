@@ -1,7 +1,8 @@
 <?php
 
-use Botble\Theme\Facades\AdminBarFacade;
-use Botble\Theme\Facades\ThemeOptionFacade;
+use Botble\Theme\Contracts\Theme as ThemeContract;
+use Botble\Theme\Facades\AdminBar;
+use Botble\Theme\Facades\ThemeOption;
 use Botble\Theme\Supports\AdminBar as AdminBarBase;
 use Botble\Theme\ThemeOption as ThemeOptionBase;
 
@@ -23,7 +24,7 @@ if (! function_exists('sanitize_html_class')) {
 }
 
 if (! function_exists('parse_args')) {
-    function parse_args(array|object $args, string|array $defaults = ''): object|array
+    function parse_args(array|object $args, string|array $defaults = ''): array
     {
         if (is_object($args)) {
             $result = get_object_vars($args);
@@ -40,9 +41,9 @@ if (! function_exists('parse_args')) {
 }
 
 if (! function_exists('theme')) {
-    function theme(?string $themeName = null, ?string $layoutName = null): mixed
+    function theme(string|null $themeName = null, string|null $layoutName = null): mixed
     {
-        $theme = app('theme');
+        $theme = app(ThemeContract::class);
 
         if ($themeName) {
             $theme->theme($themeName);
@@ -69,12 +70,12 @@ if (! function_exists('theme_option')) {
             }
         }
 
-        return ThemeOptionFacade::getFacadeRoot();
+        return ThemeOption::getFacadeRoot();
     }
 }
 
 if (! function_exists('theme_path')) {
-    function theme_path(?string $path = null): string
+    function theme_path(string|null $path = null): string
     {
         return platform_path('themes' . DIRECTORY_SEPARATOR . $path);
     }
@@ -83,6 +84,6 @@ if (! function_exists('theme_path')) {
 if (! function_exists('admin_bar')) {
     function admin_bar(): AdminBarBase
     {
-        return AdminBarFacade::getFacadeRoot();
+        return AdminBar::getFacadeRoot();
     }
 }

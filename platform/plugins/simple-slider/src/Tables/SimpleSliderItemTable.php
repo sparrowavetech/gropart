@@ -2,17 +2,18 @@
 
 namespace Botble\SimpleSlider\Tables;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
+use Botble\SimpleSlider\Models\SimpleSliderItem;
 use Botble\SimpleSlider\Repositories\Interfaces\SimpleSliderItemInterface;
 use Botble\Table\Abstracts\TableAbstract;
-use Html;
+use Botble\Base\Facades\Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Yajra\DataTables\DataTables;
+use Botble\Table\DataTables;
 
 class SimpleSliderItemTable extends TableAbstract
 {
@@ -42,10 +43,10 @@ class SimpleSliderItemTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('image', function ($item) {
+            ->editColumn('image', function (SimpleSliderItem $item) {
                 return view('plugins/simple-slider::partials.thumbnail', compact('item'))->render();
             })
-            ->editColumn('title', function ($item) {
+            ->editColumn('title', function (SimpleSliderItem $item) {
                 if (! Auth::user()->hasPermission('simple-slider-item.edit')) {
                     return BaseHelper::clean($item->title);
                 }
@@ -56,13 +57,13 @@ class SimpleSliderItemTable extends TableAbstract
                     'data-src' => route('simple-slider-item.edit', $item->id),
                 ]);
             })
-            ->editColumn('checkbox', function ($item) {
+            ->editColumn('checkbox', function (SimpleSliderItem $item) {
                 return $this->getCheckbox($item->id);
             })
-            ->editColumn('created_at', function ($item) {
+            ->editColumn('created_at', function (SimpleSliderItem $item) {
                 return BaseHelper::formatDate($item->created_at);
             })
-            ->addColumn('operations', function ($item) {
+            ->addColumn('operations', function (SimpleSliderItem $item) {
                 return view('plugins/simple-slider::partials.actions', compact('item'))->render();
             });
 

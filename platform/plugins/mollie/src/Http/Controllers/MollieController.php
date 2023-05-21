@@ -9,6 +9,7 @@ use Botble\Payment\Supports\PaymentHelper;
 use Illuminate\Http\Request;
 use Mollie;
 use Mollie\Api\Exceptions\ApiException;
+use Mollie\Api\MollieApiClient;
 use Mollie\Api\Types\PaymentStatus;
 
 class MollieController extends BaseController
@@ -16,7 +17,12 @@ class MollieController extends BaseController
     public function paymentCallback(Request $request, BaseHttpResponse $response)
     {
         try {
-            $result = Mollie::api()->payments->get($request->input('id'));
+            /**
+             * @var MollieApiClient $api
+             */
+            $api = Mollie::api();
+
+            $result = $api->payments->get($request->input('id'));
         } catch (ApiException $exception) {
             return $response
                 ->setError()

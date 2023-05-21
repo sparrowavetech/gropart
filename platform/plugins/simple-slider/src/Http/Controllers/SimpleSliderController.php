@@ -2,16 +2,17 @@
 
 namespace Botble\SimpleSlider\Http\Controllers;
 
-use Assets;
-use Botble\Base\Events\BeforeEditContentEvent;
+use Botble\Base\Facades\Assets;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Traits\HasDeleteManyItemsTrait;
 use Botble\SimpleSlider\Forms\SimpleSliderForm;
 use Botble\SimpleSlider\Http\Requests\SimpleSliderRequest;
+use Botble\SimpleSlider\Models\SimpleSlider;
 use Botble\SimpleSlider\Repositories\Interfaces\SimpleSliderInterface;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\SimpleSlider\Repositories\Interfaces\SimpleSliderItemInterface;
@@ -23,28 +24,22 @@ class SimpleSliderController extends BaseController
 {
     use HasDeleteManyItemsTrait;
 
-    protected SimpleSliderInterface $simpleSliderRepository;
-
-    protected SimpleSliderItemInterface $simpleSliderItemRepository;
-
     public function __construct(
-        SimpleSliderInterface $simpleSliderRepository,
-        SimpleSliderItemInterface $simpleSliderItemRepository
+        protected SimpleSliderInterface $simpleSliderRepository,
+        protected SimpleSliderItemInterface $simpleSliderItemRepository
     ) {
-        $this->simpleSliderRepository = $simpleSliderRepository;
-        $this->simpleSliderItemRepository = $simpleSliderItemRepository;
     }
 
     public function index(SimpleSliderTable $dataTable)
     {
-        page_title()->setTitle(trans('plugins/simple-slider::simple-slider.menu'));
+        PageTitle::setTitle(trans('plugins/simple-slider::simple-slider.menu'));
 
         return $dataTable->renderTable();
     }
 
     public function create(FormBuilder $formBuilder)
     {
-        page_title()->setTitle(trans('plugins/simple-slider::simple-slider.create'));
+        PageTitle::setTitle(trans('plugins/simple-slider::simple-slider.create'));
 
         return $formBuilder
             ->create(SimpleSliderForm::class)
@@ -64,25 +59,20 @@ class SimpleSliderController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int $id, FormBuilder $formBuilder, Request $request)
+    public function edit(SimpleSlider $simpleSlider, FormBuilder $formBuilder)
     {
         Assets::addScripts(['blockui', 'sortable'])
             ->addScriptsDirectly(['vendor/core/plugins/simple-slider/js/simple-slider-admin.js']);
 
-        $simpleSlider = $this->simpleSliderRepository->findOrFail($id);
-
-        event(new BeforeEditContentEvent($request, $simpleSlider));
-
-        page_title()->setTitle(trans('plugins/simple-slider::simple-slider.edit') . ' "' . $simpleSlider->name . '"');
+        PageTitle::setTitle(trans('core/base::forms.edit_item', ['name' => $simpleSlider->name]));
 
         return $formBuilder
             ->create(SimpleSliderForm::class, ['model' => $simpleSlider])
             ->renderForm();
     }
 
-    public function update(int $id, SimpleSliderRequest $request, BaseHttpResponse $response)
+    public function update(SimpleSlider $simpleSlider, SimpleSliderRequest $request, BaseHttpResponse $response)
     {
-        $simpleSlider = $this->simpleSliderRepository->findOrFail($id);
         $simpleSlider->fill($request->input());
 
         $this->simpleSliderRepository->createOrUpdate($simpleSlider);
@@ -94,10 +84,9 @@ class SimpleSliderController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(Request $request, int $id, BaseHttpResponse $response)
+    public function destroy(SimpleSlider $simpleSlider, Request $request, BaseHttpResponse $response)
     {
         try {
-            $simpleSlider = $this->simpleSliderRepository->findOrFail($id);
             $this->simpleSliderRepository->delete($simpleSlider);
 
             event(new DeletedContentEvent(SIMPLE_SLIDER_MODULE_SCREEN_NAME, $request, $simpleSlider));

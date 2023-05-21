@@ -15,7 +15,7 @@
 
     <div class="answer-wrapper">
         <div class="form-group mb-3">
-            {!! render_editor('message', null, false, ['without-buttons' => true, 'class' => 'form-control']) !!}
+            {!! Form::editor('message', null, ['without-buttons' => true, 'class' => 'form-control']) !!}
         </div>
 
         <div class="form-group mb-3">

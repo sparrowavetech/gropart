@@ -3,7 +3,7 @@
 namespace Botble\Language\Commands;
 
 use Illuminate\Foundation\Console\RouteClearCommand as BaseRouteClearCommand;
-use Language;
+use Botble\Language\Facades\Language;
 
 class RouteClearCommand extends BaseRouteClearCommand
 {

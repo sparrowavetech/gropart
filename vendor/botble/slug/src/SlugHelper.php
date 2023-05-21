@@ -11,7 +11,11 @@ class SlugHelper
 {
     protected array $canEmptyPrefixes = [Page::class];
 
-    public function registerModule(string|array $model, ?string $name = null): self
+    public function __construct(protected SlugCompiler $translator)
+    {
+    }
+
+    public function registerModule(string|array $model, string|null $name = null): self
     {
         $supported = $this->supportedModels();
 
@@ -44,7 +48,7 @@ class SlugHelper
         return config('packages.slug.general.supported', []);
     }
 
-    public function setPrefix(string $model, ?string $prefix, bool $canEmptyPrefix = false): self
+    public function setPrefix(string $model, string|null $prefix, bool $canEmptyPrefix = false): self
     {
         $prefixes = config('packages.slug.general.prefixes', []);
         $prefixes[$model] = $prefix;
@@ -95,9 +99,9 @@ class SlugHelper
     }
 
     public function getSlug(
-        ?string $key,
-        ?string $prefix = null,
-        ?string $model = null,
+        string|null $key,
+        string|null $prefix = null,
+        string|null $model = null,
         $referenceId = null
     ) {
         $condition = [];
@@ -121,24 +125,26 @@ class SlugHelper
         return app(SlugInterface::class)->getFirstBy($condition);
     }
 
-    public function getPrefix(string $model, string $default = ''): ?string
+    public function getPrefix(string $model, string $default = '', bool $translate = true): string|null
     {
-        $permalink = setting($this->getPermalinkSettingKey($model));
+        $prefix = setting($this->getPermalinkSettingKey($model));
 
-        if ($permalink !== null) {
-            return $permalink;
+        if (! $prefix) {
+            $prefix = Arr::get(config('packages.slug.general.prefixes', []), $model);
         }
 
-        $config = Arr::get(config('packages.slug.general.prefixes', []), $model);
+        if ($prefix !== null) {
+            if ($translate) {
+                $prefix = $this->translator->compile($prefix, $model);
+            }
 
-        if ($config !== null) {
-            return (string)$config;
+            $default = $prefix;
         }
 
         return $default;
     }
 
-    public function getColumnNameToGenerateSlug(string|object $model): ?string
+    public function getColumnNameToGenerateSlug(string|object $model): string|null
     {
         if (is_object($model)) {
             $model = get_class($model);
@@ -166,5 +172,10 @@ class SlugHelper
     public function getCanEmptyPrefixes(): array
     {
         return $this->canEmptyPrefixes;
+    }
+
+    public function getTranslator(): SlugCompiler
+    {
+        return $this->translator;
     }
 }

@@ -6,7 +6,7 @@ use Botble\Language\LanguageNegotiator;
 use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Language;
+use Botble\Language\Facades\Language;
 
 class LocaleSessionRedirect extends LaravelLocalizationMiddlewareBase
 {

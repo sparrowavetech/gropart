@@ -10,7 +10,7 @@ use Illuminate\Support\Arr;
 
 class ShortcodeController extends BaseController
 {
-    public function ajaxGetAdminConfig(?string $key, GetShortcodeDataRequest $request, BaseHttpResponse $response)
+    public function ajaxGetAdminConfig(string|null $key, GetShortcodeDataRequest $request, BaseHttpResponse $response)
     {
         $registered = shortcode()->getAll();
 

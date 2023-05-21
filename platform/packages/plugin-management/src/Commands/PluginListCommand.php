@@ -2,15 +2,22 @@
 
 namespace Botble\PluginManagement\Commands;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
+use Botble\PluginManagement\Services\PluginService;
 use Illuminate\Support\Facades\File;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Throwable;
 
 #[AsCommand('cms:plugin:list', 'Show all plugins information')]
 class PluginListCommand extends Command
 {
+    public function __construct(protected PluginService $pluginService)
+    {
+        parent::__construct();
+    }
+
     public function handle(): int
     {
         $header = [
@@ -30,6 +37,13 @@ class PluginListCommand extends Command
                 $configFile = plugin_path($plugin . '/plugin.json');
                 if (! File::exists($configFile)) {
                     continue;
+                }
+
+                try {
+                    $this->pluginService->validatePlugin($plugin, true);
+                } catch (Throwable $exception) {
+                    $this->error('Plugin ' . $plugin . ' is invalid!');
+                    $this->error($exception->getMessage());
                 }
 
                 $content = BaseHelper::getFileData($configFile);

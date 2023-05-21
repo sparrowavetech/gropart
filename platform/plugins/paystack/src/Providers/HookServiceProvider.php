@@ -5,10 +5,11 @@ namespace Botble\Paystack\Providers;
 use Botble\Ecommerce\Repositories\Interfaces\OrderAddressInterface;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Paystack\Services\Gateways\PaystackPaymentService;
-use Html;
+use Botble\Base\Facades\Html;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
-use Paystack;
+use Botble\Payment\Facades\PaymentMethods;
+use Unicodeveloper\Paystack\Facades\Paystack;
 use Throwable;
 use Illuminate\Support\Arr;
 
@@ -99,10 +100,14 @@ class HookServiceProvider extends ServiceProvider
 
     public function registerPaystackMethod(?string $html, array $data): string
     {
-        return $html . view('plugins/paystack::methods', $data)->render();
+        PaymentMethods::method(PAYSTACK_PAYMENT_METHOD_NAME, [
+            'html' => view('plugins/paystack::methods', $data)->render(),
+        ]);
+
+        return $html;
     }
 
-    public function checkoutWithPaystack(array $data, Request $request)
+    public function checkoutWithPaystack(array $data, Request $request): array
     {
         if ($request->input('payment_method') == PAYSTACK_PAYMENT_METHOD_NAME) {
             $supportedCurrencies = (new PaystackPaymentService())->supportedCurrencyCodes();

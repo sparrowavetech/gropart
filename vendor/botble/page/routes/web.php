@@ -1,6 +1,9 @@
 <?php
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Page\Models\Page;
+use Botble\Slug\Facades\SlugHelper;
+use Illuminate\Support\Facades\Route;
 
 Route::group(['namespace' => 'Botble\Page\Http\Controllers', 'middleware' => ['web', 'core']], function () {
     Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {

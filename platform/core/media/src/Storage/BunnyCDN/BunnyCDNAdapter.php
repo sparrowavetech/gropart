@@ -13,7 +13,6 @@ use League\Flysystem\FilesystemAdapter;
 use League\Flysystem\FilesystemException;
 use League\Flysystem\InvalidVisibilityProvided;
 use League\Flysystem\StorageAttributes;
-use League\Flysystem\UnableToCheckExistence;
 use League\Flysystem\UnableToCopyFile;
 use League\Flysystem\UnableToCreateDirectory;
 use League\Flysystem\UnableToDeleteDirectory;
@@ -33,26 +32,13 @@ class BunnyCDNAdapter implements FilesystemAdapter, PublicUrlGenerator, Checksum
 {
     use CalculateChecksumFromStream;
 
-    protected string $pullZoneURL;
-
-    protected BunnyCDNClient $client;
-
-    public function __construct(BunnyCDNClient $client, string $pullZoneURL = '')
+    public function __construct(protected BunnyCDNClient $client, protected string $pullZoneURL = '')
     {
-        $this->client = $client;
-        $this->pullZoneURL = $pullZoneURL;
-
         if (func_num_args() > 2 && (string)func_get_arg(2) !== '') {
             throw new RuntimeException('PrefixPath is no longer supported directly. Use PathPrefixedAdapter instead: https://flysystem.thephpleague.com/docs/adapter/path-prefixing/');
         }
     }
 
-    /**
-     * @param $source
-     * @param $destination
-     * @param Config $config
-     * @return void
-     */
     public function copy($source, $destination, Config $config): void
     {
         try {
@@ -62,11 +48,6 @@ class BunnyCDNAdapter implements FilesystemAdapter, PublicUrlGenerator, Checksum
         }
     }
 
-    /**
-     * @param $path
-     * @param $contents
-     * @param Config $config
-     */
     public function write($path, $contents, Config $config): void
     {
         try {
@@ -76,11 +57,7 @@ class BunnyCDNAdapter implements FilesystemAdapter, PublicUrlGenerator, Checksum
         }
     }
 
-    /**
-     * @param $path
-     * @return string
-     */
-    public function read($path): string
+    public function read(string $path): string
     {
         try {
             return $this->client->download($path);
@@ -89,11 +66,6 @@ class BunnyCDNAdapter implements FilesystemAdapter, PublicUrlGenerator, Checksum
         }
     }
 
-    /**
-     * @param string $path
-     * @param bool $deep
-     * @return iterable
-     */
     public function listContents(string $path, bool $deep): iterable
     {
         try {
@@ -114,10 +86,6 @@ class BunnyCDNAdapter implements FilesystemAdapter, PublicUrlGenerator, Checksum
         }
     }
 
-    /**
-     * @param array $bunnyFileArray
-     * @return StorageAttributes
-     */
     protected function normalizeObject(array $bunnyFileArray): StorageAttributes
     {
         return match ($bunnyFileArray['IsDirectory']) {
@@ -130,7 +98,7 @@ class BunnyCDNAdapter implements FilesystemAdapter, PublicUrlGenerator, Checksum
                     )
                 )
             ),
-            false => new FileAttributes(
+            default => new FileAttributes(
                 Util::normalizePath(
                     $this->replaceFirst(
                         $bunnyFileArray['StorageZoneName'] . '/',
@@ -143,14 +111,10 @@ class BunnyCDNAdapter implements FilesystemAdapter, PublicUrlGenerator, Checksum
                 self::parseBunnyTimestamp($bunnyFileArray['LastChanged']),
                 $bunnyFileArray['ContentType'] ?: $this->detectMimeType($bunnyFileArray['Path'] . $bunnyFileArray['ObjectName']),
                 $this->extractExtraMetadata($bunnyFileArray)
-            )
+            ),
         };
     }
 
-    /**
-     * @param array $bunnyFileArray
-     * @return array
-     */
     protected function extractExtraMetadata(array $bunnyFileArray): array
     {
         return [
@@ -171,9 +135,6 @@ class BunnyCDNAdapter implements FilesystemAdapter, PublicUrlGenerator, Checksum
 
     /**
      * Detects the mime type from the provided file path
-     *
-     * @param string $path
-     * @return string
      */
     public function detectMimeType(string $path): string
     {
@@ -191,24 +152,17 @@ class BunnyCDNAdapter implements FilesystemAdapter, PublicUrlGenerator, Checksum
         }
     }
 
-    /**
-     * @param $path
-     * @param $contents
-     * @param Config $config
-     * @return void
-     */
     public function writeStream($path, $contents, Config $config): void
     {
         $this->write($path, stream_get_contents($contents), $config);
     }
 
     /**
-     * @param $path
      * @return resource
      *
      * @throws UnableToReadFile
      */
-    public function readStream($path)
+    public function readStream(string $path)
     {
         try {
             return $this->client->stream($path);
@@ -250,7 +204,6 @@ class BunnyCDNAdapter implements FilesystemAdapter, PublicUrlGenerator, Checksum
 
     /**
      * @throws InvalidVisibilityProvided
-     * @throws FilesystemException
      */
     public function setVisibility(string $path, string $visibility): void
     {
@@ -269,20 +222,11 @@ class BunnyCDNAdapter implements FilesystemAdapter, PublicUrlGenerator, Checksum
         }
     }
 
-    /**
-     * @param string $path
-     * @return FileAttributes
-     */
     public function mimeType(string $path): FileAttributes
     {
         try {
             $object = $this->getObject($path);
 
-            if ($object instanceof DirectoryAttributes) {
-                throw new TypeError();
-            }
-
-            /** @var FileAttributes $object */
             if (! $object->mimeType()) {
                 $mimeType = $this->detectMimeType($path);
 
@@ -307,19 +251,16 @@ class BunnyCDNAdapter implements FilesystemAdapter, PublicUrlGenerator, Checksum
         }
     }
 
-    /**
-     * @param string $path
-     * @return mixed
-     */
-    protected function getObject(string $path = ''): StorageAttributes
+    protected function getObject(string $path = ''): FileAttributes
     {
         $directory = pathinfo($path, PATHINFO_DIRNAME);
         $list = (new DirectoryListing($this->listContents($directory, false)))
-            ->filter(function (StorageAttributes $item) use ($path) {
+            ->filter(function (FileAttributes|StorageAttributes $item) use ($path) {
                 return Util::normalizePath($item->path()) === $path;
             })->toArray();
 
         if (count($list) === 1) {
+            // @phpstan-ignore-next-line
             return $list[0];
         }
 
@@ -330,10 +271,6 @@ class BunnyCDNAdapter implements FilesystemAdapter, PublicUrlGenerator, Checksum
         throw UnableToReadFile::fromLocation($path, 'Error 404:"' . $path . '"');
     }
 
-    /**
-     * @param string $path
-     * @return FileAttributes
-     */
     public function lastModified(string $path): FileAttributes
     {
         try {
@@ -345,10 +282,6 @@ class BunnyCDNAdapter implements FilesystemAdapter, PublicUrlGenerator, Checksum
         }
     }
 
-    /**
-     * @param string $path
-     * @return FileAttributes
-     */
     public function fileSize(string $path): FileAttributes
     {
         try {
@@ -360,10 +293,6 @@ class BunnyCDNAdapter implements FilesystemAdapter, PublicUrlGenerator, Checksum
         }
     }
 
-    /**
-     * @throws UnableToMoveFile
-     * @throws FilesystemException
-     */
     public function move(string $source, string $destination, Config $config): void
     {
         try {
@@ -374,11 +303,7 @@ class BunnyCDNAdapter implements FilesystemAdapter, PublicUrlGenerator, Checksum
         }
     }
 
-    /**
-     * @param $path
-     * @return void
-     */
-    public function delete($path): void
+    public function delete(string $path): void
     {
         try {
             $this->client->delete($path);
@@ -390,17 +315,13 @@ class BunnyCDNAdapter implements FilesystemAdapter, PublicUrlGenerator, Checksum
     }
 
     /**
-     * @throws UnableToCheckExistence
+     * @throws FilesystemException
      */
     public function directoryExists(string $path): bool
     {
         return $this->fileExists($path);
     }
 
-    /**
-     * @param string $path
-     * @return bool
-     */
     public function fileExists(string $path): bool
     {
         $list = new DirectoryListing($this->listContents(
@@ -415,11 +336,6 @@ class BunnyCDNAdapter implements FilesystemAdapter, PublicUrlGenerator, Checksum
         return (bool)count($count);
     }
 
-    /**
-     * @param string $path
-     * @param Config $config
-     * @return string
-     */
     public function publicUrl(string $path, Config $config): string
     {
         if ($this->pullZoneURL === '') {
@@ -450,7 +366,7 @@ class BunnyCDNAdapter implements FilesystemAdapter, PublicUrlGenerator, Checksum
         return $this->calculateChecksumFromStream($path, $config);
     }
 
-    public function getUrl($path)
+    public function getUrl($path): string
     {
         return $this->publicUrl($path, new Config());
     }

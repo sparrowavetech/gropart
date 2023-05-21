@@ -16,8 +16,6 @@ return [
     'insert_dns_prefetch_description' => 'This filter injects tags in the HEAD to enable the browser to do DNS prefetching.',
     'remove_comments' => 'Remove comments',
     'remove_comments_description' => 'This filter eliminates HTML, JS and CSS comments. The filter reduces the transfer size of HTML files by removing the comments. Depending on the HTML file, this filter can significantly reduce the number of bytes transmitted on the network.',
-    'trim_urls' => 'Trim URLs',
-    'trim_urls_description' => 'This filter trims URLs by resolving them by making them relative to the base URL for the page.',
     'remove_quotes' => 'Remove quotes',
     'remove_quotes_description' => 'This filter eliminates unnecessary quotation marks from HTML attributes. While required by the various HTML specifications, browsers permit their omission when the value of an attribute is composed of a certain subset of characters (alphanumerics and some punctuation characters).',
     'defer_javascript' => 'Defer javascript',

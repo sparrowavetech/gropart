@@ -62,7 +62,7 @@ class SimpleSliderItemForm extends FormAbstract
                 ],
             ])
             ->add('submit', 'submit', [
-                'label' => trans('core/base::forms.save'),
+                'label' => trans('core/base::forms.save_and_continue'),
                 'attr' => [
                     'class' => 'btn btn-info float-end',
                 ],

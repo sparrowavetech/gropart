@@ -15,9 +15,7 @@ class WidgetGroup
 
     protected string $name;
 
-    protected ?string $description = null;
-
-    protected Application $app;
+    protected string|null $description = null;
 
     protected array $widgets = [];
 
@@ -27,13 +25,11 @@ class WidgetGroup
 
     protected int $count = 0;
 
-    public function __construct(array $args, Application $app)
+    public function __construct(array $args, protected Application $app)
     {
         $this->id = $args['id'];
         $this->name = $args['name'];
         $this->description = Arr::get($args, 'description');
-
-        $this->app = $app;
     }
 
     /**
@@ -61,7 +57,7 @@ class WidgetGroup
     /**
      * Display a widget according to its type.
      */
-    protected function displayWidget(array $widget, ?int $position): ?string
+    protected function displayWidget(array $widget, int|null $position): string|null
     {
         $widget['arguments'][] = $this->id;
         $widget['arguments'][] = $position;
@@ -175,12 +171,12 @@ class WidgetGroup
         return $this;
     }
 
-    public function getDescription(): ?string
+    public function getDescription(): string|null
     {
         return $this->description;
     }
 
-    public function setDescription(?string $description): self
+    public function setDescription(string|null $description): self
     {
         $this->description = $description;
 

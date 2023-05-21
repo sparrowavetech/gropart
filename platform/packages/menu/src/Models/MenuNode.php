@@ -2,12 +2,13 @@
 
 namespace Botble\Menu\Models;
 
+use Botble\Base\Casts\SafeContent;
 use Botble\Base\Models\BaseModel;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Request;
+use Illuminate\Support\Facades\Request;
 
 class MenuNode extends BaseModel
 {
@@ -25,6 +26,13 @@ class MenuNode extends BaseModel
         'target',
         'has_child',
         'position',
+    ];
+
+    protected $casts = [
+        'title' => SafeContent::class,
+        'url' => SafeContent::class,
+        'css_class' => SafeContent::class,
+        'icon_font' => SafeContent::class,
     ];
 
     public function parent(): BelongsTo

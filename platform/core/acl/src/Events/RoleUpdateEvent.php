@@ -10,10 +10,7 @@ class RoleUpdateEvent extends Event
 {
     use SerializesModels;
 
-    public Role $role;
-
-    public function __construct(Role $role)
+    public function __construct(public Role $role)
     {
-        $this->role = $role;
     }
 }

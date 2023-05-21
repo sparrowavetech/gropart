@@ -77,8 +77,10 @@ return [
     'imagick_or_gd_ext' => 'Imagick/GD Ext',
     'updater' => 'System Updater',
     'zip' => 'Zip Ext',
+    'iconv' => 'Iconv Ext',
     'memory_limit' => 'Memory limit',
     'max_execution_time' => 'Max execution time (s)',
+    'allow_url_fopen_enabled' => 'allow_url_fopen enabled',
     'cleanup' => [
         'title' => 'Cleanup System',
         'table' => [
@@ -90,5 +92,6 @@ return [
         'messenger_confirm_cleanup' => 'Are you sure you want to database cleanup action, it will clear your data in database?',
         'submit_button' => 'Cleanup',
         'success_message' => 'Cleaned data successfully',
+        'not_enabled_yet' => 'This featured is not enabled yet. <br />Please add into .env: <code>CMS_ENABLED_CLEANUP_DATABASE=true</code> to enable this feature!',
     ],
 ];

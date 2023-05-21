@@ -1,5 +1,5 @@
-import {ActionsService} from './ActionsService';
-import {Helpers} from '../Helpers/Helpers';
+import { ActionsService } from './ActionsService'
+import { Helpers } from '../Helpers/Helpers'
 
 export class ContextMenuService {
     static initContext() {
@@ -9,18 +9,18 @@ export class ContextMenuService {
                 build: () => {
                     return {
                         items: ContextMenuService._fileContextMenu(),
-                    };
+                    }
                 },
-            });
+            })
 
             $.contextMenu({
                 selector: '.js-context-menu[data-context="folder"]',
                 build: () => {
                     return {
                         items: ContextMenuService._folderContextMenu(),
-                    };
+                    }
                 },
-            });
+            })
         }
     }
 
@@ -29,44 +29,49 @@ export class ContextMenuService {
             preview: {
                 name: 'Preview',
                 icon: (opt, $itemElement, itemKey, item) => {
-                    $itemElement.html('<i class="fa fa-eye" aria-hidden="true"></i> ' + item.name);
+                    $itemElement.html('<i class="fa fa-eye" aria-hidden="true"></i> ' + item.name)
 
-                    return 'context-menu-icon-updated';
+                    return 'context-menu-icon-updated'
                 },
                 callback: () => {
-                    ActionsService.handlePreview();
-                }
+                    ActionsService.handlePreview()
+                },
             },
-        };
+        }
 
         _.each(Helpers.getConfigs().actions_list, (actionGroup, key) => {
-            _.each(actionGroup, value => {
+            _.each(actionGroup, (value) => {
                 items[value.action] = {
                     name: value.name,
                     icon: (opt, $itemElement, itemKey, item) => {
-                        $itemElement.html('<i class="' + value.icon + '" aria-hidden="true"></i> ' + (RV_MEDIA_CONFIG.translations.actions_list[key][value.action] || item.name));
+                        $itemElement.html(
+                            '<i class="' +
+                                value.icon +
+                                '" aria-hidden="true"></i> ' +
+                                (RV_MEDIA_CONFIG.translations.actions_list[key][value.action] || item.name)
+                        )
 
-                        return 'context-menu-icon-updated';
+                        return 'context-menu-icon-updated'
                     },
                     callback: () => {
-                        $('.js-files-action[data-action="' + value.action + '"]').trigger('click');
-                    }
-                };
+                        $('.js-files-action[data-action="' + value.action + '"]').trigger('click')
+                    },
+                }
             })
-        });
+        })
 
-        let except = [];
+        let except = []
 
         switch (Helpers.getRequestParams().view_in) {
             case 'all_media':
-                except = ['remove_favorite', 'delete', 'restore'];
-                break;
+                except = ['remove_favorite', 'delete', 'restore']
+                break
             case 'recent':
-                except = ['remove_favorite', 'delete', 'restore', 'make_copy'];
-                break;
+                except = ['remove_favorite', 'delete', 'restore', 'make_copy']
+                break
             case 'favorites':
-                except = ['favorite', 'delete', 'restore', 'make_copy'];
-                break;
+                except = ['favorite', 'delete', 'restore', 'make_copy']
+                break
             case 'trash':
                 items = {
                     preview: items.preview,
@@ -74,105 +79,106 @@ export class ContextMenuService {
                     download: items.download,
                     delete: items.delete,
                     restore: items.restore,
-                };
-                break;
+                }
+                break
         }
 
         _.each(except, (value) => {
-            items[value] = undefined;
-        });
+            items[value] = undefined
+        })
 
-        let hasFolderSelected = Helpers.getSelectedFolder().length > 0;
+        let hasFolderSelected = Helpers.getSelectedFolder().length > 0
 
         if (hasFolderSelected) {
-            items.preview = undefined;
-            items.crop = undefined;
-            items.copy_link = undefined;
+            items.preview = undefined
+            items.crop = undefined
+            items.copy_link = undefined
 
             if (!_.includes(RV_MEDIA_CONFIG.permissions, 'folders.create')) {
-                items.make_copy = undefined;
+                items.make_copy = undefined
             }
 
             if (!_.includes(RV_MEDIA_CONFIG.permissions, 'folders.edit')) {
-                items.rename = undefined;
+                items.rename = undefined
             }
 
             if (!_.includes(RV_MEDIA_CONFIG.permissions, 'folders.trash')) {
-                items.trash = undefined;
-                items.restore = undefined;
+                items.trash = undefined
+                items.restore = undefined
             }
 
             if (!_.includes(RV_MEDIA_CONFIG.permissions, 'folders.destroy')) {
-                items.delete = undefined;
+                items.delete = undefined
             }
 
             if (!_.includes(RV_MEDIA_CONFIG.permissions, 'folders.favorite')) {
-                items.favorite = undefined;
-                items.remove_favorite = undefined;
+                items.favorite = undefined
+                items.remove_favorite = undefined
             }
         }
 
-        let selectedFiles = Helpers.getSelectedFiles();
+        let selectedFiles = Helpers.getSelectedFiles()
 
         if (selectedFiles.length > 0) {
             if (!_.includes(RV_MEDIA_CONFIG.permissions, 'files.create')) {
-                items.make_copy = undefined;
+                items.make_copy = undefined
             }
 
             if (!_.includes(RV_MEDIA_CONFIG.permissions, 'files.edit')) {
-                items.rename = undefined;
+                items.rename = undefined
             }
 
             if (!_.includes(RV_MEDIA_CONFIG.permissions, 'files.trash')) {
-                items.trash = undefined;
-                items.restore = undefined;
+                items.trash = undefined
+                items.restore = undefined
             }
 
             if (!_.includes(RV_MEDIA_CONFIG.permissions, 'files.destroy')) {
-                items.delete = undefined;
+                items.delete = undefined
             }
 
             if (!_.includes(RV_MEDIA_CONFIG.permissions, 'files.favorite')) {
-                items.favorite = undefined;
-                items.remove_favorite = undefined;
+                items.favorite = undefined
+                items.remove_favorite = undefined
             }
 
             if (selectedFiles.length > 1) {
-                items.crop = undefined;
+                items.crop = undefined
             }
         }
 
         let canPreview = _.filter(selectedFiles, function (value) {
-            return value.preview_url;
-        }).length;
+            return value.preview_url
+        }).length
 
         if (!canPreview) {
-            items.preview = undefined;
+            items.preview = undefined
         }
 
-        let canCropImage = _.filter(selectedFiles, function (value) {
-            return value.type === 'image';
-        }).length;
+        let fileIsImage = _.filter(selectedFiles, function (value) {
+            return value.type === 'image'
+        }).length
 
-        if (! canCropImage) {
-            items.crop = undefined;
+        if (!fileIsImage) {
+            items.crop = undefined
+            items.alt_text = undefined
         }
 
-        return items;
+        return items
     }
 
     static _folderContextMenu() {
-        let items = ContextMenuService._fileContextMenu();
+        let items = ContextMenuService._fileContextMenu()
 
-        items.preview = undefined;
-        items.copy_link = undefined;
+        items.preview = undefined
+        items.copy_link = undefined
 
-        return items;
+        return items
     }
 
     static destroyContext() {
         if (jQuery().contextMenu) {
-            $.contextMenu('destroy');
+            $.contextMenu('destroy')
         }
     }
 }

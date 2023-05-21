@@ -2,9 +2,11 @@
 
 namespace Botble\Base\Models;
 
+use Botble\Base\Casts\SafeContent;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Facades\Auth;
 
 class AdminNotification extends BaseModel
 {
@@ -17,11 +19,16 @@ class AdminNotification extends BaseModel
         'action_label',
         'action_url',
         'description',
+        'permission',
         'read_at',
     ];
 
     protected $casts = [
         'read_at' => 'datetime',
+        'title' => SafeContent::class,
+        'action_label' => SafeContent::class,
+        'action_url' => SafeContent::class,
+        'description' => SafeContent::class,
     ];
 
     public function markAsRead(): void
@@ -31,8 +38,48 @@ class AdminNotification extends BaseModel
         ]);
     }
 
-    public function prunable(): Builder
+    public function prunable(): Builder|BaseQueryBuilder
     {
-        return $this->whereDate('created_at', '>', Carbon::now()->subDays(30)->toDateString());
+        return static::where('created_at', '<=', Carbon::now()->subMonth());
+    }
+
+    public static function countUnread(): int
+    {
+        return AdminNotification::query()
+            ->whereNull('read_at')
+            ->hasPermission()
+            ->select('action_url')
+            ->count();
+    }
+
+    public function scopeHasPermission(BaseQueryBuilder $query): void
+    {
+        $user = Auth::user();
+
+        if (! $user->isSuperUser()) {
+            $query->where(function (BaseQueryBuilder $query) use ($user) {
+                $query
+                    ->whereNull('permission')
+                    ->orWhereIn('permission', $user->permissions);
+            });
+        }
+    }
+
+    public function isAbleToAccess(): bool
+    {
+        $user = Auth::user();
+
+        return ! $this->permission || $user->isSuperUser() || $user->hasPermission($this->permission);
+    }
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function (AdminNotification $notification) {
+            if ($notification->action_url) {
+                $notification->action_url = str_replace(url(''), '', $notification->action_url);
+            }
+        });
     }
 }

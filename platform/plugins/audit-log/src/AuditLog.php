@@ -3,14 +3,14 @@
 namespace Botble\AuditLog;
 
 use Botble\AuditLog\Events\AuditHandlerEvent;
-use Eloquent;
+use Botble\Base\Models\BaseModel;
 use Illuminate\Database\Eloquent\Model;
 
 class AuditLog
 {
     public function handleEvent(string $screen, Model $data, string $action, string $type = 'info'): bool
     {
-        if (! $data instanceof Eloquent || ! $data->id) {
+        if (! $data instanceof BaseModel || ! $data->id) {
             return false;
         }
 
@@ -29,14 +29,12 @@ class AuditLog
 
                 break;
             default:
-                if (! empty($data)) {
-                    if (isset($data->name)) {
-                        $name = $data->name;
-                    } elseif (isset($data->title)) {
-                        $name = $data->title;
-                    } elseif (isset($data->id)) {
-                        $name = 'ID: ' . $data->id;
-                    }
+                if (isset($data->name)) {
+                    $name = $data->name;
+                } elseif (isset($data->title)) {
+                    $name = $data->title;
+                } elseif (isset($data->id)) {
+                    $name = 'ID: ' . $data->id;
                 }
         }
 

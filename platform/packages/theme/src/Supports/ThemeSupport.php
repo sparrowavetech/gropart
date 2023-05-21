@@ -2,7 +2,7 @@
 
 namespace Botble\Theme\Supports;
 
-use Html;
+use Botble\Base\Facades\Html;
 use Illuminate\Support\Str;
 
 class ThemeSupport
@@ -61,5 +61,26 @@ class ThemeSupport
         }
 
         return $html;
+    }
+
+    public static function insertBlockAfterTopHtmlTags(string|null $block, string|null $html): string|null
+    {
+        if (! $block || ! $html) {
+            return $html;
+        }
+
+        preg_match_all('/^<([a-z]+)([^>]+)*(?:>(.*)<\/\1>|\s+\/>)$/sm', $html, $matches);
+
+        if (empty($matches[0])) {
+            return $html;
+        }
+
+        $parsedHtml = '';
+
+        foreach ($matches[0] as $blockItem) {
+            $parsedHtml .= Str::replaceLast('</', $block . '</', $blockItem);
+        }
+
+        return $parsedHtml;
     }
 }

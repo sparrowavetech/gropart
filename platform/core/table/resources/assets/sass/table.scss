@@ -142,16 +142,26 @@ $general-img-path: '/vendor/core/core/base/images/' !default;
                 padding: 5px 10px;
                 font-size: 12px;
                 line-height: 1.5;
-                background: $brand-main-color;
-                border-color: $brand-main-color;
-                color: #ffffff !important;
+                background: var(--bs-btn-bg);
+                border-color: var(--bs-btn-border-color);
+                color: var(--bs-btn-color);
 
                 &:active,
                 &:active:focus,
                 &:focus,
                 &:hover {
-                    background: #1dc3d2;
-                    border-color: #1dc3d2;
+                    background-color: var(--bs-btn-hover-bg);
+                    border-color: var(--bs-btn-hover-border-color);
+                    color: var(--bs-btn-hover-color);
+                }
+
+                &.buttons-reload {
+                    --bs-btn-color: #fff;
+                    --bs-btn-bg: #0dcaf0;
+                    --bs-btn-border-color: #0dcaf0;
+                    --bs-btn-hover-color: #fff;
+                    --bs-btn-hover-bg: #31d2f2;
+                    --bs-btn-hover-border-color: #25cff2;
                 }
             }
             > .btn {

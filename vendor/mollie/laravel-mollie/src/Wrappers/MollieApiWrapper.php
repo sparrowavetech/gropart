@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (c) 2016, Mollie B.V.
  * All rights reserved.
@@ -55,8 +56,6 @@ class MollieApiWrapper
     /**
      * MollieApiWrapper constructor.
      *
-     * @param  Repository  $config
-     * @param  MollieApiClient  $client
      * @return void
      *
      * @throws \Mollie\Api\Exceptions\ApiException
@@ -118,7 +117,6 @@ class MollieApiWrapper
     }
 
     /**
-     * @param $version_string
      * @return \Mollie\Laravel\Wrappers\MollieApiWrapper
      */
     public function addVersionString($version_string)
@@ -166,6 +164,14 @@ class MollieApiWrapper
     public function paymentLinks()
     {
         return $this->client->paymentLinks;
+    }
+
+    /**
+     * @return \Mollie\Api\Endpoints\TerminalEndpoint
+     */
+    public function terminals()
+    {
+        return $this->client->terminals;
     }
 
     /**

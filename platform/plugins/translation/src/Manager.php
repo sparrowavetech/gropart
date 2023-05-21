@@ -3,7 +3,7 @@
 namespace Botble\Translation;
 
 use ArrayAccess;
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Supports\PclZip as Zip;
 use Botble\Translation\Models\Translation;
 use Exception;
@@ -16,23 +16,19 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
-use Lang;
 use League\Flysystem\Filesystem as Flysystem;
 use League\Flysystem\Local\LocalFilesystemAdapter;
 use League\Flysystem\MountManager;
 use Symfony\Component\VarExporter\VarExporter;
-use Theme;
+use Botble\Theme\Facades\Theme;
+use Illuminate\Support\Facades\Lang;
 use ZipArchive;
 
 class Manager
 {
-    protected Application $app;
-
-    protected Filesystem $files;
-
     protected array|ArrayAccess $config;
 
-    public function __construct(Application $app, Filesystem $files)
+    public function __construct(protected Application $app, protected Filesystem $files)
     {
         $this->app = $app;
         $this->files = $files;
@@ -51,7 +47,7 @@ class Manager
 
         foreach ($this->files->directories($this->app['path.lang']) as $langPath) {
             $locale = basename($langPath);
-            foreach ($this->files->allfiles($langPath) as $file) {
+            foreach ($this->files->allFiles($langPath) as $file) {
                 $info = pathinfo($file);
                 $group = $info['filename'];
                 if (in_array($group, $this->config['exclude_groups'])) {
@@ -109,7 +105,7 @@ class Manager
         }
     }
 
-    public function importTranslation(string $key, string|null|array $value, ?string $locale, ?string $group, bool $replace = false): bool
+    public function importTranslation(string $key, string|null|array $value, string|null $locale, string|null $group, bool $replace = false): bool
     {
         // process only string values
         if (is_array($value)) {
@@ -139,7 +135,7 @@ class Manager
         return true;
     }
 
-    public function exportTranslations(?string $group = null): void
+    public function exportTranslations(string|null $group = null): void
     {
         if (! empty($group)) {
             if (! in_array($group, $this->config['exclude_groups'])) {
@@ -202,7 +198,7 @@ class Manager
     {
         $array = [];
         foreach ($translations as $translation) {
-            Arr::set($array[$translation->locale][$translation->group], $translation->key, $translation->value);
+            Arr::set($array, "$translation->locale.$translation->group.$translation->key", $translation->value);
         }
 
         return $array;
@@ -218,7 +214,7 @@ class Manager
         Translation::truncate();
     }
 
-    public function getConfig(?string $key = null): string|array|null
+    public function getConfig(string|null $key = null): string|array|null
     {
         if ($key == null) {
             return $this->config;
@@ -374,5 +370,51 @@ class Manager
             'error' => false,
             'message' => 'Downloaded translation files!',
         ];
+    }
+
+    public function getTranslationData(string $locale): Collection
+    {
+        $translations = collect();
+        $jsonFile = lang_path($locale . '.json');
+
+        if (! File::exists($jsonFile)) {
+            $jsonFile = theme_path(Theme::getThemeName() . '/lang/' . $locale . '.json');
+        }
+
+        if (! File::exists($jsonFile)) {
+            $languages = BaseHelper::scanFolder(theme_path(Theme::getThemeName() . '/lang'));
+
+            if (! empty($languages)) {
+                $jsonFile = theme_path(Theme::getThemeName() . '/lang/' . Arr::first($languages));
+            }
+        }
+
+        if (File::exists($jsonFile)) {
+            $translations = $this->wrap(BaseHelper::getFileData($jsonFile));
+        }
+
+        if ($locale != 'en') {
+            $defaultEnglishFile = theme_path(Theme::getThemeName() . '/lang/en.json');
+
+            if ($defaultEnglishFile) {
+                $enTranslations = $this->wrap(BaseHelper::getFileData($defaultEnglishFile));
+
+                $translations = $enTranslations->merge($translations);
+
+                $enTranslationKeys = $enTranslations->keys()->all();
+                foreach ($translations as $translation) {
+                    if (! in_array($translation['key'], $enTranslationKeys)) {
+                        $translations->forget($translation['key']);
+                    }
+                }
+            }
+        }
+
+        return $translations;
+    }
+
+    protected function wrap(Collection|array $data): Collection
+    {
+        return collect($data)->transform(fn ($value, $key) => compact('key', 'value'));
     }
 }

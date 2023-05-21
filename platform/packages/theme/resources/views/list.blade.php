@@ -45,5 +45,14 @@
             </div>
         </div>
     </div>
-    {!! Form::modalAction('remove-theme-modal', trans('packages/theme::theme.remove_theme'), 'danger', trans('packages/theme::theme.remove_theme_confirm_message'), 'confirm-remove-theme-button', trans('packages/theme::theme.remove_theme_confirm_yes')) !!}
+
+    <x-core-base::modal
+        id="remove-theme-modal"
+        :title="trans('packages/theme::theme.remove_theme')"
+        type="danger"
+        button-id="confirm-remove-theme-button"
+        :button-label="trans('packages/theme::theme.remove_theme_confirm_yes')"
+    >
+        {!! trans('packages/theme::theme.remove_theme_confirm_message') !!}
+    </x-core-base::modal>
 @stop

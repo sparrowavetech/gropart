@@ -1,7 +1,6 @@
 <?php
 
 return [
-    //Pagination
     'previous' => '&laquo; Previous',
     'next' => 'Next &raquo;',
     'showing' => 'Showing',
@@ -9,10 +8,6 @@ return [
     'of' => 'of',
     'results' => 'results',
     'add_new' => 'Add new',
-
-    // Modal
-
-    //Card
     'installed' => 'Installed',
     'install_now' => 'Install now',
     'installing' => 'Installing...',
@@ -20,14 +15,12 @@ return [
     'version' => 'Version',
     'minimum_core_version' => 'Minimum core version',
     'last_update' => 'Last update',
-    'compatible_version' => 'Compatible with your version of Botble',
-    'incompatible_version' => 'Incompatible with your version of Botble',
+    'compatible_version' => 'Compatible with your version',
+    'incompatible_version' => 'Incompatible with your version',
     'deactivate' => 'Deactivate',
     'activate' => 'Activate',
     'activating' => 'Activating...',
     'activated' => 'Activated',
-
-    //layout
     'connection_aborted' => 'Connection Aborted',
     'connection_aborted_description' => 'Connection Aborted Description',
     'api_connect_error' => 'Connect to Marketplace API Error, please contact support',
@@ -37,7 +30,6 @@ return [
     'featured' => 'Featured',
     'popular' => 'Popular',
     'top_rated' => 'Top Rated',
-
     'install_plugin' => 'Install plugin',
     'cancel' => 'Cancel',
     'yes_install' => ' Yes! Install',

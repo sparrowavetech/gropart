@@ -3,16 +3,17 @@
 namespace Botble\Blog\Http\Controllers;
 
 use Botble\ACL\Models\User;
-use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Traits\HasDeleteManyItemsTrait;
 use Botble\Blog\Forms\TagForm;
 use Botble\Blog\Http\Requests\TagRequest;
+use Botble\Blog\Models\Tag;
 use Botble\Blog\Repositories\Interfaces\TagInterface;
 use Botble\Blog\Tables\TagTable;
 use Exception;
@@ -23,23 +24,20 @@ class TagController extends BaseController
 {
     use HasDeleteManyItemsTrait;
 
-    protected TagInterface $tagRepository;
-
-    public function __construct(TagInterface $tagRepository)
+    public function __construct(protected TagInterface $tagRepository)
     {
-        $this->tagRepository = $tagRepository;
     }
 
     public function index(TagTable $dataTable)
     {
-        page_title()->setTitle(trans('plugins/blog::tags.menu'));
+        PageTitle::setTitle(trans('plugins/blog::tags.menu'));
 
         return $dataTable->renderTable();
     }
 
     public function create(FormBuilder $formBuilder)
     {
-        page_title()->setTitle(trans('plugins/blog::tags.create'));
+        PageTitle::setTitle(trans('plugins/blog::tags.create'));
 
         return $formBuilder->create(TagForm::class)->renderForm();
     }
@@ -58,20 +56,15 @@ class TagController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int $id, FormBuilder $formBuilder, Request $request)
+    public function edit(Tag $tag, FormBuilder $formBuilder)
     {
-        $tag = $this->tagRepository->findOrFail($id);
-
-        event(new BeforeEditContentEvent($request, $tag));
-
-        page_title()->setTitle(trans('plugins/blog::tags.edit') . ' "' . $tag->name . '"');
+        PageTitle::setTitle(trans('core/base::forms.edit_item', ['name' => $tag->name]));
 
         return $formBuilder->create(TagForm::class, ['model' => $tag])->renderForm();
     }
 
-    public function update(int $id, TagRequest $request, BaseHttpResponse $response)
+    public function update(Tag $tag, TagRequest $request, BaseHttpResponse $response)
     {
-        $tag = $this->tagRepository->findOrFail($id);
         $tag->fill($request->input());
 
         $this->tagRepository->createOrUpdate($tag);
@@ -82,10 +75,9 @@ class TagController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(int $id, Request $request, BaseHttpResponse $response)
+    public function destroy(Tag $tag, Request $request, BaseHttpResponse $response)
     {
         try {
-            $tag = $this->tagRepository->findOrFail($id);
             $this->tagRepository->delete($tag);
 
             event(new DeletedContentEvent(TAG_MODULE_SCREEN_NAME, $request, $tag));

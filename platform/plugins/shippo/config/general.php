@@ -51,7 +51,6 @@ return [
         'UPS_MI_BPM_Flat' => 'UPS BPM Flat (Mail Innovations - Domestic & International)',
         'UPS_MI_BPM_Parcel' => 'UPS BPM Parcel (Mail Innovations - Domestic & International)',
         'UPS_MI_First_Class' => 'UPS First Class (Mail Innovations - Domestic only)',
-        'UPS_MI_Flat' => 'UPS Flat (Mail Innovations - Domestic only)',
         'UPS_MI_Irregular' => 'UPS Irregular (Mail Innovations - Domestic only)',
         'UPS_MI_Machinable' => 'UPS Machinable (Mail Innovations - Domestic only)',
         'UPS_MI_MEDIA_MAIL' => 'UPS Media Mail (Mail Innovations - Domestic only)',

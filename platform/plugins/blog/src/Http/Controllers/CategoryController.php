@@ -2,12 +2,12 @@
 
 namespace Botble\Blog\Http\Controllers;
 
-use Assets;
+use Botble\Base\Facades\Assets;
 use Botble\ACL\Models\User;
-use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
@@ -22,16 +22,13 @@ use Illuminate\Support\Facades\Auth;
 
 class CategoryController extends BaseController
 {
-    protected CategoryInterface $categoryRepository;
-
-    public function __construct(CategoryInterface $categoryRepository)
+    public function __construct(protected CategoryInterface $categoryRepository)
     {
-        $this->categoryRepository = $categoryRepository;
     }
 
     public function index(FormBuilder $formBuilder, Request $request, BaseHttpResponse $response)
     {
-        page_title()->setTitle(trans('plugins/blog::categories.menu'));
+        PageTitle::setTitle(trans('plugins/blog::categories.menu'));
 
         $categories = $this->categoryRepository->getCategories(['*'], [
             'created_at' => 'DESC',
@@ -59,7 +56,7 @@ class CategoryController extends BaseController
 
     public function create(FormBuilder $formBuilder, Request $request, BaseHttpResponse $response)
     {
-        page_title()->setTitle(trans('plugins/blog::categories.create'));
+        PageTitle::setTitle(trans('plugins/blog::categories.create'));
 
         if ($request->ajax()) {
             return $response->setData($this->getForm());
@@ -84,9 +81,7 @@ class CategoryController extends BaseController
         event(new CreatedContentEvent(CATEGORY_MODULE_SCREEN_NAME, $request, $category));
 
         if ($request->ajax()) {
-            $category = $this->categoryRepository->findOrFail($category->id);
-
-            if ($request->input('submit') == 'save') {
+            if ($request->input('submit') == $response->saveAction) {
                 $form = $this->getForm();
             } else {
                 $form = $this->getForm($category);
@@ -104,27 +99,21 @@ class CategoryController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int $id, FormBuilder $formBuilder, Request $request, BaseHttpResponse $response)
+    public function edit(Category $category, FormBuilder $formBuilder, Request $request, BaseHttpResponse $response)
     {
-        $category = $this->categoryRepository->findOrFail($id);
-
-        event(new BeforeEditContentEvent($request, $category));
-
         if ($request->ajax()) {
             return $response->setData($this->getForm($category));
         }
 
-        page_title()->setTitle(trans('plugins/blog::categories.edit') . ' "' . $category->name . '"');
+        PageTitle::setTitle(trans('core/base::forms.edit_item', ['name' => $category->name]));
 
         return $formBuilder->create(CategoryForm::class, ['model' => $category])->renderForm();
     }
 
-    public function update(int $id, CategoryRequest $request, BaseHttpResponse $response)
+    public function update(Category $category, CategoryRequest $request, BaseHttpResponse $response)
     {
-        $category = $this->categoryRepository->findOrFail($id);
-
         if ($request->input('is_default')) {
-            $this->categoryRepository->getModel()->where('id', '!=', $id)->update(['is_default' => 0]);
+            $this->categoryRepository->getModel()->where('id', '!=', $category->id)->update(['is_default' => 0]);
         }
 
         $category->fill($request->input());
@@ -134,13 +123,12 @@ class CategoryController extends BaseController
         event(new UpdatedContentEvent(CATEGORY_MODULE_SCREEN_NAME, $request, $category));
 
         if ($request->ajax()) {
-            $category = $this->categoryRepository->findOrFail($id);
-
-            if ($request->input('submit') == 'save') {
+            if ($request->input('submit') == $response->saveAction) {
                 $form = $this->getForm();
             } else {
                 $form = $this->getForm($category);
             }
+
             $response->setData([
                 'model' => $category,
                 'form' => $form,
@@ -152,11 +140,9 @@ class CategoryController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(Request $request, int $id, BaseHttpResponse $response)
+    public function destroy(Category $category, Request $request, BaseHttpResponse $response)
     {
         try {
-            $category = $this->categoryRepository->findOrFail($id);
-
             $this->categoryRepository->delete($category);
             event(new DeletedContentEvent(CATEGORY_MODULE_SCREEN_NAME, $request, $category));
 

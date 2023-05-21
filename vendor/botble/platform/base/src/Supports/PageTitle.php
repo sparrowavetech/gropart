@@ -6,15 +6,12 @@ class PageTitle
 {
     protected string $title;
 
-    /**
-     * @param string $title
-     */
     public function setTitle(string $title): void
     {
         $this->title = $title;
     }
 
-    public function getTitle(bool $full = true): ?string
+    public function getTitle(bool $full = true): string|null
     {
         $baseTitle = setting('admin_title', config('core.base.general.base_name'));
 

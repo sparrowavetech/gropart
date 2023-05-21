@@ -1,11 +1,13 @@
 <?php
 
-use Botble\Setting\Facades\SettingFacade;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Setting\Facades\Setting;
 use Botble\Setting\Supports\SettingStore;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\File;
 
 if (! function_exists('setting')) {
-    function setting(?string $key = null, $default = null)
+    function setting(string|null $key = null, $default = null)
     {
         if (! empty($key)) {
             try {
@@ -15,7 +17,7 @@ if (! function_exists('setting')) {
             }
         }
 
-        return SettingFacade::getFacadeRoot();
+        return Setting::getFacadeRoot();
     }
 }
 
@@ -51,14 +53,18 @@ if (! function_exists('get_setting_email_template_content')) {
 if (! function_exists('get_setting_email_template_path')) {
     function get_setting_email_template_path(string $module, string $templateKey): string
     {
-        return storage_path('app/email-templates/' . $module . '/' . $templateKey . '.tpl');
+        $template = apply_filters('setting_email_template_path', "$module/$templateKey.tpl", $module, $templateKey);
+
+        return storage_path('app/email-templates/' . $template);
     }
 }
 
 if (! function_exists('get_setting_email_subject_key')) {
     function get_setting_email_subject_key(string $type, string $module, string $templateKey): string
     {
-        return $type . '_' . $module . '_' . $templateKey . '_subject';
+        $key = $type . '_' . $module . '_' . $templateKey . '_subject';
+
+        return apply_filters('setting_email_subject_key', $key, $module, $templateKey);
     }
 }
 

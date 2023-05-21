@@ -10,19 +10,19 @@ class CKEditorUploadAdapter {
         /**
          * FileLoader instance to use during the upload.
          */
-        this.loader = loader;
+        this.loader = loader
 
         /**
          * Upload URL.
          *
          * @member {String} #url
          */
-        this.url = url;
+        this.url = url
 
         /**
          * Locale translation method.
          */
-        this.t = t;
+        this.t = t
     }
 
     /**
@@ -31,13 +31,13 @@ class CKEditorUploadAdapter {
      * @returns {Promise.<Object>}
      */
     upload() {
-        return this.loader.file.then(file => {
+        return this.loader.file.then((file) => {
             return new Promise((resolve, reject) => {
-                this._initRequest();
-                this._initListeners(resolve, reject, file);
-                this._sendRequest(file);
-            });
-        });
+                this._initRequest()
+                this._initListeners(resolve, reject, file)
+                this._sendRequest(file)
+            })
+        })
     }
 
     /**
@@ -46,7 +46,7 @@ class CKEditorUploadAdapter {
      */
     abort() {
         if (this.xhr) {
-            this.xhr.abort();
+            this.xhr.abort()
         }
     }
 
@@ -56,10 +56,10 @@ class CKEditorUploadAdapter {
      * @private
      */
     _initRequest() {
-        const xhr = this.xhr = new XMLHttpRequest();
+        const xhr = (this.xhr = new XMLHttpRequest())
 
-        xhr.open('POST', this.url, true);
-        xhr.responseType = 'json';
+        xhr.open('POST', this.url, true)
+        xhr.responseType = 'json'
     }
 
     /**
@@ -71,34 +71,36 @@ class CKEditorUploadAdapter {
      * @param {File} file File instance to be uploaded.
      */
     _initListeners(resolve, reject, file) {
-        const xhr = this.xhr;
-        const loader = this.loader;
-        const t = this.t;
-        const genericError = t('Cannot upload file:') + ` ${file.name}.`;
+        const xhr = this.xhr
+        const loader = this.loader
+        const t = this.t
+        const genericError = t('Cannot upload file:') + ` ${file.name}.`
 
-        xhr.addEventListener('error', () => reject(genericError));
-        xhr.addEventListener('abort', () => reject());
+        xhr.addEventListener('error', () => reject(genericError))
+        xhr.addEventListener('abort', () => reject())
         xhr.addEventListener('load', () => {
-            const response = xhr.response;
+            const response = xhr.response
 
             if (!response || !response.uploaded) {
-                return reject(response && response.error && response.error.message ? response.error.message : genericError);
+                return reject(
+                    response && response.error && response.error.message ? response.error.message : genericError
+                )
             }
 
             resolve({
-                default: response.url
-            });
-        });
+                default: response.url,
+            })
+        })
 
         // Upload progress when it's supported.
         /* istanbul ignore else */
         if (xhr.upload) {
-            xhr.upload.addEventListener('progress', evt => {
+            xhr.upload.addEventListener('progress', (evt) => {
                 if (evt.lengthComputable) {
-                    loader.uploadTotal = evt.total;
-                    loader.uploaded = evt.loaded;
+                    loader.uploadTotal = evt.total
+                    loader.uploaded = evt.loaded
                 }
-            });
+            })
         }
     }
 
@@ -110,13 +112,13 @@ class CKEditorUploadAdapter {
      */
     _sendRequest(file) {
         // Prepare form data.
-        const data = new FormData();
-        data.append('upload', file);
-        data.append('_token', $('meta[name="csrf-token"]').attr('content')); // laravel token
+        const data = new FormData()
+        data.append('upload', file)
+        data.append('_token', $('meta[name="csrf-token"]').attr('content')) // laravel token
 
         // Send request.
-        this.xhr.send(data);
+        this.xhr.send(data)
     }
 }
 
-export default CKEditorUploadAdapter;
+export default CKEditorUploadAdapter

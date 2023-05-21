@@ -11,6 +11,7 @@ return [
     'next' => 'Next Step',
     'back' => 'Previous',
     'finish' => 'Install',
+    'installation' => 'Installation',
     'forms' => [
         'errorTitle' => 'The following errors occurred:',
     ],
@@ -80,6 +81,12 @@ return [
                 'db_password_placeholder' => 'Database password',
                 'buttons' => [
                     'install' => 'Install',
+                ],
+                'db_host_helper' => 'If you use Laravel Sail, just change DB_HOST to DB_HOST=mysql. On some hosting DB_HOST can be localhost instead of 127.0.0.1',
+                'db_connections' => [
+                    'mysql' => 'MySQL',
+                    'sqlite' => 'SQLite',
+                    'pgsql' => 'PostgreSQL',
                 ],
             ],
         ],

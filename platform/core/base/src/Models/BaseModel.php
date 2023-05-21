@@ -2,14 +2,17 @@
 
 namespace Botble\Base\Models;
 
-use Eloquent;
+use Botble\Base\Facades\MetaBox as MetaBoxSupport;
+use Botble\Base\Models\Concerns\HasUuidsOrIntegerIds;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
-use MacroableModels;
-use MetaBox as MetaBoxSupport;
+use Botble\Base\Facades\MacroableModels;
 
-class BaseModel extends Eloquent
+class BaseModel extends Model
 {
+    use HasUuidsOrIntegerIds;
+
     public function __get($key)
     {
         if (class_exists('MacroableModels')) {

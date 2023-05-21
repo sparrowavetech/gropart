@@ -32,7 +32,7 @@ return [
     ],
     'allowed_mime_types' => env(
         'RV_MEDIA_ALLOWED_MIME_TYPES',
-        'jpg,jpeg,png,gif,txt,docx,zip,mp3,bmp,csv,xls,xlsx,ppt,pptx,pdf,mp4,doc,mpga,wav,webp'
+        'jpg,jpeg,png,gif,txt,docx,zip,mp3,bmp,csv,xls,xlsx,ppt,pptx,pdf,mp4,doc,mpga,wav,webp,mov'
     ),
     'mime_types' => [
         'image' => [
@@ -45,6 +45,8 @@ return [
         ],
         'video' => [
             'video/mp4',
+            'video/mov',
+            'video/quicktime',
         ],
         'document' => [
             'application/pdf',

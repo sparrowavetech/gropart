@@ -1,13 +1,17 @@
 <?php
 
-Route::group(['namespace' => 'Botble\LanguageAdvanced\Http\Controllers', 'middleware' => ['web', 'core']], function () {
-    Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {
-        Route::group(['prefix' => 'language-advanced'], function () {
-            Route::post('save/{id}', [
-                'as' => 'language-advanced.save',
-                'uses' => 'LanguageAdvancedController@save',
-                'permission' => false,
-            ])->where('id', '[0-9]+');
-        });
-    });
+use Botble\Base\Facades\BaseHelper;
+use Botble\LanguageAdvanced\Http\Controllers\LanguageAdvancedController;
+use Illuminate\Support\Facades\Route;
+
+Route::group([
+    'controller' => LanguageAdvancedController::class,
+    'prefix' => BaseHelper::getAdminPrefix() . '/language-advanced',
+    'middleware' => ['web', 'core', 'auth'],
+], function () {
+    Route::post('save/{id}', [
+        'as' => 'language-advanced.save',
+        'uses' => 'save',
+        'permission' => false,
+    ])->wherePrimaryKey();
 });

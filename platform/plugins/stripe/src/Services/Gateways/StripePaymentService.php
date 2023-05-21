@@ -59,7 +59,7 @@ class StripePaymentService extends StripePaymentAbstract
                 'currency' => $this->currency,
                 'source' => $this->token,
                 'description' => trans('plugins/payment::payment.payment_description', [
-                    'order_id' => Arr::first($data['order_id']),
+                    'order_id' => implode(', #', $data['order_id']),
                     'site_url' => $request->getHost(),
                 ]),
                 'metadata' => ['order_id' => json_encode($data['order_id'])],
@@ -87,7 +87,7 @@ class StripePaymentService extends StripePaymentAbstract
                         ],
                         'description' => $product['name'],
                     ],
-                    'unit_amount' => $this->convertAmount($product['price_per_order'] / $product['qty'] * get_current_exchange_rate()),
+                    'unit_amount' => $this->convertAmount($product['price_per_order'] / $product['qty']),
                     'currency' => $this->currency,
                 ],
                 'quantity' => $product['qty'],
@@ -116,7 +116,7 @@ class StripePaymentService extends StripePaymentAbstract
                     'shipping_rate_data' => [
                         'type' => 'fixed_amount',
                         'fixed_amount' => [
-                            'amount' => $this->convertAmount($data['shipping_amount'] * get_current_exchange_rate()),
+                            'amount' => $this->convertAmount($data['shipping_amount']),
                             'currency' => $this->currency,
                         ],
                         'display_name' => $data['shipping_method'],
@@ -130,16 +130,12 @@ class StripePaymentService extends StripePaymentAbstract
         return $checkoutSession->url;
     }
 
-    /**
-     * @param $amount
-     * @return int
-     */
-    protected function convertAmount($amount): int
+    protected function convertAmount(float $amount): int
     {
         $multiplier = StripeHelper::getStripeCurrencyMultiplier($this->currency);
 
         if ($multiplier > 1) {
-            $amount = (int)(round((float)$amount, 2) * $multiplier);
+            $amount = (int)(round($amount, 2) * $multiplier);
         } else {
             $amount = (int)$amount;
         }
@@ -149,10 +145,6 @@ class StripePaymentService extends StripePaymentAbstract
 
     /**
      * Use this function to perform more logic after user has made a payment
-     *
-     * @param string $chargeId
-     * @param array $data
-     * @return string
      */
     public function afterMakePayment($chargeId, array $data)
     {
@@ -163,7 +155,7 @@ class StripePaymentService extends StripePaymentAbstract
             } else {
                 $paymentStatus = PaymentStatusEnum::FAILED;
             }
-        } catch (Exception $exception) {
+        } catch (Exception) {
             $paymentStatus = PaymentStatusEnum::FAILED;
         }
 

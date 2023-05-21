@@ -17,10 +17,10 @@
         <p>{{ trans('plugins/payment::payment.amount') }}: {{ Arr::get($dataRequest, 'refund_amount') }} {{ Arr::get($dataRequest, 'currency') }}</p>
         <p>{{ trans('plugins/payment::payment.refunds.status') }}: {{ Arr::get($refund, 'status') }}</p>
         @if (Arr::has($refund, 'initiated_on'))
-            <p>{{ trans('core/base::tables.created_at') }}: {{ now()->parse(Arr::get($refund, 'initiated_on')) }}</p>
+            <p>{{ trans('core/base::tables.created_at') }}: {{ Carbon\Carbon::now()->parse(Arr::get($refund, 'initiated_on')) }}</p>
         @endif
         @if (Arr::has($refund, 'refunded_on'))
-            <p>{{ trans('plugins/payment::payment.refunds.refunded_at') }}: {{ now()->parse(Arr::get($refund, 'refunded_on')) }}</p>
+            <p>{{ trans('plugins/payment::payment.refunds.refunded_at') }}: {{ Carbon\Carbon::now()->parse(Arr::get($refund, 'refunded_on')) }}</p>
         @endif
         @if ($errorReason = Arr::get($refund, 'errorReason'))
             <p class="text-danger">{{ trans('plugins/payment::payment.refunds.error_message') }}: {{ $errorReason }}</p>

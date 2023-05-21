@@ -3,8 +3,9 @@
 namespace Botble\Payment\Providers;
 
 use Botble\Base\Traits\LoadAndPublishDataTrait;
+use Botble\Payment\Facades\PaymentMethods;
 use Botble\Payment\Models\Payment;
-use Illuminate\Support\Facades\Event;
+use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\ServiceProvider;
 use Botble\Payment\Repositories\Caches\PaymentCacheDecorator;
@@ -24,6 +25,9 @@ class PaymentServiceProvider extends ServiceProvider
         $this->app->singleton(PaymentInterface::class, function () {
             return new PaymentCacheDecorator(new PaymentRepository(new Payment()));
         });
+
+        $loader = AliasLoader::getInstance();
+        $loader->alias('PaymentMethods', PaymentMethods::class);
     }
 
     public function boot(): void
@@ -36,7 +40,7 @@ class PaymentServiceProvider extends ServiceProvider
             ->loadMigrations()
             ->publishAssets();
 
-        Event::listen(RouteMatched::class, function () {
+        $this->app['events']->listen(RouteMatched::class, function () {
             dashboard_menu()
                 ->registerItem([
                     'id' => 'cms-plugins-payments',

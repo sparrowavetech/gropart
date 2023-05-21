@@ -2,10 +2,13 @@
 
 namespace Botble\ACL\Http\Controllers\Auth;
 
-use Assets;
-use BaseHelper;
+use Botble\ACL\Http\Requests\ResetPasswordRequest;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\BaseHelper;
 use Botble\ACL\Traits\ResetsPasswords;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
+use Botble\JsValidation\Facades\JsValidator;
 use Illuminate\Http\Request;
 
 class ResetPasswordController extends BaseController
@@ -22,10 +25,9 @@ class ResetPasswordController extends BaseController
 
     public function showResetForm(Request $request, $token = null)
     {
-        page_title()->setTitle(trans('core/acl::auth.reset.title'));
+        PageTitle::setTitle(trans('core/acl::auth.reset.title'));
 
-        Assets::addScripts(['jquery-validation'])
-            ->addScriptsDirectly('vendor/core/core/acl/js/login.js')
+        Assets::addScripts(['jquery-validation', 'form-validation'])
             ->addStylesDirectly('vendor/core/core/acl/css/animate.min.css')
             ->addStylesDirectly('vendor/core/core/acl/css/login.css')
             ->removeStyles([
@@ -44,6 +46,8 @@ class ResetPasswordController extends BaseController
 
         $email = $request->input('email');
 
-        return view('core/acl::auth.reset', compact('email', 'token'));
+        $jsValidator = JsValidator::formRequest(ResetPasswordRequest::class);
+
+        return view('core/acl::auth.reset', compact('email', 'token', 'jsValidator'));
     }
 }

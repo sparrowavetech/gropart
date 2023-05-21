@@ -2,11 +2,12 @@
 
 namespace Botble\Base\Services;
 
-use Botble\Setting\Models\Setting;
+use Botble\Setting\Facades\Setting;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class CleanDatabaseService
 {
@@ -29,10 +30,18 @@ class CleanDatabaseService
     {
         $except = array_merge($except, $this->getIgnoreTables());
 
-        Schema::disableForeignKeyConstraints();
+        try {
+            $tables = DB::connection()->getDoctrineSchemaManager()->listTableNames();
+            $tables = array_diff($tables, $except);
+        } catch (Throwable) {
+            $tables = [];
+        }
 
-        $tables = DB::connection()->getDoctrineSchemaManager()->listTableNames();
-        $tables = array_diff($tables, $except);
+        if (empty($tables)) {
+            return false;
+        }
+
+        Schema::disableForeignKeyConstraints();
 
         foreach ($tables as $table) {
             DB::table($table)->truncate();
@@ -40,12 +49,12 @@ class CleanDatabaseService
 
         Schema::enableForeignKeyConstraints();
 
-        Setting::whereNotIn('key', [
+        Setting::delete(except: [
             'theme',
             'activated_plugins',
             'licensed_to',
             'media_random_hash',
-        ])->delete();
+        ]);
 
         File::cleanDirectory(Storage::disk()->path(''));
 

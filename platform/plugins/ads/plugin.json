@@ -1,4 +1,5 @@
 {
+    "id": "botble/ads",
     "name": "Ads",
     "namespace": "Botble\\Ads\\",
     "provider": "Botble\\Ads\\Providers\\AdsServiceProvider",

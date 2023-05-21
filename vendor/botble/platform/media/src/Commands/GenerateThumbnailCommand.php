@@ -6,7 +6,7 @@ use Botble\Media\Repositories\Interfaces\MediaFileInterface;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
-use RvMedia;
+use Botble\Media\Facades\RvMedia;
 use Symfony\Component\Console\Attribute\AsCommand;
 
 #[AsCommand('cms:media:thumbnail:generate', 'Generate thumbnails for images')]
@@ -18,7 +18,7 @@ class GenerateThumbnailCommand extends Command
 
         $files = $fileRepository->allBy([], [], ['url', 'mime_type', 'folder_id']);
 
-        $this->components->info('Processing ' . $files->count() . ' ' . Str::plural('file', $files->count()) . '...');
+        $this->components->info(sprintf('Processing %d %s...', $files->count(), Str::plural('file', $files->count())));
 
         $errors = [];
 

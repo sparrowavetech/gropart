@@ -7,82 +7,52 @@ use Botble\Support\Repositories\Caches\CacheAbstractDecorator;
 
 class MediaFolderCacheDecorator extends CacheAbstractDecorator implements MediaFolderInterface
 {
-    /**
-     * {@inheritDoc}
-     */
-    public function getFolderByParentId($folderId, array $params = [], $withTrash = false)
+    public function getFolderByParentId(int|string|null $folderId, array $params = [], bool $withTrash = false)
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function createSlug($name, $parentId)
+    public function createSlug(string $name, int|string|null $parentId)
     {
         return $this->flushCacheAndUpdateData(__FUNCTION__, func_get_args());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function createName($name, $parentId)
+    public function createName(string $name, int|string|null $parentId)
     {
         return $this->flushCacheAndUpdateData(__FUNCTION__, func_get_args());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function getBreadcrumbs($parentId, $breadcrumbs = [])
+    public function getBreadcrumbs(int|string|null $parentId, array $breadcrumbs = [])
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function getTrashed($parentId, array $params = [])
+    public function getTrashed(int|string|null $parentId, array $params = [])
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function deleteFolder($folderId, $force = false)
+    public function deleteFolder(int|string|null $folderId, bool $force = false)
     {
         return $this->flushCacheAndUpdateData(__FUNCTION__, func_get_args());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function getAllChildFolders($parentId, $child = [])
+    public function getAllChildFolders(int|string|null $parentId, array $child = [])
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function getFullPath($folderId, $path = '')
+    public function getFullPath(int|string|null $folderId, string|null $path = '')
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function restoreFolder($folderId)
+    public function restoreFolder(int|string|null $folderId)
     {
         $this->flushCacheAndUpdateData(__FUNCTION__, func_get_args());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function emptyTrash()
+    public function emptyTrash(): bool
     {
         return $this->flushCacheAndUpdateData(__FUNCTION__, func_get_args());
     }

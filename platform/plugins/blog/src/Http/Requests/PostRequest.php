@@ -12,9 +12,11 @@ class PostRequest extends Request
     public function rules(): array
     {
         $rules = [
-            'name' => 'required|max:255',
-            'description' => 'max:400',
-            'categories' => 'required',
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string|max:400',
+            'content' => 'nullable|string',
+            'tag' => 'nullable|string',
+            'categories' => 'required|array',
             'status' => Rule::in(BaseStatusEnum::values()),
         ];
 

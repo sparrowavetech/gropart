@@ -2,8 +2,9 @@
 
 namespace Botble\Newsletter\Tables;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Newsletter\Enums\NewsletterStatusEnum;
+use Botble\Newsletter\Models\Newsletter;
 use Botble\Newsletter\Repositories\Interfaces\NewsletterInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Illuminate\Contracts\Routing\UrlGenerator;
@@ -13,7 +14,7 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
-use Yajra\DataTables\DataTables;
+use Botble\Table\DataTables;
 
 class NewsletterTable extends TableAbstract
 {
@@ -40,19 +41,19 @@ class NewsletterTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('checkbox', function ($item) {
+            ->editColumn('checkbox', function (Newsletter $item) {
                 return $this->getCheckbox($item->id);
             })
-            ->editColumn('name', function ($item) {
+            ->editColumn('name', function (Newsletter $item) {
                 return BaseHelper::clean(trim($item->name)) ?: '&mdash;';
             })
-            ->editColumn('created_at', function ($item) {
+            ->editColumn('created_at', function (Newsletter $item) {
                 return BaseHelper::formatDate($item->created_at);
             })
-            ->editColumn('status', function ($item) {
+            ->editColumn('status', function (Newsletter $item) {
                 return $item->status->toHtml();
             })
-            ->addColumn('operations', function ($item) {
+            ->addColumn('operations', function (Newsletter $item) {
                 return $this->getOperations(null, 'newsletter.destroy', $item);
             });
 

@@ -2,8 +2,9 @@
 
 namespace Botble\Dashboard\Http\Controllers;
 
-use Assets;
 use Botble\ACL\Repositories\Interfaces\UserInterface;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Dashboard\Repositories\Interfaces\DashboardWidgetInterface;
@@ -14,30 +15,22 @@ use Illuminate\Http\Request;
 
 class DashboardController extends BaseController
 {
-    protected DashboardWidgetSettingInterface $widgetSettingRepository;
-
-    protected DashboardWidgetInterface $widgetRepository;
-
-    protected UserInterface $userRepository;
-
     public function __construct(
-        DashboardWidgetSettingInterface $widgetSettingRepository,
-        DashboardWidgetInterface $widgetRepository,
-        UserInterface $userRepository
+        protected DashboardWidgetSettingInterface $widgetSettingRepository,
+        protected DashboardWidgetInterface $widgetRepository,
+        protected UserInterface $userRepository
     ) {
-        $this->widgetSettingRepository = $widgetSettingRepository;
-        $this->widgetRepository = $widgetRepository;
-        $this->userRepository = $userRepository;
     }
 
     public function getDashboard(Request $request)
     {
-        page_title()->setTitle(trans('core/dashboard::dashboard.title'));
+        PageTitle::setTitle(trans('core/dashboard::dashboard.title'));
 
         Assets::addScripts(['blockui', 'sortable', 'equal-height', 'counterup'])
             ->addScriptsDirectly('vendor/core/core/dashboard/js/dashboard.js')
-            ->addStylesDirectly('vendor/core/core/dashboard/css/dashboard.css')
-            ->usingVueJS();
+            ->addStylesDirectly('vendor/core/core/dashboard/css/dashboard.css');
+
+        Assets::usingVueJS();
 
         do_action(DASHBOARD_ACTION_REGISTER_SCRIPTS);
 
@@ -138,6 +131,7 @@ class DashboardController extends BaseController
     public function postHideWidgets(Request $request, BaseHttpResponse $response)
     {
         $widgets = $this->widgetRepository->all();
+
         foreach ($widgets as $widget) {
             $widgetSetting = $this->widgetSettingRepository->firstOrCreate([
                 'widget_id' => $widget->id,

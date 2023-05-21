@@ -131,22 +131,12 @@
                             </div>
                             <div class="form-group mb-3 @if ($errors->has('language_display')) has-error @endif">
                                 <label for="language_display">{{ trans('plugins/language::language.language_display') }}</label>
-                                <div class="ui-select-wrapper">
-                                    {!! Form::select('language_display', ['all' => trans('plugins/language::language.language_display_all'), 'flag' => trans('plugins/language::language.language_display_flag_only'), 'name' => trans('plugins/language::language.language_display_name_only')], setting('language_display', 'all'), ['class' => 'ui-select', 'id' => 'language_display']) !!}
-                                    <svg class="svg-next-icon svg-next-icon-size-16">
-                                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#select-chevron"></use>
-                                    </svg>
-                                </div>
+                                {!! Form::customSelect('language_display', ['all' => trans('plugins/language::language.language_display_all'), 'flag' => trans('plugins/language::language.language_display_flag_only'), 'name' => trans('plugins/language::language.language_display_name_only')], setting('language_display', 'all')) !!}
                             </div>
 
                             <div class="form-group mb-3 @if ($errors->has('language_switcher_display')) has-error @endif">
                                 <label for="language_switcher_display">{{ trans('plugins/language::language.switcher_display') }}</label>
-                                <div class="ui-select-wrapper">
-                                    {!! Form::select('language_switcher_display', ['dropdown' => trans('plugins/language::language.language_switcher_display_dropdown'), 'list' => trans('plugins/language::language.language_switcher_display_list')], setting('language_switcher_display', 'dropdown'), ['class' => 'ui-select', 'id' => 'language_switcher_display']) !!}
-                                    <svg class="svg-next-icon svg-next-icon-size-16">
-                                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#select-chevron"></use>
-                                    </svg>
-                                </div>
+                                {!! Form::customSelect('language_switcher_display', ['dropdown' => trans('plugins/language::language.language_switcher_display_dropdown'), 'list' => trans('plugins/language::language.language_switcher_display_list')], setting('language_switcher_display', 'dropdown')) !!}
                             </div>
 
                             <div class="form-group mb-3 @if ($errors->has('language_hide_languages')) has-error @endif">

@@ -4,23 +4,17 @@ namespace Botble\SeoHelper\Entities\OpenGraph;
 
 use Botble\SeoHelper\Contracts\Entities\MetaCollectionContract;
 use Botble\SeoHelper\Contracts\Entities\OpenGraphContract;
+use Botble\SeoHelper\Contracts\Helpers\MetaContract;
+use Illuminate\Support\Collection;
 
 class Graph implements OpenGraphContract
 {
-    /**
-     * The Open Graph meta collection.
-     *
-     * @var MetaCollectionContract
-     */
-    protected $meta;
+    protected MetaCollectionContract|Collection|MetaContract $meta;
 
-    /**
-     * Make Graph instance.
-     */
     public function __construct()
     {
         $this->meta = new MetaCollection();
-        $this->setSiteName(theme_option('seo_title'));
+        $this->setSiteName(theme_option('site_title'));
     }
 
     /**
@@ -144,6 +138,17 @@ class Graph implements OpenGraphContract
         $this->meta->add(compact('name', 'content'));
 
         return $this;
+    }
+
+    public function getProperty(string $name): string|null
+    {
+        if (! $this->meta->has($name)) {
+            return null;
+        }
+
+        $meta = $this->meta->get($name);
+
+        return (string)$meta?->getContent();
     }
 
     /**

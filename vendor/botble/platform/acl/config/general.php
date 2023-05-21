@@ -29,5 +29,8 @@ return [
         'vendor/core/core/acl/images/backgrounds/5.jpg',
         'vendor/core/core/acl/images/backgrounds/6.jpg',
         'vendor/core/core/acl/images/backgrounds/7.jpg',
+        'vendor/core/core/acl/images/backgrounds/8.jpg',
+        'vendor/core/core/acl/images/backgrounds/9.jpg',
+        'vendor/core/core/acl/images/backgrounds/10.jpg',
     ],
 ];

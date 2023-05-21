@@ -2,10 +2,10 @@
 
 namespace Botble\SeoHelper;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\SeoHelper\Contracts\Entities\OpenGraphContract;
 use Botble\SeoHelper\Contracts\SeoOpenGraphContract;
-use RvMedia;
+use Botble\Media\Facades\RvMedia;
 
 class SeoOpenGraph implements SeoOpenGraphContract
 {
@@ -185,6 +185,11 @@ class SeoOpenGraph implements SeoOpenGraphContract
     public function hasImage()
     {
         return $this->openGraph->hasImage();
+    }
+
+    public function getProperty(string $property): string|null
+    {
+        return $this->openGraph->getProperty($property);
     }
 
     /**

@@ -17,7 +17,7 @@
                 "Botble\\Menu\\Providers\\MenuServiceProvider"
             ],
             "aliases": {
-                "Menu": "Botble\\Menu\\Facades\\MenuFacade"
+                "Menu": "Botble\\Menu\\Facades\\Menu"
             }
         }
     }

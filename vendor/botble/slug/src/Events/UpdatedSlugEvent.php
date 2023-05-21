@@ -11,13 +11,7 @@ class UpdatedSlugEvent extends Event
 {
     use SerializesModels;
 
-    public false|Model|null $data;
-
-    public Slug $slug;
-
-    public function __construct(false|Model|null $data, Slug $slug)
+    public function __construct(public bool|Model|null $data, public Slug $slug)
     {
-        $this->data = $data;
-        $this->slug = $slug;
     }
 }

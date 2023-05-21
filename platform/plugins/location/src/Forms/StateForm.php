@@ -10,13 +10,9 @@ use Botble\Location\Models\State;
 
 class StateForm extends FormAbstract
 {
-    protected CountryInterface $countryRepository;
-
-    public function __construct(CountryInterface $countryRepository)
+    public function __construct(protected CountryInterface $countryRepository)
     {
         parent::__construct();
-
-        $this->countryRepository = $countryRepository;
     }
 
     public function buildForm(): void
@@ -40,7 +36,7 @@ class StateForm extends FormAbstract
                 'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'placeholder' => trans('plugins/location::location.abbreviation_placeholder'),
-                    'data-counter' => 3,
+                    'data-counter' => 10,
                 ],
             ])
             ->add('country_id', 'customSelect', [

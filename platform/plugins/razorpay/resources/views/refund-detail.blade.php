@@ -16,7 +16,7 @@
         <p>{{ trans('plugins/payment::payment.amount') }}: {{ (Arr::get($refund, 'amount') / 100) }} {{ Arr::get($refund, 'currency') }}</p>
         <p>{{ trans('plugins/payment::payment.refunds.status') }}: {{ Arr::get($refund, 'status') }}</p>
         @if (Arr::has($refund, 'created_at'))
-            <p>{{ trans('core/base::tables.created_at') }}: {{ now()->parse(Arr::get($refund, 'created_at')) }}</p>
+            <p>{{ trans('core/base::tables.created_at') }}: {{ Carbon\Carbon::now()->parse(Arr::get($refund, 'created_at')) }}</p>
         @endif
         @if ($errorReason = Arr::get($refund, 'errorReason'))
             <p class="text-danger">{{ trans('plugins/payment::payment.refunds.error_message') }}: {{ $errorReason }}</p>

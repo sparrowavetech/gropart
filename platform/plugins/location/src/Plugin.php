@@ -7,7 +7,7 @@ use Botble\PluginManagement\Abstracts\PluginOperationAbstract;
 
 class Plugin extends PluginOperationAbstract
 {
-    public static function remove()
+    public static function remove(): void
     {
         Schema::dropIfExists('cities');
         Schema::dropIfExists('states');

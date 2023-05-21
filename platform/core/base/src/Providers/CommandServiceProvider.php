@@ -2,7 +2,9 @@
 
 namespace Botble\Base\Providers;
 
+use Botble\Base\Commands\ActivateLicenseCommand;
 use Botble\Base\Commands\CleanupSystemCommand;
+use Botble\Base\Commands\ClearExpiredCacheCommand;
 use Botble\Base\Commands\ClearLogCommand;
 use Botble\Base\Commands\ExportDatabaseCommand;
 use Botble\Base\Commands\FetchGoogleFontsCommand;
@@ -16,13 +18,15 @@ class CommandServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->commands([
-            ClearLogCommand::class,
-            InstallCommand::class,
-            UpdateCommand::class,
-            PublishAssetsCommand::class,
+            ActivateLicenseCommand::class,
             CleanupSystemCommand::class,
+            ClearExpiredCacheCommand::class,
+            ClearLogCommand::class,
             ExportDatabaseCommand::class,
             FetchGoogleFontsCommand::class,
+            InstallCommand::class,
+            PublishAssetsCommand::class,
+            UpdateCommand::class,
         ]);
     }
 }

@@ -1,3 +1,9 @@
+@php
+    use Botble\Payment\Enums\PaymentMethodEnum;
+    use Botble\Payment\Models\Payment;
+    use Botble\Payment\Supports\PaymentHelper;
+@endphp
+
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
 
 @section('content')
@@ -9,14 +15,16 @@
                     <p>{{ trans('plugins/payment::payment.payment_methods_description') }}</p>
                 </div>
                 <div class="col-md-9">
-                    @php do_action(BASE_ACTION_META_BOXES, 'top', new \Botble\Payment\Models\Payment) @endphp
+                    @php do_action(BASE_ACTION_META_BOXES, 'top', new Payment) @endphp
 
                     <div class="wrapper-content pd-all-20">
                         {!! Form::open(['route' => 'payments.settings']) !!}
-                        <div class="form-group mb-3">
-                            <label for="default_payment_method">{{ trans('plugins/payment::payment.default_payment_method') }}</label>
-                            {!! Form::customSelect('default_payment_method', \Botble\Payment\Enums\PaymentMethodEnum::labels(), \Botble\Payment\Supports\PaymentHelper::defaultPaymentMethod()) !!}
-                        </div>
+                        <x-core-setting::select
+                            name="default_payment_method"
+                            :label="trans('plugins/payment::payment.default_payment_method')"
+                            :options="PaymentMethodEnum::labels()"
+                            :value="PaymentHelper::defaultPaymentMethod()"
+                        />
                         <button type="button" class="btn btn-info button-save-payment-settings">{{ trans('core/base::forms.save') }}</button>
                         {!! Form::close() !!}
                     </div>
@@ -26,9 +34,9 @@
                     {!! apply_filters(PAYMENT_METHODS_SETTINGS_PAGE, null) !!}
 
                     <div class="table-responsive">
-                     <table class="table payment-method-item">
-
-                            <tbody><tr class="border-pay-row">
+                        <table class="table payment-method-item">
+                            <tbody>
+                            <tr class="border-pay-row">
                                 <td class="border-pay-col"><i class="fa fa-theme-payments"></i></td>
                                 <td style="width: 20%;">
                                     <span>{{ trans('plugins/payment::payment.payment_methods') }}</span>
@@ -47,7 +55,10 @@
                                 <td colspan="3">
                                     <div class="float-start" style="margin-top: 5px;">
                                         <div class="payment-name-label-group">
-                                            @if ($codStatus != 0)<span class="payment-note v-a-t">{{ trans('plugins/payment::payment.use') }}:</span>@endif <label class="ws-nm inline-display method-name-label">{{ setting('payment_cod_name', \Botble\Payment\Enums\PaymentMethodEnum::COD()->label()) }}</label>
+                                            @if ($codStatus != 0)
+                                                <span class="payment-note v-a-t">{{ trans('plugins/payment::payment.use') }}:</span>
+                                            @endif
+                                            <label class="ws-nm inline-display method-name-label">{{ setting('payment_cod_name', PaymentMethodEnum::COD()->label()) }}</label>
                                         </div>
                                     </div>
                                     <div class="float-end">
@@ -62,14 +73,18 @@
                                     {!! Form::hidden('type', 'cod', ['class' => 'payment_type']) !!}
                                     <div class="col-sm-12 mt-2">
                                         <div class="well bg-white">
-                                            <div class="form-group mb-3">
-                                                <label class="text-title-field" for="payment_cod_name">{{ trans('plugins/payment::payment.method_name') }}</label>
-                                                <input type="text" class="next-input" name="payment_cod_name" id="payment_cod_name" data-counter="400" value="{{ setting('payment_cod_name', \Botble\Payment\Enums\PaymentMethodEnum::COD()->label()) }}">
-                                            </div>
-                                            <div class="form-group mb-3">
+                                            <x-core-setting::text-input
+                                                name="payment_cod_name"
+                                                :label="trans('plugins/payment::payment.method_name')"
+                                                :value="setting('payment_cod_name', PaymentMethodEnum::COD()->label())"
+                                                data-counter="400"
+                                            />
+
+                                            <x-core-setting::form-group>
                                                 <label class="text-title-field" for="payment_cod_description">{{ trans('plugins/payment::payment.payment_method_description') }}</label>
                                                 {!! Form::editor('payment_cod_description', setting('payment_cod_description')) !!}
-                                            </div>
+                                            </x-core-setting::form-group>
+
                                             {!! apply_filters(PAYMENT_METHOD_SETTINGS_CONTENT, null, 'cod') !!}
                                         </div>
                                     </div>
@@ -89,7 +104,10 @@
                                 <td colspan="3">
                                     <div class="float-start" style="margin-top: 5px;">
                                         <div class="payment-name-label-group">
-                                            @if ($bankTransferStatus != 0) <span class="payment-note v-a-t">{{ trans('plugins/payment::payment.use') }}:</span>@endif <label class="ws-nm inline-display method-name-label">{{ setting('payment_bank_transfer_name', \Botble\Payment\Enums\PaymentMethodEnum::BANK_TRANSFER()->label()) }}</label>
+                                            @if ($bankTransferStatus != 0)
+                                                <span class="payment-note v-a-t">{{ trans('plugins/payment::payment.use') }}:</span>
+                                            @endif
+                                            <label class="ws-nm inline-display method-name-label">{{ setting('payment_bank_transfer_name', PaymentMethodEnum::BANK_TRANSFER()->label()) }}</label>
                                         </div>
                                     </div>
                                     <div class="float-end">
@@ -104,14 +122,18 @@
                                     {!! Form::hidden('type', 'bank_transfer', ['class' => 'payment_type']) !!}
                                     <div class="col-sm-12 mt-2">
                                         <div class="well bg-white">
-                                            <div class="form-group mb-3">
-                                                <label class="text-title-field" for="payment_bank_transfer_name">{{ trans('plugins/payment::payment.method_name') }}</label>
-                                                <input type="text" class="next-input" name="payment_bank_transfer_name" id="payment_bank_transfer_name" data-counter="400" value="{{ setting('payment_bank_transfer_name', \Botble\Payment\Enums\PaymentMethodEnum::BANK_TRANSFER()->label()) }}">
-                                            </div>
-                                            <div class="form-group mb-3">
+                                            <x-core-setting::text-input
+                                                name="payment_bank_transfer_name"
+                                                :label="trans('plugins/payment::payment.method_name')"
+                                                :value="setting('payment_bank_transfer_name', PaymentMethodEnum::BANK_TRANSFER()->label())"
+                                                data-counter="400"
+                                            />
+
+                                            <x-core-setting::form-group>
                                                 <label class="text-title-field" for="payment_bank_transfer_description">{{ trans('plugins/payment::payment.payment_method_description') }}</label>
                                                 {!! Form::editor('payment_bank_transfer_description', setting('payment_bank_transfer_description')) !!}
-                                            </div>
+                                            </x-core-setting::form-group>
+
                                             {!! apply_filters(PAYMENT_METHOD_SETTINGS_CONTENT, null, 'bank_transfer') !!}
                                         </div>
                                     </div>
@@ -128,16 +150,22 @@
                     </div>
                 </div>
             </div>
-            @php do_action(BASE_ACTION_META_BOXES, 'main', new \Botble\Payment\Models\Payment) @endphp
+            @php do_action(BASE_ACTION_META_BOXES, 'main', new Payment) @endphp
             <div class="group">
-                <div class="col-md-3">
-
-                </div>
+                <div class="col-md-3"></div>
                 <div class="col-md-9">
-                    @php do_action(BASE_ACTION_META_BOXES, 'advanced', new \Botble\Payment\Models\Payment) @endphp
+                    @php do_action(BASE_ACTION_META_BOXES, 'advanced', new Payment) @endphp
                 </div>
             </div>
         </div>
     </div>
-    {!! Form::modalAction('confirm-disable-payment-method-modal', trans('plugins/payment::payment.deactivate_payment_method'), 'info', trans('plugins/payment::payment.deactivate_payment_method_description'), 'confirm-disable-payment-method-button', trans('plugins/payment::payment.agree')) !!}
-@stop
+
+    <x-core-base::modal
+        id="confirm-disable-payment-method-modal"
+        :title="trans('plugins/payment::payment.deactivate_payment_method')"
+        button-id="confirm-disable-payment-method-button"
+        :button-label="trans('plugins/payment::payment.agree')"
+    >
+        {!! trans('plugins/payment::payment.deactivate_payment_method_description') !!}
+    </x-core-base::modal>
+@endsection

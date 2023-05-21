@@ -86,4 +86,6 @@ interface SeoOpenGraphContract extends RenderableContract
      * @return $this
      */
     public function addProperty($property, $content);
+
+    public function getProperty(string $property);
 }

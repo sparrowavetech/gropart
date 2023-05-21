@@ -11,16 +11,10 @@ use Illuminate\Support\Str;
 
 class MembershipAuthorization
 {
-    protected Client $client;
-
-    protected Request $request;
-
     protected string $url;
 
-    public function __construct(Client $client, Request $request)
+    public function __construct(protected Client $client, protected Request $request)
     {
-        $this->client = $client;
-        $this->request = $request;
         $this->url = rtrim(url('/'), '/');
     }
 

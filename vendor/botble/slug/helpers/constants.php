@@ -19,3 +19,7 @@ if (! defined('FILTER_SLUG_EXISTED_STRING')) {
 if (! defined('FILTER_SLUG_STRING')) {
     define('FILTER_SLUG_STRING', 'slug-string');
 }
+
+if (! defined('CMS_SLUG_VARIABLES')) {
+    define('CMS_SLUG_VARIABLES', 'cms_slug_variables');
+}

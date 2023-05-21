@@ -10,6 +10,7 @@ use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
@@ -18,23 +19,20 @@ use Illuminate\Http\Request;
 
 class AdsController extends BaseController
 {
-    protected AdsInterface $adsRepository;
-
-    public function __construct(AdsInterface $adsRepository)
+    public function __construct(protected AdsInterface $adsRepository)
     {
-        $this->adsRepository = $adsRepository;
     }
 
     public function index(AdsTable $table)
     {
-        page_title()->setTitle(trans('plugins/ads::ads.name'));
+        PageTitle::setTitle(trans('plugins/ads::ads.name'));
 
         return $table->renderTable();
     }
 
     public function create(FormBuilder $formBuilder)
     {
-        page_title()->setTitle(trans('plugins/ads::ads.create'));
+        PageTitle::setTitle(trans('plugins/ads::ads.create'));
 
         return $formBuilder->create(AdsForm::class)->renderForm();
     }
@@ -57,7 +55,7 @@ class AdsController extends BaseController
 
         event(new BeforeEditContentEvent($request, $ads));
 
-        page_title()->setTitle(trans('plugins/ads::ads.edit') . ' "' . $ads->name . '"');
+        PageTitle::setTitle(trans('core/base::forms.edit_item', ['name' => $ads->name]));
 
         return $formBuilder->create(AdsForm::class, ['model' => $ads])->renderForm();
     }

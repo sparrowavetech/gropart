@@ -40,6 +40,7 @@ return [
         'title' => 'Theme',
         'description' => 'Setting for theme',
         'redirect_404_to_homepage' => 'Redirect all not found requests to homepage?',
+        'show_guidelines' => 'Show guidelines?',
     ],
     'add_new' => 'Add new',
     'theme_activated_already' => 'Theme ":name" is activated already!',

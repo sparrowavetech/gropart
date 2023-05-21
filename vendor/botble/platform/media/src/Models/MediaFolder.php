@@ -2,10 +2,14 @@
 
 namespace Botble\Media\Models;
 
+use Botble\Base\Casts\SafeContent;
 use Botble\Base\Models\BaseModel;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use RvMedia;
+use Illuminate\Support\Collection;
+use Botble\Media\Facades\RvMedia;
 
 class MediaFolder extends BaseModel
 {
@@ -20,12 +24,39 @@ class MediaFolder extends BaseModel
         'user_id',
     ];
 
+    protected $casts = [
+        'name' => SafeContent::class,
+    ];
+
     public function files(): HasMany
     {
         return $this->hasMany(MediaFile::class, 'folder_id', 'id');
     }
 
-    protected static function boot()
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(MediaFolder::class, 'parent_id')->withDefault();
+    }
+
+    protected function parents(): Attribute
+    {
+        return Attribute::make(
+            get: function (): Collection {
+                $parents = collect();
+
+                $parent = $this->parent;
+
+                while ($parent->id) {
+                    $parents->push($parent);
+                    $parent = $parent->parent;
+                }
+
+                return $parents;
+            },
+        );
+    }
+
+    protected static function boot(): void
     {
         parent::boot();
         static::deleting(function (MediaFolder $folder) {

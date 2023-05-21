@@ -2,21 +2,23 @@
 
 namespace Botble\Newsletter\Providers;
 
+use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
+use Botble\Newsletter\Contracts\Factory;
+use Botble\Newsletter\Facades\Newsletter as NewsletterFacade;
 use Botble\Newsletter\Models\Newsletter;
+use Botble\Newsletter\NewsletterManager;
 use Botble\Newsletter\Repositories\Caches\NewsletterCacheDecorator;
 use Botble\Newsletter\Repositories\Eloquent\NewsletterRepository;
 use Botble\Newsletter\Repositories\Interfaces\NewsletterInterface;
-use EmailHandler;
 use Exception;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Event;
+use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Routing\Events\RouteMatched;
+use Illuminate\Support\Arr;
 use Illuminate\Support\ServiceProvider;
-use Newsletter as MailchimpNewsletter;
-use SendGrid;
 
-class NewsletterServiceProvider extends ServiceProvider
+class NewsletterServiceProvider extends ServiceProvider implements DeferrableProvider
 {
     use LoadAndPublishDataTrait;
 
@@ -26,6 +28,10 @@ class NewsletterServiceProvider extends ServiceProvider
             return new NewsletterCacheDecorator(
                 new NewsletterRepository(new Newsletter())
             );
+        });
+
+        $this->app->singleton(Factory::class, function ($app) {
+            return new NewsletterManager($app);
         });
     }
 
@@ -42,8 +48,8 @@ class NewsletterServiceProvider extends ServiceProvider
 
         $this->app->register(EventServiceProvider::class);
 
-        Event::listen(RouteMatched::class, function () {
-            dashboard_menu()->registerItem([
+        $this->app['events']->listen(RouteMatched::class, function () {
+            DashboardMenu::registerItem([
                 'id' => 'cms-plugins-newsletter',
                 'priority' => 6,
                 'parent_id' => null,
@@ -56,58 +62,61 @@ class NewsletterServiceProvider extends ServiceProvider
             EmailHandler::addTemplateSettings(NEWSLETTER_MODULE_SCREEN_NAME, config('plugins.newsletter.email', []));
         });
 
-        add_filter(BASE_FILTER_AFTER_SETTING_CONTENT, [$this, 'addSettings'], 249);
+        add_filter(BASE_FILTER_AFTER_SETTING_CONTENT, function (string|null $data) {
+            $mailchimpContactList = [];
 
-        $this->app->booted(function () {
-            $mailchimpApiKey = setting('newsletter_mailchimp_api_key');
-            $mailchimpListId = setting('newsletter_mailchimp_list_id');
+            if (setting('newsletter_mailchimp_api_key')) {
+                try {
+                    $contacts = collect(NewsletterFacade::driver('mailchimp')->contacts());
 
-            config([
-                'newsletter.apiKey' => $mailchimpApiKey,
-                'newsletter.lists.subscribers.id' => $mailchimpListId,
-            ]);
-        });
+                    if (! setting('newsletter_mailchimp_list_id')) {
+                        setting()->set(['newsletter_mailchimp_list_id' => Arr::get($contacts, 'id')])->save();
+                    }
+
+                    $mailchimpContactList = $contacts->pluck('name', 'id');
+                } catch (Exception $exception) {
+                    info('Caught exception: ' . $exception->getMessage());
+                }
+            }
+
+            $sendGridContactList = [];
+
+            if (setting('newsletter_sendgrid_api_key')) {
+                try {
+                    $contacts = collect(NewsletterFacade::driver('sendgrid')->contacts());
+
+                    if (! setting('newsletter_sendgrid_list_id')) {
+                        setting()->set(['newsletter_sendgrid_list_id' => Arr::get($contacts->first(), 'id')])->save();
+                    }
+
+                    $sendGridContactList = $contacts->pluck('name', 'id');
+                } catch (Exception $exception) {
+                    info('Caught exception: ' . $exception->getMessage());
+                }
+            }
+
+            return $data . view(
+                'plugins/newsletter::setting',
+                compact('mailchimpContactList', 'sendGridContactList')
+            )->render();
+        }, 249);
+
+        add_filter('cms_settings_validation_rules', [$this, 'addSettingRules'], 249);
     }
 
-    public function addSettings(?string $data = null): string
+    public function addSettingRules(array $rules): array
     {
-        $mailchimpContactList = [];
-        $mailchimpApiKey = setting('newsletter_mailchimp_api_key');
+        return array_merge($rules, [
+            'enable_newsletter_contacts_list_api' => 'nullable|in:0,1',
+            'newsletter_mailchimp_api_key' => 'nullable|string',
+            'newsletter_mailchimp_list_id' => 'nullable|string',
+            'newsletter_sendgrid_api_key' => 'nullable|string',
+            'newsletter_sendgrid_list_id' => 'nullable|string',
+        ]);
+    }
 
-        if ($mailchimpApiKey) {
-            try {
-                $list = MailchimpNewsletter::getApi()->get('lists');
-
-                $results = Arr::get($list, 'lists');
-
-                foreach ($results as $result) {
-                    $mailchimpContactList[$result['id']] = $result['name'];
-                }
-            } catch (Exception $exception) {
-                info('Caught exception: ' . $exception->getMessage());
-            }
-        }
-
-        $sendGridContactList = [];
-
-        $sendgridApiKey = setting('newsletter_sendgrid_api_key');
-        if ($sendgridApiKey) {
-            $sg = new SendGrid($sendgridApiKey);
-
-            try {
-                $list = $sg->client->marketing()->lists()->get();
-
-                $results = Arr::get(json_decode($list->body(), true), 'result');
-
-                foreach ($results as $result) {
-                    $sendGridContactList[$result['id']] = $result['name'];
-                }
-            } catch (Exception $exception) {
-                info('Caught exception: ' . $exception->getMessage());
-            }
-        }
-
-        return $data . view('plugins/newsletter::setting', compact('mailchimpContactList', 'sendGridContactList'))
-                ->render();
+    public function provides(): array
+    {
+        return [Factory::class];
     }
 }

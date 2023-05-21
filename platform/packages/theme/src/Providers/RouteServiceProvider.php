@@ -3,7 +3,7 @@
 namespace Botble\Theme\Providers;
 
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
-use Theme;
+use Botble\Theme\Facades\Theme;
 
 class RouteServiceProvider extends ServiceProvider
 {
@@ -13,7 +13,11 @@ class RouteServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->app->booted(function () {
-            $this->loadRoutesFrom(theme_path(Theme::getThemeName() . '/routes/web.php'));
+            $routeFilePath = theme_path(Theme::getThemeName() . '/routes/web.php');
+
+            if ($this->app['files']->exists($routeFilePath)) {
+                $this->loadRoutesFrom($routeFilePath);
+            }
         });
     }
 }

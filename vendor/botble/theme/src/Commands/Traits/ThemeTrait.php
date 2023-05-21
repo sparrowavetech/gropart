@@ -4,7 +4,7 @@ namespace Botble\Theme\Commands\Traits;
 
 trait ThemeTrait
 {
-    protected function getPath(?string $path = null, ?string $theme = null): string
+    protected function getPath(string|null $path = null, string|null $theme = null): string
     {
         $rootPath = theme_path();
         if ($this->option('path')) {

@@ -38,7 +38,7 @@ class PageRepository extends RepositoriesAbstract implements PageInterface
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    public function getSearch(?string $query, int $limit = 10): Collection|LengthAwarePaginator
+    public function getSearch(string|null $query, int $limit = 10): Collection|LengthAwarePaginator
     {
         $pages = $this->model->where('status', BaseStatusEnum::PUBLISHED);
         foreach (explode(' ', $query) as $term) {

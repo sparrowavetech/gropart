@@ -39,10 +39,6 @@ class ChunkSave extends AbstractSave
 
     protected ChunkStorage $chunkStorage;
 
-    /**
-     * {@inheritDoc}
-     * @throws ChunkSaveException
-     */
     public function __construct(UploadedFile $file, AbstractHandler $handler, $chunkStorage)
     {
         parent::__construct($file, $handler);
@@ -144,12 +140,12 @@ class ChunkSave extends AbstractSave
     /**
      * Returns the full file path.
      */
-    public function getChunkFullFilePath(): ?string
+    public function getChunkFullFilePath(): string|null
     {
         return $this->chunkFullFilePath;
     }
 
-    protected function createFullChunkFile(?string $finalPath): UploadedFile
+    protected function createFullChunkFile(string|null $finalPath): UploadedFile
     {
         return new UploadedFile(
             $finalPath,

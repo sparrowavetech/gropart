@@ -14,82 +14,31 @@
     <link rel="preconnect" href="{{ BaseHelper::getGoogleFontsURL() }}">
     <link href="{{ BaseHelper::getGoogleFontsURL() }}/css?family=Lato:400,700%7cPoppins:200,400,500,700" rel="stylesheet">
 
-    @yield('style')
+    @yield('styles')
 </head>
 <body>
-    <div class="master">
-        <div class="box">
-            <div class="header">
-                <h1 class="header__title">@yield('title')</h1>
-            </div>
-            <ul class="step">
-                <li class="step__divider"></li>
-                <li class="step__item {{ get_active_menu_class_name('installers.final') }}">
-                    <i class="step__icon fa fa-server" aria-hidden="true"></i>
-                </li>
-                <li class="step__divider"></li>
-                <li class="step__item {{ get_active_menu_class_name('installers.environment')}}">
-                    @if (Request::is('install/environment') || Request::is('install/environment') || Request::is('install/environment/save') )
-                        <a href="{{ URL::signedRoute('installers.environment', [], \Carbon\Carbon::now()->addMinutes(30)) }}">
-                            <i class="step__icon fa fa-cog" aria-hidden="true"></i>
-                        </a>
-                    @else
-                        <i class="step__icon fa fa-cog" aria-hidden="true"></i>
-                    @endif
-                </li>
-                <li class="step__divider"></li>
-                <li class="step__divider"></li>
-                <li class="step__item {{ get_active_menu_class_name('installers.requirements') }}">
-                    @if (Request::is('install') || Request::is('install/requirements') || Request::is('install/environment') || Request::is('install/environment/save') )
-                        <a href="{{ URL::signedRoute('installers.requirements', [], \Carbon\Carbon::now()->addMinutes(30)) }}">
-                            <i class="step__icon fa fa-list" aria-hidden="true"></i>
-                        </a>
-                    @else
-                        <i class="step__icon fa fa-list" aria-hidden="true"></i>
-                    @endif
-                </li>
-                <li class="step__divider"></li>
-                <li class="step__item {{ get_active_menu_class_name('installers.welcome') }}">
-                    @if (Request::is('install') || Request::is('install/requirements') || Request::is('install/environment') || Request::is('install/environment/save') )
-                        <a href="{{ URL::signedRoute('installers.welcome', [], \Carbon\Carbon::now()->addMinutes(30)) }}">
-                            <i class="step__icon fa fa-home" aria-hidden="true"></i>
-                        </a>
-                    @else
-                        <i class="step__icon fa fa-home" aria-hidden="true"></i>
-                    @endif
-                </li>
-                <li class="step__divider"></li>
-            </ul>
-            <div class="main">
-                @if (session('message'))
-                    <p class="alert text-center">
-                        <strong>
-                            @if (is_array(session('message')))
-                                {{ session('message')['message'] }}
-                            @else
-                                {{ session('message') }}
-                            @endif
-                        </strong>
-                    </p>
-                @endif
-                @if (session()->has('errors'))
-                    <div class="alert alert-danger" id="error_alert">
-                        <button type="button" class="close" id="close_alert" data-dismiss="alert" aria-hidden="true">
-                            <i class="fa fa-close" aria-hidden="true"></i>
-                        </button>
-                        <h4>
-                            <i class="fa fa-fw fa-exclamation-triangle" aria-hidden="true"></i>
-                            {{ trans('packages/installer::installer.forms.errorTitle') }}
-                        </h4>
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
+    @php
+        $currentStep = match (true) {
+            Route::is('installers.welcome') => 1,
+            Route::is('installers.requirements') => 2,
+            Route::is('installers.environment') => 3,
+            Route::is('installers.create_account') => 4,
+            Route::is('installers.final') => 5,
+            default => 1,
+        };
+    @endphp
+    <div class="bg-gradient-to-r from-cyan-500 to-blue-500 bg-opacity-25 min-h-screen h-auto justify-center items-center py-20">
+        <div class="text-center mb-10">
+            <h2 class="text-white font-semibold text-3xl">
+                {{ trans('packages/installer::installer.installation') }}
+            </h2>
+        </div>
+        <div class="bg-white w-full rounded-xl mx-auto max-w-7xl px-4 py-8 lg:py-8 lg:px-8 shadow-2xl">
+            @include('packages/installer::partials.progress')
+            <main class="pt-10 pb-4">
+                @include('packages/installer::partials.alert')
                 @yield('container')
-            </div>
+            </main>
         </div>
     </div>
     <script src="{{ asset('vendor/core/packages/installer/js/script.js') }}?v={{ get_cms_version() }}"></script>

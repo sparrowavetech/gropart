@@ -11,5 +11,4 @@ return array(
     'Mockery' => array($vendorDir . '/mockery/mockery/library'),
     'Kris\\LaravelFormBuilder' => array($vendorDir . '/kris/laravel-form-builder/src'),
     'HTMLPurifier' => array($vendorDir . '/ezyang/htmlpurifier/library'),
-    'Barryvdh' => array($vendorDir . '/barryvdh/reflection-docblock/src'),
 );

@@ -5,49 +5,36 @@ namespace Botble\Menu;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Facades\Html;
 use Botble\Base\Models\BaseModel;
 use Botble\Menu\Models\MenuNode;
 use Botble\Menu\Repositories\Eloquent\MenuRepository;
 use Botble\Menu\Repositories\Interfaces\MenuInterface;
 use Botble\Menu\Repositories\Interfaces\MenuNodeInterface;
 use Botble\Support\Services\Cache\Cache;
-use Collective\Html\HtmlBuilder;
 use Exception;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Config\Repository;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Theme;
+use Botble\Theme\Facades\Theme;
 
 class Menu
 {
-    protected MenuInterface $menuRepository;
-
-    protected HtmlBuilder $html;
-
-    protected MenuNodeInterface $menuNodeRepository;
-
     protected Cache $cache;
-
-    protected Repository $config;
 
     protected array $menuOptionModels = [];
 
-    protected Collection|array $data = [];
+    protected Collection $data;
 
     protected bool $loaded = false;
 
     public function __construct(
-        MenuInterface $menuRepository,
-        HtmlBuilder $html,
-        MenuNodeInterface $menuNodeRepository,
+        protected MenuInterface $menuRepository,
+        protected MenuNodeInterface $menuNodeRepository,
         CacheManager $cache,
-        Repository $config
+        protected Repository $config
     ) {
-        $this->config = $config;
-        $this->menuRepository = $menuRepository;
-        $this->html = $html;
-        $this->menuNodeRepository = $menuNodeRepository;
         $this->cache = new Cache($cache, MenuRepository::class);
         $this->data = collect();
     }
@@ -57,7 +44,7 @@ class Menu
         return $this->menuRepository->findBySlug($slug, $active);
     }
 
-    public function recursiveSaveMenu(array $menuNodes, int $menuId, int $parentId): array
+    public function recursiveSaveMenu(array $menuNodes, int|string $menuId, int|string $parentId): array
     {
         try {
             foreach ($menuNodes as &$row) {
@@ -71,7 +58,7 @@ class Menu
 
                 $row['menuItem'] = $this->saveMenuNode($row['menuItem'], $menuId, $parentId, $hasChild);
 
-                if (! empty($child)) {
+                if (! empty($child) && is_array($child)) {
                     $this->recursiveSaveMenu($child, $menuId, $row['menuItem']['id']);
                 }
             }
@@ -82,8 +69,12 @@ class Menu
         }
     }
 
-    protected function saveMenuNode(array $menuItem, int $menuId, int $parentId, bool $hasChild = false): array
-    {
+    protected function saveMenuNode(
+        array $menuItem,
+        int|string $menuId,
+        int|string $parentId,
+        bool $hasChild = false
+    ): array {
         $item = $this->menuNodeRepository->findById(Arr::get($menuItem, 'id'));
 
         $created = false;
@@ -217,7 +208,7 @@ class Menu
         return $this->menuRepository->allBy(['status' => BaseStatusEnum::PUBLISHED], $with);
     }
 
-    public function generateMenu(array $args = []): ?string
+    public function generateMenu(array $args = []): string|null
     {
         $this->load();
 
@@ -258,7 +249,7 @@ class Menu
             'menu_nodes' => $menuNodes,
         ];
 
-        $data['options'] = $this->html->attributes(Arr::get($args, 'options', []));
+        $data['options'] = Html::attributes(Arr::get($args, 'options', []));
 
         if ($theme && $view) {
             return Theme::partial($view, $data);
@@ -283,21 +274,22 @@ class Menu
         echo view('packages/menu::menu-options', compact('options', 'name'));
     }
 
-    public function generateSelect(array $args = []): ?string
+    public function generateSelect(array $args = []): string|null
     {
         /**
          * @var BaseModel $model
          */
         $model = Arr::get($args, 'model');
 
-        $options = $this->html->attributes(Arr::get($args, 'options', []));
+        $options = Html::attributes(Arr::get($args, 'options', []));
 
         if (! Arr::has($args, 'items')) {
             if (method_exists($model, 'children')) {
+                // @phpstan-ignore-next-line
                 $items = $model
                     ->where('parent_id', Arr::get($args, 'parent_id', 0))
                     ->with(['children', 'children.children'])
-                    ->orderBy('name', 'asc');
+                    ->orderBy('name');
             } else {
                 $items = $model->orderBy('name');
             }
@@ -351,7 +343,12 @@ class Menu
                     continue;
                 }
 
-                $node->url = str_replace(url(''), '', $node->reference->url);
+                $node->url = rtrim(str_replace(url(''), '', $node->reference->url), '/');
+
+                if ($node->url === rtrim(url(''), '/')) {
+                    $node->url = '/';
+                }
+
                 $node->save();
             }
         } catch (Exception $exception) {

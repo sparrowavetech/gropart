@@ -1,17 +1,17 @@
-'use strict';
+'use strict'
 
-var BPayment = BPayment || {};
+var BPayment = BPayment || {}
 
-BPayment.initResources = function () {
-    let paymentMethod = $(document).find('input[name=payment_method]:checked').first();
+BPayment.initResources = function() {
+    let paymentMethod = $(document).find('input[name=payment_method]:checked').first()
 
     if (!paymentMethod.length) {
-        paymentMethod = $(document).find('input[name=payment_method]').first();
-        paymentMethod.trigger('click').trigger('change');
+        paymentMethod = $(document).find('input[name=payment_method]').first()
+        paymentMethod.trigger('click').trigger('change')
     }
 
     if (paymentMethod.length) {
-        paymentMethod.closest('.list-group-item').find('.payment_collapse_wrap').addClass('show');
+        paymentMethod.closest('.list-group-item').find('.payment_collapse_wrap').addClass('show')
     }
 
     if ($('.stripe-card-wrapper').length > 0) {
@@ -27,7 +27,7 @@ BPayment.initResources = function () {
                 numberInput: 'input#stripe-number', // optional — default input[name="number"]
                 expiryInput: 'input#stripe-exp', // optional — default input[name="expiry"]
                 cvcInput: 'input#stripe-cvc', // optional — default input[name="cvc"]
-                nameInput: 'input#stripe-name' // optional - defaults input[name="name"]
+                nameInput: 'input#stripe-name', // optional - defaults input[name="name"]
             },
 
             width: 350, // optional — default 350px
@@ -44,61 +44,70 @@ BPayment.initResources = function () {
                 number: '•••• •••• •••• ••••',
                 name: 'Full Name',
                 expiry: '••/••',
-                cvc: '•••'
+                cvc: '•••',
             },
 
             masks: {
-                cardNumber: '•' // optional - mask card number
+                cardNumber: '•', // optional - mask card number
             },
 
             // if true, will log helpful messages for setting up Card
-            debug: false // optional - default false
-        });
+            debug: false, // optional - default false
+        })
     }
 }
 
-BPayment.init = function () {
-    BPayment.initResources();
+BPayment.init = function() {
+    BPayment.initResources()
 
-    $(document).on('change', '.js_payment_method', function () {
-        $('.payment_collapse_wrap').removeClass('collapse').removeClass('show').removeClass('active');
-    });
+    $(document).on('change', '.js_payment_method', function(event) {
+        event.preventDefault()
 
-    $(document).off('click', '.payment-checkout-btn').on('click', '.payment-checkout-btn', function (event) {
-        event.preventDefault();
+        $('.payment_collapse_wrap').removeClass('collapse').removeClass('show').removeClass('active')
 
-        let _self = $(this);
-        let form = _self.closest('form');
-        _self.attr('disabled', 'disabled');
-        let submitInitialText = _self.html();
-        _self.html('<i class="fa fa-gear fa-spin"></i> ' + _self.data('processing-text'));
+        $(event.currentTarget).closest('.list-group-item').find('.payment_collapse_wrap').addClass('show').addClass('active')
+    })
+
+    $(document).off('click', '.payment-checkout-btn').on('click', '.payment-checkout-btn', function(event) {
+        event.preventDefault()
+
+        let _self = $(this)
+        let form = _self.closest('form')
+
+        if (form.valid && !form.valid()) {
+            return
+        }
+
+        _self.attr('disabled', 'disabled')
+        let submitInitialText = _self.html()
+        _self.html('<i class="fa fa-gear fa-spin"></i> ' + _self.data('processing-text'))
 
         if ($('input[name=payment_method]:checked').val() === 'stripe' && $('.stripe-card-wrapper').length > 0) {
-            Stripe.setPublishableKey($('#payment-stripe-key').data('value'));
-            Stripe.card.createToken(form, function (status, response) {
+            Stripe.setPublishableKey($('#payment-stripe-key').data('value'))
+            Stripe.card.createToken(form, function(status, response) {
                 if (response.error) {
                     if (typeof Botble != 'undefined') {
-                        Botble.showError(response.error.message, _self.data('error-header'));
+                        Botble.showError(response.error.message, _self.data('error-header'))
                     } else {
-                        alert(response.error.message);
+                        alert(response.error.message)
                     }
-                    _self.removeAttr('disabled');
-                    _self.html(submitInitialText);
+                    _self.removeAttr('disabled')
+                    _self.html(submitInitialText)
                 } else {
-                    form.append($('<input type="hidden" name="stripeToken">').val(response.id));
-                    form.submit();
+                    form.append($('<input type="hidden" name="stripeToken">').val(response.id))
+                    form.submit()
                 }
-            });
+            })
         } else {
-            form.submit();
+            form.submit()
         }
-    });
-};
+    })
+}
 
-$(document).ready(function () {
-    BPayment.init();
+$(document).ready(function() {
+    BPayment.init()
 
-    document.addEventListener('payment-form-reloaded', function () {
-        BPayment.initResources();
-    });
-});
+    document.addEventListener('payment-form-reloaded', function() {
+        BPayment.initResources()
+    })
+})

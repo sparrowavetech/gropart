@@ -1,5 +1,6 @@
 <?php
 
+use Botble\Base\Facades\BaseHelper;
 use Carbon\Carbon;
 
 if (! function_exists('format_time')) {

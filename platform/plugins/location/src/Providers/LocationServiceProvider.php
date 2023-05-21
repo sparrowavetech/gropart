@@ -2,31 +2,30 @@
 
 namespace Botble\Location\Providers;
 
+use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Facades\MacroableModels;
 use Botble\Base\Models\BaseModel;
-use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
-use Botble\Location\Facades\LocationFacade;
-use Botble\Location\Models\City;
-use Botble\Location\Repositories\Caches\CityCacheDecorator;
-use Botble\Location\Repositories\Eloquent\CityRepository;
-use Botble\Location\Repositories\Interfaces\CityInterface;
-use Botble\Location\Models\Country;
-use Botble\Location\Repositories\Caches\CountryCacheDecorator;
-use Botble\Location\Repositories\Eloquent\CountryRepository;
-use Botble\Location\Repositories\Interfaces\CountryInterface;
-use Botble\Location\Models\State;
-use Botble\Location\Repositories\Caches\StateCacheDecorator;
-use Botble\Location\Repositories\Eloquent\StateRepository;
-use Botble\Location\Repositories\Interfaces\StateInterface;
-use Illuminate\Foundation\AliasLoader;
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Event;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
+use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
+use Botble\Location\Facades\Location;
+use Botble\Location\Models\City;
+use Botble\Location\Models\Country;
+use Botble\Location\Models\State;
+use Botble\Location\Repositories\Caches\CityCacheDecorator;
+use Botble\Location\Repositories\Caches\CountryCacheDecorator;
+use Botble\Location\Repositories\Caches\StateCacheDecorator;
+use Botble\Location\Repositories\Eloquent\CityRepository;
+use Botble\Location\Repositories\Eloquent\CountryRepository;
+use Botble\Location\Repositories\Eloquent\StateRepository;
+use Botble\Location\Repositories\Interfaces\CityInterface;
+use Botble\Location\Repositories\Interfaces\CountryInterface;
+use Botble\Location\Repositories\Interfaces\StateInterface;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Schema;
-use Location;
-use MacroableModels;
+use Illuminate\Support\ServiceProvider;
 
 class LocationServiceProvider extends ServiceProvider
 {
@@ -46,7 +45,7 @@ class LocationServiceProvider extends ServiceProvider
             return new CityCacheDecorator(new CityRepository(new City()));
         });
 
-        AliasLoader::getInstance()->alias('Location', LocationFacade::class);
+        AliasLoader::getInstance()->alias('Location', Location::class);
     }
 
     public function boot(): void
@@ -76,23 +75,22 @@ class LocationServiceProvider extends ServiceProvider
             ]);
         }
 
-        Event::listen(RouteMatched::class, function () {
-            dashboard_menu()
-                ->registerItem([
-                    'id' => 'cms-plugins-location',
-                    'priority' => 900,
-                    'parent_id' => null,
-                    'name' => 'plugins/location::location.name',
-                    'icon' => 'fas fa-globe',
-                    'url' => null,
-                    'permissions' => ['country.index'],
-                ])
+        $this->app['events']->listen(RouteMatched::class, function () {
+            DashboardMenu::registerItem([
+                'id' => 'cms-plugins-location',
+                'priority' => 900,
+                'parent_id' => null,
+                'name' => 'plugins/location::location.name',
+                'icon' => 'fas fa-globe',
+                'url' => null,
+                'permissions' => ['country.index'],
+            ])
                 ->registerItem([
                     'id' => 'cms-plugins-country',
                     'priority' => 0,
                     'parent_id' => 'cms-plugins-location',
                     'name' => 'plugins/location::country.name',
-                    'icon' => null,
+                    'icon' => 'fas fa-globe',
                     'url' => route('country.index'),
                     'permissions' => ['country.index'],
                 ])
@@ -101,7 +99,7 @@ class LocationServiceProvider extends ServiceProvider
                     'priority' => 1,
                     'parent_id' => 'cms-plugins-location',
                     'name' => 'plugins/location::state.name',
-                    'icon' => null,
+                    'icon' => 'fas fa-globe',
                     'url' => route('state.index'),
                     'permissions' => ['state.index'],
                 ])
@@ -110,39 +108,25 @@ class LocationServiceProvider extends ServiceProvider
                     'priority' => 2,
                     'parent_id' => 'cms-plugins-location',
                     'name' => 'plugins/location::city.name',
-                    'icon' => null,
+                    'icon' => 'fas fa-globe',
                     'url' => route('city.index'),
                     'permissions' => ['city.index'],
-                ]);
-
-            if (! dashboard_menu()->hasItem('cms-core-tools')) {
-                dashboard_menu()->registerItem([
-                    'id' => 'cms-core-tools',
-                    'priority' => 96,
-                    'parent_id' => null,
-                    'name' => 'core/base::base.tools',
-                    'icon' => 'fas fa-tools',
-                    'url' => '',
-                    'permissions' => [],
-                ]);
-            }
-
-            dashboard_menu()
+                ])
                 ->registerItem([
-                    'id' => 'cms-core-tools-location-bulk-import',
-                    'priority' => 1,
-                    'parent_id' => 'cms-core-tools',
+                    'id' => 'cms-plugins-location-bulk-import',
+                    'priority' => 3,
+                    'parent_id' => 'cms-plugins-location',
                     'name' => 'plugins/location::bulk-import.menu',
-                    'icon' => 'fas fa-file-import',
+                    'icon' => 'fas fa-cloud-upload-alt',
                     'url' => route('location.bulk-import.index'),
                     'permissions' => ['location.bulk-import.index'],
                 ])
                 ->registerItem([
-                    'id' => 'cms-core-tools-location-export',
-                    'priority' => 2,
-                    'parent_id' => 'cms-core-tools',
+                    'id' => 'cms-plugins-location-export',
+                    'priority' => 4,
+                    'parent_id' => 'cms-plugins-location',
                     'name' => 'plugins/location::location.export_location',
-                    'icon' => 'fas fa-file-import',
+                    'icon' => 'fas fa-cloud-download-alt',
                     'url' => route('location.export.index'),
                     'permissions' => ['location.export.index'],
                 ]);
@@ -164,26 +148,28 @@ class LocationServiceProvider extends ServiceProvider
                         }
                     }
                 } else {
-                    $keys = array_filter(array_merge([
-                        'country' => 'country_id',
-                        'state' => 'state_id',
-                        'city' => 'city_id',
-                    ], $keys));
+                    $keys = array_filter(
+                        array_merge([
+                            'country' => 'country_id',
+                            'state' => 'state_id',
+                            'city' => 'city_id',
+                        ], $keys)
+                    );
                 }
 
                 /**
                  * @var Blueprint $this
                  */
                 if ($columnName = Arr::get($keys, 'country')) {
-                    $this->integer($columnName)->unsigned()->default(1)->nullable();
+                    $this->foreignId($columnName)->default(1)->nullable();
                 }
 
                 if ($columnName = Arr::get($keys, 'state')) {
-                    $this->integer($columnName)->unsigned()->nullable();
+                    $this->foreignId($columnName)->nullable();
                 }
 
                 if ($columnName = Arr::get($keys, 'city')) {
-                    $this->integer($columnName)->unsigned()->nullable();
+                    $this->foreignId($columnName)->nullable();
                 }
 
                 return true;

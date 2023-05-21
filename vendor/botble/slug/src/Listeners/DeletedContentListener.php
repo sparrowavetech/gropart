@@ -5,15 +5,12 @@ namespace Botble\Slug\Listeners;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Slug\Repositories\Interfaces\SlugInterface;
 use Exception;
-use SlugHelper;
+use Botble\Slug\Facades\SlugHelper;
 
 class DeletedContentListener
 {
-    protected SlugInterface $slugRepository;
-
-    public function __construct(SlugInterface $slugRepository)
+    public function __construct(protected SlugInterface $slugRepository)
     {
-        $this->slugRepository = $slugRepository;
     }
 
     public function handle(DeletedContentEvent $event): void

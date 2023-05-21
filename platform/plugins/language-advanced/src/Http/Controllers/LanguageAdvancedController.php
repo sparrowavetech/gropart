@@ -10,7 +10,7 @@ use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 
 class LanguageAdvancedController extends BaseController
 {
-    public function save(int $id, LanguageAdvancedRequest $request, BaseHttpResponse $response)
+    public function save(int|string $id, LanguageAdvancedRequest $request, BaseHttpResponse $response)
     {
         $model = $request->input('model');
 

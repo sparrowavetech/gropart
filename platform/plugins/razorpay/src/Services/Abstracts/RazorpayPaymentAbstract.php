@@ -13,24 +13,17 @@ abstract class RazorpayPaymentAbstract implements ProduceServiceInterface
 {
     use PaymentErrorTrait;
 
-    /**
-     * @var string
-     */
-    protected $paymentCurrency;
+    protected string $paymentCurrency;
 
     /**
      * @var object
      */
     protected $client;
 
-    /**
-     * @var bool
-     */
-    protected $supportRefundOnline;
+    protected bool $supportRefundOnline;
 
-    /**
-     * RazorpayPaymentAbstract constructor.
-     */
+    protected float $totalAmount;
+
     public function __construct()
     {
         $this->paymentCurrency = config('plugins.payment.payment.currency');
@@ -42,10 +35,7 @@ abstract class RazorpayPaymentAbstract implements ProduceServiceInterface
         $this->supportRefundOnline = true;
     }
 
-    /**
-     * @return bool
-     */
-    public function getSupportRefundOnline()
+    public function getSupportRefundOnline(): bool
     {
         return $this->supportRefundOnline;
     }
@@ -58,11 +48,7 @@ abstract class RazorpayPaymentAbstract implements ProduceServiceInterface
         return $this->client;
     }
 
-    /**
-     * Set client
-     * @return self
-     */
-    public function setClient()
+    public function setClient(): self
     {
         $key = get_payment_setting('key', RAZORPAY_PAYMENT_METHOD_NAME);
         $secret = get_payment_setting('secret', RAZORPAY_PAYMENT_METHOD_NAME);
@@ -71,25 +57,14 @@ abstract class RazorpayPaymentAbstract implements ProduceServiceInterface
         return $this;
     }
 
-    /**
-     * Set payment currency
-     *
-     * @param string $currency String name of currency
-     * @return self
-     */
-    public function setCurrency($currency)
+    public function setCurrency(string $currency): self
     {
         $this->paymentCurrency = $currency;
 
         return $this;
     }
 
-    /**
-     * Get current payment currency
-     *
-     * @return string Current payment currency
-     */
-    public function getCurrency()
+    public function getCurrency(): string
     {
         return $this->paymentCurrency;
     }
@@ -210,7 +185,6 @@ abstract class RazorpayPaymentAbstract implements ProduceServiceInterface
 
     /**
      * List currencies supported https://razorpay.com/docs/payments/payments/international-payments/#supported-currencies
-     * @return string[]
      */
     public function supportedCurrencyCodes(): array
     {

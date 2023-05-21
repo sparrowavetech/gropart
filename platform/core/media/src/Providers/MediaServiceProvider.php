@@ -3,13 +3,14 @@
 namespace Botble\Media\Providers;
 
 use Aws\S3\S3Client;
+use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Media\Chunks\Storage\ChunkStorage;
 use Botble\Media\Commands\ClearChunksCommand;
 use Botble\Media\Commands\DeleteThumbnailCommand;
 use Botble\Media\Commands\GenerateThumbnailCommand;
 use Botble\Media\Commands\InsertWatermarkCommand;
-use Botble\Media\Facades\RvMediaFacade;
+use Botble\Media\Facades\RvMedia;
 use Botble\Media\Models\MediaFile;
 use Botble\Media\Models\MediaFolder;
 use Botble\Media\Models\MediaSetting;
@@ -30,12 +31,10 @@ use Illuminate\Filesystem\AwsS3V3Adapter as IlluminateAwsS3V3Adapter;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
 use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
 use League\Flysystem\Filesystem;
-use RvMedia;
 
 /**
  * @since 02/07/2016 09:50 AM
@@ -67,7 +66,9 @@ class MediaServiceProvider extends ServiceProvider
             );
         });
 
-        AliasLoader::getInstance()->alias('RvMedia', RvMediaFacade::class);
+        if (! class_exists('RvMedia')) {
+            AliasLoader::getInstance()->alias('RvMedia', RvMedia::class);
+        }
     }
 
     public function boot(): void
@@ -126,45 +127,8 @@ class MediaServiceProvider extends ServiceProvider
         $setting = $this->app->make(SettingStore::class);
 
         $config->set([
-            'filesystems.default' => $setting->get('media_driver', 'public'),
-            'filesystems.disks.s3' => [
-                'driver' => 's3',
-                'visibility' => 'public',
-                'key' => $setting->get('media_aws_access_key_id', $config->get('filesystems.disks.s3.key')),
-                'secret' => $setting->get('media_aws_secret_key', $config->get('filesystems.disks.s3.secret')),
-                'region' => $setting->get('media_aws_default_region', $config->get('filesystems.disks.s3.region')),
-                'bucket' => $setting->get('media_aws_bucket', $config->get('filesystems.disks.s3.bucket')),
-                'url' => $setting->get('media_aws_url', $config->get('filesystems.disks.s3.url')),
-                'endpoint' => $setting->get('media_aws_endpoint', $config->get('filesystems.disks.s3.endpoint')) ?: null,
-                'use_path_style_endpoint' => $config->get('filesystems.disks.s3.use_path_style_endpoint'),
-            ],
-            'filesystems.disks.do_spaces' => [
-                'driver' => 's3',
-                'visibility' => 'public',
-                'key' => $setting->get('media_do_spaces_access_key_id'),
-                'secret' => $setting->get('media_do_spaces_secret_key'),
-                'region' => $setting->get('media_do_spaces_default_region'),
-                'bucket' => $setting->get('media_do_spaces_bucket'),
-                'endpoint' => $setting->get('media_do_spaces_endpoint'),
-            ],
-            'filesystems.disks.wasabi' => [
-                'driver' => 'wasabi',
-                'visibility' => 'public',
-                'key' => $setting->get('media_wasabi_access_key_id'),
-                'secret' => $setting->get('media_wasabi_secret_key'),
-                'region' => $setting->get('media_wasabi_default_region'),
-                'bucket' => $setting->get('media_wasabi_bucket'),
-                'root' => $setting->get('media_wasabi_root', '/'),
-            ],
-            'filesystems.disks.bunnycdn' => [
-                'driver' => 'bunnycdn',
-                'visibility' => 'public',
-                'hostname' => $setting->get('media_bunnycdn_hostname'),
-                'storage_zone' => $setting->get('media_bunnycdn_zone'),
-                'url' => $setting->get('media_bunnycdn_pull_zone_url'),
-                'api_key' => $setting->get('media_bunnycdn_key'),
-                'region' => $setting->get('media_bunnycdn_region'),
-            ],
+            'filesystems.default' => RvMedia::getMediaDriver(),
+            'filesystems.disks.public.throw' => true,
             'core.media.media.chunk.enabled' => (bool)$setting->get(
                 'media_chunk_enabled',
                 $config->get('core.media.media.chunk.enabled')
@@ -179,8 +143,41 @@ class MediaServiceProvider extends ServiceProvider
             ),
         ]);
 
-        Event::listen(RouteMatched::class, function () {
-            dashboard_menu()->registerItem([
+        RvMedia::setS3Disk([
+            'key' => $setting->get('media_aws_access_key_id', $config->get('filesystems.disks.s3.key')),
+            'secret' => $setting->get('media_aws_secret_key', $config->get('filesystems.disks.s3.secret')),
+            'region' => $setting->get('media_aws_default_region', $config->get('filesystems.disks.s3.region')),
+            'bucket' => $setting->get('media_aws_bucket', $config->get('filesystems.disks.s3.bucket')),
+            'url' => $setting->get('media_aws_url', $config->get('filesystems.disks.s3.url')),
+            'endpoint' => $setting->get('media_aws_endpoint', $config->get('filesystems.disks.s3.endpoint')) ?: null,
+            'use_path_style_endpoint' => $config->get('filesystems.disks.s3.use_path_style_endpoint'),
+        ]);
+
+        RvMedia::setDoSpacesDisk([
+            'key' => $setting->get('media_do_spaces_access_key_id'),
+            'secret' => $setting->get('media_do_spaces_secret_key'),
+            'region' => $setting->get('media_do_spaces_default_region'),
+            'bucket' => $setting->get('media_do_spaces_bucket'),
+            'endpoint' => $setting->get('media_do_spaces_endpoint'),
+        ]);
+
+        RvMedia::setWasabiDisk([
+            'key' => $setting->get('media_wasabi_access_key_id'),
+            'secret' => $setting->get('media_wasabi_secret_key'),
+            'region' => $setting->get('media_wasabi_default_region'),
+            'bucket' => $setting->get('media_wasabi_bucket'),
+            'root' => $setting->get('media_wasabi_root', '/'),
+        ]);
+
+        RvMedia::setBunnyCdnDisk([
+            'hostname' => $setting->get('media_bunnycdn_hostname'),
+            'storage_zone' => $setting->get('media_bunnycdn_zone'),
+            'api_key' => $setting->get('media_bunnycdn_key'),
+            'region' => $setting->get('media_bunnycdn_region'),
+        ]);
+
+        $this->app['events']->listen(RouteMatched::class, function () {
+            DashboardMenu::registerItem([
                 'id' => 'cms-core-media',
                 'priority' => 995,
                 'parent_id' => null,

@@ -2,8 +2,12 @@
 
 namespace Botble\Api\Http\Resources;
 
+use Botble\ACL\Models\User;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin User
+ */
 class UserResource extends JsonResource
 {
     public function toArray($request): array

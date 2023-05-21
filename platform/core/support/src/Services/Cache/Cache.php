@@ -2,23 +2,18 @@
 
 namespace Botble\Support\Services\Cache;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 
 class Cache implements CacheInterface
 {
-    protected ?string $cacheGroup;
-
-    protected CacheManager $cache;
-
-    protected array $config;
-
-    public function __construct(CacheManager $cache, ?string $cacheGroup, array $config = [])
-    {
-        $this->cache = $cache;
-        $this->cacheGroup = $cacheGroup;
+    public function __construct(
+        protected CacheManager $cache,
+        protected string|null $cacheGroup,
+        protected array $config = []
+    ) {
         $this->config = ! empty($config) ? $config : [
             'cache_time' => setting('cache_time', 10) * 60,
             'stored_keys' => storage_path('cache_keys.json'),
@@ -56,7 +51,7 @@ class Cache implements CacheInterface
 
     public function storeCacheKey(string $key): bool
     {
-        if (file_exists($this->config['stored_keys'])) {
+        if (File::exists($this->config['stored_keys'])) {
             $cacheKeys = BaseHelper::getFileData($this->config['stored_keys']);
             if (! empty($cacheKeys) && ! in_array($key, Arr::get($cacheKeys, $this->cacheGroup, []))) {
                 $cacheKeys[$this->cacheGroup][] = $key;
@@ -73,7 +68,7 @@ class Cache implements CacheInterface
 
     public function has(string $key): bool
     {
-        if (! file_exists($this->config['stored_keys'])) {
+        if (! File::exists($this->config['stored_keys'])) {
             return false;
         }
 
@@ -85,7 +80,7 @@ class Cache implements CacheInterface
     public function flush(): bool
     {
         $cacheKeys = [];
-        if (file_exists($this->config['stored_keys'])) {
+        if (File::exists($this->config['stored_keys'])) {
             $cacheKeys = BaseHelper::getFileData($this->config['stored_keys']);
         }
 
@@ -99,7 +94,7 @@ class Cache implements CacheInterface
 
         if (! empty($cacheKeys)) {
             BaseHelper::saveFileData($this->config['stored_keys'], $cacheKeys);
-        } else {
+        } elseif (File::exists($this->config['stored_keys'])) {
             File::delete($this->config['stored_keys']);
         }
 

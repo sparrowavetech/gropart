@@ -7,25 +7,16 @@ use Botble\ACL\Models\User;
 use Botble\ACL\Repositories\Interfaces\RoleInterface;
 use Botble\ACL\Repositories\Interfaces\UserInterface;
 use Botble\Support\Services\ProduceServiceInterface;
-use Hash;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 
 class CreateUserService implements ProduceServiceInterface
 {
-    protected UserInterface $userRepository;
-
-    protected RoleInterface $roleRepository;
-
-    protected ActivateUserService $activateUserService;
-
     public function __construct(
-        UserInterface $userRepository,
-        RoleInterface $roleRepository,
-        ActivateUserService $activateUserService
+        protected UserInterface $userRepository,
+        protected RoleInterface $roleRepository,
+        protected ActivateUserService $activateUserService
     ) {
-        $this->userRepository = $userRepository;
-        $this->roleRepository = $roleRepository;
-        $this->activateUserService = $activateUserService;
     }
 
     public function execute(Request $request): User

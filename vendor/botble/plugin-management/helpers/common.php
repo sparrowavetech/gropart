@@ -1,7 +1,10 @@
 <?php
 
+use Botble\Base\Facades\BaseHelper;
+use Illuminate\Support\Facades\File;
+
 if (! function_exists('plugin_path')) {
-    function plugin_path(?string $path = null): string
+    function plugin_path(string|null $path = null): string
     {
         return platform_path('plugins' . DIRECTORY_SEPARATOR . $path);
     }

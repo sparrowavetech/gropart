@@ -9,10 +9,7 @@ class ActivatedPluginEvent extends Event
 {
     use SerializesModels;
 
-    public string $plugin;
-
-    public function __construct(string $plugin)
+    public function __construct(public string $plugin)
     {
-        $this->plugin = $plugin;
     }
 }

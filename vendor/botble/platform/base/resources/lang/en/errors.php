@@ -21,4 +21,5 @@ return [
     'reasons' => 'This may have occurred because of several reasons',
     'try_again' => 'Please try again in a few minutes, or alternatively return to the homepage by <a href=":link">clicking here</a>.',
     'not_found' => 'Not Found',
+    'results_not_found' => 'Results not found!',
 ];

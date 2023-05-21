@@ -1,6 +1,8 @@
 <?php
 
-use Botble\SocialLogin\Facades\SocialServiceFacade;
+use Botble\Base\Facades\BaseHelper;
+use Botble\SocialLogin\Facades\SocialService;
+use Illuminate\Support\Facades\Route;
 
 Route::group(['namespace' => 'Botble\SocialLogin\Http\Controllers', 'middleware' => ['web', 'core']], function () {
     Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {
@@ -18,7 +20,7 @@ Route::group(['namespace' => 'Botble\SocialLogin\Http\Controllers', 'middleware'
         });
     });
 
-    $providers = collect(SocialServiceFacade::getProviderKeys())->implode('|');
+    $providers = collect(SocialService::getProviderKeys())->implode('|');
 
     Route::get('auth/{provider}', [
         'as' => 'auth.social',

@@ -1,22 +1,15 @@
 <?php
 
-namespace Botble\Paypal\Services\Gateways;
+namespace Botble\PayPal\Services\Gateways;
 
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Supports\PaymentHelper;
-use Botble\Paypal\Services\Abstracts\PayPalPaymentAbstract;
-use Exception;
+use Botble\PayPal\Services\Abstracts\PayPalPaymentAbstract;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 class PayPalPaymentService extends PayPalPaymentAbstract
 {
-    /**
-     * Make a payment
-     *
-     * @param array $data
-     * @return mixed
-     * @throws Exception
-     */
     public function makePayment(array $data)
     {
         $amount = round((float)$data['amount'], $this->isSupportedDecimals() ? 2 : 0);
@@ -37,27 +30,23 @@ class PayPalPaymentService extends PayPalPaymentAbstract
             $this->setCancelUrl($cancelUrl);
         }
 
+        $description = Str::limit($data['description'], 50);
+
         return $this
             ->setReturnUrl($data['callback_url'] . '?' . http_build_query($queryParams))
             ->setCurrency($currency)
             ->setCustomer(Arr::get($data, 'address.email'))
             ->setItem([
-                'name' => $data['description'],
+                'name' => $description,
                 'quantity' => 1,
                 'price' => $amount,
                 'sku' => null,
                 'type' => PAYPAL_PAYMENT_METHOD_NAME,
             ])
-            ->createPayment($data['description']);
+            ->createPayment($description);
     }
 
-    /**
-     * Use this function to perform more logic after user has made a payment
-     *
-     * @param array $data
-     * @return mixed
-     */
-    public function afterMakePayment(array $data)
+    public function afterMakePayment(array $data): string|null
     {
         $status = PaymentStatusEnum::COMPLETED;
 

@@ -11,13 +11,7 @@ class RoleAssignmentEvent extends Event
 {
     use SerializesModels;
 
-    public Role $role;
-
-    public User $user;
-
-    public function __construct(Role $role, User $user)
+    public function __construct(public Role $role, public User $user)
     {
-        $this->role = $role;
-        $this->user = $user;
     }
 }

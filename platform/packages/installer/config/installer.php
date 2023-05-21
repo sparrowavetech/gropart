@@ -1,9 +1,7 @@
 <?php
 
 return [
-    'core' => [
-        'php_version' => '8.0.2',
-    ],
+    'enabled' => env('CMS_ENABLE_INSTALLER', true),
     'requirements' => [
         'php' => [
             'openssl',

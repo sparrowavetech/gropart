@@ -1,5 +1,8 @@
 <?php
 
+use Botble\Base\Facades\BaseHelper;
+use Illuminate\Support\Facades\Route;
+
 Route::group(['namespace' => 'Botble\SimpleSlider\Http\Controllers', 'middleware' => ['web', 'core']], function () {
     Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {
         Route::group(['prefix' => 'simple-sliders', 'as' => 'simple-slider.'], function () {
@@ -21,24 +24,18 @@ Route::group(['namespace' => 'Botble\SimpleSlider\Http\Controllers', 'middleware
         Route::group(['prefix' => 'simple-slider-items', 'as' => 'simple-slider-item.'], function () {
             Route::resource('', 'SimpleSliderItemController')->except([
                 'index',
-                'destroy',
             ])->parameters(['' => 'simple-slider-item']);
 
             Route::match(['GET', 'POST'], 'list/{id}', [
                 'as' => 'index',
                 'uses' => 'SimpleSliderItemController@index',
-            ])->where('id', '[0-9]+');
+            ])->wherePrimaryKey();
 
             Route::get('delete/{id}', [
-                'as' => 'destroy',
-                'uses' => 'SimpleSliderItemController@destroy',
-            ])->where('id', '[0-9]+');
-
-            Route::delete('delete/{id}', [
-                'as' => 'delete.post',
-                'uses' => 'SimpleSliderItemController@postDelete',
+                'as' => 'destroy.get',
+                'uses' => 'SimpleSliderItemController@getDelete',
                 'permission' => 'simple-slider-item.destroy',
-            ])->where('id', '[0-9]+');
+            ])->wherePrimaryKey();
         });
     });
 });

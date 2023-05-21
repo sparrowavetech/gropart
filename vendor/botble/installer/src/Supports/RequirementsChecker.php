@@ -6,8 +6,6 @@ use Illuminate\Support\Facades\File;
 
 class RequirementsChecker
 {
-    protected ?string $phpVersion = null;
-
     public function check(array $requirements): array
     {
         $results = [];

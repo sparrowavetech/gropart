@@ -39,7 +39,7 @@ class GoogleClient extends Client
             if (isset($config[$key]['redirect_uris'])) {
                 $this->setRedirectUri($config[$key]['redirect_uris'][0]);
             }
-        } else {
+        } elseif (is_array($config)) {
             // new-style
             $this->setClientId($config['client_id']);
             $this->setClientSecret($config['client_secret']);

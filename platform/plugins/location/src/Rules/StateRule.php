@@ -12,11 +12,8 @@ class StateRule implements DataAwareRule, Rule
 {
     protected array $data = [];
 
-    protected ?string $countryKey;
-
-    public function __construct(?string $countryKey = '')
+    public function __construct(protected string|null $countryKey = '')
     {
-        $this->countryKey = $countryKey;
     }
 
     public function setData($data): self
@@ -38,10 +35,11 @@ class StateRule implements DataAwareRule, Rule
             if (! $countryId) {
                 return false;
             }
+
             $condition['country_id'] = $countryId;
         }
 
-        return app(StateInterface::class)->count($condition);
+        return app(StateInterface::class)->getModel()->where($condition)->exists();
     }
 
     public function message(): string

@@ -22,7 +22,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use RvMedia;
+use Botble\Media\Facades\RvMedia;
 
 class User extends BaseModel implements
     AuthenticatableContract,
@@ -55,6 +55,7 @@ class User extends BaseModel implements
     ];
 
     protected $casts = [
+        'email_verified_at' => 'datetime',
         'permissions' => 'json',
         'username' => SafeContent::class,
         'first_name' => SafeContent::class,
@@ -101,20 +102,6 @@ class User extends BaseModel implements
         );
     }
 
-    protected function permissions(): Attribute
-    {
-        return Attribute::make(
-            get: function ($value) {
-                try {
-                    return json_decode($value ?: '', true) ?: [];
-                } catch (Exception) {
-                    return [];
-                }
-            },
-            set: fn ($value) => $value ? json_encode($value) : ''
-        );
-    }
-
     public function avatar(): BelongsTo
     {
         return $this->belongsTo(MediaFile::class)->withDefault();
@@ -150,11 +137,6 @@ class User extends BaseModel implements
         return $this->hasAnyAccess($permissions);
     }
 
-    /**
-     * Send the password reset notification.
-     *
-     * @param string $token
-     */
     public function sendPasswordResetNotification($token): void
     {
         $this->notify(new ResetPasswordNotification($token));
@@ -185,7 +167,7 @@ class User extends BaseModel implements
         return false;
     }
 
-    public function delete(): ?bool
+    public function delete(): bool|null
     {
         if ($this->exists) {
             $this->activations()->delete();

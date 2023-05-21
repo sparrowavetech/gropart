@@ -2,9 +2,9 @@
 
 namespace Botble\Theme;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Illuminate\Support\Facades\File;
-use Theme as ThemeFacade;
+use Botble\Theme\Facades\Theme as ThemeFacade;
 
 class Manager
 {

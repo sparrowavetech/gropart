@@ -8,11 +8,8 @@ use InvalidArgumentException;
 
 class TableBuilder
 {
-    protected Container $container;
-
-    public function __construct(Container $container)
+    public function __construct(protected Container $container)
     {
-        $this->container = $container;
     }
 
     public function create(string $tableClass): TableAbstract

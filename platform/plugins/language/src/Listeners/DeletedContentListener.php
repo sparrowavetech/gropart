@@ -4,7 +4,7 @@ namespace Botble\Language\Listeners;
 
 use Botble\Base\Events\DeletedContentEvent;
 use Exception;
-use Language;
+use Botble\Language\Facades\Language;
 
 class DeletedContentListener
 {

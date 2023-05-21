@@ -13,24 +13,17 @@ abstract class SslCommerzPaymentAbstract implements ProduceServiceInterface
 {
     use PaymentErrorTrait;
 
-    /**
-     * @var string
-     */
-    protected $paymentCurrency;
+    protected string $paymentCurrency;
 
     /**
      * @var object
      */
     protected $client;
 
-    /**
-     * @var bool
-     */
-    protected $supportRefundOnline;
+    protected bool $supportRefundOnline;
 
-    /**
-     * SslCommerzPaymentAbstract constructor.
-     */
+    protected int $totalAmount;
+
     public function __construct()
     {
         $this->paymentCurrency = config('plugins.payment.payment.currency');
