@@ -8,8 +8,11 @@ use OrderHelper;
 
 class HandleRemoveCouponService
 {
-    public function __construct(protected DiscountInterface $discountRepository)
+    protected DiscountInterface $discountRepository;
+
+    public function __construct(DiscountInterface $discountRepository)
     {
+        $this->discountRepository = $discountRepository;
     }
 
     public function execute(?string $prefix = '', bool $isForget = true): array

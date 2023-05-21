@@ -18,8 +18,14 @@ use Throwable;
 
 class StoreRevenueController extends BaseController
 {
-    public function __construct(protected StoreInterface $storeRepository, protected RevenueInterface $revenueRepository)
+    protected StoreInterface $storeRepository;
+
+    protected RevenueInterface $revenueRepository;
+
+    public function __construct(StoreInterface $storeRepository, RevenueInterface $revenueRepository)
     {
+        $this->storeRepository = $storeRepository;
+        $this->revenueRepository = $revenueRepository;
     }
 
     public function index(StoreRevenueTable $table)
@@ -27,7 +33,7 @@ class StoreRevenueController extends BaseController
         return $table->renderTable();
     }
 
-    public function view(int|string $id, StoreRevenueTable $table)
+    public function view(int $id, StoreRevenueTable $table)
     {
         $store = $this->storeRepository->findOrFail($id);
         $customer = $store->customer;
@@ -43,7 +49,7 @@ class StoreRevenueController extends BaseController
         return view('plugins/marketplace::stores.index', compact('table', 'store', 'customer'))->render();
     }
 
-    public function store(int|string $id, StoreRevenueRequest $request, BaseHttpResponse $response)
+    public function store(int $id, StoreRevenueRequest $request, BaseHttpResponse $response)
     {
         $store = $this->storeRepository->findOrFail($id);
 

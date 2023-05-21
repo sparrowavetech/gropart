@@ -8,9 +8,11 @@ use Botble\Marketplace\Models\Store;
 
 register_page_template([
     'default' => __('Default'),
+    'default-sidebar' => __('Default with Sidebar'),
     'homepage' => __('Homepage'),
     'full-width' => __('Full Width'),
     'coming-soon' => __('Coming Soon'),
+    'blog-right-sidebar' => __('Blog with Sidebar'),
 ]);
 
 register_sidebar([
@@ -29,6 +31,12 @@ register_sidebar([
     'id' => 'bottom_footer_sidebar',
     'name' => __('Bottom footer sidebar'),
     'description' => __('Widgets in bottom footer sidebar'),
+]);
+
+register_sidebar([
+    'id' => 'default_page_sidebar',
+    'name' => __('Default Page sidebar'),
+    'description' => __('Widgets in Default Page sidebar'),
 ]);
 
 if (is_plugin_active('ecommerce')) {

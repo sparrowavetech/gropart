@@ -17,10 +17,16 @@ use Illuminate\Http\Request;
 
 class ProductAttributeSetsController extends BaseController
 {
+    protected ProductAttributeSetInterface $productAttributeSetRepository;
+
+    protected ProductCategoryInterface $productCategoryRepository;
+
     public function __construct(
-        protected ProductAttributeSetInterface $productAttributeSetRepository,
-        protected ProductCategoryInterface $productCategoryRepository
+        ProductAttributeSetInterface $productAttributeSetRepository,
+        ProductCategoryInterface $productCategoryRepository
     ) {
+        $this->productAttributeSetRepository = $productAttributeSetRepository;
+        $this->productCategoryRepository = $productCategoryRepository;
     }
 
     public function index(ProductAttributeSetsTable $dataTable)
@@ -61,7 +67,7 @@ class ProductAttributeSetsController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int|string $id, FormBuilder $formBuilder)
+    public function edit(int $id, FormBuilder $formBuilder)
     {
         page_title()->setTitle(trans('plugins/ecommerce::product-attributes.edit'));
 
@@ -82,7 +88,7 @@ class ProductAttributeSetsController extends BaseController
     }
 
     public function update(
-        int|string $id,
+        int $id,
         ProductAttributeSetsRequest $request,
         StoreAttributeSetService $service,
         BaseHttpResponse $response
@@ -96,7 +102,7 @@ class ProductAttributeSetsController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(int|string $id, BaseHttpResponse $response)
+    public function destroy(int $id, BaseHttpResponse $response)
     {
         try {
             $productAttributeSet = $this->productAttributeSetRepository->findOrFail($id);

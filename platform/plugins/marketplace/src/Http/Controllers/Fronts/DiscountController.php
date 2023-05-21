@@ -19,8 +19,11 @@ use MarketplaceHelper;
 
 class DiscountController extends BaseController
 {
-    public function __construct(protected DiscountInterface $discountRepository)
+    protected DiscountInterface $discountRepository;
+
+    public function __construct(DiscountInterface $discountRepository)
     {
+        $this->discountRepository = $discountRepository;
     }
 
     public function index(DiscountTable $table)
@@ -91,7 +94,7 @@ class DiscountController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
+    public function destroy(Request $request, int $id, BaseHttpResponse $response)
     {
         try {
             $discount = $this->discountRepository->findOrFail($id);

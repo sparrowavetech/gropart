@@ -19,11 +19,20 @@ use Illuminate\Http\Request;
 
 class ReportController extends BaseController
 {
+    protected OrderInterface $orderRepository;
+
+    protected ProductInterface $productRepository;
+
+    protected CustomerInterface $customerRepository;
+
     public function __construct(
-        protected OrderInterface $orderRepository,
-        protected ProductInterface $productRepository,
-        protected CustomerInterface $customerRepository
+        OrderInterface $order,
+        ProductInterface $product,
+        CustomerInterface $customer
     ) {
+        $this->orderRepository = $order;
+        $this->productRepository = $product;
+        $this->customerRepository = $customer;
     }
 
     public function getIndex(

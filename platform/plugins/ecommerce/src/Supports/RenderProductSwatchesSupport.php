@@ -3,6 +3,7 @@
 namespace Botble\Ecommerce\Supports;
 
 use Botble\Ecommerce\Models\Product;
+use Botble\Ecommerce\Repositories\Eloquent\ProductRepository;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductVariationItemInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductVariationInterface;
@@ -11,8 +12,11 @@ class RenderProductSwatchesSupport
 {
     protected Product $product;
 
-    public function __construct(protected ProductInterface $productRepository)
+    protected ProductRepository|ProductInterface $productRepository;
+
+    public function __construct(ProductInterface $productRepository)
     {
+        $this->productRepository = $productRepository;
     }
 
     public function setProduct(Product $product): RenderProductSwatchesSupport

@@ -16,14 +16,12 @@
                     </div>
                     <div class="ps-block__user-content">
                         <h3 class="text-white">{{ $store->name }}</h3>
-                        @if ($store->full_address)
-                            <p><i class="icon-map-marker"></i>&nbsp;{{ $store->full_address }}</p>
-                        @endif
+                        <p><i class="icon-map-marker"></i> {{ $store->full_address }}</p>
                         @if (!MarketplaceHelper::hideStorePhoneNumber() && $store->phone)
-                            <p><i class="icon-telephone"></i>&nbsp;{{ $store->phone }}</p>
+                            <p><i class="icon-telephone"></i> {{ $store->phone }}</p>
                         @endif
                         @if (!MarketplaceHelper::hideStoreEmail() && $store->email)
-                            <p><i class="icon-envelope"></i>&nbsp;<a href="mailto:{{ $store->email }}">{{ $store->email }}</a></p>
+                            <p><i class="icon-envelope"></i> <a href="mailto:{{ $store->email }}">{{ $store->email }}</a></p>
                         @endif
                     </div>
                 </div>

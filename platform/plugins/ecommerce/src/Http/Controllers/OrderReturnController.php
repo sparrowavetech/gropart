@@ -18,11 +18,20 @@ use OrderReturnHelper;
 
 class OrderReturnController extends BaseController
 {
+    protected OrderReturnInterface $orderReturnRepository;
+
+    protected OrderReturnInterface $orderReturnItemRepository;
+
+    protected ProductInterface $productRepository;
+
     public function __construct(
-        protected OrderReturnInterface $orderReturnRepository,
-        protected OrderReturnInterface $orderReturnItemRepository,
-        protected ProductInterface $productRepository
+        OrderReturnInterface $orderReturnRepository,
+        OrderReturnInterface $orderReturnItemRepository,
+        ProductInterface $productRepository
     ) {
+        $this->orderReturnRepository = $orderReturnRepository;
+        $this->orderReturnItemRepository = $orderReturnItemRepository;
+        $this->productRepository = $productRepository;
     }
 
     public function index(OrderReturnTable $orderReturnTable)
@@ -32,7 +41,7 @@ class OrderReturnController extends BaseController
         return $orderReturnTable->renderTable();
     }
 
-    public function edit(int|string $id)
+    public function edit(int $id)
     {
         Assets::addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
             ->addScriptsDirectly([
@@ -47,14 +56,14 @@ class OrderReturnController extends BaseController
 
         $returnRequest = $this->orderReturnRepository->findOrFail($id, ['items', 'customer', 'order']);
 
-        page_title()->setTitle(trans('plugins/ecommerce::order.edit_order_return', ['code' => $returnRequest->code]));
+        page_title()->setTitle(trans('plugins/ecommerce::order.edit_order', ['code' => $returnRequest->code]));
 
         $defaultStore = get_primary_store_locator();
 
         return view('plugins/ecommerce::order-returns.edit', compact('returnRequest', 'defaultStore'));
     }
 
-    public function update(int|string $id, UpdateOrderReturnRequest $request, BaseHttpResponse $response)
+    public function update(int $id, UpdateOrderReturnRequest $request, BaseHttpResponse $response)
     {
         $returnRequest = $this->orderReturnRepository->findOrFail($id);
 
@@ -81,7 +90,7 @@ class OrderReturnController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
+    public function destroy(Request $request, int $id, BaseHttpResponse $response)
     {
         $order = $this->orderReturnRepository->findOrFail($id);
 

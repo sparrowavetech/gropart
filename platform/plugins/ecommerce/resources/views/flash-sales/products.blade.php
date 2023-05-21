@@ -2,7 +2,7 @@
     <input type="hidden" name="products" value="@if ($flashSale->id){{ implode(',', array_filter($flashSale->products()->allRelatedIds()->toArray())) }}@endif" />
     <div class="box-search-advance product">
         <div>
-            <input type="text" class="next-input textbox-advancesearch" placeholder="{{ trans('plugins/ecommerce::products.search_products') }}" data-target="{{ route('products.') }}">
+            <input type="text" class="next-input textbox-advancesearch" placeholder="{{ trans('plugins/ecommerce::products.search_products') }}" data-target="{{ route('products.get-list-product-for-search') }}">
         </div>
         <div class="panel panel-default">
 

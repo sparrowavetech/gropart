@@ -18,7 +18,7 @@ return new class () extends Migration {
             $table->id();
             $table->text('question');
             $table->text('answer');
-            $table->foreignId('category_id');
+            $table->integer('category_id')->unsigned();
             $table->string('status', 60)->default('published');
             $table->timestamps();
         });

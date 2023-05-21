@@ -26,5 +26,9 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Fronts', 'middle
             'as' => 'public.cart.destroy',
             'uses' => 'PublicCartController@getDestroy',
         ]);
+        Route::post('add-to-cart-multiple', [
+            'uses' => 'PublicCartController@addMultipleIncart',
+            'as'   => 'public.cart.multiple',
+        ]);
     });
 });

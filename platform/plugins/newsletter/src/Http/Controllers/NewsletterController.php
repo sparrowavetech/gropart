@@ -15,8 +15,11 @@ class NewsletterController extends BaseController
 {
     use HasDeleteManyItemsTrait;
 
-    public function __construct(protected NewsletterInterface $newsletterRepository)
+    protected NewsletterInterface $newsletterRepository;
+
+    public function __construct(NewsletterInterface $newsletterRepository)
     {
+        $this->newsletterRepository = $newsletterRepository;
     }
 
     public function index(NewsletterTable $dataTable)
@@ -26,7 +29,7 @@ class NewsletterController extends BaseController
         return $dataTable->renderTable();
     }
 
-    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
+    public function destroy(Request $request, int $id, BaseHttpResponse $response)
     {
         try {
             $newsletter = $this->newsletterRepository->findOrFail($id);

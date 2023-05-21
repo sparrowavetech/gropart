@@ -9,8 +9,11 @@ use Illuminate\Validation\Rule;
 
 class StoreCurrenciesService
 {
-    public function __construct(protected CurrencyInterface $currencyRepository)
+    protected CurrencyInterface $currencyRepository;
+
+    public function __construct(CurrencyInterface $currency)
     {
+        $this->currencyRepository = $currency;
     }
 
     public function execute(array $currencies, array $deletedCurrencies): array

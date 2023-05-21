@@ -28,9 +28,11 @@
                 @if (is_plugin_active('marketplace') && $product->store_id)
                     <div class="product-meta-sold-by my-2">
                         <span class="d-inline-block">{{ __('Sold By') }}: </span>
-                        <a href="{{ $product->store->url }}">
-                            {{ $product->store->name }}
-                        </a>
+                        <a href="{{ $product->store->url }}"> {{ $product->store->name }} </a>
+                        @if($product->store->is_verified)
+                        <img class="verified-store-main" src="{{ asset('/storage/stores/verified.png')}}" alt="Verified">
+                        @endif
+                        <small class="badge bg-warning text-dark">{{ $product->store->shop_category->label() }}</small>
                     </div>
                 @endif
 
@@ -42,6 +44,11 @@
                     {!! apply_filters('ecommerce_after_product_description', null, $product) !!}
                 </div>
                 {!! Theme::partial('ecommerce.product-cart-form', compact('product', 'wishlistIds', 'selectedAttrs') + ['withButtons' => true, 'withVariations' => true, 'withBuyNow' => true]) !!}
+
+                @if (is_plugin_active('pickrr'))
+                    {!! Theme::partial('ecommerce.product-pincode-form', compact('product')) !!}
+                    <hr>
+                @endif
 
                 <div class="meta-sku @if (!$product->sku) d-none @endif">
                     <span class="meta-label d-inline-block">{{ __('SKU') }}:</span>

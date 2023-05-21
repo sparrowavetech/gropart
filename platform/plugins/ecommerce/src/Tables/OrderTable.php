@@ -4,12 +4,8 @@ namespace Botble\Ecommerce\Tables;
 
 use BaseHelper;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
-use Botble\Ecommerce\Enums\ShippingMethodEnum;
 use Botble\Ecommerce\Repositories\Interfaces\OrderHistoryInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
-use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
-use Botble\Payment\Enums\PaymentMethodEnum;
-use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Table\Abstracts\TableAbstract;
 use EcommerceHelper;
 use Illuminate\Contracts\Routing\UrlGenerator;
@@ -54,19 +50,11 @@ class OrderTable extends TableAbstract
                 return BaseHelper::clean($item->status->toHtml());
             })
             ->editColumn('payment_status', function ($item) {
-                if (! is_plugin_active('payment')) {
-                    return '&mdash;';
-                }
-
                 return $item->payment->status->label() ? BaseHelper::clean(
                     $item->payment->status->toHtml()
                 ) : '&mdash;';
             })
             ->editColumn('payment_method', function ($item) {
-                if (! is_plugin_active('payment')) {
-                    return '&mdash;';
-                }
-
                 return BaseHelper::clean($item->payment->payment_channel->label() ?: '&mdash;');
             })
             ->editColumn('amount', function ($item) {
@@ -93,19 +81,14 @@ class OrderTable extends TableAbstract
                 return $this->getOperations('orders.edit', 'orders.destroy', $item);
             })
             ->filter(function ($query) {
-                if ($keyword = $this->request->input('search.value')) {
+                $keyword = $this->request->input('search.value');
+                if ($keyword) {
                     return $query
                         ->whereHas('address', function ($subQuery) use ($keyword) {
-                            return $subQuery
-                                ->where('name', 'LIKE', '%' . $keyword . '%')
-                                ->orWhere('email', 'LIKE', '%' . $keyword . '%')
-                                ->orWhere('phone', 'LIKE', '%' . $keyword . '%');
+                            return $subQuery->where('name', 'LIKE', '%' . $keyword . '%');
                         })
                         ->orWhereHas('user', function ($subQuery) use ($keyword) {
-                            return $subQuery
-                                ->where('name', 'LIKE', '%' . $keyword . '%')
-                                ->orWhere('email', 'LIKE', '%' . $keyword . '%')
-                                ->orWhere('phone', 'LIKE', '%' . $keyword . '%');
+                            return $subQuery->where('name', 'LIKE', '%' . $keyword . '%');
                         })
                         ->orWhere('code', 'LIKE', '%' . $keyword . '%');
                 }
@@ -118,14 +101,8 @@ class OrderTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $with = ['user'];
-
-        if (is_plugin_active('payment')) {
-            $with[] = 'payment';
-        }
-
         $query = $this->repository->getModel()
-            ->with($with)
+            ->with(['user', 'payment'])
             ->select([
                 'id',
                 'status',
@@ -221,60 +198,6 @@ class OrderTable extends TableAbstract
         ];
     }
 
-    public function getFilters(): array
-    {
-        $filters = parent::getFilters();
-
-        $filters = array_merge($filters, [
-            'customer_name' => [
-                'title' => trans('plugins/ecommerce::ecommerce.customer_name'),
-                'type' => 'text',
-            ],
-            'customer_email' => [
-                'title' => trans('plugins/ecommerce::ecommerce.customer_email'),
-                'type' => 'text',
-            ],
-            'customer_phone' => [
-                'title' => trans('plugins/ecommerce::ecommerce.customer_phone'),
-                'type' => 'text',
-            ],
-            'amount' => [
-                'title' => trans('plugins/ecommerce::order.amount'),
-                'type' => 'number',
-            ],
-            'shipping_method' => [
-                'title' => trans('plugins/ecommerce::ecommerce.shipping_method'),
-                'type' => 'select',
-                'choices' => array_filter(ShippingMethodEnum::labels()),
-            ],
-        ]);
-
-        if (is_plugin_active('payment')) {
-            $filters = array_merge($filters, [
-                'payment_method' => [
-                    'title' => trans('plugins/ecommerce::order.payment_method'),
-                    'type' => 'select',
-                    'choices' => PaymentMethodEnum::labels(),
-                ],
-                'payment_status' => [
-                    'title' => trans('plugins/ecommerce::order.payment_status_label'),
-                    'type' => 'select',
-                    'choices' => PaymentStatusEnum::labels(),
-                ],
-            ]);
-        }
-
-        if (is_plugin_active('marketplace')) {
-            $filters['store_id'] = [
-                'title' => trans('plugins/marketplace::store.forms.store'),
-                'type' => 'select-search',
-                'choices' => [-1 => theme_option('site_title')] + app(StoreInterface::class)->pluck('name', 'id'),
-            ];
-        }
-
-        return $filters;
-    }
-
     public function renderTable($data = [], $mergeData = []): View|Factory|Response
     {
         if ($this->query()->count() === 0 &&
@@ -315,85 +238,5 @@ class OrderTable extends TableAbstract
         }
 
         return parent::saveBulkChangeItem($item, $inputKey, $inputValue);
-    }
-
-    public function applyFilterCondition(Builder|QueryBuilder|Relation $query, string $key, string $operator, ?string $value): Builder|QueryBuilder|Relation
-    {
-        switch ($key) {
-            case 'customer_name':
-                if (! $value) {
-                    break;
-                }
-
-                return $this->filterByCustomer($query, $value);
-            case 'customer_email':
-                if (! $value) {
-                    break;
-                }
-
-                return $this->filterByCustomer($query, $value, 'email');
-            case 'customer_phone':
-                if (! $value) {
-                    break;
-                }
-
-                return $this->filterByCustomer($query, $value, 'phone');
-            case 'status':
-                if (! OrderStatusEnum::isValid($value)) {
-                    return $query;
-                }
-
-                break;
-            case 'shipping_method':
-                if (! $value) {
-                    break;
-                }
-
-                if (! ShippingMethodEnum::isValid($value)) {
-                    return $query;
-                }
-
-                break;
-            case 'payment_method':
-                if (! is_plugin_active('payment') || ! PaymentMethodEnum::isValid($value)) {
-                    return $query;
-                }
-
-                return $query->whereHas('payment', function ($subQuery) use ($value) {
-                    $subQuery->where('payment_channel', $value);
-                });
-
-            case 'payment_status':
-                if (! is_plugin_active('payment') || ! PaymentStatusEnum::isValid($value)) {
-                    return $query;
-                }
-
-                return $query->whereHas('payment', function ($subQuery) use ($value) {
-                    $subQuery->where('status', $value);
-                });
-            case 'store_id':
-                if (! is_plugin_active('marketplace')) {
-                    return $query;
-                }
-                if ($value == -1) {
-                    return $query->where(function ($subQuery) {
-                        $subQuery->whereNull('store_id')
-                            ->orWhere('store_id', 0);
-                    });
-                }
-        }
-
-        return parent::applyFilterCondition($query, $key, $operator, $value);
-    }
-
-    protected function filterByCustomer(Builder|QueryBuilder|Relation $query, ?string $value, string $column = 'name'): Builder|QueryBuilder|Relation
-    {
-        return $query
-            ->whereHas('user', function ($subQuery) use ($value, $column) {
-                $subQuery->where($column, 'LIKE', '%' . $value . '%');
-            })
-            ->whereHas('address', function ($subQuery) use ($value, $column) {
-                $subQuery->where($column, 'LIKE', '%' . $value . '%');
-            });
     }
 }

@@ -62,9 +62,11 @@ class PickrrServiceProvider extends ServiceProvider
         //     ]);
         // });
       //  add_filter('handle_shipping_fee', [$this, 'handleShippingFee'], 11, 3);
+
         if ( defined('SHIPPING_METHODS_SETTINGS_PAGE')) {
             add_filter(SHIPPING_METHODS_SETTINGS_PAGE, [$this, 'addSettings'], 2);
         }
+
         add_filter(BASE_FILTER_ENUM_ARRAY, function ($values, $class) {
             if ($class == ShippingMethodEnum::class) {
                 $values['PICKRR'] = PICKRR_MODULE_SCREEN_NAME;
@@ -81,7 +83,7 @@ class PickrrServiceProvider extends ServiceProvider
             return $value;
         }, 2, 2);
 
-
+       
     }
 
     /**

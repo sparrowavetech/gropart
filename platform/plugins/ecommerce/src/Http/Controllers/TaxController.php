@@ -17,8 +17,11 @@ use Illuminate\Http\Request;
 
 class TaxController extends BaseController
 {
-    public function __construct(protected TaxInterface $taxRepository)
+    protected TaxInterface $taxRepository;
+
+    public function __construct(TaxInterface $taxRepository)
     {
+        $this->taxRepository = $taxRepository;
     }
 
     public function index(TaxTable $dataTable)
@@ -47,7 +50,7 @@ class TaxController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int|string $id, FormBuilder $formBuilder)
+    public function edit(int $id, FormBuilder $formBuilder)
     {
         $tax = $this->taxRepository->findOrFail($id);
 
@@ -56,7 +59,7 @@ class TaxController extends BaseController
         return $formBuilder->create(TaxForm::class, ['model' => $tax])->renderForm();
     }
 
-    public function update(int|string $id, TaxRequest $request, BaseHttpResponse $response)
+    public function update(int $id, TaxRequest $request, BaseHttpResponse $response)
     {
         $tax = $this->taxRepository->createOrUpdate($request->input(), ['id' => $id]);
 
@@ -67,7 +70,7 @@ class TaxController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
+    public function destroy(Request $request, int $id, BaseHttpResponse $response)
     {
         try {
             $tax = $this->taxRepository->findOrFail($id);

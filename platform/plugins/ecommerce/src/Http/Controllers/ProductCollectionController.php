@@ -18,8 +18,11 @@ use Illuminate\Http\Request;
 
 class ProductCollectionController extends BaseController
 {
-    public function __construct(protected ProductCollectionInterface $productCollectionRepository)
+    protected ProductCollectionInterface $productCollectionRepository;
+
+    public function __construct(ProductCollectionInterface $productCollectionRepository)
     {
+        $this->productCollectionRepository = $productCollectionRepository;
     }
 
     public function index(ProductCollectionTable $dataTable)
@@ -53,7 +56,7 @@ class ProductCollectionController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
+    public function edit(int $id, FormBuilder $formBuilder, Request $request)
     {
         $productCollection = $this->productCollectionRepository->findOrFail($id);
 
@@ -67,7 +70,7 @@ class ProductCollectionController extends BaseController
             ->renderForm();
     }
 
-    public function update(int|string $id, ProductCollectionRequest $request, BaseHttpResponse $response)
+    public function update(int $id, ProductCollectionRequest $request, BaseHttpResponse $response)
     {
         $productCollection = $this->productCollectionRepository->findOrFail($id);
         $productCollection->fill($request->input());
@@ -81,7 +84,7 @@ class ProductCollectionController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(int|string $id, BaseHttpResponse $response, Request $request)
+    public function destroy(int $id, BaseHttpResponse $response, Request $request)
     {
         $productCollection = $this->productCollectionRepository->findOrFail($id);
 

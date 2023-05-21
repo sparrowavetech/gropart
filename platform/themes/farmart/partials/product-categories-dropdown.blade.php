@@ -1,3 +1,6 @@
+@php
+$categories = $categories->where('is_enquiry','=' ,0);
+@endphp
 @foreach ($categories as $category)
     <li @if ($category->activeChildren->count()) class="menu-item-has-children has-mega-menu" @endif>
         <a href="{{ $category->url }}">

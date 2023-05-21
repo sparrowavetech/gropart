@@ -19,8 +19,14 @@ use Illuminate\Http\Request;
 
 class StoreController extends BaseController
 {
-    public function __construct(protected StoreInterface $storeRepository, protected RevenueInterface $revenueRepository)
+    protected StoreInterface $storeRepository;
+
+    protected RevenueInterface $revenueRepository;
+
+    public function __construct(StoreInterface $storeRepository, RevenueInterface $revenueRepository)
     {
+        $this->storeRepository = $storeRepository;
+        $this->revenueRepository = $revenueRepository;
     }
 
     public function index(StoreTable $table)
@@ -49,7 +55,7 @@ class StoreController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
+    public function edit(int $id, FormBuilder $formBuilder, Request $request)
     {
         $store = $this->storeRepository->findOrFail($id);
 
@@ -60,7 +66,7 @@ class StoreController extends BaseController
         return $formBuilder->create(StoreForm::class, ['model' => $store])->renderForm();
     }
 
-    public function update(int|string $id, StoreRequest $request, BaseHttpResponse $response)
+    public function update(int $id, StoreRequest $request, BaseHttpResponse $response)
     {
         $store = $this->storeRepository->findOrFail($id);
 
@@ -84,7 +90,7 @@ class StoreController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
+    public function destroy(Request $request, int $id, BaseHttpResponse $response)
     {
         try {
             $store = $this->storeRepository->findOrFail($id);

@@ -13,8 +13,11 @@ use Illuminate\Support\Facades\DB;
 
 class GetProductService
 {
-    public function __construct(protected ProductInterface $productRepository)
+    protected ProductInterface $productRepository;
+
+    public function __construct(ProductInterface $productRepository)
     {
+        $this->productRepository = $productRepository;
     }
 
     public function getProduct(

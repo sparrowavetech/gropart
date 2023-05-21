@@ -97,6 +97,10 @@
                                                 <div class="store-title d-flex align-items-center">
                                                     <h2 class="h5 mb-0">
                                                         <a href="{{ $store->url }}">{{ $store->name }}</a>
+                                                        @if($store->is_verified)
+                                                            <img class="verified-store-main" src="{{ asset('/storage/stores/verified.png')}}"alt="Verified">
+                                                        @endif
+                                                        <small class="badge bg-warning text-dark">{{ $store->shop_category->label() }}</small>
                                                     </h2>
                                                 </div>
                                                 @if (EcommerceHelper::isReviewEnabled())
@@ -116,7 +120,7 @@
                                                         <i class="icon icon-telephone"></i> <a href="tel:{{ $store->phone }}">{{ $store->phone }}</a>
                                                     </div>
                                                 @endif
-                                                @if ($store->email)
+                                                @if (!MarketplaceHelper::hideStoreEmail() && $store->email)
                                                     <div class="vendor-store-email mb-1">
                                                         <i class="icon icon-envelope"></i> <a href="mailto:{{ $store->email }}">{{ $store->email }}</a>
                                                     </div>

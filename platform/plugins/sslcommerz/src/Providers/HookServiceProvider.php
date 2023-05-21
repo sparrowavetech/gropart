@@ -9,7 +9,7 @@ use Html;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\ServiceProvider;
-use PaymentMethods;
+use Throwable;
 
 class HookServiceProvider extends ServiceProvider
 {
@@ -92,21 +92,31 @@ class HookServiceProvider extends ServiceProvider
         }, 20, 3);
     }
 
-    public function addPaymentSettings(string|null $settings): string
+    /**
+     * @param string $settings
+     * @return string
+     * @throws Throwable
+     */
+    public function addPaymentSettings($settings)
     {
         return $settings . view('plugins/sslcommerz::settings')->render();
     }
 
-    public function registerSslCommerzMethod(string|null $html, array $data): string|null
+    /**
+     * @param string $html
+     * @param array $data
+     * @return string
+     */
+    public function registerSslCommerzMethod($html, array $data)
     {
-        PaymentMethods::method(SSLCOMMERZ_PAYMENT_METHOD_NAME, [
-            'html' => view('plugins/sslcommerz::methods', $data)->render(),
-        ]);
-
-        return $html;
+        return $html . view('plugins/sslcommerz::methods', $data)->render();
     }
 
-    public function checkoutWithSslCommerz(array $data, Request $request): array
+    /**
+     * @param Request $request
+     * @param array $data
+     */
+    public function checkoutWithSslCommerz(array $data, Request $request)
     {
         if ($request->input('payment_method') == SSLCOMMERZ_PAYMENT_METHOD_NAME) {
             $paymentData = apply_filters(PAYMENT_FILTER_PAYMENT_DATA, [], $request);
@@ -161,10 +171,10 @@ class HookServiceProvider extends ServiceProvider
             $body['value_c'] = $paymentData['customer_id'];
             $body['value_d'] = urlencode($paymentData['customer_type']);
 
-            $gateway = new SslCommerzNotification();
+            $sslc = new SslCommerzNotification();
 
             // initiate(Transaction Data , false: Redirect to SSLCOMMERZ gateway/ true: Show all the Payment gateway here
-            $result = $gateway->makePayment($body, 'hosted');
+            $result = $sslc->makePayment($body, 'hosted');
 
             $data = array_merge($data, $result);
         }

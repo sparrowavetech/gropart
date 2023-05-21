@@ -1,13 +1,12 @@
 <ul class="list-group list_payment_method">
-    {!! apply_filters(PAYMENT_FILTER_ADDITIONAL_PAYMENT_METHODS, null, [
-        'name' => $name,
-        'amount' => $amount,
-        'currency' => $currency,
-        'selected' => PaymentMethods::getSelectedMethod(),
-        'default' => PaymentMethods::getDefaultMethod(),
-        'selecting' => PaymentMethods::getSelectingMethod(),
-     ]) !!}
+    @php
+        $selected = session('selected_payment_method');
+        $default = \Botble\Payment\Supports\PaymentHelper::defaultPaymentMethod();
+        $selecting = $selected ?: $default;
+    @endphp
+    {!! apply_filters(PAYMENT_FILTER_ADDITIONAL_PAYMENT_METHODS, null, compact('name', 'amount', 'currency', 'selected', 'default', 'selecting')) !!}
 
-    {!! PaymentMethods::render() !!}
+    @include('plugins/payment::partials.cod')
+    @include('plugins/payment::partials.bank-transfer')
 </ul>
 

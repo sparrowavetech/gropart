@@ -19,7 +19,6 @@ class OrderReturn extends BaseModel
         'reason',
         'order_status',
         'return_status',
-        'store_id',
     ];
 
     protected $casts = [

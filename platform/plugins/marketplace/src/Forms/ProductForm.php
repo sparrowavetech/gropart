@@ -142,6 +142,11 @@ class ProductForm extends BaseProductForm
                 'choices' => ProductCategoryHelper::getAllProductCategoriesWithChildren(),
                 'value' => old('categories', $selectedCategories),
             ])
+            ->add('is_enquiry', 'onOff', [
+                'label'         => trans('plugins/ecommerce::products.form.is_enquiry'),
+                'label_attr'    => ['class' => 'control-label'],
+                'default_value' => false,
+            ])
             ->add('brand_id', 'customSelect', [
                 'label' => trans('plugins/ecommerce::products.form.brand'),
                 'label_attr' => ['class' => 'control-label'],
@@ -259,7 +264,7 @@ class ProductForm extends BaseProductForm
         }
     }
 
-    public function getProductAttributes(int|string|null $attributeSetId): Collection
+    public function getProductAttributes(?int $attributeSetId): Collection
     {
         $params = ['order_by' => ['ec_product_attributes.order' => 'ASC']];
 

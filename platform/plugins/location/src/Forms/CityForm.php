@@ -12,9 +12,16 @@ use Botble\Location\Repositories\Interfaces\StateInterface;
 
 class CityForm extends FormAbstract
 {
-    public function __construct(protected CountryInterface $countryRepository, protected StateInterface $stateRepository)
+    protected CountryInterface $countryRepository;
+
+    protected StateInterface $stateRepository;
+
+    public function __construct(CountryInterface $countryRepository, StateInterface $stateRepository)
     {
         parent::__construct();
+
+        $this->countryRepository = $countryRepository;
+        $this->stateRepository = $stateRepository;
     }
 
     public function buildForm(): void

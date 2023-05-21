@@ -7,19 +7,26 @@ use Botble\Ecommerce\Http\Requests\CartRequest;
 use Botble\Ecommerce\Http\Requests\UpdateCartRequest;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Ecommerce\Services\HandleApplyPromotionsService;
+use Botble\Support\Http\Requests\Request;
+use Illuminate\Http\Request as MultiCartRequest;
 use Cart;
 use EcommerceHelper;
 use Exception;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
 use OrderHelper;
+use Response;
 use SeoHelper;
 use Theme;
 
 class PublicCartController extends Controller
 {
-    public function __construct(protected ProductInterface $productRepository)
+    protected ProductInterface $productRepository;
+
+    public function __construct(ProductInterface $productRepository)
     {
+        $this->productRepository = $productRepository;
     }
 
     public function store(CartRequest $request, BaseHttpResponse $response)
@@ -142,6 +149,89 @@ class PublicCartController extends Controller
                 'content' => $cartItems,
             ]);
     }
+    public function addMultipleIncart(
+        MultiCartRequest $request,
+        BaseHttpResponse $response
+    ) {
+        if (!EcommerceHelper::isCartEnabled()) {
+            abort(404);
+        }
+        $product_ids = $product_id = $request->input('id');
+        $Item = 0;
+        $error = 0;
+        $message = '';
+        foreach ($product_ids as $product_id) {
+            $product = $this->productRepository->findById($product_id);
+            if (!$product) {
+                $error++;
+                $message .= __(':product is out of stock or not exists!' . ['product' =>  $product->original_product->name]);
+                continue;
+            }
+
+            if ($product->variations->count() > 0 && !$product->is_variation) {
+                $product = $product->defaultVariation->product;
+            }
+
+            if ($product->isOutOfStock()) {
+                $error++;
+                $message .= __('Product :product is out of stock!', ['product' => $product->original_product->name]);
+                continue;
+            }
+
+            $maxQuantity = $product->quantity;
+
+            if (!$product->canAddToCart(1)) {
+                $error++;
+                $message .= __('Product :product  Maximum quantity is :max!', ['product' => $product->original_product->name, 'max' => $maxQuantity]);
+                continue;
+            }
+
+            $product->quantity -= 1;
+
+            $outOfQuantity = false;
+            foreach (Cart::instance('cart')->content() as $item) {
+                if ($item->id == $product->id) {
+                    $originalQuantity = $product->quantity;
+                    $product->quantity = (int)$product->quantity - $item->qty;
+
+                    if ($product->quantity < 0) {
+                        $product->quantity = 0;
+                    }
+
+                    if ($product->isOutOfStock()) {
+                        $outOfQuantity = true;
+
+                        break;
+                    }
+
+                    $product->quantity = $originalQuantity;
+                }
+            }
+
+            if ($outOfQuantity) {
+                $error++;
+                $message .= __('Product :product is out of stock!', ['product' => $product->original_product->name]);
+                continue;
+            }
+
+            $cartItems = OrderHelper::handleAddCart($product, $request);
+
+            $Item++;
+        }
+        if ($error > 0) {
+            return  $response
+                ->setMessage(__(
+                    ':message ! :count product added to cart successfully!',
+                    ['count' => $Item, 'message' => $message]
+                ));
+        } else {
+            return  $response
+                ->setMessage(__(
+                    ':count product added to cart successfully!',
+                    ['count' => $Item]
+                ));
+        }
+    }
 
     public function getView(HandleApplyPromotionsService $applyPromotionsService)
     {
@@ -206,6 +296,8 @@ class PublicCartController extends Controller
             if (! $cartItem) {
                 continue;
             }
+
+            $product = null;
 
             $product = $this->productRepository->findById($cartItem->id);
 

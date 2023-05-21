@@ -163,7 +163,7 @@ class StripePaymentService extends StripePaymentAbstract
             } else {
                 $paymentStatus = PaymentStatusEnum::FAILED;
             }
-        } catch (Exception) {
+        } catch (Exception $exception) {
             $paymentStatus = PaymentStatusEnum::FAILED;
         }
 

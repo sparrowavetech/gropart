@@ -20,15 +20,18 @@ class OrderReturnTable extends TableAbstract
 
     protected $hasFilter = true;
 
+    protected OrderReturnItemInterface $orderReturnItemRepository;
+
     public function __construct(
         DataTables $table,
         UrlGenerator $urlGenerator,
         OrderReturnInterface $orderReturnRepository,
-        protected OrderReturnItemInterface $orderReturnItemRepository
+        OrderReturnItemInterface $orderReturnItemRepository
     ) {
         parent::__construct($table, $urlGenerator);
 
         $this->repository = $orderReturnRepository;
+        $this->orderReturnItemRepository = $orderReturnItemRepository;
     }
 
     public function ajax(): JsonResponse
@@ -99,7 +102,6 @@ class OrderReturnTable extends TableAbstract
             ])
             ->with(['customer', 'order', 'items'])
             ->withCount('items')
-            ->where('store_id', auth('customer')->user()->store->id)
             ->orderBy('id', 'desc');
 
         return $this->applyScopes($query);

@@ -7,7 +7,6 @@ use Botble\Stripe\Services\Gateways\StripePaymentService;
 use Html;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
-use PaymentMethods;
 
 class HookServiceProvider extends ServiceProvider
 {
@@ -86,11 +85,7 @@ class HookServiceProvider extends ServiceProvider
 
     public function registerStripeMethod(?string $html, array $data): string
     {
-        PaymentMethods::method(STRIPE_PAYMENT_METHOD_NAME, [
-            'html' => view('plugins/stripe::methods', $data)->render(),
-        ]);
-
-        return $html;
+        return $html . view('plugins/stripe::methods', $data)->render();
     }
 
     public function checkoutWithStripe(array $data, Request $request): array

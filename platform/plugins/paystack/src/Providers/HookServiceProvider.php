@@ -8,7 +8,6 @@ use Botble\Paystack\Services\Gateways\PaystackPaymentService;
 use Html;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
-use PaymentMethods;
 use Paystack;
 use Throwable;
 use Illuminate\Support\Arr;
@@ -100,14 +99,10 @@ class HookServiceProvider extends ServiceProvider
 
     public function registerPaystackMethod(?string $html, array $data): string
     {
-        PaymentMethods::method(PAYSTACK_PAYMENT_METHOD_NAME, [
-            'html' => view('plugins/paystack::methods', $data)->render(),
-        ]);
-
-        return $html;
+        return $html . view('plugins/paystack::methods', $data)->render();
     }
 
-    public function checkoutWithPaystack(array $data, Request $request): array
+    public function checkoutWithPaystack(array $data, Request $request)
     {
         if ($request->input('payment_method') == PAYSTACK_PAYMENT_METHOD_NAME) {
             $supportedCurrencies = (new PaystackPaymentService())->supportedCurrencyCodes();

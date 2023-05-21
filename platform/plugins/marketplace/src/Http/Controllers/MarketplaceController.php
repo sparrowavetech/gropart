@@ -15,8 +15,14 @@ use MarketplaceHelper;
 
 class MarketplaceController extends BaseController
 {
-    public function __construct(protected StoreInterface $storeRepository)
+    protected SettingStore $settingStore;
+
+    protected StoreInterface $storeRepository;
+
+    public function __construct(SettingStore $settingStore, StoreInterface $storeRepository)
     {
+        $this->settingStore = $settingStore;
+        $this->storeRepository = $storeRepository;
     }
 
     public function getSettings(ProductCategoryInterface $productCategoryRepository)
@@ -43,7 +49,7 @@ class MarketplaceController extends BaseController
         return view('plugins/marketplace::settings.index', compact('productCategories', 'commissionEachCategory'));
     }
 
-    public function postSettings(MarketPlaceSettingFormRequest $request, BaseHttpResponse $response, SettingStore $settingStore)
+    public function postSettings(MarketPlaceSettingFormRequest $request, BaseHttpResponse $response)
     {
         $settingKey = MarketplaceHelper::getSettingKey();
         $filtered = collect($request->all())->filter(function ($value, $key) use ($settingKey) {
@@ -62,10 +68,10 @@ class MarketplaceController extends BaseController
                 $settingValue = $settingValue < 0 ? 0 : min($settingValue, 100);
             }
 
-            $settingStore->set($key, $settingValue);
+            $this->settingStore->set($key, $settingValue);
         }
 
-        $settingStore->save();
+        $this->settingStore->save();
 
         if ($preVerifyVendor != MarketplaceHelper::getSetting('verify_vendor', 1)) {
             Helper::clearCache();

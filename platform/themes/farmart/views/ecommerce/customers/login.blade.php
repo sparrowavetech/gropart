@@ -2,7 +2,7 @@
 
 {!! Theme::partial('page-header', ['withTitle' => false, 'size' => 'xl']) !!}
 <div class="container">
-    <div class="row customer-auth-page py-5 mt-5 justify-content-center">
+    <div class="row customer-auth-page py-md-5 mt-md-5 justify-content-center">
         <div class="col-sm-9 col-md-6 col-lg-5 col-xl-4">
             <div class="customer-auth-form bg-light pt-1 py-3 px-4">
                 <nav>

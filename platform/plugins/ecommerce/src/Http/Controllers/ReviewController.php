@@ -13,8 +13,11 @@ use Illuminate\Http\Request;
 
 class ReviewController extends BaseController
 {
-    public function __construct(protected ReviewInterface $reviewRepository)
+    protected ReviewInterface $reviewRepository;
+
+    public function __construct(ReviewInterface $reviewRepository)
     {
+        $this->reviewRepository = $reviewRepository;
     }
 
     public function index(ReviewTable $dataTable)
@@ -26,7 +29,7 @@ class ReviewController extends BaseController
         return $dataTable->renderTable();
     }
 
-    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
+    public function destroy(Request $request, int $id, BaseHttpResponse $response)
     {
         try {
             $review = $this->reviewRepository->findOrFail($id);

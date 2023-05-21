@@ -21,8 +21,11 @@ use Botble\Base\Forms\FormBuilder;
 
 class CountryController extends BaseController
 {
-    public function __construct(protected CountryInterface $countryRepository)
+    protected CountryInterface $countryRepository;
+
+    public function __construct(CountryInterface $countryRepository)
     {
+        $this->countryRepository = $countryRepository;
     }
 
     public function index(CountryTable $table)
@@ -51,18 +54,18 @@ class CountryController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
+    public function edit(int $id, FormBuilder $formBuilder, Request $request)
     {
         $country = $this->countryRepository->findOrFail($id);
 
         event(new BeforeEditContentEvent($request, $country));
 
-        page_title()->setTitle(trans('core/base::forms.edit_item', ['name' => $country->name]));
+        page_title()->setTitle(trans('plugins/location::country.edit') . ' "' . $country->name . '"');
 
         return $formBuilder->create(CountryForm::class, ['model' => $country])->renderForm();
     }
 
-    public function update(int|string $id, CountryRequest $request, BaseHttpResponse $response)
+    public function update(int $id, CountryRequest $request, BaseHttpResponse $response)
     {
         $country = $this->countryRepository->findOrFail($id);
 
@@ -77,7 +80,7 @@ class CountryController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
+    public function destroy(Request $request, int $id, BaseHttpResponse $response)
     {
         try {
             $country = $this->countryRepository->findOrFail($id);

@@ -51,7 +51,7 @@ class ProductController extends BaseController
         return $formBuilder->create(ProductForm::class)->renderForm();
     }
 
-    public function edit(int|string $id, Request $request, FormBuilder $formBuilder)
+    public function edit(int $id, Request $request, FormBuilder $formBuilder)
     {
         $product = $this->productRepository->findOrFail($id);
 
@@ -132,7 +132,7 @@ class ProductController extends BaseController
     }
 
     public function update(
-        int|string $id,
+        int $id,
         ProductRequest $request,
         StoreProductService $service,
         GroupedProductInterface $groupedProductRepository,

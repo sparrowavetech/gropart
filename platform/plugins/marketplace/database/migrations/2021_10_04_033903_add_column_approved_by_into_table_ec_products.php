@@ -8,7 +8,7 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::table('ec_products', function (Blueprint $table) {
-            $table->foreignId('approved_by')->nullable()->default(0);
+            $table->integer('approved_by')->nullable()->default(0);
         });
     }
 

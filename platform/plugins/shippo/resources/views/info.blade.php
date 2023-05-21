@@ -22,11 +22,9 @@
 
         <div class="col-12 my-2">
             <div class="row">
-                @php
-                    $rateCreated = Carbon\Carbon::create(Arr::get($rate, 'object_created'));
-                @endphp
+                @php($rateCreated = Carbon\Carbon::create(Arr::get($rate, 'object_created')))
                 <div class="col-6">
-                    <span class="fw-bold fs-5">{{ trans('plugins/ecommerce::shipping.shipping_fee') }}</span>
+                    <span class="fw-bold" style="font-size: 18px">{{ trans('plugins/ecommerce::shipping.shipping_fee') }}</span>
                     <table class="table">
                         <tbody>
                             <tr>
@@ -66,7 +64,7 @@
             </div>
         </div>
         <div class="col-12 mt-2">
-            <span class="fw-bold fs-5">{{ trans('plugins/shippo::shippo.parcel') }}</span>
+            <span class="fw-bold" style="font-size: 18px">{{ trans('plugins/shippo::shippo.parcel') }}</span>
             @php
                 $parcel = Arr::get($shipmentShippo, 'parcels.0');
                 $distanceUnit = Arr::get($parcel, 'distance_unit');

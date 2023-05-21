@@ -18,6 +18,16 @@ use Illuminate\Support\Arr;
 
 class HandleShippingFeeService
 {
+    protected ShippingInterface $shippingRepository;
+
+    protected AddressInterface $addressRepository;
+
+    protected ShippingRuleInterface $shippingRuleRepository;
+
+    protected ProductInterface $productRepository;
+
+    protected StoreLocatorInterface $storeLocatorRepository;
+
     protected array $shipping;
 
     protected ?BaseModel $shippingDefault = null;
@@ -29,12 +39,17 @@ class HandleShippingFeeService
     protected bool $useCache;
 
     public function __construct(
-        protected ShippingInterface $shippingRepository,
-        protected AddressInterface $addressRepository,
-        protected ShippingRuleInterface $shippingRuleRepository,
-        protected ProductInterface $productRepository,
-        protected StoreLocatorInterface $storeLocatorRepository
+        ShippingInterface $shippingRepository,
+        AddressInterface $addressRepository,
+        ShippingRuleInterface $shippingRuleRepository,
+        ProductInterface $productRepository,
+        StoreLocatorInterface $storeLocatorRepository
     ) {
+        $this->shippingRepository = $shippingRepository;
+        $this->addressRepository = $addressRepository;
+        $this->shippingRuleRepository = $shippingRuleRepository;
+        $this->productRepository = $productRepository;
+        $this->storeLocatorRepository = $storeLocatorRepository;
         $this->shipping = [];
         $this->shippingRules = [];
 
@@ -76,30 +91,6 @@ class HandleShippingFeeService
             $response = Arr::get($filtered, $option);
 
             return $response ? [$response] : [];
-        }
-
-        if (get_ecommerce_setting('hide_other_shipping_options_if_it_has_free_shipping', false)) {
-            $hasFreeShipping = false;
-
-            foreach ($result as $item) {
-                foreach ($item as $option) {
-                    if ((float)$option['price'] == 0) {
-                        $hasFreeShipping = true;
-
-                        break;
-                    }
-                }
-            }
-
-            if ($hasFreeShipping) {
-                foreach ($result as $itemKey => $item) {
-                    foreach ($item as $optionKey => $option) {
-                        if ((float)$option['price'] > 0) {
-                            Arr::forget($result, $itemKey . '.' . $optionKey);
-                        }
-                    }
-                }
-            }
         }
 
         return $result;
@@ -167,8 +158,8 @@ class HandleShippingFeeService
 
     protected function calculateDefaultFeeByAddress(
         ?Shipping $shipping,
-        int|float $weight,
-        int|float $orderTotal,
+        int $weight,
+        int $orderTotal,
         array $data,
         string $option = null
     ): array {

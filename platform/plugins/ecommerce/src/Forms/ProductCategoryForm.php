@@ -72,6 +72,12 @@ class ProductCategoryForm extends FormAbstract
                 'label_attr' => ['class' => 'control-label'],
                 'default_value' => false,
             ])
+            ->add('is_enquiry', 'onOff', [
+                'label' => trans('plugins/ecommerce::products.form.is_enquiry'),
+                'label_attr' => ['class' => 'control-label'],
+                'default_value' => false,
+            ])
+
             ->setBreakFieldPoint('status');
     }
 }

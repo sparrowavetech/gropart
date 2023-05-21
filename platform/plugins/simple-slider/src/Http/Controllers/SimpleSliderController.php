@@ -23,10 +23,16 @@ class SimpleSliderController extends BaseController
 {
     use HasDeleteManyItemsTrait;
 
+    protected SimpleSliderInterface $simpleSliderRepository;
+
+    protected SimpleSliderItemInterface $simpleSliderItemRepository;
+
     public function __construct(
-        protected SimpleSliderInterface $simpleSliderRepository,
-        protected SimpleSliderItemInterface $simpleSliderItemRepository
+        SimpleSliderInterface $simpleSliderRepository,
+        SimpleSliderItemInterface $simpleSliderItemRepository
     ) {
+        $this->simpleSliderRepository = $simpleSliderRepository;
+        $this->simpleSliderItemRepository = $simpleSliderItemRepository;
     }
 
     public function index(SimpleSliderTable $dataTable)
@@ -58,7 +64,7 @@ class SimpleSliderController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
+    public function edit(int $id, FormBuilder $formBuilder, Request $request)
     {
         Assets::addScripts(['blockui', 'sortable'])
             ->addScriptsDirectly(['vendor/core/plugins/simple-slider/js/simple-slider-admin.js']);
@@ -67,14 +73,14 @@ class SimpleSliderController extends BaseController
 
         event(new BeforeEditContentEvent($request, $simpleSlider));
 
-        page_title()->setTitle(trans('core/base::forms.edit_item', ['name' => $simpleSlider->name]));
+        page_title()->setTitle(trans('plugins/simple-slider::simple-slider.edit') . ' "' . $simpleSlider->name . '"');
 
         return $formBuilder
             ->create(SimpleSliderForm::class, ['model' => $simpleSlider])
             ->renderForm();
     }
 
-    public function update(int|string $id, SimpleSliderRequest $request, BaseHttpResponse $response)
+    public function update(int $id, SimpleSliderRequest $request, BaseHttpResponse $response)
     {
         $simpleSlider = $this->simpleSliderRepository->findOrFail($id);
         $simpleSlider->fill($request->input());
@@ -88,7 +94,7 @@ class SimpleSliderController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
+    public function destroy(Request $request, int $id, BaseHttpResponse $response)
     {
         try {
             $simpleSlider = $this->simpleSliderRepository->findOrFail($id);

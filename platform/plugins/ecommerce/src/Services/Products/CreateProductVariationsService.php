@@ -9,11 +9,22 @@ use Botble\Ecommerce\Repositories\Interfaces\ProductVariationInterface;
 
 class CreateProductVariationsService
 {
+    protected ProductInterface $productRepository;
+
+    protected ProductAttributeInterface $productAttributeRepository;
+
+    protected ProductVariationInterface $productVariationRepository;
+
     public function __construct(
-        protected ProductInterface $productRepository,
-        protected ProductAttributeInterface $productAttributeRepository,
-        protected ProductVariationInterface $productVariationRepository
+        ProductInterface $product,
+        ProductAttributeInterface $productAttribute,
+        ProductVariationInterface $productVariation
     ) {
+        $this->productRepository = $product;
+
+        $this->productAttributeRepository = $productAttribute;
+
+        $this->productVariationRepository = $productVariation;
     }
 
     public function execute(Product $product): array

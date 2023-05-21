@@ -4,10 +4,7 @@ namespace Botble\Language\Providers;
 
 use Botble\Language\Commands\RouteCacheCommand;
 use Botble\Language\Commands\RouteClearCommand;
-use Botble\Language\Commands\RouteTranslationsListCommand;
 use Botble\Language\Commands\SyncOldDataCommand;
-use Illuminate\Foundation\Console\RouteCacheCommand as BaseRouteCacheCommand;
-use Illuminate\Foundation\Console\RouteClearCommand as BaseRouteClearCommand;
 use Illuminate\Support\ServiceProvider;
 
 class CommandServiceProvider extends ServiceProvider
@@ -16,14 +13,13 @@ class CommandServiceProvider extends ServiceProvider
     {
         $this->commands([
             SyncOldDataCommand::class,
-            RouteTranslationsListCommand::class,
         ]);
 
-        $this->app->extend(BaseRouteCacheCommand::class, function () {
+        $this->app->extend('command.route.cache', function () {
             return new RouteCacheCommand($this->app['files']);
         });
 
-        $this->app->extend(BaseRouteClearCommand::class, function () {
+        $this->app->extend('command.route.clear', function () {
             return new RouteClearCommand($this->app['files']);
         });
     }

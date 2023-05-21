@@ -20,7 +20,6 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
 use RvMedia;
-use Throwable;
 
 class InvoiceHelper
 {
@@ -36,7 +35,7 @@ class InvoiceHelper
             $address = $order->billingAddress;
         }
 
-        $invoiceData = [
+        $invoice = new Invoice([
             'reference_id' => $order->id,
             'reference_type' => Order::class,
             'customer_name' => $address->name ?: $order->user->name,
@@ -46,9 +45,9 @@ class InvoiceHelper
             'customer_phone' => $address->phone,
             'customer_address' => $address->full_address,
             'customer_tax_id' => null,
-            'payment_id' => null,
-            'status' => InvoiceStatusEnum::COMPLETED,
-            'paid_at' => now(),
+            'payment_id' => $order->payment->id,
+            'status' => $order->payment->status,
+            'paid_at' => $order->payment->status == PaymentStatusEnum::COMPLETED ? Carbon::now() : null,
             'tax_amount' => $order->tax_amount,
             'shipping_amount' => $order->shipping_amount,
             'discount_amount' => $order->discount_amount,
@@ -59,17 +58,7 @@ class InvoiceHelper
             'coupon_code' => $order->coupon_code,
             'discount_description' => $order->discount_description,
             'description' => $order->description,
-        ];
-
-        if (is_plugin_active('payment')) {
-            $invoiceData = array_merge($invoiceData, [
-                'payment_id' => $order->payment->id,
-                'status' => $order->payment->status,
-                'paid_at' => $order->payment->status == PaymentStatusEnum::COMPLETED ? Carbon::now() : null,
-            ]);
-        }
-
-        $invoice = new Invoice($invoiceData);
+        ]);
 
         $invoice->save();
 
@@ -108,17 +97,13 @@ class InvoiceHelper
             $twigCompiler = (new TwigCompiler())->addExtension(new TwigExtension());
             $content = $twigCompiler->compile($content, $this->getDataForInvoiceTemplate($invoice));
 
-            if (get_ecommerce_setting('invoice_support_arabic_language', 0) == 1) {
+            if (setting('job_board_invoice_support_arabic_language', 0) == 1) {
                 $arabic = new Arabic();
                 $p = $arabic->arIdentify($content);
 
                 for ($i = count($p) - 1; $i >= 0; $i -= 2) {
-                    try {
-                        $utf8ar = $arabic->utf8Glyphs(substr($content, $p[$i - 1], $p[$i] - $p[$i - 1]));
-                        $content = substr_replace($content, $utf8ar, $p[$i - 1], $p[$i] - $p[$i - 1]);
-                    } catch (Throwable) {
-                        continue;
-                    }
+                    $utf8ar = $arabic->utf8Glyphs(substr($content, $p[$i - 1], $p[$i] - $p[$i - 1]));
+                    $content = substr_replace($content, $utf8ar, $p[$i - 1], $p[$i] - $p[$i - 1]);
                 }
             }
         }
@@ -180,9 +165,18 @@ class InvoiceHelper
         $logo = get_ecommerce_setting('company_logo_for_invoicing') ?: (theme_option(
             'logo_in_invoices'
         ) ?: theme_option('logo'));
-
+       
+            if($invoice->reference->store_id){
+               $storeStateId =  $invoice->reference->store->state;
+            }else{
+                $storeStateId =  setting('ecommerce_store_state', 0);
+            }
         return [
             'invoice' => $invoice->loadMissing('items')->toArray(),
+            'toState' => $invoice->reference->address->state,
+            'fromState'=> $storeStateId ,
+            'colspan'=> $invoice->reference->address->state !== $storeStateId ?7:8 ,
+            'isIgst'=> $invoice->reference->address->state !== $storeStateId ?true:false ,
             'logo' => $logo,
             'logo_full_path' => RvMedia::getRealPath($logo),
             'site_title' => theme_option('site_title'),
@@ -195,8 +189,8 @@ class InvoiceHelper
             'is_tax_enabled' => EcommerceHelperFacade::isTaxEnabled(),
             'settings' => [
                 'using_custom_font_for_invoice' => (bool) get_ecommerce_setting('using_custom_font_for_invoice'),
-                'custom_font_family' => get_ecommerce_setting('invoice_font_family', 'DejaVu Sans'),
-                'font_family' => get_ecommerce_setting('using_custom_font_for_invoice', 0) == 1
+                'custom_font_family' => get_ecommerce_setting('invoice_font_family'),
+                'font_family' => get_ecommerce_setting('invoice_font_family', 0) == 1
                     ? get_ecommerce_setting('invoice_font_family', 'DejaVu Sans')
                     : 'DejaVu Sans',
                 'enable_invoice_stamp' => get_ecommerce_setting('enable_invoice_stamp'),

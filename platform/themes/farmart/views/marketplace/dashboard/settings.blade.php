@@ -27,7 +27,7 @@
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label for="shop-company" class="required">{{ __('Company Name') }}</label>
-                                <input class="form-control" name="company" id="shop-company" type="text" value="{{ old('company', $store->company) }}" placeholder="{{ __('Company Name') }}">
+                                <input class="form-control" name="name" id="shop-company" type="text" value="{{ old('company', $store->company) }}" placeholder="{{ __('Company Name') }}">
                                 @if ($errors->has('company'))
                                     <span class="text-danger">{{ $errors->first('company') }}</span>
                                 @endif

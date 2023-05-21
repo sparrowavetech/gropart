@@ -11,30 +11,34 @@
                         <div class="col-lg-7">
                             <div class="vendor-info-content px-3">
                                 <div class="vendor-store-information row align-items-center">
-                                    <div class="vendor-avatar col-3">
+                                    <div class="vendor-avatar col-12 col-sm-3">
                                         <img class="rounded-circle" src="{{ $store->logo_url }}" alt="avatar">
                                     </div>
                                     <div class="vendor-store-info col">
-                                        <h4 class="vendor-name">{{ $store->name }}</h4>
+                                        <h4 class="vendor-name d-inline">{{ $store->name }}</h4>
+                                        @if($store->is_verified)
+                                            <img class="verified-store-info" src="{{ asset('/storage/stores/verified.png')}}"alt="Verified">
+                                        @endif
+                                        <small class="badge bg-warning text-dark">{{ $store->shop_category->label() }}</small>
+
                                         @if (EcommerceHelper::isReviewEnabled())
-                                            <div class="vendor-store-rating mb-3">
+                                            <div class="vendor-store-rating">
                                                 {!! Theme::partial('star-rating', ['avg' => $store->reviews()->avg('star'), 'count' => $store->reviews()->count()]) !!}
                                             </div>
                                         @endif
 
-                                        @if ($store->full_address)
-                                            <div class="vendor-store-address mb-1">
-                                                <i class="icon icon-map-marker"></i>&nbsp;{{ $store->full_address }}
-                                            </div>
-                                        @endif
+                                        <div class="vendor-store-address mt-3 mb-1">
+                                            <i class="icon icon-map-marker"></i>
+                                            {{ $store->full_address }}
+                                        </div>
                                         @if (!MarketplaceHelper::hideStorePhoneNumber() && $store->phone)
                                             <div class="vendor-store-phone mb-1">
-                                                <i class="icon icon-telephone"></i>&nbsp;<a href="tel:{{ $store->phone }}">{{ $store->phone }}</a>
+                                                <i class="icon icon-telephone"></i> <a href="tel:{{ $store->phone }}">{{ $store->phone }}</a>
                                             </div>
                                         @endif
-                                        @if ($store->email)
+                                        @if (!MarketplaceHelper::hideStoreEmail() && $store->email)
                                             <div class="vendor-store-email mb-1">
-                                                <i class="icon icon-envelope"></i>&nbsp;<a href="mailto:{{ $store->email }}">{{ $store->email }}</a>
+                                                <i class="icon icon-envelope"></i> <a href="mailto:{{ $store->email }}">{{ $store->email }}</a>
                                             </div>
                                         @endif
                                     </div>

@@ -11,7 +11,7 @@ use MarketplaceHelper;
 
 class ProductController extends BaseController
 {
-    public function approveProduct(int|string $id, ProductInterface $productRepository, BaseHttpResponse $response)
+    public function approveProduct(int $id, ProductInterface $productRepository, BaseHttpResponse $response)
     {
         $product = $productRepository->findOrFail($id);
 

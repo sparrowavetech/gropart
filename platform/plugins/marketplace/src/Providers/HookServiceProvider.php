@@ -8,6 +8,7 @@ use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Base\Models\BaseModel;
 use Botble\Ecommerce\Enums\CustomerStatusEnum;
 use Botble\Ecommerce\Models\Customer;
 use Botble\Ecommerce\Models\Discount;
@@ -28,6 +29,7 @@ use Botble\Marketplace\Repositories\Interfaces\WithdrawalInterface;
 use Botble\Slug\Models\Slug;
 use Exception;
 use Html;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
@@ -110,16 +112,22 @@ class HookServiceProvider extends ServiceProvider
                             'shop_name' => 'required|min:2',
                             'shop_phone' => 'required|' . BaseHelper::getPhoneValidationRule(),
                             'shop_url' => 'required',
+                            'shop_category'   => 'required',
                         ],
                         [],
                         [
                             'shop_name' => __('Shop Name'),
                             'shop_phone' => __('Shop Phone'),
                             'shop_url' => __('Shop URL'),
+                            'shop_category'   => __('Shop Type'),
                         ]
                     )->validate();
 
-                    $existing = SlugHelper::getSlug($request->input('shop_url'), SlugHelper::getPrefix(Store::class));
+                    $existing = SlugHelper::getSlug(
+                        $request->input('shop_url'),
+                        SlugHelper::getPrefix(Store::class),
+                        Store::class
+                    );
 
                     if ($existing) {
                         throw ValidationException::withMessages([
@@ -491,10 +499,6 @@ class HookServiceProvider extends ServiceProvider
 
     public function addBankInfoTab(?string $tabs, Model|string|null $data = null): ?string
     {
-        if (is_plugin_active('language') && is_plugin_active('language-advanced') && Language::getCurrentAdminLocaleCode() != Language::getDefaultLocaleCode()) {
-            return $tabs;
-        }
-
         if (! empty($data) && get_class($data) == Store::class && $data->customer->is_vendor) {
             return $tabs .
                 view('plugins/marketplace::customers.tax-info-tab')->render() .

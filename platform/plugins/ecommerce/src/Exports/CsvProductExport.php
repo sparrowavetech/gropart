@@ -92,8 +92,6 @@ class CsvProductExport implements FromCollection, WithHeadings
                 'length' => $product->length,
                 'wide' => $product->wide,
                 'height' => $product->height,
-                'cost_per_item' => $product->cost_per_item,
-                'barcode' => $product->barcode,
                 'content' => $product->content,
                 'tags' => implode(',', $product->tags->pluck('name')->all()),
             ];
@@ -141,8 +139,6 @@ class CsvProductExport implements FromCollection, WithHeadings
                             'length' => $variation->product->length,
                             'wide' => $variation->product->wide,
                             'height' => $variation->product->height,
-                            'cost_per_item' => $variation->product->cost_per_item,
-                            'barcode' => $variation->product->barcode,
                             'content' => '',
                             'tags' => '',
                         ],
@@ -203,8 +199,6 @@ class CsvProductExport implements FromCollection, WithHeadings
             'length' => 'Length',
             'wide' => 'Wide',
             'height' => 'Height',
-            'cost_per_item' => 'Cost per item',
-            'barcode' => 'Barcode',
             'content' => 'Content',
             'tags' => 'Tags',
         ];

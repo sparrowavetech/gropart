@@ -61,15 +61,9 @@ class TopSellingProductsTable extends TableAbstract
 
         $query = $this->repository->getModel()
             ->join('ec_order_product', 'ec_products.id', '=', 'ec_order_product.product_id')
-            ->join('ec_orders', 'ec_orders.id', '=', 'ec_order_product.order_id');
-
-        if (is_plugin_active('payment')) {
-            $query = $query
-                ->join('payments', 'payments.order_id', '=', 'ec_orders.id')
-                ->where('payments.status', PaymentStatusEnum::COMPLETED);
-        }
-
-        $query = $query
+            ->join('ec_orders', 'ec_orders.id', '=', 'ec_order_product.order_id')
+            ->join('payments', 'payments.order_id', '=', 'ec_orders.id')
+            ->where('payments.status', PaymentStatusEnum::COMPLETED)
             ->whereDate('ec_orders.created_at', '>=', $startDate)
             ->whereDate('ec_orders.created_at', '<=', $endDate)
             ->select([

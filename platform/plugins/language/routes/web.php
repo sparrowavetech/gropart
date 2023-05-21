@@ -25,7 +25,7 @@ Route::group(['namespace' => 'Botble\Language\Http\Controllers', 'middleware' =>
                 'as' => 'languages.destroy',
                 'uses' => 'LanguageController@destroy',
                 'middleware' => 'preventDemo',
-            ])->where('id', BaseHelper::routeIdRegex());
+            ])->where('id', '[0-9]+');
 
             Route::get('set-default', [
                 'as' => 'languages.set.default',

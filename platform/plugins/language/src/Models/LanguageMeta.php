@@ -36,7 +36,7 @@ class LanguageMeta extends BaseModel
             $originValue = md5($model->id . get_class($model) . time());
         }
 
-        LanguageMeta::create([
+        LanguageMeta::insert([
             'reference_id' => $model->id,
             'reference_type' => get_class($model),
             'lang_meta_code' => $locale,

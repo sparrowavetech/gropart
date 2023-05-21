@@ -5,9 +5,10 @@ namespace Botble\Paypal\Providers;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Paypal\Services\Gateways\PayPalPaymentService;
 use Html;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
-use PaymentMethods;
+use Throwable;
 
 class HookServiceProvider extends ServiceProvider
 {
@@ -68,20 +69,32 @@ class HookServiceProvider extends ServiceProvider
         }, 2, 2);
     }
 
+    /**
+     * @param string|null $settings
+     * @return string
+     * @throws Throwable
+     */
     public function addPaymentSettings(?string $settings): string
     {
         return $settings . view('plugins/paypal::settings')->render();
     }
 
+    /**
+     * @param string|null $html
+     * @param array $data
+     * @return string
+     */
     public function registerPaypalMethod(?string $html, array $data): string
     {
-        PaymentMethods::method(PAYPAL_PAYMENT_METHOD_NAME, [
-            'html' => view('plugins/paypal::methods', $data)->render(),
-        ]);
-
-        return $html;
+        return $html . view('plugins/paypal::methods', $data)->render();
     }
 
+    /**
+     * @param array $data
+     * @param Request $request
+     * @return array
+     * @throws BindingResolutionException
+     */
     public function checkoutWithPaypal(array $data, Request $request): array
     {
         if ($request->input('payment_method') == PAYPAL_PAYMENT_METHOD_NAME) {

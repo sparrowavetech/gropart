@@ -12,9 +12,13 @@ use Throwable;
 #[AsCommand('cms:abandoned-carts:email', 'Send emails abandoned carts')]
 class SendAbandonedCartsEmailCommand extends Command
 {
-    public function __construct(protected OrderInterface $orderRepository)
+    public OrderInterface $orderRepository;
+
+    public function __construct(OrderInterface $orderRepository)
     {
         parent::__construct();
+
+        $this->orderRepository = $orderRepository;
     }
 
     public function handle(): int

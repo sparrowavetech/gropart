@@ -4,7 +4,7 @@ namespace Botble\Shippo\Providers;
 
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Shippo\Http\Middleware\WebhookMiddleware;
-use Illuminate\Routing\Events\RouteMatched;
+use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 
 class ShippoServiceProvider extends ServiceProvider
@@ -33,9 +33,12 @@ class ShippoServiceProvider extends ServiceProvider
             ->loadAndPublishConfigurations(['general'])
             ->publishAssets();
 
-        $this->app['events']->listen(RouteMatched::class, function () {
-            $this->app['router']->aliasMiddleware('shippo.webhook', WebhookMiddleware::class);
-        });
+        /**
+         * @var Router $router
+         */
+        $router = $this->app['router'];
+
+        $router->aliasMiddleware('shippo.webhook', WebhookMiddleware::class);
 
         $config = $this->app['config'];
         if (! $config->has('logging.channels.shippo')) {

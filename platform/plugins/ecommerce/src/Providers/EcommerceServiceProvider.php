@@ -19,6 +19,7 @@ use Botble\Ecommerce\Models\Address;
 use Botble\Ecommerce\Models\Brand;
 use Botble\Ecommerce\Models\Currency;
 use Botble\Ecommerce\Models\Customer;
+use Botble\Ecommerce\Models\Enquiry;
 use Botble\Ecommerce\Models\Discount;
 use Botble\Ecommerce\Models\FlashSale;
 use Botble\Ecommerce\Models\GlobalOption;
@@ -55,6 +56,7 @@ use Botble\Ecommerce\Repositories\Caches\AddressCacheDecorator;
 use Botble\Ecommerce\Repositories\Caches\BrandCacheDecorator;
 use Botble\Ecommerce\Repositories\Caches\CurrencyCacheDecorator;
 use Botble\Ecommerce\Repositories\Caches\CustomerCacheDecorator;
+use Botble\Ecommerce\Repositories\Caches\EnquiryCacheDecorator;
 use Botble\Ecommerce\Repositories\Caches\DiscountCacheDecorator;
 use Botble\Ecommerce\Repositories\Caches\FlashSaleCacheDecorator;
 use Botble\Ecommerce\Repositories\Caches\GlobalOptionCacheDecorator;
@@ -88,6 +90,7 @@ use Botble\Ecommerce\Repositories\Eloquent\AddressRepository;
 use Botble\Ecommerce\Repositories\Eloquent\BrandRepository;
 use Botble\Ecommerce\Repositories\Eloquent\CurrencyRepository;
 use Botble\Ecommerce\Repositories\Eloquent\CustomerRepository;
+use Botble\Ecommerce\Repositories\Eloquent\EnquiryRepository;
 use Botble\Ecommerce\Repositories\Eloquent\DiscountRepository;
 use Botble\Ecommerce\Repositories\Eloquent\FlashSaleRepository;
 use Botble\Ecommerce\Repositories\Eloquent\GlobalOptionRepository;
@@ -121,6 +124,7 @@ use Botble\Ecommerce\Repositories\Interfaces\AddressInterface;
 use Botble\Ecommerce\Repositories\Interfaces\BrandInterface;
 use Botble\Ecommerce\Repositories\Interfaces\CurrencyInterface;
 use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
+use Botble\Ecommerce\Repositories\Interfaces\EnquiryInterface;
 use Botble\Ecommerce\Repositories\Interfaces\DiscountInterface;
 use Botble\Ecommerce\Repositories\Interfaces\FlashSaleInterface;
 use Botble\Ecommerce\Repositories\Interfaces\GlobalOptionInterface;
@@ -168,13 +172,11 @@ use Illuminate\Foundation\AliasLoader;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\Router;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use SeoHelper;
-use SiteMapManager;
 use SlugHelper;
 use SocialService;
 
@@ -380,6 +382,12 @@ class EcommerceServiceProvider extends ServiceProvider
             );
         });
 
+        $this->app->bind(EnquiryInterface::class, function () {
+            return new EnquiryCacheDecorator(
+                new EnquiryRepository(new Enquiry())
+            );
+        });
+
         $this->app->bind(GroupedProductInterface::class, function () {
             return new GroupedProductCacheDecorator(
                 new GroupedProductRepository(new GroupedProduct())
@@ -442,12 +450,12 @@ class EcommerceServiceProvider extends ServiceProvider
         SlugHelper::registerModule(Brand::class, 'Brands');
         SlugHelper::registerModule(ProductCategory::class, 'Product Categories');
         SlugHelper::registerModule(ProductTag::class, 'Product Tags');
+        SlugHelper::registerModule(Enquiry::class, 'Enquiry Product');
         SlugHelper::setPrefix(Product::class, 'products');
         SlugHelper::setPrefix(Brand::class, 'brands');
         SlugHelper::setPrefix(ProductTag::class, 'product-tags');
         SlugHelper::setPrefix(ProductCategory::class, 'product-categories');
-
-        SiteMapManager::registerKey(['product-categories', 'product-tags', 'product-brands', 'products-((?:19|20|21|22)\d{2})-(0?[1-9]|1[012])']);
+        SlugHelper::setPrefix(Enquiry::class, 'enquiry-product');
 
         $this
             ->loadAndPublishConfigurations(['permissions'])
@@ -699,6 +707,8 @@ class EcommerceServiceProvider extends ServiceProvider
             }, 1234, 2);
         }
 
+        EmailHandler::addTemplateSettings(ECOMMERCE_MODULE_SCREEN_NAME, config('plugins.ecommerce.email', []));
+
         $this->app->register(HookServiceProvider::class);
 
         Event::listen(RouteMatched::class, function () {
@@ -738,6 +748,15 @@ class EcommerceServiceProvider extends ServiceProvider
                     'icon' => 'fa fa-shopping-bag',
                     'url' => route('orders.index'),
                     'permissions' => ['orders.index'],
+                ])
+                ->registerItem([
+                    'id'          => 'cms-plugins-ecommerce-enquiry',
+                    'priority'    => 1,
+                    'parent_id'   => 'cms-plugins-ecommerce',
+                    'name'        => 'plugins/ecommerce::enquiry.name',
+                    'icon'        => 'fa fa-question-circle',
+                    'url'         => route('enquires.index'),
+                    'permissions' => ['enquires.index'],
                 ])
                 ->registerItem([
                     'id' => 'cms-plugins-ecommerce-invoice',
@@ -963,18 +982,6 @@ class EcommerceServiceProvider extends ServiceProvider
                     'url' => route('ecommerce.export.products.index'),
                     'permissions' => ['ecommerce.export.products.index'],
                 ]);
-
-            $emailConfig = config('plugins.ecommerce.email', []);
-
-            if (! EcommerceHelper::isEnabledSupportDigitalProducts()) {
-                Arr::forget($emailConfig, 'templates.download_digital_products');
-            }
-
-            if (! EcommerceHelper::isReviewEnabled()) {
-                Arr::forget($emailConfig, 'templates.review_products');
-            }
-
-            EmailHandler::addTemplateSettings(ECOMMERCE_MODULE_SCREEN_NAME, $emailConfig);
         });
 
         $this->app->booted(function () {
@@ -993,7 +1000,7 @@ class EcommerceServiceProvider extends ServiceProvider
                 });
             }
 
-            if (defined('SOCIAL_LOGIN_MODULE_SCREEN_NAME') && Route::has('customer.login') && Route::has('public.index')) {
+            if (defined('SOCIAL_LOGIN_MODULE_SCREEN_NAME') && Route::has('customer.login')) {
                 SocialService::registerModule([
                     'guard' => 'customer',
                     'model' => Customer::class,

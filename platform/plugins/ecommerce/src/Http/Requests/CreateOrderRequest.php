@@ -3,24 +3,16 @@
 namespace Botble\Ecommerce\Http\Requests;
 
 use BaseHelper;
-use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Support\Http\Requests\Request;
-use Illuminate\Validation\Rule;
 
 class CreateOrderRequest extends Request
 {
     public function rules(): array
     {
-        $rules = [
+        return [
             'customer_id' => 'required|exists:ec_customers,id',
             'customer_address.phone' => BaseHelper::getPhoneValidationRule(),
         ];
-
-        if (is_plugin_active('payment')) {
-            $rules['payment_status'] = Rule::in([PaymentStatusEnum::COMPLETED, PaymentStatusEnum::PENDING]);
-        }
-
-        return $rules;
     }
 
     public function attributes(): array

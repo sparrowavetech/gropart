@@ -13,10 +13,6 @@ class ReportGeneralHtml extends Html
 {
     public function getContent(): string
     {
-        if (! is_plugin_active('payment')) {
-            return '';
-        }
-
         $count = [
             'startDate' => $this->startDate,
             'endDate' => $this->endDate,

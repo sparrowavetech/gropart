@@ -8,7 +8,7 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::table('mp_customer_revenues', function (Blueprint $table) {
-            $table->foreignId('user_id')->default(0);
+            $table->integer('user_id')->default(0)->unsigned();
             $table->string('type', 60)->nullable();
         });
     }

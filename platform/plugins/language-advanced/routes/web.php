@@ -7,7 +7,7 @@ Route::group(['namespace' => 'Botble\LanguageAdvanced\Http\Controllers', 'middle
                 'as' => 'language-advanced.save',
                 'uses' => 'LanguageAdvancedController@save',
                 'permission' => false,
-            ])->where('id', BaseHelper::routeIdRegex());
+            ])->where('id', '[0-9]+');
         });
     });
 });

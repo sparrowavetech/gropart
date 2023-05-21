@@ -15,6 +15,8 @@ return [
         'product_approved_description' => 'Send email to vendor when their product approved',
         'withdrawal_approved_title' => 'Withdrawal approved',
         'withdrawal_approved_description' => 'Send email to vendor when their withdrawal request approved',
+        'store_new_enquiry_title' => 'Notice about new enquiry',
+        'store_new_enquiry_description' => 'Send email to the store owner when an enquiry placed',
     ],
     'current_balance' => 'Current balance',
     'settings' => [
@@ -58,6 +60,8 @@ return [
         'earnings' => 'Earnings',
         'products_count' => 'Products Count',
     ],
+    'enquiry_id' => 'Enquiry ID',
+    'enquiry_description' => 'Addition Description',
     'vendors' => 'Vendors',
     'payout_payment_methods' => [
         'bank_transfer' => 'Bank Transfer',

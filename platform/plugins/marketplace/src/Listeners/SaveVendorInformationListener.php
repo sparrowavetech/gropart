@@ -3,29 +3,38 @@
 namespace Botble\Marketplace\Listeners;
 
 use BaseHelper;
-use Botble\Base\Events\AdminNotificationEvent;
-use Botble\Base\Supports\AdminNotificationItem;
 use Botble\Ecommerce\Models\Customer;
-use Botble\Marketplace\Events\NewVendorRegistered;
 use Botble\Marketplace\Models\Store;
 use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
 use Botble\Marketplace\Repositories\Interfaces\VendorInfoInterface;
+use Botble\Marketplace\Enums\ShopTypeEnum;
 use Botble\Slug\Models\Slug;
 use Carbon\Carbon;
 use EmailHandler;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use MarketplaceHelper;
 use SlugHelper;
+use Throwable;
 
 class SaveVendorInformationListener
 {
+    protected StoreInterface $storeRepository;
+
+    protected VendorInfoInterface $vendorInfoRepository;
+
+    protected Request $request;
+
     public function __construct(
-        protected StoreInterface $storeRepository,
-        protected VendorInfoInterface $vendorInfoRepository,
-        protected Request $request
+        StoreInterface $storeRepository,
+        VendorInfoInterface $vendorInfoRepository,
+        Request $request
     ) {
+        $this->storeRepository = $storeRepository;
+        $this->vendorInfoRepository = $vendorInfoRepository;
+        $this->request = $request;
     }
 
     public function handle(Registered $event): void
@@ -35,10 +44,19 @@ class SaveVendorInformationListener
             ! $customer->is_vendor &&
             $this->request->input('is_vendor') == 1) {
             $store = $this->storeRepository->getFirstBy(['customer_id' => $customer->getAuthIdentifier()]);
+
+            if ($this->request->input('shop_category') == ShopTypeEnum::MANUFACTURE) {
+                $shop_category = ShopTypeEnum::MANUFACTURE();
+            } elseif ($this->request->input('shop_category') == ShopTypeEnum::WHOLESALER) {
+                $shop_category = ShopTypeEnum::WHOLESALER();
+            } elseif ($this->request->input('shop_category') == ShopTypeEnum::RETAILER) {
+                $shop_category = ShopTypeEnum::RETAILER();
+            }
             if (! $store) {
                 $store = $this->storeRepository->createOrUpdate([
                     'name' => BaseHelper::clean($this->request->input('shop_name')),
                     'phone' => BaseHelper::clean($this->request->input('shop_phone')),
+                    'shop_category' => $shop_category,
                     'email' => BaseHelper::clean($this->request->input('email')),
                     'customer_id' => $customer->getAuthIdentifier(),
                 ]);
@@ -69,15 +87,6 @@ class SaveVendorInformationListener
                         ]);
                     $mailer->sendUsingTemplate('verify_vendor', get_admin_email()->first());
                 }
-
-                event(new AdminNotificationEvent(
-                    AdminNotificationItem::make()
-                        ->title(trans('plugins/marketplace::unverified-vendor.new_vendor_notifications.new_vendor'))
-                        ->description(trans('plugins/marketplace::unverified-vendor.new_vendor_notifications.description', [
-                            'customer' => $customer->name,
-                        ]))
-                        ->action(trans('plugins/marketplace::unverified-vendor.new_vendor_notifications.view'), route('marketplace.unverified-vendors.view', $customer->id))
-                ));
             } else {
                 $customer->vendor_verified_at = Carbon::now();
             }
@@ -90,8 +99,6 @@ class SaveVendorInformationListener
             }
 
             $customer->save();
-
-            event(new NewVendorRegistered($customer));
         }
     }
 }

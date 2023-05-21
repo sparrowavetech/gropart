@@ -13,7 +13,6 @@
                         <th>{{ __('Items Count') }}</th>
                         <th>{{ __('Date') }}</th>
                         <th>{{ __('Status') }}</th>
-                        <th>{{ __('Refund amount') }}</th>
                         <th>{{ __('Actions') }}</th>
                     </tr>
                 </thead>
@@ -26,7 +25,6 @@
                             <th scope="row">{{ $item->items_count }}</th>
                             <td>{{ $item->created_at->translatedFormat('M d, Y h:m') }}</td>
                             <td>{!! BaseHelper::clean($item->return_status->toHtml()) !!}</td>
-                            <td>{{ format_price($item->items->sum('refund_amount')) }}</td>
                             <td>
                                 <a class="btn btn-primary btn-sm" href="{{ route('customer.order_returns.detail', $item->id) }}">{{ __('View') }}</a>
                             </td>

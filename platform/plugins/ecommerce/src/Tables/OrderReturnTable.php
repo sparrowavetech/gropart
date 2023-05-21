@@ -23,17 +23,20 @@ class OrderReturnTable extends TableAbstract
 
     protected $hasFilter = true;
 
+    protected OrderReturnItemInterface $orderReturnItemRepository;
+
     public function __construct(
         DataTables $table,
         UrlGenerator $urlGenerator,
         OrderReturnInterface $orderReturnRepository,
-        protected OrderReturnItemInterface $orderReturnItemRepository
+        OrderReturnItemInterface $orderReturnItemRepository
     ) {
         parent::__construct($table, $urlGenerator);
 
         $this->repository = $orderReturnRepository;
+        $this->orderReturnItemRepository = $orderReturnItemRepository;
 
-        if (! Auth::user()->hasAnyPermission(['order_returns.edit', 'order_returns.destroy'])) {
+        if (! Auth::user()->hasPermission('orders.edit')) {
             $this->hasOperations = false;
             $this->hasActions = false;
         }

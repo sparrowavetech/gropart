@@ -16,15 +16,25 @@ use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Faq\Forms\FaqForm;
 use Botble\Base\Forms\FormBuilder;
+use Illuminate\Contracts\View\View;
+use Throwable;
 
 class FaqController extends BaseController
 {
     use HasDeleteManyItemsTrait;
 
-    public function __construct(protected FaqInterface $faqRepository)
+    protected FaqInterface $faqRepository;
+
+    public function __construct(FaqInterface $faqRepository)
     {
+        $this->faqRepository = $faqRepository;
     }
 
+    /**
+     * @param FaqTable $table
+     * @return \Illuminate\Contracts\View\Factory|\Symfony\Component\HttpFoundation\Response|View
+     * @throws Throwable
+     */
     public function index(FaqTable $table)
     {
         page_title()->setTitle(trans('plugins/faq::faq.name'));
@@ -32,6 +42,10 @@ class FaqController extends BaseController
         return $table->renderTable();
     }
 
+    /**
+     * @param FormBuilder $formBuilder
+     * @return string
+     */
     public function create(FormBuilder $formBuilder)
     {
         page_title()->setTitle(trans('plugins/faq::faq.create'));
@@ -39,6 +53,11 @@ class FaqController extends BaseController
         return $formBuilder->create(FaqForm::class)->renderForm();
     }
 
+    /**
+     * @param FaqRequest $request
+     * @param BaseHttpResponse $response
+     * @return BaseHttpResponse
+     */
     public function store(FaqRequest $request, BaseHttpResponse $response)
     {
         $faq = $this->faqRepository->createOrUpdate($request->input());
@@ -51,18 +70,30 @@ class FaqController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
+    /**
+     * @param int $id
+     * @param FormBuilder $formBuilder
+     * @param Request $request
+     * @return string
+     */
+    public function edit($id, FormBuilder $formBuilder, Request $request)
     {
         $faq = $this->faqRepository->findOrFail($id);
 
         event(new BeforeEditContentEvent($request, $faq));
 
-        page_title()->setTitle(trans('core/base::forms.edit_item', ['name' => $faq->question]));
+        page_title()->setTitle(trans('plugins/faq::faq.edit') . ' "' . $faq->question . '"');
 
         return $formBuilder->create(FaqForm::class, ['model' => $faq])->renderForm();
     }
 
-    public function update(int|string $id, FaqRequest $request, BaseHttpResponse $response)
+    /**
+     * @param int $id
+     * @param FaqRequest $request
+     * @param BaseHttpResponse $response
+     * @return BaseHttpResponse
+     */
+    public function update($id, FaqRequest $request, BaseHttpResponse $response)
     {
         $faq = $this->faqRepository->findOrFail($id);
 
@@ -77,7 +108,13 @@ class FaqController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
+    /**
+     * @param Request $request
+     * @param int $id
+     * @param BaseHttpResponse $response
+     * @return BaseHttpResponse
+     */
+    public function destroy(Request $request, $id, BaseHttpResponse $response)
     {
         try {
             $faq = $this->faqRepository->findOrFail($id);
@@ -94,6 +131,12 @@ class FaqController extends BaseController
         }
     }
 
+    /**
+     * @param Request $request
+     * @param BaseHttpResponse $response
+     * @return BaseHttpResponse
+     * @throws Exception
+     */
     public function deletes(Request $request, BaseHttpResponse $response)
     {
         return $this->executeDeleteItems($request, $response, $this->faqRepository, FAQ_MODULE_SCREEN_NAME);

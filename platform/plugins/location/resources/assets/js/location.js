@@ -65,10 +65,8 @@ class Location {
         $(document).on('change', country, function (e) {
             e.preventDefault();
 
-            const $parent = getParent($(e.currentTarget));
-
-            const $state = $parent.find(state);
-            const $city = $parent.find(city);
+            const $state = $(document).find(state);
+            const $city = $(document).find(city);
 
             $state.find('option:not([value=""]):not([value="0"])').remove();
             $city.find('option:not([value=""]):not([value="0"])').remove();
@@ -85,8 +83,7 @@ class Location {
         $(document).on('change', state, function (e) {
             e.preventDefault();
 
-            const $parent = getParent($(e.currentTarget));
-            const $city = $parent.find(city);
+            const $city = $(document).find(city);
 
             if ($city.length) {
                 $city.find('option:not([value=""]):not([value="0"])').remove();
@@ -97,16 +94,6 @@ class Location {
                 }
             }
         });
-
-        function getParent($el) {
-            let $parent = $(document);
-            let formParent = $el.data('form-parent');
-            if (formParent && $(formParent).length) {
-                $parent = $(formParent);
-            }
-
-            return $parent;
-        }
     }
 }
 

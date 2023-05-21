@@ -2,7 +2,7 @@
     @forelse ($addresses as $address)
         <div class="col">
             <address class="border rounded p-2">
-                <p>{{ $address->name }}<br> {{ $address->address }}<br> {{ $address->city }}<br> {{ $address->state }}
+                <p>{{ $address->name }}<br> {{ $address->address }}<br> {{ $address->cityName }}<br> {{ $address->stateName }}
                     @if (EcommerceHelper::isUsingInMultipleCountries())<br> {{ $address->country_name }} @endif 
                     @if (EcommerceHelper::isZipCodeEnabled())<br> {{ $address->zip_code }} @endif
                     <br> {{ $address->phone }}

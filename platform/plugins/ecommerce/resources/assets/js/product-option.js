@@ -31,10 +31,11 @@ $(document).ready(function () {
         generateProductOption() {
             let self = this;
             let html = '';
+            $('#accordion-product-option').html('');
             this.productOptions.map(function (item, index) {
                 html += self.generateOptionTemplate(item, index);
             })
-            $('#accordion-product-option').html(html);
+            $('#accordion-product-option').append(html);
             this.sortable();
         },
         eventListeners() {
@@ -119,22 +120,18 @@ $(document).ready(function () {
             axios
                 .get(window.productOptions.routes.ajax_option_info + '?id=' + optionId)
                 .then(function (res) {
-                    const data = res.data.data
+                    const option = res.data.data;
 
-                    const option = {
-                        id: data.id,
-                        name: data.name,
-                        option_type: data.option_type,
-                        option_value: data.option_value,
-                        values: data.values,
-                        required: data.required
-                    }
+                    self.productOptions.push({
+                        id: option.id,
+                        name: option.name,
+                        option_type: option.option_type,
+                        option_value: option.option_value,
+                        values: option.values,
+                        required: option.required
+                    })
 
-                    self.productOptions.push(option)
-
-                    const html = self.generateOptionTemplate(option, self.productOptions.length - 1)
-
-                    $('#accordion-product-option').append(html);
+                    self.generateProductOption()
                 });
         },
         generateOptionTemplate(option, index) {

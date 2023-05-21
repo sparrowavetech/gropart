@@ -51,68 +51,99 @@
                         <div class="table-wrap">
                             <table class="table-order table-divided">
                                 <tbody>
-                                    @foreach ($order->products as $orderProduct)
-                                        @php
-                                            $product = $orderProduct->product;
-                                        @endphp
-                                        <tr>
+                                @foreach ($order->products as $orderProduct)
+                                    @php
+                                        $product = get_products([
+                                            'condition' => [
+                                                'ec_products.id' => $orderProduct->product_id,
+                                            ],
+                                            'take' => 1,
+                                            'select' => [
+                                                'ec_products.id',
+                                                'ec_products.images',
+                                                'ec_products.name',
+                                                'ec_products.price',
+                                                'ec_products.sale_price',
+                                                'ec_products.sale_type',
+                                                'ec_products.start_date',
+                                                'ec_products.end_date',
+                                                'ec_products.sku',
+                                                'ec_products.is_variation',
+                                                'ec_products.is_variation',
+                                                'ec_products.status',
+                                                'ec_products.order',
+                                                'ec_products.created_at',
+                                            ],
+                                        ]);
+                                    @endphp
+
+                                    <tr>
+                                        @if ($product)
                                             <td class="width-60-px min-width-60-px vertical-align-t">
-                                                <div class="wrap-img">
-                                                    <img class="thumb-image thumb-image-cartorderlist"
-                                                        src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}"
-                                                        alt="{{ $orderProduct->product_name }}">
+                                                <div class="wrap-img"><img class="thumb-image thumb-image-cartorderlist"
+                                                                           src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}"
+                                                                           alt="{{ $orderProduct->product_name }}">
                                                 </div>
                                             </td>
-                                            <td class="pl5 p-r5 min-width-200-px">
-                                                <a class="text-underline hover-underline pre-line" target="_blank"
-                                                    href="{{ $product->id && $product->original_product->id ? route('marketplace.vendor.products.edit', $product->original_product->id) : '#' }}"
-                                                    title="{{ $orderProduct->product_name }}">
-                                                    {{ $orderProduct->product_name }}
-                                                </a>
+                                        @endif
+                                        <td class="pl5 p-r5 min-width-200-px">
+                                            <a class="text-underline hover-underline pre-line" target="_blank"
+                                               href="{{ $product && $product->original_product->id ? route('marketplace.vendor.products.edit', $product->original_product->id) : '#' }}"
+                                               title="{{ $orderProduct->product_name }}">
+                                                {{ $orderProduct->product_name }}
+                                            </a>
+                                            @if ($product)
                                                 &nbsp;
-                                                @if ($sku = Arr::get($orderProduct->options, 'sku'))
-                                                    ({{ trans('plugins/ecommerce::order.sku') }}: <strong>{{ $sku }}</strong>)
+                                                @if ($product->sku)
+                                                    ({{ trans('plugins/ecommerce::order.sku') }}:
+                                                    <strong>{{ $product->sku }}</strong>)
                                                 @endif
-                                                @if ($attributes = Arr::get($orderProduct->options, 'attributes'))
+                                                @if ($product->is_variation)
                                                     <p class="mb-0">
-                                                        <small>{{ $attributes }}</small>
+                                                        <small>{{ $product->variation_attributes }}</small>
                                                     </p>
                                                 @endif
+                                            @endif
 
-                                                @include('plugins/ecommerce::themes.includes.cart-item-options-extras', ['options' => $orderProduct->options])
+                                            @if (!empty($orderProduct->options) && is_array($orderProduct->options))
+                                                @foreach($orderProduct->options as $option)
+                                                    @if (!empty($option['key']) && !empty($option['value']))
+                                                        <p class="mb-0"><small>{{ $option['key'] }}:
+                                                                <strong> {{ $option['value'] }}</strong></small></p>
+                                                    @endif
+                                                @endforeach
+                                            @endif
 
-                                                {!! apply_filters(ECOMMERCE_ORDER_DETAIL_EXTRA_HTML, null) !!}
-                                                @if ($order->shipment->id)
-                                                    <ul class="unstyled">
-                                                        <li class="simple-note">
-                                                            <a>
-                                                                <span>{{ $orderProduct->qty }}</span>
-                                                                <span class="text-lowercase"> {{ trans('plugins/ecommerce::order.completed') }}</span>
-                                                            </a>
-                                                            <ul class="dom-switch-target line-item-properties small">
-                                                                <li class="ws-nm">
-                                                                    <span class="bull">↳</span>
-                                                                    <span
-                                                                        class="black">{{ trans('plugins/ecommerce::order.shipping') }} </span>
-                                                                    <strong>{{ $order->shipping_method_name }}</strong>
-                                                                </li>
-                                                            </ul>
-                                                        </li>
-                                                    </ul>
-                                                @endif
-                                            </td>
-                                            <td class="pl5 p-r5 text-end">
-                                                <div class="inline_block">
-                                                    <span>{{ format_price($orderProduct->price) }}</span>
-                                                </div>
-                                            </td>
-                                            <td class="pl5 p-r5 text-center">x</td>
-                                            <td class="pl5 p-r5">
-                                                <span>{{ $orderProduct->qty }}</span>
-                                            </td>
-                                            <td class="pl5 text-end">{{ format_price($orderProduct->price * $orderProduct->qty) }}</td>
-                                        </tr>
-                                    @endforeach
+                                            {!! apply_filters(ECOMMERCE_ORDER_DETAIL_EXTRA_HTML, null) !!}
+                                            @if ($order->shipment->id)
+                                                <ul class="unstyled">
+                                                    <li class="simple-note">
+                                                        <a><span>{{ $orderProduct->qty }}</span><span
+                                                                class="text-lowercase"> {{ trans('plugins/ecommerce::order.completed') }}</span></a>
+                                                        <ul class="dom-switch-target line-item-properties small">
+                                                            <li class="ws-nm">
+                                                                <span class="bull">↳</span>
+                                                                <span
+                                                                    class="black">{{ trans('plugins/ecommerce::order.shipping') }} </span>
+                                                                <strong>{{ $order->shipping_method_name }}</strong>
+                                                            </li>
+                                                        </ul>
+                                                    </li>
+                                                </ul>
+                                            @endif
+                                        </td>
+                                        <td class="pl5 p-r5 text-end">
+                                            <div class="inline_block">
+                                                <span>{{ format_price($orderProduct->price) }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="pl5 p-r5 text-center">x</td>
+                                        <td class="pl5 p-r5">
+                                            <span>{{ $orderProduct->qty }}</span>
+                                        </td>
+                                        <td class="pl5 text-end">{{ format_price($orderProduct->price * $orderProduct->qty) }}</td>
+                                    </tr>
+                                @endforeach
                                 </tbody>
                             </table>
                         </div>

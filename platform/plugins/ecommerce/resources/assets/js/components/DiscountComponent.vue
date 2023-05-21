@@ -3,10 +3,8 @@
         <div class="flexbox-content">
             <div class="wrapper-content">
                 <div class="pd-all-20 ws-nm">
-                    <label class="title-product-main text-no-bold">
-                        <span v-if="!is_promotion">{{ __('discount.create_coupon_code')}}</span>
-                        <span v-if="is_promotion">{{ __('discount.create_discount_promotion') }}</span>
-                    </label>
+                    <label class="title-product-main text-no-bold"><span
+                            v-if="!is_promotion">{{ __('discount.create_coupon_code')}}</span><span v-if="is_promotion">{{ __('discount.create_discount_promotion') }}</span></label>
                     <a href="#" class="btn-change-link float-end" v-on:click="generateCouponCode($event)"
                        v-show="!is_promotion">{{ __('discount.generate_coupon_code')}}</a>
                     <div class="form-group mt15 mb0">
@@ -86,7 +84,6 @@
                                     <option value="specific-product">{{ __('discount.product')}}</option>
                                     <option value="customer" v-if="type_option !== 'same-price'">{{ __('discount.customer')}}</option>
                                     <option value="product-variant">{{ __('discount.variant') }}</option>
-                                    <option value="once-per-customer" v-if="type_option !== 'same-price' && type == 'coupon'">{{ __('discount.once_per_customer') }}</option>
                                 </select>
                                 <svg class="svg-next-icon svg-next-icon-size-16">
                                     <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#select-chevron"></use>
@@ -456,15 +453,18 @@
                 <div class="pd-all-10-20 form-group mb0 date-time-group">
                     <label class="text-title-field">{{ __('discount.start_date')}}</label>
                     <div class="next-field__connected-wrapper z-index-9">
-                        <div class="input-group datepicker">
-                            <input type="text" :placeholder="dateFormat" :data-date-format="dateFormat" name="start_date" v-model="start_date"
-                                   class="next-field--connected next-input"
-                                   readonly data-input style="min-width: 0">
-                            <a class="input-button" title="toggle" data-toggle><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 17 17"><g></g><path d="M14 2V1h-3v1H6V1H3v1H0v15h17V2h-3zM12 2h1v2h-1V2zM4 2h1v2H4V2zM16 16H1v-8.921h15V16zM1 6.079v-3.079h2v2h3V3h5v2h3V3h2v3.079H1z"></path></svg></a>
+                        <div class="input-group date form_datetime form_datetime bs-datetime">
+                            <input type="text" placeholder="dd-mm-yyyy" data-date-format="dd-mm-yyyy" name="start_date" v-model="start_date"
+                                   class="next-field--connected next-input z-index-9 datepicker" autocomplete="off">
+                            <span class="input-group-prepend">
+                                <button class="btn default" type="button">
+                                    <span class="fa fa-fw fa-calendar"></span>
+                                </button>
+                            </span>
                         </div>
                         <div class="input-group">
                             <input type="text" placeholder="hh:mm" name="start_time" v-model="start_time"
-                                   class="next-field--connected next-input z-index-9 time-picker timepicker timepicker-24" style="min-width: 0">
+                                   class="next-field--connected next-input z-index-9 time-picker timepicker timepicker-24">
                             <span class="input-group-prepend">
                                 <button class="btn default" type="button">
                                     <i class="fa fa-clock"></i>
@@ -476,16 +476,20 @@
                 <div class="pd-all-10-20 form-group mb0 date-time-group">
                     <label class="text-title-field">{{ __('discount.end_date')}}</label>
                     <div class="next-field__connected-wrapper z-index-9">
-                        <div class="input-group datepicker">
-                            <input type="text" :placeholder="dateFormat" :data-date-format="dateFormat" name="end_date" v-model="end_date"
-                                   class="next-field--connected next-input"
-                                   :disabled="unlimited_time" readonly data-input style="min-width: 0">
-                            <a class="input-button" title="toggle" data-toggle><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 17 17"><g></g><path d="M14 2V1h-3v1H6V1H3v1H0v15h17V2h-3zM12 2h1v2h-1V2zM4 2h1v2H4V2zM16 16H1v-8.921h15V16zM1 6.079v-3.079h2v2h3V3h5v2h3V3h2v3.079H1z"></path></svg></a>
+                        <div class="input-group date form_datetime form_datetime bs-datetime">
+                            <input type="text" placeholder="dd-mm-yyyy" data-date-format="dd-mm-yyyy" name="end_date" v-model="end_date"
+                                   class="next-field--connected next-input z-index-9 datepicker"
+                                   :disabled="unlimited_time">
+                            <span class="input-group-prepend">
+                                <button class="btn default" type="button">
+                                    <span class="fa fa-fw fa-calendar"></span>
+                                </button>
+                            </span>
                         </div>
                         <div class="input-group">
                             <input type="text" placeholder="hh:mm" name="end_time" v-model="end_time"
                                    class="next-field--connected next-input z-index-9 time-picker timepicker timepicker-24"
-                                   :disabled="unlimited_time"  style="min-width: 0">
+                                   :disabled="unlimited_time">
                             <span class="input-group-prepend">
                                 <button class="btn default" type="button">
                                     <i class="fa fa-clock"></i>
@@ -532,9 +536,9 @@
                 is_unlimited: 1,
                 quantity: 0,
                 unlimited_time: 1,
-                start_date: moment().format('Y-MM-DD'),
+                start_date: moment().format('DD-MM-Y'),
                 start_time: '00:00',
-                end_date: moment().format('Y-MM-DD'),
+                end_date: moment().format('DD-MM-Y'),
                 end_time: '23:59',
                 type_option: 'amount',
                 discount_value: null,
@@ -573,11 +577,6 @@
             currency: {
                 type: String,
                 default: () => null,
-                required: true
-            },
-            dateFormat: {
-                type: String,
-                default: () => 'Y-m-d',
                 required: true
             },
         },
@@ -624,8 +623,8 @@
             handleChangeTypeOption: function () {
                 let context = this;
 
-                context.discountUnit = context.currency;
-                context.value_label = context.__('discount.discount');
+                context.discountUnit = this.currency;
+                context.value_label = __('discount.discount');
 
                 switch (context.type_option) {
                     case 'amount':
@@ -636,11 +635,11 @@
                         context.discountUnit = '%';
                         break;
                     case 'shipping':
-                        context.value_label = context.__('discount.when_shipping_fee_less_than');
+                        context.value_label = __('discount.when_shipping_fee_less_than');
                         break;
                     case 'same-price':
                         context.target = 'group-products';
-                        context.value_label = context.__('discount.is');
+                        context.value_label = __('discount.is');
                         context.getListProductCollections();
                         break;
                 }

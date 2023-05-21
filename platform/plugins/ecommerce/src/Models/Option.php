@@ -25,7 +25,7 @@ class Option extends BaseModel
             ->orderBy('order', 'ASC');
     }
 
-    public function product(): BelongsTo
+    public function products(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }

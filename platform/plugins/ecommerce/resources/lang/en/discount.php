@@ -72,8 +72,4 @@ return [
     'is' => 'Is',
     'when_shipping_fee_less_than' => 'when shipping fee less than',
     'minimum_order_amount_error' => 'You are under :minimum_amount to apply the coupon, you must add :add_more more items to your cart',
-    'once_per_customer' => 'Once per customer',
-    'you_need_login_to_use_coupon_code' => 'You need to login to use this coupon code',
-    'you_used_coupon_code' => 'You have already used this coupon code',
-    'customer_used_coupon_code' => 'Customers who have used this discount code',
 ];

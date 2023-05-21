@@ -2,6 +2,7 @@
 
 return [
     'create' => 'New slider',
+    'edit' => 'Edit slider',
     'menu' => 'Simple sliders',
     'settings' => [
         'title' => 'Simple sliders',

@@ -57,7 +57,6 @@ return [
     'address_address_required' => 'The address field is required.',
     'address_zipcode_required' => 'The zipcode field is required.',
     'create_order_from_payment_page' => 'Order was created from checkout page',
-    'create_order_from_admin_page' => 'Order was created from admin page',
     'order_was_verified_by' => 'Order was verified by %user_name%',
     'new_order' => 'New order :order_id',
     'payment_was_confirmed_by' => 'Payment was confirmed (amount :money) by %user_name%',
@@ -187,14 +186,6 @@ return [
     'see_on_maps' => 'See on maps',
     'name' => 'Name',
     'price' => 'Price',
-    'product_name' => 'Product name',
-    'total' => 'Total',
-    'action' => 'Action',
-    'enter_free_text' => 'Enter free text',
-    'promotion_discount_amount' => 'Promotion amount',
-    'add' => 'Add',
-    'store' => 'Store',
-    'please_choose_product_option' => 'Please choose product option',
     'sku_optional' => 'SKU (optional)',
     'with_storehouse_management' => 'With storehouse management?',
     'quantity' => 'Quantity',
@@ -272,31 +263,10 @@ return [
         'update_return_order_status_success' => 'Update return order status successfully!',
     ],
     'order_return' => 'Order returns',
-    'edit_order_return' => 'Edit order return :code',
     'order_return_items_count' => 'Product item(s)',
-    'new_order_notifications' => [
+    'notifications' => [
         'new_order' => 'New order',
         'view' => 'View',
         'description' => ':customer ordered :quantity :product',
-    ],
-    'confirm_payment_notifications' => [
-        'confirm_payment' => 'Confirm payment',
-        'description' => 'Order :order Payment was confirmed (amount :amount) by :by',
-    ],
-    'update_shipping_status_notifications' => [
-        'update_shipping_status' => 'Update shipping status',
-        'description' => 'Order :order had changed shipping status :description',
-    ],
-    'cancel_order_notifications' => [
-        'cancel_order' => 'Cancel order',
-        'description' => 'Order :order was cancelled by custom :customer',
-    ],
-    'return_order_notifications' => [
-        'return_order' => 'Return order',
-        'description' => ':customer has requested return product(s)',
-    ],
-    'order_completed_notifications' => [
-        'order_completed' => 'Order Completed',
-        'description' => 'Order :order has been completed',
     ],
 ];

@@ -145,7 +145,7 @@ class ProductController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int|string $id, FormBuilder $formBuilder)
+    public function edit(int $id, FormBuilder $formBuilder)
     {
         $product = $this->productRepository->findOrFail($id);
 
@@ -161,7 +161,7 @@ class ProductController extends BaseController
     }
 
     public function update(
-        int|string $id,
+        int $id,
         ProductRequest $request,
         StoreProductService $service,
         GroupedProductInterface $groupedProductRepository,
@@ -369,6 +369,7 @@ class ProductController extends BaseController
             ->advancedGet([
                 'condition' => [
                     'status' => BaseStatusEnum::PUBLISHED,
+                    'is_enquiry' => 0,
                     ['is_variation', '<>', 1],
                     ['id', '<>', $request->input('product_id', 0)],
                     ['name', 'LIKE', '%' . $request->input('keyword') . '%'],

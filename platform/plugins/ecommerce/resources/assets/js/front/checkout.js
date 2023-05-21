@@ -160,10 +160,9 @@ class MainCheckout {
             const selectedState = $(customerShippingAddressForm + ' #address_state option:selected').val();
             const selectedCity = $(customerShippingAddressForm + ' #address_city option:selected').val();
 
-            const billingAddressSelectedCountry = $(customerBillingAddressForm + ' #billing-address-country option:selected').val();
-            const billingAddressSelectedState = $(customerBillingAddressForm + ' #billing-address-state option:selected').val();
-            const billingAddressSelectedCity = $(customerBillingAddressForm + ' #billing-address-city option:selected').val();
-            const billingAddressId = $(customerBillingAddressForm + ' #billing_address_id option:selected').val();
+            const billingAddressSelectedCountry = $(customerBillingAddressForm + ' #address_country option:selected').val();
+            const billingAddressSelectedState = $(customerBillingAddressForm + ' #address_state option:selected').val();
+            const billingAddressSelectedCity = $(customerBillingAddressForm + ' #address_city option:selected').val();
 
             $('.shipping-info-loading').show();
             $(shippingForm).load(url, () => {
@@ -185,19 +184,15 @@ class MainCheckout {
                 $(customerBillingAddressForm).replaceWith(billingAddressForm);
 
                 if (billingAddressSelectedCountry) {
-                    $(customerBillingAddressForm + ' #billing-address-country').val(billingAddressSelectedCountry);
+                    $(customerShippingAddressForm + ' #billing-address-country').val(billingAddressSelectedCountry);
                 }
 
                 if (billingAddressSelectedState) {
-                    $(customerBillingAddressForm + ' #billing-address-state').val(billingAddressSelectedState);
+                    $(customerShippingAddressForm + ' #billing-address-state').val(billingAddressSelectedState);
                 }
 
                 if (billingAddressSelectedCity) {
-                    $(customerBillingAddressForm + ' #billing-address-city').val(billingAddressSelectedCity);
-                }
-
-                if ($(customerBillingAddressForm + ' #billing_address_id').length) {
-                    $(customerBillingAddressForm + ' #billing_address_id').val(billingAddressId);
+                    $(customerShippingAddressForm + ' #billing-address-city').val(billingAddressSelectedCity);
                 }
 
                 $('.shipping-info-loading').hide();
@@ -245,9 +240,6 @@ class MainCheckout {
                 shipping_method: {},
                 shipping_option: {},
                 payment_method: '',
-                address: {
-                    address_id: $('.address-control-item#address_id').val()
-                },
             };
 
             if (shippingMethods.length) {
@@ -308,9 +300,6 @@ class MainCheckout {
                 shipping_method: $this.val(),
                 shipping_option: $this.data('option'),
                 payment_method: '',
-                address: {
-                    address_id: $('.address-control-item#address_id').val(),
-                },
             }
 
             let paymentMethod = $(document).find('input[name=payment_method]:checked').first();
@@ -336,12 +325,6 @@ class MainCheckout {
         });
 
         let validatedFormFields = () => {
-            if ($(shippingForm).find('.shipping_method_input').length &&
-                ! $(shippingForm).find('.shipping_method_input:checked').val()
-            ) {
-                return false;
-            }
-
             let addressId = $('#address_id').val();
             if (addressId && addressId !== 'new') {
                 return true;
@@ -394,17 +377,6 @@ class MainCheckout {
                         console.log(res);
                     },
                 });
-            }
-        });
-
-        $(document).on('change', customerBillingAddressForm + ' .address-control-item', event => {
-            let _self = $(event.currentTarget);
-            let $form = _self.closest('form');
-            let val = _self.find(':selected').val();
-            if (val) {
-                $('.billing-address-form-wrapper').hide();
-            } else {
-                $('.billing-address-form-wrapper').show();
             }
         });
     }

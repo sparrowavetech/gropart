@@ -11,13 +11,21 @@
     </a>
 </div>
 <div class="cart__items">
-    @if (Cart::instance('cart')->count() > 0 && ($products = Cart::instance('cart')->products()) && $products->count() > 0)
+    @if (Cart::instance('cart')->count() > 0 && Cart::instance('cart')->products()->count() > 0)
         <ul class="mini-product-cart-list">
-            @foreach(Cart::instance('cart')->content() as $key => $cartItem)
-                @if ($product = $products->find($cartItem->id))
-                    {!! Theme::partial('cart-mini.item', compact('product', 'cartItem')) !!}
-                @endif
-            @endforeach
+            @php
+                $products = Cart::instance('cart')->products();
+            @endphp
+            @if (count($products))
+                @foreach(Cart::instance('cart')->content() as $key => $cartItem)
+                    @php
+                        $product = $products->find($cartItem->id);
+                    @endphp
+                    @if (!empty($product))
+                        {!! Theme::partial('cart-mini.item', compact('product', 'cartItem')) !!}
+                    @endif
+                @endforeach
+            @endif
         </ul>
     @else
         <div class="cart_no_items py-3 px-3">
@@ -28,38 +36,25 @@
 
 @if (Cart::instance('cart')->count() > 0 && Cart::instance('cart')->products()->count() > 0)
     <div class="control-buttons">
-        @if (EcommerceHelper::isTaxEnabled())
-            <div class="mini-cart__total">
-                <strong>{{ __('Sub Total') }}:</strong>
-                <span class="price-amount">
-                    <bdi>{{ format_price(Cart::instance('cart')->rawSubTotal()) }}</bdi>
-                </span>
-            </div>
-            <div class="mini-cart__total">
-                <strong>{{ __('Tax') }}:</strong>
-                <span class="price-amount">
-                    <bdi>{{ format_price(Cart::instance('cart')->rawTax()) }}</bdi>
-                </span>
-            </div>
-            <div class="mini-cart__total">
-                <strong class="text-uppercase">{{ __('Total') }}:</strong>
-                <span class="price-amount">
-                    <bdi>{{ format_price(Cart::instance('cart')->rawSubTotal() + Cart::instance('cart')->rawTax()) }}</bdi>
-                </span>
-            </div>
-        @else
-            <div class="mini-cart__total">
-                <strong class="text-uppercase">{{ __('Sub Total') }}:</strong>
-                <span class="price-amount">
-                    <bdi>
-                        {{ format_price(Cart::instance('cart')->rawSubTotal()) }}
-                    </bdi>
-                </span>
-            </div>
-        @endif
+
+            @if (EcommerceHelper::isTaxEnabled())
+                <div class="mini-cart__total"><strong>{{ __('Sub Total') }}:</strong> <span class="price-amount"><bdi>{{ format_price(Cart::instance('cart')->rawSubTotal()) }}</bdi></span></div>
+                <div class="mini-cart__total"><strong>{{ __('Tax') }}:</strong> <span class="price-amount"><bdi>{{ format_price(Cart::instance('cart')->rawTax()) }}</bdi></span></div>
+                <div class="mini-cart__total"><strong class="text-uppercase">{{ __('Total') }}:</strong> <span class="price-amount"><bdi>{{ format_price(Cart::instance('cart')->rawSubTotal() + Cart::instance('cart')->rawTax()) }}</bdi></span></div>
+            @else
+                <div class="mini-cart__total">
+                    <strong class="text-uppercase">{{ __('Sub Total') }}:</strong>
+                    <span class="price-amount">
+                        <bdi>
+                            {{ format_price(Cart::instance('cart')->rawSubTotal()) }}
+                        </bdi>
+                    </span>
+                </div>
+            @endif
         <div class="mini-cart__buttons row g-0">
             <div class="col me-2">
-                <a class="btn btn-light" href="{{ route('public.cart') }}">{{ __('View Cart') }}</a></div>
+                <a class="btn btn-light" href="{{ route('public.cart') }}">{{ __('View Cart') }}</a>
+            </div>
             <div class="col ms-2">
                 @if (session('tracked_start_checkout'))
                     <a class="btn btn-primary checkout"

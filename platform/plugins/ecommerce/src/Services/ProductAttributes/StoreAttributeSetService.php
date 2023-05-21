@@ -13,21 +13,33 @@ use Illuminate\Http\Request;
 
 class StoreAttributeSetService
 {
+    protected ProductAttributeSetInterface $productAttributeSetRepository;
+
+    protected ProductAttributeInterface $productAttributeRepository;
+
     public function __construct(
-        protected ProductAttributeSetInterface $productAttributeSetRepository,
-        protected ProductAttributeInterface $productAttributeRepository
+        ProductAttributeSetInterface $productAttributeSet,
+        ProductAttributeInterface $productAttribute
     ) {
+        $this->productAttributeSetRepository = $productAttributeSet;
+        $this->productAttributeRepository = $productAttribute;
     }
 
     public function execute(Request $request, ProductAttributeSet $productAttributeSet): Model|bool
     {
         $data = $request->input();
 
+        if (! $productAttributeSet->id) {
+            $isUpdated = false;
+        } else {
+            $isUpdated = true;
+        }
+
         $productAttributeSet->fill($data);
 
         $productAttributeSet = $this->productAttributeSetRepository->createOrUpdate($productAttributeSet);
 
-        if (! $productAttributeSet->id) {
+        if (! $isUpdated) {
             event(new CreatedContentEvent(PRODUCT_ATTRIBUTE_SETS_MODULE_SCREEN_NAME, $request, $productAttributeSet));
         } else {
             event(new UpdatedContentEvent(PRODUCT_ATTRIBUTE_SETS_MODULE_SCREEN_NAME, $request, $productAttributeSet));
@@ -42,7 +54,7 @@ class StoreAttributeSetService
         return $productAttributeSet;
     }
 
-    protected function deleteAttributes(int|string $productAttributeSetId, array $attributeIds): void
+    protected function deleteAttributes(int $productAttributeSetId, array $attributeIds): void
     {
         foreach ($attributeIds as $id) {
             $attribute = $this->productAttributeRepository
@@ -58,7 +70,7 @@ class StoreAttributeSetService
         }
     }
 
-    protected function storeAttributes(int|string $productAttributeSetId, array $attributes): void
+    protected function storeAttributes(int $productAttributeSetId, array $attributes): void
     {
         foreach ($attributes as $item) {
             if (isset($item['id'])) {

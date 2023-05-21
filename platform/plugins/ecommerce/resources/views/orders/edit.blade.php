@@ -35,19 +35,19 @@
                                     </div>
                                 </div>
                                 <div class="mt20">
-                                    @if ($order->completed_at)
+                                    @if ($order->shipment->id)
                                         <svg
-                                            class="svg-next-icon svg-next-icon-size-16 next-icon--right-spacing-quartered text-info">
+                                            class="svg-next-icon svg-next-icon-size-16 next-icon--right-spacing-quartered">
                                             <use xmlns:xlink="http://www.w3.org/1999/xlink"
                                                  xlink:href="#next-orders"></use>
                                         </svg>
-                                        <strong class="ml5 text-info">{{ trans('plugins/ecommerce::order.completed') }}</strong>
+                                        <strong class="ml5">{{ trans('plugins/ecommerce::order.completed') }}</strong>
                                     @else
-                                        <svg class="svg-next-icon svg-next-icon-size-16 text-warning">
+                                        <svg class="svg-next-icon svg-next-icon-size-16 svg-next-icon-gray">
                                             <use xmlns:xlink="http://www.w3.org/1999/xlink"
                                                  xlink:href="#next-order-unfulfilled-16"></use>
                                         </svg>
-                                        <strong class="ml5 text-warning">{{ trans('plugins/ecommerce::order.uncompleted') }}</strong>
+                                        <strong class="ml5">{{ trans('plugins/ecommerce::order.completed') }}</strong>
                                     @endif
                                 </div>
                             </div>
@@ -55,84 +55,134 @@
                                 <div class="table-wrap">
                                     <table class="table-order table-divided">
                                         <tbody>
-                                            @foreach ($order->products as $orderProduct)
-                                                @php
-                                                    $product = $orderProduct->product->original_product;
-                                                @endphp
+                                        @foreach ($order->products as $orderProduct)
+                                            @php
+                                                $product = get_products([
+                                                    'condition' => [
+                                                        'ec_products.id' => $orderProduct->product_id,
+                                                    ],
+                                                    'take' => 1,
+                                                    'select' => [
+                                                        'ec_products.id',
+                                                        'ec_products.images',
+                                                        'ec_products.name',
+                                                        'ec_products.price',
+                                                        'ec_products.sale_price',
+                                                        'ec_products.sale_type',
+                                                        'ec_products.start_date',
+                                                        'ec_products.end_date',
+                                                        'ec_products.sku',
+                                                        'ec_products.is_variation',
+                                                        'ec_products.is_variation',
+                                                        'ec_products.status',
+                                                        'ec_products.order',
+                                                        'ec_products.created_at',
+                                                    ],
+                                                ]);
+                                            @endphp
 
-                                                <tr>
-                                                    <td class="width-60-px min-width-60-px vertical-align-t">
-                                                        <div class="wrap-img">
-                                                            <img class="thumb-image thumb-image-cartorderlist"
-                                                                src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}"
-                                                                alt="{{ $orderProduct->product_name }}">
-                                                        </div>
-                                                    </td>
-                                                    <td class="pl5 p-r5 min-width-200-px">
-                                                        <a class="text-underline hover-underline pre-line" target="_blank"
-                                                            href="{{ $product && $product->id && Auth::user()->hasPermission('products.edit') ? route('products.edit', $product->id) : '#' }}"
-                                                            title="{{ $orderProduct->product_name }}">
-                                                            {{ $orderProduct->product_name }}
-                                                        </a>
+                                            <tr>
+                                                <td class="width-60-px min-width-60-px vertical-align-t">
+                                                    <div class="wrap-img"><img
+                                                            class="thumb-image thumb-image-cartorderlist"
+                                                            src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}"
+                                                            alt="{{ $orderProduct->product_name }}"></div>
+                                                </td>
+                                                <td class="pl5 p-r5 min-width-200-px">
+                                                    <a class="text-underline hover-underline pre-line" target="_blank"
+                                                       href="{{ $product ? route('products.edit', $product->original_product->id) : '#' }}"
+                                                       title="{{ $product ? $product->original_product->name : $orderProduct->product_name }}">
+                                                        {{ $product ? $product->original_product->name : $orderProduct->product_name }}
+                                                    </a>
+                                                    @if ($product)
                                                         &nbsp;
-                                                        @if ($sku = Arr::get($orderProduct->options, 'sku'))
+                                                        @if ($product->sku)
                                                             ({{ trans('plugins/ecommerce::order.sku') }}:
-                                                            <strong>{{ $sku }}</strong>)
+                                                            <strong>{{ $product->sku }}</strong>)
                                                         @endif
-
-                                                        @if ($attributes = Arr::get($orderProduct->options, 'attributes'))
+                                                        @if ($product->is_variation)
                                                             <p class="mb-0">
-                                                                <small>{{ $attributes }}</small>
+                                                                <small>{{ $product->variation_attributes }}</small>
                                                             </p>
                                                         @endif
+                                                    @endif
+                                                    @if (!empty($orderProduct->product_options) && is_array($orderProduct->product_options))
+                                                        {!! render_product_options_info($orderProduct->product_options, $product, true) !!}
+                                                    @endif
+                                                    @if (!empty($orderProduct->options) && is_array($orderProduct->options))
+                                                        @foreach($orderProduct->options as $option)
+                                                            @if (!empty($option['key']) && !empty($option['value']))
+                                                                <p class="mb-0"><small>{{ $option['key'] }}:
+                                                                        <strong> {{ $option['value'] }}</strong></small>
+                                                                </p>
+                                                            @endif
+                                                        @endforeach
+                                                    @endif
 
-                                                        @if (! empty($orderProduct->product_options) && is_array($orderProduct->product_options))
-                                                            {!! render_product_options_html($orderProduct->product_options, $orderProduct->price) !!}
-                                                        @endif
+                                                    {!! apply_filters(ECOMMERCE_ORDER_DETAIL_EXTRA_HTML, null) !!}
+                                                    @if ($order->shipment->id)
+                                                        <ul class="unstyled">
+                                                            <li class="simple-note">
+                                                                <a><span>{{ $orderProduct->qty }}</span><span
+                                                                        class="text-lowercase"> {{ trans('plugins/ecommerce::order.completed') }}</span></a>
+                                                                <ul class="dom-switch-target line-item-properties small">
+                                                                    <li class="ws-nm">
+                                                                        <span class="bull">↳</span>
+                                                                        <span
+                                                                            class="black">{{ trans('plugins/ecommerce::order.shipping') }} </span>
+                                                                        <a class="text-underline bold-light"
+                                                                           target="_blank"
+                                                                           title="{{ $order->shipping_method_name }}"
+                                                                           href="{{ route('ecommerce.shipments.edit', $order->shipment->id) }}">{{ $order->shipping_method_name }}</a>
+                                                                    </li>
 
-                                                        @include('plugins/ecommerce::themes.includes.cart-item-options-extras', ['options' => $orderProduct->options])
-
-                                                        {!! apply_filters(ECOMMERCE_ORDER_DETAIL_EXTRA_HTML, null) !!}
-                                                        @if ($order->shipment->id)
-                                                            <ul class="unstyled">
-                                                                <li class="simple-note">
-                                                                    <a>
-                                                                        <span>{{ $orderProduct->qty }}</span>
-                                                                        <span class="text-lowercase"> {{ trans('plugins/ecommerce::order.completed') }}</span>
-                                                                    </a>
-                                                                    <ul class="dom-switch-target line-item-properties small">
+                                                                    @if (is_plugin_active('marketplace') && $order->store->name)
                                                                         <li class="ws-nm">
                                                                             <span class="bull">↳</span>
-                                                                            <span class="black">{{ trans('plugins/ecommerce::order.shipping') }} </span>
-                                                                            <a class="text-underline bold-light" target="_blank" title="{{ $order->shipping_method_name }}"
-                                                                            href="{{ route('ecommerce.shipments.edit', $order->shipment->id) }}">{{ $order->shipping_method_name }}</a>
+                                                                            <span
+                                                                                class="black">{{ trans('plugins/marketplace::store.store') }}</span>
+                                                                            <a href="{{ $order->store->url }}"
+                                                                               class="bold-light"
+                                                                               target="_blank">{{ $order->store->name }}</a>
                                                                         </li>
+                                                                    @endif
+                                                                </ul>
+                                                            </li>
+                                                        </ul>
+                                                    @endif
+                                                    @if (is_plugin_active('pickrr'))
+                                                        @if (isset($orderProduct->shipment) && $orderProduct->shipment->id && $orderProduct->shipment->status != \Botble\Ecommerce\Enums\ShippingStatusEnum::CANCELED)
+                                                            <li class="ws-nm">
+                                                                <a href="{{ route('orders.pickrr-cancel-shipment',$orderProduct->id) }}"
+                                                                class="btn btn-primary"
+                                                                target="_blank">Cancel Shipment</a>
+                                                            </li>
+                                                        @elseif(isset($orderProduct->shipment) && $orderProduct->shipment->status == \Botble\Ecommerce\Enums\ShippingStatusEnum::CANCELED)
+                                                            <li class="ws-nm">
+                                                                <a href="{{ route('orders.pickrr-create-shipment',$orderProduct->id) }}"
+                                                                class="btn btn-primary">Create Shipment</a>
+                                                            </li>
+                                                        @else
+                                                            <li class="ws-nm">
+                                                                <a href="{{ route('orders.pickrr-create-shipment',$orderProduct->id) }}"
+                                                                class="btn btn-primary" >Create Shipment</a>
+                                                            </li>
 
-                                                                        @if (is_plugin_active('marketplace') && $order->store->name)
-                                                                            <li class="ws-nm">
-                                                                                <span class="bull">↳</span>
-                                                                                <span class="black">{{ trans('plugins/marketplace::store.store') }}</span>
-                                                                                <a href="{{ $order->store->url }}" class="bold-light"
-                                                                                    target="_blank">{{ $order->store->name }}</a>
-                                                                            </li>
-                                                                        @endif
-                                                                    </ul>
-                                                                </li>
-                                                            </ul>
                                                         @endif
-                                                    </td>
-                                                    <td class="pl5 p-r5 text-end">
-                                                        <div class="inline_block">
-                                                            <span>{{ format_price($orderProduct->price) }}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td class="pl5 p-r5 text-center">x</td>
-                                                    <td class="pl5 p-r5">
-                                                        <span>{{ $orderProduct->qty }}</span>
-                                                    </td>
-                                                    <td class="pl5 text-end">{{ format_price($orderProduct->price * $orderProduct->qty) }}</td>
-                                                </tr>
-                                            @endforeach
+                                                    @endif
+                                                </td>
+                                                <td class="pl5 p-r5 text-end">
+                                                    <div class="inline_block">
+                                                        <span>{{ format_price($orderProduct->price) }}</span>
+                                                    </div>
+                                                </td>
+                                                <td class="pl5 p-r5 text-center">x</td>
+                                                <td class="pl5 p-r5">
+                                                    <span>{{ $orderProduct->qty }}</span>
+                                                </td>
+                                                <td class="pl5 text-end">{{ format_price($orderProduct->price * $orderProduct->qty) }}</td>
+                                            </tr>
+                                        @endforeach
                                         </tbody>
                                     </table>
                                 </div>
@@ -188,7 +238,7 @@
                                                 <tr>
                                                     <td class="text-end mt10">
                                                         <p class="mb0 color-subtext">{{ trans('plugins/ecommerce::order.total_amount') }}</p>
-                                                        @if (is_plugin_active('payment') && $order->payment->id)
+                                                        @if ($order->payment->id)
                                                             <p class="mb0  font-size-12px"><a
                                                                     href="{{ route('payment.show', $order->payment->id) }}"
                                                                     target="_blank">{{ $order->payment->payment_channel->label() }}</a>
@@ -196,7 +246,7 @@
                                                         @endif
                                                     </td>
                                                     <td class="text-end text-no-bold p-none-t pl10">
-                                                        @if (is_plugin_active('payment') && $order->payment->id)
+                                                        @if ($order->payment->id)
                                                             <a href="{{ route('payment.show', $order->payment->id) }}"
                                                                target="_blank">
                                                                 <span>{{ format_price($order->amount) }}</span>
@@ -213,17 +263,17 @@
                                                 <tr>
                                                     <td class="text-end color-subtext">{{ trans('plugins/ecommerce::order.paid_amount') }}</td>
                                                     <td class="text-end color-subtext pl10">
-                                                        @if (is_plugin_active('payment') && $order->payment->id)
+                                                        @if ($order->payment->id)
                                                             <a href="{{ route('payment.show', $order->payment->id) }}"
                                                                target="_blank">
                                                                 <span>{{ format_price($order->payment->status == \Botble\Payment\Enums\PaymentStatusEnum::COMPLETED ? $order->payment->amount : 0) }}</span>
                                                             </a>
                                                         @else
-                                                            <span>{{ format_price(is_plugin_active('payment') && $order->payment->status == \Botble\Payment\Enums\PaymentStatusEnum::COMPLETED ? $order->payment->amount : 0) }}</span>
+                                                            <span>{{ format_price($order->payment->status == \Botble\Payment\Enums\PaymentStatusEnum::COMPLETED ? $order->payment->amount : 0) }}</span>
                                                         @endif
                                                     </td>
                                                 </tr>
-                                                @if (is_plugin_active('payment') && $order->payment->status == \Botble\Payment\Enums\PaymentStatusEnum::REFUNDED)
+                                                @if ($order->payment->status == \Botble\Payment\Enums\PaymentStatusEnum::REFUNDED)
                                                     <tr class="hidden">
                                                         <td class="text-end color-subtext">{{ trans('plugins/ecommerce::order.refunded_amount') }}</td>
                                                         <td class="text-end pl10">
@@ -234,7 +284,7 @@
                                                 <tr class="hidden">
                                                     <td class="text-end color-subtext">{{ trans('plugins/ecommerce::order.amount_received') }}</td>
                                                     <td class="text-end pl10">
-                                                        <span>{{ format_price(is_plugin_active('payment') && $order->payment->status == \Botble\Payment\Enums\PaymentStatusEnum::COMPLETED ? $order->amount : 0) }}</span>
+                                                        <span>{{ format_price($order->payment->status == \Botble\Payment\Enums\PaymentStatusEnum::COMPLETED ? $order->amount : 0) }}</span>
                                                     </td>
                                                 </tr>
                                                 </tbody>
@@ -310,7 +360,7 @@
                                         <div class="flexbox-auto-content ml15 mr15 text-upper">
                                             <span>{{ trans('plugins/ecommerce::order.order_was_canceled') }}</span>
                                         </div>
-                                    @elseif (is_plugin_active('payment') && $order->payment->id)
+                                    @elseif ($order->payment->id)
                                         <div class="flexbox-auto-left">
                                             @if (!$order->payment->status || $order->payment->status == \Botble\Payment\Enums\PaymentStatusEnum::PENDING)
                                                 <svg class="svg-next-icon svg-next-icon-size-24 svg-next-icon-gray">
@@ -348,7 +398,7 @@
                                     @endif
                                 </div>
                             </div>
-                            @if (EcommerceHelper::countDigitalProducts($order->products) != $order->products->count())
+                            @if (!EcommerceHelper::countDigitalProducts($order->products))
                                 <div class="pd-all-20 border-top-title-main">
                                     <div class="flexbox-grid-default flexbox-flex-wrap flexbox-align-items-center">
                                         @if ($order->status == \Botble\Ecommerce\Enums\OrderStatusEnum::CANCELED && !$order->shipment->id)
@@ -477,7 +527,7 @@
                                                                     </table>
                                                                 </div>
                                                             @endif
-                                                            @if (is_plugin_active('payment') && $history->action == 'confirm_payment' && $order->payment)
+                                                            @if ($history->action == 'confirm_payment' && $order->payment)
                                                                 <div class="timeline-dropdown"
                                                                      id="history-line-{{ $history->id }}">
                                                                     <table>
@@ -587,7 +637,7 @@
                                 </ul>
                             </div>
                             <div class="next-card-section">
-                                @if (EcommerceHelper::countDigitalProducts($order->products) != $order->products->count())
+                                @if (!EcommerceHelper::countDigitalProducts($order->products))
                                     <div class="flexbox-grid-default flexbox-align-items-center">
                                         <div class="flexbox-auto-content-left">
                                             <label
@@ -664,7 +714,12 @@
                             <div class="wrapper-content bg-gray-white mb20">
                                 <div class="pd-all-20">
                                     <div class="p-b10">
-                                        <strong>{{ trans('plugins/marketplace::store.store') }}</strong>
+                                        <strong>{{ trans('plugins/marketplace::store.store') }}
+                                        @if($order->store->is_verified)
+                                        <img class="verified-store-main" style="width: 20px;" src="{{ asset('/storage/stores/verified.png')}}"alt="Verified">
+                                        @endif
+                                        </strong>
+                                        <small class="badge bg-warning text-dark">{{ $order->store->shop_category->label() }}</small>
                                         <ul class="p-sm-r mb-0">
                                             <li class="ws-nm">
                                                 <a href="{{ $order->store->url }}" class="ww-bw text-no-bold"
@@ -696,10 +751,8 @@
             {!! Form::modalAction('cancel-shipment-modal', trans('plugins/ecommerce::order.cancel_shipping_confirmation'), 'info', trans('plugins/ecommerce::order.cancel_shipping_confirmation_description'), 'confirm-cancel-shipment-button', trans('plugins/ecommerce::order.confirm')) !!}
             {!! Form::modalAction('update-shipping-address-modal', trans('plugins/ecommerce::order.update_address'), 'info', view('plugins/ecommerce::orders.shipping-address.form', ['address' => $order->address, 'orderId' => $order->id, 'url' => route('orders.update-shipping-address', $order->address->id ?? 0)])->render(), 'confirm-update-shipping-address-button', trans('plugins/ecommerce::order.update'), 'modal-md') !!}
             {!! Form::modalAction('cancel-order-modal', trans('plugins/ecommerce::order.cancel_order_confirmation'), 'info', trans('plugins/ecommerce::order.cancel_order_confirmation_description'), 'confirm-cancel-order-button', trans('plugins/ecommerce::order.cancel_order')) !!}
-            @if (is_plugin_active('payment'))
-                {!! Form::modalAction('confirm-payment-modal', trans('plugins/ecommerce::order.confirm_payment'), 'info', trans('plugins/ecommerce::order.confirm_payment_confirmation_description', ['method' => $order->payment->payment_channel->label()]), 'confirm-payment-order-button', trans('plugins/ecommerce::order.confirm_payment')) !!}
-                {!! Form::modalAction('confirm-refund-modal', trans('plugins/ecommerce::order.refund'), 'info', view('plugins/ecommerce::orders.refund.modal', ['order' => $order, 'url' => route('orders.refund', $order->id)])->render(), 'confirm-refund-payment-button', trans('plugins/ecommerce::order.refund') . ' <span class="refund-amount-text">' . format_price($order->payment->amount - $order->payment->refunded_amount) . '</span>') !!}
-            @endif
+            {!! Form::modalAction('confirm-payment-modal', trans('plugins/ecommerce::order.confirm_payment'), 'info', trans('plugins/ecommerce::order.confirm_payment_confirmation_description', ['method' => $order->payment->payment_channel->label()]), 'confirm-payment-order-button', trans('plugins/ecommerce::order.confirm_payment')) !!}
+            {!! Form::modalAction('confirm-refund-modal', trans('plugins/ecommerce::order.refund'), 'info', view('plugins/ecommerce::orders.refund.modal', ['order' => $order, 'url' => route('orders.refund', $order->id)])->render(), 'confirm-refund-payment-button', trans('plugins/ecommerce::order.refund') . ' <span class="refund-amount-text">' . format_price($order->payment->amount - $order->payment->refunded_amount) . '</span>') !!}
             @if ($order->shipment && $order->shipment->id)
                 {!! Form::modalAction('update-shipping-status-modal', trans('plugins/ecommerce::shipping.update_shipping_status'), 'info', view('plugins/ecommerce::orders.shipping-status-modal', ['shipment' => $order->shipment, 'url' => route('ecommerce.shipments.update-status', $order->shipment->id)])->render(), 'confirm-update-shipping-status-button', trans('plugins/ecommerce::order.update'), 'modal-xs') !!}
             @endif

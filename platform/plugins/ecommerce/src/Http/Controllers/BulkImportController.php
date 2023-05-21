@@ -16,8 +16,14 @@ use Maatwebsite\Excel\Excel;
 
 class BulkImportController extends BaseController
 {
-    public function __construct(protected ProductImport $productImport, protected ValidateProductImport $validateProductImport)
+    protected ProductImport $productImport;
+
+    protected ProductImport|ValidateProductImport $validateProductImport;
+
+    public function __construct(ProductImport $productImport, ValidateProductImport $validateProductImport)
     {
+        $this->productImport = $productImport;
+        $this->validateProductImport = $validateProductImport;
     }
 
     public function index()

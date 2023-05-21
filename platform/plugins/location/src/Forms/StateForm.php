@@ -10,9 +10,13 @@ use Botble\Location\Models\State;
 
 class StateForm extends FormAbstract
 {
-    public function __construct(protected CountryInterface $countryRepository)
+    protected CountryInterface $countryRepository;
+
+    public function __construct(CountryInterface $countryRepository)
     {
         parent::__construct();
+
+        $this->countryRepository = $countryRepository;
     }
 
     public function buildForm(): void

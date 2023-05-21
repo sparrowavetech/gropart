@@ -17,26 +17,47 @@
                     <tbody>
                     @foreach ($order->products as $orderProduct)
                         @php
-                            $product = $orderProduct->product->original_product;
+                            $product = get_products([
+                                'condition' => [
+                                    'ec_products.id'     => $orderProduct->product_id,
+                                ],
+                                'take'   => 1,
+                                'select' => [
+                                    'ec_products.id',
+                                    'ec_products.images',
+                                    'ec_products.name',
+                                    'ec_products.price',
+                                    'ec_products.sale_price',
+                                    'ec_products.sale_type',
+                                    'ec_products.start_date',
+                                    'ec_products.end_date',
+                                    'ec_products.sku',
+                                    'ec_products.is_variation',
+                                    'ec_products.status',
+                                    'ec_products.order',
+                                    'ec_products.created_at',
+                                ],
+                            ]);
                         @endphp
-                        <tr>
-                            <td class="text-start width-300-px">
-                                <a class="text-underline wordwrap"
-                                    href="{{ $product && $product->id && Auth::user()->hasPermission('products.edit') ? route('products.edit', $product->id) : '#' }}"
-                                    target="_blank" title="{{ $orderProduct->product_name }}">{{ $orderProduct->product_name }}</a>
-                            </td>
-                            <td class="text-center">
-                                <span>{{ format_price($orderProduct->price) }}</span>
-                            </td>
-                            <td class="text-center">{{ $orderProduct->qty }}</td>
-                            <td class="text-center">{{ $orderProduct->restock_quantity }}</td>
-                            <td class="text-end">
-                                @if ($orderProduct->qty - $orderProduct->restock_quantity > 0)
+                        @if ($product)
+                            <tr>
+                                <td class="text-start width-300-px">
+                                    <a class="text-underline wordwrap"
+                                       href="{{ $product->original_product->id ? route('products.edit', $product->original_product->id) : '#' }}" target="_blank" title="{{ $orderProduct->product_name }}">{{ $orderProduct->product_name }}</a>
+                                </td>
+                                <td class="text-center">
+                                    <span>{{ format_price($orderProduct->price) }}</span>
+                                </td>
+                                <td class="text-center">{{ $orderProduct->qty }}</td>
+                                <td class="text-center">{{ $orderProduct->restock_quantity }}</td>
+                                <td class="text-end">
+                                    @if ($orderProduct->qty - $orderProduct->restock_quantity > 0)
                                     <input class="j-refund-quantity width-50-px pl5 m-auto next-input p-none-r" name="products[{{ $orderProduct->product_id }}]" type="number"
-                                        min="0" value="{{ $orderProduct->qty - $orderProduct->restock_quantity }}" />
-                                @endif
-                            </td>
-                        </tr>
+                                           min="0" value="{{ $orderProduct->qty - $orderProduct->restock_quantity }}" />
+                                    @endif
+                                </td>
+                            </tr>
+                        @endif
                     @endforeach
                     </tbody>
                 </table>
@@ -63,7 +84,7 @@
                             <span>{{ format_price($order->shipping_amount) }}</span>
                         </td>
                     </tr>
-                    @if (is_plugin_active('payment') && $order->payment->refunded_amount)
+                    @if ($order->payment->refunded_amount)
                         <tr>
                             <td class="text-end">{{ trans('plugins/ecommerce::order.total_refund_amount') }}:</td>
                             <td class="text-end quantity text-no-bold">
@@ -74,7 +95,7 @@
                     <tr>
                         <td class="text-end">{{ trans('plugins/ecommerce::order.total_amount_can_be_refunded') }}:</td>
                         <td class="text-end quantity text-no-bold">
-                            @if (! is_plugin_active('payment') || $order->payment->status == \Botble\Payment\Enums\PaymentStatusEnum::PENDING)
+                            @if ($order->payment->status == \Botble\Payment\Enums\PaymentStatusEnum::PENDING)
                                 <span>{{ format_price(0) }}</span>
                             @else
                                 <span>{{ format_price($order->payment->amount - $order->payment->refunded_amount) }}</span>
@@ -84,7 +105,7 @@
                     </tbody>
                 </table>
             </div>
-            @if (is_plugin_active('payment') && $order->payment->status !== \Botble\Payment\Enums\PaymentStatusEnum::PENDING && ($order->payment->amount - $order->payment->refunded_amount) > 0)
+            @if ($order->payment->status !== \Botble\Payment\Enums\PaymentStatusEnum::PENDING && ($order->payment->amount - $order->payment->refunded_amount) > 0)
                 <div class="table-wrapper p-none">
                     <table class="refund-payments">
                         <tbody>

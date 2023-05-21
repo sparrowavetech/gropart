@@ -12,49 +12,45 @@
                             <div class="table-wrapper p-none mb20 ps-relative">
                                 <table class="table-normal">
                                     <tbody>
+                                    @php
+                                        $returnRequest->load(['items.product']);
+                                        $totalAmount = $returnRequest->items->sum(function ($item) {
+                                            return $item->qty * $item->price;
+                                        });
+                                    @endphp
+                                    @foreach ($returnRequest->items as $returnRequestItem)
                                         @php
-                                            $returnRequest->load(['items.product', 'items.orderProduct']);
+                                            $product = $returnRequestItem->product;
                                         @endphp
-                                        @foreach ($returnRequest->items as $returnRequestItem)
-                                            @php
-                                                $orderProduct = $returnRequestItem->orderProduct;
-                                                $product = $orderProduct->product;
-                                            @endphp
+                                        @if ($product && $product->original_product)
                                             <tr>
                                                 <td class="width-60-px min-width-60-px">
-                                                    <div class="wrap-img">
-                                                        <img class="thumb-image thumb-image-cartorderlist" src="{{ RvMedia::getImageUrl($returnRequestItem->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}" alt="{{ $product->name }}">
-                                                    </div>
+                                                    <div class="wrap-img"><img class="thumb-image thumb-image-cartorderlist" src="{{ RvMedia::getImageUrl($product->image ?: $product->original_product->image, 'thumb', false, RvMedia::getDefaultImage()) }}" alt="{{ $product->name }}"></div>
                                                 </td>
                                                 <td class="pl5 p-r5">
-                                                    @if ($product->id && $product->original_product->id)
+                                                    @if ($product->original_product->id)
                                                         <a target="_blank" href="{{ route('products.edit', $product->original_product->id) }}" title="{{ $returnRequestItem->product_name }}">{{ $returnRequestItem->product_name }}</a>
                                                     @else
                                                         <span>{{ $returnRequestItem->product_name }}</span>
                                                     @endif
-
-                                                    @if ($orderProduct->options)
-                                                        @if ($attrbutes = Arr::get($orderProduct->options, 'attributes'))
-                                                            <p>
-                                                                <small>{{ $attrbutes }}</small>
-                                                            </p>
-                                                        @endif
-                                                        @if ($sku = Arr::get($orderProduct->options, 'sku'))
-                                                            <p>{{ trans('plugins/ecommerce::order.sku') }} : <span>{{ $sku }}</span></p>
-                                                        @endif
+                                                    <p>
+                                                        <small>{{ $product->variation_attributes }}</small>
+                                                    </p>
+                                                    @if ($product->sku)
+                                                        <p>{{ trans('plugins/ecommerce::order.sku') }} : <span>{{ $product->sku }}</span></p>
                                                     @endif
-                                                    
                                                 </td>
                                                 <td class="pl5 p-r5 width-100-px min-width-100-px text-end">
-                                                    <span>{{ format_price($returnRequestItem->price_with_tax) }}</span>
+                                                    <span>{{ format_price($returnRequestItem->price) }}</span>
                                                 </td>
                                                 <td class="pl5 p-r5 width-20-px min-width-20-px text-center"> x</td>
                                                 <td class="pl5 p-r5 width-30-px min-width-30-px text-start">
                                                     <span class="item-quantity text-danger">{{ $returnRequestItem->qty }}</span>
                                                 </td>
-                                                <td class="pl5 p-r5 width-100-px min-width-130-px text-end">{{ format_price($returnRequestItem->refund_amount) }}</td>
+                                                <td class="pl5 p-r5 width-100-px min-width-130-px text-end">{{ format_price($returnRequestItem->price * $returnRequestItem->qty) }}</td>
                                             </tr>
-                                        @endforeach
+                                        @endif
+                                    @endforeach
                                     </tbody>
                                 </table>
                             </div>
@@ -69,7 +65,7 @@
                                             <td colspan="3" class="text-end p-sm-r">
                                                 {{ trans('plugins/ecommerce::order.total_return_amount') }}:
                                             </td>
-                                            <td class="text-end p-r5">{{ format_price($returnRequest->items->sum('refund_amount')) }}</td>
+                                            <td class="text-end p-r5">{{ format_price($totalAmount) }}</td>
                                         </tr>
                                         <tr>
                                             <td colspan="3" class="text-end p-sm-r">

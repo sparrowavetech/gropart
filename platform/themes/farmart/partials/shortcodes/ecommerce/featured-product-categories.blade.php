@@ -5,16 +5,16 @@
         'arrows'         => true,
         'dots'           => false,
         'autoplay'       => $shortcode->is_autoplay == 'yes',
-        'infinite'       => $shortcode->infinite == 'yes' || $shortcode->is_infinite == 'yes',
+        'infinite'       => $shortcode->is_infinite == 'yes',
         'autoplaySpeed'  => in_array($shortcode->autoplay_speed, theme_get_autoplay_speed_options()) ? $shortcode->autoplay_speed : 3000,
         'speed'          => 800,
-        'slidesToShow'   => 8,
+        'slidesToShow'   => 6,
         'slidesToScroll' => 1,
         'responsive'     => [
             [
                 'breakpoint' => 1700,
                 'settings'   => [
-                    'slidesToShow' => 7,
+                    'slidesToShow' => 6,
                 ],
             ],
             [
@@ -26,13 +26,13 @@
             [
                 'breakpoint' => 1199,
                 'settings'   => [
-                    'slidesToShow' => 5,
+                    'slidesToShow' => 4,
                 ],
             ],
             [
                 'breakpoint' => 1024,
                 'settings'   => [
-                    'slidesToShow' => 4,
+                    'slidesToShow' => 2,
                 ],
             ],
             [
@@ -50,7 +50,7 @@
     $categories = get_featured_product_categories();
 @endphp
 @if ($categories->count())
-    <div class="widget-product-categories pt-5 pb-2">
+    <div class="widget-product-categories pt-4 pb-2">
         <div class="container-xxxl">
             <div class="row">
                 <div class="col-12">

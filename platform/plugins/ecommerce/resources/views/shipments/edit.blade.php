@@ -27,10 +27,31 @@
                             <div class="table-wrapper p-none">
                                 <table class="order-totals-summary">
                                     <tbody>
-                                        @foreach ($shipment->order->products as $orderProduct)
-                                            @php
-                                                $product = $orderProduct->product->original_product;
-                                            @endphp
+                                    @foreach ($shipment->order->products as $orderProduct)
+                                        @php
+                                            $product = get_products([
+                                                'condition' => [
+                                                    'ec_products.id'     => $orderProduct->product_id,
+                                                ],
+                                                'take'   => 1,
+                                                'select' => [
+                                                    'ec_products.id',
+                                                    'ec_products.images',
+                                                    'ec_products.name',
+                                                    'ec_products.price',
+                                                    'ec_products.sale_price',
+                                                    'ec_products.sale_type',
+                                                    'ec_products.start_date',
+                                                    'ec_products.end_date',
+                                                    'ec_products.sku',
+                                                    'ec_products.is_variation',
+                                                    'ec_products.status',
+                                                    'ec_products.order',
+                                                    'ec_products.created_at',
+                                                ],
+                                            ]);
+                                        @endphp
+                                        @if ($product)
                                             <tr class="border-bottom">
                                                 <td class="order-border text-center p-small">
                                                     <i class="fa fa-truck"></i>
@@ -38,35 +59,31 @@
                                                 <td class="order-border p-small">
                                                     <div class="flexbox-grid-default pl5 p-r5" style="align-items: center">
                                                         <div class="flexbox-auto-50">
-                                                            <div class="wrap-img">
-                                                                <img class="thumb-image thumb-image-cartorderlist" src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}" alt="{{ $product->name }}" />
-                                                            </div>
+                                                            <div class="wrap-img"><img class="thumb-image thumb-image-cartorderlist" src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}" alt="{{ $product->name }}" /></div>
                                                         </div>
                                                         <div class="flexbox-content">
                                                             <div>
-                                                                <a class="wordwrap hide-print" title="{{ $orderProduct->product_name }}"
-                                                                    href="{{ $product && $product->id && Auth::user()->hasPermission('products.edit') ? route('products.edit', $product->id) : '#' }}">{{ $orderProduct->product_name }}</a>
+                                                                <a class="wordwrap hide-print" href="{{ route('products.edit', $product->original_product->id) }}" title="{{ $orderProduct->product_name }}">{{ $orderProduct->product_name }}</a>
                                                                 <p class="mb-0">
-                                                                    <small>{{ Arr::get($orderProduct->options, 'attributes', '') }}</small>
+                                                                    <small>{{ $product->variation_attributes }}</small>
                                                                 </p>
-                                                                @if ($sku = Arr::get($orderProduct->options, 'sku'))
-                                                                    <p>{{ trans('plugins/ecommerce::shipping.sku') }} : <span>{{ $sku }}</span></p>
-                                                                @endif
+                                                                <p>{{ trans('plugins/ecommerce::shipping.sku') }} : <span>{{ $product->sku }}</span></p>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td class="order-border text-end p-small p-sm-r">
                                                     <strong class="item-quantity">{{ $orderProduct->qty }}</strong>
-                                                    <span class="item-multiplier mr5">×</span>
-                                                    <b class="color-blue-line-through">{{ format_price($orderProduct->price) }}</b>
+                                                    <span class="item-multiplier mr5">×</span><b class="color-blue-line-through">{{ format_price($orderProduct->price) }}</b>
                                                 </td>
                                                 <td class="order-border text-end p-small p-sm-r border-none-r">
                                                     <span>{{ format_price($orderProduct->price * $orderProduct->qty) }}</span>
                                                 </td>
                                             </tr>
-                                        @endforeach
+                                        @endif
+                                    @endforeach
                                     </tbody>
+
                                 </table>
                                 <div class="flexbox-grid-default p-t15 p-b15 height-light bg-order">
                                     <div class="flexbox-content">
@@ -106,7 +123,7 @@
                             </div>
                             <div class="form-group mb-3">
                                 <label for="estimate_date_shipped" class="control-label">{{ trans('plugins/ecommerce::shipping.estimate_date_shipped') }}</label>
-                                {!! Form::datePicker('estimate_date_shipped', $shipment->estimate_date_shipped) !!}
+                                <input type="text" name="estimate_date_shipped" id="estimate_date_shipped" value="{{ $shipment->estimate_date_shipped }}" class="form-control datepicker" data-date-format="yyyy/mm/dd" placeholder="yyyy/mm/dd">
                             </div>
                             <div class="form-group mb-3">
                                 <label class="control-label">{{ trans('plugins/ecommerce::shipping.note') }}</label>

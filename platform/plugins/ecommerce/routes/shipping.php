@@ -30,7 +30,7 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
             Route::put('region/rule/update/{id}', [
                 'as' => 'region.rule.update',
                 'uses' => 'ShippingMethodController@putUpdateRule',
-            ])->where('id', BaseHelper::routeIdRegex());
+            ]);
 
             Route::post('region/rule/create', [
                 'as' => 'region.rule.create',
@@ -63,7 +63,7 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
                     'as' => 'items',
                     'uses' => 'ShippingRuleItemController@items',
                     'permission' => 'ecommerce.shipping-rule-items.index',
-                ])->where('rule_id', BaseHelper::routeIdRegex());
+                ]);
 
                 Route::group([
                     'as' => 'bulk-import.',

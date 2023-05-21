@@ -23,9 +23,6 @@
             $rawTotal = Cart::rawTotalByItems($cartItems);
             $shippingCurrent = Arr::get($shipping, $defaultShippingMethod . '.' . $defaultShippingOption, []);
             $isAvailableShipping = Arr::get($sessionData, 'is_available_shipping', true);
-
-            $orderAmount = max($rawTotal - $promotionDiscountAmount - $couponDiscountAmount, 0);
-            $orderAmount += (float)$shippingAmount;
         @endphp
         <div class="mt-3 bg-light mb-3">
             <div class="p-2" style="background: antiquewhite;">
@@ -96,27 +93,6 @@
                             <p class="price-text sub-total-text text-end"> {{ format_price(Cart::rawSubTotalByItems($cartItems)) }} </p>
                         </div>
                     </div>
-                    @if (EcommerceHelper::isTaxEnabled())
-                        <div class="row">
-                            <div class="col-6">
-                                <p>{{ __('Tax') }}:</p>
-                            </div>
-                            <div class="col-6 text-end">
-                                <p class="price-text tax-price-text">{{ format_price(Cart::rawTaxByItems($cartItems)) }}</p>
-                            </div>
-                        </div>
-                    @endif
-
-                    @if ($couponDiscountAmount)
-                        <div class="row">
-                            <div class="col-6">
-                                <p>{{ __('Discount amount') }}:</p>
-                            </div>
-                            <div class="col-6 text-end">
-                                <p class="price-text coupon-price-text">{{ format_price($couponDiscountAmount) }}</p>
-                            </div>
-                        </div>
-                    @endif
 
                     @if ($isAvailableShipping)
                         <div class="row">
@@ -135,13 +111,37 @@
                             </div>
                         </div>
                     @endif
+
+                    @if (EcommerceHelper::isTaxEnabled())
+                        <div class="row">
+                            <div class="col-6">
+                                <p>{{ __('Tax') }}:</p>
+                            </div>
+                            <div class="col-6 text-end">
+                                <p class="price-text tax-price-text">{{ format_price(Cart::rawTaxByItems($cartItems)) }}</p>
+                            </div>
+                        </div>
+                    @endif
+
+                    @if ($couponDiscountAmount)
+                        <div class="row">
+                            <div class="col-6">
+                                <p>{{ __('Discount amount') }}:</p>
+                            </div>
+                            <div class="col-6 text-end">
+                                <p class="price-text tax-price-text">{{ format_price($couponDiscountAmount) }}</p>
+                            </div>
+                        </div>
+                    @endif
+
                     <div class="row">
                         <div class="col-6">
                             <p>{{ __('Total') }}:</p>
                         </div>
                         <div class="col-6 float-end">
-                            <p class="total-text raw-total-text mb-0" data-price="{{ $rawTotal }}">
-                                {{ format_price($orderAmount) }}
+                            <p class="total-text raw-total-text mb-0"
+                            data-price="{{ Cart::rawTotalByItems($cartItems) }}">
+                                {{ ($promotionDiscountAmount + $couponDiscountAmount - $shippingAmount) > $rawTotal ? format_price(0) : format_price($rawTotal - $promotionDiscountAmount - $couponDiscountAmount + $shippingAmount) }}
                             </p>
                         </div>
                     </div>

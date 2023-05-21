@@ -88,7 +88,7 @@
                 </div>
 
                 <div class="modal-body with-padding">
-                    <div class="text-break">{!! BaseHelper::clean(trans('plugins/translation::translation.import_available_locale_confirmation_content', ['lang_path' => Html::tag('strong', lang_path())->toHtml()])) !!}</div>
+                    <div>{!! BaseHelper::clean(trans('plugins/translation::translation.import_available_locale_confirmation_content', ['lang_path' => Html::tag('strong', lang_path())->toHtml()])) !!}</div>
                 </div>
 
                 <div class="modal-footer">

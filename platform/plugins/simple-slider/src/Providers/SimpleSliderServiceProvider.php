@@ -9,6 +9,7 @@ use Botble\SimpleSlider\Models\SimpleSliderItem;
 use Botble\SimpleSlider\Repositories\Caches\SimpleSliderItemCacheDecorator;
 use Botble\SimpleSlider\Repositories\Eloquent\SimpleSliderItemRepository;
 use Botble\SimpleSlider\Repositories\Interfaces\SimpleSliderItemInterface;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Botble\SimpleSlider\Repositories\Caches\SimpleSliderCacheDecorator;
 use Botble\SimpleSlider\Repositories\Eloquent\SimpleSliderRepository;
@@ -42,7 +43,7 @@ class SimpleSliderServiceProvider extends ServiceProvider
             ->loadMigrations()
             ->publishAssets();
 
-        $this->app['events']->listen(RouteMatched::class, function () {
+        Event::listen(RouteMatched::class, function () {
             dashboard_menu()->registerItem([
                 'id' => 'cms-plugins-simple-slider',
                 'priority' => 100,

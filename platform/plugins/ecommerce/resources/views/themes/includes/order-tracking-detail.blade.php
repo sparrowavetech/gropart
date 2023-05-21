@@ -15,16 +15,14 @@
                     <span>{{ __('Order status') }}: </span>
                     <strong class="text-info">{{ $order->status->label() }}</strong>
                 </p>
-                @if (is_plugin_active('payment'))
-                    <p>
-                        <span>{{ __('Payment method') }}: </span>
-                        <strong class="text-info">{{ $order->payment->payment_channel->label() }}</strong>
-                    </p>
-                    <p>
-                        <span>{{ __('Payment status') }}: </span>
-                        <strong class="text-info">{{ $order->payment->status->label() }}</strong>
-                    </p>
-                @endif
+                <p>
+                    <span>{{ __('Payment method') }}: </span>
+                    <strong class="text-info">{{ $order->payment->payment_channel->label() }}</strong>
+                </p>
+                <p>
+                    <span>{{ __('Payment status') }}: </span>
+                    <strong class="text-info">{{ $order->payment->status->label() }}</strong>
+                </p>
                 @if ($order->description)
                     <p>
                         <span>{{ __('Note') }}: </span>
@@ -70,58 +68,108 @@
         <h5>{{ __('Order detail') }}</h5>
         <div>
             <div class="table-responsive">
-                <table class="table table-striped table-hover align-middle">
+                <table class="table table-striped table-hover">
                     <thead>
-                        <tr>
-                            <th class="text-center">#</th>
-                            <th class="text-center">{{ __('Image') }}</th>
-                            <th>{{ __('Product') }}</th>
-                            <th class="text-center">{{ __('Amount') }}</th>
-                            <th class="text-end" style="width: 100px">{{ __('Quantity') }}</th>
-                            <th class="price text-end">{{ __('Total') }}</th>
-                        </tr>
+                    <tr>
+                        <th class="text-center">#</th>
+                        <th class="text-center">{{ __('Image') }}</th>
+                        <th>{{ __('Product') }}</th>
+                        <th class="text-center">{{ __('Amount') }}</th>
+                        <th class="text-center">{{ __('Tax') }}</th>
+                        <th class="text-end" style="width: 100px">{{ __('Quantity') }}</th>
+                        <th class="price text-end">{{ __('Total') }}</th>
+                    </tr>
                     </thead>
                     <tbody>
-                        @foreach ($order->products as $orderProduct)
-                            <tr>
-                                <td class="text-center">{{ $loop->iteration }}</td>
-                                <td class="text-center">
-                                    <img src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}"
-                                        width="50" alt="{{ $orderProduct->product_name }}">
-                                </td>
-                                <td>
-                                    {{ $orderProduct->product_name }}
-                                    @if ($sku = Arr::get($orderProduct->options, 'sku'))
-                                        ({{ $sku }})
+                    @foreach($order->products as $key => $orderProduct)
+                        @php
+                            $product = get_products([
+                                'condition' => [
+                                    'ec_products.id' => $orderProduct->product_id,
+                                ],
+                                'take' => 1,
+                                'select' => [
+                                    'ec_products.id',
+                                    'ec_products.images',
+                                    'ec_products.name',
+                                    'ec_products.price',
+                                    'ec_products.sale_price',
+                                    'ec_products.sale_type',
+                                    'ec_products.start_date',
+                                    'ec_products.end_date',
+                                    'ec_products.sku',
+                                    'ec_products.is_variation',
+                                    'ec_products.status',
+                                    'ec_products.order',
+                                    'ec_products.created_at',
+                                ],
+                                'include_out_of_stock_products' => true,
+                            ]);
+                        @endphp
+
+                        <tr>
+                            <td class="text-center">{{ $key + 1 }}</td>
+                            <td class="text-center">
+                                <img
+                                    src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}"
+                                    width="50" alt="{{ $orderProduct->product_name }}">
+                            </td>
+                            <td>
+                                @if ($product)
+                                    <a class="fw-bold" href="{{ $product->original_product->url }}" target="_BLANK" title="{{ $product->original_product->name }}">{{ $product->original_product->name }}</a>
+                                    @if ($product->sku)
+                                        ({{ $product->sku }})
                                     @endif
-                                    @if ($attributes = Arr::get($orderProduct->options, 'attributes'))
+                                    @if ($product->is_variation)
                                         <p class="mb-0">
-                                            <small>{{ $attributes }}</small>
+                                            <small>
+                                                @php $attributes = get_product_attributes($product->id) @endphp
+                                                @if (!empty($attributes))
+                                                    @foreach ($attributes as $attribute)
+                                                        {{ $attribute->attribute_set_title }}
+                                                        : {{ $attribute->title }}@if (!$loop->last)
+                                                            ,
+                                                        @endif
+                                                    @endforeach
+                                                @endif
+                                            </small>
                                         </p>
                                     @endif
+                                @else
+                                    {{ $orderProduct->product_name }}
+                                @endif
 
-                                    @include('plugins/ecommerce::themes.includes.cart-item-options-extras', ['options' => $orderProduct->options])
-
-                                    @if (! empty($orderProduct->product_options) && is_array($orderProduct->product_options))
-                                        {!! render_product_options_html($orderProduct->product_options, $orderProduct->price) !!}
-                                    @endif
-                                </td>
-                                <td class="text-center">{{ format_price($orderProduct->price_with_tax) }}</td>
-                                <td class="text-center">{{ $orderProduct->qty }}</td>
-                                <td class="money text-end">
-                                    <strong>
-                                        {{ format_price($orderProduct->total_price_with_tax) }}
-                                    </strong>
-                                </td>
-                            </tr>
-                        @endforeach
+                                @if (!empty($orderProduct->options) && is_array($orderProduct->options))
+                                    @foreach($orderProduct->options as $option)
+                                        @if (!empty($option['key']) && !empty($option['value']))
+                                            <p class="mb-0"><small>{{ $option['key'] }}:
+                                                    <strong> {{ $option['value'] }}</strong></small></p>
+                                        @endif
+                                    @endforeach
+                                @endif
+                                @if (!empty($orderProduct->product_options) && is_array($orderProduct->product_options))
+                                    {!! render_product_options_info($orderProduct->product_options, $product, true) !!}
+                                @endif
+                            </td>
+                            <td>{{ format_price($orderProduct->price) }}</td>
+                            <td>{{ format_price($orderProduct->tax_amount) }}</td>
+                            <td class="text-center">{{ $orderProduct->qty }}</td>
+                            <td class="money text-end">
+                                <strong>
+                                    {{ format_price(($orderProduct->price * $orderProduct->qty)+$orderProduct->tax_amount) }}
+                                </strong>
+                            </td>
+                        </tr>
+                    @endforeach
                     </tbody>
                 </table>
             </div>
+
             <p>
                 <span>{{ __('Shipping fee') }}: </span>
                 <strong>{{ format_price($order->shipping_amount) }}</strong>
             </p>
+
             <p>
                 <span>{{ __('Total Amount') }}: </span>
                 <strong>{{ format_price($order->amount) }}</strong>
@@ -176,7 +224,6 @@
                 </p>
             @endif
         @endif
-    </div>
-@elseif (request()->input('order_id') || request()->input('email'))
-    <p class="text-center text-danger">{{ __('Order not found!') }}</p>
+        @elseif (request()->input('order_id') || request()->input('email'))
+            <p class="text-center text-danger">{{ __('Order not found!') }}</p>
 @endif

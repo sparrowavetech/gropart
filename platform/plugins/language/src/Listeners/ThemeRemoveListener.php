@@ -10,8 +10,14 @@ use Language;
 
 class ThemeRemoveListener
 {
-    public function __construct(protected WidgetInterface $widgetRepository, protected SettingInterface $settingRepository)
+    protected WidgetInterface $widgetRepository;
+
+    protected SettingInterface $settingRepository;
+
+    public function __construct(WidgetInterface $widgetRepository, SettingInterface $settingRepository)
     {
+        $this->widgetRepository = $widgetRepository;
+        $this->settingRepository = $settingRepository;
     }
 
     public function handle(ThemeRemoveEvent $event): void

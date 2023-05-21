@@ -39,10 +39,10 @@ class FaqCategoryTable extends TableAbstract
             ->eloquent($this->query())
             ->editColumn('name', function ($item) {
                 if (! Auth::user()->hasPermission('faq_category.edit')) {
-                    return BaseHelper::clean($item->name);
+                    return $item->name;
                 }
 
-                return Html::link(route('faq_category.edit', $item->id), BaseHelper::clean($item->name));
+                return Html::link(route('faq_category.edit', $item->id), $item->name);
             })
             ->editColumn('checkbox', function ($item) {
                 return $this->getCheckbox($item->id);
@@ -120,7 +120,7 @@ class FaqCategoryTable extends TableAbstract
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type' => 'datePicker',
+                'type' => 'date',
             ],
         ];
     }

@@ -16,6 +16,11 @@ return [
         'categories' => 'Categories',
         'content' => 'Content',
         'price' => 'Price',
+        'discount' => 'Discount',
+        'taxable_price' => 'Taxable Price',
+        'cgst' => 'CGST',
+        'sgst' => 'SGST',
+        'igst' => 'IGST',
         'quantity' => 'Quantity',
         'brand' => 'Brand',
         'width' => 'Width',
@@ -90,6 +95,7 @@ return [
         'auto_generate_sku' => 'Auto generate SKU?',
         'featured_image' => 'Featured image (optional)',
         'product_id' => 'Product ID',
+        'is_enquiry' => 'Is enquiry'
     ],
     'price' => 'Price',
     'quantity' => 'Quantity',
@@ -169,4 +175,5 @@ return [
         'file_size' => 'File size',
         'unsaved' => 'Unsaved',
     ],
+    'frequently_bought_together'=>'Frequently Bought Together'
 ];

@@ -22,8 +22,11 @@ use Illuminate\Http\Request;
 
 class StateController extends BaseController
 {
-    public function __construct(protected StateInterface $stateRepository)
+    protected StateInterface $stateRepository;
+
+    public function __construct(StateInterface $stateRepository)
     {
+        $this->stateRepository = $stateRepository;
     }
 
     public function index(StateTable $table)
@@ -52,18 +55,18 @@ class StateController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
+    public function edit(int $id, FormBuilder $formBuilder, Request $request)
     {
         $state = $this->stateRepository->findOrFail($id);
 
         event(new BeforeEditContentEvent($request, $state));
 
-        page_title()->setTitle(trans('core/base::forms.edit_item', ['name' => $state->name]));
+        page_title()->setTitle(trans('plugins/location::state.edit') . ' "' . $state->name . '"');
 
         return $formBuilder->create(StateForm::class, ['model' => $state])->renderForm();
     }
 
-    public function update(int|string $id, StateRequest $request, BaseHttpResponse $response)
+    public function update(int $id, StateRequest $request, BaseHttpResponse $response)
     {
         $state = $this->stateRepository->findOrFail($id);
 
@@ -78,7 +81,7 @@ class StateController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
+    public function destroy(Request $request, int $id, BaseHttpResponse $response)
     {
         try {
             $state = $this->stateRepository->findOrFail($id);

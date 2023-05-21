@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Location;
 use Log;
-use Psr\Log\LoggerInterface;
 use Shippo as GoShippo;
 use Shippo_Error;
 use Shippo_Rate;
@@ -22,47 +21,37 @@ use Shippo_Transaction;
 
 class Shippo
 {
-    protected string|null $liveApiToken;
+    /**
+     * @var string
+     */
+    protected $liveApiToken;
 
-    protected string|null $testApiToken;
+    /**
+     * @var string
+     */
+    protected $testApiToken;
 
-    protected string|null $labelFileType;
+    /**
+     * @var string
+     */
+    protected $labelFileType;
 
-    protected Cache $cache;
+    /**
+     * @var Cache
+     */
+    protected $cache;
 
-    protected array $packageTypes = [];
+    /**
+     * @var array
+     */
+    protected $packageTypes = [];
 
-    protected array $serviceLevels = [];
-
-    protected bool $sandbox = true;
+    /**
+     * @var array
+     */
+    protected $serviceLevels = [];
 
     public const MAX_DESCRIPTION_LENGTH = 45;
-
-    protected string|null $currency;
-
-    protected array $statuses;
-
-    protected array $contentTypes;
-
-    protected LoggerInterface $logger;
-
-    protected bool $useCache = true;
-
-    protected bool $logging = true;
-
-    protected bool $insurance;
-
-    protected bool $signature;
-
-    protected bool $validateAddress;
-
-    protected string|array|null $distanceUnit;
-
-    protected string|array|null $massUnit;
-
-    protected string|array|null $defaultTariff;
-
-    protected array $origin;
 
     public function __construct()
     {
@@ -109,20 +98,24 @@ class Shippo
         $this->packageTypes = config('plugins.shippo.general.package_types', []);
         $this->serviceLevels = config('plugins.shippo.general.service_levels', []);
 
-        $this->useCache = setting('shipping_shippo_cache_response', 1);
-
-        $this->logging = setting('shipping_shippo_logging', 1);
-
+        $this->useCache = setting('shipping_shippo_logging', 1);
         $this->cache = new Cache(app('cache'), self::class);
 
         $this->logger = Log::channel('shippo');
     }
 
+    /**
+     * @return string
+     */
     public function getName(): string
     {
         return 'Shippo';
     }
 
+    /**
+     * @param array $address
+     * @return array
+     */
     public function mergeAddress(array $address): array
     {
         return array_merge($address, [
@@ -166,6 +159,11 @@ class Shippo
         return true;
     }
 
+    /**
+     * @param array $params
+     * @param bool $suggest
+     * @return array
+     */
     public function getRates(array $params, bool $suggest = true): array
     {
         $this->log([__LINE__, 'getRates: ' . json_encode($params)]);
@@ -191,6 +189,10 @@ class Shippo
         return $newResponse;
     }
 
+    /**
+     * @param array $params
+     * @return array
+     */
     public function getCacheOrNewRates(array $params): array
     {
         $cacheKey = $this->getCacheKey($params);
@@ -211,6 +213,10 @@ class Shippo
         return $this->getRatesResponse($response, $params);
     }
 
+    /**
+     * @param array $params
+     * @param array|null
+     */
     public function createShipment(array $params)
     {
         $cacheKey = $this->getCacheKey($params);
@@ -257,6 +263,10 @@ class Shippo
         return $response;
     }
 
+    /**
+     * @param array $rates
+     * @return array
+     */
     protected function ratesByCurrency(array $rates): array
     {
         $rates = collect($rates)
@@ -279,15 +289,23 @@ class Shippo
         return $newRates;
     }
 
-    public function log(array $logs): self
+    /**
+     * @param array $logs
+     * @return self
+     */
+    public function log($logs): self
     {
-        if ($this->logging) {
+        if ($this->useCache) {
             $this->logger->debug($logs);
         }
 
         return $this;
     }
 
+    /**
+     * @param array $inParams
+     * @return array
+     */
     public function getPrepareParams(array $inParams): array
     {
         $params['extra'] = Arr::get($inParams, 'extra', []);
@@ -305,15 +323,24 @@ class Shippo
         return $params;
     }
 
+    /**
+     * @param array $params
+     * @return string
+     */
     public function getCacheKey(array $params): string
     {
         $params['api'] = $this->getApiKey();
 
         $jsonData = json_encode($params);
+        $cacheKey = md5($jsonData) . ($this->sandbox ? '_test' : '_production');
 
-        return md5($jsonData) . ($this->sandbox ? '_test' : '_production');
+        return $cacheKey;
     }
 
+    /**
+     * @param array $params
+     * @return array
+     */
     protected function getRatesParams(array $inParams): array
     {
         $params = [
@@ -380,6 +407,10 @@ class Shippo
         return $params;
     }
 
+    /**
+     * @param array $inParams
+     * @return bool
+     */
     protected function isInsuranceRequested(array $inParams): bool
     {
         $insurance = $this->insurance;
@@ -390,6 +421,10 @@ class Shippo
         return $insurance;
     }
 
+    /**
+     * @param array $inParams
+     * @return bool
+     */
     protected function isSignatureRequested(array $inParams): bool
     {
         $signature = $this->signature;
@@ -400,6 +435,10 @@ class Shippo
         return $signature;
     }
 
+    /**
+     * @param array $inParams
+     * @return array
+     */
     protected function getRequestedOrigin(array $inParams): array
     {
         $origin = Arr::get($inParams, 'origin');
@@ -410,6 +449,10 @@ class Shippo
         return $this->mergeAddress($origin);
     }
 
+    /**
+     * @param array $inParams
+     * @return array|string
+     */
     protected function getCachedParcelInfo(array $inParams)
     {
         $cacheKey = $this->getCacheKey($inParams);
@@ -423,6 +466,10 @@ class Shippo
         return $inParams['parcels'];
     }
 
+    /**
+     * @param array $inParams
+     * @return array
+     */
     protected function prepareParcelInfo(array $inParams): array
     {
         $length = 0;
@@ -432,7 +479,7 @@ class Shippo
         foreach (Arr::get($inParams, 'items', []) as $item) {
             $_length = $item['length'] * $item['qty'];
             $_height = $item['height'] * $item['qty'];
-            $length = max($length, $_length);
+            $length = $length > $_length ? $length : $_length;
             $height = $height > $_height ? $length : $_height;
             $width += $item['wide'] * $item['qty'];
         }
@@ -458,11 +505,9 @@ class Shippo
         if ($this->useCache) {
             return $this->cache->get($cacheKey);
         }
-
-        return null;
     }
 
-    public function setCacheValue($cacheKey, $value): bool
+    public function setCacheValue($cacheKey, $value)
     {
         if ($cacheKey) {
             return $this->cache->put($cacheKey, $value);
@@ -484,7 +529,7 @@ class Shippo
         return $options;
     }
 
-    protected function prepareAddress(array $options): array
+    protected function prepareAddress($options)
     {
         $addr = $this->mergeAddress($options);
 
@@ -493,15 +538,13 @@ class Shippo
         if ($validator->fails()) {
             $this->log([__LINE__, 'Address is invalid ' . json_encode($addr)]);
 
-            $this->log([__LINE__, $validator->getMessageBag()->first()]);
-
             return [];
         }
 
         return $this->afterPrepareAddress($addr);
     }
 
-    protected function afterPrepareAddress(array $addr): array
+    protected function afterPrepareAddress(array $addr)
     {
         if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
             $cityId = $addr['city'];
@@ -516,12 +559,12 @@ class Shippo
         return $addr;
     }
 
-    protected function getAddressFromValidationRules(): array
+    protected function getAddressFromValidationRules()
     {
         return EcommerceHelper::getCustomerAddressValidationRules();
     }
 
-    protected function getValidationErrors($addressField, $addressType): array
+    protected function getValidationErrors($addressField, $addressType)
     {
         if (empty($addressField['validation_results']) || ! empty($addressField['validation_results']['is_valid'])) {
             return [];
@@ -590,7 +633,7 @@ class Shippo
         return $customsInfo;
     }
 
-    protected function prepareCustomsInfo(array $inParams): array
+    protected function prepareCustomsInfo(array $inParams)
     {
         $customsInfo = [
             'certify' => true,
@@ -625,7 +668,7 @@ class Shippo
         return $customsInfo;
     }
 
-    protected function prepareCustomsItems(array $itemsInParcel, $defaultOriginCountry): array
+    protected function prepareCustomsItems(array $itemsInParcel, $defaultOriginCountry)
     {
         $customsItems = [];
 
@@ -643,7 +686,7 @@ class Shippo
         return $customsItems;
     }
 
-    protected function prepareCustomsItem($itemInParcel): array
+    protected function prepareCustomsItem($itemInParcel)
     {
         if (empty($itemInParcel['name']) ||
             ! isset($itemInParcel['weight']) ||
@@ -651,7 +694,7 @@ class Shippo
             ! isset($itemInParcel['price'])) {
             $this->log([__LINE__, 'Item is invalid, so skip it ' . print_r($itemInParcel, true)]);
 
-            return [];
+            return false;
         }
 
         $value = $itemInParcel['price'] * $itemInParcel['qty'];
@@ -663,7 +706,7 @@ class Shippo
 
         $description = preg_replace('/[^\w\d\s]/', '?', utf8_decode($itemInParcel['name']));
 
-        return [
+        $customsItem = [
             'description' => Str::limit($description, self::MAX_DESCRIPTION_LENGTH),
             'quantity' => $itemInParcel['qty'],
             'value_amount' => round($value, 3),
@@ -673,9 +716,11 @@ class Shippo
             'origin_country' => $itemInParcel['country'],
             'tariff_number' => $tariff,
         ];
+
+        return $customsItem;
     }
 
-    protected function getShipmentResponse($response, array $params): array
+    protected function getShipmentResponse($response, array $params)
     {
         if (empty($response['object_id'])) {
             $this->log([__LINE__, 'Shipment ID has not been found']);
@@ -749,6 +794,10 @@ class Shippo
         return $newResponse;
     }
 
+    /**
+     * @param array $rates
+     * @return array
+     */
     public function sortRates(array $rates): array
     {
         uasort($rates, function ($rate1, $rate2) {
@@ -758,10 +807,9 @@ class Shippo
         return $rates;
     }
 
-    protected function getRatesResponse($response, array $params): array
+    protected function getRatesResponse($response, array $params)
     {
         $newResponse = $this->getShipmentResponse($response, $params);
-
         if (Arr::get($newResponse, 'shipment.id')) {
             $this->setShipmentCacheValues($response, $params);
         }
@@ -769,7 +817,7 @@ class Shippo
         return $newResponse;
     }
 
-    protected function setShipmentCacheValues($response, array $params): void
+    protected function setShipmentCacheValues($response, array $params)
     {
         if (($addressFrom = Arr::get($response, 'address_from')) && $this->isResponseObjectValid($addressFrom)) {
             $addrId = $addressFrom['object_id'];

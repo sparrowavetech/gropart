@@ -60,11 +60,6 @@ class Discount extends BaseModel
         return $this->belongsToMany(Product::class, 'ec_discount_products', 'discount_id', 'product_id');
     }
 
-    public function usedByCustomers(): BelongsToMany
-    {
-        return $this->belongsToMany(Customer::class, 'ec_customer_used_coupons');
-    }
-
     protected static function boot()
     {
         parent::boot();
@@ -73,7 +68,6 @@ class Discount extends BaseModel
             $discount->productCollections()->detach();
             $discount->customers()->detach();
             $discount->products()->detach();
-            $discount->usedByCustomers()->detach();
         });
     }
 }

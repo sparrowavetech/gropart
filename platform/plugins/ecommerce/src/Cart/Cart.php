@@ -15,12 +15,15 @@ use Illuminate\Database\Connection;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Session\SessionManager;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
 class Cart
 {
     public const DEFAULT_INSTANCE = 'default';
+
+    protected SessionManager $session;
+
+    protected Dispatcher $events;
 
     protected string $instance;
 
@@ -28,8 +31,11 @@ class Cart
 
     protected float $weight = 0;
 
-    public function __construct(protected SessionManager $session, protected Dispatcher $events)
+    public function __construct(SessionManager $session, Dispatcher $events)
     {
+        $this->session = $session;
+        $this->events = $events;
+
         $this->instance(self::DEFAULT_INSTANCE);
     }
 
@@ -116,10 +122,24 @@ class Cart
      */
     protected function createCartItem($id, $name, $qty, $price, array $options)
     {
-        if (($productOptions = Arr::get($options, 'options', [])) && is_array($productOptions)) {
-            $price = $this->getPriceByOptions($price, $productOptions);
+        $basePrice = $price;
+        if (! empty($options['options'])) {
+            foreach ($options['options']['optionCartValue'] as $value) {
+                if (is_array($value)) {
+                    foreach ($value as $valueItem) {
+                        if ($valueItem['affect_type'] == 1) {
+                            $valueItem['affect_price'] = ($basePrice * $valueItem['affect_price']) / 100;
+                        }
+                        $price = $price + $valueItem['affect_price'];
+                    }
+                } else {
+                    if ($value['affect_type'] == 1) {
+                        $value['affect_price'] = ($basePrice * $value['affect_price']) / 100;
+                    }
+                    $price = $price + $value['affect_price'];
+                }
+            }
         }
-
         if ($id instanceof Buyable) {
             $cartItem = CartItem::fromBuyable($id, $qty ?: []);
             $cartItem->setQuantity($name ?: 1);
@@ -135,34 +155,6 @@ class Cart
         $cartItem->setTaxRate($options['taxRate'] ?? 0);
 
         return $cartItem;
-    }
-
-    public function getPriceByOptions(float|int $price, array $options = []): float|int
-    {
-        $basePrice = $price;
-        foreach (Arr::get($options, 'optionCartValue', []) as $value) {
-            if (is_array($value)) {
-                foreach ($value as $valueItem) {
-                    if (Arr::get($valueItem, 'option_type') == 'field') {
-                        continue;
-                    }
-                    if ($valueItem['affect_type'] == 1) {
-                        $valueItem['affect_price'] = ($basePrice * $valueItem['affect_price']) / 100;
-                    }
-                    $price += $valueItem['affect_price'];
-                }
-            } else {
-                if (Arr::get($value, 'option_type') == 'field') {
-                    continue;
-                }
-                if ($value['affect_type'] == 1) {
-                    $value['affect_price'] = ($basePrice * $value['affect_price']) / 100;
-                }
-                $price += $value['affect_price'];
-            }
-        }
-
-        return $price;
     }
 
     /**
@@ -375,7 +367,12 @@ class Cart
         $content = $this->getContent();
 
         return $content->reduce(function ($subTotal, CartItem $cartItem) {
-            return $subTotal + ($cartItem->qty * $cartItem->price);
+
+            if(setting('ecommerce_display_product_price_including_taxes') == 1){
+                return $subTotal + ($cartItem->qty * ($cartItem->price-$cartItem->tax));
+            }else{
+                return $subTotal + ($cartItem->qty * ($cartItem->price));
+            }
         }, 0);
     }
 
@@ -385,7 +382,12 @@ class Cart
     public function rawSubTotalByItems($content)
     {
         return $content->reduce(function ($subTotal, CartItem $cartItem) {
-            return $subTotal + ($cartItem->qty * $cartItem->price);
+            if(setting('ecommerce_display_product_price_including_taxes') == 1){
+                return $subTotal + ($cartItem->qty * ($cartItem->price-$cartItem->tax));
+            }else{
+                return $subTotal + ($cartItem->qty * ($cartItem->price));
+            }
+
         }, 0);
     }
 
@@ -646,7 +648,12 @@ class Cart
         $content = $this->getContent();
 
         $subTotal = $content->reduce(function ($subTotal, CartItem $cartItem) {
-            return $subTotal + ($cartItem->qty * $cartItem->price);
+            if(setting('ecommerce_display_product_price_including_taxes') == 1){
+                return $subTotal + ($cartItem->qty * ($cartItem->price-$cartItem->tax));
+            }else{
+                return $subTotal + ($cartItem->qty * ($cartItem->price));
+            }
+
         }, 0);
 
         return format_price($subTotal);

@@ -19,8 +19,14 @@ use Maatwebsite\Excel\Excel;
 
 class BulkImportController extends BaseController
 {
-    public function __construct(protected LocationImport $locationImport, protected ValidateLocationImport $validateLocationImport)
+    protected LocationImport $locationImport;
+
+    protected ValidateLocationImport $validateLocationImport;
+
+    public function __construct(LocationImport $locationImport, ValidateLocationImport $validateLocationImport)
     {
+        $this->locationImport = $locationImport;
+        $this->validateLocationImport = $validateLocationImport;
     }
 
     public function index()

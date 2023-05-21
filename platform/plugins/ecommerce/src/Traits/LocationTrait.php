@@ -2,11 +2,9 @@
 
 namespace Botble\Ecommerce\Traits;
 
-use Botble\Location\Models\City;
-use Botble\Location\Models\Country;
-use Botble\Location\Models\State;
+use Botble\Location\Repositories\Interfaces\CityInterface;
+use Botble\Location\Repositories\Interfaces\StateInterface;
 use EcommerceHelper;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @mixin \Eloquent
@@ -15,36 +13,7 @@ trait LocationTrait
 {
     public function getCountryNameAttribute(): ?string
     {
-        $value = $this->country;
-
-        if (! $value || ! is_plugin_active('location')) {
-            return $value;
-        }
-
-        if (is_numeric($value)) {
-            $countryName = $this->locationCountry->name;
-
-            if ($countryName) {
-                return $countryName;
-            }
-        }
-
-        return $value;
-    }
-
-    public function locationCountry(): BelongsTo
-    {
-        return $this->belongsTo(Country::class, 'country')->withDefault();
-    }
-
-    public function locationState(): BelongsTo
-    {
-        return $this->belongsTo(State::class, 'state')->withDefault();
-    }
-
-    public function locationCity(): BelongsTo
-    {
-        return $this->belongsTo(City::class, 'city')->withDefault();
+        return EcommerceHelper::getCountryNameById($this->country);
     }
 
     public function getStateNameAttribute(): ?string
@@ -56,7 +25,9 @@ trait LocationTrait
         }
 
         if (is_numeric($value)) {
-            $stateName = $this->locationState->name;
+            $stateName = app(StateInterface::class)->getModel()
+                ->where('id', $value)
+                ->value('name');
 
             if ($stateName) {
                 return $stateName;
@@ -75,7 +46,7 @@ trait LocationTrait
         }
 
         if (is_numeric($value)) {
-            $cityName = $this->locationCity->name;
+            $cityName = app(CityInterface::class)->getModel()->where('id', $value)->value('name');
 
             if ($cityName) {
                 return $cityName;
@@ -87,10 +58,10 @@ trait LocationTrait
 
     public function getFullAddressAttribute(): string
     {
-        return ($this->address ? ($this->address . ', ') : null) .
-            ($this->city_name ? ($this->city_name . ', ') : null) .
-            ($this->state_name ? ($this->state_name . ', ') : null) .
-            ($this->country_name ?: null) .
+        return ($this->address ? $this->address . ', ' : null) .
+            $this->city_name . ', ' .
+            $this->state_name . ', ' .
+            $this->country_name .
             (EcommerceHelper::isZipCodeEnabled() && $this->zip_code ? ', ' . $this->zip_code : '');
     }
 }

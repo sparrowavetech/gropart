@@ -443,36 +443,6 @@
             <div class="flexbox-annotated-section">
                 <div class="flexbox-annotated-section-annotation">
                     <div class="annotated-section-title pd-all-20">
-                        <h2>{{ trans('plugins/ecommerce::ecommerce.setting.shipping') }}</h2>
-                    </div>
-                    <div class="annotated-section-description pd-all-20 p-none-t">
-                        <p class="color-note">{{ trans('plugins/ecommerce::ecommerce.setting.shipping_description') }}</p>
-                    </div>
-                </div>
-                <div class="flexbox-annotated-section-content">
-                    <div class="wrapper-content pd-all-20">
-                        <div class="form-group mb-3">
-                            <label class="text-title-field"
-                                   for="hide_other_shipping_options_if_it_has_free_shipping">{{ trans('plugins/ecommerce::ecommerce.setting.hide_other_shipping_options_if_it_has_free_shipping') }}
-                            </label>
-                            <label class="me-2">
-                                <input type="radio" name="hide_other_shipping_options_if_it_has_free_shipping"
-                                       value="1"
-                                       @if (get_ecommerce_setting('hide_other_shipping_options_if_it_has_free_shipping', false)) checked @endif>{{ trans('core/setting::setting.general.yes') }}
-                            </label>
-                            <label>
-                                <input type="radio" name="hide_other_shipping_options_if_it_has_free_shipping"
-                                       value="0"
-                                       @if (! get_ecommerce_setting('hide_other_shipping_options_if_it_has_free_shipping', false)) checked @endif>{{ trans('core/setting::setting.general.no') }}
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flexbox-annotated-section">
-                <div class="flexbox-annotated-section-annotation">
-                    <div class="annotated-section-title pd-all-20">
                         <h2>{{ trans('plugins/ecommerce::ecommerce.setting.company_settings') }}</h2>
                     </div>
                     <div class="annotated-section-description pd-all-20 p-none-t">
@@ -683,45 +653,26 @@
                     <div class="wrapper-content pd-all-20">
                         <div class="form-group mb-3">
                             <label class="text-title-field"
-                                   for="is_enabled_order_return">{{ trans('plugins/ecommerce::ecommerce.setting.is_enabled_order_return') }}
+                                   for="can_custom_return_product_quantity">{{ trans('plugins/ecommerce::ecommerce.setting.allow_partial_return') }}
                             </label>
                             <label class="me-2">
-                                <input type="radio" name="is_enabled_order_return"
+                                <input type="radio" name="can_custom_return_product_quantity"
                                        value="1"
-                                       class="trigger-input-option" data-setting-container=".order-returns-settings-container"
-                                       @if (EcommerceHelper::isOrderReturnEnabled()) checked @endif>{{ trans('core/setting::setting.general.yes') }}
+                                       @if (EcommerceHelper::allowPartialReturn()) checked @endif>{{ trans('core/setting::setting.general.yes') }}
                             </label>
                             <label>
-                                <input type="radio" name="is_enabled_order_return"
+                                <input type="radio" name="can_custom_return_product_quantity"
                                        value="0"
-                                       class="trigger-input-option" data-setting-container=".order-returns-settings-container"
-                                       @if (!EcommerceHelper::isOrderReturnEnabled()) checked @endif>{{ trans('core/setting::setting.general.no') }}
+                                       @if (!EcommerceHelper::allowPartialReturn()) checked @endif>{{ trans('core/setting::setting.general.no') }}
                             </label>
+                            <span class="help-ts">{{ trans('plugins/ecommerce::ecommerce.setting.allow_partial_return_description') }}</span>
                         </div>
-                        <div class="order-returns-settings-container mb-4 border rounded-top rounded-bottom p-3 bg-light @if (!EcommerceHelper::isOrderReturnEnabled()) d-none @endif">
-                            <div class="form-group mb-3">
-                                <label class="text-title-field"
-                                       for="can_custom_return_product_quantity">{{ trans('plugins/ecommerce::ecommerce.setting.allow_partial_return') }}
-                                </label>
-                                <label class="me-2">
-                                    <input type="radio" name="can_custom_return_product_quantity"
-                                           value="1"
-                                           @if (EcommerceHelper::allowPartialReturn()) checked @endif>{{ trans('core/setting::setting.general.yes') }}
-                                </label>
-                                <label>
-                                    <input type="radio" name="can_custom_return_product_quantity"
-                                           value="0"
-                                           @if (!EcommerceHelper::allowPartialReturn()) checked @endif>{{ trans('core/setting::setting.general.no') }}
-                                </label>
-                                <span class="help-ts">{{ trans('plugins/ecommerce::ecommerce.setting.allow_partial_return_description') }}</span>
-                            </div>
-                            <div class="form-group mb-3">
-                                <label class="text-title-field"
-                                       for="order_placed_webhook_url">{{ trans('plugins/ecommerce::ecommerce.setting.returnable_days') }}
-                                </label>
-                                <input type="number" min="0" name="returnable_days" class="next-input"  value="{{ get_ecommerce_setting
-                                ('returnable_days') }}" placeholder="{{ trans('plugins/ecommerce::ecommerce.setting.returnable_days') }}">
-                            </div>
+                        <div class="form-group mb-3">
+                            <label class="text-title-field"
+                                   for="order_placed_webhook_url">{{ trans('plugins/ecommerce::ecommerce.setting.returnable_days') }}
+                            </label>
+                            <input type="number" min="0" name="returnable_days" class="next-input"  value="{{ get_ecommerce_setting
+                            ('returnable_days') }}" placeholder="{{ trans('plugins/ecommerce::ecommerce.setting.returnable_days') }}">
                         </div>
                     </div>
                 </div>
@@ -745,32 +696,13 @@
                             <label class="me-2">
                                 <input type="radio" name="is_enabled_support_digital_products"
                                        value="1"
-                                       class="trigger-input-option" data-setting-container=".digital-products-settings-container"
                                        @if (EcommerceHelper::isEnabledSupportDigitalProducts()) checked @endif>{{ trans('core/setting::setting.general.yes') }}
                             </label>
                             <label>
                                 <input type="radio" name="is_enabled_support_digital_products"
                                        value="0"
-                                       class="trigger-input-option" data-setting-container=".digital-products-settings-container"
                                        @if (!EcommerceHelper::isEnabledSupportDigitalProducts()) checked @endif>{{ trans('core/setting::setting.general.no') }}
                             </label>
-                        </div>
-                        <div class="digital-products-settings-container mb-4 border rounded-top rounded-bottom p-3 bg-light @if (!EcommerceHelper::isEnabledSupportDigitalProducts()) d-none @endif">
-                            <div class="form-group mb-3">
-                                <label class="text-title-field"
-                                       for="allow_guest_checkout_for_digital_products">{{ trans('plugins/ecommerce::ecommerce.setting.allow_guest_checkout_for_digital_products') }}
-                                </label>
-                                <label class="me-2">
-                                    <input type="radio" name="allow_guest_checkout_for_digital_products"
-                                           value="1"
-                                           @if (EcommerceHelper::allowGuestCheckoutForDigitalProducts()) checked @endif>{{ trans('core/setting::setting.general.yes') }}
-                                </label>
-                                <label>
-                                    <input type="radio" name="allow_guest_checkout_for_digital_products"
-                                           value="0"
-                                           @if (!EcommerceHelper::allowGuestCheckoutForDigitalProducts()) checked @endif>{{ trans('core/setting::setting.general.no') }}
-                                </label>
-                            </div>
                         </div>
                     </div>
                 </div>

@@ -10,8 +10,12 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <div class="order-slogan">
-                            @if ($logo = theme_option('logo_in_the_checkout_page') ?: theme_option('logo'))
-                                <img width="100" src="{{ RvMedia::getImageUrl($logo) }}" alt="{{ theme_option('site_title') }}">
+                            @php
+                                $logo = theme_option('logo_in_the_checkout_page') ?: theme_option('logo');
+                            @endphp
+                            @if ($logo)
+                                <img width="100" src="{{ RvMedia::getImageUrl($logo) }}"
+                                     alt="{{ theme_option('site_title') }}">
                                 <br/>
                             @endif
                             {{ setting('contact_address') }}

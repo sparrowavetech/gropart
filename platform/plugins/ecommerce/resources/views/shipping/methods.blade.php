@@ -4,7 +4,7 @@
     <div class="max-width-1200">
         <div class="group">
             <div class="row">
-                <div class="col-md-3 col-sm-12">
+                <div class="@if (count($shipping) > 0) col-md-3 col-sm-12 @else col-sm-12 @endif">
                     <h4>{{ trans('plugins/ecommerce::shipping.shipping_rules') }}</h4>
                     <p>{{trans('plugins/ecommerce::shipping.shipping_rules_description') }}</p>
                     <p><a href="#" class="btn btn-secondary btn-select-country">{{ trans('plugins/ecommerce::shipping.select_country') }}</a></p>

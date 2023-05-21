@@ -2,8 +2,6 @@
 
 namespace Botble\Faq\Providers;
 
-use Botble\Faq\Contracts\Faq as FaqContract;
-use Botble\Faq\FaqSupport;
 use Botble\Faq\Models\FaqCategory;
 use Botble\Faq\Repositories\Caches\FaqCategoryCacheDecorator;
 use Botble\Faq\Repositories\Eloquent\FaqCategoryRepository;
@@ -15,6 +13,7 @@ use Botble\Faq\Models\Faq;
 use Botble\Faq\Repositories\Caches\FaqCacheDecorator;
 use Botble\Faq\Repositories\Eloquent\FaqRepository;
 use Botble\Faq\Repositories\Interfaces\FaqInterface;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Language;
 
@@ -22,7 +21,7 @@ class FaqServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function register(): void
+    public function register()
     {
         $this->app->bind(FaqCategoryInterface::class, function () {
             return new FaqCategoryCacheDecorator(new FaqCategoryRepository(new FaqCategory()));
@@ -31,11 +30,9 @@ class FaqServiceProvider extends ServiceProvider
         $this->app->bind(FaqInterface::class, function () {
             return new FaqCacheDecorator(new FaqRepository(new Faq()));
         });
-
-        $this->app->singleton(FaqContract::class, FaqSupport::class);
     }
 
-    public function boot(): void
+    public function boot()
     {
         $this
             ->setNamespace('plugins/faq')
@@ -66,7 +63,7 @@ class FaqServiceProvider extends ServiceProvider
             }
         }
 
-        $this->app['events']->listen(RouteMatched::class, function () {
+        Event::listen(RouteMatched::class, function () {
             dashboard_menu()
                 ->registerItem([
                     'id' => 'cms-plugins-faq',

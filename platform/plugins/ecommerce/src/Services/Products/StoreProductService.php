@@ -7,6 +7,7 @@ use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Events\ProductQuantityUpdatedEvent;
 use Botble\Ecommerce\Models\Product;
+use Botble\Ecommerce\Repositories\Eloquent\ProductRepository;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Media\Repositories\Interfaces\MediaFileInterface;
 use Botble\Media\Services\UploadsManager;
@@ -19,8 +20,11 @@ use Storage;
 
 class StoreProductService
 {
-    public function __construct(protected ProductInterface $productRepository)
+    protected ProductRepository|ProductInterface $productRepository;
+
+    public function __construct(ProductInterface $product)
     {
+        $this->productRepository = $product;
     }
 
     public function execute(Request $request, Product $product, bool $forceUpdateAll = false): Product
@@ -72,7 +76,7 @@ class StoreProductService
         $exists = $product->id;
 
         if (! $exists && EcommerceHelper::isEnabledCustomerRecentlyViewedProducts() && $request->input('product_type')) {
-            if (in_array($request->input('product_type'), ProductTypeEnum::toArray())) {
+            if (in_array($request->input('product_type'), ProductTypeEnum::values())) {
                 $product->product_type = $request->input('product_type');
             }
         }
@@ -99,15 +103,18 @@ class StoreProductService
 
             if ($request->has('related_products')) {
                 $product->products()->detach();
-
                 if ($relatedProducts = $request->input('related_products', '')) {
                     $product->products()->attach(array_filter(explode(',', $relatedProducts)));
                 }
             }
 
+            if ($request->has('frequently_bought_together')) {
+                $product->frequentlyBoughtTogether()->detach();
+                $product->frequentlyBoughtTogether()->attach(array_filter(explode(',', $request->input('frequently_bought_together', ''))));
+            }
+
             if ($request->has('cross_sale_products')) {
                 $product->crossSales()->detach();
-
                 if ($crossSaleProducts = $request->input('cross_sale_products', '')) {
                     $product->crossSales()->attach(array_filter(explode(',', $crossSaleProducts)));
                 }
@@ -115,7 +122,6 @@ class StoreProductService
 
             if ($request->has('up_sale_products')) {
                 $product->upSales()->detach();
-
                 if ($upSaleProducts = $request->input('up_sale_products', '')) {
                     $product->upSales()->attach(array_filter(explode(',', $upSaleProducts)));
                 }

@@ -3,7 +3,7 @@
     <li>
         <a href="tel:{{ $address->phone }}">
             <span><i class="fa fa-phone-square cursor-pointer mr5"></i></span>
-            <span dir="ltr">{{ $address->phone }}</span>
+            <span>{{ $address->phone }}</span>
         </a>
     </li>
 @endif
@@ -12,7 +12,7 @@
         <div><a href="mailto:{{ $address->email }}">{{ $address->email }}</a></div>
     @endif
     @if ($address->address)
-        <div>{!! BaseHelper::clean($address->address) !!}</div>
+        <div>{{ $address->address }}</div>
     @endif
     @if ($address->city)
         <div>{{ $address->city_name }}</div>

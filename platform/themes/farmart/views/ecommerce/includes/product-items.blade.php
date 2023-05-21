@@ -1,6 +1,3 @@
-@php
-    $products->loadMissing(['defaultVariation',  'options', 'options.values']);
-@endphp
 <div class="loading loading-container">
     <div class="half-circle-spinner">
         <div class="circle circle-1"></div>
@@ -10,7 +7,7 @@
 <!--products list-->
 <input type="hidden" name="page" data-value="{{ $products->currentPage() }}">
 <input type="hidden" name="q" value="{{ BaseHelper::stringify(request()->query('q')) }}">
-<div class="row @if (request()->input('layout') == 'list') row-cols-1 shop-products-listing__list @else row-cols-xl-5 row-cols-lg-4 row-cols-md-3 row-cols-2 @endif shop-products-listing g-0">
+<div class="row @if (request()->input('layout') == 'list') row-cols-1 shop-products-listing__list @else row-cols-xl-4 row-cols-lg-4 row-cols-md-3 row-cols-2 @endif shop-products-listing g-0">
     @forelse ($products as $product)
         <div class="col">
             <div class="product-inner">
@@ -27,5 +24,5 @@
 </div>
 
 <div class="row mt-2 mb-3">
-    {!! $products->withQueryString()->links(Theme::getThemeNamespace('partials.pagination-numeric')) !!}
+    {!! $products->withQueryString()->links(Theme::getThemeNamespace() . '::partials.pagination-numeric') !!}
 </div>

@@ -21,8 +21,14 @@ use ZipArchive;
 
 class Location
 {
-    public function __construct(protected StateInterface $stateRepository, protected CityInterface $cityRepository)
+    protected StateInterface $stateRepository;
+
+    protected CityInterface $cityRepository;
+
+    public function __construct(StateInterface $stateRepository, CityInterface $cityRepository)
     {
+        $this->stateRepository = $stateRepository;
+        $this->cityRepository = $cityRepository;
     }
 
     public function getStates(): array
@@ -248,7 +254,7 @@ class Location
         ];
     }
 
-    public function filter($model, int|string $cityId = null, string $location = null)
+    public function filter($model, int $cityId = null, string $location = null)
     {
         $className = get_class($model);
         if ($className == BaseQueryBuilder::class) {

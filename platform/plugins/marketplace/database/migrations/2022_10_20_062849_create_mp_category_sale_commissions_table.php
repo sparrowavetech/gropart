@@ -11,7 +11,7 @@ return new class () extends Migration {
 
         Schema::create('mp_category_sale_commissions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('product_category_id')->unique();
+            $table->integer('product_category_id')->unsigned()->unique();
             $table->decimal('commission_percentage')->default(0);
         });
     }

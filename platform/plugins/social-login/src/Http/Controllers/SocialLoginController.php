@@ -114,9 +114,7 @@ class SocialLoginController extends BaseController
                 ->setMessage(__('Cannot login, no email provided!'));
         }
 
-        $model = new $providerData['model']();
-
-        $account = $model->where('email', $oAuth->getEmail())->first();
+        $account = (new $providerData['model']())->where('email', $oAuth->getEmail())->first();
 
         if (! $account) {
             $avatarId = null;
@@ -124,7 +122,7 @@ class SocialLoginController extends BaseController
             try {
                 $url = $oAuth->getAvatar();
                 if ($url) {
-                    $result = RvMedia::uploadFromUrl($url, 0, $model->upload_folder ?: 'accounts', 'image/png');
+                    $result = RvMedia::uploadFromUrl($url, 0, 'accounts', 'image/png');
                     if (! $result['error']) {
                         $avatarId = $result['data']->id;
                     }
@@ -142,7 +140,7 @@ class SocialLoginController extends BaseController
 
             $data = apply_filters('social_login_before_saving_account', $data, $oAuth, $providerData);
 
-            $account = $model;
+            $account = new $providerData['model']();
             $account->fill($data);
             $account->confirmed_at = Carbon::now();
             $account->save();

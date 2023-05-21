@@ -28,8 +28,8 @@
                             data-action="{{ $store->url }}"
                             method="GET"
                             id="products-filter-form">
-                            <input type="hidden" name="sort-by" class="product-filter-item" value="{{ BaseHelper::stringify(request()->input('sort-by')) }}">
-                            <input type="hidden" name="layout" class="product-filter-item" value="{{ BaseHelper::stringify(request()->input('layout')) }}">
+                            <input type="hidden" name="sort-by" class="product-filter-item" value="{{ request()->input('sort-by') }}">
+                            <input type="hidden" name="layout" class="product-filter-item" value="{{ request()->input('layout') }}">
                             <div class="widget-wrapper widget-product-categories">
                                 <h4 class="widget-title">{{ __('All Categories') }}</h4>
                                 <input type="hidden" name="categories[]" value="{{ Arr::get($categoriesRequest, 0, '') }}" class="product-filter-item">

@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Arr;
 use Symfony\Component\HttpFoundation\Response;
 
 class OrderIncompleteTable extends OrderTable
@@ -54,19 +53,14 @@ class OrderIncompleteTable extends OrderTable
                 return $this->getOperations(null, 'orders.destroy', $item, $viewButton);
             })
             ->filter(function ($query) {
-                if ($keyword = $this->request->input('search.value')) {
+                $keyword = $this->request->input('search.value');
+                if ($keyword) {
                     return $query
                         ->whereHas('address', function ($subQuery) use ($keyword) {
-                            return $subQuery
-                                ->where('name', 'LIKE', '%' . $keyword . '%')
-                                ->orWhere('email', 'LIKE', '%' . $keyword . '%')
-                                ->orWhere('phone', 'LIKE', '%' . $keyword . '%');
+                            return $subQuery->where('name', 'LIKE', '%' . $keyword . '%');
                         })
                         ->orWhereHas('user', function ($subQuery) use ($keyword) {
-                            return $subQuery
-                                ->where('name', 'LIKE', '%' . $keyword . '%')
-                                ->orWhere('email', 'LIKE', '%' . $keyword . '%')
-                                ->orWhere('phone', 'LIKE', '%' . $keyword . '%');
+                            return $subQuery->where('name', 'LIKE', '%' . $keyword . '%');
                         })
                         ->orWhere('code', 'LIKE', '%' . $keyword . '%');
                 }
@@ -131,13 +125,5 @@ class OrderIncompleteTable extends OrderTable
     public function bulkActions(): array
     {
         return $this->addDeleteAction(route('orders.deletes'), 'orders.destroy', parent::bulkActions());
-    }
-
-    public function getFilters(): array
-    {
-        $filters = parent::getFilters();
-        Arr::forget($filters, ['payment_method', 'payment_status', 'shipping_method']);
-
-        return $filters;
     }
 }

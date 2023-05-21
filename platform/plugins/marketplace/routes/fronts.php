@@ -84,7 +84,7 @@ Route::group([
                 Route::get('show/{id}', [
                     'as' => 'withdrawals.show',
                     'uses' => 'WithdrawalController@show',
-                ])->where('id', BaseHelper::routeIdRegex());
+                ]);
             });
 
             if (EcommerceHelper::isReviewEnabled()) {
@@ -105,17 +105,17 @@ Route::group([
                 Route::post('add-attribute-to-product/{id}', [
                     'as' => 'add-attribute-to-product',
                     'uses' => 'ProductController@postAddAttributeToProduct',
-                ])->where('id', BaseHelper::routeIdRegex());
+                ]);
 
                 Route::post('delete-version/{id}', [
                     'as' => 'delete-version',
                     'uses' => 'ProductController@deleteVersion',
-                ])->where('id', BaseHelper::routeIdRegex());
+                ]);
 
                 Route::post('add-version/{id}', [
                     'as' => 'add-version',
                     'uses' => 'ProductController@postAddVersion',
-                ])->where('id', BaseHelper::routeIdRegex());
+                ]);
 
                 Route::get('get-version-form/{id?}', [
                     'as' => 'get-version-form',
@@ -125,12 +125,12 @@ Route::group([
                 Route::post('update-version/{id}', [
                     'as' => 'update-version',
                     'uses' => 'ProductController@postUpdateVersion',
-                ])->where('id', BaseHelper::routeIdRegex());
+                ]);
 
                 Route::post('generate-all-version/{id}', [
                     'as' => 'generate-all-versions',
                     'uses' => 'ProductController@postGenerateAllVersions',
-                ])->where('id', BaseHelper::routeIdRegex());
+                ]);
 
                 Route::post('store-related-attributes/{id}', [
                     'as' => 'store-related-attributes',
@@ -140,7 +140,7 @@ Route::group([
                 Route::post('save-all-version/{id}', [
                     'as' => 'save-all-versions',
                     'uses' => 'ProductController@postSaveAllVersions',
-                ])->where('id', BaseHelper::routeIdRegex());
+                ]);
 
                 Route::get('get-list-product-for-search', [
                     'as' => 'get-list-product-for-search',
@@ -184,7 +184,7 @@ Route::group([
                 Route::get('generate-invoice/{id}', [
                     'as' => 'generate-invoice',
                     'uses' => 'OrderController@getGenerateInvoice',
-                ])->where('id', BaseHelper::routeIdRegex());
+                ]);
 
                 Route::post('confirm', [
                     'as' => 'confirm',
@@ -194,7 +194,7 @@ Route::group([
                 Route::post('send-order-confirmation-email/{id}', [
                     'as' => 'send-order-confirmation-email',
                     'uses' => 'OrderController@postResendOrderConfirmationEmail',
-                ])->where('id', BaseHelper::routeIdRegex());
+                ]);
 
                 Route::post('update-shipping-address/{id}', [
                     'as' => 'update-shipping-address',
@@ -204,13 +204,13 @@ Route::group([
                 Route::post('cancel-order/{id}', [
                     'as' => 'cancel',
                     'uses' => 'OrderController@postCancelOrder',
-                ])->where('id', BaseHelper::routeIdRegex());
+                ]);
 
                 Route::post('update-shipping-status/{id}', [
                     'as' => 'update-shipping-status',
                     'uses' => 'OrderController@updateShippingStatus',
                     'permission' => 'orders.edit',
-                ])->where('id', BaseHelper::routeIdRegex());
+                ]);
             });
 
             Route::group(['prefix' => 'order-returns', 'as' => 'order-returns.'], function () {
@@ -234,6 +234,10 @@ Route::group([
                     'as' => 'generate-coupon',
                     'uses' => 'DiscountController@postGenerateCoupon',
                 ]);
+            });
+            Route::group(['prefix' => 'enquiries', 'as' => 'enquiries.'], function () {
+                Route::resource('', 'EnquiryController')
+                    ->parameters(['' => 'product']);
             });
 
             Route::get('ajax/product-options', [
@@ -288,6 +292,6 @@ Route::group([
         Route::post('language-advanced/save/{id}', [
             'as' => 'language-advanced.save',
             'uses' => 'LanguageAdvancedController@save',
-        ])->where('id', BaseHelper::routeIdRegex());
+        ]);
     });
 });

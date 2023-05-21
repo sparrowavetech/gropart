@@ -35,16 +35,40 @@ use Theme;
 
 class DashboardController
 {
+    protected Repository $config;
+
+    protected CustomerInterface $customerRepository;
+
+    protected StoreInterface $storeRepository;
+
+    protected VendorInfoInterface $vendorInfoRepository;
+
+    protected RevenueInterface $revenueRepository;
+
+    protected OrderInterface $orderRepository;
+
+    protected ProductInterface $productRepository;
+
+    protected WithdrawalInterface $withdrawalRepository;
+
     public function __construct(
-        protected Repository $config,
-        protected CustomerInterface $customerRepository,
-        protected StoreInterface $storeRepository,
-        protected VendorInfoInterface $vendorInfoRepository,
-        protected RevenueInterface $revenueRepository,
-        protected ProductInterface $productRepository,
-        protected WithdrawalInterface $withdrawalRepository,
-        protected OrderInterface $orderRepository
+        Repository $config,
+        CustomerInterface $customerRepository,
+        StoreInterface $storeRepository,
+        VendorInfoInterface $vendorInfoRepository,
+        RevenueInterface $revenueRepository,
+        ProductInterface $productRepository,
+        WithdrawalInterface $withdrawalRepository,
+        OrderInterface $orderRepository
     ) {
+        $this->storeRepository = $storeRepository;
+        $this->customerRepository = $customerRepository;
+        $this->vendorInfoRepository = $vendorInfoRepository;
+        $this->orderRepository = $orderRepository;
+        $this->revenueRepository = $revenueRepository;
+        $this->productRepository = $productRepository;
+        $this->withdrawalRepository = $withdrawalRepository;
+
         Assets::setConfig($config->get('plugins.marketplace.assets', []));
 
         Theme::asset()
@@ -178,7 +202,6 @@ class DashboardController
         $totalProducts = $store->products()->count();
         $totalOrders = $store->orders()->count();
         $compact = compact('user', 'store', 'data', 'totalProducts', 'totalOrders');
-
         if ($request->ajax()) {
             return $response
                 ->setData([
@@ -191,7 +214,7 @@ class DashboardController
 
     public function postUpload(Request $request, BaseHttpResponse $response)
     {
-        if (! RvMedia::isChunkUploadEnabled()) {
+        if (setting('media_chunk_enabled') != '1') {
             $validator = Validator::make($request->all(), [
                 'file.0' => 'required|image|mimes:jpg,jpeg,png',
             ]);
@@ -222,7 +245,7 @@ class DashboardController
             if ($save->isFinished()) {
                 $result = RvMedia::handleUpload($save->getFile(), 0, 'accounts');
 
-                if (! $result['error']) {
+                if ($result['error'] == false) {
                     return $response->setData($result['data']);
                 }
 
@@ -280,7 +303,7 @@ class DashboardController
             abort(404);
         }
 
-        $existing = SlugHelper::getSlug($request->input('shop_url'), SlugHelper::getPrefix(Store::class));
+        $existing = SlugHelper::getSlug($request->input('shop_url'), SlugHelper::getPrefix(Store::class), Store::class);
 
         if ($existing) {
             return $response->setError()->setMessage(__('Shop URL is existing. Please choose another one!'));

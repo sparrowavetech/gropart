@@ -15,8 +15,11 @@ use MarketplaceHelper;
 
 class UnverifiedVendorController extends BaseController
 {
-    public function __construct(protected CustomerInterface $customerRepository)
+    protected CustomerInterface $customerRepository;
+
+    public function __construct(CustomerInterface $customerRepository)
     {
+        $this->customerRepository = $customerRepository;
     }
 
     public function index(UnverifiedVendorTable $table)
@@ -26,7 +29,7 @@ class UnverifiedVendorController extends BaseController
         return $table->renderTable();
     }
 
-    public function view(int|string $id)
+    public function view(int $id)
     {
         $vendor = $this->customerRepository->getFirstBy([
             'id' => $id,
@@ -45,7 +48,7 @@ class UnverifiedVendorController extends BaseController
         return view('plugins/marketplace::customers.verify-vendor', compact('vendor'));
     }
 
-    public function approveVendor(int|string $id, Request $request, BaseHttpResponse $response)
+    public function approveVendor(int $id, Request $request, BaseHttpResponse $response)
     {
         $vendor = $this->customerRepository
             ->getFirstBy([

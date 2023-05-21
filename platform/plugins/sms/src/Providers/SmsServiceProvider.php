@@ -83,7 +83,7 @@ class SmsServiceProvider extends ServiceProvider
                 'permissions' => ['sms.settings'],
             ]);
         });
-       // add_filter(BASE_FILTER_AFTER_SETTING_CONTENT, [$this, 'addSettings'], 249);
+      //  add_filter(BASE_FILTER_AFTER_SETTING_CONTENT, [$this, 'addSettings'], 249);
     }
      /**
      * @param null $data
