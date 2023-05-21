@@ -1,9 +1,13 @@
 RewriteEngine on
 
-RewriteCond %{HTTPS} off
-RewriteRule .* https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-RewriteCond %{HTTP_HOST} !^www\. [NC]
-RewriteRule .* https://www.%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+#redirect http non-www to https://www
+#RewriteCond %{HTTPS} off
+#RewriteCond %{HTTP_HOST} ^(www\.)?gropart\.com$
+#RewriteRule (.*) https://www.gropart.com/$1 [R=301,L]
+#redirect https non-www to www
+#RewriteCond %{HTTPS} on
+#RewriteCond %{HTTP_HOST} ^gropart\.com$
+#RewriteRule (.*) https://www.gropart.com/$1 [R=301,L]
 
 # Redirect Trailing Slashes If Not A Folder...
 RewriteCond %{REQUEST_FILENAME} !-d
