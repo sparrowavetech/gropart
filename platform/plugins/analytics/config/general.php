@@ -20,4 +20,6 @@ return [
     ],
 
     'enabled_dashboard_widgets' => env('ANALYTICS_ENABLE_DASHBOARD_WIDGETS', true),
+
+    'ga4_enabled' => env('ANALYTICS_GA4_ENABLED', false),
 ];

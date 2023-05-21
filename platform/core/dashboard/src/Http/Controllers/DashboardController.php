@@ -14,11 +14,20 @@ use Illuminate\Http\Request;
 
 class DashboardController extends BaseController
 {
+    protected DashboardWidgetSettingInterface $widgetSettingRepository;
+
+    protected DashboardWidgetInterface $widgetRepository;
+
+    protected UserInterface $userRepository;
+
     public function __construct(
-        protected DashboardWidgetSettingInterface $widgetSettingRepository,
-        protected DashboardWidgetInterface $widgetRepository,
-        protected UserInterface $userRepository
+        DashboardWidgetSettingInterface $widgetSettingRepository,
+        DashboardWidgetInterface $widgetRepository,
+        UserInterface $userRepository
     ) {
+        $this->widgetSettingRepository = $widgetSettingRepository;
+        $this->widgetRepository = $widgetRepository;
+        $this->userRepository = $userRepository;
     }
 
     public function getDashboard(Request $request)

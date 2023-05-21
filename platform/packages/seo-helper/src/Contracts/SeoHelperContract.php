@@ -4,21 +4,71 @@ namespace Botble\SeoHelper\Contracts;
 
 interface SeoHelperContract extends RenderableContract
 {
-    public function meta(): SeoMetaContract;
+    /**
+     * Get SeoMeta instance.
+     *
+     * @return SeoMetaContract
+     */
+    public function meta();
 
-    public function setSeoMeta(SeoMetaContract $seoMeta): self;
+    /**
+     * Set SeoMeta instance.
+     *
+     * @param SeoMetaContract $seoMeta
+     * @return $this
+     */
+    public function setSeoMeta(SeoMetaContract $seoMeta);
 
-    public function openGraph(): SeoOpenGraphContract;
+    /**
+     * Get SeoOpenGraph instance.
+     *
+     * @return SeoOpenGraphContract
+     */
+    public function openGraph();
 
-    public function setSeoOpenGraph(SeoOpenGraphContract $seoOpenGraph): self;
+    /**
+     * Get SeoOpenGraph instance.
+     *
+     * @param SeoOpenGraphContract $seoOpenGraph
+     * @return $this
+     */
+    public function setSeoOpenGraph(SeoOpenGraphContract $seoOpenGraph);
 
-    public function twitter(): SeoTwitterContract;
+    /**
+     * Get SeoTwitter instance.
+     *
+     * @return SeoTwitterContract
+     */
+    public function twitter();
 
-    public function setSeoTwitter(SeoTwitterContract $seoTwitter): self;
+    /**
+     * Set SeoTwitter instance.
+     *
+     * @param SeoTwitterContract $seoTwitter
+     * @return $this
+     */
+    public function setSeoTwitter(SeoTwitterContract $seoTwitter);
 
-    public function setTitle(string|null $title, string|null $siteName = null, string|null $separator = null): self;
+    /**
+     * Set title.
+     *
+     * @param string $title
+     * @param string|null $siteName
+     * @param string|null $separator
+     * @return $this
+     */
+    public function setTitle($title, $siteName = null, $separator = null);
 
-    public function getTitle(): string|null;
+    /**
+     * @return string
+     */
+    public function getTitle();
 
-    public function setDescription(string|null $description): self;
+    /**
+     * Set description.
+     *
+     * @param string $description
+     * @return $this
+     */
+    public function setDescription($description);
 }

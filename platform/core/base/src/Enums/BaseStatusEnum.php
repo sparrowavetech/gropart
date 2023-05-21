@@ -10,6 +10,8 @@ use Illuminate\Support\HtmlString;
  * @method static BaseStatusEnum DRAFT()
  * @method static BaseStatusEnum PUBLISHED()
  * @method static BaseStatusEnum PENDING()
+ * @method static BaseStatusEnum IS_VERIFIED_LABEL()
+ * @method static BaseStatusEnum IS_UNVERIFIED_LABEL()
  */
 class BaseStatusEnum extends Enum
 {

@@ -15,8 +15,11 @@ use SlugHelper;
 
 class PostController extends Controller
 {
-    public function __construct(protected PostInterface $postRepository)
+    protected PostInterface $postRepository;
+
+    public function __construct(PostInterface $postRepository)
     {
+        $this->postRepository = $postRepository;
     }
 
     /**
@@ -108,7 +111,7 @@ class PostController extends Controller
      */
     public function findBySlug(string $slug, BaseHttpResponse $response)
     {
-        $slug = SlugHelper::getSlug($slug, SlugHelper::getPrefix(Post::class));
+        $slug = SlugHelper::getSlug($slug, SlugHelper::getPrefix(Post::class), Post::class);
 
         if (! $slug) {
             return $response->setError()->setCode(404)->setMessage('Not found');

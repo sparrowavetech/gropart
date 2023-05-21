@@ -3,23 +3,23 @@
 namespace Botble\Page\Listeners;
 
 use Botble\Page\Repositories\Interfaces\PageInterface;
-use Botble\Theme\Events\RenderingSiteMapEvent;
 use SiteMapManager;
 
 class RenderingSiteMapListener
 {
-    public function __construct(protected PageInterface $pageRepository)
+    protected PageInterface $pageRepository;
+
+    public function __construct(PageInterface $pageRepository)
     {
+        $this->pageRepository = $pageRepository;
     }
 
-    public function handle(RenderingSiteMapEvent $event): void
+    public function handle(): void
     {
-        if ($event->key == 'pages') {
-            $pages = $this->pageRepository->getDataSiteMap();
+        $pages = $this->pageRepository->getDataSiteMap();
 
-            foreach ($pages as $page) {
-                SiteMapManager::add($page->url, $page->updated_at, '0.8');
-            }
+        foreach ($pages as $page) {
+            SiteMapManager::add($page->url, $page->updated_at, '0.8');
         }
     }
 }

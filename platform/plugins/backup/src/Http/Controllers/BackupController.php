@@ -15,8 +15,11 @@ use Illuminate\Support\Str;
 
 class BackupController extends BaseController
 {
-    public function __construct(protected Backup $backup)
+    protected Backup $backup;
+
+    public function __construct(Backup $backup)
     {
+        $this->backup = $backup;
     }
 
     public function getIndex()

@@ -9,8 +9,11 @@ use Menu;
 
 class DeleteMenuNodeListener
 {
-    public function __construct(protected MenuNodeInterface $menuNodeRepository)
+    protected MenuNodeInterface $menuNodeRepository;
+
+    public function __construct(MenuNodeInterface $menuNodeRepository)
     {
+        $this->menuNodeRepository = $menuNodeRepository;
     }
 
     public function handle(DeletedContentEvent $event): void

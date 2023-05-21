@@ -27,8 +27,11 @@ use Throwable;
 
 class SettingController extends BaseController
 {
-    public function __construct(protected SettingInterface $settingRepository)
+    protected SettingInterface $settingRepository;
+
+    public function __construct(SettingInterface $settingRepository)
     {
+        $this->settingRepository = $settingRepository;
     }
 
     public function getOptions()
@@ -283,14 +286,14 @@ class SettingController extends BaseController
             }
 
             setting()
-                ->set(['licensed_to' => $buyer])
+                ->set(['licensed_to' => $request->input('buyer')])
                 ->save();
 
             $activatedAt = Carbon::createFromTimestamp(filectime($coreApi->getLicenseFilePath()));
 
             $data = [
                 'activated_at' => $activatedAt->format('M d Y'),
-                'licensed_to' => $buyer,
+                'licensed_to' => $request->input('buyer'),
             ];
 
             if ($resetLicense) {
@@ -313,14 +316,6 @@ class SettingController extends BaseController
             $result = $coreApi->deactivateLicense();
 
             if (! $result['status']) {
-                if (str_contains($result['message'], 'Activation not recognized or is inactive')) {
-                    $this->settingRepository->deleteBy(['key' => 'licensed_to']);
-
-                    File::delete(storage_path('.license'));
-
-                    return $response->setMessage('Deactivated license successfully!');
-                }
-
                 return $response->setError()->setMessage($result['message']);
             }
 

@@ -9,6 +9,9 @@ use Illuminate\Support\Str;
 
 class MenuRepository extends RepositoriesAbstract implements MenuInterface
 {
+    /**
+     * {@inheritDoc}
+     */
     public function findBySlug($slug, $active, array $select = [], array $with = [])
     {
         $data = $this->model->where('slug', $slug);
@@ -32,6 +35,9 @@ class MenuRepository extends RepositoriesAbstract implements MenuInterface
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function createSlug($name)
     {
         $slug = Str::slug($name);

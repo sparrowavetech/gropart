@@ -3,19 +3,16 @@
 namespace Botble\Blog\Repositories\Eloquent;
 
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Blog\Models\Category;
 use Botble\Blog\Repositories\Interfaces\PostInterface;
 use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 use Eloquent;
 use Exception;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 
 class PostRepository extends RepositoriesAbstract implements PostInterface
 {
-    public function getFeatured(int $limit = 5, array $with = []): Collection
+    public function getFeatured(int $limit = 5, array $with = [])
     {
         $data = $this->model
             ->where([
@@ -29,7 +26,7 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    public function getListPostNonInList(array $selected = [], int $limit = 7, array $with = []): Collection
+    public function getListPostNonInList(array $selected = [], $limit = 7, array $with = [])
     {
         $data = $this->model
             ->where('status', BaseStatusEnum::PUBLISHED)
@@ -41,7 +38,7 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    public function getRelated(int|string $id, int $limit = 3): Collection
+    public function getRelated($id, $limit = 3)
     {
         $data = $this->model
             ->where('status', BaseStatusEnum::PUBLISHED)
@@ -56,7 +53,7 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    public function getRelatedCategoryIds(Category|int|string $model): array
+    public function getRelatedCategoryIds($model)
     {
         $model = $model instanceof Eloquent ? $model : $this->findById($model);
 
@@ -71,7 +68,7 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         }
     }
 
-    public function getByCategory(array|int|string $categoryId, int $paginate = 12, int $limit = 0): Collection|LengthAwarePaginator
+    public function getByCategory($categoryId, $paginate = 12, $limit = 0)
     {
         if (! is_array($categoryId)) {
             $categoryId = [$categoryId];
@@ -94,7 +91,7 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         return $this->applyBeforeExecuteQuery($data)->limit($limit)->get();
     }
 
-    public function getByUserId(int|string $authorId, int $limit = 6): Collection|LengthAwarePaginator
+    public function getByUserId($authorId, $paginate = 6)
     {
         $data = $this->model
             ->where([
@@ -107,7 +104,7 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         return $this->applyBeforeExecuteQuery($data)->paginate($paginate);
     }
 
-    public function getDataSiteMap(): Collection|LengthAwarePaginator
+    public function getDataSiteMap()
     {
         $data = $this->model
             ->with('slugable')
@@ -117,7 +114,7 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    public function getByTag(int|string $tag, int $paginate = 12): Collection|LengthAwarePaginator
+    public function getByTag($tag, $paginate = 12)
     {
         $data = $this->model
             ->with('slugable', 'categories', 'categories.slugable', 'author')
@@ -133,7 +130,7 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         return $this->applyBeforeExecuteQuery($data)->paginate($paginate);
     }
 
-    public function getRecentPosts(int $limit = 5, int|string $categoryId = 0): Collection
+    public function getRecentPosts($limit = 5, $categoryId = 0)
     {
         $data = $this->model->where(['status' => BaseStatusEnum::PUBLISHED]);
 
@@ -151,7 +148,7 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    public function getSearch(string|null $keyword, int $limit = 10, int $paginate = 10): Collection|LengthAwarePaginator
+    public function getSearch($keyword, $limit = 10, $paginate = 10)
     {
         $data = $this->model
             ->with('slugable')
@@ -172,7 +169,7 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    public function getAllPosts(int $perPage = 12, bool $active = true, array $with = ['slugable']): Collection|LengthAwarePaginator
+    public function getAllPosts($perPage = 12, $active = true, array $with = ['slugable'])
     {
         $data = $this->model
             ->with($with)
@@ -185,7 +182,7 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         return $this->applyBeforeExecuteQuery($data)->paginate($perPage);
     }
 
-    public function getPopularPosts(int $limit, array $args = []): Collection
+    public function getPopularPosts($limit, array $args = [])
     {
         $data = $this->model
             ->with('slugable')
@@ -200,7 +197,7 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    public function getFilters(array $filters): Collection|LengthAwarePaginator
+    public function getFilters(array $filters)
     {
         $data = $this->originalModel;
 

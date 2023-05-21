@@ -71,8 +71,6 @@
     @if ($showEnd)
         {!! Form::close() !!}
     @endif
-
-    @yield('form_end')
 @stop
 
 @if ($form->getValidatorClass())

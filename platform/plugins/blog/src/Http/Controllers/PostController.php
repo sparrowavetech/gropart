@@ -4,7 +4,6 @@ namespace Botble\Blog\Http\Controllers;
 
 use Botble\ACL\Models\User;
 use Botble\Base\Events\BeforeEditContentEvent;
-use Botble\Base\Events\BeforeUpdateContentEvent;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
@@ -29,11 +28,20 @@ class PostController extends BaseController
 {
     use HasDeleteManyItemsTrait;
 
+    protected PostInterface $postRepository;
+
+    protected TagInterface $tagRepository;
+
+    protected CategoryInterface $categoryRepository;
+
     public function __construct(
-        protected PostInterface $postRepository,
-        protected TagInterface $tagRepository,
-        protected CategoryInterface $categoryRepository
+        PostInterface $postRepository,
+        TagInterface $tagRepository,
+        CategoryInterface $categoryRepository
     ) {
+        $this->postRepository = $postRepository;
+        $this->tagRepository = $tagRepository;
+        $this->categoryRepository = $categoryRepository;
     }
 
     public function index(PostTable $dataTable)
@@ -80,13 +88,13 @@ class PostController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
+    public function edit(int $id, FormBuilder $formBuilder, Request $request)
     {
         $post = $this->postRepository->findOrFail($id);
 
         event(new BeforeEditContentEvent($request, $post));
 
-        page_title()->setTitle(trans('core/base::forms.edit_item', ['name' => $post->name]));
+        page_title()->setTitle(trans('plugins/blog::posts.edit') . ' "' . $post->name . '"');
 
         return $formBuilder->create(PostForm::class, ['model' => $post])->renderForm();
     }
@@ -99,8 +107,6 @@ class PostController extends BaseController
         BaseHttpResponse $response
     ) {
         $post = $this->postRepository->findOrFail($id);
-
-        event(new BeforeUpdateContentEvent($request, $post));
 
         $post->fill($request->input());
 
@@ -117,7 +123,7 @@ class PostController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
+    public function destroy(int $id, Request $request, BaseHttpResponse $response)
     {
         try {
             $post = $this->postRepository->findOrFail($id);

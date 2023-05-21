@@ -5,6 +5,7 @@ namespace Botble\Theme\Providers;
 use BaseHelper;
 use Botble\Base\Supports\Helper;
 use Composer\Autoload\ClassLoader;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Arr;
 use Illuminate\Support\ServiceProvider;
 use Theme;
@@ -26,14 +27,14 @@ class ThemeManagementServiceProvider extends ServiceProvider
         if (! empty($theme)) {
             $themePath = theme_path($theme);
 
-            $configFilePath = $themePath . '/theme.json';
-
-            if ($this->app['files']->exists($configFilePath)) {
-                $content = BaseHelper::getFileData($configFilePath);
-                if (! empty($content) && Arr::has($content, 'namespace')) {
-                    $loader = new ClassLoader();
-                    $loader->setPsr4($content['namespace'], theme_path($theme . '/src'));
-                    $loader->register();
+            if (File::exists($themePath . '/theme.json')) {
+                $content = BaseHelper::getFileData($themePath . '/theme.json');
+                if (! empty($content)) {
+                    if (Arr::has($content, 'namespace')) {
+                        $loader = new ClassLoader();
+                        $loader->setPsr4($content['namespace'], theme_path($theme . '/src'));
+                        $loader->register();
+                    }
                 }
             }
 

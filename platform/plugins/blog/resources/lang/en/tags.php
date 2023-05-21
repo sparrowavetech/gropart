@@ -12,6 +12,7 @@ return [
         'no_select' => 'Please select at least one tag to take this action!',
     ],
     'create' => 'Create new tag',
+    'edit' => 'Edit tag',
     'cannot_delete' => 'Tag could not be deleted',
     'deleted' => 'Tag deleted',
     'menu' => 'Tags',

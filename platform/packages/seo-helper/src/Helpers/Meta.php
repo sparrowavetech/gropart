@@ -207,7 +207,7 @@ class Meta implements MetaContract
      *
      * @return string
      */
-    protected function getName(bool $prefixed = true)
+    protected function getName($prefixed = true)
     {
         $name = $this->name;
 
@@ -250,7 +250,7 @@ class Meta implements MetaContract
      *
      * @return string
      */
-    public function getContent()
+    protected function getContent()
     {
         return $this->clean($this->content);
     }

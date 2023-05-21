@@ -9,8 +9,11 @@ use SlugHelper;
 
 class DeletedContentListener
 {
-    public function __construct(protected SlugInterface $slugRepository)
+    protected SlugInterface $slugRepository;
+
+    public function __construct(SlugInterface $slugRepository)
     {
+        $this->slugRepository = $slugRepository;
     }
 
     public function handle(DeletedContentEvent $event): void

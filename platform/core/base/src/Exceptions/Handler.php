@@ -8,11 +8,9 @@ use Botble\Base\Http\Responses\BaseHttpResponse;
 use EmailHandler;
 use Exception;
 use Illuminate\Auth\AuthenticationException;
-use Illuminate\Contracts\Container\Container;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Exceptions\PostTooLargeException;
 use Illuminate\Session\TokenMismatchException;
-use PhpOffice\PhpSpreadsheet\Exception as PhpSpreadsheetException;
 use RvMedia;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
@@ -22,13 +20,6 @@ use Throwable;
 
 class Handler extends ExceptionHandler
 {
-    public function __construct(Container $container)
-    {
-        parent::__construct($container);
-
-        $this->ignore(PhpSpreadsheetException::class);
-    }
-
     public function render($request, Throwable $exception)
     {
         if ($exception instanceof PostTooLargeException) {
@@ -90,6 +81,9 @@ class Handler extends ExceptionHandler
         return parent::render($request, $exception);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function report(Throwable $exception)
     {
         if ($this->shouldReport($exception) && ! $this->isExceptionFromBot()) {

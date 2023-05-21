@@ -39,29 +39,24 @@
                         <form action="{{ route('get-started.save') }}" method="post">
                             @csrf
                             <input type="hidden" name="step" value="2">
-                            <div class="select-colors-fonts" data-select2-dropdown-parent="true">
+                            <div class="select-colors-fonts">
                                 <div class="row">
-                                    @if (theme_option()->hasField('primary_color'))
-                                        <div class="col-sm-6">
-                                            <h6>{{ trans('packages/get-started::get-started.colors') }}</h6>
-                                            <div class="form-group">
-                                                <label
-                                                    for="primary-color">{{ trans('packages/get-started::get-started.primary_color') }}</label>
-                                                {!! theme_option()->renderField(theme_option()->getField('primary_color')) !!}
-                                            </div>
+                                    <div class="col-sm-6">
+                                        <h6>{{ trans('packages/get-started::get-started.colors') }}</h6>
+                                        <div class="form-group">
+                                            <label
+                                                for="primary-color">{{ trans('packages/get-started::get-started.primary_color') }}</label>
+                                            {!! Form::customColor('primary_color', theme_option('primary_color')) !!}
                                         </div>
-                                    @endif
-
-                                    @if (theme_option()->hasField('primary_font'))
-                                        <div class="col-sm-6">
-                                            <h6>{{ trans('packages/get-started::get-started.fonts') }}</h6>
-                                            <div class="form-group">
-                                                <label
-                                                    for="primary-font">{{ trans('packages/get-started::get-started.primary_font') }}</label>
-                                                {!! theme_option()->renderField(theme_option()->getField('primary_font')) !!}
-                                            </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <h6>{{ trans('packages/get-started::get-started.fonts') }}</h6>
+                                        <div class="form-group">
+                                            <label
+                                                for="primary-font">{{ trans('packages/get-started::get-started.primary_font') }}</label>
+                                            {!! Form::googleFonts('primary_font', theme_option('primary_font')) !!}
                                         </div>
-                                    @endif
+                                    </div>
                                 </div>
                                 <br>
                                 <div class="row">
@@ -236,3 +231,25 @@
         </div>
     </div>
 </div>
+
+<link
+    href="{{ BaseHelper::getGoogleFontsURL() }}/css?family={{ implode('|', array_map('urlencode', config('core.base.general.google_fonts', []))) }}"
+    rel="stylesheet" type="text/css">
+<script>
+    'use strict';
+    jQuery(document).ready(function ($) {
+        $(document).find('.select2_google_fonts_picker').each(function (i, obj) {
+            $(obj).select2({
+                templateResult: function (opt) {
+                    if (!opt.id) {
+                        return opt.text;
+                    }
+                    return $('<span style="font-family:\'' + opt.id + '\';"> ' + opt.text + '</span>');
+                },
+                width: '100%',
+                minimumResultsForSearch: -1,
+                dropdownParent: $(obj).closest('.select-colors-fonts')
+            });
+        });
+    });
+</script>

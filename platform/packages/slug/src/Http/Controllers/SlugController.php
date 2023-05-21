@@ -14,8 +14,14 @@ use Menu;
 
 class SlugController extends BaseController
 {
-    public function __construct(protected SlugInterface $slugRepository, protected SlugService $slugService)
+    protected SlugInterface $slugRepository;
+
+    protected SlugService $slugService;
+
+    public function __construct(SlugInterface $slugRepository, SlugService $slugService)
     {
+        $this->slugRepository = $slugRepository;
+        $this->slugService = $slugService;
     }
 
     public function store(SlugRequest $request)

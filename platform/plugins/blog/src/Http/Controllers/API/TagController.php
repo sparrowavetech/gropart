@@ -11,8 +11,11 @@ use Illuminate\Http\Request;
 
 class TagController extends Controller
 {
-    public function __construct(protected TagInterface $tagRepository)
+    protected TagInterface $tagRepository;
+
+    public function __construct(TagInterface $tagRepository)
     {
+        $this->tagRepository = $tagRepository;
     }
 
     /**

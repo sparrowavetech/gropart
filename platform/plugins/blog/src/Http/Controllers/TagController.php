@@ -23,8 +23,11 @@ class TagController extends BaseController
 {
     use HasDeleteManyItemsTrait;
 
-    public function __construct(protected TagInterface $tagRepository)
+    protected TagInterface $tagRepository;
+
+    public function __construct(TagInterface $tagRepository)
     {
+        $this->tagRepository = $tagRepository;
     }
 
     public function index(TagTable $dataTable)
@@ -55,18 +58,18 @@ class TagController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
+    public function edit(int $id, FormBuilder $formBuilder, Request $request)
     {
         $tag = $this->tagRepository->findOrFail($id);
 
         event(new BeforeEditContentEvent($request, $tag));
 
-        page_title()->setTitle(trans('core/base::forms.edit_item', ['name' => $tag->name]));
+        page_title()->setTitle(trans('plugins/blog::tags.edit') . ' "' . $tag->name . '"');
 
         return $formBuilder->create(TagForm::class, ['model' => $tag])->renderForm();
     }
 
-    public function update(int|string $id, TagRequest $request, BaseHttpResponse $response)
+    public function update(int $id, TagRequest $request, BaseHttpResponse $response)
     {
         $tag = $this->tagRepository->findOrFail($id);
         $tag->fill($request->input());
@@ -79,7 +82,7 @@ class TagController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
+    public function destroy(int $id, Request $request, BaseHttpResponse $response)
     {
         try {
             $tag = $this->tagRepository->findOrFail($id);

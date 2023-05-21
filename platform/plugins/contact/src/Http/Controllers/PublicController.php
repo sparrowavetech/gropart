@@ -13,8 +13,11 @@ use Illuminate\Support\Str;
 
 class PublicController extends Controller
 {
-    public function __construct(protected ContactInterface $contactRepository)
+    protected ContactInterface $contactRepository;
+
+    public function __construct(ContactInterface $contactRepository)
     {
+        $this->contactRepository = $contactRepository;
     }
 
     public function postSendContact(ContactRequest $request, BaseHttpResponse $response)

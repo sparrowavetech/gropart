@@ -2,7 +2,6 @@
 
 namespace Botble\Setting\Supports;
 
-use Botble\Base\Models\BaseModel;
 use Botble\Base\Supports\Helper;
 use Botble\Setting\Models\Setting;
 use Exception;
@@ -93,12 +92,7 @@ class DatabaseSettingStore extends SettingStore
         $dbData = [];
 
         foreach ($data as $key => $value) {
-            $data = compact('key', 'value');
-            if (BaseModel::determineIfUsingUuidsForId()) {
-                $data['id'] = BaseModel::newUniqueId();
-            }
-
-            $dbData[] = $data;
+            $dbData[] = compact('key', 'value');
         }
 
         return apply_filters(SETTINGS_PREPARE_INSERT_DATA, $dbData);

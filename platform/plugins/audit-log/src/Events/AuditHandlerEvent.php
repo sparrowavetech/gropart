@@ -25,10 +25,10 @@ class AuditHandlerEvent extends Event
     public function __construct(
         string $module,
         string $action,
-        int|string $referenceId,
+        int $referenceId,
         ?string $referenceName,
         string $type,
-        int|string $referenceUser = 0
+        int $referenceUser = 0
     ) {
         if ($referenceUser === 0 && Auth::check()) {
             $referenceUser = Auth::id();

@@ -8,8 +8,11 @@ use Botble\Base\Http\Responses\BaseHttpResponse;
 
 class PublicController extends BaseController
 {
-    public function __construct(protected AdsInterface $adsRepository)
+    protected AdsInterface $adsRepository;
+
+    public function __construct(AdsInterface $adsRepository)
     {
+        $this->adsRepository = $adsRepository;
     }
 
     public function getAdsClick(string $key, BaseHttpResponse $response)

@@ -8,8 +8,11 @@ use Illuminate\Http\Request;
 
 abstract class StoreCategoryServiceAbstract
 {
-    public function __construct(protected CategoryInterface $categoryRepository)
+    protected CategoryInterface $categoryRepository;
+
+    public function __construct(CategoryInterface $categoryRepository)
     {
+        $this->categoryRepository = $categoryRepository;
     }
 
     abstract public function execute(Request $request, Post $post): void;

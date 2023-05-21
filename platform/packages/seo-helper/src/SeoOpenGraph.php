@@ -187,11 +187,6 @@ class SeoOpenGraph implements SeoOpenGraphContract
         return $this->openGraph->hasImage();
     }
 
-    public function getProperty(string $property): string|null
-    {
-        return $this->openGraph->getProperty($property);
-    }
-
     /**
      * Set image property.
      *

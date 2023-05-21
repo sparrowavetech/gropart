@@ -9,6 +9,7 @@ use Botble\Theme\Supports\Vimeo;
 use Botble\Theme\Supports\Youtube;
 use Html;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
 use Theme;
 
@@ -173,7 +174,7 @@ class HookServiceProvider extends ServiceProvider
 
         add_filter(THEME_FRONT_HEADER, function ($html) {
             $file = Theme::getStyleIntegrationPath();
-            if ($this->app['files']->exists($file)) {
+            if (File::exists($file)) {
                 $html .= "\n" . Html::style(Theme::asset()->url('css/style.integration.css?v=' . filectime($file)));
             }
 

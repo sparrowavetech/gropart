@@ -7,7 +7,6 @@ use Exception;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
 use League\Flysystem\FilesystemException;
-use League\Flysystem\UnableToRetrieveMetadata;
 use Mimey\MimeTypes;
 use RvMedia;
 use Storage;
@@ -43,11 +42,7 @@ class UploadsManager
 
     public function fileSize(string $path): int
     {
-        try {
-            return Storage::size($path);
-        } catch (UnableToRetrieveMetadata) {
-            return 0;
-        }
+        return Storage::size($path);
     }
 
     public function fileModified(string $path): string

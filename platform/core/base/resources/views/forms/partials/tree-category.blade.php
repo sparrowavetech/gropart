@@ -10,7 +10,7 @@
                 @else
                     <i class="far fa-file"></i>
                 @endif
-                <span>{!! BaseHelper::clean($category->name) !!}</span>
+                <span>{{ $category->name }}</span>
                 @if ($category->badge_with_count)
                     {!! $category->badge_with_count !!}
                 @endif

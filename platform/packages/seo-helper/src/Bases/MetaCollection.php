@@ -5,7 +5,6 @@ namespace Botble\SeoHelper\Bases;
 use Botble\SeoHelper\Contracts\Entities\MetaCollectionContract;
 use Botble\SeoHelper\Contracts\Helpers\MetaContract;
 use Botble\SeoHelper\Contracts\RenderableContract;
-use Botble\SeoHelper\Exceptions\InvalidArgumentException;
 use Botble\SeoHelper\Helpers\Meta;
 use Illuminate\Support\Collection;
 
@@ -72,7 +71,8 @@ abstract class MetaCollection extends Collection implements MetaCollectionContra
     /**
      * Add a meta to collection.
      *
-     * @param Meta $item
+     * @param string $name
+     * @param string $content
      *
      * @return MetaCollection
      */
@@ -88,9 +88,10 @@ abstract class MetaCollection extends Collection implements MetaCollectionContra
     /**
      * Make a meta and add it to collection.
      *
-     * @param array $meta
+     * @param string $name
+     * @param string $content
+     *
      * @return MetaCollection
-     * @throws InvalidArgumentException
      */
     protected function addMeta(array $meta)
     {

@@ -150,13 +150,12 @@ export class ContextMenuService {
             items.preview = undefined;
         }
 
-        let fileIsImage = _.filter(selectedFiles, function (value) {
+        let canCropImage = _.filter(selectedFiles, function (value) {
             return value.type === 'image';
         }).length;
 
-        if (! fileIsImage) {
+        if (! canCropImage) {
             items.crop = undefined;
-            items.alt_text = undefined;
         }
 
         return items;

@@ -15,7 +15,7 @@ Route::group(['namespace' => 'Botble\Contact\Http\Controllers', 'middleware' => 
                 'as' => 'reply',
                 'uses' => 'ContactController@postReply',
                 'permission' => 'contacts.edit',
-            ])->where('id', BaseHelper::routeIdRegex());
+            ])->where('id', '[0-9]+');
         });
     });
 

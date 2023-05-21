@@ -30,7 +30,7 @@ class AnalyticsServiceProvider extends ServiceProvider
                 throw InvalidConfiguration::credentialsIsNotValid();
             }
 
-            if (setting('analytics_type', 'ua') == 'ga4' && $propertyId = setting('analytics_property_id')) {
+            if (config('plugins.analytics.general.ga4_enabled', false) && $propertyId = setting('analytics_property_id')) {
                 return new AnalyticsGA4($propertyId, $credentials);
             }
 

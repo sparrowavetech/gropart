@@ -2,75 +2,72 @@
 
 namespace Botble\Blog\Repositories\Caches;
 
-use Botble\Blog\Models\Category;
 use Botble\Blog\Repositories\Interfaces\PostInterface;
 use Botble\Support\Repositories\Caches\CacheAbstractDecorator;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
 
 class PostCacheDecorator extends CacheAbstractDecorator implements PostInterface
 {
-    public function getFeatured(int $limit = 5, array $with = []): Collection
+    public function getFeatured(int $limit = 5, array $with = [])
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }
 
-    public function getListPostNonInList(array $selected = [], int $limit = 7, array $with = []): Collection
+    public function getListPostNonInList(array $selected = [], $limit = 12, array $with = [])
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }
 
-    public function getRelated(int|string $id, int $limit = 3): Collection
+    public function getByUserId($authorId, $limit = 6)
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }
 
-    public function getRelatedCategoryIds(Category|int|string $model): array
+    public function getDataSiteMap()
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }
 
-    public function getByCategory(array|int|string $categoryId, int $paginate = 12, int $limit = 0): Collection|LengthAwarePaginator
+    public function getByTag($tag, $paginate = 12)
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }
 
-    public function getByUserId(int|string $authorId, int $limit = 6): Collection|LengthAwarePaginator
+    public function getRelated($slug, $limit = 3)
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }
 
-    public function getDataSiteMap(): Collection|LengthAwarePaginator
+    public function getRecentPosts($limit = 5, $categoryId = 0)
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }
 
-    public function getByTag(int|string $tag, int $paginate = 12): Collection|LengthAwarePaginator
+    public function getSearch($query, $limit = 10, $paginate = 10)
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }
 
-    public function getRecentPosts(int $limit = 5, int|string $categoryId = 0): Collection
+    public function getByCategory($categoryId, $paginate = 12, $limit = 0)
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }
 
-    public function getSearch(string|null $keyword, int $limit = 10, int $paginate = 10): Collection|LengthAwarePaginator
+    public function getAllPosts($perPage = 12, $active = true, array $with = ['slugable'])
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }
 
-    public function getAllPosts(int $perPage = 12, bool $active = true, array $with = ['slugable']): Collection|LengthAwarePaginator
+    public function getPopularPosts($limit, array $args = [])
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }
 
-    public function getPopularPosts(int $limit, array $args = []): Collection
+    public function getRelatedCategoryIds($model)
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }
 
-    public function getFilters(array $filters): Collection|LengthAwarePaginator
+    public function getFilters(array $filters)
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }

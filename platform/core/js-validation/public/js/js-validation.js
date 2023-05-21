@@ -2661,9 +2661,6 @@ laravelValidation = {
                         if ($(validator.currentForm).attr('method').toLowerCase() !== 'get' && token) {
                             return xhr.setRequestHeader('X-XSRF-TOKEN', token);
                         }
-                    },
-                    complete: function () {
-                        $(validator.currentForm).find('button[type=submit]').prop('disabled', false).removeClass('disabled');
                     }
                 }, param )
             ).always(function( response, textStatus ) {

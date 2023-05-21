@@ -10,7 +10,7 @@ return new class () extends Migration {
     {
         Schema::create('ec_product_views', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('product_id')->index();
+            $table->integer('product_id')->unsigned()->index();
             $table->integer('views')->default(1);
             $table->date('date')->default(Carbon::now());
 

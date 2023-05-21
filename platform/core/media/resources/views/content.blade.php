@@ -346,28 +346,6 @@
                 </div>
             </div>
         </div>
-        <div class="modal fade" tabindex="-1" role="dialog" id="modal_alt_text_items">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <form class="rv-form form-alt-text">
-                        <div class="modal-header">
-                            <h4 class="modal-title">
-                                <i class="fas fa-file-signature"></i> {{ trans('core/media::media.alt_text') }}
-                            </h4>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ trans('core/media::media.close') }}"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="alt-text-items"></div>
-                            <div class="modal-notice"></div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ trans('core/media::media.close') }}</button>
-                            <button type="submit" class="btn btn-primary">{{ trans('core/media::media.save_changes') }}</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
         <div class="modal fade" tabindex="-1" role="dialog" id="modal_trash_items">
             <div class="modal-dialog modal-danger" role="document">
                 <div class="modal-content">
@@ -638,17 +616,6 @@
 </script>
 
 <script type="text/x-custom-template" id="rv_media_rename_item">
-    <div class="form-group mb-3">
-        <div class="input-group">
-            <div class="input-group-text">
-                <i class="__icon__"></i>
-            </div>
-            <input class="form-control" placeholder="__placeholder__" value="__value__">
-        </div>
-    </div>
-</script>
-
-<script type="text/x-custom-template" id="rv_media_alt_text_item">
     <div class="form-group mb-3">
         <div class="input-group">
             <div class="input-group-text">

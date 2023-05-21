@@ -19,8 +19,11 @@ class Captcha
 
     protected Repository $config;
 
-    public function __construct(protected Application $app)
+    protected Application|Repository $app;
+
+    public function __construct(Application $app)
     {
+        $this->app = $app;
         $this->config = $this->app['config'];
     }
 

@@ -7,6 +7,7 @@ use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Sitemap\Sitemap;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class SitemapServiceProvider extends ServiceProvider
@@ -22,15 +23,15 @@ class SitemapServiceProvider extends ServiceProvider
             ->loadAndPublishViews()
             ->publishAssets();
 
-        $this->app['events']->listen(CreatedContentEvent::class, function () {
+        Event::listen(CreatedContentEvent::class, function () {
             cache()->forget('cache_site_map_key');
         });
 
-        $this->app['events']->listen(UpdatedContentEvent::class, function () {
+        Event::listen(UpdatedContentEvent::class, function () {
             cache()->forget('cache_site_map_key');
         });
 
-        $this->app['events']->listen(DeletedContentEvent::class, function () {
+        Event::listen(DeletedContentEvent::class, function () {
             cache()->forget('cache_site_map_key');
         });
     }

@@ -16,8 +16,11 @@ use Illuminate\Support\Str;
 
 class TableController extends Controller
 {
-    public function __construct(protected TableBuilder $tableBuilder)
+    protected TableBuilder $tableBuilder;
+
+    public function __construct(TableBuilder $tableBuilder)
     {
+        $this->tableBuilder = $tableBuilder;
     }
 
     public function getDataForBulkChanges(BulkChangeRequest $request): array

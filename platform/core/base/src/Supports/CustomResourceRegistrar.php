@@ -2,7 +2,6 @@
 
 namespace Botble\Base\Supports;
 
-use BaseHelper;
 use Illuminate\Routing\ResourceRegistrar;
 use Illuminate\Routing\Route;
 
@@ -32,7 +31,7 @@ class CustomResourceRegistrar extends ResourceRegistrar
 
         $action = $this->getResourceAction($name, $controller, 'edit', $options);
 
-        return $this->router->get($uri, $action)->where($base, BaseHelper::routeIdRegex());
+        return $this->router->get($uri, $action)->where($base, '[0-9]+');
     }
 
     protected function addResourceUpdate($name, $base, $controller, $options): Route
@@ -41,7 +40,7 @@ class CustomResourceRegistrar extends ResourceRegistrar
 
         $action = $this->getResourceAction($name, $controller, 'update', $options);
 
-        return $this->router->post($uri, $action)->name($name . '.update')->where($base, BaseHelper::routeIdRegex());
+        return $this->router->post($uri, $action)->name($name . '.update')->where($base, '[0-9]+');
     }
 
     protected function addResourceStore($name, $base, $controller, $options): Route
@@ -66,6 +65,6 @@ class CustomResourceRegistrar extends ResourceRegistrar
 
     protected function addResourceDestroy($name, $base, $controller, $options): Route
     {
-        return parent::addResourceDestroy($name, $base, $controller, $options)->where($base, BaseHelper::routeIdRegex());
+        return parent::addResourceDestroy($name, $base, $controller, $options)->where($base, '[0-9]+');
     }
 }

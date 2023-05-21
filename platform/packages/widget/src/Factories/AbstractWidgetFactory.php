@@ -24,10 +24,13 @@ abstract class AbstractWidgetFactory
 
     public array $widgetFullParams;
 
+    public Application $app;
+
     public static bool $skipWidgetContainer = false;
 
-    public function __construct(protected Application $app)
+    public function __construct(Application $app)
     {
+        $this->app = $app;
     }
 
     public function __call(string $widgetName, array $params = [])

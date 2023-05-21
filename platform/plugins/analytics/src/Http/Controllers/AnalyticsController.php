@@ -81,10 +81,6 @@ class AnalyticsController extends BaseController
                     $total['ga:avgSessionDuration'] += 0;
                     $total['ga:newUsers'] += $item['newUsers'] ?? 0;
                 }
-
-                if ($totalQuery->count()) {
-                    $total['ga:bounceRate'] = $total['ga:bounceRate'] / $totalQuery->count();
-                }
             }
 
             foreach ($countryStats as $key => $item) {

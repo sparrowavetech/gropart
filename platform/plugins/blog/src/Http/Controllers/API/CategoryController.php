@@ -15,8 +15,11 @@ use SlugHelper;
 
 class CategoryController extends Controller
 {
-    public function __construct(protected CategoryInterface $categoryRepository)
+    protected CategoryInterface $categoryRepository;
+
+    public function __construct(CategoryInterface $categoryRepository)
     {
+        $this->categoryRepository = $categoryRepository;
     }
 
     /**
@@ -64,7 +67,7 @@ class CategoryController extends Controller
      */
     public function findBySlug(string $slug, BaseHttpResponse $response)
     {
-        $slug = SlugHelper::getSlug($slug, SlugHelper::getPrefix(Category::class));
+        $slug = SlugHelper::getSlug($slug, SlugHelper::getPrefix(Category::class), Category::class);
 
         if (! $slug) {
             return $response->setError()->setCode(404)->setMessage('Not found');

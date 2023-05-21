@@ -27,6 +27,8 @@ class PostTable extends TableAbstract
 
     protected $hasFilter = true;
 
+    protected CategoryInterface $categoryRepository;
+
     protected string $exportClass = PostExport::class;
 
     protected int $defaultSortColumn = 6;
@@ -35,11 +37,12 @@ class PostTable extends TableAbstract
         DataTables $table,
         UrlGenerator $urlGenerator,
         PostInterface $postRepository,
-        protected CategoryInterface $categoryRepository
+        CategoryInterface $categoryRepository
     ) {
         parent::__construct($table, $urlGenerator);
 
         $this->repository = $postRepository;
+        $this->categoryRepository = $categoryRepository;
 
         if (! Auth::user()->hasAnyPermission(['posts.edit', 'posts.destroy'])) {
             $this->hasOperations = false;

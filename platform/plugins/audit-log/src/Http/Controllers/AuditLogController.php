@@ -15,8 +15,11 @@ class AuditLogController extends BaseController
 {
     use HasDeleteManyItemsTrait;
 
-    public function __construct(protected AuditLogInterface $auditLogRepository)
+    protected AuditLogInterface $auditLogRepository;
+
+    public function __construct(AuditLogInterface $auditLogRepository)
     {
+        $this->auditLogRepository = $auditLogRepository;
     }
 
     public function getWidgetActivities(BaseHttpResponse $response, Request $request)
@@ -45,7 +48,7 @@ class AuditLogController extends BaseController
         return $dataTable->renderTable();
     }
 
-    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
+    public function destroy(Request $request, int $id, BaseHttpResponse $response)
     {
         try {
             $log = $this->auditLogRepository->findOrFail($id);

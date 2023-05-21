@@ -3,7 +3,6 @@
 namespace Botble\Page\Http\Controllers;
 
 use Botble\Base\Events\BeforeEditContentEvent;
-use Botble\Base\Events\BeforeUpdateContentEvent;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
@@ -23,8 +22,11 @@ class PageController extends BaseController
 {
     use HasDeleteManyItemsTrait;
 
-    public function __construct(protected PageInterface $pageRepository)
+    protected PageInterface $pageRepository;
+
+    public function __construct(PageInterface $pageRepository)
     {
+        $this->pageRepository = $pageRepository;
     }
 
     public function index(PageTable $dataTable)
@@ -54,23 +56,20 @@ class PageController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
+    public function edit(int $id, FormBuilder $formBuilder, Request $request)
     {
         $page = $this->pageRepository->findOrFail($id);
 
-        page_title()->setTitle(trans('core/base::forms.edit_item', ['name' => $page->name]));
+        page_title()->setTitle(trans('packages/page::pages.edit') . ' "' . $page->name . '"');
 
         event(new BeforeEditContentEvent($request, $page));
 
         return $formBuilder->create(PageForm::class, ['model' => $page])->renderForm();
     }
 
-    public function update(int|string $id, PageRequest $request, BaseHttpResponse $response)
+    public function update(int $id, PageRequest $request, BaseHttpResponse $response)
     {
         $page = $this->pageRepository->findOrFail($id);
-
-        event(new BeforeUpdateContentEvent($request, $page));
-
         $page->fill($request->input());
 
         $page = $this->pageRepository->createOrUpdate($page);
@@ -82,7 +81,7 @@ class PageController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
+    public function destroy(Request $request, int $id, BaseHttpResponse $response)
     {
         try {
             $page = $this->pageRepository->findOrFail($id);

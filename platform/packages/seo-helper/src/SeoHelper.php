@@ -15,12 +15,34 @@ use MetaBox;
 
 class SeoHelper implements SeoHelperContract
 {
-    protected SeoMetaContract $seoMeta;
+    /**
+     * The SeoMeta instance.
+     *
+     * @var SeoMetaContract
+     */
+    protected $seoMeta;
 
-    protected SeoOpenGraphContract $seoOpenGraph;
+    /**
+     * The SeoOpenGraph instance.
+     *
+     * @var SeoOpenGraphContract
+     */
+    protected $seoOpenGraph;
 
-    protected SeoTwitterContract $seoTwitter;
+    /**
+     * The SeoTwitter instance.
+     *
+     * @var SeoTwitterContract
+     */
+    protected $seoTwitter;
 
+    /**
+     * Make SeoHelper instance.
+     *
+     * @param SeoMetaContract $seoMeta
+     * @param SeoOpenGraphContract $seoOpenGraph
+     * @param SeoTwitterContract $seoTwitter
+     */
     public function __construct(
         SeoMetaContract $seoMeta,
         SeoOpenGraphContract $seoOpenGraph,
@@ -32,6 +54,13 @@ class SeoHelper implements SeoHelperContract
         $this->openGraph()->addProperty('type', 'website');
     }
 
+    /**
+     * Set SeoMeta instance.
+     *
+     * @param SeoMetaContract $seoMeta
+     *
+     * @return SeoHelper
+     */
     public function setSeoMeta(SeoMetaContract $seoMeta): self
     {
         $this->seoMeta = $seoMeta;
@@ -39,6 +68,13 @@ class SeoHelper implements SeoHelperContract
         return $this;
     }
 
+    /**
+     * Get SeoOpenGraph instance.
+     *
+     * @param SeoOpenGraphContract $seoOpenGraph
+     *
+     * @return SeoHelper
+     */
     public function setSeoOpenGraph(SeoOpenGraphContract $seoOpenGraph): self
     {
         $this->seoOpenGraph = $seoOpenGraph;
@@ -46,6 +82,13 @@ class SeoHelper implements SeoHelperContract
         return $this;
     }
 
+    /**
+     * Set SeoTwitter instance.
+     *
+     * @param SeoTwitterContract $seoTwitter
+     *
+     * @return SeoHelper
+     */
     public function setSeoTwitter(SeoTwitterContract $seoTwitter): self
     {
         $this->seoTwitter = $seoTwitter;
@@ -53,12 +96,26 @@ class SeoHelper implements SeoHelperContract
         return $this;
     }
 
+    /**
+     * Get SeoOpenGraph instance.
+     *
+     * @return SeoOpenGraphContract
+     */
     public function openGraph(): SeoOpenGraphContract
     {
         return $this->seoOpenGraph;
     }
 
-    public function setTitle(string|null $title, string|null $siteName = null, string|null $separator = null): self
+    /**
+     * Set title.
+     *
+     * @param string $title
+     * @param string|null $siteName
+     * @param string|null $separator
+     *
+     * @return SeoHelper
+     */
+    public function setTitle($title, $siteName = null, $separator = null): self
     {
         $this->meta()->setTitle($title, $siteName, $separator);
         $this->openGraph()->setTitle($title);
@@ -70,26 +127,49 @@ class SeoHelper implements SeoHelperContract
         return $this;
     }
 
+    /**
+     * Get SeoMeta instance.
+     *
+     * @return SeoMetaContract
+     */
     public function meta(): SeoMetaContract
     {
         return $this->seoMeta;
     }
 
+    /**
+     * Get SeoTwitter instance.
+     *
+     * @return SeoTwitterContract
+     */
     public function twitter(): SeoTwitterContract
     {
         return $this->seoTwitter;
     }
 
-    public function getTitle(): string|null
+    /**
+     * @return string
+     */
+    public function getTitle(): ?string
     {
         return $this->meta()->getTitle();
     }
 
-    public function getDescription(): string|null
+    /**
+     * @return string
+     */
+    public function getDescription(): ?string
     {
         return $this->meta()->getDescription();
     }
 
+    /**
+     * Set description.
+     *
+     * @param string $description
+     *
+     * @return SeoHelper
+     */
     public function setDescription($description): self
     {
         $description = BaseHelper::cleanShortcodes($description);
@@ -101,28 +181,39 @@ class SeoHelper implements SeoHelperContract
         return $this;
     }
 
+    /**
+     * Render the tag.
+     *
+     * @return string
+     */
     public function __toString()
     {
         return $this->render();
     }
 
+    /**
+     * Render all seo tags.
+     *
+     * @return string
+     */
     public function render()
     {
-        return implode(
-            PHP_EOL,
-            array_filter([
-                $this->meta()->render(),
-                $this->openGraph()->render(),
-                $this->twitter()->render(),
-            ])
-        );
+        return implode(PHP_EOL, array_filter([
+            $this->meta()->render(),
+            $this->openGraph()->render(),
+            $this->twitter()->render(),
+        ]));
     }
 
-    public function saveMetaData(string $screen, Request $request, BaseModel $object): bool
+    /**
+     * @param string $screen
+     * @param Request $request
+     * @param BaseModel $object
+     * @return bool
+     */
+    public function saveMetaData($screen, $request, $object)
     {
-        if (in_array(get_class($object), config('packages.seo-helper.general.supported', [])) && $request->has(
-            'seo_meta'
-        )) {
+        if (in_array(get_class($object), config('packages.seo-helper.general.supported', [])) && $request->has('seo_meta')) {
             try {
                 if (empty($request->input('seo_meta'))) {
                     MetaBox::deleteMetaData($object, 'seo_meta');
@@ -155,7 +246,12 @@ class SeoHelper implements SeoHelperContract
         return false;
     }
 
-    public function deleteMetaData(string $screen, BaseModel $object): bool
+    /**
+     * @param string $screen
+     * @param BaseModel $object
+     * @return bool
+     */
+    public function deleteMetaData($screen, $object): bool
     {
         try {
             if (in_array(get_class($object), config('packages.seo-helper.general.supported', []))) {
@@ -168,7 +264,11 @@ class SeoHelper implements SeoHelperContract
         }
     }
 
-    public function registerModule(array|string $model): self
+    /**
+     * @param string | array $model
+     * @return $this
+     */
+    public function registerModule($model): self
     {
         if (! is_array($model)) {
             $model = [$model];

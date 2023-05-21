@@ -11,6 +11,7 @@ use Botble\Installer\Http\Middleware\CheckIfInstallingMiddleware;
 use Botble\Installer\Http\Middleware\RedirectIfNotInstalledMiddleware;
 use Carbon\Carbon;
 use Illuminate\Routing\Events\RouteMatched;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Throwable;
 
@@ -28,7 +29,7 @@ class InstallerServiceProvider extends ServiceProvider
             ->loadRoutes()
             ->publishAssets();
 
-        $this->app['events']->listen(RouteMatched::class, function () {
+        Event::listen(RouteMatched::class, function () {
             if (defined('INSTALLED_SESSION_NAME')) {
                 $router = $this->app->make('router');
 
@@ -40,7 +41,7 @@ class InstallerServiceProvider extends ServiceProvider
         });
 
         try {
-            $this->app['events']->listen([UpdatedEvent::class, FinishedSeederEvent::class], function () {
+            Event::listen([UpdatedEvent::class, FinishedSeederEvent::class], function () {
                 BaseHelper::saveFileData(storage_path(INSTALLED_SESSION_NAME), Carbon::now()->toDateTimeString());
             });
         } catch (Throwable $exception) {

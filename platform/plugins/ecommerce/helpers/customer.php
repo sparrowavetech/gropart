@@ -6,7 +6,11 @@ use Botble\Ecommerce\Repositories\Interfaces\WishlistInterface;
 use Illuminate\Support\Collection;
 
 if (! function_exists('is_added_to_wishlist')) {
-    function is_added_to_wishlist(int|string $productId): bool
+    /**
+     * @param int $productId
+     * @return bool
+     */
+    function is_added_to_wishlist(int $productId): bool
     {
         if (! auth('customer')->check()) {
             return false;
@@ -20,6 +24,9 @@ if (! function_exists('is_added_to_wishlist')) {
 }
 
 if (! function_exists('count_customer_addresses')) {
+    /**
+     * @return int
+     */
     function count_customer_addresses(): int
     {
         if (! auth('customer')->check()) {
@@ -31,6 +38,9 @@ if (! function_exists('count_customer_addresses')) {
 }
 
 if (! function_exists('get_customer_addresses')) {
+    /**
+     * @return Collection
+     */
     function get_customer_addresses(): Collection
     {
         if (! auth('customer')->check()) {
@@ -49,6 +59,9 @@ if (! function_exists('get_customer_addresses')) {
 }
 
 if (! function_exists('get_default_customer_address')) {
+    /**
+     * @return Address
+     */
     function get_default_customer_address(): ?Address
     {
         if (! auth('customer')->check()) {
