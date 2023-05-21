@@ -1,10 +1,10 @@
 <?php
 
 return [
-    'name' => 'Product options',
+    'name' => 'Product Options',
     'options' => 'Options',
     'create' => 'New option',
-    'edit' => 'Edit option :name',
+    'edit' => 'Edit option',
     'required' => 'Is required?',
     'option_value' => 'Option value',
     'option_type' => 'Type',
@@ -25,5 +25,4 @@ return [
     'option_name_attribute' => 'Option :key',
     'option_type_attribute' => 'Type of option :key',
     'option_value_name_attribute' => 'Values of option :key',
-    'please_choose_option_type' => 'Please choose option type!',
 ];

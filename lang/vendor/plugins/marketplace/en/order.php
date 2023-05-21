@@ -9,7 +9,4 @@ return [
         'description' => 'Refunded from the order #:order',
     ],
     'products_are_from_different_vendors' => 'Cannot create order! Products are from different vendors.',
-    'return' => [
-        'description' => 'Returned from the order #:order',
-    ],
 ];

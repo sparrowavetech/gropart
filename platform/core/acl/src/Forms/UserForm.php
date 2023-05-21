@@ -9,8 +9,11 @@ use Botble\Base\Forms\FormAbstract;
 
 class UserForm extends FormAbstract
 {
-    public function __construct(protected RoleInterface $roleRepository)
+    protected RoleInterface $roleRepository;
+
+    public function __construct(RoleInterface $roleRepository)
     {
+        $this->roleRepository = $roleRepository;
         parent::__construct();
     }
 

@@ -13,7 +13,6 @@ return [
     'types' => [
         'add-amount' => 'Add Amount',
         'subtract-amount' => 'Subtract Amount',
-        'order-return' => 'Order Return',
     ],
     'store_name' => 'Store Name',
     'vendor_name' => 'Vendor Name',

@@ -6,5 +6,10 @@ use Botble\Support\Repositories\Interfaces\RepositoryInterface;
 
 interface RoleInterface extends RepositoryInterface
 {
-    public function createSlug(string $name, int|string $id): string;
+    /**
+     * @param string $name
+     * @param int|null $id
+     * @return string
+     */
+    public function createSlug($name, $id);
 }

@@ -26,9 +26,4 @@ return [
         'transaction_id_placeholder' => 'Transaction ID',
         'amount_with_balance' => 'Amount (balance: :balance)',
     ],
-    'new_withdrawal_request_notifications' => [
-        'new_withdrawal_request' => 'New withdrawal request',
-        'view' => 'View',
-        'description' => ':customer has requested a withdrawal.',
-    ],
 ];

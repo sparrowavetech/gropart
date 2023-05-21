@@ -35,14 +35,4 @@ return [
         ],
     ],
     'import_failed_description' => 'Import failed, please check the errors below!',
-    'column' => 'Column',
-    'row' => 'Row',
-    'attribute' => 'Attribute',
-    'errors' => 'Errors',
-    'import_types' => [
-        'name' => 'Import type',
-        'all' => 'All',
-        'products' => 'Products',
-        'variations' => 'Variations',
-    ],
 ];

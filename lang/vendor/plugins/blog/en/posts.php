@@ -2,6 +2,7 @@
 
 return [
     'create' => 'Create new post',
+    'edit' => 'Edit post',
     'form' => [
         'name' => 'Name',
         'name_placeholder' => 'Post\'s name (Maximum :c characters)',

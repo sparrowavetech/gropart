@@ -45,12 +45,4 @@ return [
     'address' => 'Address',
     'new_payment' => 'Payment for order :id',
     'payment_id' => 'Payment ID',
-    'order' => 'Order',
-    'add_payment' => 'Add payment',
-    'add_new_payment' => 'New payment',
-    'add' => 'Add',
-    'no_data' => 'No data to display',
-    'no_option' => 'No option',
-    'edit_payment' => 'Edit payment',
-    'save' => 'Save',
 ];

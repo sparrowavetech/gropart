@@ -150,6 +150,11 @@ class User extends BaseModel implements
         return $this->hasAnyAccess($permissions);
     }
 
+    /**
+     * Send the password reset notification.
+     *
+     * @param string $token
+     */
     public function sendPasswordResetNotification($token): void
     {
         $this->notify(new ResetPasswordNotification($token));

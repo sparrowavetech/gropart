@@ -4,18 +4,16 @@ namespace Botble\ACL\Commands;
 
 use Botble\ACL\Repositories\Interfaces\UserInterface;
 use Botble\ACL\Services\ActivateUserService;
-use Botble\Base\Commands\Traits\ValidateCommandInput;
-use Botble\Base\Supports\Helper;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Throwable;
 
 #[AsCommand('cms:user:create', 'Create a super user')]
 class UserCreateCommand extends Command
 {
-    use ValidateCommandInput;
-
     public function handle(UserInterface $userRepository, ActivateUserService $activateUserService): int
     {
         $this->components->info('Creating a super user...');
@@ -36,8 +34,6 @@ class UserCreateCommand extends Command
                 $this->components->info('Super user is created.');
             }
 
-            Helper::clearCache();
-
             return self::SUCCESS;
         } catch (Exception $exception) {
             $this->components->error('User could not be created.');
@@ -45,5 +41,42 @@ class UserCreateCommand extends Command
 
             return self::FAILURE;
         }
+    }
+
+    protected function askWithValidate(string $message, string $rules, bool $secret = false): string
+    {
+        do {
+            if ($secret) {
+                try {
+                    $input = $this->secret($message);
+                } catch (Throwable) {
+                    $input = $this->ask($message);
+                }
+            } else {
+                $input = $this->ask($message);
+            }
+
+            $validate = $this->validate(compact('input'), ['input' => $rules]);
+            if ($validate['error']) {
+                $this->components->error($validate['message']);
+            }
+        } while ($validate['error']);
+
+        return $input;
+    }
+
+    protected function validate(array $data, array $rules): array
+    {
+        $validator = Validator::make($data, $rules);
+        if ($validator->fails()) {
+            return [
+                'error' => true,
+                'message' => $validator->messages()->first(),
+            ];
+        }
+
+        return [
+            'error' => false,
+        ];
     }
 }
