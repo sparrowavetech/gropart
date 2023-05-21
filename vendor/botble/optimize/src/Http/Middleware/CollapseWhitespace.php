@@ -15,16 +15,6 @@ class CollapseWhitespace extends PageSpeed
             '/> +</' => '><',
         ];
 
-        $blocks = preg_split('/(<\/?pre[^>]*>)/', $buffer, -1, PREG_SPLIT_DELIM_CAPTURE);
-        $buffer = '';
-        foreach ($blocks as $i => $block) {
-            if ($i % 4 == 2) {
-                $buffer .= $block;
-            } else {
-                $buffer .= $this->replace($replace, $block);
-            }
-        }
-
-        return $buffer;
+        return $this->replace($replace, $buffer);
     }
 }

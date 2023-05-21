@@ -140,11 +140,6 @@ abstract class EC extends AsymmetricKey
     {
         self::initialize_static_variables();
 
-        $class = new \ReflectionClass(static::class);
-        if ($class->isFinal()) {
-            throw new \RuntimeException('createKey() should not be called from final classes (' . static::class . ')');
-        }
-
         if (!isset(self::$engines['PHP'])) {
             self::useBestEngine();
         }

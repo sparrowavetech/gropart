@@ -18,10 +18,13 @@ use WidgetGroup;
 
 class WidgetController extends BaseController
 {
+    protected WidgetInterface $widgetRepository;
+
     protected ?string $theme = null;
 
-    public function __construct(protected WidgetInterface $widgetRepository)
+    public function __construct(WidgetInterface $widgetRepository)
     {
+        $this->widgetRepository = $widgetRepository;
         $this->theme = Theme::getThemeName() . $this->getCurrentLocaleCode();
     }
 

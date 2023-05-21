@@ -12,9 +12,12 @@ class ForgotPasswordController extends BaseController
 {
     use SendsPasswordResetEmails;
 
-    public function __construct(protected BaseHttpResponse $response)
+    protected BaseHttpResponse $response;
+
+    public function __construct(BaseHttpResponse $response)
     {
         $this->middleware('guest');
+        $this->response = $response;
     }
 
     public function showLinkRequestForm()

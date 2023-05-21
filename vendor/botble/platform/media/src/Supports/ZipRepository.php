@@ -7,8 +7,14 @@ use ZipArchive;
 
 class ZipRepository implements ZipperInterface
 {
-    protected ZipArchive|null $archive;
+    /**
+     * @var ZipArchive|null
+     */
+    protected $archive;
 
+    /**
+     * {@inheritDoc}
+     */
     public function __construct($filePath, $create = false, $archive = null)
     {
         if (! class_exists('ZipArchive')) {
@@ -24,6 +30,10 @@ class ZipRepository implements ZipperInterface
         }
     }
 
+    /**
+     * @param $resultCode
+     * @return string
+     */
     protected function getErrorMessage($resultCode): string
     {
         return match ($resultCode) {
@@ -39,16 +49,25 @@ class ZipRepository implements ZipperInterface
         };
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function addFile($pathToFile, $pathInArchive)
     {
         $this->archive->addFile($pathToFile, $pathInArchive);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function addFromString($name, $content)
     {
         $this->archive->addFromString($name, $content);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function close()
     {
         @$this->archive->close();

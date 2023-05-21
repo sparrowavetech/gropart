@@ -8,7 +8,10 @@ use Illuminate\Support\Str;
 
 class RoleRepository extends RepositoriesAbstract implements RoleInterface
 {
-    public function createSlug(string $name, int|string $id): string
+    /**
+     * {@inheritDoc}
+     */
+    public function createSlug($name, $id)
     {
         $slug = Str::slug($name);
         $index = 1;

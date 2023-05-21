@@ -144,12 +144,6 @@ class Chart
     /** @var bool */
     private $autoTitleDeleted = false;
 
-    /** @var bool */
-    private $noFill = false;
-
-    /** @var bool */
-    private $roundedCorners = false;
-
     /**
      * Create a new Chart.
      * majorGridlines and minorGridlines are deprecated, moved to Axis.
@@ -186,13 +180,6 @@ class Chart
     public function getName()
     {
         return $this->name;
-    }
-
-    public function setName(string $name): self
-    {
-        $this->name = $name;
-
-        return $this;
     }
 
     /**
@@ -379,8 +366,7 @@ class Chart
     /**
      * Get Major Gridlines.
      *
-     * @deprecated 1.24.0 Use Axis->getMajorGridlines()
-     * @see Axis::getMajorGridlines()
+     * @Deprecated 1.24.0 Use Axis->getMajorGridlines
      *
      * @codeCoverageIgnore
      */
@@ -392,8 +378,7 @@ class Chart
     /**
      * Get Minor Gridlines.
      *
-     * @deprecated 1.24.0 Use Axis->getMinorGridlines()
-     * @see Axis::getMinorGridlines()
+     * @Deprecated 1.24.0 Use Axis->getMinorGridlines
      *
      * @codeCoverageIgnore
      */
@@ -427,11 +412,9 @@ class Chart
     /**
      * Get the top left position of the chart.
      *
-     * Returns ['cell' => string cell address, 'xOffset' => int, 'yOffset' => int].
-     *
      * @return array{cell: string, xOffset: int, yOffset: int} an associative array containing the cell address, X-Offset and Y-Offset from the top left of that cell
      */
-    public function getTopLeftPosition(): array
+    public function getTopLeftPosition()
     {
         return [
             'cell' => $this->topLeftCellRef,
@@ -467,8 +450,8 @@ class Chart
     /**
      * Set the offset position within the Top Left cell for the chart.
      *
-     * @param ?int $xOffset
-     * @param ?int $yOffset
+     * @param int $xOffset
+     * @param int $yOffset
      *
      * @return $this
      */
@@ -591,8 +574,8 @@ class Chart
     /**
      * Set the offset position within the Bottom Right cell for the chart.
      *
-     * @param ?int $xOffset
-     * @param ?int $yOffset
+     * @param int $xOffset
+     * @param int $yOffset
      *
      * @return $this
      */
@@ -665,10 +648,14 @@ class Chart
 
     /**
      * Render the chart to given file (or stream).
+     * Unable to cover code until a usable current version of JpGraph
+     * is made available through Composer.
      *
      * @param string $outputDestination Name of the file render to
      *
      * @return bool true on success
+     *
+     * @codeCoverageIgnore
      */
     public function render($outputDestination = null)
     {
@@ -757,32 +744,6 @@ class Chart
     public function setAutoTitleDeleted(bool $autoTitleDeleted): self
     {
         $this->autoTitleDeleted = $autoTitleDeleted;
-
-        return $this;
-    }
-
-    public function getNoFill(): bool
-    {
-        return $this->noFill;
-    }
-
-    public function setNoFill(bool $noFill): self
-    {
-        $this->noFill = $noFill;
-
-        return $this;
-    }
-
-    public function getRoundedCorners(): bool
-    {
-        return $this->roundedCorners;
-    }
-
-    public function setRoundedCorners(?bool $roundedCorners): self
-    {
-        if ($roundedCorners !== null) {
-            $this->roundedCorners = $roundedCorners;
-        }
 
         return $this;
     }

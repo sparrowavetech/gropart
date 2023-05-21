@@ -14,6 +14,8 @@ use Botble\Base\Listeners\CreatedContentListener;
 use Botble\Base\Listeners\DeletedContentListener;
 use Botble\Base\Listeners\SendMailListener;
 use Botble\Base\Listeners\UpdatedContentListener;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\File;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
@@ -43,8 +45,8 @@ class EventServiceProvider extends ServiceProvider
     {
         parent::boot();
 
-        $this->app['events']->listen(['cache:cleared'], function () {
-            $this->app['files']->delete([storage_path('cache_keys.json'), storage_path('settings.json')]);
+        Event::listen(['cache:cleared'], function () {
+            File::delete([storage_path('cache_keys.json'), storage_path('settings.json')]);
         });
     }
 }

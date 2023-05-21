@@ -32,6 +32,9 @@ class DropZoneUploadHandler extends AbstractHandler
      */
     protected $chunksTotal = 0;
 
+    /**
+     * {@inheritDoc}
+     */
     public function __construct(Request $request, $file)
     {
         parent::__construct($request, $file);
@@ -41,33 +44,51 @@ class DropZoneUploadHandler extends AbstractHandler
         $this->fileUuid = $request->input(self::CHUNK_UUID_INDEX);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function getChunkFileName()
     {
         return $this->createChunkFileName($this->fileUuid, $this->currentChunk);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function startSaving($chunkStorage)
     {
         // Build the parallel save
         return new ParallelSave($this->file, $this, $chunkStorage);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function isFirstChunk()
     {
         return 1 == $this->currentChunk;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function isLastChunk()
     {
         // the bytes start from zero, remove 1 byte from total
         return $this->currentChunk == $this->chunksTotal;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function isChunkedUpload()
     {
         return $this->chunksTotal > 1;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function getPercentageDone()
     {
         if (! $this->chunksTotal) {

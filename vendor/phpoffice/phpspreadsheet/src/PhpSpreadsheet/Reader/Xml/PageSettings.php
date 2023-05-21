@@ -61,27 +61,28 @@ class PageSettings
         if (isset($xmlX->WorksheetOptions->PageSetup)) {
             foreach ($xmlX->WorksheetOptions->PageSetup as $pageSetupData) {
                 foreach ($pageSetupData as $pageSetupKey => $pageSetupValue) {
-                    /** @scrutinizer ignore-call */
                     $pageSetupAttributes = $pageSetupValue->attributes($namespaces['x']);
-                    if ($pageSetupAttributes !== null) {
-                        switch ($pageSetupKey) {
-                            case 'Layout':
-                                $this->setLayout($printDefaults, $pageSetupAttributes);
+                    if (!$pageSetupAttributes) {
+                        continue;
+                    }
 
-                                break;
-                            case 'Header':
-                                $printDefaults->headerMargin = (float) $pageSetupAttributes->Margin ?: 1.0;
+                    switch ($pageSetupKey) {
+                        case 'Layout':
+                            $this->setLayout($printDefaults, $pageSetupAttributes);
 
-                                break;
-                            case 'Footer':
-                                $printDefaults->footerMargin = (float) $pageSetupAttributes->Margin ?: 1.0;
+                            break;
+                        case 'Header':
+                            $printDefaults->headerMargin = (float) $pageSetupAttributes->Margin ?: 1.0;
 
-                                break;
-                            case 'PageMargins':
-                                $this->setMargins($printDefaults, $pageSetupAttributes);
+                            break;
+                        case 'Footer':
+                            $printDefaults->footerMargin = (float) $pageSetupAttributes->Margin ?: 1.0;
 
-                                break;
-                        }
+                            break;
+                        case 'PageMargins':
+                            $this->setMargins($printDefaults, $pageSetupAttributes);
+
+                            break;
                     }
                 }
             }

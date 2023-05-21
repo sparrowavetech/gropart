@@ -33,7 +33,6 @@ class MockHandler implements \Countable
         callable $onFulfilled = null,
         callable $onRejected = null
     ) {
-        $this->queue = [];
         $this->onFulfilled = $onFulfilled;
         $this->onRejected = $onRejected;
 

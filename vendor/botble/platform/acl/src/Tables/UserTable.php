@@ -26,15 +26,18 @@ class UserTable extends TableAbstract
 
     protected $hasFilter = true;
 
+    protected ActivateUserService $service;
+
     public function __construct(
         DataTables $table,
         UrlGenerator $urlGenerator,
-        UserInterface $repository,
-        protected ActivateUserService $service
+        UserInterface $userRepository,
+        ActivateUserService $service
     ) {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $repository;
+        $this->repository = $userRepository;
+        $this->service = $service;
 
         if (! Auth::user()->hasAnyPermission(['users.edit', 'users.destroy'])) {
             $this->hasOperations = false;

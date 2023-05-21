@@ -437,8 +437,6 @@ class BigInteger implements \JsonSerializable
      * JSON Serialize
      *
      * Will be called, automatically, when json_encode() is called on a BigInteger object.
-     *
-     * @return array{hex: string, precision?: int]
      */
     #[\ReturnTypeWillChange]
     public function jsonSerialize()

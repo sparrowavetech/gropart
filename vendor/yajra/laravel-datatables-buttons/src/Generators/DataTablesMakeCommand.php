@@ -48,7 +48,7 @@ class DataTablesMakeCommand extends GeneratorCommand
             $dom = config('datatables-buttons.generator.dom', 'Bfrtip');
 
             $this->call('datatables:html', [
-                'name' => $this->getDataTableBaseName(),
+                'name' => $this->prepareHtmlBuilderName($this->getNameInput()),
                 '--columns' => $this->option('columns') ?: $columns,
                 '--buttons' => $this->option('buttons') ?: $buttons,
                 '--dom' => $this->option('dom') ?: $dom,
@@ -65,7 +65,7 @@ class DataTablesMakeCommand extends GeneratorCommand
      *
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
      */
-    protected function buildClass($name): string
+    protected function buildClass($name)
     {
         $stub = parent::buildClass($name);
 
@@ -83,13 +83,13 @@ class DataTablesMakeCommand extends GeneratorCommand
     }
 
     /**
-     * Get DataTable class base name without the suffix.
+     * Prepare html builder name from input.
      *
      * @return string
      */
-    protected function getDataTableBaseName(): string
+    protected function prepareHtmlBuilderName(): string
     {
-        return (string) preg_replace('#datatable$#i', '', $this->getNameInput());
+        return preg_replace('#datatable$#i', '', $this->getNameInput());
     }
 
     /**
@@ -99,7 +99,7 @@ class DataTablesMakeCommand extends GeneratorCommand
      */
     protected function prepareModelName(): string
     {
-        return basename($this->getDataTableBaseName());
+        return basename(preg_replace('#datatable$#i', '', $this->getNameInput()));
     }
 
     /**

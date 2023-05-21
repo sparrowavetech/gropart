@@ -3,8 +3,7 @@
 /*
  * This file is part of the Predis package.
  *
- * (c) 2009-2020 Daniele Alessandri
- * (c) 2021-2023 Till Krüss
+ * (c) Daniele Alessandri <suppakilla@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -12,11 +11,11 @@
 
 namespace Predis\PubSub;
 
-use InvalidArgumentException;
-
 /**
  * Method-dispatcher loop built around the client-side abstraction of a Redis
  * PUB / SUB context.
+ *
+ * @author Daniele Alessandri <suppakilla@gmail.com>
  */
 class DispatcherLoop
 {
@@ -31,7 +30,7 @@ class DispatcherLoop
      */
     public function __construct(Consumer $pubsub)
     {
-        $this->callbacks = [];
+        $this->callbacks = array();
         $this->pubsub = $pubsub;
     }
 
@@ -40,12 +39,12 @@ class DispatcherLoop
      *
      * @param mixed $callable A callback.
      *
-     * @throws InvalidArgumentException
+     * @throws \InvalidArgumentException
      */
     protected function assertCallback($callable)
     {
         if (!is_callable($callable)) {
-            throw new InvalidArgumentException('The given argument must be a callable object.');
+            throw new \InvalidArgumentException('The given argument must be a callable object.');
         }
     }
 
@@ -96,7 +95,7 @@ class DispatcherLoop
      */
     public function attachCallback($channel, $callback)
     {
-        $callbackName = $this->getPrefixKeys() . $channel;
+        $callbackName = $this->getPrefixKeys().$channel;
 
         $this->assertCallback($callback);
         $this->callbacks[$callbackName] = $callback;
@@ -110,7 +109,7 @@ class DispatcherLoop
      */
     public function detachCallback($channel)
     {
-        $callbackName = $this->getPrefixKeys() . $channel;
+        $callbackName = $this->getPrefixKeys().$channel;
 
         if (isset($this->callbacks[$callbackName])) {
             unset($this->callbacks[$callbackName]);

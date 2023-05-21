@@ -2,7 +2,6 @@
 
 namespace Botble\Base\Providers;
 
-use Botble\Base\Commands\ActivateLicenseCommand;
 use Botble\Base\Commands\CleanupSystemCommand;
 use Botble\Base\Commands\ClearLogCommand;
 use Botble\Base\Commands\ExportDatabaseCommand;
@@ -24,7 +23,6 @@ class CommandServiceProvider extends ServiceProvider
             CleanupSystemCommand::class,
             ExportDatabaseCommand::class,
             FetchGoogleFontsCommand::class,
-            ActivateLicenseCommand::class,
         ]);
     }
 }

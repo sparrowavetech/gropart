@@ -18,7 +18,7 @@ use phpseclib3\Crypt\DSA;
  *
  * @author  Jim Wigginton <terrafrost@php.net>
  */
-final class Parameters extends DSA
+class Parameters extends DSA
 {
     /**
      * Returns the parameters

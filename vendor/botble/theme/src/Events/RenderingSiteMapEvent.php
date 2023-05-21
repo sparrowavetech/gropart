@@ -3,10 +3,9 @@
 namespace Botble\Theme\Events;
 
 use Botble\Base\Events\Event;
+use Illuminate\Queue\SerializesModels;
 
 class RenderingSiteMapEvent extends Event
 {
-    public function __construct(public string|null $key = null)
-    {
-    }
+    use SerializesModels;
 }

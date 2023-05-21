@@ -114,10 +114,11 @@ trait EnumeratesValues
     /**
      * Wrap the given value in a collection if applicable.
      *
+     * @template TWrapKey of array-key
      * @template TWrapValue
      *
-     * @param  iterable<array-key, TWrapValue>|TWrapValue  $value
-     * @return static<array-key, TWrapValue>
+     * @param  iterable<TWrapKey, TWrapValue>  $value
+     * @return static<TWrapKey, TWrapValue>
      */
     public static function wrap($value)
     {

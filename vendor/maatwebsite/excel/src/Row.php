@@ -18,11 +18,6 @@ class Row implements ArrayAccess
     protected $headingRow = [];
 
     /**
-     * @var array
-     */
-    protected $headerIsGrouped = [];
-
-    /**
      * @var \Closure
      */
     protected $preparationCallback;

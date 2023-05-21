@@ -107,16 +107,6 @@ class QueryDataTable extends DataTableAbstract
     }
 
     /**
-     * Get paginated results.
-     *
-     * @return \Illuminate\Support\Collection<int, array>
-     */
-    public function results(): Collection
-    {
-        return $this->query->get();
-    }
-
-    /**
      * Prepare query by executing count, filter, order and paginate.
      *
      * @return $this
@@ -133,7 +123,7 @@ class QueryDataTable extends DataTableAbstract
 
         $this->prepared = true;
 
-        return $this;
+        return  $this;
     }
 
     /**
@@ -156,10 +146,9 @@ class QueryDataTable extends DataTableAbstract
         $builder = clone $this->query;
 
         if ($this->isComplexQuery($builder)) {
-            return $this->getConnection()
-                        ->query()
-                        ->fromRaw('('.$builder->toSql().') count_row_table')
-                        ->setBindings($builder->getBindings());
+            $table = $this->getConnection()->raw('('.$builder->toSql().') count_row_table');
+
+            return $this->getConnection()->table($table)->setBindings($builder->getBindings());
         }
 
         $row_count = $this->wrap('row_count');
@@ -191,6 +180,16 @@ class QueryDataTable extends DataTableAbstract
     protected function wrap(string $column): string
     {
         return $this->getConnection()->getQueryGrammar()->wrap($column);
+    }
+
+    /**
+     * Get paginated results.
+     *
+     * @return \Illuminate\Support\Collection<int, array>
+     */
+    public function results(): Collection
+    {
+        return $this->query->get();
     }
 
     /**
@@ -308,16 +307,6 @@ class QueryDataTable extends DataTableAbstract
         }
 
         return $instance;
-    }
-
-    /**
-     * Get query builder instance.
-     *
-     * @return QueryBuilder
-     */
-    public function getQuery(): QueryBuilder
-    {
-        return $this->query;
     }
 
     /**
@@ -536,6 +525,20 @@ class QueryDataTable extends DataTableAbstract
     }
 
     /**
+     * Paginate dataTable using limit without offset
+     * with additional where clause via callback.
+     *
+     * @param  callable  $callback
+     * @return $this
+     */
+    public function limit(callable $callback): static
+    {
+        $this->limitCallback = $callback;
+
+        return $this;
+    }
+
+    /**
      * Perform pagination.
      *
      * @return void
@@ -553,20 +556,6 @@ class QueryDataTable extends DataTableAbstract
         } else {
             $this->query->skip($start)->take($limit);
         }
-    }
-
-    /**
-     * Paginate dataTable using limit without offset
-     * with additional where clause via callback.
-     *
-     * @param  callable  $callback
-     * @return $this
-     */
-    public function limit(callable $callback): static
-    {
-        $this->limitCallback = $callback;
-
-        return $this;
     }
 
     /**
@@ -788,5 +777,15 @@ class QueryDataTable extends DataTableAbstract
         $this->prepareQuery();
 
         return $this->getQuery();
+    }
+
+    /**
+     * Get query builder instance.
+     *
+     * @return QueryBuilder
+     */
+    public function getQuery(): QueryBuilder
+    {
+        return $this->query;
     }
 }

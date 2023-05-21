@@ -16,6 +16,7 @@ use Botble\Menu\Repositories\Interfaces\MenuInterface;
 use Botble\Menu\Repositories\Interfaces\MenuLocationInterface;
 use Botble\Menu\Repositories\Interfaces\MenuNodeInterface;
 use Illuminate\Routing\Events\RouteMatched;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class MenuServiceProvider extends ServiceProvider
@@ -56,7 +57,7 @@ class MenuServiceProvider extends ServiceProvider
             ->loadMigrations()
             ->publishAssets();
 
-        $this->app['events']->listen(RouteMatched::class, function () {
+        Event::listen(RouteMatched::class, function () {
             dashboard_menu()
                 ->registerItem([
                     'id' => 'cms-core-menu',

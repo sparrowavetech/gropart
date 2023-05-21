@@ -11,8 +11,8 @@ use Botble\Slug\Repositories\Caches\SlugCacheDecorator;
 use Botble\Slug\Repositories\Eloquent\SlugRepository;
 use Botble\Slug\Repositories\Interfaces\SlugInterface;
 use Botble\Slug\SlugHelper;
-use Botble\Slug\SlugCompiler;
 use Illuminate\Routing\Events\RouteMatched;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use MacroableModels;
 
@@ -29,7 +29,7 @@ class SlugServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(SlugHelper::class, function () {
-            return new SlugHelper(new SlugCompiler());
+            return new SlugHelper();
         });
 
         $this->setNamespace('packages/slug')
@@ -49,7 +49,7 @@ class SlugServiceProvider extends ServiceProvider
         $this->app->register(EventServiceProvider::class);
         $this->app->register(CommandServiceProvider::class);
 
-        $this->app['events']->listen(RouteMatched::class, function () {
+        Event::listen(RouteMatched::class, function () {
             dashboard_menu()
                 ->registerItem([
                     'id' => 'cms-packages-slug-permalink',
@@ -114,8 +114,6 @@ class SlugServiceProvider extends ServiceProvider
 
                         $prefix = $this->slugable ? $this->slugable->prefix : null;
                         $prefix = apply_filters(FILTER_SLUG_PREFIX, $prefix);
-
-                        $prefix = \SlugHelper::getTranslator()->compile($prefix, $this);
 
                         return apply_filters(
                             'slug_filter_url',

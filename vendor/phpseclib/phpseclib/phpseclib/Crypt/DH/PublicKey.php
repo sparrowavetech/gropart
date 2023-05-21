@@ -19,7 +19,7 @@ use phpseclib3\Crypt\DH;
  *
  * @author  Jim Wigginton <terrafrost@php.net>
  */
-final class PublicKey extends DH
+class PublicKey extends DH
 {
     use Common\Traits\Fingerprint;
 

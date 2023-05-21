@@ -14,6 +14,7 @@ use EmailHandler;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class SettingServiceProvider extends ServiceProvider
@@ -56,7 +57,7 @@ class SettingServiceProvider extends ServiceProvider
             ->loadMigrations()
             ->publishAssets();
 
-        $this->app['events']->listen(RouteMatched::class, function () {
+        Event::listen(RouteMatched::class, function () {
             dashboard_menu()
                 ->registerItem([
                     'id' => 'cms-core-settings',

@@ -3,16 +3,13 @@
 /*
  * This file is part of the Predis package.
  *
- * (c) 2009-2020 Daniele Alessandri
- * (c) 2021-2023 Till Krüss
+ * (c) Daniele Alessandri <suppakilla@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
 namespace Predis\Command;
-
-use Predis\Command\Redis\FUNCTIONS;
 
 /**
  * Command factory for mainline Redis servers.
@@ -22,18 +19,21 @@ use Predis\Command\Redis\FUNCTIONS;
  * class in the Predis\Command\Redis namespace but this can be overridden for
  * any command ID simply by defining a new command handler class implementing
  * Predis\Command\CommandInterface.
+ *
+ * @author Daniele Alessandri <suppakilla@gmail.com>
  */
 class RedisFactory extends Factory
 {
+    /**
+     *
+     */
     public function __construct()
     {
-        $this->commands = [
+        $this->commands = array(
             'ECHO' => 'Predis\Command\Redis\ECHO_',
             'EVAL' => 'Predis\Command\Redis\EVAL_',
             'OBJECT' => 'Predis\Command\Redis\OBJECT_',
-            // Class name corresponds to PHP reserved word "function", added mapping to bypass restrictions
-            'FUNCTION' => FUNCTIONS::class,
-        ];
+        );
     }
 
     /**
@@ -66,4 +66,5 @@ class RedisFactory extends Factory
         // details of the implementation of this mechanism.
         $this->commands[strtoupper($commandID)] = null;
     }
+
 }

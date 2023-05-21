@@ -29,12 +29,6 @@ class JsonType extends Type
 
     /**
      * {@inheritdoc}
-     *
-     * @param T $value
-     *
-     * @return (T is null ? null : string)
-     *
-     * @template T
      */
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {

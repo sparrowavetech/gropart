@@ -36,12 +36,6 @@ class DateIntervalType extends Type
 
     /**
      * {@inheritdoc}
-     *
-     * @param T $value
-     *
-     * @return (T is null ? null : string)
-     *
-     * @template T
      */
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {
@@ -58,12 +52,6 @@ class DateIntervalType extends Type
 
     /**
      * {@inheritdoc}
-     *
-     * @param T $value
-     *
-     * @return (T is null ? null : DateInterval)
-     *
-     * @template T
      */
     public function convertToPHPValue($value, AbstractPlatform $platform)
     {

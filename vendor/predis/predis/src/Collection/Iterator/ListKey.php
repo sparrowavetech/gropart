@@ -3,8 +3,7 @@
 /*
  * This file is part of the Predis package.
  *
- * (c) 2009-2020 Daniele Alessandri
- * (c) 2021-2023 Till Krüss
+ * (c) Daniele Alessandri <suppakilla@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -12,11 +11,8 @@
 
 namespace Predis\Collection\Iterator;
 
-use InvalidArgumentException;
-use Iterator;
 use Predis\ClientInterface;
 use Predis\NotSupportedException;
-use ReturnTypeWillChange;
 
 /**
  * Abstracts the iteration of items stored in a list by leveraging the LRANGE
@@ -28,9 +24,11 @@ use ReturnTypeWillChange;
  * guarantees on the returned elements because the collection can change several
  * times (trimmed, deleted, overwritten) during the iteration process.
  *
- * @see http://redis.io/commands/lrange
+ * @author Daniele Alessandri <suppakilla@gmail.com>
+ *
+ * @link http://redis.io/commands/lrange
  */
-class ListKey implements Iterator
+class ListKey implements \Iterator
 {
     protected $client;
     protected $count;
@@ -47,14 +45,14 @@ class ListKey implements Iterator
      * @param string          $key    Redis list key.
      * @param int             $count  Number of items retrieved on each fetch operation.
      *
-     * @throws InvalidArgumentException
+     * @throws \InvalidArgumentException
      */
     public function __construct(ClientInterface $client, $key, $count = 10)
     {
         $this->requiredCommand($client, 'LRANGE');
 
         if ((false === $count = filter_var($count, FILTER_VALIDATE_INT)) || $count < 0) {
-            throw new InvalidArgumentException('The $count argument must be a positive integer.');
+            throw new \InvalidArgumentException('The $count argument must be a positive integer.');
         }
 
         $this->client = $client;
@@ -87,7 +85,7 @@ class ListKey implements Iterator
     {
         $this->valid = true;
         $this->fetchmore = true;
-        $this->elements = [];
+        $this->elements = array();
         $this->position = -1;
         $this->current = null;
     }
@@ -130,7 +128,7 @@ class ListKey implements Iterator
     /**
      * {@inheritdoc}
      */
-    #[ReturnTypeWillChange]
+    #[\ReturnTypeWillChange]
     public function rewind()
     {
         $this->reset();
@@ -140,7 +138,7 @@ class ListKey implements Iterator
     /**
      * {@inheritdoc}
      */
-    #[ReturnTypeWillChange]
+    #[\ReturnTypeWillChange]
     public function current()
     {
         return $this->current;
@@ -149,7 +147,7 @@ class ListKey implements Iterator
     /**
      * {@inheritdoc}
      */
-    #[ReturnTypeWillChange]
+    #[\ReturnTypeWillChange]
     public function key()
     {
         return $this->position;
@@ -158,7 +156,7 @@ class ListKey implements Iterator
     /**
      * {@inheritdoc}
      */
-    #[ReturnTypeWillChange]
+    #[\ReturnTypeWillChange]
     public function next()
     {
         if (!$this->elements && $this->fetchmore) {
@@ -175,7 +173,7 @@ class ListKey implements Iterator
     /**
      * {@inheritdoc}
      */
-    #[ReturnTypeWillChange]
+    #[\ReturnTypeWillChange]
     public function valid()
     {
         return $this->valid;

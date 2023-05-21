@@ -29,6 +29,7 @@ namespace Google\Analytics\Data\V1beta\Gapic;
 use Google\Analytics\Data\V1beta\BatchRunPivotReportsRequest;
 use Google\Analytics\Data\V1beta\BatchRunPivotReportsResponse;
 use Google\Analytics\Data\V1beta\BatchRunReportsRequest;
+
 use Google\Analytics\Data\V1beta\BatchRunReportsResponse;
 use Google\Analytics\Data\V1beta\CheckCompatibilityRequest;
 use Google\Analytics\Data\V1beta\CheckCompatibilityResponse;
@@ -86,19 +87,29 @@ class BetaAnalyticsDataGapicClient
 {
     use GapicClientTrait;
 
-    /** The name of the service. */
+    /**
+     * The name of the service.
+     */
     const SERVICE_NAME = 'google.analytics.data.v1beta.BetaAnalyticsData';
 
-    /** The default address of the service. */
+    /**
+     * The default address of the service.
+     */
     const SERVICE_ADDRESS = 'analyticsdata.googleapis.com';
 
-    /** The default port of the service. */
+    /**
+     * The default port of the service.
+     */
     const DEFAULT_SERVICE_PORT = 443;
 
-    /** The name of the code generator, to be included in the agent header. */
+    /**
+     * The name of the code generator, to be included in the agent header.
+     */
     const CODEGEN_NAME = 'gapic';
 
-    /** The default scopes required by the service. */
+    /**
+     * The default scopes required by the service.
+     */
     public static $serviceScopes = [
         'https://www.googleapis.com/auth/analytics',
         'https://www.googleapis.com/auth/analytics.readonly',
@@ -227,6 +238,9 @@ class BetaAnalyticsDataGapicClient
      * @param array $options {
      *     Optional. Options for configuring the service API wrapper.
      *
+     *     @type string $serviceAddress
+     *           **Deprecated**. This option will be removed in a future major release. Please
+     *           utilize the `$apiEndpoint` option instead.
      *     @type string $apiEndpoint
      *           The address of the API remote host. May optionally include the port, formatted
      *           as "<uri>:<port>". Default 'analyticsdata.googleapis.com:443'.
@@ -256,7 +270,7 @@ class BetaAnalyticsDataGapicClient
      *           *Advanced usage*: Additionally, it is possible to pass in an already
      *           instantiated {@see \Google\ApiCore\Transport\TransportInterface} object. Note
      *           that when this object is provided, any settings in $transportConfig, and any
-     *           $apiEndpoint setting, will be ignored.
+     *           $serviceAddress setting, will be ignored.
      *     @type array $transportConfig
      *           Configuration options that will be used to construct the transport. Options for
      *           each supported transport type should be passed in a key for that transport. For
@@ -745,15 +759,9 @@ class BetaAnalyticsDataGapicClient
     }
 
     /**
-     * Returns a customized report of realtime event data for your property.
-     * Events appear in realtime reports seconds after they have been sent to
-     * the Google Analytics. Realtime reports show events and usage data for the
-     * periods of time ranging from the present moment to 30 minutes ago (up to
-     * 60 minutes for Google Analytics 360 properties).
-     *
-     * For a guide to constructing realtime requests & understanding responses,
-     * see [Creating a Realtime
-     * Report](https://developers.google.com/analytics/devguides/reporting/data/v1/realtime-basics).
+     * The Google Analytics Realtime API returns a customized report of realtime
+     * event data for your property. These reports show events and usage from the
+     * last 30 minutes.
      *
      * Sample code:
      * ```
@@ -780,10 +788,12 @@ class BetaAnalyticsDataGapicClient
      *     @type Metric[] $metrics
      *           The metrics requested and displayed.
      *     @type FilterExpression $dimensionFilter
-     *           The filter clause of dimensions. Metrics cannot be used in this filter.
+     *           The filter clause of dimensions. Dimensions must be requested to be used in
+     *           this filter. Metrics cannot be used in this filter.
      *     @type FilterExpression $metricFilter
      *           The filter clause of metrics. Applied at post aggregation phase, similar to
-     *           SQL having-clause. Dimensions cannot be used in this filter.
+     *           SQL having-clause. Metrics must be requested to be used in this filter.
+     *           Dimensions cannot be used in this filter.
      *     @type int $limit
      *           The number of rows to return. If unspecified, 10,000 rows are returned. The
      *           API returns a maximum of 100,000 rows per request, no matter how many you
@@ -893,10 +903,6 @@ class BetaAnalyticsDataGapicClient
      * event count. Dimensions break down metrics across some common criteria,
      * such as country or event name.
      *
-     * For a guide to constructing requests & understanding responses, see
-     * [Creating a
-     * Report](https://developers.google.com/analytics/devguides/reporting/data/v1/basics).
-     *
      * Sample code:
      * ```
      * $betaAnalyticsDataClient = new BetaAnalyticsDataClient();
@@ -935,8 +941,8 @@ class BetaAnalyticsDataGapicClient
      *           Filters](https://developers.google.com/analytics/devguides/reporting/data/v1/basics#dimension_filters)
      *           for examples. Metrics cannot be used in this filter.
      *     @type FilterExpression $metricFilter
-     *           The filter clause of metrics. Applied after aggregating the report's rows,
-     *           similar to SQL having-clause. Dimensions cannot be used in this filter.
+     *           The filter clause of metrics. Applied at post aggregation phase, similar to
+     *           SQL having-clause. Dimensions cannot be used in this filter.
      *     @type int $offset
      *           The row count of the start row. The first row is counted as row 0.
      *

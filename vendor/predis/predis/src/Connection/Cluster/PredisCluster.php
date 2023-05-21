@@ -3,8 +3,7 @@
 /*
  * This file is part of the Predis package.
  *
- * (c) 2009-2020 Daniele Alessandri
- * (c) 2021-2023 Till Krüss
+ * (c) Daniele Alessandri <suppakilla@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -12,31 +11,31 @@
 
 namespace Predis\Connection\Cluster;
 
-use ArrayIterator;
-use Countable;
-use IteratorAggregate;
 use Predis\Cluster\PredisStrategy;
 use Predis\Cluster\StrategyInterface;
 use Predis\Command\CommandInterface;
 use Predis\Connection\NodeConnectionInterface;
 use Predis\NotSupportedException;
-use ReturnTypeWillChange;
 
 /**
  * Abstraction for a cluster of aggregate connections to various Redis servers
  * implementing client-side sharding based on pluggable distribution strategies.
+ *
+ * @author Daniele Alessandri <suppakilla@gmail.com>
+ *
+ * @todo Add the ability to remove connections from pool.
  */
-class PredisCluster implements ClusterInterface, IteratorAggregate, Countable
+class PredisCluster implements ClusterInterface, \IteratorAggregate, \Countable
 {
     /**
      * @var NodeConnectionInterface[]
      */
-    private $pool = [];
+    private $pool = array();
 
     /**
      * @var NodeConnectionInterface[]
      */
-    private $aliases = [];
+    private $aliases = array();
 
     /**
      * @var StrategyInterface
@@ -44,7 +43,7 @@ class PredisCluster implements ClusterInterface, IteratorAggregate, Countable
     private $strategy;
 
     /**
-     * @var \Predis\Cluster\Distributor\DistributorInterface
+     * @var Predis\Cluster\Distributor\DistributorInterface
      */
     private $distributor;
 
@@ -147,7 +146,9 @@ class PredisCluster implements ClusterInterface, IteratorAggregate, Countable
      */
     public function getConnectionById($id)
     {
-        return $this->pool[$id] ?? null;
+        if (isset($this->pool[$id])) {
+            return $this->pool[$id];
+        }
     }
 
     /**
@@ -159,13 +160,15 @@ class PredisCluster implements ClusterInterface, IteratorAggregate, Countable
      */
     public function getConnectionByAlias($alias)
     {
-        return $this->aliases[$alias] ?? null;
+        if (isset($this->aliases[$alias])) {
+            return $this->aliases[$alias];
+        }
     }
 
     /**
      * Retrieves a connection instance by slot.
      *
-     * @param string $slot Slot name.
+     * @param string $key Key string.
      *
      * @return NodeConnectionInterface|null
      */
@@ -184,7 +187,6 @@ class PredisCluster implements ClusterInterface, IteratorAggregate, Countable
     public function getConnectionByKey($key)
     {
         $hash = $this->strategy->getSlotByKey($key);
-
         return $this->distributor->getBySlot($hash);
     }
 
@@ -202,7 +204,7 @@ class PredisCluster implements ClusterInterface, IteratorAggregate, Countable
     /**
      * {@inheritdoc}
      */
-    #[ReturnTypeWillChange]
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return count($this->pool);
@@ -211,10 +213,10 @@ class PredisCluster implements ClusterInterface, IteratorAggregate, Countable
     /**
      * {@inheritdoc}
      */
-    #[ReturnTypeWillChange]
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
-        return new ArrayIterator($this->pool);
+        return new \ArrayIterator($this->pool);
     }
 
     /**

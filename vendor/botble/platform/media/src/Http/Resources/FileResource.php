@@ -32,7 +32,6 @@ class FileResource extends JsonResource
             'folder_id' => $this->folder_id,
             'preview_url' => $this->preview_url,
             'preview_type' => $this->preview_type,
-            'alt' => $this->alt,
         ];
     }
 }

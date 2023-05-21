@@ -3,8 +3,7 @@
 /*
  * This file is part of the Predis package.
  *
- * (c) 2009-2020 Daniele Alessandri
- * (c) 2021-2023 Till Krüss
+ * (c) Daniele Alessandri <suppakilla@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -13,17 +12,14 @@
 namespace Predis\Command\Redis;
 
 use Predis\Command\Command as RedisCommand;
-use Predis\Command\Traits\BitByte;
 
 /**
- * @see http://redis.io/commands/bitpos
+ * @link http://redis.io/commands/bitpos
  *
- * Return the position of the first bit set to 1 or 0 in a string.
+ * @author Daniele Alessandri <suppakilla@gmail.com>
  */
 class BITPOS extends RedisCommand
 {
-    use BitByte;
-
     /**
      * {@inheritdoc}
      */

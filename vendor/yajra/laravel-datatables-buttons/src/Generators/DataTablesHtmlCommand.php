@@ -41,7 +41,7 @@ class DataTablesHtmlCommand extends DataTablesMakeCommand
      *
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
      */
-    protected function buildClass($name): string
+    protected function buildClass($name)
     {
         $stub = $this->files->get($this->getStub());
 

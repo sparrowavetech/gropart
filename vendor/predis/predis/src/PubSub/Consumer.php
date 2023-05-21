@@ -3,8 +3,7 @@
 /*
  * This file is part of the Predis package.
  *
- * (c) 2009-2020 Daniele Alessandri
- * (c) 2021-2023 Till Krüss
+ * (c) Daniele Alessandri <suppakilla@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -20,6 +19,8 @@ use Predis\NotSupportedException;
 
 /**
  * PUB/SUB consumer abstraction.
+ *
+ * @author Daniele Alessandri <suppakilla@gmail.com>
  */
 class Consumer extends AbstractConsumer
 {
@@ -34,7 +35,7 @@ class Consumer extends AbstractConsumer
     {
         $this->checkCapabilities($client);
 
-        $this->options = $options ?: [];
+        $this->options = $options ?: array();
         $this->client = $client;
 
         $this->genericSubscribeInit('subscribe');
@@ -67,7 +68,7 @@ class Consumer extends AbstractConsumer
             );
         }
 
-        $commands = ['publish', 'subscribe', 'unsubscribe', 'psubscribe', 'punsubscribe'];
+        $commands = array('publish', 'subscribe', 'unsubscribe', 'psubscribe', 'punsubscribe');
 
         if (!$client->getCommandFactory()->supports(...$commands)) {
             throw new NotSupportedException(
@@ -128,25 +129,25 @@ class Consumer extends AbstractConsumer
                 // no break
 
             case self::MESSAGE:
-                return (object) [
+                return (object) array(
                     'kind' => $response[0],
                     'channel' => $response[1],
                     'payload' => $response[2],
-                ];
+                );
 
             case self::PMESSAGE:
-                return (object) [
+                return (object) array(
                     'kind' => $response[0],
                     'pattern' => $response[1],
                     'channel' => $response[2],
                     'payload' => $response[3],
-                ];
+                );
 
             case self::PONG:
-                return (object) [
+                return (object) array(
                     'kind' => $response[0],
                     'payload' => $response[1],
-                ];
+                );
 
             default:
                 throw new ClientException(

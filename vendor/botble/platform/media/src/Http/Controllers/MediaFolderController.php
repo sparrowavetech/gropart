@@ -15,8 +15,14 @@ use RvMedia;
  */
 class MediaFolderController extends Controller
 {
-    public function __construct(protected MediaFolderInterface $folderRepository, protected MediaFileInterface $fileRepository)
+    protected MediaFolderInterface $folderRepository;
+
+    protected MediaFileInterface $fileRepository;
+
+    public function __construct(MediaFolderInterface $folderRepository, MediaFileInterface $fileRepository)
     {
+        $this->folderRepository = $folderRepository;
+        $this->fileRepository = $fileRepository;
     }
 
     public function store(MediaFolderRequest $request)

@@ -13,7 +13,7 @@ trait GuardHelpers
     /**
      * The currently authenticated user.
      *
-     * @var \Illuminate\Contracts\Auth\Authenticatable|null
+     * @var \Illuminate\Contracts\Auth\Authenticatable
      */
     protected $user;
 

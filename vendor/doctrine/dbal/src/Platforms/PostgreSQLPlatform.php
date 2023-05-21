@@ -957,12 +957,6 @@ SQL
 
     /**
      * {@inheritDoc}
-     *
-     * @param T $item
-     *
-     * @return (T is null ? null : bool)
-     *
-     * @template T
      */
     public function convertFromBoolean($item)
     {

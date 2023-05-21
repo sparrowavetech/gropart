@@ -8,6 +8,9 @@ use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 
 class DashboardWidgetSettingRepository extends RepositoriesAbstract implements DashboardWidgetSettingInterface
 {
+    /**
+     * {@inheritDoc}
+     */
     public function getListWidget()
     {
         $data = $this->model

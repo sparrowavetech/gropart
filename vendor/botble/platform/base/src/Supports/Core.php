@@ -339,7 +339,6 @@ final class Core
         curl_setopt($ch, CURLOPT_URL, $source);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $dataArray);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
         curl_setopt(
             $ch,

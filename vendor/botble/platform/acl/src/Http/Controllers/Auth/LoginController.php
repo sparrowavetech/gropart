@@ -18,11 +18,14 @@ class LoginController extends BaseController
 
     protected string $redirectTo = '/';
 
-    public function __construct(protected BaseHttpResponse $response)
+    protected BaseHttpResponse $response;
+
+    public function __construct(BaseHttpResponse $response)
     {
         $this->middleware('guest', ['except' => 'logout']);
 
         $this->redirectTo = BaseHelper::getAdminPrefix();
+        $this->response = $response;
     }
 
     public function showLoginForm()

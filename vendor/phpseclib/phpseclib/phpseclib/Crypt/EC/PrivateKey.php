@@ -29,7 +29,7 @@ use phpseclib3\Math\BigInteger;
  *
  * @author  Jim Wigginton <terrafrost@php.net>
  */
-final class PrivateKey extends EC implements Common\PrivateKey
+class PrivateKey extends EC implements Common\PrivateKey
 {
     use Common\Traits\PasswordProtected;
 

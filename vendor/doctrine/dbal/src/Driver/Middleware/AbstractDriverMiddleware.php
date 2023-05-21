@@ -8,7 +8,6 @@ use Doctrine\DBAL\Driver\API\ExceptionConverter;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\VersionAwarePlatformDriver;
 use Doctrine\Deprecations\Deprecation;
-use SensitiveParameter;
 
 abstract class AbstractDriverMiddleware implements VersionAwarePlatformDriver
 {
@@ -22,10 +21,8 @@ abstract class AbstractDriverMiddleware implements VersionAwarePlatformDriver
     /**
      * {@inheritdoc}
      */
-    public function connect(
-        #[SensitiveParameter]
-        array $params
-    ) {
+    public function connect(array $params)
+    {
         return $this->wrappedDriver->connect($params);
     }
 

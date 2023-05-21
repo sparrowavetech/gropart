@@ -3,8 +3,7 @@
 /*
  * This file is part of the Predis package.
  *
- * (c) 2009-2020 Daniele Alessandri
- * (c) 2021-2023 Till Krüss
+ * (c) Daniele Alessandri <suppakilla@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -18,7 +17,9 @@ use Predis\Command\Traits\Keys;
 use Predis\Command\Traits\Weights;
 
 /**
- * @see http://redis.io/commands/zunionstore
+ * @link http://redis.io/commands/zunionstore
+ *
+ * @author Daniele Alessandri <suppakilla@gmail.com>
  */
 class ZUNIONSTORE extends RedisCommand
 {
@@ -50,7 +51,7 @@ class ZUNIONSTORE extends RedisCommand
     public function setArguments(array $arguments)
     {
         // support old `$options` array for backwards compatibility
-        if (!isset($arguments[3]) && (isset($arguments[2]['weights']) || isset($arguments[2]['aggregate']))) {
+        if (! isset($arguments[3]) && (isset($arguments[2]['weights']) || isset($arguments[2]['aggregate']))) {
             $options = array_pop($arguments);
             array_push($arguments, $options['weights'] ?? []);
             array_push($arguments, $options['aggregate'] ?? 'sum');

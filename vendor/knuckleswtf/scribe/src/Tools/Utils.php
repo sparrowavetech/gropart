@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Str;
 use Knuckles\Scribe\Exceptions\CouldntFindFactory;
-use Knuckles\Scribe\Exceptions\CouldntGetRouteDetails;
 use Knuckles\Scribe\Tools\ConsoleOutputUtils as c;
 use League\Flysystem\Filesystem;
 use League\Flysystem\Local\LocalFilesystemAdapter;
@@ -106,12 +105,8 @@ class Utils
             if (is_array($uses)) {
                 return $uses;
             } elseif (is_string($uses)) {
-                $usesArray = explode('@', $uses);
-                if (count($usesArray) < 2) {
-                    throw CouldntGetRouteDetails::new();
-                }
-                [$class, $method] = $usesArray;
-
+                [$class, $method] = explode('@', $uses);
+                
                 // Support for the Laravel Actions package, docblock should be put on the asController method
                 if ($method === '__invoke' && method_exists($class, 'asController'))
                 {
@@ -234,9 +229,6 @@ class Utils
      */
     public static function getReflectedRouteMethod(array $routeControllerAndMethod): ReflectionFunctionAbstract
     {
-        if (count($routeControllerAndMethod) < 2) {
-            throw CouldntGetRouteDetails::new();
-        }
         [$class, $method] = $routeControllerAndMethod;
 
         if ($class instanceof Closure) {

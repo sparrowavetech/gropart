@@ -8,6 +8,8 @@ $baseDir = dirname($vendorDir);
 return array(
     'Parsedown' => array($vendorDir . '/erusev/parsedown'),
     'Mpociot' => array($vendorDir . '/mpociot/reflection-docblock/src'),
+    'Mockery' => array($vendorDir . '/mockery/mockery/library'),
     'Kris\\LaravelFormBuilder' => array($vendorDir . '/kris/laravel-form-builder/src'),
     'HTMLPurifier' => array($vendorDir . '/ezyang/htmlpurifier/library'),
+    'Barryvdh' => array($vendorDir . '/barryvdh/reflection-docblock/src'),
 );

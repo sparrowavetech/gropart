@@ -23,6 +23,7 @@ use function db2_prepare;
 use function db2_rollback;
 use function db2_server_info;
 use function error_get_last;
+use function is_bool;
 
 use const DB2_AUTOCOMMIT_OFF;
 use const DB2_AUTOCOMMIT_ON;
@@ -112,7 +113,10 @@ final class Connection implements ServerInfoAwareConnection
 
     public function beginTransaction(): bool
     {
-        return db2_autocommit($this->connection, DB2_AUTOCOMMIT_OFF);
+        $result = db2_autocommit($this->connection, DB2_AUTOCOMMIT_OFF);
+        assert(is_bool($result));
+
+        return $result;
     }
 
     public function commit(): bool
@@ -121,7 +125,10 @@ final class Connection implements ServerInfoAwareConnection
             throw ConnectionError::new($this->connection);
         }
 
-        return db2_autocommit($this->connection, DB2_AUTOCOMMIT_ON);
+        $result = db2_autocommit($this->connection, DB2_AUTOCOMMIT_ON);
+        assert(is_bool($result));
+
+        return $result;
     }
 
     public function rollBack(): bool
@@ -130,7 +137,10 @@ final class Connection implements ServerInfoAwareConnection
             throw ConnectionError::new($this->connection);
         }
 
-        return db2_autocommit($this->connection, DB2_AUTOCOMMIT_ON);
+        $result = db2_autocommit($this->connection, DB2_AUTOCOMMIT_ON);
+        assert(is_bool($result));
+
+        return $result;
     }
 
     /** @return resource */

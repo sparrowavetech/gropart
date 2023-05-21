@@ -30,6 +30,7 @@ use Illuminate\Filesystem\AwsS3V3Adapter as IlluminateAwsS3V3Adapter;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
 use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
@@ -178,7 +179,7 @@ class MediaServiceProvider extends ServiceProvider
             ),
         ]);
 
-        $this->app['events']->listen(RouteMatched::class, function () {
+        Event::listen(RouteMatched::class, function () {
             dashboard_menu()->registerItem([
                 'id' => 'cms-core-media',
                 'priority' => 995,

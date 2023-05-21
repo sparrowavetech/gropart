@@ -8,7 +8,7 @@ class Breadcrumb
 {
     public array $crumbs = [];
 
-    public function add(string|array|null $label, string|null $url = ''): self
+    public function add(string|array $label, ?string $url = ''): self
     {
         if (is_array($label)) {
             if (count($label) > 0) {
@@ -33,9 +33,9 @@ class Breadcrumb
         return $this;
     }
 
-    public function render(string $view = 'packages/theme::partials.breadcrumb'): string
+    public function render(): string
     {
-        return view($view)->render();
+        return view('packages/theme::partials.breadcrumb')->render();
     }
 
     public function getCrumbs(): array

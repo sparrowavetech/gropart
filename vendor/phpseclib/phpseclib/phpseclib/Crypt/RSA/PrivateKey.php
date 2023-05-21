@@ -23,7 +23,7 @@ use phpseclib3\Math\BigInteger;
  *
  * @author  Jim Wigginton <terrafrost@php.net>
  */
-final class PrivateKey extends RSA implements Common\PrivateKey
+class PrivateKey extends RSA implements Common\PrivateKey
 {
     use Common\Traits\PasswordProtected;
 

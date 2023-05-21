@@ -157,8 +157,6 @@ use Aws\AwsClient;
  * @method \GuzzleHttp\Promise\Promise getFederationTokenAsync(array $args = [])
  * @method \Aws\Result getMetricData(array $args = [])
  * @method \GuzzleHttp\Promise\Promise getMetricDataAsync(array $args = [])
- * @method \Aws\Result getMetricDataV2(array $args = [])
- * @method \GuzzleHttp\Promise\Promise getMetricDataV2Async(array $args = [])
  * @method \Aws\Result getTaskTemplate(array $args = [])
  * @method \GuzzleHttp\Promise\Promise getTaskTemplateAsync(array $args = [])
  * @method \Aws\Result getTrafficDistribution(array $args = [])

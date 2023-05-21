@@ -12,6 +12,7 @@ use Botble\Theme\Commands\ThemeRenameCommand;
 use Botble\Theme\Contracts\Theme as ThemeContract;
 use Botble\Theme\Theme;
 use Illuminate\Routing\Events\RouteMatched;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class ThemeServiceProvider extends ServiceProvider
@@ -44,7 +45,7 @@ class ThemeServiceProvider extends ServiceProvider
             ->loadRoutes()
             ->publishAssets();
 
-        $this->app['events']->listen(RouteMatched::class, function () {
+        Event::listen(RouteMatched::class, function () {
             dashboard_menu()
                 ->registerItem([
                     'id' => 'cms-core-appearance',

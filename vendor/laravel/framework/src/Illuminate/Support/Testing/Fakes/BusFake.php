@@ -127,21 +127,15 @@ class BusFake implements QueueingDispatcher
     /**
      * Assert if a job was pushed a number of times.
      *
-     * @param  string|\Closure  $command
+     * @param  string  $command
      * @param  int  $times
      * @return void
      */
     public function assertDispatchedTimes($command, $times = 1)
     {
-        $callback = null;
-
-        if ($command instanceof Closure) {
-            [$command, $callback] = [$this->firstClosureParameterType($command), $command];
-        }
-
-        $count = $this->dispatched($command, $callback)->count() +
-                 $this->dispatchedAfterResponse($command, $callback)->count() +
-                 $this->dispatchedSync($command, $callback)->count();
+        $count = $this->dispatched($command)->count() +
+                 $this->dispatchedAfterResponse($command)->count() +
+                 $this->dispatchedSync($command)->count();
 
         PHPUnit::assertSame(
             $times, $count,
@@ -206,19 +200,13 @@ class BusFake implements QueueingDispatcher
     /**
      * Assert if a job was pushed synchronously a number of times.
      *
-     * @param  string|\Closure  $command
+     * @param  string  $command
      * @param  int  $times
      * @return void
      */
     public function assertDispatchedSyncTimes($command, $times = 1)
     {
-        $callback = null;
-
-        if ($command instanceof Closure) {
-            [$command, $callback] = [$this->firstClosureParameterType($command), $command];
-        }
-
-        $count = $this->dispatchedSync($command, $callback)->count();
+        $count = $this->dispatchedSync($command)->count();
 
         PHPUnit::assertSame(
             $times, $count,
@@ -271,19 +259,13 @@ class BusFake implements QueueingDispatcher
     /**
      * Assert if a job was pushed after the response was sent a number of times.
      *
-     * @param  string|\Closure  $command
+     * @param  string  $command
      * @param  int  $times
      * @return void
      */
     public function assertDispatchedAfterResponseTimes($command, $times = 1)
     {
-        $callback = null;
-
-        if ($command instanceof Closure) {
-            [$command, $callback] = [$this->firstClosureParameterType($command), $command];
-        }
-
-        $count = $this->dispatchedAfterResponse($command, $callback)->count();
+        $count = $this->dispatchedAfterResponse($command)->count();
 
         PHPUnit::assertSame(
             $times, $count,

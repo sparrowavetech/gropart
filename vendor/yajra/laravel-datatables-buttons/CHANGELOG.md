@@ -1,9 +1,5 @@
 # Laravel DataTables Buttons Plugin CHANGELOG.
 
-## v9.1.4 - 2023-02-20
-
-- fix: applyScopes method to support Collection #168
-
 ## v9.1.3 - 2022-11-15
 
 - Fixes some issues and confusion of datatable generator command #165

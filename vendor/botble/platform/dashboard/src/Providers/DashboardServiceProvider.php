@@ -12,6 +12,7 @@ use Botble\Dashboard\Repositories\Eloquent\DashboardWidgetSettingRepository;
 use Botble\Dashboard\Repositories\Interfaces\DashboardWidgetInterface;
 use Botble\Dashboard\Repositories\Interfaces\DashboardWidgetSettingInterface;
 use Illuminate\Routing\Events\RouteMatched;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 /**
@@ -46,7 +47,7 @@ class DashboardServiceProvider extends ServiceProvider
             ->publishAssets()
             ->loadMigrations();
 
-        $this->app['events']->listen(RouteMatched::class, function () {
+        Event::listen(RouteMatched::class, function () {
             dashboard_menu()
                 ->registerItem([
                     'id' => 'cms-core-dashboard',

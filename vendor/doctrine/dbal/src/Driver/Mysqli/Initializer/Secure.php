@@ -6,7 +6,6 @@ namespace Doctrine\DBAL\Driver\Mysqli\Initializer;
 
 use Doctrine\DBAL\Driver\Mysqli\Initializer;
 use mysqli;
-use SensitiveParameter;
 
 final class Secure implements Initializer
 {
@@ -16,14 +15,8 @@ final class Secure implements Initializer
     private string $capath;
     private string $cipher;
 
-    public function __construct(
-        #[SensitiveParameter]
-        string $key,
-        string $cert,
-        string $ca,
-        string $capath,
-        string $cipher
-    ) {
+    public function __construct(string $key, string $cert, string $ca, string $capath, string $cipher)
+    {
         $this->key    = $key;
         $this->cert   = $cert;
         $this->ca     = $ca;

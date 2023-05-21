@@ -3,8 +3,7 @@
 /*
  * This file is part of the Predis package.
  *
- * (c) 2009-2020 Daniele Alessandri
- * (c) 2021-2023 Till Krüss
+ * (c) Daniele Alessandri <suppakilla@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,11 +13,13 @@ namespace Predis\Command;
 
 /**
  * Base class for Redis commands.
+ *
+ * @author Daniele Alessandri <suppakilla@gmail.com>
  */
 abstract class Command implements CommandInterface
 {
     private $slot;
-    private $arguments = [];
+    private $arguments = array();
 
     /**
      * {@inheritdoc}
@@ -69,7 +70,9 @@ abstract class Command implements CommandInterface
      */
     public function getSlot()
     {
-        return $this->slot ?? null;
+        if (isset($this->slot)) {
+            return $this->slot;
+        }
     }
 
     /**
@@ -106,7 +109,7 @@ abstract class Command implements CommandInterface
     public static function normalizeVariadic(array $arguments)
     {
         if (count($arguments) === 2 && is_array($arguments[1])) {
-            return array_merge([$arguments[0]], $arguments[1]);
+            return array_merge(array($arguments[0]), $arguments[1]);
         }
 
         return $arguments;
@@ -120,7 +123,7 @@ abstract class Command implements CommandInterface
     public function filterArguments(): void
     {
         $this->arguments = array_filter($this->arguments, static function ($argument) {
-            return $argument !== false && $argument !== null;
+            return $argument !== false;
         });
     }
 }

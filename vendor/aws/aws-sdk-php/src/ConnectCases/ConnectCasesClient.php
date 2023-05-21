@@ -21,8 +21,6 @@ use Aws\AwsClient;
  * @method \GuzzleHttp\Promise\Promise createRelatedItemAsync(array $args = [])
  * @method \Aws\Result createTemplate(array $args = [])
  * @method \GuzzleHttp\Promise\Promise createTemplateAsync(array $args = [])
- * @method \Aws\Result deleteDomain(array $args = [])
- * @method \GuzzleHttp\Promise\Promise deleteDomainAsync(array $args = [])
  * @method \Aws\Result getCase(array $args = [])
  * @method \GuzzleHttp\Promise\Promise getCaseAsync(array $args = [])
  * @method \Aws\Result getCaseEventConfiguration(array $args = [])
