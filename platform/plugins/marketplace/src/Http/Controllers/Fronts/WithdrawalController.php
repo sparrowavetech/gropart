@@ -2,9 +2,11 @@
 
 namespace Botble\Marketplace\Http\Controllers\Fronts;
 
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Marketplace\Enums\WithdrawalStatusEnum;
+use Botble\Marketplace\Events\WithdrawalRequested;
 use Botble\Marketplace\Forms\VendorWithdrawalForm;
 use Botble\Marketplace\Http\Requests\VendorEditWithdrawalRequest;
 use Botble\Marketplace\Http\Requests\VendorWithdrawalRequest;
@@ -12,21 +14,18 @@ use Botble\Marketplace\Repositories\Interfaces\WithdrawalInterface;
 use Botble\Marketplace\Tables\VendorWithdrawalTable;
 use Exception;
 use Illuminate\Support\Facades\DB;
-use MarketplaceHelper;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 use Throwable;
 
 class WithdrawalController
 {
-    protected WithdrawalInterface $withdrawalRepository;
-
-    public function __construct(WithdrawalInterface $withdrawalRepository)
+    public function __construct(protected WithdrawalInterface $withdrawalRepository)
     {
-        $this->withdrawalRepository = $withdrawalRepository;
     }
 
     public function index(VendorWithdrawalTable $table)
     {
-        page_title()->setTitle(__('Withdrawals'));
+        PageTitle::setTitle(__('Withdrawals'));
 
         return $table->render(MarketplaceHelper::viewPath('dashboard.table.base'));
     }
@@ -43,7 +42,7 @@ class WithdrawalController
                 ->setMessage(__('Insufficient balance or no bank information'));
         }
 
-        page_title()->setTitle(__('Withdrawal request'));
+        PageTitle::setTitle(__('Withdrawal request'));
 
         return $formBuilder->create(VendorWithdrawalForm::class)->renderForm();
     }
@@ -57,7 +56,7 @@ class WithdrawalController
         try {
             DB::beginTransaction();
 
-            $this->withdrawalRepository->create([
+            $withdrawal = $this->withdrawalRepository->create([
                 'fee' => $fee,
                 'amount' => $request->input('amount'),
                 'customer_id' => $vendor->getKey(),
@@ -70,6 +69,8 @@ class WithdrawalController
 
             $vendorInfo->balance -= $request->input('amount') + $fee;
             $vendorInfo->save();
+
+            event(new WithdrawalRequested($vendor, $withdrawal));
 
             DB::commit();
         } catch (Throwable | Exception $th) {
@@ -85,7 +86,7 @@ class WithdrawalController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int $id, FormBuilder $formBuilder)
+    public function edit(int|string $id, FormBuilder $formBuilder)
     {
         $withdrawal = $this->withdrawalRepository->getFirstBy([
             'id' => $id,
@@ -97,12 +98,12 @@ class WithdrawalController
             abort(404);
         }
 
-        page_title()->setTitle(__('Update withdrawal request #' . $id));
+        PageTitle::setTitle(__('Update withdrawal request #' . $id));
 
         return $formBuilder->create(VendorWithdrawalForm::class, ['model' => $withdrawal])->renderForm();
     }
 
-    public function update(int $id, VendorEditWithdrawalRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, VendorEditWithdrawalRequest $request, BaseHttpResponse $response)
     {
         $withdrawal = $this->withdrawalRepository->getFirstBy([
             'id' => $id,
@@ -132,7 +133,7 @@ class WithdrawalController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function show(int $id, FormBuilder $formBuilder)
+    public function show(int|string $id, FormBuilder $formBuilder)
     {
         $withdrawal = $this->withdrawalRepository
             ->getFirstBy([
@@ -145,7 +146,7 @@ class WithdrawalController
             abort(404);
         }
 
-        page_title()->setTitle(__('View withdrawal request #' . $id));
+        PageTitle::setTitle(__('View withdrawal request #' . $id));
 
         return $formBuilder->create(VendorWithdrawalForm::class, ['model' => $withdrawal])->renderForm();
     }

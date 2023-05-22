@@ -6,6 +6,7 @@ use Botble\Base\Forms\FormAbstract;
 use Botble\Marketplace\Enums\PayoutPaymentMethodsEnum;
 use Botble\Marketplace\Http\Requests\WithdrawalRequest;
 use Botble\Marketplace\Models\Withdrawal;
+use Illuminate\Support\Arr;
 
 class WithdrawalForm extends FormAbstract
 {
@@ -34,7 +35,7 @@ class WithdrawalForm extends FormAbstract
             ->add('payment_channel', 'customSelect', [
                 'label' => trans('plugins/marketplace::withdrawal.forms.payment_channel'),
                 'label_attr' => ['class' => 'control-label'],
-                'choices' => PayoutPaymentMethodsEnum::labels(),
+                'choices' => Arr::pluck(PayoutPaymentMethodsEnum::payoutMethodsEnabled(), 'label', 'key'),
                 'attr' => $this->model->transaction_id ? ['disabled' => 'disabled'] : [],
             ])
             ->add('transaction_id', 'text', [

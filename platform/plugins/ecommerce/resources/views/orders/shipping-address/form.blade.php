@@ -29,7 +29,7 @@
                             @endforeach
                         </select>
                         <svg class="svg-next-icon svg-next-icon-size-16">
-                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#select-chevron"></use>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M10 16l-4-4h8l-4 4zm0-12L6 8h8l-4-4z"></path></svg>
                         </svg>
                     </div>
                 </div>
@@ -52,7 +52,7 @@
                             @endif
                         </select>
                         <svg class="svg-next-icon svg-next-icon-size-16">
-                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#select-chevron"></use>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M10 16l-4-4h8l-4 4zm0-12L6 8h8l-4-4z"></path></svg>
                         </svg>
                     </div>
                 @else
@@ -75,7 +75,7 @@
                             @endif
                         </select>
                         <svg class="svg-next-icon svg-next-icon-size-16">
-                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#select-chevron"></use>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M10 16l-4-4h8l-4 4zm0-12L6 8h8l-4-4z"></path></svg>
                         </svg>
                     </div>
                 @else

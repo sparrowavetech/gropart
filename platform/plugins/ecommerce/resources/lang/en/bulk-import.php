@@ -45,4 +45,5 @@ return [
         'products' => 'Products',
         'variations' => 'Variations',
     ],
+    'import_products' => 'Import products',
 ];

@@ -1,32 +1,10 @@
 <div class="note note-info" role="alert">
     <p class="mb-2 uppercase"><strong>{{ $title ?? __('You will receive money through the information below') }}</strong>:</p>
-    @if (!$paymentChannel || $paymentChannel == \Botble\Marketplace\Enums\PayoutPaymentMethodsEnum::BANK_TRANSFER)
-        @if (Arr::get($bankInfo, 'name'))
-            <p>{{ __('Bank Name') }}: <strong>{{ Arr::get($bankInfo, 'name') }}</strong></p>
+    @foreach (\Botble\Marketplace\Enums\PayoutPaymentMethodsEnum::getFields($paymentChannel) as $key => $field)
+        @if (Arr::get($bankInfo, $key))
+            <p>{{ Arr::get($field, 'title') }}: <strong>{{ Arr::get($bankInfo, $key) }}</strong></p>
         @endif
-        @if (Arr::get($bankInfo, 'code'))
-            <p>{{ __('Bank Code/IFSC') }}: <strong>{{ Arr::get($bankInfo, 'code') }}</strong></p>
-        @endif
-        @if (Arr::get($bankInfo, 'full_name'))
-            <p>{{ __('Account Holder Name') }}: <strong>{{ Arr::get($bankInfo, 'full_name') }}</strong></p>
-        @endif
-        @if (Arr::get($bankInfo, 'number'))
-            <p>{{ __('Account Number') }}: <strong>{{ Arr::get($bankInfo, 'number') }}</strong></p>
-        @endif
-        @if (Arr::get($bankInfo, 'paypal_id'))
-            <p>{{ __('PayPal ID') }}: <strong>{{ Arr::get($bankInfo, 'paypal_id') }}</strong></p>
-        @endif
-        @if (Arr::get($bankInfo, 'upi_id'))
-            <p>{{ __('UPI ID') }}: <strong>{{ Arr::get($bankInfo, 'upi_id') }}</strong></p>
-        @endif
-        @if (Arr::get($bankInfo, 'description'))
-            <p>{{ __('Description') }}: {{ Arr::get($bankInfo, 'description') }}</p>
-        @endif
-    @else
-        @if (Arr::get($bankInfo, 'paypal_id'))
-            <p>{{ __('PayPal Email ID') }}: <strong>{{ Arr::get($bankInfo, 'paypal_id') }}</strong></p>
-        @endif
-    @endif
+    @endforeach
 
     @isset($link)
         <p>{!! BaseHelper::clean(__('You can change it <a href=":link">here</a>', ['link' => $link])) !!}.</p>

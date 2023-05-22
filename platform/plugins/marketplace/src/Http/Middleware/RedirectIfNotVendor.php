@@ -5,7 +5,7 @@ namespace Botble\Marketplace\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use MarketplaceHelper;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 
 class RedirectIfNotVendor
 {

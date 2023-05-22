@@ -17,10 +17,10 @@ class ShippingRuleRequest extends Request
         }
 
         $ruleItems = [
-            'name' => 'required|max:120',
+            'name' => 'required|string|max:120',
             'from' => 'required|numeric',
-            'to' => 'nullable|numeric|min:' . (float)$this->input('from'),
-            'price' => 'required',
+            'to' => 'nullable|numeric|gt:from',
+            'price' => 'required|numeric',
             'type' => Rule::in(array_keys(ShippingRuleTypeEnum::availableLabels())),
         ] + $ruleItems;
 
@@ -31,6 +31,8 @@ class ShippingRuleRequest extends Request
                     if ($this->input('type') == ShippingRuleTypeEnum::BASED_ON_ZIPCODE) {
                         return $query->whereNotNull('country');
                     }
+
+                    return $query;
                 }),
             ];
         }

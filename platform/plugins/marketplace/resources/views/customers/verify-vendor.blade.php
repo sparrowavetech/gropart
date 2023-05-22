@@ -62,6 +62,14 @@
         </div>
     </div>
 
-    {!! Form::modalAction('approve-vendor-for-selling-modal', trans('plugins/marketplace::unverified-vendor.approve_vendor_confirmation'), 'warning', trans('plugins/marketplace::unverified-vendor.approve_vendor_confirmation_description', ['vendor' => $vendor->name]), 'confirm-approve-vendor-for-selling-button', trans('plugins/marketplace::unverified-vendor.approve')) !!}
+    <x-core-base::modal
+        id="approve-vendor-for-selling-modal"
+        :title="trans('plugins/marketplace::unverified-vendor.approve_vendor_confirmation')"
+        type="warning"
+        button-id="confirm-approve-vendor-for-selling-button"
+        :button-label="trans('plugins/marketplace::unverified-vendor.approve')"
+    >
+        {!! trans('plugins/marketplace::unverified-vendor.approve_vendor_confirmation_description', ['vendor' => $vendor->name]) !!}
+    </x-core-base::modal>
 </div>
 @stop

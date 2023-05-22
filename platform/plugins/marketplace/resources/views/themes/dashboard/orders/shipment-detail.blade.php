@@ -1,6 +1,12 @@
 <div class="shipment-info-panel hide-print">
     <div class="shipment-info-header">
-        <h4>{{ get_shipment_code($shipment->id) }}</h4>
+        @if (MarketplaceHelper::allowVendorManageShipping())
+            <a target="_blank" href="{{ route('marketplace.vendor.shipments.edit', $shipment->id) }}">
+                <h4>{{ get_shipment_code($shipment->id) }}</h4>
+            </a>
+        @else
+            <h4>{{ get_shipment_code($shipment->id) }}</h4>
+        @endif
         <span class="label carrier-status carrier-status-{{ $shipment->status }}">{{ $shipment->status->label() }}</span>
     </div>
 

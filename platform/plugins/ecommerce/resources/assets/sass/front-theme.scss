@@ -161,7 +161,7 @@ label {
     margin-bottom: 20px;
 }
 
-.checkout-input {
+.form-control {
     height: 45px;
     border: 1px solid #dcdcdc;
 
@@ -189,7 +189,7 @@ label {
     height: 45px;
 }
 
-.payment-checkout-btn {
+.payment-checkout-btn, .payment-checkout-btn-step {
     background-color: #1fa4d1;
     color: #ffffff;
     padding: 15px 15px;
@@ -486,5 +486,42 @@ body, .form-control, .btn {
 
     button.btn.payment-checkout-btn.payment-checkout-btn-step.float-end {
         width: 100%;
+    }
+}
+
+.customer-address-payment-form, .billing-address-form-wrapper {
+    .form-input-wrapper.select--arrow label,
+    .form-control:not(:placeholder-shown):focus + label,
+    .form-control.is-valid + .invalid-feedback + label,
+    .form-control.is-invalid + .invalid-feedback + label,
+    .form-control:not(:placeholder-shown):valid + label {
+        font-size: 12px;
+        top: -7px;
+        left: 10px;
+        background: #ffffff;
+        padding: 0 5px 0 5px;
+    }
+
+    .form-input-wrapper {
+        position: relative;
+
+        label {
+            font-size: 14px;
+            color: #6b7078;
+            padding: 14px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transition: 0.2s ease all;
+            -moz-transition: 0.2s ease all;
+            -webkit-transition: 0.2s ease all;
+            pointer-events: none;
+        }
+    }
+
+    .select--arrow {
+        .form-control.is-valid {
+            background-image: none;
+        }
     }
 }

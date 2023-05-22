@@ -75,4 +75,9 @@ return [
         'parent_flag' => 'marketplace.index',
     ],
 
+    [
+        'name' => 'Reports',
+        'flag' => 'marketplace.reports',
+        'parent_flag' => 'marketplace.index',
+    ],
 ];

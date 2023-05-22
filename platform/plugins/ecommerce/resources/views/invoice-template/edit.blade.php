@@ -79,14 +79,12 @@
     </div>
     {!! Form::close() !!}
 
-    {!!
-        Form::modalAction(
-            'reset-template-to-default-modal',
-            trans('core/setting::setting.email.confirm_reset'),
-            'info',
-            trans('core/setting::setting.email.confirm_message'),
-            'reset-template-to-default-button',
-            trans('core/setting::setting.email.continue')
-        )
-    !!}
+    <x-core-base::modal
+        id="reset-template-to-default-modal"
+        :title="trans('core/setting::setting.email.confirm_reset')"
+        button-id="reset-template-to-default-button"
+        :button-label="trans('core/setting::setting.email.continue')"
+    >
+        {!! trans('core/setting::setting.email.confirm_message') !!}
+    </x-core-base::modal>
 @endsection

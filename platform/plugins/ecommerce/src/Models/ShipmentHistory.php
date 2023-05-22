@@ -2,9 +2,9 @@
 
 namespace Botble\Ecommerce\Models;
 
-use Botble\ACL\Models\User;
 use Botble\Base\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class ShipmentHistory extends BaseModel
 {
@@ -16,20 +16,21 @@ class ShipmentHistory extends BaseModel
         'user_id',
         'shipment_id',
         'order_id',
+        'user_type',
     ];
 
-    public function user(): BelongsTo
+    public function user(): MorphTo
     {
-        return $this->belongsTo(User::class, 'user_id', 'id')->withDefault();
+        return $this->morphTo()->withDefault();
     }
 
     public function shipment(): BelongsTo
     {
-        return $this->belongsTo(Shipment::class, 'shipment_id', 'id')->withDefault();
+        return $this->belongsTo(Shipment::class, 'shipment_id')->withDefault();
     }
 
     public function order(): BelongsTo
     {
-        return $this->belongsTo(Order::class, 'order_id', 'id')->withDefault();
+        return $this->belongsTo(Order::class, 'order_id')->withDefault();
     }
 }

@@ -7,28 +7,22 @@ use Botble\Ecommerce\Models\Brand;
 use Botble\Ecommerce\Models\ProductCategory;
 use Botble\Menu\Repositories\Interfaces\MenuNodeInterface;
 use Botble\PluginManagement\Abstracts\PluginOperationAbstract;
-use Botble\Setting\Models\Setting;
-use Schema;
+use Botble\Setting\Facades\Setting;
+use Illuminate\Support\Facades\Schema;
 
 class Plugin extends PluginOperationAbstract
 {
-    public static function activated()
+    public static function activated(): void
     {
-        Setting::insertOrIgnore([
-            [
-                'key' => 'payment_cod_status',
-                'value' => 1,
-            ],
-            [
-                'key' => 'payment_bank_transfer_status',
-                'value' => 1,
-            ],
-        ]);
+        Setting::set([
+            'payment_cod_status' => 1,
+            'payment_bank_transfer_status' => 1,
+        ])->save();
 
         app('migrator')->run(database_path('migrations'));
     }
 
-    public static function remove()
+    public static function remove(): void
     {
         Schema::disableForeignKeyConstraints();
         Schema::dropIfExists('ec_product_label_products');
@@ -95,11 +89,16 @@ class Plugin extends PluginOperationAbstract
         Schema::dropIfExists('ec_order_return_items');
         Schema::dropIfExists('ec_global_options');
         Schema::dropIfExists('ec_global_option_value');
+        Schema::dropIfExists('ec_global_options_translations');
+        Schema::dropIfExists('ec_options_translations');
+        Schema::dropIfExists('ec_option_value_translations');
+        Schema::dropIfExists('ec_global_option_value_translations');
         Schema::dropIfExists('ec_options');
         Schema::dropIfExists('ec_option_value');
         Schema::dropIfExists('ec_invoice_items');
         Schema::dropIfExists('ec_invoices');
         Schema::dropIfExists('ec_tax_products');
         Schema::dropIfExists('ec_product_views');
+        Schema::dropIfExists('ec_customer_used_coupons');
     }
 }

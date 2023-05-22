@@ -2,7 +2,7 @@
 
 namespace Botble\Testimonial\Tables;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Testimonial\Repositories\Interfaces\TestimonialInterface;
 use Html;

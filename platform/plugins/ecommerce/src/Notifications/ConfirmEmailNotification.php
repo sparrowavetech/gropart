@@ -2,13 +2,13 @@
 
 namespace Botble\Ecommerce\Notifications;
 
-use EmailHandler;
+use Botble\Base\Facades\EmailHandler;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\HtmlString;
-use URL;
+use Illuminate\Support\Facades\URL;
 
 class ConfirmEmailNotification extends Notification implements ShouldQueue
 {

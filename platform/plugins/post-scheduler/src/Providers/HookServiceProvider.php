@@ -4,7 +4,7 @@ namespace Botble\PostScheduler\Providers;
 
 use Assets;
 use Auth;
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Models\BaseModel;
 use Carbon\Carbon;
 use Illuminate\Http\Request;

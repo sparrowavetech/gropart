@@ -3,7 +3,7 @@
 namespace Botble\VigReactions\Tables;
 
 use Auth;
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\VigReactions\Repositories\Interfaces\VigReactionsInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Illuminate\Contracts\Routing\UrlGenerator;

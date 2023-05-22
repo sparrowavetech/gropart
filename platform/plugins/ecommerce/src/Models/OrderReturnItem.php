@@ -19,6 +19,7 @@ class OrderReturnItem extends BaseModel
         'qty',
         'price',
         'reason',
+        'refund_amount',
     ];
 
     protected $casts = [

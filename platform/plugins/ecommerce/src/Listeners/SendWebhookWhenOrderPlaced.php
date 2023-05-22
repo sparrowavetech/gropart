@@ -31,11 +31,11 @@ class SendWebhookWhenOrderPlaced
                     'value' => $order->shipment->status->getValue(),
                     'text' => $order->shipment->status->label(),
                 ] : [],
-                'payment_method' => $order->payment->id ? [
+                'payment_method' => is_plugin_active('payment') && $order->payment->id ? [
                     'value' => $order->payment->payment_channel->getValue(),
                     'text' => $order->payment->payment_channel->label(),
                 ] : [],
-                'payment_status' => $order->payment->id ? [
+                'payment_status' => is_plugin_active('payment') && $order->payment->id ? [
                     'value' => $order->payment->status->getValue(),
                     'text' => $order->payment->status->label(),
                 ] : [],

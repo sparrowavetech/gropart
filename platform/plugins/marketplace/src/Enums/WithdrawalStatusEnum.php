@@ -3,14 +3,14 @@
 namespace Botble\Marketplace\Enums;
 
 use Botble\Base\Supports\Enum;
-use Html;
+use Botble\Base\Facades\Html;
 use Illuminate\Support\HtmlString;
 
 /**
  * @method static WithdrawalStatusEnum PENDING()
  * @method static WithdrawalStatusEnum PROCESSING()
  * @method static WithdrawalStatusEnum COMPLETED()
- * @method static WithdrawalStatusEnum CANCELLED()
+ * @method static WithdrawalStatusEnum CANCELED()
  * @method static WithdrawalStatusEnum REFUSED()
  */
 class WithdrawalStatusEnum extends Enum

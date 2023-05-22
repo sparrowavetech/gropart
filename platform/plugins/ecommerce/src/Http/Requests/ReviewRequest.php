@@ -2,7 +2,7 @@
 
 namespace Botble\Ecommerce\Http\Requests;
 
-use EcommerceHelper;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Support\Http\Requests\Request;
 
 class ReviewRequest extends Request

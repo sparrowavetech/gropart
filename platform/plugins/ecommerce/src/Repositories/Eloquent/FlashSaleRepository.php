@@ -3,6 +3,7 @@
 namespace Botble\Ecommerce\Repositories\Eloquent;
 
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Ecommerce\Models\FlashSale;
 use Botble\Ecommerce\Repositories\Interfaces\FlashSaleInterface;
 use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 
@@ -10,9 +11,13 @@ class FlashSaleRepository extends RepositoriesAbstract implements FlashSaleInter
 {
     public function getAvailableFlashSales(array $with = [])
     {
-        $data = $this->model
-            ->where('status', BaseStatusEnum::PUBLISHED)
+        /**
+         * @var FlashSale $model
+         */
+        $model = $this->model;
+        $data = $model
             ->notExpired()
+            ->where('status', BaseStatusEnum::PUBLISHED)
             ->latest();
 
         if ($with) {

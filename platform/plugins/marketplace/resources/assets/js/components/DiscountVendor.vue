@@ -44,11 +44,11 @@
                                 </option>
                             </select>
                             <svg class="svg-next-icon svg-next-icon-size-16">
-                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#select-chevron"></use>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M10 16l-4-4h8l-4 4zm0-12L6 8h8l-4-4z"></path></svg>
                             </svg>
                         </div>
                         <span class="lb-dis"> <span>{{ value_label }}</span></span>
-                        <div class="inline width20-rsp-768 mb5">
+                        <div class="inline mb5">
                             <div class="next-input--stylized">
                                 <input type="text" class="next-input next-input--invisible" name="value"
                                        v-model="value" autocomplete="off" placeholder="0">
@@ -67,18 +67,17 @@
                 <div class="pd-all-10-20 form-group mb0">
                     <label class="text-title-field">{{ __('discount.start_date')}}</label>
                     <div class="next-field__connected-wrapper z-index-9">
-                        <div class="input-group date form_datetime form_datetime bs-datetime">
-                            <input type="text" placeholder="dd-mm-yyyy" data-date-format="dd-mm-yyyy" name="start_date"
-                                   class="next-field--connected next-input z-index-9 datepicker" autocomplete="off">
-                            <span class="input-group-prepend">
-                                <button class="btn default" type="button">
-                                    <span class="fa fa-fw fa-calendar"></span>
-                                </button>
-                            </span>
+                        <div class="input-group">
+                            <div class="input-group datepicker">
+                                <input type="text" :placeholder="dateFormat" :data-date-format="dateFormat" name="start_date" v-model="start_date"
+                                       class="next-field--connected next-input"
+                                       readonly data-input style="min-width: 0">
+                                <a class="input-button" title="toggle" data-toggle><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 17 17"><g></g><path d="M14 2V1h-3v1H6V1H3v1H0v15h17V2h-3zM12 2h1v2h-1V2zM4 2h1v2H4V2zM16 16H1v-8.921h15V16zM1 6.079v-3.079h2v2h3V3h5v2h3V3h2v3.079H1z"></path></svg></a>
+                            </div>
                         </div>
                         <div class="input-group">
                             <input type="text" placeholder="hh:mm" name="start_time"
-                                   class="next-field--connected next-input z-index-9 time-picker timepicker timepicker-24">
+                                   class="next-field--connected next-input z-index-9 time-picker timepicker timepicker-24" v-model="start_time" style="min-width: 0">
                             <span class="input-group-prepend">
                                 <button class="btn default" type="button">
                                     <i class="fa fa-clock"></i>
@@ -90,22 +89,18 @@
                 <div class="pd-all-10-20 form-group mb0">
                     <label class="text-title-field">{{ __('discount.end_date')}}</label>
                     <div class="next-field__connected-wrapper z-index-9">
-                        <div class="input-group date form_datetime form_datetime bs-datetime">
-                            <input type="text" placeholder="dd-mm-yyyy"
-                                data-date-format="dd-mm-yyyy"
-                                name="end_date"
-                                class="next-field--connected next-input z-index-9 datepicker"
-                                :disabled="unlimited_time">
-                            <span class="input-group-prepend">
-                                <button class="btn default" type="button">
-                                    <span class="fa fa-fw fa-calendar"></span>
-                                </button>
-                            </span>
+                        <div class="input-group">
+                            <div class="input-group datepicker">
+                                <input type="text" :placeholder="dateFormat" :data-date-format="dateFormat" name="end_date" v-model="end_date"
+                                       class="next-field--connected next-input"
+                                       :disabled="unlimited_time" readonly data-input style="min-width: 0">
+                                <a class="input-button" title="toggle" data-toggle><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 17 17"><g></g><path d="M14 2V1h-3v1H6V1H3v1H0v15h17V2h-3zM12 2h1v2h-1V2zM4 2h1v2H4V2zM16 16H1v-8.921h15V16zM1 6.079v-3.079h2v2h3V3h5v2h3V3h2v3.079H1z"></path></svg></a>
+                            </div>
                         </div>
                         <div class="input-group">
                             <input type="text" placeholder="hh:mm" name="end_time"
-                                   class="next-field--connected next-input z-index-9 time-picker timepicker timepicker-24"
-                                   :disabled="unlimited_time">
+                                   class="next-field--connected next-input z-index-9 time-picker timepicker timepicker-24" v-model="end_time"
+                                   :disabled="unlimited_time" style="min-width: 0">
                             <span class="input-group-prepend">
                                 <button class="btn default" type="button">
                                     <i class="fa fa-clock"></i>
@@ -125,7 +120,7 @@
             <br>
             <div class="wrapper-content">
                 <div class="pd-all-20">
-                    <a class="btn btn-secondary" :href="cancleUrl" v-if="cancleUrl">{{ __('discount.cancel') }}</a>
+                    <a class="btn btn-secondary" :href="cancelUrl" v-if="cancelUrl">{{ __('discount.cancel') }}</a>
                     <button class="btn btn-primary">{{ __('discount.save') }}</button>
                 </div>
             </div>
@@ -134,8 +129,14 @@
 
 </template>
 
+<style>
+.date-time-group .invalid-feedback {
+    display: none !important;
+}
+</style>
+
 <script>
-    // let moment = require('moment');
+    let moment = require('moment');
 
     export default {
         data: () => {
@@ -146,6 +147,10 @@
                 is_unlimited: 1,
                 quantity: 0,
                 unlimited_time: 1,
+                start_date: moment().format('Y-MM-DD'),
+                start_time: '00:00',
+                end_date: moment().format('Y-MM-DD'),
+                end_time: '23:59',
                 type_option: 'amount',
                 value: null,
                 target: 'all-orders',
@@ -171,9 +176,14 @@
                 type: String,
                 default: () => null,
             },
-            cancleUrl: {
+            cancelUrl: {
                 type: String,
                 default: () => null,
+            },
+            dateFormat: {
+                type: String,
+                default: () => 'Y-m-d',
+                required: true
             },
         },
         mounted: function () {

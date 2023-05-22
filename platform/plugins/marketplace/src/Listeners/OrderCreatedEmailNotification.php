@@ -9,7 +9,7 @@ use Botble\Ecommerce\Events\OrderPlacedEvent;
 use Botble\Ecommerce\Repositories\Interfaces\ShipmentInterface;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Illuminate\Support\Arr;
-use MarketplaceHelper;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 
 class OrderCreatedEmailNotification
 {

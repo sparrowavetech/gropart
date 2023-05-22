@@ -20,9 +20,12 @@ class ProductVersionRequest extends Request
             'barcode' => [
                 'nullable',
                 'max:50',
+                'string',
                 Rule::unique('ec_products')->ignore($this->input('product_id')),
             ],
             'cost_per_item' => 'nullable|numeric|min:0|max:' . $this->input('price'),
+            'attribute_sets' => 'nullable|array',
+            'attribute_sets.*' => 'required',
         ];
     }
 
@@ -35,6 +38,13 @@ class ProductVersionRequest extends Request
             'start_date.required_if' => trans('plugins/ecommerce::products.product_create_validate_start_date_required_if'),
             'sale_price' => trans('plugins/ecommerce::products.product_create_validate_sale_price'),
             'cost_per_item.max' => trans('plugins/ecommerce::products.product_create_validate_cost_per_item_max'),
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'attribute_sets.*' => trans('plugins/ecommerce::product-attribute-sets.attribute_set'),
         ];
     }
 }

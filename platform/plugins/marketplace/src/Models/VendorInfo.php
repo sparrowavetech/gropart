@@ -4,8 +4,8 @@ namespace Botble\Marketplace\Models;
 
 use Botble\Base\Models\BaseModel;
 use Exception;
-use Hash;
-use MarketplaceHelper;
+use Illuminate\Support\Facades\Hash;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 
 class VendorInfo extends BaseModel
 {
@@ -70,7 +70,7 @@ class VendorInfo extends BaseModel
         );
     }
 
-    public function checkSignature(): string
+    public function checkSignature(): bool
     {
         return Hash::check($this->getSignatureKey(), $this->signature);
     }

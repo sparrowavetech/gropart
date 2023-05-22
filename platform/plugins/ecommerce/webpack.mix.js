@@ -21,10 +21,15 @@ mix
     .js(source + '/resources/assets/js/discount.js', dist + '/js').vue({ version: 2 })
     .js(source + '/resources/assets/js/order-create.js', dist + '/js').vue({ version: 2 })
     .js(source + '/resources/assets/js/front/checkout.js', dist + '/js')
-    .js(source + '/resources/assets/js/front/order-return.js', dist + '/js')
-    .copy(dist + '/js/discount.js', source + '/public/js')
-    .copy(dist + '/js/order-create.js', source + '/public/js')
-    .copy(dist + '/js/checkout.js', source + '/public/js');
+    .js(source + '/resources/assets/js/front/order-return.js', dist + '/js');
+
+if (mix.inProduction()) {
+    mix
+        .copy(dist + '/js/discount.js', source + '/public/js')
+        .copy(dist + '/js/order-create.js', source + '/public/js')
+        .copy(dist + '/js/checkout.js', source + '/public/js')
+        .copy(dist + '/js/order-return.js', source + '/public/js');
+}
 
 const scripts = [
     'edit-product.js',
@@ -50,13 +55,18 @@ const scripts = [
     'flash-sale.js',
     'bulk-import.js',
     'export.js',
+    'address.js',
 ];
 
 scripts.forEach(item => {
-    mix
-        .js(source + '/resources/assets/js/' + item, dist + '/js')
-        .copy(dist + '/js/' + item, source + '/public/js');
+    mix.js(source + '/resources/assets/js/' + item, dist + '/js');
 });
+
+if (mix.inProduction()) {
+    scripts.forEach(item => {
+        mix.copy(dist + '/js/' + item, source + '/public/js');
+    });
+}
 
 const styles = [
     'ecommerce.scss',
@@ -71,7 +81,11 @@ const styles = [
 ];
 
 styles.forEach(item => {
-    mix
-        .sass(source + '/resources/assets/sass/' + item, dist + '/css')
-        .copy(dist + '/css/' + item.replace('.scss', '.css'), source + '/public/css');
+    mix.sass(source + '/resources/assets/sass/' + item, dist + '/css');
 });
+
+if (mix.inProduction()) {
+    styles.forEach(item => {
+        mix.copy(dist + '/css/' + item.replace('.scss', '.css'), source + '/public/css');
+    });
+}

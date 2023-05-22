@@ -2,14 +2,14 @@
 
 namespace Botble\Ecommerce\Http\Resources;
 
-use Illuminate\Http\Request;
+use Botble\Ecommerce\Models\OrderAddress;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin OrderAddress
+ */
 class OrderAddressResource extends JsonResource
 {
-    /**
-     * @param Request $request
-     */
     public function toArray($request): array
     {
         return [

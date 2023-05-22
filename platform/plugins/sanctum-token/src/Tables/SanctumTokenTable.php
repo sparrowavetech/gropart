@@ -2,7 +2,7 @@
 
 namespace Datlechin\SanctumToken\Tables;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Table\Abstracts\TableAbstract;
 use Datlechin\SanctumToken\Repositories\Interfaces\SanctumTokenInterface;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;

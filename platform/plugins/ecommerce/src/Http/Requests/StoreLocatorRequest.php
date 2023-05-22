@@ -2,7 +2,7 @@
 
 namespace Botble\Ecommerce\Http\Requests;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Support\Http\Requests\Request;
 
 class StoreLocatorRequest extends Request
@@ -10,7 +10,7 @@ class StoreLocatorRequest extends Request
     public function rules(): array
     {
         return [
-            'name' => 'required|max:255',
+            'name' => 'required|string|max:220',
             'email' => 'email|nullable|max:60',
             'phone' => 'required|' . BaseHelper::getPhoneValidationRule(),
             'state' => 'required|max:120',

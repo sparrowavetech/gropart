@@ -8,7 +8,7 @@ use Botble\Ecommerce\Models\Currency;
 use Botble\Ecommerce\Models\Customer;
 use Botble\Ecommerce\Models\Order;
 use Botble\Marketplace\Enums\RevenueTypeEnum;
-use Html;
+use Botble\Base\Facades\Html;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Revenue extends BaseModel

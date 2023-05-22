@@ -2,8 +2,8 @@
 
 namespace Botble\Marketplace\Forms\Fields;
 
-use Kris\LaravelFormBuilder\Fields\FormField;
-use MarketplaceHelper;
+use Botble\Base\Forms\FormField;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 
 class CustomImagesField extends FormField
 {

@@ -9,7 +9,7 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
 class ProductExport extends TableExportHandler
 {
-    protected function afterSheet(AfterSheet $event)
+    protected function afterSheet(AfterSheet $event): void
     {
         parent::afterSheet($event);
 

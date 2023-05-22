@@ -2,7 +2,7 @@
 
 namespace Botble\Marketplace\Tables;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Ecommerce\Repositories\Interfaces\DiscountInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Illuminate\Contracts\Routing\UrlGenerator;
@@ -12,9 +12,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
-use MarketplaceHelper;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 use Symfony\Component\HttpFoundation\Response;
-use Yajra\DataTables\DataTables;
+use Botble\Table\DataTables;
 
 class DiscountTable extends TableAbstract
 {

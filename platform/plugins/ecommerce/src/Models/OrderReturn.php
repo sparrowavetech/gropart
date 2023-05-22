@@ -19,6 +19,7 @@ class OrderReturn extends BaseModel
         'reason',
         'order_status',
         'return_status',
+        'store_id',
     ];
 
     protected $casts = [
@@ -42,7 +43,7 @@ class OrderReturn extends BaseModel
         return $this->hasMany(OrderReturnItem::class, 'order_return_id');
     }
 
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
 

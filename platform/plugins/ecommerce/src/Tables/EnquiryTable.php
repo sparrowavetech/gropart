@@ -2,7 +2,7 @@
 
 namespace Botble\Ecommerce\Tables;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Ecommerce\Enums\EnquiryStatusEnum;
 use Botble\Ecommerce\Repositories\Interfaces\EnquiryInterface;
 use Botble\Table\Abstracts\TableAbstract;

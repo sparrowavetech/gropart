@@ -3,7 +3,7 @@
 namespace Botble\Sms\Tables;
 
 use Illuminate\Support\Facades\Auth;
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Sms\Enums\SmsEnum;
 use Botble\Sms\Repositories\Interfaces\SmsInterface;

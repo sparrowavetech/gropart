@@ -5,6 +5,7 @@ namespace Botble\Ecommerce\Models;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Models\BaseModel;
 use Botble\Ecommerce\Services\Products\UpdateDefaultProductService;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -46,7 +47,21 @@ class ProductVariation extends BaseModel
         );
     }
 
-    protected static function boot()
+    protected function image(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->product->image ?: $this->configurableProduct->image,
+        );
+    }
+
+    protected function name(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->product->name,
+        );
+    }
+
+    protected static function boot(): void
     {
         parent::boot();
 

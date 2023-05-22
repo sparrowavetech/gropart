@@ -56,7 +56,7 @@ class Review extends BaseModel
         );
     }
 
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
 

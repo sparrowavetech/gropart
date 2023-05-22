@@ -2,7 +2,7 @@
 
 namespace Botble\Ecommerce\Imports;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
@@ -44,8 +44,8 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Validators\Failure;
 use Mimey\MimeTypes;
-use RvMedia;
-use SlugHelper;
+use Botble\Media\Facades\RvMedia;
+use Botble\Slug\Facades\SlugHelper;
 
 class ProductImport implements
     ToModel,
@@ -60,28 +60,6 @@ class ProductImport implements
     use SkipsFailures;
     use SkipsErrors;
     use ImportTrait;
-
-    protected ProductInterface $productRepository;
-
-    protected ProductCategoryInterface $productCategoryRepository;
-
-    protected ProductTagInterface $productTagRepository;
-
-    protected ProductLabelInterface $productLabelRepository;
-
-    protected TaxInterface $taxRepository;
-
-    protected ProductCollectionInterface $productCollectionRepository;
-
-    protected ProductAttributeInterface $productAttributeRepository;
-
-    protected ProductVariationInterface $productVariationRepository;
-
-    protected BrandInterface $brandRepository;
-
-    protected StoreProductTagService $storeProductTagService;
-
-    protected Request $request;
 
     protected Request $validatorClass;
 
@@ -107,34 +85,24 @@ class ProductImport implements
 
     protected int $rowCurrent = 1; // include header
 
-    protected ProductAttributeSetInterface $productAttributeSetRepository;
-
     protected Collection $allTaxes;
 
+    protected Collection $barcodes;
+
     public function __construct(
-        ProductInterface $productRepository,
-        ProductCategoryInterface $productCategoryRepository,
-        ProductTagInterface $productTagRepository,
-        ProductLabelInterface $productLabelRepository,
-        TaxInterface $taxRepository,
-        ProductCollectionInterface $productCollectionRepository,
-        ProductAttributeSetInterface $productAttributeSetRepository,
-        ProductAttributeInterface $productAttributeRepository,
-        ProductVariationInterface $productVariationRepository,
-        BrandInterface $brandRepository,
-        StoreProductTagService $storeProductTagService,
-        Request $request
+        protected ProductInterface $productRepository,
+        protected ProductCategoryInterface $productCategoryRepository,
+        protected ProductTagInterface $productTagRepository,
+        protected ProductLabelInterface $productLabelRepository,
+        protected TaxInterface $taxRepository,
+        protected ProductCollectionInterface $productCollectionRepository,
+        protected ProductAttributeSetInterface $productAttributeSetRepository,
+        protected ProductAttributeInterface $productAttributeRepository,
+        protected ProductVariationInterface $productVariationRepository,
+        protected BrandInterface $brandRepository,
+        protected StoreProductTagService $storeProductTagService,
+        protected Request $request
     ) {
-        $this->productRepository = $productRepository;
-        $this->productCategoryRepository = $productCategoryRepository;
-        $this->productTagRepository = $productTagRepository;
-        $this->productLabelRepository = $productLabelRepository;
-        $this->taxRepository = $taxRepository;
-        $this->productCollectionRepository = $productCollectionRepository;
-        $this->storeProductTagService = $storeProductTagService;
-        $this->brandRepository = $brandRepository;
-        $this->productAttributeSetRepository = $productAttributeSetRepository;
-        $this->request = $request;
         $this->categories = collect();
         $this->brands = collect();
         $this->taxes = collect();
@@ -142,9 +110,10 @@ class ProductImport implements
         $this->productCollections = collect();
         $this->productLabels = collect();
         $this->productAttributeSets = $this->productAttributeSetRepository->all(['attributes']);
-        $this->productAttributeRepository = $productAttributeRepository;
-        $this->productVariationRepository = $productVariationRepository;
         $this->allTaxes = $this->taxRepository->all();
+        $this->barcodes = collect();
+
+        config(['excel.imports.ignore_empty' => true]);
     }
 
     public function setImportType(string $importType): self
@@ -204,7 +173,7 @@ class ProductImport implements
     protected function getProduct(string $name, ?string $slug): Model|\Eloquent|Builder|null
     {
         if ($slug) {
-            $slug = SlugHelper::getSlug($slug, null, Product::class);
+            $slug = SlugHelper::getSlug($slug, SlugHelper::getPrefix(Product::class), Product::class);
 
             if ($slug) {
                 return $this->productRepository->getFirstBy([
@@ -238,6 +207,8 @@ class ProductImport implements
         if ($content = $this->request->input('content')) {
             $this->request->merge(['content' => BaseHelper::clean($content)]);
         }
+
+        $product->status = strtolower($this->request->input('status'));
 
         $product = (new StoreProductService($this->productRepository))->execute($this->request, $product);
 
@@ -432,7 +403,7 @@ class ProductImport implements
             $this->getImageURLs((array)Arr::get($version, 'images', []) ?: [])
         );
 
-        $productRelatedToVariation->status = Arr::get($version, 'status', $product->status);
+        $productRelatedToVariation->status = strtolower(Arr::get($version, 'status', $product->status));
 
         $productRelatedToVariation->product_type = $product->product_type;
 
@@ -647,17 +618,17 @@ class ProductImport implements
     public function mapLocalization(array $row): array
     {
         $row['stock_status'] = (string)Arr::get($row, 'stock_status');
-        if (! in_array($row['stock_status'], StockStatusEnum::values())) {
+        if (! in_array($row['stock_status'], StockStatusEnum::toArray())) {
             $row['stock_status'] = StockStatusEnum::IN_STOCK;
         }
 
         $row['status'] = Arr::get($row, 'status');
-        if (! in_array($row['status'], BaseStatusEnum::values())) {
+        if (! in_array($row['status'], BaseStatusEnum::toArray())) {
             $row['status'] = BaseStatusEnum::PENDING;
         }
 
         $row['product_type'] = Arr::get($row, 'product_type');
-        if (! in_array($row['product_type'], ProductTypeEnum::values())) {
+        if (! in_array($row['product_type'], ProductTypeEnum::toArray())) {
             $row['product_type'] = ProductTypeEnum::PHYSICAL;
         }
 
@@ -677,6 +648,8 @@ class ProductImport implements
             ['key' => 'length', 'type' => 'number'],
             ['key' => 'wide', 'type' => 'number'],
             ['key' => 'height', 'type' => 'number'],
+            ['key' => 'cost_per_item', 'type' => 'number'],
+            ['key' => 'barcode', 'type' => 'string'],
             ['key' => 'is_featured', 'type' => 'bool'],
             ['key' => 'product_labels'],
             ['key' => 'labels'],
@@ -797,6 +770,22 @@ class ProductImport implements
         }
 
         Arr::set($row, $key, $value);
+
+        if ($value && $key == 'barcode') {
+            if ($barcode = $this->barcodes->firstWhere('value', $value)) {
+                if (method_exists($this, 'onFailure')) {
+                    $failures[] = new Failure(
+                        $this->rowCurrent,
+                        'Barcode',
+                        [__('Barcode ":value" has been duplicated on row #:row', ['value' => $value, 'row' => Arr::get($barcode, 'row')])],
+                        [$value]
+                    );
+                    $this->onFailure(...$failures);
+                }
+            } else {
+                $this->barcodes->push(['row' => $this->rowCurrent, 'value' => $value]);
+            }
+        }
 
         return $this;
     }

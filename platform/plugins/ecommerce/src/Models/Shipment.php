@@ -5,6 +5,7 @@ namespace Botble\Ecommerce\Models;
 use Botble\Base\Models\BaseModel;
 use Botble\Ecommerce\Enums\ShippingCodStatusEnum;
 use Botble\Ecommerce\Enums\ShippingStatusEnum;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -41,7 +42,7 @@ class Shipment extends BaseModel
         'date_shipped' => 'datetime',
     ];
 
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
 
@@ -63,5 +64,12 @@ class Shipment extends BaseModel
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class)->withDefault();
+    }
+
+    protected function isCanceled(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->status == ShippingStatusEnum::CANCELED,
+        );
     }
 }

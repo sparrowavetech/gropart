@@ -4,7 +4,7 @@ namespace Botble\Ecommerce\Option\OptionType;
 
 use Botble\Ecommerce\Models\Option;
 use Botble\Ecommerce\Models\Product;
-use Theme;
+use Botble\Theme\Facades\Theme;
 
 abstract class BaseOptionType
 {

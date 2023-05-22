@@ -5,6 +5,7 @@ namespace Botble\Marketplace\Http\Controllers;
 use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
@@ -13,39 +14,36 @@ use Botble\Marketplace\Forms\WithdrawalForm;
 use Botble\Marketplace\Http\Requests\WithdrawalRequest;
 use Botble\Marketplace\Repositories\Interfaces\WithdrawalInterface;
 use Botble\Marketplace\Tables\WithdrawalTable;
-use EmailHandler;
+use Botble\Base\Facades\EmailHandler;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class WithdrawalController extends BaseController
 {
-    protected WithdrawalInterface $withdrawalRepository;
-
-    public function __construct(WithdrawalInterface $withdrawalRepository)
+    public function __construct(protected WithdrawalInterface $withdrawalRepository)
     {
-        $this->withdrawalRepository = $withdrawalRepository;
     }
 
     public function index(WithdrawalTable $table)
     {
-        page_title()->setTitle(trans('plugins/marketplace::withdrawal.name'));
+        PageTitle::setTitle(trans('plugins/marketplace::withdrawal.name'));
 
         return $table->renderTable();
     }
 
-    public function edit(int $id, FormBuilder $formBuilder, Request $request)
+    public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
     {
         $withdrawal = $this->withdrawalRepository->findOrFail($id);
 
         event(new BeforeEditContentEvent($request, $withdrawal));
 
-        page_title()->setTitle(trans('plugins/marketplace::withdrawal.edit') . ' "' . $withdrawal->customer->name . '"');
+        PageTitle::setTitle(trans('core/base::forms.edit_item', ['name' => $withdrawal->name]));
 
         return $formBuilder->create(WithdrawalForm::class, ['model' => $withdrawal])->renderForm();
     }
 
-    public function update(int $id, WithdrawalRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, WithdrawalRequest $request, BaseHttpResponse $response)
     {
         $withdrawal = $this->withdrawalRepository->findOrFail($id);
 
@@ -85,7 +83,7 @@ class WithdrawalController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(Request $request, int $id, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
             $withdrawal = $this->withdrawalRepository->findOrFail($id);

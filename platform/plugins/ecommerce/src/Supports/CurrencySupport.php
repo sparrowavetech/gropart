@@ -42,7 +42,7 @@ class CurrencySupport
 
         if (session('currency')) {
             $currency = $this->currencies->where('title', session('currency'))->first();
-        } elseif (get_ecommerce_setting('enable_auto_detect_visitor_currency', 0) == 1) {
+        } elseif ((int)get_ecommerce_setting('enable_auto_detect_visitor_currency', 0) == 1) {
             $currency = $this->currencies->where('title', $this->detectedCurrencyCode())->first();
         }
 

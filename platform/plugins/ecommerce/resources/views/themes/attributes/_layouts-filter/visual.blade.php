@@ -9,7 +9,7 @@
                     title="{{ $attribute->title }}">
                     <div class="custom-checkbox">
                         <label>
-                            <input class="product-filter-item" type="checkbox" name="attributes[]" value="{{ $attribute->id }}" {{ in_array($attribute->id, $selected) ? 'checked' : '' }}>
+                            <input class="product-filter-item" type="checkbox" name="attributes[]" value="{{ $attribute->id }}" @checked(in_array($attribute->id, $selected))>
                             <span style="{{ $attribute->getAttributeStyle() }}"></span>
                         </label>
                     </div>

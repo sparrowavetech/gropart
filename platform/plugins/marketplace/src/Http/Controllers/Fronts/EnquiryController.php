@@ -5,8 +5,8 @@ namespace Botble\Marketplace\Http\Controllers\Fronts;
 use Exception;
 use Throwable;
 use EmailHandler;
-use EcommerceHelper;
-use MarketplaceHelper;
+use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Tables\EnquiryTable;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Ecommerce\Repositories\Interfaces\EnquiryInterface;
@@ -17,7 +17,7 @@ class EnquiryController extends BaseController
      * @var EnquiryInterface
      */
     protected $enquiryRepository;
-    
+
     /**
      * @param EnquiryInterface $enquiryRepository
      */
@@ -54,5 +54,5 @@ class EnquiryController extends BaseController
 
         return MarketplaceHelper::view('dashboard.enquires.edit', compact('enquiry'));
     }
-   
+
 }

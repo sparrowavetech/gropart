@@ -2,39 +2,39 @@
 
 namespace Botble\Marketplace\Http\Controllers\Fronts;
 
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Marketplace\Enums\RevenueTypeEnum;
-use EcommerceHelper;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Marketplace\Repositories\Interfaces\RevenueInterface;
-use Botble\Marketplace\Tables\RevenueTable;
+use Botble\Marketplace\Tables\StoreRevenueTable;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use MarketplaceHelper;
+use Botble\Marketplace\Facades\MarketplaceHelper;
+use Botble\Table\Abstracts\TableAbstract;
 
 class RevenueController
 {
-    protected RevenueInterface $revenueRepository;
-
-    public function __construct(RevenueInterface $revenueRepository)
+    public function index(StoreRevenueTable $table)
     {
-        $this->revenueRepository = $revenueRepository;
-    }
+        PageTitle::setTitle(__('Revenues'));
 
-    public function index(RevenueTable $table)
-    {
-        page_title()->setTitle(__('Revenues'));
+        $table
+            ->setCustomerId(auth('customer')->id())
+            ->setType(TableAbstract::TABLE_TYPE_ADVANCED)
+            ->setView('core/table::table');
 
         return $table->render(MarketplaceHelper::viewPath('dashboard.table.base'));
     }
 
-    public function getMonthChart(Request $request, BaseHttpResponse $response)
+    public function getMonthChart(Request $request, BaseHttpResponse $response, RevenueInterface $revenueRepository)
     {
         [$startDate, $endDate] = EcommerceHelper::getDateRangeInReport($request);
 
         $customerId = auth('customer')->id();
 
-        $revenues = $this->revenueRepository
+        $revenues = $revenueRepository
             ->getModel()
             ->selectRaw(
                 'SUM(CASE WHEN type IS NULL OR type = ? THEN amount WHEN type = ? THEN amount * -1 ELSE 0 END) as amount,
@@ -52,7 +52,7 @@ class RevenueController
         $series = [];
         $dates = [];
         $revenuesGrouped = $revenues->groupBy('currency');
-        $earningSales = collect([]);
+        $earningSales = collect();
         $period = CarbonPeriod::create($startDate, $endDate);
 
         $colors = ['#fcb800', '#80bc00'];
@@ -60,7 +60,7 @@ class RevenueController
         foreach ($revenuesGrouped as $key => $revenues) {
             $data = [
                 'name' => $key,
-                'data' => collect([]),
+                'data' => collect(),
             ];
 
             foreach ($period as $date) {

@@ -5,7 +5,7 @@ namespace Botble\Ecommerce\Repositories\Eloquent;
 use Botble\Ecommerce\Repositories\Interfaces\DiscountInterface;
 use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 use Carbon\Carbon;
-use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 
 class DiscountRepository extends RepositoriesAbstract implements DiscountInterface
 {
@@ -14,30 +14,21 @@ class DiscountRepository extends RepositoriesAbstract implements DiscountInterfa
         $data = $this->model
             ->where('type', 'promotion')
             ->where('start_date', '<=', Carbon::now())
-            ->where(function ($query) {
-                /**
-                 * @var Builder $query
-                 */
+            ->where(function (EloquentBuilder $query) {
                 return $query
                     ->whereNull('end_date')
                     ->orWhere('end_date', '>=', Carbon::now());
             })
-            ->where(function ($query) use ($forProductSingle) {
-                /**
-                 * @var Builder $query
-                 */
+            ->where(function (EloquentBuilder $query) use ($forProductSingle) {
                 return $query
                     ->whereIn('target', ['all-orders', 'amount-minimum-order'])
-                    ->orWhere(function ($sub) use ($forProductSingle) {
+                    ->orWhere(function (EloquentBuilder $sub) use ($forProductSingle) {
                         $compare = '>';
 
                         if ($forProductSingle) {
                             $compare = '=';
                         }
 
-                        /**
-                         * @var Builder $sub
-                         */
                         return $sub
                             ->whereIn('target', ['customer', 'group-products', 'specific-product', 'product-variant'])
                             ->where('product_quantity', $compare, 1);
@@ -56,48 +47,33 @@ class DiscountRepository extends RepositoriesAbstract implements DiscountInterfa
         $data = $this->model
             ->where('type', 'promotion')
             ->where('start_date', '<=', Carbon::now())
-            ->where(function ($query) use ($productIds, $productCollectionIds) {
-                /**
-                 * @var Builder $query
-                 */
+            ->where(function (EloquentBuilder $query) use ($productIds, $productCollectionIds) {
                 return $query
-                    ->where(function ($sub) use ($productIds) {
-                        /**
-                         * @var Builder $sub
-                         */
+                    ->where(function (EloquentBuilder $sub) use ($productIds) {
                         return $sub
                             ->whereIn('target', ['specific-product', 'product-variant'])
                             ->whereHas('products', function ($whereHas) use ($productIds) {
                                 return $whereHas->whereIn('ec_discount_products.product_id', $productIds);
                             });
                     })
-                    ->orWhere(function ($sub) use ($productCollectionIds) {
-                        /**
-                         * @var Builder $sub
-                         */
+                    ->orWhere(function (EloquentBuilder $sub) use ($productCollectionIds) {
                         return $sub
                             ->where('target', 'group-products')
-                            ->whereHas('productCollections', function ($whereHas) use ($productCollectionIds) {
+                            ->whereHas('productCollections', function (EloquentBuilder $whereHas) use ($productCollectionIds) {
                                 return $whereHas->whereIn('ec_discount_product_collections.product_collection_id', $productCollectionIds);
                             });
                     })
-                    ->orWhere(function ($sub) {
-                        /**
-                         * @var Builder $sub
-                         */
+                    ->orWhere(function (EloquentBuilder $sub) {
                         return $sub
                             ->where('target', 'customer')
-                            ->whereHas('customers', function ($whereHas) {
+                            ->whereHas('customers', function (EloquentBuilder $whereHas) {
                                 $customerId = auth('customer')->check() ? auth('customer')->id() : -1;
 
                                 return $whereHas->where('ec_discount_customers.customer_id', $customerId);
                             });
                     });
             })
-            ->where(function ($query) {
-                /**
-                 * @var Builder $query
-                 */
+            ->where(function (EloquentBuilder $query) {
                 return $query
                     ->whereNull('end_date')
                     ->orWhere('end_date', '>=', Carbon::now());

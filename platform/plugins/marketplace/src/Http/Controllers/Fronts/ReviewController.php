@@ -2,23 +2,16 @@
 
 namespace Botble\Marketplace\Http\Controllers\Fronts;
 
-use Assets;
-use Botble\Ecommerce\Repositories\Interfaces\ReviewInterface;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\PageTitle;
 use Botble\Marketplace\Tables\ReviewTable;
-use MarketplaceHelper;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 
 class ReviewController
 {
-    protected ReviewInterface $reviewRepository;
-
-    public function __construct(ReviewInterface $reviewRepository)
-    {
-        $this->reviewRepository = $reviewRepository;
-    }
-
     public function index(ReviewTable $table)
     {
-        page_title()->setTitle(__('Reviews'));
+        PageTitle::setTitle(__('Reviews'));
 
         Assets::addStylesDirectly('vendor/core/plugins/ecommerce/css/review.css');
 

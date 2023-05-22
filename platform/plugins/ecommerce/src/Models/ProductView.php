@@ -3,6 +3,7 @@
 namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Models\BaseModel;
+use Botble\Base\Models\BaseQueryBuilder;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -32,7 +33,7 @@ class ProductView extends BaseModel
         return $this->belongsTo(Product::class);
     }
 
-    public function prunable(): Builder
+    public function prunable(): Builder|BaseQueryBuilder
     {
         return $this->whereDate('created_at', '>', Carbon::now()->subDays(90)->toDateString());
     }

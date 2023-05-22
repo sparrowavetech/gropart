@@ -1,7 +1,9 @@
 @php
     $key = mt_rand();
 @endphp
-<div class="product-attributes" data-target="{{ route('public.web.get-variation-by-attributes', $product->id) }}">
+<div class="product-attributes product-attribute-swatches"
+    id="product-attributes-{{ $product->id }}"
+    data-target="{{ route('public.web.get-variation-by-attributes', $product->id) }}">
      @php
          $variationInfo = $productVariationsInfo;
          $variationNextIds = [];

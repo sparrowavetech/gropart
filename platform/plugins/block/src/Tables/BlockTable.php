@@ -2,7 +2,7 @@
 
 namespace Botble\Block\Tables;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Html;
 use Illuminate\Support\Facades\Auth;
 use Botble\Base\Enums\BaseStatusEnum;

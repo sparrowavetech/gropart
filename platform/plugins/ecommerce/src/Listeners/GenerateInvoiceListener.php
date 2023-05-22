@@ -4,7 +4,7 @@ namespace Botble\Ecommerce\Listeners;
 
 use Botble\Ecommerce\Events\OrderCreated;
 use Botble\Ecommerce\Events\OrderPlacedEvent;
-use InvoiceHelper;
+use Botble\Ecommerce\Facades\InvoiceHelper;
 
 class GenerateInvoiceListener
 {

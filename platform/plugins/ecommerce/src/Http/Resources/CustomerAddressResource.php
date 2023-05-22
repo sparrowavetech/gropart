@@ -2,14 +2,14 @@
 
 namespace Botble\Ecommerce\Http\Resources;
 
-use Illuminate\Http\Request;
+use Botble\Ecommerce\Models\Address;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin Address
+ */
 class CustomerAddressResource extends JsonResource
 {
-    /**
-     * @param Request $request
-     */
     public function toArray($request): array
     {
         return [
@@ -27,6 +27,7 @@ class CustomerAddressResource extends JsonResource
             'zip_code' => $this->zip_code,
             'is_default' => $this->is_default,
             'customer_id' => $this->customer_id,
+            'full_address' => $this->full_address,
         ];
     }
 }

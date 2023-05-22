@@ -8,6 +8,8 @@ class UpdateOrderRequest extends Request
 {
     public function rules(): array
     {
-        return [];
+        return [
+            'description' => 'nullable|string',
+        ];
     }
 }

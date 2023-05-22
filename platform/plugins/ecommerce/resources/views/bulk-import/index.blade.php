@@ -36,7 +36,7 @@
                             {!! Form::error('file', $errors) !!}
                             <div class="mt-3 text-center p-2 border bg-light">
                                 <a href="#" class="download-template"
-                                    data-url="{{ route('ecommerce.bulk-import.download-template') }}"
+                                    data-url="{{ route('ecommerce.import.products.download-template') }}"
                                     data-extension="csv"
                                     data-filename="template_products_import.csv"
                                     data-downloading="<i class='fas fa-spinner fa-spin'></i> {{ trans('plugins/ecommerce::bulk-import.downloading') }}">
@@ -44,7 +44,7 @@
                                     {{ trans('plugins/ecommerce::bulk-import.download-csv-file') }}
                                 </a> &nbsp; | &nbsp;
                                 <a href="#" class="download-template"
-                                    data-url="{{ route('ecommerce.bulk-import.download-template') }}"
+                                    data-url="{{ route('ecommerce.import.products.download-template') }}"
                                     data-extension="xlsx"
                                     data-filename="template_products_import.xlsx"
                                     data-downloading="<i class='fas fa-spinner fa-spin'></i> {{ trans('plugins/ecommerce::bulk-import.downloading') }}">

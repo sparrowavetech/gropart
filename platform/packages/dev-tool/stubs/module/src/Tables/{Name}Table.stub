@@ -3,7 +3,7 @@
 namespace Botble\{Module}\Tables;
 
 use Illuminate\Support\Facades\Auth;
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\{Module}\Repositories\Interfaces\{Name}Interface;
 use Botble\Table\Abstracts\TableAbstract;

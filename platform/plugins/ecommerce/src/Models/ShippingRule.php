@@ -37,7 +37,7 @@ class ShippingRule extends BaseModel
         return $this->hasMany(ShippingRuleItem::class);
     }
 
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
 

@@ -6,7 +6,7 @@
                 <select class="form-select product-filter-item" name="attributes[]" multiple>
                     <option value="">{{ __('-- Select --') }}</option>
                     @foreach($attributes->where('attribute_set_id', $set->id) as $attribute)
-                        <option value="{{ $attribute->id }}" {{ in_array($attribute->id, $selected) ? 'selected' : '' }}>{{ $attribute->title }}</option>
+                        <option value="{{ $attribute->id }}" @selected(in_array($attribute->id, $selected))>{{ $attribute->title }}</option>
                     @endforeach
                 </select>
             </label>

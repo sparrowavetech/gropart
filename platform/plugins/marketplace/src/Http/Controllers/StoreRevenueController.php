@@ -2,8 +2,9 @@
 
 namespace Botble\Marketplace\Http\Controllers;
 
-use Assets;
+use Botble\Base\Facades\Assets;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Marketplace\Enums\RevenueTypeEnum;
@@ -18,14 +19,8 @@ use Throwable;
 
 class StoreRevenueController extends BaseController
 {
-    protected StoreInterface $storeRepository;
-
-    protected RevenueInterface $revenueRepository;
-
-    public function __construct(StoreInterface $storeRepository, RevenueInterface $revenueRepository)
+    public function __construct(protected StoreInterface $storeRepository, protected RevenueInterface $revenueRepository)
     {
-        $this->storeRepository = $storeRepository;
-        $this->revenueRepository = $revenueRepository;
     }
 
     public function index(StoreRevenueTable $table)
@@ -33,7 +28,7 @@ class StoreRevenueController extends BaseController
         return $table->renderTable();
     }
 
-    public function view(int $id, StoreRevenueTable $table)
+    public function view(int|string $id, StoreRevenueTable $table)
     {
         $store = $this->storeRepository->findOrFail($id);
         $customer = $store->customer;
@@ -44,12 +39,12 @@ class StoreRevenueController extends BaseController
 
         Assets::addScriptsDirectly(['vendor/core/plugins/marketplace/js/store-revenue.js']);
         $table->setAjaxUrl(route('marketplace.store.revenue.index', $customer->id));
-        page_title()->setTitle(trans('plugins/marketplace::revenue.view_store', ['store' => $store->name]));
+        PageTitle::setTitle(trans('plugins/marketplace::revenue.view_store', ['store' => $store->name]));
 
         return view('plugins/marketplace::stores.index', compact('table', 'store', 'customer'))->render();
     }
 
-    public function store(int $id, StoreRevenueRequest $request, BaseHttpResponse $response)
+    public function store(int|string $id, StoreRevenueRequest $request, BaseHttpResponse $response)
     {
         $store = $this->storeRepository->findOrFail($id);
 

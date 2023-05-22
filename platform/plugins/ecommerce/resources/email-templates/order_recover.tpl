@@ -13,6 +13,10 @@
 
 {{ product_list }}
 
+{% if order_note %}
+    <p>Note: {{ order_note }}</p>
+{% endif %}
+
 <br />
 
 <p>If you have any question, please contact us via <a href="mailto:{{ site_admin_email }}">{{ site_admin_email }}</a></p>

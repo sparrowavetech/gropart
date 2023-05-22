@@ -2,14 +2,14 @@
 
 namespace Botble\Ecommerce\Http\Resources;
 
-use Illuminate\Http\Request;
+use Botble\Ecommerce\Models\Customer;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin Customer
+ */
 class CustomerResource extends JsonResource
 {
-    /**
-     * @param Request $request
-     */
     public function toArray($request): array
     {
         return [

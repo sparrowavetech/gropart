@@ -5,6 +5,7 @@ namespace Botble\Ecommerce\Models;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class ProductAttributeSet extends BaseModel
 {
@@ -31,7 +32,12 @@ class ProductAttributeSet extends BaseModel
         return $this->hasMany(ProductAttribute::class, 'attribute_set_id')->orderBy('order', 'ASC');
     }
 
-    protected static function boot()
+    public function categories(): MorphToMany
+    {
+        return $this->morphToMany(ProductCategory::class, 'reference', 'ec_product_categorizables', 'reference_id', 'category_id');
+    }
+
+    protected static function boot(): void
     {
         parent::boot();
 
@@ -41,6 +47,8 @@ class ProductAttributeSet extends BaseModel
             foreach ($attributes as $attribute) {
                 $attribute->delete();
             }
+
+            $productAttributeSet->categories()->detach();
         });
     }
 }

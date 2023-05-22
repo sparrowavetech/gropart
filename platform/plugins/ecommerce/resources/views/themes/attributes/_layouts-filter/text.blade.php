@@ -6,7 +6,7 @@
                 <li data-slug="{{ $attribute->slug }}">
                     <div class="custom-checkbox">
                         <label>
-                            <input class="product-filter-item" type="checkbox" name="attributes[]" value="{{ $attribute->id }}" {{ in_array($attribute->id, $selected) ? 'checked' : '' }}>
+                            <input class="product-filter-item" type="checkbox" name="attributes[]" value="{{ $attribute->id }}" @checked(in_array($attribute->id, $selected))>
                             <span>{{ $attribute->title }}</span>
                         </label>
                     </div>

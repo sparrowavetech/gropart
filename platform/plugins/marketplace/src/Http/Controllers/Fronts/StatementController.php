@@ -8,7 +8,7 @@ use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
 use Botble\Marketplace\Tables\StoreRevenueTable;
 use Botble\Table\Abstracts\TableAbstract;
 use Illuminate\Http\Request;
-use MarketplaceHelper;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 
 class StatementController extends BaseController
 {

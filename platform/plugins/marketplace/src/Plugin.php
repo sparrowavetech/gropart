@@ -3,12 +3,13 @@
 namespace Botble\Marketplace;
 
 use Botble\PluginManagement\Abstracts\PluginOperationAbstract;
+use Botble\Setting\Facades\Setting;
 use Illuminate\Database\Schema\Blueprint;
-use Schema;
+use Illuminate\Support\Facades\Schema;
 
 class Plugin extends PluginOperationAbstract
 {
-    public static function remove()
+    public static function remove(): void
     {
         Schema::dropIfExists('mp_vendor_info');
         Schema::dropIfExists('mp_customer_revenues');
@@ -55,5 +56,18 @@ class Plugin extends PluginOperationAbstract
         });
 
         Schema::dropIfExists('mp_stores');
+
+        Setting::delete([
+            'marketplace_enable_commission_fee_for_each_category',
+            'marketplace_check_valid_signature',
+            'marketplace_verify_vendor',
+            'marketplace_enable_product_approval',
+            'marketplace_hide_store_phone_number',
+            'marketplace_hide_store_email',
+            'marketplace_allow_vendor_manage_shipping',
+            'marketplace_fee_per_order',
+            'marketplace_fee_withdrawal',
+            'marketplace_payout_methods',
+        ]);
     }
 }

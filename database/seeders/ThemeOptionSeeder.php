@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Supports\BaseSeeder;
 use Botble\Setting\Models\Setting;
-use EcommerceHelper;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Illuminate\Support\Arr;
 
 class ThemeOptionSeeder extends BaseSeeder

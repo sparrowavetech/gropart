@@ -12,7 +12,7 @@
                         ])
                     !!}
                         <svg class="svg-next-icon svg-next-icon-size-16">
-                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#select-chevron"></use>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M10 16l-4-4h8l-4 4zm0-12L6 8h8l-4-4z"></path></svg>
                         </svg>
                     </div>
                 </div>
@@ -85,7 +85,7 @@
             </div>
             <div class="flexbox-grid-form flexbox-grid-form-item flexbox-grid-form-no-outside-padding rps-no-pd-none-l ps-relative max-width-220-px">
                 <div class="flexbox-grid-form-item">
-                    @if ($order->payment->payment_channel == \Botble\Payment\Enums\PaymentMethodEnum::COD && $order->payment->status !== \Botble\Payment\Enums\PaymentStatusEnum::COMPLETED)
+                    @if (is_plugin_active('payment') && $order->payment->payment_channel == \Botble\Payment\Enums\PaymentMethodEnum::COD && $order->payment->status !== \Botble\Payment\Enums\PaymentStatusEnum::COMPLETED)
                         <div class="form-group mb-3">
                             <label class="text-title-field">{{ trans('plugins/ecommerce::shipping.cod_amount') }}:</label>
                             <div class="next-input--stylized">

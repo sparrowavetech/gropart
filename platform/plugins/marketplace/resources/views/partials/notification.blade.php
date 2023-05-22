@@ -16,6 +16,14 @@
 
 @push('footer')
     @if (!$isApproved)
-        {!! Form::modalAction('approve-product-for-selling-modal', trans('plugins/marketplace::store.approve_product_confirmation'), 'warning', trans('plugins/marketplace::store.approve_product_confirmation_description', ['vendor' => Html::link($product->createdBy->store->url, $product->createdBy->store->name, ['target' => '_blank'])]), 'confirm-approve-product-for-selling-button', trans('plugins/marketplace::store.approve')) !!}
+        <x-core-base::modal
+            id="approve-product-for-selling-modal"
+            :title="trans('plugins/marketplace::store.approve_product_confirmation')"
+            type="warning"
+            button-id="confirm-approve-product-for-selling-button"
+            :button-label="trans('plugins/marketplace::store.approve')"
+        >
+            {!! trans('plugins/marketplace::store.approve_product_confirmation_description', ['vendor' => Html::link($product->createdBy->store->url, $product->createdBy->store->name, ['target' => '_blank'])]) !!}
+        </x-core-base::modal>
     @endif
 @endpush

@@ -55,9 +55,30 @@ class Withdrawal extends BaseModel
                 if (in_array($statusOriginal, [WithdrawalStatusEnum::PROCESSING, WithdrawalStatusEnum::PENDING]) &&
                     in_array($status, [WithdrawalStatusEnum::CANCELED, WithdrawalStatusEnum::REFUSED])) {
                     $vendor = $withdrawal->customer;
+
+                    if ($vendor && $vendor->id) {
+                        $vendorInfo = $vendor->vendorInfo;
+                        if ($vendorInfo && $vendorInfo->id) {
+                            $vendorInfo->balance += ($withdrawal->amount + $withdrawal->fee);
+                            $vendorInfo->save();
+                        }
+                    }
+                }
+            }
+
+            return $withdrawal;
+        });
+
+        static::deleting(function (Withdrawal $withdrawal) {
+            if (in_array($withdrawal->status, [WithdrawalStatusEnum::PROCESSING, WithdrawalStatusEnum::PENDING])) {
+                $vendor = $withdrawal->customer;
+
+                if ($vendor && $vendor->id) {
                     $vendorInfo = $vendor->vendorInfo;
-                    $vendorInfo->balance += ($withdrawal->amount + $withdrawal->fee);
-                    $vendorInfo->save();
+                    if ($vendorInfo && $vendorInfo->id) {
+                        $vendorInfo->balance += ($withdrawal->amount + $withdrawal->fee);
+                        $vendorInfo->save();
+                    }
                 }
             }
         });

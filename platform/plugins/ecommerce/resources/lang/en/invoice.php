@@ -32,4 +32,6 @@ return [
     'payment_info' => 'Payment Info',
     'payment_method' => 'Payment Method',
     'payment_status' => 'Payment Status',
+    'generate_invoices' => 'Generate Invoices',
+    'generate_success_message' => 'Generated :count invoices successfully',
 ];

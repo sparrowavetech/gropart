@@ -2,9 +2,10 @@
 
 namespace Botble\Marketplace\Http\Controllers\Fronts;
 
-use Assets;
+use Botble\Base\Facades\Assets;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Marketplace\Http\Requests\DiscountRequest;
@@ -15,35 +16,33 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use MarketplaceHelper;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 
 class DiscountController extends BaseController
 {
-    protected DiscountInterface $discountRepository;
-
-    public function __construct(DiscountInterface $discountRepository)
+    public function __construct(protected DiscountInterface $discountRepository)
     {
-        $this->discountRepository = $discountRepository;
     }
 
     public function index(DiscountTable $table)
     {
-        page_title()->setTitle(__('Coupons'));
+        PageTitle::setTitle(__('Coupons'));
 
         return $table->render(MarketplaceHelper::viewPath('dashboard.table.base'));
     }
 
     public function create()
     {
-        page_title()->setTitle(__('Create coupon'));
+        PageTitle::setTitle(__('Create coupon'));
 
         Assets::addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
             ->addScriptsDirectly([
                 'vendor/core/plugins/marketplace/js/discount.js',
             ])
             ->addScripts(['timepicker', 'input-mask', 'blockui'])
-            ->addStyles(['timepicker'])
-            ->usingVueJS();
+            ->addStyles(['timepicker']);
+
+        Assets::usingVueJS();
 
         return MarketplaceHelper::view('dashboard.discounts.create');
     }
@@ -94,7 +93,7 @@ class DiscountController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function destroy(Request $request, int $id, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
             $discount = $this->discountRepository->findOrFail($id);

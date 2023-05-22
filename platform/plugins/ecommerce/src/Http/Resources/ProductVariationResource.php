@@ -2,14 +2,14 @@
 
 namespace Botble\Ecommerce\Http\Resources;
 
-use Illuminate\Http\Request;
+use Botble\Ecommerce\Models\Product;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin Product
+ */
 class ProductVariationResource extends JsonResource
 {
-    /**
-     * @param Request $request
-     */
     public function toArray($request): array
     {
         return [
@@ -37,6 +37,16 @@ class ProductVariationResource extends JsonResource
             'height' => $this->height,
             'wide' => $this->wide,
             'length' => $this->length,
+            'selected_attributes' => $this->when($this->selectedAttributes, function () {
+                return $this->selectedAttributes->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'slug' => $item->slug,
+                        'set_slug' => $item->attribute_set_slug,
+                        'set_id' => $item->attribute_set_id,
+                    ];
+                });
+            }),
         ];
     }
 }

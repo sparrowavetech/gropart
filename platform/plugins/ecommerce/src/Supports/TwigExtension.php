@@ -13,6 +13,7 @@ class TwigExtension extends AbstractExtension implements ExtensionInterface
     {
         return [
             new TwigFilter('price_format', 'format_price'),
+            new TwigFilter('urlencode', 'urlencode'),
         ];
     }
 

@@ -5,7 +5,7 @@ namespace Botble\Marketplace\Http\Requests;
 use Botble\Ecommerce\Enums\ShippingStatusEnum;
 use Botble\Support\Http\Requests\Request;
 use Illuminate\Validation\Rule;
-use MarketplaceHelper;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 
 class UpdateShippingStatusRequest extends Request
 {

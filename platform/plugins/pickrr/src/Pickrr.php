@@ -2,7 +2,7 @@
 
 namespace Botble\Pickrr;
 
-use EcommerceHelper;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Enums\ShippingStatusEnum;
 use Botble\Ecommerce\Models\Shipment;
 use Botble\Ecommerce\Models\OrderProduct;
@@ -71,7 +71,7 @@ class Pickrr
             );
         } else {
             $store = Store::find($inParams->order->store_id);
-            
+
             $params = array(
                 'auth_token' => $this->liveApiToken,
                 'item_name' => $inParams->product_name,

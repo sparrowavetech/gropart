@@ -14,5 +14,10 @@ return [
     'approve' => 'Approve',
     'approve_vendor_confirmation' => 'Approve vendor confirmation',
     'approve_vendor_confirmation_description' => 'Are you sure you really want to approve :vendor for selling on this site?',
-    'vendor_approval_notification' => 'Do you want to approve this vendor for selling on this site? Approve here :approve_link',
+    'vendor_approval_notification' => 'Do you want to approve this vendor for selling on this site? :approve_link',
+    'new_vendor_notifications' => [
+        'new_vendor' => 'New vendor',
+        'view' => 'View',
+        'description' => ':customer has registered but not verified.',
+    ],
 ];

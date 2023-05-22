@@ -26,7 +26,7 @@ class ProductCollection extends BaseModel
         'name' => SafeContent::class,
     ];
 
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
 

@@ -19,11 +19,13 @@ class InvoiceItem extends BaseModel
         'description',
         'image',
         'qty',
+        'price',
         'sub_total',
         'tax_amount',
         'discount_amount',
         'amount',
         'metadata',
+        'options',
     ];
 
     protected $casts = [
@@ -33,6 +35,7 @@ class InvoiceItem extends BaseModel
         'amount' => 'float',
         'metadata' => 'json',
         'paid_at' => 'datetime',
+        'options' => 'json',
         'name' => SafeContent::class,
     ];
 

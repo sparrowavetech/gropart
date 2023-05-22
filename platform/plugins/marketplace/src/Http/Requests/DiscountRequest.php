@@ -4,20 +4,20 @@ namespace Botble\Marketplace\Http\Requests;
 
 use Botble\Support\Http\Requests\Request;
 use Illuminate\Validation\Rule;
-use MarketplaceHelper;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 
 class DiscountRequest extends Request
 {
     public function rules(): array
     {
         return [
-            'title' => 'nullable|max:255',
-            'code' => 'required|max:20|unique:ec_discounts,code',
+            'title' => 'nullable|string|max:255',
+            'code' => 'required|string|max:20|unique:ec_discounts,code',
             'value' => 'required|numeric|min:0',
             'type_option' => 'required|' . Rule::in(array_keys(MarketplaceHelper::discountTypes())),
             'quantity' => 'required_without:is_unlimited|numeric|min:1',
-            'start_date' => 'nullable|date|date_format:d-m-Y',
-            'end_date' => 'nullable|date|date_format:d-m-Y|after:start_date',
+            'start_date' => 'nullable|date|date_format:' . config('core.base.general.date_format.date'),
+            'end_date' => 'nullable|date|date_format:' . config('core.base.general.date_format.date') . '|after:start_date',
         ];
     }
 
