@@ -14,7 +14,7 @@ return new class () extends Migration {
             $table->id();
             $table->string('name')->comment('Name of options');
             $table->string('option_type')->nullable()->comment('option type');
-            $table->bigInteger('product_id')->default(0);
+            $table->foreignId('product_id')->default(0);
             $table->integer('order')->default(9999);
             $table->boolean('required')->default(false)->comment('Checked if this option is required');
             $table->timestamps();

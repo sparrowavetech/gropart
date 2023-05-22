@@ -11,7 +11,7 @@ return new class () extends Migration {
         Schema::dropIfExists('ec_global_option_value');
 
         Schema::create('ec_option_value', function (Blueprint $table) {
-            $table->bigInteger('option_id')->comment('option id');
+            $table->foreignId('option_id')->comment('option id');
             $table->tinyText('option_value')->nullable()->comment('option value');
             $table->double('affect_price')->nullable()->comment('value of price of this option affect');
             $table->integer('order')->default(9999);
@@ -20,7 +20,7 @@ return new class () extends Migration {
         });
 
         Schema::create('ec_global_option_value', function (Blueprint $table) {
-            $table->bigInteger('option_id')->comment('option id');
+            $table->foreignId('option_id')->comment('option id');
             $table->tinyText('option_value')->nullable()->comment('option value');
             $table->double('affect_price')->nullable()->comment('value of price of this option affect');
             $table->integer('order')->default(9999);

@@ -3,6 +3,7 @@
 use Botble\Ecommerce\Models\Product;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class () extends Migration {
@@ -10,9 +11,9 @@ return new class () extends Migration {
     {
         if (! Schema::hasTable('ec_tax_products')) {
             Schema::create('ec_tax_products', function (Blueprint $table) {
-                $table->id();
-                $table->integer('tax_id')->unsigned()->index();
-                $table->integer('product_id')->unsigned()->index();
+                $table->foreignId('tax_id')->index();
+                $table->foreignId('product_id')->index();
+                $table->primary(['product_id', 'tax_id'], 'tax_products_primary_key');
             });
         }
 

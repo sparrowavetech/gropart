@@ -17,7 +17,7 @@ return new class () extends Migration {
         if (! Schema::hasTable('ec_product_files')) {
             Schema::create('ec_product_files', function (Blueprint $table) {
                 $table->id();
-                $table->integer('product_id')->nullable()->index();
+                $table->foreignId('product_id')->nullable()->index();
                 $table->string('url', 400)->nullable();
                 $table->mediumText('extras')->nullable(); // file name, size, mime_type...
                 $table->timestamps();

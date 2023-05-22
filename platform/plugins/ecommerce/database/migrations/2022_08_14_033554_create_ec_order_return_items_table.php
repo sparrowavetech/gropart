@@ -10,9 +10,9 @@ return new class () extends Migration {
         if (! Schema::hasTable('ec_order_return_items')) {
             Schema::create('ec_order_return_items', function (Blueprint $table) {
                 $table->id();
-                $table->unsignedInteger('order_return_id')->comment('Order return id');
-                $table->unsignedInteger('order_product_id')->comment('Order product id');
-                $table->unsignedInteger('product_id')->comment('Product id');
+                $table->foreignId('order_return_id')->comment('Order return id');
+                $table->foreignId('order_product_id')->comment('Order product id');
+                $table->foreignId('product_id')->comment('Product id');
                 $table->string('product_name');
                 $table->integer('qty')->comment('Quantity return');
                 $table->decimal('price', 15, 2)->comment('Price Product');

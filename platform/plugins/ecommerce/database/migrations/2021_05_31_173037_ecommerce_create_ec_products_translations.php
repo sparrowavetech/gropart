@@ -18,7 +18,7 @@ return new class () extends Migration {
 
         Schema::create('ec_products_translations', function (Blueprint $table) {
             $table->string('lang_code');
-            $table->integer('ec_products_id');
+            $table->foreignId('ec_products_id');
             $table->string('name')->nullable();
             $table->text('description')->nullable();
             $table->text('content')->nullable();
@@ -28,7 +28,7 @@ return new class () extends Migration {
 
         Schema::create('ec_product_categories_translations', function (Blueprint $table) {
             $table->string('lang_code');
-            $table->integer('ec_product_categories_id');
+            $table->foreignId('ec_product_categories_id');
             $table->string('name')->nullable();
             $table->text('description')->nullable();
 
@@ -37,7 +37,7 @@ return new class () extends Migration {
 
         Schema::create('ec_product_attributes_translations', function (Blueprint $table) {
             $table->string('lang_code');
-            $table->integer('ec_product_attributes_id');
+            $table->foreignId('ec_product_attributes_id');
             $table->string('title')->nullable();
 
             $table->primary(['lang_code', 'ec_product_attributes_id'], 'ec_product_attributes_translations_primary');
@@ -45,7 +45,7 @@ return new class () extends Migration {
 
         Schema::create('ec_product_attribute_sets_translations', function (Blueprint $table) {
             $table->string('lang_code');
-            $table->integer('ec_product_attribute_sets_id');
+            $table->foreignId('ec_product_attribute_sets_id');
             $table->string('title')->nullable();
 
             $table->primary(['lang_code', 'ec_product_attribute_sets_id'], 'ec_product_attribute_sets_translations_primary');
@@ -53,7 +53,7 @@ return new class () extends Migration {
 
         Schema::create('ec_brands_translations', function (Blueprint $table) {
             $table->string('lang_code');
-            $table->integer('ec_brands_id');
+            $table->foreignId('ec_brands_id');
             $table->string('name')->nullable();
             $table->string('description')->nullable();
 
@@ -62,7 +62,7 @@ return new class () extends Migration {
 
         Schema::create('ec_product_collections_translations', function (Blueprint $table) {
             $table->string('lang_code');
-            $table->integer('ec_product_collections_id');
+            $table->foreignId('ec_product_collections_id');
             $table->string('name')->nullable();
             $table->string('description')->nullable();
 
@@ -71,7 +71,7 @@ return new class () extends Migration {
 
         Schema::create('ec_product_labels_translations', function (Blueprint $table) {
             $table->string('lang_code');
-            $table->integer('ec_product_labels_id');
+            $table->foreignId('ec_product_labels_id');
             $table->string('name')->nullable();
             $table->string('description')->nullable();
 
@@ -80,7 +80,7 @@ return new class () extends Migration {
 
         Schema::create('ec_flash_sales_translations', function (Blueprint $table) {
             $table->string('lang_code');
-            $table->integer('ec_flash_sales_id');
+            $table->foreignId('ec_flash_sales_id');
             $table->string('name')->nullable();
 
             $table->primary(['lang_code', 'ec_flash_sales_id'], 'ec_flash_sales_translations_primary');

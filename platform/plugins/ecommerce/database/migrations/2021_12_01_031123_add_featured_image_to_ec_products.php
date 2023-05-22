@@ -14,7 +14,7 @@ return new class () extends Migration {
                 $table->string('image', 255)->nullable();
             });
 
-            foreach (Product::where('is_variation', 0) as $product) {
+            foreach (Product::query()->where('is_variation', 0)->get() as $product) {
                 $product->image = Arr::first($product->images) ?: null;
                 $product->save();
             }

@@ -25,7 +25,7 @@ return new class () extends Migration {
             $table->string('utm_content', 255)->nullable();
             $table->text('referrer_url')->nullable();
             $table->string('referrer_domain', 255)->nullable();
-            $table->integer('order_id')->nullable()->index();
+            $table->foreignId('order_id')->nullable()->index();
             $table->timestamps();
         });
     }
