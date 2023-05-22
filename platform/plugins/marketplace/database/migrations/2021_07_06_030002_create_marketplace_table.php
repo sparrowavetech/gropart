@@ -55,7 +55,7 @@ return new class () extends Migration {
             $table->string('country', 120)->nullable();
             $table->string('state', 120)->nullable();
             $table->string('city', 120)->nullable();
-            $table->integer('customer_id')->unsigned()->nullable();
+            $table->foreignId('customer_id')->nullable();
             $table->string('logo', 255)->nullable();
             $table->string('description', 400)->nullable();
             $table->longText('content')->nullable();
@@ -65,12 +65,12 @@ return new class () extends Migration {
         });
 
         Schema::table('ec_products', function (Blueprint $table) {
-            $table->integer('store_id')->unsigned()->nullable();
+            $table->foreignId('store_id')->nullable();
         });
 
         Schema::create('mp_vendor_info', function (Blueprint $table) {
             $table->id();
-            $table->integer('customer_id')->default(0)->unsigned();
+            $table->foreignId('customer_id')->default(0);
             $table->decimal('balance', 15)->default(0);
             $table->decimal('total_fee', 15)->default(0);
             $table->decimal('total_revenue', 15)->default(0);
@@ -84,17 +84,17 @@ return new class () extends Migration {
         });
 
         Schema::table('ec_orders', function (Blueprint $table) {
-            $table->integer('store_id')->unsigned()->nullable();
+            $table->foreignId('store_id')->nullable();
         });
 
         Schema::table('ec_discounts', function (Blueprint $table) {
-            $table->integer('store_id')->unsigned()->nullable();
+            $table->foreignId('store_id')->nullable();
         });
 
         Schema::create('mp_customer_revenues', function (Blueprint $table) {
             $table->id();
-            $table->integer('customer_id')->unsigned()->nullable();
-            $table->integer('order_id')->unsigned()->nullable();
+            $table->foreignId('customer_id')->nullable();
+            $table->foreignId('order_id')->nullable();
             $table->decimal('sub_amount', 15)->default(0)->unsigned()->nullable();
             $table->decimal('fee', 15)->default(0)->unsigned()->nullable();
             $table->decimal('amount', 15)->default(0)->unsigned()->nullable();
@@ -106,7 +106,7 @@ return new class () extends Migration {
 
         Schema::create('mp_customer_withdrawals', function (Blueprint $table) {
             $table->id();
-            $table->integer('customer_id')->unsigned()->nullable();
+            $table->foreignId('customer_id')->nullable();
             $table->decimal('fee', 15)->default(0)->unsigned()->nullable();
             $table->decimal('amount', 15)->default(0)->unsigned()->nullable();
             $table->decimal('current_balance', 15)->default(0)->unsigned()->nullable();
@@ -114,7 +114,7 @@ return new class () extends Migration {
             $table->text('description')->nullable();
             $table->text('bank_info')->nullable();
             $table->string('payment_channel', 60)->nullable();
-            $table->integer('user_id')->default(0)->unsigned();
+            $table->foreignId('user_id')->default(0);
             $table->string('status', 60)->default(WithdrawalStatusEnum::PENDING);
             $table->text('images')->nullable();
             $table->timestamps();
