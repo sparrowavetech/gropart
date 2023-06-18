@@ -15,13 +15,13 @@ Route::group(['namespace' => 'Botble\Widget\Http\Controllers', 'middleware' => [
 
             Route::post('save-widgets-to-sidebar', [
                 'as' => 'widgets.save_widgets_sidebar',
-                'uses' => 'WidgetController@postSaveWidgetToSidebar',
+                'uses' => 'WidgetController@update',
                 'permission' => 'widgets.index',
             ]);
 
             Route::delete('delete', [
                 'as' => 'widgets.destroy',
-                'uses' => 'WidgetController@postDelete',
+                'uses' => 'WidgetController@destroy',
                 'permission' => 'widgets.index',
             ]);
         });

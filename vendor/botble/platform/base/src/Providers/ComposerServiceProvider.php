@@ -8,7 +8,7 @@ use Botble\Base\Facades\BaseHelper;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Media\Facades\RvMedia;
 
 class ComposerServiceProvider extends ServiceProvider
@@ -43,7 +43,7 @@ class ComposerServiceProvider extends ServiceProvider
 
         $view->composer(['core/media::config'], function () {
             $mediaPermissions = RvMedia::getConfig('permissions', []);
-            if (Auth::check() && ! Auth::user()->isSuperUser()) {
+            if (Auth::check() && ! Auth::user()->isSuperUser() && Auth::user()->permissions) {
                 $mediaPermissions = array_intersect(array_keys(Auth::user()->permissions), $mediaPermissions);
             }
 

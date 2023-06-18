@@ -4,7 +4,7 @@ namespace Botble\Base\Traits;
 
 use Botble\Base\Supports\Helper;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 use Illuminate\Support\Str;
 use ReflectionClass;
 

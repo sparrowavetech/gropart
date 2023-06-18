@@ -3,17 +3,17 @@
 namespace Botble\Setting\Supports;
 
 use Botble\Base\Models\BaseModel;
-use Botble\Base\Supports\Helper;
 use Botble\Setting\Models\Setting;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Cache;
+use Throwable;
 use UnexpectedValueException;
 
 class DatabaseSettingStore extends SettingStore
 {
-    protected bool $connectedDatabase = false;
-
     public function forget($key): SettingStore
     {
         parent::forget($key);
@@ -89,15 +89,17 @@ class DatabaseSettingStore extends SettingStore
 
     protected function read(): array
     {
-        if (! $this->connectedDatabase) {
-            $this->connectedDatabase = Helper::isConnectedDatabase();
-        }
+        try {
+            if (App::runningInConsole()) {
+                return $this->parseReadData($this->newQuery()->get());
+            }
 
-        if (! $this->connectedDatabase) {
+            return Cache::remember($this->cacheKey, $this->settingTime, function () {
+                return $this->parseReadData($this->newQuery()->get());
+            });
+        } catch (Throwable) {
             return [];
         }
-
-        return $this->parseReadData($this->newQuery()->get());
     }
 
     public function parseReadData(Collection|array $data): array
@@ -139,6 +141,10 @@ class DatabaseSettingStore extends SettingStore
             $query = $query->whereNotIn('key', $keys);
         }
 
-        return $query->delete();
+        $deleted = $query->delete();
+
+        $this->clearCache();
+
+        return $deleted;
     }
 }

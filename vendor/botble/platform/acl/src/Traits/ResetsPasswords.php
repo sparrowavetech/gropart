@@ -2,16 +2,8 @@
 
 namespace Botble\ACL\Traits;
 
-use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
-use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Contracts\Auth\PasswordBroker;
-use Illuminate\Contracts\Auth\StatefulGuard;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -23,29 +15,11 @@ trait ResetsPasswords
 {
     use RedirectsUsers;
 
-    /**
-     * Display the password reset view for the given token.
-     *
-     * If no token is present, display the link request form.
-     *
-     * @param Request $request
-     * @param string|null $token
-     * @return Factory|Application|View|\Response
-     */
     public function showResetForm(Request $request, $token = null)
     {
-        return view('auth.passwords.reset')->with(
-            ['token' => $token, 'email' => $request->email]
-        );
+        return null;
     }
 
-    /**
-     * Reset the given user's password.
-     *
-     * @param Request $request
-     * @return RedirectResponse|JsonResponse
-     * @throws ValidationException
-     */
     public function reset(Request $request)
     {
         $request->validate($this->rules(), $this->validationErrorMessages());
@@ -79,11 +53,6 @@ trait ResetsPasswords
         return [];
     }
 
-    /**
-     * Get the broker to be used during password reset.
-     *
-     * @return PasswordBroker
-     */
     public function broker()
     {
         return Password::broker();
@@ -99,14 +68,7 @@ trait ResetsPasswords
         );
     }
 
-    /**
-     * Reset the given user's password.
-     *
-     * @param Authenticatable|User $user
-     * @param string $password
-     * @return void
-     */
-    protected function resetPassword($user, $password)
+    protected function resetPassword($user, $password): void
     {
         $this->setUserPassword($user, $password);
 
@@ -119,36 +81,17 @@ trait ResetsPasswords
         $this->guard()->login($user);
     }
 
-    /**
-     * Set the user's password.
-     *
-     * @param Authenticatable|User $user
-     * @param string $password
-     * @return void
-     */
     protected function setUserPassword($user, $password)
     {
         // @phpstan-ignore-next-line
         $user->password = Hash::make($password);
     }
 
-    /**
-     * Get the guard to be used during password reset.
-     *
-     * @return StatefulGuard
-     */
     protected function guard()
     {
         return Auth::guard();
     }
 
-    /**
-     * Get the response for a successful password reset.
-     *
-     * @param Request $request
-     * @param string $response
-     * @return RedirectResponse|JsonResponse
-     */
     protected function sendResetResponse(Request $request, $response)
     {
         if ($request->wantsJson()) {
@@ -159,14 +102,6 @@ trait ResetsPasswords
             ->with('status', trans($response));
     }
 
-    /**
-     * Get the response for a failed password reset.
-     *
-     * @param Request $request
-     * @param string $response
-     * @return RedirectResponse
-     * @throws ValidationException
-     */
     protected function sendResetFailedResponse(Request $request, $response)
     {
         if ($request->wantsJson()) {

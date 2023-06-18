@@ -74,4 +74,6 @@ return [
     'public_theme_name' => env('CMS_THEME_PUBLIC_NAME'),
 
     'display_theme_manager_in_admin_panel' => env('CMS_THEME_DISPLAY_THEME_MANAGER_IN_ADMIN_PANEL', true),
+
+    'public_single_ending_url' => env('PUBLIC_SINGLE_ENDING_URL'),
 ];

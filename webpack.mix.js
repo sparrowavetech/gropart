@@ -10,7 +10,15 @@ mix.options({
     manifest: false
 });
 
+mix.webpackConfig({
+    stats: {
+        children: false,
+    },
+});
+
 mix.disableSuccessNotifications();
+
+mix.vue();
 
 // Run all webpack.mix.js in app
 glob.sync('./platform/*/*/webpack.mix.js').forEach(item => require(__dirname + '/' + item));

@@ -21,10 +21,12 @@ class SlugSettingsRequest extends Request
 
             $prefixKey = str_replace('-model-key', '', $settingKey);
 
+            $regex = 'regex:/^[\pL\s\ \_\%\-0-9\/]+$/u';
+
             if (! in_array($settingValue, $canEmptyPrefixes)) {
-                $rules[$prefixKey] = 'required|regex:/^[\pL\s\ \_\%\-0-9\/]+$/u';
+                $rules[$prefixKey] = 'required|' . $regex;
             } else {
-                $rules[$prefixKey] = 'nullable|regex:/^[\pL\s\ \_\%\-0-9\/]+$/u';
+                $rules[$prefixKey] = 'nullable|' . $regex;
             }
         }
 

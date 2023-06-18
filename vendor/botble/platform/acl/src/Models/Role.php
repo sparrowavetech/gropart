@@ -8,6 +8,7 @@ use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Str;
 
 class Role extends BaseModel
 {
@@ -70,5 +71,21 @@ class Role extends BaseModel
         }
 
         return $permissions;
+    }
+
+    public static function createSlug(string $name, int|string $id): string
+    {
+        $slug = Str::slug($name);
+        $index = 1;
+        $baseSlug = $slug;
+        while (self::query()->where('slug', $slug)->where('id', '!=', $id)->exists()) {
+            $slug = $baseSlug . '-' . $index++;
+        }
+
+        if (empty($slug)) {
+            $slug = time();
+        }
+
+        return $slug;
     }
 }

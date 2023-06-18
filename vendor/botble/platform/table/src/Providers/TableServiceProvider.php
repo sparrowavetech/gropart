@@ -7,7 +7,7 @@ use Botble\Table\ApiResourceDataTable;
 use Botble\Table\CollectionDataTable;
 use Botble\Table\EloquentDataTable;
 use Botble\Table\QueryDataTable;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 
 class TableServiceProvider extends ServiceProvider
 {

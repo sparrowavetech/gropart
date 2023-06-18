@@ -8,7 +8,7 @@ const dist = 'public/vendor/core/packages/' + directory
 
 mix
     .js(source + '/resources/assets/js/plugin.js', dist + '/js')
-    .js(source + '/resources/assets/js/marketplace.js', dist + '/js').vue()
+    .js(source + '/resources/assets/js/marketplace.js', dist + '/js')
 
     .sass(source + '/resources/assets/sass/plugin.scss', dist + '/css')
 

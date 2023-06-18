@@ -120,7 +120,7 @@ class UpdateCommand extends Command
 
             $progressBar->setMessage('Cleaning up the system...');
             $progressBar->advance();
-            $this->core->cleanUpUpdate();
+            $this->core->cleanCaches();
         } catch (Throwable $exception) {
             $this->errorWithNewLines($exception->getMessage());
             $this->core->logError($exception);

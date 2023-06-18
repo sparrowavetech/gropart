@@ -11,7 +11,7 @@ use Botble\Slug\Models\Slug;
 use Botble\Base\Facades\Html;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Menu\Facades\Menu;
 use Botble\Media\Facades\RvMedia;
 

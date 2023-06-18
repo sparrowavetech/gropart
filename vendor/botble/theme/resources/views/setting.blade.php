@@ -22,7 +22,7 @@
     <x-core-setting::checkbox
         name="show_admin_bar"
         :label="trans('packages/theme::theme.show_admin_bar')"
-        :value="setting('show_admin_bar', true)"
+        :checked="setting('show_admin_bar', true)"
     />
 
     <x-core-setting::on-off

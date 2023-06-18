@@ -103,7 +103,7 @@ class BaseHelper
 
     public function jsonEncodePrettify(array|string|null $data): string
     {
-        return json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        return json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . PHP_EOL;
     }
 
     public function scanFolder(string $path, array $ignoreFiles = []): array
@@ -131,6 +131,11 @@ class BaseHelper
     public function siteLanguageDirection(): string
     {
         return apply_filters(BASE_FILTER_SITE_LANGUAGE_DIRECTION, setting('locale_direction', 'ltr'));
+    }
+
+    public function isRtlEnabled(): bool
+    {
+        return $this->siteLanguageDirection() == 'rtl';
     }
 
     public function adminLanguageDirection(): string
@@ -373,8 +378,10 @@ class BaseHelper
             return '';
         }
 
+        $directlyUrl = Html::style(str_replace('https://fonts.googleapis.com', $this->getGoogleFontsURL(), $font));
+
         if (! config('core.base.general.google_fonts_enabled_cache', true)) {
-            return Html::style(str_replace('https://fonts.googleapis.com', $this->getGoogleFontsURL(), $font));
+            return $directlyUrl;
         }
 
         try {
@@ -382,13 +389,17 @@ class BaseHelper
 
             $googleFont = app('core:google-fonts')->load($fontUrl);
 
+            if (! $googleFont) {
+                return $directlyUrl;
+            }
+
             if (! $inline) {
                 return $googleFont->link();
             }
 
             return $googleFont->toHtml();
         } catch (Exception) {
-            return Html::style(str_replace('https://fonts.googleapis.com', $this->getGoogleFontsURL(), $font));
+            return $directlyUrl;
         }
     }
 

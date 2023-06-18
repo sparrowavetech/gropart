@@ -2,7 +2,6 @@
 
 namespace Botble\Base\Supports;
 
-use Botble\Base\Repositories\Interfaces\MetaBoxInterface;
 use Closure;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
@@ -11,10 +10,6 @@ use Botble\Base\Models\MetaBox as MetaBoxModel;
 class MetaBox
 {
     protected array $metaBoxes = [];
-
-    public function __construct(protected MetaBoxInterface $metaBoxRepository)
-    {
-    }
 
     public function addMetaBox(
         string $id,
@@ -136,17 +131,17 @@ class MetaBox
         $key = apply_filters('stored_meta_box_key', $key, $object);
 
         try {
-            $fieldMeta = $this->metaBoxRepository->getFirstBy([
+            $data = [
                 'meta_key' => $key,
                 'reference_id' => $object->getKey(),
-                'reference_type' => get_class($object),
-            ]);
+                'reference_type' => $object::class,
+            ];
+
+            $fieldMeta = MetaBoxModel::query()->where($data)->first();
 
             if (! $fieldMeta) {
-                $fieldMeta = $this->metaBoxRepository->getModel();
-                $fieldMeta->reference_id = $object->getKey();
-                $fieldMeta->meta_key = $key;
-                $fieldMeta->reference_type = get_class($object);
+                $fieldMeta = MetaBoxModel::query()->getModel();
+                $fieldMeta->fill($data);
             }
 
             if (! empty($options)) {
@@ -154,7 +149,7 @@ class MetaBox
             }
 
             $fieldMeta->meta_value = [$value];
-            $this->metaBoxRepository->createOrUpdate($fieldMeta);
+            $fieldMeta->save();
         } catch (Exception $exception) {
             info($exception->getMessage());
         }
@@ -183,22 +178,22 @@ class MetaBox
     {
         $key = apply_filters('stored_meta_box_key', $key, $object);
 
-        return $this->metaBoxRepository->getFirstBy([
+        return MetaBoxModel::query()->where([
             'meta_key' => $key,
             'reference_id' => $object->getKey(),
             'reference_type' => get_class($object),
-        ], $select);
+        ], $select)->first();
     }
 
     public function deleteMetaData(Model $object, string $key): bool
     {
         $key = apply_filters('stored_meta_box_key', $key, $object);
 
-        return $this->metaBoxRepository->deleteBy([
+        return MetaBoxModel::query()->where([
             'meta_key' => $key,
             'reference_id' => $object->getKey(),
             'reference_type' => get_class($object),
-        ]);
+        ])->delete();
     }
 
     public function getMetaBoxes(): array

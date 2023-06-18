@@ -2,7 +2,7 @@
 
 namespace Botble\GetStarted\Http\Controllers;
 
-use Botble\ACL\Repositories\Interfaces\UserInterface;
+use Botble\ACL\Models\User;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
@@ -63,11 +63,8 @@ class GetStartedController extends BaseController
             case 3:
                 $user = Auth::user();
 
-                $userRepository = app(UserInterface::class);
-
                 if ($user->email !== $request->input('email')) {
-                    $users = $userRepository
-                        ->getModel()
+                    $users = User::query()
                         ->where('email', $request->input('email'))
                         ->where('id', '<>', $user->id)
                         ->exists();
@@ -81,8 +78,7 @@ class GetStartedController extends BaseController
                 }
 
                 if ($user->username !== $request->input('username')) {
-                    $users = $userRepository
-                        ->getModel()
+                    $users = User::query()
                         ->where('username', $request->input('username'))
                         ->where('id', '<>', $user->id)
                         ->exists();
@@ -98,7 +94,7 @@ class GetStartedController extends BaseController
                 $user->fill($request->only(['username', 'email']));
                 $user->password = Hash::make($request->input('password'));
 
-                $userRepository->createOrUpdate($user);
+                $user->save();
 
                 do_action(USER_ACTION_AFTER_UPDATE_PROFILE, USER_MODULE_SCREEN_NAME, $request, $user);
                 do_action(USER_ACTION_AFTER_UPDATE_PASSWORD, USER_MODULE_SCREEN_NAME, $request, $user);

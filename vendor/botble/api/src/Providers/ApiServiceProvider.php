@@ -8,7 +8,7 @@ use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 
 class ApiServiceProvider extends ServiceProvider
 {

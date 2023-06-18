@@ -3,17 +3,15 @@
 namespace Botble\Base\Supports;
 
 use Carbon\Carbon;
-use Exception;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use Throwable;
 
 class MembershipAuthorization
 {
     protected string $url;
 
-    public function __construct(protected Client $client, protected Request $request)
+    public function __construct()
     {
         $this->url = rtrim(url('/'), '/');
     }
@@ -41,7 +39,7 @@ class MembershipAuthorization
             }
 
             return true;
-        } catch (Exception|GuzzleException) {
+        } catch (Throwable) {
             return false;
         }
     }
@@ -74,19 +72,24 @@ class MembershipAuthorization
     protected function processAuthorize(): bool
     {
         try {
-            $this->client->post('https://botble.com/membership/authorize', [
-                'form_params' => [
+            $response = Http::withoutVerifying()
+                ->asJson()
+                ->acceptJson()
+                ->post('https://botble.com/membership/authorize', [
                     'website' => $this->url,
-                ],
-            ]);
-        } catch (GuzzleException) {
+                ]);
+
+            if (! $response->ok()) {
+                return true;
+            }
+
+            setting()
+                ->set('membership_authorization_at', Carbon::now()->toDateTimeString())
+                ->save();
+
+            return true;
+        } catch (Throwable) {
             return true;
         }
-
-        setting()
-            ->set('membership_authorization_at', Carbon::now()->toDateTimeString())
-            ->save();
-
-        return true;
     }
 }

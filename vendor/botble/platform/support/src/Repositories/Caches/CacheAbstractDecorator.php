@@ -5,48 +5,20 @@ namespace Botble\Support\Repositories\Caches;
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Models\BaseQueryBuilder;
 use Botble\Support\Repositories\Interfaces\RepositoryInterface;
-use Botble\Support\Services\Cache\Cache;
-use Exception;
 use Illuminate\Database\Eloquent\Model;
-use Psr\SimpleCache\InvalidArgumentException;
 
+/**
+ * @deprecated
+ */
 abstract class CacheAbstractDecorator implements RepositoryInterface
 {
-    protected Cache $cache;
-
-    public function __construct(protected RepositoryInterface $repository, string $cacheGroup = null)
+    public function __construct(protected RepositoryInterface $repository)
     {
-        $this->cache = new Cache(app('cache'), $cacheGroup ?? get_class($repository->getModel()));
     }
 
     public function getDataIfExistCache(string $function, array $args)
     {
-        if (! setting('enable_cache', false) || (is_in_admin(true) && setting('disable_cache_in_the_admin_panel', true))) {
-            return call_user_func_array([$this->repository, $function], $args);
-        }
-
-        try {
-            $cacheKey = md5(
-                get_class($this) .
-                $function .
-                serialize(request()->input()) . serialize(url()->current()) .
-                serialize(json_encode($args))
-            );
-
-            if ($this->cache->has($cacheKey)) {
-                return $this->cache->get($cacheKey);
-            }
-
-            $cacheData = call_user_func_array([$this->repository, $function], $args);
-
-            $this->cache->put($cacheKey, $cacheData);
-
-            return $cacheData;
-        } catch (Exception | InvalidArgumentException $ex) {
-            info($ex->getMessage());
-
-            return call_user_func_array([$this->repository, $function], $args);
-        }
+        return call_user_func_array([$this->repository, $function], $args);
     }
 
     public function getDataWithoutCache(string $function, array $args)
@@ -54,12 +26,8 @@ abstract class CacheAbstractDecorator implements RepositoryInterface
         return call_user_func_array([$this->repository, $function], $args);
     }
 
-    public function flushCacheAndUpdateData(string $function, array $args, bool $flushCache = true)
+    public function flushCacheAndUpdateData(string $function, array $args)
     {
-        if ($flushCache) {
-            $this->cache->flush();
-        }
-
         return call_user_func_array([$this->repository, $function], $args);
     }
 

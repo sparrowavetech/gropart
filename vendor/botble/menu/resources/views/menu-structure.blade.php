@@ -68,7 +68,7 @@
                             <span>{{ trans('packages/menu::menu.menu_settings') }}</span>
                         </h4>
                     </div>
-                    <div class="widget-body">
+                    <div class="widget-body" style="min-height: 0">
                         <div class="row">
                             <div class="col-md-4">
                                 <p><i>{{ trans('packages/menu::menu.display_location') }}</i></p>

@@ -6,8 +6,6 @@ use Botble\ACL\Http\Requests\LoginRequest;
 use Botble\ACL\Models\User;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
-use Botble\ACL\Repositories\Interfaces\ActivationInterface;
-use Botble\ACL\Repositories\Interfaces\UserInterface;
 use Botble\ACL\Traits\AuthenticatesUsers;
 use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
@@ -75,9 +73,9 @@ class LoginController extends BaseController
             $this->sendLockoutResponse($request);
         }
 
-        $user = app(UserInterface::class)->getFirstBy([$this->username() => $request->input($this->username())]);
+        $user = User::query()->where([$this->username() => $request->input($this->username())])->first();
         if (! empty($user)) {
-            if (! app(ActivationInterface::class)->completed($user)) {
+            if (! $user->activated) {
                 return $this->response
                     ->setError()
                     ->setMessage(trans('core/acl::auth.login.not_active'));

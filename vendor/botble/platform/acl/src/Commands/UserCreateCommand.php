@@ -2,7 +2,7 @@
 
 namespace Botble\ACL\Commands;
 
-use Botble\ACL\Repositories\Interfaces\UserInterface;
+use Botble\ACL\Models\User;
 use Botble\ACL\Services\ActivateUserService;
 use Botble\Base\Commands\Traits\ValidateCommandInput;
 use Botble\Base\Supports\Helper;
@@ -16,12 +16,12 @@ class UserCreateCommand extends Command
 {
     use ValidateCommandInput;
 
-    public function handle(UserInterface $userRepository, ActivateUserService $activateUserService): int
+    public function handle(ActivateUserService $activateUserService): int
     {
         $this->components->info('Creating a super user...');
 
         try {
-            $user = $userRepository->getModel();
+            $user = new User();
             $user->first_name = $this->askWithValidate('Enter first name', 'required|min:2|max:60');
             $user->last_name = $this->askWithValidate('Enter last name', 'required|min:2|max:60');
             $user->email = $this->askWithValidate('Enter email address', 'required|email|unique:users,email');
@@ -29,8 +29,7 @@ class UserCreateCommand extends Command
             $user->password = Hash::make($this->askWithValidate('Enter password', 'required|min:6|max:60', true));
             $user->super_user = 1;
             $user->manage_supers = 1;
-
-            $userRepository->createOrUpdate($user);
+            $user->save();
 
             if ($activateUserService->activate($user)) {
                 $this->components->info('Super user is created.');

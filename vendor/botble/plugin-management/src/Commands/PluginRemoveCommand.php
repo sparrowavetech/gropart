@@ -2,6 +2,7 @@
 
 namespace Botble\PluginManagement\Commands;
 
+use Botble\PluginManagement\Commands\Concern\HasPluginNameValidation;
 use Botble\PluginManagement\Services\PluginService;
 use Illuminate\Console\Command;
 use Illuminate\Console\ConfirmableTrait;
@@ -12,6 +13,7 @@ use Symfony\Component\Console\Input\InputArgument;
 class PluginRemoveCommand extends Command
 {
     use ConfirmableTrait;
+    use HasPluginNameValidation;
 
     public function handle(PluginService $pluginService): int
     {
@@ -19,11 +21,7 @@ class PluginRemoveCommand extends Command
             return self::FAILURE;
         }
 
-        if (! preg_match('/^[a-z0-9\-]+$/i', $this->argument('name'))) {
-            $this->components->error('Only alphabetic characters are allowed.');
-
-            return self::FAILURE;
-        }
+        $this->validatePluginName($this->argument('name'));
 
         $plugin = strtolower($this->argument('name'));
         $result = $pluginService->remove($plugin);

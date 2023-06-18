@@ -6,7 +6,6 @@ use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Models\BaseModel;
-use Botble\Support\Repositories\Interfaces\RepositoryInterface;
 use Botble\Table\Supports\Builder as CustomTableBuilder;
 use Botble\Table\Supports\TableExportHandler;
 use Botble\Base\Facades\Form;
@@ -62,6 +61,8 @@ abstract class TableAbstract extends DataTable
 
     protected $repository;
 
+    protected BaseModel|null $model = null;
+
     protected bool $useDefaultSorting = true;
 
     protected int $defaultSortColumn = 1;
@@ -113,11 +114,6 @@ abstract class TableAbstract extends DataTable
         $this->hasFilter = $hasFilter;
 
         return $this;
-    }
-
-    public function getRepository(): RepositoryInterface
-    {
-        return $this->repository;
     }
 
     public function getType(): string
@@ -253,7 +249,7 @@ abstract class TableAbstract extends DataTable
 
     protected function getModel(): BaseModel
     {
-        return $this->repository ? $this->repository->getModel() : new BaseModel();
+        return $this->model ?: ($this->repository ? $this->repository->getModel() : new BaseModel());
     }
 
     public function columns()
@@ -616,7 +612,7 @@ abstract class TableAbstract extends DataTable
             $key = Arr::last(explode('.', $key));
         }
 
-        $column = $this->repository->getTable() . '.' . $key;
+        $column = $this->getModel()->getTable() . '.' . $key;
 
         $key = preg_replace('/[^A-Za-z0-9_]/', '', str_replace(' ', '', $key));
 
@@ -729,12 +725,17 @@ abstract class TableAbstract extends DataTable
             return false;
         }
 
+        $request = request();
+
         foreach ($ids as $id) {
-            $item = $this->repository->findOrFail($id);
-            if ($item) {
-                $this->saveBulkChangeItem($item, $inputKey, $inputValue);
-                event(new UpdatedContentEvent($this->getModel(), request(), $item));
-            }
+            $item = $this->getModel()->query()->findOrFail($id);
+
+            /**
+             * @var BaseModel $item
+             */
+            $item = $this->saveBulkChangeItem($item, $inputKey, $inputValue);
+
+            event(new UpdatedContentEvent($this->getModel(), $request, $item));
         }
 
         return true;
@@ -744,7 +745,9 @@ abstract class TableAbstract extends DataTable
     {
         $item->{Auth::check() ? 'forceFill' : 'fill'}([$inputKey => $this->prepareBulkChangeValue($inputKey, $inputValue)]);
 
-        return $this->repository->createOrUpdate($item);
+        $item->save();
+
+        return $item;
     }
 
     public function prepareBulkChangeValue(string $key, string|null $value): string

@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static string|null getColumnNameToGenerateSlug(object|string $model)
  * @method static string getPermalinkSettingKey(string $model)
  * @method static bool turnOffAutomaticUrlTranslationIntoLatin()
+ * @method static string|null getPublicSingleEndingURL()
  * @method static array getCanEmptyPrefixes()
  * @method static \Botble\Slug\SlugCompiler getTranslator()
  *

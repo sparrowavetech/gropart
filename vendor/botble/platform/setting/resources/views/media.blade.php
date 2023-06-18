@@ -246,12 +246,12 @@
                 <x-core-setting::on-off
                     name="media_watermark_enabled"
                     :label="trans('core/setting::setting.media.enable_watermark')"
-                    :value="setting('media_watermark_enabled', RvMedia::getConfig('watermark.enabled'))"
+                    :value="setting('media_watermark_enabled', RvMedia::getConfig('watermark.enabled', false))"
                     class="setting-selection-option"
                     data-target="#media-watermark-settings"
                 />
 
-                <div id="media-watermark-settings" @class(['mb-4 border rounded-top rounded-bottom p-3 bg-light', 'd-none' => ! setting('media_watermark_enabled', RvMedia::getConfig('watermark.enabled'))])>
+                <div id="media-watermark-settings" @class(['mb-4 border rounded-top rounded-bottom p-3 bg-light', 'd-none' => ! setting('media_watermark_enabled', RvMedia::getConfig('watermark.enabled', false))])>
                     <x-core-setting::form-group>
                         {{ Form::helper(trans('core/setting::setting.watermark_description')) }}
                     </x-core-setting::form-group>

@@ -3,7 +3,7 @@
 namespace Botble\Revision\Providers;
 
 use Botble\Base\Traits\LoadAndPublishDataTrait;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 
 class RevisionServiceProvider extends ServiceProvider
 {

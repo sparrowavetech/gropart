@@ -14,6 +14,11 @@ class DashboardMenu
 {
     protected array $links = [];
 
+    public function make(): self
+    {
+        return $this;
+    }
+
     public function registerItem(array $options): self
     {
         if (! is_in_admin(true)) {

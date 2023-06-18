@@ -3,22 +3,17 @@
 namespace Botble\ACL\Forms;
 
 use Botble\ACL\Http\Requests\CreateUserRequest;
+use Botble\ACL\Models\Role;
 use Botble\ACL\Models\User;
-use Botble\ACL\Repositories\Interfaces\RoleInterface;
 use Botble\Base\Forms\FormAbstract;
 
 class UserForm extends FormAbstract
 {
-    public function __construct(protected RoleInterface $roleRepository)
-    {
-        parent::__construct();
-    }
-
     public function buildForm(): void
     {
-        $roles = $this->roleRepository->pluck('name', 'id');
+        $roles = Role::query()->pluck('name', 'id');
 
-        $defaultRole = $this->roleRepository->getFirstBy(['is_default' => 1]);
+        $defaultRole = $roles->where('is_default', 1)->first();
 
         $this
             ->setupModel(new User())
@@ -109,7 +104,7 @@ class UserForm extends FormAbstract
                 'attr' => [
                     'class' => 'form-control roles-list',
                 ],
-                'choices' => ['' => trans('core/acl::users.select_role')] + $roles,
+                'choices' => ['' => trans('core/acl::users.select_role')] + $roles->all(),
                 'default_value' => $defaultRole ? $defaultRole->id : null,
             ])
             ->setBreakFieldPoint('role_id');

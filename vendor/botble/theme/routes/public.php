@@ -20,7 +20,7 @@ Route::group(['controller' => PublicController::class, 'middleware' => ['web', '
             ->whereIn('extension', SiteMapManager::allowedExtensions())
             ->name('public.sitemap.index');
 
-        Route::get('{slug?}' . config('core.base.general.public_single_ending_url'), [
+        Route::get('{slug?}', [
             'as' => 'public.single',
             'uses' => 'getView',
         ]);

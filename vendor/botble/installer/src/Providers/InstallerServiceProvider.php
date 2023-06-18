@@ -11,7 +11,7 @@ use Botble\Installer\Http\Middleware\CheckIfInstallingMiddleware;
 use Botble\Installer\Http\Middleware\RedirectIfNotInstalledMiddleware;
 use Carbon\Carbon;
 use Illuminate\Routing\Events\RouteMatched;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 use Throwable;
 
 class InstallerServiceProvider extends ServiceProvider

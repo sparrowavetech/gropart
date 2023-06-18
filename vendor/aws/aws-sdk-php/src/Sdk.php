@@ -138,6 +138,8 @@ namespace Aws;
  * @method \Aws\MultiRegionClient createMultiRegionCodeGuruProfiler(array $args = [])
  * @method \Aws\CodeGuruReviewer\CodeGuruReviewerClient createCodeGuruReviewer(array $args = [])
  * @method \Aws\MultiRegionClient createMultiRegionCodeGuruReviewer(array $args = [])
+ * @method \Aws\CodeGuruSecurity\CodeGuruSecurityClient createCodeGuruSecurity(array $args = [])
+ * @method \Aws\MultiRegionClient createMultiRegionCodeGuruSecurity(array $args = [])
  * @method \Aws\CodePipeline\CodePipelineClient createCodePipeline(array $args = [])
  * @method \Aws\MultiRegionClient createMultiRegionCodePipeline(array $args = [])
  * @method \Aws\CodeStar\CodeStarClient createCodeStar(array $args = [])
@@ -482,6 +484,10 @@ namespace Aws;
  * @method \Aws\MultiRegionClient createMultiRegionPI(array $args = [])
  * @method \Aws\Panorama\PanoramaClient createPanorama(array $args = [])
  * @method \Aws\MultiRegionClient createMultiRegionPanorama(array $args = [])
+ * @method \Aws\PaymentCryptography\PaymentCryptographyClient createPaymentCryptography(array $args = [])
+ * @method \Aws\MultiRegionClient createMultiRegionPaymentCryptography(array $args = [])
+ * @method \Aws\PaymentCryptographyData\PaymentCryptographyDataClient createPaymentCryptographyData(array $args = [])
+ * @method \Aws\MultiRegionClient createMultiRegionPaymentCryptographyData(array $args = [])
  * @method \Aws\Personalize\PersonalizeClient createPersonalize(array $args = [])
  * @method \Aws\MultiRegionClient createMultiRegionPersonalize(array $args = [])
  * @method \Aws\PersonalizeEvents\PersonalizeEventsClient createPersonalizeEvents(array $args = [])
@@ -654,6 +660,8 @@ namespace Aws;
  * @method \Aws\MultiRegionClient createMultiRegionTranslate(array $args = [])
  * @method \Aws\VPCLattice\VPCLatticeClient createVPCLattice(array $args = [])
  * @method \Aws\MultiRegionClient createMultiRegionVPCLattice(array $args = [])
+ * @method \Aws\VerifiedPermissions\VerifiedPermissionsClient createVerifiedPermissions(array $args = [])
+ * @method \Aws\MultiRegionClient createMultiRegionVerifiedPermissions(array $args = [])
  * @method \Aws\VoiceID\VoiceIDClient createVoiceID(array $args = [])
  * @method \Aws\MultiRegionClient createMultiRegionVoiceID(array $args = [])
  * @method \Aws\WAFV2\WAFV2Client createWAFV2(array $args = [])
@@ -695,7 +703,7 @@ namespace Aws;
  */
 class Sdk
 {
-    const VERSION = '3.270.0';
+    const VERSION = '3.273.0';
 
     /** @var array Arguments for creating clients */
     private $args;
@@ -761,7 +769,7 @@ class Sdk
         $namespace = $service['namespace'];
 
         $klass = "Aws\\{$namespace}\\{$namespace}MultiRegionClient";
-        $klass = class_exists($klass) ? $klass : 'Aws\\MultiRegionClient';
+        $klass = class_exists($klass) ? $klass : MultiRegionClient::class;
 
         return new $klass($this->mergeArgs($namespace, $service, $args));
     }

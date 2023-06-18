@@ -18,6 +18,7 @@ use Illuminate\Config\Repository;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Botble\Theme\Facades\Theme;
+use Throwable;
 
 class Menu
 {
@@ -205,7 +206,11 @@ class Menu
             'locations',
         ];
 
-        return $this->menuRepository->allBy(['status' => BaseStatusEnum::PUBLISHED], $with);
+        try {
+            return $this->menuRepository->allBy(['status' => BaseStatusEnum::PUBLISHED], $with);
+        } catch (Throwable) {
+            return collect();
+        }
     }
 
     public function generateMenu(array $args = []): string|null

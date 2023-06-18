@@ -6,7 +6,6 @@ use Botble\Base\Facades\EmailHandler;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\HtmlString;
-use Throwable;
 
 class ResetPasswordNotification extends Notification
 {
@@ -17,30 +16,11 @@ class ResetPasswordNotification extends Notification
         $this->token = $token;
     }
 
-    /**
-     * Get the notification's channels.
-     *
-     * @param mixed $notifiable
-     * @return array
-     */
     public function via($notifiable)
     {
         return ['mail'];
     }
 
-    /**
-     * Build the mail representation of the notification.
-     *
-     * @param mixed $notifiable
-     * @return MailMessage
-     * @throws Throwable
-     */
-    /**
-     * Get the mail representation of the notification.
-     *
-     * @param  mixed $notifiable
-     * @return MailMessage
-     */
     public function toMail($notifiable)
     {
         EmailHandler::setModule('acl')

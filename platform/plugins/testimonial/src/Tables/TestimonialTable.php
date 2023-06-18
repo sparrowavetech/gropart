@@ -5,11 +5,11 @@ namespace Botble\Testimonial\Tables;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Testimonial\Repositories\Interfaces\TestimonialInterface;
-use Html;
+use Botble\Base\Facades\Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Yajra\DataTables\DataTables;
+use Botble\Table\DataTables;
 
 class TestimonialTable extends TableAbstract
 {

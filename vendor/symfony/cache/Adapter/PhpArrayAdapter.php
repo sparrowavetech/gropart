@@ -49,7 +49,7 @@ class PhpArrayAdapter implements AdapterInterface, CacheInterface, PruneableInte
     {
         $this->file = $file;
         $this->pool = $fallbackPool;
-        self::$createCacheItem ??= \Closure::bind(
+        self::$createCacheItem ?? self::$createCacheItem = \Closure::bind(
             static function ($key, $value, $isHit) {
                 $item = new CacheItem();
                 $item->key = $key;
@@ -78,6 +78,9 @@ class PhpArrayAdapter implements AdapterInterface, CacheInterface, PruneableInte
         return new static($file, $fallbackPool);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function get(string $key, callable $callback, float $beta = null, array &$metadata = null): mixed
     {
         if (!isset($this->values)) {
@@ -100,7 +103,7 @@ class PhpArrayAdapter implements AdapterInterface, CacheInterface, PruneableInte
             if ($value instanceof \Closure) {
                 return $value();
             }
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
             unset($this->keys[$key]);
             goto get_from_pool;
         }
@@ -108,6 +111,9 @@ class PhpArrayAdapter implements AdapterInterface, CacheInterface, PruneableInte
         return $value;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getItem(mixed $key): CacheItem
     {
         if (!\is_string($key)) {
@@ -128,7 +134,7 @@ class PhpArrayAdapter implements AdapterInterface, CacheInterface, PruneableInte
         } elseif ($value instanceof \Closure) {
             try {
                 $value = $value();
-            } catch (\Throwable) {
+            } catch (\Throwable $e) {
                 $value = null;
                 $isHit = false;
             }
@@ -137,6 +143,9 @@ class PhpArrayAdapter implements AdapterInterface, CacheInterface, PruneableInte
         return (self::$createCacheItem)($key, $value, $isHit);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getItems(array $keys = []): iterable
     {
         foreach ($keys as $key) {
@@ -151,6 +160,9 @@ class PhpArrayAdapter implements AdapterInterface, CacheInterface, PruneableInte
         return $this->generateItems($keys);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function hasItem(mixed $key): bool
     {
         if (!\is_string($key)) {
@@ -163,6 +175,9 @@ class PhpArrayAdapter implements AdapterInterface, CacheInterface, PruneableInte
         return isset($this->keys[$key]) || $this->pool->hasItem($key);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function deleteItem(mixed $key): bool
     {
         if (!\is_string($key)) {
@@ -175,6 +190,9 @@ class PhpArrayAdapter implements AdapterInterface, CacheInterface, PruneableInte
         return !isset($this->keys[$key]) && $this->pool->deleteItem($key);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function deleteItems(array $keys): bool
     {
         $deleted = true;
@@ -202,6 +220,9 @@ class PhpArrayAdapter implements AdapterInterface, CacheInterface, PruneableInte
         return $deleted;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function save(CacheItemInterface $item): bool
     {
         if (!isset($this->values)) {
@@ -211,6 +232,9 @@ class PhpArrayAdapter implements AdapterInterface, CacheInterface, PruneableInte
         return !isset($this->keys[$item->getKey()]) && $this->pool->save($item);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function saveDeferred(CacheItemInterface $item): bool
     {
         if (!isset($this->values)) {
@@ -220,11 +244,17 @@ class PhpArrayAdapter implements AdapterInterface, CacheInterface, PruneableInte
         return !isset($this->keys[$item->getKey()]) && $this->pool->saveDeferred($item);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function commit(): bool
     {
         return $this->pool->commit();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function clear(string $prefix = ''): bool
     {
         $this->keys = $this->values = [];
@@ -371,7 +401,7 @@ EOF;
                 } elseif ($value instanceof \Closure) {
                     try {
                         yield $key => $f($key, $value(), true);
-                    } catch (\Throwable) {
+                    } catch (\Throwable $e) {
                         yield $key => $f($key, null, false);
                     }
                 } else {

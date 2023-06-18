@@ -11,7 +11,7 @@ use Botble\SeoHelper\SeoHelper;
 use Botble\SeoHelper\SeoMeta;
 use Botble\SeoHelper\SeoOpenGraph;
 use Botble\SeoHelper\SeoTwitter;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 
 /**
  * @since 02/12/2015 14:09 PM

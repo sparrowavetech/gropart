@@ -264,6 +264,10 @@ class SettingManagement {
                 }
             })
         })
+
+        $(document).on('click', '.cronjob #copy-command', () => {
+            this.copyCommand()
+        })
     }
 
     handleMultipleAdminEmails() {
@@ -320,6 +324,34 @@ class SettingManagement {
         })
 
         render()
+    }
+
+    async copyCommand() {
+        const input = $('.cronjob #command')
+
+        const textToCopy = input.val()
+        if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(textToCopy)
+
+            Botble.showSuccess(input.data('copied'));
+        } else {
+            const textarea = document.createElement('textarea')
+            textarea.value = textToCopy
+            textarea.style.position = 'absolute'
+            textarea.style.left = '-999999px'
+            document.body.prepend(textarea)
+            textarea.select()
+
+            try {
+                document.execCommand('copy')
+
+                Botble.showSuccess(input.data('copied'));
+            } catch (error) {
+                console.error(error)
+            } finally {
+                textarea.remove()
+            }
+        }
     }
 }
 

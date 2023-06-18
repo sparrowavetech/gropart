@@ -2,9 +2,11 @@
 
 namespace Botble\Slug\Repositories\Caches;
 
-use Botble\Slug\Repositories\Interfaces\SlugInterface;
-use Botble\Support\Repositories\Caches\CacheAbstractDecorator;
+use Botble\Slug\Repositories\Eloquent\SlugRepository;
 
-class SlugCacheDecorator extends CacheAbstractDecorator implements SlugInterface
+/**
+ * @deprecated
+ */
+class SlugCacheDecorator extends SlugRepository
 {
 }

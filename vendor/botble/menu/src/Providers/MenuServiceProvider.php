@@ -7,9 +7,6 @@ use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Menu\Models\Menu as MenuModel;
 use Botble\Menu\Models\MenuLocation;
 use Botble\Menu\Models\MenuNode;
-use Botble\Menu\Repositories\Caches\MenuCacheDecorator;
-use Botble\Menu\Repositories\Caches\MenuLocationCacheDecorator;
-use Botble\Menu\Repositories\Caches\MenuNodeCacheDecorator;
 use Botble\Menu\Repositories\Eloquent\MenuLocationRepository;
 use Botble\Menu\Repositories\Eloquent\MenuNodeRepository;
 use Botble\Menu\Repositories\Eloquent\MenuRepository;
@@ -18,7 +15,7 @@ use Botble\Menu\Repositories\Interfaces\MenuLocationInterface;
 use Botble\Menu\Repositories\Interfaces\MenuNodeInterface;
 use Botble\Theme\Facades\AdminBar;
 use Illuminate\Routing\Events\RouteMatched;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 
 class MenuServiceProvider extends ServiceProvider
 {
@@ -33,21 +30,15 @@ class MenuServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->app->bind(MenuInterface::class, function () {
-            return new MenuCacheDecorator(
-                new MenuRepository(new MenuModel())
-            );
+            return new MenuRepository(new MenuModel());
         });
 
         $this->app->bind(MenuNodeInterface::class, function () {
-            return new MenuNodeCacheDecorator(
-                new MenuNodeRepository(new MenuNode())
-            );
+            return new MenuNodeRepository(new MenuNode());
         });
 
         $this->app->bind(MenuLocationInterface::class, function () {
-            return new MenuLocationCacheDecorator(
-                new MenuLocationRepository(new MenuLocation())
-            );
+            return new MenuLocationRepository(new MenuLocation());
         });
 
         $this

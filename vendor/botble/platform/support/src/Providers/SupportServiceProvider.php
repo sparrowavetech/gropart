@@ -2,7 +2,7 @@
 
 namespace Botble\Support\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 
 class SupportServiceProvider extends ServiceProvider
 {

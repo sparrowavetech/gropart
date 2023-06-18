@@ -12,7 +12,7 @@ mix
     .js(source + '/resources/assets/js/custom-html.js', dist + '/js')
     .js(source + '/resources/assets/js/theme-options.js', dist + '/js')
     .js(source + '/resources/assets/js/theme.js', dist + '/js')
-    .vue()
+
 
     .sass(source + '/resources/assets/sass/custom-css.scss', dist + '/css')
     .sass(source + '/resources/assets/sass/theme-options.scss', dist + '/css')

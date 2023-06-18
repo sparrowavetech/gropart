@@ -11,7 +11,8 @@ use Botble\Base\Commands\FetchGoogleFontsCommand;
 use Botble\Base\Commands\InstallCommand;
 use Botble\Base\Commands\PublishAssetsCommand;
 use Botble\Base\Commands\UpdateCommand;
-use Illuminate\Support\ServiceProvider;
+use Illuminate\Console\Scheduling\Schedule;
+use Botble\Base\Supports\ServiceProvider;
 
 class CommandServiceProvider extends ServiceProvider
 {
@@ -28,5 +29,9 @@ class CommandServiceProvider extends ServiceProvider
             PublishAssetsCommand::class,
             UpdateCommand::class,
         ]);
+
+        $this->app->afterResolving(Schedule::class, function (Schedule $schedule) {
+            $schedule->command(ClearExpiredCacheCommand::class)->everyFiveMinutes();
+        });
     }
 }

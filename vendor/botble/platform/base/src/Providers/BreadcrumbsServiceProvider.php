@@ -7,7 +7,7 @@ use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Supports\BreadcrumbsGenerator;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 use Illuminate\Support\Str;
 
 class BreadcrumbsServiceProvider extends ServiceProvider

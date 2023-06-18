@@ -87,7 +87,7 @@ trait PermissionTrait
         foreach ($permissions as $keys => $value) {
             foreach ($this->extractClassPermissions($keys) as $key) {
                 // If the value is not in the array, we're opting in
-                if (! array_key_exists($key, (array)$prepared)) {
+                if (! array_key_exists($key, $prepared)) {
                     $prepared[$key] = $value;
 
                     continue;

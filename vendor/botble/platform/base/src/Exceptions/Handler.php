@@ -105,9 +105,15 @@ class Handler extends ExceptionHandler
     public function report(Throwable $e)
     {
         if ($this->shouldReport($e) && ! $this->isExceptionFromBot()) {
-            $isSent = Cache::has('send_error_exception');
-            if (! app()->isLocal() && ! app()->runningInConsole() && ! app()->isDownForMaintenance() && ! $isSent) {
-                Cache::put('send_error_exception', 1, Carbon::now()->addMinutes(5));
+            $key = 'send_error_exception';
+
+            if (Cache::has($key)) {
+                return;
+            }
+
+            Cache::put($key, 1, Carbon::now()->addMinutes(5));
+
+            if (! app()->isLocal() && ! app()->runningInConsole() && ! app()->isDownForMaintenance()) {
                 if (setting('enable_send_error_reporting_via_email', false) &&
                     setting('email_driver', config('mail.default')) &&
                     $e instanceof Exception
@@ -116,15 +122,21 @@ class Handler extends ExceptionHandler
                 }
 
                 if (config('core.base.general.error_reporting.via_slack', false)) {
+                    $request = request();
+
                     logger()->channel('slack')->critical(
                         $e->getMessage() . ($e->getPrevious() ? '(' . $e->getPrevious() . ')' : null),
                         [
-                            'Request URL' => request()->fullUrl(),
-                            'Request IP' => request()->ip(),
-                            'Request Method' => request()->method(),
+                            'Request URL' => $request->fullUrl(),
+                            'Request IP' => $request->ip(),
+                            'Request Referer' => $request->header('referer'),
+                            'Request Method' => $request->method(),
+                            'Request Form Data' => $request->method() != 'GET' ? BaseHelper::jsonEncodePrettify($request->input()) : null,
                             'Exception Type' => get_class($e),
                             'File Path' => ltrim(str_replace(base_path(), '', $e->getFile()), '/') . ':' .
                                 $e->getLine(),
+                            'Previous File Path' => ltrim(str_replace(base_path(), '', $e->getPrevious()->getFile()), '/') . ':' .
+                                $e->getPrevious()->getLine(),
                         ]
                     );
                 }

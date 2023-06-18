@@ -85,6 +85,13 @@ class User extends BaseModel implements
         );
     }
 
+    protected function activated(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): bool => $this->activations()->where('completed', true)->exists(),
+        );
+    }
+
     protected function avatarUrl(): Attribute
     {
         return Attribute::make(

@@ -126,6 +126,10 @@ class ThumbnailService
             $type = 'height';
         }
 
+        if ($this->thumbWidth === 0 || $this->thumbHeight === 0) {
+            return $destinationPath;
+        }
+
         switch ($type) {
             case 'width':
                 $thumbImage->resize($this->thumbWidth, null, function ($constraint) {

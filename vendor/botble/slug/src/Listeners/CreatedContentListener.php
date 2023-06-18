@@ -17,7 +17,7 @@ class CreatedContentListener
 
     public function handle(CreatedContentEvent $event): void
     {
-        if (SlugHelper::isSupportedModel(get_class($event->data)) && $event->request->input('is_slug_editable', 0)) {
+        if (SlugHelper::isSupportedModel($class = get_class($event->data)) && $event->request->input('is_slug_editable', 0)) {
             try {
                 $slug = $event->request->input('slug');
 
@@ -42,10 +42,10 @@ class CreatedContentListener
                 $slugService = new SlugService($this->slugRepository);
 
                 $this->slugRepository->createOrUpdate([
-                    'key' => $slugService->create($slug, (int)$event->data->slug_id, get_class($event->data)),
-                    'reference_type' => get_class($event->data),
-                    'reference_id' => $event->data->id,
-                    'prefix' => SlugHelper::getPrefix(get_class($event->data)),
+                    'key' => $slugService->create($slug, (int)$event->data->slug_id, $class),
+                    'reference_type' => $class,
+                    'reference_id' => $event->data->getKey(),
+                    'prefix' => SlugHelper::getPrefix($class),
                 ]);
             } catch (Exception $exception) {
                 info($exception->getMessage());

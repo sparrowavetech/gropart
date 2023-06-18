@@ -77,7 +77,7 @@ class Youtube
         $url = rtrim($url, '/');
 
         if (! $url) {
-            return $url;
+            return false;
         }
 
         $regExp = '/^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$/';

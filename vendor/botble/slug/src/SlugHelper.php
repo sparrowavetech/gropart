@@ -106,8 +106,14 @@ class SlugHelper
     ) {
         $condition = [];
 
+        $extension = $this->getPublicSingleEndingURL();
+
         if ($key !== null) {
             $condition = ['key' => $key];
+
+            if (! empty($extension)) {
+                $condition = ['key' => Str::replaceLast($extension, '', $key)];
+            }
         }
 
         if ($model !== null) {
@@ -167,6 +173,13 @@ class SlugHelper
     public function turnOffAutomaticUrlTranslationIntoLatin(): bool
     {
         return setting('slug_turn_off_automatic_url_translation_into_latin', 0) == 1;
+    }
+
+    public function getPublicSingleEndingURL(): string|null
+    {
+        $endingURL = setting('public_single_ending_url', config('packages.theme.general.public_single_ending_url'));
+
+        return ! empty($endingURL) ? '.' . $endingURL : null;
     }
 
     public function getCanEmptyPrefixes(): array

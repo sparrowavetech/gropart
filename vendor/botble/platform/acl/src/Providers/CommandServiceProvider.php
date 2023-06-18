@@ -3,7 +3,7 @@
 namespace Botble\ACL\Providers;
 
 use Botble\ACL\Commands\UserCreateCommand;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 
 class CommandServiceProvider extends ServiceProvider
 {
