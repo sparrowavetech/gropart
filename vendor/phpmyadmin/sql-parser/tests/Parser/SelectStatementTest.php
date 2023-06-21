@@ -44,6 +44,8 @@ class SelectStatementTest extends TestCase
             ['parser/parseSelect12'],
             ['parser/parseSelect13'],
             ['parser/parseSelect14'],
+            ['parser/parseSelect15'],
+            ['parser/parseSelect16'],
             ['parser/parseSelectErr1'],
             ['parser/parseSelectErr2'],
             ['parser/parseSelectNested'],
@@ -97,6 +99,10 @@ class SelectStatementTest extends TestCase
             ['parser/parseSelectWithParenthesis'],
             ['parser/parseSelectOrderByComment'],
             ['parser/parseSelectOverAlias_mariadb_100600'],
+            ['parser/parseSelectGroupBy'],
+            ['parser/parseSelectGroupByErr'],
+            ['parser/parseSelectGroupByWithComments'],
+            ['parser/parseTable1'],
         ];
     }
 }

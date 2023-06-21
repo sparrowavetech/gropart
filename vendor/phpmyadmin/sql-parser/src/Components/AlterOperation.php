@@ -13,6 +13,7 @@ use function array_key_exists;
 use function in_array;
 use function is_numeric;
 use function is_string;
+use function trim;
 
 /**
  * Parses an alter operation.
@@ -69,6 +70,10 @@ class AlterOperation extends Component
             1,
             'var=',
         ],
+        'ALGORITHM' => [
+            1,
+            'var=',
+        ],
         'AUTO_INCREMENT' => [
             1,
             'var=',
@@ -76,6 +81,14 @@ class AlterOperation extends Component
         'AVG_ROW_LENGTH' => [
             1,
             'var',
+        ],
+        'COALESCE PARTITION' => [
+            1,
+            'var',
+        ],
+        'LOCK' => [
+            1,
+            'var=',
         ],
         'MAX_ROWS' => [
             1,
@@ -95,7 +108,6 @@ class AlterOperation extends Component
         'CHANGE' => 1,
         'CHARSET' => 1,
         'CHECK' => 1,
-        'COALESCE' => 1,
         'CONVERT' => 1,
         'DEFAULT CHARSET' => 1,
         'DISABLE' => 1,
@@ -158,9 +170,14 @@ class AlterOperation extends Component
             1,
             'var',
         ],
-        'BY' => [
+
+        'IDENTIFIED VIA' => [
             2,
-            'expr',
+            'var',
+        ],
+        'IDENTIFIED WITH' => [
+            2,
+            'var',
         ],
         'PASSWORD' => [
             2,
@@ -169,6 +186,11 @@ class AlterOperation extends Component
         'WITH' => [
             2,
             'var',
+        ],
+
+        'BY' => [
+            4,
+            'expr',
         ],
 
         'ACCOUNT' => 1,
@@ -217,7 +239,8 @@ class AlterOperation extends Component
         'RENAME' => 6,
         'TO' => [
             7,
-            'var',
+            'expr',
+            ['parseField' => 'table'],
         ],
         'ENABLE' => 8,
         'DISABLE' => 8,
@@ -380,6 +403,13 @@ class AlterOperation extends Component
                     --$list->idx;
                 }
 
+                // If the operation is a RENAME COLUMN, now we have detected the field to rename, we need to parse
+                // again the options to get the new name of the column.
+                if ($ret->options->has('RENAME') && $ret->options->has('COLUMN')) {
+                    $nextOptions = OptionsArray::parse($parser, $list, $options);
+                    $ret->options->merge($nextOptions);
+                }
+
                 $state = 2;
             } elseif ($state === 2) {
                 if (is_string($token->value) || is_numeric($token->value)) {
@@ -431,8 +461,8 @@ class AlterOperation extends Component
                 $ret->unknown[] = $token;
             } elseif ($state === 3) {
                 if ($partitionState === 0) {
-                        $list->idx++; // Ignore the current token
-                        $nextToken = $list->getNext();
+                    $list->idx++; // Ignore the current token
+                    $nextToken = $list->getNext();
                     if (
                         ($token->type === Token::TYPE_KEYWORD)
                         && (($token->keyword === 'PARTITION BY')
@@ -451,12 +481,27 @@ class AlterOperation extends Component
 
                     ++$list->idx; // to index the idx by one, because the last getPrevious returned and decreased it.
                 } elseif ($partitionState === 1) {
+                    // Fetch the next token in a way the current index is reset to manage whitespaces in "field".
+                    $currIdx = $list->idx;
+                    ++$list->idx;
+                    $nextToken = $list->getNext();
+                    $list->idx = $currIdx;
                     // Building the expression used for partitioning.
                     if (empty($ret->field)) {
                         $ret->field = '';
                     }
 
-                    $ret->field .= $token->type === Token::TYPE_WHITESPACE ? ' ' : $token->token;
+                    if (
+                        $token->type === Token::TYPE_OPERATOR
+                        && $token->value === '('
+                        && $nextToken
+                        && $nextToken->keyword === 'PARTITION'
+                    ) {
+                        $partitionState = 2;
+                        --$list->idx; // Current idx is on "(". We need a step back for ArrayObj::parse incoming.
+                    } else {
+                        $ret->field .= $token->type === Token::TYPE_WHITESPACE ? ' ' : $token->token;
+                    }
                 } elseif ($partitionState === 2) {
                     $ret->partitions = ArrayObj::parse(
                         $parser,
@@ -484,18 +529,27 @@ class AlterOperation extends Component
      */
     public static function build($component, array $options = [])
     {
+        // Specific case of RENAME COLUMN that insert the field between 2 options.
+        $afterFieldsOptions = new OptionsArray();
+        if ($component->options->has('RENAME') && $component->options->has('COLUMN')) {
+            $afterFieldsOptions = clone $component->options;
+            $afterFieldsOptions->remove('RENAME');
+            $afterFieldsOptions->remove('COLUMN');
+            $component->options->remove('TO');
+        }
+
         $ret = $component->options . ' ';
         if (isset($component->field) && ($component->field !== '')) {
             $ret .= $component->field . ' ';
         }
 
-        $ret .= TokensList::build($component->unknown);
+        $ret .= $afterFieldsOptions . TokensList::build($component->unknown);
 
         if (isset($component->partitions)) {
             $ret .= PartitionDefinition::build($component->partitions);
         }
 
-        return $ret;
+        return trim($ret);
     }
 
     /**
