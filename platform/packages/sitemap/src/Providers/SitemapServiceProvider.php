@@ -9,7 +9,7 @@ use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Sitemap\Sitemap;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Contracts\Routing\ResponseFactory;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 
 class SitemapServiceProvider extends ServiceProvider
 {
@@ -24,15 +24,11 @@ class SitemapServiceProvider extends ServiceProvider
             ->loadAndPublishViews()
             ->publishAssets();
 
-        $this->app['events']->listen(CreatedContentEvent::class, function () {
-            cache()->forget('cache_site_map_key');
-        });
-
-        $this->app['events']->listen(UpdatedContentEvent::class, function () {
-            cache()->forget('cache_site_map_key');
-        });
-
-        $this->app['events']->listen(DeletedContentEvent::class, function () {
+        $this->app['events']->listen([
+            CreatedContentEvent::class,
+            UpdatedContentEvent::class,
+            DeletedContentEvent::class,
+        ], function () {
             cache()->forget('cache_site_map_key');
         });
     }

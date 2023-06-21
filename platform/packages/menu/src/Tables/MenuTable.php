@@ -5,7 +5,6 @@ namespace Botble\Menu\Tables;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Menu\Models\Menu;
-use Botble\Menu\Repositories\Interfaces\MenuInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Base\Facades\Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
@@ -19,15 +18,14 @@ use Botble\Table\DataTables;
 
 class MenuTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, MenuInterface $menuRepository)
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Menu $menu)
     {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $menuRepository;
+        $this->model = $menu;
+
+        $this->hasActions = true;
+        $this->hasFilter = true;
 
         if (! Auth::user()->hasAnyPermission(['menus.edit', 'menus.destroy'])) {
             $this->hasOperations = false;
@@ -44,10 +42,10 @@ class MenuTable extends TableAbstract
                     return BaseHelper::clean($item->name);
                 }
 
-                return Html::link(route('menus.edit', $item->id), BaseHelper::clean($item->name));
+                return Html::link(route('menus.edit', $item->getKey()), BaseHelper::clean($item->name));
             })
             ->editColumn('checkbox', function (Menu $item) {
-                return $this->getCheckbox($item->id);
+                return $this->getCheckbox($item->getKey());
             })
             ->editColumn('created_at', function (Menu $item) {
                 return BaseHelper::formatDate($item->created_at);
@@ -64,7 +62,9 @@ class MenuTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()
+        $query = $this
+            ->getModel()
+            ->query()
             ->select([
                 'id',
                 'name',

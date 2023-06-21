@@ -5,6 +5,7 @@ namespace Botble\Media;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Media\Http\Resources\FileResource;
 use Botble\Media\Models\MediaFile;
+use Botble\Media\Models\MediaFolder;
 use Botble\Media\Repositories\Interfaces\MediaFileInterface;
 use Botble\Media\Repositories\Interfaces\MediaFolderInterface;
 use Botble\Media\Services\ThumbnailService;
@@ -426,10 +427,10 @@ class RvMedia
                 if (str_contains($folderSlug, '/')) {
                     $paths = array_filter(explode('/', $folderSlug));
                     foreach ($paths as $folder) {
-                        $folderId = $this->createFolder($folder, $folderId);
+                        $folderId = $this->createFolder($folder, $folderId, true);
                     }
                 } else {
-                    $folderId = $this->createFolder($folderSlug, $folderId);
+                    $folderId = $this->createFolder($folderSlug, $folderId, true);
                 }
             }
 
@@ -472,7 +473,7 @@ class RvMedia
             $file->folder_id = $folderId;
             $file->user_id = Auth::check() ? Auth::id() : 0;
             $file->options = $request->input('options', []);
-            $file = $this->fileRepository->createOrUpdate($file);
+            $file->save();
 
             $this->generateThumbnails($file, $fileUpload);
 
@@ -505,11 +506,11 @@ class RvMedia
     public function getServerConfigMaxUploadFileSize(): float
     {
         // Start with post_max_size.
-        $maxSize = $this->parseSize(ini_get('post_max_size'));
+        $maxSize = $this->parseSize(@ini_get('post_max_size'));
 
         // If upload_max_size is less, then reduce. Except if upload_max_size is
         // zero, which indicates no limit.
-        $uploadMax = $this->parseSize(ini_get('upload_max_filesize'));
+        $uploadMax = $this->parseSize(@ini_get('upload_max_filesize'));
         if ($uploadMax > 0 && $uploadMax < $maxSize) {
             $maxSize = $uploadMax;
         }
@@ -777,7 +778,7 @@ class RvMedia
         return RvMedia::isImage($mimeType) && ! in_array($mimeType, ['image/svg+xml', 'image/x-icon']);
     }
 
-    public function createFolder(string $folderSlug, int|string|null $parentId = 0): int|string
+    public function createFolder(string $folderSlug, int|string|null $parentId = 0, bool $force = false): int|string
     {
         $folder = $this->folderRepository->getFirstBy([
             'slug' => $folderSlug,
@@ -785,7 +786,14 @@ class RvMedia
         ]);
 
         if (! $folder) {
-            $folder = $this->folderRepository->createOrUpdate([
+            if ($force) {
+                $this->folderRepository->forceDelete([
+                    'slug' => $folderSlug,
+                    'parent_id' => $parentId,
+                ]);
+            }
+
+            $folder = MediaFolder::query()->create([
                 'user_id' => Auth::check() ? Auth::id() : 0,
                 'name' => $this->folderRepository->createName($folderSlug, 0),
                 'slug' => $this->folderRepository->createSlug($folderSlug, 0),
@@ -802,7 +810,7 @@ class RvMedia
             $paths = array_filter(explode('/', $filePath));
             array_pop($paths);
             foreach ($paths as $folder) {
-                $folderId = $this->createFolder($folder, $folderId);
+                $folderId = $this->createFolder($folder, $folderId, true);
             }
         }
 

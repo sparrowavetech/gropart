@@ -3,7 +3,7 @@
 namespace Botble\SocialLogin\Providers;
 
 use Illuminate\Support\Arr;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\SocialLogin\Facades\SocialService;
 use Botble\Theme\Facades\Theme;
 

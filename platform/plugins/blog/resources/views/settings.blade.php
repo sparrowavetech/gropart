@@ -5,7 +5,7 @@
     <x-core-setting::checkbox
         name="blog_post_schema_enabled"
         :label="trans('plugins/blog::base.settings.enable_blog_post_schema')"
-        :value="setting('blog_post_schema_enabled', true)"
+        :checked="setting('blog_post_schema_enabled', true)"
         :helper-text="trans('plugins/blog::base.settings.enable_blog_post_schema_description')"
     />
 

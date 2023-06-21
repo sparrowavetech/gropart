@@ -39,10 +39,14 @@ class Widget extends BaseModel
             $theme = Theme::getThemeName();
         }
 
+        if ($refLang = request()->input('ref_lang')) {
+            $locale = $refLang;
+        }
+
         if (! $defaultLocale) {
             $defaultLocale = App::getLocale();
         }
 
-        return $locale == $defaultLocale ? $theme : ($theme . '-' . ltrim($locale, '-'));
+        return (! $locale || $locale == $defaultLocale) ? $theme : ($theme . '-' . ltrim($locale, '-'));
     }
 }

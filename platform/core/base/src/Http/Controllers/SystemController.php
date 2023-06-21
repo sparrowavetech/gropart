@@ -3,6 +3,7 @@
 namespace Botble\Base\Http\Controllers;
 
 use Botble\Base\Facades\PageTitle;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
 use Botble\Base\Events\UpdatedEvent;
 use Botble\Base\Events\UpdatingEvent;
@@ -201,7 +202,7 @@ class SystemController extends Controller
         return view('core/base::system.updater', compact('latestUpdate', 'isOutdated', 'updateData'));
     }
 
-    public function postUpdater(Core $core, Request $request)
+    public function postUpdater(Core $core, Request $request): JsonResponse
     {
         $request->validate([
             'step' => ['required', 'integer', 'min:1', 'max:4'],
@@ -211,6 +212,8 @@ class SystemController extends Controller
 
         $updateId = $request->input('update_id');
         $version = $request->input('version');
+
+        BaseHelper::maximumExecutionTimeAndMemoryLimit();
 
         try {
             switch ($request->integer('step', 1)) {
@@ -245,12 +248,12 @@ class SystemController extends Controller
                         'message' => __('Your asset files have been published successfully.'),
                     ]);
                 case 4:
-                    $core->cleanUpUpdate();
+                    $core->cleanCaches();
 
                     event(new UpdatedEvent());
 
                     return response()->json([
-                        'message' => __('Your system have been cleaned up successfully.'),
+                        'message' => __('Your system has been cleaned up successfully.'),
                     ]);
             }
         } catch (Throwable $exception) {

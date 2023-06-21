@@ -47,7 +47,7 @@ class MarketplaceService
 
     public function callApi(string $method, string $path, array $request = []): JsonResponse|Response
     {
-        if (! config('core.base.general.enable_marketplace_feature')) {
+        if (! config('packages.plugin-management.general.enable_marketplace_feature')) {
             abort(404);
         }
 
@@ -81,21 +81,19 @@ class MarketplaceService
 
     protected function request(): PendingRequest
     {
-        return Http::withHeaders([
-            'Authorization' => 'Token ' . $this->token,
-        ])
-            ->asJson()
+        return Http::asJson()
+            ->withHeaders([
+                'Authorization' => 'Token ' . $this->token,
+            ])
             ->acceptJson()
-            ->withOptions([
-                'verify' => false,
-                'connect_timeout' => 100,
-                'timeout' => 300,
-            ]);
+            ->withoutVerifying()
+            ->connectTimeout(100)
+            ->timeout(300);
     }
 
     public function beginInstall(string $id, string $type, string $name): bool|JsonResponse
     {
-        $core = app()->make(Core::class);
+        $core = Core::make();
         $licenseFilePath = $core->getLicenseFilePath();
 
         if (! File::exists($licenseFilePath)) {

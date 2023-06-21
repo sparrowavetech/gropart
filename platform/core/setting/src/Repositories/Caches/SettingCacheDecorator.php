@@ -2,9 +2,11 @@
 
 namespace Botble\Setting\Repositories\Caches;
 
-use Botble\Setting\Repositories\Interfaces\SettingInterface;
-use Botble\Support\Repositories\Caches\CacheAbstractDecorator;
+use Botble\Setting\Repositories\Eloquent\SettingRepository;
 
-class SettingCacheDecorator extends CacheAbstractDecorator implements SettingInterface
+/**
+ * @deprecated
+ */
+class SettingCacheDecorator extends SettingRepository
 {
 }

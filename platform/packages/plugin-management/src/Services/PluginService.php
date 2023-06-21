@@ -255,13 +255,7 @@ class PluginService
             $this->files->deleteDirectory(plugin_path());
         }
 
-        Helper::removeModuleFiles($plugin, 'plugins');
-
-        $publishedPath = public_path('vendor/core') . '/' . $this->getPluginNamespace($plugin);
-
-        if (File::isDirectory($publishedPath)) {
-            File::deleteDirectory($publishedPath);
-        }
+        Helper::removeModuleFiles(Str::afterLast($this->getPluginNamespace($plugin), '/'), 'plugins');
 
         if (class_exists($content['namespace'] . 'Plugin')) {
             call_user_func([$content['namespace'] . 'Plugin', 'removed']);

@@ -8,16 +8,13 @@ use Botble\Faq\Contracts\Faq as FaqContract;
 use Botble\Faq\FaqSupport;
 use Botble\Faq\Models\Faq;
 use Botble\Faq\Models\FaqCategory;
-use Botble\Faq\Repositories\Caches\FaqCacheDecorator;
-use Botble\Faq\Repositories\Caches\FaqCategoryCacheDecorator;
 use Botble\Faq\Repositories\Eloquent\FaqCategoryRepository;
 use Botble\Faq\Repositories\Eloquent\FaqRepository;
 use Botble\Faq\Repositories\Interfaces\FaqCategoryInterface;
 use Botble\Faq\Repositories\Interfaces\FaqInterface;
-use Botble\Language\Facades\Language;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Illuminate\Routing\Events\RouteMatched;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 
 class FaqServiceProvider extends ServiceProvider
 {
@@ -26,11 +23,11 @@ class FaqServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(FaqCategoryInterface::class, function () {
-            return new FaqCategoryCacheDecorator(new FaqCategoryRepository(new FaqCategory()));
+            return new FaqCategoryRepository(new FaqCategory());
         });
 
         $this->app->bind(FaqInterface::class, function () {
-            return new FaqCacheDecorator(new FaqRepository(new Faq()));
+            return new FaqRepository(new Faq());
         });
 
         $this->app->singleton(FaqContract::class, FaqSupport::class);
@@ -48,35 +45,27 @@ class FaqServiceProvider extends ServiceProvider
             ->loadAndPublishViews()
             ->publishAssets();
 
-        $useLanguageV2 = $this->app['config']->get('plugins.faq.general.use_language_v2', false) &&
-            defined('LANGUAGE_ADVANCED_MODULE_SCREEN_NAME');
-
-        if (defined('LANGUAGE_MODULE_SCREEN_NAME')) {
-            if ($useLanguageV2) {
-                LanguageAdvancedManager::registerModule(Faq::class, [
-                    'question',
-                    'answer',
-                ]);
-                LanguageAdvancedManager::registerModule(FaqCategory::class, [
-                    'name',
-                ]);
-            } else {
-                $this->app->booted(function () {
-                    Language::registerModule([Faq::class, FaqCategory::class]);
-                });
-            }
+        if (defined('LANGUAGE_ADVANCED_MODULE_SCREEN_NAME')) {
+            LanguageAdvancedManager::registerModule(Faq::class, [
+                'question',
+                'answer',
+            ]);
+            LanguageAdvancedManager::registerModule(FaqCategory::class, [
+                'name',
+            ]);
         }
 
         $this->app['events']->listen(RouteMatched::class, function () {
-            DashboardMenu::registerItem([
-                'id' => 'cms-plugins-faq',
-                'priority' => 5,
-                'parent_id' => null,
-                'name' => 'plugins/faq::faq.name',
-                'icon' => 'far fa-question-circle',
-                'url' => route('faq.index'),
-                'permissions' => ['faq.index'],
-            ])
+            DashboardMenu::make()
+                ->registerItem([
+                    'id' => 'cms-plugins-faq',
+                    'priority' => 5,
+                    'parent_id' => null,
+                    'name' => 'plugins/faq::faq.name',
+                    'icon' => 'far fa-question-circle',
+                    'url' => route('faq.index'),
+                    'permissions' => ['faq.index'],
+                ])
                 ->registerItem([
                     'id' => 'cms-plugins-faq-list',
                     'priority' => 0,

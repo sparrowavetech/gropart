@@ -2,7 +2,7 @@
 
 namespace Botble\PostScheduler\Providers;
 
-use Assets;
+use Botble\Base\Facades\Assets;
 use Auth;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Models\BaseModel;

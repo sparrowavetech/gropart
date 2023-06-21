@@ -4,6 +4,7 @@ namespace Botble\Theme\Supports;
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\Sitemap\Sitemap;
+use Botble\Slug\Facades\SlugHelper;
 use Carbon\Carbon;
 use Illuminate\Http\Response;
 
@@ -13,7 +14,7 @@ class SiteMapManager
 
     protected string $extension = 'xml';
 
-    protected string $defaultDate = '2023-05-01 00:00';
+    protected string $defaultDate = '2023-06-01 00:00';
 
     public function __construct(protected Sitemap $siteMap)
     {
@@ -97,6 +98,16 @@ class SiteMapManager
 
     public function allowedExtensions(): array
     {
-        return ['xml', 'html', 'txt', 'ror-rss', 'ror-rdf'];
+        $extensions = ['xml', 'html', 'txt', 'ror-rss', 'ror-rdf'];
+
+        $slugPostfix = SlugHelper::getPublicSingleEndingURL();
+
+        if (! $slugPostfix) {
+            return $extensions;
+        }
+
+        $slugPostfix = trim($slugPostfix, '.');
+
+        return array_filter($extensions, fn ($item) => $item != $slugPostfix);
     }
 }

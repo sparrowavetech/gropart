@@ -10,7 +10,7 @@
         <td class="border-right">
             <ul>
                 <li>
-                    <a href="https://sslcommerz.com" target="_blank">{{ __('SslCommerz') }}</a>
+                    <a href="https://sslcommerz.com" target="_blank">SslCommerz</a>
                     <p>{{ __('Customer can buy product and pay directly using Visa, Credit card via :name', ['name' => 'SslCommerz']) }}</p>
                 </li>
             </ul>
@@ -29,7 +29,7 @@
             </div>
         </td>
     </tr>
-    <tr class="paypal-online-payment payment-content-item hidden">
+    <tr class="payment-content-item hidden">
         <td class="border-left" colspan="3">
             {!! Form::open() !!}
             {!! Form::hidden('type', SSLCOMMERZ_PAYMENT_METHOD_NAME, ['class' => 'payment_type']) !!}
@@ -91,7 +91,8 @@
                         <x-core-setting::checkbox
                             :name="'payment_' . SSLCOMMERZ_PAYMENT_METHOD_NAME . '_mode'"
                             :label="trans('plugins/payment::payment.sandbox_mode')"
-                            :value="! get_payment_setting('mode', SSLCOMMERZ_PAYMENT_METHOD_NAME, true)"
+                            :value="0"
+                            :checked="! get_payment_setting('mode', SSLCOMMERZ_PAYMENT_METHOD_NAME, true)"
                         />
 
                         {!! apply_filters(PAYMENT_METHOD_SETTINGS_CONTENT, null, SSLCOMMERZ_PAYMENT_METHOD_NAME) !!}

@@ -18,7 +18,6 @@ use Botble\Base\Http\Middleware\HttpsProtocolMiddleware;
 use Botble\Base\Http\Middleware\LocaleMiddleware;
 use Botble\Base\Models\AdminNotification;
 use Botble\Base\Models\MetaBox as MetaBoxModel;
-use Botble\Base\Repositories\Caches\MetaBoxCacheDecorator;
 use Botble\Base\Repositories\Eloquent\MetaBoxRepository;
 use Botble\Base\Repositories\Interfaces\MetaBoxInterface;
 use Botble\Base\Supports\Action;
@@ -36,7 +35,6 @@ use Botble\Setting\Providers\SettingServiceProvider;
 use Botble\Setting\Supports\SettingStore;
 use Botble\Support\Http\Middleware\BaseMiddleware;
 use DateTimeZone;
-use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Schema\Builder;
@@ -51,7 +49,7 @@ use Illuminate\Routing\Router;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 use Throwable;
 
 class BaseServiceProvider extends ServiceProvider
@@ -77,7 +75,7 @@ class BaseServiceProvider extends ServiceProvider
         $this->app->singleton(BreadcrumbsManager::class, BreadcrumbsManager::class);
 
         $this->app->bind(MetaBoxInterface::class, function () {
-            return new MetaBoxCacheDecorator(new MetaBoxRepository(new MetaBoxModel()));
+            return new MetaBoxRepository(new MetaBoxModel());
         });
 
         $this->app['config']->set([
@@ -223,8 +221,6 @@ class BaseServiceProvider extends ServiceProvider
             if (in_array($timezone, DateTimeZone::listIdentifiers())) {
                 date_default_timezone_set($timezone);
             }
-
-            $this->app->make(Schedule::class)->command('cms:cache:clear-expired')->everyFifteenMinutes();
         });
 
         $this->app['events']->listen(RouteMatched::class, function () {
@@ -306,15 +302,16 @@ class BaseServiceProvider extends ServiceProvider
      */
     public function registerDefaultMenus(): void
     {
-        DashboardMenu::registerItem([
-            'id' => 'cms-core-platform-administration',
-            'priority' => 999,
-            'parent_id' => null,
-            'name' => 'core/base::layouts.platform_admin',
-            'icon' => 'fa fa-user-shield',
-            'url' => null,
-            'permissions' => ['users.index'],
-        ])
+        DashboardMenu::make()
+            ->registerItem([
+                'id' => 'cms-core-platform-administration',
+                'priority' => 999,
+                'parent_id' => null,
+                'name' => 'core/base::layouts.platform_admin',
+                'icon' => 'fa fa-user-shield',
+                'url' => null,
+                'permissions' => ['users.index'],
+            ])
             ->registerItem([
                 'id' => 'cms-core-system-information',
                 'priority' => 5,
@@ -361,7 +358,7 @@ class BaseServiceProvider extends ServiceProvider
 
     protected function configureIni(): void
     {
-        $currentLimit = ini_get('memory_limit');
+        $currentLimit = @ini_get('memory_limit');
         $currentLimitInt = Helper::convertHrToBytes($currentLimit);
 
         $memoryLimit = $this->app['config']->get('core.base.general.memory_limit');

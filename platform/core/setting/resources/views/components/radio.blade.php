@@ -1,6 +1,7 @@
 @props([
     'name',
     'label' => null,
+    'helperText' => null,
     'value' => null,
     'options' => [],
 ])
@@ -13,7 +14,7 @@
         </label>
     @endforeach
 
-    @if($attributes->has('helper-text'))
-        {{ Form::helper($attributes->get('helper-text')) }}
+    @if($helperText)
+        {{ Form::helper($helperText) }}
     @endif
 </x-core-setting::form-group>

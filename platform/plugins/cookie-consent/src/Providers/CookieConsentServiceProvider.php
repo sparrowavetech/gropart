@@ -6,7 +6,7 @@ use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Illuminate\Contracts\View\View;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Support\Facades\Cookie;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Theme\Facades\Theme;
 
 class CookieConsentServiceProvider extends ServiceProvider

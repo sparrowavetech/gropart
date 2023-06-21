@@ -17,6 +17,6 @@
     <x-core-setting::checkbox
         name="enable_math_captcha_for_contact_form"
         :label="trans('plugins/contact::contact.settings.enable_math_captcha')"
-        :value="setting('enable_math_captcha_for_contact_form', false)"
+        :checked="setting('enable_math_captcha_for_contact_form', false)"
     />
 </x-core-setting::section>

@@ -7,9 +7,11 @@ let directory = path.basename(path.resolve(__dirname))
 const source = 'platform/core/' + directory
 const dist = 'public/vendor/core/core/' + directory
 
-glob.sync(source + '/resources/assets/sass/base/themes/*.scss').forEach((item) => {
-    mix.sass(item, dist + '/css/themes')
-})
+glob.sync(source + '/resources/assets/sass/base/themes/*.scss').forEach(
+    (item) => mix.sass(item, dist + '/css/themes')
+)
+
+mix.vue();
 
 mix
     .sass(source + '/resources/assets/sass/core.scss', dist + '/css')
@@ -30,9 +32,9 @@ mix
     .js(source + '/resources/assets/js/cleanup.js', dist + '/js')
 
 mix
-    .js(source + '/resources/assets/js/vue-app.js', dist + '/js').vue()
-    .js(source + '/resources/assets/js/repeater-field.js', dist + '/js').vue()
-    .js(source + '/resources/assets/js/system-update.js', dist + '/js').vue()
+    .js(source + '/resources/assets/js/vue-app.js', dist + '/js')
+    .js(source + '/resources/assets/js/repeater-field.js', dist + '/js')
+    .js(source + '/resources/assets/js/system-update.js', dist + '/js')
 
 if (mix.inProduction()) {
     mix

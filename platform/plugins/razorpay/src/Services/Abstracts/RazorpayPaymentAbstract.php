@@ -15,10 +15,7 @@ abstract class RazorpayPaymentAbstract implements ProduceServiceInterface
 
     protected string $paymentCurrency;
 
-    /**
-     * @var object
-     */
-    protected $client;
+    protected Api $client;
 
     protected bool $supportRefundOnline;
 
@@ -40,9 +37,6 @@ abstract class RazorpayPaymentAbstract implements ProduceServiceInterface
         return $this->supportRefundOnline;
     }
 
-    /**
-     * @return object|Api
-     */
     public function getClient()
     {
         return $this->client;
@@ -69,13 +63,6 @@ abstract class RazorpayPaymentAbstract implements ProduceServiceInterface
         return $this->paymentCurrency;
     }
 
-    /**
-     * Get payment details
-     *
-     * @param string $paymentId
-     * @return mixed Object payment details
-     * @throws Exception
-     */
     public function getPaymentDetails($paymentId)
     {
         try {
@@ -89,10 +76,7 @@ abstract class RazorpayPaymentAbstract implements ProduceServiceInterface
         return $response;
     }
 
-    /**
-     * This function can be used to preform refund on the capture.
-     */
-    public function refundOrder($paymentId, $amount, array $options = [])
+    public function refundOrder($paymentId, $amount, array $options = []): array
     {
         try {
             $response = $this->client->refund->create([
@@ -128,14 +112,7 @@ abstract class RazorpayPaymentAbstract implements ProduceServiceInterface
         }
     }
 
-    /**
-     * Get refund details
-     *
-     * @param string $refundId
-     * @return mixed Object refund details
-     * @throws Exception
-     */
-    public function getRefundDetails($refundId)
+    public function getRefundDetails($refundId): array
     {
         try {
             $response = $this->client->refund->fetch($refundId);
@@ -156,13 +133,6 @@ abstract class RazorpayPaymentAbstract implements ProduceServiceInterface
         }
     }
 
-    /**
-     * Execute main service
-     *
-     * @param Request $request
-     *
-     * @return mixed
-     */
     public function execute(Request $request)
     {
         try {
@@ -174,13 +144,6 @@ abstract class RazorpayPaymentAbstract implements ProduceServiceInterface
         }
     }
 
-    /**
-     * Make a payment
-     *
-     * @param Request $request
-     *
-     * @return mixed
-     */
     abstract public function makePayment(Request $request);
 
     /**
@@ -196,12 +159,5 @@ abstract class RazorpayPaymentAbstract implements ProduceServiceInterface
         ];
     }
 
-    /**
-     * Use this function to perform more logic after user has made a payment
-     *
-     * @param Request $request
-     *
-     * @return mixed
-     */
     abstract public function afterMakePayment(Request $request);
 }

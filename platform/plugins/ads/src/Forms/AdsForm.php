@@ -7,6 +7,7 @@ use Botble\Ads\Http\Requests\AdsRequest;
 use Botble\Ads\Models\Ads;
 use Botble\Ads\Repositories\Interfaces\AdsInterface;
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Forms\FormAbstract;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
@@ -78,13 +79,10 @@ class AdsForm extends FormAbstract
                 ],
                 'choices' => AdsManager::getLocations(),
             ])
-            ->add('expired_at', 'text', [
+            ->add('expired_at', 'datePicker', [
                 'label' => trans('plugins/ads::ads.expired_at'),
                 'label_attr' => ['class' => 'control-label'],
-                'attr' => [
-                    'class' => 'form-control datepicker',
-                ],
-                'default_value' => Carbon::now()->format('m/d/Y'),
+                'default_value' => BaseHelper::formatDate(Carbon::now()->addMonth()),
             ])
             ->add('image', 'mediaImage', [
                 'label' => trans('core/base::forms.image'),

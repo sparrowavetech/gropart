@@ -13,6 +13,7 @@ mix
     .js(source + '/resources/assets/js/marketplace-setting.js', dist + '/js')
     .js(source + '/resources/assets/js/discount.js', dist + '/js')
     .js(source + '/resources/assets/js/store-revenue.js', dist + '/js')
+    .vue()
 
     .sass(source + '/resources/assets/sass/style.scss', dist + '/css')
     .sass(source + '/resources/assets/sass/rtl.scss', dist + '/css')

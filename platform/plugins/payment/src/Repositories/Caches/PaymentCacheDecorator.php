@@ -2,9 +2,11 @@
 
 namespace Botble\Payment\Repositories\Caches;
 
-use Botble\Support\Repositories\Caches\CacheAbstractDecorator;
-use Botble\Payment\Repositories\Interfaces\PaymentInterface;
+use Botble\Payment\Repositories\Eloquent\PaymentRepository;
 
-class PaymentCacheDecorator extends CacheAbstractDecorator implements PaymentInterface
+/**
+ * @deprecated
+ */
+class PaymentCacheDecorator extends PaymentRepository
 {
 }

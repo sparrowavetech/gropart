@@ -2,9 +2,11 @@
 
 namespace Botble\Location\Repositories\Caches;
 
-use Botble\Support\Repositories\Caches\CacheAbstractDecorator;
-use Botble\Location\Repositories\Interfaces\StateInterface;
+use Botble\Location\Repositories\Eloquent\StateRepository;
 
-class StateCacheDecorator extends CacheAbstractDecorator implements StateInterface
+/**
+ * @deprecated
+ */
+class StateCacheDecorator extends StateRepository
 {
 }

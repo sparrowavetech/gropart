@@ -10,8 +10,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Location\Repositories\Interfaces\CountryInterface;
-use Botble\Location\Repositories\Interfaces\StateInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Base\Facades\Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
@@ -19,20 +17,17 @@ use Botble\Table\DataTables;
 
 class StateTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
     public function __construct(
         DataTables $table,
         UrlGenerator $urlGenerator,
-        StateInterface $stateRepository,
-        protected CountryInterface $countryRepository
+        State $state
     ) {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $stateRepository;
-        $this->countryRepository = $countryRepository;
+        $this->model = $state;
+
+        $this->hasActions = true;
+        $this->hasFilter = true;
 
         if (! Auth::user()->hasAnyPermission(['state.edit', 'state.destroy'])) {
             $this->hasOperations = false;
@@ -49,7 +44,7 @@ class StateTable extends TableAbstract
                     return BaseHelper::clean($item->name);
                 }
 
-                return Html::link(route('state.edit', $item->id), BaseHelper::clean($item->name));
+                return Html::link(route('state.edit', $item->getKey()), BaseHelper::clean($item->name));
             })
             ->editColumn('country_id', function (State $item) {
                 if (! $item->country_id && $item->country->name) {
@@ -59,7 +54,7 @@ class StateTable extends TableAbstract
                 return Html::link(route('country.edit', $item->country_id), $item->country->name);
             })
             ->editColumn('checkbox', function (State $item) {
-                return $this->getCheckbox($item->id);
+                return $this->getCheckbox($item->getKey());
             })
             ->editColumn('created_at', function (State $item) {
                 return BaseHelper::formatDate($item->created_at);
@@ -76,13 +71,16 @@ class StateTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()->select([
-            'id',
-            'name',
-            'country_id',
-            'created_at',
-            'status',
-        ]);
+        $query = $this
+            ->getModel()
+            ->query()
+            ->select([
+                'id',
+                'name',
+                'country_id',
+                'created_at',
+                'status',
+            ]);
 
         return $this->applyScopes($query);
     }

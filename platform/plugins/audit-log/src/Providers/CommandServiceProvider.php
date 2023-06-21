@@ -4,7 +4,7 @@ namespace Botble\AuditLog\Providers;
 
 use Botble\AuditLog\Commands\ActivityLogClearCommand;
 use Botble\AuditLog\Commands\CleanOldLogsCommand;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 
 class CommandServiceProvider extends ServiceProvider
 {

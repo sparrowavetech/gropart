@@ -4,10 +4,10 @@ namespace Botble\Ads\Providers;
 
 use Botble\Ads\Facades\AdsManager;
 use Botble\Ads\Models\Ads;
-use Botble\Ads\Repositories\Caches\AdsCacheDecorator;
 use Botble\Ads\Repositories\Eloquent\AdsRepository;
 use Botble\Ads\Repositories\Interfaces\AdsInterface;
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Supports\Helper;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
@@ -20,10 +20,10 @@ class AdsServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function register()
+    public function register(): void
     {
         $this->app->bind(AdsInterface::class, function () {
-            return new AdsCacheDecorator(new AdsRepository(new Ads()));
+            return new AdsRepository(new Ads());
         });
 
         Helper::autoload(__DIR__ . '/../../helpers');
@@ -31,7 +31,7 @@ class AdsServiceProvider extends ServiceProvider
         AliasLoader::getInstance()->alias('AdsManager', AdsManager::class);
     }
 
-    public function boot()
+    public function boot(): void
     {
         $this->setNamespace('plugins/ads')
             ->loadAndPublishConfigurations(['permissions'])
@@ -41,7 +41,7 @@ class AdsServiceProvider extends ServiceProvider
             ->loadAndPublishViews();
 
         $this->app['events']->listen(RouteMatched::class, function () {
-            dashboard_menu()->registerItem([
+            DashboardMenu::registerItem([
                 'id' => 'cms-plugins-ads',
                 'priority' => 5,
                 'parent_id' => null,

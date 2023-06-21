@@ -3,7 +3,7 @@
 namespace Botble\Slug\Providers;
 
 use Botble\Base\Facades\Form;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 
 class FormServiceProvider extends ServiceProvider
 {

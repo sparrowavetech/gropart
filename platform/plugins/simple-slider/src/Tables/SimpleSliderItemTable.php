@@ -4,7 +4,6 @@ namespace Botble\SimpleSlider\Tables;
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\SimpleSlider\Models\SimpleSliderItem;
-use Botble\SimpleSlider\Repositories\Interfaces\SimpleSliderItemInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Base\Facades\Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
@@ -21,17 +20,15 @@ class SimpleSliderItemTable extends TableAbstract
 
     protected $view = 'plugins/simple-slider::items';
 
-    protected $repository;
-
     public function __construct(
         DataTables $table,
         UrlGenerator $urlGenerator,
-        SimpleSliderItemInterface $simpleSliderItemRepository
+        SimpleSliderItem $simpleSliderItem
     ) {
         parent::__construct($table, $urlGenerator);
         $this->setOption('id', 'simple-slider-items-table');
 
-        $this->repository = $simpleSliderItemRepository;
+        $this->model = $simpleSliderItem;
 
         if (! Auth::user()->hasAnyPermission(['simple-slider-item.edit', 'simple-slider-item.destroy'])) {
             $this->hasOperations = false;
@@ -54,11 +51,11 @@ class SimpleSliderItemTable extends TableAbstract
                 return Html::link('#', BaseHelper::clean($item->title), [
                     'data-fancybox' => true,
                     'data-type' => 'ajax',
-                    'data-src' => route('simple-slider-item.edit', $item->id),
+                    'data-src' => route('simple-slider-item.edit', $item->getKey()),
                 ]);
             })
             ->editColumn('checkbox', function (SimpleSliderItem $item) {
-                return $this->getCheckbox($item->id);
+                return $this->getCheckbox($item->getKey());
             })
             ->editColumn('created_at', function (SimpleSliderItem $item) {
                 return BaseHelper::formatDate($item->created_at);
@@ -72,7 +69,9 @@ class SimpleSliderItemTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()
+        $query = $this
+            ->getModel()
+            ->query()
             ->select([
                 'id',
                 'title',

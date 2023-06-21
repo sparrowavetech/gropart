@@ -17,6 +17,7 @@ class AdsRequest extends Request
             'location' => 'required|' . Rule::in(array_keys(AdsManager::getLocations())),
             'order' => 'required|integer|min:0|max:127',
             'status' => Rule::in(BaseStatusEnum::values()),
+            'expired_at' => 'required|date',
         ];
     }
 }

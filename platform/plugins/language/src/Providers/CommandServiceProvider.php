@@ -8,7 +8,7 @@ use Botble\Language\Commands\RouteTranslationsListCommand;
 use Botble\Language\Commands\SyncOldDataCommand;
 use Illuminate\Foundation\Console\RouteCacheCommand as BaseRouteCacheCommand;
 use Illuminate\Foundation\Console\RouteClearCommand as BaseRouteClearCommand;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 
 class CommandServiceProvider extends ServiceProvider
 {

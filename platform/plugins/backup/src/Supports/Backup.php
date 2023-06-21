@@ -106,7 +106,11 @@ class Backup
             Process::fromShellCommandline($sql)->mustRun();
         } catch (Exception) {
             try {
-                system($sql);
+                if (function_exists('system')) {
+                    system($sql);
+                } else {
+                    $this->processMySqlDumpPHP($path, $config);
+                }
             } catch (Exception) {
                 $this->processMySqlDumpPHP($path, $config);
             }

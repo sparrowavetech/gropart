@@ -10,7 +10,7 @@
         <td class="border-right">
             <ul>
                 <li>
-                    <a href="https://paystack.com" target="_blank">{{ __('Paystack') }}</a>
+                    <a href="https://paystack.com" target="_blank">Paystack</a>
                     <p>{{ __('Customer can buy product and pay directly using Visa, Credit card via :name', ['name' => 'Paystack']) }}</p>
                 </li>
             </ul>
@@ -31,7 +31,7 @@
             </div>
         </td>
     </tr>
-    <tr class="paypal-online-payment payment-content-item hidden">
+    <tr class="payment-content-item hidden">
         <td class="border-left" colspan="3">
             {!! Form::open() !!}
             {!! Form::hidden('type', PAYSTACK_PAYMENT_METHOD_NAME, ['class' => 'payment_type']) !!}
@@ -71,7 +71,7 @@
 
                         <div class="form-group mb-3">
                             <label class="text-title-field" for="payment_{{ PAYSTACK_PAYMENT_METHOD_NAME }}_description">{{ trans('core/base::forms.description') }}</label>
-                            <textarea class="next-input" name="payment_{{ PAYSTACK_PAYMENT_METHOD_NAME }}_description" id="payment_{{ PAYSTACK_PAYMENT_METHOD_NAME }}_description">{{ get_payment_setting('description', PAYSTACK_PAYMENT_METHOD_NAME, __('Payment with Paystack')) }}</textarea>
+                            <textarea class="next-input" name="payment_{{ PAYSTACK_PAYMENT_METHOD_NAME }}_description" id="payment_{{ PAYSTACK_PAYMENT_METHOD_NAME }}_description">{{ get_payment_setting('description', PAYSTACK_PAYMENT_METHOD_NAME, __('Payment with :paymentType', ['paymentType' => 'Paystack'])) }}</textarea>
                         </div>
 
                         <p class="payment-note">

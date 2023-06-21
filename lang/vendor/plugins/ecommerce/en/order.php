@@ -183,6 +183,7 @@ return [
     'customer' => 'Customer',
     'orders' => 'order(s)',
     'shipping_address' => 'Shipping Address',
+    'shipping_info' => 'Shipping information',
     'billing_address' => 'Billing Address',
     'see_on_maps' => 'See on maps',
     'name' => 'Name',

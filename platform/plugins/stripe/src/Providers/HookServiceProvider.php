@@ -95,22 +95,24 @@ class HookServiceProvider extends ServiceProvider
 
     public function checkoutWithStripe(array $data, Request $request): array
     {
-        if ($request->input('payment_method') == STRIPE_PAYMENT_METHOD_NAME) {
-            $stripePaymentService = $this->app->make(StripePaymentService::class);
+        if ($data['type'] !== STRIPE_PAYMENT_METHOD_NAME) {
+            return $data;
+        }
 
-            $paymentData = apply_filters(PAYMENT_FILTER_PAYMENT_DATA, [], $request);
+        $stripePaymentService = $this->app->make(StripePaymentService::class);
 
-            $result = $stripePaymentService->execute($paymentData);
+        $paymentData = apply_filters(PAYMENT_FILTER_PAYMENT_DATA, [], $request);
 
-            if ($stripePaymentService->getErrorMessage()) {
-                $data['error'] = true;
-                $data['message'] = $stripePaymentService->getErrorMessage();
-            } elseif ($result) {
-                if ($stripePaymentService->isStripeApiCharge()) {
-                    $data['charge_id'] = $result;
-                } else {
-                    $data['checkoutUrl'] = $result;
-                }
+        $result = $stripePaymentService->execute($paymentData);
+
+        if ($stripePaymentService->getErrorMessage()) {
+            $data['error'] = true;
+            $data['message'] = $stripePaymentService->getErrorMessage();
+        } elseif ($result) {
+            if ($stripePaymentService->isStripeApiCharge()) {
+                $data['charge_id'] = $result;
+            } else {
+                $data['checkoutUrl'] = $result;
             }
         }
 

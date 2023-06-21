@@ -18,6 +18,9 @@ class PluginManagementController extends Controller
 {
     public function __construct(protected PluginService $pluginService)
     {
+        if (! config('packages.plugin-management.general.enable_plugin_manager', true)) {
+            abort(404);
+        }
     }
 
     public function index(): View

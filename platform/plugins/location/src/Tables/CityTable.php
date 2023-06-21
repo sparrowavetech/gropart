@@ -10,9 +10,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Location\Repositories\Interfaces\CityInterface;
-use Botble\Location\Repositories\Interfaces\CountryInterface;
-use Botble\Location\Repositories\Interfaces\StateInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Base\Facades\Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
@@ -20,20 +17,17 @@ use Botble\Table\DataTables;
 
 class CityTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
     public function __construct(
         DataTables $table,
         UrlGenerator $urlGenerator,
-        CityInterface $cityRepository,
-        protected CountryInterface $countryRepository,
-        protected StateInterface $stateRepository
+        City $city
     ) {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $cityRepository;
+        $this->model = $city;
+
+        $this->hasActions = true;
+        $this->hasFilter = true;
 
         if (! Auth::user()->hasAnyPermission(['city.edit', 'city.destroy'])) {
             $this->hasOperations = false;
@@ -50,7 +44,7 @@ class CityTable extends TableAbstract
                     return BaseHelper::clean($item->name);
                 }
 
-                return Html::link(route('city.edit', $item->id), BaseHelper::clean($item->name));
+                return Html::link(route('city.edit', $item->getKey()), BaseHelper::clean($item->name));
             })
             ->editColumn('state_id', function (City $item) {
                 if (! $item->state_id || ! $item->state->name) {
@@ -67,7 +61,7 @@ class CityTable extends TableAbstract
                 return Html::link(route('country.edit', $item->country_id), $item->country->name);
             })
             ->editColumn('checkbox', function (City $item) {
-                return $this->getCheckbox($item->id);
+                return $this->getCheckbox($item->getKey());
             })
             ->editColumn('created_at', function (City $item) {
                 return BaseHelper::formatDate($item->created_at);
@@ -84,14 +78,17 @@ class CityTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()->select([
-            'id',
-            'name',
-            'state_id',
-            'country_id',
-            'created_at',
-            'status',
-        ]);
+        $query = $this
+            ->getModel()
+            ->query()
+            ->select([
+                'id',
+                'name',
+                'state_id',
+                'country_id',
+                'created_at',
+                'status',
+            ]);
 
         return $this->applyScopes($query);
     }

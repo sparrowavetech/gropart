@@ -3,7 +3,7 @@
 namespace Botble\Backup\Providers;
 
 use Botble\Base\Facades\BaseHelper;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 
 class HookServiceProvider extends ServiceProvider
 {

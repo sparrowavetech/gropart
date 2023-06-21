@@ -32,13 +32,16 @@ class ThemeTranslationTable extends TableAbstract
 
     public function ajax(): JsonResponse
     {
+        $translations = collect($this->manager->getThemeTranslations($this->locale))
+            ->transform(fn ($value, $key) => compact('key', 'value'));
+
         $table = $this->table
-            ->of($this->manager->getTranslationData($this->locale))
+            ->of($translations)
             ->editColumn('key', fn (array $item) => $this->formatKeyAndValue($item['key']))
             ->editColumn(
                 $this->locale,
                 fn (array $item) => Html::link('#edit', $this->formatKeyAndValue($item['value']), [
-                    'class' => 'editable',
+                    'class' => 'editable' . ($item['key'] === $item['value'] ? ' text-info' : ''),
                     'data-locale' => $this->locale,
                     'data-name' => $item['key'],
                     'data-type' => 'textarea',

@@ -138,53 +138,63 @@ class HookServiceProvider extends ServiceProvider
 
     public function checkoutWithRazorpay(array $data, Request $request): array
     {
-        if ($request->input('payment_method') == RAZORPAY_PAYMENT_METHOD_NAME) {
-            try {
-                $api = new Api(
-                    get_payment_setting('key', RAZORPAY_PAYMENT_METHOD_NAME),
-                    get_payment_setting('secret', RAZORPAY_PAYMENT_METHOD_NAME)
-                );
+        if ($data['type'] !== RAZORPAY_PAYMENT_METHOD_NAME) {
+            return $data;
+        }
 
+        $paymentData = apply_filters(PAYMENT_FILTER_PAYMENT_DATA, [], $request);
+
+        $data['charge_id'] = $request->input('razorpay_payment_id');
+
+        if (! $data['charge_id']) {
+            $data['error'] = true;
+            $data['message'] = __('Payment failed!');
+        }
+
+        $amount = $paymentData['amount'];
+
+        $status = PaymentStatusEnum::PENDING;
+
+        try {
+            $api = new Api(
+                get_payment_setting('key', RAZORPAY_PAYMENT_METHOD_NAME),
+                get_payment_setting('secret', RAZORPAY_PAYMENT_METHOD_NAME)
+            );
+
+            $orderId = $request->input('razorpay_order_id');
+
+            $signature = $request->input('razorpay_signature');
+
+            if ($orderId && $signature) {
                 $api->utility->verifyPaymentSignature([
-                    'razorpay_signature' => $request->input('razorpay_signature'),
-                    'razorpay_payment_id' => $request->input('razorpay_payment_id'),
-                    'razorpay_order_id' => $request->input('razorpay_order_id'),
+                    'razorpay_signature' => $signature,
+                    'razorpay_payment_id' => $data['charge_id'],
+                    'razorpay_order_id' => $orderId,
                 ]);
 
-                $order = $api->order->fetch($request->input('razorpay_order_id'));
+                $order = $api->order->fetch($orderId);
 
                 $order = $order->toArray();
 
-                if (in_array($order['status'], ['created', 'paid', 'attempted', 'captured', 'authorized'])) {
-                    $amount = $order['amount_paid'] / 100;
+                $amount = $order['amount_paid'] / 100;
 
-                    $status = $order['status'] === 'paid' ? PaymentStatusEnum::COMPLETED : PaymentStatusEnum::PENDING;
-
-                    $data['charge_id'] = $request->input('razorpay_payment_id');
-
-                    if ($data['charge_id']) {
-                        do_action(PAYMENT_ACTION_PAYMENT_PROCESSED, [
-                            'account_id' => Arr::get($data, 'account_id'),
-                            'amount' => $amount,
-                            'currency' => $data['currency'],
-                            'charge_id' => $data['charge_id'],
-                            'payment_channel' => RAZORPAY_PAYMENT_METHOD_NAME,
-                            'status' => $status,
-                            'order_id' => (array) $request->input('order_id', []),
-                        ]);
-                    } else {
-                        $data['error'] = true;
-                        $data['message'] = __('Payment failed!');
-                    }
-                } else {
-                    $data['error'] = true;
-                    $data['message'] = __('Payment failed!');
-                }
-            } catch (SignatureVerificationError $exception) {
-                $data['message'] = $exception->getMessage();
-                $data['error'] = true;
+                $status = $order['status'] === 'paid' ? PaymentStatusEnum::COMPLETED : $status;
             }
+        } catch (SignatureVerificationError $exception) {
+            $data['message'] = $exception->getMessage();
+            $data['error'] = true;
         }
+
+        do_action(PAYMENT_ACTION_PAYMENT_PROCESSED, [
+            'amount' => $amount,
+            'currency' => $paymentData['currency'],
+            'charge_id' => $data['charge_id'],
+            'payment_channel' => RAZORPAY_PAYMENT_METHOD_NAME,
+            'status' => $status,
+            'order_id' => $paymentData['order_id'],
+            'customer_id' => $paymentData['customer_id'],
+            'customer_type' => $paymentData['customer_type'],
+        ]);
 
         return $data;
     }

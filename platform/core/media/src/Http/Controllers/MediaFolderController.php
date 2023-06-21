@@ -4,6 +4,7 @@ namespace Botble\Media\Http\Controllers;
 
 use Botble\Media\Facades\RvMedia;
 use Botble\Media\Http\Requests\MediaFolderRequest;
+use Botble\Media\Models\MediaFolder;
 use Botble\Media\Repositories\Interfaces\MediaFileInterface;
 use Botble\Media\Repositories\Interfaces\MediaFolderInterface;
 use Exception;
@@ -27,7 +28,7 @@ class MediaFolderController extends Controller
             $name = $request->input('name');
             $parentId = $request->input('parent_id');
 
-            $this->folderRepository->createOrUpdate([
+            MediaFolder::query()->create([
                 'name' => $this->folderRepository->createName($name, $parentId),
                 'slug' => $this->folderRepository->createSlug($name, $parentId),
                 'parent_id' => $parentId,

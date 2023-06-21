@@ -119,13 +119,7 @@ class AdsManager
         if ($isNotExpired) {
             return $this->data
                 ->where('status', BaseStatusEnum::PUBLISHED)
-                ->filter(function ($item) {
-                    if ($expiredAt = $item->getRawOriginal('expired_at')) {
-                        return Carbon::parse($expiredAt)->gte(now());
-                    }
-
-                    return true;
-                });
+                ->filter(fn (Ads $item) => $item->expired_at->gte(Carbon::now()));
         }
 
         return $this->data;

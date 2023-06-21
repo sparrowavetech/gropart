@@ -10,11 +10,11 @@ class AuditLog
 {
     public function handleEvent(string $screen, Model $data, string $action, string $type = 'info'): bool
     {
-        if (! $data instanceof BaseModel || ! $data->id) {
+        if (! $data instanceof BaseModel || ! $data->getKey()) {
             return false;
         }
 
-        event(new AuditHandlerEvent($screen, $action, $data->id, $this->getReferenceName($screen, $data), $type));
+        event(new AuditHandlerEvent($screen, $action, $data->getKey(), $this->getReferenceName($screen, $data), $type));
 
         return true;
     }

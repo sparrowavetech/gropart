@@ -6,7 +6,7 @@ use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Models\BaseModel;
 use Botble\Page\Models\Page;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Facades\MetaBox;
 use Botble\SeoHelper\Facades\SeoHelper;
 

@@ -13,7 +13,7 @@ use Botble\Theme\Commands\ThemeRenameCommand;
 use Botble\Theme\Contracts\Theme as ThemeContract;
 use Botble\Theme\Theme;
 use Illuminate\Routing\Events\RouteMatched;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 
 class ThemeServiceProvider extends ServiceProvider
 {
@@ -68,15 +68,16 @@ class ThemeServiceProvider extends ServiceProvider
                 ]);
             }
 
-            DashboardMenu::registerItem([
-                'id' => 'cms-core-theme-option',
-                'priority' => 4,
-                'parent_id' => 'cms-core-appearance',
-                'name' => 'packages/theme::theme.theme_options',
-                'icon' => null,
-                'url' => route('theme.options'),
-                'permissions' => ['theme.options'],
-            ])
+            DashboardMenu::make()
+                ->registerItem([
+                    'id' => 'cms-core-theme-option',
+                    'priority' => 4,
+                    'parent_id' => 'cms-core-appearance',
+                    'name' => 'packages/theme::theme.theme_options',
+                    'icon' => null,
+                    'url' => route('theme.options'),
+                    'permissions' => ['theme.options'],
+                ])
                 ->registerItem([
                     'id' => 'cms-core-appearance-custom-css',
                     'priority' => 5,

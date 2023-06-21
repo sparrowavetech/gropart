@@ -28,7 +28,7 @@
             </div>
         </td>
     </tr>
-    <tr class="paypal-online-payment payment-content-item hidden">
+    <tr class="payment-content-item hidden">
         <td class="border-left" colspan="3">
             {!! Form::open() !!}
             {!! Form::hidden('type', STRIPE_PAYMENT_METHOD_NAME, ['class' => 'payment_type']) !!}
@@ -67,7 +67,7 @@
 
                         <x-core-setting::form-group>
                             <label class="text-title-field" for="payment_stripe_description">{{ trans('core/base::forms.description') }}</label>
-                            <textarea class="next-input" name="payment_stripe_description" id="payment_stripe_description">{{ get_payment_setting('description', 'stripe', __('Payment with Stripe')) }}</textarea>
+                            <textarea class="next-input" name="payment_stripe_description" id="payment_stripe_description">{{ get_payment_setting('description', 'stripe', __('Payment with :paymentType', ['paymentType' => 'Stripe'])) }}</textarea>
                         </x-core-setting::form-group>
 
                         <p class="payment-note">
@@ -77,7 +77,7 @@
                         <x-core-setting::text-input
                             name="payment_stripe_client_id"
                             :label="trans('plugins/payment::payment.stripe_key')"
-                            :value="app()->environment('demo') ? '*******************************' : setting('payment_stripe_client_id')"
+                            :value="BaseHelper::hasDemoModeEnabled() ? '*******************************' : setting('payment_stripe_client_id')"
                             placeholder="pk_*************"
                             data-counter="400"
                         />
@@ -86,7 +86,7 @@
                             name="payment_stripe_secret"
                             type="password"
                             :label="trans('plugins/payment::payment.stripe_secret')"
-                            :value="app()->environment('demo') ? '*******************************' : setting('payment_stripe_secret')"
+                            :value="BaseHelper::hasDemoModeEnabled() ? '*******************************' : setting('payment_stripe_secret')"
                             placeholder="sk_*************"
                         />
 
@@ -94,8 +94,8 @@
                             :name="'payment_' . STRIPE_PAYMENT_METHOD_NAME . '_payment_type'"
                             :label="__('Payment Type')"
                             :options="[
-                                'stripe_api_charge' => __('Stripe API Charge'),
-                                'stripe_checkout' => __('Stripe Checkout'),
+                                'stripe_api_charge' => 'Stripe API Charge',
+                                'stripe_checkout' => 'Stripe Checkout',
                             ]"
                             :value="get_payment_setting('payment_type', STRIPE_PAYMENT_METHOD_NAME, 'stripe_api_charge')"
                         />

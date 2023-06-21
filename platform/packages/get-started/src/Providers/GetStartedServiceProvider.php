@@ -6,7 +6,7 @@ use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 
 class GetStartedServiceProvider extends ServiceProvider
 {

@@ -14,9 +14,6 @@ use Botble\Media\Facades\RvMedia;
 use Botble\Media\Models\MediaFile;
 use Botble\Media\Models\MediaFolder;
 use Botble\Media\Models\MediaSetting;
-use Botble\Media\Repositories\Caches\MediaFileCacheDecorator;
-use Botble\Media\Repositories\Caches\MediaFolderCacheDecorator;
-use Botble\Media\Repositories\Caches\MediaSettingCacheDecorator;
 use Botble\Media\Repositories\Eloquent\MediaFileRepository;
 use Botble\Media\Repositories\Eloquent\MediaFolderRepository;
 use Botble\Media\Repositories\Eloquent\MediaSettingRepository;
@@ -32,7 +29,7 @@ use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
 use League\Flysystem\Filesystem;
 
@@ -46,25 +43,18 @@ class MediaServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(MediaFileInterface::class, function () {
-            return new MediaFileCacheDecorator(
-                new MediaFileRepository(new MediaFile()),
-                MEDIA_GROUP_CACHE_KEY
-            );
+            return new MediaFileRepository(new MediaFile());
         });
 
         $this->app->bind(MediaFolderInterface::class, function () {
-            return new MediaFolderCacheDecorator(
-                new MediaFolderRepository(new MediaFolder()),
-                MEDIA_GROUP_CACHE_KEY
-            );
+            return new MediaFolderRepository(new MediaFolder());
         });
 
         $this->app->bind(MediaSettingInterface::class, function () {
-            return new MediaSettingCacheDecorator(
-                new MediaSettingRepository(new MediaSetting()),
-                MEDIA_GROUP_CACHE_KEY
-            );
+            return new MediaSettingRepository(new MediaSetting());
         });
+
+        $this->app->singleton(ChunkStorage::class);
 
         if (! class_exists('RvMedia')) {
             AliasLoader::getInstance()->alias('RvMedia', RvMedia::class);
@@ -192,24 +182,15 @@ class MediaServiceProvider extends ServiceProvider
             GenerateThumbnailCommand::class,
             DeleteThumbnailCommand::class,
             InsertWatermarkCommand::class,
+            ClearChunksCommand::class,
         ]);
 
-        $this->app->booted(function () {
+        $this->app->afterResolving(Schedule::class, function (Schedule $schedule) {
             if (RvMedia::getConfig('chunk.clear.schedule.enabled')) {
-                $schedule = $this->app->make(Schedule::class);
-
-                $schedule->command('cms:media:chunks:clear')->cron(RvMedia::getConfig('chunk.clear.schedule.cron'));
+                $schedule
+                    ->command(ClearChunksCommand::class)
+                    ->cron(RvMedia::getConfig('chunk.clear.schedule.cron'));
             }
         });
-
-        if (RvMedia::getConfig('chunk.clear.schedule.enabled')) {
-            $this->commands([
-                ClearChunksCommand::class,
-            ]);
-
-            $this->app->singleton(ChunkStorage::class, function () {
-                return new ChunkStorage();
-            });
-        }
     }
 }

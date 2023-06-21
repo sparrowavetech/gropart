@@ -66,7 +66,10 @@ class HookServiceProvider extends ServiceProvider
                 $paymentService = (new PaystackPaymentService());
                 $paymentDetail = $paymentService->getPaymentDetails($payment);
                 if ($paymentDetail) {
-                    $data = view('plugins/paystack::detail', ['payment' => $paymentDetail, 'paymentModel' => $payment])->render();
+                    $data = view(
+                        'plugins/paystack::detail',
+                        ['payment' => $paymentDetail, 'paymentModel' => $payment]
+                    )->render();
                 }
             }
 
@@ -82,7 +85,10 @@ class HookServiceProvider extends ServiceProvider
                     $refund = array_merge($refund, Arr::get($refundDetail, 'data', []));
 
                     return array_merge($refundDetail, [
-                        'view' => view('plugins/paystack::refund-detail', ['refund' => $refund, 'paymentModel' => $payment])->render(),
+                        'view' => view(
+                            'plugins/paystack::refund-detail',
+                            ['refund' => $refund, 'paymentModel' => $payment]
+                        )->render(),
                     ]);
                 }
 
@@ -109,50 +115,57 @@ class HookServiceProvider extends ServiceProvider
 
     public function checkoutWithPaystack(array $data, Request $request): array
     {
-        if ($request->input('payment_method') == PAYSTACK_PAYMENT_METHOD_NAME) {
-            $supportedCurrencies = (new PaystackPaymentService())->supportedCurrencyCodes();
+        if ($data['type'] !== PAYSTACK_PAYMENT_METHOD_NAME) {
+            return $data;
+        }
 
-            if (! in_array($data['currency'], $supportedCurrencies)) {
-                $data['error'] = true;
-                $data['message'] = __(":name doesn't support :currency. List of currencies supported by :name: :currencies.", [
+        $supportedCurrencies = (new PaystackPaymentService())->supportedCurrencyCodes();
+
+        $paymentData = apply_filters(PAYMENT_FILTER_PAYMENT_DATA, [], $request);
+
+        if (! in_array($paymentData['currency'], $supportedCurrencies)) {
+            $data['error'] = true;
+            $data['message'] = __(
+                ":name doesn't support :currency. List of currencies supported by :name: :currencies.",
+                [
                     'name' => 'Paystack',
-                    'currency' => $data['currency'],
+                    'currency' => $paymentData['currency'],
                     'currencies' => implode(', ', $supportedCurrencies),
-                ]);
+                ]
+            );
 
-                return $data;
+            return $data;
+        }
+
+        $orderIds = $paymentData['order_id'];
+        $orderId = Arr::first($orderIds);
+        $orderAddress = $this->app->make(OrderAddressInterface::class)->getFirstBy(['order_id' => $orderId]);
+
+        try {
+            $response = Paystack::getAuthorizationResponse([
+                'reference' => Paystack::genTranxRef(),
+                'quantity' => 1,
+                'currency' => $paymentData['currency'],
+                'amount' => (int)$paymentData['amount'] * 100,
+                'email' => $orderAddress ? $orderAddress->email : 'no-email@domain.com',
+                'callback_url' => route('paystack.payment.callback'),
+                'metadata' => json_encode([
+                    'order_id' => $orderIds,
+                    'customer_id' => $paymentData['customer_id'],
+                    'customer_type' => $paymentData['customer_type'],
+                ]),
+            ]);
+
+            if ($response['status']) {
+                header('Location: ' . $response['data']['authorization_url']);
+                exit;
             }
 
-            $orderIds = (array) $request->input('order_id', []);
-            $orderId = Arr::first($orderIds);
-            $orderAddress = $this->app->make(OrderAddressInterface::class)->getFirstBy(['order_id' => $orderId]);
-
-            try {
-                $response = Paystack::getAuthorizationResponse([
-                    'reference' => Paystack::genTranxRef(),
-                    'quantity' => 1,
-                    'currency' => $data['currency'],
-                    'amount' => (int)$data['amount'] * 100,
-                    'email' => $orderAddress ? $orderAddress->email : 'no-email@domain.com',
-                    'callback_url' => route('paystack.payment.callback'),
-                    'metadata' => json_encode([
-                        'order_id' => $orderIds,
-                        'customer_id' => $request->input('customer_id'),
-                        'customer_type' => $request->input('customer_type'),
-                    ]),
-                ]);
-
-                if ($response['status']) {
-                    header('Location: ' . $response['data']['authorization_url']);
-                    exit;
-                }
-
-                $data['error'] = true;
-                $data['message'] = __('Payment failed!');
-            } catch (Throwable $exception) {
-                $data['error'] = true;
-                $data['message'] = json_encode($exception->getMessage());
-            }
+            $data['error'] = true;
+            $data['message'] = __('Payment failed!');
+        } catch (Throwable $exception) {
+            $data['error'] = true;
+            $data['message'] = json_encode($exception->getMessage());
         }
 
         return $data;

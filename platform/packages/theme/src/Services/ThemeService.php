@@ -5,11 +5,11 @@ namespace Botble\Theme\Services;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Supports\Helper;
 use Botble\PluginManagement\Services\PluginService;
-use Botble\Setting\Repositories\Interfaces\SettingInterface;
+use Botble\Setting\Models\Setting;
 use Botble\Setting\Supports\SettingStore;
 use Botble\Theme\Events\ThemeRemoveEvent;
 use Botble\Theme\Facades\ThemeOption;
-use Botble\Widget\Repositories\Interfaces\WidgetInterface;
+use Botble\Widget\Models\Widget;
 use Exception;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
@@ -20,9 +20,7 @@ class ThemeService
     public function __construct(
         protected Filesystem $files,
         protected SettingStore $settingStore,
-        protected PluginService $pluginService,
-        protected WidgetInterface $widgetRepository,
-        protected SettingInterface $settingRepository
+        protected PluginService $pluginService
     ) {
     }
 
@@ -163,12 +161,12 @@ class ThemeService
         $this->removeAssets($theme);
 
         $this->files->deleteDirectory($this->getPath($theme));
-        $this->widgetRepository->getModel()
+        Widget::query()
             ->where('theme', $theme)
-            ->orWhere('theme', 'like', $theme . '-%')
+            ->orWhere('theme', 'LIKE', $theme . '-%')
             ->delete();
-        $this->settingRepository->getModel()
-            ->where('key', 'like', ThemeOption::getOptionKey('%', theme: $theme))
+        Setting::query()
+            ->where('key', 'LIKE', ThemeOption::getOptionKey('%', theme: $theme))
             ->delete();
 
         event(new ThemeRemoveEvent($theme));

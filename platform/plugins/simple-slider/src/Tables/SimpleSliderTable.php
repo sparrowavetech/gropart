@@ -5,7 +5,6 @@ namespace Botble\SimpleSlider\Tables;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\SimpleSlider\Models\SimpleSlider;
-use Botble\SimpleSlider\Repositories\Interfaces\SimpleSliderInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Base\Facades\Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
@@ -19,18 +18,17 @@ use Botble\Table\DataTables;
 
 class SimpleSliderTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
     public function __construct(
         DataTables $table,
         UrlGenerator $urlGenerator,
-        SimpleSliderInterface $simpleSliderRepository
+        SimpleSlider $simpleSlider
     ) {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $simpleSliderRepository;
+        $this->model = $simpleSlider;
+
+        $this->hasActions = true;
+        $this->hasFilter = true;
 
         if (! Auth::user()->hasAnyPermission(['simple-slider.edit', 'simple-slider.destroy'])) {
             $this->hasOperations = false;
@@ -47,10 +45,10 @@ class SimpleSliderTable extends TableAbstract
                     return BaseHelper::clean($item->name);
                 }
 
-                return Html::link(route('simple-slider.edit', $item->id), BaseHelper::clean($item->name));
+                return Html::link(route('simple-slider.edit', $item->getKey()), BaseHelper::clean($item->name));
             })
             ->editColumn('checkbox', function (SimpleSlider $item) {
-                return $this->getCheckbox($item->id);
+                return $this->getCheckbox($item->getKey());
             })
             ->editColumn('created_at', function (SimpleSlider $item) {
                 return BaseHelper::formatDate($item->created_at);
@@ -73,13 +71,16 @@ class SimpleSliderTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()->select([
-            'id',
-            'name',
-            'key',
-            'status',
-            'created_at',
-        ]);
+        $query = $this
+            ->getModel()
+            ->query()
+            ->select([
+                'id',
+                'name',
+                'key',
+                'status',
+                'created_at',
+            ]);
 
         return $this->applyScopes($query);
     }

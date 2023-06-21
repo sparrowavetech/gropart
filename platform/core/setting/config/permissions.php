@@ -16,4 +16,9 @@ return [
         'flag' => 'settings.media',
         'parent_flag' => 'settings.options',
     ],
+    [
+        'name' => 'Cronjob',
+        'flag' => 'settings.cronjob',
+        'parent_flag' => 'settings.options',
+    ],
 ];

@@ -10,6 +10,8 @@ class ContactPluginManagement {
             } else {
                 answerWrapper.fadeIn()
             }
+
+            new EditorManagement().init()
         })
 
         $(document).on('click', '.answer-send-button', (event) => {

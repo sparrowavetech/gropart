@@ -23,4 +23,4 @@
     .
 </span>
 <span class="small italic d-inline-block">{{ $history->created_at->diffForHumans() }} </span>
-<span class="d-inline-block">(<a href="https://whatismyipaddress.com/ip/{{ $history->ip_address }}" target="_blank" title="{{ $history->ip_address }}" rel="nofollow">{{ $history->ip_address }}</a>)</span>
+<span class="d-inline-block">(<a href="https://ipinfo.io/{{ $history->ip_address }}" target="_blank" title="{{ $history->ip_address }}" rel="nofollow">{{ $history->ip_address }}</a>)</span>

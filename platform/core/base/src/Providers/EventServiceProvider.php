@@ -41,10 +41,8 @@ class EventServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        parent::boot();
-
         $this->app['events']->listen(['cache:cleared'], function () {
-            $this->app['files']->delete([storage_path('cache_keys.json'), storage_path('settings.json')]);
+            $this->app['files']->delete(storage_path('cache_keys.json'));
         });
     }
 }

@@ -23,7 +23,12 @@ class BaseSeeder extends Seeder
 {
     public function uploadFiles(string $folder, string|null $basePath = null): array
     {
-        Storage::deleteDirectory($folder);
+        $storage = Storage::disk('public');
+
+        if ($storage->exists($folder)) {
+            $storage->deleteDirectory($folder);
+        }
+
         MediaFile::where('url', 'LIKE', $folder . '/%')->forceDelete();
         MediaFolder::where('name', $folder)->forceDelete();
 

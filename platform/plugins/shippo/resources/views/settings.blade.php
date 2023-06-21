@@ -107,16 +107,16 @@
                                     name="shipping_shippo_test_key"
                                     :label="trans('plugins/shippo::shippo.test_api_token')"
                                     placeholder="<API-KEY>"
-                                    :disabled="app()->environment('demo')"
-                                    :value="app()->environment('demo') ? Str::mask($testKey, '*', 10) : $testKey"
+                                    :disabled="BaseHelper::hasDemoModeEnabled()"
+                                    :value="BaseHelper::hasDemoModeEnabled() ? Str::mask($testKey, '*', 10) : $testKey"
                                 />
 
                                 <x-core-setting::text-input
                                     name="shipping_shippo_production_key"
                                     :label="trans('plugins/shippo::shippo.live_api_token')"
                                     placeholder="<API-KEY>"
-                                    :disabled="app()->environment('demo')"
-                                    :value="app()->environment('demo') ? Str::mask($prodKey, '*', 10) : $prodKey"
+                                    :disabled="BaseHelper::hasDemoModeEnabled()"
+                                    :value="BaseHelper::hasDemoModeEnabled() ? Str::mask($prodKey, '*', 10) : $prodKey"
                                 />
 
                                 <div class="form-group mb-3">
@@ -160,8 +160,7 @@
                                 <x-core-setting::checkbox
                                     name="shipping_shippo_validate"
                                     :label="trans('plugins/shippo::shippo.check_validate_token')"
-                                    :value="setting('shipping_shippo_validate')"
-
+                                    :checked="setting('shipping_shippo_validate')"
                                 />
 
                                 @if (count($logFiles))

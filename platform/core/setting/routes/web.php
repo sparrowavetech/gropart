@@ -112,6 +112,12 @@ Route::group(['namespace' => 'Botble\Setting\Http\Controllers', 'middleware' => 
                     'uses' => 'SettingController@postSendTestEmail',
                 ]);
             });
+
+            Route::get('cronjob', [
+                'as' => 'settings.cronjob',
+                'uses' => 'SettingController@cronjob',
+                'permission' => 'settings.cronjob',
+            ]);
         });
     });
 });

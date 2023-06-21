@@ -13,7 +13,7 @@ Route::group(['namespace' => 'Botble\Language\Http\Controllers', 'middleware' =>
 
             Route::post('store', [
                 'as' => 'languages.store',
-                'uses' => 'LanguageController@postStore',
+                'uses' => 'LanguageController@store',
                 'permission' => 'languages.create',
                 'middleware' => 'preventDemo',
             ]);

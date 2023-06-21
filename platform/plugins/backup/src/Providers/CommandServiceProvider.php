@@ -7,7 +7,7 @@ use Botble\Backup\Commands\BackupCreateCommand;
 use Botble\Backup\Commands\BackupListCommand;
 use Botble\Backup\Commands\BackupRemoveCommand;
 use Botble\Backup\Commands\BackupRestoreCommand;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 
 class CommandServiceProvider extends ServiceProvider
 {

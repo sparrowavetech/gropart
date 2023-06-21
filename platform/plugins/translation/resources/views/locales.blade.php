@@ -12,8 +12,8 @@
                             <form class="add-locale-form" action="{{ route('translations.locales') }}" method="POST">
                                 @csrf
                                 <div class="form-group mb-3">
-                                    <label for="locale_id" class="control-label">{{ trans('plugins/translation::translation.locale') }}</label>
-                                    {!! Form::customSelect('locale_id', ['' => trans('plugins/translation::translation.select_locale')] + collect($locales)->map(fn($item, $key) => $item . ' - ' . $key)->all(), null, ['class' => 'select-search-full']) !!}
+                                    <label for="locale" class="control-label">{{ trans('plugins/translation::translation.locale') }}</label>
+                                    {!! Form::customSelect('locale', ['' => trans('plugins/translation::translation.select_locale')] + collect($locales)->map(fn($item, $key) => $item . ' - ' . $key)->all(), null, ['class' => 'select-search-full']) !!}
                                 </div>
                                 <p class="submit">
                                     <button class="btn btn-primary" type="submit">{{ trans('plugins/translation::translation.add_new_locale') }}</button>

@@ -104,7 +104,7 @@
 
                     a {
                         display: flex;
-                        justify-content: start;
+                        justify-content: flex-start;
                         margin-right: 0 !important;
                         width: 100%;
                         text-align: left;
@@ -119,7 +119,7 @@
             display: block;
             margin-left: 5px;
             float: left;
-            min-width: 95px;
+            min-width: 90px;
 
             a {
                 text-align: left;

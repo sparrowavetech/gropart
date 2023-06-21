@@ -14,7 +14,8 @@ use Botble\Theme\Supports\Vimeo;
 use Botble\Theme\Supports\Youtube;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
+use Throwable;
 
 class HookServiceProvider extends ServiceProvider
 {
@@ -238,11 +239,15 @@ class HookServiceProvider extends ServiceProvider
         }
 
         add_filter(THEME_FRONT_FOOTER, function (string|null $html): string|null {
-            if (! Auth::check() || ! AdminBar::isDisplay() || ! (int)setting('show_admin_bar', 1)) {
+            try {
+                if (! Auth::check() || ! AdminBar::isDisplay() || ! (int)setting('show_admin_bar', 1)) {
+                    return $html;
+                }
+
+                return $html . Html::style('vendor/core/packages/theme/css/admin-bar.css') . AdminBar::render();
+            } catch (Throwable) {
                 return $html;
             }
-
-            return $html . Html::style('vendor/core/packages/theme/css/admin-bar.css') . AdminBar::render();
         }, 14);
 
         add_filter(

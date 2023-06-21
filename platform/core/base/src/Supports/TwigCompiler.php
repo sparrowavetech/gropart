@@ -32,4 +32,9 @@ class TwigCompiler
 
         return $this;
     }
+
+    public function getExtensions(): array
+    {
+        return $this->env->getExtensions();
+    }
 }

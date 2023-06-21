@@ -18,7 +18,7 @@ class DeletedContentListener
         if (SlugHelper::isSupportedModel(get_class($event->data))) {
             try {
                 $this->slugRepository->deleteBy([
-                    'reference_id' => $event->data->id,
+                    'reference_id' => $event->data->getKey(),
                     'reference_type' => get_class($event->data),
                 ]);
             } catch (Exception $exception) {

@@ -3,7 +3,7 @@
 namespace Botble\ACL\Providers;
 
 use Botble\ACL\Hooks\UserWidgetHook;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 
 class HookServiceProvider extends ServiceProvider
 {

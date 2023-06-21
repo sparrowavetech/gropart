@@ -11,7 +11,7 @@
         <td class="border-right">
             <ul>
                 <li>
-                    <a href="https://mollie.com" target="_blank">{{ __('Mollie') }}</a>
+                    <a href="https://mollie.com" target="_blank">Mollie</a>
                     <p>{{ __('Customer can buy product and pay directly using Visa, Credit card via :name', ['name' => 'Mollie']) }}</p>
                 </li>
             </ul>
@@ -32,7 +32,7 @@
             </div>
         </td>
     </tr>
-    <tr class="paypal-online-payment payment-content-item hidden">
+    <tr class="payment-content-item hidden">
         <td class="border-left" colspan="3">
             {!! Form::open() !!}
             {!! Form::hidden('type', MOLLIE_PAYMENT_METHOD_NAME, ['class' => 'payment_type']) !!}
@@ -72,7 +72,7 @@
                         </div>
                         <div class="form-group mb-3">
                             <label class="text-title-field" for="payment_{{ MOLLIE_PAYMENT_METHOD_NAME }}_description">{{ trans('core/base::forms.description') }}</label>
-                            <textarea class="next-input" name="payment_{{ MOLLIE_PAYMENT_METHOD_NAME }}_description" id="payment_{{ MOLLIE_PAYMENT_METHOD_NAME }}_description">{{ get_payment_setting('description', MOLLIE_PAYMENT_METHOD_NAME, __('Payment with Mollie')) }}</textarea>
+                            <textarea class="next-input" name="payment_{{ MOLLIE_PAYMENT_METHOD_NAME }}_description" id="payment_{{ MOLLIE_PAYMENT_METHOD_NAME }}_description">{{ get_payment_setting('description', MOLLIE_PAYMENT_METHOD_NAME, __('Payment with :paymentType', ['paymentType' => 'Mollie'])) }}</textarea>
                         </div>
                         <p class="payment-note">
                             {{ trans('plugins/payment::payment.please_provide_information') }} <a target="_blank" href="https://mollie.com">Mollie</a>:

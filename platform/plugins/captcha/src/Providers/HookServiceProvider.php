@@ -2,7 +2,7 @@
 
 namespace Botble\Captcha\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 
 class HookServiceProvider extends ServiceProvider
 {

@@ -6,7 +6,7 @@ use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Supports\Helper;
 use Composer\Autoload\ClassLoader;
 use Illuminate\Support\Arr;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Theme\Facades\Theme;
 
 class ThemeManagementServiceProvider extends ServiceProvider
@@ -16,6 +16,7 @@ class ThemeManagementServiceProvider extends ServiceProvider
         $theme = Theme::getThemeName();
         if (! empty($theme)) {
             $this->app['translator']->addJsonPath(theme_path($theme . '/lang'));
+            $this->app['translator']->addJsonPath(lang_path('vendor/themes/' . $theme));
         }
     }
 

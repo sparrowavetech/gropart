@@ -12,8 +12,6 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Botble\ACL\Enums\UserStatusEnum;
-use Botble\ACL\Repositories\Interfaces\ActivationInterface;
-use Botble\ACL\Repositories\Interfaces\UserInterface;
 use Botble\ACL\Services\ActivateUserService;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Table\Abstracts\TableAbstract;
@@ -24,19 +22,18 @@ use Illuminate\Support\Arr;
 
 class UserTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
     public function __construct(
         DataTables $table,
         UrlGenerator $urlGenerator,
-        UserInterface $repository,
+        User $user,
         protected ActivateUserService $service
     ) {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $repository;
+        $this->model = $user;
+
+        $this->hasActions = true;
+        $this->hasFilter = true;
 
         if (! Auth::user()->hasAnyPermission(['users.edit', 'users.destroy'])) {
             $this->hasOperations = false;
@@ -49,14 +46,14 @@ class UserTable extends TableAbstract
         $data = $this->table
             ->eloquent($this->query())
             ->editColumn('checkbox', function (User $item) {
-                return $this->getCheckbox($item->id);
+                return $this->getCheckbox($item->getKey());
             })
             ->editColumn('username', function (User $item) {
                 if (! Auth::user()->hasPermission('users.edit')) {
                     return $item->username;
                 }
 
-                return Html::link(route('users.profile.view', $item->id), $item->username);
+                return Html::link(route('users.profile.view', $item->getKey()), $item->username);
             })
             ->editColumn('created_at', function (User $item) {
                 return BaseHelper::formatDate($item->created_at);
@@ -72,7 +69,7 @@ class UserTable extends TableAbstract
                 return $item->super_user ? trans('core/base::base.yes') : trans('core/base::base.no');
             })
             ->editColumn('status', function (User $item) {
-                if (app(ActivationInterface::class)->completed($item)) {
+                if ($item->activations()->where('completed', true)->exists()) {
                     return UserStatusEnum::ACTIVATED()->toHtml();
                 }
 
@@ -83,14 +80,14 @@ class UserTable extends TableAbstract
                 $action = null;
                 if (Auth::user()->isSuperUser()) {
                     $action = Html::link(
-                        route('users.make-super', $item->id),
+                        route('users.make-super', $item->getKey()),
                         trans('core/acl::users.make_super'),
                         ['class' => 'btn btn-info']
                     )->toHtml();
 
                     if ($item->super_user) {
                         $action = Html::link(
-                            route('users.remove-super', $item->id),
+                            route('users.remove-super', $item->getKey()),
                             trans('core/acl::users.remove_super'),
                             ['class' => 'btn btn-danger']
                         )->toHtml();
@@ -109,7 +106,9 @@ class UserTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()
+        $query = $this
+            ->getModel()
+            ->query()
             ->leftJoin('role_users', 'users.id', '=', 'role_users.user_id')
             ->leftJoin('roles', 'roles.id', '=', 'role_users.role_id')
             ->select([
@@ -235,12 +234,15 @@ class UserTable extends TableAbstract
                     $hasWarning = true;
                 }
 
-                $user = $this->repository->findOrFail($id);
+                /**
+                 * @var User $user
+                 */
+                $user = $this->getModel()->query()->findOrFail($id);
 
                 if ($inputValue == UserStatusEnum::ACTIVATED) {
                     $this->service->activate($user);
                 } else {
-                    app(ActivationInterface::class)->remove($user);
+                    $this->service->remove($user);
                 }
 
                 event(new UpdatedContentEvent(USER_MODULE_SCREEN_NAME, request(), $user));

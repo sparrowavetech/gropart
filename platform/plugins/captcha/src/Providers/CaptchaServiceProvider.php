@@ -10,7 +10,7 @@ use Botble\Captcha\MathCaptcha;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Theme\Facades\Theme;
 
 class CaptchaServiceProvider extends ServiceProvider

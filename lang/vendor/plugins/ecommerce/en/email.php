@@ -10,6 +10,9 @@ return [
     'delivery_confirmation_title' => 'Delivering confirmation',
     'delivery_confirmation_description' => 'Send to customer when order is delivering',
 
+    'order_delivered_title' => 'Order delivered',
+    'order_delivered_description' => 'Send to customer when order is delivered',
+
     'admin_new_order_title' => 'Notice about new order',
     'admin_new_order_description' => 'Send to administrators when an order placed',
 

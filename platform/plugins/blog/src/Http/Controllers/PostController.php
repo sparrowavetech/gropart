@@ -129,7 +129,7 @@ class PostController extends BaseController
 
     public function deletes(Request $request, BaseHttpResponse $response)
     {
-        return $this->executeDeleteItems($request, $response, $this->postRepository, POST_MODULE_SCREEN_NAME);
+        return $this->executeDeleteItems($request, $response, new Post(), POST_MODULE_SCREEN_NAME);
     }
 
     public function getWidgetRecentPosts(Request $request, BaseHttpResponse $response)

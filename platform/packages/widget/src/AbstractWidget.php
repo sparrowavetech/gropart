@@ -141,7 +141,7 @@ abstract class AbstractWidget
 
     protected function data(): array|Collection
     {
-        return [];
+        return $this->data;
     }
 
     protected function setBackendTemplate(string $template): self

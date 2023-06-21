@@ -11,9 +11,6 @@ use Botble\Location\Facades\Location;
 use Botble\Location\Models\City;
 use Botble\Location\Models\Country;
 use Botble\Location\Models\State;
-use Botble\Location\Repositories\Caches\CityCacheDecorator;
-use Botble\Location\Repositories\Caches\CountryCacheDecorator;
-use Botble\Location\Repositories\Caches\StateCacheDecorator;
 use Botble\Location\Repositories\Eloquent\CityRepository;
 use Botble\Location\Repositories\Eloquent\CountryRepository;
 use Botble\Location\Repositories\Eloquent\StateRepository;
@@ -25,7 +22,7 @@ use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 
 class LocationServiceProvider extends ServiceProvider
 {
@@ -34,15 +31,15 @@ class LocationServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(CountryInterface::class, function () {
-            return new CountryCacheDecorator(new CountryRepository(new Country()));
+            return new CountryRepository(new Country());
         });
 
         $this->app->bind(StateInterface::class, function () {
-            return new StateCacheDecorator(new StateRepository(new State()));
+            return new StateRepository(new State());
         });
 
         $this->app->bind(CityInterface::class, function () {
-            return new CityCacheDecorator(new CityRepository(new City()));
+            return new CityRepository(new City());
         });
 
         AliasLoader::getInstance()->alias('Location', Location::class);
@@ -76,15 +73,16 @@ class LocationServiceProvider extends ServiceProvider
         }
 
         $this->app['events']->listen(RouteMatched::class, function () {
-            DashboardMenu::registerItem([
-                'id' => 'cms-plugins-location',
-                'priority' => 900,
-                'parent_id' => null,
-                'name' => 'plugins/location::location.name',
-                'icon' => 'fas fa-globe',
-                'url' => null,
-                'permissions' => ['country.index'],
-            ])
+            DashboardMenu::make()
+                ->registerItem([
+                    'id' => 'cms-plugins-location',
+                    'priority' => 900,
+                    'parent_id' => null,
+                    'name' => 'plugins/location::location.name',
+                    'icon' => 'fas fa-globe',
+                    'url' => null,
+                    'permissions' => ['country.index'],
+                ])
                 ->registerItem([
                     'id' => 'cms-plugins-country',
                     'priority' => 0,

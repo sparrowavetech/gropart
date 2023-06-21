@@ -9,7 +9,7 @@ use Botble\Faq\FaqCollection;
 use Botble\Faq\FaqItem;
 use Botble\Base\Facades\Html;
 use Illuminate\Support\Arr;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Facades\MetaBox;
 
 class HookServiceProvider extends ServiceProvider

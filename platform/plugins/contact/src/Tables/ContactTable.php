@@ -12,7 +12,6 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Botble\Contact\Enums\ContactStatusEnum;
-use Botble\Contact\Repositories\Interfaces\ContactInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Validation\Rule;
@@ -20,17 +19,16 @@ use Botble\Table\DataTables;
 
 class ContactTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
     protected string $exportClass = ContactExport::class;
 
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, ContactInterface $contactRepository)
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Contact $contact)
     {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $contactRepository;
+        $this->model = $contact;
+
+        $this->hasActions = true;
+        $this->hasFilter = true;
 
         if (! Auth::user()->hasAnyPermission(['contacts.edit', 'contacts.destroy'])) {
             $this->hasOperations = false;
@@ -47,10 +45,10 @@ class ContactTable extends TableAbstract
                     return BaseHelper::clean($item->name);
                 }
 
-                return Html::link(route('contacts.edit', $item->id), BaseHelper::clean($item->name));
+                return Html::link(route('contacts.edit', $item->getKey()), BaseHelper::clean($item->name));
             })
             ->editColumn('checkbox', function (Contact $item) {
-                return $this->getCheckbox($item->id);
+                return $this->getCheckbox($item->getKey());
             })
             ->editColumn('created_at', function (Contact $item) {
                 return BaseHelper::formatDate($item->created_at);
@@ -67,14 +65,17 @@ class ContactTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()->select([
-            'id',
-            'name',
-            'phone',
-            'email',
-            'created_at',
-            'status',
-        ]);
+        $query = $this
+            ->getModel()
+            ->query()
+            ->select([
+                'id',
+                'name',
+                'phone',
+                'email',
+                'created_at',
+                'status',
+            ]);
 
         return $this->applyScopes($query);
     }

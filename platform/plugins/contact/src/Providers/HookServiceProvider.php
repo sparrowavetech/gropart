@@ -8,7 +8,7 @@ use Botble\Contact\Repositories\Interfaces\ContactInterface;
 use Botble\Shortcode\Compilers\Shortcode;
 use Botble\Base\Facades\Html;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Theme\Facades\Theme;
 
 class HookServiceProvider extends ServiceProvider

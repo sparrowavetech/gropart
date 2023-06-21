@@ -1,8 +1,8 @@
 @php
     $prefix = apply_filters(FILTER_SLUG_PREFIX, $prefix);
     $value = $value ?: old('slug');
-    $endingURL = config('core.base.general.public_single_ending_url');
-    $previewURL = str_replace('--slug--', (string)$value, url($prefix) . '/' . config('packages.slug.general.pattern')) . $endingURL . (Auth::user() && $preview ? '?preview=true' : '');
+    $endingURL = SlugHelper::getPublicSingleEndingURL();
+    $previewURL = str_replace('--slug--', (string) $value, url($prefix) . '/' . config('packages.slug.general.pattern')) . $endingURL . (Auth::user() && $preview ? '?preview=true' : '');
 @endphp
 
 <div id="edit-slug-box" @if (empty($value) && !$errors->has($name)) class="hidden" @endif data-field-name="{{ SlugHelper::getColumnNameToGenerateSlug($model) }}">
@@ -14,7 +14,6 @@
             </a>
         </span>
     @else
-
         <label class="control-label @if ($editable) required @endif" for="current-slug">{{ trans('core/base::forms.permalink') }}:</label>
         <span id="sample-permalink" class="d-inline-block" dir="ltr">
             <a class="permalink" target="_blank" href="{{ $previewURL }}">

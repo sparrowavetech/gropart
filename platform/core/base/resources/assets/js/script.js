@@ -469,6 +469,29 @@ class Botble {
                     $(element).select2(options)
                 }
             })
+
+            $(document).find('.select2_google_fonts_picker').each(function (i, obj) {
+                if (!$(obj).hasClass('select2-hidden-accessible')) {
+                    let options = {
+                        templateResult: function (opt) {
+                            if (!opt.id) {
+                                return opt.text
+                            }
+
+                            return $('<span style="font-family:\'' + opt.id + '\';"> ' + opt.text + '</span>')
+                        },
+                        width: '100%',
+                    }
+
+                    let parent = $(obj).closest('div[data-select2-dropdown-parent]') || $(obj).closest('.modal')
+                    if (parent.length) {
+                        options.dropdownParent = parent
+                        options.minimumResultsForSearch = -1
+                    }
+
+                    $(obj).select2(options)
+                }
+            })
         }
 
         if (jQuery().timepicker) {
@@ -587,29 +610,6 @@ class Botble {
         if (jQuery().textareaAutoSize) {
             $('textarea.textarea-auto-height').textareaAutoSize()
         }
-
-        $('.select2_google_fonts_picker').each(function (i, obj) {
-            if (!$(obj).hasClass('select2-hidden-accessible')) {
-                let options = {
-                    templateResult: function (opt) {
-                        if (!opt.id) {
-                            return opt.text
-                        }
-
-                        return $('<span style="font-family:\'' + opt.id + '\';"> ' + opt.text + '</span>')
-                    },
-                }
-
-                let parent = $(obj).closest('div[data-select2-dropdown-parent]') || $(obj).closest('.modal')
-                if (parent.length) {
-                    options.dropdownParent = parent
-                    options.width = '100%'
-                    options.minimumResultsForSearch = -1
-                }
-
-                $(obj).select2(options)
-            }
-        })
 
         $(document).on('submit', '.js-base-form', (event) => {
             $(event.currentTarget).find('button[type=submit]').addClass('disabled')

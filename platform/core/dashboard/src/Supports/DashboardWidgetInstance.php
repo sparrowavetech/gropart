@@ -260,13 +260,13 @@ class DashboardWidgetInstance
 
     public function getPredefinedRangesDefault(): array
     {
-        $endDate = today()->endOfDay();
+        $endDate = Carbon::today()->endOfDay();
 
         return [
             [
                 'key' => 'today',
                 'label' => trans('core/dashboard::dashboard.predefined_ranges.today'),
-                'startDate' => today()->startOfDay(),
+                'startDate' => Carbon::today()->startOfDay(),
                 'endDate' => $endDate,
             ],
             [

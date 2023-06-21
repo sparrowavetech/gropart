@@ -10,7 +10,7 @@ use Botble\Analytics\Facades\Analytics as AnalyticsFacade;
 use Botble\Analytics\GA4\Analytics as AnalyticsGA4;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Illuminate\Foundation\AliasLoader;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Analytics\Exceptions\InvalidConfiguration;
 
 class AnalyticsServiceProvider extends ServiceProvider

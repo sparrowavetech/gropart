@@ -4,6 +4,7 @@ namespace Botble\Base\Traits;
 
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Base\Models\BaseModel;
 use Botble\Support\Repositories\Interfaces\RepositoryInterface;
 use Illuminate\Http\Request;
 
@@ -12,7 +13,7 @@ trait HasDeleteManyItemsTrait
     protected function executeDeleteItems(
         Request $request,
         BaseHttpResponse $response,
-        RepositoryInterface $repository,
+        RepositoryInterface|BaseModel $repository,
         string $screen
     ): BaseHttpResponse {
         $ids = $request->input('ids');
@@ -29,7 +30,8 @@ trait HasDeleteManyItemsTrait
                 continue;
             }
 
-            $repository->delete($item);
+            $item->delete();
+
             event(new DeletedContentEvent($screen, $request, $item));
         }
 

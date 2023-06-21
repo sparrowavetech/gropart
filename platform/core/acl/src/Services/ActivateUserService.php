@@ -13,7 +13,7 @@ class ActivateUserService
 
     public function activate(User $user): bool
     {
-        if ($this->activationRepository->completed($user)) {
+        if ($user->activated) {
             return false;
         }
 
@@ -24,5 +24,20 @@ class ActivateUserService
         event('acl.activated', [$user, $activation]);
 
         return $this->activationRepository->complete($user, $activation->code);
+    }
+
+    public function remove(User $user): bool|null
+    {
+        if (! $user->activated) {
+            return false;
+        }
+
+        event('acl.deactivating', $user);
+
+        $removed = $this->activationRepository->remove($user);
+
+        event('acl.deactivated', $user);
+
+        return $removed;
     }
 }

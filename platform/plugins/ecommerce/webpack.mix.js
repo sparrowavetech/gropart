@@ -6,22 +6,11 @@ let directory = path.basename(path.resolve(__dirname));
 const source = 'platform/plugins/' + directory;
 const dist = 'public/vendor/core/plugins/' + directory;
 
-/*
- |--------------------------------------------------------------------------
- | Mix Asset Management
- |--------------------------------------------------------------------------
- |
- | Mix provides a clean, fluent API for defining some Webpack build steps
- | for your Laravel application. By default, we are compiling the Sass
- | file for the application as well as bundling up all the JS files.
- |
- */
-
 mix
-    .js(source + '/resources/assets/js/discount.js', dist + '/js').vue({ version: 2 })
-    .js(source + '/resources/assets/js/order-create.js', dist + '/js').vue({ version: 2 })
+    .js(source + '/resources/assets/js/discount.js', dist + '/js')
+    .js(source + '/resources/assets/js/order-create.js', dist + '/js')
     .js(source + '/resources/assets/js/front/checkout.js', dist + '/js')
-    .js(source + '/resources/assets/js/front/order-return.js', dist + '/js');
+    .js(source + '/resources/assets/js/front/order-return.js', dist + '/js')
 
 if (mix.inProduction()) {
     mix

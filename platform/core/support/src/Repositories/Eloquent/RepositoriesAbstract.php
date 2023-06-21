@@ -198,6 +198,8 @@ abstract class RepositoriesAbstract implements RepositoryInterface
 
     public function getFirstBy(array $condition = [], array $select = ['*'], array $with = [])
     {
+        $this->resetModel();
+
         $this->make($with);
 
         $this->applyConditions($condition);

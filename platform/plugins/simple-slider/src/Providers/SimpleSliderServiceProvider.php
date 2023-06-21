@@ -7,14 +7,12 @@ use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Language\Facades\Language;
 use Botble\SimpleSlider\Models\SimpleSlider;
 use Botble\SimpleSlider\Models\SimpleSliderItem;
-use Botble\SimpleSlider\Repositories\Caches\SimpleSliderCacheDecorator;
-use Botble\SimpleSlider\Repositories\Caches\SimpleSliderItemCacheDecorator;
 use Botble\SimpleSlider\Repositories\Eloquent\SimpleSliderItemRepository;
 use Botble\SimpleSlider\Repositories\Eloquent\SimpleSliderRepository;
 use Botble\SimpleSlider\Repositories\Interfaces\SimpleSliderInterface;
 use Botble\SimpleSlider\Repositories\Interfaces\SimpleSliderItemInterface;
 use Illuminate\Routing\Events\RouteMatched;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 
 class SimpleSliderServiceProvider extends ServiceProvider
 {
@@ -23,11 +21,11 @@ class SimpleSliderServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(SimpleSliderInterface::class, function () {
-            return new SimpleSliderCacheDecorator(new SimpleSliderRepository(new SimpleSlider()));
+            return new SimpleSliderRepository(new SimpleSlider());
         });
 
         $this->app->bind(SimpleSliderItemInterface::class, function () {
-            return new SimpleSliderItemCacheDecorator(new SimpleSliderItemRepository(new SimpleSliderItem()));
+            return new SimpleSliderItemRepository(new SimpleSliderItem());
         });
     }
 

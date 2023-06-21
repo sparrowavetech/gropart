@@ -11,4 +11,8 @@ return [
     ],
     'preview' => 'Preview',
     'prefix_for' => 'Prefix for :name',
+    'public_single_ending_url' => 'Postfix for single page URL',
+    'current_year' => 'Current year',
+    'current_month' => 'Current month',
+    'current_day' => 'Current day',
 ];

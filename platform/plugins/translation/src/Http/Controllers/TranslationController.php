@@ -252,6 +252,17 @@ class TranslationController extends BaseController
             ->addStylesDirectly('vendor/core/plugins/translation/css/theme-translations.css');
 
         $groups = Language::getAvailableLocales();
+
+        if (! count($groups)) {
+            $groups = [
+                'en' => [
+                    'locale' => 'en',
+                    'name' => 'English',
+                    'flag' => 'us',
+                ],
+            ];
+        }
+
         $defaultLanguage = Arr::get($groups, 'en');
 
         $group = [];
@@ -277,6 +288,10 @@ class TranslationController extends BaseController
 
     public function postThemeTranslations(Request $request, BaseHttpResponse $response)
     {
+        if (! File::isDirectory(lang_path())) {
+            File::makeDirectory(lang_path());
+        }
+
         if (! File::isWritable(lang_path())) {
             return $response
                 ->setError()
@@ -286,49 +301,13 @@ class TranslationController extends BaseController
         $locale = $request->input('pk');
 
         if ($locale) {
-            $isAvailableLocale = Arr::first(Language::getAvailableLocales(), fn ($item) => $item['locale'] == $locale);
-            if (! $isAvailableLocale) {
-                abort(404);
-            }
-
-            $translations = [];
-
-            $jsonFile = lang_path($locale . '.json');
-
-            if (! File::exists($jsonFile)) {
-                $jsonFile = theme_path(Theme::getThemeName() . '/lang/' . $locale . '.json');
-            }
-
-            if (File::exists($jsonFile)) {
-                $translations = BaseHelper::getFileData($jsonFile);
-            }
-
-            if ($locale != 'en') {
-                $defaultEnglishFile = theme_path(Theme::getThemeName() . '/lang/en.json');
-
-                if ($defaultEnglishFile) {
-                    $enTranslations = BaseHelper::getFileData($defaultEnglishFile);
-                    $translations = array_merge($enTranslations, $translations);
-
-                    $enTranslationKeys = array_keys($enTranslations);
-
-                    foreach ($translations as $key => $translation) {
-                        if (! in_array($key, $enTranslationKeys)) {
-                            Arr::forget($translations, $key);
-                        }
-                    }
-                }
-            }
-
-            ksort($translations);
-
-            $translations = array_combine(array_map('trim', array_keys($translations)), $translations);
+            $translations = $this->manager->getThemeTranslations($locale);
 
             if ($request->has('name') && $request->has('value') && Arr::has($translations, $request->input('name'))) {
                 $translations[$request->input('name')] = $request->input('value');
             }
 
-            File::put(lang_path($locale . '.json'), json_encode($translations, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+            $this->manager->saveThemeTranslations($locale, $translations);
         }
 
         return $response

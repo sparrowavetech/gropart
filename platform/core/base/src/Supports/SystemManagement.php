@@ -47,15 +47,15 @@ class SystemManagement
             'debug_mode' => app()->hasDebugModeEnabled(),
             'storage_dir_writable' => File::isWritable(base_path('storage')),
             'cache_dir_writable' => File::isReadable(app()->bootstrapPath('cache')),
-            'app_size' => BaseHelper::humanFilesize(self::folderSize(base_path())),
+            'app_size' => BaseHelper::humanFilesize(self::calculateAppSize(base_path())),
         ];
     }
 
-    protected static function folderSize(string $directory): int
+    protected static function calculateAppSize(string $directory): int
     {
         $size = 0;
         foreach (File::glob(rtrim($directory, '/') . '/*', GLOB_NOSORT) as $each) {
-            $size += File::isFile($each) ? File::size($each) : self::folderSize($each);
+            $size += File::isFile($each) ? File::size($each) : self::calculateAppSize($each);
         }
 
         return $size;
@@ -70,7 +70,7 @@ class SystemManagement
             'server_software' => Request::server('SERVER_SOFTWARE'),
             'server_os' => function_exists('php_uname') ? php_uname() : 'N/A',
             'database_connection_name' => config('database.default'),
-            'ssl_installed' => self::checkSslIsInstalled(),
+            'ssl_installed' => request()->isSecure(),
             'cache_driver' => config('cache.default'),
             'session_driver' => config('session.driver'),
             'queue_connection' => config('queue.default'),
@@ -86,10 +86,5 @@ class SystemManagement
             'zip' => extension_loaded('zip'),
             'iconv' => extension_loaded('iconv'),
         ];
-    }
-
-    protected static function checkSslIsInstalled(): bool
-    {
-        return ! empty(Request::server('HTTPS')) && Request::server('HTTPS') != 'off';
     }
 }

@@ -2,9 +2,11 @@
 
 namespace Botble\Translation\Repositories\Caches;
 
-use Botble\Support\Repositories\Caches\CacheAbstractDecorator;
-use Botble\Translation\Repositories\Interfaces\TranslationInterface;
+use Botble\Translation\Repositories\Eloquent\TranslationRepository;
 
-class TranslationCacheDecorator extends CacheAbstractDecorator implements TranslationInterface
+/**
+ * @deprecated
+ */
+class TranslationCacheDecorator extends TranslationRepository
 {
 }

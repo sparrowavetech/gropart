@@ -13,7 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
-use Html;
+use Botble\Base\Facades\Html;
 
 class PickrrTable extends TableAbstract
 {

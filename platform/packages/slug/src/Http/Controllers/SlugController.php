@@ -15,13 +15,9 @@ use Botble\Menu\Facades\Menu;
 
 class SlugController extends BaseController
 {
-    public function __construct(protected SlugInterface $slugRepository, protected SlugService $slugService)
+    public function store(SlugRequest $request, SlugService $slugService)
     {
-    }
-
-    public function store(SlugRequest $request)
-    {
-        return $this->slugService->create(
+        return $slugService->create(
             $request->input('value'),
             $request->input('slug_id'),
             $request->input('model')
@@ -35,15 +31,29 @@ class SlugController extends BaseController
         return view('packages/slug::settings');
     }
 
-    public function postSettings(SlugSettingsRequest $request, BaseHttpResponse $response, SettingStore $settingStore)
-    {
+    public function postSettings(
+        SlugSettingsRequest $request,
+        SlugInterface $slugRepository,
+        BaseHttpResponse $response,
+        SettingStore $settingStore
+    ) {
+        $hasChangedEndingUrl = false;
+
         foreach ($request->except(['_token']) as $settingKey => $settingValue) {
             if (Str::contains($settingKey, '-model-key')) {
                 continue;
             }
 
+            if ($settingKey == 'public_single_ending_url') {
+                $settingValue = ltrim($settingValue, '.');
+
+                if ($settingStore->get($settingKey) !== $settingValue) {
+                    $hasChangedEndingUrl = true;
+                }
+            }
+
             if ($settingStore->get($settingKey) !== (string)$settingValue) {
-                $this->slugRepository->update(
+                $slugRepository->update(
                     ['reference_type' => $request->input($settingKey . '-model-key')],
                     ['prefix' => (string)$settingValue]
                 );
@@ -55,6 +65,10 @@ class SlugController extends BaseController
         }
 
         $settingStore->save();
+
+        if ($hasChangedEndingUrl) {
+            Menu::clearCacheMenuItems();
+        }
 
         return $response
             ->setPreviousUrl(route('slug.settings'))

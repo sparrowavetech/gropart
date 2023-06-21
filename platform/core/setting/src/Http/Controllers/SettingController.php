@@ -13,6 +13,7 @@ use Botble\Base\Supports\Language;
 use Botble\JsValidation\Facades\JsValidator;
 use Botble\Media\Repositories\Interfaces\MediaFileInterface;
 use Botble\Media\Repositories\Interfaces\MediaFolderInterface;
+use Botble\Setting\Facades\Setting;
 use Botble\Setting\Http\Requests\EmailSettingRequest;
 use Botble\Setting\Http\Requests\EmailTemplateRequest;
 use Botble\Setting\Http\Requests\LicenseSettingRequest;
@@ -20,22 +21,20 @@ use Botble\Setting\Http\Requests\MediaSettingRequest;
 use Botble\Setting\Http\Requests\ResetEmailTemplateRequest;
 use Botble\Setting\Http\Requests\SendTestEmailRequest;
 use Botble\Setting\Http\Requests\SettingRequest;
-use Botble\Setting\Repositories\Interfaces\SettingInterface;
 use Carbon\Carbon;
 use Botble\Base\Facades\EmailHandler;
 use Exception;
+use Illuminate\Console\Application;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use Botble\Media\Facades\RvMedia;
+use Illuminate\Support\ProcessUtils;
 use Throwable;
 
 class SettingController extends BaseController
 {
-    public function __construct(protected SettingInterface $settingRepository)
-    {
-    }
-
     public function getOptions()
     {
         PageTitle::setTitle(trans('core/setting::setting.title'));
@@ -178,7 +177,7 @@ class SettingController extends BaseController
 
     public function postResetToDefault(ResetEmailTemplateRequest $request, BaseHttpResponse $response)
     {
-        $this->settingRepository->deleteBy(['key' => $request->input('email_subject_key')]);
+        Setting::delete([$request->input('email_subject_key')]);
 
         $templatePath = get_setting_email_template_path($request->input('module'), $request->input('template_file'));
 
@@ -256,11 +255,19 @@ class SettingController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function getVerifyLicense(Core $core, BaseHttpResponse $response)
+    public function getVerifyLicense(Request $request, Core $core, BaseHttpResponse $response)
     {
+        if ($request->expectsJson() && ! $core->checkConnection()) {
+            return response()->json([
+                'message' => __('Your server is not connected to the internet.'),
+            ], 400);
+        }
+
         $invalidMessage = 'Your license is invalid. Please activate your license!';
 
-        if (! File::exists(storage_path('.license'))) {
+        $licenseFilePath = $core->getLicenseFilePath();
+
+        if (! File::exists($licenseFilePath)) {
             return $response->setError()->setMessage($invalidMessage);
         }
 
@@ -336,7 +343,7 @@ class SettingController extends BaseController
         try {
             $core->deactivateLicense();
 
-            $this->settingRepository->deleteBy(['key' => 'licensed_to']);
+            Setting::delete(['licensed_to']);
 
             return $response->setMessage('Deactivated license successfully!');
         } catch (Throwable $exception) {
@@ -351,7 +358,7 @@ class SettingController extends BaseController
                 return $response->setError()->setMessage('Could not reset your license.');
             }
 
-            $this->settingRepository->deleteBy(['key' => 'licensed_to']);
+            Setting::delete(['licensed_to']);
 
             return $response->setMessage('Your license has been reset successfully.');
         } catch (Throwable $exception) {
@@ -451,6 +458,27 @@ class SettingController extends BaseController
         $content = $emailHandler->prepareData($content);
 
         return BaseHelper::clean($content);
+    }
+
+    public function cronjob(): View
+    {
+        PageTitle::setTitle(trans('core/setting::setting.cronjob.name'));
+
+        Assets::addScriptsDirectly('vendor/core/core/setting/js/setting.js');
+
+        $command = sprintf(
+            '* * * * * cd %s && %s >> /dev/null 2>&1',
+            BaseHelper::hasDemoModeEnabled() ? 'path-to-your-project' : ProcessUtils::escapeArgument(base_path()),
+            Application::formatCommandString('schedule:run')
+        );
+
+        $lastRunAt = Setting::get('cronjob_last_run_at');
+
+        if ($lastRunAt) {
+            $lastRunAt = Carbon::parse($lastRunAt);
+        }
+
+        return view('core/setting::cronjob', compact('command', 'lastRunAt'));
     }
 
     protected function saveActivatedLicense(Core $core, string $buyer): array

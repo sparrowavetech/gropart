@@ -112,7 +112,7 @@
                 </button>
             </div>
 
-            @if (now()->subHours(24)->gt($rateCreated))
+            @if (\Carbon\Carbon::now()->subHours(24)->gt($rateCreated))
                 <div class="col-12 my-3">
                     <div class="alert alert-warning">
                     <small>

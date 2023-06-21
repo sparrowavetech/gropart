@@ -5,7 +5,6 @@ namespace Botble\Newsletter\Tables;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Newsletter\Enums\NewsletterStatusEnum;
 use Botble\Newsletter\Models\Newsletter;
-use Botble\Newsletter\Repositories\Interfaces\NewsletterInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
@@ -18,18 +17,17 @@ use Botble\Table\DataTables;
 
 class NewsletterTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
     public function __construct(
         DataTables $table,
         UrlGenerator $urlGenerator,
-        NewsletterInterface $newsletterRepository
+        Newsletter $newsletter
     ) {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $newsletterRepository;
+        $this->model = $newsletter;
+
+        $this->hasActions = true;
+        $this->hasFilter = true;
 
         if (! Auth::user()->hasPermission('newsletter.destroy')) {
             $this->hasOperations = false;
@@ -42,7 +40,7 @@ class NewsletterTable extends TableAbstract
         $data = $this->table
             ->eloquent($this->query())
             ->editColumn('checkbox', function (Newsletter $item) {
-                return $this->getCheckbox($item->id);
+                return $this->getCheckbox($item->getKey());
             })
             ->editColumn('name', function (Newsletter $item) {
                 return BaseHelper::clean(trim($item->name)) ?: '&mdash;';
@@ -62,13 +60,16 @@ class NewsletterTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()->select([
-            'id',
-            'email',
-            'name',
-            'created_at',
-            'status',
-        ]);
+        $query = $this
+            ->getModel()
+            ->query()
+            ->select([
+                'id',
+                'email',
+                'name',
+                'created_at',
+                'status',
+            ]);
 
         return $this->applyScopes($query);
     }

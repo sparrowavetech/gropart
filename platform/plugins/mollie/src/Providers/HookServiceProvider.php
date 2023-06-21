@@ -95,34 +95,38 @@ class HookServiceProvider extends ServiceProvider
 
     public function checkoutWithMollie(array $data, Request $request)
     {
-        if ($request->input('payment_method') == MOLLIE_PAYMENT_METHOD_NAME) {
-            $orderIds = (array)$request->input('order_id', []);
+        if ($data['type'] !== MOLLIE_PAYMENT_METHOD_NAME) {
+            return $data;
+        }
 
-            $orderCodes = collect($orderIds)->map(function ($item) {
-                return get_order_code($item);
-            });
+        $paymentData = apply_filters(PAYMENT_FILTER_PAYMENT_DATA, [], $request);
 
-            try {
-                /** @var MollieApiClient $api */
-                $api = Mollie::api();
+        $orderIds = $paymentData['order_id'];
 
-                $response = $api->payments->create([
-                    'amount' => [
-                        'currency' => $request->input('currency'),
-                        'value' => number_format((float)$request->input('amount'), 2, '.', ''),
-                    ],
-                    'description' => 'Order(s) ' . $orderCodes->implode(', '),
-                    'redirectUrl' => PaymentHelper::getRedirectURL(),
-                    'webhookUrl' => route('mollie.payment.callback'),
-                    'metadata' => ['order_id' => $orderIds],
-                ]);
+        $orderCodes = collect($orderIds)->map(function ($item) {
+            return get_order_code($item);
+        });
 
-                header('Location: ' . $response->getCheckoutUrl());
-                exit;
-            } catch (Exception $exception) {
-                $data['error'] = true;
-                $data['message'] = $exception->getMessage();
-            }
+        try {
+            /** @var MollieApiClient $api */
+            $api = Mollie::api();
+
+            $response = $api->payments->create([
+                'amount' => [
+                    'currency' => $paymentData['currency'],
+                    'value' => number_format((float)$paymentData['amount'], 2, '.', ''),
+                ],
+                'description' => 'Order(s) ' . $orderCodes->implode(', '),
+                'redirectUrl' => PaymentHelper::getRedirectURL(),
+                'webhookUrl' => route('mollie.payment.callback'),
+                'metadata' => ['order_id' => $orderIds],
+            ]);
+
+            header('Location: ' . $response->getCheckoutUrl());
+            exit;
+        } catch (Exception $exception) {
+            $data['error'] = true;
+            $data['message'] = $exception->getMessage();
         }
 
         return $data;

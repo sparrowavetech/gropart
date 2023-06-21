@@ -13,7 +13,6 @@ use Botble\Widget\AbstractWidget;
 use Botble\Widget\Facades\WidgetGroup;
 use Botble\Widget\Factories\WidgetFactory;
 use Botble\Widget\Models\Widget;
-use Botble\Widget\Repositories\Caches\WidgetCacheDecorator;
 use Botble\Widget\Repositories\Eloquent\WidgetRepository;
 use Botble\Widget\Repositories\Interfaces\WidgetInterface;
 use Botble\Widget\WidgetGroupCollection;
@@ -21,7 +20,7 @@ use Botble\Widget\Widgets\Text;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 
 class WidgetServiceProvider extends ServiceProvider
 {
@@ -30,7 +29,7 @@ class WidgetServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(WidgetInterface::class, function () {
-            return new WidgetCacheDecorator(new WidgetRepository(new Widget()));
+            return new WidgetRepository(new Widget());
         });
 
         $this->app->bind('botble.widget', function (Application $app) {

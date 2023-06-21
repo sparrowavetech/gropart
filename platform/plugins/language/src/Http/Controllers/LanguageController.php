@@ -50,7 +50,7 @@ class LanguageController extends BaseController
         return view('plugins/language::index', compact('languages', 'flags', 'activeLanguages'));
     }
 
-    public function postStore(LanguageRequest $request, BaseHttpResponse $response, LanguageManager $languageManager)
+    public function store(LanguageRequest $request, BaseHttpResponse $response, LanguageManager $languageManager)
     {
         try {
             $language = $this->languageRepository->getFirstBy([
@@ -267,17 +267,21 @@ class LanguageController extends BaseController
 
     public function getSetDefault(Request $request, BaseHttpResponse $response)
     {
-        $defaultLanguage = LanguageFacade::getDefaultLanguage(['lang_id', 'lang_code']);
-        $currentLanguageId = $defaultLanguage->lang_id;
-        $currentLanguageCode = $defaultLanguage->lang_code;
-
         $newLanguageId = $request->input('lang_id');
 
         $newLanguage = $this->languageRepository->getFirstBy(['lang_id' => $newLanguageId]);
 
+        if (! $newLanguage) {
+            abort(404);
+        }
+
         $newLanguageCode = $newLanguage->lang_code;
 
         $themeName = Theme::getThemeName();
+
+        $defaultLanguage = LanguageFacade::getDefaultLanguage(['lang_id', 'lang_code']);
+        $currentLanguageId = $defaultLanguage->lang_id;
+        $currentLanguageCode = $defaultLanguage->lang_code;
 
         try {
             if ($currentLanguageId != $newLanguageId) {
@@ -368,10 +372,8 @@ class LanguageController extends BaseController
 
         $this->languageRepository->update(['lang_is_default' => 1], ['lang_is_default' => 0]);
 
-        if ($newLanguage) {
-            $newLanguage->lang_is_default = 1;
-            $newLanguage->save();
-        }
+        $newLanguage->lang_is_default = 1;
+        $newLanguage->save();
 
         $this->clearRoutesCache();
 

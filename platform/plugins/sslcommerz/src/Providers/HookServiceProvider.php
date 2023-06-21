@@ -65,7 +65,10 @@ class HookServiceProvider extends ServiceProvider
                 $paymentService = (new SslCommerzPaymentService());
                 $paymentDetail = $paymentService->getPaymentDetails($payment->charge_id);
                 if ($paymentDetail) {
-                    $data = view('plugins/sslcommerz::detail', ['payment' => $paymentDetail, 'paymentModel' => $payment])->render();
+                    $data = view(
+                        'plugins/sslcommerz::detail',
+                        ['payment' => $paymentDetail, 'paymentModel' => $payment]
+                    )->render();
                 }
             }
 
@@ -78,10 +81,13 @@ class HookServiceProvider extends ServiceProvider
                 if (! Arr::get($refundDetail, 'error')) {
                     $refunds = Arr::get($payment->metadata, 'refunds', []);
                     $refund = collect($refunds)->firstWhere('refund_ref_id', $refundId);
-                    $refund = array_merge((array) $refund, Arr::get($refundDetail, 'data'));
+                    $refund = array_merge((array)$refund, Arr::get($refundDetail, 'data'));
 
                     return array_merge($refundDetail, [
-                        'view' => view('plugins/sslcommerz::refund-detail', ['refund' => $refund, 'paymentModel' => $payment])->render(),
+                        'view' => view(
+                            'plugins/sslcommerz::refund-detail',
+                            ['refund' => $refund, 'paymentModel' => $payment]
+                        )->render(),
                     ]);
                 }
 
@@ -108,67 +114,67 @@ class HookServiceProvider extends ServiceProvider
 
     public function checkoutWithSslCommerz(array $data, Request $request): array
     {
-        if ($request->input('payment_method') == SSLCOMMERZ_PAYMENT_METHOD_NAME) {
-            $paymentData = apply_filters(PAYMENT_FILTER_PAYMENT_DATA, [], $request);
-
-            $body = [];
-            $body['total_amount'] = $paymentData['amount']; // You can't pay less than 10
-            $body['currency'] = $paymentData['currency'];
-            $body['tran_id'] = uniqid(); // tran_id must be unique
-
-            $orderIds = $paymentData['order_id'];
-            $orderId = Arr::first($orderIds);
-
-            $body['cus_add2'] = '';
-            $body['cus_city'] = '';
-            $body['cus_state'] = '';
-            $body['cus_postcode'] = '';
-            $body['cus_fax'] = '';
-
-            $body['cus_name'] = 'Not set';
-            $body['cus_email'] = 'Not set';
-            $body['cus_add1'] = 'Not set';
-            $body['cus_country'] = 'Not set';
-            $body['cus_phone'] = 'Not set';
-
-            $orderAddress = $paymentData['address'];
-
-            // CUSTOMER INFORMATION
-            if ($orderAddress) {
-                $body['cus_name'] = $orderAddress['name'];
-                $body['cus_email'] = $orderAddress['email'];
-                $body['cus_add1'] = $orderAddress['address'];
-                $body['cus_country'] = $orderAddress['country'];
-                $body['cus_phone'] = $orderAddress['phone'];
-            }
-
-            $body['ship_name'] = 'Not set';
-            $body['ship_add1'] = 'Not set';
-            $body['ship_add2'] = 'Not set';
-            $body['ship_city'] = 'Not set';
-            $body['ship_state'] = 'Not set';
-            $body['ship_postcode'] = 'Not set';
-            $body['ship_phone'] = 'Not set';
-            $body['ship_country'] = 'Not set';
-            $body['shipping_method'] = 'NO';
-
-            $body['product_category'] = 'Goods';
-            $body['product_name'] = 'Order #' . $orderId;
-            $body['product_profile'] = 'physical-goods';
-
-            $body['value_a'] = implode(';', $orderIds);
-            $body['value_b'] = Arr::get($paymentData, 'checkout_token');
-            $body['value_c'] = $paymentData['customer_id'];
-            $body['value_d'] = urlencode($paymentData['customer_type']);
-
-            $gateway = new SslCommerzNotification();
-
-            // initiate(Transaction Data , false: Redirect to SSLCOMMERZ gateway/ true: Show all the Payment gateway here
-            $result = $gateway->makePayment($body, 'hosted');
-
-            $data = array_merge($data, $result);
+        if ($data['type'] !== SSLCOMMERZ_PAYMENT_METHOD_NAME) {
+            return $data;
         }
 
-        return $data;
+        $paymentData = apply_filters(PAYMENT_FILTER_PAYMENT_DATA, [], $request);
+
+        $body = [];
+        $body['total_amount'] = $paymentData['amount']; // You can't pay less than 10
+        $body['currency'] = $paymentData['currency'];
+        $body['tran_id'] = uniqid(); // tran_id must be unique
+
+        $orderIds = $paymentData['order_id'];
+        $orderId = Arr::first($orderIds);
+
+        $body['cus_add2'] = '';
+        $body['cus_city'] = '';
+        $body['cus_state'] = '';
+        $body['cus_postcode'] = '';
+        $body['cus_fax'] = '';
+
+        $body['cus_name'] = 'Not set';
+        $body['cus_email'] = 'Not set';
+        $body['cus_add1'] = 'Not set';
+        $body['cus_country'] = 'Not set';
+        $body['cus_phone'] = 'Not set';
+
+        $orderAddress = $paymentData['address'];
+
+        // CUSTOMER INFORMATION
+        if ($orderAddress) {
+            $body['cus_name'] = $orderAddress['name'];
+            $body['cus_email'] = $orderAddress['email'];
+            $body['cus_add1'] = $orderAddress['address'];
+            $body['cus_country'] = $orderAddress['country'];
+            $body['cus_phone'] = $orderAddress['phone'];
+        }
+
+        $body['ship_name'] = 'Not set';
+        $body['ship_add1'] = 'Not set';
+        $body['ship_add2'] = 'Not set';
+        $body['ship_city'] = 'Not set';
+        $body['ship_state'] = 'Not set';
+        $body['ship_postcode'] = 'Not set';
+        $body['ship_phone'] = 'Not set';
+        $body['ship_country'] = 'Not set';
+        $body['shipping_method'] = 'NO';
+
+        $body['product_category'] = 'Goods';
+        $body['product_name'] = 'Order #' . $orderId;
+        $body['product_profile'] = 'physical-goods';
+
+        $body['value_a'] = implode(';', $orderIds);
+        $body['value_b'] = Arr::get($paymentData, 'checkout_token');
+        $body['value_c'] = $paymentData['customer_id'];
+        $body['value_d'] = urlencode($paymentData['customer_type']);
+
+        $gateway = new SslCommerzNotification();
+
+        // initiate(Transaction Data , false: Redirect to SSLCOMMERZ gateway/ true: Show all the Payment gateway here
+        $result = $gateway->makePayment($body, 'hosted');
+
+        return array_merge($data, $result);
     }
 }

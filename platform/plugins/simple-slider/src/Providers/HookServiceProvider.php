@@ -8,7 +8,7 @@ use Botble\SimpleSlider\Repositories\Interfaces\SimpleSliderInterface;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Theme\Facades\Theme;
 
 class HookServiceProvider extends ServiceProvider

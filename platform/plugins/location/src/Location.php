@@ -11,13 +11,12 @@ use Botble\Location\Models\Country;
 use Botble\Location\Models\State;
 use Botble\Location\Repositories\Interfaces\CityInterface;
 use Botble\Location\Repositories\Interfaces\StateInterface;
-use Exception;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Utils;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
+use Throwable;
 use ZipArchive;
 
 class Location
@@ -126,17 +125,17 @@ class Location
 
     public function getRemoteAvailableLocations(): array
     {
-        $client = new Client(['verify' => false]);
-
         try {
-            $info = $client->request('GET', 'https://api.github.com/repos/botble/locations/git/trees/master', [
-                'headers' => [
-                    'Content-Type' => 'application/json',
-                    'Accept' => 'application/json',
-                ],
-            ]);
+            $info = Http::withoutVerifying()
+                ->asJson()
+                ->acceptJson()
+                ->get('https://api.github.com/repos/botble/locations/git/trees/master');
 
-            $info = json_decode($info->getBody()->getContents(), true);
+            if (! $info->ok()) {
+                return ['us', 'ca', 'vn'];
+            }
+
+            $info = $info->json();
 
             $availableLocations = [];
 
@@ -147,7 +146,7 @@ class Location
 
                 $availableLocations[] = $tree['path'];
             }
-        } catch (Exception|GuzzleException) {
+        } catch (Throwable) {
             $availableLocations = ['us', 'ca', 'vn'];
         }
 
@@ -160,22 +159,27 @@ class Location
 
         $destination = storage_path('app/location-files.zip');
 
-        $client = new Client(['verify' => false]);
-
         $availableLocations = $this->getRemoteAvailableLocations();
 
         if (! in_array($countryCode, $availableLocations)) {
             return [
                 'error' => true,
-                'message' => 'This country locations data is not available on ' . $repository,
+                'message' => sprintf('This country locations data is not available on %s', $repository),
             ];
         }
 
         try {
-            $client->request('GET', $repository . '/archive/refs/heads/master.zip', [
-                'sink' => Utils::tryFopen($destination, 'w'),
-            ]);
-        } catch (Exception|GuzzleException $exception) {
+            $response = Http::withoutVerifying()
+                ->sink(Utils::tryFopen($destination, 'w'))
+                ->get($repository . '/archive/refs/heads/master.zip');
+
+            if (! $response->ok()) {
+                return [
+                    'error' => true,
+                    'message' => $response->reason(),
+                ];
+            }
+        } catch (Throwable $exception) {
             return [
                 'error' => true,
                 'message' => $exception->getMessage(),
@@ -200,7 +204,7 @@ class Location
         }
 
         if (File::exists($destination)) {
-            unlink($destination);
+            File::delete($destination);
         }
 
         $dataPath = storage_path('app/locations-master/' . $countryCode);

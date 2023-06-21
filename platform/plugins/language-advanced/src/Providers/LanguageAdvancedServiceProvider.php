@@ -11,7 +11,7 @@ use Botble\Page\Models\Page;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 use Illuminate\Support\Str;
 use Botble\Language\Facades\Language;
 use Botble\Base\Facades\MacroableModels;

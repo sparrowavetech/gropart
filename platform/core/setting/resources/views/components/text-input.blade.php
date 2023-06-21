@@ -1,6 +1,7 @@
 @props([
     'name',
     'label' => null,
+    'value' => null,
     'type' => 'text',
     'helperText' => null,
 ])
@@ -9,7 +10,9 @@
     @if($label)
         <label for="{{ $name }}" class="text-title-field">{{ $label }}</label>
     @endif
-    <input {{ $attributes->merge(['type' => $type, 'class' => 'next-input', 'name' => $name, 'id' => $name]) }} value="{{ old($name) }}" type="{{ $type }}">
+
+    <input type="{{ $type }}" {{ $attributes->merge(['class' => 'next-input', 'name' => $name, 'id' => $name]) }} value="{{ old($name) && ! is_array(old($name)) ? old($name) : $value }}">
+
     @if($helperText)
         {{ Form::helper($helperText) }}
     @endif

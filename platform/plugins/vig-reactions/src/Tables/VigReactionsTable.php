@@ -8,7 +8,7 @@ use Botble\VigReactions\Repositories\Interfaces\VigReactionsInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Yajra\DataTables\DataTables;
-use Html;
+use Botble\Base\Facades\Html;
 use Illuminate\Http\JsonResponse;
 
 class VigReactionsTable extends TableAbstract

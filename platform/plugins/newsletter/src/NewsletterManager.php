@@ -26,7 +26,7 @@ class NewsletterManager extends Manager implements Factory
         );
     }
 
-    public function getDefaultDriver()
+    public function getDefaultDriver(): string
     {
         throw new InvalidArgumentException('No email marketing provider was specified.');
     }

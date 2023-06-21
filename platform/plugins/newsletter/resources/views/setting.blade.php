@@ -5,12 +5,12 @@
     <x-core-setting::on-off
         name="enable_newsletter_contacts_list_api"
         :label="trans('plugins/newsletter::newsletter.settings.enable_newsletter_contacts_list_api')"
-        :value="setting('enable_newsletter_contacts_list_api')"
+        :value="setting('enable_newsletter_contacts_list_api', false)"
         class="setting-selection-option"
         data-target="#newsletter-settings"
     />
 
-    <div id="newsletter-settings" @class(['mb-4 border rounded-top rounded-bottom p-3 bg-light', 'd-none' => ! setting('enable_newsletter_contacts_list_api')])>
+    <div id="newsletter-settings" @class(['mb-4 border rounded-top rounded-bottom p-3 bg-light', 'd-none' => ! setting('enable_newsletter_contacts_list_api', false)])>
         <x-core-setting::text-input
             name="newsletter_mailchimp_api_key"
             :label="trans('plugins/newsletter::newsletter.settings.mailchimp_api_key')"

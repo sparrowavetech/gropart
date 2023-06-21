@@ -45,7 +45,7 @@ class MollieController extends BaseController
             return $response
                 ->setError()
                 ->setNextUrl(PaymentHelper::getCancelURL())
-                ->setMessage(__('Error when processing payment via Mollie!'));
+                ->setMessage(__('Error when processing payment via :paymentType!', ['paymentType' => 'Mollie']));
         }
 
         $status = PaymentStatusEnum::COMPLETED;

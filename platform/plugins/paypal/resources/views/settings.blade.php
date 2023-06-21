@@ -28,7 +28,7 @@
             </div>
         </td>
     </tr>
-    <tr class="paypal-online-payment payment-content-item hidden">
+    <tr class="payment-content-item hidden">
         <td class="border-left" colspan="3">
             {!! Form::open() !!}
             {!! Form::hidden('type', PAYPAL_PAYMENT_METHOD_NAME, ['class' => 'payment_type']) !!}
@@ -67,7 +67,7 @@
 
                         <div class="form-group mb-3">
                             <label class="text-title-field" for="payment_paypal_description">{{ trans('core/base::forms.description') }}</label>
-                            <textarea class="next-input" name="payment_paypal_description" id="payment_paypal_description">{{ get_payment_setting('description', 'paypal', __('You will be redirected to PayPal to complete the payment.')) }}</textarea>
+                            <textarea class="next-input" name="payment_paypal_description" id="payment_paypal_description">{{ get_payment_setting('description', 'paypal', __('You will be redirected to :name to complete the payment.', ['name' => 'PayPal'])) }}</textarea>
                         </div>
 
                         <p class="payment-note">
@@ -77,20 +77,21 @@
                         <x-core-setting::text-input
                             name="payment_paypal_client_id"
                             :label="trans('plugins/payment::payment.client_id')"
-                            :value="app()->environment('demo') ? '*******************************' :setting('payment_paypal_client_id')"
+                            :value="BaseHelper::hasDemoModeEnabled() ? '*******************************' :setting('payment_paypal_client_id')"
                         />
 
                         <x-core-setting::text-input
-                            name="payment_paypal_client_secret"
+                            :name="'payment_' . PAYPAL_PAYMENT_METHOD_NAME . '_client_secret'"
                             type="password"
                             :label="trans('plugins/payment::payment.client_secret')"
-                            :value="app()->environment('demo') ? '*******************************' : setting('payment_paypal_client_secret')"
+                            :value="BaseHelper::hasDemoModeEnabled() ? '*******************************' : setting('payment_paypal_client_secret')"
                         />
 
                         <x-core-setting::checkbox
-                            name="payment_paypal_mode"
+                            :name="'payment_' . PAYPAL_PAYMENT_METHOD_NAME . '_mode'"
                             :label="trans('plugins/payment::payment.sandbox_mode')"
-                            :value="! setting('payment_paypal_mode')"
+                            :value="0"
+                            :checked="! get_payment_setting('mode', PAYPAL_PAYMENT_METHOD_NAME, true)"
                         />
 
                         {!! apply_filters(PAYMENT_METHOD_SETTINGS_CONTENT, null, 'paypal') !!}

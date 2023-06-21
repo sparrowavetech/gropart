@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Botble\AuditLog\Repositories\Interfaces\AuditLogInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Base\Facades\Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
@@ -16,15 +15,14 @@ use Botble\Table\DataTables;
 
 class AuditLogTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = false;
-
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, AuditLogInterface $auditLogRepository)
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, AuditHistory $auditHistory)
     {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $auditLogRepository;
+        $this->model = $auditHistory;
+
+        $this->hasActions = true;
+        $this->hasFilter = false;
 
         if (! Auth::user()->hasPermission('audit-log.destroy')) {
             $this->hasOperations = false;
@@ -37,7 +35,7 @@ class AuditLogTable extends TableAbstract
         $data = $this->table
             ->eloquent($this->query())
             ->editColumn('checkbox', function (AuditHistory $item) {
-                return $this->getCheckbox($item->id);
+                return $this->getCheckbox($item->getKey());
             })
             ->editColumn('action', function (AuditHistory $item) {
                 return view('plugins/audit-log::activity-line', ['history' => $item])->render();
@@ -51,7 +49,9 @@ class AuditLogTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()
+        $query = $this
+            ->getModel()
+            ->query()
             ->with(['user'])
             ->select(['*']);
 

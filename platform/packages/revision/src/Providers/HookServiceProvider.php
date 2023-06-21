@@ -4,7 +4,7 @@ namespace Botble\Revision\Providers;
 
 use Botble\Base\Facades\Assets;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 
 class HookServiceProvider extends ServiceProvider
 {

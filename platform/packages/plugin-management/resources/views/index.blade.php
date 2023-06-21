@@ -2,7 +2,7 @@
 
 @section('content')
     <div id="plugin-list">
-        @if (config('core.base.general.enable_marketplace_feature'))
+        @if (config('packages.plugin-management.general.enable_marketplace_feature'))
             <div class="mb-3">
                 <a class="btn btn-info" href="{{ route('plugins.marketplace') }}">
                     <i class="fa fa-plus me-3"></i> {{ trans('packages/plugin-management::plugin.plugins_add_new') }}

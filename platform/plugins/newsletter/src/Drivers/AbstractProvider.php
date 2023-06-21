@@ -9,13 +9,13 @@ class AbstractProvider
 {
     protected string $apiUrl;
 
-    public function __construct(protected string $apiKey, protected string $listId)
+    public function __construct(protected string|null $apiKey, protected string|null $listId)
     {
     }
 
     protected function request(string $method, string $uri, array $data = []): Response
     {
-        $request = Http::withToken($this->apiKey);
+        $request = Http::withoutVerifying()->withToken($this->apiKey);
 
         $uri = $this->apiUrl . $uri;
 

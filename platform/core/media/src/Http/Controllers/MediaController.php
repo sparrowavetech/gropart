@@ -455,7 +455,7 @@ class MediaController extends Controller
                     $meta->value = $request->input('selected', []);
                 }
 
-                $this->mediaSettingRepository->createOrUpdate($meta);
+                $meta->save();
 
                 $response = RvMedia::responseSuccess([], trans('core/media::media.favorite_success'));
 
@@ -477,9 +477,10 @@ class MediaController extends Controller
                                 }
                             }
                         }
+
                         $meta->value = $value;
 
-                        $this->mediaSettingRepository->createOrUpdate($meta);
+                        $meta->save();
                     }
                 }
 
@@ -536,7 +537,7 @@ class MediaController extends Controller
 
             case 'rename':
                 foreach ($request->input('selected') as $item) {
-                    if (! $item['id'] || ! $item['name']) {
+                    if (! $item['id'] || empty($item['name'])) {
                         continue;
                     }
 
@@ -546,7 +547,7 @@ class MediaController extends Controller
 
                         if (! empty($file)) {
                             $file->name = $this->fileRepository->createName($item['name'], $file->folder_id);
-                            $this->fileRepository->createOrUpdate($file);
+                            $file->save();
                         }
                     } else {
                         $name = $item['name'];
@@ -554,7 +555,7 @@ class MediaController extends Controller
 
                         if (! empty($folder)) {
                             $folder->name = $this->folderRepository->createName($name, $folder->parent_id);
-                            $this->folderRepository->createOrUpdate($folder);
+                            $folder->save();
                         }
                     }
                 }
@@ -573,7 +574,7 @@ class MediaController extends Controller
 
                     if ($file) {
                         $file->alt = $item['alt'];
-                        $this->fileRepository->createOrUpdate($file);
+                        $file->save();
                     }
                 }
 
@@ -632,7 +633,7 @@ class MediaController extends Controller
         unset($file->slug);
         unset($file->parent_id);
 
-        return $this->fileRepository->createOrUpdate($file);
+        return $file->save();
     }
 
     public function download(Request $request)

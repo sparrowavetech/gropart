@@ -123,7 +123,7 @@
                     <x-core-setting::checkbox
                         name="enable_change_admin_theme"
                         :label="trans('core/setting::setting.general.enable_change_admin_theme')"
-                        :value="setting('enable_change_admin_theme')"
+                        :checked="setting('enable_change_admin_theme')"
                     />
                 @endif
             </x-core-setting::section>
@@ -135,12 +135,12 @@
                 <x-core-setting::on-off
                     name="enable_cache"
                     :label="trans('core/setting::setting.general.enable_cache')"
-                    :value="setting('enable_cache')"
+                    :value="setting('enable_cache', false)"
                     class="setting-selection-option"
                     data-target="#cache-settings"
                 />
 
-                <div id="cache-settings" @class(['mb-4 border rounded-top rounded-bottom p-3 bg-light', 'd-none' => ! setting('enable_cache')])>
+                <div id="cache-settings" @class(['mb-4 border rounded-top rounded-bottom p-3 bg-light', 'd-none' => ! setting('enable_cache', false)])>
                     <x-core-setting::text-input
                         name="cache_time"
                         :label="trans('core/setting::setting.general.cache_time')"
@@ -159,7 +159,7 @@
                 <x-core-setting::on-off
                     name="cache_admin_menu_enable"
                     :label="trans('core/setting::setting.general.cache_admin_menu')"
-                    :value="setting('cache_admin_menu_enable')"
+                    :value="setting('cache_admin_menu_enable', false)"
                 />
             </x-core-setting::section>
 

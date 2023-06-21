@@ -3,7 +3,7 @@
 namespace Botble\Comment\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
-use RvMedia;
+use Botble\Media\Facades\RvMedia;
 
 class UserResource extends JsonResource
 {

@@ -9,14 +9,13 @@ use Botble\Newsletter\Contracts\Factory;
 use Botble\Newsletter\Facades\Newsletter as NewsletterFacade;
 use Botble\Newsletter\Models\Newsletter;
 use Botble\Newsletter\NewsletterManager;
-use Botble\Newsletter\Repositories\Caches\NewsletterCacheDecorator;
 use Botble\Newsletter\Repositories\Eloquent\NewsletterRepository;
 use Botble\Newsletter\Repositories\Interfaces\NewsletterInterface;
 use Exception;
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Arr;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 
 class NewsletterServiceProvider extends ServiceProvider implements DeferrableProvider
 {
@@ -25,9 +24,7 @@ class NewsletterServiceProvider extends ServiceProvider implements DeferrablePro
     public function register(): void
     {
         $this->app->singleton(NewsletterInterface::class, function () {
-            return new NewsletterCacheDecorator(
-                new NewsletterRepository(new Newsletter())
-            );
+            return new NewsletterRepository(new Newsletter());
         });
 
         $this->app->singleton(Factory::class, function ($app) {
@@ -73,7 +70,7 @@ class NewsletterServiceProvider extends ServiceProvider implements DeferrablePro
                         setting()->set(['newsletter_mailchimp_list_id' => Arr::get($contacts, 'id')])->save();
                     }
 
-                    $mailchimpContactList = $contacts->pluck('name', 'id');
+                    $mailchimpContactList = $contacts->pluck('name', 'id')->toArray();
                 } catch (Exception $exception) {
                     info('Caught exception: ' . $exception->getMessage());
                 }
@@ -89,7 +86,7 @@ class NewsletterServiceProvider extends ServiceProvider implements DeferrablePro
                         setting()->set(['newsletter_sendgrid_list_id' => Arr::get($contacts->first(), 'id')])->save();
                     }
 
-                    $sendGridContactList = $contacts->pluck('name', 'id');
+                    $sendGridContactList = $contacts->pluck('name', 'id')->toArray();
                 } catch (Exception $exception) {
                     info('Caught exception: ' . $exception->getMessage());
                 }
@@ -108,10 +105,10 @@ class NewsletterServiceProvider extends ServiceProvider implements DeferrablePro
     {
         return array_merge($rules, [
             'enable_newsletter_contacts_list_api' => 'nullable|in:0,1',
-            'newsletter_mailchimp_api_key' => 'nullable|string',
-            'newsletter_mailchimp_list_id' => 'nullable|string',
-            'newsletter_sendgrid_api_key' => 'nullable|string',
-            'newsletter_sendgrid_list_id' => 'nullable|string',
+            'newsletter_mailchimp_api_key' => 'nullable|string|min:32|max:40',
+            'newsletter_mailchimp_list_id' => 'nullable|string|size:10',
+            'newsletter_sendgrid_api_key' => 'nullable|string|min:32|max:255',
+            'newsletter_sendgrid_list_id' => 'nullable|string|min:10|max:255',
         ]);
     }
 

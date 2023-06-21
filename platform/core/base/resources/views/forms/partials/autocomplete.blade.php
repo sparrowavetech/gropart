@@ -15,7 +15,7 @@
                                 q: params.term,
                             };
                         },
-                        processResults: data => {
+                        processResults: (data) => {
                             let results = data.data.map(item => {
                                 return {
                                     id: item['id'],

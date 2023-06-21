@@ -11,7 +11,7 @@
             <ul>
                 <li>
                     <a href="https://razorpay.com" target="_blank">Razorpay</a>
-                    <p>{{ __('Customer can buy product and pay directly using Visa, Credit card via Razorpay') }}</p>
+                    <p>{{ __('Customer can buy product and pay directly using Visa, Credit card via :name', ['name' => 'Razorpay']) }}</p>
                 </li>
             </ul>
         </td>
@@ -31,7 +31,7 @@
             </div>
         </td>
     </tr>
-    <tr class="paypal-online-payment payment-content-item hidden">
+    <tr class="payment-content-item hidden">
         <td class="border-left" colspan="3">
             {!! Form::open() !!}
             {!! Form::hidden('type', RAZORPAY_PAYMENT_METHOD_NAME, ['class' => 'payment_type']) !!}
@@ -47,7 +47,7 @@
                             <ul class="m-md-l" style="list-style-type:decimal">
                                 <li style="list-style-type:decimal">
                                     <a href="https://razorpay.com" target="_blank">
-                                        {{ __('Register an account on Razorpay') }}
+                                        {{ __('Register an account on :name', ['name' => 'Razorpay']) }}
                                     </a>
                                 </li>
                                 <li style="list-style-type:decimal">
@@ -77,7 +77,7 @@
 
                         <div class="form-group mb-3">
                             <label class="text-title-field" for="payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}_description">{{ trans('core/base::forms.description') }}</label>
-                            <textarea class="next-input" name="payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}_description" id="payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}_description">{{ get_payment_setting('description', RAZORPAY_PAYMENT_METHOD_NAME, __('Payment with Razorpay')) }}</textarea>
+                            <textarea class="next-input" name="payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}_description" id="payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}_description">{{ get_payment_setting('description', RAZORPAY_PAYMENT_METHOD_NAME, __('Payment with :paymentType', ['paymentType' => 'Razorpay'])) }}</textarea>
                         </div>
 
                         <p class="payment-note">

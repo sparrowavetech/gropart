@@ -2,9 +2,11 @@
 
 namespace Botble\Dashboard\Repositories\Caches;
 
-use Botble\Dashboard\Repositories\Interfaces\DashboardWidgetInterface;
-use Botble\Support\Repositories\Caches\CacheAbstractDecorator;
+use Botble\Dashboard\Repositories\Eloquent\DashboardWidgetRepository;
 
-class DashboardWidgetCacheDecorator extends CacheAbstractDecorator implements DashboardWidgetInterface
+/**
+ * @deprecated
+ */
+class DashboardWidgetCacheDecorator extends DashboardWidgetRepository
 {
 }

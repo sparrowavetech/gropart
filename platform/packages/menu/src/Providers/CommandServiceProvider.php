@@ -3,7 +3,7 @@
 namespace Botble\Menu\Providers;
 
 use Botble\Menu\Commands\ClearMenuCacheCommand;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 
 class CommandServiceProvider extends ServiceProvider
 {

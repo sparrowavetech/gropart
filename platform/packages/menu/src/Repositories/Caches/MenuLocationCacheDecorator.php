@@ -2,9 +2,11 @@
 
 namespace Botble\Menu\Repositories\Caches;
 
-use Botble\Menu\Repositories\Interfaces\MenuLocationInterface;
-use Botble\Support\Repositories\Caches\CacheAbstractDecorator;
+use Botble\Menu\Repositories\Eloquent\MenuLocationRepository;
 
-class MenuLocationCacheDecorator extends CacheAbstractDecorator implements MenuLocationInterface
+/**
+ * @deprecated
+ */
+class MenuLocationCacheDecorator extends MenuLocationRepository
 {
 }

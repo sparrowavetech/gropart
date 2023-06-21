@@ -49,6 +49,10 @@ class CredentialsWrapper extends \Google\ApiCore\CredentialsWrapper
                 $keyFile['quota_project_id'] = $args['quotaProject'];
             }
 
+            if (! isset($keyFile['type'])) {
+                $keyFile['type'] = 'service_account';
+            }
+
             $loader = CredentialsLoader::makeCredentials(
                 $args['scopes'],
                 (array)$keyFile,

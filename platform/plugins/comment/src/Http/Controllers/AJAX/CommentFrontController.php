@@ -18,7 +18,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
-use RvMedia;
+use Botble\Media\Facades\RvMedia;
 
 class CommentFrontController extends BaseController
 {

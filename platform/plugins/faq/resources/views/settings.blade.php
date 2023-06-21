@@ -5,7 +5,7 @@
     <x-core-setting::checkbox
         name="enable_faq_schema"
         :label="trans('plugins/faq::faq.settings.enable_faq_schema')"
-        :value="setting('enable_faq_schema', false)"
+        :checked="setting('enable_faq_schema', false)"
         :helper-text="trans('plugins/faq::faq.settings.enable_faq_schema_description')"
     />
 </x-core-setting::section>

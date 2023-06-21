@@ -273,15 +273,17 @@ class EmailHandler
 
         $data = [];
 
+        $twigCompiler = apply_filters('cms_twig_compiler', $this->twigCompiler);
+
         foreach ($variables as $variable) {
             $data[$variable] = $this->getVariableValue($variable, $module);
         }
 
         foreach ($data as $key => $value) {
-            $data[$key] = $this->twigCompiler->compile($value, $data);
+            $data[$key] = $twigCompiler->compile($value, $data);
         }
 
-        return $this->twigCompiler->compile($content, $data);
+        return $twigCompiler->compile($content, $data);
     }
 
     public function getVariableValue(string $variable, string $module, string $default = ''): string

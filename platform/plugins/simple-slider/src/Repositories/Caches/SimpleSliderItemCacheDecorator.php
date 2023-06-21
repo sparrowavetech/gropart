@@ -2,9 +2,11 @@
 
 namespace Botble\SimpleSlider\Repositories\Caches;
 
-use Botble\SimpleSlider\Repositories\Interfaces\SimpleSliderItemInterface;
-use Botble\Support\Repositories\Caches\CacheAbstractDecorator;
+use Botble\SimpleSlider\Repositories\Eloquent\SimpleSliderItemRepository;
 
-class SimpleSliderItemCacheDecorator extends CacheAbstractDecorator implements SimpleSliderItemInterface
+/**
+ * @deprecated
+ */
+class SimpleSliderItemCacheDecorator extends SimpleSliderItemRepository
 {
 }

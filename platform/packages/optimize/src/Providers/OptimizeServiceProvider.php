@@ -14,7 +14,7 @@ use Botble\Optimize\Http\Middleware\RemoveQuotes;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\Router;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 
 class OptimizeServiceProvider extends ServiceProvider
 {

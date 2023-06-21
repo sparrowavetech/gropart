@@ -15,6 +15,27 @@ Customized List Group
     }
 }
 
+@mixin list-group-item-variant($state, $background, $color) {
+    .list-group-item-#{$state} {
+        color: $color;
+        background-color: $background;
+
+        &.list-group-item-action {
+            &:hover,
+            &:focus {
+                color: $color;
+                background-color: shade-color($background, 10%);
+            }
+
+            &.active {
+                color: $white;
+                background-color: $color;
+                border-color: $color;
+            }
+        }
+    }
+}
+
 .list-group {
     @include list-group-item-variant(success, $state-success-bg, $state-success-text);
 }

@@ -29,37 +29,29 @@ class UpdateThemeTranslationCommand extends Command
         return self::SUCCESS;
     }
 
-    /**
-     * @param string $path
-     * @return array
-     */
     public function findTranslations(string $path): array
     {
         $keys = [];
 
         $stringPattern =
-            '[^\w]' .                                     // Must not have an alphanum before real method
-            '(__)' .             // Must start with one of the functions
-            '\(\s*' .                                       // Match opening parenthesis
+            "[^\w]" .                                       // Must not have an alpha num before real method
+            '(__)' .                                        // Must start with one of the functions
+            "\(\s*" .                                       // Match opening parenthesis
             "(?P<quote>['\"])" .                            // Match " or ' and store in {quote}
-            '(?P<string>(?:\\\k{quote}|(?!\k{quote}).)*)' . // Match any string that can be {quote} escaped
-            '\k{quote}' .                                   // Match " or ' previously matched
-            '\s*[\),]';                                    // Close parentheses or new parameter
+            "(?P<string>(?:\\\k{quote}|(?!\k{quote}).)*)" . // Match any string that can be {quote} escaped
+            "\k{quote}" .                                   // Match " or ' previously matched
+            "\s*[\),]";                                     // Close parentheses or new parameter
 
-        // Find all PHP + Twig files in the app folder, except for storage
         $finder = new Finder();
-        $finder->in($path)->name('*.php')->files();
+        $finder->in($path)->exclude('storage')->exclude('vendor')->name('*.php')->files();
 
-        /**
-         * @var \Symfony\Component\Finder\SplFileInfo $file
-         */
         foreach ($finder as $file) {
             if (! preg_match_all('/' . $stringPattern . '/siU', $file->getContents(), $matches)) {
                 continue;
             }
 
             foreach ($matches['string'] as $key) {
-                if (preg_match('/(^[a-zA-Z0-9_-]+([.][^\)\ ]+)+$)/siU', $key, $groupMatches) && ! Str::contains(
+                if (preg_match('/(^[a-zA-Z0-9_-]+([.][^\)\ ]+)+$)/siU', $key) && ! Str::contains(
                     $key,
                     '...'
                 )) {

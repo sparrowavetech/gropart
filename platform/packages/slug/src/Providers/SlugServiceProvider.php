@@ -10,13 +10,12 @@ use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Page\Models\Page;
 use Botble\Slug\Facades\SlugHelper as SlugHelperFacade;
 use Botble\Slug\Models\Slug;
-use Botble\Slug\Repositories\Caches\SlugCacheDecorator;
 use Botble\Slug\Repositories\Eloquent\SlugRepository;
 use Botble\Slug\Repositories\Interfaces\SlugInterface;
 use Botble\Slug\SlugCompiler;
 use Botble\Slug\SlugHelper;
 use Illuminate\Routing\Events\RouteMatched;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 
 class SlugServiceProvider extends ServiceProvider
 {
@@ -26,25 +25,26 @@ class SlugServiceProvider extends ServiceProvider
 
     public function register(): void
     {
+        $this
+            ->setNamespace('packages/slug')
+            ->loadAndPublishTranslations();
+
         $this->app->bind(SlugInterface::class, function () {
-            return new SlugCacheDecorator(new SlugRepository(new Slug()));
+            return new SlugRepository(new Slug());
         });
 
         $this->app->singleton(SlugHelper::class, function () {
             return new SlugHelper(new SlugCompiler());
         });
-
-        $this->setNamespace('packages/slug')
-            ->loadHelpers();
     }
 
     public function boot(): void
     {
         $this
             ->loadAndPublishConfigurations(['general'])
+            ->loadHelpers()
             ->loadAndPublishViews()
             ->loadRoutes()
-            ->loadAndPublishTranslations()
             ->loadMigrations()
             ->publishAssets();
 
@@ -59,7 +59,7 @@ class SlugServiceProvider extends ServiceProvider
                 'name' => 'packages/slug::slug.permalink_settings',
                 'icon' => null,
                 'url' => route('slug.settings'),
-                'permissions' => ['setting.options'],
+                'permissions' => ['settings.options'],
             ]);
         });
 
@@ -76,6 +76,7 @@ class SlugServiceProvider extends ServiceProvider
                  */
                 $item::resolveRelationUsing('slugable', function ($model) {
                     return $model->morphOne(Slug::class, 'reference')->select([
+                        'id',
                         'key',
                         'reference_type',
                         'reference_id',
@@ -94,7 +95,7 @@ class SlugServiceProvider extends ServiceProvider
                     /**
                      * @var BaseModel $this
                      */
-                    return $this->slugable ? $this->slugable->id : '';
+                    return $this->slugable ? $this->slugable->getKey() : '';
                 });
 
                 MacroableModels::addMacro(
@@ -104,7 +105,7 @@ class SlugServiceProvider extends ServiceProvider
                         /**
                          * @var BaseModel $this
                          */
-                        if (! $this->slug || (get_class($this) == Page::class && BaseHelper::isHomepage($this->id))) {
+                        if (! $this->slug || (get_class($this) == Page::class && BaseHelper::isHomepage($this->getKey()))) {
                             return route('public.index');
                         }
 
@@ -115,7 +116,7 @@ class SlugServiceProvider extends ServiceProvider
 
                         return apply_filters(
                             'slug_filter_url',
-                            url($prefix ? $prefix . '/' . $this->slug : $this->slug)
+                            url($prefix ? $prefix . '/' . $this->slug : $this->slug) . SlugHelperFacade::getPublicSingleEndingURL()
                         );
                     }
                 );

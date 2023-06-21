@@ -36,7 +36,7 @@ class SyncOldDataCommand extends Command
             return self::FAILURE;
         }
 
-        $ids = LanguageMeta::where('reference_type', $this->argument('class'))
+        $ids = LanguageMeta::query()->where('reference_type', $class)
             ->pluck('reference_id')
             ->all();
 
@@ -55,7 +55,7 @@ class SyncOldDataCommand extends Command
             ];
         }
 
-        LanguageMeta::insert($data);
+        LanguageMeta::query()->insert($data);
 
         $this->components->info('Processed ' . count($data) . ' item(s)!');
 

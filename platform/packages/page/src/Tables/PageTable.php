@@ -5,7 +5,6 @@ namespace Botble\Page\Tables;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Page\Models\Page;
-use Botble\Page\Repositories\Interfaces\PageInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Base\Facades\Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
@@ -20,15 +19,14 @@ use Botble\Table\DataTables;
 
 class PageTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, PageInterface $pageRepository)
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Page $page)
     {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $pageRepository;
+        $this->model = $page;
+
+        $this->hasActions = true;
+        $this->hasFilter = true;
 
         if (! Auth::user()->hasAnyPermission(['pages.edit', 'pages.destroy'])) {
             $this->hasOperations = false;
@@ -46,10 +44,10 @@ class PageTable extends TableAbstract
                 if (! Auth::user()->hasPermission('posts.edit')) {
                     $name = BaseHelper::clean($item->name);
                 } else {
-                    $name = Html::link(route('pages.edit', $item->id), BaseHelper::clean($item->name));
+                    $name = Html::link(route('pages.edit', $item->getKey()), BaseHelper::clean($item->name));
                 }
 
-                if (function_exists('theme_option') && BaseHelper::isHomepage($item->id)) {
+                if (function_exists('theme_option') && BaseHelper::isHomepage($item->getKey())) {
                     $name .= Html::tag('span', ' — ' . trans('packages/page::pages.front_page'), [
                         'class' => 'additional-page-name',
                     ])->toHtml();
@@ -58,7 +56,7 @@ class PageTable extends TableAbstract
                 return apply_filters(PAGE_FILTER_PAGE_NAME_IN_ADMIN_LIST, $name, $item);
             })
             ->editColumn('checkbox', function (Page $item) {
-                return $this->getCheckbox($item->id);
+                return $this->getCheckbox($item->getKey());
             })
             ->editColumn('template', function (Page $item) use ($pageTemplates) {
                 return Arr::get($pageTemplates, $item->template ?: 'default');
@@ -78,13 +76,16 @@ class PageTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()->select([
-            'id',
-            'name',
-            'template',
-            'created_at',
-            'status',
-        ]);
+        $query = $this
+            ->getModel()
+            ->query()
+            ->select([
+                'id',
+                'name',
+                'template',
+                'created_at',
+                'status',
+            ]);
 
         return $this->applyScopes($query);
     }

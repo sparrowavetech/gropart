@@ -2,9 +2,11 @@
 
 namespace Botble\Media\Repositories\Caches;
 
-use Botble\Media\Repositories\Interfaces\MediaSettingInterface;
-use Botble\Support\Repositories\Caches\CacheAbstractDecorator;
+use Botble\Media\Repositories\Eloquent\MediaSettingRepository;
 
-class MediaSettingCacheDecorator extends CacheAbstractDecorator implements MediaSettingInterface
+/**
+ * @deprecated
+ */
+class MediaSettingCacheDecorator extends MediaSettingRepository
 {
 }

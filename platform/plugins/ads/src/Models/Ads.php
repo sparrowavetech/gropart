@@ -26,23 +26,14 @@ class Ads extends BaseModel
 
     protected $casts = [
         'status' => BaseStatusEnum::class,
-        'expired_at' => 'datetime',
+        'expired_at' => 'date',
         'open_in_new_tab' => 'boolean',
     ];
 
     public function scopeNotExpired(Builder $query): Builder
     {
         return $query->where(function ($query) {
-            $query->whereDate('expired_at', '>=', Carbon::now()->toDateString());
+            $query->whereDate('expired_at', '>=', Carbon::now());
         });
-    }
-
-    public function getExpiredAtAttribute($value): ?string
-    {
-        if (! $value) {
-            return null;
-        }
-
-        return Carbon::parse($value)->format('m/d/Y');
     }
 }

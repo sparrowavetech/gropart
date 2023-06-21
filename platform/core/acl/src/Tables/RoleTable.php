@@ -10,8 +10,6 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Botble\ACL\Repositories\Interfaces\RoleInterface;
-use Botble\ACL\Repositories\Interfaces\UserInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Botble\Table\DataTables;
@@ -25,12 +23,11 @@ class RoleTable extends TableAbstract
     public function __construct(
         DataTables $table,
         UrlGenerator $urlGenerator,
-        RoleInterface $repository,
-        protected UserInterface $userRepository
+        Role $role
     ) {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $repository;
+        $this->model = $role;
 
         if (! Auth::user()->hasAnyPermission(['roles.edit', 'roles.destroy'])) {
             $this->hasOperations = false;
@@ -47,10 +44,10 @@ class RoleTable extends TableAbstract
                     return BaseHelper::clean($item->name);
                 }
 
-                return Html::link(route('roles.edit', $item->id), BaseHelper::clean($item->name));
+                return Html::link(route('roles.edit', $item->getKey()), BaseHelper::clean($item->name));
             })
             ->editColumn('checkbox', function (Role $item) {
-                return $this->getCheckbox($item->id);
+                return $this->getCheckbox($item->getKey());
             })
             ->editColumn('description', function (Role $item) {
                 return $item->description;
@@ -70,7 +67,9 @@ class RoleTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()
+        $query = $this
+            ->getModel()
+            ->query()
             ->with('author')
             ->select([
                 'id',

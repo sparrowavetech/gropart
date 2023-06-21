@@ -15,8 +15,6 @@ use Botble\Language\Http\Middleware\LocalizationRedirectFilter;
 use Botble\Language\Http\Middleware\LocalizationRoutes;
 use Botble\Language\Models\Language as LanguageModel;
 use Botble\Language\Models\LanguageMeta;
-use Botble\Language\Repositories\Caches\LanguageCacheDecorator;
-use Botble\Language\Repositories\Caches\LanguageMetaCacheDecorator;
 use Botble\Language\Repositories\Eloquent\LanguageMetaRepository;
 use Botble\Language\Repositories\Eloquent\LanguageRepository;
 use Botble\Language\Repositories\Interfaces\LanguageInterface;
@@ -35,7 +33,7 @@ use Illuminate\Routing\Router;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 use Illuminate\Support\Str;
 
 class LanguageServiceProvider extends ServiceProvider
@@ -48,11 +46,11 @@ class LanguageServiceProvider extends ServiceProvider
             ->loadAndPublishConfigurations(['general']);
 
         $this->app->bind(LanguageInterface::class, function () {
-            return new LanguageCacheDecorator(new LanguageRepository(new LanguageModel()));
+            return new LanguageRepository(new LanguageModel());
         });
 
         $this->app->bind(LanguageMetaInterface::class, function () {
-            return new LanguageMetaCacheDecorator(new LanguageMetaRepository(new LanguageMeta()));
+            return new LanguageMetaRepository(new LanguageMeta());
         });
 
         AliasLoader::getInstance()->alias('Language', Language::class);

@@ -40,6 +40,9 @@ return [
         'commission_fee_each_category_name' => 'Categories of commission setting :key',
         'add_new' => 'Add new',
         'payout_methods' => 'Payout methods',
+        'max_upload_filesize' => 'Max upload filesize (MB)',
+        'max_upload_filesize_placeholder' => 'Default: 10',
+        'max_product_images_upload_by_vendor' => 'Max number of images for each product',
     ],
     'theme_options' => [
         'name' => 'Marketplace',

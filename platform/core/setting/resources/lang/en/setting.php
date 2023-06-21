@@ -106,7 +106,6 @@ return [
         'template_footer' => 'Email template footer',
         'template_footer_description' => 'Template for footer of emails',
         'default' => 'Default',
-        'using_queue_to_send_mail' => 'Using queue job to send emails (Must to setup Queue first https://laravel.com/docs/queues#supervisor-configuration)',
     ],
     'media' => [
         'title' => 'Media',
@@ -200,4 +199,25 @@ return [
     'back' => 'Back',
     'enter_sample_value' => 'Enter sample values for testing',
     'preview' => 'Preview',
+    'media_size_width' => ':size size width must be greater than 0',
+    'media_size_height' => ':size size height must be greater than 0',
+    'cronjob' => [
+        'name' => 'Cronjob',
+        'description' => 'Cronjob allow you to automate certain commands or scripts on your site.',
+        'is_not_ready' => 'To run the cronjob, follow the instructions below.',
+        'is_working' => 'Congratulations! Your cronjob is running.',
+        'is_not_working' => "Your cronjob is not running. Please check your server's cronjob.",
+        'last_checked' => 'Last checked at :time.',
+        'copy_button' => 'Copy',
+        'setup' => [
+            'name' => 'Setting up the Cronjob',
+            'connect_to_server' => 'Connect to your server via SSH or any preferred method.',
+            'open_crontab' => 'Open the crontab file using a text editor (e.g., `crontab -e`).',
+            'add_cronjob' => 'Add the above command to the crontab file and save it.',
+            'done' => 'The cronjob will now run at every minute and execute the specified command.',
+            'learn_more' => 'You can learn more about cronjob from the Laravel :documentation',
+            'documentation' => 'documentation',
+            'copied' => 'Copied',
+        ],
+    ],
 ];

@@ -11,7 +11,7 @@
                     {!! BaseHelper::clean($errorMessage) !!}
                 </div>
             @else
-                <p>{!! get_payment_setting('description', RAZORPAY_PAYMENT_METHOD_NAME, __('Payment with Razorpay')) !!}</p>
+                <p>{!! get_payment_setting('description', RAZORPAY_PAYMENT_METHOD_NAME, __('Payment with :paymentType', ['paymentType' => 'Razorpay'])) !!}</p>
             @endif
 
             @php $supportedCurrencies = (new \Botble\Razorpay\Services\Gateways\RazorpayPaymentService)->supportedCurrencyCodes(); @endphp
@@ -85,28 +85,27 @@
 
                 var callRazorPayScript = function() {
                     loadExternalScript('https://checkout.razorpay.com/v1/checkout.js').then(function() {
-
-                        var options = {
+                        window.rzpay = new Razorpay({
                             key: '{{ get_payment_setting('key', RAZORPAY_PAYMENT_METHOD_NAME) }}',
                             name: '{{ $name }}',
                             description: '{{ $name }}',
                             order_id: $('#rzp_order_id').val(),
                             handler: function (transaction) {
                                 var form = $paymentCheckoutForm;
-                                form.append($('<input type="hidden" name="razorpay_payment_id">').val(transaction.razorpay_payment_id));
-                                form.append($('<input type="hidden" name="razorpay_order_id">').val(transaction.razorpay_order_id));
-                                form.append($('<input type="hidden" name="razorpay_signature">').val(transaction.razorpay_signature));
-                                form.submit();
+                                if (transaction.razorpay_payment_id && transaction.razorpay_order_id && transaction.razorpay_signature) {
+                                    form.append($('<input type="hidden" name="razorpay_payment_id">').val(transaction.razorpay_payment_id));
+                                    form.append($('<input type="hidden" name="razorpay_order_id">').val(transaction.razorpay_order_id));
+                                    form.append($('<input type="hidden" name="razorpay_signature">').val(transaction.razorpay_signature));
+                                    form.submit();
+                                }
                             },
                             'prefill': {
-                                'name': $('#address_name').val(),
-                                'email': $('#address_email').val(),
-                                'contact': $('#address_phone').val()
+                                'name': $(document).find('#address_name').val(),
+                                'email': $(document).find('#address_email').val(),
+                                'contact': $(document).find('#address_phone').val()
                             },
-                        };
-
-                        window.rzpay = new Razorpay(options);
-                        rzpay.open();
+                        });
+                        window.rzpay.open();
                     });
                 }
 

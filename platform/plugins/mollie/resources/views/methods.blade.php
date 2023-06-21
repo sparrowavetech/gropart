@@ -4,7 +4,7 @@
             value="{{ MOLLIE_PAYMENT_METHOD_NAME }}" @if ($selecting == MOLLIE_PAYMENT_METHOD_NAME) checked @endif>
         <label for="payment_{{ MOLLIE_PAYMENT_METHOD_NAME }}">{{ get_payment_setting('name', MOLLIE_PAYMENT_METHOD_NAME) }}</label>
         <div class="payment_{{ MOLLIE_PAYMENT_METHOD_NAME }}_wrap payment_collapse_wrap collapse @if ($selecting == MOLLIE_PAYMENT_METHOD_NAME) show @endif">
-            <p>{!! get_payment_setting('description', MOLLIE_PAYMENT_METHOD_NAME, __('Payment with Mollie')) !!}</p>
+            <p>{!! get_payment_setting('description', MOLLIE_PAYMENT_METHOD_NAME, __('Payment with :paymentType', ['paymentType' => 'Mollie'])) !!}</p>
         </div>
     </li>
 @endif

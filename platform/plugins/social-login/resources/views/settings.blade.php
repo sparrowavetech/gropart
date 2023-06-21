@@ -10,7 +10,7 @@
                 <x-core-setting::checkbox
                     name="social_login_enable"
                     :label="trans('plugins/social-login::social-login.settings.enable')"
-                    :value="setting('social_login_enable')"
+                    :checked="setting('social_login_enable')"
                 />
             </x-core-setting::section>
 
@@ -23,18 +23,18 @@
                         <x-core-setting::checkbox
                             name="social_login_{{ $provider }}_enable"
                             :label="trans('plugins/social-login::social-login.settings.enable')"
-                            :value="SocialService::getProviderEnabled($provider)"
+                            :checked="SocialService::getProviderEnabled($provider)"
                             class="enable-social-login-option"
                         />
 
                         <div class="enable-social-login-option-wrapper" @style(['display:none' => ! SocialService::getProviderEnabled($provider)])>
                             @foreach ($item['data'] as $input)
-                                @php($isDisabled = ! in_array(app()->environment(), SocialService::getEnvDisableData()) && in_array($input, Arr::get($item, 'disable', [])))
+                                @php($isDisabled = in_array(app()->environment(), SocialService::getEnvDisableData()) && in_array($input, Arr::get($item, 'disable', [])))
 
                                 <x-core-setting::text-input
                                     :name="'social_login_' . $provider . '_' . $input"
                                     :label="trans('plugins/social-login::social-login.settings.' . $provider . '.' . $input)"
-                                    :value="SocialService::getDataDisable($provider . '_' . $input)"
+                                    :value="$isDisabled ? SocialService::getDataDisable($provider . '_' . $input) : setting('social_login_' . $provider . '_' . $input)"
                                     :disabled="$isDisabled"
                                     :readonly="$isDisabled"
                                 />

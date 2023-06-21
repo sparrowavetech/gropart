@@ -37,7 +37,6 @@ return [
         'date' => env('CMS_DATE_FORMAT', 'Y-m-d'),
         'date_time' => env('CMS_DATE_TIME_FORMAT', 'Y-m-d H:i:s'),
     ],
-    'public_single_ending_url' => env('PUBLIC_SINGLE_ENDING_URL'),
     'locale' => env('APP_LOCALE', 'en'),
     'demo' => [
         'account' => [
@@ -687,7 +686,6 @@ return [
         ],
     ],
     'enable_system_updater' => env('CMS_ENABLE_SYSTEM_UPDATER', true),
-    'enable_marketplace_feature' => env('CMS_ENABLE_MARKETPLACE_FEATURE', true),
     'phone_validation_rule' => env('CMS_PHONE_VALIDATION_RULE', 'min:8|max:15|regex:/^([0-9\s\-\+\(\)]*)$/'),
     'disable_verify_csrf_token' => env('CMS_DISABLE_VERIFY_CSRF_TOKEN', false),
     'enable_less_secure_web' => env('CMS_ENABLE_LESS_SECURE_WEB', false),
@@ -701,4 +699,5 @@ return [
     'google_fonts_enabled_cache' => env('CMS_GOOGLE_FONTS_ENABLED_CACHE', true),
     'using_uuids_for_id' => env('CMS_USING_UUIDS_FOR_ID', false),
     'using_ulids_for_id' => env('CMS_USING_ULIDS_FOR_ID', false),
+    'type_id' => env('CMS_USING_TYPE_ID', 'BIGINT'),
 ];

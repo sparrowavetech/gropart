@@ -7,7 +7,6 @@ use Botble\ACL\Http\Middleware\RedirectIfAuthenticated;
 use Botble\ACL\Models\Activation;
 use Botble\ACL\Models\Role;
 use Botble\ACL\Models\User;
-use Botble\ACL\Repositories\Caches\RoleCacheDecorator;
 use Botble\ACL\Repositories\Eloquent\ActivationRepository;
 use Botble\ACL\Repositories\Eloquent\RoleRepository;
 use Botble\ACL\Repositories\Eloquent\UserRepository;
@@ -20,10 +19,9 @@ use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Media\Facades\RvMedia;
 use Exception;
 use Illuminate\Routing\Events\RouteMatched;
-use Illuminate\Routing\Router;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\View;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 use Illuminate\View\View as IlluminateView;
 
 class AclServiceProvider extends ServiceProvider
@@ -41,7 +39,7 @@ class AclServiceProvider extends ServiceProvider
         });
 
         $this->app->bind(RoleInterface::class, function () {
-            return new RoleCacheDecorator(new RoleRepository(new Role()));
+            return new RoleRepository(new Role());
         });
     }
 
@@ -62,15 +60,16 @@ class AclServiceProvider extends ServiceProvider
         $this->garbageCollect();
 
         $this->app['events']->listen(RouteMatched::class, function () {
-            DashboardMenu::registerItem([
-                'id' => 'cms-core-role-permission',
-                'priority' => 2,
-                'parent_id' => 'cms-core-platform-administration',
-                'name' => 'core/acl::permissions.role_permission',
-                'icon' => null,
-                'url' => route('roles.index'),
-                'permissions' => ['roles.index'],
-            ])
+            DashboardMenu::make()
+                ->registerItem([
+                    'id' => 'cms-core-role-permission',
+                    'priority' => 2,
+                    'parent_id' => 'cms-core-platform-administration',
+                    'name' => 'core/acl::permissions.role_permission',
+                    'icon' => null,
+                    'url' => route('roles.index'),
+                    'permissions' => ['roles.index'],
+                ])
                 ->registerItem([
                     'id' => 'cms-core-user',
                     'priority' => 3,
@@ -81,9 +80,6 @@ class AclServiceProvider extends ServiceProvider
                     'permissions' => ['users.index'],
                 ]);
 
-            /**
-             * @var Router $router
-             */
             $router = $this->app['router'];
 
             $router->aliasMiddleware('auth', Authenticate::class);

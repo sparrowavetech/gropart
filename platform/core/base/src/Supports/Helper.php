@@ -3,8 +3,8 @@
 namespace Botble\Base\Supports;
 
 use Botble\Base\Models\BaseModel;
-use Exception;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
@@ -26,13 +26,13 @@ class Helper
 
     public static function handleViewCount(BaseModel $object, string $sessionName): bool
     {
-        if (! array_key_exists($object->id, session()->get($sessionName, []))) {
+        if (! array_key_exists($object->getKey(), session($sessionName, []))) {
             try {
                 $object::withoutEvents(fn () => $object::withoutTimestamps(fn () => $object->increment('views')));
-                session()->put($sessionName . '.' . $object->id, time());
+                session()->put($sessionName . '.' . $object->getKey(), time());
 
                 return true;
-            } catch (Exception) {
+            } catch (Throwable) {
                 return false;
             }
         }
@@ -74,8 +74,20 @@ class Helper
     public static function isConnectedDatabase(): bool
     {
         try {
-            return Schema::hasTable('settings');
-        } catch (Exception) {
+            if (App::runningInConsole()) {
+                return Schema::hasTable('settings');
+            }
+
+            if (Cache::get('cms_connected_to_database')) {
+                return true;
+            }
+
+            $connected = Schema::hasTable('settings');
+
+            Cache::set('cms_connected_to_database', $connected, 86400);
+
+            return $connected;
+        } catch (Throwable) {
             return false;
         }
     }
@@ -95,7 +107,7 @@ class Helper
                     File::delete($file);
                 }
             }
-        } catch (Exception $exception) {
+        } catch (Throwable $exception) {
             info($exception->getMessage());
         }
 
@@ -140,7 +152,9 @@ class Helper
         $defaultIpAddress = Request::ip() ?: '127.0.0.1';
 
         try {
-            return trim(Http::get('https://ipecho.net/plain')->body()) ?: $defaultIpAddress;
+            $ip = trim(Http::withoutVerifying()->get('https://ipecho.net/plain')->body());
+
+            return filter_var($ip, FILTER_VALIDATE_IP) ? $ip : $defaultIpAddress;
         } catch (Throwable) {
             return $defaultIpAddress;
         }

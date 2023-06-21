@@ -4,6 +4,8 @@ namespace Botble\Location\Imports;
 
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Location\Events\ImportedCityEvent;
+use Botble\Location\Events\ImportedCountryEvent;
+use Botble\Location\Events\ImportedStateEvent;
 use Botble\Location\Models\City;
 use Botble\Location\Models\Country;
 use Botble\Location\Models\State;
@@ -194,6 +196,8 @@ class LocationImport implements
             $state = $this->stateRepository->create($row);
         }
 
+        event(new ImportedStateEvent($row, $state));
+
         if ($this->getActiveLanguage) {
             foreach ($this->getActiveLanguage as $language) {
                 if ($language->lang_is_default) {
@@ -242,6 +246,8 @@ class LocationImport implements
         } else {
             $country = $this->countryRepository->create($row);
         }
+
+        event(new ImportedCountryEvent($row, $country));
 
         if ($this->getActiveLanguage) {
             foreach ($this->getActiveLanguage as $language) {

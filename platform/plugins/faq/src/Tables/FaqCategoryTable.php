@@ -5,7 +5,6 @@ namespace Botble\Faq\Tables;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Faq\Models\FaqCategory;
-use Botble\Faq\Repositories\Interfaces\FaqCategoryInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Base\Facades\Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
@@ -18,15 +17,14 @@ use Botble\Table\DataTables;
 
 class FaqCategoryTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, FaqCategoryInterface $faqCategoryRepository)
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, FaqCategory $faqCategory)
     {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $faqCategoryRepository;
+        $this->model = $faqCategory;
+
+        $this->hasActions = true;
+        $this->hasFilter = true;
 
         if (! Auth::user()->hasAnyPermission(['faq_category.edit', 'faq_category.destroy'])) {
             $this->hasOperations = false;
@@ -43,10 +41,10 @@ class FaqCategoryTable extends TableAbstract
                     return BaseHelper::clean($item->name);
                 }
 
-                return Html::link(route('faq_category.edit', $item->id), BaseHelper::clean($item->name));
+                return Html::link(route('faq_category.edit', $item->getKey()), BaseHelper::clean($item->name));
             })
             ->editColumn('checkbox', function (FaqCategory $item) {
-                return $this->getCheckbox($item->id);
+                return $this->getCheckbox($item->getKey());
             })
             ->editColumn('created_at', function (FaqCategory $item) {
                 return BaseHelper::formatDate($item->created_at);
@@ -63,12 +61,15 @@ class FaqCategoryTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()->select([
-            'id',
-            'name',
-            'created_at',
-            'status',
-        ]);
+        $query = $this
+            ->getModel()
+            ->query()
+            ->select([
+                'id',
+                'name',
+                'created_at',
+                'status',
+            ]);
 
         return $this->applyScopes($query);
     }

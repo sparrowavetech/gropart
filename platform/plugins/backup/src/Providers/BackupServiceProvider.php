@@ -5,7 +5,7 @@ namespace Botble\Backup\Providers;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Illuminate\Routing\Events\RouteMatched;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 
 class BackupServiceProvider extends ServiceProvider
 {

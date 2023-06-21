@@ -5,15 +5,17 @@ namespace Botble\Setting\Providers;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
+use Botble\Setting\Commands\CronJobTestCommand;
+use Botble\Setting\Facades\Setting;
 use Botble\Setting\Models\Setting as SettingModel;
-use Botble\Setting\Repositories\Caches\SettingCacheDecorator;
 use Botble\Setting\Repositories\Eloquent\SettingRepository;
 use Botble\Setting\Repositories\Interfaces\SettingInterface;
 use Botble\Setting\Supports\DatabaseSettingStore;
 use Botble\Setting\Supports\SettingStore;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 
 class SettingServiceProvider extends ServiceProvider
 {
@@ -31,9 +33,7 @@ class SettingServiceProvider extends ServiceProvider
         });
 
         $this->app->bind(SettingInterface::class, function () {
-            return new SettingCacheDecorator(
-                new SettingRepository(new SettingModel())
-            );
+            return new SettingRepository(new SettingModel());
         });
 
         if (! class_exists('Setting')) {
@@ -55,15 +55,16 @@ class SettingServiceProvider extends ServiceProvider
             ->publishAssets();
 
         $this->app['events']->listen(RouteMatched::class, function () {
-            DashboardMenu::registerItem([
-                'id' => 'cms-core-settings',
-                'priority' => 998,
-                'parent_id' => null,
-                'name' => 'core/setting::setting.title',
-                'icon' => 'fa fa-cogs',
-                'url' => route('settings.options'),
-                'permissions' => ['settings.options'],
-            ])
+            DashboardMenu::make()
+                ->registerItem([
+                    'id' => 'cms-core-settings',
+                    'priority' => 998,
+                    'parent_id' => null,
+                    'name' => 'core/setting::setting.title',
+                    'icon' => 'fa fa-cogs',
+                    'url' => route('settings.options'),
+                    'permissions' => ['settings.options'],
+                ])
                 ->registerItem([
                     'id' => 'cms-core-settings-general',
                     'priority' => 1,
@@ -90,9 +91,29 @@ class SettingServiceProvider extends ServiceProvider
                     'icon' => null,
                     'url' => route('settings.media'),
                     'permissions' => ['settings.media'],
+                ])
+                ->registerItem([
+                    'id' => 'cms-core-settings-cronjob',
+                    'priority' => 999,
+                    'parent_id' => 'cms-core-settings',
+                    'name' => 'core/setting::setting.cronjob.name',
+                    'url' => route('settings.cronjob'),
+                    'permissions' => ['settings.cronjob'],
                 ]);
 
             EmailHandler::addTemplateSettings('base', config('core.setting.email', []), 'core');
+        });
+
+        $this->commands([
+            CronJobTestCommand::class,
+        ]);
+
+        $this->app->afterResolving(Schedule::class, function (Schedule $schedule) {
+            rescue(function () use ($schedule) {
+                $schedule
+                    ->command(CronJobTestCommand::class)
+                    ->everyMinute();
+            });
         });
     }
 

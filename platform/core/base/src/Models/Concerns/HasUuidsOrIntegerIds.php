@@ -44,4 +44,9 @@ trait HasUuidsOrIntegerIds
     {
         return config('core.base.general.using_uuids_for_id', false);
     }
+
+    public static function getTypeOfId(): string
+    {
+        return config('core.base.general.type_id', 'BIGINT');
+    }
 }

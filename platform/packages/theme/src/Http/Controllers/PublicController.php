@@ -14,6 +14,7 @@ use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Theme\Facades\SiteMapManager;
 use Botble\Slug\Facades\SlugHelper;
 use Botble\Theme\Facades\Theme;
+use Illuminate\Support\Str;
 
 class PublicController extends Controller
 {
@@ -26,6 +27,10 @@ class PublicController extends Controller
 
                 if ($slug) {
                     $data = (new PageService())->handleFrontRoutes($slug);
+
+                    if (! $data) {
+                        return Theme::scope('index')->render();
+                    }
 
                     event(new RenderingSingleEvent($slug));
 
@@ -63,7 +68,7 @@ class PublicController extends Controller
 
         $result = apply_filters(BASE_FILTER_PUBLIC_SINGLE_DATA, $slug);
 
-        if (isset($result['slug']) && $result['slug'] !== $key) {
+        if (isset($result['slug']) && $result['slug'] !== Str::replaceLast(SlugHelper::getPublicSingleEndingURL(), '', $key)) {
             return redirect()->route('public.single', $result['slug']);
         }
 

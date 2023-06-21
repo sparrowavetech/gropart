@@ -4,7 +4,7 @@ namespace Botble\Base\Providers;
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\Setting\Supports\SettingStore;
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 
 class MailConfigServiceProvider extends ServiceProvider
 {

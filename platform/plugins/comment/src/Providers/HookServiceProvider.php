@@ -5,13 +5,13 @@ namespace Botble\Comment\Providers;
 use Botble\Base\Models\BaseModel;
 use Botble\Blog\Models\Post;
 use Botble\Comment\Repositories\Interfaces\CommentInterface;
-use Html;
+use Botble\Base\Facades\Html;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 use MetaBox;
-use RvMedia;
-use SlugHelper;
-use Theme;
+use Botble\Media\Facades\RvMedia;
+use Botble\Slug\Facades\SlugHelper;
+use Botble\Theme\Facades\Theme;
 
 class HookServiceProvider extends ServiceProvider
 {

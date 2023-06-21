@@ -39,6 +39,10 @@ class PageService
         $page = app(PageInterface::class)->getFirstBy($condition, ['*'], ['slugable']);
 
         if (empty($page)) {
+            if ($slug->reference_id == BaseHelper::getHomepageId()) {
+                return [];
+            }
+
             abort(404);
         }
 

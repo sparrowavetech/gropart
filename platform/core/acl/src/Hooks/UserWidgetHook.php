@@ -2,7 +2,7 @@
 
 namespace Botble\ACL\Hooks;
 
-use Botble\ACL\Repositories\Interfaces\UserInterface;
+use Botble\ACL\Models\User;
 use Botble\Dashboard\Supports\DashboardWidgetInstance;
 use Illuminate\Support\Collection;
 
@@ -10,7 +10,7 @@ class UserWidgetHook
 {
     public static function addUserStatsWidget(array $widgets, Collection $widgetSettings): array
     {
-        $users = app(UserInterface::class)->count();
+        $users = User::query()->count();
 
         return (new DashboardWidgetInstance())
             ->setType('stats')

@@ -84,61 +84,68 @@ class HookServiceProvider extends ServiceProvider
 
     public function checkoutWithPayPal(array $data, Request $request): array
     {
-        if ($request->input('payment_method') == PAYPAL_PAYMENT_METHOD_NAME) {
-            $currentCurrency = get_application_currency();
+        if ($data['type'] !== PAYPAL_PAYMENT_METHOD_NAME) {
+            return $data;
+        }
 
-            $currencyModel = $currentCurrency->replicate();
+        $currentCurrency = get_application_currency();
 
-            $payPalService = $this->app->make(PayPalPaymentService::class);
+        $currencyModel = $currentCurrency->replicate();
 
-            $supportedCurrencies = $payPalService->supportedCurrencyCodes();
+        $payPalService = $this->app->make(PayPalPaymentService::class);
 
-            $currency = strtoupper($currentCurrency->title);
+        $supportedCurrencies = $payPalService->supportedCurrencyCodes();
 
-            $notSupportCurrency = false;
+        $currency = strtoupper($currentCurrency->title);
 
-            if (! in_array($currency, $supportedCurrencies)) {
-                $notSupportCurrency = true;
+        $notSupportCurrency = false;
 
-                if (! $currencyModel->where('title', 'USD')->exists()) {
-                    $data['error'] = true;
-                    $data['message'] = __(":name doesn't support :currency. List of currencies supported by :name: :currencies.", [
+        if (! in_array($currency, $supportedCurrencies)) {
+            $notSupportCurrency = true;
+
+            if (! $currencyModel->where('title', 'USD')->exists()) {
+                $data['error'] = true;
+                $data['message'] = __(
+                    ":name doesn't support :currency. List of currencies supported by :name: :currencies.",
+                    [
                         'name' => 'PayPal',
                         'currency' => $currency,
                         'currencies' => implode(', ', $supportedCurrencies),
-                    ]);
+                    ]
+                );
 
-                    return $data;
-                }
+                return $data;
             }
+        }
 
-            $paymentData = apply_filters(PAYMENT_FILTER_PAYMENT_DATA, [], $request);
+        $paymentData = apply_filters(PAYMENT_FILTER_PAYMENT_DATA, [], $request);
 
-            if ($notSupportCurrency) {
-                $usdCurrency = $currencyModel->where('title', 'USD')->first();
+        if ($notSupportCurrency) {
+            $usdCurrency = $currencyModel->where('title', 'USD')->first();
 
-                $paymentData['currency'] = 'USD';
-                if ($currentCurrency->is_default) {
-                    $paymentData['amount'] = $paymentData['amount'] * $usdCurrency->exchange_rate;
-                } else {
-                    $paymentData['amount'] = format_price($paymentData['amount'] / $currentCurrency->exchange_rate, $currentCurrency, true);
-                }
-            }
-
-            if (! $request->input('callback_url')) {
-                $paymentData['callback_url'] = route('payments.paypal.status');
-            }
-
-            $checkoutUrl = $payPalService->execute($paymentData);
-
-            if ($checkoutUrl) {
-                $data['checkoutUrl'] = $checkoutUrl;
+            $paymentData['currency'] = 'USD';
+            if ($currentCurrency->is_default) {
+                $paymentData['amount'] = $paymentData['amount'] * $usdCurrency->exchange_rate;
             } else {
-                $data['error'] = true;
-                $data['message'] = $payPalService->getErrorMessage();
+                $paymentData['amount'] = format_price(
+                    $paymentData['amount'] / $currentCurrency->exchange_rate,
+                    $currentCurrency,
+                    true
+                );
             }
+        }
 
-            return $data;
+        if (! $request->input('callback_url')) {
+            $paymentData['callback_url'] = route('payments.paypal.status');
+        }
+
+        $checkoutUrl = $payPalService->execute($paymentData);
+
+        if ($checkoutUrl) {
+            $data['checkoutUrl'] = $checkoutUrl;
+        } else {
+            $data['error'] = true;
+            $data['message'] = $payPalService->getErrorMessage();
         }
 
         return $data;

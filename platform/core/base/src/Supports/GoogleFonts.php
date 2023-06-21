@@ -4,6 +4,7 @@ namespace Botble\Base\Supports;
 
 use Exception;
 use Illuminate\Contracts\Filesystem\Filesystem;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -18,7 +19,7 @@ class GoogleFonts
     ) {
     }
 
-    public function load(string $font, string|null $nonce = null, bool $forceDownload = false): Fonts
+    public function load(string $font, string|null $nonce = null, bool $forceDownload = false): Fonts|null
     {
         ['font' => $font, 'nonce' => $nonce] = $this->parseOptions($font, $nonce);
 
@@ -37,7 +38,7 @@ class GoogleFonts
 
             return $fonts;
         } catch (Exception $exception) {
-            if (config('app.debug')) {
+            if (App::hasDebugModeEnabled()) {
                 throw $exception;
             }
 
@@ -51,37 +52,49 @@ class GoogleFonts
             return null;
         }
 
-        $localizedCss = $this->filesystem->get($this->path($url, 'fonts.css'));
+        $fontCssPath = $this->path($url, 'fonts.css');
+
+        $localizedCss = $this->filesystem->get($fontCssPath);
+
+        if (str_contains($localizedCss, '<!DOCTYPE html>')) {
+            $this->filesystem->delete($fontCssPath);
+
+            return null;
+        }
 
         if (! str_contains($localizedCss, Storage::disk('public')->url('fonts'))) {
             $localizedCss = preg_replace('/(http|https):\/\/.*?\/storage\/fonts\//i', Storage::disk('public')->url('fonts/'), $localizedCss);
-            $this->filesystem->put($this->path($url, 'fonts.css'), $localizedCss);
+            $this->filesystem->put($fontCssPath, $localizedCss);
         }
 
         return new Fonts(
             googleFontsUrl: $url,
-            localizedUrl: $this->filesystem->url($this->path($url, 'fonts.css')),
+            localizedUrl: $this->filesystem->url($fontCssPath),
             localizedCss: $localizedCss,
             nonce: $nonce,
             preferInline: $this->inline,
         );
     }
 
-    protected function fetch(string $url, string|null $nonce): Fonts
+    protected function fetch(string $url, string|null $nonce): Fonts|null
     {
-        $css = Http::withHeaders(['User-Agent' => $this->userAgent])
+        $response = Http::withHeaders(['User-Agent' => $this->userAgent])
             ->timeout(300)
-            ->get($url)
-            ->body();
+            ->withoutVerifying()
+            ->get($url);
 
-        $localizedCss = $css;
+        if ($response->failed()) {
+            return null;
+        }
 
-        foreach ($this->extractFontUrls($css) as $fontUrl) {
+        $localizedCss = $response->body();
+
+        foreach ($this->extractFontUrls($response) as $fontUrl) {
             $localizedFontUrl = $this->localizeFontUrl($fontUrl);
 
             $this->filesystem->put(
                 $this->path($url, $localizedFontUrl),
-                Http::get($fontUrl)->body(),
+                Http::withoutVerifying()->get($fontUrl)->body(),
             );
 
             $localizedCss = str_replace(
