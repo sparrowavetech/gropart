@@ -2,11 +2,12 @@
 
 namespace Botble\Ecommerce\Tables;
 
-use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Ecommerce\Repositories\Interfaces\BrandInterface;
-use Botble\Table\Abstracts\TableAbstract;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
+use Botble\Ecommerce\Models\Brand;
+use Botble\Table\Abstracts\TableAbstract;
+use Botble\Table\DataTables;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -16,19 +17,16 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
-use Botble\Table\DataTables;
 
 class BrandTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, BrandInterface $brandRepository)
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Brand $model)
     {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $brandRepository;
+        $this->model = $model;
+        $this->hasActions = true;
+        $this->hasFilter = true;
 
         if (! Auth::user()->hasAnyPermission(['brands.edit', 'brands.destroy'])) {
             $this->hasOperations = false;
@@ -40,29 +38,29 @@ class BrandTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('name', function ($item) {
+            ->editColumn('name', function (Brand $item) {
                 if (! Auth::user()->hasPermission('brands.edit')) {
                     return BaseHelper::clean($item->name);
                 }
 
                 return Html::link(route('brands.edit', $item->id), BaseHelper::clean($item->name));
             })
-            ->editColumn('checkbox', function ($item) {
+            ->editColumn('checkbox', function (Brand $item) {
                 return $this->getCheckbox($item->id);
             })
-            ->editColumn('logo', function ($item) {
+            ->editColumn('logo', function (Brand $item) {
                 return $this->displayThumbnail($item->logo);
             })
-            ->editColumn('created_at', function ($item) {
+            ->editColumn('created_at', function (Brand $item) {
                 return BaseHelper::formatDate($item->created_at);
             })
-            ->editColumn('is_featured', function ($item) {
+            ->editColumn('is_featured', function (Brand $item) {
                 return $item->is_featured ? trans('core/base::base.yes') : trans('core/base::base.no');
             })
-            ->editColumn('status', function ($item) {
+            ->editColumn('status', function (Brand $item) {
                 return BaseHelper::clean($item->status->toHtml());
             })
-            ->addColumn('operations', function ($item) {
+            ->addColumn('operations', function (Brand $item) {
                 return $this->getOperations('brands.edit', 'brands.destroy', $item);
             });
 
@@ -71,14 +69,16 @@ class BrandTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()->select([
-            'id',
-            'name',
-            'created_at',
-            'status',
-            'is_featured',
-            'logo',
-        ]);
+        $query = $this->getModel()
+            ->query()
+            ->select([
+                'id',
+                'name',
+                'created_at',
+                'status',
+                'is_featured',
+                'logo',
+            ]);
 
         return $this->applyScopes($query);
     }
@@ -153,10 +153,7 @@ class BrandTable extends TableAbstract
 
     public function renderTable($data = [], $mergeData = []): View|Factory|Response
     {
-        if ($this->query()->count() === 0 &&
-            ! $this->request()->wantsJson() &&
-            $this->request()->input('filter_table_id') !== $this->getOption('id') && ! $this->request()->ajax()
-        ) {
+        if ($this->isEmpty()) {
             return view('plugins/ecommerce::brands.intro');
         }
 

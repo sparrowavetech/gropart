@@ -2,53 +2,53 @@
 
 namespace Botble\Ecommerce\Tables\Reports;
 
-use BaseHelper;
-use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
+use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Models\Product;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Table\Abstracts\TableAbstract;
-use EcommerceHelper;
-use Html;
+use Botble\Table\DataTables;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
-use Yajra\DataTables\DataTables;
 
 class TopSellingProductsTable extends TableAbstract
 {
-    protected string $type = self::TABLE_TYPE_SIMPLE;
-
-    protected $view = 'core/table::simple-table';
-
-    public function __construct(
-        DataTables $table,
-        UrlGenerator $urlGenerator,
-        ProductInterface $productRepository
-    ) {
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Product $model)
+    {
         parent::__construct($table, $urlGenerator);
-        $this->repository = $productRepository;
+
+        $this->model = $model;
+        $this->type = self::TABLE_TYPE_SIMPLE;
+        $this->view = 'core/table::simple-table';
     }
 
     public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('id', function ($item) {
+            ->editColumn('id', function (Product $item) {
                 if (! $item->is_variation) {
                     return $item->id;
                 }
 
                 return $item->original_product->id;
             })
-            ->editColumn('name', function ($item) {
+            ->editColumn('name', function (Product $item) {
                 if (! $item->is_variation) {
                     return Html::link($item->url, BaseHelper::clean($item->name), ['target' => '_blank']);
                 }
 
                 $attributeText = $item->variation_attributes;
 
-                return Html::link($item->original_product->url, BaseHelper::clean($item->original_product->name), ['target' => '_blank'])
+                return Html::link(
+                    $item->original_product->url,
+                    BaseHelper::clean($item->original_product->name),
+                    ['target' => '_blank']
+                )
                         ->toHtml() . ' ' . Html::tag('small', $attributeText);
             });
 
@@ -59,11 +59,18 @@ class TopSellingProductsTable extends TableAbstract
     {
         [$startDate, $endDate] = EcommerceHelper::getDateRangeInReport(request());
 
-        $query = $this->repository->getModel()
+        $query = $this->getModel()
+            ->query()
             ->join('ec_order_product', 'ec_products.id', '=', 'ec_order_product.product_id')
-            ->join('ec_orders', 'ec_orders.id', '=', 'ec_order_product.order_id')
-            ->join('payments', 'payments.order_id', '=', 'ec_orders.id')
-            ->where('payments.status', PaymentStatusEnum::COMPLETED)
+            ->join('ec_orders', 'ec_orders.id', '=', 'ec_order_product.order_id');
+
+        if (is_plugin_active('payment')) {
+            $query = $query
+                ->join('payments', 'payments.order_id', '=', 'ec_orders.id')
+                ->where('payments.status', PaymentStatusEnum::COMPLETED);
+        }
+
+        $query = $query
             ->whereDate('ec_orders.created_at', '>=', $startDate)
             ->whereDate('ec_orders.created_at', '<=', $endDate)
             ->select([

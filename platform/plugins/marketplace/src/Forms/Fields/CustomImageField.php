@@ -4,7 +4,7 @@ namespace Botble\Marketplace\Forms\Fields;
 
 use Illuminate\Support\Arr;
 use Kris\LaravelFormBuilder\Fields\FormField;
-use Botble\Marketplace\Facades\MarketplaceHelper;
+use MarketplaceHelper;
 
 class CustomImageField extends FormField
 {

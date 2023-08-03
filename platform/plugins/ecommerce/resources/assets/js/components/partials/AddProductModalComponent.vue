@@ -1,6 +1,6 @@
 <template>
     <div>
-        <b-modal id='add-product-item' :title="__('order.add_product')" :ok-title="__('order.save')"
+        <ec-modal id='add-product-item' :title="__('order.add_product')" :ok-title="__('order.save')"
                  :cancel-title="__('order.cancel')"
                  @shown='resetProductData()' @ok="$emit('create-product', $event, product)">
             <div class='form-group mb15'>
@@ -41,7 +41,7 @@
                         store.name
                     }}</strong></label>
             </div>
-        </b-modal>
+        </ec-modal>
     </div>
 </template>
 

@@ -9,7 +9,7 @@ use Botble\Ecommerce\Models\Tax;
 
 class TaxForm extends FormAbstract
 {
-    public function buildForm()
+    public function buildForm(): void
     {
         $this
             ->setupModel(new Tax())

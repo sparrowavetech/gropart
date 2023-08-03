@@ -9,6 +9,7 @@ use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Enums\ShippingCodStatusEnum;
 use Botble\Ecommerce\Enums\ShippingStatusEnum;
 use Botble\Ecommerce\Events\ShippingStatusChanged;
+use Botble\Ecommerce\Facades\OrderHelper;
 use Botble\Ecommerce\Http\Requests\ShipmentRequest;
 use Botble\Ecommerce\Http\Requests\UpdateShipmentCodStatusRequest;
 use Botble\Ecommerce\Models\Customer;
@@ -17,13 +18,12 @@ use Botble\Ecommerce\Repositories\Interfaces\OrderHistoryInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ShipmentHistoryInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ShipmentInterface;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Http\Requests\UpdateShippingStatusRequest;
 use Botble\Marketplace\Tables\ShipmentTable;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
-use Botble\Marketplace\Facades\MarketplaceHelper;
-use Botble\Ecommerce\Facades\OrderHelper;
 
 class ShipmentController extends BaseController
 {
@@ -33,6 +33,13 @@ class ShipmentController extends BaseController
         protected OrderHistoryInterface $orderHistoryRepository,
         protected ShipmentHistoryInterface $shipmentHistoryRepository
     ) {
+        $this->middleware(function ($request, $next) {
+            if (! MarketplaceHelper::allowVendorManageShipping()) {
+                abort(404);
+            }
+
+            return $next($request);
+        });
     }
 
     public function index(ShipmentTable $dataTable)

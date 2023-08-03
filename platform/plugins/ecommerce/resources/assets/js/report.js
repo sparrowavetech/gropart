@@ -1,10 +1,12 @@
 import SalesReportsChart from './components/SalesReportsChart'
 import RevenueChart from './components/RevenueChart'
 
-vueApp.booting(vue => {
-    vue.component('sales-reports-chart', SalesReportsChart)
-    vue.component('revenue-chart', RevenueChart)
-})
+if (typeof vueApp !== 'undefined') {
+    vueApp.booting((vue) => {
+        vue.component('sales-reports-chart', SalesReportsChart)
+        vue.component('revenue-chart', RevenueChart)
+    })
+}
 
 $(() => {
     if (!window.moment || !jQuery().daterangepicker) {
@@ -62,17 +64,19 @@ $(() => {
                     if (data.error) {
                         Botble.showError(data.message)
                     } else {
-                        $('.widget-item').each((key, widget) => {
-                            const widgetEl = $(widget).prop('id')
-                            $(`#${widgetEl}`).replaceWith($(data.data).find(`#${widgetEl}`))
-                        })
+                        if (! $('#report-stats-content').length) {
+                            const newUrl = new URL(window.location.href)
 
-                        if ($('.report-chart-content').length) {
-                            $('.report-chart-content').html(data.data.html)
-                            window.vueApp.vue.component('sales-reports-chart', SalesReportsChart)
+                            newUrl.searchParams.set('date_from', start.format('YYYY-MM-DD'))
+                            newUrl.searchParams.set('date_to', end.format('YYYY-MM-DD'))
 
-                            new window.vueApp.vue({
-                                el: '#report-chart',
+                            history.pushState({ urlPath: newUrl.href }, '', newUrl.href)
+
+                            window.location.reload()
+                        } else {
+                            $('.widget-item').each((key, widget) => {
+                                const widgetEl = $(widget).prop('id')
+                                $(`#${widgetEl}`).replaceWith($(data.data).find(`#${widgetEl}`))
                             })
                         }
 

@@ -2,21 +2,20 @@
 
 namespace Botble\Ecommerce\Http\Requests;
 
-use BaseHelper;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Support\Http\Requests\Request;
 
 class AddCustomerWhenCreateOrderRequest extends Request
 {
     public function rules(): array
     {
-        return [
-            'name' => 'required|max:255',
-            'email' => 'required|max:60|min:6|email|unique:ec_customers',
-            'phone' => 'required|' . BaseHelper::getPhoneValidationRule(),
-            'state' => 'required|max:120',
-            'city' => 'required|max:120',
-            'address' => 'required|max:120',
-            'is_default' => 'integer|min:0|max:1',
-        ];
+        if (! EcommerceHelper::isUsingInMultipleCountries()) {
+            $this->merge(['country' => EcommerceHelper::getFirstCountryId()]);
+        }
+
+        $rules = EcommerceHelper::getCustomerAddressValidationRules();
+        $rules['email'] = 'required|max:60|min:6|email|unique:ec_customers';
+
+        return $rules;
     }
 }

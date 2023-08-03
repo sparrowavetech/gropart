@@ -2,18 +2,11 @@
 
 namespace Botble\Ecommerce\Repositories\Caches;
 
-use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeSetInterface;
-use Botble\Support\Repositories\Caches\CacheAbstractDecorator;
+use Botble\Ecommerce\Repositories\Eloquent\ProductAttributeSetRepository;
 
-class ProductAttributeSetCacheDecorator extends CacheAbstractDecorator implements ProductAttributeSetInterface
+/**
+ * @deprecated
+ */
+class ProductAttributeSetCacheDecorator extends ProductAttributeSetRepository
 {
-    public function getByProductId($productId)
-    {
-        return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
-    }
-
-    public function getAllWithSelected($productId)
-    {
-        return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
-    }
 }

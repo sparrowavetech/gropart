@@ -48,8 +48,8 @@ body.offcanvas-active {
         min-height: 72px;
 
         .brand-wrap {
-            padding-left: $spacer/2;
-            padding-right: $spacer/2;
+            padding-left: calc($spacer / 2);
+            padding-right: calc($spacer / 2);
             display: inline-block;
         }
 

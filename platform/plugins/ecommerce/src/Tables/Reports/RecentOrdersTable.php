@@ -2,67 +2,72 @@
 
 namespace Botble\Ecommerce\Tables\Reports;
 
-use BaseHelper;
-use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
+use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Models\Order;
 use Botble\Table\Abstracts\TableAbstract;
-use EcommerceHelper;
-use Html;
+use Botble\Table\DataTables;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Yajra\DataTables\DataTables;
 
 class RecentOrdersTable extends TableAbstract
 {
-    protected string $type = self::TABLE_TYPE_SIMPLE;
-
-    protected int $defaultSortColumn = 0;
-
-    protected $view = 'core/table::simple-table';
-
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, OrderInterface $orderRepository)
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Order $model)
     {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $orderRepository;
+        $this->model = $model;
+        $this->type = self::TABLE_TYPE_SIMPLE;
+        $this->defaultSortColumn = 0;
+        $this->view = 'core/table::simple-table';
     }
 
     public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('checkbox', function ($item) {
+            ->editColumn('checkbox', function (Order $item) {
                 return $this->getCheckbox($item->id);
             })
-            ->editColumn('id', function ($item) {
+            ->editColumn('id', function (Order $item) {
                 if (! Auth::user()->hasPermission('orders.edit')) {
                     return $item->code;
                 }
 
                 return Html::link(route('orders.edit', $item->id), $item->code);
             })
-            ->editColumn('status', function ($item) {
+            ->editColumn('status', function (Order $item) {
                 return BaseHelper::clean($item->status->toHtml());
             })
-            ->editColumn('payment_status', function ($item) {
+            ->editColumn('payment_status', function (Order $item) {
+                if (! is_plugin_active('payment')) {
+                    return '&mdash;';
+                }
+
                 return BaseHelper::clean($item->payment->status->label() ?: '&mdash;');
             })
-            ->editColumn('payment_method', function ($item) {
+            ->editColumn('payment_method', function (Order $item) {
+                if (! is_plugin_active('payment')) {
+                    return '&mdash;';
+                }
+
                 return BaseHelper::clean($item->payment->payment_channel->label() ?: '&mdash;');
             })
-            ->editColumn('amount', function ($item) {
+            ->editColumn('amount', function (Order $item) {
                 return format_price($item->amount);
             })
-            ->editColumn('shipping_amount', function ($item) {
+            ->editColumn('shipping_amount', function (Order $item) {
                 return format_price($item->shipping_amount);
             })
-            ->editColumn('user_id', function ($item) {
+            ->editColumn('user_id', function (Order $item) {
                 return BaseHelper::clean($item->user->name ?: $item->address->name);
             })
-            ->editColumn('created_at', function ($item) {
+            ->editColumn('created_at', function (Order $item) {
                 return BaseHelper::formatDate($item->created_at);
             });
 
@@ -73,7 +78,14 @@ class RecentOrdersTable extends TableAbstract
     {
         [$startDate, $endDate] = EcommerceHelper::getDateRangeInReport(request());
 
-        $query = $this->repository->getModel()
+        $with = ['user'];
+
+        if (is_plugin_active('payment')) {
+            $with[] = 'payment';
+        }
+
+        $query = $this->getModel()
+            ->query()
             ->select([
                 'id',
                 'status',
@@ -85,7 +97,7 @@ class RecentOrdersTable extends TableAbstract
                 'shipping_amount',
                 'payment_id',
             ])
-            ->with(['user', 'payment'])
+            ->with($with)
             ->where('is_finished', 1)
             ->whereDate('created_at', '>=', $startDate)
             ->whereDate('created_at', '<=', $endDate)

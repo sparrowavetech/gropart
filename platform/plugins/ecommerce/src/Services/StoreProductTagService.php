@@ -4,23 +4,16 @@ namespace Botble\Ecommerce\Services;
 
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Ecommerce\Models\Product;
-use Botble\Ecommerce\Repositories\Interfaces\ProductTagInterface;
+use Botble\Ecommerce\Models\ProductTag;
 use Illuminate\Http\Request;
 
 class StoreProductTagService
 {
-    public ProductTagInterface $productTagRepository;
-
-    public function __construct(ProductTagInterface $productTagRepository)
-    {
-        $this->productTagRepository = $productTagRepository;
-    }
-
     public function execute(Request $request, Product $product): void
     {
         $tags = $product->tags->pluck('name')->all();
 
-        $tagsInput = collect(json_decode($request->input('tag'), true))->pluck('value')->all();
+        $tagsInput = collect(json_decode((string)$request->input('tag'), true))->pluck('value')->all();
 
         if (count($tags) != count($tagsInput) || count(array_diff($tags, $tagsInput)) > 0) {
             $product->tags()->detach();
@@ -29,10 +22,10 @@ class StoreProductTagService
                     continue;
                 }
 
-                $tag = $this->productTagRepository->getFirstBy(['name' => $tagName]);
+                $tag = ProductTag::query()->where('name', $tagName)->first();
 
                 if ($tag === null && ! empty($tagName)) {
-                    $tag = $this->productTagRepository->createOrUpdate(['name' => $tagName]);
+                    $tag = ProductTag::query()->create(['name' => $tagName]);
 
                     $request->merge(['slug' => $tagName]);
 

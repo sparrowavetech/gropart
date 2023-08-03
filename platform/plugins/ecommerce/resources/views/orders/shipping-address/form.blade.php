@@ -7,7 +7,7 @@
                 <input type="text" class="next-input" name="name" placeholder="{{ trans('plugins/ecommerce::shipping.form_name') }}" value="{{ $address->name }}">
             </div>
             <div class="next-form-grid-cell">
-                <label class="text-title-field @if (!EcommerceHelper::isPhoneFieldOptionalAtCheckout()) required @endif">{{ trans('plugins/ecommerce::shipping.phone') }}</label>
+                <label class="text-title-field">{{ trans('plugins/ecommerce::shipping.phone') }}</label>
                 <input type="text" class="next-input" name="phone" placeholder="{{ trans('plugins/ecommerce::shipping.phone') }}" value="{{ $address->phone }}">
             </div>
         </div>
@@ -66,7 +66,7 @@
                 <label class="text-title-field required">{{ trans('plugins/ecommerce::shipping.city') }}</label>
                 @if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation())
                     <div class="ui-select-wrapper">
-                        <select name="city" class="ui-select form-control" data-type="city" data-url="{{ route('ajax.cities-by-state') }}">
+                        <select name="city" class="ui-select form-control" data-type="city" data-using-select2="false" data-url="{{ route('ajax.cities-by-state') }}">
                             <option value="">{{ __('Select city...') }}</option>
                             @if ($address->city)
                                 @foreach(EcommerceHelper::getAvailableCitiesByState($address->state) as $cityId => $cityName)

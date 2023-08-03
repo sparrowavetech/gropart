@@ -2,9 +2,11 @@
 
 namespace Botble\Ecommerce\Repositories\Caches;
 
-use Botble\Ecommerce\Repositories\Interfaces\AddressInterface;
-use Botble\Support\Repositories\Caches\CacheAbstractDecorator;
+use Botble\Ecommerce\Repositories\Eloquent\AddressRepository;
 
-class AddressCacheDecorator extends CacheAbstractDecorator implements AddressInterface
+/**
+ * @deprecated
+ */
+class AddressCacheDecorator extends AddressRepository
 {
 }

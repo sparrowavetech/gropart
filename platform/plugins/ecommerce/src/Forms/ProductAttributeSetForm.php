@@ -4,13 +4,15 @@ namespace Botble\Ecommerce\Forms;
 
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Forms\FormAbstract;
+use Botble\Ecommerce\Facades\ProductCategoryHelper;
+use Botble\Ecommerce\Forms\Fields\CategoryMultiField;
 use Botble\Ecommerce\Http\Requests\ProductAttributeSetsRequest;
 use Botble\Ecommerce\Models\ProductAttributeSet;
-use Language;
+use Botble\Language\Facades\Language;
 
 class ProductAttributeSetForm extends FormAbstract
 {
-    public function buildForm()
+    public function buildForm(): void
     {
         $displayLayout = [
             'dropdown' => trans('plugins/ecommerce::product-attribute-sets.dropdown_swatch'),
@@ -31,6 +33,7 @@ class ProductAttributeSetForm extends FormAbstract
         $this
             ->setupModel(new ProductAttributeSet())
             ->setValidatorClass(ProductAttributeSetsRequest::class)
+            ->addCustomField('categoryMulti', CategoryMultiField::class)
             ->setFormOption('class', 'update-attribute-set-form')
             ->withCustomFields()
             ->add('title', 'text', [
@@ -84,6 +87,12 @@ class ProductAttributeSetForm extends FormAbstract
                     'placeholder' => trans('core/base::forms.order_by_placeholder'),
                 ],
                 'default_value' => 0,
+            ])
+            ->add('categories[]', 'categoryMulti', [
+                'label' => trans('plugins/ecommerce::products.form.categories'),
+                'label_attr' => ['class' => 'control-label'],
+                'choices' => ProductCategoryHelper::getActiveTreeCategories(),
+                'value' => $this->getModel()->id ? $this->getModel()->categories->pluck('id')->all() : [],
             ])
             ->setBreakFieldPoint('status')
             ->addMetaBoxes([

@@ -3,22 +3,19 @@
 namespace Botble\Ecommerce\Http\Controllers\Fronts;
 
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Ecommerce\Facades\Cart;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeSetInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
-use Cart;
-use EcommerceHelper;
+use Botble\SeoHelper\Facades\SeoHelper;
+use Botble\Theme\Facades\Theme;
 use Illuminate\Routing\Controller;
-use SeoHelper;
-use Theme;
 
 class CompareController extends Controller
 {
-    protected ProductInterface $productRepository;
-
-    public function __construct(ProductInterface $productRepository)
+    public function __construct(protected ProductInterface $productRepository)
     {
-        $this->productRepository = $productRepository;
     }
 
     public function index()
@@ -43,12 +40,7 @@ class CompareController extends Controller
             $products = $this->productRepository
                 ->getProductsByIds($itemIds->toArray(), array_merge([
                     'take' => 10,
-                    'with' => [
-                        'slugable',
-                        'variations',
-                        'productCollections',
-                        'variationAttributeSwatchesForProductList',
-                    ],
+                    'with' => EcommerceHelper::withProductEagerLoadingRelations(),
                 ], EcommerceHelper::withReviewsParams()));
 
             $attributeSets = app(ProductAttributeSetInterface::class)->getAllWithSelected($itemIds);
@@ -61,7 +53,7 @@ class CompareController extends Controller
         )->render();
     }
 
-    public function store(int $productId, BaseHttpResponse $response)
+    public function store(int|string $productId, BaseHttpResponse $response)
     {
         if (! EcommerceHelper::isCompareEnabled()) {
             abort(404);
@@ -87,7 +79,7 @@ class CompareController extends Controller
             ->setData(['count' => Cart::instance('compare')->count()]);
     }
 
-    public function destroy(int $productId, BaseHttpResponse $response)
+    public function destroy(int|string $productId, BaseHttpResponse $response)
     {
         if (! EcommerceHelper::isCompareEnabled()) {
             abort(404);

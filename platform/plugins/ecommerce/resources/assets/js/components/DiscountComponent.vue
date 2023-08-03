@@ -102,7 +102,7 @@
                                     </option>
                                     <option value='product-variant'>{{ __('discount.variant') }}</option>
                                     <option value='once-per-customer'
-                                            v-if="type_option !== 'same-price' && type == 'coupon'">
+                                            v-if="type_option !== 'same-price' && type === 'coupon'">
                                         {{ __('discount.once_per_customer') }}
                                     </option>
                                 </select>
@@ -288,33 +288,34 @@
                                                     <i class='fa fa-spinner fa-spin'></i>
                                                 </div>
                                                 <ul class='clearfix' v-show='!loading'>
-                                                    <li v-for='product_variant in variants.data'
-                                                        v-if='product_variant.variations.length'>
-                                                        <div class='wrap-img inline_block vertical-align-t'>
-                                                            <img class='thumb-image'
-                                                                 :src='product_variant.image_url'
-                                                                 :title='product_variant.name'
-                                                                 :alt='product_variant.name'>
-                                                        </div>
-                                                        <label class='inline_block ml10 mt10 ws-nm'
-                                                               style='width:calc(100% - 50px); cursor: pointer;'>{{
-                                                                product_variant.name
-                                                            }}</label>
-                                                        <div class='clear'></div>
-                                                        <ul>
-                                                            <li class='clearfix product-variant'
-                                                                v-for='variation in product_variant.variations'
-                                                                @click='handleSelectVariants(product_variant, variation)'>
-                                                                <a class='color_green float-start'>
+                                                    <li v-for='product_variant in variants.data'>
+                                                        <template v-if='product_variant.variations.length'>
+                                                            <div class='wrap-img inline_block vertical-align-t'>
+                                                                <img class='thumb-image'
+                                                                     :src='product_variant.image_url'
+                                                                     :title='product_variant.name'
+                                                                     :alt='product_variant.name'>
+                                                            </div>
+                                                            <label class='inline_block ml10 mt10 ws-nm'
+                                                                   style='width:calc(100% - 50px); cursor: pointer;'>{{
+                                                                    product_variant.name
+                                                                }}</label>
+                                                            <div class='clear'></div>
+                                                            <ul>
+                                                                <li class='clearfix product-variant'
+                                                                    v-for='variation in product_variant.variations'
+                                                                    @click='handleSelectVariants(product_variant, variation)'>
+                                                                    <a class='color_green float-start'>
                                                                     <span
                                                                         v-for='(variantItem, index) in variation.variation_items'>
                                                                         {{ variantItem.attribute_title }}
                                                                         <span
                                                                             v-if='index !== variation.variation_items.length - 1'>/</span>
                                                                     </span>
-                                                                </a>
-                                                            </li>
-                                                        </ul>
+                                                                    </a>
+                                                                </li>
+                                                            </ul>
+                                                        </template>
                                                     </li>
                                                     <li v-if='variants.data.length === 0'>
                                                         <span>{{ __('discount.no_products_found') }}</span>
@@ -380,7 +381,7 @@
                             </div>
                         </div>
                         <div style='margin: 10px 0;' v-show='is_promotion'>
-                            <span class='lb-dis'>  {{ __('discount.number_of_products') }}: </span>
+                            <span>{{ __('discount.number_of_products') }}:</span>
                             <input type='text' class='form-control width-100-px p-none-r' name='product_quantity'
                                    id='product-quantity' v-model='product_quantity'>
                         </div>
@@ -437,10 +438,13 @@
                                 <tbody>
                                 <tr v-for='product in selected_products'>
                                     <td class='width-60-px min-width-60-px'>
-                                        <div class='wrap-img vertical-align-m-i'><img class='thumb-image'
-                                                                                      :src='product.image_url'
-                                                                                      :title='product.name'
-                                                                                      :alt='product.name' />
+                                        <div class='wrap-img vertical-align-m-i'>
+                                            <img
+                                                class='thumb-image'
+                                                :src='product.image_url'
+                                                :title='product.name'
+                                                :alt='product.name'
+                                            />
                                         </div>
                                     </td>
                                     <td class='pl5 p-r5 min-width-200-px'>
@@ -599,9 +603,9 @@ export default {
             code: null,
             is_promotion: false,
             type: 'coupon',
-            is_unlimited: 1,
+            is_unlimited: true,
             quantity: 0,
-            unlimited_time: 1,
+            unlimited_time: true,
             start_date: moment().format('Y-MM-DD'),
             start_time: '00:00',
             end_date: moment().format('Y-MM-DD'),
@@ -620,7 +624,7 @@ export default {
             product_collection_id: null,
             product_collections: [],
             discount_on: 'per-order',
-            min_order_price: null,
+            min_order_price: 0,
             product_quantity: 1,
             products: {
                 data: [],
@@ -650,8 +654,12 @@ export default {
             default: () => 'Y-m-d',
             required: true,
         },
+        discount: {
+            type: Object,
+            default: () => null,
+        },
     },
-    mounted: function() {
+    mounted: async function () {
         let context = this
         $(document).on('click', 'body', e => {
             let container = $('.box-search-advance')
@@ -663,6 +671,57 @@ export default {
         })
 
         this.discountUnit = this.currency
+
+        if (this.discount) {
+            this.title = this.discount.title
+            this.type = this.discount.type
+            this.code = this.discount.code
+            this.is_promotion = this.type !== 'coupon'
+            this.start_date = moment(this.discount.start_date).utc().format('Y-MM-DD')
+            this.start_time = moment(this.discount.start_date).utc().format('HH:mm')
+
+            if (this.discount.end_date) {
+                this.end_date = moment(this.discount.end_date).utc().format('Y-MM-DD')
+                this.end_time = moment(this.discount.end_date).utc().format('HH:mm')
+            }
+
+            this.unlimited_time = !this.discount.end_date
+            this.is_unlimited = !this.discount.quantity
+            this.type_option = this.discount.type_option
+            this.target = this.discount.target
+            this.product_quantity = this.discount.product_quantity
+            this.min_order_price = this.discount.min_order_price || 0
+            this.discount_on = this.discount.discount_on || 'per-order'
+            this.can_use_with_promotion = this.discount.can_use_with_promotion
+            this.discount_value = this.discount.value
+            this.quantity = this.discount.quantity
+
+            this.discount.products.forEach(product => {
+                this.handleSelectProducts(product)
+            })
+
+            this.discount.customers.forEach(customer => {
+                this.handleSelectCustomers(customer)
+            })
+
+            if (this.discount.product_collections.length) {
+                await this.getListProductCollections()
+
+                this.product_collection_id = this.discount.product_collections[0].id
+            }
+
+            this.discount.product_variants.forEach(variant => {
+                variant.product_link = route('products.edit', variant.id)
+                variant.product_name = variant.name
+                variant.variation_items = variant.variationItems
+                this.selected_variants.push(variant)
+                this.selected_variant_ids.push(variant.id)
+            })
+
+            if (this.type_option === 'shipping') {
+                this.handleChangeTypeOption()
+            }
+        }
     },
     methods: {
         generateCouponCode: function(event) {
@@ -774,11 +833,11 @@ export default {
                     break
             }
         },
-        getListProductCollections: function() {
+        getListProductCollections: async function() {
             let context = this
             if (_.isEmpty(context.product_collections)) {
                 context.loading = true
-                axios
+                await axios
                     .get(route('product-collections.get-list-product-collections-for-select'))
                     .then(res => {
                         context.product_collections = res.data.data

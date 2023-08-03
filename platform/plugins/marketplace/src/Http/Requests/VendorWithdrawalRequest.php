@@ -2,8 +2,8 @@
 
 namespace Botble\Marketplace\Http\Requests;
 
-use Botble\Support\Http\Requests\Request;
 use Botble\Marketplace\Facades\MarketplaceHelper;
+use Botble\Support\Http\Requests\Request;
 
 class VendorWithdrawalRequest extends Request
 {

@@ -5,35 +5,24 @@ namespace Botble\Ecommerce\Http\Controllers\Fronts;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Http\Requests\ReviewRequest;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ReviewInterface;
-use Botble\Slug\Repositories\Interfaces\SlugInterface;
-use EcommerceHelper;
+use Botble\Media\Facades\RvMedia;
+use Botble\SeoHelper\Facades\SeoHelper;
+use Botble\Slug\Facades\SlugHelper;
+use Botble\Theme\Facades\Theme;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
-use RvMedia;
-use SeoHelper;
-use SlugHelper;
-use Theme;
 
 class ReviewController extends Controller
 {
-    protected ReviewInterface $reviewRepository;
-
-    protected OrderInterface $orderRepository;
-
-    protected SlugInterface $slugRepository;
-
     public function __construct(
-        ReviewInterface $reviewRepository,
-        OrderInterface $orderRepository,
-        SlugInterface $slugRepository
+        protected  ReviewInterface $reviewRepository,
+        protected OrderInterface $orderRepository
     ) {
-        $this->reviewRepository = $reviewRepository;
-        $this->orderRepository = $orderRepository;
-        $this->slugRepository = $slugRepository;
     }
 
     public function store(ReviewRequest $request, BaseHttpResponse $response): BaseHttpResponse
@@ -47,7 +36,7 @@ class ReviewController extends Controller
 
         $check = $this->check($productId);
         if (Arr::get($check, 'error')) {
-            return $response->setError()->setMessage(Arr::get($check, 'message', __('Opps!')));
+            return $response->setError()->setMessage(Arr::get($check, 'message', __('Oops! Something Went Wrong.')));
         }
 
         $results = [];
@@ -74,7 +63,7 @@ class ReviewController extends Controller
         return $response->setMessage(__('Added review successfully!'));
     }
 
-    public function destroy(int $id, BaseHttpResponse $response)
+    public function destroy(int|string $id, BaseHttpResponse $response)
     {
         if (! EcommerceHelper::isReviewEnabled()) {
             abort(404);
@@ -91,17 +80,13 @@ class ReviewController extends Controller
         abort(401);
     }
 
-    public function getProductReview(string $slug, BaseHttpResponse $response)
+    public function getProductReview(string $key, BaseHttpResponse $response)
     {
         if (! EcommerceHelper::isReviewEnabled()) {
             abort(404);
         }
 
-        $slug = $this->slugRepository->getFirstBy([
-            'key' => $slug,
-            'reference_type' => Product::class,
-            'prefix' => SlugHelper::getPrefix(Product::class),
-        ]);
+        $slug = SlugHelper::getSlug($key, SlugHelper::getPrefix(Product::class));
 
         if (! $slug) {
             abort(404);
@@ -126,7 +111,7 @@ class ReviewController extends Controller
             return $response
                 ->setNextUrl($product->url)
                 ->setError()
-                ->setMessage(Arr::get($check, 'message', __('Ops!')));
+                ->setMessage(Arr::get($check, 'message', __('Oops! Something Went Wrong.')));
         }
 
         Theme::asset()
@@ -148,7 +133,7 @@ class ReviewController extends Controller
             ->render();
     }
 
-    protected function check(int $productId)
+    protected function check(int|string $productId)
     {
         $customerId = auth('customer')->id();
 

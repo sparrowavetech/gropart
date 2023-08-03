@@ -2,11 +2,12 @@
 
 namespace Botble\Ecommerce\Tables;
 
-use BaseHelper;
-use Botble\Ecommerce\Repositories\Interfaces\ShippingRuleItemInterface;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
+use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Models\ShippingRule;
 use Botble\Table\Abstracts\TableAbstract;
-use EcommerceHelper;
-use Html;
+use Botble\Table\DataTables;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -14,23 +15,20 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
-use Yajra\DataTables\DataTables;
 
 class ShippingRuleItemTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
     protected array $countries;
 
     protected bool $isExporting;
 
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, ShippingRuleItemInterface $repository)
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, ShippingRule $model)
     {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $repository;
+        $this->model = $model;
+        $this->hasActions = true;
+        $this->hasFilter = true;
 
         if (! Auth::user()->hasAnyPermission(['ecommerce.shipping-rule-items.bulk-import.edit'])) {
             $this->hasOperations = false;
@@ -45,20 +43,20 @@ class ShippingRuleItemTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('checkbox', function ($item) {
+            ->editColumn('checkbox', function (ShippingRule $item) {
                 return $this->getCheckbox($item->id);
             })
-            ->editColumn('shipping_rule_id', function ($item) {
+            ->editColumn('shipping_rule_id', function (ShippingRule $item) {
                 return $item->shippingRule->name;
             })
-            ->editColumn('country', function ($item) {
+            ->editColumn('country', function (ShippingRule $item) {
                 return Arr::get(
                     $this->countries,
                     $item->shippingRule->shipping->country
                 ) ?: $item->shippingRule->shipping->country;
             });
         if ($this->isExporting) {
-            $data = $data->editColumn('is_enabled', function ($item) {
+            $data = $data->editColumn('is_enabled', function (ShippingRule $item) {
                 if ($item->is_enabled) {
                     return trans('core/base::base.yes');
                 }
@@ -66,19 +64,19 @@ class ShippingRuleItemTable extends TableAbstract
                 return trans('core/base::base.no');
             });
         } else {
-            $data = $data->editColumn('country', function ($item) {
+            $data = $data->editColumn('country', function (ShippingRule $item) {
                 return Arr::get(
                     $this->countries,
                     $item->shippingRule->shipping->country
                 ) ?: $item->shippingRule->shipping->country;
             })
-                ->editColumn('state', function ($item) {
+                ->editColumn('state', function (ShippingRule $item) {
                     return $item->state_name;
                 })
-                ->editColumn('city', function ($item) {
+                ->editColumn('city', function (ShippingRule $item) {
                     return $item->city_name;
                 })
-                ->editColumn('adjustment_price', function ($item) {
+                ->editColumn('adjustment_price', function (ShippingRule $item) {
                     return ($item->adjustment_price < 0 ? '-' : '') .
                         format_price($item->adjustment_price) .
                         Html::tag(
@@ -87,7 +85,7 @@ class ShippingRuleItemTable extends TableAbstract
                             ['class' => 'text-info ms-1']
                         );
                 })
-                ->editColumn('is_enabled', function ($item) {
+                ->editColumn('is_enabled', function (ShippingRule $item) {
                     if ($item->is_enabled) {
                         return Html::tag('span', trans('core/base::base.yes'), ['class' => 'text-primary']);
                     }
@@ -96,10 +94,10 @@ class ShippingRuleItemTable extends TableAbstract
                 });
         }
 
-        $data = $data->editColumn('created_at', function ($item) {
+        $data = $data->editColumn('created_at', function (ShippingRule $item) {
             return BaseHelper::formatDate($item->created_at);
         })
-            ->addColumn('operations', function ($item) {
+            ->addColumn('operations', function (ShippingRule $item) {
                 return $this->getOperations(
                     'ecommerce.shipping-rule-items.edit',
                     'ecommerce.shipping-rule-items.destroy',
@@ -112,7 +110,8 @@ class ShippingRuleItemTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()
+        $query = $this->getModel()
+            ->query()
             ->with(['shippingRule', 'shippingRule.shipping'])
             ->select([
                 'id',

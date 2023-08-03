@@ -123,7 +123,7 @@
                                         @foreach($products as $product)
                                             <td class="row_btn">
                                                 <a href="#" class="btn btn-rounded btn-sm add-to-cart-button" data-id="{{ $product->id }}" data-url="{{ route('public.cart.add-to-cart') }}">
-                                                    <i class="far fa-shopping-bag mr-5"></i>{{ __('Add To Cart') }}
+                                                    <i class="far fa-shopping-bag me-5"></i>{{ __('Add To Cart') }}
                                                 </a>
                                             </td>
                                         @endforeach
@@ -135,7 +135,7 @@
                                     @foreach($products as $product)
                                         <td class="row_remove">
                                             <a class="js-remove-from-compare-button" href="#" data-url="{{ route('public.compare.remove', $product->id) }}">
-                                                <i class="fa fa-trash-alt mr-5"></i>
+                                                <i class="fa fa-trash-alt me-5"></i>
                                                 <span>{{ __('Remove') }}</span>
                                             </a>
                                         </td>

@@ -1201,6 +1201,19 @@ $(() => {
         })
     })
 
+    $(document).on('click', '.digital_attachments_external_btn', function(e) {
+        e.preventDefault()
+        const $this = $(e.currentTarget)
+        const $box = $this.closest('.product-type-digital-management')
+        let id = Math.floor(Math.random() * 26) + Date.now()
+        let $template = $('#digital_attachment_external_template').html()
+        $template = $template
+            .replace(/__id__/gi, id)
+
+
+        $box.find('table tbody').append($template)
+    })
+
     /**
      * Format bytes as human-readable text.
      *
@@ -1231,4 +1244,40 @@ $(() => {
 
         return Botble.numberFormat(bytes, dp, ',', '.') + ' ' + units[u]
     }
+
+    $(document)
+        .on('click', '.btn-trigger-duplicate-product', function (e) {
+            $('#confirm-duplicate-product-button').data('url', $(e.currentTarget).data('url'))
+            $('#duplicate-product-modal').modal('show')
+        })
+        .on('click', '#confirm-duplicate-product-button', function (e) {
+            const button = $(e.currentTarget)
+
+            $.ajax({
+                url: button.data('url'),
+                type: 'POST',
+                beforeSend: () => {
+                    button.prop('disabled', true)
+                    button.addClass('button-loading')
+                },
+                success: ({ error, message, data }) => {
+                    if (error) {
+                        Botble.showError(message)
+                        return
+                    }
+
+                    Botble.showSuccess(message)
+                    $('#duplicate-product-modal').modal('hide')
+
+                    setTimeout(() => window.location.href = data.next_url, 1000)
+                },
+                error: (error) => {
+                    Botble.handleError(error)
+                },
+                complete: () => {
+                    button.removeClass('button-loading')
+                    button.prop('disabled', false)
+                },
+            })
+        })
 })

@@ -2,11 +2,12 @@
 
 namespace Botble\Ecommerce\Tables;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Ecommerce\Enums\OrderReturnStatusEnum;
-use Botble\Ecommerce\Repositories\Interfaces\OrderReturnInterface;
-use Botble\Ecommerce\Repositories\Interfaces\OrderReturnItemInterface;
+use Botble\Ecommerce\Facades\OrderReturnHelper;
+use Botble\Ecommerce\Models\OrderReturn;
 use Botble\Table\Abstracts\TableAbstract;
+use Botble\Table\DataTables;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -14,29 +15,18 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use OrderReturnHelper;
-use Yajra\DataTables\DataTables;
 
 class OrderReturnTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
-    protected OrderReturnItemInterface $orderReturnItemRepository;
-
-    public function __construct(
-        DataTables $table,
-        UrlGenerator $urlGenerator,
-        OrderReturnInterface $orderReturnRepository,
-        OrderReturnItemInterface $orderReturnItemRepository
-    ) {
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, OrderReturn $model)
+    {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $orderReturnRepository;
-        $this->orderReturnItemRepository = $orderReturnItemRepository;
+        $this->model = $model;
+        $this->hasActions = true;
+        $this->hasFilter = true;
 
-        if (! Auth::user()->hasPermission('orders.edit')) {
+        if (! Auth::user()->hasAnyPermission(['order_returns.edit', 'order_returns.destroy'])) {
             $this->hasOperations = false;
             $this->hasActions = false;
         }
@@ -46,31 +36,31 @@ class OrderReturnTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('checkbox', function ($item) {
+            ->editColumn('checkbox', function (OrderReturn $item) {
                 return $this->getCheckbox($item->id);
             })
-            ->editColumn('return_status', function ($item) {
+            ->editColumn('return_status', function (OrderReturn $item) {
                 return BaseHelper::clean($item->return_status->toHtml());
             })
-            ->editColumn('reason', function ($item) {
+            ->editColumn('reason', function (OrderReturn $item) {
                 return BaseHelper::clean($item->reason->toHtml());
             })
-            ->editColumn('order_id', function ($item) {
+            ->editColumn('order_id', function (OrderReturn $item) {
                 return BaseHelper::clean($item->order->code);
             })
-            ->editColumn('user_id', function ($item) {
+            ->editColumn('user_id', function (OrderReturn $item) {
                 if (! $item->customer->name) {
                     return '&mdash;';
                 }
 
                 return BaseHelper::clean($item->customer->name);
             })
-            ->editColumn('created_at', function ($item) {
+            ->editColumn('created_at', function (OrderReturn $item) {
                 return BaseHelper::formatDate($item->created_at);
             });
 
         $data = $data
-            ->addColumn('operations', function ($item) {
+            ->addColumn('operations', function (OrderReturn $item) {
                 return $this->getOperations('order_returns.edit', 'order_returns.destroy', $item);
             })
             ->filter(function ($query) {
@@ -92,7 +82,8 @@ class OrderReturnTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()
+        $query = $this->getModel()
+            ->query()
             ->select([
                 'id',
                 'order_id',
@@ -170,9 +161,12 @@ class OrderReturnTable extends TableAbstract
         return $this->addDeleteAction(route('order_returns.deletes'), 'order_returns.destroy', parent::bulkActions());
     }
 
-    public function saveBulkChangeItem(Model $item, string $inputKey, ?string $inputValue): Model|bool
+    public function saveBulkChangeItem(Model|OrderReturn $item, string $inputKey, string|null $inputValue): Model|bool
     {
         if ($inputKey === 'status' && $inputValue == OrderReturnStatusEnum::CANCELED) {
+            /**
+             * @var OrderReturn $item
+             */
             OrderReturnHelper::cancelReturnOrder($item);
 
             return $item;

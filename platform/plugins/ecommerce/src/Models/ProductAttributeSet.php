@@ -37,16 +37,10 @@ class ProductAttributeSet extends BaseModel
         return $this->morphToMany(ProductCategory::class, 'reference', 'ec_product_categorizables', 'reference_id', 'category_id');
     }
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
-
         self::deleting(function (ProductAttributeSet $productAttributeSet) {
-            $attributes = ProductAttribute::where('attribute_set_id', $productAttributeSet->id)->get();
-
-            foreach ($attributes as $attribute) {
-                $attribute->delete();
-            }
+            $productAttributeSet->attributes()->each(fn (ProductAttribute $attribute) => $attribute->delete());
 
             $productAttributeSet->categories()->detach();
         });

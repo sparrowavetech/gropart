@@ -2,11 +2,13 @@
 
 namespace Botble\Ecommerce\Tables;
 
-use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Ecommerce\Repositories\Interfaces\ReviewInterface;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
+use Botble\Ecommerce\Models\Review;
+use Botble\Media\Facades\RvMedia;
 use Botble\Table\Abstracts\TableAbstract;
-use Html;
+use Botble\Table\DataTables;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -15,21 +17,17 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use RvMedia;
 use Symfony\Component\HttpFoundation\Response;
-use Yajra\DataTables\DataTables;
 
 class ReviewTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, ReviewInterface $reviewRepository)
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Review $model)
     {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $reviewRepository;
+        $this->model = $model;
+        $this->hasActions = true;
+        $this->hasFilter = true;
 
         if (! Auth::user()->hasAnyPermission(['review.edit', 'review.destroy'])) {
             $this->hasOperations = false;
@@ -41,8 +39,8 @@ class ReviewTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('product_id', function ($item) {
-                if (! empty($item->product)) {
+            ->editColumn('product_id', function (Review $item) {
+                if (! empty($item->product) && $item->product->url) {
                     return Html::link(
                         $item->product->url,
                         BaseHelper::clean($item->product_name),
@@ -52,19 +50,26 @@ class ReviewTable extends TableAbstract
 
                 return null;
             })
-            ->editColumn('customer_id', function ($item) {
+            ->editColumn('customer_id', function (Review $item) {
+                if (! $item->user->id) {
+                    return null;
+                }
+
                 return Html::link(route('customers.edit', $item->user->id), BaseHelper::clean($item->user->name))->toHtml();
             })
-            ->editColumn('star', function ($item) {
+            ->editColumn('star', function (Review $item) {
                 return view('plugins/ecommerce::reviews.partials.rating', ['star' => $item->star])->render();
             })
-            ->editColumn('checkbox', function ($item) {
+            ->editColumn('checkbox', function (Review $item) {
                 return $this->getCheckbox($item->id);
             })
-            ->editColumn('status', function ($item) {
+            ->editColumn('status', function (Review $item) {
                 return BaseHelper::clean($item->status->toHtml());
             })
-            ->editColumn('images', function ($item) {
+            ->editColumn('comment', function (Review $review) {
+                return Html::link(route('reviews.show', $review), $review->comment);
+            })
+            ->editColumn('images', function (Review $item) {
                 if (! is_array($item->images)) {
                     return '&mdash;';
                 }
@@ -136,10 +141,10 @@ class ReviewTable extends TableAbstract
 
                 return $html;
             })
-            ->editColumn('created_at', function ($item) {
+            ->editColumn('created_at', function (Review $item) {
                 return BaseHelper::formatDate($item->created_at);
             })
-            ->addColumn('operations', function ($item) {
+            ->addColumn('operations', function (Review $item) {
                 return view('plugins/ecommerce::reviews.partials.actions', compact('item'))->render();
             })
             ->filter(function ($query) {
@@ -165,7 +170,8 @@ class ReviewTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()
+        $query = $this->getModel()
+            ->query()
             ->select([
                 'id',
                 'star',
@@ -260,7 +266,7 @@ class ReviewTable extends TableAbstract
         ];
     }
 
-    public function htmlDrawCallbackFunction(): ?string
+    public function htmlDrawCallbackFunction(): string|null
     {
         return parent::htmlDrawCallbackFunction() . 'if (jQuery().fancybox) {
             $(".dataTables_wrapper .fancybox").fancybox({
@@ -277,10 +283,7 @@ class ReviewTable extends TableAbstract
 
     public function renderTable($data = [], $mergeData = []): View|Factory|Response
     {
-        if ($this->query()->count() === 0 &&
-            ! $this->request()->wantsJson() &&
-            $this->request()->input('filter_table_id') !== $this->getOption('id') && ! $this->request()->ajax()
-        ) {
+        if ($this->isEmpty()) {
             return view('plugins/ecommerce::reviews.intro');
         }
 

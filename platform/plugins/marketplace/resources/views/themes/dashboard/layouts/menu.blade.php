@@ -26,15 +26,6 @@
             'order' => 3,
         ],
         [
-            'key'    => 'marketplace.vendor.order-returns.index',
-            'icon'   => 'icon material-icons md-shopping_cart',
-            'name'   => __('Order Returns'),
-            'routes' => [
-                'marketplace.vendor.order-returns.edit',
-            ],
-            'order' => 3,
-        ],
-        [
             'key'    => 'marketplace.vendor.discounts.index',
             'icon'   => 'icon material-icons md-card_giftcard',
             'name'   => __('Coupons'),
@@ -82,6 +73,30 @@
             'name'  => __('Reviews'),
             'order' => 6,
         ]);
+    }
+
+    if (EcommerceHelper::isOrderReturnEnabled()) {
+        $menus->push([
+            'key'    => 'marketplace.vendor.order-returns.index',
+            'icon'   => 'icon material-icons md-assignment_returned',
+            'name'   => __('Order Returns'),
+            'routes' => [
+                'marketplace.vendor.order-returns.edit',
+            ],
+            'order' => 3,
+        ],);
+    }
+
+    if (MarketplaceHelper::allowVendorManageShipping()) {
+        $menus->push([
+            'key'    => 'marketplace.vendor.shipments.index',
+            'icon'   => 'icon material-icons md-local_shipping',
+            'name'   => __('Shipments'),
+            'routes' => [
+                'marketplace.vendor.shipments.edit',
+            ],
+            'order' => 3,
+        ],);
     }
 
     $currentRouteName = Route::currentRouteName();

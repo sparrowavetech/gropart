@@ -3,11 +3,12 @@
 namespace Botble\Ecommerce\Tables;
 
 use Botble\Base\Facades\BaseHelper;
-use Botble\Ecommerce\Enums\CustomerStatusEnum;
-use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
-use Botble\Table\Abstracts\TableAbstract;
-use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Base\Facades\Html;
+use Botble\Ecommerce\Enums\CustomerStatusEnum;
+use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Models\Customer;
+use Botble\Table\Abstracts\TableAbstract;
+use Botble\Table\DataTables;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -17,19 +18,16 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
-use Botble\Table\DataTables;
 
 class CustomerTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, CustomerInterface $customerRepository)
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Customer $model)
     {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $customerRepository;
+        $this->model = $model;
+        $this->hasActions = true;
+        $this->hasFilter = true;
 
         if (! Auth::user()->hasAnyPermission(['customers.edit', 'customers.destroy'])) {
             $this->hasOperations = false;
@@ -41,7 +39,7 @@ class CustomerTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('avatar', function ($item) {
+            ->editColumn('avatar', function (Customer $item) {
                 if ($this->request()->input('action') == 'excel' ||
                     $this->request()->input('action') == 'csv') {
                     return $item->avatar_url;
@@ -49,29 +47,29 @@ class CustomerTable extends TableAbstract
 
                 return Html::tag('img', '', ['src' => $item->avatar_url, 'alt' => BaseHelper::clean($item->name), 'width' => 50]);
             })
-            ->editColumn('name', function ($item) {
+            ->editColumn('name', function (Customer $item) {
                 if (! Auth::user()->hasPermission('customers.edit')) {
                     return BaseHelper::clean($item->name);
                 }
 
                 return Html::link(route('customers.edit', $item->id), BaseHelper::clean($item->name));
             })
-            ->editColumn('email', function ($item) {
+            ->editColumn('email', function (Customer $item) {
                 return BaseHelper::clean($item->email);
             })
-            ->editColumn('checkbox', function ($item) {
+            ->editColumn('checkbox', function (Customer $item) {
                 return $this->getCheckbox($item->id);
             })
-            ->editColumn('created_at', function ($item) {
+            ->editColumn('created_at', function (Customer $item) {
                 return BaseHelper::formatDate($item->created_at);
             })
-            ->editColumn('status', function ($item) {
+            ->editColumn('status', function (Customer $item) {
                 return BaseHelper::clean($item->status->toHtml());
             });
 
         if (EcommerceHelper::isEnableEmailVerification()) {
             $data = $data
-                ->addColumn('confirmed_at', function ($item) {
+                ->addColumn('confirmed_at', function (Customer $item) {
                     return $item->confirmed_at ? Html::tag(
                         'span',
                         trans('core/base::base.yes'),
@@ -81,7 +79,7 @@ class CustomerTable extends TableAbstract
         }
 
         $data = $data
-            ->addColumn('operations', function ($item) {
+            ->addColumn('operations', function (Customer $item) {
                 return $this->getOperations('customers.edit', 'customers.destroy', $item);
             });
 
@@ -90,7 +88,7 @@ class CustomerTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()->select([
+        $query = $this->getModel()->query()->select([
             'id',
             'name',
             'email',
@@ -184,9 +182,7 @@ class CustomerTable extends TableAbstract
 
     public function renderTable($data = [], $mergeData = []): View|Factory|Response
     {
-        if ($this->query()->count() === 0 &&
-            $this->request()->input('filter_table_id') !== $this->getOption('id') && ! $this->request()->ajax()
-        ) {
+        if ($this->isEmpty()) {
             return view('plugins/ecommerce::customers.intro');
         }
 

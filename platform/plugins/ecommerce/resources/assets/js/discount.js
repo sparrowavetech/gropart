@@ -1,5 +1,7 @@
 import DiscountComponent from './components/DiscountComponent'
 
-vueApp.booting(vue => {
-    vue.component('discount-component', DiscountComponent)
-})
+if (typeof vueApp !== 'undefined') {
+    vueApp.booting((vue) => {
+        vue.component('discount-component', DiscountComponent)
+    })
+}

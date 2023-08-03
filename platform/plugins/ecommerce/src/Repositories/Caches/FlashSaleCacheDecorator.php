@@ -2,13 +2,11 @@
 
 namespace Botble\Ecommerce\Repositories\Caches;
 
-use Botble\Ecommerce\Repositories\Interfaces\FlashSaleInterface;
-use Botble\Support\Repositories\Caches\CacheAbstractDecorator;
+use Botble\Ecommerce\Repositories\Eloquent\FlashSaleRepository;
 
-class FlashSaleCacheDecorator extends CacheAbstractDecorator implements FlashSaleInterface
+/**
+ * @deprecated
+ */
+class FlashSaleCacheDecorator extends FlashSaleRepository
 {
-    public function getAvailableFlashSales(array $with = [])
-    {
-        return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
-    }
 }

@@ -62,7 +62,7 @@
             <label class="text-title-field" for="store_city">{{ trans('plugins/ecommerce::store-locator.city') }}</label>
             @if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation())
                 <div class="ui-select-wrapper">
-                    <select name="city" class="ui-select" id="store_city" data-type="city" data-url="{{ route('ajax.cities-by-state') }}">
+                    <select name="city" class="ui-select" id="store_city" data-type="city" data-using-select2="false" data-url="{{ route('ajax.cities-by-state') }}">
                         <option value="">{{ __('Select city...') }}</option>
                         @if ($locator ? $locator->state : null)
                             @foreach(EcommerceHelper::getAvailableCitiesByState($locator ? $locator->state : null) as $cityId => $cityName)

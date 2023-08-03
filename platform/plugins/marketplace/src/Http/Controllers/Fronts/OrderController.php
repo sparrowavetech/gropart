@@ -2,66 +2,48 @@
 
 namespace Botble\Marketplace\Http\Controllers\Fronts;
 
-use Assets;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\EmailHandler;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
-use Botble\Ecommerce\Enums\ShippingStatusEnum;
+use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Facades\InvoiceHelper;
+use Botble\Ecommerce\Facades\OrderHelper;
 use Botble\Ecommerce\Http\Requests\AddressRequest;
 use Botble\Ecommerce\Http\Requests\UpdateOrderRequest;
+use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Repositories\Interfaces\OrderAddressInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderHistoryInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ShipmentHistoryInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ShipmentInterface;
-use Botble\Marketplace\Http\Requests\UpdateShippingStatusRequest;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Tables\OrderTable;
 use Botble\Payment\Repositories\Interfaces\PaymentInterface;
-use Carbon\Carbon;
-use EmailHandler;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use InvoiceHelper;
-use MarketplaceHelper;
-use OrderHelper;
 
 class OrderController extends BaseController
 {
-    protected OrderInterface $orderRepository;
-
-    protected OrderHistoryInterface $orderHistoryRepository;
-
-    protected OrderAddressInterface $orderAddressRepository;
-
-    protected PaymentInterface $paymentRepository;
-
     public function __construct(
-        OrderInterface $orderRepository,
-        OrderHistoryInterface $orderHistoryRepository,
-        OrderAddressInterface $orderAddressRepository,
-        PaymentInterface $paymentRepository
+        protected OrderInterface $orderRepository,
+        protected OrderHistoryInterface $orderHistoryRepository,
+        protected OrderAddressInterface $orderAddressRepository,
+        protected PaymentInterface $paymentRepository
     ) {
-        $this->orderRepository = $orderRepository;
-        $this->orderHistoryRepository = $orderHistoryRepository;
-        $this->orderAddressRepository = $orderAddressRepository;
-        $this->paymentRepository = $paymentRepository;
-
         Assets::setConfig(config('plugins.marketplace.assets', []));
     }
 
     public function index(OrderTable $table)
     {
-        page_title()->setTitle(__('Orders'));
+        PageTitle::setTitle(__('Orders'));
 
-        $orders = auth('customer')->user()->store->orders()->get();
-
-        return $table->render(MarketplaceHelper::viewPath('dashboard.table.base'), compact('orders'));
+        return $table->render(MarketplaceHelper::viewPath('dashboard.table.base'));
     }
 
-    public function edit(int $id)
+    public function edit(int|string $id)
     {
         Assets::addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
             ->addScriptsDirectly([
@@ -70,17 +52,15 @@ class OrderController extends BaseController
             ])
             ->addScripts(['blockui', 'input-mask']);
 
-        $order = $this->orderRepository
-            ->getModel()
-            ->where('id', $id)
-            ->with(['products', 'user'])
-            ->firstOrFail();
-
-        if ($order->store_id != auth('customer')->user()->store->id) {
-            abort(404);
+        if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
+            Assets::addScriptsDirectly('vendor/core/plugins/location/js/location.js');
         }
 
-        page_title()->setTitle(trans('plugins/ecommerce::order.edit_order', ['code' => $order->code]));
+        $order = $this->findOrFail($id);
+
+        $order->load(['products', 'user']);
+
+        PageTitle::setTitle(trans('plugins/ecommerce::order.edit_order', ['code' => $order->code]));
 
         $weight = $order->products_weight;
 
@@ -89,7 +69,7 @@ class OrderController extends BaseController
         return MarketplaceHelper::view('dashboard.orders.edit', compact('order', 'weight', 'defaultStore'));
     }
 
-    public function update(int $id, UpdateOrderRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, UpdateOrderRequest $request, BaseHttpResponse $response)
     {
         $order = $this->orderRepository->createOrUpdate($request->input(), ['id' => $id]);
 
@@ -100,13 +80,9 @@ class OrderController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(int $id, Request $request, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
-        $order = $this->orderRepository->findOrFail($id);
-
-        if ($order->store_id != auth('customer')->user()->store->id) {
-            abort(404);
-        }
+        $order = $this->findOrFail($id);
 
         try {
             $this->orderRepository->deleteBy(['id' => $id]);
@@ -130,11 +106,7 @@ class OrderController extends BaseController
         }
 
         foreach ($ids as $id) {
-            $order = $this->orderRepository->findOrFail($id);
-
-            if ($order->store_id != auth('customer')->user()->store->id) {
-                abort(404);
-            }
+            $order = $this->findOrFail($id);
 
             $this->orderRepository->delete($order);
             event(new DeletedContentEvent(ORDER_MODULE_SCREEN_NAME, $request, $order));
@@ -143,24 +115,16 @@ class OrderController extends BaseController
         return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
-    public function getGenerateInvoice(int $orderId)
+    public function getGenerateInvoice(int|string $orderId)
     {
-        $order = $this->orderRepository->findOrFail($orderId);
-
-        if ($order->store_id != auth('customer')->user()->store->id) {
-            abort(404);
-        }
+        $order = $this->findOrFail($orderId);
 
         return InvoiceHelper::downloadInvoice($order->invoice);
     }
 
     public function postConfirm(Request $request, BaseHttpResponse $response)
     {
-        $order = $this->orderRepository->findOrFail($request->input('order_id'));
-
-        if ($order->store_id != auth('customer')->user()->store->id) {
-            abort(404);
-        }
+        $order = $this->findOrFail($request->input('order_id'));
 
         $order->is_confirmed = 1;
         if ($order->status == OrderStatusEnum::PENDING) {
@@ -195,13 +159,9 @@ class OrderController extends BaseController
         return $response->setMessage(trans('plugins/ecommerce::order.confirm_order_success'));
     }
 
-    public function postResendOrderConfirmationEmail(int $id, BaseHttpResponse $response)
+    public function postResendOrderConfirmationEmail(int|string $id, BaseHttpResponse $response)
     {
-        $order = $this->orderRepository->findOrFail($id);
-
-        if ($order->store_id != auth('customer')->user()->store->id) {
-            abort(404);
-        }
+        $order = $this->findOrFail($id);
 
         $result = OrderHelper::sendOrderConfirmationEmail($order);
 
@@ -214,17 +174,39 @@ class OrderController extends BaseController
         return $response->setMessage(trans('plugins/ecommerce::order.sent_confirmation_email_success'));
     }
 
-    public function postUpdateShippingAddress(int $id, AddressRequest $request, BaseHttpResponse $response)
+    public function postUpdateShippingAddress(int|string $id, AddressRequest $request, BaseHttpResponse $response)
     {
-        $address = $this->orderAddressRepository->createOrUpdate($request->input(), compact('id'));
+        $address = $this->orderAddressRepository
+            ->getModel()
+            ->where('id', $id)
+            ->whereHas('order', function ($query) {
+                $query->where('store_id', auth('customer')->user()->store->id);
+            })
+            ->first();
 
-        if (! $address) {
-            abort(404);
+        if ($address) {
+            $order = $address->order;
+        } else {
+            if (! $orderId = $request->input('order_id')) {
+                abort(404);
+            }
+
+            $order = $this->findOrFail($orderId);
+
+            if ($order->address->id) {
+                $address = $order->address;
+            } else {
+                $address = $this->orderAddressRepository->getModel();
+                $address->order_id = $order->id;
+            }
         }
 
-        if ($address->order->status == OrderStatusEnum::CANCELED) {
+        if ($order->status == OrderStatusEnum::CANCELED) {
             abort(401);
         }
+
+        $address->fill($request->validated());
+        $address = $this->orderAddressRepository->createOrUpdate($address);
 
         return $response
             ->setData([
@@ -234,13 +216,9 @@ class OrderController extends BaseController
             ->setMessage(trans('plugins/ecommerce::order.update_shipping_address_success'));
     }
 
-    public function postCancelOrder(int $id, BaseHttpResponse $response)
+    public function postCancelOrder(int|string $id, BaseHttpResponse $response)
     {
-        $order = $this->orderRepository->findOrFail($id);
-
-        if ($order->store_id != auth('customer')->user()->store->id) {
-            abort(404);
-        }
+        $order = $this->findOrFail($id);
 
         if (! $order->canBeCanceledByAdmin()) {
             abort(403);
@@ -258,49 +236,15 @@ class OrderController extends BaseController
         return $response->setMessage(trans('plugins/ecommerce::order.customer.messages.cancel_success'));
     }
 
-    public function updateShippingStatus(
-        int $id,
-        UpdateShippingStatusRequest $request,
-        BaseHttpResponse $response,
-        ShipmentInterface $shipmentRepository,
-        ShipmentHistoryInterface $shipmentHistoryRepository
-    ) {
-        $shipment = $shipmentRepository->findOrFail($id);
-
-        $status = $request->input('status');
-
-        $shipmentRepository->createOrUpdate(['status' => $status], compact('id'));
-
-        $shipmentHistoryRepository->createOrUpdate([
-            'action' => 'update_status',
-            'description' => trans('plugins/ecommerce::shipping.changed_shipping_status', [
-                'status' => ShippingStatusEnum::getLabel($status),
-            ]),
-            'shipment_id' => $id,
-            'order_id' => $shipment->order_id,
-            'user_id' => Auth::id() ?? 0,
-        ]);
-
-        switch ($status) {
-            case ShippingStatusEnum::DELIVERED:
-                $shipment->date_shipped = Carbon::now();
-                $shipment->save();
-
-                OrderHelper::shippingStatusDelivered($shipment, $request);
-
-                break;
-
-            case ShippingStatusEnum::CANCELED:
-                $this->orderHistoryRepository->createOrUpdate([
-                    'action' => 'cancel_shipment',
-                    'description' => trans('plugins/ecommerce::shipping.shipping_canceled_by'),
-                    'order_id' => $shipment->order_id,
-                    'user_id' => Auth::id(),
-                ]);
-
-                break;
-        }
-
-        return $response->setMessage(trans('plugins/ecommerce::shipping.update_shipping_status_success'));
+    protected function findOrFail(int|string $id): Order
+    {
+        return $this->orderRepository
+            ->getModel()
+            ->where([
+                'id' => $id,
+                'is_finished' => 1,
+                'store_id' => auth('customer')->user()->store->id,
+            ])
+            ->firstOrFail();
     }
 }

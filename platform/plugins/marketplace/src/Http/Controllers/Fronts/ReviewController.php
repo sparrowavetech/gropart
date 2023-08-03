@@ -4,8 +4,8 @@ namespace Botble\Marketplace\Http\Controllers\Fronts;
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\PageTitle;
-use Botble\Marketplace\Tables\ReviewTable;
 use Botble\Marketplace\Facades\MarketplaceHelper;
+use Botble\Marketplace\Tables\ReviewTable;
 
 class ReviewController
 {

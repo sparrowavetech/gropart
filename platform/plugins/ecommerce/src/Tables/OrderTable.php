@@ -2,12 +2,17 @@
 
 namespace Botble\Ecommerce\Tables;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
-use Botble\Ecommerce\Repositories\Interfaces\OrderHistoryInterface;
-use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
+use Botble\Ecommerce\Enums\ShippingMethodEnum;
+use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Facades\OrderHelper;
+use Botble\Ecommerce\Models\Order;
+use Botble\Ecommerce\Models\OrderHistory;
+use Botble\Payment\Enums\PaymentMethodEnum;
+use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Table\Abstracts\TableAbstract;
-use EcommerceHelper;
+use Botble\Table\DataTables;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -17,21 +22,19 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use OrderHelper;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
-use Yajra\DataTables\DataTables;
 
 class OrderTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, OrderInterface $orderRepository)
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Order $model)
     {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $orderRepository;
+        $this->model = $model;
+
+        $this->hasActions = true;
+        $this->hasFilter = true;
 
         if (! Auth::user()->hasPermission('orders.edit')) {
             $this->hasOperations = false;
@@ -43,52 +46,71 @@ class OrderTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('checkbox', function ($item) {
+            ->editColumn('checkbox', function (Order $item) {
                 return $this->getCheckbox($item->id);
             })
-            ->editColumn('status', function ($item) {
+            ->editColumn('status', function (Order $item) {
                 return BaseHelper::clean($item->status->toHtml());
             })
-            ->editColumn('payment_status', function ($item) {
+            ->editColumn('payment_status', function (Order $item) {
+                if (! is_plugin_active('payment')) {
+                    return '&mdash;';
+                }
+
                 return $item->payment->status->label() ? BaseHelper::clean(
                     $item->payment->status->toHtml()
                 ) : '&mdash;';
             })
-            ->editColumn('payment_method', function ($item) {
+            ->editColumn('payment_method', function (Order $item) {
+                if (! is_plugin_active('payment')) {
+                    return '&mdash;';
+                }
+
                 return BaseHelper::clean($item->payment->payment_channel->label() ?: '&mdash;');
             })
-            ->editColumn('amount', function ($item) {
+            ->editColumn('amount', function (Order $item) {
                 return format_price($item->amount);
             })
-            ->editColumn('shipping_amount', function ($item) {
+            ->editColumn('shipping_amount', function (Order $item) {
                 return format_price($item->shipping_amount);
             })
-            ->editColumn('user_id', function ($item) {
+            ->editColumn('user_id', function (Order $item) {
                 return BaseHelper::clean($item->user->name ?: $item->address->name);
             })
-            ->editColumn('created_at', function ($item) {
+            ->editColumn('customer_email', function (Order $item) {
+                return BaseHelper::clean($item->user->email ?: $item->address->email);
+            })
+            ->editColumn('customer_phone', function (Order $item) {
+                return BaseHelper::clean($item->user->phone ?: $item->address->phone);
+            })
+            ->editColumn('created_at', function (Order $item) {
                 return BaseHelper::formatDate($item->created_at);
             });
 
         if (EcommerceHelper::isTaxEnabled()) {
-            $data = $data->editColumn('tax_amount', function ($item) {
+            $data = $data->editColumn('tax_amount', function (Order $item) {
                 return format_price($item->tax_amount);
             });
         }
 
         $data = $data
-            ->addColumn('operations', function ($item) {
+            ->addColumn('operations', function (Order $item) {
                 return $this->getOperations('orders.edit', 'orders.destroy', $item);
             })
             ->filter(function ($query) {
-                $keyword = $this->request->input('search.value');
-                if ($keyword) {
+                if ($keyword = $this->request->input('search.value')) {
                     return $query
                         ->whereHas('address', function ($subQuery) use ($keyword) {
-                            return $subQuery->where('name', 'LIKE', '%' . $keyword . '%');
+                            return $subQuery
+                                ->where('name', 'LIKE', '%' . $keyword . '%')
+                                ->orWhere('email', 'LIKE', '%' . $keyword . '%')
+                                ->orWhere('phone', 'LIKE', '%' . $keyword . '%');
                         })
                         ->orWhereHas('user', function ($subQuery) use ($keyword) {
-                            return $subQuery->where('name', 'LIKE', '%' . $keyword . '%');
+                            return $subQuery
+                                ->where('name', 'LIKE', '%' . $keyword . '%')
+                                ->orWhere('email', 'LIKE', '%' . $keyword . '%')
+                                ->orWhere('phone', 'LIKE', '%' . $keyword . '%');
                         })
                         ->orWhere('code', 'LIKE', '%' . $keyword . '%');
                 }
@@ -101,8 +123,15 @@ class OrderTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()
-            ->with(['user', 'payment'])
+        $with = ['user'];
+
+        if (is_plugin_active('payment')) {
+            $with[] = 'payment';
+        }
+
+        $query = $this->getModel()
+            ->query()
+            ->with($with)
             ->select([
                 'id',
                 'status',
@@ -129,6 +158,16 @@ class OrderTable extends TableAbstract
             'user_id' => [
                 'title' => trans('plugins/ecommerce::order.customer_label'),
                 'class' => 'text-start',
+            ],
+            'customer_email' => [
+                'title' => trans('plugins/ecommerce::customer.email'),
+                'class' => 'text-start',
+                'sortable' => false,
+            ],
+            'customer_phone' => [
+                'title' => trans('plugins/ecommerce::customer.phone'),
+                'class' => 'text-start',
+                'sortable' => false,
             ],
             'amount' => [
                 'title' => trans('plugins/ecommerce::order.amount'),
@@ -198,12 +237,63 @@ class OrderTable extends TableAbstract
         ];
     }
 
+    public function getFilters(): array
+    {
+        $filters = parent::getFilters();
+
+        $filters = array_merge($filters, [
+            'customer_name' => [
+                'title' => trans('plugins/ecommerce::ecommerce.customer_name'),
+                'type' => 'text',
+            ],
+            'customer_email' => [
+                'title' => trans('plugins/ecommerce::ecommerce.customer_email'),
+                'type' => 'text',
+            ],
+            'customer_phone' => [
+                'title' => trans('plugins/ecommerce::ecommerce.customer_phone'),
+                'type' => 'text',
+            ],
+            'amount' => [
+                'title' => trans('plugins/ecommerce::order.amount'),
+                'type' => 'number',
+            ],
+            'shipping_method' => [
+                'title' => trans('plugins/ecommerce::ecommerce.shipping_method'),
+                'type' => 'select',
+                'choices' => array_filter(ShippingMethodEnum::labels()),
+            ],
+        ]);
+
+        if (is_plugin_active('payment')) {
+            $filters = array_merge($filters, [
+                'payment_method' => [
+                    'title' => trans('plugins/ecommerce::order.payment_method'),
+                    'type' => 'select',
+                    'choices' => PaymentMethodEnum::labels(),
+                ],
+                'payment_status' => [
+                    'title' => trans('plugins/ecommerce::order.payment_status_label'),
+                    'type' => 'select',
+                    'choices' => PaymentStatusEnum::labels(),
+                ],
+            ]);
+        }
+
+        if (is_plugin_active('marketplace')) {
+            $filters['store_id'] = [
+                'title' => trans('plugins/marketplace::store.forms.store'),
+                'type' => 'select-search',
+                'choices' => [-1 => theme_option('site_title')] + DB::table('mp_stores')->pluck('name', 'id')->all(),
+            ];
+        }
+
+        return $filters;
+    }
+
     public function renderTable($data = [], $mergeData = []): View|Factory|Response
     {
-        if ($this->query()->count() === 0 &&
-            ! $this->request()->wantsJson() &&
-            $this->request()->input('filter_table_id') !== $this->getOption('id') && ! $this->request()->ajax()
-        ) {
+        if ($this->isEmpty()) {
             return view('plugins/ecommerce::orders.intro');
         }
 
@@ -218,16 +308,19 @@ class OrderTable extends TableAbstract
         ];
     }
 
-    public function saveBulkChangeItem(Model $item, string $inputKey, ?string $inputValue): Model|bool
+    public function saveBulkChangeItem(Model|Order $item, string $inputKey, string|null $inputValue): Model|bool
     {
         if ($inputKey === 'status' && $inputValue == OrderStatusEnum::CANCELED) {
+            /**
+             * @var Order $item
+             */
             if (! $item->canBeCanceledByAdmin()) {
                 return $item;
             }
 
             OrderHelper::cancelOrder($item);
 
-            app(OrderHistoryInterface::class)->createOrUpdate([
+            OrderHistory::query()->create([
                 'action' => 'cancel_order',
                 'description' => trans('plugins/ecommerce::order.order_was_canceled_by'),
                 'order_id' => $item->id,
@@ -238,5 +331,94 @@ class OrderTable extends TableAbstract
         }
 
         return parent::saveBulkChangeItem($item, $inputKey, $inputValue);
+    }
+
+    public function applyFilterCondition(Builder|QueryBuilder|Relation $query, string $key, string $operator, string|null $value): Builder|QueryBuilder|Relation
+    {
+        switch ($key) {
+            case 'customer_name':
+                if (! $value) {
+                    break;
+                }
+
+                return $this->filterByCustomer($query, 'name', $operator, $value);
+            case 'customer_email':
+                if (! $value) {
+                    break;
+                }
+
+                return $this->filterByCustomer($query, 'email', $operator, $value);
+            case 'customer_phone':
+                if (! $value) {
+                    break;
+                }
+
+                return $this->filterByCustomer($query, 'phone', $operator, $value);
+            case 'status':
+                if (! OrderStatusEnum::isValid($value)) {
+                    return $query;
+                }
+
+                break;
+            case 'shipping_method':
+                if (! $value) {
+                    break;
+                }
+
+                if (! ShippingMethodEnum::isValid($value)) {
+                    return $query;
+                }
+
+                break;
+            case 'payment_method':
+                if (! is_plugin_active('payment') || ! PaymentMethodEnum::isValid($value)) {
+                    return $query;
+                }
+
+                return $query->whereHas('payment', function ($subQuery) use ($value) {
+                    $subQuery->where('payment_channel', $value);
+                });
+
+            case 'payment_status':
+                if (! is_plugin_active('payment') || ! PaymentStatusEnum::isValid($value)) {
+                    return $query;
+                }
+
+                return $query->whereHas('payment', function ($subQuery) use ($value) {
+                    $subQuery->where('status', $value);
+                });
+            case 'store_id':
+                if (! is_plugin_active('marketplace')) {
+                    return $query;
+                }
+                if ($value == -1) {
+                    return $query->where(function ($subQuery) {
+                        $subQuery->whereNull('store_id')
+                            ->orWhere('store_id', 0);
+                    });
+                }
+        }
+
+        return parent::applyFilterCondition($query, $key, $operator, $value);
+    }
+
+    protected function filterByCustomer(Builder|QueryBuilder|Relation $query, string $column, string $operator, string|null $value): Builder|QueryBuilder|Relation
+    {
+        if ($operator === 'like') {
+            $value = '%' . $value . '%';
+        } elseif ($operator !== '=') {
+            $operator = '=';
+        }
+
+        return $query
+            ->where(function ($query) use ($column, $operator, $value) {
+                $query
+                    ->whereHas('user', function ($subQuery) use ($column, $operator, $value) {
+                        $subQuery->where($column, $operator, $value);
+                    })
+                    ->orWhereHas('address', function ($subQuery) use ($column, $operator, $value) {
+                        $subQuery->where($column, $operator, $value);
+                    });
+            });
     }
 }

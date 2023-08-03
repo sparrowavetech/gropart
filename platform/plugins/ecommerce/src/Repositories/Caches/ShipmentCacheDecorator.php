@@ -2,9 +2,11 @@
 
 namespace Botble\Ecommerce\Repositories\Caches;
 
-use Botble\Ecommerce\Repositories\Interfaces\ShipmentInterface;
-use Botble\Support\Repositories\Caches\CacheAbstractDecorator;
+use Botble\Ecommerce\Repositories\Eloquent\ShipmentRepository;
 
-class ShipmentCacheDecorator extends CacheAbstractDecorator implements ShipmentInterface
+/**
+ * @deprecated
+ */
+class ShipmentCacheDecorator extends ShipmentRepository
 {
 }

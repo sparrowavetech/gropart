@@ -3,12 +3,13 @@
 namespace Botble\Ecommerce\Http\Controllers\Customers;
 
 use App\Http\Controllers\Controller;
+use Botble\Base\Facades\PageTitle;
+use Botble\Ecommerce\Facades\InvoiceHelper;
 use Botble\Ecommerce\Models\Invoice;
 use Botble\Ecommerce\Repositories\Interfaces\InvoiceInterface;
+use Botble\SeoHelper\Facades\SeoHelper;
+use Botble\Theme\Facades\Theme;
 use Illuminate\Http\Request;
-use InvoiceHelper;
-use SeoHelper;
-use Theme;
 
 class InvoiceController extends Controller
 {
@@ -32,7 +33,7 @@ class InvoiceController extends Controller
 
         $title = __('Invoice detail :code', ['code' => $invoice->code]);
 
-        page_title()->setTitle($title);
+        PageTitle::setTitle($title);
 
         SeoHelper::setTitle($title);
 
@@ -43,7 +44,7 @@ class InvoiceController extends Controller
         )->render();
     }
 
-    public function getGenerateInvoice(int $invoiceId, Request $request, InvoiceInterface $invoiceRepository)
+    public function getGenerateInvoice(int|string $invoiceId, Request $request, InvoiceInterface $invoiceRepository)
     {
         $invoice = $invoiceRepository->findOrFail($invoiceId);
 

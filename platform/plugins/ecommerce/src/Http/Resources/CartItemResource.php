@@ -3,10 +3,10 @@
 namespace Botble\Ecommerce\Http\Resources;
 
 use Botble\Ecommerce\Cart\CartItem;
+use Botble\Media\Facades\RvMedia;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
-use Botble\Media\Facades\RvMedia;
 
 /**
  * @mixin CartItem

@@ -9,7 +9,7 @@ class ApplyCouponRequest extends Request
     public function rules(): array
     {
         return [
-            'coupon_code' => 'required|max:255',
+            'coupon_code' => 'required|string|max:255',
         ];
     }
 }

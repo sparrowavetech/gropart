@@ -2,17 +2,18 @@
 
 namespace Botble\Ecommerce\Tables;
 
-use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Enums\StockStatusEnum;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Repositories\Interfaces\ProductCategoryInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
+use Botble\Media\Facades\RvMedia;
 use Botble\Table\Abstracts\TableAbstract;
+use Botble\Table\DataTables;
 use Carbon\Carbon;
-use EcommerceHelper;
-use Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -24,21 +25,17 @@ use Illuminate\Database\Eloquent\Relations\Relation as EloquentRelation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use RvMedia;
 use Symfony\Component\HttpFoundation\Response;
-use Yajra\DataTables\DataTables;
 
 class ProductTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, ProductInterface $productRepository)
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Product $model)
     {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $productRepository;
+        $this->model = $model;
+        $this->hasActions = true;
+        $this->hasFilter = true;
 
         if (! Auth::user()->hasAnyPermission(['products.edit', 'products.destroy'])) {
             $this->hasOperations = false;
@@ -50,7 +47,7 @@ class ProductTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('name', function ($item) {
+            ->editColumn('name', function (Product $item) {
                 $productType = null;
 
                 if (EcommerceHelper::isEnabledSupportDigitalProducts()) {
@@ -63,7 +60,7 @@ class ProductTable extends TableAbstract
 
                 return Html::link(route('products.edit', $item->id), BaseHelper::clean($item->name)) . $productType;
             })
-            ->editColumn('image', function ($item) {
+            ->editColumn('image', function (Product $item) {
                 if ($this->request()->input('action') == 'csv') {
                     return RvMedia::getImageUrl($item->image, null, false, RvMedia::getDefaultImage());
                 }
@@ -74,31 +71,31 @@ class ProductTable extends TableAbstract
 
                 return $this->displayThumbnail($item->image);
             })
-            ->editColumn('checkbox', function ($item) {
+            ->editColumn('checkbox', function (Product $item) {
                 return $this->getCheckbox($item->id);
             })
-            ->editColumn('price', function ($item) {
+            ->editColumn('price', function (Product $item) {
                 return $item->price_in_table;
             })
-            ->editColumn('quantity', function ($item) {
+            ->editColumn('quantity', function (Product $item) {
                 return $item->with_storehouse_management ? $item->quantity : '&#8734;';
             })
-            ->editColumn('sku', function ($item) {
+            ->editColumn('sku', function (Product $item) {
                 return BaseHelper::clean($item->sku ?: '&mdash;');
             })
-            ->editColumn('order', function ($item) {
+            ->editColumn('order', function (Product $item) {
                 return view('plugins/ecommerce::products.partials.sort-order', compact('item'))->render();
             })
-            ->editColumn('created_at', function ($item) {
+            ->editColumn('created_at', function (Product $item) {
                 return BaseHelper::formatDate($item->created_at);
             })
-            ->editColumn('status', function ($item) {
+            ->editColumn('status', function (Product $item) {
                 return BaseHelper::clean($item->status->toHtml());
             })
-            ->editColumn('stock_status', function ($item) {
+            ->editColumn('stock_status', function (Product $item) {
                 return BaseHelper::clean($item->stock_status_html);
             })
-            ->addColumn('operations', function ($item) {
+            ->addColumn('operations', function (Product $item) {
                 return $this->getOperations('products.edit', 'products.destroy', $item);
             });
 
@@ -107,7 +104,8 @@ class ProductTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()
+        $query = $this->getModel()
+            ->query()
             ->select([
                 'id',
                 'name',
@@ -131,7 +129,7 @@ class ProductTable extends TableAbstract
         return $this->applyScopes($query);
     }
 
-    public function htmlDrawCallbackFunction(): ?string
+    public function htmlDrawCallbackFunction(): string|null
     {
         return parent::htmlDrawCallbackFunction() . '$(".editable").editable({mode: "inline"});';
     }
@@ -217,17 +215,19 @@ class ProductTable extends TableAbstract
             $buttons = $this->addCreateButton(route('products.create'), 'products.create');
         }
 
-        if (Auth::user()->hasPermission('ecommerce.bulk-import.index')) {
+        if (Auth::user()->hasPermission('ecommerce.import.products.index')) {
             $buttons['import'] = [
-                'link' => route('ecommerce.bulk-import.index'),
-                'text' => '<i class="fas fa-file-import"></i> ' . trans('plugins/ecommerce::bulk-import.tables.import'),
+                'link' => route('ecommerce.import.products.index'),
+                'text' => '<i class="fas fa-cloud-upload-alt"></i> ' . trans('plugins/ecommerce::bulk-import.import_products'),
+                'class' => 'btn-warning',
             ];
         }
 
         if (Auth::user()->hasPermission('ecommerce.export.products.index')) {
             $buttons['export'] = [
                 'link' => route('ecommerce.export.products.index'),
-                'text' => '<i class="fas fa-file-export"></i> ' . trans('plugins/ecommerce::export.export'),
+                'text' => '<i class="fas fa-cloud-download-alt"></i> ' . trans('plugins/ecommerce::export.products.name'),
+                'class' => 'btn-warning',
             ];
         }
 
@@ -241,10 +241,7 @@ class ProductTable extends TableAbstract
 
     public function renderTable($data = [], $mergeData = []): View|Factory|Response
     {
-        if ($this->query()->count() === 0 &&
-            ! $this->request()->wantsJson() &&
-            $this->request()->input('filter_table_id') !== $this->getOption('id') && ! $this->request()->ajax()
-        ) {
+        if ($this->isEmpty()) {
             return view('plugins/ecommerce::products.intro');
         }
 
@@ -271,6 +268,7 @@ class ProductTable extends TableAbstract
         return [
             'url' => route('product-categories.search'),
             'selected' => $categorySelected,
+            'minimum-input' => 1,
         ];
     }
 
@@ -332,7 +330,7 @@ class ProductTable extends TableAbstract
         ];
     }
 
-    public function applyFilterCondition(EloquentBuilder|QueryBuilder|EloquentRelation $query, string $key, string $operator, ?string $value): EloquentRelation|EloquentBuilder|QueryBuilder
+    public function applyFilterCondition(EloquentBuilder|QueryBuilder|EloquentRelation $query, string $key, string $operator, string|null $value): EloquentRelation|EloquentBuilder|QueryBuilder
     {
         switch ($key) {
             case 'created_at':
@@ -419,9 +417,12 @@ class ProductTable extends TableAbstract
         return parent::applyFilterCondition($query, $key, $operator, $value);
     }
 
-    public function saveBulkChangeItem(Model|Product $item, string $inputKey, ?string $inputValue): Model|bool
+    public function saveBulkChangeItem(Model|Product $item, string $inputKey, string|null $inputValue): Model|bool
     {
         if ($inputKey === 'category') {
+            /**
+             * @var Product $item
+             */
             $item->categories()->sync([$inputValue]);
 
             return $item;

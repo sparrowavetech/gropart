@@ -4,16 +4,19 @@ namespace Botble\Ecommerce\Forms;
 
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Forms\FormAbstract;
+use Botble\Ecommerce\Facades\ProductCategoryHelper;
+use Botble\Ecommerce\Forms\Fields\CategoryMultiField;
 use Botble\Ecommerce\Http\Requests\BrandRequest;
 use Botble\Ecommerce\Models\Brand;
 
 class BrandForm extends FormAbstract
 {
-    public function buildForm()
+    public function buildForm(): void
     {
         $this
             ->setupModel(new Brand())
             ->setValidatorClass(BrandRequest::class)
+            ->addCustomField('categoryMulti', CategoryMultiField::class)
             ->withCustomFields()
             ->add('name', 'text', [
                 'label' => trans('core/base::forms.name'),
@@ -61,6 +64,12 @@ class BrandForm extends FormAbstract
                 'label' => trans('plugins/ecommerce::brands.form.is_featured'),
                 'label_attr' => ['class' => 'control-label'],
                 'default_value' => false,
+            ])
+            ->add('categories[]', 'categoryMulti', [
+                'label' => trans('plugins/ecommerce::products.form.categories'),
+                'label_attr' => ['class' => 'control-label'],
+                'choices' => ProductCategoryHelper::getActiveTreeCategories(),
+                'value' => $this->getModel()->id ? $this->getModel()->categories->pluck('id')->all() : [],
             ])
             ->setBreakFieldPoint('status');
     }

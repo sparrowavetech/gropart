@@ -2,8 +2,8 @@
 
 namespace Botble\Ecommerce\Http\Requests;
 
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Support\Http\Requests\Request;
-use EcommerceHelper;
 
 class AddressRequest extends Request
 {

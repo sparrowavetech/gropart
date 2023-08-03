@@ -23,6 +23,7 @@ class Review extends BaseModel
     protected $casts = [
         'status' => BaseStatusEnum::class,
         'images' => 'array',
+        'order_created_at' => 'datetime',
     ];
 
     public function user(): BelongsTo
@@ -35,31 +36,35 @@ class Review extends BaseModel
         return $this->belongsTo(Product::class)->withDefault();
     }
 
-    public function getProductNameAttribute(): ?string
+    protected function productName(): Attribute
     {
-        return $this->product->name;
+        return Attribute::make(
+            get: function () {
+                return $this->product->name;
+            }
+        );
     }
 
-    public function getUserNameAttribute(): ?string
+    protected function userName(): Attribute
     {
-        return $this->user->name;
+        return Attribute::make(
+            get: function () {
+                return $this->user->name;
+            }
+        );
     }
 
     protected function orderCreatedAt(): Attribute
     {
         return Attribute::make(
             get: function () {
-                $order = $this->user->orders->first();
-
-                return $order?->created_at;
+                return $this->user->orders()->first()?->created_at;
             }
         );
     }
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
-
         self::creating(function (Review $review) {
             if (! $review->images || ! is_array($review->images) || ! count($review->images)) {
                 $review->images = null;

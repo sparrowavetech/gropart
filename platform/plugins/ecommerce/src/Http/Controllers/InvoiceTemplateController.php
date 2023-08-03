@@ -2,13 +2,13 @@
 
 namespace Botble\Ecommerce\Http\Controllers;
 
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Supports\InvoiceHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
-use Assets;
-use BaseHelper;
 
 class InvoiceTemplateController extends BaseController
 {

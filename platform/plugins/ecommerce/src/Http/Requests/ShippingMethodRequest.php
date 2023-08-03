@@ -9,14 +9,11 @@ class ShippingMethodRequest extends Request
     public function rules(): array
     {
         $rules = [
-            'name' => 'required|max:120',
+            'name' => 'required|string|max:120',
             'order' => 'required|integer|min:0',
         ];
 
-        foreach (config(
-            'plugins.ecommerce.shipping.integration_rules.' . $this->input('method_code'),
-            []
-        ) as $key => $rule) {
+        foreach (config('plugins.ecommerce.shipping.integration_rules.' . $this->input('method_code'), []) as $key => $rule) {
             $rules[$this->input('method_code') . '.' . $key] = $rule['rule'];
         }
 
@@ -26,10 +23,7 @@ class ShippingMethodRequest extends Request
     public function attributes(): array
     {
         $attributes = [];
-        foreach (config(
-            'plugins.ecommerce.shipping.integration_rules.' . $this->input('method_code'),
-            []
-        ) as $key => $rule) {
+        foreach (config('plugins.ecommerce.shipping.integration_rules.' . $this->input('method_code'), []) as $key => $rule) {
             $attributes[$this->input('method_code') . '.' . $key] = $rule['name'];
         }
 

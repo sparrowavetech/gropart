@@ -3,10 +3,11 @@
 namespace Botble\Ecommerce\Widgets;
 
 use Botble\Base\Widgets\Table;
+use Botble\Ecommerce\Tables\Reports\TopSellingProductsTable as BaseTopSellingProductsTable;
 
 class TopSellingProductsTable extends Table
 {
-    protected string $table = \Botble\Ecommerce\Tables\Reports\TopSellingProductsTable::class;
+    protected string $table = BaseTopSellingProductsTable::class;
 
     protected string $route = 'ecommerce.report.top-selling-products';
 

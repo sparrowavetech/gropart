@@ -11,11 +11,9 @@ class ProductOptionRequest extends Request
     public function rules(): array
     {
         return [
-            'option_name' => 'required',
+            'option_name' => 'required|string',
             'option_type' => [
-                Rule::requiredIf(function () {
-                    return $this->input('option_type') == GlobalOptionEnum::NA;
-                }),
+                Rule::requiredIf(fn () => $this->input('option_type') == GlobalOptionEnum::NA),
             ],
         ];
     }

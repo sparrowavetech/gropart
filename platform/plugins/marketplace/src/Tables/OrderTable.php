@@ -2,26 +2,27 @@
 
 namespace Botble\Marketplace\Tables;
 
-use BaseHelper;
-use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Models\Order;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Table\Abstracts\TableAbstract;
-use EcommerceHelper;
+use Botble\Table\DataTables;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
-use MarketplaceHelper;
-use Yajra\DataTables\DataTables;
 
 class OrderTable extends TableAbstract
 {
-    protected $hasCheckbox = false;
-
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, OrderInterface $orderRepository)
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Order $model)
     {
-        $this->repository = $orderRepository;
         parent::__construct($table, $urlGenerator);
+
+        $this->model = $model;
+
+        $this->hasCheckbox = false;
     }
 
     public function ajax(): JsonResponse
@@ -73,7 +74,7 @@ class OrderTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()
+        $query = $this->getModel()->query()
             ->select([
                 'id',
                 'status',

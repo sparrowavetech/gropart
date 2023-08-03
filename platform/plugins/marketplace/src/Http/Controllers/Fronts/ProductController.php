@@ -3,10 +3,13 @@
 namespace Botble\Marketplace\Http\Controllers\Fronts;
 
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Facades\EmailHandler;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Http\Requests\ProductRequest;
 use Botble\Ecommerce\Http\Requests\ProductVersionRequest;
 use Botble\Ecommerce\Models\Customer;
@@ -19,13 +22,12 @@ use Botble\Ecommerce\Services\Products\StoreAttributesOfProductService;
 use Botble\Ecommerce\Services\Products\StoreProductService;
 use Botble\Ecommerce\Services\StoreProductTagService;
 use Botble\Ecommerce\Traits\ProductActionsTrait;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Forms\ProductForm;
 use Botble\Marketplace\Tables\ProductTable;
-use EcommerceHelper;
-use EmailHandler;
+use Botble\Marketplace\Tables\ProductVariationTable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use MarketplaceHelper;
 
 class ProductController extends BaseController
 {
@@ -37,7 +39,7 @@ class ProductController extends BaseController
 
     public function index(ProductTable $table)
     {
-        page_title()->setTitle(__('Products'));
+        PageTitle::setTitle(__('Products'));
 
         return $table->render(MarketplaceHelper::viewPath('dashboard.table.base'));
     }
@@ -46,12 +48,12 @@ class ProductController extends BaseController
     {
         if (EcommerceHelper::isEnabledSupportDigitalProducts()) {
             if ($request->input('product_type') == ProductTypeEnum::DIGITAL) {
-                page_title()->setTitle(trans('plugins/ecommerce::products.create_product_type.digital'));
+                PageTitle::setTitle(trans('plugins/ecommerce::products.create_product_type.digital'));
             } else {
-                page_title()->setTitle(trans('plugins/ecommerce::products.create_product_type.physical'));
+                PageTitle::setTitle(trans('plugins/ecommerce::products.create_product_type.physical'));
             }
         } else {
-            page_title()->setTitle(trans('plugins/ecommerce::products.create'));
+            PageTitle::setTitle(trans('plugins/ecommerce::products.create'));
         }
 
         return $formBuilder->create(ProductForm::class)->renderForm();
@@ -145,7 +147,7 @@ class ProductController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int $id, FormBuilder $formBuilder)
+    public function edit(int|string $id, FormBuilder $formBuilder)
     {
         $product = $this->productRepository->findOrFail($id);
 
@@ -153,7 +155,7 @@ class ProductController extends BaseController
             abort(404);
         }
 
-        page_title()->setTitle(trans('plugins/ecommerce::products.edit', ['name' => $product->name]));
+        PageTitle::setTitle(trans('plugins/ecommerce::products.edit', ['name' => $product->name]));
 
         return $formBuilder
             ->create(ProductForm::class, ['model' => $product])
@@ -161,7 +163,7 @@ class ProductController extends BaseController
     }
 
     public function update(
-        int $id,
+        int|string $id,
         ProductRequest $request,
         StoreProductService $service,
         GroupedProductInterface $groupedProductRepository,
@@ -183,15 +185,17 @@ class ProductController extends BaseController
         $product = $service->execute($request, $product);
         $storeProductTagService->execute($request, $product);
 
-        $variationRepository
-            ->getModel()
-            ->where('configurable_product_id', $product->id)
-            ->update(['is_default' => 0]);
+        if ($request->has('variation_default_id')) {
+            $variationRepository
+                ->getModel()
+                ->where('configurable_product_id', $product->id)
+                ->update(['is_default' => 0]);
 
-        $defaultVariation = $variationRepository->findById($request->input('variation_default_id'));
-        if ($defaultVariation) {
-            $defaultVariation->is_default = true;
-            $defaultVariation->save();
+            $defaultVariation = $variationRepository->findById($request->input('variation_default_id'));
+            if ($defaultVariation) {
+                $defaultVariation->is_default = true;
+                $defaultVariation->save();
+            }
         }
 
         $addedAttributes = $request->input('added_attributes', []);
@@ -249,7 +253,7 @@ class ProductController extends BaseController
 
         $request->merge([
             'content' => $shortcodeCompiler->strip($request->input('content'), $shortcodeCompiler->whitelistShortcodes()),
-            'images' => json_decode($request->input('images')),
+            'images' => array_filter($request->input('images', [])),
         ]);
 
         $except = [
@@ -289,7 +293,7 @@ class ProductController extends BaseController
         BaseHttpResponse $response
     ) {
         $request->merge([
-            'images' => json_decode($request->input('images', '[]')),
+            'images' => array_filter($request->input('images', [])),
         ]);
 
         return $this->basePostAddVersion($request, $productVariation, $id, $response);
@@ -302,7 +306,7 @@ class ProductController extends BaseController
         BaseHttpResponse $response
     ) {
         $request->merge([
-            'images' => json_decode($request->input('images', '[]')),
+            'images' => array_filter($request->input('images', [])),
         ]);
 
         return $this->basePostUpdateVersion($request, $productVariation, $id, $response);
@@ -369,7 +373,6 @@ class ProductController extends BaseController
             ->advancedGet([
                 'condition' => [
                     'status' => BaseStatusEnum::PUBLISHED,
-                    'is_enquiry' => 0,
                     ['is_variation', '<>', 1],
                     ['id', '<>', $request->input('product_id', 0)],
                     ['name', 'LIKE', '%' . $request->input('keyword') . '%'],
@@ -385,7 +388,7 @@ class ProductController extends BaseController
                 'paginate' => [
                     'per_page' => 5,
                     'type' => 'simplePaginate',
-                    'current_paged' => (int)$request->input('page', 1),
+                    'current_paged' => $request->integer('page', 1),
                 ],
             ]);
 
@@ -407,5 +410,45 @@ class ProductController extends BaseController
         $optionsValues = $globalOptionRepository->findOrFail($request->input('id'), ['values']);
 
         return $response->setData($optionsValues);
+    }
+
+    public function getProductVariations(int|string $id, ProductVariationTable $dataTable)
+    {
+        $product = $this->productRepository
+            ->getModel()
+            ->where([
+                'is_variation' => 0,
+                'store_id' => auth('customer')->user()->store->id,
+            ])
+            ->findOrFail($id);
+
+        $dataTable->setProductId($id);
+
+        if (EcommerceHelper::isEnabledSupportDigitalProducts() && $product->isTypeDigital()) {
+            $dataTable->isDigitalProduct();
+        }
+
+        return $dataTable->renderTable();
+    }
+
+    public function setDefaultProductVariation(int|string $id, ProductVariationInterface $variationRepository, BaseHttpResponse $response)
+    {
+        $variation = $variationRepository->findOrFail($id);
+
+        if ($variation->configurableProduct->store_id != auth('customer')->user()->store->id) {
+            abort(404);
+        }
+
+        $variationRepository
+            ->getModel()
+            ->where('configurable_product_id', $variation->configurable_product_id)
+            ->update(['is_default' => 0]);
+
+        if ($variation) {
+            $variation->is_default = true;
+            $variation->save();
+        }
+
+        return $response->setMessage(trans('core/base::notices.update_success_message'));
     }
 }

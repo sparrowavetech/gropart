@@ -9,7 +9,7 @@
                     data-href="{{ route('marketplace.vendor.dashboard') }}"
                     data-start-date="{{ $data['startDate'] }}"
                     data-end-date="{{ $data['endDate'] }}">
-                <i class="fa fa-calendar"></i>
+                <i class="fa fa-calendar me-1"></i>
                 <span>{{ trans('plugins/ecommerce::reports.date_range_format_value', [
                         'from' => $data['startDate']->translatedFormat('Y-m-d'),
                         'to'   => $data['endDate']->translatedFormat('Y-m-d')

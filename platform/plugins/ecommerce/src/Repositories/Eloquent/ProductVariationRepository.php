@@ -13,20 +13,12 @@ class ProductVariationRepository extends RepositoriesAbstract implements Product
     {
         $allRelatedVariations = $this->model
             ->where('configurable_product_id', $configurableProductId)
-            ->distinct()
-            ->with('variationItems')
-            ->get();
+            ->whereHas('variationItems', function ($query) use ($attributes) {
+                $query->whereIn('attribute_id', array_unique($attributes));
+            }, '=', count(array_unique($attributes)))
+            ->with('variationItems');
 
-        $matchedVariation = $allRelatedVariations
-            ->filter(function ($value) use ($attributes) {
-                $items = $value->variationItems->pluck('attribute_id')->toArray();
-
-                $items = array_unique($items);
-
-                return array_equal(array_unique($attributes), $items);
-            });
-
-        return $this->applyBeforeExecuteQuery($matchedVariation, true)->first();
+        return $this->applyBeforeExecuteQuery($allRelatedVariations, true)->first();
     }
 
     public function getVariationByAttributesOrCreate($configurableProductId, array $attributes)

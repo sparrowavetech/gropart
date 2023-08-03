@@ -1,4 +1,4 @@
-<div class="form-group variant-radio product-option product-option-{{ Str::slug($option->name) }} product-option-{{ $option->id }}"
+<div class="form-group mb-3 variant-radio product-option product-option-{{ Str::slug($option->name) }} product-option-{{ $option->id }}"
     style="margin-bottom: 10px">
     <div class="product-option-item-wrapper">
         <div class="product-option-item-label">

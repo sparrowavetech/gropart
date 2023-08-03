@@ -2,11 +2,13 @@
 
 namespace Botble\Ecommerce\Http\Controllers;
 
-use Assets;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Widgets\Contracts\AdminWidget;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
@@ -14,25 +16,15 @@ use Botble\Ecommerce\Tables\Reports\RecentOrdersTable;
 use Botble\Ecommerce\Tables\Reports\TopSellingProductsTable;
 use Botble\Ecommerce\Tables\Reports\TrendingProductsTable;
 use Carbon\Carbon;
-use EcommerceHelper;
 use Illuminate\Http\Request;
 
 class ReportController extends BaseController
 {
-    protected OrderInterface $orderRepository;
-
-    protected ProductInterface $productRepository;
-
-    protected CustomerInterface $customerRepository;
-
     public function __construct(
-        OrderInterface $order,
-        ProductInterface $product,
-        CustomerInterface $customer
+        protected OrderInterface $orderRepository,
+        protected ProductInterface $productRepository,
+        protected CustomerInterface $customerRepository
     ) {
-        $this->orderRepository = $order;
-        $this->productRepository = $product;
-        $this->customerRepository = $customer;
     }
 
     public function getIndex(
@@ -40,7 +32,7 @@ class ReportController extends BaseController
         AdminWidget $widget,
         BaseHttpResponse $response
     ) {
-        page_title()->setTitle(trans('plugins/ecommerce::reports.name'));
+        PageTitle::setTitle(trans('plugins/ecommerce::reports.name'));
 
         Assets::addScriptsDirectly([
             'vendor/core/plugins/ecommerce/libraries/daterangepicker/daterangepicker.js',
@@ -49,8 +41,9 @@ class ReportController extends BaseController
             ->addStylesDirectly([
                 'vendor/core/plugins/ecommerce/libraries/daterangepicker/daterangepicker.css',
                 'vendor/core/plugins/ecommerce/css/report.css',
-            ])
-            ->usingVueJS();
+            ]);
+
+        Assets::usingVueJS();
 
         [$startDate, $endDate] = EcommerceHelper::getDateRangeInReport($request);
 

@@ -2,11 +2,11 @@
 
 namespace Botble\Ecommerce\Listeners;
 
+use Botble\Base\Facades\EmailHandler;
 use Botble\Ecommerce\Events\OrderCompletedEvent;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
-use Botble\Ecommerce\Facades\EcommerceHelper;
-use Botble\Base\Facades\EmailHandler;
 
 class SendProductReviewsMailAfterOrderCompleted
 {

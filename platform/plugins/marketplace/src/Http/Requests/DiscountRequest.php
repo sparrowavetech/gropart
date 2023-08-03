@@ -2,9 +2,9 @@
 
 namespace Botble\Marketplace\Http\Requests;
 
+use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Support\Http\Requests\Request;
 use Illuminate\Validation\Rule;
-use Botble\Marketplace\Facades\MarketplaceHelper;
 
 class DiscountRequest extends Request
 {

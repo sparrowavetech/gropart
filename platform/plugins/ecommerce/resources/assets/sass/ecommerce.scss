@@ -778,6 +778,14 @@ img.thumb-image {
 
         .discount-desc {
             color: #bdecff;
+
+            a {
+                color: #bdecff;
+
+                &:hover {
+                    color: #fff;
+                }
+            }
         }
 
         .discount-text-color {
@@ -874,7 +882,7 @@ Product option
 
 #product-option {
     .product-option {
-        margin-bottom:10px;
+        margin-bottom: 10px;
     }
 }
 
@@ -893,6 +901,7 @@ Product option
         background-position: -200%;
     }
 }
+
 .table-shipping-rule-items {
     tbody {
         tr + tr.tr-no-data {
@@ -917,6 +926,7 @@ Product option
                 right: 7px;
                 content: "\2191";
             }
+
             &::after {
                 right: 2px;
                 content: "\2193";
@@ -939,6 +949,7 @@ Product option
     &.table-loading {
         table {
             border-collapse: collapse;
+
             tbody {
                 > tr {
                     &:nth-of-type(odd) {
@@ -948,7 +959,7 @@ Product option
                     }
                 }
             }
-        
+
             tr th, tr td {
                 opacity: .45;
                 pointer-events: none;

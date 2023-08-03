@@ -3,27 +3,21 @@
 namespace Botble\Ecommerce\Http\Controllers\Fronts;
 
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Ecommerce\Facades\Cart;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Ecommerce\Repositories\Interfaces\WishlistInterface;
-use Cart;
-use EcommerceHelper;
+use Botble\SeoHelper\Facades\SeoHelper;
+use Botble\Theme\Facades\Theme;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Routing\Controller;
-use SeoHelper;
-use Theme;
 
 class WishlistController extends Controller
 {
-    protected ProductInterface $productRepository;
-
-    protected WishlistInterface $wishlistRepository;
-
-    public function __construct(WishlistInterface $wishlistRepository, ProductInterface $productRepository)
+    public function __construct(protected WishlistInterface $wishlistRepository, protected ProductInterface $productRepository)
     {
-        $this->productRepository = $productRepository;
-        $this->wishlistRepository = $wishlistRepository;
     }
 
     public function index(Request $request)
@@ -37,7 +31,7 @@ class WishlistController extends Controller
         $queryParams = array_merge([
             'paginate' => [
                 'per_page' => 10,
-                'current_paged' => (int)$request->input('page'),
+                'current_paged' => $request->integer('page'),
             ],
             'with' => ['slugable'],
         ], EcommerceHelper::withReviewsParams());
@@ -62,7 +56,7 @@ class WishlistController extends Controller
         return Theme::scope('ecommerce.wishlist', compact('products'), 'plugins/ecommerce::themes.wishlist')->render();
     }
 
-    public function store(int $productId, BaseHttpResponse $response)
+    public function store(int|string $productId, BaseHttpResponse $response)
     {
         if (! EcommerceHelper::isWishlistEnabled()) {
             abort(404);
@@ -105,7 +99,7 @@ class WishlistController extends Controller
             ->setData(['count' => auth('customer')->user()->wishlist()->count()]);
     }
 
-    public function destroy(int $productId, BaseHttpResponse $response)
+    public function destroy(int|string $productId, BaseHttpResponse $response)
     {
         if (! EcommerceHelper::isWishlistEnabled()) {
             abort(404);

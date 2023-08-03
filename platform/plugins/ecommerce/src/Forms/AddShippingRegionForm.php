@@ -3,14 +3,14 @@
 namespace Botble\Ecommerce\Forms;
 
 use Botble\Base\Forms\FormAbstract;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Http\Requests\AddShippingRegionRequest;
 use Botble\Ecommerce\Models\Shipping;
 use Botble\Ecommerce\Repositories\Interfaces\ShippingInterface;
-use EcommerceHelper;
 
 class AddShippingRegionForm extends FormAbstract
 {
-    public function buildForm()
+    public function buildForm(): void
     {
         $existedCountries = app(ShippingInterface::class)->pluck('country');
 

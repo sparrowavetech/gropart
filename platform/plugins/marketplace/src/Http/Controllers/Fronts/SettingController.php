@@ -2,16 +2,17 @@
 
 namespace Botble\Marketplace\Http\Controllers\Fronts;
 
-use Assets;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Http\Requests\SettingRequest;
 use Botble\Marketplace\Models\Store;
 use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
+use Botble\Media\Facades\RvMedia;
+use Botble\Slug\Facades\SlugHelper;
 use Illuminate\Contracts\Config\Repository;
-use MarketplaceHelper;
-use RvMedia;
-use SlugHelper;
 
 class SettingController
 {
@@ -22,7 +23,7 @@ class SettingController
 
     public function index()
     {
-        page_title()->setTitle(__('Settings'));
+        PageTitle::setTitle(__('Settings'));
 
         Assets::addScriptsDirectly('vendor/core/plugins/location/js/location.js');
 
@@ -35,14 +36,14 @@ class SettingController
     {
         $store = auth('customer')->user()->store;
 
-        $existing = SlugHelper::getSlug($request->input('slug'), SlugHelper::getPrefix(Store::class), Store::class);
+        $existing = SlugHelper::getSlug($request->input('slug'), SlugHelper::getPrefix(Store::class));
 
         if ($existing && $existing->reference_id != $store->id) {
             return $response->setError()->setMessage(__('Shop URL is existing. Please choose another one!'));
         }
 
         if ($request->hasFile('logo_input')) {
-            $result = RvMedia::handleUpload($request->file('logo_input'), 0, 'stores');
+            $result = RvMedia::handleUpload($request->file('logo_input'), 0, $store->upload_folder);
             if (! $result['error']) {
                 $file = $result['data'];
                 $request->merge(['logo' => $file->url]);
@@ -62,6 +63,8 @@ class SettingController
             $vendorInfo->tax_info = $request->input('tax_info', []);
             $vendorInfo->save();
         }
+
+        $request->merge(['is_slug_editable' => 1]);
 
         event(new UpdatedContentEvent(STORE_MODULE_SCREEN_NAME, $request, $store));
 

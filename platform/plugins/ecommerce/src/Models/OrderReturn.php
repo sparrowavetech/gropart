@@ -43,12 +43,10 @@ class OrderReturn extends BaseModel
         return $this->hasMany(OrderReturnItem::class, 'order_return_id');
     }
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
-
         self::deleting(function (OrderReturn $orderReturn) {
-            OrderReturnItem::where('order_return_id', $orderReturn->id)->delete();
+            $orderReturn->items()->delete();
         });
 
         static::creating(function (OrderReturn $orderReturn) {

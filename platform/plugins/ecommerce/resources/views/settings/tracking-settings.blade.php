@@ -35,8 +35,8 @@
 
                 <div @class(['google-tag-manager-settings-container mb-4 border rounded-top rounded-bottom p-3 bg-light', 'd-none' => ! EcommerceHelper::isGoogleTagManagerEnabled()])>
                     <div class="form-group mb-3">
-                        <label class="text-title-field mb-2" for="google_tag_manager_id">{{ trans('plugins/ecommerce::ecommerce.setting.google_tag_manager_code') }}</label>
-                        <textarea rows="3" name="google_tag_manager_code" id="google_tag_manager_code" class="next-input">{{ get_ecommerce_setting('google_tag_manager_code') }}</textarea>
+                        <label class="text-title-field mb-2" for="google_tag_manager_code">{{ trans('plugins/ecommerce::ecommerce.setting.google_tag_manager_code') }}</label>
+                        <textarea rows="3" name="google_tag_manager_code" id="google_tag_manager_code" class="next-input">{{ old('google_tag_manager_code', get_ecommerce_setting('google_tag_manager_code')) }}</textarea>
                     </div>
                 </div>
             </x-core-setting::section>
@@ -49,6 +49,7 @@
             </div>
         {!! Form::close() !!}
     </div>
+    {!! $jsValidation !!}
 @endsection
 
 @push('footer')
@@ -58,4 +59,5 @@
             Botble.initCodeEditor('google_tag_manager_code', 'javascript');
         });
     </script>
+
 @endpush

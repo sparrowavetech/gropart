@@ -16,23 +16,29 @@
                         </tr>
                         </thead>
                         <tbody>
-                        @forelse ($payments as $payment)
-                            <tr>
-                                <td>{{ $loop->iteration }}</td>
-                                <td class="text-start"> {{ $payment->order->code }}</td>
-                                <td>{{ $payment->charge_id }}</td>
-                                <td>{{ $payment->amount }} {{ $payment->currency }}</td>
-                                <td>{{ $payment->payment_channel->label() }}</td>
-                                <td>{!! $payment->status->toHtml() !!}</td>
-                                <td class="text-center" style="width: 120px;">
-                                    <a href="{{ route('payment.show', $payment->id) }}" class="btn btn-icon btn-sm btn-info me-1 btn-trigger-edit-payment" data-bs-toggle="tooltip" role="button" data-bs-original-title="{{ trans('core/base::forms.view_new_tab') }}" target="_blank">
-                                        <i class="fa fa-external-link"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        @empty
-                            <td colspan="7" class="text-center">{{ trans('plugins/ecommerce::payment.no_data') }}</td>
-                        @endforelse
+                            @forelse ($payments as $payment)
+                                <tr>
+                                    <td>{{ $loop->iteration }}</td>
+                                    <td class="text-start">
+                                        @if ($payment->order->id)
+                                            <a href="{{ route('orders.edit', $payment->order->id) }}" target="_blank">{{ $payment->order->code }} <i class="fa fa-external-link"></i></a>
+                                        @else
+                                            &mdash;
+                                        @endif
+                                    </td>
+                                    <td>{{ $payment->charge_id }}</td>
+                                    <td>{{ $payment->amount }} {{ $payment->currency }}</td>
+                                    <td>{{ $payment->payment_channel->label() }}</td>
+                                    <td>{!! BaseHelper::clean($payment->status->toHtml()) !!}</td>
+                                    <td class="text-center" style="width: 120px;">
+                                        <a href="{{ route('payment.show', $payment->id) }}" class="btn btn-icon btn-sm btn-info me-1 btn-trigger-edit-payment" data-bs-toggle="tooltip" role="button" data-bs-original-title="{{ trans('core/base::forms.view_new_tab') }}" target="_blank">
+                                            <i class="fa fa-external-link"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            @empty
+                                <td colspan="7" class="text-center">{{ trans('plugins/ecommerce::payment.no_data') }}</td>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -48,5 +54,5 @@
     :button-label="trans('plugins/ecommerce::payment.save')"
     size="md"
 >
-    {!! trans('plugins/ecommerce::customer.verify_email.confirm_description') !!}
+    {!! BaseHelper::clean(trans('plugins/ecommerce::customer.verify_email.confirm_description')) !!}
 </x-core-base::modal>

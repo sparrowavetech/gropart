@@ -8,8 +8,6 @@ let directory = path.basename(path.resolve(__dirname));
 const source = 'platform/themes/' + directory;
 const dist = 'public/themes/' + directory;
 
-mix.js(source + '/assets/js/app.js', dist + '/js').vue({version: 2});
-
 mix
     .sass(source + '/assets/sass/marketplace.scss', dist + '/css')
     .sass(source + '/assets/sass/marketplace-rtl.scss', dist + '/css')
@@ -64,17 +62,13 @@ mix
     .sass(source + '/assets/sass/style-rtl.scss', dist + '/css')
 
     .js(source + '/assets/js/marketplace.js', dist + '/js')
-
     .js(source + '/assets/js/main.js', dist + '/js')
-
     .js(source + '/assets/js/icons-field.js', dist + '/js')
 
     .copy(dist + '/css/style.css', source + '/public/css')
     .copy(dist + '/css/style-rtl.css', source + '/public/css')
     .copy(dist + '/css/marketplace.css', source + '/public/css')
     .copy(dist + '/css/marketplace-rtl.css', source + '/public/css')
-    .copy(dist + '/js/app.js', source + '/public/js')
     .copy(dist + '/js/marketplace.js', source + '/public/js')
     .copy(dist + '/js/main.js', source + '/public/js')
-    .copy(dist + '/js/app.js', source + '/public/js')
     .copy(dist + '/js/icons-field.js', source + '/public/js');

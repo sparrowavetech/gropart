@@ -141,7 +141,7 @@ $(document).ready(function() {
             let options = this.generateFieldOptions(option)
             let id = typeof option.id !== 'undefined' ? option.id : 0
             const order = typeof option.order !== 'undefined' && option.order != 9999 ? option.order : index
-            const template = $('#template-option').html()
+            const template = $(document).find('#template-option').html()
             const checked = (option.required) ? 'checked' : ''
             const values = this.generateOptionValues(option.values, option.option_type, index)
             return template.replace(/__index__/g, index)

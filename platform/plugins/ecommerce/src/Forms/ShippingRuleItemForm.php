@@ -2,18 +2,18 @@
 
 namespace Botble\Ecommerce\Forms;
 
-use Assets;
+use Botble\Base\Facades\Assets;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Enums\ShippingRuleTypeEnum;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Http\Requests\ShippingRuleItemRequest;
 use Botble\Ecommerce\Models\ShippingRuleItem;
 use Botble\Ecommerce\Repositories\Interfaces\ShippingRuleInterface;
-use EcommerceHelper;
 use Illuminate\Database\Eloquent\Builder;
 
 class ShippingRuleItemForm extends FormAbstract
 {
-    public function buildForm()
+    public function buildForm(): void
     {
         if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
             Assets::addScriptsDirectly('vendor/core/plugins/location/js/location.js');

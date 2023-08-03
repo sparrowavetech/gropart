@@ -2,22 +2,16 @@
 
 namespace Botble\Ecommerce\Http\Middleware;
 
-use Closure;
-
-use Illuminate\Http\Request;
 use Botble\Ecommerce\Services\Footprints\TrackingFilterInterface;
+
 use Botble\Ecommerce\Services\Footprints\TrackingLoggerInterface;
+use Closure;
+use Illuminate\Http\Request;
 
 class CaptureFootprintsMiddleware
 {
-    protected TrackingFilterInterface $filter;
-
-    protected TrackingLoggerInterface $logger;
-
-    public function __construct(TrackingFilterInterface $filter, TrackingLoggerInterface $logger)
+    public function __construct(protected TrackingFilterInterface $filter, protected TrackingLoggerInterface $logger)
     {
-        $this->filter = $filter;
-        $this->logger = $logger;
     }
 
     public function handle(Request $request, Closure $next)

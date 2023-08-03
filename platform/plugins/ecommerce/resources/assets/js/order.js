@@ -202,6 +202,11 @@ class OrderAdminManagement {
             $('#update-shipping-address-modal').modal('show')
         })
 
+        $(document).on('click', '.btn-trigger-update-tax-information', event => {
+            event.preventDefault()
+            $('#update-tax-information-modal').modal('show')
+        })
+
         $(document).on('click', '#confirm-update-shipping-address-button', event => {
             event.preventDefault()
             let _self = $(event.currentTarget)
@@ -239,6 +244,40 @@ class OrderAdminManagement {
                     Botble.handleError(res)
                     _self.removeClass('button-loading')
                 },
+            })
+        })
+
+        $(document).on('click', '#confirm-update-tax-information-button', (event) => {
+            event.preventDefault()
+
+            const button = $(event.currentTarget)
+            const form = button.closest('.modal-content').find('form')
+
+            $.ajax({
+                type: 'POST',
+                cache: false,
+                url: form.prop('action'),
+                data: form.serialize(),
+                beforeSend: () => {
+                    button.addClass('button-loading')
+                },
+                success: ({ error, message, data }) => {
+                    if (error) {
+                        Botble.showError(message)
+                        return
+                    }
+
+                    $('.text-infor-subdued.tax-info').html(data)
+                    $('#update-tax-information-modal').modal('hide')
+
+                    Botble.showSuccess(message)
+                },
+                error: (res) => {
+                    Botble.handleError(res)
+                },
+                complete: () => {
+                    button.removeClass('button-loading')
+                }
             })
         })
 

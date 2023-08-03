@@ -3,20 +3,18 @@
 namespace Botble\Ecommerce\Supports;
 
 use Botble\Ecommerce\Models\Product;
-use Botble\Ecommerce\Repositories\Eloquent\ProductRepository;
+use Botble\Ecommerce\Models\ProductVariation;
+use Botble\Ecommerce\Models\ProductVariationItem;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductVariationItemInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductVariationInterface;
+use Botble\Ecommerce\Repositories\Interfaces\ProductVariationItemInterface;
 
 class RenderProductSwatchesSupport
 {
     protected Product $product;
 
-    protected ProductRepository|ProductInterface $productRepository;
-
-    public function __construct(ProductInterface $productRepository)
+    public function __construct(protected ProductInterface $productRepository)
     {
-        $this->productRepository = $productRepository;
     }
 
     public function setProduct(Product $product): RenderProductSwatchesSupport
@@ -41,10 +39,20 @@ class RenderProductSwatchesSupport
 
         $productVariations = app(ProductVariationInterface::class)->allBy([
             'configurable_product_id' => $product->id,
-        ], ['product', 'productAttributes']);
+        ], ['productAttributes']);
+
+        $productVariations->each(fn (ProductVariation $productVariation) => $productVariation->setRelation('product', $product));
 
         $productVariationsInfo = app(ProductVariationItemInterface::class)
             ->getVariationsInfo($productVariations->pluck('id')->toArray());
+
+        if ($productVariationsInfo->count()) {
+            $productVariationsInfo->loadMissing(['productVariation.product']);
+
+            $productVariationsInfo = $productVariationsInfo->reject(function (ProductVariationItem $productVariation) {
+                return $productVariation->productVariation->product->isOutOfStock();
+            });
+        }
 
         $selected = $params['selected'];
 

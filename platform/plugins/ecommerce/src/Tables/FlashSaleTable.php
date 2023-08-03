@@ -2,30 +2,28 @@
 
 namespace Botble\Ecommerce\Tables;
 
-use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Ecommerce\Repositories\Interfaces\FlashSaleInterface;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
+use Botble\Ecommerce\Models\FlashSale;
 use Botble\Table\Abstracts\TableAbstract;
-use Html;
+use Botble\Table\DataTables;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Yajra\DataTables\DataTables;
 
 class FlashSaleTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, FlashSaleInterface $flashSaleRepository)
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, FlashSale $model)
     {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $flashSaleRepository;
+        $this->model = $model;
+        $this->hasActions = true;
+        $this->hasFilter = true;
 
         if (! Auth::user()->hasAnyPermission(['flash-sale.edit', 'flash-sale.destroy'])) {
             $this->hasOperations = false;
@@ -37,23 +35,26 @@ class FlashSaleTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('name', function ($item) {
+            ->editColumn('name', function (FlashSale $item) {
                 if (! Auth::user()->hasPermission('flash-sale.edit')) {
                     return BaseHelper::clean($item->name);
                 }
 
                 return Html::link(route('flash-sale.edit', $item->id), BaseHelper::clean($item->name));
             })
-            ->editColumn('checkbox', function ($item) {
+            ->editColumn('checkbox', function (FlashSale $item) {
                 return $this->getCheckbox($item->id);
             })
-            ->editColumn('created_at', function ($item) {
+            ->editColumn('end_date', function (FlashSale $item) {
+                return Html::tag('span', BaseHelper::formatDate($item->end_date), ['class' => $item->expired ? 'text-danger' : 'text-success']);
+            })
+            ->editColumn('created_at', function (FlashSale $item) {
                 return BaseHelper::formatDate($item->created_at);
             })
-            ->editColumn('status', function ($item) {
+            ->editColumn('status', function (FlashSale $item) {
                 return BaseHelper::clean($item->status->toHtml());
             })
-            ->addColumn('operations', function ($item) {
+            ->addColumn('operations', function (FlashSale $item) {
                 return $this->getOperations('flash-sale.edit', 'flash-sale.destroy', $item);
             });
 
@@ -62,9 +63,10 @@ class FlashSaleTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()->select([
+        $query = $this->getModel()->query()->select([
             'id',
             'name',
+            'end_date',
             'created_at',
             'status',
         ]);
@@ -82,6 +84,10 @@ class FlashSaleTable extends TableAbstract
             'name' => [
                 'title' => trans('core/base::tables.name'),
                 'class' => 'text-start',
+            ],
+            'end_date' => [
+                'title' => __('End date'),
+                'width' => '100px',
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),

@@ -6,6 +6,7 @@ use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
@@ -18,23 +19,20 @@ use Illuminate\Http\Request;
 
 class ProductOptionController extends BaseController
 {
-    protected GlobalOptionInterface $globalOptionRepository;
-
-    public function __construct(GlobalOptionInterface $globalOptionRepository)
+    public function __construct(protected GlobalOptionInterface $globalOptionRepository)
     {
-        $this->globalOptionRepository = $globalOptionRepository;
     }
 
     public function index(GlobalOptionTable $table)
     {
-        page_title()->setTitle(trans('plugins/ecommerce::product-option.name'));
+        PageTitle::setTitle(trans('plugins/ecommerce::product-option.name'));
 
         return $table->renderTable();
     }
 
     public function create(FormBuilder $formBuilder)
     {
-        page_title()->setTitle(trans('plugins/ecommerce::product-option.create'));
+        PageTitle::setTitle(trans('plugins/ecommerce::product-option.create'));
 
         return $formBuilder->create(GlobalOptionForm::class)->renderForm();
     }
@@ -51,18 +49,18 @@ class ProductOptionController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int $id, FormBuilder $formBuilder, Request $request)
+    public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
     {
         $option = $this->globalOptionRepository->findOrFail($id, ['values']);
 
         event(new BeforeEditContentEvent($request, $option));
 
-        page_title()->setTitle(trans('plugins/ecommerce::product-option.edit', ['name' => $option->name]));
+        PageTitle::setTitle(trans('plugins/ecommerce::product-option.edit', ['name' => $option->name]));
 
         return $formBuilder->create(GlobalOptionForm::class, ['model' => $option])->renderForm();
     }
 
-    public function destroy(Request $request, int $id, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
             $option = $this->globalOptionRepository->findOrFail($id);
@@ -79,7 +77,7 @@ class ProductOptionController extends BaseController
         }
     }
 
-    public function update(int $id, GlobalOptionRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, GlobalOptionRequest $request, BaseHttpResponse $response)
     {
         $option = $this->globalOptionRepository->findOrFail($id);
 

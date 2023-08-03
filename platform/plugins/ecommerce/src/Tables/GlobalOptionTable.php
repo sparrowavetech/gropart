@@ -2,33 +2,28 @@
 
 namespace Botble\Ecommerce\Tables;
 
-use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Ecommerce\Repositories\Interfaces\GlobalOptionInterface;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
+use Botble\Ecommerce\Models\GlobalOption;
 use Botble\Table\Abstracts\TableAbstract;
-use Html;
+use Botble\Table\DataTables;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Yajra\DataTables\DataTables;
 
 class GlobalOptionTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
-    public function __construct(
-        DataTables $table,
-        UrlGenerator $urlGenerator,
-        GlobalOptionInterface $globalOptionRepository
-    ) {
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, GlobalOption $model)
+    {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $globalOptionRepository;
+        $this->model = $model;
+        $this->hasActions = true;
+        $this->hasFilter = true;
 
         if (! Auth::user()->hasAnyPermission(['global-option.edit', 'global-option.destroy'])) {
             $this->hasOperations = false;
@@ -40,23 +35,23 @@ class GlobalOptionTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('name', function ($item) {
+            ->editColumn('name', function (GlobalOption $item) {
                 if (! Auth::user()->hasPermission('global-option.edit')) {
                     return BaseHelper::clean($item->name);
                 }
 
                 return Html::link(route('global-option.edit', $item->id), BaseHelper::clean($item->name));
             })
-            ->editColumn('checkbox', function ($item) {
+            ->editColumn('checkbox', function (GlobalOption $item) {
                 return $this->getCheckbox($item->id);
             })
-            ->editColumn('required', function ($item) {
+            ->editColumn('required', function (GlobalOption $item) {
                 return $item->required ? trans('core/base::base.yes') : trans('core/base::base.no');
             })
-            ->editColumn('created_at', function ($item) {
+            ->editColumn('created_at', function (GlobalOption $item) {
                 return BaseHelper::formatDate($item->created_at);
             })
-            ->addColumn('operations', function ($item) {
+            ->addColumn('operations', function (GlobalOption $item) {
                 return $this->getOperations('global-option.edit', 'global-option.destroy', $item);
             });
 
@@ -65,7 +60,7 @@ class GlobalOptionTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()->select([
+        $query = $this->getModel()->query()->select([
             'id',
             'name',
             'created_at',

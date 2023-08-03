@@ -137,6 +137,9 @@
             </table>
         </div>
     </div>
+@stop
+
+@push('footer')
     <script type="text/x-custom-template" id="failure-template">
         <tr>
             <td scope="row">__row__</td>
@@ -144,4 +147,4 @@
             <td>__errors__</td>
         </tr>
     </script>
-@stop
+@endpush

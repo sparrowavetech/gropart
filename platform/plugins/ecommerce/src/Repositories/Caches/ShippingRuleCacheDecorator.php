@@ -2,9 +2,11 @@
 
 namespace Botble\Ecommerce\Repositories\Caches;
 
-use Botble\Ecommerce\Repositories\Interfaces\ShippingRuleInterface;
-use Botble\Support\Repositories\Caches\CacheAbstractDecorator;
+use Botble\Ecommerce\Repositories\Eloquent\ShippingRuleRepository;
 
-class ShippingRuleCacheDecorator extends CacheAbstractDecorator implements ShippingRuleInterface
+/**
+ * @deprecated
+ */
+class ShippingRuleCacheDecorator extends ShippingRuleRepository
 {
 }

@@ -1,10 +1,18 @@
 <?php
 
+use Botble\Base\Facades\Html;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Product;
+use Botble\Theme\Facades\Theme;
+use Illuminate\Support\Facades\Log;
 
 if (! function_exists('render_product_options')) {
     function render_product_options(Product $product): string
     {
+        if (! EcommerceHelper::isEnabledProductOptions()) {
+            return '';
+        }
+
         $product->loadMissing(['options', 'options.values']);
 
         if (! $product->options) {
@@ -38,20 +46,35 @@ if (! function_exists('render_product_options')) {
 }
 
 if (! function_exists('render_product_options_info')) {
-    function render_product_options_info(array $productOption, Product $product, bool $displayBasePrice = false): string
+    function render_product_options_info(array $productOptions, ?Product $product, bool $displayBasePrice = false): string
     {
-        $view = 'plugins/ecommerce::themes.options.render-options-info';
-
-        $themeView = Theme::getThemeNamespace() . '::views.ecommerce.options.render-options-info';
-
-        if (view()->exists($themeView)) {
-            $view = $themeView;
+        if (! EcommerceHelper::isEnabledProductOptions()) {
+            return '';
         }
 
-        return view($view, [
-            'productOptions' => $productOption,
-            'product' => $product,
-            'displayBasePrice' => $displayBasePrice,
-        ])->render();
+        $view = Theme::getThemeNamespace('views.ecommerce.options.render-options-info');
+
+        if (! view()->exists($view)) {
+            $view = 'plugins/ecommerce::themes.options.render-options-info';
+        }
+
+        return view($view, compact('productOptions', 'product', 'displayBasePrice'))->render();
+    }
+}
+
+if (! function_exists('render_product_options_html')) {
+    function render_product_options_html(array $productOptions, ?float $basePrice = null, bool $displayBasePrice = true): string
+    {
+        if (! EcommerceHelper::isEnabledProductOptions()) {
+            return '';
+        }
+
+        $view = Theme::getThemeNamespace('views.ecommerce.options.render-options-html');
+
+        if (! view()->exists($view)) {
+            $view = 'plugins/ecommerce::themes.options.render-options-html';
+        }
+
+        return view($view, compact('productOptions', 'displayBasePrice', 'basePrice'))->render();
     }
 }

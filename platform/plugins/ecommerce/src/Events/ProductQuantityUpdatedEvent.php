@@ -10,10 +10,7 @@ class ProductQuantityUpdatedEvent extends Event
 {
     use SerializesModels;
 
-    public Product $product;
-
-    public function __construct(Product $product)
+    public function __construct(public Product $product)
     {
-        $this->product = $product;
     }
 }

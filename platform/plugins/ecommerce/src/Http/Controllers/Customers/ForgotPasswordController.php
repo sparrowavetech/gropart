@@ -4,10 +4,10 @@ namespace Botble\Ecommerce\Http\Controllers\Customers;
 
 use App\Http\Controllers\Controller;
 use Botble\ACL\Traits\SendsPasswordResetEmails;
+use Botble\SeoHelper\Facades\SeoHelper;
+use Botble\Theme\Facades\Theme;
 use Illuminate\Contracts\Auth\PasswordBroker;
 use Password;
-use SeoHelper;
-use Theme;
 
 class ForgotPasswordController extends Controller
 {

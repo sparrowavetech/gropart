@@ -38,10 +38,8 @@ class Brand extends BaseModel
         return $this->morphToMany(ProductCategory::class, 'reference', 'ec_product_categorizables', 'reference_id', 'category_id');
     }
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
-
         self::deleting(function (Brand $brand) {
             $brand->categories()->detach();
         });

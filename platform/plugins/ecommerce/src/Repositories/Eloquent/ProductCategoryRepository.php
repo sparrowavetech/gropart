@@ -73,7 +73,7 @@ class ProductCategoryRepository extends RepositoriesAbstract implements ProductC
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    public function getAllCategories($active = true)
+    public function getAllCategories(bool $active = true)
     {
         $data = $this->model;
         if ($active) {
@@ -87,7 +87,8 @@ class ProductCategoryRepository extends RepositoriesAbstract implements ProductC
         array $conditions = [],
         array $with = [],
         array $withCount = [],
-        bool $parentOnly = false
+        bool $parentOnly = false,
+        array $select = [],
     ) {
         $data = $this->model;
 
@@ -114,6 +115,10 @@ class ProductCategoryRepository extends RepositoriesAbstract implements ProductC
         $data = $data
             ->orderBy('order', 'ASC')
             ->orderBy('created_at', 'DESC');
+
+        if ($select) {
+            $data = $data->select($select);
+        }
 
         return $this->applyBeforeExecuteQuery($data)->get();
     }

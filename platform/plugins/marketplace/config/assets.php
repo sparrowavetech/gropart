@@ -36,7 +36,19 @@ return [
                 'use_cdn' => false,
                 'location' => 'header',
                 'src' => [
-                    'local' => '/vendor/core/core/base/js/app.js',
+                    'local' => [
+                        '/vendor/core/core/base/libraries/jquery.min.js',
+                        '/vendor/core/core/base/js/app.js',
+                    ],
+                ],
+            ],
+            'vue' => [
+                'use_cdn' => false,
+                'location' => 'header',
+                'src' => [
+                    'local' => [
+                        '/vendor/core/core/base/libraries/vue.global.min.js',
+                    ],
                 ],
             ],
             'vue-app' => [

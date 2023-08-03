@@ -2,8 +2,9 @@
 
 namespace Botble\Ecommerce\Forms;
 
-use Assets;
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Http\Requests\FlashSaleRequest;
 use Botble\Ecommerce\Models\FlashSale;
@@ -11,7 +12,7 @@ use Carbon\Carbon;
 
 class FlashSaleForm extends FormAbstract
 {
-    public function buildForm()
+    public function buildForm(): void
     {
         Assets::addScriptsDirectly('vendor/core/plugins/ecommerce/js/flash-sale.js')
             ->addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
@@ -40,14 +41,10 @@ class FlashSaleForm extends FormAbstract
                 ],
                 'choices' => BaseStatusEnum::labels(),
             ])
-            ->add('end_date', 'text', [
+            ->add('end_date', 'datePicker', [
                 'label' => __('End date'),
                 'label_attr' => ['class' => 'control-label required'],
-                'attr' => [
-                    'class' => 'form-control datepicker',
-                    'data-date-format' => 'yyyy/mm/dd',
-                ],
-                'default_value' => Carbon::now()->addDay()->format('Y/m/d'),
+                'default_value' => BaseHelper::formatDate(Carbon::now()->addMonth()),
             ])
             ->addMetaBoxes([
                 'products' => [

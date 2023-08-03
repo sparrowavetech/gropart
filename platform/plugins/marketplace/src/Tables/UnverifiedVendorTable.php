@@ -2,28 +2,27 @@
 
 namespace Botble\Marketplace\Tables;
 
-use Auth;
-use BaseHelper;
-use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
+use Botble\Ecommerce\Models\Customer;
 use Botble\Table\Abstracts\TableAbstract;
-use Html;
+use Botble\Table\DataTables;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
-use Yajra\DataTables\DataTables;
+use Illuminate\Support\Facades\Auth;
 
 class UnverifiedVendorTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, CustomerInterface $customerRepository)
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Customer $model)
     {
-        $this->repository = $customerRepository;
         parent::__construct($table, $urlGenerator);
+
+        $this->model = $model;
+        $this->hasActions = true;
+        $this->hasFilter = true;
 
         if (! Auth::user()->hasAnyPermission(['marketplace.unverified-vendors.edit'])) {
             $this->hasOperations = false;
@@ -77,7 +76,7 @@ class UnverifiedVendorTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()
+        $query = $this->getModel()->query()
             ->select([
                 'id',
                 'name',

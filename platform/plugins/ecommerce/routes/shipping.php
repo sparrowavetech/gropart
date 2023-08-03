@@ -1,5 +1,8 @@
 <?php
 
+use Botble\Base\Facades\BaseHelper;
+use Illuminate\Support\Facades\Route;
+
 Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' => ['web', 'core']], function () {
     Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {
         Route::group([
@@ -30,7 +33,7 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
             Route::put('region/rule/update/{id}', [
                 'as' => 'region.rule.update',
                 'uses' => 'ShippingMethodController@putUpdateRule',
-            ]);
+            ])->wherePrimaryKey();
 
             Route::post('region/rule/create', [
                 'as' => 'region.rule.create',
@@ -63,7 +66,7 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
                     'as' => 'items',
                     'uses' => 'ShippingRuleItemController@items',
                     'permission' => 'ecommerce.shipping-rule-items.index',
-                ]);
+                ])->wherePrimaryKey('rule_id');
 
                 Route::group([
                     'as' => 'bulk-import.',

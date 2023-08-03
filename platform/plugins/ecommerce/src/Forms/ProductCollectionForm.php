@@ -3,14 +3,20 @@
 namespace Botble\Ecommerce\Forms;
 
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\Html;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Http\Requests\ProductCollectionRequest;
 use Botble\Ecommerce\Models\ProductCollection;
 
 class ProductCollectionForm extends FormAbstract
 {
-    public function buildForm()
+    public function buildForm(): void
     {
+        Assets::addStylesDirectly('vendor/core/plugins/ecommerce/css/ecommerce.css')
+            ->addScripts(['blockui'])
+            ->addScriptsDirectly('vendor/core/plugins/ecommerce/js/edit-product-collection.js');
+
         $this
             ->setupModel(new ProductCollection())
             ->setValidatorClass(ProductCollectionRequest::class)
@@ -60,5 +66,21 @@ class ProductCollectionForm extends FormAbstract
                 'label_attr' => ['class' => 'control-label'],
             ])
             ->setBreakFieldPoint('status');
+
+        if ($productCollectionId = $this->getModel()->id) {
+            $this
+                ->addMetaBoxes([
+                    'collection-products' => [
+                        'title' => null,
+                        'content' =>
+                            Html::tag('div', '', [
+                                'class' => 'wrap-collection-products',
+                                'data-target' => route('product-collections.get-product-collection', $productCollectionId),
+                            ]),
+                        'wrap' => false,
+                        'priority' => 9999,
+                    ],
+            ]);
+        }
     }
 }

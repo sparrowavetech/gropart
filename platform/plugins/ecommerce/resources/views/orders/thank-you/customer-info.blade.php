@@ -1,3 +1,8 @@
+@php
+    $orders = $order;
+    $order = $order instanceof \Illuminate\Support\Collection ? $order->first() : $order;
+@endphp
+
 <div class="order-customer-info">
     <h3> {{ __('Customer information') }}</h3>
     @if ($order->address->id)
@@ -36,6 +41,7 @@
             <span class="order-customer-info-meta">{{ $order->shipping_method_name }} - {{ format_price($order->shipping_amount) }}</span>
         </p>
     @endif
+
     @if (is_plugin_active('payment'))
         <p>
             <span class="d-inline-block">{{ __('Payment method') }}:</span>
@@ -45,5 +51,36 @@
             <span class="d-inline-block">{{ __('Payment status') }}:</span>
             <span class="order-customer-info-meta" style="text-transform: uppercase">{!! $order->payment->status->toHtml() !!}</span>
         </p>
+
+        @if(setting('payment_bank_transfer_display_bank_info_at_the_checkout_success_page', false) && $bankInfo = OrderHelper::getOrderBankInfo($orders))
+            {!! $bankInfo !!}
+        @endif
     @endif
+
+    {!! apply_filters('ecommerce_thank_you_customer_info', null, $order) !!}
 </div>
+
+@if($tax = $order->taxInformation)
+    <div class="order-customer-info">
+        <h3> {{ __('Tax information') }}</h3>
+        <p>
+            <span class="d-inline-block">{{ __('Company name') }}:</span>
+            <span class="order-customer-info-meta">{{ $tax->company_name }}</span>
+        </p>
+
+        <p>
+            <span class="d-inline-block">{{ __('Company tax code') }}:</span>
+            <span class="order-customer-info-meta">{{ $tax->company_tax_code }}</span>
+        </p>
+
+        <p>
+            <span class="d-inline-block">{{ __('Company email') }}:</span>
+            <span class="order-customer-info-meta">{{ $tax->company_email }}</span>
+        </p>
+
+        <p>
+            <span class="d-inline-block">{{ __('Company address') }}:</span>
+            <span class="order-customer-info-meta">{{ $tax->company_address }}</span>
+        </p>
+    </div>
+@endif

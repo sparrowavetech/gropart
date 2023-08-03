@@ -11,13 +11,7 @@ class OrderConfirmedEvent extends Event
 {
     use SerializesModels;
 
-    public Order $order;
-
-    public User $confirmedBy;
-
-    public function __construct(Order $order, User $confirmedBy)
+    public function __construct(public Order $order, public User $confirmedBy)
     {
-        $this->order = $order;
-        $this->confirmedBy = $confirmedBy;
     }
 }

@@ -1,1 +1,10 @@
-<footer-product-categories-component name="{{ $config['name'] }}" url="{{ route('public.ajax.get-product-categories') }}?{{ http_build_query(['categories' => $config['categories']]) }}"></footer-product-categories-component>
+@if (is_plugin_active('ecommerce'))
+    <div>
+        <p>
+            <strong>{{ $config['name'] }}:</strong>
+            @foreach($categories as $category)
+                <a href="{{ $category->url }}" title="{{ $category->name }}">{{ $category->name }}</a>
+            @endforeach
+        </p>
+    </div>
+@endif

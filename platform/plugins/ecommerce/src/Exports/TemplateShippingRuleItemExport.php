@@ -3,9 +3,9 @@
 namespace Botble\Ecommerce\Exports;
 
 use Botble\Ecommerce\Enums\ShippingRuleTypeEnum;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\ShippingRule;
 use Botble\Location\Models\Country;
-use EcommerceHelper;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -271,10 +271,10 @@ class TemplateShippingRuleItemExport implements
         $validation->setPromptTitle(trans('plugins/ecommerce::bulk-import.export.template.allowed_input'));
 
         if ($min != null) {
-            $validation->setFormula1($min);
+            $validation->setFormula1((string)$min);
         }
         if ($max != null) {
-            $validation->setFormula2($max);
+            $validation->setFormula2((string)$max);
         }
 
         if (! ($min == null && $max == null)) {

@@ -4,18 +4,6 @@ use Botble\Widget\AbstractWidget;
 
 class RecentPostsWidget extends AbstractWidget
 {
-    /**
-     * The configuration array.
-     *
-     * @var array
-     */
-    protected $config = [];
-
-    /**
-     * @var string
-     */
-    protected $widgetDirectory = 'recent-posts';
-
     public function __construct()
     {
         parent::__construct([

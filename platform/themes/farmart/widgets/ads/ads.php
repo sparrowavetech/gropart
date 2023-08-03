@@ -4,21 +4,6 @@ use Botble\Widget\AbstractWidget;
 
 class AdsWidget extends AbstractWidget
 {
-    /**
-     * The configuration array.
-     *
-     * @var array
-     */
-    protected $config = [];
-
-    /**
-     * @var string
-     */
-    protected $widgetDirectory = 'ads';
-
-    /**
-     * AdsWidget constructor.
-     */
     public function __construct()
     {
         parent::__construct([

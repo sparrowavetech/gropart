@@ -2,21 +2,21 @@
 
 namespace Botble\Marketplace\Http\Controllers\Fronts;
 
-use Botble\Base\Facades\Assets;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
+use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
-use Botble\Marketplace\Http\Requests\DiscountRequest;
 use Botble\Ecommerce\Models\Discount;
 use Botble\Ecommerce\Repositories\Interfaces\DiscountInterface;
+use Botble\Marketplace\Facades\MarketplaceHelper;
+use Botble\Marketplace\Http\Requests\DiscountRequest;
 use Botble\Marketplace\Tables\DiscountTable;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Botble\Marketplace\Facades\MarketplaceHelper;
 
 class DiscountController extends BaseController
 {

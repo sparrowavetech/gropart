@@ -4,8 +4,8 @@ namespace Botble\Ecommerce\Widgets;
 
 use Botble\Base\Widgets\Html;
 use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
-use Carbon\CarbonPeriod;
 use Botble\Payment\Enums\PaymentStatusEnum;
+use Carbon\CarbonPeriod;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
@@ -13,6 +13,10 @@ class ReportGeneralHtml extends Html
 {
     public function getContent(): string
     {
+        if (! is_plugin_active('payment')) {
+            return '';
+        }
+
         $count = [
             'startDate' => $this->startDate,
             'endDate' => $this->endDate,
@@ -65,7 +69,7 @@ class ReportGeneralHtml extends Html
 
         foreach ($period as $date) {
             $value = $revenues
-                ->where('date', $date->format('Y-m-d'))
+                ->where('date', $date->toDateString())
                 ->sum('revenue');
 
             $data['data'][] = (float) $value;
@@ -77,10 +81,11 @@ class ReportGeneralHtml extends Html
             ]),
             'color' => Arr::get($colors, $earningSales->count(), Arr::first($colors)),
         ];
+
         $series[] = $data;
 
         foreach ($period as $date) {
-            $dates[] = $date->format('Y-m-d');
+            $dates[] = $date->toDateString();
         }
 
         $colors = $earningSales->pluck('color');

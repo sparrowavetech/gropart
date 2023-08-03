@@ -12,14 +12,16 @@
     .dropzone .dz-message {
         margin : 50px 0;
     }
+
+    .dropzone.dz-clickable * {
+        cursor: move;
+    }
 </style>
 <script>
     'use strict';
     Dropzone.autoDiscover = false;
 
     $(document).ready(function () {
-        var uploadedImages = [];
-
         var dropzone = new Dropzone('#{{ $id }}-upload', {
             previewTemplate: document.querySelector('#preview-template').innerHTML,
             parallelUploads: 1,
@@ -35,8 +37,8 @@
             retryChunks: true, // retry chunks on failure
             retryChunksLimit: 3, // retry maximum of 3 times (default is 3)
             timeout: 0, // MB,
-            maxFilesize: {{ setting('media_chunk_enabled') == '1' ? setting('media_chunk_size', config('core.media.media.chunk.chunk_size')) : 10 }}, // MB
-            maxFiles: null, // max files upload,
+            maxFilesize: {{ MarketplaceHelper::maxFilesizeUploadByVendor() }}, // MB
+            maxFiles: {{ MarketplaceHelper::maxProductImagesUploadByVendor() }}, // max files upload,
             paramName: 'file',
             acceptedFiles: 'image/*',
             url: '{{ route('marketplace.vendor.upload') }}',
@@ -53,6 +55,10 @@
                         thumbnailElement.src = dataUrl;
                     }
                     setTimeout(function() { file.previewElement.classList.add('dz-image-preview'); }, 1);
+
+                    if (file.url) {
+                        $(file.previewElement).append('<input type="hidden" name="{{ $name }}[]" value="' + file.url + '" />');
+                    }
                 }
             },
             success: function (file, response) {
@@ -62,38 +68,39 @@
                     if ({{ setting('media_chunk_enabled') == '1' ? 'true' : 'false' }}) {
                         response = JSON.parse(file.xhr.response);
                     }
-                    uploadedImages.push(response.data.url);
-                    $('input[name="{{ $name }}"]').val(JSON.stringify(uploadedImages));
                 }
+
+                $(file.previewElement).append('<input type="hidden" name="{{ $name }}[]" value="' + response.data.url + '" />');
+
+                $('.dz-sortable').sortable();
             },
             removedfile: function(file) {
-                var x = confirm('Do you want to delete this image?');
-                if (!x)  {
+                if (! confirm('{{ __('Do you want to delete this image?') }}'))  {
                     return false;
                 }
-                var i = $(file.previewElement).index() - 1;
                 dropzone.options.maxFiles = dropzone.options.maxFiles + 1;
-                uploadedImages.splice(i, 1);
-                $('input[name="{{ $name }}"]').val(JSON.stringify(uploadedImages));
                 $('.dz-message.needsclick').hide();
-                if (uploadedImages.length === 0) {
+                if (dropzone.options.maxFiles === {{ MarketplaceHelper::maxProductImagesUploadByVendor() }}) {
                     $('.dz-message.needsclick').show();
                 }
 
-                var _ref;
-                return (_ref = file.previewElement) != null ? _ref.parentNode.removeChild(file.previewElement) : void 0;
+                return file.previewElement != null ? file.previewElement.parentNode.removeChild(file.previewElement) : void 0;
             }
         });
 
+        @if ($values)
         var files = [];
         @foreach($values as $item)
-        uploadedImages.push('{{ $item }}');
         files.push({name: '{{ File::name($item) }}', size: '{{ Storage::exists($item) ? Storage::size($item) : 0 }}', url: '{{ $item }}', full_url: '{{ RvMedia::getImageUrl($item, 'thumb') }}'});
         @endforeach
 
         $.each(files, function(key, file) {
             dropzone.options.addedfile.call(dropzone, file);
             dropzone.options.thumbnail.call(dropzone, file, file.full_url);
+            dropzone.options.maxFiles = dropzone.options.maxFiles - 1;
         });
+
+        $('.dz-sortable').sortable();
+        @endif
     });
 </script>

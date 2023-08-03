@@ -1,5 +1,5 @@
 <!-- Page Content Wrapper -->
-<div class="page-content-wraper">
+<div class="page-content-wrapper">
     <!-- Bread Crumb -->
     {!! Theme::breadcrumb()->render() !!}
     <!-- Bread Crumb -->
@@ -45,14 +45,14 @@
                         @if (EcommerceHelper::isReviewEnabled())
                             <div class="product-rating">
                                 <div class="star-rating" itemprop="reviewRating" itemscope=""
-                                     itemtype="http://schema.org/Rating"
+                                     itemtype="https://schema.org/Rating"
                                      title="Rated {{ $product->reviews_avg }} out of 5">
                                     <span style="width: {{ $product->reviews_avg * 20 }}%"></span>
                                 </div>
-                                    <div class="product-rating-count"><a href="#list-reviews">( <span
-                                                    class="count">{{ $product->reviews_count }}</span>
-                                            {{ __('Reviews') }} )</a>
-                                    </div>
+                                <div class="product-rating-count"><a href="#list-reviews">( <span
+                                            class="count">{{ $product->reviews_count }}</span>
+                                        {{ __('Reviews') }} )</a>
+                                </div>
                             </div>
                         @endif
                         <div class="product-price">
@@ -101,7 +101,7 @@
                         <div class="product-meta">
                             @if ($product->sku)
                                 <span>{{ __('SKU') }} : <span id="product-sku" class="sku"
-                                                  itemprop="sku">{{ $product->sku }}</span></span>
+                                                              itemprop="sku">{{ $product->sku }}</span></span>
                             @endif
                             <span>
                                 <span id="is-out-of-stock">{{ ! $product->isOutOfStock() ? __('In stock') : __('Out of stock') }}</span>
@@ -154,12 +154,13 @@
                     <!-- Accordion Content -->
                     <div id="tab_description-coll" class="shop_description product-collapse collapse container">
                         <div class="row">
-                            <div class=" col-md-12">
-                                {!! BaseHelper::clean($product->content) !!}
+                            <div class="col-md-12">
+                                <div class="ck-content">
+                                    {!! BaseHelper::clean($product->content) !!}
+                                </div>
                             </div>
                         </div>
                     </div>
-
                     <!-- End Accordion Content -->
                 </div>
 
@@ -179,11 +180,11 @@
 
                 @if (EcommerceHelper::isReviewEnabled())
                     <div id="tab_reviews" role="tabpanel" class="tab-pane fade">
-                    <!-- Accordion Title -->
-                    <h6 class="product-collapse-title" data-bs-toggle="collapse" data-bs-target="#tab_reviews-coll">{{ __('Reviews') }}
-                        ({{ $product->reviews_count }})
-                    </h6>
-                </div>
+                        <!-- Accordion Title -->
+                        <h6 class="product-collapse-title" data-bs-toggle="collapse" data-bs-target="#tab_reviews-coll">{{ __('Reviews') }}
+                            ({{ $product->reviews_count }})
+                        </h6>
+                    </div>
                 @endif
 
                 <div id="tab_more_products" role="tabpanel" class="tab-pane fade">
@@ -207,8 +208,8 @@
                                 </div>
                             </div>
 
-                    @endif
-                    <!-- End Product Carousel -->
+                        @endif
+                        <!-- End Product Carousel -->
                     </div>
 
                     <!-- End Accordion Content -->
@@ -234,8 +235,8 @@
                 </div>
             </div>
 
-         @endif
-    <!-- End Product Carousel -->
+        @endif
+        <!-- End Product Carousel -->
     </section>
 </div>
 <!-- End Page Content Wrapper -->

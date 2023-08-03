@@ -3,8 +3,8 @@
 namespace Botble\Ecommerce\Http\Requests;
 
 use Botble\Ecommerce\Enums\OrderReturnReasonEnum;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Support\Http\Requests\Request;
-use EcommerceHelper;
 use Illuminate\Validation\Rule;
 
 class OrderReturnRequest extends Request

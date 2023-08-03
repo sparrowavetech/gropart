@@ -2,13 +2,11 @@
 
 namespace Botble\Ecommerce\Repositories\Caches;
 
-use Botble\Ecommerce\Repositories\Interfaces\ProductCollectionInterface;
-use Botble\Support\Repositories\Caches\CacheAbstractDecorator;
+use Botble\Ecommerce\Repositories\Eloquent\ProductCollectionRepository;
 
-class ProductCollectionCacheDecorator extends CacheAbstractDecorator implements ProductCollectionInterface
+/**
+ * @deprecated
+ */
+class ProductCollectionCacheDecorator extends ProductCollectionRepository
 {
-    public function createSlug($name, $id)
-    {
-        return $this->flushCacheAndUpdateData(__FUNCTION__, func_get_args());
-    }
 }

@@ -2,11 +2,12 @@
 
 namespace Botble\Ecommerce\Tables;
 
-use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeSetInterface;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
+use Botble\Ecommerce\Models\ProductAttributeSet;
 use Botble\Table\Abstracts\TableAbstract;
-use Html;
+use Botble\Table\DataTables;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -16,22 +17,16 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
-use Yajra\DataTables\DataTables;
 
 class ProductAttributeSetsTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
-    public function __construct(
-        DataTables $table,
-        UrlGenerator $urlGenerator,
-        ProductAttributeSetInterface $productAttributeSetRepository
-    ) {
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, ProductAttributeSet $model)
+    {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $productAttributeSetRepository;
+        $this->model = $model;
+        $this->hasActions = true;
+        $this->hasFilter = true;
 
         if (! Auth::user()->hasAnyPermission(['product-attribute-sets.edit', 'product-attribute-sets.destroy'])) {
             $this->hasOperations = false;
@@ -43,23 +38,23 @@ class ProductAttributeSetsTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('title', function ($item) {
+            ->editColumn('title', function (ProductAttributeSet $item) {
                 if (! Auth::user()->hasPermission('product-attribute-sets.edit')) {
                     return BaseHelper::clean($item->title);
                 }
 
                 return Html::link(route('product-attribute-sets.edit', $item->id), BaseHelper::clean($item->title));
             })
-            ->editColumn('checkbox', function ($item) {
+            ->editColumn('checkbox', function (ProductAttributeSet $item) {
                 return $this->getCheckbox($item->id);
             })
-            ->editColumn('created_at', function ($item) {
+            ->editColumn('created_at', function (ProductAttributeSet $item) {
                 return BaseHelper::formatDate($item->created_at);
             })
-            ->editColumn('status', function ($item) {
+            ->editColumn('status', function (ProductAttributeSet $item) {
                 return BaseHelper::clean($item->status->toHtml());
             })
-            ->addColumn('operations', function ($item) {
+            ->addColumn('operations', function (ProductAttributeSet $item) {
                 return $this->getOperations('product-attribute-sets.edit', 'product-attribute-sets.destroy', $item);
             });
 
@@ -68,7 +63,7 @@ class ProductAttributeSetsTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()->select([
+        $query = $this->getModel()->query()->select([
             'id',
             'created_at',
             'title',
@@ -150,10 +145,7 @@ class ProductAttributeSetsTable extends TableAbstract
 
     public function renderTable($data = [], $mergeData = []): View|Factory|Response
     {
-        if ($this->query()->count() === 0 &&
-            ! $this->request()->wantsJson() &&
-            $this->request()->input('filter_table_id') !== $this->getOption('id') && ! $this->request()->ajax()
-        ) {
+        if ($this->isEmpty()) {
             return view('plugins/ecommerce::product-attributes.intro');
         }
 

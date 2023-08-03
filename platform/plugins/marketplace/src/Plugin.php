@@ -15,12 +15,6 @@ class Plugin extends PluginOperationAbstract
         Schema::dropIfExists('mp_customer_revenues');
         Schema::dropIfExists('mp_customer_withdrawals');
 
-        Schema::table('ec_products', function (Blueprint $table) {
-            if (Schema::hasColumn('ec_products', 'approved_by')) {
-                $table->dropColumn('approved_by');
-            }
-        });
-
         Schema::table('ec_orders', function (Blueprint $table) {
             if (Schema::hasColumn('ec_orders', 'store_id')) {
                 $table->dropColumn('store_id');

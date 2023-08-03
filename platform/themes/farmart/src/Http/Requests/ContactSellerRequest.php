@@ -2,6 +2,7 @@
 
 namespace Theme\Farmart\Http\Requests;
 
+use Botble\Captcha\Facades\Captcha;
 use Botble\Support\Http\Requests\Request;
 
 class ContactSellerRequest extends Request
@@ -9,38 +10,31 @@ class ContactSellerRequest extends Request
     public function rules(): array
     {
         $rules = [
-            'content' => 'required',
+            'content' => 'required|string|max:1000',
         ];
 
         if (! auth('customer')->check()) {
             $rules += [
-                'name' => 'required',
+                'name' => 'required|string|max:40',
                 'email' => 'required|email',
             ];
         }
 
         if (is_plugin_active('captcha')) {
             if (setting('enable_captcha_for_contact_seller')) {
-                $rules += [
-                    'g-recaptcha-response' => 'required|captcha',
-                ];
+                $rules += Captcha::rules();
             }
 
             if (setting('enable_math_captcha_for_contact_seller', 0)) {
-                $rules['math-captcha'] = 'required|math_captcha';
+                $rules += Captcha::mathCaptchaRules();
             }
         }
 
         return $rules;
     }
 
-    public function messages(): array
+    public function attributes(): array
     {
-        return [
-            'g-recaptcha-response.required' => __('Captcha Verification Failed!'),
-            'g-recaptcha-response.captcha' => __('Captcha Verification Failed!'),
-            'math-captcha.required' => __('Math function Verification Failed!'),
-            'math_captcha' => __('Math function Verification Failed!'),
-        ];
+        return is_plugin_active('captcha') ? Captcha::attributes() : [];
     }
 }

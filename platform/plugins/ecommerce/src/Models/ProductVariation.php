@@ -61,10 +61,8 @@ class ProductVariation extends BaseModel
         );
     }
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
-
         self::deleted(function (ProductVariation $variation) {
             $variation->productAttributes()->detach();
 

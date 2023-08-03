@@ -1,6 +1,6 @@
 @php
     $supportedLocales = Language::getSupportedLocales();
-    if (!isset($options) || empty($options)) {
+    if (empty($options)) {
         $options = [
             'before' => '',
             'lang_flag' => true,
@@ -32,8 +32,12 @@
                         @if ($localeCode != Language::getCurrentLocale())
                             <li>
                                 <a href="{{ Language::getSwitcherUrl($localeCode, $properties['lang_code']) }}">
-                                    @if (Arr::get($options, 'lang_flag', true) && ($languageDisplay == 'all' || $languageDisplay == 'flag')){!! language_flag($properties['lang_flag'], $properties['lang_name']) !!}@endif
-                                    @if (Arr::get($options, 'lang_name', true) && ($languageDisplay == 'all' || $languageDisplay == 'name'))<span>{{ $properties['lang_name'] }}</span>@endif
+                                    @if (Arr::get($options, 'lang_flag', true) && ($languageDisplay == 'all' || $languageDisplay == 'flag'))
+                                        {!! language_flag($properties['lang_flag'], $properties['lang_name']) !!}
+                                    @endif
+                                    @if (Arr::get($options, 'lang_name', true) && ($languageDisplay == 'all' || $languageDisplay == 'name'))
+                                        <span>{{ $properties['lang_name'] }}</span>
+                                    @endif
                                 </a>
                             </li>
                         @endif
@@ -45,10 +49,14 @@
     @else
         @foreach ($supportedLocales as $localeCode => $properties)
             @if ($localeCode != Language::getCurrentLocale())
-                <li>
+                <li class="d-inline-block me-1">
                     <a href="{{ Language::getSwitcherUrl($localeCode, $properties['lang_code']) }}">
-                        @if (Arr::get($options, 'lang_flag', true) && ($languageDisplay == 'all' || $languageDisplay == 'flag')){!! language_flag($properties['lang_flag'], $properties['lang_name']) !!}@endif
-                        @if (Arr::get($options, 'lang_name', true) && ($languageDisplay == 'all' || $languageDisplay == 'name'))<span>{{ $properties['lang_name'] }}</span>@endif
+                        @if (Arr::get($options, 'lang_flag', true) && ($languageDisplay == 'all' || $languageDisplay == 'flag'))
+                            {!! language_flag($properties['lang_flag'], $properties['lang_name']) !!}
+                        @endif
+                        @if (Arr::get($options, 'lang_name', true) && ($languageDisplay == 'all' || $languageDisplay == 'name'))
+                            <span>{{ $properties['lang_name'] }}</span>
+                        @endif
                     </a>
                 </li>
             @endif

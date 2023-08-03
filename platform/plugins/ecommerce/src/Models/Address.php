@@ -3,8 +3,8 @@
 namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Models\BaseModel;
-use Botble\Ecommerce\Traits\LocationTrait;
 use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Traits\LocationTrait;
 
 class Address extends BaseModel
 {

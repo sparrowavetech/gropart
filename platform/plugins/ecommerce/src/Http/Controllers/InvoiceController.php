@@ -2,49 +2,40 @@
 
 namespace Botble\Ecommerce\Http\Controllers;
 
-use Assets;
 use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
-use Botble\Ecommerce\Repositories\Interfaces\InvoiceInterface;
+use Botble\Ecommerce\Facades\InvoiceHelper;
+use Botble\Ecommerce\Models\Invoice;
+use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Tables\InvoiceTable;
 use Exception;
 use Illuminate\Http\Request;
-use InvoiceHelper;
 
 class InvoiceController extends BaseController
 {
-    public function __construct(protected InvoiceInterface $invoiceRepository)
-    {
-    }
-
     public function index(InvoiceTable $table)
     {
-        page_title()->setTitle(trans('plugins/ecommerce::invoice.name'));
+        PageTitle::setTitle(trans('plugins/ecommerce::invoice.name'));
 
         return $table->renderTable();
     }
 
-    public function edit(string $id, Request $request)
+    public function edit(Invoice $invoice, Request $request)
     {
-        $invoice = $this->invoiceRepository->findOrFail($id);
-
         event(new BeforeEditContentEvent($request, $invoice));
 
-        page_title()->setTitle(trans('plugins/ecommerce::invoice.edit') . ' "' . $invoice->code . '"');
-
-        Assets::addStylesDirectly('vendor/core/plugins/ecommerce/css/invoice.css');
+        PageTitle::setTitle(trans('core/base::forms.edit_item', ['name' => $invoice->code]));
 
         return view('plugins/ecommerce::invoices.edit', compact('invoice'));
     }
 
-    public function destroy(Request $request, string $id, BaseHttpResponse $response)
+    public function destroy(Invoice $invoice, Request $request, BaseHttpResponse $response)
     {
         try {
-            $invoice = $this->invoiceRepository->findOrFail($id);
-
-            $this->invoiceRepository->delete($invoice);
+            $invoice->delete();
 
             event(new DeletedContentEvent(INVOICE_MODULE_SCREEN_NAME, $request, $invoice));
 
@@ -66,22 +57,36 @@ class InvoiceController extends BaseController
         }
 
         foreach ($ids as $id) {
-            $invoice = $this->invoiceRepository->findOrFail($id);
-            $this->invoiceRepository->delete($invoice);
+            $invoice = Invoice::query()->findOrFail($id);
+            $invoice->delete();
             event(new DeletedContentEvent(INVOICE_MODULE_SCREEN_NAME, $request, $invoice));
         }
 
         return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
-    public function getGenerateInvoice(string $invoiceId, Request $request)
+    public function getGenerateInvoice(Invoice $invoice, Request $request)
     {
-        $invoice = $this->invoiceRepository->findOrFail($invoiceId);
-
         if ($request->input('type') === 'print') {
             return InvoiceHelper::streamInvoice($invoice);
         }
 
         return InvoiceHelper::downloadInvoice($invoice);
+    }
+
+    public function generateInvoices(BaseHttpResponse $response)
+    {
+        $orders = Order::query()
+            ->where('is_finished', true)
+            ->doesntHave('invoice')
+            ->get();
+
+        foreach ($orders as $order) {
+            InvoiceHelper::store($order);
+        }
+
+        return $response
+            ->setNextUrl(route('ecommerce.invoice.index'))
+            ->setMessage(trans('plugins/ecommerce::invoice.generate_success_message', ['count' => $orders->count()]));
     }
 }

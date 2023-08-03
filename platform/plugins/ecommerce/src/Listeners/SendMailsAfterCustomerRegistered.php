@@ -2,9 +2,9 @@
 
 namespace Botble\Ecommerce\Listeners;
 
-use Botble\Ecommerce\Models\Customer;
-use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Base\Facades\EmailHandler;
+use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Models\Customer;
 use Illuminate\Auth\Events\Registered;
 
 class SendMailsAfterCustomerRegistered

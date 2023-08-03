@@ -2,45 +2,37 @@
 
 namespace Botble\Marketplace\Tables;
 
-use BaseHelper;
-use Botble\Ecommerce\Repositories\Interfaces\OrderReturnInterface;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Ecommerce\Models\OrderReturn;
 use Botble\Ecommerce\Repositories\Interfaces\OrderReturnItemInterface;
+use Botble\Marketplace\Facades\MarketplaceHelper;
+use Botble\Table\Abstracts\TableAbstract;
+use Botble\Table\DataTables;
+use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
-use MarketplaceHelper;
-use Botble\Table\Abstracts\TableAbstract;
-use Illuminate\Contracts\Routing\UrlGenerator;
-use Yajra\DataTables\DataTables;
 
 class OrderReturnTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
-    protected OrderReturnItemInterface $orderReturnItemRepository;
-
     public function __construct(
         DataTables $table,
         UrlGenerator $urlGenerator,
-        OrderReturnInterface $orderReturnRepository,
-        OrderReturnItemInterface $orderReturnItemRepository
+        OrderReturn $model,
+        protected OrderReturnItemInterface $orderReturnItemRepository
     ) {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $orderReturnRepository;
-        $this->orderReturnItemRepository = $orderReturnItemRepository;
+        $this->model = $model;
+
+        $this->hasCheckbox = false;
     }
 
     public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('checkbox', function ($item) {
-                return $this->getCheckbox($item->id);
-            })
             ->editColumn('return_status', function ($item) {
                 return BaseHelper::clean($item->return_status->toHtml());
             })
@@ -90,7 +82,7 @@ class OrderReturnTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()
+        $query = $this->getModel()->query()
             ->select([
                 'id',
                 'order_id',
@@ -102,6 +94,7 @@ class OrderReturnTable extends TableAbstract
             ])
             ->with(['customer', 'order', 'items'])
             ->withCount('items')
+            ->where('store_id', auth('customer')->user()->store->id)
             ->orderBy('id', 'desc');
 
         return $this->applyScopes($query);

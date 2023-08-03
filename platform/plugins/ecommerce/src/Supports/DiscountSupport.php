@@ -2,6 +2,8 @@
 
 namespace Botble\Ecommerce\Supports;
 
+use Botble\Ecommerce\Enums\DiscountTargetEnum;
+use Botble\Ecommerce\Enums\DiscountTypeEnum;
 use Botble\Ecommerce\Models\Discount;
 use Botble\Ecommerce\Repositories\Interfaces\DiscountInterface;
 use Carbon\Carbon;
@@ -41,8 +43,8 @@ class DiscountSupport
 
         foreach ($this->promotions as $promotion) {
             switch ($promotion->target) {
-                case 'specific-product':
-                case 'product-variant':
+                case DiscountTargetEnum::SPECIFIC_PRODUCT:
+                case DiscountTargetEnum::PRODUCT_VARIANT:
                     foreach ($promotion->products as $product) {
                         if (in_array($product->id, $productIds)) {
                             return $promotion;
@@ -51,7 +53,7 @@ class DiscountSupport
 
                     break;
 
-                case 'group-products':
+                case DiscountTargetEnum::PRODUCT_COLLECTIONS:
                     foreach ($promotion->productCollections as $productCollection) {
                         if (in_array($productCollection->id, $productCollectionIds)) {
                             return $promotion;
@@ -60,7 +62,7 @@ class DiscountSupport
 
                     break;
 
-                case 'customer':
+                case DiscountTargetEnum::CUSTOMER:
                     if ($this->customerId) {
                         foreach ($promotion->customers as $customer) {
                             if ($customer->id == $this->customerId) {
@@ -76,7 +78,7 @@ class DiscountSupport
         return null;
     }
 
-    public function getAvailablePromotions(): Collection
+    public function getAvailablePromotions(bool $forProductSingle = true): Collection
     {
         if (! $this->promotions instanceof Collection) {
             $this->promotions = collect();
@@ -84,7 +86,7 @@ class DiscountSupport
 
         if ($this->promotions->count() == 0) {
             $this->promotions = app(DiscountInterface::class)
-                ->getAvailablePromotions(['products', 'customers', 'productCollections'], true);
+                ->getAvailablePromotions(['products', 'customers', 'productCollections'], $forProductSingle);
         }
 
         return $this->promotions;
@@ -94,10 +96,9 @@ class DiscountSupport
     {
         $now = Carbon::now();
 
-        $discount = app(DiscountInterface::class)
-            ->getModel()
+        $discount = Discount::query()
             ->where('code', $couponCode)
-            ->where('type', 'coupon')
+            ->where('type', DiscountTypeEnum::COUPON)
             ->where('start_date', '<=', $now)
             ->where(function (Builder $query) use ($now) {
                 return $query
@@ -108,13 +109,13 @@ class DiscountSupport
 
         if ($discount) {
             $discount->total_used++;
-            app(DiscountInterface::class)->createOrUpdate($discount);
+            $discount->save();
 
             if (func_num_args() == 1) {
                 $customerId = auth('customer')->check() ? auth('customer')->id() : 0;
             }
 
-            if ($discount->target == 'once-per-customer' && $customerId) {
+            if ($discount->target === DiscountTargetEnum::ONCE_PER_CUSTOMER && $customerId) {
                 $discount->usedByCustomers()->syncWithoutDetaching($customerId);
             }
         }
@@ -122,21 +123,20 @@ class DiscountSupport
 
     public function afterOrderCancelled(string $couponCode, int|string|null $customerId = 0): void
     {
-        $discount = app(DiscountInterface::class)
-            ->getModel()
+        $discount = Discount::query()
             ->where('code', $couponCode)
-            ->where('type', 'coupon')
+            ->where('type', DiscountTypeEnum::COUPON)
             ->first();
 
         if ($discount) {
             $discount->total_used--;
-            app(DiscountInterface::class)->createOrUpdate($discount);
+            $discount->save();
 
             if (func_num_args() == 1) {
                 $customerId = auth('customer')->check() ? auth('customer')->id() : 0;
             }
 
-            if ($discount->target == 'once-per-customer' && $customerId) {
+            if ($discount->target === DiscountTargetEnum::ONCE_PER_CUSTOMER && $customerId) {
                 $discount->usedByCustomers()->detach($customerId);
             }
         }

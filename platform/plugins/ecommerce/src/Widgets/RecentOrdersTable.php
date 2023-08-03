@@ -3,10 +3,11 @@
 namespace Botble\Ecommerce\Widgets;
 
 use Botble\Base\Widgets\Table;
+use Botble\Ecommerce\Tables\Reports\RecentOrdersTable as BaseRecentOrdersTable;
 
 class RecentOrdersTable extends Table
 {
-    protected string $table = \Botble\Ecommerce\Tables\Reports\RecentOrdersTable::class;
+    protected string $table = BaseRecentOrdersTable::class;
 
     protected string $route = 'ecommerce.report.recent-orders';
 

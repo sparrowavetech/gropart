@@ -10,6 +10,7 @@ mix
     .js(source + '/resources/assets/js/discount.js', dist + '/js')
     .js(source + '/resources/assets/js/order-create.js', dist + '/js')
     .js(source + '/resources/assets/js/front/checkout.js', dist + '/js')
+    .js(source + '/resources/assets/js/admin-review.js', dist + '/js')
     .js(source + '/resources/assets/js/front/order-return.js', dist + '/js')
 
 if (mix.inProduction()) {
@@ -17,11 +18,13 @@ if (mix.inProduction()) {
         .copy(dist + '/js/discount.js', source + '/public/js')
         .copy(dist + '/js/order-create.js', source + '/public/js')
         .copy(dist + '/js/checkout.js', source + '/public/js')
+        .copy(dist + '/js/admin-review.js', source + '/public/js')
         .copy(dist + '/js/order-return.js', source + '/public/js');
 }
 
 const scripts = [
     'edit-product.js',
+    'edit-product-collection.js',
     'global-option.js',
     'product-option.js',
     'ecommerce-product-attributes.js',
@@ -67,6 +70,7 @@ const styles = [
     'front-theme-rtl.scss',
     'report.scss',
     'order-return.scss',
+    'customer-admin.scss',
 ];
 
 styles.forEach(item => {

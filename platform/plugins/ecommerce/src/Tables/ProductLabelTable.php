@@ -2,33 +2,28 @@
 
 namespace Botble\Ecommerce\Tables;
 
-use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Ecommerce\Repositories\Interfaces\ProductLabelInterface;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
+use Botble\Ecommerce\Models\ProductLabel;
 use Botble\Table\Abstracts\TableAbstract;
-use Html;
+use Botble\Table\DataTables;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Yajra\DataTables\DataTables;
 
 class ProductLabelTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
-    public function __construct(
-        DataTables $table,
-        UrlGenerator $urlGenerator,
-        ProductLabelInterface $productLabelRepository
-    ) {
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, ProductLabel $model)
+    {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $productLabelRepository;
+        $this->model = $model;
+        $this->hasActions = true;
+        $this->hasFilter = true;
 
         if (! Auth::user()->hasAnyPermission(['product-label.edit', 'product-label.destroy'])) {
             $this->hasOperations = false;
@@ -40,23 +35,23 @@ class ProductLabelTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('name', function ($item) {
+            ->editColumn('name', function (ProductLabel $item) {
                 if (! Auth::user()->hasPermission('product-label.edit')) {
                     return BaseHelper::clean($item->name);
                 }
 
                 return Html::link(route('product-label.edit', $item->id), BaseHelper::clean($item->name));
             })
-            ->editColumn('checkbox', function ($item) {
+            ->editColumn('checkbox', function (ProductLabel $item) {
                 return $this->getCheckbox($item->id);
             })
-            ->editColumn('created_at', function ($item) {
+            ->editColumn('created_at', function (ProductLabel $item) {
                 return BaseHelper::formatDate($item->created_at);
             })
-            ->editColumn('status', function ($item) {
+            ->editColumn('status', function (ProductLabel $item) {
                 return BaseHelper::clean($item->status->toHtml());
             })
-            ->addColumn('operations', function ($item) {
+            ->addColumn('operations', function (ProductLabel $item) {
                 return $this->getOperations('product-label.edit', 'product-label.destroy', $item);
             });
 
@@ -65,7 +60,7 @@ class ProductLabelTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()->select([
+        $query = $this->getModel()->query()->select([
             'id',
             'name',
             'created_at',

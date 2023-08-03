@@ -49,9 +49,7 @@ class SaleCommissionHtml extends Html
             ],
         ]);
 
-        $series = [];
         $dates = [];
-        $earningSales = collect();
         $period = CarbonPeriod::create($this->startDate->startOfDay(), $this->endDate->endOfDay());
 
         $symbol = get_application_currency()->symbol;
@@ -66,17 +64,19 @@ class SaleCommissionHtml extends Html
         ];
 
         foreach ($period as $date) {
+            $date = $date->format('Y-m-d');
+
             $fee = $revenues
-                ->where('date', $date->format('Y-m-d'))
+                ->where('date', $date)
                 ->sum('total_fee');
 
             $amount = $revenues
-                ->where('date', $date->format('Y-m-d'))
+                ->where('date', $date)
                 ->sum('total_amount');
 
             $feeData['data'][] = (float) $fee;
             $amountData['data'][] = (float) $amount;
-            $dates[] = $date->format('Y-m-d');
+            $dates[] = $date;
         }
 
         $series = [

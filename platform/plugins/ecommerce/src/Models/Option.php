@@ -30,12 +30,10 @@ class Option extends BaseModel
         return $this->belongsTo(Product::class);
     }
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
-
         self::deleting(function (Option $option) {
-            OptionValue::where('option_id', $option->id)->delete();
+            $option->values()->delete();
         });
     }
 }

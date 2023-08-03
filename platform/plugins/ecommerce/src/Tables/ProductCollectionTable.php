@@ -2,11 +2,13 @@
 
 namespace Botble\Ecommerce\Tables;
 
-use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Ecommerce\Repositories\Interfaces\ProductCollectionInterface;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
+use Botble\Ecommerce\Models\ProductCollection;
+use Botble\Media\Facades\RvMedia;
 use Botble\Table\Abstracts\TableAbstract;
-use Html;
+use Botble\Table\DataTables;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -15,24 +17,17 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use RvMedia;
 use Symfony\Component\HttpFoundation\Response;
-use Yajra\DataTables\DataTables;
 
 class ProductCollectionTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
-    public function __construct(
-        DataTables $table,
-        UrlGenerator $urlGenerator,
-        ProductCollectionInterface $productCollectionRepository
-    ) {
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, ProductCollection $model)
+    {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $productCollectionRepository;
+        $this->model = $model;
+        $this->hasActions = true;
+        $this->hasFilter = true;
 
         if (! Auth::user()->hasAnyPermission([
             'product-collections.edit',
@@ -47,30 +42,30 @@ class ProductCollectionTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('name', function ($item) {
+            ->editColumn('name', function (ProductCollection $item) {
                 if (! Auth::user()->hasPermission('product-collections.edit')) {
                     return BaseHelper::clean($item->name);
                 }
 
                 return Html::link(route('product-collections.edit', $item->id), BaseHelper::clean($item->name));
             })
-            ->editColumn('image', function ($item) {
+            ->editColumn('image', function (ProductCollection $item) {
                 return Html::image(
                     RvMedia::getImageUrl($item->image, 'thumb', false, RvMedia::getDefaultImage()),
                     BaseHelper::clean($item->name),
                     ['width' => 50]
                 );
             })
-            ->editColumn('checkbox', function ($item) {
+            ->editColumn('checkbox', function (ProductCollection $item) {
                 return $this->getCheckbox($item->id);
             })
-            ->editColumn('created_at', function ($item) {
+            ->editColumn('created_at', function (ProductCollection $item) {
                 return BaseHelper::formatDate($item->created_at);
             })
-            ->editColumn('status', function ($item) {
+            ->editColumn('status', function (ProductCollection $item) {
                 return BaseHelper::clean($item->status->toHtml());
             })
-            ->addColumn('operations', function ($item) {
+            ->addColumn('operations', function (ProductCollection $item) {
                 return $this->getOperations(
                     'product-collections.edit',
                     'product-collections.destroy',
@@ -83,7 +78,7 @@ class ProductCollectionTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()->select([
+        $query = $this->getModel()->query()->select([
             'id',
             'name',
             'image',
@@ -166,10 +161,7 @@ class ProductCollectionTable extends TableAbstract
 
     public function renderTable($data = [], $mergeData = []): View|Factory|Response
     {
-        if ($this->query()->count() === 0 &&
-            ! $this->request()->wantsJson() &&
-            $this->request()->input('filter_table_id') !== $this->getOption('id') && ! $this->request()->ajax()
-        ) {
+        if ($this->isEmpty()) {
             return view('plugins/ecommerce::product-collections.intro');
         }
 

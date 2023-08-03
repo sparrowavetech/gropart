@@ -47,11 +47,11 @@ class TrackingFilter implements TrackingFilterInterface
 
     protected function disableInternalLinks(): bool
     {
-        if ($referrer_domain = $this->request->headers->get('referer')) {
-            $referrer_domain = parse_url($referrer_domain)['host'] ?? null;
-            $request_domain = $this->request->server('SERVER_NAME');
+        if ($referrerDomain = $this->request->headers->get('referer')) {
+            $referrerDomain = parse_url($referrerDomain)['host'] ?? null;
+            $requestDomain = $this->request->server('SERVER_NAME');
 
-            if ($referrer_domain && ($referrer_domain === $request_domain)) {
+            if ($referrerDomain && $referrerDomain === $requestDomain) {
                 return true;
             }
         }
@@ -59,7 +59,7 @@ class TrackingFilter implements TrackingFilterInterface
         return false;
     }
 
-    protected function disabledLandingPages(?string $landingPage = null): bool|array
+    protected function disabledLandingPages(string|null $landingPage = null): bool|array
     {
         $blacklist = [];
 

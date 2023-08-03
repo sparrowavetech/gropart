@@ -8,6 +8,9 @@ class Currencies {
         this.initData()
         this.handleForm()
         this.updateCurrency()
+        this.clearCacheRates()
+        this.switchApiProvider()
+        this.changeOptionUsingExchangeRateCurrencyFormAPI()
     }
 
     initData() {
@@ -102,7 +105,7 @@ class Currencies {
     }
 
     updateCurrency() {
-        $(document).on('click', '#btn-update-currencies', function(event) {
+        $(document).on('click', '#btn-update-currencies', (event) => {
             event.preventDefault()
             let _self = $(event.currentTarget)
 
@@ -112,7 +115,7 @@ class Currencies {
                 type: 'POST',
                 url: form.prop('url'),
                 data: form.serialize(),
-                success: function(res) {
+                success: (res) => {
                     if (res.error) {
                         Botble.showNotice('error', res.message)
                     }
@@ -122,13 +125,13 @@ class Currencies {
             $.ajax({
                 type: 'POST',
                 url: _self.data('url'),
-                beforeSend: function() {
+                beforeSend: () => {
                     _self.addClass('button-loading')
                 },
-                success: function(res) {
+                success: (res) => {
                     if (!res.error) {
                         Botble.showNotice('success', res.message)
-                        const data = $.parseJSON(res.data)
+                        const data = res.data
                         const template = $('#currency_template').html()
                         let html = ''
                         $('#loading-update-currencies').show()
@@ -156,11 +159,71 @@ class Currencies {
                     Botble.handleError(res)
                     _self.removeClass('button-loading')
                 },
-                complete: function() {
+                complete: () => {
                     _self.removeClass('button-loading')
                 },
             })
         })
+    }
+
+    clearCacheRates() {
+        $(document).on('click', '#btn-clear-cache-rates', (event) => {
+            event.preventDefault()
+
+            let _self = $(event.currentTarget)
+
+            $.ajax({
+                type: 'POST',
+                url: _self.data('url'),
+                beforeSend: () => {
+                    _self.addClass('button-loading')
+                },
+                success: (res) => {
+                    if (!res.error) {
+                        Botble.showNotice('success', res.message)
+                    } else {
+                        Botble.showNotice('error', res.message)
+                    }
+                },
+                error: (res) => {
+                    Botble.handleError(res)
+                    _self.removeClass('button-loading')
+                },
+                complete: () => {
+                    _self.removeClass('button-loading')
+                },
+            })
+        })
+    }
+
+    switchApiProvider() {
+        $(document).on('change', '.switch_api_provider', (event) => {
+            event.preventDefault()
+            const apiLayer = $('.api-layer-api-key')
+            const openExchange = $('.open-exchange-api-key')
+            if (event.target.value === 'api_layer') {
+                apiLayer.show()
+                openExchange.hide()
+            } else if (event.target.value === 'open_exchange_rate') {
+                openExchange.show()
+                apiLayer.hide()
+            }
+        })
+    }
+
+    changeOptionUsingExchangeRateCurrencyFormAPI() {
+        $(document).on('change', 'input[name="use_exchange_rate_from_api"]', (event) => {
+            event.preventDefault()
+
+            const inputExchangeRate = $('.swatch-exchange-rate').find('.input-exchange-rate')
+
+            if (event.target.value === '1') {
+                inputExchangeRate.attr('disabled', 'disabled')
+            } else {
+                inputExchangeRate.removeAttr('disabled')
+            }
+        })
+
     }
 }
 

@@ -5,7 +5,6 @@ namespace Botble\Ecommerce\Models;
 use Botble\Base\Casts\SafeContent;
 use Botble\Base\Models\BaseModel;
 use Botble\Ecommerce\Enums\ShippingRuleTypeEnum;
-use Botble\Ecommerce\Repositories\Interfaces\ShippingRuleItemInterface;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -37,12 +36,10 @@ class ShippingRule extends BaseModel
         return $this->hasMany(ShippingRuleItem::class);
     }
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
-
         self::deleting(function (ShippingRule $shippingRule) {
-            app(ShippingRuleItemInterface::class)->deleteBy(['shipping_rule_id' => $shippingRule->id]);
+            $shippingRule->items()->delete();
         });
     }
 }

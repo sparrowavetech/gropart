@@ -2,7 +2,9 @@
 
 namespace Botble\Ecommerce\Http\Controllers;
 
-use Assets;
+use Botble\Base\Events\DeletedContentEvent;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
@@ -17,28 +19,22 @@ use Illuminate\Http\Request;
 
 class ProductAttributeSetsController extends BaseController
 {
-    protected ProductAttributeSetInterface $productAttributeSetRepository;
-
-    protected ProductCategoryInterface $productCategoryRepository;
-
     public function __construct(
-        ProductAttributeSetInterface $productAttributeSetRepository,
-        ProductCategoryInterface $productCategoryRepository
+        protected ProductAttributeSetInterface $productAttributeSetRepository,
+        protected ProductCategoryInterface $productCategoryRepository
     ) {
-        $this->productAttributeSetRepository = $productAttributeSetRepository;
-        $this->productCategoryRepository = $productCategoryRepository;
     }
 
     public function index(ProductAttributeSetsTable $dataTable)
     {
-        page_title()->setTitle(trans('plugins/ecommerce::product-attributes.name'));
+        PageTitle::setTitle(trans('plugins/ecommerce::product-attributes.name'));
 
         return $dataTable->renderTable();
     }
 
     public function create(FormBuilder $formBuilder)
     {
-        page_title()->setTitle(trans('plugins/ecommerce::product-attributes.create'));
+        PageTitle::setTitle(trans('plugins/ecommerce::product-attributes.create'));
 
         Assets::addScripts(['spectrum', 'jquery-ui'])
             ->addStyles(['spectrum'])
@@ -61,15 +57,19 @@ class ProductAttributeSetsController extends BaseController
 
         $productAttributeSet = $service->execute($request, $productAttributeSet);
 
+        if ($request->has('categories')) {
+            $productAttributeSet->categories()->sync((array) $request->input('categories', []));
+        }
+
         return $response
             ->setPreviousUrl(route('product-attribute-sets.index'))
             ->setNextUrl(route('product-attribute-sets.edit', $productAttributeSet->id))
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int $id, FormBuilder $formBuilder)
+    public function edit(int|string $id, FormBuilder $formBuilder)
     {
-        page_title()->setTitle(trans('plugins/ecommerce::product-attributes.edit'));
+        PageTitle::setTitle(trans('plugins/ecommerce::product-attributes.edit'));
 
         $productAttributeSet = $this->productAttributeSetRepository->findOrFail($id);
 
@@ -88,7 +88,7 @@ class ProductAttributeSetsController extends BaseController
     }
 
     public function update(
-        int $id,
+        int|string $id,
         ProductAttributeSetsRequest $request,
         StoreAttributeSetService $service,
         BaseHttpResponse $response
@@ -97,16 +97,21 @@ class ProductAttributeSetsController extends BaseController
 
         $service->execute($request, $productAttributeSet);
 
+        if ($request->has('categories')) {
+            $productAttributeSet->categories()->sync((array) $request->input('categories', []));
+        }
+
         return $response
             ->setPreviousUrl(route('product-attribute-sets.index'))
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(int $id, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
             $productAttributeSet = $this->productAttributeSetRepository->findOrFail($id);
             $this->productAttributeSetRepository->delete($productAttributeSet);
+            event(new DeletedContentEvent(PRODUCT_ATTRIBUTE_SETS_MODULE_SCREEN_NAME, $request, $productAttributeSet));
 
             return $response->setMessage(trans('core/base::notices.delete_success_message'));
         } catch (Exception $exception) {
@@ -128,6 +133,7 @@ class ProductAttributeSetsController extends BaseController
         foreach ($ids as $id) {
             $productAttributeSet = $this->productAttributeSetRepository->findOrFail($id);
             $this->productAttributeSetRepository->delete($productAttributeSet);
+            event(new DeletedContentEvent(PRODUCT_ATTRIBUTE_SETS_MODULE_SCREEN_NAME, $request, $productAttributeSet));
         }
 
         return $response->setMessage(trans('core/base::notices.delete_success_message'));

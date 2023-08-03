@@ -32,46 +32,17 @@
         </tr>
 
         @foreach (($products ?? $order->products) as $orderProduct)
-            @php
-                $product = get_products([
-                    'condition' => [
-                        'ec_products.id'     => $orderProduct->product_id,
-                    ],
-                    'take'      => 1,
-                    'select'    => [
-                        'ec_products.id',
-                        'ec_products.name',
-                        'ec_products.price',
-                        'ec_products.sale_price',
-                        'ec_products.sale_type',
-                        'ec_products.start_date',
-                        'ec_products.end_date',
-                        'ec_products.sku',
-                        'ec_products.is_variation',
-                        'ec_products.status',
-                        'ec_products.order',
-                        'ec_products.created_at',
-                        'ec_products.images',
-                    ],
-                ]);
-            @endphp
             <tr>
                 <td>
                     <img src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb') }}" alt="{{ $orderProduct->product_name }}" width="50">
                 </td>
                 <td>
                     {{ $orderProduct->product_name }}
-                    @if ($product)
-                        <small>{{ $product->variation_attributes }}</small>
+                    @if ($attributes = Arr::get($orderProduct->options, 'attributes'))
+                        <small>{{ $attributes }}</small>
                     @endif
 
-                    @if (!empty($orderProduct->options) && is_array($orderProduct->options))
-                        @foreach($orderProduct->options as $option)
-                            @if (!empty($option['key']) && !empty($option['value']))
-                                <p class="mb-0"><small>{{ $option['key'] }}: <strong> {{ $option['value'] }}</strong></small></p>
-                            @endif
-                        @endforeach
-                    @endif
+                    @include('plugins/ecommerce::themes.includes.cart-item-options-extras', ['options' => $orderProduct->options])
                 </td>
 
                 <td>

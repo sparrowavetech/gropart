@@ -5,6 +5,7 @@ namespace Botble\Ecommerce\Http\Requests;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Ecommerce\Enums\GlobalOptionEnum;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Support\Http\Requests\Request;
 use Carbon\Carbon;
 use Illuminate\Validation\Rule;
@@ -14,7 +15,7 @@ class ProductRequest extends Request
     public function rules(): array
     {
         $rules = [
-            'name' => 'required|max:255',
+            'name' => 'required|string|max:220',
             'price' => 'numeric|nullable|min:0|max:100000000000',
             'sale_price' => 'numeric|nullable|min:0|max:100000000000',
             'start_date' => 'date|nullable|required_if:sale_type,1',
@@ -23,19 +24,34 @@ class ProductRequest extends Request
             'height' => 'numeric|nullable|min:0|max:100000000',
             'weight' => 'numeric|nullable|min:0|max:100000000',
             'length' => 'numeric|nullable|min:0|max:100000000',
+            'images' => 'sometimes|array',
             'status' => Rule::in(BaseStatusEnum::values()),
             'quantity' => 'numeric|nullable|min:0|max:100000000',
             'product_type' => Rule::in(ProductTypeEnum::values()),
             'product_files_input' => 'nullable|array',
             'product_files_input.*' => 'nullable|file|mimes:' . config('plugins.ecommerce.general.digital_products.allowed_mime_types'),
+            'product_files_external' => 'nullable|array',
+            'product_files_external.*.name' => 'nullable|string|max:120',
+            'product_files_external.*.link' => 'required|url|max:400',
+            'product_files_external.*.size' => 'nullable|numeric|min:0|max:100000000',
             'taxes' => 'nullable|array',
+            'cost_per_item' => 'numeric|nullable|min:0|max:100000000000',
+            'barcode' => [
+                'nullable',
+                'string',
+                'max:50',
+                Rule::unique('ec_products')->ignore($this->route('product')),
+            ],
+            'general_license_code' => 'nullable|in:0,1',
         ];
 
-        $options = $this->input('options');
+        if (EcommerceHelper::isEnabledProductOptions()) {
+            $options = $this->input('options');
 
-        if (! empty($options)) {
-            $productOptionRules = $this->getRuleProductOptionRequest($options);
-            $rules = array_merge($rules, $productOptionRules);
+            if (! empty($options)) {
+                $productOptionRules = $this->getRuleProductOptionRequest($options);
+                $rules = array_merge($rules, $productOptionRules);
+            }
         }
 
         return $rules;
@@ -56,7 +72,9 @@ class ProductRequest extends Request
     public function attributes(): array
     {
         $options = $this->input('options');
-        $attrs = [];
+        $attrs = [
+            'product_files_external.*.link' => trans('plugins/ecommerce::products.digital_attachments.external_link_download'),
+        ];
         if (! empty($options)) {
             foreach ($options as $key => $option) {
                 $name = sprintf('options.%s.name', $key);

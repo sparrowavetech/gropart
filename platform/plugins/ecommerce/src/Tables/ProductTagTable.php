@@ -2,33 +2,28 @@
 
 namespace Botble\Ecommerce\Tables;
 
-use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Ecommerce\Repositories\Interfaces\ProductTagInterface;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
+use Botble\Ecommerce\Models\ProductTag;
 use Botble\Table\Abstracts\TableAbstract;
-use Html;
+use Botble\Table\DataTables;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Yajra\DataTables\DataTables;
 
 class ProductTagTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
-    public function __construct(
-        DataTables $table,
-        UrlGenerator $urlGenerator,
-        ProductTagInterface $productTagRepository
-    ) {
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, ProductTag $model)
+    {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $productTagRepository;
+        $this->model = $model;
+        $this->hasActions = true;
+        $this->hasFilter = true;
 
         if (! Auth::user()->hasAnyPermission(['product-tag.edit', 'product-tag.destroy'])) {
             $this->hasOperations = false;
@@ -40,23 +35,23 @@ class ProductTagTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('name', function ($item) {
+            ->editColumn('name', function (ProductTag $item) {
                 if (! Auth::user()->hasPermission('product-tag.edit')) {
                     return BaseHelper::clean($item->name);
                 }
 
                 return Html::link(route('product-tag.edit', $item->id), BaseHelper::clean($item->name));
             })
-            ->editColumn('checkbox', function ($item) {
+            ->editColumn('checkbox', function (ProductTag $item) {
                 return $this->getCheckbox($item->id);
             })
-            ->editColumn('created_at', function ($item) {
+            ->editColumn('created_at', function (ProductTag $item) {
                 return BaseHelper::formatDate($item->created_at);
             })
-            ->editColumn('status', function ($item) {
+            ->editColumn('status', function (ProductTag $item) {
                 return BaseHelper::clean($item->status->toHtml());
             })
-            ->addColumn('operations', function ($item) {
+            ->addColumn('operations', function (ProductTag $item) {
                 return $this->getOperations('product-tag.edit', 'product-tag.destroy', $item);
             });
 
@@ -65,7 +60,7 @@ class ProductTagTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()->select([
+        $query = $this->getModel()->query()->select([
             'id',
             'name',
             'created_at',

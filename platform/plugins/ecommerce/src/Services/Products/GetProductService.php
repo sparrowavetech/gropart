@@ -2,10 +2,10 @@
 
 namespace Botble\Ecommerce\Services\Products;
 
-use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
-use EcommerceHelper;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
@@ -13,11 +13,8 @@ use Illuminate\Support\Facades\DB;
 
 class GetProductService
 {
-    protected ProductInterface $productRepository;
-
-    public function __construct(ProductInterface $productRepository)
+    public function __construct(protected ProductInterface $productRepository)
     {
-        $this->productRepository = $productRepository;
     }
 
     public function getProduct(
@@ -28,7 +25,7 @@ class GetProductService
         array $withCount = [],
         array $conditions = []
     ): Collection|LengthAwarePaginator {
-        $num = (int)$request->input('num');
+        $num = $request->integer('num');
         $shows = EcommerceHelper::getShowParams();
 
         if (! array_key_exists($num, $shows)) {
@@ -36,7 +33,7 @@ class GetProductService
         }
 
         $queryVar = [
-            'keyword' => $request->input('q'),
+            'keyword' => BaseHelper::stringify($request->input('q')),
             'brands' => (array)$request->input('brands', []),
             'categories' => (array)$request->input('categories', []),
             'tags' => (array)$request->input('tags', []),
@@ -74,55 +71,55 @@ class GetProductService
         }
 
         $params = array_merge([
-                'paginate' => [
-                    'per_page' => $queryVar['num'],
-                    'current_paged' => (int)$request->query('page', 1),
-                ],
-                'with' => $with,
-                'withCount' => $withCount,
-            ], EcommerceHelper::withReviewsParams());
+            'paginate' => [
+                'per_page' => $queryVar['num'],
+                'current_paged' => $request->integer('page', 1) ?: 1,
+            ],
+            'with' => array_merge(EcommerceHelper::withProductEagerLoadingRelations(), $with),
+            'withCount' => $withCount,
+        ], EcommerceHelper::withReviewsParams());
 
         switch ($queryVar['sort_by']) {
             case 'date_asc':
                 $orderBy = [
-                    'ec_products.created_at' => 'asc',
+                    'ec_products.created_at' => 'ASC',
                 ];
 
                 break;
             case 'date_desc':
                 $orderBy = [
-                    'ec_products.created_at' => 'desc',
+                    'ec_products.created_at' => 'DESC',
                 ];
 
                 break;
             case 'price_asc':
                 $orderBy = [
-                    'products_with_final_price.final_price' => 'asc',
+                    'products_with_final_price.final_price' => 'ASC',
                 ];
 
                 break;
             case 'price_desc':
                 $orderBy = [
-                    'products_with_final_price.final_price' => 'desc',
+                    'products_with_final_price.final_price' => 'DESC',
                 ];
 
                 break;
             case 'name_asc':
                 $orderBy = [
-                    'ec_products.name' => 'asc',
+                    'ec_products.name' => 'ASC',
                 ];
 
                 break;
             case 'name_desc':
                 $orderBy = [
-                    'ec_products.name' => 'desc',
+                    'ec_products.name' => 'DESC',
                 ];
 
                 break;
             case 'rating_asc':
                 if (EcommerceHelper::isReviewEnabled()) {
                     $orderBy = [
-                        'reviews_avg' => 'asc',
+                        'reviews_avg' => 'ASC',
                     ];
                 }
 
@@ -130,7 +127,7 @@ class GetProductService
             case 'rating_desc':
                 if (EcommerceHelper::isReviewEnabled()) {
                     $orderBy = [
-                        'reviews_avg' => 'desc',
+                        'reviews_avg' => 'DESC',
                     ];
                 }
 
@@ -157,8 +154,8 @@ class GetProductService
             'order_by' => $orderBy,
         ], $params);
 
-        if ($queryVar['keyword'] && is_string($queryVar['keyword'])) {
-            $products->setCollection(BaseHelper::sortSearchResults($products->getCollection(), $queryVar['keyword'], 'name'));
+        if ($keyword = $queryVar['keyword']) {
+            $products->setCollection(BaseHelper::sortSearchResults($products->getCollection(), $keyword, 'name'));
         }
 
         return $products;

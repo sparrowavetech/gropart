@@ -83,7 +83,7 @@
                             <div class='panel panel-default'
                                  :class='{ active: list_products, hidden : hidden_product_search_panel }'>
                                 <div class='panel-body'>
-                                    <div class='box-search-advance-head' v-b-modal.add-product-item>
+                                    <div class='box-search-advance-head' v-ec-modal.add-product-item>
                                         <img width='30'
                                              src='/vendor/core/plugins/ecommerce/images/next-create-custom-line-item.svg'
                                              alt='icon'>
@@ -213,7 +213,7 @@
                                     </tr>
                                     <tr>
                                         <td>
-                                            <button type='button' v-b-modal.add-discounts
+                                            <button type='button' v-ec-modal.add-discounts
                                                     class='btn btn text-primary p-0'>
                                                     <span v-if='!has_applied_discount'>
                                                         <i class='fa fa-plus-circle'></i> {{ __('order.add_discount') }}</span>
@@ -235,7 +235,7 @@
                                     </tr>
                                     <tr v-if='is_available_shipping'>
                                         <td>
-                                            <button type='button' v-b-modal.add-shipping
+                                            <button type='button' v-ec-modal.add-shipping
                                                     class='btn btn text-primary p-0'>
                                                     <span v-if='!child_is_selected_shipping'>
                                                         <i class='fa fa-plus-circle'></i> {{
@@ -308,11 +308,11 @@
                             </div>
                         </div>
                         <div class='col-12 col-sm-6 col-md-12 col-lg-6 text-end'>
-                            <button class='btn btn-success' v-b-modal.make-paid
+                            <button class='btn btn-success' v-ec-modal.make-paid
                                     :disabled="!child_product_ids.length || child_payment_method == 'cod'">
                                 {{ __('order.paid') }}
                             </button>
-                            <button class='btn btn-primary ml15' v-b-modal.make-pending
+                            <button class='btn btn-primary ml15' v-ec-modal.make-pending
                                     :disabled='!child_product_ids.length || child_total_amount === 0'>
                                 {{ __('order.pay_later') }}
                             </button>
@@ -341,7 +341,7 @@
                                 <div class='panel panel-default'
                                      :class='{ active: customers, hidden : hidden_customer_search_panel }'>
                                     <div class='panel-body'>
-                                        <div class='box-search-advance-head' v-b-modal.add-customer>
+                                        <div class='box-search-advance-head' v-ec-modal.add-customer>
                                             <div class='flexbox-grid-default flexbox-align-items-center'>
                                                 <div class='flexbox-auto-40'>
                                                     <img width='30'
@@ -465,7 +465,7 @@
                                         </a>
                                     </div>
                                     <div class='flexbox-auto-left'>
-                                        <a v-b-modal.edit-email>
+                                        <a v-ec-modal.edit-email>
                                             <span data-placement='top' data-bs-toggle='tooltip'
                                                   data-bs-original-title='Edit email'>
                                                 <svg class='svg-next-icon svg-next-icon-size-12'>
@@ -487,7 +487,7 @@
                                         <label class='title-text-second'>{{ __('order.shipping_address') }}</label>
                                     </div>
                                     <div class='flexbox-auto-left'>
-                                        <a v-b-modal.edit-address>
+                                        <a v-ec-modal.edit-address>
                                             <span data-placement='top' title='Update address' data-bs-toggle='tooltip'>
                                                 <svg class='svg-next-icon svg-next-icon-size-12'>
                                                     <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 55.25 55.25'><path
@@ -545,7 +545,7 @@
 
         <AddProductModal @create-product='createProduct' :store='store'></AddProductModal>
 
-        <b-modal id='add-discounts' title='Add discount' :ok-title="__('order.add_discount')"
+        <ec-modal id='add-discounts' title='Add discount' :ok-title="__('order.add_discount')"
                  :cancel-title="__('order.close')"
                  @ok='handleAddDiscount($event)'>
             <div class='next-form-section'>
@@ -596,9 +596,9 @@
                     </div>
                 </div>
             </div>
-        </b-modal>
+        </ec-modal>
 
-        <b-modal id='add-shipping' :title="__('order.shipping_fee')" :ok-title="__('order.update')"
+        <ec-modal id='add-shipping' :title="__('order.shipping_fee')" :ok-title="__('order.update')"
                  :cancel-title="__('order.close')"
                  @ok='selectShippingMethod($event)'>
             <div class='next-form-section'>
@@ -671,9 +671,9 @@
                     </div>
                 </div>
             </div>
-        </b-modal>
+        </ec-modal>
 
-        <b-modal id='make-paid' :title="__('order.confirm_payment_is_paid_for_this_order')"
+        <ec-modal id='make-paid' :title="__('order.confirm_payment_is_paid_for_this_order')"
                  :ok-title="__('order.create_order')" :cancel-title="__('order.close')"
                  @ok='createOrder($event, true)'>
             <div class='note note-warning'>
@@ -686,9 +686,9 @@
                 <span>{{ __('order.paid_amount') }}:</span>
                 <span class='fs-5'>{{ child_total_amount_label }}</span>
             </p>
-        </b-modal>
+        </ec-modal>
 
-        <b-modal id='make-pending' :title="__('order.confirm_that_payment_for_this_order_will_be_paid_later')"
+        <ec-modal id='make-pending' :title="__('order.confirm_that_payment_for_this_order_will_be_paid_later')"
                  :ok-title="__('order.create_order')"
                  :cancel-title="__('order.close')" @ok='createOrder($event)'>
             <div class='note note-warning'>
@@ -698,10 +698,10 @@
             </div>
             <br />
             <p>
-                <span>{{ __('order.pending_amount') }}:</span>
+                <span class="me-1">{{ __('order.pending_amount') }}:</span>
                 <span class='fs-5'>{{ child_total_amount_label }}</span>
             </p>
-        </b-modal>
+        </ec-modal>
 
         <OrderCustomerAddress
             :child_customer_address='child_customer_address'
@@ -830,7 +830,7 @@ export default {
         shipping_method_name: {
             type: String,
             default: function() {
-                return this.__('order.free_shipping')
+                return ('order.free_shipping')
             },
         },
         payment_method: {
@@ -1189,17 +1189,16 @@ export default {
 
             this.checkDataBeforeCreateOrder()
         },
-        handleRemoveVariant: function($event, variant, vKey) {
-            $event.preventDefault()
-            this.child_product_ids = this.child_product_ids.filter((item, k) => k != vKey)
-            this.child_products = this.child_products.filter((item, k) => k != vKey)
+        handleRemoveVariant: function(event, variant, vKey) {
+            event.preventDefault()
+            this.child_product_ids = this.child_product_ids.filter((item, k) => k !== vKey)
+            this.child_products = this.child_products.filter((item, k) => k !== vKey)
 
             this.checkDataBeforeCreateOrder()
         },
-        createOrder: function($event, paid = false) {
-            $event.preventDefault()
-            $($event.target).find('.btn-primary').addClass('button-loading')
-            let context = this
+        createOrder: function(event, paid = false) {
+            event.preventDefault()
+            $(event.target).addClass('button-loading')
 
             let formData = this.getOrderFormData()
             formData.payment_status = paid ? 'completed' : 'pending'
@@ -1213,9 +1212,9 @@ export default {
                     } else {
                         Botble.showSuccess(res.data.message)
                         if (paid) {
-                            context.$root.$emit('bv::hide::modal', 'make-paid')
+                            $event.emit('ec-modal:close', 'make-paid')
                         } else {
-                            context.$root.$emit('bv::hide::modal', 'make-pending')
+                            $event.emit('ec-modal:close', 'make-pending')
                         }
 
                         setTimeout(() => {
@@ -1227,12 +1226,12 @@ export default {
                     Botble.handleError(res.response.data)
                 })
                 .then(() => {
-                    $($event.target).find('.btn-primary').removeClass('button-loading')
+                    $(event.target).removeClass('button-loading')
                 })
         },
-        createProduct: function($event, product) {
-            $event.preventDefault()
-            $($event.target).find('.btn-primary').addClass('button-loading')
+        createProduct: function(event, product) {
+            event.preventDefault()
+            $(event.target).addClass('button-loading')
             let context = this
             if (context.store && context.store.id) {
                 product.store_id = context.store.id
@@ -1261,7 +1260,7 @@ export default {
 
                         Botble.showSuccess(res.data.message)
 
-                        context.$root.$emit('bv::hide::modal', 'add-product-item')
+                        $event.emit('ec-modal:close', 'add-product-item')
 
                         context.checkDataBeforeCreateOrder()
                     }
@@ -1270,18 +1269,18 @@ export default {
                     Botble.handleError(res.response.data)
                 })
                 .then(() => {
-                    $($event.target).find('.btn-primary').removeClass('button-loading')
+                    $(event.target).removeClass('button-loading')
                 })
         },
-        updateCustomerEmail: function($event) {
-            $event.preventDefault()
-            $($event.target).find('.btn-primary').addClass('button-loading')
+        updateCustomerEmail: function(event) {
+            event.preventDefault()
+            $(event.target).addClass('button-loading')
 
             let context = this
 
             axios
-                .post(route('customers.update-email', context.child_customer.id), {
-                    email: context.child_customer.email,
+                .post(route('customers.update-email', context.child_customer_address.id), {
+                    email: context.child_customer_address.email,
                 })
                 .then(res => {
                     if (res.data.error) {
@@ -1289,40 +1288,38 @@ export default {
                     } else {
                         Botble.showSuccess(res.data.message)
 
-                        context.$root.$emit('bv::hide::modal', 'edit-email')
+                        $event.emit('ec-modal:close', 'edit-email')
                     }
                 })
                 .catch(res => {
                     Botble.handleError(res.response.data)
                 })
                 .then(() => {
-                    $($event.target).find('.btn-primary').removeClass('button-loading')
+                    $(event.target).removeClass('button-loading')
                 })
         },
-        updateOrderAddress: function($event) {
-            $event.preventDefault()
+        updateOrderAddress: function(event) {
+            event.preventDefault()
             if (this.customer) {
-                $($event.target).find('.btn-primary').addClass('button-loading')
-
-                let context = this
+                $(event.target).addClass('button-loading')
 
                 this.checkDataBeforeCreateOrder({}, () => {
                     setTimeout(() => {
-                        $($event.target).find('.btn-primary').removeClass('button-loading')
-                        context.$root.$emit('bv::hide::modal', 'edit-address')
+                        $(event.target).removeClass('button-loading')
+                        $event.emit('ec-modal:close', 'edit-address')
                     }, 500)
                 }, () => {
                     setTimeout(() => {
-                        $($event.target).find('.btn-primary').removeClass('button-loading')
+                        $(event.target).removeClass('button-loading')
                     }, 500)
                 })
             }
         },
-        createNewCustomer: function($event) {
-            $event.preventDefault()
+        createNewCustomer: function(event) {
+            event.preventDefault()
             let context = this
 
-            $($event.target).find('.btn-primary').addClass('button-loading')
+            $(event.target).addClass('button-loading')
 
             axios
                 .post(route('customers.create-customer-when-creating-order'), {
@@ -1351,14 +1348,14 @@ export default {
                         Botble.showSuccess(res.data.message)
                         context.checkDataBeforeCreateOrder()
 
-                        context.$root.$emit('bv::hide::modal', 'add-customer')
+                        $event.emit('ec-modal:close', 'add-customer')
                     }
                 })
                 .catch(res => {
                     Botble.handleError(res.response.data)
                 })
                 .then(() => {
-                    $($event.target).find('.btn-primary').removeClass('button-loading')
+                    $(event.target).removeClass('button-loading')
                 })
         },
         selectCustomerAddress: function(event) {
@@ -1397,10 +1394,10 @@ export default {
                     Botble.handleError(res.response.data)
                 })
         },
-        selectShippingMethod: function($event) {
-            $event.preventDefault()
+        selectShippingMethod: function(event) {
+            event.preventDefault()
             let context = this
-            let $button = $($event.target).find('.btn-primary')
+            let $button = $(event.target).find('.btn-primary')
             $button.addClass('button-loading')
 
             context.child_is_selected_shipping = true
@@ -1409,9 +1406,9 @@ export default {
                 context.child_shipping_method_name = context.__('order.free_shipping')
                 context.child_shipping_amount = 0
             } else {
-                let selected_shipping = $($event.target).find('.ui-select').val()
+                let selected_shipping = $(event.target).find('.ui-select').val()
                 if (!_.isEmpty(selected_shipping)) {
-                    let option = $($event.target).find('.ui-select option:selected')
+                    let option = $(event.target).find('.ui-select option:selected')
                     context.child_shipping_method = option.data('shipping-method')
                     context.child_shipping_option = option.data('shipping-option')
                 }
@@ -1420,7 +1417,7 @@ export default {
             this.checkDataBeforeCreateOrder({}, () => {
                 setTimeout(function() {
                     $button.removeClass('button-loading')
-                    context.$root.$emit('bv::hide::modal', 'add-shipping')
+                    $event.emit('ec-modal:close', 'add-shipping')
                 }, 500)
             }, () => {
                 setTimeout(function() {
@@ -1436,9 +1433,9 @@ export default {
             }
             this.discount_type = $(event.target).val()
         },
-        handleAddDiscount: function($event) {
-            $event.preventDefault()
-            let $target = $($event.target)
+        handleAddDiscount: function(event) {
+            event.preventDefault()
+            let $target = $(event.target)
             let context = this
 
             context.has_applied_discount = true
@@ -1453,7 +1450,7 @@ export default {
                 context.discount_custom_value = 0
             } else {
                 context.discount_custom_value = Math.max(parseFloat(context.discount_custom_value), 0)
-                if (context.discount_type == 'percentage') {
+                if (context.discount_type === 'percentage') {
                     context.discount_custom_value = Math.min(context.discount_custom_value, 100)
                 }
             }
@@ -1464,7 +1461,7 @@ export default {
                         context.has_applied_discount = false
                     }
                     $button.removeClass('button-loading').prop('disabled', false)
-                    context.$root.$emit('bv::hide::modal', 'add-discounts')
+                    $event.emit('ec-modal:close', 'add-discounts')
                 }, 500)
             }, () => {
                 if (context.child_coupon_code) {
@@ -1473,11 +1470,10 @@ export default {
                 $button.removeClass('button-loading').prop('disabled', false)
             })
         },
-        handleChangeQuantity: function($event, variant, vKey) {
-            $event.preventDefault()
+        handleChangeQuantity: function(event, variant, vKey) {
+            event.preventDefault()
             let context = this
-            const value = parseInt($event.target.value)
-            variant.select_qty = value
+            variant.select_qty = parseInt(event.target.value)
 
             _.each(context.child_products, function(item, key) {
                 if (vKey === key) {
@@ -1498,7 +1494,7 @@ export default {
         },
     },
     watch: {
-        child_payment_method: function(value) {
+        child_payment_method: function() {
             this.checkDataBeforeCreateOrder()
         },
     },

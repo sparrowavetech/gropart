@@ -3,8 +3,8 @@
 namespace Botble\Ecommerce\Widgets;
 
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Base\Widgets\Card;
+use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Carbon\CarbonPeriod;
 
 class NewProductCard extends Card

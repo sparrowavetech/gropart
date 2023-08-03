@@ -28,7 +28,7 @@
                                     </div>
                                 </div>
                                 <h6 class="entry-title">
-                                    <a href="{{ $post->url }}">{!! BaseHelper::clean($post->name) !!}</a>
+                                    <a href="{{ $post->url }}">{{ $post->name }}</a>
                                 </h6>
                             </div>
                         </div>

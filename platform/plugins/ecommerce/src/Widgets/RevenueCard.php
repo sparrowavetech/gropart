@@ -2,9 +2,9 @@
 
 namespace Botble\Ecommerce\Widgets;
 
+use Botble\Base\Widgets\Card;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
-use Botble\Base\Widgets\Card;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\DB;
@@ -36,18 +36,32 @@ class RevenueCard extends Card
 
     public function getViewData(): array
     {
-        $revenue = app(OrderInterface::class)
-            ->getModel()
-            ->select([
-                DB::raw('SUM(COALESCE(payments.amount, 0) - COALESCE(payments.refunded_amount, 0)) as revenue'),
-                'payments.status',
-            ])
-            ->join('payments', 'payments.id', '=', 'ec_orders.payment_id')
-            ->whereIn('payments.status', [PaymentStatusEnum::COMPLETED, PaymentStatusEnum::PENDING])
-            ->whereDate('payments.created_at', '>=', $this->startDate)
-            ->whereDate('payments.created_at', '<=', $this->endDate)
-            ->groupBy('payments.status')
-            ->first();
+        if (is_plugin_active('payment')) {
+            $revenue = app(OrderInterface::class)
+                ->getModel()
+                ->select([
+                    DB::raw('SUM(COALESCE(payments.amount, 0) - COALESCE(payments.refunded_amount, 0)) as revenue'),
+                    'payments.status',
+                ])
+                ->join('payments', 'payments.id', '=', 'ec_orders.payment_id')
+                ->whereIn('payments.status', [PaymentStatusEnum::COMPLETED, PaymentStatusEnum::PENDING])
+                ->whereDate('payments.created_at', '>=', $this->startDate)
+                ->whereDate('payments.created_at', '<=', $this->endDate)
+                ->groupBy('payments.status')
+                ->first();
+        } else {
+            $revenue = app(OrderInterface::class)
+                ->getModel()
+                ->select([
+                    DB::raw('SUM(COALESCE(amount, 0)) as revenue'),
+                    'status',
+                ])
+                ->where('status', OrderStatusEnum::COMPLETED)
+                ->whereDate('created_at', '>=', $this->startDate)
+                ->whereDate('created_at', '<=', $this->endDate)
+                ->groupBy('status')
+                ->first();
+        }
 
         $startDate = clone $this->startDate;
         $endDate = clone $this->endDate;

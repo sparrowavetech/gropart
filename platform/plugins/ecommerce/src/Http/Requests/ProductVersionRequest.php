@@ -17,6 +17,10 @@ class ProductVersionRequest extends Request
             'end_date' => 'date|nullable|after:' . ($this->input('start_date') ?? Carbon::now()->toDateTimeString()),
             'product_files_input' => 'array',
             'product_files_input.*' => 'nullable|file|mimes:' . config('plugins.ecommerce.general.digital_products.allowed_mime_types'),
+            'product_files_external' => 'nullable|array',
+            'product_files_external.*.name' => 'nullable|string|max:120',
+            'product_files_external.*.link' => 'required|url|max:400',
+            'product_files_external.*.size' => 'nullable|numeric|min:0|max:100000000',
             'barcode' => [
                 'nullable',
                 'max:50',
@@ -26,6 +30,7 @@ class ProductVersionRequest extends Request
             'cost_per_item' => 'nullable|numeric|min:0|max:' . $this->input('price'),
             'attribute_sets' => 'nullable|array',
             'attribute_sets.*' => 'required',
+            'general_license_code' => 'nullable|in:0,1',
         ];
     }
 
@@ -45,6 +50,7 @@ class ProductVersionRequest extends Request
     {
         return [
             'attribute_sets.*' => trans('plugins/ecommerce::product-attribute-sets.attribute_set'),
+            'product_files_external.*.link' => trans('plugins/ecommerce::products.digital_attachments.external_link_download'),
         ];
     }
 }

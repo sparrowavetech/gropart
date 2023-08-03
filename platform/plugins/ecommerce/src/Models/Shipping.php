@@ -3,7 +3,6 @@
 namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Models\BaseModel;
-use Botble\Ecommerce\Repositories\Interfaces\ShippingRuleInterface;
 use Botble\Ecommerce\Traits\LocationTrait;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -18,12 +17,10 @@ class Shipping extends BaseModel
         'country',
     ];
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
-
         self::deleting(function (Shipping $shipping) {
-            app(ShippingRuleInterface::class)->deleteBy(['shipping_id' => $shipping->id]);
+            $shipping->rules()->each(fn (ShippingRule $rule) => $rule->delete());
         });
     }
 

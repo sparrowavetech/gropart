@@ -4,10 +4,11 @@ namespace Botble\Ecommerce\Supports;
 
 use Botble\Base\Supports\Language;
 use Botble\Ecommerce\Models\Currency;
-use Botble\Ecommerce\Repositories\Interfaces\CurrencyInterface;
+use Botble\Ecommerce\Services\ExchangeRates\ExchangeRateInterface;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Locale;
+use Throwable;
 
 class CurrencySupport
 {
@@ -50,7 +51,7 @@ class CurrencySupport
             $currency = $this->getDefaultCurrency();
         }
 
-        $this->currency = $currency;
+        $this->currency = $this->setCurrencyExchangeRate($currency);
 
         return $currency;
     }
@@ -68,11 +69,11 @@ class CurrencySupport
         }
 
         if (! $currency) {
-            $currency = app(CurrencyInterface::class)->getFirstBy(['is_default' => 1]);
+            $currency = Currency::query()->where('is_default', 1)->first();
         }
 
         if (! $currency) {
-            $currency = app(CurrencyInterface::class)->getFirstBy([]);
+            $currency = new Currency();
         }
 
         if (! $currency) {
@@ -99,13 +100,15 @@ class CurrencySupport
         }
 
         if ($this->currencies->count() == 0) {
-            $this->currencies = app(CurrencyInterface::class)->getAllCurrencies();
+            $this->currencies = Currency::query()
+                ->orderBy('order', 'ASC')
+                ->get();
         }
 
         return $this->currencies;
     }
 
-    public function detectedCurrencyCode(): ?string
+    public function detectedCurrencyCode(): string|null
     {
         $currencies = $this->countryCurrencies();
 
@@ -573,5 +576,25 @@ class CurrencySupport
             'ZMW' => 'ZMW',
             'ZWL' => 'ZWL',
         ];
+    }
+
+    protected function setCurrencyExchangeRate(Currency $currency): Currency
+    {
+        if (
+            ! get_ecommerce_setting('use_exchange_rate_from_api') ||
+            ! get_ecommerce_setting('exchange_rate_api_provider') ||
+            (! get_ecommerce_setting('api_layer_api_key') && ! get_ecommerce_setting('open_exchange_app_id'))
+        ) {
+            return $currency;
+        }
+
+        try {
+            $rates = app(ExchangeRateInterface::class)->cacheExchangeRates();
+
+            $currency->exchange_rate = $rates[$currency->title];
+        } catch (Throwable) {
+        }
+
+        return $currency;
     }
 }

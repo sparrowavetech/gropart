@@ -2,6 +2,7 @@
 
 namespace Botble\Ecommerce\Listeners;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Ecommerce\Events\OrderPlacedEvent;
 use Exception;
 use GuzzleHttp\Client;
@@ -14,7 +15,7 @@ class SendWebhookWhenOrderPlaced
     {
         $webhookURL = get_ecommerce_setting('order_placed_webhook_url');
 
-        if (! $webhookURL || ! URL::isValidUrl($webhookURL) || app()->environment('demo')) {
+        if (! $webhookURL || ! URL::isValidUrl($webhookURL) || BaseHelper::hasDemoModeEnabled()) {
             return;
         }
 

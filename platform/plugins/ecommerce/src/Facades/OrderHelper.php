@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static bool decreaseProductQuantity(\Botble\Ecommerce\Models\Order $order)
  * @method static \Botble\Ecommerce\Models\Order shippingStatusDelivered(\Botble\Ecommerce\Models\Shipment $shipment, \Illuminate\Http\Request $request, string|int $userId = 0)
  * @method static \Botble\Ecommerce\Models\Order setOrderCompleted(string|int $orderId, \Illuminate\Http\Request $request, string|int $userId = 0)
+ * @method static string|null getOrderBankInfo(\Botble\Ecommerce\Models\Order|\Illuminate\Database\Eloquent\Collection $orders)
  *
  * @see \Botble\Ecommerce\Supports\OrderHelper
  */

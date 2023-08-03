@@ -4,12 +4,12 @@ namespace Botble\Ecommerce\Http\Controllers\Customers;
 
 use App\Http\Controllers\Controller;
 use Botble\ACL\Traits\ResetsPasswords;
+use Botble\SeoHelper\Facades\SeoHelper;
+use Botble\Theme\Facades\Theme;
 use Illuminate\Contracts\Auth\PasswordBroker;
 use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
-use SeoHelper;
-use Theme;
 
 class ResetPasswordController extends Controller
 {

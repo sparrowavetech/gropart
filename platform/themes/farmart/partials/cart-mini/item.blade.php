@@ -4,7 +4,8 @@
             <a class="img-fluid-eq" href="{{ $product->original_product->url }}">
                 <div class="img-fluid-eq__dummy"></div>
                 <div class="img-fluid-eq__wrap">
-                    <img class="lazyload" data-src="{{ Arr::get($cartItem->options, 'image', $product->original_product->image) }}" alt="{{ $product->original_product->name }}">
+                    <img class="lazyload" alt="{{ $product->original_product->name }}"
+                        data-src="{{ RvMedia::getImageUrl(Arr::get($cartItem->options, 'image', $product->original_product->image), 'thumb', false, RvMedia::getDefaultImage()) }}">
                 </div>
             </a>
         </div>
@@ -27,24 +28,16 @@
                             <small><del>{{ format_price($product->price) }}</del></small>
                         @endif</bdi>
                 </span>
-                (x{{ $cartItem->qty }})
+                ({{ __('x:quantity', ['quantity' => $cartItem->qty]) }})
             </span>
             <p class="mb-0">
-                <small>
-                    <small>{{ $cartItem->options['attributes'] ?? '' }}</small>
-                </small>
+                <small>{{ Arr::get($cartItem->options, 'attributes', '') }}</small>
             </p>
-            @if (!empty($cartItem->options['options']))
-                {!! render_product_options_info($cartItem->options['options'], $product, true) !!}
+            @if (EcommerceHelper::isEnabledProductOptions() && ! empty($cartItem->options['options']))
+                {!! render_product_options_html($cartItem->options['options'], $product->original_product->front_sale_price_with_taxes) !!}
             @endif
 
-            @if (!empty($cartItem->options['extras']) && is_array($cartItem->options['extras']))
-                @foreach($cartItem->options['extras'] as $option)
-                    @if (!empty($option['key']) && !empty($option['value']))
-                        <p class="mb-0"><small>{{ $option['key'] }}: <strong> {{ $option['value'] }}</strong></small></p>
-                    @endif
-                @endforeach
-            @endif
+            @include('plugins/ecommerce::themes.includes.cart-item-options-extras', ['options' => $cartItem->options])
         </div>
     </div>
     <div class="col-2">

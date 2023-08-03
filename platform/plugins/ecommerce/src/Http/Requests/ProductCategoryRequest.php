@@ -9,7 +9,7 @@ class ProductCategoryRequest extends Request
     public function rules(): array
     {
         return [
-            'name' => 'required',
+            'name' => 'required|string|max:220',
             'order' => 'required|integer|min:0',
         ];
     }

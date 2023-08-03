@@ -2,9 +2,9 @@
 
 namespace Theme\Farmart\Fields;
 
-use Assets;
-use Kris\LaravelFormBuilder\Fields\FormField;
-use Theme;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Forms\FormField;
+use Botble\Theme\Facades\Theme;
 
 class ThemeIconField extends FormField
 {

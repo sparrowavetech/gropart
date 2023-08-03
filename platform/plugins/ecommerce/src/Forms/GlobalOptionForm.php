@@ -2,7 +2,7 @@
 
 namespace Botble\Ecommerce\Forms;
 
-use Assets;
+use Botble\Base\Facades\Assets;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Enums\GlobalOptionEnum;
 use Botble\Ecommerce\Http\Requests\GlobalOptionRequest;
@@ -10,7 +10,7 @@ use Botble\Ecommerce\Models\GlobalOption;
 
 class GlobalOptionForm extends FormAbstract
 {
-    public function buildForm()
+    public function buildForm(): void
     {
         Assets::addScripts(['jquery-ui'])->addScriptsDirectly([
             'vendor/core/plugins/ecommerce/js/global-option.js',

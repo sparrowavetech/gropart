@@ -2,13 +2,14 @@
 
 namespace Botble\Ecommerce\Tables;
 
-use Botble\Ecommerce\Enums\ProductTypeEnum;
-use Botble\Ecommerce\Models\ProductVariation;
-use Botble\Table\Abstracts\TableAbstract;
-use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeSetInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductVariationInterface;
 use Botble\Base\Facades\Form;
 use Botble\Base\Facades\Html;
+use Botble\Ecommerce\Enums\ProductTypeEnum;
+use Botble\Ecommerce\Models\ProductVariation;
+use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeSetInterface;
+use Botble\Table\Abstracts\TableAbstract;
+use Botble\Table\DataTables;
+use Botble\Table\EloquentDataTable;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,8 +18,6 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-use Botble\Table\DataTables;
-use Botble\Table\EloquentDataTable;
 
 class ProductVariationTable extends TableAbstract
 {
@@ -36,14 +35,11 @@ class ProductVariationTable extends TableAbstract
 
     protected bool $hasDigitalProduct = false;
 
-    public function __construct(
-        DataTables $table,
-        UrlGenerator $urlGenerator,
-        ProductVariationInterface $repository
-    ) {
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, ProductVariation $model)
+    {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $repository;
+        $this->model = $model;
         $this->productAttributeSets = collect();
         $this->setOption('class', $this->getOption('class') . ' table-hover-variants');
 
@@ -77,7 +73,7 @@ class ProductVariationTable extends TableAbstract
                             'images',
                         ]);
                     if ($this->hasDigitalProduct) {
-                        $query->withCount('productFiles');
+                        $query->with('productFiles:id,product_id,extras');
                     }
                 },
                 'configurableProduct' => function (BelongsTo $query) {
@@ -103,8 +99,9 @@ class ProductVariationTable extends TableAbstract
 
     protected function baseQuery(): Relation|Builder|QueryBuilder
     {
-        return $this->repository
+        return $this
             ->getModel()
+            ->query()
             ->whereHas('configurableProduct', function (Builder $query) {
                 $query->where('configurable_product_id', $this->productId);
             });
@@ -162,7 +159,10 @@ class ProductVariationTable extends TableAbstract
         if ($this->hasDigitalProduct) {
             $data
                 ->editColumn('digital_product', function (ProductVariation $item) {
-                    return $item->product->product_files_count . Html::tag('i', '', ['class' => 'ms-1 fas fa-paperclip']);
+                    $internal = Html::tag('div', $item->product->product_file_internal_count . Html::tag('i', '', ['class' => 'ms-1 fas fa-paperclip']));
+                    $external = Html::tag('div', $item->product->product_file_external_count . Html::tag('i', '', ['class' => 'ms-1 fas fa-link']));
+
+                    return $internal . $external;
                 });
         }
 
@@ -268,14 +268,14 @@ class ProductVariationTable extends TableAbstract
         ]);
     }
 
-    public function htmlInitComplete(): ?string
+    public function htmlInitComplete(): string|null
     {
         return 'function (settings, json) {
             EcommerceProduct.tableInitComplete(this.api(), settings, json);
         ' . $this->htmlInitCompleteFunction() . '}';
     }
 
-    protected function getDom(): ?string
+    protected function getDom(): string|null
     {
         return $this->simpleDom();
     }

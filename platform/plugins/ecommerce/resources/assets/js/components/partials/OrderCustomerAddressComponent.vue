@@ -1,6 +1,6 @@
 <template>
     <div>
-        <b-modal id='add-customer' :title="__('order.create_new_customer')" :ok-title="__('order.save')"
+        <ec-modal id='add-customer' :title="__('order.create_new_customer')" :ok-title="__('order.save')"
                  :cancel-title="__('order.cancel')"
                  @shown='loadCountries($event)' @ok="$emit('create-new-customer', $event)">
             <div class='next-form-section'>
@@ -88,9 +88,9 @@
                     </div>
                 </div>
             </div>
-        </b-modal>
+        </ec-modal>
 
-        <b-modal id='edit-email' :title="__('order.update_email')" :ok-title="__('order.update')"
+        <ec-modal id='edit-email' :title="__('order.update_email')" :ok-title="__('order.update')"
                  :cancel-title="__('order.close')"
                  @ok="$emit('update-customer-email', $event)">
             <div class='next-form-section'>
@@ -101,9 +101,9 @@
                     </div>
                 </div>
             </div>
-        </b-modal>
+        </ec-modal>
 
-        <b-modal id='edit-address' :title="__('order.update_address')" :ok-title="__('order.save')"
+        <ec-modal id='edit-address' :title="__('order.update_address')" :ok-title="__('order.save')"
                  :cancel-title="__('order.cancel')"
                  @shown='shownEditAddress' @ok="$emit('update-order-address', $event)">
             <div class='next-form-section'>
@@ -197,7 +197,7 @@
                     </div>
                 </div>
             </div>
-        </b-modal>
+        </ec-modal>
     </div>
 </template>
 
@@ -237,9 +237,7 @@ export default {
                 this.loadCities($event, this.child_customer_address.state)
             }
         },
-        loadCountries: function($event) {
-            let $target = $($event.target)
-
+        loadCountries: function() {
             let context = this
             if (_.isEmpty(context.countries)) {
                 axios

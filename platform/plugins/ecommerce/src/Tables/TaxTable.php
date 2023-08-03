@@ -2,30 +2,28 @@
 
 namespace Botble\Ecommerce\Tables;
 
-use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Ecommerce\Repositories\Interfaces\TaxInterface;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
+use Botble\Ecommerce\Models\Tax;
 use Botble\Table\Abstracts\TableAbstract;
-use Html;
+use Botble\Table\DataTables;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Yajra\DataTables\DataTables;
 
 class TaxTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, TaxInterface $taxRepository)
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Tax $model)
     {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $taxRepository;
+        $this->model = $model;
+        $this->hasActions = true;
+        $this->hasFilter = true;
 
         if (! Auth::user()->hasAnyPermission(['tax.edit', 'tax.destroy'])) {
             $this->hasOperations = false;
@@ -37,26 +35,26 @@ class TaxTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('title', function ($item) {
+            ->editColumn('title', function (Tax $item) {
                 if (! Auth::user()->hasPermission('tax.edit')) {
                     return BaseHelper::clean($item->title);
                 }
 
                 return Html::link(route('tax.edit', $item->id), BaseHelper::clean($item->title));
             })
-            ->editColumn('percentage', function ($item) {
+            ->editColumn('percentage', function (Tax $item) {
                 return $item->percentage . '%';
             })
-            ->editColumn('checkbox', function ($item) {
+            ->editColumn('checkbox', function (Tax $item) {
                 return $this->getCheckbox($item->id);
             })
-            ->editColumn('status', function ($item) {
+            ->editColumn('status', function (Tax $item) {
                 return BaseHelper::clean($item->status->toHtml());
             })
-            ->editColumn('created_at', function ($item) {
+            ->editColumn('created_at', function (Tax $item) {
                 return BaseHelper::formatDate($item->created_at);
             })
-            ->addColumn('operations', function ($item) {
+            ->addColumn('operations', function (Tax $item) {
                 return $this->getOperations('tax.edit', 'tax.destroy', $item);
             });
 
@@ -65,7 +63,7 @@ class TaxTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()->select([
+        $query = $this->getModel()->query()->select([
             'id',
             'title',
             'percentage',

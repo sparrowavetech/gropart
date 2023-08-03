@@ -3,13 +3,13 @@
 namespace Botble\Ecommerce\Listeners;
 
 use Botble\Base\Events\AdminNotificationEvent;
+use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Supports\AdminNotificationItem;
 use Botble\Ecommerce\Enums\ShippingStatusEnum;
 use Botble\Ecommerce\Events\ShippingStatusChanged;
-use Botble\Base\Facades\EmailHandler;
+use Botble\Ecommerce\Facades\OrderHelper;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
-use Botble\Ecommerce\Facades\OrderHelper;
 
 class SendShippingStatusChangedNotification implements ShouldQueue
 {
@@ -31,6 +31,17 @@ class SendShippingStatusChangedNotification implements ShouldQueue
         }
 
         if ($event->shipment->status == ShippingStatusEnum::DELIVERED) {
+            $mailer = EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+            if ($mailer->templateEnabled('customer_order_delivered')) {
+                $order = $event->shipment->order;
+
+                OrderHelper::setEmailVariables($order);
+                $mailer->sendUsingTemplate(
+                    'customer_order_delivered',
+                    $order->user->email ?: $order->address->email
+                );
+            }
+
             event(new AdminNotificationEvent(
                 AdminNotificationItem::make()
                     ->title(trans('plugins/ecommerce::order.order_completed_notifications.order_completed'))

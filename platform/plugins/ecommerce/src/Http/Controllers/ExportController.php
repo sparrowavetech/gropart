@@ -2,37 +2,25 @@
 
 namespace Botble\Ecommerce\Http\Controllers;
 
-use Assets;
-use BaseHelper;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Ecommerce\Exports\CsvProductExport;
-use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductVariationInterface;
+use Botble\Ecommerce\Models\Product;
+use Botble\Ecommerce\Models\ProductVariation;
 use Maatwebsite\Excel\Excel;
 
 class ExportController extends BaseController
 {
-    protected ProductInterface $productRepository;
-
-    protected ProductVariationInterface $productVariationRepository;
-
-    public function __construct(
-        ProductInterface $productRepository,
-        ProductVariationInterface $productVariationRepository
-    ) {
-        $this->productRepository = $productRepository;
-        $this->productVariationRepository = $productVariationRepository;
-    }
-
     public function products()
     {
-        page_title()->setTitle(trans('plugins/ecommerce::export.products.name'));
+        PageTitle::setTitle(trans('plugins/ecommerce::export.products.name'));
 
         Assets::addScriptsDirectly(['vendor/core/plugins/ecommerce/js/export.js']);
 
-        $totalProduct = $this->productRepository->count(['is_variation' => 0]);
-        $totalVariation = $this->productVariationRepository
-            ->getModel()
+        $totalProduct = Product::query()->where(['is_variation' => 0])->count();
+        $totalVariation = ProductVariation::query()
             ->whereHas('product')
             ->whereHas('configurableProduct', function ($query) {
                 $query->where('is_variation', 0);

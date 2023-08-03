@@ -2,33 +2,33 @@
 
 namespace Botble\Marketplace\Tables;
 
-use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
+use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Models\Product;
 use Botble\Marketplace\Exports\ProductExport;
-use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Table\Abstracts\TableAbstract;
-use EcommerceHelper;
-use Html;
+use Botble\Table\DataTables;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
-use MarketplaceHelper;
-use RvMedia;
-use Yajra\DataTables\DataTables;
 
 class ProductTable extends TableAbstract
 {
-    protected $hasCheckbox = false;
-
-    protected string $exportClass = ProductExport::class;
-
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, ProductInterface $productRepository)
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Product $model)
     {
-        $this->repository = $productRepository;
         parent::__construct($table, $urlGenerator);
+
+        $this->model = $model;
+
+        $this->hasCheckbox = false;
+
+        $this->exportClass = ProductExport::class;
     }
 
     public function ajax(): JsonResponse
@@ -39,14 +39,6 @@ class ProductTable extends TableAbstract
                 return Html::link(route('marketplace.vendor.products.edit', $item->id), BaseHelper::clean($item->name));
             })
             ->editColumn('image', function ($item) {
-                if ($this->request()->input('action') == 'csv') {
-                    return RvMedia::getImageUrl($item->image, null, false, RvMedia::getDefaultImage());
-                }
-
-                if ($this->request()->input('action') == 'excel') {
-                    return RvMedia::getImageUrl($item->image, 'thumb', false, RvMedia::getDefaultImage());
-                }
-
                 return $this->displayThumbnail($item->image);
             })
             ->editColumn('checkbox', function ($item) {
@@ -83,7 +75,7 @@ class ProductTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()
+        $query = $this->getModel()->query()
             ->select([
                 'id',
                 'name',

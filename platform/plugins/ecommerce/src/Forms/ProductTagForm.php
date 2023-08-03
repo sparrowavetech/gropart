@@ -9,7 +9,7 @@ use Botble\Ecommerce\Models\ProductTag;
 
 class ProductTagForm extends FormAbstract
 {
-    public function buildForm()
+    public function buildForm(): void
     {
         $this
             ->setupModel(new ProductTag())

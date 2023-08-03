@@ -33,7 +33,7 @@ class FlashSale extends BaseModel
             ->withPivot(['price', 'quantity', 'sold']);
     }
 
-    public function getEndDateAttribute($value): ?string
+    public function getEndDateAttribute($value): string|null
     {
         if (! $value) {
             return $value;
@@ -61,10 +61,8 @@ class FlashSale extends BaseModel
         );
     }
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
-
         static::deleting(function (FlashSale $flashSale) {
             $flashSale->products()->detach();
         });

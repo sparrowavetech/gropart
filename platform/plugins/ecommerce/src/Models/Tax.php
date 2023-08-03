@@ -48,10 +48,8 @@ class Tax extends BaseModel
         );
     }
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
-
         self::deleting(function (Tax $tax) {
             $tax->products()->detach();
         });

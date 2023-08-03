@@ -1,5 +1,5 @@
 <div class="d-flex px-2 pt-3 position-relative">
-    <div class="block-left d-flex mr-1">
+    <div class="block-left d-flex me-1">
         <span class="align-self-center bg-white p-1">
             <i class="fas fa-users fa-2x m-2"></i>
         </span>

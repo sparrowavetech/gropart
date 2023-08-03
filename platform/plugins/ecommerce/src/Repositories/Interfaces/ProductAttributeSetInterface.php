@@ -3,19 +3,11 @@
 namespace Botble\Ecommerce\Repositories\Interfaces;
 
 use Botble\Support\Repositories\Interfaces\RepositoryInterface;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
 
 interface ProductAttributeSetInterface extends RepositoryInterface
 {
-    /**
-     * @param int $productId
-     * @return Collection
-     */
-    public function getByProductId($productId);
+    public function getByProductId(int|array|string|null $productId): Collection;
 
-    /**
-     * @param int $productId
-     * @return Collection
-     */
-    public function getAllWithSelected($productId);
+    public function getAllWithSelected(int|array|string|null $productId, array $with = []): Collection;
 }

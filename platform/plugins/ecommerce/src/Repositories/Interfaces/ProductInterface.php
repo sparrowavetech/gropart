@@ -4,15 +4,16 @@ namespace Botble\Ecommerce\Repositories\Interfaces;
 
 use Botble\Ecommerce\Models\Product;
 use Botble\Support\Repositories\Interfaces\RepositoryInterface;
+use Illuminate\Database\Eloquent\Collection;
 
 interface ProductInterface extends RepositoryInterface
 {
     /**
      * @deprecated
      */
-    public function getSearch($query, $paginate = 10);
+    public function getSearch(string|null $keyword, int $paginate = 10);
 
-    public function getRelatedProductAttributes($product);
+    public function getRelatedProductAttributes(Product $product): Collection;
 
     public function getProducts(array $params);
 
@@ -20,7 +21,7 @@ interface ProductInterface extends RepositoryInterface
 
     public function getOnSaleProducts(array $params);
 
-    public function getProductVariations($configurableProductId, array $params = []);
+    public function getProductVariations(int|string|null $configurableProductId, array $params = []);
 
     public function getProductsByCollections(array $params);
 
@@ -34,11 +35,9 @@ interface ProductInterface extends RepositoryInterface
 
     public function getProductsByIds(array $ids, array $params = []);
 
-    public function getProductsWishlist(int $customerId, array $params = []);
+    public function getProductsWishlist(int|string $customerId, array $params = []);
 
-    public function getProductsRecentlyViewed(int $customerId, array $params = []);
+    public function getProductsRecentlyViewed(int|string $customerId, array $params = []);
 
-    public function saveProductOptions(array $options, Product $product);
-
-    public function productsNeedToReviewByCustomer(int $customerId, int $limit = 12, array $orderIds = []);
+    public function productsNeedToReviewByCustomer(int|string $customerId, int $limit = 12, array $orderIds = []);
 }

@@ -5,16 +5,16 @@ namespace Botble\Ecommerce\Exports;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Enums\StockStatusEnum;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Repositories\Interfaces\BrandInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeSetInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductCategoryInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductTagInterface;
 use Botble\Ecommerce\Repositories\Interfaces\TaxInterface;
-use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
 use Carbon\Carbon;
-use EcommerceHelper;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -106,7 +106,7 @@ class TemplateProductExport implements
         }
 
         if ($this->isMarketplaceActive) {
-            $stores = app(StoreInterface::class)->pluck('name', 'id');
+            $stores = DB::table('mp_stores')->pluck('name', 'id')->all();
             $stores = collect($stores);
 
             $product['vendor'] = $stores->count() ? $stores->random() : null;
@@ -117,6 +117,7 @@ class TemplateProductExport implements
             $attributes1[] = $set->title . ':' . ($set->attributes->count() ? $set->attributes->random()->title : null);
         }
 
+        $salePrice = $price - rand(2, 5);
         $productVariation1 = array_replace($this->getTempProductData(), [
             'name' => $productName,
             'auto_generate_sku' => 'Yes',
@@ -130,13 +131,15 @@ class TemplateProductExport implements
             'stock_status' => StockStatusEnum::IN_STOCK,
             'with_storehouse_management' => 'Yes',
             'quantity' => rand(20, 300),
-            'sale_price' => $price - rand(2, 5),
+            'sale_price' => $salePrice,
             'start_date_sale_price' => Carbon::now()->startOfDay()->format('Y-m-d H:i:s'),
             'end_date_sale_price' => Carbon::now()->addDays(20)->endOfDay()->format('Y-m-d H:i:s'),
             'weight' => rand(20, 300),
             'length' => rand(20, 300),
             'wide' => rand(20, 300),
             'height' => rand(20, 300),
+            'cost_per_item' => $salePrice - rand(2, 3),
+            'barcode' => mt_rand(1000000000, 9999999999),
         ]);
 
         $attributes2 = [];
@@ -167,6 +170,8 @@ class TemplateProductExport implements
             'length' => rand(20, 300),
             'wide' => rand(20, 300),
             'height' => rand(20, 300),
+            'cost_per_item' => $price - rand(2, 3),
+            'barcode' => mt_rand(1000000000, 9999999999),
         ]);
 
         $this->results = collect([
@@ -214,6 +219,8 @@ class TemplateProductExport implements
             'length' => 'Length',
             'wide' => 'Wide',
             'height' => 'Height',
+            'cost_per_item' => 'Cost per item',
+            'barcode' => 'Barcode',
             'content' => 'Content',
             'tags' => 'Tags',
         ];
@@ -239,7 +246,7 @@ class TemplateProductExport implements
         $key = array_search($column, array_keys($this->headings()));
 
         if ($key !== false) {
-            return Coordinate::stringFromColumnIndex($key);
+            return Coordinate::stringFromColumnIndex($key + 1);
         }
 
         return '';
@@ -267,6 +274,7 @@ class TemplateProductExport implements
                 $lengthColumn = $this->stringFromColumnIndex('length');
                 $wideColumn = $this->stringFromColumnIndex('wide');
                 $heightColumn = $this->stringFromColumnIndex('height');
+                $costPerItemColumn = $this->stringFromColumnIndex('cost_per_item');
                 $productTypeColumn = $this->stringFromColumnIndex('product_type');
 
                 // set dropdown list for first data row
@@ -303,6 +311,7 @@ class TemplateProductExport implements
                     $event->sheet->getCell($heightColumn . $index)->setDataValidation($decimalValidation);
                     $event->sheet->getCell($saleColumn . $index)->setDataValidation($decimalValidation);
                     $event->sheet->getCell($priceColumn . $index)->setDataValidation($decimalValidation);
+                    $event->sheet->getCell($costPerItemColumn . $index)->setDataValidation($decimalValidation);
 
                     if ($this->enabledDigital) {
                         $event->sheet->getCell($productTypeColumn . $index)->setDataValidation($productTypeValidation);
@@ -383,7 +392,7 @@ class TemplateProductExport implements
             'plugins/ecommerce::bulk-import.export.template.prompt_whole_number',
             compact('min')
         ));
-        $validation->setFormula1($min);
+        $validation->setFormula1((string)$min);
         $validation->setOperator(DataValidation::OPERATOR_GREATERTHANOREQUAL);
 
         return $validation;
@@ -403,7 +412,7 @@ class TemplateProductExport implements
         $validation->setError(trans('plugins/ecommerce::bulk-import.export.template.number_not_allowed'));
         $validation->setPromptTitle(trans('plugins/ecommerce::bulk-import.export.template.allowed_input'));
         $validation->setPrompt(trans('plugins/ecommerce::bulk-import.export.template.prompt_decimal', compact('min')));
-        $validation->setFormula1($min);
+        $validation->setFormula1((string)$min);
         $validation->setOperator(DataValidation::OPERATOR_GREATERTHANOREQUAL);
 
         return $validation;
@@ -439,6 +448,7 @@ class TemplateProductExport implements
             'length' => NumberFormat::FORMAT_GENERAL,
             'wide' => NumberFormat::FORMAT_GENERAL,
             'height' => NumberFormat::FORMAT_GENERAL,
+            'cost_per_item' => NumberFormat::FORMAT_NUMBER_00,
         ];
 
         $formatted = [];
@@ -461,8 +471,8 @@ class TemplateProductExport implements
     public function rules(): array
     {
         $rules = [
-            'name' => 'required',
-            'description' => 'nullable',
+            'name' => 'required|string|max:220',
+            'description' => 'nullable|string|max:400',
             'slug' => 'nullable',
             'sku' => 'nullable|multiple',
             'auto_generate_sku' => 'nullable|string (Yes or No)|default: Yes',
@@ -489,6 +499,8 @@ class TemplateProductExport implements
             'length' => 'nullable|number',
             'wide' => 'nullable|number',
             'height' => 'nullable|number',
+            'cost_per_item' => 'nullable|numeric|min:0|max:100000000000',
+            'barcode' => 'nullable|max:50|unique:products',
             'content' => 'nullable',
             'tags' => 'nullable|[Product tag name]|multiple',
         ];

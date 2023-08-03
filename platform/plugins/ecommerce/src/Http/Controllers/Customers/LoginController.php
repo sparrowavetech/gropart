@@ -6,11 +6,14 @@ use App\Http\Controllers\Controller;
 use Botble\ACL\Traits\AuthenticatesUsers;
 use Botble\ACL\Traits\LogoutGuardTrait;
 use Botble\Ecommerce\Enums\CustomerStatusEnum;
-use EcommerceHelper;
+use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Http\Requests\LoginRequest;
+use Botble\JsValidation\Facades\JsValidator;
+use Botble\SeoHelper\Facades\SeoHelper;
+use Botble\Theme\Facades\Theme;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
-use SeoHelper;
-use Theme;
 
 class LoginController extends Controller
 {
@@ -31,11 +34,20 @@ class LoginController extends Controller
 
         Theme::breadcrumb()->add(__('Home'), route('public.index'))->add(__('Login'), route('customer.login'));
 
-        if (! session()->has('url.intended')) {
-            if (! in_array(url()->previous(), [route('customer.login'), route('customer.register')])) {
-                session(['url.intended' => url()->previous()]);
-            }
+        if (! session()->has('url.intended') &&
+            ! in_array(url()->previous(), [route('customer.login'), route('customer.register')])
+        ) {
+            session(['url.intended' => url()->previous()]);
         }
+
+        Theme::asset()
+            ->container('footer')
+            ->usePath(false)
+            ->add('js-validation', 'vendor/core/core/js-validation/js/js-validation.js', ['jquery']);
+
+        add_filter(THEME_FRONT_FOOTER, function ($html) {
+            return $html . JsValidator::formRequest(LoginRequest::class)->render();
+        });
 
         return Theme::scope('ecommerce.customers.login', [], 'plugins/ecommerce::themes.customers.login')->render();
     }
@@ -43,6 +55,11 @@ class LoginController extends Controller
     protected function guard()
     {
         return auth('customer');
+    }
+
+    protected function validator(array $data)
+    {
+        return Validator::make($data, (new LoginRequest())->rules());
     }
 
     public function login(Request $request)
@@ -74,7 +91,9 @@ class LoginController extends Controller
     {
         $this->guard()->logout();
 
-        return $this->loggedOut($request) ?: redirect('/');
+        $this->loggedOut($request);
+
+        return redirect()->to(route('public.index'));
     }
 
     protected function attemptLogin(Request $request)

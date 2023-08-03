@@ -2,30 +2,28 @@
 
 namespace Botble\Ecommerce\Tables;
 
+use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
+use Botble\Ecommerce\Models\Invoice;
+use Botble\Table\Abstracts\TableAbstract;
+use Botble\Table\DataTables;
+use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use BaseHelper;
-use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Ecommerce\Repositories\Interfaces\InvoiceInterface;
-use Botble\Table\Abstracts\TableAbstract;
-use Illuminate\Contracts\Routing\UrlGenerator;
-use Yajra\DataTables\DataTables;
-use Html;
 
 class InvoiceTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, InvoiceInterface $invoiceRepository)
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Invoice $model)
     {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $invoiceRepository;
+        $this->model = $model;
+        $this->hasActions = true;
+        $this->hasFilter = true;
 
         if (! Auth::user()->hasAnyPermission(['ecommerce.invoice.edit', 'ecommerce.invoice.destroy'])) {
             $this->hasOperations = false;
@@ -37,29 +35,29 @@ class InvoiceTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('customer_name', function ($item) {
+            ->editColumn('customer_name', function (Invoice $item) {
                 return $item->customer_name;
             })
-            ->editColumn('checkbox', function ($item) {
+            ->editColumn('checkbox', function (Invoice $item) {
                 return $this->getCheckbox($item->id);
             })
-            ->editColumn('amount', function ($item) {
+            ->editColumn('amount', function (Invoice $item) {
                 return format_price($item->amount);
             })
-            ->editColumn('code', function ($item) {
+            ->editColumn('code', function (Invoice $item) {
                 if (! Auth::user()->hasPermission('ecommerce.invoice.edit')) {
                     return $item->code;
                 }
 
                 return Html::link(route('ecommerce.invoice.edit', $item->id), $item->code);
             })
-            ->editColumn('created_at', function ($item) {
+            ->editColumn('created_at', function (Invoice $item) {
                 return BaseHelper::formatDate($item->created_at);
             })
-            ->editColumn('status', function ($item) {
+            ->editColumn('status', function (Invoice $item) {
                 return $item->status->toHtml();
             })
-            ->addColumn('operations', function ($item) {
+            ->addColumn('operations', function (Invoice $item) {
                 return $this->getOperations('ecommerce.invoice.edit', 'ecommerce.invoice.destroy', $item);
             });
 
@@ -68,7 +66,8 @@ class InvoiceTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()
+        $query = $this->getModel()
+            ->query()
             ->select([
                 'id',
                 'customer_name',
@@ -110,6 +109,21 @@ class InvoiceTable extends TableAbstract
                 'width' => '100px',
             ],
         ];
+    }
+
+    public function buttons(): array
+    {
+        $buttons = [];
+
+        if (Auth::user()->hasPermission('ecommerce.invoice.edit')) {
+            $buttons['generate-invoices'] = [
+                'link' => route('ecommerce.invoice.generate-invoices'),
+                'text' => '<i class="fas fa-file-export"></i> ' . trans('plugins/ecommerce::invoice.generate_invoices'),
+                'class' => 'btn-info',
+            ];
+        }
+
+        return $buttons;
     }
 
     public function bulkActions(): array

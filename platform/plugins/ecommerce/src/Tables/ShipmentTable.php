@@ -2,30 +2,28 @@
 
 namespace Botble\Ecommerce\Tables;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
 use Botble\Ecommerce\Enums\ShippingStatusEnum;
-use Botble\Ecommerce\Repositories\Interfaces\ShipmentInterface;
+use Botble\Ecommerce\Models\Shipment;
 use Botble\Table\Abstracts\TableAbstract;
-use Html;
+use Botble\Table\DataTables;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Yajra\DataTables\DataTables;
 
 class ShipmentTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, ShipmentInterface $repository)
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Shipment $model)
     {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $repository;
+        $this->model = $model;
+        $this->hasActions = true;
+        $this->hasFilter = true;
 
         if (! Auth::user()->hasAnyPermission(['ecommerce.shipments.edit', 'ecommerce.shipments.destroy'])) {
             $this->hasOperations = false;
@@ -37,29 +35,29 @@ class ShipmentTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('checkbox', function ($item) {
+            ->editColumn('checkbox', function (Shipment $item) {
                 return $this->getCheckbox($item->id);
             })
-            ->editColumn('order_id', function ($item) {
+            ->editColumn('order_id', function (Shipment $item) {
                 if (! Auth::user()->hasPermission('orders.edit')) {
                     return $item->order->code;
                 }
 
                 return Html::link(route('orders.edit', $item->order->id), $item->order->code . ' <i class="fa fa-external-link-alt"></i>', ['target' => '_blank'], null, false);
             })
-            ->editColumn('user_id', function ($item) {
+            ->editColumn('user_id', function (Shipment $item) {
                 return BaseHelper::clean($item->order->user->name ?: $item->order->address->name);
             })
-            ->editColumn('price', function ($item) {
+            ->editColumn('price', function (Shipment $item) {
                 return format_price($item->price);
             })
-            ->editColumn('created_at', function ($item) {
+            ->editColumn('created_at', function (Shipment $item) {
                 return BaseHelper::formatDate($item->created_at);
             })
-            ->editColumn('status', function ($item) {
+            ->editColumn('status', function (Shipment $item) {
                 return BaseHelper::clean($item->status->toHtml());
             })
-            ->editColumn('cod_status', function ($item) {
+            ->editColumn('cod_status', function (Shipment $item) {
                 if (! (float)$item->cod_amount) {
                     return Html::tag('span', trans('plugins/ecommerce::shipping.not_available'), ['class' => 'label-info status-label'])
                         ->toHtml();
@@ -67,7 +65,7 @@ class ShipmentTable extends TableAbstract
 
                 return BaseHelper::clean($item->cod_status->toHtml());
             })
-            ->addColumn('operations', function ($item) {
+            ->addColumn('operations', function (Shipment $item) {
                 return $this->getOperations('ecommerce.shipments.edit', 'ecommerce.shipments.destroy', $item);
             })
             ->filter(function ($query) {
@@ -87,7 +85,7 @@ class ShipmentTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()->select([
+        $query = $this->getModel()->query()->select([
             'id',
             'order_id',
             'user_id',

@@ -2,7 +2,7 @@
 
 namespace Botble\Marketplace\Tables;
 
-use Botble\Base\Facades\BaseHelper;
+use BaseHelper;
 use Botble\Marketplace\Repositories\Interfaces\RevenueInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Html;

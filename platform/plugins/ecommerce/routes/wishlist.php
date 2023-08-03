@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+
 Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Fronts', 'middleware' => ['web', 'core']], function () {
     Route::group(apply_filters(BASE_FILTER_GROUP_PUBLIC_ROUTE, []), function () {
         Route::get('wishlist', [
@@ -10,11 +12,11 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Fronts', 'middle
         Route::post('wishlist/{productId}', [
             'as' => 'public.wishlist.add',
             'uses' => 'WishlistController@store',
-        ]);
+        ])->wherePrimaryKey('productId');
 
         Route::delete('wishlist/{productId}', [
             'as' => 'public.wishlist.remove',
             'uses' => 'WishlistController@destroy',
-        ]);
+        ])->wherePrimaryKey('productId');
     });
 });

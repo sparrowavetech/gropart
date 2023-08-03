@@ -2,8 +2,8 @@
 
 namespace Botble\Ecommerce\Http\Requests;
 
-use Botble\Support\Http\Requests\Request;
 use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Support\Http\Requests\Request;
 
 class CreateAddressFromAdminRequest extends Request
 {

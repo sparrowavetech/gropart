@@ -2,8 +2,8 @@
 
 namespace Botble\Ecommerce\Widgets;
 
-use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
 use Botble\Base\Widgets\Card;
+use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
 use Carbon\CarbonPeriod;
 
 class NewOrderCard extends Card

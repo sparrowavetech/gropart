@@ -3,6 +3,7 @@
 namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Models\BaseModel;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Discount extends BaseModel
@@ -29,11 +30,12 @@ class Discount extends BaseModel
     protected $casts = [
         'start_date' => 'datetime',
         'end_date' => 'datetime',
+        'can_use_with_promotion' => 'bool',
     ];
 
     public function isExpired(): bool
     {
-        if ($this->end_date && strtotime($this->end_date) < strtotime(now()->toDateTimeString())) {
+        if ($this->end_date && strtotime($this->end_date) < strtotime(Carbon::now()->toDateTimeString())) {
             return true;
         }
 
@@ -60,15 +62,20 @@ class Discount extends BaseModel
         return $this->belongsToMany(Product::class, 'ec_discount_products', 'discount_id', 'product_id');
     }
 
+    public function productVariants(): BelongsToMany
+    {
+        return $this
+            ->products()
+            ->where('is_variation', true);
+    }
+
     public function usedByCustomers(): BelongsToMany
     {
         return $this->belongsToMany(Customer::class, 'ec_customer_used_coupons');
     }
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
-
         static::deleting(function (Discount $discount) {
             $discount->productCollections()->detach();
             $discount->customers()->detach();

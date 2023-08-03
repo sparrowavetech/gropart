@@ -10,7 +10,7 @@
                 data-href="{{ route('marketplace.reports.index') }}"
                 data-start-date="{{ $startDate }}"
                 data-end-date="{{ $endDate }}">
-                <i class="fa fa-calendar"></i>
+                <i class="fa fa-calendar me-1"></i>
                 <span>
                     <span>{{ trans('plugins/ecommerce::reports.date_range_format_value', [
                         'from' => $startDate->format('Y-m-d'),
@@ -20,8 +20,8 @@
             </button>
         </div>
 
-        <div id="report-stats-content">
-            @include('plugins/marketplace::reports.ajax')
+        <div>
+            {!! $widget->render(MARKETPLACE_MODULE_SCREEN_NAME) !!}
         </div>
     </section>
 @stop

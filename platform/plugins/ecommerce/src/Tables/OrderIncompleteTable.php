@@ -2,42 +2,42 @@
 
 namespace Botble\Ecommerce\Tables;
 
-use BaseHelper;
-use Html;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
+use Botble\Ecommerce\Models\Order;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Arr;
 use Symfony\Component\HttpFoundation\Response;
 
 class OrderIncompleteTable extends OrderTable
 {
-    protected $hasCheckbox = true;
-
     protected $hasActions = true;
 
     public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('checkbox', function ($item) {
+            ->editColumn('checkbox', function (Order $item) {
                 return $this->getCheckbox($item->id);
             })
-            ->editColumn('status', function ($item) {
+            ->editColumn('status', function (Order $item) {
                 return BaseHelper::clean($item->status->toHtml());
             })
-            ->editColumn('amount', function ($item) {
+            ->editColumn('amount', function (Order $item) {
                 return format_price($item->amount);
             })
-            ->editColumn('user_id', function ($item) {
+            ->editColumn('user_id', function (Order $item) {
                 return BaseHelper::clean($item->user->name ?: $item->address->name);
             })
-            ->editColumn('created_at', function ($item) {
+            ->editColumn('created_at', function (Order $item) {
                 return BaseHelper::formatDate($item->created_at);
             })
-            ->addColumn('operations', function ($item) {
+            ->addColumn('operations', function (Order $item) {
                 $viewButton = Html::link(
                     route('orders.view-incomplete-order', $item->id),
                     Html::tag('i', '', ['class' => 'fa fa-eye'])->toHtml(),
@@ -53,14 +53,19 @@ class OrderIncompleteTable extends OrderTable
                 return $this->getOperations(null, 'orders.destroy', $item, $viewButton);
             })
             ->filter(function ($query) {
-                $keyword = $this->request->input('search.value');
-                if ($keyword) {
+                if ($keyword = $this->request->input('search.value')) {
                     return $query
                         ->whereHas('address', function ($subQuery) use ($keyword) {
-                            return $subQuery->where('name', 'LIKE', '%' . $keyword . '%');
+                            return $subQuery
+                                ->where('name', 'LIKE', '%' . $keyword . '%')
+                                ->orWhere('email', 'LIKE', '%' . $keyword . '%')
+                                ->orWhere('phone', 'LIKE', '%' . $keyword . '%');
                         })
                         ->orWhereHas('user', function ($subQuery) use ($keyword) {
-                            return $subQuery->where('name', 'LIKE', '%' . $keyword . '%');
+                            return $subQuery
+                                ->where('name', 'LIKE', '%' . $keyword . '%')
+                                ->orWhere('email', 'LIKE', '%' . $keyword . '%')
+                                ->orWhere('phone', 'LIKE', '%' . $keyword . '%');
                         })
                         ->orWhere('code', 'LIKE', '%' . $keyword . '%');
                 }
@@ -73,7 +78,8 @@ class OrderIncompleteTable extends OrderTable
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()
+        $query = $this->getModel()
+            ->query()
             ->select([
                 'id',
                 'user_id',
@@ -88,10 +94,7 @@ class OrderIncompleteTable extends OrderTable
 
     public function renderTable($data = [], $mergeData = []): View|Factory|Response
     {
-        if ($this->query()->count() === 0 &&
-            ! $this->request()->wantsJson() &&
-            $this->request()->input('filter_table_id') !== $this->getOption('id') && ! $this->request()->ajax()
-        ) {
+        if ($this->isEmpty()) {
             return view('plugins/ecommerce::orders.incomplete-intro');
         }
 
@@ -125,5 +128,13 @@ class OrderIncompleteTable extends OrderTable
     public function bulkActions(): array
     {
         return $this->addDeleteAction(route('orders.deletes'), 'orders.destroy', parent::bulkActions());
+    }
+
+    public function getFilters(): array
+    {
+        $filters = parent::getFilters();
+        Arr::forget($filters, ['payment_method', 'payment_status', 'shipping_method']);
+
+        return $filters;
     }
 }

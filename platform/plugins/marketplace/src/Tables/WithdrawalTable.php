@@ -2,11 +2,12 @@
 
 namespace Botble\Marketplace\Tables;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
 use Botble\Marketplace\Enums\WithdrawalStatusEnum;
-use Botble\Marketplace\Repositories\Interfaces\WithdrawalInterface;
+use Botble\Marketplace\Models\Withdrawal;
 use Botble\Table\Abstracts\TableAbstract;
-use Html;
+use Botble\Table\DataTables;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -14,7 +15,6 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
-use Yajra\DataTables\DataTables;
 
 class WithdrawalTable extends TableAbstract
 {
@@ -25,11 +25,11 @@ class WithdrawalTable extends TableAbstract
     public function __construct(
         DataTables $table,
         UrlGenerator $urlGenerator,
-        WithdrawalInterface $withdrawalRepository
+        Withdrawal $model
     ) {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $withdrawalRepository;
+        $this->model = $model;
 
         if (! Auth::user()->hasAnyPermission(['marketplace.withdrawal.edit', 'marketplace.withdrawal.destroy'])) {
             $this->hasOperations = false;
@@ -68,7 +68,7 @@ class WithdrawalTable extends TableAbstract
                 return BaseHelper::clean($item->status->toHtml());
             })
             ->addColumn('operations', function ($item) {
-                return $this->getOperations('marketplace.withdrawal.edit', null, $item);
+                return $this->getOperations('marketplace.withdrawal.edit', 'marketplace.withdrawal.destroy', $item);
             });
 
         return $this->toJson($data);
@@ -76,7 +76,7 @@ class WithdrawalTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()
+        $query = $this->getModel()->query()
             ->select([
                 'id',
                 'customer_id',

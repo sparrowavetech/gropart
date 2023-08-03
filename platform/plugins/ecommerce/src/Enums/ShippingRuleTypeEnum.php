@@ -2,10 +2,10 @@
 
 namespace Botble\Ecommerce\Enums;
 
+use Botble\Base\Facades\Html;
 use Botble\Base\Supports\Enum;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Shipping;
-use EcommerceHelper;
-use Html;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\HtmlString;
@@ -40,7 +40,7 @@ class ShippingRuleTypeEnum extends Enum
         };
     }
 
-    public static function getLabel(?string $value): ?string
+    public static function getLabel(string|null $value): string|null
     {
         $key = sprintf(
             '%s.%s',
@@ -67,7 +67,7 @@ class ShippingRuleTypeEnum extends Enum
         return apply_filters(BASE_FILTER_ENUM_LABEL, $label, get_called_class());
     }
 
-    public function label(): ?string
+    public function label(): string|null
     {
         return self::getLabel($this->getValue());
     }

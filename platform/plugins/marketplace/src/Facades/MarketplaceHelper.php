@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\Facade;
  * @method static mixed sendMailToVendorAfterProcessingOrder($orders)
  * @method static \Botble\Base\Supports\EmailHandler setEmailVendorVariables(\Botble\Ecommerce\Models\Order $order)
  * @method static bool isCommissionCategoryFeeBasedEnabled()
+ * @method static int maxFilesizeUploadByVendor()
+ * @method static int maxProductImagesUploadByVendor()
  *
  * @see \Botble\Marketplace\Supports\MarketplaceHelper
  */

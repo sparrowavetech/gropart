@@ -1,16 +1,13 @@
-@php
-$categories = $categories->where('is_enquiry','=' ,0);
-@endphp
 @foreach ($categories as $category)
-    <li @if ($category->activeChildren->count()) class="menu-item-has-children has-mega-menu" @endif>
+    <li @if ($categoriesCount = $category->activeChildren->isNotEmpty()) class="menu-item-has-children has-mega-menu" @endif>
         <a href="{{ $category->url }}">
-            @if ($category->getMetaData('icon_image', true))
-                <img src="{{ RvMedia::getImageUrl($category->getMetaData('icon_image', true)) }}" alt="{{ $category->name }}" width="18" height="18">
-            @elseif ($category->getMetaData('icon', true))
-                <i class="{{ $category->getMetaData('icon', true) }}"></i>
+            @if ($iconImage = $category->getMetaData('icon_image', true))
+                <img src="{{ RvMedia::getImageUrl($iconImage) }}" alt="{{ $category->name }}" width="18" height="18">
+            @elseif ($icon = $category->getMetaData('icon', true))
+                <i class="{{ $icon }}"></i>
             @endif
-            <span class="ms-1">{!! BaseHelper::clean($category->name) !!}</span>
-            @if ($category->activeChildren->count())
+            <span class="ms-1">{{ $category->name }}</span>
+            @if ($categoriesCount)
                 <span class="sub-toggle">
                     <span class="svg-icon">
                         <svg>
@@ -20,11 +17,11 @@ $categories = $categories->where('is_enquiry','=' ,0);
                 </span>
             @endif
         </a>
-        @if ($category->activeChildren->count())
-            <div class="mega-menu" @if ($category->activeChildren->count() == 1) style="min-width: 250px;" @endif>
+        @if ($categoriesCount)
+            <div class="mega-menu" @if (! isset($category->activeChildren[1])) style="min-width: 250px;" @endif>
                 @foreach($category->activeChildren as $childCategory)
                     <div class="mega-menu__column">
-                        @if ($childCategory->activeChildren->count())
+                        @if ($childCategory->activeChildren->isNotEmpty())
                             <a href="{{ $childCategory->url }}">
                                 <h4>{{ $childCategory->name }}</h4>
                                 <span class="sub-toggle">

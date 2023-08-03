@@ -14,6 +14,15 @@ class UpdateDefaultProductService
             return null;
         }
 
+        $this->updateColumns($parent, $product);
+
+        $parent->save();
+
+        return $parent;
+    }
+
+    public function updateColumns(Product $parent, Product $product): Product
+    {
         $data = [
             'sku',
             'sale_type',
@@ -39,8 +48,6 @@ class UpdateDefaultProductService
             $parent->start_date = null;
             $parent->end_date = null;
         }
-
-        $parent->save();
 
         return $parent;
     }

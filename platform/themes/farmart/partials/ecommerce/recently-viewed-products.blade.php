@@ -1,5 +1,5 @@
 <div class="recently-product-wrapper">
-    @if ($products->count())
+    @if ($products->isNotEmpty())
         <ul class="product-list"
             data-slick="{{ json_encode(['arrows' => true, 'dots' => false, 'autoplay' => false, 'infinite' => true, 'slidesToShow' => 10]) }}">
             @foreach ($products as $product)

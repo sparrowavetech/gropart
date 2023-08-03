@@ -5,8 +5,8 @@
                 'condition' => [
                     'status' => \Botble\Base\Enums\BaseStatusEnum::PUBLISHED
                 ],
-                'take'      => $config['number_display'] ?? 10,
-                'with'      => ['slugable'],
+                'take' => (int)$config['number_display'] ?? 10,
+                'with' => ['slugable'],
             ]);
     @endphp
     @if ($categories->count())
@@ -16,7 +16,7 @@
                 <ul>
                     @foreach ($categories as $category)
                         <li class="cat-item">
-                            <a href="{{ $category->url }}">{!! BaseHelper::clean($category->name) !!}</a>
+                            <a href="{{ $category->url }}" title="{{ $category->name }}">{{ $category->name }}</a>
                         </li>
                     @endforeach
                 </ul>

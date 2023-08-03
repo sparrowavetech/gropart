@@ -2,8 +2,7 @@
     $id = $name . '-' . time();
 @endphp
 
-{!! Form::hidden($name, $values ? json_encode($values) : null, $attributes) !!}
-<div id="{{ $id }}-upload" class="dropzone needsclick">
+<div id="{{ $id }}-upload" class="dropzone needsclick dz-sortable">
     <div class="dz-message needsclick">
         {{ __('Drop files here or click to upload.') }}<br>
     </div>

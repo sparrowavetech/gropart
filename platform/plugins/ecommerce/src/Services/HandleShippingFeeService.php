@@ -5,6 +5,7 @@ namespace Botble\Ecommerce\Services;
 use Botble\Base\Models\BaseModel;
 use Botble\Ecommerce\Enums\ShippingMethodEnum;
 use Botble\Ecommerce\Enums\ShippingRuleTypeEnum;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Shipping;
 use Botble\Ecommerce\Repositories\Interfaces\AddressInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
@@ -12,44 +13,29 @@ use Botble\Ecommerce\Repositories\Interfaces\ShippingInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ShippingRuleInterface;
 use Botble\Ecommerce\Repositories\Interfaces\StoreLocatorInterface;
 use Botble\Support\Services\Cache\Cache;
-use EcommerceHelper;
+use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 
 class HandleShippingFeeService
 {
-    protected ShippingInterface $shippingRepository;
-
-    protected AddressInterface $addressRepository;
-
-    protected ShippingRuleInterface $shippingRuleRepository;
-
-    protected ProductInterface $productRepository;
-
-    protected StoreLocatorInterface $storeLocatorRepository;
-
     protected array $shipping;
 
     protected ?BaseModel $shippingDefault = null;
 
     protected array $shippingRules;
 
-    protected Cache $cache;
-
     protected bool $useCache;
 
+    protected Cache $cache;
+
     public function __construct(
-        ShippingInterface $shippingRepository,
-        AddressInterface $addressRepository,
-        ShippingRuleInterface $shippingRuleRepository,
-        ProductInterface $productRepository,
-        StoreLocatorInterface $storeLocatorRepository
+        protected ShippingInterface $shippingRepository,
+        protected AddressInterface $addressRepository,
+        protected ShippingRuleInterface $shippingRuleRepository,
+        protected ProductInterface $productRepository,
+        protected StoreLocatorInterface $storeLocatorRepository
     ) {
-        $this->shippingRepository = $shippingRepository;
-        $this->addressRepository = $addressRepository;
-        $this->shippingRuleRepository = $shippingRuleRepository;
-        $this->productRepository = $productRepository;
-        $this->storeLocatorRepository = $storeLocatorRepository;
         $this->shipping = [];
         $this->shippingRules = [];
 
@@ -57,7 +43,7 @@ class HandleShippingFeeService
         $this->useCache = true;
     }
 
-    public function execute(array $data, ?string $method = null, ?string $option = null): array
+    public function execute(array $data, string|null $method = null, string|null $option = null): array
     {
         $result = [];
 
@@ -93,10 +79,34 @@ class HandleShippingFeeService
             return $response ? [$response] : [];
         }
 
+        if (get_ecommerce_setting('hide_other_shipping_options_if_it_has_free_shipping', false)) {
+            $hasFreeShipping = false;
+
+            foreach ($result as $item) {
+                foreach ($item as $option) {
+                    if ((float)$option['price'] == 0) {
+                        $hasFreeShipping = true;
+
+                        break;
+                    }
+                }
+            }
+
+            if ($hasFreeShipping) {
+                foreach ($result as $itemKey => $item) {
+                    foreach ($item as $optionKey => $option) {
+                        if ((float)$option['price'] > 0) {
+                            Arr::forget($result, $itemKey . '.' . $optionKey);
+                        }
+                    }
+                }
+            }
+        }
+
         return $result;
     }
 
-    protected function getShippingFee(array $data, string $method, ?string $option = null): array
+    protected function getShippingFee(array $data, string $method, string|null $option = null): array
     {
         $weight = EcommerceHelper::validateOrderWeight(Arr::get($data, 'weight'));
 
@@ -158,8 +168,8 @@ class HandleShippingFeeService
 
     protected function calculateDefaultFeeByAddress(
         ?Shipping $shipping,
-        int $weight,
-        int $orderTotal,
+        int|float $weight,
+        int|float $orderTotal,
         array $data,
         string $option = null
     ): array {
@@ -314,7 +324,12 @@ class HandleShippingFeeService
         return md5(json_encode(Arr::only($data, ['origin', 'address_to', 'items', 'extra'])));
     }
 
-    protected function getCacheValue(string $key): mixed
+    public function clearCache(): void
+    {
+        $this->cache->flush();
+    }
+
+    protected function getCacheValue(string $key): array|Repository|string|null
     {
         if ($this->useCache) {
             return $this->cache->get($key);

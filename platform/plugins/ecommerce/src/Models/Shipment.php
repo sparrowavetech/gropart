@@ -42,12 +42,10 @@ class Shipment extends BaseModel
         'date_shipped' => 'datetime',
     ];
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
-
         self::deleting(function (Shipment $shipment) {
-            ShipmentHistory::where('shipment_id', $shipment->id)->delete();
+            $shipment->histories()->delete();
         });
     }
 

@@ -4,10 +4,10 @@ namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
+use Botble\Media\Facades\RvMedia;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
-use Botble\Media\Facades\RvMedia;
 
 class ProductAttribute extends BaseModel
 {
@@ -43,12 +43,10 @@ class ProductAttribute extends BaseModel
         return $value;
     }
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
-
         self::deleting(function (ProductAttribute $productAttribute) {
-            ProductVariationItem::where('attribute_id', $productAttribute->id)->delete();
+            $productAttribute->productVariationItems()->delete();
         });
     }
 

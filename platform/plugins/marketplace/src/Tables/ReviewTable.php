@@ -2,53 +2,52 @@
 
 namespace Botble\Marketplace\Tables;
 
-use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Ecommerce\Repositories\Interfaces\ReviewInterface;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
+use Botble\Ecommerce\Models\Review;
+use Botble\Media\Facades\RvMedia;
 use Botble\Table\Abstracts\TableAbstract;
-use Html;
+use Botble\Table\DataTables;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
-use Yajra\DataTables\DataTables;
-use RvMedia;
 
 class ReviewTable extends TableAbstract
 {
-    protected $hasOperations = false;
-
-    protected $hasCheckbox = false;
-
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, ReviewInterface $reviewRepository)
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Review $model)
     {
-        $this->repository = $reviewRepository;
         parent::__construct($table, $urlGenerator);
+
+        $this->model = $model;
+        $this->hasOperations = false;
+        $this->hasCheckbox = false;
     }
 
     public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('product_id', function ($item) {
+            ->editColumn('product_id', function (Review $item) {
                 if (! empty($item->product)) {
                     return Html::link(
                         $item->product->url,
-                        BaseHelper::clean($item->product_name),
+                        BaseHelper::clean($item->product->name),
                         ['target' => '_blank']
                     );
                 }
 
                 return null;
             })
-            ->editColumn('customer_id', function ($item) {
+            ->editColumn('customer_id', function (Review $item) {
                 return BaseHelper::clean($item->user->name);
             })
             ->editColumn('star', function ($item) {
                 return view('plugins/ecommerce::reviews.partials.rating', ['star' => $item->star])->render();
             })
-            ->editColumn('images', function ($item) {
+            ->editColumn('images', function (Review $item) {
                 if (! is_array($item->images)) {
                     return '&mdash;';
                 }
@@ -120,7 +119,7 @@ class ReviewTable extends TableAbstract
 
                 return $html;
             })
-            ->editColumn('created_at', function ($item) {
+            ->editColumn('created_at', function (Review $item) {
                 return BaseHelper::formatDate($item->created_at);
             });
 
@@ -129,7 +128,7 @@ class ReviewTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()
+        $query = $this->getModel()->query()
             ->select([
                 'ec_reviews.id',
                 'ec_reviews.star',

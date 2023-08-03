@@ -3,14 +3,14 @@
 namespace Botble\Ecommerce\Listeners;
 
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Repositories\Interfaces\BrandInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductCategoryInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductTagInterface;
 use Botble\Theme\Events\RenderingSiteMapEvent;
-use Botble\Ecommerce\Facades\EcommerceHelper;
-use Illuminate\Support\Arr;
 use Botble\Theme\Facades\SiteMapManager;
+use Illuminate\Support\Arr;
 
 class RenderingSiteMapListener
 {

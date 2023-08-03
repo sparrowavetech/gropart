@@ -2,50 +2,14 @@
 
 namespace Botble\Ecommerce\Services;
 
-use Botble\Ecommerce\Repositories\Interfaces\CurrencyInterface;
-use CurrencyHelper;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
+use Botble\Ecommerce\Models\Currency;
 
 class StoreCurrenciesService
 {
-    protected CurrencyInterface $currencyRepository;
-
-    public function __construct(CurrencyInterface $currency)
-    {
-        $this->currencyRepository = $currency;
-    }
-
     public function execute(array $currencies, array $deletedCurrencies): array
     {
-        $validated = Validator::make(
-            $currencies,
-            [
-                '*.title' => 'required|string|' . Rule::in(CurrencyHelper::currencyCodes()),
-                '*.symbol' => 'required|string',
-            ],
-            [
-                '*.title.in' => trans('plugins/ecommerce::currency.invalid_currency_name', [
-                    'currencies' => implode(', ', CurrencyHelper::currencyCodes()),
-                ]),
-            ],
-            [
-                '*.title' => trans('plugins/ecommerce::currency.invalid_currency_name'),
-                '*.symbol' => trans('plugins/ecommerce::currency.symbol'),
-            ]
-        );
-
-        if ($validated->fails()) {
-            return [
-                'error' => true,
-                'message' => $validated->getMessageBag()->first(),
-            ];
-        }
-
         if ($deletedCurrencies) {
-            $this->currencyRepository->deleteBy([
-                ['id', 'IN', $deletedCurrencies],
-            ]);
+            Currency::query()->whereIn('id', $deletedCurrencies)->delete();
         }
 
         foreach ($currencies as $item) {
@@ -61,13 +25,13 @@ class StoreCurrenciesService
                 $item['is_default'] = 1;
             }
 
-            $currency = $this->currencyRepository->findById($item['id']);
+            $currency = Currency::query()->find($item['id']);
 
             if (! $currency) {
-                $this->currencyRepository->create($item);
+                Currency::query()->create($item);
             } else {
                 $currency->fill($item);
-                $this->currencyRepository->createOrUpdate($currency);
+                $currency->save();
             }
         }
 

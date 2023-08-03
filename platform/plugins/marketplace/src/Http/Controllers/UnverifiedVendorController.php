@@ -2,53 +2,54 @@
 
 namespace Botble\Marketplace\Http\Controllers;
 
-use Assets;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\EmailHandler;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Tables\UnverifiedVendorTable;
 use Carbon\Carbon;
-use EmailHandler;
 use Illuminate\Http\Request;
-use MarketplaceHelper;
 
 class UnverifiedVendorController extends BaseController
 {
-    protected CustomerInterface $customerRepository;
-
-    public function __construct(CustomerInterface $customerRepository)
+    public function __construct(protected CustomerInterface $customerRepository)
     {
-        $this->customerRepository = $customerRepository;
     }
 
     public function index(UnverifiedVendorTable $table)
     {
-        page_title()->setTitle(trans('plugins/marketplace::unverified-vendor.name'));
+        PageTitle::setTitle(trans('plugins/marketplace::unverified-vendor.name'));
 
         return $table->renderTable();
     }
 
-    public function view(int $id)
+    public function view(int|string $id)
     {
         $vendor = $this->customerRepository->getFirstBy([
             'id' => $id,
             'is_vendor' => true,
-            'vendor_verified_at' => null,
         ]);
 
         if (! $vendor) {
             abort(404);
         }
 
-        page_title()->setTitle(trans('plugins/marketplace::unverified-vendor.verify', ['name' => $vendor->name]));
+        if ($vendor->vendor_verified_at) {
+            return route('customers.edit', $vendor->id);
+        }
+
+        PageTitle::setTitle(trans('plugins/marketplace::unverified-vendor.verify', ['name' => $vendor->name]));
 
         Assets::addScriptsDirectly(['vendor/core/plugins/marketplace/js/marketplace-vendor.js']);
 
         return view('plugins/marketplace::customers.verify-vendor', compact('vendor'));
     }
 
-    public function approveVendor(int $id, Request $request, BaseHttpResponse $response)
+    public function approveVendor(int|string $id, Request $request, BaseHttpResponse $response)
     {
         $vendor = $this->customerRepository
             ->getFirstBy([

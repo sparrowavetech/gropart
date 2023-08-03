@@ -11,7 +11,7 @@ class VendorTable extends CustomerTable
 {
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()
+        $query = $this->getModel()->query()
             ->select([
                 'id',
                 'name',
@@ -21,8 +21,25 @@ class VendorTable extends CustomerTable
                 'status',
                 'confirmed_at',
             ])
-            ->where('is_vendor', true);
+            ->where('is_vendor', true)
+            ->with(['store']);
 
         return $this->applyScopes($query);
+    }
+
+    public function columns(): array
+    {
+        $columns = parent::columns();
+
+        $columns['store_name'] = [
+            'title' => trans('plugins/marketplace::marketplace.store_name'),
+            'class' => 'text-start',
+            'orderable' => false,
+            'searchable' => false,
+            'exportable' => false,
+            'printable' => false,
+        ];
+
+        return $columns;
     }
 }

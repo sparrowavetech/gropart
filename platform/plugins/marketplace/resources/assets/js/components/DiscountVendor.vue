@@ -67,7 +67,7 @@
                 <div class="pd-all-10-20 form-group mb0">
                     <label class="text-title-field">{{ __('discount.start_date')}}</label>
                     <div class="next-field__connected-wrapper z-index-9">
-                        <div class="input-group">
+                        <div class="input-group me-2">
                             <div class="input-group datepicker">
                                 <input type="text" :placeholder="dateFormat" :data-date-format="dateFormat" name="start_date" v-model="start_date"
                                        class="next-field--connected next-input"
@@ -89,7 +89,7 @@
                 <div class="pd-all-10-20 form-group mb0">
                     <label class="text-title-field">{{ __('discount.end_date')}}</label>
                     <div class="next-field__connected-wrapper z-index-9">
-                        <div class="input-group">
+                        <div class="input-group me-2">
                             <div class="input-group datepicker">
                                 <input type="text" :placeholder="dateFormat" :data-date-format="dateFormat" name="end_date" v-model="end_date"
                                        class="next-field--connected next-input"
@@ -120,7 +120,7 @@
             <br>
             <div class="wrapper-content">
                 <div class="pd-all-20">
-                    <a class="btn btn-secondary" :href="cancelUrl" v-if="cancelUrl">{{ __('discount.cancel') }}</a>
+                    <a class="btn btn-secondary me-2" :href="cancelUrl" v-if="cancelUrl">{{ __('discount.cancel') }}</a>
                     <button class="btn btn-primary">{{ __('discount.save') }}</button>
                 </div>
             </div>
@@ -144,9 +144,9 @@
                 title: null,
                 code: null,
                 type: 'coupon',
-                is_unlimited: 1,
+                is_unlimited: true,
                 quantity: 0,
-                unlimited_time: 1,
+                unlimited_time: true,
                 start_date: moment().format('Y-MM-DD'),
                 start_time: '00:00',
                 end_date: moment().format('Y-MM-DD'),

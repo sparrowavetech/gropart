@@ -4,10 +4,10 @@ namespace Botble\Ecommerce\Services\ExchangeRates;
 
 use Botble\Ecommerce\Facades\Currency;
 use Botble\Ecommerce\Repositories\Interfaces\CurrencyInterface;
+use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
-use Exception;
 
 class OpenExchangeRatesService implements ExchangeRateInterface
 {

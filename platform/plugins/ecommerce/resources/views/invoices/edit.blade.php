@@ -1,6 +1,7 @@
 @extends('core/base::layouts.master')
 
 @section('content')
+    <div class="max-width-1036">
     <div class="card">
         <div class="card-body">
             <div class="invoice-info">
@@ -83,6 +84,11 @@
                     </tbody>
                     <tfoot>
                     <tr>
+                        <th colspan="2" class="text-end">{{ trans('plugins/ecommerce::invoice.detail.quantity') }}:
+                        </th>
+                        <th class="text-center">{{ number_format($invoice->items->sum('qty')) }}</th>
+                    </tr>
+                    <tr>
                         <th colspan="2" class="text-end">{{ trans('plugins/ecommerce::invoice.detail.sub_total') }}:
                         </th>
                         <th class="text-center">{{ format_price($invoice->sub_total) }}</th>
@@ -93,21 +99,17 @@
                             <th class="text-center">{{ format_price($invoice->tax_amount) }}</th>
                         </tr>
                     @endif
-                    @if ($invoice->shipping_amount > 0)
-                        <tr>
-                            <th colspan="2"
-                                class="text-end">{{ trans('plugins/ecommerce::invoice.detail.shipping_fee') }}:
-                            </th>
-                            <th class="text-center">{{ format_price($invoice->shipping_amount) }}</th>
-                        </tr>
-                    @endif
-                    @if ($invoice->discount_amount > 0)
-                        <tr>
-                            <th colspan="2" class="text-end">{{ trans('plugins/ecommerce::invoice.detail.discount') }}:
-                            </th>
-                            <th class="text-center">{{ format_price($invoice->discount_amount) }}</th>
-                        </tr>
-                    @endif
+                    <tr>
+                        <th colspan="2"
+                            class="text-end">{{ trans('plugins/ecommerce::invoice.detail.shipping_fee') }}:
+                        </th>
+                        <th class="text-center">{{ format_price($invoice->shipping_amount) }}</th>
+                    </tr>
+                    <tr>
+                        <th colspan="2" class="text-end">{{ trans('plugins/ecommerce::invoice.detail.discount') }}:
+                        </th>
+                        <th class="text-center">{{ format_price($invoice->discount_amount) }}</th>
+                    </tr>
                     <tr>
                         <th colspan="2" class="text-end">{{ trans('plugins/ecommerce::invoice.detail.grand_total') }}:
                         </th>
@@ -130,6 +132,8 @@
                             @if ($invoice->customer_tax_id)
                                 <strong>{{ trans('plugins/ecommerce::invoice.detail.tax_id') }}:</strong> {{ $invoice->customer_tax_id }}<br>
                             @endif
+
+                            {!! apply_filters('ecommerce_admin_invoice_extra_info', null, $invoice->reference) !!}
                         </p>
                     </div>
                     <div class="col-md-6 text-end">
@@ -141,14 +145,15 @@
             </div>
         </div>
         <div class="card-footer text-center">
-            <a href="{{ route('ecommerce.invoice.generate-invoice', ['id' => $invoice->id, 'type' => 'print']) }}" target="_blank"
+            <a href="{{ route('ecommerce.invoice.generate-invoice', ['invoice' => $invoice, 'type' => 'print']) }}" target="_blank"
                class="btn btn-danger">
                 <i class="fas fa-print"></i> {{ trans('plugins/ecommerce::invoice.print') }}
             </a>
-            <a href="{{ route('ecommerce.invoice.generate-invoice', ['id' => $invoice->id, 'type' => 'download']) }}"
+            <a href="{{ route('ecommerce.invoice.generate-invoice', ['invoice' => $invoice, 'type' => 'download']) }}"
                target="_blank" class="btn btn-success">
                 <i class="fas fa-download"></i> {{ trans('plugins/ecommerce::invoice.download') }}
             </a>
         </div>
+    </div>
     </div>
 @endsection

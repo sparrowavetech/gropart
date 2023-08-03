@@ -2,23 +2,19 @@
 
 namespace Botble\Ecommerce\Commands;
 
+use Botble\Base\Facades\EmailHandler;
+use Botble\Ecommerce\Facades\OrderHelper;
 use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
-use EmailHandler;
 use Illuminate\Console\Command;
-use OrderHelper;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Throwable;
 
 #[AsCommand('cms:abandoned-carts:email', 'Send emails abandoned carts')]
 class SendAbandonedCartsEmailCommand extends Command
 {
-    public OrderInterface $orderRepository;
-
-    public function __construct(OrderInterface $orderRepository)
+    public function __construct(protected OrderInterface $orderRepository)
     {
         parent::__construct();
-
-        $this->orderRepository = $orderRepository;
     }
 
     public function handle(): int

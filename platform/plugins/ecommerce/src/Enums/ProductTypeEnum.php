@@ -2,9 +2,9 @@
 
 namespace Botble\Ecommerce\Enums;
 
+use Botble\Base\Facades\Html;
 use Botble\Base\Supports\Enum;
-use EcommerceHelper;
-use Html;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Illuminate\Support\HtmlString;
 
 /**
@@ -43,10 +43,8 @@ class ProductTypeEnum extends Enum
             self::DIGITAL => Html::tag('i', '', [
                 'class' => 'fa-solid fa-microchip text-info',
                 'title' => self::DIGITAL()->label(),
-            ])
-                ->toHtml(),
-            default => Html::tag('i', '', ['class' => 'fa fa-camera'])
-                ->toHtml(),
+            ])->toHtml(),
+            default => Html::tag('i', '', ['class' => 'fa fa-camera'])->toHtml(),
         };
     }
 }

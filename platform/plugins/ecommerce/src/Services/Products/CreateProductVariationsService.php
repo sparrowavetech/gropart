@@ -4,27 +4,14 @@ namespace Botble\Ecommerce\Services\Products;
 
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductVariationInterface;
 
 class CreateProductVariationsService
 {
-    protected ProductInterface $productRepository;
-
-    protected ProductAttributeInterface $productAttributeRepository;
-
-    protected ProductVariationInterface $productVariationRepository;
-
     public function __construct(
-        ProductInterface $product,
-        ProductAttributeInterface $productAttribute,
-        ProductVariationInterface $productVariation
+        protected ProductAttributeInterface $productAttributeRepository,
+        protected ProductVariationInterface $productVariationRepository
     ) {
-        $this->productRepository = $product;
-
-        $this->productAttributeRepository = $productAttribute;
-
-        $this->productVariationRepository = $productVariation;
     }
 
     public function execute(Product $product): array
@@ -49,7 +36,7 @@ class CreateProductVariationsService
 
         $variations = [];
         foreach ($variationsInfo as $value) {
-            $result = $this->productVariationRepository->getVariationByAttributesOrCreate($product->id, $value);
+            $result = $this->productVariationRepository->getVariationByAttributesOrCreate($product->getKey(), $value);
             $variations[] = $result['variation'];
         }
 

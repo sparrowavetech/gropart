@@ -2,13 +2,11 @@
 
 namespace Botble\Ecommerce\Repositories\Caches;
 
-use Botble\Ecommerce\Repositories\Interfaces\CurrencyInterface;
-use Botble\Support\Repositories\Caches\CacheAbstractDecorator;
+use Botble\Ecommerce\Repositories\Eloquent\CurrencyRepository;
 
-class CurrencyCacheDecorator extends CacheAbstractDecorator implements CurrencyInterface
+/**
+ * @deprecated
+ */
+class CurrencyCacheDecorator extends CurrencyRepository
 {
-    public function getAllCurrencies()
-    {
-        return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
-    }
 }

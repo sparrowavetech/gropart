@@ -1,5 +1,7 @@
 <?php
 
+use Carbon\Carbon;
+
 app()->booted(function () {
     theme_option()
         ->setField([
@@ -31,6 +33,24 @@ app()->booted(function () {
                     'no' => trans('core/base::base.no'),
                 ],
                 'value' => 'yes',
+                'options' => [
+                    'class' => 'form-control',
+                ],
+            ],
+        ])
+        ->setField([
+            'id' => 'sticky_header_content_position',
+            'section_id' => 'opt-text-subsection-general',
+            'type' => 'customSelect',
+            'label' => __('Sticky header content position?'),
+            'attributes' => [
+                'name' => 'sticky_header_content_position',
+                'list' => [
+                    'bottom' => __('Header bottom'),
+                    'middle' => __('Header middle'),
+                    'top' => __('Header top'),
+                ],
+                'value' => 'middle',
                 'options' => [
                     'class' => 'form-control',
                 ],
@@ -104,7 +124,7 @@ app()->booted(function () {
             'label' => __('Copyright'),
             'attributes' => [
                 'name' => 'copyright',
-                'value' => __('© :year Your Company. All right reserved.', ['year' => now()->format('Y')]),
+                'value' => __('© :year Your Company. All right reserved.', ['year' => Carbon::now()->format('Y')]),
                 'options' => [
                     'class' => 'form-control',
                     'placeholder' => __('Change copyright'),
@@ -408,26 +428,6 @@ app()->booted(function () {
                     'class' => 'form-control',
                     'placeholder' => 'https://...',
                     'data-counter' => 255,
-                ],
-            ],
-        ]);
-
-    // Facebook integration
-    theme_option()
-        ->setField([
-            'id' => 'facebook_comment_enabled_in_product',
-            'section_id' => 'opt-text-subsection-facebook-integration',
-            'type' => 'customSelect',
-            'label' => __('Enable Facebook comment in product detail page?'),
-            'attributes' => [
-                'name' => 'facebook_comment_enabled_in_product',
-                'list' => [
-                    'no' => trans('core/base::base.no'),
-                    'yes' => trans('core/base::base.yes'),
-                ],
-                'value' => 'no',
-                'options' => [
-                    'class' => 'form-control',
                 ],
             ],
         ]);

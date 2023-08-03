@@ -10,10 +10,7 @@ class OrderReturnedEvent extends Event
 {
     use SerializesModels;
 
-    public OrderReturn $order;
-
-    public function __construct(OrderReturn $order)
+    public function __construct(public OrderReturn $order)
     {
-        $this->order = $order;
     }
 }

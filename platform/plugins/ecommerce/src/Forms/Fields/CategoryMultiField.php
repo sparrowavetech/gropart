@@ -2,7 +2,7 @@
 
 namespace Botble\Ecommerce\Forms\Fields;
 
-use Kris\LaravelFormBuilder\Fields\FormField;
+use Botble\Base\Forms\FormField;
 
 class CategoryMultiField extends FormField
 {

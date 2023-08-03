@@ -3,10 +3,10 @@
 namespace Botble\Marketplace\Forms;
 
 use Botble\Base\Forms\FormAbstract;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Http\Requests\VendorEditWithdrawalRequest;
 use Botble\Marketplace\Http\Requests\VendorWithdrawalRequest;
 use Botble\Marketplace\Models\Withdrawal;
-use Botble\Marketplace\Facades\MarketplaceHelper;
 
 class VendorWithdrawalForm extends FormAbstract
 {

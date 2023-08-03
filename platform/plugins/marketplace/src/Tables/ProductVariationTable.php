@@ -2,10 +2,13 @@
 
 namespace Botble\Marketplace\Tables;
 
-use Botble\Ecommerce\Models\ProductVariation;
-use Botble\Ecommerce\Tables\ProductVariationTable as EcommerceProductVariationTable;
 use Botble\Base\Facades\Form;
 use Botble\Base\Facades\Html;
+use Botble\Ecommerce\Models\ProductVariation;
+use Botble\Ecommerce\Tables\ProductVariationTable as EcommerceProductVariationTable;
+use Botble\Marketplace\Exports\ProductExport;
+use Botble\Table\DataTables;
+use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -13,7 +16,12 @@ use Illuminate\Http\JsonResponse;
 
 class ProductVariationTable extends EcommerceProductVariationTable
 {
-    protected $hasCheckbox = false;
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, ProductVariation $productVariation)
+    {
+        parent::__construct($table, $urlGenerator, $productVariation);
+
+        $this->exportClass = ProductExport::class;
+    }
 
     public function ajax(): JsonResponse
     {
@@ -37,8 +45,9 @@ class ProductVariationTable extends EcommerceProductVariationTable
 
     protected function baseQuery(): Relation|Builder|QueryBuilder
     {
-        return $this->repository
+        return $this
             ->getModel()
+            ->query()
             ->whereHas('configurableProduct', function (Builder $query) {
                 $query
                     ->where([

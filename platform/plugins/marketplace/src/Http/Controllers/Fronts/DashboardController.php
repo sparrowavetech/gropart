@@ -2,14 +2,17 @@
 
 namespace Botble\Marketplace\Http\Controllers\Fronts;
 
-use Assets;
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
 use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Marketplace\Enums\RevenueTypeEnum;
 use Botble\Marketplace\Enums\WithdrawalStatusEnum;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Http\Requests\BecomeVendorRequest;
 use Botble\Marketplace\Models\Store;
 use Botble\Marketplace\Repositories\Interfaces\RevenueInterface;
@@ -19,7 +22,10 @@ use Botble\Marketplace\Repositories\Interfaces\WithdrawalInterface;
 use Botble\Media\Chunks\Exceptions\UploadMissingFileException;
 use Botble\Media\Chunks\Handler\DropZoneUploadHandler;
 use Botble\Media\Chunks\Receiver\FileReceiver;
-use EcommerceHelper;
+use Botble\Media\Facades\RvMedia;
+use Botble\SeoHelper\Facades\SeoHelper;
+use Botble\Slug\Facades\SlugHelper;
+use Botble\Theme\Facades\Theme;
 use Exception;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Contracts\Config\Repository;
@@ -27,48 +33,19 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use MarketplaceHelper;
-use RvMedia;
-use SeoHelper;
-use SlugHelper;
-use Theme;
 
 class DashboardController
 {
-    protected Repository $config;
-
-    protected CustomerInterface $customerRepository;
-
-    protected StoreInterface $storeRepository;
-
-    protected VendorInfoInterface $vendorInfoRepository;
-
-    protected RevenueInterface $revenueRepository;
-
-    protected OrderInterface $orderRepository;
-
-    protected ProductInterface $productRepository;
-
-    protected WithdrawalInterface $withdrawalRepository;
-
     public function __construct(
-        Repository $config,
-        CustomerInterface $customerRepository,
-        StoreInterface $storeRepository,
-        VendorInfoInterface $vendorInfoRepository,
-        RevenueInterface $revenueRepository,
-        ProductInterface $productRepository,
-        WithdrawalInterface $withdrawalRepository,
-        OrderInterface $orderRepository
+        protected Repository $config,
+        protected CustomerInterface $customerRepository,
+        protected StoreInterface $storeRepository,
+        protected VendorInfoInterface $vendorInfoRepository,
+        protected RevenueInterface $revenueRepository,
+        protected ProductInterface $productRepository,
+        protected WithdrawalInterface $withdrawalRepository,
+        protected OrderInterface $orderRepository
     ) {
-        $this->storeRepository = $storeRepository;
-        $this->customerRepository = $customerRepository;
-        $this->vendorInfoRepository = $vendorInfoRepository;
-        $this->orderRepository = $orderRepository;
-        $this->revenueRepository = $revenueRepository;
-        $this->productRepository = $productRepository;
-        $this->withdrawalRepository = $withdrawalRepository;
-
         Assets::setConfig($config->get('plugins.marketplace.assets', []));
 
         Theme::asset()
@@ -83,7 +60,7 @@ class DashboardController
 
     public function index(Request $request, BaseHttpResponse $response)
     {
-        page_title()->setTitle(__('Dashboard'));
+        PageTitle::setTitle(__('Dashboard'));
 
         Assets::addScriptsDirectly([
                 'vendor/core/plugins/ecommerce/libraries/daterangepicker/daterangepicker.js',
@@ -95,8 +72,9 @@ class DashboardController
                 'vendor/core/plugins/ecommerce/libraries/apexcharts-bundle/dist/apexcharts.css',
                 'vendor/core/plugins/ecommerce/css/report.css',
             ])
-            ->addScripts(['moment'])
-            ->usingVueJS();
+            ->addScripts(['moment']);
+
+        Assets::usingVueJS();
 
         [$startDate, $endDate, $predefinedRange] = EcommerceHelper::getDateRangeInReport($request);
 
@@ -202,6 +180,7 @@ class DashboardController
         $totalProducts = $store->products()->count();
         $totalOrders = $store->orders()->count();
         $compact = compact('user', 'store', 'data', 'totalProducts', 'totalOrders');
+
         if ($request->ajax()) {
             return $response
                 ->setData([
@@ -214,7 +193,7 @@ class DashboardController
 
     public function postUpload(Request $request, BaseHttpResponse $response)
     {
-        if (setting('media_chunk_enabled') != '1') {
+        if (! RvMedia::isChunkUploadEnabled()) {
             $validator = Validator::make($request->all(), [
                 'file.0' => 'required|image|mimes:jpg,jpeg,png',
             ]);
@@ -223,7 +202,9 @@ class DashboardController
                 return $response->setError()->setMessage($validator->getMessageBag()->first());
             }
 
-            $result = RvMedia::handleUpload(Arr::first($request->file('file')), 0, 'customers');
+            $uploadFolder = auth('customer')->user()->upload_folder;
+
+            $result = RvMedia::handleUpload(Arr::first($request->file('file')), 0, $uploadFolder);
 
             if ($result['error']) {
                 return $response->setError()->setMessage($result['message']);
@@ -243,9 +224,9 @@ class DashboardController
             $save = $receiver->receive();
             // Check if the upload has finished (in chunk mode it will send smaller files)
             if ($save->isFinished()) {
-                $result = RvMedia::handleUpload($save->getFile(), 0, 'accounts');
+                $result = RvMedia::handleUpload($save->getFile(), 0, $uploadFolder);
 
-                if ($result['error'] == false) {
+                if (! $result['error']) {
                     return $response->setData($result['data']);
                 }
 
@@ -303,7 +284,7 @@ class DashboardController
             abort(404);
         }
 
-        $existing = SlugHelper::getSlug($request->input('shop_url'), SlugHelper::getPrefix(Store::class), Store::class);
+        $existing = SlugHelper::getSlug($request->input('shop_url'), SlugHelper::getPrefix(Store::class));
 
         if ($existing) {
             return $response->setError()->setMessage(__('Shop URL is existing. Please choose another one!'));

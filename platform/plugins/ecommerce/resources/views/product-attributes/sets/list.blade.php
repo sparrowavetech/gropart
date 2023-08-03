@@ -1,4 +1,4 @@
-@if (!$isNotDefaultLanguage)
+@if (! $isNotDefaultLanguage)
     <script id="product_attribute_template" type="text/x-custom-template">
         <li data-id="__id__" class="clearfix">
             <div class="swatch-is-default">
@@ -31,7 +31,7 @@
 <textarea name="attributes" id="attributes" class="hidden">{!! json_encode($attributes) !!}</textarea>
 <div class="swatches-container">
     <div class="header clearfix">
-        @if (!$isNotDefaultLanguage)
+        @if (! $isNotDefaultLanguage)
             <div class="swatch-is-default">
                 {{ trans('plugins/ecommerce::product-attribute-sets.is_default') }}
             </div>
@@ -39,7 +39,7 @@
         <div class="swatch-title text-start">
             {{ trans('plugins/ecommerce::product-attribute-sets.title') }}
         </div>
-        @if (!$isNotDefaultLanguage)
+        @if (! $isNotDefaultLanguage)
             <div class="swatch-slug">
                 {{ trans('plugins/ecommerce::product-attribute-sets.slug') }}
             </div>
@@ -56,7 +56,7 @@
         @if (count($attributes) > 0)
             @foreach($attributes as $attribute)
                 <li data-id="{{ $attribute->id }}" class="clearfix">
-                    @if (!$isNotDefaultLanguage)
+                    @if (! $isNotDefaultLanguage)
                         <div class="swatch-is-default">
                             <input type="radio" name="related_attribute_is_default" value="{{ $attribute->order }}" @if ($attribute->is_default) checked @endif>
                         </div>
@@ -64,7 +64,7 @@
                     <div class="swatch-title">
                         <input type="text" class="form-control" value="{{ $attribute->title }}">
                     </div>
-                    @if (!$isNotDefaultLanguage)
+                    @if (! $isNotDefaultLanguage)
                         <div class="swatch-slug">
                             <input type="text" class="form-control" value="{{ $attribute->slug }}">
                         </div>
@@ -86,7 +86,7 @@
             @endforeach
         @endif
     </ul>
-    @if (!$isNotDefaultLanguage)
+    @if (! $isNotDefaultLanguage)
         <button type="button" class="btn purple js-add-new-attribute">{{ trans('plugins/ecommerce::product-attribute-sets.add_new_attribute') }}</button>
     @endif
     <div class="clearfix"></div>

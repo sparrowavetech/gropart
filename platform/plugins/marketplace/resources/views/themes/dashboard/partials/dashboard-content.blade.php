@@ -40,7 +40,6 @@
     </div>
 </div>
 
-
 <div class="ps-section__left">
     <div class="row">
         @if (!$totalProducts)
@@ -86,10 +85,9 @@
                         </a>
                     </div>
                     <div class="card-body">
-                        <sales-reports-chart url="{{ route('marketplace.vendor.chart.month', [
-                            'date_from' => $data['startDate']->format('Y-m-d'),
-                            'date_to'   => $data['endDate']->format('Y-m-d')
-                        ]) }}" ></sales-reports-chart>
+                        <div id='sales-report-chart'>
+                            <sales-reports-chart url="{{ route('marketplace.vendor.chart.month') }}" date_from='{{ $data['startDate']->format('Y-m-d') }}' date_to='{{ $data['endDate']->format('Y-m-d') }}'></sales-reports-chart>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -7,9 +7,9 @@ use Botble\Ecommerce\Enums\ShippingStatusEnum;
 use Botble\Ecommerce\Events\OrderCreated;
 use Botble\Ecommerce\Events\OrderPlacedEvent;
 use Botble\Ecommerce\Repositories\Interfaces\ShipmentInterface;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Illuminate\Support\Arr;
-use Botble\Marketplace\Facades\MarketplaceHelper;
 
 class OrderCreatedEmailNotification
 {

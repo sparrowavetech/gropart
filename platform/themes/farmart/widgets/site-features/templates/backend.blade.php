@@ -12,7 +12,7 @@
             </div>
             <div class="form-group mb-3">
                 <label>{{ __('Subtitle :number', ['number' => $i]) }}</label>
-                <input type="text" class="form-control" name="data[{{ $i }}][subtitle]" value="{{ Arr::get(Arr::get($config['data'], $i), 'subtitle') }}">
+                <textarea name="data[{{ $i }}][subtitle]" class="form-control" rows="3">{{ Arr::get(Arr::get($config['data'], $i), 'subtitle') }}</textarea>
             </div>
             <div class="form-group mb-3">
                 <label>{{ __('Icon :number', ['number' => $i]) }}</label>

@@ -2,24 +2,24 @@
 
 namespace Botble\Marketplace\Tables;
 
-use BaseHelper;
-use Botble\Marketplace\Repositories\Interfaces\WithdrawalInterface;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Marketplace\Models\Withdrawal;
 use Botble\Table\Abstracts\TableAbstract;
+use Botble\Table\DataTables;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
-use Yajra\DataTables\DataTables;
 
 class VendorWithdrawalTable extends TableAbstract
 {
-    protected $hasCheckbox = false;
-
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, WithdrawalInterface $revenueRepository)
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Withdrawal $model)
     {
-        $this->repository = $revenueRepository;
         parent::__construct($table, $urlGenerator);
+
+        $this->model = $model;
+        $this->hasCheckbox = false;
     }
 
     public function ajax(): JsonResponse
@@ -47,7 +47,7 @@ class VendorWithdrawalTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()
+        $query = $this->getModel()->query()
             ->select([
                 'id',
                 'fee',

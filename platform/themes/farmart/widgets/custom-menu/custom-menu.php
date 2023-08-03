@@ -4,21 +4,6 @@ use Botble\Widget\AbstractWidget;
 
 class CustomMenuWidget extends AbstractWidget
 {
-    /**
-     * The configuration array.
-     *
-     * @var array
-     */
-    protected $config = [];
-
-    /**
-     * @var string
-     */
-    protected $widgetDirectory = 'custom-menu';
-
-    /**
-     * CustomMenuWidget constructor.
-     */
     public function __construct()
     {
         parent::__construct([

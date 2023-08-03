@@ -3,12 +3,9 @@
 namespace Botble\Ecommerce\Repositories\Interfaces;
 
 use Botble\Support\Repositories\Interfaces\RepositoryInterface;
+use Illuminate\Database\Eloquent\Collection;
 
 interface ReviewInterface extends RepositoryInterface
 {
-    /**
-     * @param int $productId
-     * @return mixed
-     */
-    public function getGroupedByProductId(array $productId);
+    public function getGroupedByProductId(int|string $productId): Collection;
 }

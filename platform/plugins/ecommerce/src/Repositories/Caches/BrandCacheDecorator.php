@@ -2,13 +2,11 @@
 
 namespace Botble\Ecommerce\Repositories\Caches;
 
-use Botble\Ecommerce\Repositories\Interfaces\BrandInterface;
-use Botble\Support\Repositories\Caches\CacheAbstractDecorator;
+use Botble\Ecommerce\Repositories\Eloquent\BrandRepository;
 
-class BrandCacheDecorator extends CacheAbstractDecorator implements BrandInterface
+/**
+ * @deprecated
+ */
+class BrandCacheDecorator extends BrandRepository
 {
-    public function getAll(array $condition = [])
-    {
-        return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
-    }
 }

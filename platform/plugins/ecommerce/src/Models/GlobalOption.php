@@ -30,12 +30,10 @@ class GlobalOption extends BaseModel
         );
     }
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
-
         self::deleting(function (GlobalOption $option) {
-            GlobalOptionValue::where('option_id', $option->id)->delete();
+            $option->values()->delete();
         });
     }
 }

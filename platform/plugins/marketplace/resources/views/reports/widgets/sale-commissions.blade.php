@@ -30,7 +30,7 @@
                             @foreach ($count['revenues'] as $item)
                                 <p>
                                     <small>
-                                        <i class="fas fa-circle mr-2" style="color: {{ Arr::get($item, 'color') }}"></i>
+                                        <i class="fas fa-circle me-2" style="color: {{ Arr::get($item, 'color') }}"></i>
                                     </small>
                                     <strong>{{ format_price($item['value']) }}</strong>
                                     <span>{{ $item['label'] }}</span>

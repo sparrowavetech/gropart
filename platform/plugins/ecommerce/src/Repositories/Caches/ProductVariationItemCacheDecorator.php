@@ -2,18 +2,11 @@
 
 namespace Botble\Ecommerce\Repositories\Caches;
 
-use Botble\Ecommerce\Repositories\Interfaces\ProductVariationItemInterface;
-use Botble\Support\Repositories\Caches\CacheAbstractDecorator;
+use Botble\Ecommerce\Repositories\Eloquent\ProductVariationItemRepository;
 
-class ProductVariationItemCacheDecorator extends CacheAbstractDecorator implements ProductVariationItemInterface
+/**
+ * @deprecated
+ */
+class ProductVariationItemCacheDecorator extends ProductVariationItemRepository
 {
-    public function getVariationsInfo(array $versionIds)
-    {
-        return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
-    }
-
-    public function getProductAttributes($productId)
-    {
-        return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
-    }
 }

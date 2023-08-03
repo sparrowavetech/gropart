@@ -55,7 +55,9 @@
             </span>
         </span>
     </div>
-    <small class="star-count ms-1 text-secondary d-inline-block">
-        (<span class="d-inline-block">{{ $count }}</span><span class="ms-1 star-customers-review">{{ __('customers review') }}</span>)
-    </small>
+    @if (isset($count))
+        <small class="star-count ms-1 text-secondary d-inline-block">
+            (<span class="d-inline-block">{{ $count }}</span><span class="ms-1 star-customers-review">{{ __('customers review') }}</span>)
+        </small>
+    @endif
 </div>

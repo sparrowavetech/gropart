@@ -32,7 +32,6 @@ use Illuminate\Support\Facades\Facade;
  * @method static bool showOutOfStockProducts()
  * @method static array getDateRangeInReport(\Illuminate\Http\Request $request)
  * @method static string|null getSettingPrefix()
- * @method static bool isPhoneFieldOptionalAtCheckout()
  * @method static bool isEnableEmailVerification()
  * @method static bool disableOrderInvoiceUntilOrderConfirmed()
  * @method static bool isEnabledProductOptions()
@@ -72,6 +71,13 @@ use Illuminate\Support\Facades\Facade;
  * @method static array getShippingData(\Illuminate\Support\Collection|array $products, array $session, array $origin, float $orderTotal, string|null $paymentMethod = null)
  * @method static bool onlyAllowCustomersPurchasedToReview()
  * @method static bool isValidToProcessCheckout()
+ * @method static array getMandatoryFieldsAtCheckout()
+ * @method static array getEnabledMandatoryFieldsAtCheckout()
+ * @method static array getHiddenFieldsAtCheckout()
+ * @method static array withProductEagerLoadingRelations()
+ * @method static bool isDisplayTaxFieldsAtCheckoutPage()
+ * @method static int getProductMaxPrice()
+ * @method static void clearProductMaxPriceCache()
  *
  * @see \Botble\Ecommerce\Supports\EcommerceHelper
  */

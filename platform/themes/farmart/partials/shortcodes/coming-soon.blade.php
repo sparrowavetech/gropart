@@ -5,8 +5,8 @@
         <div class="col-md-6">
             <div class="d-flex justify-content-center h-100 align-items-center">
                 <div class="px-3 px-xl-5 pb-5 mb-5">
-                    <h1 class="mb-4">{!! BaseHelper::clean($shortcode->title) !!}</h1>
-                    <p class="mb-4">{!! BaseHelper::clean($shortcode->subtitle) !!}</p>
+                    <h1 class="mb-4">{{ $shortcode->title }}</h1>
+                    <p class="mb-4">{{ $shortcode->subtitle }}</p>
                     @if ($shortcode->time)
                         <div class="countdown-wrapper mt-3">
                             <div class="expire-countdown" data-expire="{{ now()->diffInSeconds($shortcode->time) }}">

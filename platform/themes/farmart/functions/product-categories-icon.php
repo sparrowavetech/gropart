@@ -1,7 +1,9 @@
 <?php
 
+use Botble\Base\Facades\MetaBox;
 use Botble\Base\Models\MetaBox as MetaBoxModel;
 use Botble\Ecommerce\Models\ProductCategory;
+use Botble\Theme\Facades\Theme;
 
 if (is_plugin_active('ecommerce')) {
     add_action(BASE_ACTION_META_BOXES, function ($context, $object) {

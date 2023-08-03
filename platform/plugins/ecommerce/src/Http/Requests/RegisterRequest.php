@@ -13,11 +13,8 @@ class RegisterRequest extends Request
             'name' => 'required|max:120|min:2',
             'email' => 'required|max:120|min:6|email|unique:ec_customers',
             'password' => 'required|min:6|confirmed',
+            'agree_terms_and_policy' => 'sometimes|accepted:1',
         ];
-
-        if ($this->has('agree_terms_and_policy')) {
-            $rules['agree_terms_and_policy'] = 'accepted:1';
-        }
 
         if (is_plugin_active('captcha')) {
             if (get_ecommerce_setting('enable_recaptcha_in_register_page', 0)) {

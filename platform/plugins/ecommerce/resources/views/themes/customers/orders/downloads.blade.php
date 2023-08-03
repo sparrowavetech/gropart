@@ -12,7 +12,7 @@
                         <th>{{ __('Product Name') }}</th>
                         <th class="text-center">{{ __('Times downloaded') }}</th>
                         <th>{{ __('Ordered at') }}</th>
-                        <th>{{ __('Action') }}</th>
+                        <th class="text-right">{{ __('Action') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -35,11 +35,19 @@
                                     <span>{{ $orderProduct->times_downloaded }}</span>
                                 </td>
                                 <td>{{ $orderProduct->created_at->translatedFormat('M d, Y h:m') }}</td>
-                                <td>
-                                    <a class="btn btn-primary btn-sm" href="{{ route('customer.downloads.product', $orderProduct->id) }}">
-                                        <i class="icon icon-download"></i>
-                                        <span>{{ __('Download') }}</span>
-                                    </a>
+                                <td class="text-right">
+                                    @if ($orderProduct->product_file_internal_count)
+                                        <a class="btn btn-primary mb-2" style="white-space: nowrap" href="{{ route('customer.downloads.product', $orderProduct->id) }}">
+                                            <i class="icon icon-download mr-1"></i>&nbsp;
+                                            <span>{{ __('Download all files') }}</span>
+                                        </a>
+                                    @endif
+                                    @if ($orderProduct->product_file_external_count)
+                                        <a class="btn btn-info mb-2" style="white-space: nowrap" href="{{ route('customer.downloads.product', [$orderProduct->id, 'external' => true]) }}">
+                                            <i class="icon icon-link2"></i>&nbsp;
+                                            <span>{{ __('External link downloads') }}</span>
+                                        </a>
+                                    @endif
                                 </td>
                             </tr>
                         @endforeach

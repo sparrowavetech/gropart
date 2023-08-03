@@ -13,8 +13,8 @@ class CustomerEditRequest extends Request
             'email' => 'required|max:60|min:6|email|unique:ec_customers,email,' . $this->route('customer'),
         ];
 
-        if ($this->input('is_change_password') == 1) {
-            $rules['password'] = 'required|min:6';
+        if ($this->boolean('is_change_password')) {
+            $rules['password'] = 'required|string|min:6';
             $rules['password_confirmation'] = 'required|same:password';
         }
 

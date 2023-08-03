@@ -35,7 +35,7 @@ class ReportController extends BaseController
         [$startDate, $endDate] = EcommerceHelper::getDateRangeInReport($request);
 
         if ($request->ajax()) {
-            return $response->setData(view('plugins/marketplace::reports.ajax', compact('widget'))->render());
+            return $response->setData($widget->render(MARKETPLACE_MODULE_SCREEN_NAME));
         }
 
         return view(

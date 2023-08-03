@@ -3,11 +3,11 @@
 namespace Botble\Ecommerce\Imports;
 
 use Carbon\Carbon;
+use DateTime;
 use Exception;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
-use DateTime;
-use Illuminate\Database\Eloquent\Model;
 
 trait ImportTrait
 {
@@ -48,7 +48,7 @@ trait ImportTrait
         }
     }
 
-    public function getDate($value, $format = 'Y-m-d H:i:s', $default = null): ?string
+    public function getDate($value, $format = 'Y-m-d H:i:s', $default = null): string|null
     {
         try {
             $date = DateTime::createFromFormat('!' . $format, $value);

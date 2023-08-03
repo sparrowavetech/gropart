@@ -2,10 +2,10 @@
 
 namespace Botble\Ecommerce\Http\Resources;
 
-use Illuminate\Support\Facades\Auth;
 use Botble\Ecommerce\Models\Product;
-use Illuminate\Http\Resources\Json\JsonResource;
 use Botble\Media\Facades\RvMedia;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * @mixin Product

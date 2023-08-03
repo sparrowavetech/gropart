@@ -2,35 +2,28 @@
 
 namespace Botble\Marketplace\Http\Controllers\Fronts;
 
-use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Services\Products\GetProductService;
 use Botble\Marketplace\Http\Requests\CheckStoreUrlRequest;
 use Botble\Marketplace\Models\Store;
 use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
+use Botble\Media\Facades\RvMedia;
+use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\SeoHelper\SeoOpenGraph;
-use Botble\Slug\Repositories\Interfaces\SlugInterface;
-use EcommerceHelper;
+use Botble\Slug\Facades\SlugHelper;
+use Botble\Theme\Facades\Theme;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-use RvMedia;
-use SeoHelper;
-use SlugHelper;
-use Theme;
 
 class PublicStoreController
 {
-    protected StoreInterface $storeRepository;
-
-    protected SlugInterface $slugRepository;
-
-    public function __construct(StoreInterface $storeRepository, SlugInterface $slugRepository)
+    public function __construct(protected StoreInterface $storeRepository)
     {
-        $this->storeRepository = $storeRepository;
-        $this->slugRepository = $slugRepository;
     }
 
     public function getStores(Request $request)
@@ -42,7 +35,7 @@ class PublicStoreController
 
         $condition = ['status' => BaseStatusEnum::PUBLISHED];
 
-        $search = BaseHelper::clean($request->input('q'));
+        $search = BaseHelper::stringify(BaseHelper::clean($request->input('q')));
         if ($search) {
             $condition[] = ['name', 'LIKE', '%' . $search . '%'];
         }
@@ -62,7 +55,7 @@ class PublicStoreController
             'order_by' => ['created_at' => 'desc'],
             'paginate' => [
                 'per_page' => 12,
-                'current_paged' => (int)$request->input('page'),
+                'current_paged' => $request->integer('page'),
             ],
             'with' => $with,
             'withCount' => [
@@ -76,16 +69,12 @@ class PublicStoreController
     }
 
     public function getStore(
-        string $slug,
+        string $key,
         Request $request,
         GetProductService $productService,
         BaseHttpResponse $response
     ) {
-        $slug = $this->slugRepository->getFirstBy([
-            'key' => $slug,
-            'reference_type' => Store::class,
-            'prefix' => SlugHelper::getPrefix(Store::class),
-        ]);
+        $slug = SlugHelper::getSlug($key, SlugHelper::getPrefix(Store::class));
 
         if (! $slug) {
             abort(404);
@@ -127,14 +116,7 @@ class PublicStoreController
             ->add(__('Stores'), route('public.stores'))
             ->add($store->name, $store->url);
 
-        $with = [
-            'slugable',
-            'variations',
-            'productLabels',
-            'variationAttributeSwatchesForProductList',
-            'store',
-            'store.slugable',
-        ];
+        $with = EcommerceHelper::withProductEagerLoadingRelations();
 
         $products = $productService->getProduct($request, null, null, $with, [], ['store_id' => $store->id]);
 
@@ -164,10 +146,11 @@ class PublicStoreController
         if (! $request->ajax()) {
             abort(404);
         }
+
         $slug = $request->input('url');
         $slug = Str::slug($slug, '-', ! SlugHelper::turnOffAutomaticUrlTranslationIntoLatin() ? 'en' : false);
 
-        $existing = SlugHelper::getSlug($slug, null, Store::class);
+        $existing = SlugHelper::getSlug($slug, SlugHelper::getPrefix(Store::class));
 
         $response->setData(['slug' => $slug]);
 

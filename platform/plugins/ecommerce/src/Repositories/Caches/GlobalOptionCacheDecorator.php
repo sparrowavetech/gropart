@@ -2,9 +2,11 @@
 
 namespace Botble\Ecommerce\Repositories\Caches;
 
-use Botble\Ecommerce\Repositories\Interfaces\GlobalOptionInterface;
-use Botble\Support\Repositories\Caches\CacheAbstractDecorator;
+use Botble\Ecommerce\Repositories\Eloquent\GlobalOptionRepository;
 
-class GlobalOptionCacheDecorator extends CacheAbstractDecorator implements GlobalOptionInterface
+/**
+ * @deprecated
+ */
+class GlobalOptionCacheDecorator extends GlobalOptionRepository
 {
 }

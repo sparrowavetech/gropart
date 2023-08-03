@@ -4,7 +4,6 @@ namespace Botble\Ecommerce\Models;
 
 use Botble\ACL\Models\User;
 use Botble\Base\Models\BaseModel;
-use Exception;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -22,23 +21,19 @@ class OrderHistory extends BaseModel
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id', 'id')->withDefault();
+        return $this->belongsTo(User::class, 'user_id')->withDefault();
     }
 
     public function order(): BelongsTo
     {
-        return $this->belongsTo(Order::class, 'order_id', 'id')->withDefault();
+        return $this->belongsTo(Order::class, 'order_id')->withDefault();
     }
 
     protected function extras(): Attribute
     {
         return Attribute::make(
-            get: function (?string $value): array {
-                try {
-                    return json_decode($value, true) ?: [];
-                } catch (Exception) {
-                    return [];
-                }
+            get: function (string|null $value): array {
+                return json_decode($value, true) ?: [];
             }
         );
     }

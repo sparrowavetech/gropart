@@ -3,8 +3,10 @@
 namespace Botble\Marketplace\Tables;
 
 use Botble\Base\Facades\BaseHelper;
-use Botble\Ecommerce\Repositories\Interfaces\DiscountInterface;
+use Botble\Ecommerce\Models\Discount;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Table\Abstracts\TableAbstract;
+use Botble\Table\DataTables;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -12,19 +14,17 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
-use Botble\Marketplace\Facades\MarketplaceHelper;
 use Symfony\Component\HttpFoundation\Response;
-use Botble\Table\DataTables;
 
 class DiscountTable extends TableAbstract
 {
-    protected $hasCheckbox = false;
-
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, DiscountInterface $discountRepository)
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Discount $model)
     {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $discountRepository;
+        $this->model = $model;
+
+        $this->hasCheckbox = false;
     }
 
     public function ajax(): JsonResponse
@@ -67,11 +67,11 @@ class DiscountTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $storeId = auth('customer')->user()->store->id;
-        $query = $this->repository
+        $query = $this
             ->getModel()
+            ->query()
             ->select(['*'])
-            ->where('store_id', $storeId);
+            ->where('store_id', auth('customer')->user()->store->id);
 
         return $this->applyScopes($query);
     }

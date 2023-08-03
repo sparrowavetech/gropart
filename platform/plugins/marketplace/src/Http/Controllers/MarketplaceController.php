@@ -2,27 +2,23 @@
 
 namespace Botble\Marketplace\Http\Controllers;
 
-use Assets;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Supports\Helper;
 use Botble\Ecommerce\Repositories\Interfaces\ProductCategoryInterface;
+use Botble\JsValidation\Facades\JsValidator;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Http\Requests\MarketPlaceSettingFormRequest;
 use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
 use Botble\Setting\Supports\SettingStore;
 use Illuminate\Support\Str;
-use MarketplaceHelper;
 
 class MarketplaceController extends BaseController
 {
-    protected SettingStore $settingStore;
-
-    protected StoreInterface $storeRepository;
-
-    public function __construct(SettingStore $settingStore, StoreInterface $storeRepository)
+    public function __construct(protected StoreInterface $storeRepository)
     {
-        $this->settingStore = $settingStore;
-        $this->storeRepository = $storeRepository;
     }
 
     public function getSettings(ProductCategoryInterface $productCategoryRepository)
@@ -35,9 +31,10 @@ class MarketplaceController extends BaseController
                 'vendor/core/core/base/libraries/tagify/tagify.js',
                 'vendor/core/core/base/js/tags.js',
                 'vendor/core/plugins/marketplace/js/marketplace-setting.js',
-            ]);
+            ])
+            ->addScripts(['jquery-validation', 'form-validation']);
 
-        page_title()->setTitle(trans('plugins/marketplace::marketplace.settings.name'));
+        PageTitle::setTitle(trans('plugins/marketplace::marketplace.settings.name'));
 
         $productCategories = $productCategoryRepository->all();
         $commissionEachCategory = [];
@@ -46,11 +43,16 @@ class MarketplaceController extends BaseController
             $commissionEachCategory = $this->storeRepository->getCommissionEachCategory();
         }
 
-        return view('plugins/marketplace::settings.index', compact('productCategories', 'commissionEachCategory'));
+        $jsValidation = JsValidator::formRequest(MarketPlaceSettingFormRequest::class);
+
+        return view('plugins/marketplace::settings.index', compact('productCategories', 'commissionEachCategory', 'jsValidation'));
     }
 
-    public function postSettings(MarketPlaceSettingFormRequest $request, BaseHttpResponse $response)
-    {
+    public function postSettings(
+        MarketPlaceSettingFormRequest $request,
+        BaseHttpResponse $response,
+        SettingStore $settingStore
+    ) {
         $settingKey = MarketplaceHelper::getSettingKey();
         $filtered = collect($request->all())->filter(function ($value, $key) use ($settingKey) {
             return Str::startsWith($key, $settingKey);
@@ -68,10 +70,10 @@ class MarketplaceController extends BaseController
                 $settingValue = $settingValue < 0 ? 0 : min($settingValue, 100);
             }
 
-            $this->settingStore->set($key, $settingValue);
+            $settingStore->set($key, $settingValue);
         }
 
-        $this->settingStore->save();
+        $settingStore->save();
 
         if ($preVerifyVendor != MarketplaceHelper::getSetting('verify_vendor', 1)) {
             Helper::clearCache();

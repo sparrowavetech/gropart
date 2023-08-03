@@ -2,46 +2,38 @@
 
 namespace Botble\Ecommerce\Http\Controllers;
 
-use Assets;
 use Botble\Base\Events\DeletedContentEvent;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Enums\OrderReturnStatusEnum;
+use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Facades\OrderReturnHelper;
 use Botble\Ecommerce\Http\Requests\UpdateOrderReturnRequest;
 use Botble\Ecommerce\Repositories\Interfaces\OrderReturnInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Ecommerce\Tables\OrderReturnTable;
-use EcommerceHelper;
 use Exception;
 use Illuminate\Http\Request;
-use OrderReturnHelper;
 
 class OrderReturnController extends BaseController
 {
-    protected OrderReturnInterface $orderReturnRepository;
-
-    protected OrderReturnInterface $orderReturnItemRepository;
-
-    protected ProductInterface $productRepository;
-
     public function __construct(
-        OrderReturnInterface $orderReturnRepository,
-        OrderReturnInterface $orderReturnItemRepository,
-        ProductInterface $productRepository
+        protected OrderReturnInterface $orderReturnRepository,
+        protected OrderReturnInterface $orderReturnItemRepository,
+        protected ProductInterface $productRepository
     ) {
-        $this->orderReturnRepository = $orderReturnRepository;
-        $this->orderReturnItemRepository = $orderReturnItemRepository;
-        $this->productRepository = $productRepository;
     }
 
     public function index(OrderReturnTable $orderReturnTable)
     {
-        page_title()->setTitle(trans('plugins/ecommerce::order.order_return'));
+        PageTitle::setTitle(trans('plugins/ecommerce::order.order_return'));
 
         return $orderReturnTable->renderTable();
     }
 
-    public function edit(int $id)
+    public function edit(int|string $id)
     {
         Assets::addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
             ->addScriptsDirectly([
@@ -56,14 +48,14 @@ class OrderReturnController extends BaseController
 
         $returnRequest = $this->orderReturnRepository->findOrFail($id, ['items', 'customer', 'order']);
 
-        page_title()->setTitle(trans('plugins/ecommerce::order.edit_order', ['code' => $returnRequest->code]));
+        PageTitle::setTitle(trans('plugins/ecommerce::order.edit_order_return', ['code' => $returnRequest->code]));
 
         $defaultStore = get_primary_store_locator();
 
         return view('plugins/ecommerce::order-returns.edit', compact('returnRequest', 'defaultStore'));
     }
 
-    public function update(int $id, UpdateOrderReturnRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, UpdateOrderReturnRequest $request, BaseHttpResponse $response)
     {
         $returnRequest = $this->orderReturnRepository->findOrFail($id);
 
@@ -90,7 +82,7 @@ class OrderReturnController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(Request $request, int $id, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         $order = $this->orderReturnRepository->findOrFail($id);
 

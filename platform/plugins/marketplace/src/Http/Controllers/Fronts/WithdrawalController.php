@@ -7,6 +7,7 @@ use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Marketplace\Enums\WithdrawalStatusEnum;
 use Botble\Marketplace\Events\WithdrawalRequested;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Forms\VendorWithdrawalForm;
 use Botble\Marketplace\Http\Requests\VendorEditWithdrawalRequest;
 use Botble\Marketplace\Http\Requests\VendorWithdrawalRequest;
@@ -14,7 +15,6 @@ use Botble\Marketplace\Repositories\Interfaces\WithdrawalInterface;
 use Botble\Marketplace\Tables\VendorWithdrawalTable;
 use Exception;
 use Illuminate\Support\Facades\DB;
-use Botble\Marketplace\Facades\MarketplaceHelper;
 use Throwable;
 
 class WithdrawalController

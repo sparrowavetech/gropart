@@ -3,21 +3,17 @@
     <input type="text" class="form-control" name="name" value="{{ $config['name'] }}">
 </div>
 
-@php
-  $categories = ProductCategoryHelper::getActiveTreeCategories();
-@endphp
-
 <div class="form-group product-categories-select">
     <div class="multi-choices-widget list-item-checkbox">
         <ul>
-            @foreach ($categories as $category)
+            @foreach (ProductCategoryHelper::getActiveTreeCategories() as $category)
                 <li>
                     <label>
                         <input type="checkbox"
                                name="categories[]"
                                value="{{ $category->id }}"
                                @if (in_array($category->id, $config['categories'])) checked="checked" @endif>
-                        {!! BaseHelper::clean($category->name) !!}
+                        {{ $category->name }}
                     </label>
                     @if ($category->activeChildren->count())
                         <ul style="padding-left: 20px">
@@ -60,7 +56,7 @@
         background: #f1f1f1; margin-bottom: 20px; padding-left: 15px !important;
     }
 
-    .product-categories-select .list-item-checkbox .hrv-checkbox, input[type=checkbox] {
+    .product-categories-select .list-item-checkbox input[type=checkbox] {
         margin-left : 2px;
     }
 </style>

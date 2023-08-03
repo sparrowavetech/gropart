@@ -7,10 +7,9 @@
                 </div>
 
                 <div class="rp-card__content">
-                    <sales-reports-chart url="{{ route('ecommerce.report.revenue', [
-                        'date_from' => $count['startDate']->format('Y-m-d'),
-                        'date_to'   => $count['endDate']->format('Y-m-d')
-                    ]) }}"></sales-reports-chart>
+                    <div id='sales-report-chart'>
+                        <sales-reports-chart url="{{ route('marketplace.vendor.chart.month') }}" date_from='{{ $count['startDate']->format('Y-m-d') }}' date_to='{{ $count['endDate']->format('Y-m-d') }}'></sales-reports-chart>
+                    </div>
                 </div>
             </div>
         </div>
@@ -36,7 +35,7 @@
                             @foreach ($count['revenues'] as $item)
                                 <p>
                                     <small>
-                                        <small><i class="fas fa-circle mr-2" style="color: {{ Arr::get($item, 'color') }}"></i></small>
+                                        <small><i class="fas fa-circle me-2" style="color: {{ Arr::get($item, 'color') }}"></i></small>
                                     </small>
                                     <strong>{{ format_price($item['value']) }}</strong>
                                     <span>{{ $item['label'] }}</span>
@@ -61,7 +60,7 @@
         <div class="rp-card-content row row-cols-md-2 row-cols-lg-1 row-cols-1">
             <div class="col my-2">
                 <div class="d-flex rounded px-2 py-3 h-100 position-relative bg-yellow-opacity">
-                    <div class="block-left d-flex mr-1">
+                    <div class="block-left d-flex me-1">
                         <span class="align-self-center bg-white p-1"><i class="fas fa-shopping-bag fa-2x m-2"></i></span>
                     </div>
                         <div class="block-content mx-3">
@@ -75,7 +74,7 @@
             </div>
             <div class="col my-2">
                 <div class="d-flex rounded px-2 py-3 h-100 bg-blue-opacity">
-                    <div class="block-left d-flex mr-1">
+                    <div class="block-left d-flex me-1">
                         <span class="align-self-center bg-white p-1"><i class="fas fa-hand-holding-usd fa-2x m-2"></i></span>
                     </div>
                     <div class="block-content mx-3">
@@ -86,7 +85,7 @@
             </div>
             <div class="col my-2">
                 <div class=" d-flex rounded px-2 py-3 h-100 position-relative bg-green-opacity">
-                    <div class="block-left d-flex mr-1">
+                    <div class="block-left d-flex me-1">
                         <span class="align-self-center bg-white p-1"><i class="fas fa-database fa-2x m-2"></i></span>
                     </div>
                     <div class="block-content mx-3">
@@ -100,7 +99,7 @@
             </div>
             <div class="col my-2">
                 <div class="d-flex rounded px-2 py-3 h-100 position-relative bg-red-pink-opacity">
-                    <div class="block-left d-flex mr-1">
+                    <div class="block-left d-flex me-1">
                         <span class="align-self-center bg-white p-1"><i class="fas fa-users fa-2x m-2"></i></span>
                     </div>
                     <div class="block-content mx-3">

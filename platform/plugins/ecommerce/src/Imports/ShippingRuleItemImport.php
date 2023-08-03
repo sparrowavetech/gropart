@@ -3,15 +3,13 @@
 namespace Botble\Ecommerce\Imports;
 
 use Botble\Ecommerce\Enums\ShippingRuleTypeEnum;
+use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Models\Shipping;
+use Botble\Ecommerce\Models\ShippingRule;
 use Botble\Ecommerce\Repositories\Interfaces\ShippingInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ShippingRuleInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ShippingRuleItemInterface;
 use Botble\Location\Models\Country;
-use Botble\Ecommerce\Facades\EcommerceHelper;
-use Eloquent;
-use Exception;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -82,10 +80,6 @@ class ShippingRuleItemImport implements
         return $this->importType;
     }
 
-    /**
-     * @return false|null|Model
-     * @throws Exception
-     */
     public function model(array $row)
     {
         $importType = $this->getImportType();
@@ -165,7 +159,7 @@ class ShippingRuleItemImport implements
         return $shippingRuleItem;
     }
 
-    public function getShippingRule(string $name, ?string $country, ?string $type): Eloquent|Builder|Model|null
+    public function getShippingRule(string $name, string|null $country, string|null $type): ShippingRule|null
     {
         return $this->shippingRuleRepository
             ->getModel()
@@ -179,7 +173,7 @@ class ShippingRuleItemImport implements
             ->first();
     }
 
-    public function getShipping(?string $country): Eloquent|Builder|Model|null
+    public function getShipping(string|null $country): Shipping|null
     {
         return $this->shippingRepository->getFirstBy(['country' => $country]);
     }
@@ -218,7 +212,7 @@ class ShippingRuleItemImport implements
             $country = $this->countries->where('id', $row['country'])->first();
 
             if (! $country) {
-                $country = Country::where(['id' => $row['country']])
+                $country = Country::query()->where(['id' => $row['country']])
                     ->with(['states', 'states.cities'])
                     ->first();
 

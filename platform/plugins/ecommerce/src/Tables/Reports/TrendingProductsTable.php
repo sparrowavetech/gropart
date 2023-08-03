@@ -2,18 +2,17 @@
 
 namespace Botble\Ecommerce\Tables\Reports;
 
-use Botble\Ecommerce\Facades\EcommerceHelperFacade as EcommerceHelper;
+use Botble\Base\Facades\Html;
+use Botble\Ecommerce\Facades\EcommerceHelper as EcommerceHelper;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductView;
-use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Table\Abstracts\TableAbstract;
-use Html;
+use Botble\Table\DataTables;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
-use Yajra\DataTables\DataTables;
 
 class TrendingProductsTable extends TableAbstract
 {
@@ -24,10 +23,11 @@ class TrendingProductsTable extends TableAbstract
     public function __construct(
         DataTables $table,
         UrlGenerator $urlGenerator,
-        ProductInterface $productRepository
+        Product $model
     ) {
         parent::__construct($table, $urlGenerator);
-        $this->repository = $productRepository;
+
+        $this->model = $model;
     }
 
     public function ajax(): JsonResponse
@@ -38,7 +38,7 @@ class TrendingProductsTable extends TableAbstract
                 return Html::link($product->url, $product->name, ['target' => '_blank']);
             })
             ->editColumn('views', function (Product $product) {
-                return Html::tag('i', '', ['class' => 'fa fa-eye'])->toHtml() . ' ' . number_format($product->views_count);
+                return Html::tag('i', '', ['class' => 'fa fa-eye'])->toHtml() . ' ' . number_format((float)$product->views_count);
             });
 
         return $data->escapeColumns([])->make();
@@ -48,21 +48,19 @@ class TrendingProductsTable extends TableAbstract
     {
         [$startDate, $endDate] = EcommerceHelper::getDateRangeInReport(request());
 
-        $query = $this->repository->getModel()
+        $query = $this->getModel()
+            ->query()
             ->select([
                 'ec_products.id',
                 'ec_products.name',
-            ])
-            ->addSelect([
                 'views_count' => ProductView::query()
-                    ->selectRaw('SUM(ec_product_views.views) as views_count')
-                    ->whereColumn('ec_product_views.product_id', 'ec_products.id')
-                    ->whereDate('ec_product_views.date', '>=', $startDate)
-                    ->whereDate('ec_product_views.date', '<=', $endDate)
-                    ->groupBy('ec_product_views.product_id'),
+                    ->selectRaw('SUM(views) as views_count')
+                    ->whereColumn('product_id', 'ec_products.id')
+                    ->whereDate('date', '>=', $startDate)
+                    ->whereDate('date', '<=', $endDate)
+                    ->groupBy('product_id'),
             ])
             ->orderByDesc('views_count')
-            ->having('views_count', '>', 0)
             ->limit(5);
 
         return $this->applyScopes($query);

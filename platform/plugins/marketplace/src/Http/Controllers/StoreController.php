@@ -6,6 +6,7 @@ use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
@@ -19,26 +20,20 @@ use Illuminate\Http\Request;
 
 class StoreController extends BaseController
 {
-    protected StoreInterface $storeRepository;
-
-    protected RevenueInterface $revenueRepository;
-
-    public function __construct(StoreInterface $storeRepository, RevenueInterface $revenueRepository)
+    public function __construct(protected StoreInterface $storeRepository, protected RevenueInterface $revenueRepository)
     {
-        $this->storeRepository = $storeRepository;
-        $this->revenueRepository = $revenueRepository;
     }
 
     public function index(StoreTable $table)
     {
-        page_title()->setTitle(trans('plugins/marketplace::store.name'));
+        PageTitle::setTitle(trans('plugins/marketplace::store.name'));
 
         return $table->renderTable();
     }
 
     public function create(FormBuilder $formBuilder)
     {
-        page_title()->setTitle(trans('plugins/marketplace::store.create'));
+        PageTitle::setTitle(trans('plugins/marketplace::store.create'));
 
         return $formBuilder->create(StoreForm::class)->renderForm();
     }
@@ -55,18 +50,18 @@ class StoreController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int $id, FormBuilder $formBuilder, Request $request)
+    public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
     {
         $store = $this->storeRepository->findOrFail($id);
 
         event(new BeforeEditContentEvent($request, $store));
 
-        page_title()->setTitle(trans('plugins/marketplace::store.edit') . ' "' . $store->name . '"');
+        PageTitle::setTitle(trans('core/base::forms.edit_item', ['name' => $store->name]));
 
         return $formBuilder->create(StoreForm::class, ['model' => $store])->renderForm();
     }
 
-    public function update(int $id, StoreRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, StoreRequest $request, BaseHttpResponse $response)
     {
         $store = $this->storeRepository->findOrFail($id);
 
@@ -90,7 +85,7 @@ class StoreController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(Request $request, int $id, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
             $store = $this->storeRepository->findOrFail($id);

@@ -43,10 +43,9 @@
                         </a>
                     </div>
                     <div class="ps-card__content">
-                        <sales-reports-chart url="{{ route('marketplace.vendor.chart.month', [
-                            'date_from' => $data['startDate']->translatedFormat('Y-m-d'),
-                            'date_to'   => $data['endDate']->translatedFormat('Y-m-d')
-                        ]) }}" ></sales-reports-chart>
+                        <div id='sales-report-chart'>
+                            <sales-reports-chart url="{{ route('marketplace.vendor.chart.month') }}" date_from='{{ $data['startDate']->format('Y-m-d') }}' date_to='{{ $data['endDate']->format('Y-m-d') }}'></sales-reports-chart>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -60,10 +59,12 @@
                     </div>
                     <div class="ps-card__content">
                         <div class="ps-card__chart">
-                            <revenue-chart :data="{{ json_encode([
+                            <div id='revenue-chart'>
+                                <revenue-chart :data="{{ json_encode([
                                 ['label' => __('Revenue'), 'value' => $data['revenue']['amount'], 'color' => '#80bc00'],
                                 ['label' => __('Fees'), 'value' => $data['revenue']['fee'], 'color' => '#fcb800'],
                                 ['label' => __('Withdrawals'), 'value' => $data['revenue']['withdrawal'], 'color' => '#fc6b00']]) }}"></revenue-chart>
+                            </div>
                             <div class="ps-card__information">
                                 <i class="icon-wallet"></i>
                                 <strong>{{ format_price($data['revenue']['sub_amount']) }}</strong>
@@ -150,7 +151,7 @@
                             @forelse ($data['products'] as $product)
                                 <tr>
                                     <td>{{ $product->id }}</td>
-                                    <td><a href="{{ route('marketplace.vendor.products.edit', $product->id) }}"><strong>{!! BaseHelper::clean($product->name) !!}</strong></a></td>
+                                    <td><a href="{{ route('marketplace.vendor.products.edit', $product->id) }}"><strong>{{ $product->name }}</strong></a></td>
                                     <td><strong>{!! BaseHelper::clean($product->price_in_table) !!}</strong></td>
                                     <td>{!! BaseHelper::clean($product->status->toHtml()) !!}</td>
                                     <td><strong>{{ $product->created_at->translatedFormat('M d, Y') }}</strong></td>

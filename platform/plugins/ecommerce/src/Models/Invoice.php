@@ -49,12 +49,14 @@ class Invoice extends BaseModel
         'paid_at' => 'datetime',
     ];
 
-    public static function boot()
+    protected static function booted(): void
     {
-        parent::boot();
-
         static::creating(function (Invoice $invoice) {
             $invoice->code = static::generateUniqueCode();
+        });
+
+        static::deleted(function (Invoice $invoice) {
+            $invoice->items()->delete();
         });
     }
 
@@ -76,7 +78,7 @@ class Invoice extends BaseModel
     public static function generateUniqueCode(): string
     {
         $prefix = get_ecommerce_setting('invoice_code_prefix', 'INV-');
-        $nextInsertId = static::query()->max('id') + 1;
+        $nextInsertId = BaseModel::determineIfUsingUuidsForId() ? static::query()->count() + 1 : static::query()->max('id') + 1;
 
         do {
             $code = sprintf('%s%d', $prefix, $nextInsertId);

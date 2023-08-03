@@ -2,9 +2,9 @@
 
 namespace Botble\Ecommerce\Imports;
 
-use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Events\CreatedContentEvent;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Enums\StockStatusEnum;
 use Botble\Ecommerce\Models\Product;
@@ -22,6 +22,8 @@ use Botble\Ecommerce\Repositories\Interfaces\ProductVariationInterface;
 use Botble\Ecommerce\Repositories\Interfaces\TaxInterface;
 use Botble\Ecommerce\Services\Products\StoreProductService;
 use Botble\Ecommerce\Services\StoreProductTagService;
+use Botble\Media\Facades\RvMedia;
+use Botble\Slug\Facades\SlugHelper;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
@@ -44,8 +46,6 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Validators\Failure;
 use Mimey\MimeTypes;
-use Botble\Media\Facades\RvMedia;
-use Botble\Slug\Facades\SlugHelper;
 
 class ProductImport implements
     ToModel,
@@ -170,7 +170,7 @@ class ProductImport implements
         return $this->storeProduct();
     }
 
-    protected function getProduct(string $name, ?string $slug): Model|\Eloquent|Builder|null
+    protected function getProduct(string $name, string|null $slug): Model|Builder|null
     {
         if ($slug) {
             $slug = SlugHelper::getSlug($slug, SlugHelper::getPrefix(Product::class), Product::class);
@@ -210,7 +210,7 @@ class ProductImport implements
 
         $product->status = strtolower($this->request->input('status'));
 
-        $product = (new StoreProductService($this->productRepository))->execute($this->request, $product);
+        $product = (new StoreProductService())->execute($this->request, $product);
 
         $tagsInput = (array)$this->request->input('tags', []);
         if ($tagsInput) {
@@ -246,7 +246,7 @@ class ProductImport implements
         foreach ($images as $key => $image) {
             $images[$key] = str_replace(RvMedia::getUploadURL() . '/', '', trim($image));
 
-            if (Str::contains($images[$key], 'http://') || Str::contains($images[$key], 'https://')) {
+            if (Str::startsWith($images[$key], ['http://', 'https://'])) {
                 $images[$key] = $this->uploadImageFromURL($images[$key]);
             }
         }
@@ -254,7 +254,7 @@ class ProductImport implements
         return $images;
     }
 
-    protected function uploadImageFromURL(?string $url): ?string
+    protected function uploadImageFromURL(string|null $url): string|null
     {
         if (empty($url)) {
             return $url;
@@ -275,7 +275,7 @@ class ProductImport implements
         $path = '/tmp';
 
         if (! File::isDirectory($path)) {
-            File::makeDirectory($path, 0755);
+            File::makeDirectory($path);
         }
 
         $path = $path . '/' . $info['basename'];
@@ -457,7 +457,7 @@ class ProductImport implements
         if (! empty($row['tax'])) {
             $tax = $this->getTaxByKeyword(trim($row['tax']));
             if ($tax) {
-                $taxIds[] = $tax->id;
+                $taxIds[] = $tax->getKey();
             }
         }
 
@@ -465,7 +465,7 @@ class ProductImport implements
             foreach ($row['taxes'] as $value) {
                 $tax = $this->getTaxByKeyword(trim($value));
                 if ($tax) {
-                    $taxIds[] = $tax->id;
+                    $taxIds[] = $tax->getKey();
                 }
             }
 

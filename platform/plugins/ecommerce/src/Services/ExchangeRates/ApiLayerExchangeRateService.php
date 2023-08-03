@@ -56,9 +56,6 @@ class ApiLayerExchangeRateService implements ExchangeRateInterface
         return $rates;
     }
 
-    /**
-     * @throws Exception
-     */
     protected function request(array $params): array
     {
         $response = Http::baseUrl('https://api.apilayer.com')
@@ -68,7 +65,7 @@ class ApiLayerExchangeRateService implements ExchangeRateInterface
             ->get('exchangerates_data/latest?' . http_build_query($params));
 
         if ($response->failed()) {
-            throw new Exception($response->json()['code']);
+            throw new Exception($response->reason());
         }
 
         return $response->json();

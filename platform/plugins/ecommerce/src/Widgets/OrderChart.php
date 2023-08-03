@@ -2,11 +2,14 @@
 
 namespace Botble\Ecommerce\Widgets;
 
-use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
 use Botble\Base\Widgets\Chart;
+use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
+use Botble\Ecommerce\Widgets\Traits\HasCategory;
 
 class OrderChart extends Chart
 {
+    use HasCategory;
+
     protected int $columns = 6;
 
     public function getLabel(): string

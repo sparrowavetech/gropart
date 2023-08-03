@@ -118,6 +118,7 @@ class MainCheckout {
         let shippingForm = '#main-checkout-product-info'
         let customerShippingAddressForm = '.customer-address-payment-form .address-form-wrapper'
         let customerBillingAddressForm = '.customer-billing-address-form'
+        let customerTaxInformationForm = '.customer-tax-information-form'
 
         let disablePaymentMethodsForm = () => {
             $('.payment-info-loading').show()
@@ -343,6 +344,12 @@ class MainCheckout {
             } else {
                 $('.billing-address-form-wrapper').show()
             }
+        })
+
+        $(document).on('change', customerTaxInformationForm + ' #with_tax_information', event => {
+            let _self = $(event.currentTarget)
+
+            $('.tax-information-form-wrapper').toggle(_self.is(':checked'))
         })
     }
 }

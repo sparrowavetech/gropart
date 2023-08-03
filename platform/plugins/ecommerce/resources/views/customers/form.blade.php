@@ -40,3 +40,22 @@
         ],
     ])
 @endsection
+
+@section('form_main_end')
+    @if ($customerId = $form->getModel()->id)
+        <div class="customer-reviews-table widget meta-boxes">
+            <div class="widget-title">
+                <h4>
+                    <span>{{ trans('plugins/ecommerce::review.name') }}</span>
+                </h4>
+            </div>
+            <div class="widget-body">
+                {!! app(\Botble\Ecommerce\Tables\CustomerReviewTable::class)
+                    ->customerId($customerId)
+                    ->setAjaxUrl(route('customers.ajax.reviews', $customerId))
+                    ->renderTable()
+                !!}
+            </div>
+        </div>
+    @endif
+@endsection

@@ -64,18 +64,7 @@ class GlobalOptionRepository extends RepositoriesAbstract implements GlobalOptio
         $textTypeArr = ['Field'];
 
         if (in_array($type, $textTypeArr)) {
-            /**
-             * Only type text save 1-1 to db
-             */
-            $globalOptionValue = null;
-            if (! empty($item['id'])) {
-                $globalOptionValue = GlobalOptionValue::find($item['id']);
-            }
-
-            if (! $globalOptionValue) {
-                $globalOptionValue = new GlobalOptionValue();
-            }
-
+            $globalOptionValue = new GlobalOptionValue();
             $item['affect_price'] = $data['affect_price'] ?? 0;
             $item['affect_type'] = $data['affect_type'] ?? GlobalOptionEnum::TYPE_PERCENT;
             $item['option_value'] = 'n/a';

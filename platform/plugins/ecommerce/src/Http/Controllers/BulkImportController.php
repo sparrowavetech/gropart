@@ -2,8 +2,9 @@
 
 namespace Botble\Ecommerce\Http\Controllers;
 
-use Assets;
-use BaseHelper;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Exports\TemplateProductExport;
@@ -16,19 +17,13 @@ use Maatwebsite\Excel\Excel;
 
 class BulkImportController extends BaseController
 {
-    protected ProductImport $productImport;
-
-    protected ProductImport|ValidateProductImport $validateProductImport;
-
-    public function __construct(ProductImport $productImport, ValidateProductImport $validateProductImport)
+    public function __construct(protected ProductImport $productImport, protected ValidateProductImport $validateProductImport)
     {
-        $this->productImport = $productImport;
-        $this->validateProductImport = $validateProductImport;
     }
 
     public function index()
     {
-        page_title()->setTitle(trans('plugins/ecommerce::bulk-import.name'));
+        PageTitle::setTitle(trans('plugins/ecommerce::bulk-import.name'));
 
         Assets::addScriptsDirectly(['vendor/core/plugins/ecommerce/js/bulk-import.js']);
 

@@ -3,23 +3,19 @@
 namespace Botble\Ecommerce\Supports;
 
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Ecommerce\Repositories\Eloquent\ProductAttributeSetRepository;
 use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeSetInterface;
 
 class RenderProductAttributeSetsOnSearchPageSupport
 {
-    protected ProductAttributeSetInterface|ProductAttributeSetRepository $productAttributeSetRepository;
-
-    public function __construct(ProductAttributeSetInterface $productAttributeSetRepository)
+    public function __construct(protected ProductAttributeSetInterface $productAttributeSetRepository)
     {
-        $this->productAttributeSetRepository = $productAttributeSetRepository;
     }
 
     public function render(array $params = []): string
     {
         $params = array_merge(['view' => 'plugins/ecommerce::themes.attributes.attributes-filter-renderer'], $params);
 
-        $with = ['attributes'];
+        $with = ['attributes', 'categories:id'];
 
         if (is_plugin_active('language') && is_plugin_active('language-advanced')) {
             $with[] = 'attributes.translations';
@@ -37,6 +33,6 @@ class RenderProductAttributeSetsOnSearchPageSupport
                 'with' => $with,
             ]);
 
-        return view($params['view'], compact('attributeSets'))->render();
+        return view($params['view'], array_merge($params, compact('attributeSets')))->render();
     }
 }

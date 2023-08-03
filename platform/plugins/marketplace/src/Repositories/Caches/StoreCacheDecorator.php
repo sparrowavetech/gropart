@@ -2,18 +2,11 @@
 
 namespace Botble\Marketplace\Repositories\Caches;
 
-use Botble\Support\Repositories\Caches\CacheAbstractDecorator;
-use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
+use Botble\Marketplace\Repositories\Eloquent\StoreRepository;
 
-class StoreCacheDecorator extends CacheAbstractDecorator implements StoreInterface
+/**
+ * @deprecated
+ */
+class StoreCacheDecorator extends StoreRepository
 {
-    public function handleCommissionEachCategory(array $data): array
-    {
-        return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
-    }
-
-    public function getCommissionEachCategory(): array
-    {
-        return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
-    }
 }

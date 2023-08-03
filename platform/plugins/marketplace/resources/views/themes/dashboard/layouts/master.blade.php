@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -13,6 +13,13 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ page_title()->getTitle(false) }}</title>
+
+    <style>
+        :root {
+            --primary-font: '{{ theme_option('primary_font', 'Muli') }}', sans-serif;
+            --primary-color: {{ theme_option('primary_color', '#fab528') }};
+        }
+    </style>
 
     @yield('header', view(MarketplaceHelper::viewPath('dashboard.layouts.header')))
 
@@ -40,8 +47,6 @@
 </head>
 
 <body @if (BaseHelper::siteLanguageDirection() == 'rtl') dir="rtl" @endif>
-
-    @include('core/base::layouts.partials.svg-icon')
 
     @yield('body', view(MarketplaceHelper::viewPath('dashboard.layouts.body')))
 
@@ -76,5 +81,6 @@
 
     @stack('scripts')
     @stack('footer')
+    {!! apply_filters(THEME_FRONT_FOOTER, null) !!}
 </body>
 </html>
