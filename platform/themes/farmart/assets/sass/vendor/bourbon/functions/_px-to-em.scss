@@ -5,11 +5,11 @@
 @use "sass:math";
 
 @function em($pxval, $base: $em-base) {
-  @if not unitless($pxval) {
-    $pxval: strip-units($pxval);
-  }
-  @if not unitless($base) {
-    $base: strip-units($base);
-  }
-  @return math.div($pxval, $base) * 1em;
+    @if not unitless($pxval) {
+        $pxval: strip-units($pxval);
+    }
+    @if not unitless($base) {
+        $base: strip-units($base);
+    }
+    @return math.div($pxval, $base) * 1em;
 }

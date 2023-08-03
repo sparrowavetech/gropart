@@ -14,8 +14,11 @@
     --component-padding: var(--space-xxxl)
 }
 
+$primary-font: var(--primary-font);
+$primary-color: var(--primary-color);
+
 * {
-    font-family: "Work Sans", sans-serif;
+    font-family: var(--primary-font), sans-serif;
     font-weight: 400
 }
 
@@ -83,7 +86,7 @@ a {
 }
 
 a:hover {
-    color: #fcb800
+    color: $primary-color
 }
 
 a, button, input, select, textarea {
@@ -178,7 +181,7 @@ figure {
 }
 
 .ps-fullfillment.warning:before {
-    background-color: #fcb800
+    background-color: $primary-color
 }
 
 .ps-fullfillment.danger:before {
@@ -235,9 +238,9 @@ body {
 }
 
 .ps-list--social li a:hover {
-    color: #fcb800;
-    border-color: #fcb800;
-    background-color: #fcb800
+    color: $primary-color;
+    border-color: $primary-color;
+    background-color: $primary-color
 }
 
 .ps-list--social li a:hover i {
@@ -404,8 +407,8 @@ body {
 }
 
 .ps-list--checked li a:hover:before {
-    background-color: #fcb800;
-    border-color: #fcb800
+    background-color: $primary-color;
+    border-color: $primary-color
 }
 
 .ps-list--checked li a:hover:after {
@@ -414,8 +417,8 @@ body {
 }
 
 .ps-list--checked li.current a:before {
-    background-color: #fcb800;
-    border-color: #fcb800
+    background-color: $primary-color;
+    border-color: $primary-color
 }
 
 .ps-list--checked li.current a:after {
@@ -451,7 +454,7 @@ body {
 }
 
 .ps-list--arrow a:hover {
-    color: #fcb800
+    color: $primary-color
 }
 
 .ps-list--arrow a:hover .circle {
@@ -505,7 +508,7 @@ body {
     left: 0;
     width: 6px;
     height: 6px;
-    background-color: #fcb800;
+    background-color: $primary-color;
     border-radius: 50px
 }
 
@@ -660,8 +663,8 @@ body {
 }
 
 .ps-btn--outline:hover, button.ps-btn--outline:hover {
-    background-color: #fcb800;
-    border-color: #fcb800;
+    background-color: $primary-color;
+    border-color: $primary-color;
     color: #fff
 }
 
@@ -723,11 +726,11 @@ body {
 
 .ps-btn:active, .ps-btn:hover, button.ps-btn:active, button.ps-btn:hover {
     color: #fff;
-    background-color: #fcb800
+    background-color: $primary-color
 }
 
 .ps-btn:active.ps-btn--black, .ps-btn:hover.ps-btn--black, button.ps-btn:active.ps-btn--black, button.ps-btn:hover.ps-btn--black {
-    background-color: #fcb800
+    background-color: $primary-color
 }
 
 .ps-btn--close {
@@ -802,7 +805,7 @@ body {
 .form-control:focus {
     outline: 0;
     box-shadow: 0 0 0 #000;
-    border-color: #fcb800
+    border-color: $primary-color
 }
 
 textarea.form-control {
@@ -887,7 +890,7 @@ textarea.form-control {
 }
 
 .ps-checkbox--circle input[type=checkbox]:checked ~ label:after {
-    background-color: #fcb800;
+    background-color: $primary-color;
     border-radius: 50%;
     border: none;
     width: 14px;
@@ -1017,7 +1020,7 @@ textarea.form-control {
 }
 
 .ps-radio input[type=radio]:checked ~ label:after {
-    background-color: #fcb800;
+    background-color: $primary-color;
     border-radius: 50%;
     border: none;
     width: 8px;
@@ -1419,7 +1422,7 @@ textarea.form-control {
 }
 
 .select2-container .select2-results li.select2-results__option--highlighted {
-    background-color: #fcb800
+    background-color: $primary-color
 }
 
 .form-group--inside {
@@ -1564,7 +1567,7 @@ textarea.form-control {
 }
 
 .ps-variant.ps-variant--size:hover {
-    background-color: #fcb800
+    background-color: $primary-color
 }
 
 .ps-variant.ps-variant--size:hover .ps-variant__size {
@@ -1659,7 +1662,7 @@ textarea.form-control {
 
 .pagination li > a:hover {
     color: #fff;
-    background-color: #fcb800
+    background-color: $primary-color
 }
 
 .pagination li.active {
@@ -1668,7 +1671,7 @@ textarea.form-control {
 
 .pagination li.active a {
     color: #fff;
-    background-color: #fcb800
+    background-color: $primary-color
 }
 
 .pagination li:last-child {
@@ -1822,7 +1825,7 @@ textarea.form-control {
 }
 
 .ps-block--stat .ps-block__left i {
-    color: #fcb800;
+    color: $primary-color;
     font-size: 20px
 }
 
@@ -1917,13 +1920,13 @@ textarea.form-control {
 }
 
 .ps-block--track-order .ps-block__content figure.active:before {
-    background-color: #fcb800;
+    background-color: $primary-color;
     width: 14px;
     height: 14px
 }
 
 .ps-block--track-order .ps-block__content figure.active:after {
-    background-color: #fcb800
+    background-color: $primary-color
 }
 
 .ps-card .ps-card__morelink {
@@ -1943,7 +1946,7 @@ textarea.form-control {
 }
 
 .ps-card .ps-card__morelink:hover {
-    color: #fcb800
+    color: $primary-color
 }
 
 .ps-card .ps-card__header {
@@ -2010,7 +2013,7 @@ textarea.form-control {
     width: 4px;
     height: 4px;
     border-radius: 50%;
-    background-color: #fcb800
+    background-color: $primary-color
 }
 
 .ps-card--top-country figure strong {
@@ -2018,7 +2021,7 @@ textarea.form-control {
 }
 
 .ps-card--top-country figure.yellow:before {
-    background-color: #fcb800
+    background-color: $primary-color
 }
 
 .ps-card--top-country figure.red:before {
@@ -2055,7 +2058,7 @@ textarea.form-control {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background-color: #fcb800
+    background-color: $primary-color
 }
 
 .ps-card--sale-report .ps-card__footer a {
@@ -2130,7 +2133,7 @@ textarea.form-control {
 }
 
 .ps-card--earning .ps-card__status p.yellow:before {
-    background-color: #fcb800
+    background-color: $primary-color
 }
 
 .ps-card--earning .ps-card__status p.red:before {
@@ -2249,7 +2252,7 @@ textarea.form-control {
     top: 0;
     left: 0;
     height: 100%;
-    background-color: #fcb800;
+    background-color: $primary-color;
     borde-radius: 0;
     border: none
 }
@@ -2491,7 +2494,7 @@ textarea.form-control {
 }
 
 .ps-carousel--dots .owl-nav > :hover:after, .ps-carousel--dots .owl-nav > :hover:before {
-    background-color: #fcb800
+    background-color: $primary-color
 }
 
 .ps-carousel--dots .owl-nav .owl-prev:after, .ps-carousel--dots .owl-nav .owl-prev:before {
@@ -2540,7 +2543,7 @@ textarea.form-control {
     height: 5px;
     border-radius: 10px;
     border: none;
-    background-color: #fcb800;
+    background-color: $primary-color;
     transition: all .4s ease
 }
 
@@ -2910,7 +2913,7 @@ textarea.form-control {
 }
 
 .ps-form--search-bar input:hover {
-    border-bottom-color: #fcb800
+    border-bottom-color: $primary-color
 }
 
 .ps-form--search-bar button {
@@ -3392,7 +3395,7 @@ textarea.form-control {
 }
 
 .mega-menu .sub-menu--mega li a:hover {
-    color: #fcb800
+    color: $primary-color
 }
 
 @media (min-width: 1200px) {
@@ -3452,7 +3455,7 @@ textarea.form-control {
 }
 
 .sub-menu > li > a:hover {
-    color: #fcb800
+    color: $primary-color
 }
 
 .sub-menu > li:last-child a {
@@ -3519,7 +3522,7 @@ textarea.form-control {
     right: 0;
     width: 2px;
     height: 100%;
-    background-color: #fcb800;
+    background-color: $primary-color;
     transition: all .4s ease;
     visibility: hidden;
     opacity: 0
@@ -3530,7 +3533,7 @@ textarea.form-control {
 }
 
 .menu > li > a.active, .menu > li > a:hover {
-    color: #fcb800
+    color: $primary-color
 }
 
 .menu > li > a.active:after, .menu > li > a:hover:after {
@@ -3570,7 +3573,7 @@ textarea.form-control {
 }
 
 .header--dashboard .header__site-link:hover i, .header--dashboard .header__site-link:hover span {
-    color: #fcb800
+    color: $primary-color
 }
 
 .header--dashboard .header__left {
@@ -4872,7 +4875,7 @@ a {
             height: 18px;
             -webkit-animation: button-loading-spinner 0.7s linear infinite;
             animation: button-loading-spinner 1s linear infinite;
-            border-color: #fcb800;
+            border-color: $primary-color;
             border-bottom-color: transparent;
         }
 

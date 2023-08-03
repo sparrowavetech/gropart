@@ -90,9 +90,6 @@
 //|
 /////////////////////////////////////////////////////////////////////////////////////|
 
-
-
-
 ////////////
 ////////////
 // Variable
@@ -116,7 +113,6 @@ $dataColMd: 'data-col-md';
 $dataColLg: 'data-col-lg';
 
 
-
 // Map deep get
 @function map-deep-get($map, $keys...) {
     @each $key in $keys {
@@ -127,7 +123,8 @@ $dataColLg: 'data-col-lg';
 
 
 // Map deep merge
-@function extend($map, $maps.../*, $deep */) {
+@function extend($map, $maps.../*, $deep */
+) {
     $last: nth($maps, -1);
     $deep: $last == true;
     $max: if($deep, length($maps) - 1, length($maps));
@@ -156,17 +153,18 @@ $dataColLg: 'data-col-lg';
 %relative {
     position: relative;
 }
+
 %absolute {
     position: absolute;
 }
+
 %overHidden {
     overflow: hidden;
 }
+
 %margin0 {
     margin: 0 !important;
 }
-
-
 
 
 ////////////
@@ -181,10 +179,12 @@ $dataColLg: 'data-col-lg';
     @if ($col > 1) {
         #{$gridItem} {
             $widthLarge: (math.div(100 * 1, $col) * 2) * 1%;
+
             &#{$wideItem},
             &#{$largeItem} {
                 width: $widthLarge;
             }
+
             &#{$extraLargeItem} {
                 width: 100%;
             }
@@ -206,6 +206,7 @@ $dataColLg: 'data-col-lg';
                 padding-top: $ratio * 0.5;
             }
         }
+
         &#{$highItem} {
             #{$gridItemInner} {
                 padding-top: $ratio * 2;
@@ -224,6 +225,7 @@ $gridRatio: (
         #{$gridItemInner} {
             padding-top: $value;
         }
+
         #{$gridItem} {
             &#{$extraLargeItem},
             &#{$wideItem} {
@@ -231,6 +233,7 @@ $gridRatio: (
                     padding-top: $value * 0.5;
                 }
             }
+
             &#{$highItem} {
                 #{$gridItemInner} {
                     padding-top: $value * 2;
@@ -277,12 +280,14 @@ $gridBreakpoints: (
     }
 
 }
+
 %dataGap {
     @for $i from 1 through 6 {
         $gap: $i * 5;
         $valueGap: ($gap * 0.5) * 1px;
         &[#{$dataGap}="#{$gap}"] {
             margin: round(-$valueGap);
+
             #{$gridItem} {
                 #{$gridItemContentWrap} {
                     margin: round($valueGap);
@@ -297,21 +302,20 @@ $gridBreakpoints: (
 }
 
 
-
 // Start
 @mixin gridOptions($mainClass, $options) {
     $default: extend((
-        'bgColorItem': #ccc,                        // Background color item
-        'columnGap': 0,                             // Space item default
-        'colDefault': 1,                            // Column default
-        'ratioItem': 100%,                          // Example ratio 4:3 = 3/4*100% = 75%
-        'responsive': (                             // Responsive Device large >=1200, medium >=992, small >=768, extraSmall <=767
+        'bgColorItem': #ccc, // Background color item
+        'columnGap': 0, // Space item default
+        'colDefault': 1, // Column default
+        'ratioItem': 100%, // Example ratio 4:3 = 3/4*100% = 75%
+        'responsive': (// Responsive Device large >=1200, medium >=992, small >=768, extraSmall <=767
             'large': 4,
             'medium': 3,
             'small': 2,
             'extraSmall': 1
         ),
-        'optionsData': false,                       // Options with data html (data-gap, data-ratio, data-col-lg, data-col-md, data-col-sm, data-col-xs)
+        'optionsData': false, // Options with data html (data-gap, data-ratio, data-col-lg, data-col-md, data-col-sm, data-col-xs)
     ), $options, true);
 
     // $maxColumn: map-get($default, 'maxColumn');
@@ -329,10 +333,6 @@ $gridBreakpoints: (
     $valueGapDefault: ($columnGap * 0.5) * 1px;
 
 
-
-
-
-
     ////////////
     ////////////
     // Style
@@ -341,9 +341,11 @@ $gridBreakpoints: (
         margin: 0;
         // Set column default
         @include grid($colDefault);
+
         #{$gridItem} {
             #{$gridItemInner} {
                 @extend %relative;
+
                 #{$gridItemContentWrap} {
                     @extend %overHidden;
                     background-color: $bgColorItem;
@@ -364,6 +366,7 @@ $gridBreakpoints: (
                 left: 0;
                 @extend %margin0; // fix masonry style
             }
+
             ////////////
             ////////////
             // Set ratio
@@ -403,7 +406,6 @@ $gridBreakpoints: (
                     left: round($valueGap);
                 }
             }
-
 
 
             @if $extraSmall {

@@ -1,5 +1,5 @@
-$(document).ready(function () {
-    'use strict';
+$(document).ready(function() {
+    'use strict'
     let icons = [
         'icon-home',
         'icon-home2',
@@ -1098,49 +1098,56 @@ $(document).ready(function () {
         'icon-uni7d',
         'icon-uni7e',
         'icon-copyright',
-    ];
+    ]
 
-    let initIconsField = function () {
-        $('.icon-select').each(function (index, el) {
-            let value = $(el).children('option:selected').val();
+    let initIconsField = function() {
+        $('.icon-select').each(function(index, el) {
+            let value = $(el).children('option:selected').val()
 
-            let options = '<option value="">' + $(el).data('empty') + '</option>';
+            let options = ''
 
-            icons.forEach(function (value) {
-                options += '<option value="' + value + '">' + value + '</option>';
-            });
-
-            $(el).html(options);
-            $(el).val(value);
-
-            let select2Options = {
-                templateResult: function (state) {
-                    if (!state.id) {
-                        return state.text;
-                    }
-                    return $('<span><i class="elegant-icon ' + state.id + '"></i></span>&nbsp; ' + state.text + '</span>');
-                },
-                width: '100%',
-                templateSelection: function (state) {
-                    if (!state.id) {
-                        return state.text;
-                    }
-                    return $('<span><i class="elegant-icon ' + state.id + '"></i></span>&nbsp; ' + state.text + '</span>');
-                },
-            };
-
-            let parent = $(el).closest('.modal');
-            if (parent.length) {
-                select2Options.dropdownParent = parent;
+            const $this = $(el)
+            if ($this.data('empty-value')) {
+                options = '<option value="">' + $this.data('empty-value') + '</option>'
+            } else if (!value) {
+                options = '<option value="">&nbsp;</option>'
             }
 
-            $(el).select2(select2Options);
-        });
+            icons.forEach(function(value) {
+                options += '<option value="' + value + '">' + value + '</option>'
+            })
+
+            $(el).html(options)
+            $(el).val(value)
+
+            let select2Options = {
+                templateResult: function(state) {
+                    if (!state.id) {
+                        return state.text
+                    }
+                    return $('<span><i class="elegant-icon ' + state.id + '"></i></span>&nbsp; ' + state.text + '</span>')
+                },
+                width: '100%',
+                templateSelection: function(state) {
+                    if (!state.id) {
+                        return state.text
+                    }
+                    return $('<span><i class="elegant-icon ' + state.id + '"></i></span>&nbsp; ' + state.text + '</span>')
+                },
+            }
+
+            let parent = $(el).closest('.modal')
+            if (parent.length) {
+                select2Options.dropdownParent = parent
+            }
+
+            $(el).select2(select2Options)
+        })
     }
 
-    initIconsField();
+    initIconsField()
 
     document.addEventListener('core-init-resources', function() {
-        initIconsField();
-    });
-});
+        initIconsField()
+    })
+})

@@ -61,4 +61,11 @@ return [
     'bulk_changes' => 'Bulk changes',
     'submit' => 'Submit',
     'please_select_record' => 'Please select at least one record to perform this action!',
+    'product_name'=>'Product Name',
+    'phone'=>'Phone No.',
+    'address'=>'Address',
+    'city'=>'City',
+    'state'=>'State',
+    'zip_code' => 'Zip Code',
+    'store' => 'Store'
 ];

@@ -137,7 +137,7 @@ body[dir="rtl"] {
 .cart--mini {
     .cart__content {
         right: auto;
-        left: 0;
+        left: 0 !important;
 
         .cart__items {
             &:before {
@@ -440,6 +440,12 @@ body[dir="rtl"] {
     }
 }
 
+i.icon-cart, i.icon-list {
+    &::before {
+        transform: rotate3d(0, 1, 0, 180deg);
+    }
+}
+
 #search-mobile {
     .search-inner-content {
         .close-search-panel {
@@ -465,6 +471,48 @@ body[dir="rtl"] {
         .add-to-cart-button {
             margin-left: 10px;
             margin-right: 0;
+        }
+    }
+}
+
+.header-recently-viewed {
+    .recent-icon {
+        margin-right: 0;
+        margin-left: 10px;
+    }
+}
+
+#back2top {
+    right: auto;
+    left: 30px;
+}
+
+.panel--sidebar {
+    left: auto;
+    right: 0;
+    transform: translateX(101%);
+
+    &.active {
+        transform: translateX(0);
+    }
+
+    &.panel--sidebar__right {
+        left: 0;
+        right: auto;
+        transform: translateX(-101%);
+
+        &.active {
+            transform: translateX(0);
+        }
+    }
+}
+
+.mini-cart-content, .panel--sidebar {
+    .panel__header {
+        .close-toggle--sidebar {
+            svg {
+                transform: rotate3d(0, 1, 0, 180deg);
+            }
         }
     }
 }

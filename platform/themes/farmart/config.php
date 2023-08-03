@@ -1,7 +1,12 @@
 <?php
 
+use Botble\Base\Facades\BaseHelper;
+use Botble\Ecommerce\Facades\ProductCategoryHelper;
+use Botble\Language\Facades\Language;
+use Botble\Shortcode\View\View;
 use Botble\Theme\Theme;
 use Illuminate\Support\Arr;
+use Illuminate\View\View as IlluminateView;
 
 return [
 
@@ -36,7 +41,7 @@ return [
         // Before event inherit from package config and the theme that call before,
         // you can use this event to set meta, breadcrumb template or anything
         // you want inheriting.
-        'before' => function ($theme) {
+        'before' => function (Theme $theme) {
             // You can remove this line anytime.
         },
 
@@ -44,23 +49,41 @@ return [
         // this event should call to assign some assets,
         // breadcrumb template.
         'beforeRenderTheme' => function (Theme $theme) {
+            ;
+            $categories = collect();
+            $currencies = collect();
+
             // Partial composer.
             if (is_plugin_active('ecommerce')) {
                 $categories = ProductCategoryHelper::getActiveTreeCategories();
 
-                $theme->partialComposer('header', function ($view) use ($categories) {
-                    $view->with('currencies', get_all_currencies());
-                    $view->with('categories', $categories);
-                });
+                $with = ['slugable', 'metadata'];
+                if (
+                    is_plugin_active('language') &&
+                    is_plugin_active('language-advanced') &&
+                    Language::getCurrentLocaleCode() != Language::getDefaultLocaleCode()
+                ) {
+                    $with[] = 'translations';
+                }
 
-                $theme->partialComposer('footer', function ($view) use ($categories) {
-                    $view->with('categories', $categories);
-                });
+                $categories->loadMissing($with);
 
-                $theme->composer('ecommerce.includes.filters', function ($view) use ($categories) {
-                    $view->with(['categories' => $categories]);
-                });
+                $currencies = get_all_currencies();
             }
+
+            $theme->partialComposer('header', function (IlluminateView $view) use ($categories, $currencies) {
+                $view->with('currencies', $currencies);
+                $view->with('categories', $categories);
+            });
+
+            $theme->partialComposer('footer', function (IlluminateView $view) use ($categories, $currencies) {
+                $view->with('currencies', $currencies);
+                $view->with('categories', $categories);
+            });
+
+            $theme->composer('ecommerce.includes.filters', function (IlluminateView $view) use ($categories) {
+                $view->with(['categories' => $categories]);
+            });
 
             // You may use this event to set up your assets.
             $version = get_cms_version();
@@ -133,10 +156,10 @@ return [
                 ],
                 'jquery' => [
                     'cdn' => [
-                        'source' => '//ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js',
+                        'source' => '//ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js',
                     ],
                     'local' => [
-                        'source' => 'plugins/jquery-3.6.0.min.js',
+                        'source' => 'plugins/jquery-3.6.4.min.js',
                     ],
                     'container' => 'footer',
                 ],
@@ -234,7 +257,7 @@ return [
                     'local' => [
                         'source' => 'js/main.js',
                         'dependencies' => ['jquery'],
-                        'version' => $version . '.1',
+                        'version' => $version,
                     ],
                     'container' => 'footer',
                 ],
@@ -245,26 +268,9 @@ return [
                     ],
                     'container' => 'footer',
                 ],
-                'vue-infinite-scroll' => [
-                    'cdn' => [
-                        'source' => '//cdn.jsdelivr.net/npm/vue-infinite-scroll@2.0.2/vue-infinite-scroll.min.js',
-                    ],
-                    'local' => [
-                        'source' => 'plugins/vue-infinite-scroll.js',
-                    ],
-                    'container' => 'footer',
-                ],
-                'app-js' => [
-                    'local' => [
-                        'source' => 'js/app.js',
-                        'dependencies' => ['jquery'],
-                        'version' => $version,
-                    ],
-                    'container' => 'footer',
-                ],
             ];
 
-            if (BaseHelper::siteLanguageDirection() == 'rtl') {
+            if (BaseHelper::isRtlEnabled()) {
                 $assets['bootstrap-css'] = [
                     'cdn' => [
                         'source' => '//cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.rtl.min.css',
@@ -310,7 +316,7 @@ return [
                     'ecommerce.brand',
                     'ecommerce.search',
                     'ecommerce.cart',
-                ], function (\Botble\Shortcode\View\View $view) use ($theme, $version) {
+                ], function (View $view) {
                     $view->withShortcodes();
                 });
             }
@@ -320,7 +326,7 @@ return [
         // this should call to assign style, script for a layout.
         'beforeRenderLayout' => [
 
-            'default' => function ($theme) {
+            'default' => function (Theme $theme) {
                 // $theme->asset()->usePath()->add('ipad', 'css/layouts/ipad.css');
             },
         ],
