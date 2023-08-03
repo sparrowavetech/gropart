@@ -7,12 +7,12 @@ use Botble\AuditLog\Models\AuditHistory;
 use Botble\AuditLog\Repositories\Eloquent\AuditLogRepository;
 use Botble\AuditLog\Repositories\Interfaces\AuditLogInterface;
 use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Database\Console\PruneCommand;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
-use Botble\Base\Supports\ServiceProvider;
 
 /**
  * @since 02/07/2016 09:05 AM

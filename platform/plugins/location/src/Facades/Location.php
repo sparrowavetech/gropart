@@ -7,10 +7,10 @@ use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static array getStates()
- * @method static array getCitiesByState($stateId)
- * @method static \Botble\Location\Models\City|null getCityById($cityId)
- * @method static string|null getCityNameById($cityId)
- * @method static string|null getStateNameById($stateId)
+ * @method static array getCitiesByState(string|int|null $stateId)
+ * @method static \Botble\Location\Models\City|null getCityById(string|int|null $cityId)
+ * @method static string|null getCityNameById(string|int|null $cityId)
+ * @method static string|null getStateNameById(string|int|null $stateId)
  * @method static bool isSupported(object|string $model)
  * @method static array supportedModels()
  * @method static array getSupported(object|string|null $model = null)

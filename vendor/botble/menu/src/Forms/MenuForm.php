@@ -2,8 +2,8 @@
 
 namespace Botble\Menu\Forms;
 
-use Botble\Base\Facades\Assets;
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Facades\Assets;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Menu\Http\Requests\MenuRequest;
 use Botble\Menu\Models\Menu;

@@ -2,12 +2,12 @@
 
 namespace Botble\Api\Http\Controllers;
 
-use Botble\Api\Facades\ApiHelper;
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Api\Facades\ApiHelper;
 use Botble\Api\Http\Requests\LoginRequest;
 use Botble\Api\Http\Requests\RegisterRequest;
+use Botble\Base\Http\Responses\BaseHttpResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

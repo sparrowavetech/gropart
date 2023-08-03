@@ -15,100 +15,50 @@ abstract class SslCommerzPaymentAbstract implements ProduceServiceInterface
 
     protected string $paymentCurrency;
 
-    /**
-     * @var object
-     */
-    protected $client;
+    protected SslCommerz $client;
 
-    protected bool $supportRefundOnline;
+    protected bool $supportRefundOnline = true;
 
-    protected int $totalAmount;
+    protected int $totalAmount = 0;
 
     public function __construct()
     {
         $this->paymentCurrency = config('plugins.payment.payment.currency');
 
-        $this->totalAmount = 0;
-
         $this->setClient();
-
-        $this->supportRefundOnline = true;
     }
 
-    /**
-     * @return bool
-     */
-    public function getSupportRefundOnline()
+    public function getSupportRefundOnline(): bool
     {
         return $this->supportRefundOnline;
     }
 
-    /**
-     * Set client
-     * @return self
-     */
-    public function setClient()
+    public function setClient(): static
     {
         $this->client = new SslCommerz();
 
         return $this;
     }
 
-    /**
-     * @return object
-     */
-    public function getClient()
+    public function getClient(): SslCommerz
     {
         return $this->client;
     }
 
-    /**
-     * Set payment currency
-     *
-     * @param string $currency String name of currency
-     * @return self
-     */
-    public function setCurrency($currency)
-    {
-        $this->paymentCurrency = $currency;
-
-        return $this;
-    }
-
-    /**
-     * Get current payment currency
-     *
-     * @return string Current payment currency
-     */
-    public function getCurrency()
-    {
-        return $this->paymentCurrency;
-    }
-
-    /**
-     * Get payment details
-     *
-     * @param string $paymentId
-     * @return mixed Object payment details
-     * @throws Exception
-     */
-    public function getPaymentDetails($paymentId)
+    public function getPaymentDetails(string $paymentId): array
     {
         try {
             $payment = $this->client->getPaymentDetails($paymentId);
         } catch (Exception $exception) {
             $this->setErrorMessageAndLogging($exception, 1);
 
-            return false;
+            return ['status' => 'error'];
         }
 
         return $payment;
     }
 
-    /**
-     * This function can be used to preform refund on the capture.
-     */
-    public function refundOrder($paymentId, $amount, array $options = [])
+    public function refundOrder(string $paymentId, float $amount, array $options = []): array
     {
         try {
             $detail = $this->client->getPaymentDetails($paymentId);
@@ -122,7 +72,7 @@ abstract class SslCommerzPaymentAbstract implements ProduceServiceInterface
                     return [
                         'error' => false,
                         'message' => $status,
-                        'data' => (array) $response,
+                        'data' => $response,
                     ];
                 }
 
@@ -134,7 +84,7 @@ abstract class SslCommerzPaymentAbstract implements ProduceServiceInterface
 
             return [
                 'error' => true,
-                'message' => 'Payment ' . $paymentId . ' can not found bank_tran_id',
+                'message' => sprintf('Payment %s can not found bank_tran_id', $paymentId),
             ];
         } catch (Exception $exception) {
             $this->setErrorMessageAndLogging($exception, 1);
@@ -146,19 +96,16 @@ abstract class SslCommerzPaymentAbstract implements ProduceServiceInterface
         }
     }
 
-    /**
-     * @param string $refundRefId
-     */
-    public function refundDetail($refundRefId)
+    public function refundDetail(string $refundRefId): array
     {
         try {
-            $response = (array) $this->client->refundDetail($refundRefId);
+            $response = $this->client->refundDetail($refundRefId);
             $status = Arr::get($response, 'status');
 
             return [
                 'error' => false,
                 'message' => $status,
-                'data' => (array) $response,
+                'data' => $response,
                 'status' => $status,
             ];
         } catch (Exception $exception) {
@@ -171,13 +118,6 @@ abstract class SslCommerzPaymentAbstract implements ProduceServiceInterface
         }
     }
 
-    /**
-     * Execute main service
-     *
-     * @param Request $request
-     *
-     * @return mixed
-     */
     public function execute(Request $request)
     {
         try {
@@ -189,21 +129,7 @@ abstract class SslCommerzPaymentAbstract implements ProduceServiceInterface
         }
     }
 
-    /**
-     * Make a payment
-     *
-     * @param Request $request
-     *
-     * @return mixed
-     */
     abstract public function makePayment(Request $request);
 
-    /**
-     * Use this function to perform more logic after user has made a payment
-     *
-     * @param Request $request
-     *
-     * @return mixed
-     */
     abstract public function afterMakePayment(Request $request);
 }

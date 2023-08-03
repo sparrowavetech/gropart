@@ -2,9 +2,9 @@
 
 namespace Botble\Base\Helpers;
 
+use Botble\Base\Facades\Html;
 use Carbon\Carbon;
 use Exception;
-use Botble\Base\Facades\Html;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\File;
@@ -273,12 +273,20 @@ class BaseHelper
             return $dirty;
         }
 
-        return clean($dirty ?: '', $config);
+        if (! $dirty && $dirty !== null) {
+            return $dirty;
+        }
+
+        if (! is_numeric($dirty)) {
+            $dirty = (string) $dirty;
+        }
+
+        return clean($dirty, $config);
     }
 
     public function html(array|string|null $dirty, array|string $config = null): HtmlString
     {
-        return new HtmlString($this->clean($dirty, $config));
+        return new HtmlString((string)$this->clean($dirty, $config));
     }
 
     public function hexToRgba(string $color, float $opacity = 1): string

@@ -2,16 +2,16 @@
 
 namespace Botble\Installer\Providers;
 
-use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Events\FinishedSeederEvent;
 use Botble\Base\Events\UpdatedEvent;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Installer\Http\Middleware\CheckIfInstalledMiddleware;
 use Botble\Installer\Http\Middleware\CheckIfInstallingMiddleware;
 use Botble\Installer\Http\Middleware\RedirectIfNotInstalledMiddleware;
 use Carbon\Carbon;
 use Illuminate\Routing\Events\RouteMatched;
-use Botble\Base\Supports\ServiceProvider;
 use Throwable;
 
 class InstallerServiceProvider extends ServiceProvider

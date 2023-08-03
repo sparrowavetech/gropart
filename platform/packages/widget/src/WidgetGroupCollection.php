@@ -2,12 +2,12 @@
 
 namespace Botble\Widget;
 
+use Botble\Language\Facades\Language;
+use Botble\Theme\Facades\Theme;
 use Botble\Widget\Models\Widget;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Botble\Language\Facades\Language;
-use Botble\Theme\Facades\Theme;
 
 class WidgetGroupCollection
 {

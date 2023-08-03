@@ -21,14 +21,14 @@ export class MediaList {
 
         let view_in = Helpers.getRequestParams().view_in
 
-        if (!_.includes(['all_media', 'public', 'trash', 'favorites', 'recent'], view_in)) {
+        if (!Helpers.inArray(['all_media', 'public', 'trash', 'favorites', 'recent'], view_in)) {
             view_in = 'all_media'
         }
 
         template = template
-            .replace(/__noItemIcon__/gi, RV_MEDIA_CONFIG.translations.no_item[view_in].icon || '')
-            .replace(/__noItemTitle__/gi, RV_MEDIA_CONFIG.translations.no_item[view_in].title || '')
-            .replace(/__noItemMessage__/gi, RV_MEDIA_CONFIG.translations.no_item[view_in].message || '')
+            .replace(/__noItemIcon__/gi, Helpers.trans('no_item.' + view_in +'.icon') || '')
+            .replace(/__noItemTitle__/gi, Helpers.trans('no_item.' + view_in +'.title') || '')
+            .replace(/__noItemMessage__/gi, Helpers.trans('no_item.' + view_in +'.message') || '')
 
         let $result = $(template)
         let $itemsWrapper = $result.find('ul')
@@ -37,13 +37,13 @@ export class MediaList {
             $itemsWrapper = this.$groupContainer.find('.rv-media-grid ul')
         }
 
-        if (_.size(data.folders) > 0 || _.size(data.files) > 0 || load_more_file) {
+        if (Helpers.size(data.folders) > 0 || Helpers.size(data.files) > 0 || load_more_file) {
             $('.rv-media-items').addClass('has-items')
         } else {
             $('.rv-media-items').removeClass('has-items')
         }
 
-        _.forEach(data.folders, (value) => {
+        Helpers.forEach(data.folders, (value) => {
             let item = _self.item[Helpers.getRequestParams().view_type]
             item = item
                 .replace(/__type__/gi, 'folder')
@@ -53,7 +53,7 @@ export class MediaList {
                 .replace(/__date__/gi, value.created_at || '')
                 .replace(/__thumb__/gi, '<i class="fa fa-folder"></i>')
             let $item = $(item)
-            _.forEach(value, (val, index) => {
+            Helpers.forEach(value, (val, index) => {
                 $item.data(index, val)
             })
             $item.data('is_folder', true)
@@ -61,7 +61,7 @@ export class MediaList {
             $itemsWrapper.append($item)
         })
 
-        _.forEach(data.files, (value) => {
+        Helpers.forEach(data.files, (value) => {
             let item = _self.item[Helpers.getRequestParams().view_type]
             item = item
                 .replace(/__type__/gi, 'file')
@@ -81,7 +81,7 @@ export class MediaList {
             }
             let $item = $(item)
             $item.data('is_folder', false)
-            _.forEach(value, (val, index) => {
+            Helpers.forEach(value, (val, index) => {
                 $item.data(index, val)
             })
             $itemsWrapper.append($item)

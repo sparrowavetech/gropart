@@ -4,12 +4,12 @@ namespace Botble\JsValidation\Remote;
 
 use Botble\JsValidation\Support\AccessProtectedTrait;
 use Botble\JsValidation\Support\RuleListTrait;
-use Illuminate\Validation\Validator as BaseValidator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\ValidationRuleParser;
+use Illuminate\Validation\Validator as BaseValidator;
 
 class Validator
 {

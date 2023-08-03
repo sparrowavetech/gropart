@@ -2,8 +2,11 @@
 
 namespace Botble\LanguageAdvanced\Providers;
 
+use Botble\Base\Facades\MacroableModels;
 use Botble\Base\Models\BaseModel;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
+use Botble\Language\Facades\Language;
 use Botble\Language\Models\Language as LanguageModel;
 use Botble\LanguageAdvanced\Models\TranslationResolver;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
@@ -11,10 +14,7 @@ use Botble\Page\Models\Page;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
-use Botble\Base\Supports\ServiceProvider;
 use Illuminate\Support\Str;
-use Botble\Language\Facades\Language;
-use Botble\Base\Facades\MacroableModels;
 
 class LanguageAdvancedServiceProvider extends ServiceProvider
 {
@@ -30,10 +30,11 @@ class LanguageAdvancedServiceProvider extends ServiceProvider
                 ->loadAndPublishViews()
                 ->loadRoutes();
 
-            $this->app->register(HookServiceProvider::class);
             $this->app->register(EventServiceProvider::class);
 
             $this->app->booted(function () {
+                $this->app->register(HookServiceProvider::class);
+
                 foreach (LanguageAdvancedManager::getSupported() as $item => $columns) {
                     if (! class_exists($item)) {
                         continue;
@@ -94,7 +95,7 @@ class LanguageAdvancedServiceProvider extends ServiceProvider
 
             $config = $this->app['config'];
 
-            if ($config->get('plugins.language-advanced.general.page_use_language_v2', false)) {
+            if ($config->get('plugins.language-advanced.general.page_use_language_v2')) {
                 LanguageAdvancedManager::registerModule(Page::class, [
                     'name',
                     'description',

@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static void send(string $content, string $title, array|string|null $to = null, array $args = [], bool $debug = false)
  * @method static string prepareData(string $content)
  * @method static void initVariableValues()
- * @method static string getVariableValue(string $variable, string $module, string $default = '')
+ * @method static array|string|null getVariableValue(string $variable, string $module, string $default = '')
  * @method static void sendErrorException(\Exception $exception)
  * @method static string|null getTemplateContent(string $template, string $type = 'plugins')
  * @method static string getTemplateSubject(string $template, string $type = 'plugins')

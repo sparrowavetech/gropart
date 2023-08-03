@@ -3,9 +3,9 @@
 namespace Botble\Slug\Providers;
 
 use Botble\Base\Facades\Assets;
-use Illuminate\Database\Eloquent\Model;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Slug\Facades\SlugHelper;
+use Illuminate\Database\Eloquent\Model;
 
 class HookServiceProvider extends ServiceProvider
 {

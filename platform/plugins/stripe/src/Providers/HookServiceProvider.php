@@ -2,12 +2,12 @@
 
 namespace Botble\Stripe\Providers;
 
-use Botble\Payment\Enums\PaymentMethodEnum;
-use Botble\Stripe\Services\Gateways\StripePaymentService;
 use Botble\Base\Facades\Html;
+use Botble\Payment\Enums\PaymentMethodEnum;
+use Botble\Payment\Facades\PaymentMethods;
+use Botble\Stripe\Services\Gateways\StripePaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
-use Botble\Payment\Facades\PaymentMethods;
 
 class HookServiceProvider extends ServiceProvider
 {

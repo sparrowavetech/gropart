@@ -28,12 +28,12 @@ export class FolderService {
             },
             success: (res) => {
                 if (res.error) {
-                    MessageService.showMessage('error', res.message, RV_MEDIA_CONFIG.translations.message.error_header)
+                    MessageService.showMessage('error', res.message, Helpers.trans('message.error_header'))
                 } else {
                     MessageService.showMessage(
                         'success',
                         res.message,
-                        RV_MEDIA_CONFIG.translations.message.success_header
+                        Helpers.trans('message.success_header')
                     )
                     Helpers.resetPagination()
                     _self.MediaService.getMedia(true)

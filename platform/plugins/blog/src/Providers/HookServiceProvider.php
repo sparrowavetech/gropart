@@ -6,11 +6,13 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Blog\Models\Category;
 use Botble\Blog\Models\Post;
 use Botble\Blog\Models\Tag;
 use Botble\Blog\Services\BlogService;
 use Botble\Dashboard\Supports\DashboardWidgetInstance;
+use Botble\Language\Facades\Language;
 use Botble\Media\Facades\RvMedia;
 use Botble\Menu\Facades\Menu;
 use Botble\Page\Models\Page;
@@ -23,7 +25,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-use Botble\Base\Supports\ServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -253,7 +254,7 @@ class HookServiceProvider extends ServiceProvider
 
     public function addAdditionNameToPageName(string|null $name, Page $page): string|null
     {
-        if ($page->id == theme_option('blog_page_id', setting('blog_page_id'))) {
+        if ($page->getKey() == theme_option('blog_page_id', setting('blog_page_id'))) {
             $subTitle = Html::tag('span', trans('plugins/blog::base.blog_page'), ['class' => 'additional-page-name'])
                 ->toHtml();
 
@@ -272,7 +273,13 @@ class HookServiceProvider extends ServiceProvider
         if ($priority == 'head' && $model instanceof Category) {
             $route = 'categories.index';
 
-            echo view('plugins/language::partials.admin-list-language-chooser', compact('route'))->render();
+            $languages = Language::getActiveLanguage(['lang_id', 'lang_name', 'lang_code', 'lang_flag']);
+
+            if ($languages->count() < 2) {
+                return;
+            }
+
+            echo view('plugins/language::partials.admin-list-language-chooser', compact('route', 'languages'))->render();
         }
     }
 

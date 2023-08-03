@@ -2,8 +2,8 @@
 
 namespace Botble\Location\Forms;
 
-use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Forms\FormAbstract;
 use Botble\Location\Http\Requests\CountryRequest;
 use Botble\Location\Models\Country;
 

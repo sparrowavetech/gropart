@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
-use Botble\Media\Facades\RvMedia;
 
 class MediaFolder extends BaseModel
 {
@@ -56,28 +55,18 @@ class MediaFolder extends BaseModel
         );
     }
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
         static::deleting(function (MediaFolder $folder) {
             if ($folder->isForceDeleting()) {
-                $files = MediaFile::where('folder_id', $folder->getKey())->onlyTrashed()->get();
-
-                foreach ($files as $file) {
-                    RvMedia::deleteFile($file);
-                    $file->forceDelete();
-                }
+                $folder->files()->onlyTrashed()->each(fn (MediaFile $file) => $file->forceDelete());
             } else {
-                $files = MediaFile::where('folder_id', $folder->getKey())->withTrashed()->get();
-
-                foreach ($files as $file) {
-                    $file->delete();
-                }
+                $folder->files()->withTrashed()->each(fn (MediaFile $file) => $file->delete());
             }
         });
 
         static::restoring(function (MediaFolder $folder) {
-            MediaFile::where('folder_id', $folder->getKey())->restore();
+            $folder->files()->restore();
         });
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Botble\Base\Supports;
 
-use Botble\Base\Facades\Botble\Base\Facades\BaseHelper;
+use BaseHelper;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;

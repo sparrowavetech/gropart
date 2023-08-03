@@ -3,6 +3,7 @@
 namespace Botble\Faq\Providers;
 
 use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Faq\Contracts\Faq as FaqContract;
 use Botble\Faq\FaqSupport;
@@ -14,7 +15,6 @@ use Botble\Faq\Repositories\Interfaces\FaqCategoryInterface;
 use Botble\Faq\Repositories\Interfaces\FaqInterface;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Illuminate\Routing\Events\RouteMatched;
-use Botble\Base\Supports\ServiceProvider;
 
 class FaqServiceProvider extends ServiceProvider
 {

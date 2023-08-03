@@ -4,9 +4,9 @@ namespace Botble\Media\Chunks\Handler;
 
 use Botble\Media\Chunks\Save\AbstractSave;
 use Botble\Media\Chunks\Storage\ChunkStorage;
+use Botble\Media\Facades\RvMedia;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
-use Botble\Media\Facades\RvMedia;
 use Illuminate\Support\Facades\Session;
 
 abstract class AbstractHandler

@@ -15,8 +15,11 @@ use Stripe\PaymentIntent;
 
 class StripeController extends Controller
 {
-    public function success(StripePaymentCallbackRequest $request, StripePaymentService $stripePaymentService, BaseHttpResponse $response)
-    {
+    public function success(
+        StripePaymentCallbackRequest $request,
+        StripePaymentService $stripePaymentService,
+        BaseHttpResponse $response
+    ) {
         try {
             $stripePaymentService->setClient();
 

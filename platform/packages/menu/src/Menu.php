@@ -7,17 +7,17 @@ use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\Html;
 use Botble\Base\Models\BaseModel;
+use Botble\Base\Supports\RepositoryHelper;
+use Botble\Menu\Models\Menu as MenuModel;
 use Botble\Menu\Models\MenuNode;
-use Botble\Menu\Repositories\Eloquent\MenuRepository;
-use Botble\Menu\Repositories\Interfaces\MenuInterface;
-use Botble\Menu\Repositories\Interfaces\MenuNodeInterface;
 use Botble\Support\Services\Cache\Cache;
+use Botble\Theme\Facades\Theme;
 use Exception;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Config\Repository;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
-use Botble\Theme\Facades\Theme;
 use Throwable;
 
 class Menu
@@ -30,19 +30,19 @@ class Menu
 
     protected bool $loaded = false;
 
-    public function __construct(
-        protected MenuInterface $menuRepository,
-        protected MenuNodeInterface $menuNodeRepository,
-        CacheManager $cache,
-        protected Repository $config
-    ) {
-        $this->cache = new Cache($cache, MenuRepository::class);
-        $this->data = collect();
+    public function __construct(CacheManager $cache, protected Repository $config)
+    {
+        $this->cache = new Cache($cache, MenuModel::class);
     }
 
-    public function hasMenu(string $slug, bool $active): bool
+    public function hasMenu(string $slug): bool
     {
-        return $this->menuRepository->findBySlug($slug, $active);
+        $this->load();
+
+        return $this->data
+            ->where('slug', $slug)
+            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->isNotEmpty();
     }
 
     public function recursiveSaveMenu(array $menuNodes, int|string $menuId, int|string $parentId): array
@@ -76,30 +76,22 @@ class Menu
         int|string $parentId,
         bool $hasChild = false
     ): array {
-        $item = $this->menuNodeRepository->findById(Arr::get($menuItem, 'id'));
+        $node = MenuNode::query()->findOrNew(Arr::get($menuItem, 'id'));
 
-        $created = false;
+        $node->fill($menuItem);
+        $node->menu_id = $menuId;
+        $node->parent_id = $parentId;
+        $node->has_child = $hasChild;
 
-        if (! $item) {
-            $item = $this->menuNodeRepository->getModel();
-            $created = true;
-        }
+        $node = $this->getReferenceMenuNode($menuItem, $node);
+        $node->save();
 
-        $item->fill($menuItem);
-        $item->menu_id = $menuId;
-        $item->parent_id = $parentId;
-        $item->has_child = $hasChild;
+        $menuItem['id'] = $node->getKey();
 
-        $item = $this->getReferenceMenuNode($menuItem, $item);
-
-        $this->menuNodeRepository->createOrUpdate($item);
-
-        $menuItem['id'] = $item->id;
-
-        if ($created) {
-            event(new CreatedContentEvent(MENU_NODE_MODULE_SCREEN_NAME, request(), $item));
+        if ($node->wasRecentlyCreated) {
+            event(new CreatedContentEvent(MENU_NODE_MODULE_SCREEN_NAME, request(), $node));
         } else {
-            event(new UpdatedContentEvent(MENU_NODE_MODULE_SCREEN_NAME, request(), $item));
+            event(new UpdatedContentEvent(MENU_NODE_MODULE_SCREEN_NAME, request(), $node));
         }
 
         return $menuItem;
@@ -199,18 +191,17 @@ class Menu
 
     protected function read(): Collection
     {
-        $with = [
+        $with = apply_filters('cms_menu_load_with_relations', [
             'menuNodes',
             'menuNodes.child',
-            'menuNodes.metadata',
             'locations',
-        ];
+        ]);
 
-        try {
-            return $this->menuRepository->allBy(['status' => BaseStatusEnum::PUBLISHED], $with);
-        } catch (Throwable) {
-            return collect();
-        }
+        $items = MenuModel::query()
+            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->with($with);
+
+        return RepositoryHelper::applyBeforeExecuteQuery($items, new MenuModel())->get();
     }
 
     public function generateMenu(array $args = []): string|null
@@ -244,10 +235,13 @@ class Menu
         }
 
         if ($menuNodes instanceof Collection) {
-            $menuNodes = $menuNodes->sortBy('position');
-        } else {
-            $menuNodes->loadMissing('reference');
+            try {
+                $menuNodes->loadMissing('reference');
+            } catch (Throwable) {
+            }
         }
+
+        $menuNodes = $menuNodes->sortBy('position');
 
         $data = [
             'menu' => $menu,
@@ -282,7 +276,7 @@ class Menu
     public function generateSelect(array $args = []): string|null
     {
         /**
-         * @var BaseModel $model
+         * @var BaseModel|Builder $model
          */
         $model = Arr::get($args, 'model');
 
@@ -290,7 +284,6 @@ class Menu
 
         if (! Arr::has($args, 'items')) {
             if (method_exists($model, 'children')) {
-                // @phpstan-ignore-next-line
                 $items = $model
                     ->where('parent_id', Arr::get($args, 'parent_id', 0))
                     ->with(['children', 'children.children'])
@@ -337,7 +330,7 @@ class Menu
     public function clearCacheMenuItems(): self
     {
         try {
-            $nodes = $this->menuNodeRepository->all();
+            $nodes = MenuNode::query()->get();
 
             foreach ($nodes as $node) {
                 if (! $node->reference_type ||

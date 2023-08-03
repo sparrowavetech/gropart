@@ -2,31 +2,29 @@
 
 namespace Botble\Ads\Tables;
 
-use Illuminate\Support\Facades\Auth;
-use Botble\Base\Facades\BaseHelper;
 use Botble\Ads\Models\Ads;
-use Botble\Ads\Repositories\Interfaces\AdsInterface;
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Table\Abstracts\TableAbstract;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
+use Botble\Media\Facades\RvMedia;
+use Botble\Table\Abstracts\TableAbstract;
+use Botble\Table\DataTables;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
-use Botble\Media\Facades\RvMedia;
-use Botble\Table\DataTables;
+use Illuminate\Support\Facades\Auth;
 
 class AdsTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, AdsInterface $adsRepository)
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Ads $model)
     {
-        $this->repository = $adsRepository;
         parent::__construct($table, $urlGenerator);
+
+        $this->model = $model;
+        $this->hasActions = true;
+        $this->hasFilter = true;
 
         if (! Auth::user()->hasAnyPermission(['ads.edit', 'ads.destroy'])) {
             $this->hasOperations = false;
@@ -77,15 +75,17 @@ class AdsTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()->select([
-            'ads.id',
-            'ads.image',
-            'ads.key',
-            'ads.name',
-            'ads.clicked',
-            'ads.expired_at',
-            'ads.status',
-        ]);
+        $query = $this->getModel()
+            ->query()
+            ->select([
+                'id',
+                'image',
+                'key',
+                'name',
+                'clicked',
+                'expired_at',
+                'status',
+            ]);
 
         return $this->applyScopes($query);
     }
@@ -94,37 +94,37 @@ class AdsTable extends TableAbstract
     {
         return [
             'id' => [
-                'name' => 'ads.id',
+                'name' => 'id',
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
             ],
             'image' => [
-                'name' => 'ads.image',
+                'name' => 'image',
                 'title' => trans('core/base::tables.image'),
                 'width' => '70px',
             ],
             'name' => [
-                'name' => 'ads.name',
+                'name' => 'name',
                 'title' => trans('core/base::tables.name'),
                 'class' => 'text-start',
             ],
             'key' => [
-                'name' => 'ads.key',
+                'name' => 'key',
                 'title' => trans('plugins/ads::ads.shortcode'),
                 'class' => 'text-start',
             ],
             'clicked' => [
-                'name' => 'ads.clicked',
+                'name' => 'clicked',
                 'title' => trans('plugins/ads::ads.clicked'),
                 'class' => 'text-start',
             ],
             'expired_at' => [
-                'name' => 'ads.expired_at',
+                'name' => 'expired_at',
                 'title' => trans('plugins/ads::ads.expired_at'),
                 'width' => '100px',
             ],
             'status' => [
-                'name' => 'ads.status',
+                'name' => 'status',
                 'title' => trans('core/base::tables.status'),
                 'width' => '100px',
             ],
@@ -151,18 +151,18 @@ class AdsTable extends TableAbstract
     public function getBulkChanges(): array
     {
         return [
-            'ads.name' => [
+            'name' => [
                 'title' => trans('core/base::tables.name'),
                 'type' => 'text',
                 'validate' => 'required|max:120',
             ],
-            'ads.status' => [
+            'status' => [
                 'title' => trans('core/base::tables.status'),
                 'type' => 'select',
                 'choices' => BaseStatusEnum::labels(),
                 'validate' => 'required|in:' . implode(',', BaseStatusEnum::values()),
             ],
-            'ads.expired_at' => [
+            'expired_at' => [
                 'title' => trans('plugins/ads::ads.expired_at'),
                 'type' => 'datePicker',
             ],

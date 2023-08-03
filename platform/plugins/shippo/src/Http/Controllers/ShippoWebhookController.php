@@ -5,6 +5,7 @@ namespace Botble\Shippo\Http\Controllers;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Enums\ShippingStatusEnum;
+use Botble\Ecommerce\Facades\OrderHelper;
 use Botble\Ecommerce\Models\Shipment;
 use Botble\Ecommerce\Repositories\Interfaces\ShipmentHistoryInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ShipmentInterface;
@@ -13,7 +14,6 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Botble\Ecommerce\Facades\OrderHelper;
 
 class ShippoWebhookController extends BaseController
 {

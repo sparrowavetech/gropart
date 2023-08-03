@@ -2,8 +2,8 @@
 
 namespace Botble\Faq\Forms;
 
-use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Forms\FormAbstract;
 use Botble\Faq\Http\Requests\FaqCategoryRequest;
 use Botble\Faq\Models\FaqCategory;
 

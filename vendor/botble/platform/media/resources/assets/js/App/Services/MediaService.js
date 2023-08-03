@@ -106,7 +106,7 @@ export class MediaService {
         let $breadcrumbContainer = $('.rv-media-breadcrumb .breadcrumb')
         $breadcrumbContainer.find('li').remove()
 
-        _.each(breadcrumbItems, (value) => {
+        Helpers.each(breadcrumbItems, (value) => {
             let template = _self.breadcrumbTemplate
             template = template
                 .replace(/__name__/gi, value.name || '')
@@ -114,7 +114,7 @@ export class MediaService {
                 .replace(/__folderId__/gi, value.id || 0)
             $breadcrumbContainer.append($(template))
         })
-        $('.rv-media-container').attr('data-breadcrumb-count', _.size(breadcrumbItems))
+        $('.rv-media-container').attr('data-breadcrumb-count', Helpers.size(breadcrumbItems))
     }
 
     static refreshFilter() {
@@ -133,7 +133,7 @@ export class MediaService {
         let $empty_trash_btn = $('.rv-media-actions .btn[data-action="empty_trash"]')
         if (viewIn === 'trash') {
             $empty_trash_btn.removeClass('hidden').removeClass('disabled')
-            if (!_.size(Helpers.getItems())) {
+            if (!Helpers.size(Helpers.getItems())) {
                 $empty_trash_btn.addClass('hidden').addClass('disabled')
             }
         } else {

@@ -2,9 +2,9 @@
 
 namespace Botble\ACL\Forms;
 
-use Botble\Base\Facades\Assets;
 use Botble\ACL\Http\Requests\RoleCreateRequest;
 use Botble\ACL\Models\Role;
+use Botble\Base\Facades\Assets;
 use Botble\Base\Forms\FormAbstract;
 use Illuminate\Support\Arr;
 

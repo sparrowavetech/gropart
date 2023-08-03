@@ -3,8 +3,8 @@
 namespace Botble\Base\Providers;
 
 use Botble\Base\Facades\BaseHelper;
-use Botble\Setting\Supports\SettingStore;
 use Botble\Base\Supports\ServiceProvider;
+use Botble\Setting\Supports\SettingStore;
 
 class MailConfigServiceProvider extends ServiceProvider
 {

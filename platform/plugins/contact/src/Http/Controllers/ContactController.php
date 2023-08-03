@@ -2,6 +2,9 @@
 
 namespace Botble\Contact\Http\Controllers;
 
+use Botble\Base\Events\DeletedContentEvent;
+use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
@@ -12,14 +15,11 @@ use Botble\Contact\Forms\ContactForm;
 use Botble\Contact\Http\Requests\ContactReplyRequest;
 use Botble\Contact\Http\Requests\EditContactRequest;
 use Botble\Contact\Models\Contact;
+use Botble\Contact\Repositories\Interfaces\ContactInterface;
 use Botble\Contact\Repositories\Interfaces\ContactReplyInterface;
 use Botble\Contact\Tables\ContactTable;
-use Botble\Contact\Repositories\Interfaces\ContactInterface;
-use Botble\Base\Facades\EmailHandler;
 use Exception;
 use Illuminate\Http\Request;
-use Botble\Base\Events\DeletedContentEvent;
-use Botble\Base\Events\UpdatedContentEvent;
 
 class ContactController extends BaseController
 {
@@ -72,7 +72,7 @@ class ContactController extends BaseController
 
     public function deletes(Request $request, BaseHttpResponse $response)
     {
-        return $this->executeDeleteItems($request, $response, $this->contactRepository, CONTACT_MODULE_SCREEN_NAME);
+        return $this->executeDeleteItems($request, $response, new Contact(), CONTACT_MODULE_SCREEN_NAME);
     }
 
     public function postReply(

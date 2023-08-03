@@ -3,11 +3,11 @@
 namespace Botble\Analytics\Providers;
 
 use Botble\Base\Facades\Assets;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Dashboard\Supports\DashboardWidgetInstance;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use Botble\Base\Supports\ServiceProvider;
 
 class HookServiceProvider extends ServiceProvider
 {

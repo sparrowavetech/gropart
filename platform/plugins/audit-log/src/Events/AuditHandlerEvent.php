@@ -3,8 +3,8 @@
 namespace Botble\AuditLog\Events;
 
 use Botble\Base\Events\Event;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Auth;
 
 class AuditHandlerEvent extends Event
 {

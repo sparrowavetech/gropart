@@ -3,7 +3,8 @@
 namespace Botble\LanguageAdvanced\Tests;
 
 use Botble\ACL\Models\User;
-use Botble\ACL\Repositories\Interfaces\ActivationInterface;
+use Botble\ACL\Services\ActivateUserService;
+use Botble\Language\Facades\Language as LanguageFacade;
 use Botble\Language\Models\Language;
 use Botble\Language\Models\LanguageMeta;
 use Botble\Page\Models\Page;
@@ -16,70 +17,78 @@ class LanguageTest extends TestCase
 {
     public function testTranslatable(): void
     {
-        $this->createLanguages();
+        $languages = $this->createLanguages();
 
         $this->assertTrue(is_plugin_active('language') && is_plugin_active('language-advanced'));
 
         $user = $this->createUser();
 
-        $this->be(User::first());
+        $this->actingAs($user);
 
-        $page = Page::create([
-            'name' => 'This is a page in English',
-            'user_id' => $user->id,
+        $this->assertAuthenticated();
+
+        $englishTitle = 'This is a page in English';
+        $vietnameseTitle = 'This is a page in Vietnamese';
+
+        $testingLanguageCode = $languages[1]->lang_code;
+
+        $page = Page::query()->create([
+            'name' => $englishTitle,
+            'user_id' => $user->getKey(),
         ]);
 
-        $this->get(route('pages.edit', $page->id))
-            ->assertSee('This is a page in English');
+        $pageId = $page->getKey();
 
-        DB::table('pages_translations')->truncate();
+        $this
+            ->get(route('pages.edit', $pageId))
+            ->assertSee($englishTitle);
+
         DB::table('pages_translations')->insert([
-            'lang_code' => 'vi',
-            'pages_id' => $page->id,
-            'name' => 'This is a page in Vietnamese',
+            'lang_code' => $testingLanguageCode,
+            'pages_id' => $pageId,
+            'name' => $vietnameseTitle,
         ]);
 
-        $this->call('GET', route('pages.edit', $page->id), ['ref_lang' => 'vi']);
-        //->assertSee('This is a page in Vietnamese');
+        $this
+            ->call('GET', route('pages.edit', $pageId), [LanguageFacade::refLangKey() => $testingLanguageCode])
+            ->assertSee($vietnameseTitle);
+
+        DB::table('pages_translations')->where([
+            'lang_code' => $testingLanguageCode,
+            'pages_id' => $pageId,
+        ])->delete();
+
+        $this
+            ->call('GET', route('pages.edit', $pageId), [LanguageFacade::refLangKey() => $testingLanguageCode])
+            ->assertSee($englishTitle);
 
         $page->delete();
-
-        $this->assertDatabaseHas(
-            'pages_translations',
-            [
-                'lang_code' => 'vi',
-                'pages_id' => $page->id,
-                'name' => 'This is a page in Vietnamese',
-            ]
-        );
     }
 
     protected function createUser(): User
     {
         Schema::disableForeignKeyConstraints();
 
-        User::truncate();
+        User::query()->truncate();
 
         $user = new User();
-        $user->first_name = 'System';
-        $user->last_name = 'Admin';
-        $user->email = 'admin@botble.com';
-        $user->username = 'botble';
-        $user->password = Hash::make('159357');
-        $user->super_user = 1;
-        $user->manage_supers = 1;
+        $user->forceFill([
+            'first_name' => 'Super',
+            'last_name' => 'Admin',
+            'email' => 'admin@botble.com',
+            'username' => 'botble',
+            'password' => Hash::make('159357'),
+            'super_user' => 1,
+            'manage_supers' => 1,
+        ]);
         $user->save();
 
-        $activationRepository = app(ActivationInterface::class);
-
-        $activation = $activationRepository->createUser($user);
-
-        $activationRepository->complete($user, $activation->code);
+        app(ActivateUserService::class)->activate($user);
 
         return $user;
     }
 
-    protected function createLanguages(): void
+    protected function createLanguages(): array
     {
         $languages = [
             [
@@ -102,11 +111,15 @@ class LanguageTest extends TestCase
             ],
         ];
 
-        Language::truncate();
-        LanguageMeta::truncate();
+        Language::query()->truncate();
+        LanguageMeta::query()->truncate();
+
+        $results = [];
 
         foreach ($languages as $item) {
-            Language::create($item);
+            $results[] = Language::query()->create($item);
         }
+
+        return $results;
     }
 }

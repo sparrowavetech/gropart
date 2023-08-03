@@ -65,6 +65,10 @@ class JavascriptValidator implements Arrayable
         $this->selector = empty($options['selector']) ? 'form' : $options['selector'];
         $this->view = empty($options['view']) ? 'core/js-validation::bootstrap' : $options['view'];
         $this->remote = $options['remote'] ?? true;
+
+        if (isset($options['ignore'])) {
+            $this->ignore = $options['ignore'];
+        }
     }
 
     /**

@@ -92,7 +92,7 @@ class TagController extends BaseController
 
     public function deletes(Request $request, BaseHttpResponse $response)
     {
-        return $this->executeDeleteItems($request, $response, $this->tagRepository, TAG_MODULE_SCREEN_NAME);
+        return $this->executeDeleteItems($request, $response, new Tag(), TAG_MODULE_SCREEN_NAME);
     }
 
     public function getAllTags()

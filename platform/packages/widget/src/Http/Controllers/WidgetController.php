@@ -6,11 +6,11 @@ use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Widget\Facades\WidgetGroup;
 use Botble\Widget\Models\Widget;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Botble\Widget\Facades\WidgetGroup;
 
 class WidgetController extends BaseController
 {

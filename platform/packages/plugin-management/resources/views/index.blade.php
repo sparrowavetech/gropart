@@ -2,10 +2,10 @@
 
 @section('content')
     <div id="plugin-list">
-        @if (config('packages.plugin-management.general.enable_marketplace_feature'))
+        @if (config('packages.plugin-management.general.enable_marketplace_feature') && auth()->user()->hasPermission('plugins.marketplace'))
             <div class="mb-3">
                 <a class="btn btn-info" href="{{ route('plugins.marketplace') }}">
-                    <i class="fa fa-plus me-3"></i> {{ trans('packages/plugin-management::plugin.plugins_add_new') }}
+                    <i class="fa fa-plus me-1"></i> {{ trans('packages/plugin-management::plugin.plugins_add_new') }}
                 </a>
             </div>
         @endif
@@ -41,7 +41,7 @@
                                     </button>
                                 @endif
 
-                                <button class="btn btn-success btn-trigger-update-plugin" style="display: none;" data-check-update="{{ $plugin->id ?? 'plugin-' . $plugin->path }}" data-version="{{ $plugin->version }}">{{ trans('packages/plugin-management::plugin.update') }}</button>
+                                <button class="btn btn-success btn-trigger-update-plugin" style="display: none;" data-name="{{ $plugin->path }}" data-check-update="{{ $plugin->id ?? 'plugin-' . $plugin->path }}" data-version="{{ $plugin->version }}">{{ trans('packages/plugin-management::plugin.update') }}</button>
 
                                 @if (auth()->user()->hasPermission('plugins.remove'))
                                     <button class="btn btn-link text-danger text-decoration-none btn-trigger-remove-plugin" data-plugin="{{ $plugin->path }}">{{ trans('packages/plugin-management::plugin.remove') }}</button>

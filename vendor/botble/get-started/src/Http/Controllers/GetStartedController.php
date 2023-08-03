@@ -7,9 +7,9 @@ use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\GetStarted\Http\Requests\GetStartedRequest;
+use Botble\Theme\Facades\ThemeOption;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Botble\Theme\Facades\ThemeOption;
 
 class GetStartedController extends BaseController
 {

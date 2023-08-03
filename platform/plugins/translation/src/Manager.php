@@ -4,22 +4,21 @@ namespace Botble\Translation;
 
 use ArrayAccess;
 use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Supports\PclZip as Zip;
+use Botble\Base\Supports\ServiceProvider;
+use Botble\Base\Supports\Zipper;
+use Botble\Theme\Facades\Theme;
 use Botble\Translation\Models\Translation;
 use Exception;
 use GuzzleHttp\Psr7\Utils;
-use Illuminate\Filesystem\Filesystem;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
-use Botble\Base\Supports\ServiceProvider;
-use Symfony\Component\VarExporter\VarExporter;
-use Botble\Theme\Facades\Theme;
 use Illuminate\Support\Facades\Lang;
+use Symfony\Component\VarExporter\VarExporter;
 use Throwable;
-use ZipArchive;
 
 class Manager
 {
@@ -102,7 +101,7 @@ class Manager
         }
 
         $value = (string)$value;
-        $translation = Translation::firstOrNew([
+        $translation = Translation::query()->firstOrNew([
             'locale' => $locale,
             'group' => $group,
             'key' => $key,
@@ -147,6 +146,16 @@ class Manager
                 foreach ($tree as $locale => $groups) {
                     if (isset($groups[$group])) {
                         $translations = $groups[$group];
+
+                        if (
+                            $locale != 'en' &&
+                            isset($tree['en'][$group]) &&
+                            is_array($tree['en'][$group]) &&
+                            count($tree['en'][$group]) !== count($translations)
+                        ) {
+                            $translations = array_merge($tree['en'][$group], $translations);
+                        }
+
                         $file = $locale . '/' . $group;
 
                         if (! $this->files->isDirectory(lang_path($locale))) {
@@ -178,7 +187,7 @@ class Manager
 
     public function exportAllTranslations(): bool
     {
-        $groups = Translation::whereNotNull('value')->selectDistinctGroup()->get('group');
+        $groups = Translation::query()->whereNotNull('value')->selectDistinctGroup()->get('group');
 
         foreach ($groups as $group) {
             $this->exportTranslations($group->group);
@@ -199,12 +208,12 @@ class Manager
 
     public function cleanTranslations(): void
     {
-        Translation::whereNull('value')->delete();
+        Translation::query()->whereNull('value')->delete();
     }
 
     public function truncateTranslations(): void
     {
-        Translation::truncate();
+        Translation::query()->truncate();
     }
 
     public function getConfig(string|null $key = null): string|array|null
@@ -334,22 +343,9 @@ class Manager
             ];
         }
 
-        if (class_exists('ZipArchive', false)) {
-            $zip = new ZipArchive();
-            $res = $zip->open($destination);
-            if ($res === true) {
-                $zip->extractTo(storage_path('app'));
-                $zip->close();
-            } else {
-                return [
-                    'error' => true,
-                    'message' => 'Extract translation files failed!',
-                ];
-            }
-        } else {
-            $archive = new Zip($destination);
-            $archive->extract(PCLZIP_OPT_PATH, storage_path('app'));
-        }
+        $zip = new Zipper();
+
+        $zip->extract($destination, storage_path('app'));
 
         if (File::exists($destination)) {
             unlink($destination);
@@ -358,7 +354,9 @@ class Manager
         $localePath = storage_path('app/translations-master/' . $locale);
 
         File::copyDirectory($localePath . '/' . $locale, lang_path($locale));
-        File::copyDirectory($localePath . '/vendor', lang_path('vendor'));
+        File::copyDirectory($localePath . '/vendor/core', lang_path('vendor/core'));
+        File::copyDirectory($localePath . '/vendor/packages', lang_path('vendor/packages'));
+        File::copyDirectory($localePath . '/vendor/plugins', lang_path('vendor/plugins'));
 
         $theme = Theme::getThemeName();
 

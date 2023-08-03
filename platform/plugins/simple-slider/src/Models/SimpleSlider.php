@@ -30,12 +30,10 @@ class SimpleSlider extends BaseModel
         return $this->hasMany(SimpleSliderItem::class)->orderBy('simple_slider_items.order');
     }
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
-
         self::deleting(function (SimpleSlider $slider) {
-            SimpleSliderItem::where('simple_slider_id', $slider->id)->delete();
+            $slider->sliderItems()->delete();
         });
     }
 }

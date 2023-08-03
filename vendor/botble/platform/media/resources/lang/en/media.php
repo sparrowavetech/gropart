@@ -114,7 +114,7 @@ return [
         ],
 
         'clipboard' => [
-            'success' => 'These file links has been copied to clipboard',
+            'success' => 'These file links have been copied to clipboard',
         ],
 
         'message' => [
@@ -135,6 +135,7 @@ return [
                 'copy_link' => 'Copy link',
                 'rename' => 'Rename',
                 'make_copy' => 'Make a copy',
+                'alt_text' => 'ALT text',
             ],
             'user' => [
                 'favorite' => 'Add to favorite',

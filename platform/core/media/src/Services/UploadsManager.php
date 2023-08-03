@@ -2,15 +2,15 @@
 
 namespace Botble\Media\Services;
 
+use Botble\Media\Facades\RvMedia;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use League\Flysystem\FilesystemException;
 use League\Flysystem\UnableToRetrieveMetadata;
 use Mimey\MimeTypes;
-use Botble\Media\Facades\RvMedia;
-use Illuminate\Support\Facades\Storage;
 
 class UploadsManager
 {

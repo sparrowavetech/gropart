@@ -2,22 +2,17 @@
 
 namespace Botble\Location\Forms;
 
-use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Location\Repositories\Interfaces\CountryInterface;
+use Botble\Base\Forms\FormAbstract;
 use Botble\Location\Http\Requests\StateRequest;
+use Botble\Location\Models\Country;
 use Botble\Location\Models\State;
 
 class StateForm extends FormAbstract
 {
-    public function __construct(protected CountryInterface $countryRepository)
-    {
-        parent::__construct();
-    }
-
     public function buildForm(): void
     {
-        $countries = $this->countryRepository->pluck('countries.name', 'countries.id');
+        $countries = Country::query()->pluck('name', 'id')->all();
 
         $this
             ->setupModel(new State())
@@ -28,6 +23,14 @@ class StateForm extends FormAbstract
                 'label_attr' => ['class' => 'control-label required'],
                 'attr' => [
                     'placeholder' => trans('core/base::forms.name_placeholder'),
+                    'data-counter' => 120,
+                ],
+            ])
+            ->add('slug', 'text', [
+                'label' => __('Slug'),
+                'label_attr' => ['class' => 'control-label'],
+                'attr' => [
+                    'placeholder' => __('Slug'),
                     'data-counter' => 120,
                 ],
             ])
@@ -64,6 +67,10 @@ class StateForm extends FormAbstract
                 'label' => trans('core/base::tables.status'),
                 'label_attr' => ['class' => 'control-label required'],
                 'choices' => BaseStatusEnum::labels(),
+            ])
+            ->add('image', 'mediaImage', [
+                'label' => trans('core/base::forms.image'),
+                'label_attr' => ['class' => 'control-label'],
             ])
             ->setBreakFieldPoint('status');
     }

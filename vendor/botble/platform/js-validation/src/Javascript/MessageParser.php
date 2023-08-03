@@ -2,6 +2,7 @@
 
 namespace Botble\JsValidation\Javascript;
 
+use Botble\JsValidation\JsValidatorFactory;
 use Botble\JsValidation\Support\DelegatedValidator;
 use Botble\JsValidation\Support\UseDelegatedValidatorTrait;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -39,6 +40,8 @@ class MessageParser
      */
     public function getMessage($attribute, $rule, $parameters)
     {
+        $attribute = str_replace(JsValidatorFactory::ASTERISK, '*', $attribute);
+
         $data = $this->fakeValidationData($attribute, $rule, $parameters);
 
         $message = $this->validator->getMessage($attribute, $rule);

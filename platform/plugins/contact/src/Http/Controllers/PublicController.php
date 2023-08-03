@@ -2,11 +2,11 @@
 
 namespace Botble\Contact\Http\Controllers;
 
+use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Contact\Events\SentContactEvent;
 use Botble\Contact\Http\Requests\ContactRequest;
 use Botble\Contact\Repositories\Interfaces\ContactInterface;
-use Botble\Base\Facades\EmailHandler;
 use Exception;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;

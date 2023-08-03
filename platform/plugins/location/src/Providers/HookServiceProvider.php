@@ -2,9 +2,9 @@
 
 namespace Botble\Location\Providers;
 
-use Botble\Base\Supports\ServiceProvider;
-use Botble\Base\Forms\FormHelper;
 use Botble\Base\Forms\FormAbstract;
+use Botble\Base\Forms\FormHelper;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Location\Fields\SelectLocationField;
 
 class HookServiceProvider extends ServiceProvider

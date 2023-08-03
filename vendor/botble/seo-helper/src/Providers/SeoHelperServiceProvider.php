@@ -2,6 +2,7 @@
 
 namespace Botble\SeoHelper\Providers;
 
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\SeoHelper\Contracts\SeoHelperContract;
 use Botble\SeoHelper\Contracts\SeoMetaContract;
@@ -11,7 +12,6 @@ use Botble\SeoHelper\SeoHelper;
 use Botble\SeoHelper\SeoMeta;
 use Botble\SeoHelper\SeoOpenGraph;
 use Botble\SeoHelper\SeoTwitter;
-use Botble\Base\Supports\ServiceProvider;
 
 /**
  * @since 02/12/2015 14:09 PM

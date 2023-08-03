@@ -3,11 +3,11 @@
 namespace Botble\ACL\Services;
 
 use Botble\ACL\Models\User;
-use Illuminate\Support\Facades\Auth;
 use Botble\Support\Services\ProduceServiceInterface;
 use Exception;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Throwable;
 
 class ChangePasswordService implements ProduceServiceInterface

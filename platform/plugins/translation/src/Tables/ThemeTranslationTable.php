@@ -2,14 +2,14 @@
 
 namespace Botble\Translation\Tables;
 
-use Botble\Base\Supports\Language;
-use Illuminate\Http\JsonResponse;
-use Botble\Table\Abstracts\TableAbstract;
-use Botble\Translation\Manager;
 use Botble\Base\Facades\Html;
-use Illuminate\Contracts\Routing\UrlGenerator;
-use Illuminate\Support\Arr;
+use Botble\Base\Supports\Language;
+use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\DataTables;
+use Botble\Translation\Manager;
+use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Arr;
 
 class ThemeTranslationTable extends TableAbstract
 {

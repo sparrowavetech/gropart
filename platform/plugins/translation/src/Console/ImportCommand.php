@@ -15,7 +15,7 @@ class ImportCommand extends Command
         $this->components->info('Importing...');
         $replace = $this->option('replace');
         $counter = $manager->importTranslations($replace);
-        $this->components->info('Done importing, processed ' . $counter . ' items!');
+        $this->components->info(sprintf('Done importing, processed %s items!', number_format($counter)));
 
         return self::SUCCESS;
     }

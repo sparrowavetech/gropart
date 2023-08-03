@@ -2,34 +2,24 @@
 
 namespace Botble\Location\Forms;
 
-use Botble\Base\Facades\Assets;
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Facades\Assets;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Location\Http\Requests\CityRequest;
 use Botble\Location\Models\City;
-use Botble\Location\Repositories\Interfaces\CountryInterface;
-use Botble\Location\Repositories\Interfaces\StateInterface;
+use Botble\Location\Models\Country;
 
 class CityForm extends FormAbstract
 {
-    public function __construct(protected CountryInterface $countryRepository, protected StateInterface $stateRepository)
-    {
-        parent::__construct();
-    }
-
     public function buildForm(): void
     {
         Assets::addScriptsDirectly('vendor/core/plugins/location/js/location.js');
 
-        $countries = $this->countryRepository->pluck('countries.name', 'countries.id');
+        $countries = Country::query()->pluck('name', 'id')->all();
 
         $states = [];
         if ($this->getModel()) {
-            $states = $this->stateRepository->pluck(
-                'states.name',
-                'states.id',
-                [['country_id', '=', $this->model->country_id]]
-            );
+            $states = $this->getModel()->country->states()->pluck('name', 'id')->all();
         }
 
         $this
@@ -41,6 +31,14 @@ class CityForm extends FormAbstract
                 'label_attr' => ['class' => 'control-label required'],
                 'attr' => [
                     'placeholder' => trans('core/base::forms.name_placeholder'),
+                    'data-counter' => 120,
+                ],
+            ])
+            ->add('slug', 'text', [
+                'label' => __('Slug'),
+                'label_attr' => ['class' => 'control-label'],
+                'attr' => [
+                    'placeholder' => __('Slug'),
                     'data-counter' => 120,
                 ],
             ])
@@ -87,6 +85,10 @@ class CityForm extends FormAbstract
                 'label' => trans('core/base::tables.status'),
                 'label_attr' => ['class' => 'control-label required'],
                 'choices' => BaseStatusEnum::labels(),
+            ])
+            ->add('image', 'mediaImage', [
+                'label' => trans('core/base::forms.image'),
+                'label_attr' => ['class' => 'control-label'],
             ])
             ->setBreakFieldPoint('status');
     }

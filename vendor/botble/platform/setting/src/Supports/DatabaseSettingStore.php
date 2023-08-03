@@ -3,17 +3,17 @@
 namespace Botble\Setting\Supports;
 
 use Botble\Base\Models\BaseModel;
+use Botble\Base\Supports\Helper;
 use Botble\Setting\Models\Setting;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Cache;
-use Throwable;
 use UnexpectedValueException;
 
 class DatabaseSettingStore extends SettingStore
 {
+    protected bool $connectedDatabase = false;
+
     public function forget($key): SettingStore
     {
         parent::forget($key);
@@ -46,13 +46,10 @@ class DatabaseSettingStore extends SettingStore
 
         $insertData = Arr::dot($data);
         $updateData = [];
-        $deleteKeys = [];
 
         foreach ($keys as $key) {
             if (isset($insertData[$key])) {
                 $updateData[$key] = $insertData[$key];
-            } else {
-                $deleteKeys[] = $key;
             }
             unset($insertData[$key]);
         }
@@ -64,10 +61,6 @@ class DatabaseSettingStore extends SettingStore
 
         if ($insertData) {
             $this->newQuery()->insert($this->prepareInsertData($insertData));
-        }
-
-        if ($deleteKeys) {
-            $this->newQuery()->whereIn('key', $deleteKeys)->delete();
         }
     }
 
@@ -89,17 +82,15 @@ class DatabaseSettingStore extends SettingStore
 
     protected function read(): array
     {
-        try {
-            if (App::runningInConsole()) {
-                return $this->parseReadData($this->newQuery()->get());
-            }
+        if (! $this->connectedDatabase) {
+            $this->connectedDatabase = Helper::isConnectedDatabase();
+        }
 
-            return Cache::remember($this->cacheKey, $this->settingTime, function () {
-                return $this->parseReadData($this->newQuery()->get());
-            });
-        } catch (Throwable) {
+        if (! $this->connectedDatabase) {
             return [];
         }
+
+        return $this->parseReadData($this->newQuery()->get());
     }
 
     public function parseReadData(Collection|array $data): array
@@ -141,10 +132,6 @@ class DatabaseSettingStore extends SettingStore
             $query = $query->whereNotIn('key', $keys);
         }
 
-        $deleted = $query->delete();
-
-        $this->clearCache();
-
-        return $deleted;
+        return $query->delete();
     }
 }

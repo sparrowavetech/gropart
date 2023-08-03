@@ -3,9 +3,9 @@
 namespace Botble\PayPal\Http\Controllers;
 
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Payment\Supports\PaymentHelper;
 use Botble\PayPal\Http\Requests\PayPalPaymentCallbackRequest;
 use Botble\PayPal\Services\Gateways\PayPalPaymentService;
-use Botble\Payment\Supports\PaymentHelper;
 use Illuminate\Routing\Controller;
 
 class PayPalController extends Controller

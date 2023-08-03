@@ -14,16 +14,12 @@ use Botble\Location\Http\Requests\LocationImportRequest;
 use Botble\Location\Imports\LocationImport;
 use Botble\Location\Imports\ValidateLocationImport;
 use Botble\Location\Location;
-use Botble\Location\Repositories\Interfaces\CountryInterface;
+use Botble\Location\Models\Country;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Excel;
 
 class BulkImportController extends BaseController
 {
-    public function __construct(protected LocationImport $locationImport, protected ValidateLocationImport $validateLocationImport)
-    {
-    }
-
     public function index()
     {
         PageTitle::setTitle(trans('plugins/location::bulk-import.name'));
@@ -33,71 +29,73 @@ class BulkImportController extends BaseController
         return view('plugins/location::bulk-import.index');
     }
 
-    public function postImport(BulkImportRequest $request, BaseHttpResponse $response)
-    {
+    public function postImport(
+        BulkImportRequest $request,
+        BaseHttpResponse $response,
+        LocationImport $locationImport,
+        ValidateLocationImport $validateLocationImport
+    ) {
         BaseHelper::maximumExecutionTimeAndMemoryLimit();
 
         $file = $request->file('file');
+        $importType = $request->input('type');
 
-        $this->validateLocationImport
+        $validateLocationImport
             ->setValidatorClass(new LocationImportRequest())
-            ->setImportType($request->input('type'))
+            ->setImportType($importType)
             ->import($file);
 
-        if ($this->validateLocationImport->failures()->count()) {
+        if ($validateLocationImport->failures()->count()) {
             $data = [
-                'total_failed' => $this->validateLocationImport->failures()->count(),
-                'total_error' => $this->validateLocationImport->errors()->count(),
-                'failures' => $this->validateLocationImport->failures(),
+                'total_failed' => $validateLocationImport->failures()->count(),
+                'total_error' => $validateLocationImport->errors()->count(),
+                'failures' => $validateLocationImport->failures(),
             ];
-
-            $message = trans('plugins/location::bulk-import.import_failed_description');
 
             return $response
                 ->setError()
                 ->setData($data)
-                ->setMessage($message);
+                ->setMessage(trans('plugins/location::bulk-import.import_failed_description'));
         }
 
-        $this->locationImport
+        $locationImport
             ->setValidatorClass(new LocationImportRequest())
-            ->setImportType($request->input('type'))
+            ->setImportType($importType)
             ->import($file);
 
         $data = [
-            'total_success' => $this->locationImport->successes()->count(),
-            'total_failed' => $this->locationImport->failures()->count(),
-            'total_error' => $this->locationImport->errors()->count(),
-            'failures' => $this->locationImport->failures(),
-            'successes' => $this->locationImport->successes(),
+            'total_success' => $locationImport->successes()->count(),
+            'total_failed' => $locationImport->failures()->count(),
+            'total_error' => $locationImport->errors()->count(),
+            'failures' => $locationImport->failures(),
+            'successes' => $locationImport->successes(),
         ];
 
-        $message = trans('plugins/location::bulk-import.imported_successfully');
-
-        $result = trans('plugins/location::bulk-import.results', [
-            'success' => $data['total_success'],
-            'failed' => $data['total_failed'],
-        ]);
-
-        return $response->setData($data)->setMessage($message . ' ' . $result);
+        return $response->setData($data)->setMessage(
+            trans('plugins/location::bulk-import.imported_successfully') . ' ' .
+            trans('plugins/location::bulk-import.results', [
+                'success' => $data['total_success'],
+                'failed' => $data['total_failed'],
+            ])
+        );
     }
 
     public function downloadTemplate(Request $request)
     {
         $extension = $request->input('extension');
-        $extension = $extension == 'csv' ? $extension : Excel::XLSX;
-        $writeType = $extension == 'csv' ? Excel::CSV : Excel::XLSX;
-        $contentType = $extension == 'csv' ? ['Content-Type' => 'text/csv'] : ['Content-Type' => 'text/xlsx'];
+        $extension = $extension === 'csv' ? $extension : Excel::XLSX;
+        $writeType = $extension === 'csv' ? Excel::CSV : Excel::XLSX;
+        $contentType = $extension === 'csv' ? ['Content-Type' => 'text/csv'] : ['Content-Type' => 'text/xlsx'];
         $fileName = 'template_locations_import.' . $extension;
 
         return (new TemplateLocationExport($extension))->download($fileName, $writeType, $contentType);
     }
 
-    public function ajaxGetAvailableRemoteLocations(Location $location, BaseHttpResponse $response, CountryInterface $countryRepository)
+    public function ajaxGetAvailableRemoteLocations(Location $location, BaseHttpResponse $response)
     {
         $remoteLocations = $location->getRemoteAvailableLocations();
 
-        $availableLocations = $countryRepository->pluck('code');
+        $availableLocations = Country::query()->pluck('code')->all();
 
         $listCountries = Helper::countries();
 
@@ -125,6 +123,8 @@ class BulkImportController extends BaseController
 
     public function importLocationData(string $countryCode, Location $location, BaseHttpResponse $response)
     {
+        BaseHelper::maximumExecutionTimeAndMemoryLimit();
+
         $result = $location->downloadRemoteLocation($countryCode);
 
         return $response

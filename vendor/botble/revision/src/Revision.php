@@ -3,8 +3,8 @@
 namespace Botble\Revision;
 
 use Botble\ACL\Models\User;
-use Exception;
 use Botble\Base\Models\BaseModel;
+use Exception;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Str;
 

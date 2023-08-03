@@ -2,8 +2,8 @@
 
 namespace Botble\ACL\Models;
 
-use Illuminate\Support\Facades\Auth;
 use Botble\Base\Models\BaseModel;
+use Illuminate\Support\Facades\Auth;
 
 class UserMeta extends BaseModel
 {

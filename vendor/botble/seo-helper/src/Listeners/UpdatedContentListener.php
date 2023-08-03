@@ -3,8 +3,8 @@
 namespace Botble\SeoHelper\Listeners;
 
 use Botble\Base\Events\UpdatedContentEvent;
-use Exception;
 use Botble\SeoHelper\Facades\SeoHelper;
+use Exception;
 
 class UpdatedContentListener
 {

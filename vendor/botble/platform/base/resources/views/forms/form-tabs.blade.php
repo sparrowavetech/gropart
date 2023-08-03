@@ -42,6 +42,8 @@
             @endforeach
 
             @php do_action(BASE_ACTION_META_BOXES, 'advanced', $form->getModel()) @endphp
+
+            @yield('form_main_end')
         </div>
         <div class="col-md-3 right-sidebar d-flex flex-column-reverse flex-md-column">
             <div class="form-actions-wrapper">

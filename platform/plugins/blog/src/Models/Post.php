@@ -71,10 +71,8 @@ class Post extends BaseModel
         return $this->morphTo()->withDefault();
     }
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
-
         static::deleting(function (Post $post) {
             $post->categories()->detach();
             $post->tags()->detach();

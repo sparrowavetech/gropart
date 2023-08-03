@@ -1,28 +1,47 @@
-import Vue from 'vue'
 import emitter from 'tiny-emitter/instance'
 import sanitizeHTML from 'sanitize-html'
 import _ from 'lodash'
-import { BootstrapVue } from 'bootstrap-vue'
 
 class VueApp {
     constructor() {
-        this.vue = Vue
-        this.vue.use(BootstrapVue)
-
-        this.vue.prototype.__ = (key) => {
-            if (typeof window.trans === 'undefined') {
-                return key
+        const { createApp } = Vue
+        this.vue = createApp({
+            mounted() {
+                $event.on('vue-app:force-update', () => {
+                    this.$forceUpdate()
+                })
             }
+        })
 
-            return _.get(window.trans, key, key)
+        this.vue.use({
+            install: (app) => {
+                app.config.globalProperties.__ = (key) => {
+                    if (typeof window.trans === 'undefined') {
+                        return key
+                    }
+
+                    return _.get(window.trans, key, key)
+                }
+
+                app.config.globalProperties.$sanitize = sanitizeHTML
+            }
+        })
+
+        this.eventBus = {
+            $on: (...args) => $event.on(...args),
+            $once: (...args) => $event.once(...args),
+            $off: (...args) => $event.off(...args),
+            $emit: (...args) => $event.emit(...args),
         }
 
-        this.vue.prototype.$sanitize = sanitizeHTML
-
+        this.vuePlugins = []
         this.bootingCallbacks = []
         this.bootedCallbacks = []
-        this.vueInstance = null
         this.hasBooted = false
+    }
+
+    registerVuePlugins(plugin) {
+        this.vuePlugins.push(plugin)
     }
 
     booting(callback) {
@@ -38,13 +57,15 @@ class VueApp {
             callback(this.vue)
         }
 
-        this.vueInstance = new this.vue({
-            el: '#app',
-        })
+        for (const vuePlugin of this.vuePlugins) {
+            this.vue.use(vuePlugin)
+        }
 
         for (const callback of this.bootedCallbacks) {
             callback(this)
         }
+
+        this.vue.mount('#app')
 
         this.hasBooted = true
     }

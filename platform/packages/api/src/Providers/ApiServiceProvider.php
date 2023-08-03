@@ -5,10 +5,10 @@ namespace Botble\Api\Providers;
 use Botble\Api\Facades\ApiHelper;
 use Botble\Api\Http\Middleware\ForceJsonResponseMiddleware;
 use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
-use Botble\Base\Supports\ServiceProvider;
 
 class ApiServiceProvider extends ServiceProvider
 {

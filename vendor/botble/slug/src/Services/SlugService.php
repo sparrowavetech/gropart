@@ -2,9 +2,9 @@
 
 namespace Botble\Slug\Services;
 
+use Botble\Slug\Facades\SlugHelper;
 use Botble\Slug\Repositories\Interfaces\SlugInterface;
 use Illuminate\Support\Str;
-use Botble\Slug\Facades\SlugHelper;
 
 class SlugService
 {

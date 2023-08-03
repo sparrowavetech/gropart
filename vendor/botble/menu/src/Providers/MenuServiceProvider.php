@@ -3,6 +3,7 @@
 namespace Botble\Menu\Providers;
 
 use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Menu\Models\Menu as MenuModel;
 use Botble\Menu\Models\MenuLocation;
@@ -15,7 +16,6 @@ use Botble\Menu\Repositories\Interfaces\MenuLocationInterface;
 use Botble\Menu\Repositories\Interfaces\MenuNodeInterface;
 use Botble\Theme\Facades\AdminBar;
 use Illuminate\Routing\Events\RouteMatched;
-use Botble\Base\Supports\ServiceProvider;
 
 class MenuServiceProvider extends ServiceProvider
 {
@@ -25,10 +25,7 @@ class MenuServiceProvider extends ServiceProvider
     {
         $this->setNamespace('packages/menu')
             ->loadHelpers();
-    }
 
-    public function boot(): void
-    {
         $this->app->bind(MenuInterface::class, function () {
             return new MenuRepository(new MenuModel());
         });
@@ -40,7 +37,10 @@ class MenuServiceProvider extends ServiceProvider
         $this->app->bind(MenuLocationInterface::class, function () {
             return new MenuLocationRepository(new MenuLocation());
         });
+    }
 
+    public function boot(): void
+    {
         $this
             ->loadAndPublishConfigurations(['permissions', 'general'])
             ->loadRoutes()
@@ -72,7 +72,7 @@ class MenuServiceProvider extends ServiceProvider
                 ]);
             }
 
-            if (class_exists('admin_bar')) {
+            if (function_exists('admin_bar')) {
                 AdminBar::registerLink(
                     trans('packages/menu::menu.name'),
                     route('menus.index'),

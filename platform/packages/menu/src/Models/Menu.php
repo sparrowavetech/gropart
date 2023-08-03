@@ -5,10 +5,13 @@ namespace Botble\Menu\Models;
 use Botble\Base\Casts\SafeContent;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
+use Botble\Base\Models\Concerns\HasSlug;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Menu extends BaseModel
 {
+    use HasSlug;
+
     protected $table = 'menus';
 
     protected $fillable = [
@@ -22,12 +25,14 @@ class Menu extends BaseModel
         'name' => SafeContent::class,
     ];
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
+        static::deleting(function (self $model) {
+            $model->menuNodes()->delete();
+        });
 
-        static::deleting(function (Menu $menu) {
-            MenuNode::where('menu_id', $menu->getKey())->delete();
+        self::saving(function (self $model) {
+            $model->slug = self::createSlug($model->slug, $model->getKey());
         });
     }
 

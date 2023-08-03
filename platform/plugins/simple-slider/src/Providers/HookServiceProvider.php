@@ -3,13 +3,13 @@
 namespace Botble\SimpleSlider\Providers;
 
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Shortcode\Compilers\Shortcode;
 use Botble\SimpleSlider\Repositories\Interfaces\SimpleSliderInterface;
+use Botble\Theme\Facades\Theme;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Botble\Base\Supports\ServiceProvider;
-use Botble\Theme\Facades\Theme;
 
 class HookServiceProvider extends ServiceProvider
 {

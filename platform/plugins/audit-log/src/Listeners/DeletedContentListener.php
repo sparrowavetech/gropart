@@ -3,9 +3,9 @@
 namespace Botble\AuditLog\Listeners;
 
 use Botble\AuditLog\Events\AuditHandlerEvent;
+use Botble\AuditLog\Facades\AuditLog;
 use Botble\Base\Events\DeletedContentEvent;
 use Exception;
-use Botble\AuditLog\Facades\AuditLog;
 
 class DeletedContentListener
 {

@@ -2,23 +2,23 @@
 
 namespace Botble\SimpleSlider\Http\Controllers;
 
-use Botble\Base\Facades\Assets;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormBuilder;
+use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Traits\HasDeleteManyItemsTrait;
 use Botble\SimpleSlider\Forms\SimpleSliderForm;
 use Botble\SimpleSlider\Http\Requests\SimpleSliderRequest;
 use Botble\SimpleSlider\Models\SimpleSlider;
 use Botble\SimpleSlider\Repositories\Interfaces\SimpleSliderInterface;
-use Botble\Base\Http\Controllers\BaseController;
 use Botble\SimpleSlider\Repositories\Interfaces\SimpleSliderItemInterface;
-use Illuminate\Http\Request;
-use Exception;
 use Botble\SimpleSlider\Tables\SimpleSliderTable;
+use Exception;
+use Illuminate\Http\Request;
 
 class SimpleSliderController extends BaseController
 {
@@ -101,7 +101,7 @@ class SimpleSliderController extends BaseController
 
     public function deletes(Request $request, BaseHttpResponse $response)
     {
-        return $this->executeDeleteItems($request, $response, $this->simpleSliderRepository, SIMPLE_SLIDER_MODULE_SCREEN_NAME);
+        return $this->executeDeleteItems($request, $response, new SimpleSlider(), SIMPLE_SLIDER_MODULE_SCREEN_NAME);
     }
 
     public function postSorting(Request $request, BaseHttpResponse $response)

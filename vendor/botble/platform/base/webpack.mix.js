@@ -36,6 +36,14 @@ mix
     .js(source + '/resources/assets/js/repeater-field.js', dist + '/js')
     .js(source + '/resources/assets/js/system-update.js', dist + '/js')
 
+mix
+    .copy('node_modules/jquery/dist/jquery.min.js', dist + '/libraries/jquery.min.js')
+    .copy(
+        mix.inProduction() ? './node_modules/vue/dist/vue.global.prod.js' : './node_modules/vue/dist/vue.global.js',
+        `${dist}/libraries/vue.global.min.js`
+    )
+
+
 if (mix.inProduction()) {
     mix
         .copy(dist + '/css/core.css', source + '/public/css')
@@ -56,4 +64,6 @@ if (mix.inProduction()) {
         .copy(dist + '/js/tree-category.js', source + '/public/js')
         .copy(dist + '/js/cleanup.js', source + '/public/js')
         .copy(dist + '/js/system-update.js', source + '/public/js')
+        .copy(dist + '/libraries/jquery.min.js', source + '/public/libraries/jquery.min.js')
+        .copy(dist + '/libraries/vue.global.min.js', source + '/public/libraries/vue.global.min.js')
 }

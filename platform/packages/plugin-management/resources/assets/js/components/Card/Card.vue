@@ -4,33 +4,45 @@
             <img :src="data.image_url" class="card-img-top" :alt="data.name" />
             <div class="card-body">
                 <h5 class="card-title">{{ data.name }}</h5>
-                <p class="card-text text-truncate">{{ data.description }}</p>
-                <span class="badge rounded-pill bg-info">{{ __('base.version') }} {{ data.latest_version }}</span>
-                <span class="badge rounded-pill bg-info"
-                    >{{ __('base.minimum_core_version') }} {{ data.minimum_core_version }}</span
-                >
+                <div class="card-text text-truncate">{{ data.description }}</div>
+                <div>
+                    <span class="badge rounded-pill bg-info me-1">{{ __('base.version') }} {{ data.latest_version }}</span>
+                    <span class="badge rounded-pill bg-info">{{ __('base.minimum_core_version') }} {{ data.minimum_core_version }}</span>
+                </div>
 
-                <p class="mt-2 card-text d-flex">
+                <div class="mt-2 card-text d-flex justify-content-between flex-wrap">
                     <small class="text-muted">
                         {{ __('base.last_update') }}:
-                        <TimeAgo refresh :datetime="data.last_updated_at" long tooltip></TimeAgo>
+                        {{ data.humanized_last_updated_at }}
                     </small>
 
                     <Rating :count="data.ratings_count" :avg="data.ratings_avg"></Rating>
-                </p>
+                </div>
 
                 <Compatible v-if="versionCheck"></Compatible>
             </div>
 
             <div class="card-footer d-flex">
                 <button v-if="!installed" class="btn btn-warning" @click.prevent="install()">
-                    <span v-if="!installing"><i class="fa-solid fa-download"></i> {{ __('base.install_now') }}</span>
-                    <span v-else><i class="fas fa-circle-notch fa-spin"></i> {{ __('base.installing') }}</span>
+                    <i :class="{
+                        'fa-solid fa-download': !installing,
+                        'fas fa-circle-notch fa-spin': installing,
+                    }"></i>
+                    <span
+                        class="d-inline-block d-md-none d-xl-inline-block ms-1"
+                        v-text="!installing ? __('base.install_now') : __('base.installing')"
+                    ></span>
                 </button>
 
                 <button v-if="installed && !activated" class="btn btn-success" @click.prevent="changeStatus()">
-                    <span v-if="!activating"><i class="fa-solid fa-check"></i> {{ __('base.activate') }}</span>
-                    <span v-else><i class="fas fa-circle-notch fa-spin"></i> {{ __('base.activating') }}</span>
+                    <i :class="{
+                        'fa-solid fa-check': !activating,
+                        'fas fa-circle-notch fa-spin': activating,
+                    }"></i>
+                    <span
+                        class="d-inline-block d-md-none d-xl-inline-block ms-1"
+                        v-text="!activating ? __('base.activate') : __('base.activating')"
+                    ></span>
                 </button>
 
                 <button v-if="installed && activated" class="btn btn-info btn-disabled" disabled="disabled">
@@ -38,7 +50,8 @@
                 </button>
 
                 <button type="button" class="btn btn-secondary ms-auto" @click.prevent="detail()">
-                    <i class="fa-solid fa-asterisk"></i> {{ __('base.detail') }}
+                    <i class="fa-solid fa-info-circle"></i>
+                    <span class="d-inline-block d-md-none d-xl-inline-block ms-1">{{ __('base.detail') }}</span>
                 </button>
             </div>
         </div>
@@ -46,8 +59,6 @@
 </template>
 
 <script>
-import { TimeAgo } from 'vue2-timeago'
-import 'vue2-timeago/dist/vue2-timeago.css'
 import Rating from './Rating.vue'
 import Compatible from './Compatible.vue'
 
@@ -67,7 +78,6 @@ export default {
         data: [],
     },
     components: {
-        TimeAgo,
         Rating,
         Compatible,
     },

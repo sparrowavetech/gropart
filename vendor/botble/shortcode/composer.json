@@ -14,7 +14,10 @@
         "laravel": {
             "providers": [
                 "Botble\\Shortcode\\Providers\\ShortcodeServiceProvider"
-            ]
+            ],
+            "aliases": {
+                "Shortcode": "Botble\\Shortcode\\Facades\\Shortcode"
+            }
         }
     }
 }

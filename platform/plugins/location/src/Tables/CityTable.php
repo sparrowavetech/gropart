@@ -2,26 +2,23 @@
 
 namespace Botble\Location\Tables;
 
+use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
 use Botble\Location\Models\City;
+use Botble\Table\Abstracts\TableAbstract;
+use Botble\Table\DataTables;
+use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Table\Abstracts\TableAbstract;
-use Botble\Base\Facades\Html;
-use Illuminate\Contracts\Routing\UrlGenerator;
-use Botble\Table\DataTables;
 
 class CityTable extends TableAbstract
 {
-    public function __construct(
-        DataTables $table,
-        UrlGenerator $urlGenerator,
-        City $city
-    ) {
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, City $city)
+    {
         parent::__construct($table, $urlGenerator);
 
         $this->model = $city;

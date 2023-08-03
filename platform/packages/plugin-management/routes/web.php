@@ -60,7 +60,7 @@ Route::group(['namespace' => 'Botble\PluginManagement\Http\Controllers', 'middle
                     'middleware' => 'preventDemo',
                 ]);
 
-                Route::post('{id}/update', [
+                Route::post('{id}/update/{name?}', [
                     'as' => 'update',
                     'uses' => 'MarketplaceController@update',
                     'middleware' => 'preventDemo',

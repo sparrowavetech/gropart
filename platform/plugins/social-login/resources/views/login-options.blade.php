@@ -6,7 +6,7 @@
             @foreach (SocialService::getProviderKeys() as $item)
                 @if (SocialService::getProviderEnabled($item))
                     <li>
-                        <a class="social-icon-color {{ $item }}" data-bs-toggle="tooltip" data-bs-original-title="{{ $item }}"
+                        <a class="{{ $item }}" data-bs-toggle="tooltip" data-bs-original-title="{{ $item }}"
                            href="{{ route('auth.social', isset($params) ? array_merge([$item], $params) : $item) }}"></a>
                     </li>
                 @endif

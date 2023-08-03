@@ -3,8 +3,8 @@
 namespace Botble\Blog\Http\Resources;
 
 use Botble\Blog\Models\Post;
-use Illuminate\Http\Resources\Json\JsonResource;
 use Botble\Media\Facades\RvMedia;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * @mixin Post

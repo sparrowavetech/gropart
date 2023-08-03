@@ -2,9 +2,9 @@
 
 namespace Botble\SimpleSlider;
 
+use Botble\PluginManagement\Abstracts\PluginOperationAbstract;
 use Botble\Setting\Facades\Setting;
 use Illuminate\Support\Facades\Schema;
-use Botble\PluginManagement\Abstracts\PluginOperationAbstract;
 
 class Plugin extends PluginOperationAbstract
 {

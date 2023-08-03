@@ -88,7 +88,7 @@ export class Helpers {
 
     static addToRecent(id) {
         if (id instanceof Array) {
-            _.each(id, (value) => {
+            Helpers.each(id, (value) => {
                 RecentItems.push(value)
             })
         } else {
@@ -147,5 +147,53 @@ export class Helpers {
 
     static resetPagination() {
         RV_MEDIA_CONFIG.pagination = { paged: 1, posts_per_page: 40, in_process_get_media: false, has_more: true }
+    }
+
+    static trans(key) {
+        return _.get(RV_MEDIA_CONFIG.translations, key, key)
+    }
+
+    static config(key, defaultValue = null) {
+        return _.get(RV_MEDIA_CONFIG, key, defaultValue)
+    }
+
+    static hasPermission(key) {
+        return Helpers.inArray(Helpers.config('permissions', []), key)
+    }
+
+    static inArray(array, value) {
+        return _.includes(array, value)
+    }
+
+    static each(array, callback) {
+        return _.each(array, callback);
+    }
+
+    static forEach(array, callback) {
+        return _.forEach(array, callback)
+    }
+
+    static arrayReject(array, callback) {
+        return _.reject(array, callback)
+    }
+
+    static arrayFilter(array, callback) {
+        return _.filter(array, callback)
+    }
+
+    static arrayFirst(array) {
+        return _.first(array)
+    }
+
+    static isArray(value) {
+        return _.isArray(value)
+    }
+
+    static isEmpty(value) {
+        return _.isEmpty(value)
+    }
+
+    static size(item) {
+        return _.size(item);
     }
 }

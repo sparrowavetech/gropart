@@ -3,6 +3,7 @@
 namespace Botble\SimpleSlider\Providers;
 
 use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Language\Facades\Language;
 use Botble\SimpleSlider\Models\SimpleSlider;
@@ -12,7 +13,6 @@ use Botble\SimpleSlider\Repositories\Eloquent\SimpleSliderRepository;
 use Botble\SimpleSlider\Repositories\Interfaces\SimpleSliderInterface;
 use Botble\SimpleSlider\Repositories\Interfaces\SimpleSliderItemInterface;
 use Illuminate\Routing\Events\RouteMatched;
-use Botble\Base\Supports\ServiceProvider;
 
 class SimpleSliderServiceProvider extends ServiceProvider
 {
@@ -53,11 +53,11 @@ class SimpleSliderServiceProvider extends ServiceProvider
             ]);
         });
 
-        $this->app->booted(function () {
-            if (defined('LANGUAGE_MODULE_SCREEN_NAME')) {
-                Language::registerModule([SimpleSlider::class]);
-            }
+        if (defined('LANGUAGE_MODULE_SCREEN_NAME')) {
+            Language::registerModule(SimpleSlider::class);
+        }
 
+        $this->app->booted(function () {
             $this->app->register(HookServiceProvider::class);
         });
     }

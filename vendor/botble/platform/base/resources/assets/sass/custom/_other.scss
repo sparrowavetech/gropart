@@ -664,7 +664,6 @@ h4.modal-title {
     text-align: left;
 
     .note {
-        border-left: 5px solid #eee;
         border-right: none;
         border-radius: 0 4px 4px 0;
         padding: 15px 30px 15px 15px;
@@ -893,4 +892,8 @@ h4.modal-title {
             margin-bottom: 25px;
         }
     }
+}
+
+.tagify__dropdown.users-list {
+    z-index: 9999999;
 }

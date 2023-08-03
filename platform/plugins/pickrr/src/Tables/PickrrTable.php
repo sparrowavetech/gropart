@@ -3,7 +3,7 @@
 namespace Botble\Pickrr\Tables;
 
 use Illuminate\Support\Facades\Auth;
-use Botble\Base\Facades\BaseHelper;
+use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Pickrr\Repositories\Interfaces\PickrrInterface;
 use Botble\Table\Abstracts\TableAbstract;
@@ -13,7 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
-use Botble\Base\Facades\Html;
+use Html;
 
 class PickrrTable extends TableAbstract
 {

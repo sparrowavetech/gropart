@@ -4,6 +4,7 @@ namespace Botble\Contact\Providers;
 
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Facades\EmailHandler;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Contact\Models\Contact;
 use Botble\Contact\Models\ContactReply;
@@ -12,7 +13,6 @@ use Botble\Contact\Repositories\Eloquent\ContactRepository;
 use Botble\Contact\Repositories\Interfaces\ContactInterface;
 use Botble\Contact\Repositories\Interfaces\ContactReplyInterface;
 use Illuminate\Routing\Events\RouteMatched;
-use Botble\Base\Supports\ServiceProvider;
 
 class ContactServiceProvider extends ServiceProvider
 {

@@ -3,11 +3,11 @@
 namespace Botble\SocialLogin\Providers;
 
 use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\SocialLogin\Facades\SocialService;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
-use Botble\Base\Supports\ServiceProvider;
 
 class SocialLoginServiceProvider extends ServiceProvider
 {

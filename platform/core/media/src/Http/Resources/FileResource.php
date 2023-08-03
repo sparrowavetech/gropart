@@ -3,10 +3,10 @@
 namespace Botble\Media\Http\Resources;
 
 use Botble\Base\Facades\BaseHelper;
-use Botble\Media\Models\MediaFile;
-use Illuminate\Support\Facades\File;
-use Illuminate\Http\Resources\Json\JsonResource;
 use Botble\Media\Facades\RvMedia;
+use Botble\Media\Models\MediaFile;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\File;
 
 /**
  * @mixin MediaFile

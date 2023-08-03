@@ -1,7 +1,7 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
 
 @section('content')
-    <div class="card ml-5 mr-5" id="marketplace">
+    <div class="card" id="marketplace">
         <marketplace-plugins></marketplace-plugins>
     </div>
 @stop

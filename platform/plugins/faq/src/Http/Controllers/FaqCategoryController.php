@@ -2,20 +2,20 @@
 
 namespace Botble\Faq\Http\Controllers;
 
-use Botble\Base\Facades\PageTitle;
-use Botble\Faq\Http\Requests\FaqCategoryRequest;
-use Botble\Faq\Models\FaqCategory;
-use Botble\Faq\Repositories\Interfaces\FaqCategoryInterface;
-use Botble\Base\Http\Controllers\BaseController;
-use Illuminate\Http\Request;
-use Exception;
-use Botble\Faq\Tables\FaqCategoryTable;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Facades\PageTitle;
+use Botble\Base\Forms\FormBuilder;
+use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Faq\Forms\FaqCategoryForm;
-use Botble\Base\Forms\FormBuilder;
+use Botble\Faq\Http\Requests\FaqCategoryRequest;
+use Botble\Faq\Models\FaqCategory;
+use Botble\Faq\Repositories\Interfaces\FaqCategoryInterface;
+use Botble\Faq\Tables\FaqCategoryTable;
+use Exception;
+use Illuminate\Http\Request;
 
 class FaqCategoryController extends BaseController
 {

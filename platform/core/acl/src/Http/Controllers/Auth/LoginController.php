@@ -4,9 +4,9 @@ namespace Botble\ACL\Http\Controllers\Auth;
 
 use Botble\ACL\Http\Requests\LoginRequest;
 use Botble\ACL\Models\User;
+use Botble\ACL\Traits\AuthenticatesUsers;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
-use Botble\ACL\Traits\AuthenticatesUsers;
 use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;

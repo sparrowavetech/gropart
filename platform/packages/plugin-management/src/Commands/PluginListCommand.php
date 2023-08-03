@@ -4,9 +4,9 @@ namespace Botble\PluginManagement\Commands;
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\PluginManagement\Services\PluginService;
-use Illuminate\Support\Facades\File;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\File;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Throwable;
 

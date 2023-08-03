@@ -2,11 +2,12 @@
 
 namespace Botble\SimpleSlider\Tables;
 
-use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
 use Botble\SimpleSlider\Models\SimpleSlider;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Base\Facades\Html;
+use Botble\Table\DataTables;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -14,7 +15,6 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
-use Botble\Table\DataTables;
 
 class SimpleSliderTable extends TableAbstract
 {

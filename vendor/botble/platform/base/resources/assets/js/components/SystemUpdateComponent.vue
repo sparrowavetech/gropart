@@ -9,13 +9,13 @@
                 v-if="!askToProcessUpdate"
                 @click.prevent="askToProcessUpdate = true"
             >
-                <i class="fa mr-2" :class="{ 'fa-download': isOutdated, 'fa-refresh': !isOutdated }"></i>
+                <i class="fa me-2" :class="{ 'fa-download': isOutdated, 'fa-refresh': !isOutdated }"></i>
                 <span v-if="isOutdated">Download & Install Update</span>
                 <span v-else>Re-install The Latest Version</span>
             </button>
 
             <button type="button" class="btn btn-danger" v-if="askToProcessUpdate" @click="performUpdate">
-                <i class="fa fa-check mr-2"></i> <span>Click To Confirm!</span>
+                <i class="fa fa-check me-2"></i> <span>Click To Confirm!</span>
             </button>
         </div>
 

@@ -10,12 +10,18 @@ class MediaSettingRequest extends Request
     public function rules(): array
     {
         $rules = [
-            'media_driver' => 'required|string|in:public,s3,do_spaces,wasabi,bunnycdn',
+            'media_driver' => 'required|string|in:public,s3,r2,do_spaces,wasabi,bunnycdn',
             'media_aws_access_key_id' => 'nullable|string|required_if:media_driver,s3',
             'media_aws_secret_key' => 'nullable|string|required_if:media_driver,s3',
             'media_aws_default_region' => 'nullable|string|required_if:media_driver,s3',
             'media_aws_bucket' => 'nullable|string|required_if:media_driver,s3',
             'media_aws_url' => 'nullable|string|required_if:media_driver,s3',
+
+            'media_r2_access_key_id' => 'nullable|string|required_if:media_driver,r2',
+            'media_r2_secret_key' => 'nullable|string|required_if:media_driver,r2',
+            'media_r2_bucket' => 'nullable|string|required_if:media_driver,r2',
+            'media_r2_endpoint' => 'nullable|string|required_if:media_driver,r2',
+            'media_r2_url' => 'nullable|string|required_if:media_driver,r2',
 
             'media_wasabi_access_key_id' => 'nullable|string|required_if:media_driver,wasabi',
             'media_wasabi_secret_key' => 'nullable|string|required_if:media_driver,wasabi',
@@ -32,7 +38,7 @@ class MediaSettingRequest extends Request
             'media_bunnycdn_hostname' => 'nullable|string|required_if:media_driver,bunnycdn',
             'media_bunnycdn_zone' => 'nullable|string|required_if:media_driver,bunnycdn',
             'media_bunnycdn_key' => 'nullable|string|required_if:media_driver,bunnycdn',
-            'media_bunnycdn_region' => 'nullable|string|max:200',
+            'media_bunnycdn_region' => 'nullable|string|max:200|required_if:media_driver,bunnycdn',
 
             'media_watermark_enabled' => 'nullable|in:0,1',
             'media_image_processing_library' => 'nullable|in:gd,imagick',

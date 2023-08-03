@@ -5,6 +5,7 @@ namespace Botble\Location\Providers;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Facades\MacroableModels;
 use Botble\Base\Models\BaseModel;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Botble\Location\Facades\Location;
@@ -22,7 +23,6 @@ use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Schema;
-use Botble\Base\Supports\ServiceProvider;
 
 class LocationServiceProvider extends ServiceProvider
 {
@@ -64,7 +64,6 @@ class LocationServiceProvider extends ServiceProvider
 
             LanguageAdvancedManager::registerModule(State::class, [
                 'name',
-                'abbreviation',
             ]);
 
             LanguageAdvancedManager::registerModule(City::class, [
@@ -230,10 +229,9 @@ class LocationServiceProvider extends ServiceProvider
                     /**
                      * @var BaseModel $this
                      */
-                    return ($this->address ? $this->address . ', ' : null) .
-                        ($this->city_name ? $this->city_name . ', ' : null) .
-                        ($this->state_name ? $this->state_name . ', ' : null) .
-                        $this->country_name;
+                    $addresses = [$this->address, $this->city_name, $this->state_name, $this->country_name];
+
+                    return implode(', ', array_filter($addresses));
                 });
             }
         });

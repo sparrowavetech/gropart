@@ -2,12 +2,12 @@
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Facades\Html;
 use Botble\Base\Facades\PageTitle;
+use Botble\Base\Supports\Core;
 use Botble\Base\Supports\DashboardMenu as DashboardMenuSupport;
 use Botble\Base\Supports\Editor;
 use Botble\Base\Supports\PageTitle as PageTitleSupport;
-use Illuminate\Support\Arr;
-use Botble\Base\Facades\Html;
 
 if (! function_exists('language_flag')) {
     function language_flag(string $flag, string|null $name = null, int $width = 16): string
@@ -61,14 +61,10 @@ if (! function_exists('dashboard_menu')) {
 if (! function_exists('get_cms_version')) {
     function get_cms_version(): string
     {
-        $version = '...';
-
         try {
-            $core = BaseHelper::getFileData(core_path('core.json'));
-
-            return Arr::get($core, 'version', $version);
-        } catch (Exception) {
-            return $version;
+            return Core::make()->version();
+        } catch (Throwable) {
+            return '...';
         }
     }
 }
@@ -76,21 +72,17 @@ if (! function_exists('get_cms_version')) {
 if (! function_exists('get_core_version')) {
     function get_core_version(): string
     {
-        return '6.7.2';
+        return '6.8.0';
     }
 }
 
 if (! function_exists('get_minimum_php_version')) {
     function get_minimum_php_version(): string
     {
-        $version = '8.0.2';
-
         try {
-            $core = BaseHelper::getFileData(core_path('core.json'));
-
-            return Arr::get($core, 'minimumPhpVersion', $version);
-        } catch (Exception) {
-            return $version;
+            return Core::make()->minimumPhpVersion();
+        } catch (Throwable) {
+            return phpversion();
         }
     }
 }

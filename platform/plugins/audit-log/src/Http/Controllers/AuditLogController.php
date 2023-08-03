@@ -64,7 +64,7 @@ class AuditLogController extends BaseController
 
     public function deletes(Request $request, BaseHttpResponse $response)
     {
-        return $this->executeDeleteItems($request, $response, $this->auditLogRepository, AUDIT_LOG_MODULE_SCREEN_NAME);
+        return $this->executeDeleteItems($request, $response, new AuditHistory(), AUDIT_LOG_MODULE_SCREEN_NAME);
     }
 
     public function deleteAll(BaseHttpResponse $response)

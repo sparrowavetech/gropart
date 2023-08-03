@@ -6,9 +6,9 @@ use Botble\Blog\Models\Category;
 use Botble\Blog\Models\Tag;
 use Botble\Dashboard\Repositories\Interfaces\DashboardWidgetInterface;
 use Botble\Menu\Repositories\Interfaces\MenuNodeInterface;
+use Botble\PluginManagement\Abstracts\PluginOperationAbstract;
 use Botble\Setting\Facades\Setting;
 use Illuminate\Support\Facades\Schema;
-use Botble\PluginManagement\Abstracts\PluginOperationAbstract;
 
 class Plugin extends PluginOperationAbstract
 {

@@ -2,9 +2,9 @@
 
 namespace Botble\Installer\Http\Controllers;
 
-use Botble\Base\Facades\BaseHelper;
 use Botble\ACL\Models\User;
 use Botble\ACL\Services\ActivateUserService;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Installer\Events\EnvironmentSaved;
 use Botble\Installer\Events\InstallerFinished;
 use Botble\Installer\Http\Requests\SaveAccountRequest;
@@ -13,14 +13,14 @@ use Botble\Installer\Supports\EnvironmentManager;
 use Botble\Installer\Supports\RequirementsChecker;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Support\Facades\File;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\MessageBag;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\MessageBag;
 
 class InstallController extends Controller
 {

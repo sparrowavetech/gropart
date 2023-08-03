@@ -2,8 +2,8 @@
 
 namespace Botble\Analytics\Http\Controllers;
 
-use Botble\Analytics\Facades\Analytics;
 use Botble\Analytics\Exceptions\InvalidConfiguration;
+use Botble\Analytics\Facades\Analytics;
 use Botble\Analytics\Period;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 class AnalyticsController extends BaseController
 {
@@ -164,10 +165,22 @@ class AnalyticsController extends BaseController
 
             $pages = [];
 
+            $schema = $request->getScheme() . '://';
+
             foreach ($query as $item) {
+                if (empty($item['fullPageUrl'])) {
+                    continue;
+                }
+
+                $pageUrl = $item['fullPageUrl'];
+
+                if (! Str::startsWith($pageUrl, $schema)) {
+                    $pageUrl = $schema . $pageUrl;
+                }
+
                 $pages[] = [
                     'pageTitle' => $item['pageTitle'],
-                    'url' => $item['fullPageUrl'] ?? $item['url'],
+                    'url' => $pageUrl,
                     'pageViews' => $item['screenPageViews'] ?? $item['pageViews'],
                 ];
             }

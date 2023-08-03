@@ -2,8 +2,9 @@
 
 namespace Botble\Payment\Http\Controllers;
 
-use Botble\Base\Facades\Assets;
 use Botble\Base\Events\DeletedContentEvent;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Http\Requests\PaymentMethodRequest;
@@ -15,7 +16,6 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
-use Botble\Base\Facades\PageTitle;
 
 class PaymentController extends Controller
 {

@@ -34,6 +34,11 @@ class RazorpayController extends BaseController
                     if ($payment) {
                         $payment->status = PaymentStatusEnum::COMPLETED;
                         $payment->save();
+
+                        do_action(PAYMENT_ACTION_PAYMENT_PROCESSED, [
+                            'charge_id' => $chargeId,
+                            'order_id' => $payment->order_id,
+                        ]);
                     }
                 }
             } catch (BadRequestError) {

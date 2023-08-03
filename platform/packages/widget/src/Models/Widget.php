@@ -2,6 +2,7 @@
 
 namespace Botble\Widget\Models;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Models\BaseModel;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -39,7 +40,7 @@ class Widget extends BaseModel
             $theme = Theme::getThemeName();
         }
 
-        if ($refLang = request()->input('ref_lang')) {
+        if ($refLang = BaseHelper::stringify(request()->input('ref_lang'))) {
             $locale = $refLang;
         }
 

@@ -29,8 +29,8 @@ use Botble\Base\Events\SystemUpdateUnavailable;
 use Botble\Base\Exceptions\LicenseIsAlreadyActivatedException;
 use Botble\Base\Exceptions\MissingCURLExtensionException;
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Services\ClearCacheService;
 use Botble\Base\Supports\ValueObjects\CoreProduct;
-use Botble\Menu\Facades\Menu;
 use Botble\Setting\Facades\Setting;
 use Botble\Theme\Facades\Theme;
 use Botble\Theme\Services\ThemeService;
@@ -67,6 +67,8 @@ final class Core
     private string $productSource;
 
     private string $version = '1.0.0';
+
+    private string $minimumPhpVersion = '8.0.2';
 
     private string $licenseUrl = 'https://license.botble.com';
 
@@ -105,6 +107,11 @@ final class Core
     public function version(): string
     {
         return $this->version;
+    }
+
+    public function minimumPhpVersion(): string
+    {
+        return $this->minimumPhpVersion;
     }
 
     /**
@@ -372,22 +379,7 @@ final class Core
         try {
             SystemUpdateCachesClearing::dispatch();
 
-            Helper::clearCache();
-            Menu::clearCacheMenuItems();
-
-            $this->files->delete(app()->getCachedConfigPath());
-            $this->files->delete(app()->getCachedRoutesPath());
-            $this->files->delete(app()->getCachedPackagesPath());
-            $this->files->delete(app()->getCachedServicesPath());
-
-            $this->files->delete(app()->bootstrapPath('cache/plugins.php'));
-            foreach ($this->files->glob(storage_path('app/purifier') . '/*') as $view) {
-                $this->files->delete($view);
-            }
-
-            foreach ($this->files->glob(storage_path('framework/views') . '/*') as $view) {
-                $this->files->delete($view);
-            }
+            ClearCacheService::make()->purgeAll();
 
             SystemUpdateCachesCleared::dispatch();
         } catch (Throwable $exception) {
@@ -526,15 +518,22 @@ final class Core
             return;
         }
 
-        try {
-            $data = json_decode($this->files->get($this->coreDataFilePath), true) ?: [];
+        $data = $this->getCoreFileData();
 
-            $this->productId = Arr::get($data, 'productId', '');
-            $this->productSource = Arr::get($data, 'source', 'envato');
-            $this->licenseUrl = rtrim(Arr::get($data, 'apiUrl', $this->licenseUrl), '/');
-            $this->licenseKey = Arr::get($data, 'apiKey', $this->licenseKey);
-            $this->version = Arr::get($data, 'version', $this->version);
+        $this->productId = Arr::get($data, 'productId', '');
+        $this->productSource = Arr::get($data, 'source', 'envato');
+        $this->licenseUrl = rtrim(Arr::get($data, 'apiUrl', $this->licenseUrl), '/');
+        $this->licenseKey = Arr::get($data, 'apiKey', $this->licenseKey);
+        $this->version = Arr::get($data, 'version', $this->version);
+        $this->minimumPhpVersion = Arr::get($data, 'minimumPhpVersion', $this->minimumPhpVersion);
+    }
+
+    public function getCoreFileData(): array
+    {
+        try {
+            return json_decode($this->files->get($this->coreDataFilePath), true) ?: [];
         } catch (FileNotFoundException) {
+            return [];
         }
     }
 

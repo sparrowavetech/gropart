@@ -5,7 +5,7 @@ import Cropper from 'cropperjs'
 
 export class ActionsService {
     static handleDropdown() {
-        let selected = _.size(Helpers.getSelectedItems())
+        let selected = Helpers.size(Helpers.getSelectedItems())
 
         ActionsService.renderActions()
 
@@ -19,7 +19,7 @@ export class ActionsService {
     static handlePreview() {
         let selected = []
 
-        _.each(Helpers.getSelectedFiles(), (value) => {
+        Helpers.each(Helpers.getSelectedFiles(), (value) => {
             if (value.preview_url) {
                 selected.push({
                     src: value.preview_url,
@@ -29,7 +29,7 @@ export class ActionsService {
             }
         })
 
-        if (_.size(selected) > 0) {
+        if (Helpers.size(selected) > 0) {
             $.fancybox.open(selected)
             Helpers.storeRecentItems()
         } else {
@@ -96,8 +96,8 @@ export class ActionsService {
 
     static handleCopyLink() {
         let links = ''
-        _.each(Helpers.getSelectedFiles(), (value) => {
-            if (!_.isEmpty(links)) {
+        Helpers.each(Helpers.getSelectedFiles(), (value) => {
+            if (! Helpers.isEmpty(links)) {
                 links += '\n'
             }
             links += value.full_url
@@ -111,15 +111,15 @@ export class ActionsService {
         })
         MessageService.showMessage(
             'success',
-            RV_MEDIA_CONFIG.translations.clipboard.success,
-            RV_MEDIA_CONFIG.translations.message.success_header
+            Helpers.trans('clipboard.success'),
+            Helpers.trans('message.success_header')
         )
         $clipboardTemp.trigger('click')
     }
 
     static handleGlobalAction(type, callback) {
         let selected = []
-        _.each(Helpers.getSelectedItems(), (value) => {
+        Helpers.each(Helpers.getSelectedItems(), (value) => {
             selected.push({
                 is_folder: value.is_folder,
                 id: value.id,
@@ -154,8 +154,8 @@ export class ActionsService {
                 break
             case 'download':
                 let files = []
-                _.each(Helpers.getSelectedItems(), (value) => {
-                    if (!_.includes(Helpers.getConfigs().denied_download, value.mime_type)) {
+                Helpers.each(Helpers.getSelectedItems(), (value) => {
+                    if (!Helpers.inArray(Helpers.getConfigs().denied_download, value.mime_type)) {
                         files.push({
                             id: value.id,
                             is_folder: value.is_folder,
@@ -168,8 +168,8 @@ export class ActionsService {
                 } else {
                     MessageService.showMessage(
                         'error',
-                        RV_MEDIA_CONFIG.translations.download.error,
-                        RV_MEDIA_CONFIG.translations.message.error_header
+                        Helpers.trans('download.error'),
+                        Helpers.trans('message.error_header')
                     )
                 }
                 break
@@ -200,10 +200,10 @@ export class ActionsService {
                     MessageService.showMessage(
                         'success',
                         res.message,
-                        RV_MEDIA_CONFIG.translations.message.success_header
+                        Helpers.trans('message.success_header')
                     )
                 } else {
-                    MessageService.showMessage('error', res.message, RV_MEDIA_CONFIG.translations.message.error_header)
+                    MessageService.showMessage('error', res.message, Helpers.trans('message.error_header'))
                 }
                 if (callback) {
                     callback(res)
@@ -222,7 +222,7 @@ export class ActionsService {
         let VIEW = $('#rv_media_rename_item').html()
         let $itemsWrapper = $('#modal_rename_items .rename-items').empty()
 
-        _.each(Helpers.getSelectedItems(), (value) => {
+        Helpers.each(Helpers.getSelectedItems(), (value) => {
             let item = VIEW.replace(/__icon__/gi, value.icon || 'fa fa-file')
                 .replace(/__placeholder__/gi, 'Input file name')
                 .replace(/__value__/gi, value.name)
@@ -239,7 +239,7 @@ export class ActionsService {
         let VIEW = $('#rv_media_alt_text_item').html()
         let $itemsWrapper = $('#modal_alt_text_items .alt-text-items').empty()
 
-        _.each(Helpers.getSelectedItems(), (value) => {
+        Helpers.each(Helpers.getSelectedItems(), (value) => {
             let item = VIEW.replace(/__icon__/gi, value.icon || 'fa fa-file')
                 .replace(/__placeholder__/gi, 'Input file alt')
                 .replace(/__value__/gi, value.alt === null ? '' : value.alt)
@@ -262,139 +262,139 @@ export class ActionsService {
         let actionsList = $.extend({}, true, Helpers.getConfigs().actions_list)
 
         if (hasFolderSelected) {
-            actionsList.basic = _.reject(actionsList.basic, (item) => {
+            actionsList.basic = Helpers.arrayReject(actionsList.basic, (item) => {
                 return item.action === 'preview'
             })
-            actionsList.basic = _.reject(actionsList.basic, (item) => {
+            actionsList.basic = Helpers.arrayReject(actionsList.basic, (item) => {
                 return item.action === 'crop'
             })
-            actionsList.file = _.reject(actionsList.file, (item) => {
+            actionsList.file = Helpers.arrayReject(actionsList.file, (item) => {
                 return item.action === 'alt_text'
             })
-            actionsList.file = _.reject(actionsList.file, (item) => {
+            actionsList.file = Helpers.arrayReject(actionsList.file, (item) => {
                 return item.action === 'copy_link'
             })
 
-            if (!_.includes(RV_MEDIA_CONFIG.permissions, 'folders.create')) {
-                actionsList.file = _.reject(actionsList.file, (item) => {
+            if (! Helpers.hasPermission('folders.create')) {
+                actionsList.file = Helpers.arrayReject(actionsList.file, (item) => {
                     return item.action === 'make_copy'
                 })
             }
 
-            if (!_.includes(RV_MEDIA_CONFIG.permissions, 'folders.edit')) {
-                actionsList.file = _.reject(actionsList.file, (item) => {
-                    return _.includes(['rename'], item.action)
+            if (! Helpers.hasPermission('folders.edit')) {
+                actionsList.file = Helpers.arrayReject(actionsList.file, (item) => {
+                    return Helpers.inArray(['rename'], item.action)
                 })
 
-                actionsList.user = _.reject(actionsList.user, (item) => {
-                    return _.includes(['rename'], item.action)
-                })
-            }
-
-            if (!_.includes(RV_MEDIA_CONFIG.permissions, 'folders.trash')) {
-                actionsList.other = _.reject(actionsList.other, (item) => {
-                    return _.includes(['trash', 'restore'], item.action)
+                actionsList.user = Helpers.arrayReject(actionsList.user, (item) => {
+                    return Helpers.inArray(['rename'], item.action)
                 })
             }
 
-            if (!_.includes(RV_MEDIA_CONFIG.permissions, 'folders.destroy')) {
-                actionsList.other = _.reject(actionsList.other, (item) => {
-                    return _.includes(['delete'], item.action)
+            if (! Helpers.hasPermission('folders.trash')) {
+                actionsList.other = Helpers.arrayReject(actionsList.other, (item) => {
+                    return Helpers.inArray(['trash', 'restore'], item.action)
                 })
             }
 
-            if (!_.includes(RV_MEDIA_CONFIG.permissions, 'folders.favorite')) {
-                actionsList.other = _.reject(actionsList.other, (item) => {
-                    return _.includes(['favorite', 'remove_favorite'], item.action)
+            if (! Helpers.hasPermission('folders.destroy')) {
+                actionsList.other = Helpers.arrayReject(actionsList.other, (item) => {
+                    return Helpers.inArray(['delete'], item.action)
+                })
+            }
+
+            if (!Helpers.hasPermission('folders.favorite')) {
+                actionsList.other = Helpers.arrayReject(actionsList.other, (item) => {
+                    return Helpers.inArray(['favorite', 'remove_favorite'], item.action)
                 })
             }
         }
 
         let selectedFiles = Helpers.getSelectedFiles()
 
-        let canPreview = _.filter(selectedFiles, function (value) {
+        let canPreview = Helpers.arrayFilter(selectedFiles, function (value) {
             return value.preview_url
         }).length
 
         if (!canPreview) {
-            actionsList.basic = _.reject(actionsList.basic, (item) => {
+            actionsList.basic = Helpers.arrayReject(actionsList.basic, (item) => {
                 return item.action === 'preview'
             })
         }
 
-        let fileIsImage = _.filter(selectedFiles, function (value) {
+        let fileIsImage = Helpers.arrayFilter(selectedFiles, function (value) {
             return value.type === 'image'
         }).length
 
         if (!fileIsImage) {
-            actionsList.basic = _.reject(actionsList.basic, (item) => {
+            actionsList.basic = Helpers.arrayReject(actionsList.basic, (item) => {
                 return item.action === 'crop'
             })
 
-            actionsList.file = _.reject(actionsList.file, (item) => {
+            actionsList.file = Helpers.arrayReject(actionsList.file, (item) => {
                 return item.action === 'alt_text'
             })
         }
 
         if (selectedFiles.length > 0) {
-            if (!_.includes(RV_MEDIA_CONFIG.permissions, 'files.create')) {
-                actionsList.file = _.reject(actionsList.file, (item) => {
+            if (!Helpers.hasPermission('files.create')) {
+                actionsList.file = Helpers.arrayReject(actionsList.file, (item) => {
                     return item.action === 'make_copy'
                 })
             }
 
-            if (!_.includes(RV_MEDIA_CONFIG.permissions, 'files.edit')) {
-                actionsList.file = _.reject(actionsList.file, (item) => {
-                    return _.includes(['rename'], item.action)
+            if (!Helpers.hasPermission('files.edit')) {
+                actionsList.file = Helpers.arrayReject(actionsList.file, (item) => {
+                    return Helpers.inArray(['rename'], item.action)
                 })
             }
 
-            if (!_.includes(RV_MEDIA_CONFIG.permissions, 'files.trash')) {
-                actionsList.other = _.reject(actionsList.other, (item) => {
-                    return _.includes(['trash', 'restore'], item.action)
+            if (!Helpers.hasPermission('files.trash')) {
+                actionsList.other = Helpers.arrayReject(actionsList.other, (item) => {
+                    return Helpers.inArray(['trash', 'restore'], item.action)
                 })
             }
 
-            if (!_.includes(RV_MEDIA_CONFIG.permissions, 'files.destroy')) {
-                actionsList.other = _.reject(actionsList.other, (item) => {
-                    return _.includes(['delete'], item.action)
+            if (!Helpers.hasPermission('files.destroy')) {
+                actionsList.other = Helpers.arrayReject(actionsList.other, (item) => {
+                    return Helpers.inArray(['delete'], item.action)
                 })
             }
 
-            if (!_.includes(RV_MEDIA_CONFIG.permissions, 'files.favorite')) {
-                actionsList.other = _.reject(actionsList.other, (item) => {
-                    return _.includes(['favorite', 'remove_favorite'], item.action)
+            if (!Helpers.hasPermission('files.favorite')) {
+                actionsList.other = Helpers.arrayReject(actionsList.other, (item) => {
+                    return Helpers.inArray(['favorite', 'remove_favorite'], item.action)
                 })
             }
 
             if (selectedFiles.length > 1) {
-                actionsList.basic = _.reject(actionsList.basic, (item) => {
+                actionsList.basic = Helpers.arrayReject(actionsList.basic, (item) => {
                     return item.action === 'crop'
                 })
             }
         }
 
-        _.each(actionsList, (action, key) => {
-            _.each(action, (item, index) => {
+        Helpers.each(actionsList, (action, key) => {
+            Helpers.each(action, (item, index) => {
                 let is_break = false
                 switch (Helpers.getRequestParams().view_in) {
                     case 'all_media':
-                        if (_.includes(['remove_favorite', 'delete', 'restore'], item.action)) {
+                        if (Helpers.inArray(['remove_favorite', 'delete', 'restore'], item.action)) {
                             is_break = true
                         }
                         break
                     case 'recent':
-                        if (_.includes(['remove_favorite', 'delete', 'restore', 'make_copy'], item.action)) {
+                        if (Helpers.inArray(['remove_favorite', 'delete', 'restore', 'make_copy'], item.action)) {
                             is_break = true
                         }
                         break
                     case 'favorites':
-                        if (_.includes(['favorite', 'delete', 'restore', 'make_copy'], item.action)) {
+                        if (Helpers.inArray(['favorite', 'delete', 'restore', 'make_copy'], item.action)) {
                             is_break = true
                         }
                         break
                     case 'trash':
-                        if (!_.includes(['preview', 'delete', 'restore', 'rename', 'download'], item.action)) {
+                        if (!Helpers.inArray(['preview', 'delete', 'restore', 'rename', 'download'], item.action)) {
                             is_break = true
                         }
                         break
@@ -402,7 +402,7 @@ export class ActionsService {
                 if (!is_break) {
                     let template = ACTION_TEMPLATE.replace(/__action__/gi, item.action || '')
                         .replace(/__icon__/gi, item.icon || '')
-                        .replace(/__name__/gi, RV_MEDIA_CONFIG.translations.actions_list[key][item.action] || item.name)
+                        .replace(/__name__/gi, Helpers.trans('actions_list.' + key + '.' + item.action) || item.name)
                     if (!index && initializedItem) {
                         template = '<li role="separator" class="divider"></li>' + template
                     }

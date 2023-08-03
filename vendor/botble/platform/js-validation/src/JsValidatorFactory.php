@@ -16,6 +16,8 @@ use Illuminate\Validation\Validator;
 
 class JsValidatorFactory
 {
+    public const ASTERISK = '__asterisk__';
+
     protected array $options = [];
 
     public function __construct(protected Container $app, array $options = [])
@@ -68,6 +70,9 @@ class JsValidatorFactory
         $attributes = array_merge(array_keys($customAttributes), $attributes);
 
         return array_reduce($attributes, function ($data, $attribute) {
+            // Prevent wildcard rule being removed as an implicit attribute (not present in the data).
+            $attribute = str_replace('*', self::ASTERISK, $attribute);
+
             Arr::set($data, $attribute, true);
 
             return $data;
@@ -149,6 +154,7 @@ class JsValidatorFactory
         $remote = ! $this->options['disable_remote_validation'];
         $view = $this->options['view'];
         $selector = is_null($selector) ? $this->options['form_selector'] : $selector;
+        $ignore = Arr::get($this->options, 'ignore');
 
         $delegated = new DelegatedValidator($validator, new ValidationRuleParserProxy($validator->getData()));
         $rules = new RuleParser($delegated, $this->getSessionToken());
@@ -156,7 +162,7 @@ class JsValidatorFactory
 
         $jsValidator = new ValidatorHandler($rules, $messages);
 
-        return new JavascriptValidator($jsValidator, compact('view', 'selector', 'remote'));
+        return new JavascriptValidator($jsValidator, compact('view', 'selector', 'remote', 'ignore'));
     }
 
     /**

@@ -2,8 +2,8 @@
 
 namespace Botble\Language\Commands;
 
-use Illuminate\Foundation\Console\RouteClearCommand as BaseRouteClearCommand;
 use Botble\Language\Facades\Language;
+use Illuminate\Foundation\Console\RouteClearCommand as BaseRouteClearCommand;
 
 class RouteClearCommand extends BaseRouteClearCommand
 {

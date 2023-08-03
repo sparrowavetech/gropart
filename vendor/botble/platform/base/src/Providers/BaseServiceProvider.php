@@ -28,6 +28,7 @@ use Botble\Base\Supports\Database\Blueprint;
 use Botble\Base\Supports\Filter;
 use Botble\Base\Supports\GoogleFonts;
 use Botble\Base\Supports\Helper;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Base\Widgets\AdminWidget;
 use Botble\Base\Widgets\Contracts\AdminWidget as AdminWidgetContract;
@@ -49,7 +50,6 @@ use Illuminate\Routing\Router;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
-use Botble\Base\Supports\ServiceProvider;
 use Throwable;
 
 class BaseServiceProvider extends ServiceProvider
@@ -111,8 +111,9 @@ class BaseServiceProvider extends ServiceProvider
             'datatables-buttons.pdf_generator' => 'excel',
             'excel.exports.csv.use_bom' => true,
             'dompdf.public_path' => public_path(),
-            'debugbar.enabled' => $this->app->hasDebugModeEnabled() && ! $this->app->runningInConsole(
-            ) && ! $this->app->environment(['testing', 'production']),
+            'debugbar.enabled' => $this->app->hasDebugModeEnabled() &&
+                ! $this->app->runningInConsole() &&
+                ! $this->app->environment(['testing', 'production']),
             'laravel-form-builder.plain_form_class' => Form::class,
             'laravel-form-builder.form_builder_class' => FormBuilder::class,
             'laravel-form-builder.form_helper_class' => FormHelper::class,

@@ -2,8 +2,8 @@
 
 namespace Botble\Widget;
 
-use Illuminate\Support\Collection;
 use Botble\Theme\Facades\Theme;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\View;
 use ReflectionClass;

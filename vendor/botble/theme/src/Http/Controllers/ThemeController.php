@@ -8,6 +8,8 @@ use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Theme\Facades\Theme;
+use Botble\Theme\Facades\ThemeOption;
 use Botble\Theme\Forms\CustomCSSForm;
 use Botble\Theme\Forms\CustomHTMLForm;
 use Botble\Theme\Forms\CustomJSForm;
@@ -19,8 +21,6 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
-use Botble\Theme\Facades\Theme;
-use Botble\Theme\Facades\ThemeOption;
 
 class ThemeController extends BaseController
 {
@@ -61,7 +61,7 @@ class ThemeController extends BaseController
 
     public function postUpdate(Request $request, BaseHttpResponse $response)
     {
-        foreach ($request->except(['_token', 'ref_lang']) as $key => $value) {
+        foreach ($request->except(['_token', 'ref_lang', 'ref_from']) as $key => $value) {
             if (is_array($value)) {
                 $value = json_encode($value);
 

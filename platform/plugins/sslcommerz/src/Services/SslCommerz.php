@@ -2,19 +2,14 @@
 
 namespace Botble\SslCommerz\Services;
 
-use Exception;
 use Botble\SslCommerz\Library\SslCommerz\SslCommerzNotification;
+use Exception;
 use Illuminate\Support\Arr;
-use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Http;
 
 class SslCommerz extends SslCommerzNotification
 {
-    /**
-     * Refund order
-     * @return array
-     * @throws Exception
-     */
-    public function refundOrder($paymentId, $amount, array $options = [])
+    public function refundOrder($paymentId, $amount, array $options = []): array
     {
         $this->setApiUrl($this->config['apiDomain'] . $this->config['apiUrl']['refund_payment']);
 
@@ -26,18 +21,12 @@ class SslCommerz extends SslCommerzNotification
 
         $this->data = array_merge($this->data, $requestData);
 
-        // Set the authentication information
         $this->setAuthenticationInfo();
 
         return $this->callApi();
     }
 
-    /**
-     * Get Refund detail order
-     * @return array
-     * @throws Exception
-     */
-    public function refundDetail($refundRefId)
+    public function refundDetail(string $refundRefId): array
     {
         $this->setApiUrl($this->config['apiDomain'] . $this->config['apiUrl']['refund_status']);
 
@@ -47,44 +36,30 @@ class SslCommerz extends SslCommerzNotification
 
         $this->data = array_merge($this->data, $requestData);
 
-        // Set the authentication information
         $this->setAuthenticationInfo();
 
         return $this->callApi();
     }
 
-    /**
-     * Get transaction details
-     * @param int $transactionId
-     * @return array
-     * @throws Exception
-     */
-    public function getPaymentDetails($transactionId)
+    public function getPaymentDetails(string $transactionId): array
     {
         $this->setApiUrl($this->config['apiDomain'] . $this->config['apiUrl']['refund_payment']);
 
         $this->data['tran_id'] = $transactionId;
         $this->data['format'] = 'json';
 
-        // Set the authentication information
         $this->setAuthenticationInfo();
 
         return $this->callApi();
     }
 
-    /**
-     * Call API
-     * @return array
-     * @throws Exception
-     */
-    public function callApi()
+    public function callApi(): array
     {
-        $client = new Client();
-        $response = $client->request('GET', $this->getApiUrl(), [
+        $response = Http::get($this->getApiUrl(), [
             'query' => $this->data,
         ]);
 
-        $data = json_decode($response->getBody(), true);
+        $data = $response->json();
         $status = Arr::get($data, 'APIConnect');
 
         switch ($status) {

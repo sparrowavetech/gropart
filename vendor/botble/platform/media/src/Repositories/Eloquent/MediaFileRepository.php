@@ -3,19 +3,19 @@
 namespace Botble\Media\Repositories\Eloquent;
 
 use Botble\Base\Models\BaseModel;
+use Botble\Media\Facades\RvMedia;
 use Botble\Media\Models\MediaFile;
 use Botble\Media\Repositories\Interfaces\MediaFileInterface;
 use Botble\Media\Repositories\Interfaces\MediaFolderInterface;
 use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 use Exception;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
-use Illuminate\Support\Facades\File;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
-use Botble\Media\Facades\RvMedia;
 
 /**
  * @since 19/08/2015 07:45 AM

@@ -3,6 +3,7 @@
 namespace Botble\Translation\Providers;
 
 use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Translation\Console\CleanCommand;
 use Botble\Translation\Console\DownloadLocaleCommand;
@@ -17,7 +18,6 @@ use Botble\Translation\Models\Translation;
 use Botble\Translation\Repositories\Eloquent\TranslationRepository;
 use Botble\Translation\Repositories\Interfaces\TranslationInterface;
 use Illuminate\Routing\Events\RouteMatched;
-use Botble\Base\Supports\ServiceProvider;
 
 class TranslationServiceProvider extends ServiceProvider
 {

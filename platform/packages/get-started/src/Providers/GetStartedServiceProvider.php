@@ -4,9 +4,9 @@ namespace Botble\GetStarted\Providers;
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Illuminate\Support\Facades\Auth;
-use Botble\Base\Supports\ServiceProvider;
 
 class GetStartedServiceProvider extends ServiceProvider
 {

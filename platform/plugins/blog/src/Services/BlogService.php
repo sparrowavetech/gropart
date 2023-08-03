@@ -85,7 +85,7 @@ class BlogService
 
                 $category = $post->categories->sortByDesc('id')->first();
                 if ($category) {
-                    if ($category->parents->count()) {
+                    if ($category->parents->isNotEmpty()) {
                         foreach ($category->parents as $parentCategory) {
                             Theme::breadcrumb()->add($parentCategory->name, $parentCategory->url);
                         }
@@ -145,7 +145,7 @@ class BlogService
                 Theme::breadcrumb()
                     ->add(__('Home'), route('public.index'));
 
-                if ($category->parents->count()) {
+                if ($category->parents->isNotEmpty()) {
                     foreach ($category->parents->reverse() as $parentCategory) {
                         Theme::breadcrumb()->add($parentCategory->name, $parentCategory->url);
                     }

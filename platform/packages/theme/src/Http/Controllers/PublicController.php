@@ -5,15 +5,15 @@ namespace Botble\Theme\Http\Controllers;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Page\Models\Page;
 use Botble\Page\Services\PageService;
+use Botble\SeoHelper\Facades\SeoHelper;
+use Botble\Slug\Facades\SlugHelper;
 use Botble\Theme\Events\RenderingHomePageEvent;
 use Botble\Theme\Events\RenderingSingleEvent;
 use Botble\Theme\Events\RenderingSiteMapEvent;
+use Botble\Theme\Facades\SiteMapManager;
+use Botble\Theme\Facades\Theme;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
-use Botble\SeoHelper\Facades\SeoHelper;
-use Botble\Theme\Facades\SiteMapManager;
-use Botble\Slug\Facades\SlugHelper;
-use Botble\Theme\Facades\Theme;
 use Illuminate\Support\Str;
 
 class PublicController extends Controller

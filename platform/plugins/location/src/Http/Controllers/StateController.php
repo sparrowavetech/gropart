@@ -2,11 +2,11 @@
 
 namespace Botble\Location\Http\Controllers;
 
-use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
@@ -15,17 +15,12 @@ use Botble\Location\Forms\StateForm;
 use Botble\Location\Http\Requests\StateRequest;
 use Botble\Location\Http\Resources\StateResource;
 use Botble\Location\Models\State;
-use Botble\Location\Repositories\Interfaces\StateInterface;
 use Botble\Location\Tables\StateTable;
 use Exception;
 use Illuminate\Http\Request;
 
 class StateController extends BaseController
 {
-    public function __construct(protected StateInterface $stateRepository)
-    {
-    }
-
     public function index(StateTable $table)
     {
         PageTitle::setTitle(trans('plugins/location::state.name'));
@@ -42,7 +37,7 @@ class StateController extends BaseController
 
     public function store(StateRequest $request, BaseHttpResponse $response)
     {
-        $state = $this->stateRepository->createOrUpdate($request->input());
+        $state = State::query()->create($request->input());
 
         event(new CreatedContentEvent(STATE_MODULE_SCREEN_NAME, $request, $state));
 
@@ -62,8 +57,7 @@ class StateController extends BaseController
     public function update(State $state, StateRequest $request, BaseHttpResponse $response)
     {
         $state->fill($request->input());
-
-        $this->stateRepository->createOrUpdate($state);
+        $state->save();
 
         event(new UpdatedContentEvent(STATE_MODULE_SCREEN_NAME, $request, $state));
 
@@ -75,7 +69,7 @@ class StateController extends BaseController
     public function destroy(State $state, Request $request, BaseHttpResponse $response)
     {
         try {
-            $this->stateRepository->delete($state);
+            $state->delete();
 
             event(new DeletedContentEvent(STATE_MODULE_SCREEN_NAME, $request, $state));
 
@@ -97,8 +91,8 @@ class StateController extends BaseController
         }
 
         foreach ($ids as $id) {
-            $state = $this->stateRepository->findOrFail($id);
-            $this->stateRepository->delete($state);
+            $state = State::query()->findOrFail($id);
+            $state->delete();
             event(new DeletedContentEvent(STATE_MODULE_SCREEN_NAME, $request, $state));
         }
 
@@ -113,14 +107,13 @@ class StateController extends BaseController
             return $response->setData([]);
         }
 
-        $data = $this->stateRepository->advancedGet([
-            'condition' => [
-                ['states.name', 'LIKE', '%' . $keyword . '%'],
-            ],
-            'select' => ['states.id', 'states.name'],
-            'take' => 10,
-            'order_by' => ['order' => 'ASC', 'name' => 'ASC'],
-        ]);
+        $data = State::query()
+            ->where('name', 'LIKE', '%' . $keyword . '%')
+            ->select(['id', 'name'])
+            ->take(10)
+            ->orderBy('order', 'ASC')
+            ->orderBy('name', 'ASC')
+            ->get();
 
         $data->prepend(new State(['id' => 0, 'name' => trans('plugins/location::city.select_state')]));
 
@@ -129,19 +122,17 @@ class StateController extends BaseController
 
     public function ajaxGetStates(Request $request, BaseHttpResponse $response)
     {
-        $params = [
-            'select' => ['states.id', 'states.name'],
-            'condition' => [
-                'states.status' => BaseStatusEnum::PUBLISHED,
-            ],
-            'order_by' => ['order' => 'ASC', 'name' => 'ASC'],
-        ];
+        $data = State::query()
+            ->select(['id', 'name'])
+            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->orderBy('order', 'ASC')
+            ->orderBy('name', 'ASC');
 
         if ($request->input('country_id') && $request->input('country_id') != 'null') {
-            $params['condition']['states.country_id'] = $request->input('country_id');
+            $data = $data->where('country_id', $request->input('country_id'));
         }
 
-        $data = $this->stateRepository->advancedGet($params);
+        $data = $data->get();
 
         $data->prepend(new State(['id' => 0, 'name' => trans('plugins/location::city.select_state')]));
 

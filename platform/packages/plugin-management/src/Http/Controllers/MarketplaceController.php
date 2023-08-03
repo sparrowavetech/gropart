@@ -7,6 +7,7 @@ use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\PluginManagement\Services\MarketplaceService;
 use Botble\PluginManagement\Services\PluginService;
+use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -58,6 +59,7 @@ class MarketplaceController extends Controller
 
         foreach ($data['data'] as $key => $item) {
             $data['data'][$key]['version_check'] = version_compare($coreVersion, $item['minimum_core_version'], '>=');
+            $data['data'][$key]['humanized_last_updated_at'] = Carbon::parse($item['last_updated_at'])->diffForHumans();
         }
 
         return $data;
@@ -118,11 +120,13 @@ class MarketplaceController extends Controller
         ]);
     }
 
-    public function update(string $id): JsonResponse
+    public function update(string $id, string|null $name = null): JsonResponse
     {
         $detail = $this->detail($id);
 
-        $name = Str::afterLast($detail['data']['package_name'], '/');
+        if (! $name) {
+            $name = Str::afterLast($detail['data']['package_name'], '/');
+        }
 
         try {
             $this->marketplaceService->beginInstall($id, 'plugin', $name);
@@ -168,10 +172,6 @@ class MarketplaceController extends Controller
             'products' => $installedPlugins,
         ]);
 
-        if ($response instanceof JsonResponse) {
-            return $response;
-        }
-
-        return $response->json();
+        return $response instanceof JsonResponse ? $response : $response->json();
     }
 }

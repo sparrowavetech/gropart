@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Arr;
 use Botble\Base\Facades\Action;
 use Botble\Base\Facades\Filter;
+use Illuminate\Support\Arr;
 
 if (! function_exists('add_filter')) {
     function add_filter(

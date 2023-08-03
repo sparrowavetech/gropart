@@ -2,14 +2,14 @@
 
 namespace Botble\Base\Providers;
 
-use Botble\Base\Facades\Assets;
 use Botble\ACL\Models\UserMeta;
+use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Supports\ServiceProvider;
+use Botble\Media\Facades\RvMedia;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
-use Botble\Base\Supports\ServiceProvider;
-use Botble\Media\Facades\RvMedia;
 
 class ComposerServiceProvider extends ServiceProvider
 {

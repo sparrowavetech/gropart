@@ -50,9 +50,9 @@
                 </label>
                 <div class="relative mt-2 rounded-md">
                     <select id="database_connection" name="database_connection" class="mt-2 w-full rounded-md border-0 py-2 ps-3 pe-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
-                        <option value="mysql"@selected(old('database_connection', config('database.default')) === 'mysql')>{{ trans('packages/installer::installer.environment.wizard.form.db_connection_label_mysql') }}</option>
-                        <option value="sqlite"@selected(old('database_connection', config('database.default')) === 'sqlite')>{{ trans('packages/installer::installer.environment.wizard.form.db_connection_label_sqlite') }}</option>
-                        <option value="pgsql"@selected(old('database_connection', config('database.default')) === 'pgsql')>{{ trans('packages/installer::installer.environment.wizard.form.db_connection_label_pgsql') }}</option>
+                        <option value="mysql"@selected(old('database_connection', DB::getDefaultConnection()) === 'mysql')>{{ trans('packages/installer::installer.environment.wizard.form.db_connection_label_mysql') }}</option>
+                        <option value="sqlite"@selected(old('database_connection', DB::getDefaultConnection()) === 'sqlite')>{{ trans('packages/installer::installer.environment.wizard.form.db_connection_label_sqlite') }}</option>
+                        <option value="pgsql"@selected(old('database_connection', DB::getDefaultConnection()) === 'pgsql')>{{ trans('packages/installer::installer.environment.wizard.form.db_connection_label_pgsql') }}</option>
                     </select>
                 </div>
                 @error('database_connection')
@@ -65,7 +65,7 @@
                     {{ trans('packages/installer::installer.environment.wizard.form.db_host_label') }}
                 </label>
                 <div class="relative mt-2 rounded-md">
-                    <input type="text" name="database_hostname" id="database_hostname" @class(['w-full rounded-md border-0 py-2 px-3 pe-10 sm:text-sm sm:leading-6 ring-1 ring-inset focus:ring-2', ' ring-red-300 focus:ring-red-500' => $errors->has('database_hostname'), 'ring-gray-300' => ! $errors->has('database_hostname')])value="{{ old('database_hostname', config('database.connections.mysql.host')) }}" placeholder="{{ trans('packages/installer::installer.environment.wizard.form.db_host_placeholder') }}">
+                    <input type="text" name="database_hostname" id="database_hostname" @class(['w-full rounded-md border-0 py-2 px-3 pe-10 sm:text-sm sm:leading-6 ring-1 ring-inset focus:ring-2', ' ring-red-300 focus:ring-red-500' => $errors->has('database_hostname'), 'ring-gray-300' => ! $errors->has('database_hostname')]) value="{{ old('database_hostname', DB::connection('mysql')->getConfig()['host']) }}" placeholder="{{ trans('packages/installer::installer.environment.wizard.form.db_host_placeholder') }}">
                     @if ($errors->has('database_hostname'))
                         <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pe-3">
                             <svg class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -87,7 +87,7 @@
                     {{ trans('packages/installer::installer.environment.wizard.form.db_port_label') }}
                 </label>
                 <div class="relative mt-2 rounded-md shadow-sm">
-                    <input type="text" name="database_port" id="database_port" @class(['w-full rounded-md border-0 py-2 px-3 pe-10 ring-1 ring-inset sm:text-sm sm:leading-6 focus:ring-2', 'ring-red-300 focus:ring-2 focus:ring-inset focus:ring-red-500 ' => $errors->has('database_port'), 'ring-gray-300' => ! $errors->has('database_port')])value="{{ old('database_port', config('database.connections.mysql.port')) }}" placeholder="{{ trans('packages/installer::installer.environment.wizard.form.db_port_placeholder') }}">
+                    <input type="text" name="database_port" id="database_port" @class(['w-full rounded-md border-0 py-2 px-3 pe-10 ring-1 ring-inset sm:text-sm sm:leading-6 focus:ring-2', 'ring-red-300 focus:ring-2 focus:ring-inset focus:ring-red-500 ' => $errors->has('database_port'), 'ring-gray-300' => ! $errors->has('database_port')]) value="{{ old('database_port', DB::connection('mysql')->getConfig()['port']) }}" placeholder="{{ trans('packages/installer::installer.environment.wizard.form.db_port_placeholder') }}">
                     @if ($errors->has('database_port'))
                         <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pe-3">
                             <svg class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">

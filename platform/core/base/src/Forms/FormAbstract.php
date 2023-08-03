@@ -18,11 +18,11 @@ use Botble\Base\Forms\Fields\MediaImagesField;
 use Botble\Base\Forms\Fields\OnOffField;
 use Botble\Base\Forms\Fields\RepeaterField;
 use Botble\Base\Forms\Fields\TimeField;
+use Botble\JsValidation\Facades\JsValidator;
 use Botble\JsValidation\Javascript\JavascriptValidator;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Botble\JsValidation\Facades\JsValidator;
-use Illuminate\Contracts\View\View;
 
 abstract class FormAbstract extends Form
 {

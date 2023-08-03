@@ -8,12 +8,12 @@ use Botble\PluginManagement\Services\PluginService;
 use Botble\Setting\Models\Setting;
 use Botble\Setting\Supports\SettingStore;
 use Botble\Theme\Events\ThemeRemoveEvent;
+use Botble\Theme\Facades\Theme;
 use Botble\Theme\Facades\ThemeOption;
 use Botble\Widget\Models\Widget;
 use Exception;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
-use Botble\Theme\Facades\Theme;
 
 class ThemeService
 {

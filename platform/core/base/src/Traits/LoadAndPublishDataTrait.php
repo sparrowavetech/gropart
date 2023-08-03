@@ -3,8 +3,8 @@
 namespace Botble\Base\Traits;
 
 use Botble\Base\Supports\Helper;
-use Illuminate\Support\Facades\File;
 use Botble\Base\Supports\ServiceProvider;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use ReflectionClass;
 
@@ -137,13 +137,11 @@ trait LoadAndPublishDataTrait
 
     protected function publishAssets(string $path = null): self
     {
-        if ($this->app->runningInConsole()) {
-            if (empty($path)) {
-                $path = 'vendor/core/' . $this->getDashedNamespace();
-            }
-
-            $this->publishes([$this->getAssetsPath() => public_path($path)], 'cms-public');
+        if (empty($path)) {
+            $path = 'vendor/core/' . $this->getDashedNamespace();
         }
+
+        $this->publishes([$this->getAssetsPath() => public_path($path)], 'cms-public');
 
         return $this;
     }

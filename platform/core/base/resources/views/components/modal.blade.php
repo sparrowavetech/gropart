@@ -15,7 +15,7 @@
 
 <div @if ($id) id="{{ $id }}" @endif @class(['modal fade', $class => $class]) tabindex="-1" role="dialog" aria-labelledby="{{ $id }}"
      aria-hidden="true" @if ($options) {!! Html::attributes(array_merge(['data-backdrop' => 'static', 'data-keyboard' => 'false'], $options)) !!} @else data-backdrop="static" data-keyboard="false" @endif>
-    <div class="modal-dialog modal-{{ str_replace('modal-', '', (string)$size) }} @if (! $size) @if (strlen($slot) < 120) xs @elseif (strlen($slot) > 1000) lg @endif @endif">
+    <div @class(['modal-dialog', 'modal-xs' => ! $size && strlen($slot) < 120, 'modal-lg' => ! $size && strlen($slot) > 1000, 'modal-' . str_replace('modal-', '', (string)$size) => $size])>
         <div class="modal-content">
             @if($header !== false)
                 @if($header)

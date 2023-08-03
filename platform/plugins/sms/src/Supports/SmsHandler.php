@@ -239,6 +239,7 @@ class SmsHandler
             $url = $this->getUrl($to,$content);
         
             $res = file_get_contents($url);
+            
            // event(new SendSmsEvent($url, $args, $debug));
         } catch (Exception $exception) {
             if ($debug) {

@@ -3,13 +3,14 @@ class LanguageManagement {
         if (!state.id || state.element.value.toLowerCase().includes('...')) {
             return state.text
         }
+
         return $(
             '<span><img src="' +
-                $('#language_flag_path').val() +
-                state.element.value.toLowerCase() +
-                '.svg" class="img-flag" width="16" alt="Language flag"/> ' +
-                state.text +
-                '</span>'
+            $('#language_flag_path').val() +
+            state.element.value.toLowerCase() +
+            '.svg" class="img-flag" width="16" alt="Language flag"/> ' +
+            state.text +
+            '</span>',
         )
     }
 
@@ -114,14 +115,14 @@ class LanguageManagement {
                         let star = languageTable.find('td > i')
                         star.replaceWith(
                             '<a data-section="' +
-                                route('languages.set.default') +
-                                '?lang_id=' +
-                                star.data('id') +
-                                '" class="set-language-default tip" data-bs-original-title="Choose ' +
-                                star.data('name') +
-                                ' as default language">' +
-                                star.closest('td').html() +
-                                '</a>'
+                            route('languages.set.default') +
+                            '?lang_id=' +
+                            star.data('id') +
+                            '" class="set-language-default tip" data-bs-original-title="Choose ' +
+                            star.data('name') +
+                            ' as default language">' +
+                            star.closest('td').html() +
+                            '</a>',
                         )
                         _self.find('i').unwrap()
                         $('.tooltip').remove()

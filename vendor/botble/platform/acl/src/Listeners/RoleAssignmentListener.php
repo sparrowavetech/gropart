@@ -2,8 +2,8 @@
 
 namespace Botble\ACL\Listeners;
 
-use Illuminate\Support\Facades\Auth;
 use Botble\ACL\Events\RoleAssignmentEvent;
+use Illuminate\Support\Facades\Auth;
 
 class RoleAssignmentListener
 {

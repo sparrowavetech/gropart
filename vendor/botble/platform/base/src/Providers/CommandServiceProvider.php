@@ -11,8 +11,8 @@ use Botble\Base\Commands\FetchGoogleFontsCommand;
 use Botble\Base\Commands\InstallCommand;
 use Botble\Base\Commands\PublishAssetsCommand;
 use Botble\Base\Commands\UpdateCommand;
-use Illuminate\Console\Scheduling\Schedule;
 use Botble\Base\Supports\ServiceProvider;
+use Illuminate\Console\Scheduling\Schedule;
 
 class CommandServiceProvider extends ServiceProvider
 {

@@ -3,11 +3,12 @@
 namespace Botble\Base\Supports;
 
 use Botble\Base\Events\SendMailEvent;
+use Botble\Media\Facades\RvMedia;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\URL;
-use Botble\Media\Facades\RvMedia;
 use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
 use Throwable;
@@ -105,11 +106,13 @@ class EmailHandler
 
     public function getVariableValues(string|null $module = null): array
     {
+        $values = apply_filters('cms_email_variable_values', $this->variableValues, $this->template);
+
         if ($module) {
-            return Arr::get($this->variableValues, $module, []);
+            return Arr::get($values, $module, []);
         }
 
-        return $this->variableValues;
+        return $values;
     }
 
     public function setVariableValues(array $data, string|null $module = null): self
@@ -280,18 +283,28 @@ class EmailHandler
         }
 
         foreach ($data as $key => $value) {
-            $data[$key] = $twigCompiler->compile($value, $data);
+            $data[$key] = $value && is_string($value) ? $twigCompiler->compile($value, $data) : $value;
+        }
+
+        if (empty($data) || empty($content)) {
+            return $content;
         }
 
         return $twigCompiler->compile($content, $data);
     }
 
-    public function getVariableValue(string $variable, string $module, string $default = ''): string
+    public function getVariableValue(string $variable, string $module, string $default = ''): string|array|null
     {
-        $value = (string)Arr::get($this->variableValues, $module . '.' . $variable, $default);
+        $values = $this->getVariableValues();
+
+        $value = Arr::get($values, $module . '.' . $variable, $default);
 
         if (! $value) {
-            $value = (string)Arr::get($this->variableValues, 'core.' . $variable, $default);
+            $value = Arr::get($values, 'core.' . $variable, $default);
+        }
+
+        if ($value instanceof Arrayable) {
+            $value = $value->toArray();
         }
 
         return $value;

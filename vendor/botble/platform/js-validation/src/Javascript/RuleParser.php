@@ -2,6 +2,7 @@
 
 namespace Botble\JsValidation\Javascript;
 
+use Botble\JsValidation\JsValidatorFactory;
 use Botble\JsValidation\Support\DelegatedValidator;
 use Botble\JsValidation\Support\RuleListTrait;
 use Botble\JsValidation\Support\UseDelegatedValidatorTrait;
@@ -156,6 +157,8 @@ class RuleParser
      */
     protected function getAttributeName($attribute)
     {
+        $attribute = str_replace(JsValidatorFactory::ASTERISK, '*', $attribute);
+
         $attributeArray = explode('.', $attribute);
         if (count($attributeArray) > 1) {
             return $attributeArray[0] . '[' . implode('][', array_slice($attributeArray, 1)) . ']';

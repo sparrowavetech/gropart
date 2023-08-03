@@ -33,10 +33,8 @@ class Language extends BaseModel
         'lang_code' => SafeContent::class,
     ];
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
-
         self::deleted(function (Language $language) {
             $defaultLanguage = self::where('lang_is_default', 1)->first();
 

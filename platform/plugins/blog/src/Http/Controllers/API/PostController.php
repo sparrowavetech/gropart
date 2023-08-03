@@ -9,9 +9,9 @@ use Botble\Blog\Http\Resources\PostResource;
 use Botble\Blog\Models\Post;
 use Botble\Blog\Repositories\Interfaces\PostInterface;
 use Botble\Blog\Supports\FilterPost;
+use Botble\Slug\Facades\SlugHelper;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Botble\Slug\Facades\SlugHelper;
 
 class PostController extends Controller
 {

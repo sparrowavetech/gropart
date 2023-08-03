@@ -3,9 +3,9 @@
 namespace Botble\ACL\Http\Controllers\Auth;
 
 use Botble\ACL\Http\Requests\ResetPasswordRequest;
+use Botble\ACL\Traits\ResetsPasswords;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
-use Botble\ACL\Traits\ResetsPasswords;
 use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\JsValidation\Facades\JsValidator;

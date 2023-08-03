@@ -13,6 +13,7 @@
                     :options="[
                         'public' => 'Local disk',
                         's3' => 'Amazon S3',
+                        'r2' => 'Cloudflare R2',
                         'do_spaces' => 'DigitalOcean Spaces',
                         'wasabi' => 'Wasabi',
                         'bunnycdn' => 'BunnyCDN',
@@ -62,6 +63,43 @@
                         :label="trans('core/setting::setting.media.aws_endpoint')"
                         :value="config('filesystems.disks.s3.endpoint')"
                         :placeholder="trans('core/setting::setting.media.optional')"
+                    />
+                </div>
+
+                <div data-type="r2" @class(['setting-wrapper', 'hidden' => old('media_driver', RvMedia::getMediaDriver()) !== 'r2'])>
+                    <x-core-setting::text-input
+                        name="media_r2_access_key_id"
+                        :label="trans('core/setting::setting.media.r2_access_key_id')"
+                        :value="config('filesystems.disks.r2.key')"
+                        placeholder="Ex: AKIAIKYXBSNBXXXXXX"
+                    />
+
+                    <x-core-setting::text-input
+                        name="media_r2_secret_key"
+                        :label="trans('core/setting::setting.media.r2_secret_key')"
+                        :value="config('filesystems.disks.r2.secret')"
+                        placeholder="Ex: +fivlGCeTJCVVnzpM2WfzzrFIMLHGhxxxxxxx"
+                    />
+
+                    <x-core-setting::text-input
+                        name="media_r2_bucket"
+                        :label="trans('core/setting::setting.media.r2_bucket')"
+                        :value="config('filesystems.disks.r2.bucket')"
+                        placeholder="Ex: botble"
+                    />
+
+                    <x-core-setting::text-input
+                        name="media_r2_endpoint"
+                        :label="trans('core/setting::setting.media.r2_endpoint')"
+                        :value="config('filesystems.disks.r2.endpoint')"
+                        placeholder="Ex: https://xxx.r2.cloudflarestorage.com"
+                    />
+
+                    <x-core-setting::text-input
+                        name="media_r2_url"
+                        :label="trans('core/setting::setting.media.r2_url')"
+                        :value="config('filesystems.disks.r2.url')"
+                        placeholder="Ex: https://pub-f70218cc331a40689xxx.r2.dev"
                     />
                 </div>
 

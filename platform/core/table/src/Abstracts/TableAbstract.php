@@ -2,14 +2,15 @@
 
 namespace Botble\Table\Abstracts;
 
+use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Events\UpdatedContentEvent;
-use Botble\Base\Models\BaseModel;
-use Botble\Table\Supports\Builder as CustomTableBuilder;
-use Botble\Table\Supports\TableExportHandler;
 use Botble\Base\Facades\Form;
 use Botble\Base\Facades\Html;
+use Botble\Base\Models\BaseModel;
+use Botble\Media\Facades\RvMedia;
+use Botble\Table\Supports\Builder as CustomTableBuilder;
+use Botble\Table\Supports\TableExportHandler;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -20,11 +21,10 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Request;
-use Botble\Media\Facades\RvMedia;
 use Symfony\Component\HttpFoundation\Response;
 use Yajra\DataTables\DataTables;
 use Yajra\DataTables\Services\DataTable;
@@ -886,5 +886,13 @@ abstract class TableAbstract extends DataTable
     protected function simpleDom(): string
     {
         return "rt<'datatables__info_wrap'pli<'clearfix'>>";
+    }
+
+    protected function isEmpty(): bool
+    {
+        return ! $this->request()->wantsJson() &&
+            ! $this->request()->ajax() &&
+            ! ($this->request()->input('filter_table_id') === $this->getOption('id')) &&
+            ! (method_exists($this, 'query') && $this->query()->exists());
     }
 }

@@ -4,10 +4,10 @@ namespace Botble\SeoHelper\Providers;
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Models\BaseModel;
-use Botble\Page\Models\Page;
-use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Facades\MetaBox;
+use Botble\Base\Models\BaseModel;
+use Botble\Base\Supports\ServiceProvider;
+use Botble\Page\Models\Page;
 use Botble\SeoHelper\Facades\SeoHelper;
 
 class HookServiceProvider extends ServiceProvider

@@ -2,12 +2,12 @@
 
 namespace Botble\Media\Commands;
 
+use Botble\Media\Facades\RvMedia;
 use Botble\Media\Repositories\Interfaces\MediaFileInterface;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
-use Botble\Media\Facades\RvMedia;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
 

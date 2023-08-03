@@ -1,3 +1,5 @@
+import { Helpers } from '../Helpers/Helpers'
+
 export class MessageService {
     static showMessage(type, message) {
         toastr.options = {
@@ -19,17 +21,17 @@ export class MessageService {
 
         switch (type) {
             case 'error':
-                messageHeader = RV_MEDIA_CONFIG.translations.message.error_header
+                messageHeader = Helpers.trans('message.error_header')
                 break
             case 'success':
-                messageHeader = RV_MEDIA_CONFIG.translations.message.success_header
+                messageHeader = Helpers.trans('message.success_header')
                 break
         }
         toastr[type](message, messageHeader)
     }
 
     static handleError(data) {
-        if (typeof data.responseJSON !== 'undefined' && !_.isArray(data.errors)) {
+        if (typeof data.responseJSON !== 'undefined' && ! Helpers.isArray(data.errors)) {
             MessageService.handleValidationError(data.responseJSON.errors)
         } else {
             if (typeof data.responseJSON !== 'undefined') {

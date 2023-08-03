@@ -7,7 +7,7 @@ export class EditorService {
         let is_ckeditor = Helpers.getUrlParam('CKEditor') || Helpers.getUrlParam('CKEditorFuncNum')
 
         if (window.opener && is_ckeditor) {
-            let firstItem = _.first(selectedFiles)
+            let firstItem = Helpers.arrayFirst(selectedFiles)
 
             window.opener.CKEDITOR.tools.callFunction(Helpers.getUrlParam('CKEditorFuncNum'), firstItem.full_url)
 
@@ -98,7 +98,7 @@ $('.js-insert-to-editor')
     .on('click', function (event) {
         event.preventDefault()
         let selectedFiles = Helpers.getSelectedFiles()
-        if (_.size(selectedFiles) > 0) {
+        if (Helpers.size(selectedFiles) > 0) {
             EditorService.editorSelectFile(selectedFiles)
         }
     })

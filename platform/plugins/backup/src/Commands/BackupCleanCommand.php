@@ -2,9 +2,9 @@
 
 namespace Botble\Backup\Commands;
 
+use Illuminate\Console\Command;
 use Illuminate\Console\ConfirmableTrait;
 use Illuminate\Support\Facades\File;
-use Illuminate\Console\Command;
 use Symfony\Component\Console\Attribute\AsCommand;
 
 #[AsCommand('cms:backup:clean', 'Remove all backup')]

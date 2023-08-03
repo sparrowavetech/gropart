@@ -4,8 +4,8 @@ namespace Botble\ACL\Forms;
 
 use Botble\ACL\Http\Requests\UpdatePasswordRequest;
 use Botble\ACL\Models\User;
-use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Facades\Html;
+use Botble\Base\Forms\FormAbstract;
 
 class PasswordForm extends FormAbstract
 {

@@ -19,31 +19,12 @@ abstract class StripePaymentAbstract
 {
     use PaymentErrorTrait;
 
-    /**
-     * Token
-     *
-     * @var string
-     */
-    protected $token;
+    protected string|null $token = null;
 
-    /**
-     * Amount of payment
-     *
-     * @var double
-     */
-    protected $amount;
+    protected float $amount;
 
-    /**
-     * Payment currency
-     *
-     * @var string
-     */
-    protected $currency;
+    protected string $currency;
 
-    /**
-     * For Stripe, after make charge successfully, it will return a charge ID for tracking purpose
-     * We will store this Charge ID in our DB for tracking purpose
-     */
     protected string $chargeId;
 
     protected bool $supportRefundOnline = true;
@@ -53,13 +34,7 @@ abstract class StripePaymentAbstract
         return $this->supportRefundOnline;
     }
 
-    /**
-     * Execute main service
-     *
-     * @param array $data
-     * @return mixed
-     */
-    public function execute(array $data)
+    public function execute(array $data): string|null
     {
         $this->token = request()->input('stripeToken');
 
@@ -86,30 +61,11 @@ abstract class StripePaymentAbstract
         return $chargeId;
     }
 
-    /**
-     * Make a payment
-     *
-     * @param array $data
-     * @return mixed
-     */
-    abstract public function makePayment(array $data);
+    abstract public function makePayment(array $data): string|null;
 
-    /**
-     * Use this function to perform more logic after user has made a payment
-     *
-     * @param string $chargeId
-     * @param array $data
-     * @return mixed
-     */
-    abstract public function afterMakePayment($chargeId, array $data);
+    abstract public function afterMakePayment(string $chargeId, array $data);
 
-    /**
-     * Get payment details
-     *
-     * @param string $chargeId Stripe charge ID
-     * @return Charge|null
-     */
-    public function getPaymentDetails($chargeId)
+    public function getPaymentDetails(string $chargeId): ?Charge
     {
         if (! $this->setClient()) {
             return null;
@@ -137,25 +93,14 @@ abstract class StripePaymentAbstract
         return true;
     }
 
-    /**
-     * @param string $currency
-     * @return $this
-     */
-    public function setCurrency($currency)
+    public function setCurrency($currency): static
     {
         $this->currency = $currency;
 
         return $this;
     }
 
-    /**
-     * This function can be used to preform refund
-     * @param string $paymentId
-     * @param int $totalAmount
-     * @param array $options
-     * @return array
-     */
-    public function refundOrder($paymentId, $totalAmount, array $options = [])
+    public function refundOrder(string $paymentId, float|string $totalAmount, array $options = []): array
     {
         if (! $this->setClient()) {
             return [

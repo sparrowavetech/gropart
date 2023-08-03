@@ -130,7 +130,7 @@ class LanguageNegotiator
 
                 //If for some reason the Accept-Language header only sends language with country
                 //we should make the language without country an accepted option, with a value
-                //less than it's parent.
+                //less than its parent.
                 $lOps = explode('-', $la);
                 array_pop($lOps);
                 while (! empty($lOps)) {

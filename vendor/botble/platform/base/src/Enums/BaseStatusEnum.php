@@ -2,14 +2,16 @@
 
 namespace Botble\Base\Enums;
 
-use Botble\Base\Supports\Enum;
 use Botble\Base\Facades\Html;
+use Botble\Base\Supports\Enum;
 use Illuminate\Support\HtmlString;
 
 /**
  * @method static BaseStatusEnum DRAFT()
  * @method static BaseStatusEnum PUBLISHED()
  * @method static BaseStatusEnum PENDING()
+ * @method static BaseStatusEnum IS_VERIFIED_LABEL()
+ * @method static BaseStatusEnum IS_UNVERIFIED_LABEL()
  */
 class BaseStatusEnum extends Enum
 {

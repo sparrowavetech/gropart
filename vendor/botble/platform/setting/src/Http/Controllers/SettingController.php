@@ -5,12 +5,14 @@ namespace Botble\Setting\Http\Controllers;
 use Botble\Base\Exceptions\LicenseIsAlreadyActivatedException;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Supports\Core;
 use Botble\Base\Supports\Language;
 use Botble\JsValidation\Facades\JsValidator;
+use Botble\Media\Facades\RvMedia;
 use Botble\Media\Repositories\Interfaces\MediaFileInterface;
 use Botble\Media\Repositories\Interfaces\MediaFolderInterface;
 use Botble\Setting\Facades\Setting;
@@ -22,14 +24,12 @@ use Botble\Setting\Http\Requests\ResetEmailTemplateRequest;
 use Botble\Setting\Http\Requests\SendTestEmailRequest;
 use Botble\Setting\Http\Requests\SettingRequest;
 use Carbon\Carbon;
-use Botble\Base\Facades\EmailHandler;
 use Exception;
 use Illuminate\Console\Application;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
-use Botble\Media\Facades\RvMedia;
 use Illuminate\Support\ProcessUtils;
 use Throwable;
 
@@ -39,9 +39,12 @@ class SettingController extends BaseController
     {
         PageTitle::setTitle(trans('core/setting::setting.title'));
 
-        Assets::addScriptsDirectly('vendor/core/core/setting/js/setting.js')
-            ->addStylesDirectly('vendor/core/core/setting/css/setting.css')
-            ->addScripts(['jquery-validation', 'form-validation']);
+        Assets::addScripts(['jquery-validation', 'form-validation'])
+            ->addScriptsDirectly([
+                'vendor/core/core/setting/js/setting.js',
+                'vendor/core/core/setting/js/verify-license.js',
+            ])
+            ->addStylesDirectly('vendor/core/core/setting/css/setting.css');
 
         Assets::usingVueJS();
 

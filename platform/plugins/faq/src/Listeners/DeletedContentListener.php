@@ -3,8 +3,8 @@
 namespace Botble\Faq\Listeners;
 
 use Botble\Base\Events\DeletedContentEvent;
-use Exception;
 use Botble\Base\Facades\MetaBox;
+use Exception;
 
 class DeletedContentListener
 {

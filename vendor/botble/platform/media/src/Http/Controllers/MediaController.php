@@ -3,6 +3,7 @@
 namespace Botble\Media\Http\Controllers;
 
 use Botble\Base\Facades\PageTitle;
+use Botble\Media\Facades\RvMedia;
 use Botble\Media\Http\Resources\FileResource;
 use Botble\Media\Http\Resources\FolderResource;
 use Botble\Media\Models\MediaFile;
@@ -15,14 +16,13 @@ use Botble\Media\Services\UploadsManager;
 use Botble\Media\Supports\Zipper;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Support\Facades\File;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Botble\Media\Facades\RvMedia;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * @since 19/08/2015 08:05 AM

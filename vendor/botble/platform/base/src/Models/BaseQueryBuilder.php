@@ -3,6 +3,7 @@
 namespace Botble\Base\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @template TModelClass of \Illuminate\Database\Eloquent\Model
@@ -35,7 +36,7 @@ class BaseQueryBuilder extends Builder
 
     protected function getBackslashByPdo(): string
     {
-        if (config('database.default') === 'sqlite') {
+        if (DB::getDefaultConnection() === 'sqlite') {
             return '\\\\';
         }
 

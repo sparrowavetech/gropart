@@ -2,8 +2,8 @@
 
 namespace Botble\ACL\Http\Requests;
 
-use Botble\Support\Http\Requests\Request;
 use Botble\Media\Facades\RvMedia;
+use Botble\Support\Http\Requests\Request;
 
 class AvatarRequest extends Request
 {

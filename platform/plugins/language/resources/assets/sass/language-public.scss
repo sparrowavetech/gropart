@@ -116,20 +116,18 @@
 
     .language_bar_list {
         li {
-            display: block;
+            display: inline-block;
             margin-left: 5px;
-            float: left;
             min-width: 90px;
 
             a {
-                text-align: left;
-                display: block;
                 width: 100%;
+                align-items: center;
+                display: flex;
+                justify-content: center;
 
                 img {
-                    float: left;
                     margin-right: 10px;
-                    margin-top: 10px;
                     width: 20px;
                 }
 

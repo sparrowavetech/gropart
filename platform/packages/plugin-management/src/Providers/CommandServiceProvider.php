@@ -2,6 +2,7 @@
 
 namespace Botble\PluginManagement\Providers;
 
+use Botble\Base\Supports\ServiceProvider;
 use Botble\PluginManagement\Commands\ClearCompiledCommand;
 use Botble\PluginManagement\Commands\IlluminateClearCompiledCommand as OverrideIlluminateClearCompiledCommand;
 use Botble\PluginManagement\Commands\PackageDiscoverCommand;
@@ -17,7 +18,6 @@ use Botble\PluginManagement\Commands\PluginRemoveAllCommand;
 use Botble\PluginManagement\Commands\PluginRemoveCommand;
 use Illuminate\Foundation\Console\ClearCompiledCommand as IlluminateClearCompiledCommand;
 use Illuminate\Foundation\Console\PackageDiscoverCommand as IlluminatePackageDiscoverCommand;
-use Botble\Base\Supports\ServiceProvider;
 
 class CommandServiceProvider extends ServiceProvider
 {

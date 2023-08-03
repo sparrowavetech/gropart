@@ -3,6 +3,7 @@
 namespace Botble\Dashboard\Providers;
 
 use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Dashboard\Models\DashboardWidget;
 use Botble\Dashboard\Models\DashboardWidgetSetting;
@@ -11,7 +12,6 @@ use Botble\Dashboard\Repositories\Eloquent\DashboardWidgetSettingRepository;
 use Botble\Dashboard\Repositories\Interfaces\DashboardWidgetInterface;
 use Botble\Dashboard\Repositories\Interfaces\DashboardWidgetSettingInterface;
 use Illuminate\Routing\Events\RouteMatched;
-use Botble\Base\Supports\ServiceProvider;
 
 /**
  * @since 02/07/2016 09:50 AM

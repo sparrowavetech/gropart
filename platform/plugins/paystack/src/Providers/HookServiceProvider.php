@@ -2,16 +2,16 @@
 
 namespace Botble\Paystack\Providers;
 
+use Botble\Base\Facades\Html;
 use Botble\Ecommerce\Repositories\Interfaces\OrderAddressInterface;
 use Botble\Payment\Enums\PaymentMethodEnum;
-use Botble\Paystack\Services\Gateways\PaystackPaymentService;
-use Botble\Base\Facades\Html;
-use Illuminate\Http\Request;
-use Illuminate\Support\ServiceProvider;
 use Botble\Payment\Facades\PaymentMethods;
-use Unicodeveloper\Paystack\Facades\Paystack;
-use Throwable;
+use Botble\Paystack\Services\Gateways\PaystackPaymentService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\ServiceProvider;
+use Throwable;
+use Unicodeveloper\Paystack\Facades\Paystack;
 
 class HookServiceProvider extends ServiceProvider
 {

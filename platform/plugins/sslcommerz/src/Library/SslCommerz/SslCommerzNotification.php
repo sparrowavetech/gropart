@@ -29,7 +29,7 @@ class SslCommerzNotification extends AbstractSslCommerz
         $this->setStorePassword($this->config['apiCredentials']['store_password']);
     }
 
-    public function orderValidate($postData, $transactionId = '', $amount = 0, $currency = 'BDT')
+    public function orderValidate(array|null $postData, string $transactionId, float $amount, string $currency = 'BDT')
     {
         if ($postData == '' && $transactionId == '' && ! is_array($postData)) {
             $this->error = 'Please provide valid transaction ID and post request data';
@@ -40,16 +40,7 @@ class SslCommerzNotification extends AbstractSslCommerz
         return $this->validate($transactionId, $amount, $currency, $postData);
     }
 
-    /**
-     * VALIDATE SSLCOMMERZ TRANSACTION
-     *
-     * @param $merchant_trans_id
-     * @param $merchant_trans_amount
-     * @param $merchant_trans_currency
-     * @param $postData
-     * @return bool
-     */
-    protected function validate($merchant_trans_id, $merchant_trans_amount, $merchant_trans_currency, $postData): bool
+    protected function validate(string $merchant_trans_id, float $merchant_trans_amount, string $merchant_trans_currency, array $postData): bool
     {
         // MERCHANT SYSTEM INFO
         if ($merchant_trans_id != '' && $merchant_trans_amount != 0) {
@@ -107,15 +98,14 @@ class SslCommerzNotification extends AbstractSslCommerz
                                 return false;
                             }
                         } else {
-                            //echo "trim($merchant_trans_id) == trim($tran_id) && ( abs($merchant_trans_amount-$currency_amount) < 1 ) && trim($merchant_trans_currency)==trim($currency_type)";
                             if (trim($merchant_trans_id) == trim($tran_id) && (abs($merchant_trans_amount - $currency_amount) < 1) && trim($merchant_trans_currency) == trim($currency_type)) {
                                 return true;
-                            } else {
-                                // DATA TEMPERED
-                                $this->error = 'Data has been tempered';
-
-                                return false;
                             }
+
+                            // DATA TEMPERED
+                            $this->error = 'Data has been tempered';
+
+                            return false;
                         }
                     } else {
                         // FAILED TRANSACTION
@@ -143,14 +133,7 @@ class SslCommerzNotification extends AbstractSslCommerz
         }
     }
 
-    /**
-     * FUNCTION TO CHECK HASH VALUE
-     *
-     * @param $postData
-     * @param string|null $storePassword
-     * @return bool
-     */
-    protected function verifyHash($postData, ?string $storePassword = ''): bool
+    protected function verifyHash(array $postData, ?string $storePassword = ''): bool
     {
         if (isset($postData) && isset($postData['verify_sign']) && isset($postData['verify_key'])) {
             // NEW ARRAY DECLARED TO TAKE VALUE OF ALL POST
@@ -186,13 +169,7 @@ class SslCommerzNotification extends AbstractSslCommerz
         }
     }
 
-    /**
-     * @param array $requestData
-     * @param string $type
-     * @param string $pattern
-     * @return array
-     */
-    public function makePayment(array $requestData, $type = 'checkout', $pattern = 'json')
+    public function makePayment(array $requestData, string $type = 'checkout', string $pattern = 'json')
     {
         if (empty($requestData)) {
             return [
@@ -240,10 +217,7 @@ class SslCommerzNotification extends AbstractSslCommerz
         return $data;
     }
 
-    /**
-     * @param array $requestData
-     */
-    public function setParams($requestData)
+    public function setParams(array $requestData)
     {
         //  Integration Required Parameters
         $this->setRequiredInfo($requestData);
@@ -261,10 +235,6 @@ class SslCommerzNotification extends AbstractSslCommerz
         $this->setAdditionalInfo($requestData);
     }
 
-    /**
-     * @param array $info
-     * @return array
-     */
     public function setRequiredInfo(array $info)
     {
         // decimal (10,2) Mandatory - The amount which will process by SslCommerz. It shall be decimal value (10,2). Example : 55.40. The transaction amount must be from 10.00 BDT to 500000.00 BDT
@@ -353,9 +323,6 @@ class SslCommerzNotification extends AbstractSslCommerz
         return $this->data;
     }
 
-    /**
-     * @return string
-     */
     protected function getSuccessUrl(): string
     {
         return $this->successUrl;
@@ -366,9 +333,6 @@ class SslCommerzNotification extends AbstractSslCommerz
         $this->successUrl = route('public.index') . '/' . ltrim($this->config['success_url'], '/');
     }
 
-    /**
-     * @return string
-     */
     protected function getFailedUrl(): string
     {
         return $this->failedUrl;
@@ -379,9 +343,6 @@ class SslCommerzNotification extends AbstractSslCommerz
         $this->failedUrl = route('public.index') . '/' . ltrim($this->config['failed_url'], '/');
     }
 
-    /**
-     * @return string
-     */
     protected function getCancelUrl(): string
     {
         return $this->cancelUrl;
@@ -392,10 +353,6 @@ class SslCommerzNotification extends AbstractSslCommerz
         $this->cancelUrl = route('public.index') . '/' . ltrim($this->config['cancel_url'], '/');
     }
 
-    /**
-     * @param array $info
-     * @return array
-     */
     public function setCustomerInfo(array $info): array
     {
         // string (50) Mandatory - Your customer name to address the customer in payment receipt email
@@ -422,43 +379,35 @@ class SslCommerzNotification extends AbstractSslCommerz
         return $this->data;
     }
 
-    /**
-     * @param array $info
-     * @return array
-     */
     public function setShipmentInfo(array $info): array
     {
         // string (50) Mandatory - Shipping method of the order. Example: YES or NO or Courier
         $this->data['shipping_method'] = $info['shipping_method'];
         // integer (1) Mandatory - No of product will be shipped. Example: 1 or 2 or etc
-        $this->data['num_of_item'] = isset($info['num_of_item']) ? $info['num_of_item'] : 1;
+        $this->data['num_of_item'] = $info['num_of_item'] ?? 1;
         // string (50) Mandatory, if shipping_method is YES - Shipping Address of your order. Not mandatory but useful if provided
         $this->data['ship_name'] = $info['ship_name'];
         // string (50) Mandatory, if shipping_method is YES - Additional Shipping Address of your order. Not mandatory but useful if provided
         $this->data['ship_add1'] = $info['ship_add1'];
         // string (50) Additional Shipping Address of your order. Not mandatory but useful if provided
-        $this->data['ship_add2'] = (isset($info['ship_add2'])) ? $info['ship_add2'] : null;
+        $this->data['ship_add2'] = $info['ship_add2'] ?? null;
         // string (50) Mandatory, if shipping_method is YES - Shipping city of your order. Not mandatory but useful if provided
         $this->data['ship_city'] = $info['ship_city'];
         // string (50) Shipping state of your order. Not mandatory but useful if provided
-        $this->data['ship_state'] = (isset($info['ship_state'])) ? $info['ship_state'] : null;
+        $this->data['ship_state'] = $info['ship_state'] ?? null;
         // string (50) Mandatory, if shipping_method is YES - Shipping postcode of your order. Not mandatory but useful if provided
-        $this->data['ship_postcode'] = (isset($info['ship_postcode'])) ? $info['ship_postcode'] : null;
+        $this->data['ship_postcode'] = $info['ship_postcode'] ?? null;
         // string (50) Mandatory, if shipping_method is YES - Shipping country of your order. Not mandatory but useful if provided
-        $this->data['ship_country'] = (isset($info['ship_country'])) ? $info['ship_country'] : null;
+        $this->data['ship_country'] = $info['ship_country'] ?? null;
 
         return $this->data;
     }
 
-    /**
-     * @param array $info
-     * @return array
-     */
     public function setProductInfo(array $info): array
     {
         // String (256) Mandatory - Mention the product name briefly. Mention the product name by coma separate. Example: Computer,Speaker
         $this->data['product_name'] = (isset($info['product_name'])) ? $info['product_name'] : '';
-        // String (100) Mandatory - Mention the product category. Example: Electronic or topup or bus ticket or air ticket
+        // String (100) Mandatory - Mention the product category. Example: Electronic or top up or bus ticket or air ticket
         $this->data['product_category'] = (isset($info['product_category'])) ? $info['product_category'] : '';
 
         /*
@@ -518,10 +467,6 @@ class SslCommerzNotification extends AbstractSslCommerz
         return $this->data;
     }
 
-    /**
-     * @param array $info
-     * @return array
-     */
     public function setAdditionalInfo(array $info): array
     {
         // value_a [ string (255) - Extra parameter to pass your metadata if it is needed. Not mandatory]
@@ -536,9 +481,6 @@ class SslCommerzNotification extends AbstractSslCommerz
         return $this->data;
     }
 
-    /**
-     * @return array
-     */
     public function setAuthenticationInfo(): array
     {
         $this->data['store_id'] = $this->getStoreId();

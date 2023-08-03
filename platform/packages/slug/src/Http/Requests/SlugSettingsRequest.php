@@ -2,9 +2,9 @@
 
 namespace Botble\Slug\Http\Requests;
 
+use Botble\Slug\Facades\SlugHelper;
 use Botble\Support\Http\Requests\Request;
 use Illuminate\Support\Str;
-use Botble\Slug\Facades\SlugHelper;
 
 class SlugSettingsRequest extends Request
 {

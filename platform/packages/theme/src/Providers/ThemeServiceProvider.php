@@ -3,6 +3,7 @@
 namespace Botble\Theme\Providers;
 
 use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Theme\Commands\ThemeActivateCommand;
 use Botble\Theme\Commands\ThemeAssetsPublishCommand;
@@ -13,7 +14,6 @@ use Botble\Theme\Commands\ThemeRenameCommand;
 use Botble\Theme\Contracts\Theme as ThemeContract;
 use Botble\Theme\Theme;
 use Illuminate\Routing\Events\RouteMatched;
-use Botble\Base\Supports\ServiceProvider;
 
 class ThemeServiceProvider extends ServiceProvider
 {

@@ -41,4 +41,11 @@ return [
      * Whether to escape all validation messages with htmlentities.
      */
     'escape' => false,
+
+    /*
+     * Set a default value for the validation ignore property.
+     *
+     * See https://jqueryvalidation.org/validate/#ignore
+     */
+    'ignore' => '',
 ];

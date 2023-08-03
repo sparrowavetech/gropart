@@ -6,12 +6,13 @@ use Botble\ACL\Traits\PermissionTrait;
 use Botble\Base\Casts\SafeContent;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Models\BaseModel;
+use Botble\Base\Models\Concerns\HasSlug;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Support\Str;
 
 class Role extends BaseModel
 {
+    use HasSlug;
     use PermissionTrait;
 
     protected $table = 'roles';
@@ -73,19 +74,10 @@ class Role extends BaseModel
         return $permissions;
     }
 
-    public static function createSlug(string $name, int|string $id): string
+    protected static function booted(): void
     {
-        $slug = Str::slug($name);
-        $index = 1;
-        $baseSlug = $slug;
-        while (self::query()->where('slug', $slug)->where('id', '!=', $id)->exists()) {
-            $slug = $baseSlug . '-' . $index++;
-        }
-
-        if (empty($slug)) {
-            $slug = time();
-        }
-
-        return $slug;
+        self::saving(function (self $model) {
+            $model->slug = self::createSlug($model->slug ?: $model->name, $model->getKey());
+        });
     }
 }

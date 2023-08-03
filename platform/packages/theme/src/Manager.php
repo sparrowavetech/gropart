@@ -3,8 +3,8 @@
 namespace Botble\Theme;
 
 use Botble\Base\Facades\BaseHelper;
-use Illuminate\Support\Facades\File;
 use Botble\Theme\Facades\Theme as ThemeFacade;
+use Illuminate\Support\Facades\File;
 
 class Manager
 {

@@ -2,9 +2,9 @@
 
 namespace Botble\PostScheduler\Providers;
 
-use Botble\Base\Facades\Assets;
+use Assets;
 use Auth;
-use Botble\Base\Facades\BaseHelper;
+use BaseHelper;
 use Botble\Base\Models\BaseModel;
 use Carbon\Carbon;
 use Illuminate\Http\Request;

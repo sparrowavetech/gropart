@@ -2,10 +2,10 @@
 
 namespace Botble\Ads\Http\Requests;
 
+use Botble\Ads\Facades\AdsManager;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Support\Http\Requests\Request;
 use Illuminate\Validation\Rule;
-use Botble\Ads\Facades\AdsManager;
 
 class AdsRequest extends Request
 {

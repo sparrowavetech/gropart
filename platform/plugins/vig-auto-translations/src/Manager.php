@@ -26,25 +26,39 @@ class Manager
 
         $value = str_replace('%', '#_#', $value);
 
-        $variables = array_values(array_filter(explode(' ', $value), fn ($item) => Str::startsWith($item, ':')));
+        $variables = $this->findVariablesByRule($value, ':');
 
         foreach ($variables as $item) {
             $value = str_replace($item, '%s', $value);
         }
 
         $translated = $this->translator->translate($source, $target, $value);
+
+        $translated = str_replace('%S', '%s', $translated);
+
+        if (count($this->findVariablesByRule($translated, '%s')) !== count($variables)) {
+            return $originalValue;
+        }
+
         $translated = sprintf($translated, ...$variables);
 
         $translated = str_replace('#_#', '%', $translated);
         $translated = str_replace('#_ #', '%', $translated);
 
-        $translatedVariables = array_values(array_filter(explode(' ', $translated), fn ($item) => Str::startsWith($item, ':')));
+        $translatedVariables = $this->findVariablesByRule($translated, '%s');
 
         if (count($translatedVariables) == count($variables)) {
             return $translated;
         }
 
         return $originalValue;
+    }
+
+    protected function findVariablesByRule(string $text, string $rule): array
+    {
+        return array_values(array_filter(explode(' ', $text), function ($item) use ($rule) {
+            return str_replace($rule, '', $item) && Str::startsWith($item, $rule);
+        }));
     }
 
     public function getThemeTranslations(string $locale): array

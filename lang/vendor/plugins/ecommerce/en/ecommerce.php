@@ -152,6 +152,7 @@ return [
         'display_bank_info_at_the_checkout_success_page' => 'Display bank info at the checkout success page?',
         'mandatory_form_fields_at_checkout' => 'Mandatory fields at the checkout page:',
         'hide_form_fields_at_checkout' => 'Hide customer fields at checkout page:',
+        'display_tax_fields_at_checkout_page' => 'Display tax information fields at the checkout page?',
     ],
     'store_address' => 'Store address',
     'store_phone' => 'Store phone',
@@ -186,4 +187,10 @@ return [
     'basic_settings' => 'Basic settings',
     'advanced_settings' => 'Advanced settings',
     'product_review_list' => 'Product review list',
+    'forms' => [
+        'duplicate' => 'Duplicate',
+        'duplicate_success_message' => 'Duplicate product successfully!',
+    ],
+    'duplicate_modal' => 'Duplicate product',
+    'duplicate_modal_description' => 'Are you sure you want to duplicate this product?',
 ];

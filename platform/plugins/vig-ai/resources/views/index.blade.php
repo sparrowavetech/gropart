@@ -40,6 +40,7 @@
                                                     <option value="5">{{ trans('plugins/vig-ai::vig-ai.select_5') }}</option>
                                                     <option value="6">{{ trans('plugins/vig-ai::vig-ai.select_6') }}</option>
                                                     <option value="7">{{ trans('plugins/vig-ai::vig-ai.select_7') }}</option>
+                                                    <option value="7">{{ trans('plugins/vig-ai::vig-ai.select_8') }}</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -60,7 +61,7 @@
                                             {{ trans('plugins/vig-ai::vig-ai.model-alert') }}<br />
                                             <form action="{{ route('vig-ai.importModel') }}" method="POST">
                                                 @csrf
-                                                <button class="btn btn-success btn-submit-model" type="submit">{{ trans('plugins/vig-ai::vig-ai.import') }}</button>
+                                                <button type="button" class="btn btn-success btn-submit-model" type="submit">{{ trans('plugins/vig-ai::vig-ai.import') }}</button>
                                             </form>
 
                                         </div>

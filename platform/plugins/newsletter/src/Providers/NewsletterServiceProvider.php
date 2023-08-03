@@ -4,6 +4,7 @@ namespace Botble\Newsletter\Providers;
 
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Facades\EmailHandler;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Newsletter\Contracts\Factory;
 use Botble\Newsletter\Facades\Newsletter as NewsletterFacade;
@@ -15,7 +16,6 @@ use Exception;
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Arr;
-use Botble\Base\Supports\ServiceProvider;
 
 class NewsletterServiceProvider extends ServiceProvider implements DeferrableProvider
 {

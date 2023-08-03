@@ -11,9 +11,9 @@ class ContactRequest extends Request
     public function rules(): array
     {
         $rules = [
-            'name' => 'required|string',
-            'email' => 'required|email',
-            'content' => 'required|string',
+            'name' => 'required|string|max:40',
+            'email' => 'required|email|max:80',
+            'content' => 'required|string|max:1000',
             'phone' => 'nullable|' . BaseHelper::getPhoneValidationRule(),
         ];
 

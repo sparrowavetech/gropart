@@ -1531,6 +1531,11 @@ svg:not(:root) {
 
     .ui-select {
         width: 100%;
+        background: none;
+
+        &.form-control.is-valid, &.form-control:valid {
+            background: none;
+        }
     }
 
     .invalid-feedback {

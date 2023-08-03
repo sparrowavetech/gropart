@@ -3,6 +3,7 @@
 namespace Botble\Base\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Process\Process;
 
@@ -11,7 +12,7 @@ class ExportDatabaseCommand extends Command
 {
     public function handle(): int
     {
-        $config = config('database.connections.mysql', []);
+        $config = DB::connection('mysql')->getConfig();
 
         if (! $config) {
             return self::FAILURE;

@@ -11,18 +11,10 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Stripe\Charge;
 use Stripe\Checkout\Session as StripeCheckoutSession;
-use Stripe\Exception\ApiErrorException;
 
 class StripePaymentService extends StripePaymentAbstract
 {
-    /**
-     * Make a payment
-     *
-     * @param array $data
-     * @return mixed
-     * @throws ApiErrorException
-     */
-    public function makePayment(array $data)
+    public function makePayment(array $data): string|null
     {
         $request = request();
         $this->amount = $data['amount'];
@@ -51,7 +43,7 @@ class StripePaymentService extends StripePaymentAbstract
                     )
                 );
 
-                return false;
+                return null;
             }
 
             $charge = Charge::create([
@@ -68,7 +60,6 @@ class StripePaymentService extends StripePaymentAbstract
             $this->chargeId = $charge['id'];
 
             if ($this->chargeId) {
-                // Hook after made payment
                 $this->afterMakePayment($this->chargeId, $data);
             }
 
@@ -135,18 +126,13 @@ class StripePaymentService extends StripePaymentAbstract
         $multiplier = StripeHelper::getStripeCurrencyMultiplier($this->currency);
 
         if ($multiplier > 1) {
-            $amount = (int)(round($amount, 2) * $multiplier);
-        } else {
-            $amount = (int)$amount;
+            $amount = round($amount, 2) * $multiplier;
         }
 
-        return $amount;
+        return (int)$amount;
     }
 
-    /**
-     * Use this function to perform more logic after user has made a payment
-     */
-    public function afterMakePayment($chargeId, array $data)
+    public function afterMakePayment(string $chargeId, array $data): string
     {
         try {
             $payment = $this->getPaymentDetails($chargeId);
@@ -159,13 +145,11 @@ class StripePaymentService extends StripePaymentAbstract
             $paymentStatus = PaymentStatusEnum::FAILED;
         }
 
-        $orderIds = (array)$data['order_id'];
-
         do_action(PAYMENT_ACTION_PAYMENT_PROCESSED, [
             'amount' => $data['amount'],
             'currency' => $data['currency'],
             'charge_id' => $chargeId,
-            'order_id' => $orderIds,
+            'order_id' => (array)$data['order_id'],
             'customer_id' => Arr::get($data, 'customer_id'),
             'customer_type' => Arr::get($data, 'customer_type'),
             'payment_channel' => STRIPE_PAYMENT_METHOD_NAME,

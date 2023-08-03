@@ -3,13 +3,13 @@
 namespace Botble\Contact\Models;
 
 use Botble\Base\Casts\SafeContent;
+use Botble\Base\Models\BaseModel;
 use Botble\Base\Supports\Avatar;
 use Botble\Contact\Enums\ContactStatusEnum;
-use Botble\Base\Models\BaseModel;
+use Botble\Media\Facades\RvMedia;
 use Exception;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Botble\Media\Facades\RvMedia;
 
 class Contact extends BaseModel
 {

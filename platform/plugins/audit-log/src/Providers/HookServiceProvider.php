@@ -2,15 +2,15 @@
 
 namespace Botble\AuditLog\Providers;
 
-use Botble\Base\Facades\Assets;
-use Botble\AuditLog\Facades\AuditLog;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
-use Botble\Dashboard\Supports\DashboardWidgetInstance;
-use Illuminate\Support\Collection;
-use Botble\Base\Supports\ServiceProvider;
 use Botble\AuditLog\Events\AuditHandlerEvent;
+use Botble\AuditLog\Facades\AuditLog;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Supports\ServiceProvider;
+use Botble\Dashboard\Supports\DashboardWidgetInstance;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 
 class HookServiceProvider extends ServiceProvider
 {

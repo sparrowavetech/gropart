@@ -5,13 +5,13 @@ namespace Botble\Slug\Http\Controllers;
 use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Menu\Facades\Menu;
 use Botble\Setting\Supports\SettingStore;
 use Botble\Slug\Http\Requests\SlugRequest;
 use Botble\Slug\Http\Requests\SlugSettingsRequest;
 use Botble\Slug\Repositories\Interfaces\SlugInterface;
 use Botble\Slug\Services\SlugService;
 use Illuminate\Support\Str;
-use Botble\Menu\Facades\Menu;
 
 class SlugController extends BaseController
 {

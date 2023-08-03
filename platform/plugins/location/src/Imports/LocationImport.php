@@ -3,15 +3,13 @@
 namespace Botble\Location\Imports;
 
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Language\Facades\Language;
 use Botble\Location\Events\ImportedCityEvent;
 use Botble\Location\Events\ImportedCountryEvent;
 use Botble\Location\Events\ImportedStateEvent;
 use Botble\Location\Models\City;
 use Botble\Location\Models\Country;
 use Botble\Location\Models\State;
-use Botble\Location\Repositories\Interfaces\CityInterface;
-use Botble\Location\Repositories\Interfaces\CountryInterface;
-use Botble\Location\Repositories\Interfaces\StateInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Request;
@@ -19,7 +17,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Botble\Language\Facades\Language;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\SkipsErrors;
 use Maatwebsite\Excel\Concerns\SkipsFailures;
@@ -58,12 +55,8 @@ class LocationImport implements
 
     protected Collection $states;
 
-    public function __construct(
-        protected CityInterface $cityRepository,
-        protected StateInterface $stateRepository,
-        protected CountryInterface $countryRepository,
-        protected Request $request
-    ) {
+    public function __construct(protected Request $request)
+    {
         $this->countries = collect();
         $this->states = collect();
 
@@ -133,33 +126,34 @@ class LocationImport implements
         }
 
         $isCreateNew = false;
-        if (is_numeric($name)) {
-            $state = $this->stateRepository->getFirstBy(['id' => $name, 'country_id' => $countryId]);
-        } else {
-            $state = $this->stateRepository->getFirstBy(['name' => $name, 'country_id' => $countryId]);
-        }
+
+        $findInColumn = is_numeric($name) ? 'name' : 'id';
+
+        $state = State::query()->where([$findInColumn => $name, 'country_id' => $countryId])->first();
 
         if (! $state) {
-            $state = $this->stateRepository->create(['name' => $name, 'country_id' => $countryId]);
+            $state = State::query()->create(['name' => $name, 'country_id' => $countryId]);
             $isCreateNew = true;
         }
 
-        $this->states->push(collect([
-            'keyword' => $name,
-            'is_create_new' => $isCreateNew,
-            'model' => $state,
-            'country' => $this->request->input('country_temp'),
-        ]));
+        $this->states->push(
+            collect([
+                'keyword' => $name,
+                'is_create_new' => $isCreateNew,
+                'model' => $state,
+                'country' => $this->request->input('country_temp'),
+            ])
+        );
 
         return $state;
     }
 
     public function storeCity(State $state): ?City
     {
-        $this->request->merge(['state_id' => $state->id]);
+        $this->request->merge(['state_id' => $state->getKey()]);
         $row = $this->request->input();
 
-        $city = $this->cityRepository->create($row);
+        $city = City::query()->create($row);
         event(new ImportedCityEvent($row, $city));
 
         if ($this->getActiveLanguage) {
@@ -172,6 +166,7 @@ class LocationImport implements
                     'cities_id' => $city->id,
                     'lang_code' => $language->lang_code,
                     'name' => Arr::get($row, 'name_' . $language->lang_code) ?: Arr::get($row, 'name'),
+                    'slug' => Str::slug(Arr::get($row, 'name_' . $language->lang_code) ?: Arr::get($row, 'name')),
                 ]);
             }
         }
@@ -193,7 +188,7 @@ class LocationImport implements
         if ($collection) {
             $state = $collection['model'];
         } else {
-            $state = $this->stateRepository->create($row);
+            $state = State::query()->create($row);
         }
 
         event(new ImportedStateEvent($row, $state));
@@ -205,9 +200,10 @@ class LocationImport implements
                 }
 
                 DB::table('states_translations')->insertOrIgnore([
-                    'states_id' => $state->id,
+                    'states_id' => $state->getKey(),
                     'lang_code' => $language->lang_code,
                     'name' => Arr::get($row, 'name_' . $language->lang_code) ?: Arr::get($row, 'name'),
+                    'slug' => Str::slug(Arr::get($row, 'name_' . $language->lang_code) ?: Arr::get($row, 'name')),
                     'abbreviation' => Arr::get($row, 'abbreviation_' . $language->lang_code) ?: Arr::get(
                         $row,
                         'abbreviation'
@@ -216,19 +212,23 @@ class LocationImport implements
             }
         }
 
-        $this->onSuccess(collect([
-            'name' => $state->name,
-            'country' => $row['country_temp'],
-            'import_type' => 'state',
-            'model' => $state,
-        ]));
+        $this->onSuccess(
+            collect([
+                'name' => $state->name,
+                'country' => $row['country_temp'],
+                'import_type' => 'state',
+                'model' => $state,
+            ])
+        );
 
-        $this->states->push(collect([
-            'keyword' => $state->name,
-            'is_create_new' => false,
-            'model' => $state,
-            'country' => $row['country_temp'],
-        ]));
+        $this->states->push(
+            collect([
+                'keyword' => $state->name,
+                'is_create_new' => false,
+                'model' => $state,
+                'country' => $row['country_temp'],
+            ])
+        );
 
         return $state;
     }
@@ -244,7 +244,7 @@ class LocationImport implements
         if ($collection) {
             $country = $collection['model'];
         } else {
-            $country = $this->countryRepository->create($row);
+            $country = Country::query()->create($row);
         }
 
         event(new ImportedCountryEvent($row, $country));
@@ -272,12 +272,14 @@ class LocationImport implements
             'country_id' => $country->id,
         ]);
 
-        $this->onSuccess(collect([
-            'name' => $country->name,
-            'country' => $row['country_temp'],
-            'import_type' => 'country',
-            'model' => $country,
-        ]));
+        $this->onSuccess(
+            collect([
+                'name' => $country->name,
+                'country' => $row['country_temp'],
+                'import_type' => 'country',
+                'model' => $country,
+            ])
+        );
 
         return $country;
     }
@@ -359,13 +361,13 @@ class LocationImport implements
         } else {
             $isCreateNew = false;
             if (is_numeric($value)) {
-                $country = $this->countryRepository->findById($value);
+                $country = Country::query()->find($value);
             } else {
-                $country = $this->countryRepository->getFirstBy(['name' => $value]);
+                $country = Country::query()->where(['name' => $value])->first();
             }
 
             if (! $country) {
-                $country = $this->countryRepository->create([
+                $country = Country::query()->create([
                     'name' => $value,
                     'nationality' => $this->getNationalityFromName($value),
                     'status' => BaseStatusEnum::PUBLISHED,

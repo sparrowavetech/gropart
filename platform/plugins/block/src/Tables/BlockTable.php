@@ -2,8 +2,8 @@
 
 namespace Botble\Block\Tables;
 
-use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Facades\Html;
+use BaseHelper;
+use Html;
 use Illuminate\Support\Facades\Auth;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Block\Repositories\Interfaces\BlockInterface;

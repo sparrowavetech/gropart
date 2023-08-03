@@ -10,8 +10,8 @@ use Botble\Blog\Http\Resources\ListCategoryResource;
 use Botble\Blog\Models\Category;
 use Botble\Blog\Repositories\Interfaces\CategoryInterface;
 use Botble\Blog\Supports\FilterCategory;
-use Illuminate\Http\Request;
 use Botble\Slug\Facades\SlugHelper;
+use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {

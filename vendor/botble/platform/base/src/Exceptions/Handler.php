@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Exceptions\PostTooLargeException;
 use Illuminate\Session\TokenMismatchException;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Mail;
 use PhpOffice\PhpSpreadsheet\Exception as PhpSpreadsheetException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
@@ -115,7 +116,7 @@ class Handler extends ExceptionHandler
 
             if (! app()->isLocal() && ! app()->runningInConsole() && ! app()->isDownForMaintenance()) {
                 if (setting('enable_send_error_reporting_via_email', false) &&
-                    setting('email_driver', config('mail.default')) &&
+                    setting('email_driver', Mail::getDefaultDriver()) &&
                     $e instanceof Exception
                 ) {
                     EmailHandler::sendErrorException($e);
@@ -124,8 +125,10 @@ class Handler extends ExceptionHandler
                 if (config('core.base.general.error_reporting.via_slack', false)) {
                     $request = request();
 
+                    $previous = $e->getPrevious();
+
                     logger()->channel('slack')->critical(
-                        $e->getMessage() . ($e->getPrevious() ? '(' . $e->getPrevious() . ')' : null),
+                        $e->getMessage() . ($previous ? '(' . $previous . ')' : null),
                         [
                             'Request URL' => $request->fullUrl(),
                             'Request IP' => $request->ip(),
@@ -135,8 +138,7 @@ class Handler extends ExceptionHandler
                             'Exception Type' => get_class($e),
                             'File Path' => ltrim(str_replace(base_path(), '', $e->getFile()), '/') . ':' .
                                 $e->getLine(),
-                            'Previous File Path' => ltrim(str_replace(base_path(), '', $e->getPrevious()->getFile()), '/') . ':' .
-                                $e->getPrevious()->getLine(),
+                            'Previous File Path' => $previous ? ltrim(str_replace(base_path(), '', $previous->getFile()), '/') . ':' . $previous->getLine() : null,
                         ]
                     );
                 }

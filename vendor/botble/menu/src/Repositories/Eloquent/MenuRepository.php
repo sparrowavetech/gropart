@@ -3,13 +3,14 @@
 namespace Botble\Menu\Repositories\Eloquent;
 
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Models\BaseModel;
+use Botble\Menu\Models\Menu;
 use Botble\Menu\Repositories\Interfaces\MenuInterface;
 use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
-use Illuminate\Support\Str;
 
 class MenuRepository extends RepositoriesAbstract implements MenuInterface
 {
-    public function findBySlug($slug, $active, array $select = [], array $with = [])
+    public function findBySlug(string $slug, bool $active, array $select = [], array $with = []): BaseModel|null
     {
         $data = $this->model->where('slug', $slug);
 
@@ -32,21 +33,8 @@ class MenuRepository extends RepositoriesAbstract implements MenuInterface
         return $data;
     }
 
-    public function createSlug($name)
+    public function createSlug(string $name): string
     {
-        $slug = Str::slug($name);
-        $index = 1;
-        $baseSlug = $slug;
-        while ($this->model->where('slug', $slug)->exists()) {
-            $slug = $baseSlug . '-' . $index++;
-        }
-
-        if (empty($slug)) {
-            $slug = time();
-        }
-
-        $this->resetModel();
-
-        return $slug;
+        return Menu::createSlug($name, null);
     }
 }

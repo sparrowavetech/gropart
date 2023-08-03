@@ -5,6 +5,7 @@ namespace Botble\Widget\Providers;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Facades\Html;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Theme\Facades\AdminBar;
 use Botble\Theme\Facades\Theme;
@@ -20,7 +21,6 @@ use Botble\Widget\Widgets\Text;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Facades\Auth;
-use Botble\Base\Supports\ServiceProvider;
 
 class WidgetServiceProvider extends ServiceProvider
 {
@@ -114,7 +114,7 @@ class WidgetServiceProvider extends ServiceProvider
                     trans('packages/widget::widget.name'),
                     route('widgets.index'),
                     'appearance',
-                    'menus.index'
+                    'widgets.index'
                 );
             }
         });

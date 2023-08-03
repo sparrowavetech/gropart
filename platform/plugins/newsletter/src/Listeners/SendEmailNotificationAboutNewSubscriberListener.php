@@ -2,9 +2,9 @@
 
 namespace Botble\Newsletter\Listeners;
 
-use Botble\Newsletter\Events\SubscribeNewsletterEvent;
 use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Facades\Html;
+use Botble\Newsletter\Events\SubscribeNewsletterEvent;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\URL;
 

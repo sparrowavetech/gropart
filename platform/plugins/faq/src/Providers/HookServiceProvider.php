@@ -4,13 +4,13 @@ namespace Botble\Faq\Providers;
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
+use Botble\Base\Facades\MetaBox;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Faq\Contracts\Faq as FaqContract;
 use Botble\Faq\FaqCollection;
 use Botble\Faq\FaqItem;
-use Botble\Base\Facades\Html;
 use Illuminate\Support\Arr;
-use Botble\Base\Supports\ServiceProvider;
-use Botble\Base\Facades\MetaBox;
 
 class HookServiceProvider extends ServiceProvider
 {

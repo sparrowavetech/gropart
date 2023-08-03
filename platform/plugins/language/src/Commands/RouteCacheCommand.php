@@ -2,11 +2,11 @@
 
 namespace Botble\Language\Commands;
 
-use Botble\Language\LanguageManager;
-use Illuminate\Foundation\Console\RouteCacheCommand as BaseRouteCacheCommand;
-use Botble\Language\Traits\TranslatedRouteCommandContext;
-use Illuminate\Routing\RouteCollection;
 use Botble\Language\Facades\Language;
+use Botble\Language\LanguageManager;
+use Botble\Language\Traits\TranslatedRouteCommandContext;
+use Illuminate\Foundation\Console\RouteCacheCommand as BaseRouteCacheCommand;
+use Illuminate\Routing\RouteCollection;
 
 class RouteCacheCommand extends BaseRouteCacheCommand
 {
@@ -89,7 +89,10 @@ class RouteCacheCommand extends BaseRouteCacheCommand
 
     protected function getFreshApplicationRoutesForLocale(string|null $locale = null, bool $force = false): RouteCollection
     {
-        if ($locale === null || (Language::hideDefaultLocaleInURL() && $locale == Language::getDefaultLocale() && ! $force)) {
+        if (
+            $locale === null ||
+            (Language::hideDefaultLocaleInURL() && $locale == Language::getDefaultLocale() && ! $force)
+        ) {
             return $this->getFreshApplicationRoutes();
         }
 

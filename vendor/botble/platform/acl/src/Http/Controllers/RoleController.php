@@ -120,7 +120,6 @@ class RoleController extends BaseController
 
         $role = Role::query()->create([
             'name' => $request->input('name'),
-            'slug' => Role::createSlug($request->input('name'), 0),
             'permissions' => $this->cleanPermission((array)$request->input('flags', [])),
             'description' => $request->input('description'),
             'is_default' => $request->input('is_default'),
@@ -140,7 +139,7 @@ class RoleController extends BaseController
 
         $role = Role::query()->create([
             'name' => $baseRole->name . ' (Duplicate)',
-            'slug' => Role::createSlug($baseRole->slug, 0),
+            'slug' => $baseRole->slug,
             'permissions' => $baseRole->permissions,
             'description' => $baseRole->description,
             'created_by' => $baseRole->created_by,

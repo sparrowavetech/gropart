@@ -2,8 +2,8 @@
 
 namespace Botble\SeoHelper;
 
-use Illuminate\Support\Arr;
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\MetaBox;
 use Botble\Base\Models\BaseModel;
 use Botble\SeoHelper\Contracts\SeoHelperContract;
 use Botble\SeoHelper\Contracts\SeoMetaContract;
@@ -11,7 +11,7 @@ use Botble\SeoHelper\Contracts\SeoOpenGraphContract;
 use Botble\SeoHelper\Contracts\SeoTwitterContract;
 use Exception;
 use Illuminate\Http\Request;
-use Botble\Base\Facades\MetaBox;
+use Illuminate\Support\Arr;
 
 class SeoHelper implements SeoHelperContract
 {

@@ -12,8 +12,8 @@ class CountryRequest extends Request
     {
         return [
             'name' => 'required|string|max:220',
-            'code' => 'nullable|string',
-            'nationality' => 'nullable|string',
+            'code' => 'nullable|string|max:120',
+            'nationality' => 'nullable|string|max:120',
             'order' => 'required|integer|min:0|max:127',
             'status' => Rule::in(BaseStatusEnum::values()),
         ];

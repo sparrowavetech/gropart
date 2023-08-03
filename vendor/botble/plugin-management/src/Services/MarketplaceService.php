@@ -3,7 +3,6 @@
 namespace Botble\PluginManagement\Services;
 
 use Botble\Base\Exceptions\RequiresLicenseActivatedException;
-use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Supports\Core;
 use Botble\Base\Supports\Zipper;
 use Illuminate\Http\Client\PendingRequest;
@@ -30,7 +29,7 @@ class MarketplaceService
 
     public function __construct(string $url = null, string $token = null)
     {
-        $core = BaseHelper::getFileData(core_path('core.json'));
+        $core = Core::make()->getCoreFileData();
 
         $this->url = $url ?? $core['marketplaceUrl'];
 

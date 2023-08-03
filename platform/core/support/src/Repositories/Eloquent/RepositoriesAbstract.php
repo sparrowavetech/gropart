@@ -253,7 +253,7 @@ abstract class RepositoriesAbstract implements RepositoryInterface
 
         $data = $this->model->get();
 
-        if (! $data->count()) {
+        if ($data->isEmpty()) {
             return false;
         }
 

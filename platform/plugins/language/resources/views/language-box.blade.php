@@ -34,21 +34,7 @@
                         <a href="{{ Route::has($route['edit']) ? route($route['edit'], $related[$language->lang_code]) : '#' }}"> {{ $language->lang_name }} <i class="fa fa-edit"></i></a>
                         <br>
                     @else
-                        @php
-                            $currentQueryString = BaseHelper::removeQueryStringVars(Request::getQueryString(), ['ref_from', 'ref_lang']);
-
-                            $queryString = '';
-
-                            if (!Str::contains($currentQueryString, 'ref_from=')) {
-                                $queryString = 'ref_from=' . (!empty($args[0]) && $args[0]->id ? $args[0]->id : 0) . '&';
-                            }
-
-                            $queryString .= 'ref_lang=' . $language->lang_code;
-                            if (!empty($currentQueryString)) {
-                                $queryString = $currentQueryString . '&' . $queryString;
-                            }
-                        @endphp
-                        <a href="{{ Route::has($route['create']) ? route($route['create']) : '#' }}?{{ $queryString }}"> {{ $language->lang_name }} <i class="fa fa-plus"></i></a>
+                        <a href="{{ Route::has($route['create']) ? route($route['create']) : '#' }}?{{ http_build_query(array_merge($queryParams, [Language::refLangKey() => $language->lang_code])) }}"> {{ $language->lang_name }} <i class="fa fa-plus"></i></a>
                         <br>
                     @endif
                 @endif
@@ -56,11 +42,11 @@
         </div>
     </div>
 
-    <input type="hidden" id="lang_meta_created_from" name="ref_from" value="{{ BaseHelper::stringify(request()->input('ref_from')) }}">
-    <input type="hidden" id="reference_id" value="{{ $args[0] && $args[0]->id ? $args[0]->id : 0 }}">
+    <input type="hidden" id="lang_meta_created_from" name="ref_from" value="{{ Language::getRefFrom() }}">
+    <input type="hidden" id="reference_id" value="{{ $queryParams['ref_from'] }}">
     <input type="hidden" id="reference_type" value="{{ $args[1] }}">
     <input type="hidden" id="route_create" value="{{ Route::has($route['create']) ? route($route['create']) : '#' }}">
-    <input type="hidden" id="route_edit" value="{{ Route::has($route['edit']) ? route($route['edit'], $args[0] && $args[0]->id ? $args[0]->id : '') : '#' }}">
+    <input type="hidden" id="route_edit" value="{{ Route::has($route['edit']) ? route($route['edit'], $queryParams['ref_from']) : '#' }}">
     <input type="hidden" id="language_flag_path" value="{{ BASE_LANGUAGE_FLAG_PATH }}">
 
     <div data-change-language-route="{{ route('languages.change.item.language') }}"></div>
@@ -72,11 +58,11 @@
         button-id="confirm-change-language-button"
         :button-label="trans('plugins/language::language.confirm-change-language-btn')"
     >
-        {!! trans('plugins/language::language.confirm-change-language-message') !!}
+        {!! BaseHelper::clean(trans('plugins/language::language.confirm-change-language-message')) !!}
     </x-core-base::modal>
 @endif
 
 @push('header')
-    <meta name="ref_from" content="{{ (!empty($args[0]) && $args[0]->id ? $args[0]->id : 0) }}">
-    <meta name="ref_lang" content="{{ $currentLanguage->lang_code }}">
+    <meta name="{{ Language::refFromKey() }}" content="{{ $queryParams['ref_from'] }}">
+    <meta name="{{ Language::refLangKey() }}" content="{{ $currentLanguage->lang_code }}">
 @endpush

@@ -11,14 +11,16 @@ class StripeServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        if (is_plugin_active('payment')) {
-            $this->setNamespace('plugins/stripe')
-                ->loadHelpers()
-                ->loadRoutes()
-                ->loadAndPublishViews()
-                ->publishAssets();
-
-            $this->app->register(HookServiceProvider::class);
+        if (! is_plugin_active('payment')) {
+            return;
         }
+
+        $this->setNamespace('plugins/stripe')
+            ->loadHelpers()
+            ->loadRoutes()
+            ->loadAndPublishViews()
+            ->publishAssets();
+
+        $this->app->register(HookServiceProvider::class);
     }
 }

@@ -3,13 +3,13 @@
 namespace Botble\Contact\Providers;
 
 use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\Html;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Contact\Enums\ContactStatusEnum;
 use Botble\Contact\Repositories\Interfaces\ContactInterface;
 use Botble\Shortcode\Compilers\Shortcode;
-use Botble\Base\Facades\Html;
-use Illuminate\Support\Facades\Auth;
-use Botble\Base\Supports\ServiceProvider;
 use Botble\Theme\Facades\Theme;
+use Illuminate\Support\Facades\Auth;
 
 class HookServiceProvider extends ServiceProvider
 {

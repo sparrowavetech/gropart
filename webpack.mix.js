@@ -7,12 +7,15 @@ mix.options({
     terser: {
         extractComments: false,
     },
-    manifest: false
+    manifest: false,
 });
 
 mix.webpackConfig({
     stats: {
         children: false,
+    },
+    externals: {
+        vue: 'Vue',
     },
 });
 

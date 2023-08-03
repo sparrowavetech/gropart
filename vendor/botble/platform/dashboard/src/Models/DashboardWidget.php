@@ -23,12 +23,10 @@ class DashboardWidget extends BaseModel
         return $this->hasMany(DashboardWidgetSetting::class, 'widget_id', 'id');
     }
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
-
         static::deleting(function (DashboardWidget $widget) {
-            DashboardWidgetSetting::where('widget_id', $widget->id)->delete();
+            $widget->settings()->delete();
         });
     }
 }

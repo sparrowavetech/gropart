@@ -2,8 +2,8 @@
 
 namespace Botble\Slug\Providers;
 
-use Botble\Slug\Commands\ChangeSlugPrefixCommand;
 use Botble\Base\Supports\ServiceProvider;
+use Botble\Slug\Commands\ChangeSlugPrefixCommand;
 
 class CommandServiceProvider extends ServiceProvider
 {

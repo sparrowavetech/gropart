@@ -2,8 +2,8 @@
 
 namespace Botble\Location\Providers;
 
-use Botble\Location\Commands\MigrateLocationCommand;
 use Botble\Base\Supports\ServiceProvider;
+use Botble\Location\Commands\MigrateLocationCommand;
 
 class CommandServiceProvider extends ServiceProvider
 {

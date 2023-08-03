@@ -8,18 +8,22 @@ use Botble\Blog\Models\Post;
 use Botble\Blog\Models\Tag;
 use Botble\Blog\Repositories\Interfaces\PostInterface;
 use Botble\Blog\Services\BlogService;
-use Botble\Theme\Events\RenderingSingleEvent;
-use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Slug\Facades\SlugHelper;
+use Botble\Theme\Events\RenderingSingleEvent;
 use Botble\Theme\Facades\Theme;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 
 class PublicController extends Controller
 {
     public function getSearch(Request $request, PostInterface $postRepository)
     {
         $query = BaseHelper::stringify($request->input('q'));
+
+        if (! $query || ! is_string($query)) {
+            abort(404);
+        }
 
         $title = __('Search result for: ":query"', compact('query'));
 

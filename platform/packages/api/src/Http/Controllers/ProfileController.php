@@ -2,16 +2,16 @@
 
 namespace Botble\Api\Http\Controllers;
 
-use Botble\Api\Facades\ApiHelper;
 use App\Http\Controllers\Controller;
+use Botble\Api\Facades\ApiHelper;
 use Botble\Api\Http\Resources\UserResource;
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Media\Facades\RvMedia;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Botble\Media\Facades\RvMedia;
 
 class ProfileController extends Controller
 {

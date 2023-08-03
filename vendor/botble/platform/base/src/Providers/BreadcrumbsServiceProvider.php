@@ -5,9 +5,9 @@ namespace Botble\Base\Providers;
 use Botble\Base\Facades\Breadcrumbs;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Supports\BreadcrumbsGenerator;
+use Botble\Base\Supports\ServiceProvider;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
-use Botble\Base\Supports\ServiceProvider;
 use Illuminate\Support\Str;
 
 class BreadcrumbsServiceProvider extends ServiceProvider

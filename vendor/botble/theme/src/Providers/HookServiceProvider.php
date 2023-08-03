@@ -4,6 +4,7 @@ namespace Botble\Theme\Providers;
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Dashboard\Supports\DashboardWidgetInstance;
 use Botble\Shortcode\Compilers\Shortcode;
 use Botble\Shortcode\Compilers\ShortcodeCompiler;
@@ -14,7 +15,6 @@ use Botble\Theme\Supports\Vimeo;
 use Botble\Theme\Supports\Youtube;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-use Botble\Base\Supports\ServiceProvider;
 use Throwable;
 
 class HookServiceProvider extends ServiceProvider

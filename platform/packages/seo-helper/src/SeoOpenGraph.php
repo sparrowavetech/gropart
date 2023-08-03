@@ -3,9 +3,9 @@
 namespace Botble\SeoHelper;
 
 use Botble\Base\Facades\BaseHelper;
+use Botble\Media\Facades\RvMedia;
 use Botble\SeoHelper\Contracts\Entities\OpenGraphContract;
 use Botble\SeoHelper\Contracts\SeoOpenGraphContract;
-use Botble\Media\Facades\RvMedia;
 
 class SeoOpenGraph implements SeoOpenGraphContract
 {

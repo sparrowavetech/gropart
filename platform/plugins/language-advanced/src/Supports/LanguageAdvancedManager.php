@@ -2,15 +2,15 @@
 
 namespace Botble\LanguageAdvanced\Supports;
 
+use Botble\Language\Facades\Language;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
-use Botble\Language\Facades\Language;
 
 class LanguageAdvancedManager
 {
-    public static function save(?Model $object, Request $request): bool
+    public static function save(Model|null $object, Request $request): bool
     {
         if (! self::isSupported($object)) {
             return false;
@@ -24,7 +24,7 @@ class LanguageAdvancedManager
 
         $condition = [
             'lang_code' => $language,
-            $object->getTable() . '_id' => $object->id,
+            $object->getTable() . '_id' => $object->getKey(),
         ];
 
         $table = $object->getTable() . '_translations';
@@ -50,7 +50,7 @@ class LanguageAdvancedManager
             $defaultTranslation = DB::table($table)
                 ->where([
                     'lang_code' => Language::getDefaultLocaleCode(),
-                    $object->getTable() . '_id' => $object->id,
+                    $object->getTable() . '_id' => $object->getKey(),
                 ])
                 ->first();
 
@@ -126,7 +126,7 @@ class LanguageAdvancedManager
 
         $table = $object->getTable() . '_translations';
 
-        DB::table($table)->where([$object->getTable() . '_id' => $object->id])->delete();
+        DB::table($table)->where([$object->getTable() . '_id' => $object->getKey()])->delete();
 
         return true;
     }

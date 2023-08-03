@@ -2,12 +2,12 @@
 
 namespace Botble\Media\Repositories\Eloquent;
 
+use Botble\Media\Facades\RvMedia;
 use Botble\Media\Models\MediaFolder;
 use Botble\Media\Repositories\Interfaces\MediaFolderInterface;
 use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Str;
-use Botble\Media\Facades\RvMedia;
 
 /**
  * @since 19/08/2015 07:45 AM

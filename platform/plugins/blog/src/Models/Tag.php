@@ -30,10 +30,8 @@ class Tag extends BaseModel
         return $this->belongsToMany(Post::class, 'post_tags');
     }
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
-
         self::deleting(function (Tag $tag) {
             $tag->posts()->detach();
         });

@@ -2,7 +2,7 @@
 
 namespace Botble\Sms\Http\Requests;
 
-use Botble\Base\Facades\BaseHelper;
+use BaseHelper;
 use Botble\Support\Http\Requests\Request;
 
 class UpdateSettingsRequest extends Request

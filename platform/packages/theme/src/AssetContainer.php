@@ -2,12 +2,12 @@
 
 namespace Botble\Theme;
 
-use Botble\Theme\Contracts\Theme as ThemeContract;
-use Exception;
 use Botble\Base\Facades\Html;
+use Botble\Theme\Contracts\Theme as ThemeContract;
+use Botble\Theme\Facades\Theme as ThemeFacade;
+use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
-use Botble\Theme\Facades\Theme as ThemeFacade;
 
 class AssetContainer
 {

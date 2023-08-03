@@ -2,8 +2,8 @@
 
 namespace Botble\Chart\Providers;
 
-use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Base\Supports\ServiceProvider;
+use Botble\Base\Traits\LoadAndPublishDataTrait;
 
 class ChartServiceProvider extends ServiceProvider
 {

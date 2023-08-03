@@ -1,5 +1,5 @@
 @php
-    $defaultLocale = setting('locale', config('app.locale'));
+    $defaultLocale = setting('locale', App::getLocale());
     if (BaseHelper::hasDemoModeEnabled() && session('site-locale') && array_key_exists(session('site-locale'), \Botble\Base\Supports\Language::getAvailableLocales())) {
         $defaultLocale = session('site-locale');
     }

@@ -48,7 +48,7 @@
                 <p>{{ trans('plugins/payment::payment.amount') }}: {{ $item->amount->value }} {{ $item->amount->currency_code }}</p>
                 <p>{{ trans('plugins/payment::payment.refunds.status') }}: {{ $item->status }}</p>
                 <p>{{ trans('plugins/payment::payment.refunds.breakdowns') }}: </p>
-                <div class="ml-4">
+                <div class="ms-4">
                     @foreach ($item->seller_payable_breakdown as $k => $breakdown)
                         <p>{{ trans('plugins/payment::payment.refunds.' . $k) }}: {{ $breakdown->value }} {{ $breakdown->currency_code }}</p>
                     @endforeach

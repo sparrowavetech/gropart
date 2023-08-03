@@ -2,12 +2,12 @@
 
 namespace Botble\PayPal\Providers;
 
-use Botble\Payment\Enums\PaymentMethodEnum;
-use Botble\PayPal\Services\Gateways\PayPalPaymentService;
 use Botble\Base\Facades\Html;
+use Botble\Payment\Enums\PaymentMethodEnum;
+use Botble\Payment\Facades\PaymentMethods;
+use Botble\PayPal\Services\Gateways\PayPalPaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
-use Botble\Payment\Facades\PaymentMethods;
 
 class HookServiceProvider extends ServiceProvider
 {

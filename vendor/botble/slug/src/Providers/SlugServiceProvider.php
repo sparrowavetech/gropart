@@ -6,6 +6,7 @@ use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Facades\MacroableModels;
 use Botble\Base\Models\BaseModel;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Page\Models\Page;
 use Botble\Slug\Facades\SlugHelper as SlugHelperFacade;
@@ -15,7 +16,6 @@ use Botble\Slug\Repositories\Interfaces\SlugInterface;
 use Botble\Slug\SlugCompiler;
 use Botble\Slug\SlugHelper;
 use Illuminate\Routing\Events\RouteMatched;
-use Botble\Base\Supports\ServiceProvider;
 
 class SlugServiceProvider extends ServiceProvider
 {
@@ -105,18 +105,26 @@ class SlugServiceProvider extends ServiceProvider
                         /**
                          * @var BaseModel $this
                          */
-                        if (! $this->slug || (get_class($this) == Page::class && BaseHelper::isHomepage($this->getKey()))) {
+                        $model = $this;
+
+                        $slug = $model->slugable;
+
+                        if (
+                            ! $slug ||
+                            ! $slug->key ||
+                            (get_class($model) == Page::class && BaseHelper::isHomepage($model->getKey()))
+                        ) {
                             return route('public.index');
                         }
 
-                        $prefix = $this->slugable ? $this->slugable->prefix : null;
-                        $prefix = apply_filters(FILTER_SLUG_PREFIX, $prefix);
-
-                        $prefix = SlugHelperFacade::getTranslator()->compile($prefix, $this);
+                        $prefix = SlugHelperFacade::getTranslator()->compile(
+                            apply_filters(FILTER_SLUG_PREFIX, $slug->prefix),
+                            $model
+                        );
 
                         return apply_filters(
                             'slug_filter_url',
-                            url($prefix ? $prefix . '/' . $this->slug : $this->slug) . SlugHelperFacade::getPublicSingleEndingURL()
+                            url(ltrim($prefix . '/' . $slug->key, '/')) . SlugHelperFacade::getPublicSingleEndingURL()
                         );
                     }
                 );

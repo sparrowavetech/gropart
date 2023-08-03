@@ -3,12 +3,12 @@
 namespace Botble\Location\Imports;
 
 use Carbon\Carbon;
-use Exception;
-use Illuminate\Support\Collection;
-use PhpOffice\PhpSpreadsheet\Shared\Date;
 use DateTime;
+use Exception;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 trait ImportTrait
 {
@@ -75,8 +75,13 @@ trait ImportTrait
         return $this;
     }
 
-    public function setValue(array &$row, string $key, string $type = 'array', string|null $default = null, string|null $from = null): self
-    {
+    public function setValue(
+        array &$row,
+        string $key,
+        string $type = 'array',
+        string|null $default = null,
+        string|null $from = null
+    ): self {
         $value = Arr::get($row, $from ?: $key, $default);
 
         switch ($type) {
@@ -88,7 +93,7 @@ trait ImportTrait
                 if (Str::lower($value) == 'false' || $value == '0' || Str::lower($value) == 'no') {
                     $value = false;
                 }
-                $value = (bool) $value;
+                $value = (bool)$value;
 
                 break;
             case 'datetime':
@@ -102,7 +107,7 @@ trait ImportTrait
 
                 break;
             case 'integer':
-                $value = (int) $value;
+                $value = (int)$value;
 
                 break;
         }

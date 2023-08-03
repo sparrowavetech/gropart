@@ -14,7 +14,7 @@ class AutoTranslateCommand extends Command
 {
     public function handle(): int
     {
-        if (! preg_match('/^[a-z0-9\-]+$/i', $this->argument('locale'))) {
+        if (! preg_match('/^[a-z0-9\-_]+$/i', $this->argument('locale'))) {
             $this->components->error('Only alphabetic characters are allowed.');
 
             return self::FAILURE;
@@ -22,10 +22,20 @@ class AutoTranslateCommand extends Command
 
         $locale = $this->argument('locale');
 
+        $this->components->info(sprintf('Translating %s...', $locale));
+
         $manager = app(Manager::class);
 
         if ($path = $this->option('path')) {
-            $translations = BaseHelper::getFileData($this->option('path'));
+            $themeName = $this->getThemeNameFromPath($path);
+
+            $langPath = $path;
+
+            if ($this->laravel['files']->exists($translatedPath = lang_path("vendor/themes/$themeName/$locale.json"))) {
+                $langPath = $translatedPath;
+            }
+
+            $translations = BaseHelper::getFileData($langPath);
         } else {
             $translations = $manager->getThemeTranslations($locale);
         }
@@ -50,10 +60,7 @@ class AutoTranslateCommand extends Command
         }
 
         if ($path) {
-            $themeName = basename(dirname($path, 2));
-            if (str_contains($path, 'lang/vendor/themes')) {
-                $themeName = basename(dirname($path));
-            }
+            $themeName = $this->getThemeNameFromPath($path);
 
             BaseHelper::saveFileData(lang_path("vendor/themes/$themeName/$locale.json"), $translations);
         } else {
@@ -69,5 +76,15 @@ class AutoTranslateCommand extends Command
     {
         $this->addArgument('locale', InputArgument::REQUIRED, 'The locale name that you want to translate');
         $this->addOption('path', null, InputOption::VALUE_REQUIRED, 'Path to the original JSON file');
+    }
+
+    protected function getThemeNameFromPath(string $path): string
+    {
+        $themeName = basename(dirname($path, 2));
+        if (str_contains($path, 'lang/vendor/themes')) {
+            $themeName = basename(dirname($path));
+        }
+
+        return $themeName;
     }
 }

@@ -3,16 +3,16 @@
 namespace Botble\Faq\Tables;
 
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
 use Botble\Faq\Models\Faq;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Base\Facades\Html;
+use Botble\Table\DataTables;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Botble\Table\DataTables;
 
 class FaqTable extends TableAbstract
 {

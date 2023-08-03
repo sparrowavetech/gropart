@@ -3,11 +3,11 @@
 namespace Botble\PluginManagement\Providers;
 
 use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\PluginManagement\PluginManifest;
 use Composer\Autoload\ClassLoader;
 use Illuminate\Routing\Events\RouteMatched;
-use Botble\Base\Supports\ServiceProvider;
 
 class PluginManagementServiceProvider extends ServiceProvider
 {

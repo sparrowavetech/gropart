@@ -2,10 +2,10 @@
 
 namespace Botble\Base\Supports;
 
+use Botble\Base\Models\MetaBox as MetaBoxModel;
 use Closure;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
-use Botble\Base\Models\MetaBox as MetaBoxModel;
 
 class MetaBox
 {
@@ -155,8 +155,12 @@ class MetaBox
         }
     }
 
-    public function getMetaData(Model $object, string $key, bool $single = false, array $select = ['meta_value']): string|array|null
-    {
+    public function getMetaData(
+        Model $object,
+        string $key,
+        bool $single = false,
+        array $select = ['meta_value']
+    ): string|array|null {
         if ($object instanceof MetaBoxModel) {
             $field = $object;
         } else {
@@ -167,11 +171,7 @@ class MetaBox
             return $single ? '' : [];
         }
 
-        if ($single) {
-            return $field->meta_value[0];
-        }
-
-        return $field->meta_value;
+        return $single ? $field->meta_value[0] : $field->meta_value;
     }
 
     public function getMeta(Model $object, string $key, array $select = ['meta_value']): ?Model

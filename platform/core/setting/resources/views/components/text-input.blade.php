@@ -11,7 +11,11 @@
         <label for="{{ $name }}" class="text-title-field">{{ $label }}</label>
     @endif
 
-    <input type="{{ $type }}" {{ $attributes->merge(['class' => 'next-input', 'name' => $name, 'id' => $name]) }} value="{{ old($name) && ! is_array(old($name)) ? old($name) : $value }}">
+    <input type="{{ $type }}" {{ $attributes->merge([
+        'class' => 'form-control next-input' . ($errors->has($name) ? ' is-invalid' : ''),
+        'name' => $name,
+        'id' => $name,
+    ]) }} value="{{ old($name) && ! is_array(old($name)) ? old($name) : $value }}">
 
     @if($helperText)
         {{ Form::helper($helperText) }}

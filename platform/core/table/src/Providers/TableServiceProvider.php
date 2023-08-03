@@ -2,12 +2,12 @@
 
 namespace Botble\Table\Providers;
 
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Table\ApiResourceDataTable;
 use Botble\Table\CollectionDataTable;
 use Botble\Table\EloquentDataTable;
 use Botble\Table\QueryDataTable;
-use Botble\Base\Supports\ServiceProvider;
 
 class TableServiceProvider extends ServiceProvider
 {

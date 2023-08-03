@@ -2,9 +2,9 @@
 
 namespace Botble\Optimize\Http\Middleware;
 
+use Botble\Optimize\Facades\OptimizerHelper;
 use Closure;
 use Illuminate\Http\Request;
-use Botble\Optimize\Facades\OptimizerHelper;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response;
 

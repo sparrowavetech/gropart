@@ -3,11 +3,11 @@
 namespace Botble\Payment\Tables;
 
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Models\Payment;
-use Botble\Payment\Repositories\Interfaces\PaymentInterface;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Base\Facades\Html;
+use Botble\Table\DataTables;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -16,19 +16,17 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-use Botble\Table\DataTables;
 
 class PaymentTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, PaymentInterface $paymentRepository)
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Payment $payment)
     {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $paymentRepository;
+        $this->model = $payment;
+
+        $this->hasActions = true;
+        $this->hasFilter = true;
 
         if (! Auth::user()->hasAnyPermission(['payment.show', 'payment.destroy'])) {
             $this->hasOperations = false;
@@ -78,18 +76,20 @@ class PaymentTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()->select([
-            'id',
-            'charge_id',
-            'amount',
-            'currency',
-            'payment_channel',
-            'created_at',
-            'status',
-            'order_id',
-            'customer_id',
-            'customer_type',
-        ])->with(['customer']);
+        $query = $this->getModel()
+            ->query()
+            ->select([
+                'id',
+                'charge_id',
+                'amount',
+                'currency',
+                'payment_channel',
+                'created_at',
+                'status',
+                'order_id',
+                'customer_id',
+                'customer_type',
+            ])->with(['customer']);
 
         if (method_exists($query->getModel(), 'order')) {
             $query->with(['customer', 'order']);

@@ -1,5 +1,5 @@
 <div class="col-lg-7 mb-2">
-    @if ($stats->count())
+    @if ($stats->isNotEmpty())
         <div class="chart" id="stats-chart"></div>
     @else
         <div class="h-100 d-flex align-items-center justify-content-center bg-light">

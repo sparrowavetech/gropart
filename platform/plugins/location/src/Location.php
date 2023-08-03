@@ -3,76 +3,85 @@
 namespace Botble\Location;
 
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Models\BaseQueryBuilder;
-use Botble\Base\Supports\PclZip as Zip;
+use Botble\Base\Supports\Zipper;
+use Botble\Location\Events\DownloadedCities;
+use Botble\Location\Events\DownloadedCountry;
+use Botble\Location\Events\DownloadedStates;
 use Botble\Location\Models\City;
 use Botble\Location\Models\Country;
 use Botble\Location\Models\State;
-use Botble\Location\Repositories\Interfaces\CityInterface;
-use Botble\Location\Repositories\Interfaces\StateInterface;
+use Carbon\Carbon;
 use GuzzleHttp\Psr7\Utils;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use Throwable;
-use ZipArchive;
 
 class Location
 {
-    public function __construct(protected StateInterface $stateRepository, protected CityInterface $cityRepository)
-    {
-    }
-
     public function getStates(): array
     {
-        $states = $this->stateRepository->advancedGet([
-            'condition' => [
-                'status' => BaseStatusEnum::PUBLISHED,
-            ],
-            'order_by' => ['order' => 'ASC', 'name' => 'ASC'],
-        ]);
+        $states = State::query()
+            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->orderBy('order')
+            ->orderBy('name')
+            ->get();
 
         return $states->pluck('name', 'id')->all();
     }
 
-    public function getCitiesByState($stateId): array
+    public function getCitiesByState(int|string|null $stateId): array
     {
-        $cities = $this->cityRepository->advancedGet([
-            'condition' => [
-                'status' => BaseStatusEnum::PUBLISHED,
-                'state_id' => $stateId,
-            ],
-            'order_by' => ['order' => 'ASC', 'name' => 'ASC'],
-        ]);
+        if (! $stateId) {
+            return [];
+        }
 
-        return $cities->pluck('name', 'id')->all();
+        return City::query()
+            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->where('state_id', $stateId)
+            ->orderBy('order')
+            ->orderBy('name')
+            ->pluck('name', 'id')
+            ->all();
     }
 
-    public function getCityById($cityId): ?City
+    public function getCityById(int|string|null $cityId): City|Model|null
     {
-        return $this->cityRepository->getFirstBy([
+        if (! $cityId) {
+            return null;
+        }
+
+        return City::query()->where([
             'id' => $cityId,
             'status' => BaseStatusEnum::PUBLISHED,
-        ]);
+        ])->first();
     }
 
-    public function getCityNameById($cityId): string|null
+    public function getCityNameById(int|string|null $cityId): string|null
     {
+        if (! $cityId) {
+            return null;
+        }
+
         $city = $this->getCityById($cityId);
 
         return $city?->name;
     }
 
-    public function getStateNameById($stateId): string|null
+    public function getStateNameById(int|string|null $stateId): string|null
     {
-        $state = $this->stateRepository->getFirstBy([
+        if (! $stateId) {
+            return null;
+        }
+
+        return State::query()->where([
             'id' => $stateId,
             'status' => BaseStatusEnum::PUBLISHED,
-        ]);
-
-        return $state ? $state->name : null;
+        ])->value('name');
     }
 
     public function isSupported(string|object $model): bool
@@ -186,22 +195,9 @@ class Location
             ];
         }
 
-        if (class_exists('ZipArchive', false)) {
-            $zip = new ZipArchive();
-            $res = $zip->open($destination);
-            if ($res === true) {
-                $zip->extractTo(storage_path('app'));
-                $zip->close();
-            } else {
-                return [
-                    'error' => true,
-                    'message' => 'Extract location files failed!',
-                ];
-            }
-        } else {
-            $archive = new Zip($destination);
-            $archive->extract(PCLZIP_OPT_PATH, storage_path('app'));
-        }
+        $zip = new Zipper();
+
+        $zip->extract($destination, storage_path('app'));
 
         if (File::exists($destination)) {
             File::delete($destination);
@@ -216,39 +212,68 @@ class Location
         $country = file_get_contents($dataPath . '/country.json');
         $country = json_decode($country, true);
 
-        $country = Country::create($country);
+        $country = Country::query()->create($country);
 
-        event(new CreatedContentEvent(COUNTRY_MODULE_SCREEN_NAME, request(), $country));
+        if ($country) {
+            event(new DownloadedCountry());
+        }
 
         $states = file_get_contents($dataPath . '/states.json');
         $states = json_decode($states, true);
+
+        $statesForInserting = [];
+
+        $now = Carbon::now();
+
         foreach ($states as $state) {
             $state['country_id'] = $country->id;
 
-            $state = State::create($state);
+            $statesForInserting[] = array_merge($state, [
+                'slug' => Str::slug($state['name']),
+                'country_id' => $country->id,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+        }
 
-            event(new CreatedContentEvent(STATE_MODULE_SCREEN_NAME, request(), $state));
+        if (! empty($statesForInserting)) {
+            collect($statesForInserting)
+                ->chunk(1000)
+                ->each(fn ($items) => State::query()->insertOrIgnore($items->toArray()));
+
+            event(new DownloadedStates());
         }
 
         $cities = file_get_contents($dataPath . '/cities.json');
         $cities = json_decode($cities, true);
+
+        $citiesForInserting = [];
+
         foreach ($cities as $item) {
-            $state = State::where('name', $item['name'])->first();
-            if (! $state) {
+            $stateId = State::query()->where('name', $item['name'])->value('id');
+
+            if (! $stateId) {
                 continue;
             }
 
             foreach ($item['cities'] as $cityName) {
-                $city = [
+                $citiesForInserting[] = [
                     'name' => $cityName,
-                    'state_id' => $state->id,
+                    'slug' => Str::slug($cityName),
+                    'state_id' => $stateId,
                     'country_id' => $country->id,
+                    'created_at' => $now,
+                    'updated_at' => $now,
                 ];
-
-                $city = City::create($city);
-
-                event(new CreatedContentEvent(CITY_MODULE_SCREEN_NAME, request(), $city));
             }
+        }
+
+        if (! empty($citiesForInserting)) {
+            collect($citiesForInserting)
+                ->chunk(1000)
+                ->each(fn ($items) => City::query()->insertOrIgnore($items->toArray()));
+
+            event(new DownloadedCities());
         }
 
         File::deleteDirectory(storage_path('app/locations-master'));

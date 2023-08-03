@@ -1,8 +1,8 @@
 <template>
-    <small class="mt-2 card-text">
+    <div class="mt-2 card-text small">
         <i class="fa-solid fa-check fw-bold px-2 text-success"></i>
         {{ __('base.compatible_version') }}
-    </small>
+    </div>
 </template>
 
 <script>

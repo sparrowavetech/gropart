@@ -4,12 +4,12 @@ namespace Botble\Blog\Models;
 
 use Botble\Base\Casts\SafeContent;
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Facades\Html;
 use Botble\Base\Models\BaseModel;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Botble\Base\Facades\Html;
 use Illuminate\Support\Collection;
 use Illuminate\Support\HtmlString;
 
@@ -96,14 +96,10 @@ class Category extends BaseModel
             ->with(['slugable', 'activeChildren']);
     }
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
-
         self::deleting(function (Category $category) {
-            foreach ($category->children()->get() as $child) {
-                $child->delete();
-            }
+            $category->children()->each(fn (Category $child) => $child->delete());
 
             $category->posts()->detach();
         });

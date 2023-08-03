@@ -72,10 +72,8 @@ class AdminNotification extends BaseModel
         return ! $this->permission || $user->isSuperUser() || $user->hasPermission($this->permission);
     }
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
-
         static::creating(function (AdminNotification $notification) {
             if ($notification->action_url) {
                 $notification->action_url = str_replace(url(''), '', $notification->action_url);

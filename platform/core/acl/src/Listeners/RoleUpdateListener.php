@@ -2,8 +2,8 @@
 
 namespace Botble\ACL\Listeners;
 
-use Illuminate\Support\Facades\Auth;
 use Botble\ACL\Events\RoleUpdateEvent;
+use Illuminate\Support\Facades\Auth;
 
 class RoleUpdateListener
 {

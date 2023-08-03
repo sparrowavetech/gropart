@@ -2,11 +2,11 @@
 
 namespace Botble\Media\Commands;
 
+use Botble\Media\Facades\RvMedia;
 use Botble\Media\Repositories\Interfaces\MediaFileInterface;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
-use Botble\Media\Facades\RvMedia;
 use Symfony\Component\Console\Attribute\AsCommand;
 
 #[AsCommand('cms:media:thumbnail:generate', 'Generate thumbnails for images')]

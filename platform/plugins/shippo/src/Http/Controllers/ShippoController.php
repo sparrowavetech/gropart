@@ -298,6 +298,12 @@ class ShippoController extends BaseController
 
     public function viewLog(string $logFile)
     {
+        $logPath = storage_path('logs/' . $logFile);
+
+        if (! File::exists($logPath)) {
+            abort(404);
+        }
+
         return nl2br(File::get(storage_path('logs/' . $logFile)));
     }
 }

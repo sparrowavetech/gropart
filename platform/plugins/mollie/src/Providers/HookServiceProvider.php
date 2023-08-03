@@ -2,15 +2,14 @@
 
 namespace Botble\Mollie\Providers;
 
+use Botble\Base\Facades\Html;
 use Botble\Mollie\Services\Gateways\MolliePaymentService;
 use Botble\Payment\Enums\PaymentMethodEnum;
+use Botble\Payment\Facades\PaymentMethods;
 use Botble\Payment\Supports\PaymentHelper;
 use Exception;
-use Botble\Base\Facades\Html;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
-use Botble\Payment\Facades\PaymentMethods;
-use Mollie\Api\MollieApiClient;
 use Mollie\Laravel\Facades\Mollie;
 
 class HookServiceProvider extends ServiceProvider
@@ -108,10 +107,9 @@ class HookServiceProvider extends ServiceProvider
         });
 
         try {
-            /** @var MollieApiClient $api */
             $api = Mollie::api();
 
-            $response = $api->payments->create([
+            $response = $api->payments()->create([
                 'amount' => [
                     'currency' => $paymentData['currency'],
                     'value' => number_format((float)$paymentData['amount'], 2, '.', ''),
@@ -119,7 +117,11 @@ class HookServiceProvider extends ServiceProvider
                 'description' => 'Order(s) ' . $orderCodes->implode(', '),
                 'redirectUrl' => PaymentHelper::getRedirectURL(),
                 'webhookUrl' => route('mollie.payment.callback'),
-                'metadata' => ['order_id' => $orderIds],
+                'metadata' => [
+                    'order_id' => $orderIds,
+                    'customer_id' => $paymentData['customer_id'],
+                    'customer_type' => $paymentData['customer_type'],
+                ],
             ]);
 
             header('Location: ' . $response->getCheckoutUrl());

@@ -3,6 +3,7 @@
 return [
     'name' => 'Discounts',
     'create' => 'Create discount',
+    'edit' => 'Edit discount',
     'invalid_coupon' => 'This coupon is invalid or expired!',
     'cannot_use_same_time_with_other_discount_program' => 'Cannot use this coupon in the same time with other discount program!',
     'not_used' => 'This coupon is not used yet!',
@@ -28,6 +29,18 @@ return [
             'percentage' => 'Discount %',
             'shipping' => 'Free shipping',
             'same-price' => 'Same price',
+        ],
+        'types' => [
+            'coupon' => 'Coupon',
+            'promotion' => 'Promotion',
+        ],
+        'targets' => [
+            'all-orders' => 'All orders',
+            'customer' => 'Customer',
+            'amount-minimum-order' => 'Minimum order amount',
+            'product-variant' => 'Product variant',
+            'group-products' => 'Product collections',
+            'specific-product' => 'Specific product',
         ],
     ],
     'discount' => 'Discount',

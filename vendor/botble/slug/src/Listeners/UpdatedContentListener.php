@@ -4,11 +4,11 @@ namespace Botble\Slug\Listeners;
 
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Slug\Events\UpdatedSlugEvent;
+use Botble\Slug\Facades\SlugHelper;
 use Botble\Slug\Repositories\Interfaces\SlugInterface;
 use Botble\Slug\Services\SlugService;
 use Exception;
 use Illuminate\Support\Str;
-use Botble\Slug\Facades\SlugHelper;
 
 class UpdatedContentListener
 {

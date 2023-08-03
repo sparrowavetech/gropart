@@ -26,12 +26,10 @@ class ClearExpiredCacheCommand extends Command
     {
         parent::__construct();
 
-        $cacheDisk = [
+        config(['filesystems.disks.fcache' => [
             'driver' => 'local',
             'root' => config('cache.stores.file.path'),
-        ];
-
-        config(['filesystems.disks.fcache' => $cacheDisk]);
+        ]]);
 
         $this->disk = Storage::disk('fcache');
     }
@@ -52,7 +50,7 @@ class ClearExpiredCacheCommand extends Command
 
         // Loop the files and get rid of any that have expired
         foreach ($files as $cacheFile) {
-            // Ignore files that named with dot(.) at the begining e.g. .gitignore
+            // Ignore files that named with dot(.) at the beginning e.g: .gitignore
             if (str_starts_with($cacheFile, '.')) {
                 continue;
             }

@@ -13,6 +13,7 @@ use PayPalCheckoutSdk\Orders\OrdersCaptureRequest;
 use PayPalCheckoutSdk\Orders\OrdersCreateRequest;
 use PayPalCheckoutSdk\Orders\OrdersGetRequest;
 use PayPalCheckoutSdk\Payments\CapturesRefundRequest;
+use PayPalHttp\HttpResponse;
 
 abstract class PayPalPaymentAbstract
 {
@@ -155,16 +156,6 @@ abstract class PayPalPaymentAbstract
         return $this;
     }
 
-    public function getItemList(): array
-    {
-        return $this->itemList;
-    }
-
-    public function getTotalAmount(): float
-    {
-        return $this->totalAmount;
-    }
-
     public function setReturnUrl(string $url): self
     {
         $this->returnUrl = $url;
@@ -172,21 +163,11 @@ abstract class PayPalPaymentAbstract
         return $this;
     }
 
-    public function getReturnUrl(): string
-    {
-        return $this->returnUrl;
-    }
-
     public function setCancelUrl(string $url): self
     {
         $this->cancelUrl = $url;
 
         return $this;
-    }
-
-    public function getCancelUrl(): string
-    {
-        return $this->cancelUrl;
     }
 
     /**
@@ -229,8 +210,10 @@ abstract class PayPalPaymentAbstract
             // Call API with your client and get a response for your call
             $response = $this->client->execute($orderRequest);
             if ($response && $response->statusCode == 201) {
+                // @phpstan-ignore-next-line
                 $paymentId = $response->result->id;
 
+                // @phpstan-ignore-next-line
                 foreach ($response->result->links as $link) {
                     if ($link->rel == 'approve') {
                         $checkoutUrl = $link->href;
@@ -254,12 +237,6 @@ abstract class PayPalPaymentAbstract
         return null;
     }
 
-    /**
-     * Get payment status
-     *
-     * @param Request $request
-     * @return mixed Object payment details or false
-     */
     public function getPaymentStatus(Request $request)
     {
         if (empty($request->input('PayerID')) || empty($request->input('token'))) {
@@ -273,7 +250,10 @@ abstract class PayPalPaymentAbstract
             $orderRequest->prefer('return=representation');
 
             $response = $this->client->execute($orderRequest);
+
+            // @phpstan-ignore-next-line
             if ($response && $response->statusCode == 201 && $response->result->status == 'COMPLETED') {
+                // @phpstan-ignore-next-line
                 return $response->result->status;
             }
         } catch (Exception $exception) {
@@ -283,12 +263,7 @@ abstract class PayPalPaymentAbstract
         return false;
     }
 
-    /**
-     * Get payment details
-     *
-     * @return mixed Object payment details
-     */
-    public function getPaymentDetails(string $paymentId)
+    public function getPaymentDetails(string $paymentId): bool|HttpResponse
     {
         try {
             $response = $this->client->execute(new OrdersGetRequest($paymentId));
@@ -325,6 +300,7 @@ abstract class PayPalPaymentAbstract
             $detail = $this->getPaymentDetails($paymentId);
             $captureId = null;
             if ($detail) {
+                // @phpstan-ignore-next-line
                 $purchase = Arr::get($detail->result->purchase_units, 0);
                 $capture = Arr::get($purchase->payments->captures, 0);
                 $captureId = $capture->id;
@@ -335,9 +311,10 @@ abstract class PayPalPaymentAbstract
                 $refundRequest->prefer('return=representation');
                 $response = $this->client->execute($refundRequest);
 
+                // @phpstan-ignore-next-line
                 if ($response && $response->statusCode == 201 && $response->result->status == 'COMPLETED') {
                     return [
-                        'error' => false,
+                        'error' => false, // @phpstan-ignore-next-line
                         'status' => $response->result->status,
                         'data' => (array) $response->result,
                     ];
@@ -364,11 +341,6 @@ abstract class PayPalPaymentAbstract
         }
     }
 
-    /**
-     * Execute main service
-     *
-     * @return mixed
-     */
     public function execute(array $data)
     {
         try {
@@ -435,17 +407,7 @@ abstract class PayPalPaymentAbstract
         ];
     }
 
-    /**
-     * Make a payment
-     *
-     * @return mixed
-     */
     abstract public function makePayment(array $data);
 
-    /**
-     * Use this function to perform more logic after user has made a payment
-     *
-     * @return mixed
-     */
     abstract public function afterMakePayment(array $data);
 }

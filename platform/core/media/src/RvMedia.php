@@ -18,12 +18,12 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Intervention\Image\Facades\Image;
 use League\Flysystem\UnableToWriteFile;
 use Mimey\MimeTypes;
 use Throwable;
-use Illuminate\Support\Facades\Validator;
 
 class RvMedia
 {
@@ -118,6 +118,10 @@ class RvMedia
             $width = setting($settingName . '_width', $size[0]);
 
             $height = setting($settingName . '_height', $size[1]);
+
+            if (! $width && ! $height) {
+                continue;
+            }
 
             if (! $width) {
                 $width = 'auto';
@@ -358,8 +362,8 @@ class RvMedia
     ): array {
         $request = request();
 
-        if ($request->input('path')) {
-            $folderId = $this->handleTargetFolder($folderId, $request->input('path', ''));
+        if ($uploadPath = $request->input('path')) {
+            $folderId = $this->handleTargetFolder($folderId, $uploadPath);
         }
 
         if (! $fileUpload) {
@@ -877,6 +881,33 @@ class RvMedia
                 'url' => $config['url'],
                 'endpoint' => $config['endpoint'],
                 'use_path_style_endpoint' => $config['use_path_style_endpoint'],
+            ],
+        ]);
+    }
+
+    public function setR2Disk(array $config): void
+    {
+        if (
+            ! $config['key'] ||
+            ! $config['secret'] ||
+            ! $config['bucket'] ||
+            ! $config['endpoint']
+        ) {
+            return;
+        }
+
+        config()->set([
+            'filesystems.disks.r2' => [
+                'driver' => 's3',
+                'visibility' => 'public',
+                'throw' => true,
+                'key' => $config['key'],
+                'secret' => $config['secret'],
+                'region' => 'auto',
+                'bucket' => $config['bucket'],
+                'url' => $config['url'],
+                'endpoint' => $config['endpoint'],
+                'use_path_style_endpoint' => true,
             ],
         ]);
     }

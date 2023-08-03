@@ -1,7 +1,7 @@
 <template>
-    <small class="ms-auto">
+    <small>
         <i v-for="(s, index) in star" :key="index" class="fa-sm" :class="s"></i>
-        <span class="fw-bold">
+        <span class="fw-bold ms-1">
             <span class="badge bg-info text-wrap fw-bold">{{ count }}</span>
         </span>
     </small>

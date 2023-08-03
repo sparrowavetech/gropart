@@ -6,8 +6,8 @@ use Botble\ACL\Events\RoleAssignmentEvent;
 use Botble\ACL\Models\Role;
 use Botble\ACL\Models\User;
 use Botble\Support\Services\ProduceServiceInterface;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class CreateUserService implements ProduceServiceInterface
 {

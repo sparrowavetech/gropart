@@ -2,18 +2,18 @@
 
 namespace Botble\Page\Services;
 
-use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Supports\RepositoryHelper;
+use Botble\Media\Facades\RvMedia;
 use Botble\Page\Models\Page;
-use Botble\Page\Repositories\Interfaces\PageInterface;
+use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\SeoHelper\SeoOpenGraph;
 use Botble\Slug\Models\Slug;
+use Botble\Theme\Facades\Theme;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
-use Botble\Media\Facades\RvMedia;
-use Botble\SeoHelper\Facades\SeoHelper;
-use Botble\Theme\Facades\Theme;
 
 class PageService
 {
@@ -36,7 +36,11 @@ class PageService
             return $slug;
         }
 
-        $page = app(PageInterface::class)->getFirstBy($condition, ['*'], ['slugable']);
+        $page = Page::query()
+            ->where($condition)
+            ->with('slugable');
+
+        $page = RepositoryHelper::applyBeforeExecuteQuery($page, new Page(), true)->first();
 
         if (empty($page)) {
             if ($slug->reference_id == BaseHelper::getHomepageId()) {
@@ -52,7 +56,7 @@ class PageService
             $meta->setImage(RvMedia::getImageUrl($page->image));
         }
 
-        if (! BaseHelper::isHomepage($page->id)) {
+        if (! BaseHelper::isHomepage($page->getKey())) {
             SeoHelper::setTitle($page->name)
                 ->setDescription($page->description);
 
@@ -83,11 +87,11 @@ class PageService
 
         if (function_exists('admin_bar')) {
             admin_bar()
-                ->registerLink(trans('packages/page::pages.edit_this_page'), route('pages.edit', $page->id), null, 'pages.edit');
+                ->registerLink(trans('packages/page::pages.edit_this_page'), route('pages.edit', $page->getKey()), null, 'pages.edit');
         }
 
         if (function_exists('shortcode')) {
-            shortcode()->getCompiler()->setEditLink(route('pages.edit', $page->id), 'pages.edit');
+            shortcode()->getCompiler()->setEditLink(route('pages.edit', $page->getKey()), 'pages.edit');
         }
 
         do_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, PAGE_MODULE_SCREEN_NAME, $page);

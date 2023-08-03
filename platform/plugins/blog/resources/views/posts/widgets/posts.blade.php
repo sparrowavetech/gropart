@@ -1,4 +1,4 @@
-@if ($posts->count() > 0)
+@if ($posts->isNotEmpty())
     <div class="scroller">
         <table class="table table-striped">
             <thead>

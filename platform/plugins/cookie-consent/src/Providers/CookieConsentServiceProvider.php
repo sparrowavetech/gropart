@@ -2,12 +2,12 @@
 
 namespace Botble\CookieConsent\Providers;
 
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
+use Botble\Theme\Facades\Theme;
 use Illuminate\Contracts\View\View;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Support\Facades\Cookie;
-use Botble\Base\Supports\ServiceProvider;
-use Botble\Theme\Facades\Theme;
 
 class CookieConsentServiceProvider extends ServiceProvider
 {

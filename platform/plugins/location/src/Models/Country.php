@@ -32,12 +32,16 @@ class Country extends BaseModel
         return $this->hasMany(State::class);
     }
 
-    protected static function boot(): void
+    public function cities(): HasMany
     {
-        parent::boot();
+        return $this->hasMany(City::class);
+    }
+
+    protected static function booted(): void
+    {
         static::deleting(function (Country $country) {
-            State::where('country_id', $country->id)->delete();
-            City::where('country_id', $country->id)->delete();
+            $country->states()->delete();
+            $country->cities()->delete();
         });
     }
 }

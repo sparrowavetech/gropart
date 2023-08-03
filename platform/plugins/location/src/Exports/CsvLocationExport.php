@@ -2,10 +2,10 @@
 
 namespace Botble\Location\Exports;
 
-use Botble\Location\Repositories\Interfaces\CountryInterface;
+use Botble\Language\Facades\Language;
+use Botble\Location\Models\Country;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use Botble\Language\Facades\Language;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -44,7 +44,7 @@ class CsvLocationExport implements FromCollection, WithHeadings
             ];
         }
 
-        $countries = app(CountryInterface::class)->all($with);
+        $countries = Country::query()->with($with)->get();
 
         $locations = [];
 

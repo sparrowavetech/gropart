@@ -57,7 +57,7 @@ export class DownloadService {
         _self.MediaService.getMedia(true)
         if (!hasError) {
             DownloadService.closeModal()
-            MessageService.showMessage('success', RV_MEDIA_CONFIG.translations.message.success_header)
+            MessageService.showMessage('success', Helpers.trans('message.success_header'))
         }
     }
 

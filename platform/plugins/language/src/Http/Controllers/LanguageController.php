@@ -14,6 +14,7 @@ use Botble\Base\Supports\Language;
 use Botble\Language\Facades\Language as LanguageFacade;
 use Botble\Language\Http\Requests\LanguageRequest;
 use Botble\Language\LanguageManager;
+use Botble\Language\Models\Language as LanguageModel;
 use Botble\Language\Models\LanguageMeta;
 use Botble\Language\Repositories\Interfaces\LanguageInterface;
 use Botble\Language\Repositories\Interfaces\LanguageMetaInterface;
@@ -63,9 +64,11 @@ class LanguageController extends BaseController
                     ->setMessage(trans('plugins/language::language.added_already'));
             }
 
-            if ($this->languageRepository->count() == 0) {
+            if (! LanguageModel::query()->exists()) {
                 $request->merge(['lang_is_default' => 1]);
             }
+
+            File::ensureDirectoryExists(lang_path('vendor'));
 
             if (! File::isWritable(lang_path()) || ! File::isWritable(lang_path('vendor'))) {
                 return $response
@@ -198,7 +201,8 @@ class LanguageController extends BaseController
         $others = $this->languageMetaRepository->getModel();
 
         if ($currentLanguage) {
-            $others = $others->where('lang_meta_code', '!=', $request->input('lang_meta_current_language'))
+            $others = $others
+                ->where('lang_meta_code', '!=', $request->input('lang_meta_current_language'))
                 ->where('lang_meta_origin', $currentLanguage->origin);
         }
 
@@ -411,7 +415,7 @@ class LanguageController extends BaseController
 
         $queryString = null;
         if ($code !== $language->getDefaultLocaleCode()) {
-            $queryString = '?' . http_build_query(['ref_lang' => $code]);
+            $queryString = '?' . http_build_query([LanguageFacade::refLangKey() => $code]);
         }
 
         return redirect()->to($previousUrl . $queryString);
@@ -434,9 +438,9 @@ class LanguageController extends BaseController
 
     public function clearRoutesCache(): bool
     {
-        foreach (LanguageFacade::getSupportedLanguagesKeys() as $locale) {
-            $path = app()->getCachedRoutesPath();
+        $path = app()->getCachedRoutesPath();
 
+        foreach (LanguageFacade::getSupportedLanguagesKeys() as $locale) {
             if (! $locale) {
                 $locale = LanguageFacade::getDefaultLocale();
             }

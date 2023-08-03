@@ -3,9 +3,9 @@
 namespace Botble\Slug\Listeners;
 
 use Botble\Base\Events\DeletedContentEvent;
+use Botble\Slug\Facades\SlugHelper;
 use Botble\Slug\Repositories\Interfaces\SlugInterface;
 use Exception;
-use Botble\Slug\Facades\SlugHelper;
 
 class DeletedContentListener
 {

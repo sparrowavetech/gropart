@@ -4,6 +4,7 @@ namespace Botble\Shippo\Commands;
 
 use Botble\Ecommerce\Models\Address;
 use Botble\Ecommerce\Models\StoreLocator;
+use Botble\Location\Facades\Location;
 use Botble\Location\Models\City;
 use Botble\Location\Models\Country;
 use Botble\Location\Models\State;
@@ -11,7 +12,6 @@ use Botble\Setting\Facades\Setting;
 use Illuminate\Console\Command;
 use Illuminate\Console\ConfirmableTrait;
 use Illuminate\Support\Facades\DB;
-use Botble\Location\Facades\Location;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
 use Throwable;

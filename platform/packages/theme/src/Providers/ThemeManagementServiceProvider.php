@@ -4,10 +4,10 @@ namespace Botble\Theme\Providers;
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Supports\Helper;
-use Composer\Autoload\ClassLoader;
-use Illuminate\Support\Arr;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Theme\Facades\Theme;
+use Composer\Autoload\ClassLoader;
+use Illuminate\Support\Arr;
 
 class ThemeManagementServiceProvider extends ServiceProvider
 {

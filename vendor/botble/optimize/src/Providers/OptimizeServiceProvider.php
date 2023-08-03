@@ -2,6 +2,7 @@
 
 namespace Botble\Optimize\Providers;
 
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Optimize\Facades\OptimizerHelper;
 use Botble\Optimize\Http\Middleware\CollapseWhitespace;
@@ -14,7 +15,6 @@ use Botble\Optimize\Http\Middleware\RemoveQuotes;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\Router;
-use Botble\Base\Supports\ServiceProvider;
 
 class OptimizeServiceProvider extends ServiceProvider
 {

@@ -6,7 +6,7 @@ use Botble\Newsletter\Contracts\Factory;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @method static mixed getDefaultDriver()
+ * @method static string getDefaultDriver()
  * @method static mixed driver(string|null $driver = null)
  * @method static \Botble\Newsletter\NewsletterManager extend(string $driver, \Closure $callback)
  * @method static array getDrivers()

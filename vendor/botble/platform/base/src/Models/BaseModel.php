@@ -2,12 +2,12 @@
 
 namespace Botble\Base\Models;
 
+use Botble\Base\Facades\MacroableModels;
 use Botble\Base\Facades\MetaBox as MetaBoxSupport;
 use Botble\Base\Models\Concerns\HasUuidsOrIntegerIds;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
-use Botble\Base\Facades\MacroableModels;
 
 class BaseModel extends Model
 {
@@ -15,11 +15,8 @@ class BaseModel extends Model
 
     public function __get($key)
     {
-        if (class_exists('MacroableModels')) {
-            $method = 'get' . Str::studly($key) . 'Attribute';
-            if (MacroableModels::modelHasMacro(get_class($this), $method)) {
-                return call_user_func([$this, $method]);
-            }
+        if (MacroableModels::modelHasMacro($this::class, $method = 'get' . Str::studly($key) . 'Attribute')) {
+            return call_user_func([$this, $method]);
         }
 
         return parent::__get($key);

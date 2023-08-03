@@ -3,8 +3,8 @@
 namespace Botble\Language\Listeners;
 
 use Botble\Base\Events\CreatedContentEvent;
-use Exception;
 use Botble\Language\Facades\Language;
+use Exception;
 
 class CreatedContentListener
 {

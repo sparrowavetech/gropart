@@ -2,10 +2,10 @@
 
 namespace Botble\Media\Services;
 
-use Exception;
-use Intervention\Image\ImageManager;
-use Illuminate\Support\Facades\Log;
 use Botble\Media\Facades\RvMedia;
+use Exception;
+use Illuminate\Support\Facades\Log;
+use Intervention\Image\ImageManager;
 
 class ThumbnailService
 {
@@ -126,12 +126,12 @@ class ThumbnailService
             $type = 'height';
         }
 
-        if ($this->thumbWidth === 0 || $this->thumbHeight === 0) {
-            return $destinationPath;
-        }
-
         switch ($type) {
             case 'width':
+                if (! $this->thumbWidth) {
+                    return $destinationPath;
+                }
+
                 $thumbImage->resize($this->thumbWidth, null, function ($constraint) {
                     $constraint->aspectRatio();
                     $constraint->upsize();
@@ -140,6 +140,10 @@ class ThumbnailService
                 break;
 
             case 'height':
+                if (! $this->thumbHeight) {
+                    return $destinationPath;
+                }
+
                 $thumbImage->resize(null, $this->thumbHeight, function ($constraint) {
                     $constraint->aspectRatio();
                     $constraint->upsize();
@@ -148,17 +152,29 @@ class ThumbnailService
                 break;
 
             case 'resize':
+                if (! $this->thumbWidth || ! $this->thumbHeight) {
+                    return $destinationPath;
+                }
+
                 $thumbImage->resize($this->thumbWidth, $this->thumbHeight);
 
                 break;
 
             case 'crop':
+                if (! $this->thumbWidth || ! $this->thumbHeight) {
+                    return $destinationPath;
+                }
+
                 $thumbImage->crop($this->thumbWidth, $this->thumbHeight, $this->xCoordinate, $this->yCoordinate);
 
                 break;
 
             case 'fit':
             default:
+                if (! $this->thumbWidth || ! $this->thumbHeight) {
+                    return $destinationPath;
+                }
+
                 if (extension_loaded('exif')) {
                     $thumbImage->orientate();
                 }

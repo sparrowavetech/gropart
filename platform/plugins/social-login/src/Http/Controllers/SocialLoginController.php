@@ -6,7 +6,9 @@ use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Media\Facades\RvMedia;
 use Botble\Setting\Supports\SettingStore;
+use Botble\SocialLogin\Facades\SocialService;
 use Botble\SocialLogin\Http\Requests\SocialLoginRequest;
 use Carbon\Carbon;
 use Exception;
@@ -16,9 +18,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Laravel\Socialite\AbstractUser;
-use Botble\Media\Facades\RvMedia;
 use Laravel\Socialite\Facades\Socialite;
-use Botble\SocialLogin\Facades\SocialService;
 
 class SocialLoginController extends BaseController
 {

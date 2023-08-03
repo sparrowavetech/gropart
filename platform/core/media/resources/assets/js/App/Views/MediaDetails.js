@@ -26,11 +26,11 @@ export class MediaDetails {
                 : '<i class="' + data.icon + '"></i>'
         let description = ''
         let useClipboard = false
-        _.forEach(data, (val, index) => {
-            if (_.includes(_self.onlyFields, index) && val) {
-                if (!_.includes(['size', 'mime_type'], index)) {
+        Helpers.forEach(data, (val, index) => {
+            if (Helpers.inArray(_self.onlyFields, index) && val) {
+                if (!Helpers.inArray(['size', 'mime_type'], index)) {
                     description += _self.descriptionItemTemplate
-                        .replace(/__title__/gi, RV_MEDIA_CONFIG.translations[index])
+                        .replace(/__title__/gi, Helpers.trans(index))
                         .replace(
                             /__url__/gi,
                             val
@@ -55,11 +55,11 @@ export class MediaDetails {
             new Clipboard('.js-btn-copy-to-clipboard')
             $('.js-btn-copy-to-clipboard')
                 .tooltip()
-                .on('mouseenter', () => {
-                    $(this).tooltip('hide')
+                .on('mouseenter', (event) => {
+                    $(event.currentTarget).tooltip('hide')
                 })
-                .on('mouseleave', () => {
-                    $(this).tooltip('hide')
+                .on('mouseleave', (event) => {
+                    $(event.currentTarget).tooltip('hide')
                 })
         }
     }

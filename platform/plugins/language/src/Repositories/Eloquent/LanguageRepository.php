@@ -4,8 +4,8 @@ namespace Botble\Language\Repositories\Eloquent;
 
 use Botble\Base\Models\BaseModel;
 use Botble\Language\Models\Language;
-use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 use Botble\Language\Repositories\Interfaces\LanguageInterface;
+use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 

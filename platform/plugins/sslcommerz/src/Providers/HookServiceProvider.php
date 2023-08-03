@@ -2,14 +2,14 @@
 
 namespace Botble\SslCommerz\Providers;
 
+use Botble\Base\Facades\Html;
 use Botble\Payment\Enums\PaymentMethodEnum;
+use Botble\Payment\Facades\PaymentMethods;
 use Botble\SslCommerz\Library\SslCommerz\SslCommerzNotification;
 use Botble\SslCommerz\Services\Gateways\SslCommerzPaymentService;
-use Botble\Base\Facades\Html;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\ServiceProvider;
-use Botble\Payment\Facades\PaymentMethods;
 
 class HookServiceProvider extends ServiceProvider
 {

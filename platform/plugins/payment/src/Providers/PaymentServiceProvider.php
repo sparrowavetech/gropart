@@ -6,11 +6,11 @@ use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Payment\Facades\PaymentMethods;
 use Botble\Payment\Models\Payment;
+use Botble\Payment\Repositories\Eloquent\PaymentRepository;
+use Botble\Payment\Repositories\Interfaces\PaymentInterface;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\ServiceProvider;
-use Botble\Payment\Repositories\Eloquent\PaymentRepository;
-use Botble\Payment\Repositories\Interfaces\PaymentInterface;
 
 class PaymentServiceProvider extends ServiceProvider
 {

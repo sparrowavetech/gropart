@@ -67,3 +67,7 @@ if (! defined('PAYMENT_FILTER_FOOTER_ASSETS')) {
 if (! defined('PAYMENT_FILTER_PAYMENT_DATA')) {
     define('PAYMENT_FILTER_PAYMENT_DATA', 'payment-data');
 }
+
+if (! defined('PAYMENT_FILTER_AFTER_PAYMENT_METHOD')) {
+    define('PAYMENT_FILTER_AFTER_PAYMENT_METHOD', 'payment-after-payment-method');
+}

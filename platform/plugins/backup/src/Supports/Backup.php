@@ -2,8 +2,8 @@
 
 namespace Botble\Backup\Supports;
 
-use Botble\Base\Facades\BaseHelper;
 use Botble\Backup\Supports\MySql\MySqlDump;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Supports\Zipper;
 use Carbon\Carbon;
 use Exception;
@@ -92,7 +92,7 @@ class Backup
             $mysqlPath = $mysqlPath . '/';
         }
 
-        $config = config('database.connections.mysql', []);
+        $config = DB::connection('mysql')->getConfig();
 
         if (! $config) {
             return false;
@@ -204,10 +204,12 @@ class Backup
             return false;
         }
 
+        $databaseName = DB::connection('mysql')->getConfig()['database'];
+
         // Force the new login to be used
         DB::purge();
-        DB::unprepared('USE `' . config('database.connections.mysql.database') . '`');
-        DB::connection()->setDatabaseName(config('database.connections.mysql.database'));
+        DB::unprepared('USE `' . $databaseName . '`');
+        DB::connection()->setDatabaseName($databaseName);
         DB::getSchemaBuilder()->dropAllTables();
         DB::unprepared(file_get_contents($file));
 

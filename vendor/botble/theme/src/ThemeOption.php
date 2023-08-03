@@ -3,11 +3,11 @@
 namespace Botble\Theme;
 
 use Botble\Base\Facades\BaseHelper;
-use Exception;
 use Botble\Base\Facades\Form;
-use Illuminate\Support\Arr;
 use Botble\Language\Facades\Language;
 use Botble\Setting\Facades\Setting;
+use Exception;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 
 class ThemeOption

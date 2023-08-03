@@ -5,17 +5,22 @@ namespace Botble\Location\Models;
 use Botble\Base\Casts\SafeContent;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
+use Botble\Base\Models\Concerns\HasSlug;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class State extends BaseModel
 {
+    use HasSlug;
+
     protected $table = 'states';
 
     protected $fillable = [
         'name',
         'abbreviation',
         'country_id',
+        'slug',
+        'image',
         'order',
         'is_default',
         'status',
@@ -37,11 +42,14 @@ class State extends BaseModel
         return $this->hasMany(City::class);
     }
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
         static::deleting(function (State $state) {
-            City::where('state_id', $state->id)->delete();
+            $state->cities()->delete();
+        });
+
+        self::saving(function (self $model) {
+            $model->slug = self::createSlug($model->slug ?: $model->name, $model->getKey());
         });
     }
 }

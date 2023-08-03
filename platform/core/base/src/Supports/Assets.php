@@ -71,14 +71,14 @@ class Assets extends BaseAssets
 
     public function usingVueJS(): self
     {
-        $this->addScripts(['vue-app']);
+        $this->addScripts(['vue', 'vue-app']);
 
         return $this;
     }
 
     public function disableVueJS(): self
     {
-        $this->removeScripts(['vue-app']);
+        $this->removeScripts(['vue', 'vue-app']);
 
         return $this;
     }

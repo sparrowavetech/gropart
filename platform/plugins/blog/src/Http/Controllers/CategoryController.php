@@ -2,11 +2,11 @@
 
 namespace Botble\Blog\Http\Controllers;
 
-use Botble\Base\Facades\Assets;
 use Botble\ACL\Models\User;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Forms\FormBuilder;

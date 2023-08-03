@@ -2,21 +2,21 @@
 
 namespace Botble\Faq\Http\Controllers;
 
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Traits\HasDeleteManyItemsTrait;
-use Botble\Faq\Http\Requests\FaqRequest;
-use Botble\Faq\Models\Faq;
-use Botble\Faq\Repositories\Interfaces\FaqInterface;
-use Botble\Base\Http\Controllers\BaseController;
-use Exception;
-use Illuminate\Http\Request;
-use Botble\Faq\Tables\FaqTable;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
-use Botble\Base\Http\Responses\BaseHttpResponse;
-use Botble\Faq\Forms\FaqForm;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormBuilder;
+use Botble\Base\Http\Controllers\BaseController;
+use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Base\Traits\HasDeleteManyItemsTrait;
+use Botble\Faq\Forms\FaqForm;
+use Botble\Faq\Http\Requests\FaqRequest;
+use Botble\Faq\Models\Faq;
+use Botble\Faq\Repositories\Interfaces\FaqInterface;
+use Botble\Faq\Tables\FaqTable;
+use Exception;
+use Illuminate\Http\Request;
 
 class FaqController extends BaseController
 {
@@ -89,6 +89,6 @@ class FaqController extends BaseController
 
     public function deletes(Request $request, BaseHttpResponse $response)
     {
-        return $this->executeDeleteItems($request, $response, $this->faqRepository, FAQ_MODULE_SCREEN_NAME);
+        return $this->executeDeleteItems($request, $response, new Faq(), FAQ_MODULE_SCREEN_NAME);
     }
 }

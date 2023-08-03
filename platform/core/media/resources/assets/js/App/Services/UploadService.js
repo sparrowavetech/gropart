@@ -23,7 +23,7 @@ export class UploadService {
     }
 
     init() {
-        if (_.includes(RV_MEDIA_CONFIG.permissions, 'files.create') && $('.rv-media-items').length > 0) {
+        if (Helpers.hasPermission('files.create') && $('.rv-media-items').length > 0) {
             this.setupDropZone()
         }
         this.handleEvents()

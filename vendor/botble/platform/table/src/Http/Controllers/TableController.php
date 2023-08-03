@@ -3,12 +3,12 @@
 namespace Botble\Table\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Botble\Base\Facades\Form;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Table\Http\Requests\BulkChangeRequest;
 use Botble\Table\Http\Requests\FilterRequest;
 use Botble\Table\TableBuilder;
 use Exception;
-use Botble\Base\Facades\Form;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;

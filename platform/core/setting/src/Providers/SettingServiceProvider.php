@@ -4,6 +4,7 @@ namespace Botble\Setting\Providers;
 
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Facades\EmailHandler;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Setting\Commands\CronJobTestCommand;
 use Botble\Setting\Facades\Setting;
@@ -15,7 +16,6 @@ use Botble\Setting\Supports\SettingStore;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
-use Botble\Base\Supports\ServiceProvider;
 
 class SettingServiceProvider extends ServiceProvider
 {

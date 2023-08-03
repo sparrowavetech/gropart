@@ -39,8 +39,8 @@ export class ContextMenuService {
             },
         }
 
-        _.each(Helpers.getConfigs().actions_list, (actionGroup, key) => {
-            _.each(actionGroup, (value) => {
+        Helpers.each(Helpers.getConfigs().actions_list, (actionGroup, key) => {
+            Helpers.each(actionGroup, (value) => {
                 items[value.action] = {
                     name: value.name,
                     icon: (opt, $itemElement, itemKey, item) => {
@@ -48,7 +48,7 @@ export class ContextMenuService {
                             '<i class="' +
                                 value.icon +
                                 '" aria-hidden="true"></i> ' +
-                                (RV_MEDIA_CONFIG.translations.actions_list[key][value.action] || item.name)
+                                (Helpers.trans('actions_list.' + key + '.' + value.action) || item.name)
                         )
 
                         return 'context-menu-icon-updated'
@@ -83,7 +83,7 @@ export class ContextMenuService {
                 break
         }
 
-        _.each(except, (value) => {
+        Helpers.each(except, (value) => {
             items[value] = undefined
         })
 
@@ -94,24 +94,24 @@ export class ContextMenuService {
             items.crop = undefined
             items.copy_link = undefined
 
-            if (!_.includes(RV_MEDIA_CONFIG.permissions, 'folders.create')) {
+            if (!Helpers.hasPermission('folders.create')) {
                 items.make_copy = undefined
             }
 
-            if (!_.includes(RV_MEDIA_CONFIG.permissions, 'folders.edit')) {
+            if (!Helpers.hasPermission('folders.edit')) {
                 items.rename = undefined
             }
 
-            if (!_.includes(RV_MEDIA_CONFIG.permissions, 'folders.trash')) {
+            if (!Helpers.hasPermission('folders.trash')) {
                 items.trash = undefined
                 items.restore = undefined
             }
 
-            if (!_.includes(RV_MEDIA_CONFIG.permissions, 'folders.destroy')) {
+            if (!Helpers.hasPermission('folders.destroy')) {
                 items.delete = undefined
             }
 
-            if (!_.includes(RV_MEDIA_CONFIG.permissions, 'folders.favorite')) {
+            if (!Helpers.hasPermission('folders.favorite')) {
                 items.favorite = undefined
                 items.remove_favorite = undefined
             }
@@ -120,24 +120,24 @@ export class ContextMenuService {
         let selectedFiles = Helpers.getSelectedFiles()
 
         if (selectedFiles.length > 0) {
-            if (!_.includes(RV_MEDIA_CONFIG.permissions, 'files.create')) {
+            if (!Helpers.hasPermission('files.create')) {
                 items.make_copy = undefined
             }
 
-            if (!_.includes(RV_MEDIA_CONFIG.permissions, 'files.edit')) {
+            if (!Helpers.hasPermission('files.edit')) {
                 items.rename = undefined
             }
 
-            if (!_.includes(RV_MEDIA_CONFIG.permissions, 'files.trash')) {
+            if (!Helpers.hasPermission('files.trash')) {
                 items.trash = undefined
                 items.restore = undefined
             }
 
-            if (!_.includes(RV_MEDIA_CONFIG.permissions, 'files.destroy')) {
+            if (!Helpers.hasPermission('files.destroy')) {
                 items.delete = undefined
             }
 
-            if (!_.includes(RV_MEDIA_CONFIG.permissions, 'files.favorite')) {
+            if (!Helpers.hasPermission('files.favorite')) {
                 items.favorite = undefined
                 items.remove_favorite = undefined
             }
@@ -147,7 +147,7 @@ export class ContextMenuService {
             }
         }
 
-        let canPreview = _.filter(selectedFiles, function (value) {
+        let canPreview = Helpers.arrayFilter(selectedFiles, function (value) {
             return value.preview_url
         }).length
 
@@ -155,7 +155,7 @@ export class ContextMenuService {
             items.preview = undefined
         }
 
-        let fileIsImage = _.filter(selectedFiles, function (value) {
+        let fileIsImage = Helpers.arrayFilter(selectedFiles, function (value) {
             return value.type === 'image'
         }).length
 

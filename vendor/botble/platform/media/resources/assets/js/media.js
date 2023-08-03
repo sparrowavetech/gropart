@@ -125,7 +125,7 @@ class MediaManagement {
                 let $current = $(event.currentTarget)
 
                 if (shift_key) {
-                    let firstItem = _.first(Helpers.getSelectedItems())
+                    let firstItem = Helpers.arrayFirst(Helpers.getSelectedItems())
                     if (firstItem) {
                         let firstIndex = firstItem.index_key
                         let currentIndex = $current.index()
@@ -157,7 +157,7 @@ class MediaManagement {
                         ActionsService.handlePreview()
                     } else if (Helpers.getConfigs().request_params.view_in !== 'trash') {
                         let selectedFiles = Helpers.getSelectedFiles()
-                        if (_.size(selectedFiles) > 0) {
+                        if (Helpers.size(selectedFiles) > 0) {
                             EditorService.editorSelectFile(selectedFiles)
                         }
                     }
@@ -174,7 +174,7 @@ class MediaManagement {
                 }
             })
             .on('click contextmenu', '.rv-media-items', (e) => {
-                if (!_.size(e.target.closest('.js-context-menu'))) {
+                if (!Helpers.size(e.target.closest('.js-context-menu'))) {
                     $('.rv-media-items input[type="checkbox"]').prop('checked', false)
                     $('.rv-dropdown-actions').addClass('disabled')
                     _self.MediaService.getFileDetails({
@@ -445,7 +445,7 @@ class MediaManagement {
                         } else {
                             $('#modal_rename_items .form-group').each((index, el) => {
                                 let $current = $(el)
-                                if (_.includes(res.data, $current.data('id'))) {
+                                if (Helpers.inArray(res.data, $current.data('id'))) {
                                     $current.addClass('has-error')
                                 } else {
                                     $current.removeClass('has-error')
@@ -483,7 +483,7 @@ class MediaManagement {
                         } else {
                             $('#modal_alt_text_items .form-group').each((index, el) => {
                                 let $current = $(el)
-                                if (_.includes(res.data, $current.data('id'))) {
+                                if (Helpers.inArray(res.data, $current.data('id'))) {
                                     $current.addClass('has-error')
                                 } else {
                                     $current.removeClass('has-error')
@@ -500,7 +500,7 @@ class MediaManagement {
             let items = []
             let $form = $(event.currentTarget)
 
-            _.each(Helpers.getSelectedItems(), (value) => {
+            Helpers.each(Helpers.getSelectedItems(), (value) => {
                 items.push({
                     id: value.id,
                     is_folder: value.is_folder,
@@ -550,7 +550,7 @@ class MediaManagement {
 
     checkFileTypeSelect(selectedFiles) {
         if (typeof window.rvMedia.$el !== 'undefined') {
-            let firstItem = _.first(selectedFiles)
+            let firstItem = Helpers.arrayFirst(selectedFiles)
             let ele_options = window.rvMedia.$el.data('rv-media')
             if (
                 typeof ele_options !== 'undefined' &&
@@ -579,7 +579,7 @@ class MediaManagement {
         $mainModal.off('click', '.js-insert-to-editor').on('click', '.js-insert-to-editor', (event) => {
             event.preventDefault()
             let selectedFiles = Helpers.getSelectedFiles()
-            if (_.size(selectedFiles) > 0) {
+            if (Helpers.size(selectedFiles) > 0) {
                 window.rvMedia.options.onSelectFiles(selectedFiles, window.rvMedia.$el)
                 if (_self.checkFileTypeSelect(selectedFiles)) {
                     $mainModal.find('.btn-close').trigger('click')
@@ -591,7 +591,7 @@ class MediaManagement {
             event.preventDefault()
             if (Helpers.getConfigs().request_params.view_in !== 'trash') {
                 let selectedFiles = Helpers.getSelectedFiles()
-                if (_.size(selectedFiles) > 0) {
+                if (Helpers.size(selectedFiles) > 0) {
                     window.rvMedia.options.onSelectFiles(selectedFiles, window.rvMedia.$el)
                     if (_self.checkFileTypeSelect(selectedFiles)) {
                         $mainModal.find('.btn-close').trigger('click')

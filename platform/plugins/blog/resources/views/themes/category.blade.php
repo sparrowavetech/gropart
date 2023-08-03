@@ -3,7 +3,7 @@
     {!! Theme::breadcrumb()->render() !!}
 </div>
 <div>
-    @if ($posts->count() > 0)
+    @if ($posts->isNotEmpty())
         @foreach ($posts as $post)
             <article>
                 <div>

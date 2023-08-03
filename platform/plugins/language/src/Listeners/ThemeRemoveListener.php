@@ -2,12 +2,12 @@
 
 namespace Botble\Language\Listeners;
 
+use Botble\Language\Facades\Language;
 use Botble\Setting\Models\Setting;
 use Botble\Theme\Events\ThemeRemoveEvent;
 use Botble\Theme\Facades\ThemeOption;
 use Botble\Widget\Models\Widget;
 use Exception;
-use Botble\Language\Facades\Language;
 
 class ThemeRemoveListener
 {

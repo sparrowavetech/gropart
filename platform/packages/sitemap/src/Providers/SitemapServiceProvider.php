@@ -5,11 +5,11 @@ namespace Botble\Sitemap\Providers;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Sitemap\Sitemap;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Contracts\Routing\ResponseFactory;
-use Botble\Base\Supports\ServiceProvider;
 
 class SitemapServiceProvider extends ServiceProvider
 {

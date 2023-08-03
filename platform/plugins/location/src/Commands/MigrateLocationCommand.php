@@ -2,10 +2,10 @@
 
 namespace Botble\Location\Commands;
 
+use Botble\Location\Facades\Location;
 use Illuminate\Console\Command;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Botble\Location\Facades\Location;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
 

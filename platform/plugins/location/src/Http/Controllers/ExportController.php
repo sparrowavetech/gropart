@@ -7,33 +7,30 @@ use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Location\Exports\CsvLocationExport;
-use Botble\Location\Repositories\Interfaces\CityInterface;
-use Botble\Location\Repositories\Interfaces\CountryInterface;
-use Botble\Location\Repositories\Interfaces\StateInterface;
+use Botble\Location\Models\City;
+use Botble\Location\Models\Country;
+use Botble\Location\Models\State;
 use Maatwebsite\Excel\Excel;
 
 class ExportController extends BaseController
 {
-    public function index(
-        CountryInterface $countryRepository,
-        StateInterface $stateRepository,
-        CityInterface $cityRepository
-    ) {
+    public function index()
+    {
         PageTitle::setTitle(trans('plugins/location::location.export_location'));
 
         Assets::addScriptsDirectly(['vendor/core/plugins/location/js/export.js']);
 
-        $countryCount = $countryRepository->count();
-        $stateCount = $stateRepository->count();
-        $cityCount = $cityRepository->count();
+        $countryCount = Country::query()->count();
+        $stateCount = State::query()->count();
+        $cityCount = City::query()->count();
 
         return view('plugins/location::export.index', compact('countryCount', 'stateCount', 'cityCount'));
     }
 
-    public function export()
+    public function export(CsvLocationExport $csvLocationExport)
     {
         BaseHelper::maximumExecutionTimeAndMemoryLimit();
 
-        return (new CsvLocationExport())->download('exported_location.csv', Excel::CSV, ['Content-Type' => 'text/csv']);
+        return $csvLocationExport->download('exported_location.csv', Excel::CSV, ['Content-Type' => 'text/csv']);
     }
 }

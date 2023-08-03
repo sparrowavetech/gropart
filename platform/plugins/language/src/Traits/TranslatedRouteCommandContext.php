@@ -2,8 +2,8 @@
 
 namespace Botble\Language\Traits;
 
-use Botble\Language\LanguageManager;
 use Botble\Language\Facades\Language;
+use Botble\Language\LanguageManager;
 
 trait TranslatedRouteCommandContext
 {
@@ -19,7 +19,7 @@ trait TranslatedRouteCommandContext
 
     protected function getLocalization()
     {
-        return $this->laravel->make(LanguageManager::class);
+        return app(LanguageManager::class);
     }
 
     protected function getBootstrapPath(): string

@@ -2,23 +2,23 @@
 
 namespace Botble\ACL\Tables;
 
+use Botble\ACL\Enums\UserStatusEnum;
 use Botble\ACL\Models\User;
+use Botble\ACL\Services\ActivateUserService;
+use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Exceptions\DisabledInDemoModeException;
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
+use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\DataTables;
+use Exception;
+use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
-use Botble\ACL\Enums\UserStatusEnum;
-use Botble\ACL\Services\ActivateUserService;
-use Botble\Base\Events\UpdatedContentEvent;
-use Botble\Table\Abstracts\TableAbstract;
-use Exception;
-use Botble\Base\Facades\Html;
-use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 
 class UserTable extends TableAbstract
 {

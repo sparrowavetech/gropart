@@ -4,7 +4,6 @@ namespace Botble\Setting\Supports;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Cache;
 
 abstract class SettingStore
 {
@@ -13,10 +12,6 @@ abstract class SettingStore
     protected bool $unsaved = false;
 
     protected bool $loaded = false;
-
-    protected string $cacheKey = 'cms_settings_cache';
-
-    protected int $settingTime = 86400;
 
     public function get(string|array $key, mixed $default = null): mixed
     {
@@ -83,8 +78,6 @@ abstract class SettingStore
         $this->write($this->data);
         $this->unsaved = false;
 
-        $this->clearCache();
-
         return true;
     }
 
@@ -94,11 +87,6 @@ abstract class SettingStore
             $this->data = $this->read();
             $this->loaded = true;
         }
-    }
-
-    protected function clearCache(): void
-    {
-        Cache::forget($this->cacheKey);
     }
 
     abstract protected function read(): array;

@@ -2,10 +2,10 @@
 
 namespace Botble\SocialLogin\Providers;
 
-use Illuminate\Support\Arr;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\SocialLogin\Facades\SocialService;
 use Botble\Theme\Facades\Theme;
+use Illuminate\Support\Arr;
 
 class HookServiceProvider extends ServiceProvider
 {

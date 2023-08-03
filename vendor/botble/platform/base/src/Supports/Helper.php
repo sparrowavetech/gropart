@@ -3,15 +3,13 @@
 namespace Botble\Base\Supports;
 
 use Botble\Base\Models\BaseModel;
+use Botble\Base\Services\ClearCacheService;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Schema;
 use Throwable;
 
 class Helper
@@ -74,19 +72,7 @@ class Helper
     public static function isConnectedDatabase(): bool
     {
         try {
-            if (App::runningInConsole()) {
-                return Schema::hasTable('settings');
-            }
-
-            if (Cache::get('cms_connected_to_database')) {
-                return true;
-            }
-
-            $connected = Schema::hasTable('settings');
-
-            Cache::set('cms_connected_to_database', $connected, 86400);
-
-            return $connected;
+            return Schema::hasTable('settings');
         } catch (Throwable) {
             return false;
         }
@@ -94,24 +80,13 @@ class Helper
 
     public static function clearCache(): bool
     {
-        Event::dispatch('cache:clearing');
+        $clearCacheService = ClearCacheService::make();
 
-        try {
-            Cache::flush();
-            if (! File::exists($storagePath = storage_path('framework/cache'))) {
-                return true;
-            }
-
-            foreach (File::files($storagePath) as $file) {
-                if (preg_match('/facade-.*\.php$/', $file)) {
-                    File::delete($file);
-                }
-            }
-        } catch (Throwable $exception) {
-            info($exception->getMessage());
-        }
-
-        Event::dispatch('cache:cleared');
+        $clearCacheService->clearFrameworkCache();
+        $clearCacheService->clearBootstrapCache();
+        $clearCacheService->clearRoutesCache();
+        $clearCacheService->clearPurifier();
+        $clearCacheService->clearDebugbar();
 
         return true;
     }

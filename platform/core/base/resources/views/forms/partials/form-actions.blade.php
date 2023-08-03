@@ -20,6 +20,7 @@
                 <i class="fa fa-check-circle"></i> {{ trans('core/base::forms.save_and_continue') }}
             </button>
 
+            {!! apply_filters('base_action_form_actions_extra', null) !!}
         </div>
     </div>
 </div>
@@ -38,5 +39,7 @@
         <button type="submit" name="submit" value="apply" class="btn btn-success">
             <i class="fa fa-check-circle"></i> {{ trans('core/base::forms.save_and_continue') }}
         </button>
+
+        {!! apply_filters('base_action_form_actions_extra', null) !!}
     </div>
 </div>

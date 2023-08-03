@@ -71,8 +71,8 @@
         'use strict';
         var BWidget = BWidget || {};
         BWidget.routes = {
-            'delete': '{{ route('widgets.destroy', ['ref_lang' => request()->input('ref_lang')]) }}',
-            'save_widgets_sidebar': '{{ route('widgets.save_widgets_sidebar', ['ref_lang' => request()->input('ref_lang')]) }}'
+            'delete': '{{ route('widgets.destroy', ['ref_lang' => BaseHelper::stringify(request()->input('ref_lang'))]) }}',
+            'save_widgets_sidebar': '{{ route('widgets.save_widgets_sidebar', ['ref_lang' => BaseHelper::stringify(request()->input('ref_lang'))]) }}'
         };
     </script>
 @endpush

@@ -7,6 +7,7 @@ use Botble\ACL\Traits\PermissionTrait;
 use Botble\Base\Casts\SafeContent;
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Supports\Avatar;
+use Botble\Media\Facades\RvMedia;
 use Botble\Media\Models\MediaFile;
 use Exception;
 use Illuminate\Auth\Authenticatable;
@@ -22,7 +23,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Botble\Media\Facades\RvMedia;
 
 class User extends BaseModel implements
     AuthenticatableContract,

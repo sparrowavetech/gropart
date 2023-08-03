@@ -3,9 +3,9 @@
 namespace Botble\Faq\Listeners;
 
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Facades\MetaBox;
 use Exception;
 use Illuminate\Support\Arr;
-use Botble\Base\Facades\MetaBox;
 
 class UpdatedContentListener
 {

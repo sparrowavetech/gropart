@@ -6,9 +6,9 @@ use Botble\Base\Facades\BaseHelper;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use RuntimeException;
-use Illuminate\Support\Facades\URL;
 
 class DashboardMenu
 {

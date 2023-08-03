@@ -1,4 +1,4 @@
-@if ($histories->count() > 0)
+@if ($histories->isNotEmpty())
     <div class="scroller">
         <ul class="item-list padding">
             @foreach ($histories as $history)

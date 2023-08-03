@@ -34,13 +34,14 @@ class MacroableModels
     protected function checkModelSubclass(string $model): void
     {
         if (! is_subclass_of($model, Model::class)) {
-            throw new InvalidArgumentException('$model must be a subclass of ' . Model::class);
+            throw new InvalidArgumentException(sprintf('%s must be a subclass of %s', $model, Model::class));
         }
     }
 
     protected function syncMacros(string $name): void
     {
-        $models = $this->macros[$name];
+        $models = $this->macros[$name] ?? [];
+
         Builder::macro($name, function (...$args) use ($name, $models) {
             /**
              * @var BaseModel $this
@@ -48,7 +49,7 @@ class MacroableModels
             $class = get_class($this->getModel());
 
             if (! isset($models[$class])) {
-                throw new BadMethodCallException("Call to undefined method $class::$name()");
+                throw new BadMethodCallException(sprintf('Call to undefined method %s::%s()', $class, $name));
             }
 
             $closure = Closure::bind($models[$class], $this->getModel());
@@ -70,9 +71,9 @@ class MacroableModels
             unset($this->macros[$name][$model]);
             if (count($this->macros[$name]) == 0) {
                 unset($this->macros[$name]);
-            } else {
-                $this->syncMacros($name);
             }
+
+            $this->syncMacros($name);
 
             return true;
         }

@@ -2,9 +2,9 @@
 
 namespace Botble\Language\Http\Middleware;
 
+use Botble\Language\Facades\Language;
 use Closure;
 use Illuminate\Http\Request;
-use Botble\Language\Facades\Language;
 
 class LocalizationRoutes extends LaravelLocalizationMiddlewareBase
 {

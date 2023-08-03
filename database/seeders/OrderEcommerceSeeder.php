@@ -26,11 +26,11 @@ use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Models\Payment;
 use Carbon\Carbon;
 use DB;
-use Botble\Ecommerce\Facades\EcommerceHelper;
+use EcommerceHelper;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use Botble\Marketplace\Facades\MarketplaceHelper;
+use MarketplaceHelper;
 use Throwable;
 
 class OrderEcommerceSeeder extends BaseSeeder

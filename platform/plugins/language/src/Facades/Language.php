@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static string getLocalizedURL(string|bool $locale = null, string|false $url = null, array $attributes = [], $forceDefaultLocation = true)
  * @method static string|bool|null getCurrentLocale()
  * @method static bool checkLocaleInSupportedLocales(string|bool|null $locale)
- * @method static string|false getURLFromRouteNameTranslated(string|bool $locale, string $transKeyName, array $attributes = [], $forceDefaultLocation = false)
+ * @method static string|bool getURLFromRouteNameTranslated(string|false|null $locale, string $transKeyName, array $attributes = [], bool $forceDefaultLocation = false)
  * @method static bool hideDefaultLocaleInURL()
  * @method static string createUrlFromUri(string|null $uri)
  * @method static string getNonLocalizedURL(string|false $url = null)
@@ -49,8 +49,13 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Botble\Language\LanguageManager setSwitcherURLs(array $urls)
  * @method static string|null getSwitcherUrl(string $localeCode, string $languageCode)
  * @method static string getSerializedTranslatedRoutes()
- * @method static mixed setSerializedTranslatedRoutes(string|null $serializedRoutes)
+ * @method static void setSerializedTranslatedRoutes(string|null $serializedRoutes)
  * @method static string setRoutesCachePath()
+ * @method static string refLangKey()
+ * @method static string refFromKey()
+ * @method static string|null getRefLang()
+ * @method static string|int|null getRefFrom()
+ * @method static void initModelRelations()
  *
  * @see \Botble\Language\LanguageManager
  */

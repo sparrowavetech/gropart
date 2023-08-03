@@ -6,6 +6,11 @@ use Botble\Base\Models\BaseModel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @method ofTranslatedGroup(string|null $group)
+ * @method orderByGroupKeys(bool $ordered)
+ * @method selectDistinctGroup()
+ */
 class Translation extends BaseModel
 {
     public const STATUS_SAVED = 0;
@@ -19,21 +24,21 @@ class Translation extends BaseModel
         'updated_at',
     ];
 
-    public function scopeOfTranslatedGroup(Builder $query, $group)
+    public function scopeOfTranslatedGroup(Builder $query, string|null $group): void
     {
         $query->where('group', $group)->whereNotNull('value');
     }
 
-    public function scopeOrderByGroupKeys(Builder $query, bool $ordered)
+    public function scopeOrderByGroupKeys(Builder $query, bool $ordered): void
     {
         if ($ordered) {
             $query->orderBy('group')->orderBy('key');
         }
     }
 
-    public function scopeSelectDistinctGroup(Builder $query)
+    public function scopeSelectDistinctGroup(Builder $query): void
     {
-        $select = match (config('database.default')) {
+        $select = match (DB::getDefaultConnection()) {
             'mysql' => 'DISTINCT `group`',
             default => 'DISTINCT "group"',
         };

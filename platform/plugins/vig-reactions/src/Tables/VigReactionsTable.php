@@ -3,12 +3,12 @@
 namespace Botble\VigReactions\Tables;
 
 use Auth;
-use Botble\Base\Facades\BaseHelper;
+use BaseHelper;
 use Botble\VigReactions\Repositories\Interfaces\VigReactionsInterface;
 use Botble\Table\Abstracts\TableAbstract;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Yajra\DataTables\DataTables;
-use Botble\Base\Facades\Html;
+use Html;
 use Illuminate\Http\JsonResponse;
 
 class VigReactionsTable extends TableAbstract

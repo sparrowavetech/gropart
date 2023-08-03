@@ -2,16 +2,16 @@
 
 namespace Botble\Captcha\Providers;
 
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Captcha\Captcha;
 use Botble\Captcha\CaptchaV3;
 use Botble\Captcha\Facades\Captcha as CaptchaFacade;
 use Botble\Captcha\MathCaptcha;
+use Botble\Theme\Facades\Theme;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
-use Botble\Base\Supports\ServiceProvider;
-use Botble\Theme\Facades\Theme;
 
 class CaptchaServiceProvider extends ServiceProvider
 {

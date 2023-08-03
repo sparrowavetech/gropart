@@ -6,7 +6,7 @@ use Botble\Menu\Menu as BaseMenu;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @method static bool hasMenu(string $slug, bool $active)
+ * @method static bool hasMenu(string $slug)
  * @method static array recursiveSaveMenu(array $menuNodes, string|int $menuId, string|int $parentId)
  * @method static \Botble\Menu\Models\MenuNode getReferenceMenuNode(array $item, \Botble\Menu\Models\MenuNode $menuNode)
  * @method static \Botble\Menu\Menu addMenuLocation(string $location, string $description)

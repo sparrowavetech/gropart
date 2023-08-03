@@ -3,11 +3,11 @@
 namespace Botble\Location\Repositories\Eloquent;
 
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Language\Facades\Language;
 use Botble\Location\Repositories\Interfaces\CityInterface;
 use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Botble\Language\Facades\Language;
 
 class CityRepository extends RepositoriesAbstract implements CityInterface
 {

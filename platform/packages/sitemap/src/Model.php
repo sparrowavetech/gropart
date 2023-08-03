@@ -3,7 +3,6 @@
 namespace Botble\Sitemap;
 
 use Carbon\Carbon;
-use DateTime;
 
 class Model
 {
@@ -275,7 +274,7 @@ class Model
     /**
      * Set cache duration value.
      *
-     * @param Carbon|Datetime|int $cacheDuration
+     * @param Carbon|\Datetime|int $cacheDuration
      */
     public function setCacheDuration($cacheDuration)
     {

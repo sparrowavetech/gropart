@@ -8,8 +8,9 @@ class PluginManagement {
 
         $(document).on('click', '#confirm-remove-plugin-button', (event) => {
             event.preventDefault()
-            let _self = $(event.currentTarget)
+            const _self = $(event.currentTarget)
             _self.addClass('button-loading')
+            const $modal = $('#remove-plugin-modal')
 
             $.ajax({
                 url: route('plugins.remove', { plugin: _self.data('plugin') }),
@@ -23,12 +24,12 @@ class PluginManagement {
                         window.location.reload()
                     }
                     _self.removeClass('button-loading')
-                    $('#remove-plugin-modal').modal('hide')
+                    $modal.modal('hide')
                 },
                 error: (data) => {
                     Botble.handleError(data)
                     _self.removeClass('button-loading')
-                    $('#remove-plugin-modal').modal('hide')
+                    $modal.modal('hide')
                 },
             })
         })
@@ -36,14 +37,15 @@ class PluginManagement {
         $(document).on('click', '.btn-trigger-update-plugin', (event) => {
             event.preventDefault()
 
-            let _self = $(event.currentTarget)
-            let uuid = _self.data('uuid')
+            const _self = $(event.currentTarget)
+            const uuid = _self.data('uuid')
+            const name = _self.data('name')
 
             _self.addClass('button-loading')
             _self.attr('disabled', true)
 
             $.ajax({
-                url: route('plugins.marketplace.ajax.update', { id: uuid }),
+                url: route('plugins.marketplace.ajax.update', { id: uuid, name: name }),
                 type: 'POST',
                 success: (data) => {
                     if (data.error) {
@@ -72,7 +74,7 @@ class PluginManagement {
 
         $(document).on('click', '.btn-trigger-change-status', async (event) => {
             event.preventDefault()
-            let _self = $(event.currentTarget)
+            const _self = $(event.currentTarget)
             _self.addClass('button-loading')
 
             const pluginName = _self.data('plugin')
@@ -153,35 +155,10 @@ class PluginManagement {
                 Object.keys(data.data).forEach((key) => {
                     const plugin = data.data[key]
 
-                    const element = $('[data-check-update="' + plugin.name + '"]')
-
-                    const $checkVersion = this.checkVersion(element.data('version'), plugin.version)
-
-                    if ($checkVersion) {
-                        element.show()
-                        element.attr('data-uuid', plugin.id)
-                    }
+                    $('button[data-check-update="' + plugin.name + '"]').data('uuid', plugin.id).show()
                 })
             },
         })
-    }
-
-    checkVersion(currentVersion, latestVersion) {
-        const current = currentVersion.toString().split('.')
-        const latest = latestVersion.toString().split('.')
-
-        const length = Math.max(current.length, latest.length)
-
-        for (let i = 0; i < length; i++) {
-            const oldVer = ~~current[i]
-            const newVer = ~~latest[i]
-
-            if (newVer > oldVer) {
-                return true
-            }
-        }
-
-        return false
     }
 
     async activateOrDeactivatePlugin(pluginName, reload = true) {
@@ -194,7 +171,7 @@ class PluginManagement {
                     Botble.showSuccess(data.message)
                     if (reload) {
                         $('#plugin-list #app-' + pluginName).load(
-                            window.location.href + ' #plugin-list #app-' + pluginName + ' > *'
+                            window.location.href + ' #plugin-list #app-' + pluginName + ' > *',
                         )
                         window.location.reload()
                     }

@@ -15,15 +15,7 @@
                                 <div class="overlay__content"><span class="spinner"></span></div>
                             </div>
                         </div>
-                        <iframe
-                            v-resize="{
-                                log: false,
-                                sizeHeight: true,
-                                scrolling: true,
-                                warningTimeout: 0,
-                            }"
-                            :src="iframeUrl"
-                        ></iframe>
+                        <iframe :src="iframeUrl"></iframe>
                     </div>
                 </div>
                 <div class="modal-footer">

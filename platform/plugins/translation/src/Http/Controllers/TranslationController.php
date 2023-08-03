@@ -9,18 +9,20 @@ use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Supports\Language;
 use Botble\Base\Supports\PclZip as Zip;
+use Botble\Language\Facades\Language as LanguageFacade;
+use Botble\Media\Facades\RvMedia;
+use Botble\Theme\Facades\Theme;
 use Botble\Translation\Http\Requests\LocaleRequest;
 use Botble\Translation\Http\Requests\TranslationRequest;
 use Botble\Translation\Manager;
 use Botble\Translation\Models\Translation;
 use Botble\Translation\Tables\ThemeTranslationTable;
-use Illuminate\Support\Facades\File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
-use Botble\Media\Facades\RvMedia;
-use Botble\Theme\Facades\Theme;
+use Illuminate\Support\Facades\File;
 use Throwable;
 use ZipArchive;
 
@@ -42,7 +44,7 @@ class TranslationController extends BaseController
         $group = $request->input('group');
 
         $locales = $this->loadLocales();
-        $groups = Translation::groupBy('group');
+        $groups = Translation::query()->groupBy('group');
         $excludedGroups = $this->manager->getConfig('exclude_groups');
         if ($excludedGroups) {
             $groups->whereNotIn('group', $excludedGroups);
@@ -53,9 +55,12 @@ class TranslationController extends BaseController
             $groups = $groups->all();
         }
         $groups = ['' => trans('plugins/translation::translation.choose_a_group')] + $groups;
-        $numChanged = Translation::where('group', $group)->where('status', Translation::STATUS_CHANGED)->count();
+        $numChanged = Translation::query()
+            ->where('group', $group)
+            ->where('status', Translation::STATUS_CHANGED)
+            ->count();
 
-        $allTranslations = Translation::where('group', $group)->orderBy('key')->get();
+        $allTranslations = Translation::query()->where('group', $group)->orderBy('key')->get();
         $numTranslations = count($allTranslations);
         $translations = [];
         foreach ($allTranslations as $translation) {
@@ -75,15 +80,13 @@ class TranslationController extends BaseController
     protected function loadLocales(): array
     {
         // Set the default locale as the first one.
-        $locales = Translation::groupBy('locale')
+        $locales = Translation::query()
+            ->groupBy('locale')
             ->select('locale')
-            ->get()
-            ->pluck('locale');
+            ->pluck('locale')
+            ->all();
 
-        if ($locales instanceof Collection) {
-            $locales = $locales->all();
-        }
-        $locales = array_merge([config('app.locale')], $locales);
+        $locales = array_merge([App::getLocale()], $locales);
 
         return array_unique($locales);
     }
@@ -97,7 +100,7 @@ class TranslationController extends BaseController
             $value = $request->input('value');
 
             [$locale, $key] = explode('|', $name, 2);
-            $translation = Translation::firstOrNew([
+            $translation = Translation::query()->firstOrNew([
                 'locale' => $locale,
                 'group' => $group,
                 'key' => $key,
@@ -217,6 +220,13 @@ class TranslationController extends BaseController
                 File::delete(lang_path($locale . '.json'));
             }
 
+            if (File::isDirectory($themeLangPath = lang_path('vendor/themes/' . Theme::getThemeName()))) {
+                File::deleteDirectory($themeLangPath);
+                if (File::isEmptyDirectory(dirname($themeLangPath))) {
+                    File::deleteDirectory(dirname($themeLangPath));
+                }
+            }
+
             $this->removeLocaleInPath(lang_path('vendor/core'), $locale);
             $this->removeLocaleInPath(lang_path('vendor/packages'), $locale);
             $this->removeLocaleInPath(lang_path('vendor/plugins'), $locale);
@@ -253,20 +263,20 @@ class TranslationController extends BaseController
 
         $groups = Language::getAvailableLocales();
 
+        $defaultLanguage = [
+            'locale' => 'en',
+            'name' => 'English',
+            'flag' => 'us',
+        ];
+
         if (! count($groups)) {
             $groups = [
-                'en' => [
-                    'locale' => 'en',
-                    'name' => 'English',
-                    'flag' => 'us',
-                ],
+                'en' => $defaultLanguage,
             ];
         }
 
-        $defaultLanguage = Arr::get($groups, 'en');
-
         $group = [];
-        if ($refLang = $request->input('ref_lang')) {
+        if (is_plugin_active('language') && $refLang = LanguageFacade::getRefLang()) {
             $group = Arr::first($groups, fn ($item) => $item['locale'] == $refLang);
         }
 

@@ -15,13 +15,13 @@ use Botble\ACL\Repositories\Interfaces\RoleInterface;
 use Botble\ACL\Repositories\Interfaces\UserInterface;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Facades\EmailHandler;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Media\Facades\RvMedia;
 use Exception;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\View;
-use Botble\Base\Supports\ServiceProvider;
 use Illuminate\View\View as IlluminateView;
 
 class AclServiceProvider extends ServiceProvider

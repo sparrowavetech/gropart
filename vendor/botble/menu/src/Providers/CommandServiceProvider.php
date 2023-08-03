@@ -2,17 +2,19 @@
 
 namespace Botble\Menu\Providers;
 
-use Botble\Menu\Commands\ClearMenuCacheCommand;
 use Botble\Base\Supports\ServiceProvider;
+use Botble\Menu\Commands\ClearMenuCacheCommand;
 
 class CommandServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        if ($this->app->runningInConsole()) {
-            $this->commands([
-                ClearMenuCacheCommand::class,
-            ]);
+        if (! $this->app->runningInConsole()) {
+            return;
         }
+
+        $this->commands([
+            ClearMenuCacheCommand::class,
+        ]);
     }
 }
