@@ -8,6 +8,9 @@ class GetShortcodeDataRequest extends Request
 {
     public function rules(): array
     {
-        return [];
+        return [
+            'key' => 'nullable|string|max:255',
+            'code' => 'nullable|string|max:10000',
+        ];
     }
 }

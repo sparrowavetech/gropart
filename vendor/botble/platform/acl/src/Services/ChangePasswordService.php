@@ -22,17 +22,18 @@ class ChangePasswordService implements ProduceServiceInterface
             }
         }
 
-        /**
-         * @var User $user
-         */
-        $user = User::query()->findOrFail($request->input('id', $currentUser->getKey()));
+        if (($userId = $request->input('id')) && $userId === $currentUser->getKey()) {
+            $user = $currentUser;
+        } else {
+            $user = User::query()->findOrFail($userId);
+        }
 
         $password = $request->input('password');
 
         $user->password = Hash::make($password);
         $user->save();
 
-        if ($user->id != $currentUser->getKey()) {
+        if ($user->getKey() != $currentUser->getKey()) {
             try {
                 Auth::setUser($user);
                 Auth::logoutOtherDevices($password);

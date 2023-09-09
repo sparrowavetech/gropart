@@ -23,12 +23,18 @@ trait ProxyTrait
 {
     private object $pool;
 
+    /**
+     * {@inheritdoc}
+     */
     public function prune(): bool
     {
         return $this->pool instanceof PruneableInterface && $this->pool->prune();
     }
 
-    public function reset(): void
+    /**
+     * {@inheritdoc}
+     */
+    public function reset()
     {
         if ($this->pool instanceof ResetInterface) {
             $this->pool->reset();

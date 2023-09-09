@@ -8,12 +8,13 @@ use Botble\Theme\Facades\ThemeOption;
 use Botble\Theme\Services\ThemeService;
 use Botble\Widget\Models\Widget;
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Filesystem\Filesystem as File;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 
 #[AsCommand('cms:theme:rename', 'Rename theme to the new name')]
-class ThemeRenameCommand extends Command
+class ThemeRenameCommand extends Command implements PromptsForMissingInput
 {
     use ThemeTrait;
 

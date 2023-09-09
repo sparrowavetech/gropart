@@ -11,7 +11,7 @@
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="float-start btn btn-warning" data-bs-dismiss="modal">{{ trans('core/table::table.cancel') }}</button>
+                <button type="button" class="float-start btn btn-warning" data-bs-dismiss="modal" {!! Html::attributes(Arr::except($cancel_button_attributes ?? [], 'class')) !!}>{{ $cancel_name ?? trans('core/table::table.cancel') }}</button>
                 <button class="float-end btn btn-{{ $type }} {{ Arr::get($action_button_attributes, 'class') }}" {!! Html::attributes(Arr::except($action_button_attributes, 'class')) !!}>{{ $action_name }}</button>
             </div>
         </div>

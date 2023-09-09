@@ -8,12 +8,6 @@ Route::group(['namespace' => 'Botble\Contact\Http\Controllers', 'middleware' => 
         Route::group(['prefix' => 'contacts', 'as' => 'contacts.'], function () {
             Route::resource('', 'ContactController')->except(['create', 'store'])->parameters(['' => 'contact']);
 
-            Route::delete('items/destroy', [
-                'as' => 'deletes',
-                'uses' => 'ContactController@deletes',
-                'permission' => 'contacts.destroy',
-            ]);
-
             Route::post('reply/{id}', [
                 'as' => 'reply',
                 'uses' => 'ContactController@postReply',

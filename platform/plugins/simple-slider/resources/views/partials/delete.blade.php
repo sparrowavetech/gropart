@@ -13,7 +13,7 @@
             </div>
         </div>
         <div class="modal-footer">
-            <a href="javascript:;" class="btn btn-primary" data-fancybox-close>{{ trans('core/base::tables.cancel')  }}</a>
+            <a href="javascript:;" class="btn btn-primary" data-fancybox-close>{{ trans('core/base::tables.cancel') }}</a>
             <button type="submit" class="btn btn-info btn-delete-slider">{{ trans('core/base::tables.delete') }}</button>
         </div>
     </form>

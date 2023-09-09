@@ -848,7 +848,7 @@ class LanguageManager
         $this->baseUrl = $url;
     }
 
-    public function saveLanguage(string $screen, HttpRequest $request, BaseModel|false|null $data): bool
+    public function saveLanguage(string $screen, HttpRequest $request, Model|false|null $data): bool
     {
         $defaultLanguage = $this->getDefaultLanguage(['lang_id']);
         if (! empty($defaultLanguage)) {
@@ -880,7 +880,7 @@ class LanguageManager
                     }
 
                     $meta->lang_meta_code = $currentLanguageCode;
-                    $this->languageMetaRepository->createOrUpdate($meta);
+                    $meta->save();
 
                     return true;
                 }
@@ -910,7 +910,7 @@ class LanguageManager
         );
     }
 
-    public function deleteLanguage(string $screen, BaseModel|null|false $data): bool
+    public function deleteLanguage(string $screen, Model|null|false $data): bool
     {
         $defaultLanguage = $this->getDefaultLanguage(['lang_id']);
         if (! empty($defaultLanguage) && in_array(get_class($data), $this->supportedModels())) {

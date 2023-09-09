@@ -69,7 +69,7 @@
         ],
     ])
 
-    <x-core-base::modal
+    <x-core::modal
         class="modal-confirm-import-locale"
         :title="trans('plugins/translation::translation.import_available_locale_confirmation')"
         type="info"
@@ -77,5 +77,5 @@
         :button-label="trans('plugins/translation::translation.download_locale')"
     >
         <div class="text-break">{!! BaseHelper::clean(trans('plugins/translation::translation.import_available_locale_confirmation_content', ['lang_path' => Html::tag('strong', lang_path())->toHtml()])) !!}</div>
-    </x-core-base::modal>
+    </x-core::modal>
 @stop

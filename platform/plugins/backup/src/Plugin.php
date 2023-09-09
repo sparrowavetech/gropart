@@ -10,6 +10,7 @@ class Plugin extends PluginOperationAbstract
     public static function remove(): void
     {
         $backupPath = storage_path('app/backup');
+
         if (File::isDirectory($backupPath)) {
             File::deleteDirectory($backupPath);
         }

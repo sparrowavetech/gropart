@@ -5,11 +5,12 @@ namespace Botble\PluginManagement\Commands;
 use Botble\PluginManagement\Commands\Concern\HasPluginNameValidation;
 use Botble\PluginManagement\Services\PluginService;
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 
 #[AsCommand('cms:plugin:activate', 'Activate a plugin in /plugins directory')]
-class PluginActivateCommand extends Command
+class PluginActivateCommand extends Command implements PromptsForMissingInput
 {
     use HasPluginNameValidation;
 

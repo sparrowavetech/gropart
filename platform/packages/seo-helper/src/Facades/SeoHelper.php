@@ -17,8 +17,8 @@ use Illuminate\Support\Facades\Facade;
  * @method static string|null getDescription()
  * @method static \Botble\SeoHelper\SeoHelper setDescription($description)
  * @method static mixed render()
- * @method static bool saveMetaData(string $screen, \Illuminate\Http\Request $request, \Botble\Base\Models\BaseModel $object)
- * @method static bool deleteMetaData(string $screen, \Botble\Base\Models\BaseModel $object)
+ * @method static bool saveMetaData(string $screen, \Illuminate\Http\Request $request, \Illuminate\Database\Eloquent\Model $object)
+ * @method static bool deleteMetaData(string $screen, \Illuminate\Database\Eloquent\Model $object)
  * @method static \Botble\SeoHelper\SeoHelper registerModule(array|string $model)
  *
  * @see \Botble\SeoHelper\SeoHelper

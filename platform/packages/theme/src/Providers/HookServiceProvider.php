@@ -6,6 +6,7 @@ use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Dashboard\Supports\DashboardWidgetInstance;
+use Botble\Page\Models\Page;
 use Botble\Shortcode\Compilers\Shortcode;
 use Botble\Shortcode\Compilers\ShortcodeCompiler;
 use Botble\Theme\Facades\AdminBar;
@@ -21,6 +22,16 @@ class HookServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
+        add_filter(PAGE_FILTER_PAGE_NAME_IN_ADMIN_LIST, function (string $name, Page $page) {
+            if (BaseHelper::isHomepage($page->getKey())) {
+                $name .= Html::tag('span', ' — ' . trans('packages/page::pages.front_page'), [
+                    'class' => 'additional-page-name',
+                ])->toHtml();
+            }
+
+            return $name;
+        }, 10, 2);
+
         add_filter(DASHBOARD_FILTER_ADMIN_LIST, [$this, 'addStatsWidgets'], 4, 2);
 
         add_filter(BASE_FILTER_AFTER_SETTING_CONTENT, [$this, 'addSetting'], 39);

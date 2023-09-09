@@ -9,10 +9,6 @@ use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Supports\Helper;
 use Botble\Location\Exports\TemplateLocationExport;
-use Botble\Location\Http\Requests\BulkImportRequest;
-use Botble\Location\Http\Requests\LocationImportRequest;
-use Botble\Location\Imports\LocationImport;
-use Botble\Location\Imports\ValidateLocationImport;
 use Botble\Location\Location;
 use Botble\Location\Models\Country;
 use Illuminate\Http\Request;
@@ -24,60 +20,15 @@ class BulkImportController extends BaseController
     {
         PageTitle::setTitle(trans('plugins/location::bulk-import.name'));
 
-        Assets::addScriptsDirectly(['vendor/core/plugins/location/js/bulk-import.js']);
+        $mimetypes = collect(config('plugins.location.general.bulk-import.mime_types', []))->implode(',');
 
-        return view('plugins/location::bulk-import.index');
-    }
-
-    public function postImport(
-        BulkImportRequest $request,
-        BaseHttpResponse $response,
-        LocationImport $locationImport,
-        ValidateLocationImport $validateLocationImport
-    ) {
-        BaseHelper::maximumExecutionTimeAndMemoryLimit();
-
-        $file = $request->file('file');
-        $importType = $request->input('type');
-
-        $validateLocationImport
-            ->setValidatorClass(new LocationImportRequest())
-            ->setImportType($importType)
-            ->import($file);
-
-        if ($validateLocationImport->failures()->count()) {
-            $data = [
-                'total_failed' => $validateLocationImport->failures()->count(),
-                'total_error' => $validateLocationImport->errors()->count(),
-                'failures' => $validateLocationImport->failures(),
-            ];
-
-            return $response
-                ->setError()
-                ->setData($data)
-                ->setMessage(trans('plugins/location::bulk-import.import_failed_description'));
-        }
-
-        $locationImport
-            ->setValidatorClass(new LocationImportRequest())
-            ->setImportType($importType)
-            ->import($file);
-
-        $data = [
-            'total_success' => $locationImport->successes()->count(),
-            'total_failed' => $locationImport->failures()->count(),
-            'total_error' => $locationImport->errors()->count(),
-            'failures' => $locationImport->failures(),
-            'successes' => $locationImport->successes(),
-        ];
-
-        return $response->setData($data)->setMessage(
-            trans('plugins/location::bulk-import.imported_successfully') . ' ' .
-            trans('plugins/location::bulk-import.results', [
-                'success' => $data['total_success'],
-                'failed' => $data['total_failed'],
+        Assets::addScriptsDirectly([
+                'vendor/core/plugins/location/js/bulk-import.js',
             ])
-        );
+            ->addScripts(['dropzone', 'blockui'])
+            ->addStyles(['dropzone', 'blockui']);
+
+        return view('plugins/location::bulk-import.index', compact('mimetypes'));
     }
 
     public function downloadTemplate(Request $request)

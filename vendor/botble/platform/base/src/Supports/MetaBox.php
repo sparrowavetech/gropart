@@ -4,7 +4,6 @@ namespace Botble\Base\Supports;
 
 use Botble\Base\Models\MetaBox as MetaBoxModel;
 use Closure;
-use Exception;
 use Illuminate\Database\Eloquent\Model;
 
 class MetaBox
@@ -130,29 +129,22 @@ class MetaBox
     {
         $key = apply_filters('stored_meta_box_key', $key, $object);
 
-        try {
-            $data = [
-                'meta_key' => $key,
-                'reference_id' => $object->getKey(),
-                'reference_type' => $object::class,
-            ];
+        $data = [
+            'meta_key' => $key,
+            'reference_id' => $object->getKey(),
+            'reference_type' => $object::class,
+        ];
 
-            $fieldMeta = MetaBoxModel::query()->where($data)->first();
+        $fieldMeta = MetaBoxModel::query()->firstOrNew($data);
 
-            if (! $fieldMeta) {
-                $fieldMeta = MetaBoxModel::query()->getModel();
-                $fieldMeta->fill($data);
-            }
+        $fieldMeta->fill($data);
 
-            if (! empty($options)) {
-                $fieldMeta->options = $options;
-            }
-
-            $fieldMeta->meta_value = [$value];
-            $fieldMeta->save();
-        } catch (Exception $exception) {
-            info($exception->getMessage());
+        if (! empty($options)) {
+            $fieldMeta->options = $options;
         }
+
+        $fieldMeta->meta_value = [$value];
+        $fieldMeta->save();
     }
 
     public function getMetaData(

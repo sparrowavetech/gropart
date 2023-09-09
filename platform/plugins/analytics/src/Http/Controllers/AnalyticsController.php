@@ -4,19 +4,19 @@ namespace Botble\Analytics\Http\Controllers;
 
 use Botble\Analytics\Exceptions\InvalidConfiguration;
 use Botble\Analytics\Facades\Analytics;
+use Botble\Analytics\Http\Requests\AnalyticsRequest;
 use Botble\Analytics\Period;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Dashboard\Supports\DashboardWidgetInstance;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 class AnalyticsController extends BaseController
 {
-    public function getGeneral(Request $request, BaseHttpResponse $response)
+    public function getGeneral(AnalyticsRequest $request, BaseHttpResponse $response)
     {
         $dashboardInstance = new DashboardWidgetInstance();
         $predefinedRangeFound = $dashboardInstance->getFilterRange($request->input('predefined_range'));
@@ -144,7 +144,7 @@ class AnalyticsController extends BaseController
         return Arr::get($data, $key, 'hour');
     }
 
-    public function getTopVisitPages(Request $request, BaseHttpResponse $response)
+    public function getTopVisitPages(AnalyticsRequest $request, BaseHttpResponse $response)
     {
         $dashboardInstance = new DashboardWidgetInstance();
         $predefinedRangeFound = $dashboardInstance->getFilterRange($request->input('predefined_range'));
@@ -197,7 +197,7 @@ class AnalyticsController extends BaseController
         }
     }
 
-    public function getTopBrowser(Request $request, BaseHttpResponse $response)
+    public function getTopBrowser(AnalyticsRequest $request, BaseHttpResponse $response)
     {
         $dashboardInstance = new DashboardWidgetInstance();
         $predefinedRangeFound = $dashboardInstance->getFilterRange($request->input('predefined_range'));
@@ -228,7 +228,7 @@ class AnalyticsController extends BaseController
         }
     }
 
-    public function getTopReferrer(Request $request, BaseHttpResponse $response)
+    public function getTopReferrer(AnalyticsRequest $request, BaseHttpResponse $response)
     {
         $dashboardInstance = new DashboardWidgetInstance();
         $predefinedRangeFound = $dashboardInstance->getFilterRange($request->input('predefined_range'));

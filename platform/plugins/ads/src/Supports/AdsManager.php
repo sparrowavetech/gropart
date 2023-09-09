@@ -3,7 +3,6 @@
 namespace Botble\Ads\Supports;
 
 use Botble\Ads\Models\Ads;
-use Botble\Ads\Repositories\Interfaces\AdsInterface;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\Html;
 use Botble\Media\Facades\RvMedia;
@@ -71,7 +70,7 @@ class AdsManager
 
     protected function read(): Collection
     {
-        return app(AdsInterface::class)->getAll();
+        return Ads::query()->get();
     }
 
     public function locationHasAds(string $location): bool

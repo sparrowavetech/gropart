@@ -2,8 +2,9 @@
 
 namespace Botble\Slug;
 
+use Botble\Base\Contracts\BaseModel;
 use Botble\Page\Models\Page;
-use Botble\Slug\Repositories\Interfaces\SlugInterface;
+use Botble\Slug\Models\Slug;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
@@ -98,6 +99,16 @@ class SlugHelper
         return ! in_array($model, config('packages.slug.general.disable_preview', []));
     }
 
+    public function createSlug(BaseModel $model, string $name = null): BaseModel|Slug
+    {
+        return Slug::query()->create([
+            'reference_type' => $model::class,
+            'reference_id' => $model->getKey(),
+            'key' => Str::slug($name ?: $model->name),
+            'prefix' => $this->getPrefix($model::class),
+        ]);
+    }
+
     public function getSlug(
         string|null $key,
         string|null $prefix = null,
@@ -128,7 +139,7 @@ class SlugHelper
             $condition['prefix'] = $prefix;
         }
 
-        return app(SlugInterface::class)->getFirstBy($condition);
+        return Slug::query()->where($condition)->first();
     }
 
     public function getPrefix(string $model, string $default = '', bool $translate = true): string|null

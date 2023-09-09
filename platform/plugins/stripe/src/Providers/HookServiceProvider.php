@@ -101,7 +101,44 @@ class HookServiceProvider extends ServiceProvider
 
         $stripePaymentService = $this->app->make(StripePaymentService::class);
 
+        $currentCurrency = get_application_currency();
+
         $paymentData = apply_filters(PAYMENT_FILTER_PAYMENT_DATA, [], $request);
+
+        if (strtoupper($currentCurrency->title) !== 'USD') {
+            $currencyModel = $currentCurrency->replicate();
+
+            $supportedCurrency = $currencyModel->query()->where('title', 'USD')->first();
+
+            if ($supportedCurrency) {
+                $paymentData['currency'] = strtoupper($supportedCurrency->title);
+                if ($currentCurrency->is_default) {
+                    $paymentData['amount'] = $paymentData['amount'] * $supportedCurrency->exchange_rate;
+                } else {
+                    $paymentData['amount'] = format_price(
+                        $paymentData['amount'] / $currentCurrency->exchange_rate,
+                        $currentCurrency,
+                        true
+                    );
+                }
+            }
+        }
+
+        $supportedCurrencies = $stripePaymentService->supportedCurrencyCodes();
+
+        if (! in_array($paymentData['currency'], $supportedCurrencies)) {
+            $data['error'] = true;
+            $data['message'] = __(
+                ":name doesn't support :currency. List of currencies supported by :name: :currencies.",
+                [
+                    'name' => 'Stripe',
+                    'currency' => $paymentData['currency'],
+                    'currencies' => implode(', ', $supportedCurrencies),
+                ]
+            );
+
+            return $data;
+        }
 
         $result = $stripePaymentService->execute($paymentData);
 

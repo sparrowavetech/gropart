@@ -46,7 +46,6 @@ export class UploadService {
             parallelUploads: 1,
             autoQueue: true,
             clickable: '.js-dropzone-upload',
-            previewTemplate: false,
             previewsContainer: false,
             sending: function (file, xhr, formData) {
                 formData.append('_token', $('meta[name="csrf-token"]').attr('content'))

@@ -12,12 +12,16 @@ use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Supports\Helper;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class BackupController extends BaseController
 {
+    protected string $databaseDriver;
+
     public function __construct(protected Backup $backup)
     {
+        $this->databaseDriver = DB::getConfig('driver');
     }
 
     public function getIndex()
@@ -31,11 +35,19 @@ class BackupController extends BaseController
 
         $backups = $this->backup->getBackupList();
 
-        return view('plugins/backup::index', compact('backups', 'backupManager'));
+        $driver = $this->databaseDriver;
+
+        return view('plugins/backup::index', compact('backups', 'backupManager', 'driver'));
     }
 
     public function store(BackupRequest $request, BaseHttpResponse $response)
     {
+        if ($this->databaseDriver !== 'mysql') {
+            return $response
+                ->setError()
+                ->setMessage(trans('plugins/backup::backup.database_driver_not_supported'));
+        }
+
         try {
             BaseHelper::maximumExecutionTimeAndMemoryLimit();
 
@@ -46,6 +58,7 @@ class BackupController extends BaseController
             do_action(BACKUP_ACTION_AFTER_BACKUP, BACKUP_MODULE_SCREEN_NAME, $request);
 
             $data['backupManager'] = $this->backup;
+            $data['driver'] = $this->databaseDriver;
 
             return $response
                 ->setData(view('plugins/backup::partials.backup-item', $data)->render())
@@ -72,6 +85,12 @@ class BackupController extends BaseController
 
     public function getRestore(string $folder, Request $request, BaseHttpResponse $response)
     {
+        if ($this->databaseDriver !== 'mysql') {
+            return $response
+                ->setError()
+                ->setMessage(trans('plugins/backup::backup.database_driver_not_supported'));
+        }
+
         try {
             $path = $this->backup->getBackupPath($folder);
 

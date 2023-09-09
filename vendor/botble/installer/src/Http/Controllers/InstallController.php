@@ -5,6 +5,7 @@ namespace Botble\Installer\Http\Controllers;
 use Botble\ACL\Models\User;
 use Botble\ACL\Services\ActivateUserService;
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Supports\Database;
 use Botble\Installer\Events\EnvironmentSaved;
 use Botble\Installer\Events\InstallerFinished;
 use Botble\Installer\Http\Requests\SaveAccountRequest;
@@ -16,7 +17,6 @@ use Exception;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
@@ -72,11 +72,7 @@ class InstallController extends Controller
         ]);
 
         try {
-            DB::purge($driverName);
-            DB::unprepared('USE `' . $databaseName . '`');
-            DB::connection()->setDatabaseName($databaseName);
-            DB::getSchemaBuilder()->dropAllTables();
-            DB::unprepared(file_get_contents(base_path('database.sql')));
+            Database::restoreFromPath(base_path('database.sql'));
 
             File::delete(app()->bootstrapPath('cache/plugins.php'));
         } catch (QueryException $exception) {

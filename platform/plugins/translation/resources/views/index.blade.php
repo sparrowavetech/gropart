@@ -66,7 +66,7 @@
         <div class="clearfix"></div>
     </div>
     @if (!empty($group))
-        <x-core-base::modal
+        <x-core::modal
             id="confirm-publish-modal"
             :title="trans('plugins/translation::translation.publish_translations')"
             type="warning"
@@ -74,6 +74,6 @@
             :button-label="trans('core/base::base.yes')"
         >
             {!! trans('plugins/translation::translation.confirm_publish_group', ['group' => $group]) !!}
-        </x-core-base::modal>
+        </x-core::modal>
     @endif
 @stop

@@ -36,15 +36,15 @@ class Language extends BaseModel
     protected static function booted(): void
     {
         self::deleted(function (Language $language) {
-            $defaultLanguage = self::where('lang_is_default', 1)->first();
+            $defaultLanguage = self::query()->where('lang_is_default', 1)->first();
 
-            if (empty($defaultLanguage) && self::exists()) {
-                $defaultLanguage = self::first();
+            if (empty($defaultLanguage) && self::query()->exists()) {
+                $defaultLanguage = self::query()->first();
                 $defaultLanguage->lang_is_default = 1;
                 $defaultLanguage->save();
             }
 
-            $meta = LanguageMeta::where('lang_meta_code', $language->lang_code)->get();
+            $meta = LanguageMeta::query()->where('lang_meta_code', $language->lang_code)->get();
 
             try {
                 foreach ($meta as $item) {
@@ -54,10 +54,10 @@ class Language extends BaseModel
                 info($exception->getMessage());
             }
 
-            LanguageMeta::where('lang_meta_code', $language->lang_code)->delete();
+            LanguageMeta::query()->where('lang_meta_code', $language->lang_code)->delete();
 
             Setting::newQuery()->where('key', 'LIKE', ThemeOption::getOptionKey('%', $language->lang_code))->delete();
-            Widget::where('theme', 'LIKE', Widget::getThemeName($language->lang_code))->delete();
+            Widget::query()->where('theme', 'LIKE', Widget::getThemeName($language->lang_code))->delete();
         });
     }
 }

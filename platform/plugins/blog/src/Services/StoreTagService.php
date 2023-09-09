@@ -5,6 +5,7 @@ namespace Botble\Blog\Services;
 use Botble\ACL\Models\User;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Blog\Models\Post;
+use Botble\Blog\Models\Tag;
 use Botble\Blog\Services\Abstracts\StoreTagServiceAbstract;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,10 +25,10 @@ class StoreTagService extends StoreTagServiceAbstract
                     continue;
                 }
 
-                $tag = $this->tagRepository->getFirstBy(['name' => $tagName]);
+                $tag = Tag::query()->where('name', $tagName)->first();
 
                 if ($tag === null && ! empty($tagName)) {
-                    $tag = $this->tagRepository->createOrUpdate([
+                    $tag = Tag::query()->create([
                         'name' => $tagName,
                         'author_id' => Auth::check() ? Auth::id() : 0,
                         'author_type' => User::class,

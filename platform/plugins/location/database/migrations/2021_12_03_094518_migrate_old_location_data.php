@@ -17,17 +17,9 @@ return new class () extends Migration {
             Schema::dropIfExists('states_backup');
             Schema::dropIfExists('cities_backup');
 
-            DB::statement('CREATE TABLE IF NOT EXISTS countries_backup LIKE countries');
-            DB::statement('TRUNCATE TABLE countries_backup');
-            DB::statement('INSERT countries_backup SELECT * FROM countries');
-
-            DB::statement('CREATE TABLE IF NOT EXISTS states_backup LIKE states');
-            DB::statement('TRUNCATE TABLE states_backup');
-            DB::statement('INSERT states_backup SELECT * FROM states');
-
-            DB::statement('CREATE TABLE IF NOT EXISTS cities_backup LIKE cities');
-            DB::statement('TRUNCATE TABLE cities_backup');
-            DB::statement('INSERT cities_backup SELECT * FROM cities');
+            DB::statement('CREATE TABLE countries_backup AS SELECT * FROM countries');
+            DB::statement('CREATE TABLE states_backup AS SELECT * FROM states');
+            DB::statement('CREATE TABLE cities_backup AS SELECT * FROM cities');
 
             $cities = LanguageMeta::query()->where('reference_type', State::class)
                 ->where('lang_meta_code', '!=', Language::getDefaultLocaleCode())
@@ -67,7 +59,7 @@ return new class () extends Migration {
                 ->get();
 
             foreach ($states as $item) {
-                $originalItem = State::find($item->reference_id);
+                $originalItem = State::query()->find($item->reference_id);
 
                 if (! $originalItem) {
                     continue;
@@ -127,8 +119,7 @@ return new class () extends Migration {
                 DB::table('countries')->where('id', $originalItem->id)->delete();
             }
 
-            DB::statement('CREATE TABLE IF NOT EXISTS language_meta_backup LIKE language_meta');
-            DB::statement('TRUNCATE TABLE language_meta_backup');
+            DB::statement('CREATE TABLE language_meta_backup AS SELECT * FROM language_meta');
 
             DB::table('language_meta_backup')->insert(
                 LanguageMeta::query()->where('reference_type', State::class)->get()->toArray()

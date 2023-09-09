@@ -41,7 +41,6 @@ class Menu
 
         return $this->data
             ->where('slug', $slug)
-            ->where('status', BaseStatusEnum::PUBLISHED)
             ->isNotEmpty();
     }
 
@@ -198,7 +197,7 @@ class Menu
         ]);
 
         $items = MenuModel::query()
-            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->wherePublished()
             ->with($with);
 
         return RepositoryHelper::applyBeforeExecuteQuery($items, new MenuModel())->get();
@@ -222,6 +221,14 @@ class Menu
 
         if (! $menu) {
             $menu = $this->data->where('slug', $slug)->first();
+        }
+
+        if (! $menu) {
+            $menu = RepositoryHelper::applyBeforeExecuteQuery(
+                MenuModel::query()->where('slug', $slug),
+                new MenuModel(),
+                true
+            )->first();
         }
 
         if (! $menu) {

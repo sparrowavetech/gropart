@@ -36,6 +36,7 @@ class EditorManagement {
                         key: name,
                         href: route('short-codes.ajax-get-admin-config', name),
                         data: {
+                            key: name,
                             code: shortcode,
                         },
                         description: description,
@@ -332,13 +333,14 @@ class EditorManagement {
             let $result = $('#' + editorInstance)
 
             if ($result.hasClass('editor-ckeditor')) {
+                const $editorActionItem = $('.editor-action-item')
                 if (this.CKEDITOR[editorInstance] && typeof this.CKEDITOR[editorInstance] !== 'undefined') {
                     this.CKEDITOR[editorInstance].destroy()
                     this.CKEDITOR[editorInstance] = null
-                    $('.editor-action-item').not('.action-show-hide-editor').hide()
+                    $editorActionItem.not('.action-show-hide-editor').hide()
                 } else {
                     current.initCkEditor(editorInstance, {}, 'ckeditor')
-                    $('.editor-action-item').not('.action-show-hide-editor').show()
+                    $editorActionItem.not('.action-show-hide-editor').show()
                 }
             } else if ($result.hasClass('editor-tinymce')) {
                 tinymce.execCommand('mceToggleEditor', false, editorInstance)

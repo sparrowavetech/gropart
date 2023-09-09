@@ -1,4 +1,4 @@
-<x-core-base::modal
+<x-core::modal
     class="get-started-modal"
     size="lg"
     :options="['data-step' => 1]"
@@ -26,9 +26,9 @@
             </form>
         </div>
     </div>
-</x-core-base::modal>
+</x-core::modal>
 
-<x-core-base::modal
+<x-core::modal
     class="get-started-modal"
     size="lg"
     :options="['data-step' => 2]"
@@ -125,9 +125,9 @@
             </form>
         </div>
     </div>
-</x-core-base::modal>
+</x-core::modal>
 
-<x-core-base::modal
+<x-core::modal
     class="get-started-modal"
     size="lg"
     :options="['data-step' => 3]"
@@ -180,9 +180,9 @@
             </form>
         </div>
     </div>
-</x-core-base::modal>
+</x-core::modal>
 
-<x-core-base::modal
+<x-core::modal
     class="get-started-modal"
     size="lg"
     :options="['data-step' => 4]"
@@ -218,9 +218,9 @@
             </form>
         </div>
     </div>
-</x-core-base::modal>
+</x-core::modal>
 
-<x-core-base::modal
+<x-core::modal
     class="close-get-started-modal"
     size="lg"
     :header="false"
@@ -244,4 +244,4 @@
             </p>
         </div>
     </div>
-</x-core-base::modal>
+</x-core::modal>

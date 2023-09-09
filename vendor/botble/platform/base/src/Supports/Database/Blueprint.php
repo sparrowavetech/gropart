@@ -15,7 +15,11 @@ class Blueprint extends IlluminateBlueprint
     {
         parent::__construct($table, $callback, $prefix);
 
-        rescue(fn () => DB::statement('SET SESSION sql_require_primary_key=0'), report: false);
+        rescue(function () {
+            if (DB::getDefaultConnection() === 'mysql') {
+                DB::statement('SET SESSION sql_require_primary_key=0');
+            }
+        }, report: false);
     }
 
     public function id($column = 'id'): ColumnDefinition

@@ -24,7 +24,7 @@ use Symfony\Component\DependencyInjection\Reference;
 class CachePoolPrunerPass implements CompilerPassInterface
 {
     /**
-     * @return void
+     * {@inheritdoc}
      */
     public function process(ContainerBuilder $container)
     {

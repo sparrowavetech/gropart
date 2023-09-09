@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Facade;
 /**
  * @method static array getStates()
  * @method static array getCitiesByState(string|int|null $stateId)
- * @method static \Botble\Location\Models\City|null getCityById(string|int|null $cityId)
+ * @method static \Botble\Location\Models\City|\Illuminate\Database\Eloquent\Model|null getCityById(string|int|null $cityId)
  * @method static string|null getCityNameById(string|int|null $cityId)
  * @method static string|null getStateNameById(string|int|null $stateId)
  * @method static bool isSupported(object|string $model)
@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static bool registerModule(string $model, array $keys = [])
  * @method static array getRemoteAvailableLocations()
  * @method static array downloadRemoteLocation(string $countryCode)
- * @method static mixed filter($model, string|int|null $cityId = null, string|null $location = null)
+ * @method static mixed filter($model, string|int|null $cityId = null, string|null $location = null, string|int|null $stateId = null)
  *
  * @see \Botble\Location\Location
  */

@@ -11,13 +11,14 @@ use Botble\Location\Models\State;
 use Botble\Setting\Facades\Setting;
 use Illuminate\Console\Command;
 use Illuminate\Console\ConfirmableTrait;
+use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
 use Throwable;
 
 #[AsCommand('cms:shippo:init', 'Shippo initialization')]
-class InitShippoCommand extends Command
+class InitShippoCommand extends Command implements PromptsForMissingInput
 {
     use ConfirmableTrait;
 
@@ -39,9 +40,9 @@ class InitShippoCommand extends Command
         $this->loadLocation();
 
         $city = null;
-        $country = Country::where(['code' => 'US'])->first();
+        $country = Country::query()->where(['code' => 'US'])->first();
         if ($country) {
-            $city = City::where(['name' => 'San Francisco', 'country_id' => $country->id])->first();
+            $city = City::query()->where(['name' => 'San Francisco', 'country_id' => $country->id])->first();
         }
 
         if ($city) {
@@ -51,7 +52,7 @@ class InitShippoCommand extends Command
             $zipCode = '94117';
             $address = '215 Clayton St.';
             $phone = '+1 555 341 9393';
-            $storeLocator = StoreLocator::where(['is_shipping_location' => 1, 'is_primary' => 1])->first();
+            $storeLocator = StoreLocator::query()->where(['is_shipping_location' => 1, 'is_primary' => 1])->first();
             if ($storeLocator) {
                 $storeLocator->update([
                     'phone' => $phone,
@@ -89,9 +90,9 @@ class InitShippoCommand extends Command
                 }
             }
 
-            $city2 = City::where(['name' => 'San Diego', 'country_id' => '1'])->first();
+            $city2 = City::query()->where(['name' => 'San Diego', 'country_id' => '1'])->first();
             if ($city2) {
-                $address = Address::where(['is_default' => 1])->first();
+                $address = Address::query()->where(['is_default' => 1])->first();
                 $address->update([
                     'phone' => '+1 555 341 9393',
                     'country' => $city2->country_id,
@@ -116,11 +117,11 @@ class InitShippoCommand extends Command
 
     public function loadLocation(): void
     {
-        $country = Country::where(['code' => 'US'])->first();
+        $country = Country::query()->where(['code' => 'US'])->first();
         if (! $country) {
-            City::truncate();
-            State::truncate();
-            Country::truncate();
+            City::query()->truncate();
+            State::query()->truncate();
+            Country::query()->truncate();
             DB::table('cities_translations')->truncate();
             DB::table('states_translations')->truncate();
             DB::table('countries_translations')->truncate();
@@ -136,7 +137,8 @@ class InitShippoCommand extends Command
 
     protected function configure(): void
     {
-        $this->addOption('key', null, InputOption::VALUE_REQUIRED, 'The Test API Token to use')
+        $this
+            ->addOption('key', null, InputOption::VALUE_REQUIRED, 'The Test API Token to use')
             ->addOption('force', 'f', null, 'Force the operation to run when in production');
     }
 }

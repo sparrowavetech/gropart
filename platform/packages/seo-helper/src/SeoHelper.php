@@ -4,12 +4,12 @@ namespace Botble\SeoHelper;
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\MetaBox;
-use Botble\Base\Models\BaseModel;
 use Botble\SeoHelper\Contracts\SeoHelperContract;
 use Botble\SeoHelper\Contracts\SeoMetaContract;
 use Botble\SeoHelper\Contracts\SeoOpenGraphContract;
 use Botble\SeoHelper\Contracts\SeoTwitterContract;
 use Exception;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 
@@ -109,11 +109,12 @@ class SeoHelper implements SeoHelperContract
         );
     }
 
-    public function saveMetaData(string $screen, Request $request, BaseModel $object): bool
+    public function saveMetaData(string $screen, Request $request, Model $object): bool
     {
-        if (in_array(get_class($object), config('packages.seo-helper.general.supported', [])) && $request->has(
-            'seo_meta'
-        )) {
+        if (
+            in_array(get_class($object), config('packages.seo-helper.general.supported', [])) &&
+            $request->has('seo_meta')
+        ) {
             try {
                 if (empty($request->input('seo_meta'))) {
                     MetaBox::deleteMetaData($object, 'seo_meta');
@@ -146,7 +147,7 @@ class SeoHelper implements SeoHelperContract
         return false;
     }
 
-    public function deleteMetaData(string $screen, BaseModel $object): bool
+    public function deleteMetaData(string $screen, Model $object): bool
     {
         try {
             if (in_array(get_class($object), config('packages.seo-helper.general.supported', []))) {

@@ -9,16 +9,23 @@ use Botble\Blog\Exports\PostExport;
 use Botble\Blog\Models\Category;
 use Botble\Blog\Models\Post;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Table\DataTables;
-use Illuminate\Contracts\Routing\UrlGenerator;
+use Botble\Table\Actions\DeleteAction;
+use Botble\Table\Actions\EditAction;
+use Botble\Table\BulkActions\DeleteBulkAction;
+use Botble\Table\Columns\Column;
+use Botble\Table\Columns\CreatedAtColumn;
+use Botble\Table\Columns\IdColumn;
+use Botble\Table\Columns\ImageColumn;
+use Botble\Table\Columns\NameColumn;
+use Botble\Table\Columns\StatusColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\Relations\Relation as EloquentRelation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 
 class PostTable extends TableAbstract
 {
@@ -26,64 +33,30 @@ class PostTable extends TableAbstract
 
     protected int $defaultSortColumn = 6;
 
-    public function __construct(
-        DataTables $table,
-        UrlGenerator $urlGenerator,
-        Post $post
-    ) {
-        parent::__construct($table, $urlGenerator);
-
-        $this->model = $post;
-
-        $this->hasActions = true;
-        $this->hasFilter = true;
-
-        if (! Auth::user()->hasAnyPermission(['posts.edit', 'posts.destroy'])) {
-            $this->hasOperations = false;
-            $this->hasActions = false;
-        }
+    public function setup(): void
+    {
+        $this
+            ->model(Post::class)
+            ->addActions([
+                EditAction::make()->route('posts.edit'),
+                DeleteAction::make()->route('posts.destroy'),
+            ]);
     }
 
     public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('name', function (Post $item) {
-                if (! Auth::user()->hasPermission('posts.edit')) {
-                    return BaseHelper::clean($item->name);
-                }
-
-                return Html::link(route('posts.edit', $item->getKey()), BaseHelper::clean($item->name));
-            })
-            ->editColumn('image', function (Post $item) {
-                return $this->displayThumbnail($item->image);
-            })
-            ->editColumn('checkbox', function (Post $item) {
-                return $this->getCheckbox($item->getKey());
-            })
-            ->editColumn('created_at', function (Post $item) {
-                return BaseHelper::formatDate($item->created_at);
-            })
-            ->editColumn('updated_at', function (Post $item) {
-                $categories = '';
+            ->editColumn('categories_name', function (Post $item) {
+                $categories = [];
                 foreach ($item->categories as $category) {
-                    $categories .= Html::link(route('categories.edit', $category->id), $category->name) . ', ';
+                    $categories[] = Html::link(route('categories.edit', $category->id), $category->name);
                 }
 
-                return rtrim($categories, ', ');
+                return implode(', ', $categories);
             })
             ->editColumn('author_id', function (Post $item) {
                 return $item->author && $item->author->name ? BaseHelper::clean($item->author->name) : '&mdash;';
-            })
-            ->editColumn('status', function (Post $item) {
-                if ($this->request()->input('action') === 'excel') {
-                    return $item->status->getValue();
-                }
-
-                return BaseHelper::clean($item->status->toHtml());
-            })
-            ->addColumn('operations', function (Post $item) {
-                return $this->getOperations('posts.edit', 'posts.destroy', $item);
             });
 
         return $this->toJson($data);
@@ -95,7 +68,7 @@ class PostTable extends TableAbstract
             ->getModel()
             ->query()
             ->with([
-                'categories' => function ($query) {
+                'categories' => function (BelongsToMany $query) {
                     $query->select(['categories.id', 'categories.name']);
                 },
                 'author',
@@ -117,40 +90,21 @@ class PostTable extends TableAbstract
     public function columns(): array
     {
         return [
-            'id' => [
-                'title' => trans('core/base::tables.id'),
-                'width' => '20px',
-            ],
-            'image' => [
-                'title' => trans('core/base::tables.image'),
-                'width' => '70px',
-            ],
-            'name' => [
-                'title' => trans('core/base::tables.name'),
-                'class' => 'text-start',
-            ],
-            'updated_at' => [
-                'title' => trans('plugins/blog::posts.categories'),
-                'width' => '150px',
-                'class' => 'no-sort text-center',
-                'orderable' => false,
-            ],
-            'author_id' => [
-                'title' => trans('plugins/blog::posts.author'),
-                'width' => '150px',
-                'class' => 'no-sort text-center',
-                'orderable' => false,
-            ],
-            'created_at' => [
-                'title' => trans('core/base::tables.created_at'),
-                'width' => '100px',
-                'class' => 'text-center',
-            ],
-            'status' => [
-                'title' => trans('core/base::tables.status'),
-                'width' => '100px',
-                'class' => 'text-center',
-            ],
+            IdColumn::make(),
+            ImageColumn::make(),
+            NameColumn::make()->route('posts.edit'),
+            Column::make('categories_name')
+                ->title(trans('plugins/blog::posts.categories'))
+                ->width(150)
+                ->orderable(false)
+                ->searchable(false),
+            Column::make('author_id')
+                ->title(trans('plugins/blog::posts.author'))
+                ->width(150)
+                ->orderable(false)
+                ->searchable(false),
+            CreatedAtColumn::make(),
+            StatusColumn::make(),
         ];
     }
 
@@ -161,7 +115,9 @@ class PostTable extends TableAbstract
 
     public function bulkActions(): array
     {
-        return $this->addDeleteAction(route('posts.deletes'), 'posts.destroy', parent::bulkActions());
+        return [
+            DeleteBulkAction::make()->permission('posts.destroy'),
+        ];
     }
 
     public function getBulkChanges(): array
@@ -197,10 +153,14 @@ class PostTable extends TableAbstract
         return Category::query()->pluck('name', 'id')->all();
     }
 
-    public function applyFilterCondition(EloquentBuilder|QueryBuilder|EloquentRelation $query, string $key, string $operator, string|null $value): EloquentRelation|EloquentBuilder|QueryBuilder
-    {
+    public function applyFilterCondition(
+        EloquentBuilder|QueryBuilder|EloquentRelation $query,
+        string $key,
+        string $operator,
+        string|null $value
+    ): EloquentRelation|EloquentBuilder|QueryBuilder {
         if ($key === 'category' && $value) {
-            return $query->whereHas('categories', fn ($query) => $query->where('categories.id', $value));
+            return $query->whereHas('categories', fn (BelongsToMany $query) => $query->where('categories.id', $value));
         }
 
         return parent::applyFilterCondition($query, $key, $operator, $value);
@@ -208,10 +168,7 @@ class PostTable extends TableAbstract
 
     public function saveBulkChangeItem(Model|Post $item, string $inputKey, string|null $inputValue): Model|bool
     {
-        if ($inputKey === 'category') {
-            /**
-             * @var Post $item
-             */
+        if ($inputKey === 'category' && $item instanceof Post) {
             $item->categories()->sync([$inputValue]);
 
             return $item;

@@ -2,6 +2,7 @@
 
 namespace Botble\Setting\Http\Controllers;
 
+use Botble\Base\Exceptions\LicenseInvalidException;
 use Botble\Base\Exceptions\LicenseIsAlreadyActivatedException;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
@@ -13,8 +14,8 @@ use Botble\Base\Supports\Core;
 use Botble\Base\Supports\Language;
 use Botble\JsValidation\Facades\JsValidator;
 use Botble\Media\Facades\RvMedia;
-use Botble\Media\Repositories\Interfaces\MediaFileInterface;
-use Botble\Media\Repositories\Interfaces\MediaFolderInterface;
+use Botble\Media\Models\MediaFile;
+use Botble\Media\Models\MediaFolder;
 use Botble\Setting\Facades\Setting;
 use Botble\Setting\Http\Requests\EmailSettingRequest;
 use Botble\Setting\Http\Requests\EmailTemplateRequest;
@@ -232,7 +233,7 @@ class SettingController extends BaseController
         }
     }
 
-    public function getMediaSetting(MediaFolderInterface $mediaFolderRepository)
+    public function getMediaSetting()
     {
         PageTitle::setTitle(trans('core/setting::setting.media.title'));
 
@@ -242,7 +243,7 @@ class SettingController extends BaseController
 
         $folderIds = json_decode((string)setting('media_folders_can_add_watermark'), true);
 
-        $folders = $mediaFolderRepository->pluck('name', 'id', ['parent_id' => 0]);
+        $folders = MediaFolder::query()->where('parent_id', 0)->pluck('name', 'id')->all();
 
         $jsValidation = JsValidator::formRequest(MediaSettingRequest::class);
 
@@ -280,64 +281,51 @@ class SettingController extends BaseController
             }
 
             $activatedAt = Carbon::createFromTimestamp(filectime($core->getLicenseFilePath()));
-            $message = 'Your license is activated.';
+
+            $data = [
+                'activated_at' => $activatedAt->format('M d Y'),
+                'licensed_to' => setting('licensed_to'),
+            ];
+
+            return $response->setMessage('Your license is activated.')->setData($data);
         } catch (Throwable $exception) {
-            $activatedAt = Carbon::now();
-            $message = $exception->getMessage();
+            return $response->setMessage($exception->getMessage());
         }
-
-        $data = [
-            'activated_at' => $activatedAt->format('M d Y'),
-            'licensed_to' => setting('licensed_to'),
-        ];
-
-        return $response->setMessage($message)->setData($data);
     }
 
     public function activateLicense(LicenseSettingRequest $request, BaseHttpResponse $response, Core $core)
     {
         $buyer = $request->input('buyer');
+
         if (filter_var($buyer, FILTER_VALIDATE_URL)) {
             $buyer = explode('/', $buyer);
             $username = end($buyer);
 
             return $response
                 ->setError()
-                ->setMessage(sprintf('Envato username must not a URL. Please try with username "%s"!', $username));
+                ->setMessage(sprintf('Envato username must not a URL. Please try with username "%s".', $username));
         }
 
         $purchasedCode = $request->input('purchase_code');
 
         try {
-            if (! $core->activateLicense($purchasedCode, $buyer)) {
-                return $response->setError()->setMessage('Your license is invalid.');
-            }
+            $core->activateLicense($purchasedCode, $buyer);
 
             $data = $this->saveActivatedLicense($core, $buyer);
 
-            return $response->setMessage('Your license has been activated successfully!')->setData($data);
-        } catch (LicenseIsAlreadyActivatedException) {
-            try {
-                $core->revokeLicense($purchasedCode, $buyer);
-
-                if (! $core->activateLicense($purchasedCode, $buyer)) {
-                    return $response->setError()->setMessage('Your license is invalid.');
-                }
-
-                $data = $this->saveActivatedLicense($core, $buyer);
-
-                return $response
-                    ->setMessage('Your license has been activated successfully and the license on the previous domain has been revoked!')
-                    ->setData($data);
-            } catch (LicenseIsAlreadyActivatedException) {
-                return $response
-                    ->setError()
-                    ->setMessage('Exceeded maximum number of activations, please contact our support to reset your license.');
-            }
-        } catch (Throwable $exception) {
+            return $response
+                ->setMessage('Your license has been activated successfully.')
+                ->setData($data);
+        } catch (LicenseInvalidException|LicenseIsAlreadyActivatedException $exception) {
             return $response
                 ->setError()
                 ->setMessage($exception->getMessage());
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return $response
+                ->setError()
+                ->setMessage('Something went wrong. Please try again later.');
         }
     }
 
@@ -369,11 +357,11 @@ class SettingController extends BaseController
         }
     }
 
-    public function generateThumbnails(MediaFileInterface $fileRepository, BaseHttpResponse $response)
+    public function generateThumbnails(BaseHttpResponse $response)
     {
         BaseHelper::maximumExecutionTimeAndMemoryLimit();
 
-        $files = $fileRepository->allBy([], [], ['url', 'mime_type', 'folder_id']);
+        $files = MediaFile::query()->select(['url', 'mime_type', 'folder_id'])->get();
 
         $errors = [];
 

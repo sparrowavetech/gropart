@@ -3,6 +3,7 @@
 namespace Botble\Blog\Http\Controllers\API;
 
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Blog\Http\Resources\ListPostResource;
 use Botble\Blog\Http\Resources\PostResource;
@@ -50,7 +51,7 @@ class PostController extends Controller
      */
     public function getSearch(Request $request, PostInterface $postRepository, BaseHttpResponse $response)
     {
-        $query = $request->input('q');
+        $query = BaseHelper::stringify($request->input('q'));
         $posts = $postRepository->getSearch($query);
 
         $data = [
@@ -114,10 +115,12 @@ class PostController extends Controller
             return $response->setError()->setCode(404)->setMessage('Not found');
         }
 
-        $post = $this->postRepository->getFirstBy([
-            'id' => $slug->reference_id,
-            'status' => BaseStatusEnum::PUBLISHED,
-        ]);
+        $post = Post::query()
+            ->where([
+                'id' => $slug->reference_id,
+                'status' => BaseStatusEnum::PUBLISHED,
+            ])
+            ->first();
 
         if (! $post) {
             return $response->setError()->setCode(404)->setMessage('Not found');

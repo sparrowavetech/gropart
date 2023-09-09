@@ -5,16 +5,26 @@ namespace Botble\Backup\Commands;
 use Botble\Backup\Supports\Backup;
 use Exception;
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Console\PromptsForMissingInput;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
 #[AsCommand('cms:backup:create', 'Create a backup')]
-class BackupCreateCommand extends Command
+class BackupCreateCommand extends Command implements PromptsForMissingInput
 {
     public function handle(Backup $backupService): int
     {
+        $driver = DB::getConfig('driver');
+
+        if (! in_array($driver, ['mysql', 'pgsql'], true)) {
+            $this->components->error(sprintf('Driver [%s] is not supported to create the backup!', $driver));
+
+            return self::FAILURE;
+        }
+
         try {
             $this->components->info('Generating backup...');
 

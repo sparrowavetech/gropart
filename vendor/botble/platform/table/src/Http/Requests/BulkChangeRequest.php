@@ -10,6 +10,7 @@ class BulkChangeRequest extends Request
     {
         return [
             'class' => 'required|string',
+            'key' => 'nullable|string',
         ];
     }
 }

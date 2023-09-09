@@ -5,12 +5,13 @@ namespace Botble\Theme\Commands;
 use Botble\Theme\Commands\Traits\ThemeTrait;
 use Botble\Theme\Services\ThemeService;
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
 #[AsCommand('cms:theme:assets:remove', 'Remove assets for a theme')]
-class ThemeAssetsRemoveCommand extends Command
+class ThemeAssetsRemoveCommand extends Command implements PromptsForMissingInput
 {
     use ThemeTrait;
 

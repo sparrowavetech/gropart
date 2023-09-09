@@ -7,6 +7,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 abstract class PageSpeed
 {
@@ -21,6 +22,7 @@ abstract class PageSpeed
             || $request->expectsJson()
             || in_array($response->headers->get('Content-Type'), ['application/json', 'application/pdf'])
             || $response instanceof BinaryFileResponse
+            || $response instanceof StreamedResponse
         ) {
             return $response;
         }

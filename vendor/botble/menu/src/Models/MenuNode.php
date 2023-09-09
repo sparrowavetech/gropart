@@ -3,6 +3,7 @@
 namespace Botble\Menu\Models;
 
 use Botble\Base\Casts\SafeContent;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Models\BaseModel;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -54,6 +55,8 @@ class MenuNode extends BaseModel
     {
         return Attribute::make(
             get: function ($value) {
+                $value = html_entity_decode(BaseHelper::clean($value));
+
                 if ($value) {
                     return apply_filters(MENU_FILTER_NODE_URL, $value);
                 }

@@ -6,12 +6,13 @@ use Botble\Theme\Commands\Traits\ThemeTrait;
 use Botble\Theme\Services\ThemeService;
 use Illuminate\Console\Command;
 use Illuminate\Console\ConfirmableTrait;
+use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
 #[AsCommand('cms:theme:remove', 'Remove an existing theme')]
-class ThemeRemoveCommand extends Command
+class ThemeRemoveCommand extends Command implements PromptsForMissingInput
 {
     use ThemeTrait;
     use ConfirmableTrait;

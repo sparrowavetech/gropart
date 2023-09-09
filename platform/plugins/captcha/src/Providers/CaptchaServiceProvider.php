@@ -63,6 +63,10 @@ class CaptchaServiceProvider extends ServiceProvider
          */
         $validator = $app['validator'];
         $validator->extend('captcha', function ($attribute, $value, $parameters) use ($app) {
+            if (! is_string($value)) {
+                return false;
+            }
+
             if (setting('captcha_type') === 'v3') {
                 if (empty($parameters)) {
                     $parameters = ['form', '0.6'];
@@ -71,11 +75,15 @@ class CaptchaServiceProvider extends ServiceProvider
                 $parameters = $this->mapParameterToOptions($parameters);
             }
 
-            return $app['captcha']->verify((string)$value, $this->app['request']->getClientIp(), $parameters);
+            return $app['captcha']->verify($value, $this->app['request']->getClientIp(), $parameters);
         }, __('Captcha Verification Failed!'));
 
         $validator->extend('math_captcha', function ($attribute, $value) {
-            return $this->app['math-captcha']->verify((string)$value);
+            if (! is_string($value)) {
+                return false;
+            }
+
+            return $this->app['math-captcha']->verify($value);
         }, __('Math Captcha Verification Failed!'));
     }
 

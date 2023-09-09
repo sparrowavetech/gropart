@@ -80,24 +80,6 @@ class CountryController extends BaseController
         }
     }
 
-    public function deletes(Request $request, BaseHttpResponse $response)
-    {
-        $ids = $request->input('ids');
-        if (empty($ids)) {
-            return $response
-                ->setError()
-                ->setMessage(trans('core/base::notices.no_select'));
-        }
-
-        foreach ($ids as $id) {
-            $country = Country::query()->findOrFail($id);
-            $country->delete();
-            event(new DeletedContentEvent(COUNTRY_MODULE_SCREEN_NAME, $request, $country));
-        }
-
-        return $response->setMessage(trans('core/base::notices.delete_success_message'));
-    }
-
     public function getList(Request $request, BaseHttpResponse $response)
     {
         $keyword = BaseHelper::stringify($request->input('q'));
@@ -110,7 +92,7 @@ class CountryController extends BaseController
             ->where('name', 'LIKE', '%' . $keyword . '%')
             ->select(['id', 'name'])
             ->take(10)
-            ->orderBy('order', 'ASC')
+            ->orderBy('order')
             ->orderBy('name', 'ASC')
             ->get();
 

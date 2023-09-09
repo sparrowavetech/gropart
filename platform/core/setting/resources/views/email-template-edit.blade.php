@@ -79,7 +79,7 @@
         {!! Form::close() !!}
     </div>
 
-    <x-core-base::modal
+    <x-core::modal
         id="reset-template-to-default-modal"
         :title="trans('core/setting::setting.email.confirm_reset')"
         type="info"
@@ -87,5 +87,5 @@
         :button-label="trans('core/setting::setting.email.continue')"
     >
         {!! trans('core/setting::setting.email.confirm_message') !!}
-    </x-core-base::modal>
+    </x-core::modal>
 @endsection

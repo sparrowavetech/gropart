@@ -73,7 +73,7 @@ class Post extends BaseModel
 
     protected static function booted(): void
     {
-        static::deleting(function (Post $post) {
+        static::deleted(function (Post $post) {
             $post->categories()->detach();
             $post->tags()->detach();
         });

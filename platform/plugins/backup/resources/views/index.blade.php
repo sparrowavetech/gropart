@@ -1,4 +1,5 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
+
 @section('content')
     <div class="clearfix"></div>
     @if (!function_exists('proc_open'))
@@ -7,14 +8,21 @@
         </div>
     @endif
 
-    <div class="note note-warning">
-        <p>- {!! BaseHelper::clean(trans('plugins/backup::backup.important_message1')) !!}</p>
-        <p>- {!! BaseHelper::clean(trans('plugins/backup::backup.important_message2')) !!}</p>
-        <p>- {!! BaseHelper::clean(trans('plugins/backup::backup.important_message3')) !!}</p>
-        <p>- {!! BaseHelper::clean(trans('plugins/backup::backup.important_message4')) !!}</p>
-    </div>
+    @if ($driver === 'mysql')
+        <div class="note note-warning">
+            <p>- {!! BaseHelper::clean(trans('plugins/backup::backup.important_message1')) !!}</p>
+            <p>- {!! BaseHelper::clean(trans('plugins/backup::backup.important_message2')) !!}</p>
+            <p>- {!! BaseHelper::clean(trans('plugins/backup::backup.important_message3')) !!}</p>
+            <p>- {!! BaseHelper::clean(trans('plugins/backup::backup.important_message4')) !!}</p>
+        </div>
+    @elseif ($driver === 'pgsql')
+        <div class="note note-warning">
+            <p>- {!! BaseHelper::clean(trans('plugins/backup::backup.important_message_pgsql1')) !!}</p>
+            <p>- {!! BaseHelper::clean(trans('plugins/backup::backup.important_message_pgsql2')) !!}</p>
+        </div>
+    @endif
 
-    @if (auth()->user()->hasPermission('backups.create'))
+    @if ($driver === 'mysql' && auth()->user()->hasPermission('backups.create'))
         <p><button class="btn btn-primary" id="generate_backup">{{ trans('plugins/backup::backup.generate_btn') }}</button></p>
     @endif
 
@@ -42,7 +50,7 @@
     </table>
 
     @if (auth()->user()->hasPermission('backups.create'))
-        <x-core-base::modal
+        <x-core::modal
             id="create-backup-modal"
             :title="trans('plugins/backup::backup.create')"
             type="info"
@@ -59,12 +67,12 @@
                 {!! Form::textarea('description', old('description'), ['class' => 'form-control', 'rows' => 4, 'id' => 'description', 'placeholder' => trans('core/base::forms.description'), 'data-counter' => 400]) !!}
             </div>
 
-        </x-core-base::modal>
+        </x-core::modal>
         <div data-route-create="{{ route('backups.create') }}"></div>
     @endif
 
     @if (auth()->user()->hasPermission('backups.restore'))
-        <x-core-base::modal
+        <x-core::modal
             id="restore-backup-modal"
             :title="trans('plugins/backup::backup.restore')"
             type="info"
@@ -72,7 +80,7 @@
             :button-label="trans('plugins/backup::backup.restore_btn')"
         >
             {!! trans('plugins/backup::backup.restore_confirm_msg') !!}
-        </x-core-base::modal>
+        </x-core::modal>
     @endif
 
     @include('core/table::modal')

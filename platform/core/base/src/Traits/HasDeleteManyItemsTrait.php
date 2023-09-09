@@ -8,6 +8,9 @@ use Botble\Base\Models\BaseModel;
 use Botble\Support\Repositories\Interfaces\RepositoryInterface;
 use Illuminate\Http\Request;
 
+/**
+ * @deprecated since v6.8.0
+ */
 trait HasDeleteManyItemsTrait
 {
     protected function executeDeleteItems(

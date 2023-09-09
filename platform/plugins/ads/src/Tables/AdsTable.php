@@ -4,71 +4,40 @@ namespace Botble\Ads\Tables;
 
 use Botble\Ads\Models\Ads;
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Facades\Html;
-use Botble\Media\Facades\RvMedia;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Table\DataTables;
-use Illuminate\Contracts\Routing\UrlGenerator;
+use Botble\Table\Actions\DeleteAction;
+use Botble\Table\Actions\EditAction;
+use Botble\Table\BulkActions\DeleteBulkAction;
+use Botble\Table\Columns\Column;
+use Botble\Table\Columns\DateColumn;
+use Botble\Table\Columns\IdColumn;
+use Botble\Table\Columns\ImageColumn;
+use Botble\Table\Columns\NameColumn;
+use Botble\Table\Columns\StatusColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 
 class AdsTable extends TableAbstract
 {
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Ads $model)
+    public function setup(): void
     {
-        parent::__construct($table, $urlGenerator);
-
-        $this->model = $model;
-        $this->hasActions = true;
-        $this->hasFilter = true;
-
-        if (! Auth::user()->hasAnyPermission(['ads.edit', 'ads.destroy'])) {
-            $this->hasOperations = false;
-            $this->hasActions = false;
-        }
+        $this
+            ->model(Ads::class)
+            ->addActions([
+                EditAction::make()->route('ads.edit'),
+                DeleteAction::make()->route('ads.destroy'),
+            ]);
     }
 
     public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('image', function ($item) {
-                return Html::image(
-                    RvMedia::getImageUrl($item->image, 'thumb', false, RvMedia::getDefaultImage()),
-                    $item->name,
-                    ['width' => 50]
-                );
-            })
-            ->editColumn('name', function ($item) {
-                if (! Auth::user()->hasPermission('ads.edit')) {
-                    return BaseHelper::clean($item->name);
-                }
-
-                return Html::link(route('ads.edit', $item->id), BaseHelper::clean($item->name));
-            })
-            ->editColumn('checkbox', function ($item) {
-                return $this->getCheckbox($item->id);
-            })
-            ->editColumn('expired_at', function ($item) {
-                return BaseHelper::formatDate($item->expired_at);
-            })
-            ->editColumn('status', function ($item) {
-                return $item->status->toHtml();
-            });
-
-        if (function_exists('shortcode')) {
-            $data = $data->editColumn('key', function ($item) {
+            ->editColumn('key', function ($item) {
                 return generate_shortcode('ads', ['key' => $item->key]);
             });
-        }
-
-        $data = $data->addColumn('operations', function ($item) {
-            return $this->getOperations('ads.edit', 'ads.destroy', $item);
-        });
 
         return $this->toJson($data);
     }
@@ -93,59 +62,30 @@ class AdsTable extends TableAbstract
     public function columns(): array
     {
         return [
-            'id' => [
-                'name' => 'id',
-                'title' => trans('core/base::tables.id'),
-                'width' => '20px',
-            ],
-            'image' => [
-                'name' => 'image',
-                'title' => trans('core/base::tables.image'),
-                'width' => '70px',
-            ],
-            'name' => [
-                'name' => 'name',
-                'title' => trans('core/base::tables.name'),
-                'class' => 'text-start',
-            ],
-            'key' => [
-                'name' => 'key',
-                'title' => trans('plugins/ads::ads.shortcode'),
-                'class' => 'text-start',
-            ],
-            'clicked' => [
-                'name' => 'clicked',
-                'title' => trans('plugins/ads::ads.clicked'),
-                'class' => 'text-start',
-            ],
-            'expired_at' => [
-                'name' => 'expired_at',
-                'title' => trans('plugins/ads::ads.expired_at'),
-                'width' => '100px',
-            ],
-            'status' => [
-                'name' => 'status',
-                'title' => trans('core/base::tables.status'),
-                'width' => '100px',
-            ],
+            IdColumn::make(),
+            ImageColumn::make(),
+            NameColumn::make()->route('ads.edit'),
+            Column::make('key')
+                ->title(trans('plugins/ads::ads.shortcode'))
+                ->alignLeft(),
+            Column::make('clicked')
+                ->title(trans('plugins/ads::ads.clicked'))
+                ->alignLeft(),
+            DateColumn::make('expired_at'),
+            StatusColumn::make(),
         ];
     }
 
     public function buttons(): array
     {
-        $buttons = $this->addCreateButton(route('ads.create'), 'ads.create');
-
-        return apply_filters(BASE_FILTER_TABLE_BUTTONS, $buttons, Ads::class);
+        return $this->addCreateButton(route('ads.create'), 'ads.create');
     }
 
     public function bulkActions(): array
     {
-        return $this->addDeleteAction(route('ads.deletes'), 'ads.destroy', parent::bulkActions());
-    }
-
-    public function getFilters(): array
-    {
-        return $this->getBulkChanges();
+        return [
+            DeleteBulkAction::make()->permission('ads.destroy'),
+        ];
     }
 
     public function getBulkChanges(): array

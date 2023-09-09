@@ -2,6 +2,7 @@
 
 namespace Botble\Base\Http\Controllers;
 
+use Botble\Base\Enums\SystemUpdaterStepEnum;
 use Botble\Base\Events\UpdatedEvent;
 use Botble\Base\Events\UpdatingEvent;
 use Botble\Base\Facades\Assets;
@@ -15,6 +16,7 @@ use Botble\Base\Supports\Language;
 use Botble\Base\Supports\MembershipAuthorization;
 use Botble\Base\Supports\SystemManagement;
 use Botble\Base\Tables\InfoTable;
+use Exception;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -193,57 +195,20 @@ class SystemController extends Controller
     public function postUpdater(Core $core, Request $request, BaseHttpResponse $response): BaseHttpResponse
     {
         $request->validate([
-            'step' => ['required', 'integer', 'min:1', 'max:4'],
+            'step' => ['required_without:step_name', 'integer', 'min:1', 'max:4'],
+            'step_name' => ['required_without:step', 'string'],
             'update_id' => ['required', 'string'],
             'version' => ['required', 'string'],
         ]);
 
-        $updateId = $request->input('update_id');
-        $version = $request->input('version');
-
         BaseHelper::maximumExecutionTimeAndMemoryLimit();
 
-        try {
-            switch ($request->integer('step', 1)) {
-                case 1:
-                    event(new UpdatingEvent());
+        if ($request->filled('step_name')) {
+            return $this->postUpdaterByStepName($core, $request, $response);
+        }
 
-                    if ($core->downloadUpdate($updateId, $version)) {
-                        return $response->setMessage(__('The update files have been downloaded successfully.'));
-                    }
-
-                    return $response
-                        ->setMessage(__('Could not download updated file. Please check your license or your internet network.'))
-                        ->setError()
-                        ->setCode(422);
-
-                case 2:
-                    if ($core->updateFilesAndDatabase($version)) {
-                        return $response->setMessage(__('Your files and database have been updated successfully.'));
-                    }
-
-                    return $response
-                        ->setMessage(__('Could not update files & database.'))
-                        ->setError()
-                        ->setCode(422);
-                case 3:
-                    $core->publishUpdateAssets();
-
-                    return $response->setMessage(__('Your asset files have been published successfully.'));
-                case 4:
-                    $core->cleanCaches();
-
-                    event(new UpdatedEvent());
-
-                    return $response->setMessage(__('Your system has been cleaned up successfully.'));
-            }
-        } catch (Throwable $exception) {
-            $core->logError($exception);
-
-            return $response
-                ->setMessage($exception->getMessage() . ' - ' . $exception->getFile() . ':' . $exception->getLine())
-                ->setError()
-                ->setCode(422);
+        if ($request->filled('step')) {
+            return $this->postUpdaterByStep($core, $request, $response);
         }
 
         return $response
@@ -288,5 +253,109 @@ class SystemController extends Controller
         }
 
         return view('core/base::system.cleanup', compact('tables', 'disabledTables'));
+    }
+
+    /**
+     * @deprecated Will be removed in the future, use postUpdaterByStepName instead.
+     */
+    protected function postUpdaterByStep(Core $core, Request $request, BaseHttpResponse $response): BaseHttpResponse
+    {
+        $updateId = $request->input('update_id');
+        $version = $request->input('version');
+
+        try {
+            switch ($request->integer('step', 1)) {
+                case 1:
+                    event(new UpdatingEvent());
+
+                    if ($core->downloadUpdate($updateId, $version)) {
+                        return $response->setMessage(__('The update files have been downloaded successfully.'));
+                    }
+
+                    return $response
+                        ->setMessage(__('Could not download updated file. Please check your license or your internet network.'))
+                        ->setError()
+                        ->setCode(422);
+
+                case 2:
+                    if ($core->updateFilesAndDatabase($version)) {
+                        return $response->setMessage(__('Your files and database have been updated successfully.'));
+                    }
+
+                    return $response
+                        ->setMessage(__('Could not update files & database.'))
+                        ->setError()
+                        ->setCode(422);
+                case 3:
+                    $core->publishUpdateAssets();
+
+                    return $response->setMessage(__('Your asset files have been published successfully.'));
+                case 4:
+                    $core->cleanCaches();
+
+                    event(new UpdatedEvent());
+
+                    return $response->setMessage(__('Your system has been cleaned up successfully.'));
+                default:
+                    throw new Exception(__('Invalid step.'));
+            }
+        } catch (Throwable $exception) {
+            $core->logError($exception);
+
+            return $response
+                ->setMessage($exception->getMessage())
+                ->setError()
+                ->setCode(422);
+        }
+    }
+
+    protected function postUpdaterByStepName(Core $core, Request $request, BaseHttpResponse $response): BaseHttpResponse
+    {
+        $updateId = $request->input('update_id');
+        $version = $request->input('version');
+        $stepName = $request->input('step_name');
+        $step = SystemUpdaterStepEnum::tryFrom($stepName);
+
+        if (! $step) {
+            return $response
+                ->setMessage(__('Invalid step.'))
+                ->setError()
+                ->setCode(422);
+        }
+
+        try {
+            $success = match ($step->getValue()) {
+                SystemUpdaterStepEnum::DOWNLOAD => $core->downloadUpdate($updateId, $version),
+                SystemUpdaterStepEnum::UPDATE_FILES => $core->updateFiles($version),
+                SystemUpdaterStepEnum::UPDATE_DATABASE => $core->updateDatabase(),
+                SystemUpdaterStepEnum::PUBLISH_CORE_ASSETS => $core->publishCoreAssets(),
+                SystemUpdaterStepEnum::PUBLISH_PACKAGES_ASSETS => $core->publishPackagesAssets(),
+                SystemUpdaterStepEnum::PUBLISH_PLUGINS_ASSETS => $core->publishPluginsAssets(),
+                SystemUpdaterStepEnum::PUBLISH_THEMES_ASSETS => $core->publishThemesAssets(),
+                SystemUpdaterStepEnum::CLEAN_UP => $core->cleanUp(),
+                default => throw new Exception(__('Invalid step.')),
+            };
+
+            if (! $success) {
+                return $response
+                    ->setError()
+                    ->setMessage($step->failedMessage());
+            }
+
+            return $response
+                ->setData([
+                    'next_step' => $step->nextStep(),
+                    'next_message' => $step->nextStepMessage(),
+                    'current_percent' => $step->currentPercent(),
+                ])
+                ->setMessage($step->successMessage());
+        } catch (Throwable $exception) {
+            $core->logError($exception);
+
+            return $response
+                ->setMessage($exception->getMessage())
+                ->setError()
+                ->setCode(422);
+        }
     }
 }

@@ -12,22 +12,36 @@ class ExportDatabaseCommand extends Command
 {
     public function handle(): int
     {
-        $config = DB::connection('mysql')->getConfig();
+        $config = DB::getConfig();
 
-        if (! $config) {
-            return self::FAILURE;
+        switch ($driver = $config['driver']) {
+            case 'mysql':
+                $sqlPath = base_path('database.sql');
+                $command = 'mysqldump --user="%s" --password="%s" --host="%s" --port="%s" "%s" > "%s"';
+
+                Process::fromShellCommandline(
+                    sprintf($command, $config['username'], $config['password'], $config['host'], $config['port'], $config['database'], $sqlPath)
+                )->mustRun();
+
+                $this->components->info('Exported database to SQL file successfully on MySQL connection.');
+
+                return self::SUCCESS;
+            case 'pgsql':
+                $sqlPath = base_path('database.pgsql.dump');
+
+                $command = 'PGPASSWORD="%s" pg_dump --username="%s" --host="%s" --port="%s" --dbname="%s" -Fc > "%s"';
+
+                Process::fromShellCommandline(
+                    sprintf($command, $config['password'], $config['username'], $config['host'], $config['port'], $config['database'], $sqlPath)
+                )->mustRun();
+
+                $this->components->info('Exported database to SQL file successfully on PostgreSQL connection.');
+
+                return self::SUCCESS;
         }
 
-        $sqlPath = base_path('database.sql');
+        $this->components->error(sprintf('The driver [%s] does not support.', $driver));
 
-        $sql = 'mysqldump --user="' . $config['username'] . '" --password="' . $config['password'] . '"';
-
-        $sql .= ' --host=' . $config['host'] . ' --port=' . $config['port'] . ' ' . $config['database'] . ' > ' . $sqlPath;
-
-        Process::fromShellCommandline($sql)->mustRun();
-
-        $this->components->info('Exported database to SQL file successfully!');
-
-        return self::SUCCESS;
+        return self::FAILURE;
     }
 }

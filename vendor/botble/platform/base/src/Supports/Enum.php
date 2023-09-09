@@ -106,6 +106,7 @@ abstract class Enum implements CastsAttributes, JsonSerializable
     public static function __callStatic(string $name, array $arguments)
     {
         $array = static::toArray();
+
         if (isset($array[$name]) || array_key_exists($name, $array)) {
             return (new static())->make($array[$name]);
         }

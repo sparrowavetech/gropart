@@ -3,46 +3,38 @@
 namespace Botble\Location\Tables;
 
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
 use Botble\Location\Models\State;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Table\DataTables;
-use Illuminate\Contracts\Routing\UrlGenerator;
+use Botble\Table\Actions\DeleteAction;
+use Botble\Table\Actions\EditAction;
+use Botble\Table\BulkActions\DeleteBulkAction;
+use Botble\Table\Columns\Column;
+use Botble\Table\Columns\CreatedAtColumn;
+use Botble\Table\Columns\IdColumn;
+use Botble\Table\Columns\NameColumn;
+use Botble\Table\Columns\StatusColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 
 class StateTable extends TableAbstract
 {
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, State $state)
+    public function setup(): void
     {
-        parent::__construct($table, $urlGenerator);
-
-        $this->model = $state;
-
-        $this->hasActions = true;
-        $this->hasFilter = true;
-
-        if (! Auth::user()->hasAnyPermission(['state.edit', 'state.destroy'])) {
-            $this->hasOperations = false;
-            $this->hasActions = false;
-        }
+        $this
+            ->model(State::class)
+            ->addActions([
+                EditAction::make()->route('state.edit'),
+                DeleteAction::make()->route('state.destroy'),
+            ]);
     }
 
     public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('name', function (State $item) {
-                if (! Auth::user()->hasPermission('state.edit')) {
-                    return BaseHelper::clean($item->name);
-                }
-
-                return Html::link(route('state.edit', $item->getKey()), BaseHelper::clean($item->name));
-            })
             ->editColumn('country_id', function (State $item) {
                 if (! $item->country_id && $item->country->name) {
                     return null;
@@ -50,17 +42,22 @@ class StateTable extends TableAbstract
 
                 return Html::link(route('country.edit', $item->country_id), $item->country->name);
             })
-            ->editColumn('checkbox', function (State $item) {
-                return $this->getCheckbox($item->getKey());
-            })
-            ->editColumn('created_at', function (State $item) {
-                return BaseHelper::formatDate($item->created_at);
-            })
-            ->editColumn('status', function (State $item) {
-                return $item->status->toHtml();
-            })
-            ->addColumn('operations', function (State $item) {
-                return $this->getOperations('state.edit', 'state.destroy', $item);
+            ->filter(function (Builder $query) {
+                $keyword = $this->request->input('search.value');
+
+                if (! $keyword) {
+                    return $query;
+                }
+
+                return $query->where(function (Builder $query) use ($keyword) {
+                    $query
+                        ->where('id', $keyword)
+                        ->orWhere('name', 'LIKE', '%' . $keyword . '%')
+                        ->orWhereHas('country', function (Builder $subQuery) use ($keyword) {
+                            return $subQuery
+                                ->where('name', 'LIKE', '%' . $keyword . '%');
+                        });
+                });
             });
 
         return $this->toJson($data);
@@ -85,26 +82,13 @@ class StateTable extends TableAbstract
     public function columns(): array
     {
         return [
-            'id' => [
-                'title' => trans('core/base::tables.id'),
-                'width' => '20px',
-            ],
-            'name' => [
-                'title' => trans('core/base::tables.name'),
-                'class' => 'text-start',
-            ],
-            'country_id' => [
-                'title' => trans('plugins/location::state.country'),
-                'class' => 'text-start',
-            ],
-            'created_at' => [
-                'title' => trans('core/base::tables.created_at'),
-                'width' => '100px',
-            ],
-            'status' => [
-                'title' => trans('core/base::tables.status'),
-                'width' => '100px',
-            ],
+            IdColumn::make(),
+            NameColumn::make()->route('state.edit'),
+            Column::make('country_id')
+                ->title(trans('plugins/location::state.country'))
+                ->alignLeft(),
+            CreatedAtColumn::make(),
+            StatusColumn::make(),
         ];
     }
 
@@ -115,7 +99,9 @@ class StateTable extends TableAbstract
 
     public function bulkActions(): array
     {
-        return $this->addDeleteAction(route('state.deletes'), 'state.destroy', parent::bulkActions());
+        return [
+            DeleteBulkAction::make()->permission('state.destroy'),
+        ];
     }
 
     public function getBulkChanges(): array

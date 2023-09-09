@@ -62,7 +62,8 @@ trait RevisionableTrait
      */
     public static function classRevisionHistory(int $limit = 100, string $order = 'desc')
     {
-        return Revision::where('revisionable_type', get_called_class())
+        return Revision::query()
+            ->where('revisionable_type', get_called_class())
             ->orderBy('updated_at', $order)->limit($limit)->get();
     }
 
@@ -129,8 +130,7 @@ trait RevisionableTrait
             $revisions = [];
 
             foreach ($changesToRecord as $key => $change) {
-                $revisions[] = [
-                    'id' => BaseModel::determineIfUsingUuidsForId() ? BaseModel::newUniqueId() : null,
+                $data = [
                     'revisionable_type' => $this->getMorphClass(),
                     'revisionable_id' => $this->getKey(),
                     'key' => $key,
@@ -140,6 +140,12 @@ trait RevisionableTrait
                     'created_at' => new DateTime(),
                     'updated_at' => new DateTime(),
                 ];
+
+                if (BaseModel::determineIfUsingUuidsForId()) {
+                    $data['id'] = (new BaseModel())->newUniqueId();
+                }
+
+                $revisions[] = $data;
             }
 
             if (count($revisions) > 0) {

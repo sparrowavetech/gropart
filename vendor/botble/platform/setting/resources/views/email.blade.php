@@ -190,7 +190,7 @@
         {!! Form::close() !!}
     </div>
 
-    <x-core-base::modal
+    <x-core::modal
         id="send-test-email-modal"
         :title="trans('core/setting::setting.test_email_modal_title')"
         type="info"
@@ -201,7 +201,7 @@
         <div class="form-group mb-3">
             <input type="email" class="form-control" name="email" placeholder="{{ trans('core/setting::setting.test_email_input_placeholder') }}">
         </div>
-    </x-core-base::modal>
+    </x-core::modal>
 
     {!! $jsValidation !!}
 @endsection

@@ -4,6 +4,7 @@ namespace Botble\PluginManagement\Commands;
 
 use Botble\PluginManagement\Services\MarketplaceService;
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -11,7 +12,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Throwable;
 
 #[AsCommand('cms:plugin:install-from-marketplace', 'Install a plugin from https://marketplace.botble.com')]
-class PluginInstallFromMarketplaceCommand extends Command
+class PluginInstallFromMarketplaceCommand extends Command implements PromptsForMissingInput
 {
     public function handle(MarketplaceService $marketplaceService): int
     {

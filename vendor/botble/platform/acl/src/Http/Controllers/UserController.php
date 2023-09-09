@@ -93,41 +93,6 @@ class UserController extends BaseController
         }
     }
 
-    public function deletes(Request $request, BaseHttpResponse $response)
-    {
-        $ids = $request->input('ids');
-        if (empty($ids)) {
-            return $response
-                ->setError()
-                ->setMessage(trans('core/base::notices.no_select'));
-        }
-
-        foreach ($ids as $id) {
-            if ($request->user()->getKey() == $id) {
-                return $response
-                    ->setError()
-                    ->setMessage(trans('core/acl::users.delete_user_logged_in'));
-            }
-
-            try {
-                $user = User::query()->findOrFail($id);
-                if (! $request->user()->isSuperUser() && $user->isSuperUser()) {
-                    continue;
-                }
-
-                $user->delete();
-
-                event(new DeletedContentEvent(USER_MODULE_SCREEN_NAME, $request, $user));
-            } catch (Exception $exception) {
-                return $response
-                    ->setError()
-                    ->setMessage($exception->getMessage());
-            }
-        }
-
-        return $response->setMessage(trans('core/acl::users.deleted'));
-    }
-
     public function getUserProfile(int|string $id, Request $request, FormBuilder $formBuilder)
     {
         $user = User::query()->findOrFail($id);
@@ -135,7 +100,7 @@ class UserController extends BaseController
         Assets::addScripts(['bootstrap-pwstrength', 'cropper'])
             ->addScriptsDirectly('vendor/core/core/acl/js/profile.js');
 
-        PageTitle::setTitle(trans(':name', ['name' => $user->name]));
+        PageTitle::setTitle($user->name);
 
         $form = $formBuilder
             ->create(ProfileForm::class, ['model' => $user])
@@ -202,7 +167,6 @@ class UserController extends BaseController
 
         if ($user->username !== $request->input('username')) {
             $users = User::query()
-                ->getModel()
                 ->where('username', $request->input('username'))
                 ->where('id', '<>', $user->getKey())
                 ->exists();
@@ -301,9 +265,7 @@ class UserController extends BaseController
 
             $mediaFile = MediaFile::query()->find($user->avatar_id);
 
-            if ($mediaFile) {
-                $mediaFile->delete();
-            }
+            $mediaFile?->delete();
 
             $user->avatar_id = $file->id;
             $user->save();

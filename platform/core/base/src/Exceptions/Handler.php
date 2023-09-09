@@ -175,7 +175,13 @@ class Handler extends ExceptionHandler
         $code = $e->getStatusCode();
 
         if (request()->is(BaseHelper::getAdminPrefix() . '/*') || request()->is(BaseHelper::getAdminPrefix())) {
-            return 'core/base::errors.' . $code;
+            $view = 'core/base::errors.' . $code;
+
+            if (view()->exists($view)) {
+                return $view;
+            }
+
+            return parent::getHttpExceptionView($e);
         }
 
         if (class_exists('Theme')) {

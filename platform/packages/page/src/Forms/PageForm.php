@@ -36,7 +36,7 @@ class PageForm extends FormAbstract
             ])
             ->add('content', 'editor', [
                 'label' => trans('core/base::forms.content'),
-                'label_attr' => ['class' => 'control-label required'],
+                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'placeholder' => trans('core/base::forms.description_placeholder'),
                     'with-short-code' => true,

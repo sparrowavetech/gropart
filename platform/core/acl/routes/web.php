@@ -38,13 +38,6 @@ Route::group(['namespace' => 'Botble\ACL\Http\Controllers', 'middleware' => ['we
             Route::group(['prefix' => 'users', 'as' => 'users.'], function () {
                 Route::resource('', 'UserController')->except(['edit', 'update'])->parameters(['' => 'users']);
 
-                Route::delete('items/destroy', [
-                    'as' => 'deletes',
-                    'uses' => 'UserController@deletes',
-                    'permission' => 'users.destroy',
-                    'middleware' => 'preventDemo',
-                ]);
-
                 Route::post('update-profile/{id}', [
                     'as' => 'update-profile',
                     'uses' => 'UserController@postUpdateProfile',
@@ -87,12 +80,6 @@ Route::group(['namespace' => 'Botble\ACL\Http\Controllers', 'middleware' => ['we
 
             Route::group(['prefix' => 'roles', 'as' => 'roles.'], function () {
                 Route::resource('', 'RoleController')->parameters(['' => 'roles']);
-
-                Route::delete('items/destroy', [
-                    'as' => 'deletes',
-                    'uses' => 'RoleController@deletes',
-                    'permission' => 'roles.destroy',
-                ]);
 
                 Route::get('duplicate/{id}', [
                     'as' => 'duplicate',

@@ -101,48 +101,50 @@ class Location {
 
         function stateFieldUsingSelect2() {
             if (jQuery().select2) {
-                $(document).find('select[data-using-select2="true"]').each(function (index, input) {
-                    let options = {
-                        width: '100%',
-                        minimumInputLength: 0,
-                        ajax: {
-                            url: $(input).data('url'),
-                            dataType: 'json',
-                            delay: 250,
-                            type: 'GET',
-                            data: function (params) {
-                                return {
-                                    state_id: $(input).closest('form').find(state).val(),
-                                    k: params.term,
-                                    page: params.page || 1
-                                };
-                            },
-                            processResults: function (data, params) {
-                                return {
-                                    results: $.map(data.data[0], function (item) {
-                                        return {
-                                            text: item.name,
-                                            id: item.id,
-                                            data: item
-                                        };
-                                    }),
-                                    pagination: {
-                                        more: (params.page * 10) < data.total
+                $(document)
+                    .find('select[data-using-select2="true"]')
+                    .each(function (index, input) {
+                        let options = {
+                            width: '100%',
+                            minimumInputLength: 0,
+                            ajax: {
+                                url: $(input).data('url'),
+                                dataType: 'json',
+                                delay: 250,
+                                type: 'GET',
+                                data: function (params) {
+                                    return {
+                                        state_id: $(input).closest('form').find(state).val(),
+                                        k: params.term,
+                                        page: params.page || 1,
                                     }
-                                };
-                            }
+                                },
+                                processResults: function (data, params) {
+                                    return {
+                                        results: $.map(data.data[0], function (item) {
+                                            return {
+                                                text: item.name,
+                                                id: item.id,
+                                                data: item,
+                                            }
+                                        }),
+                                        pagination: {
+                                            more: params.page * 10 < data.total,
+                                        },
+                                    }
+                                },
+                            },
                         }
-                    }
 
-                    let parent = $(input).closest('div[data-select2-dropdown-parent]') || $(input).closest('.modal')
-                    if (parent.length) {
-                        options.dropdownParent = parent
-                        options.width = '100%'
-                        options.minimumResultsForSearch = -1
-                    }
+                        let parent = $(input).closest('div[data-select2-dropdown-parent]') || $(input).closest('.modal')
+                        if (parent.length) {
+                            options.dropdownParent = parent
+                            options.width = '100%'
+                            options.minimumResultsForSearch = -1
+                        }
 
-                    $(input).select2(options)
-                });
+                        $(input).select2(options)
+                    })
             }
         }
 

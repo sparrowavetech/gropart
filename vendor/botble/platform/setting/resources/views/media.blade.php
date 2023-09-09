@@ -435,7 +435,7 @@
         {!! Form::close() !!}
     </div>
 
-    <x-core-base::modal
+    <x-core::modal
         id="generate-thumbnails-modal"
         :title="trans('core/setting::setting.generate_thumbnails')"
         type="warning"
@@ -443,7 +443,7 @@
         :button-label="trans('core/setting::setting.generate')"
     >
         {!! trans('core/setting::setting.generate_thumbnails_description') !!}
-    </x-core-base::modal>
+    </x-core::modal>
 
     {!! $jsValidation !!}
 @endsection

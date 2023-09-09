@@ -46,7 +46,7 @@
         </div>
     </div>
 
-    <x-core-base::modal
+    <x-core::modal
         id="remove-theme-modal"
         :title="trans('packages/theme::theme.remove_theme')"
         type="danger"
@@ -54,5 +54,5 @@
         :button-label="trans('packages/theme::theme.remove_theme_confirm_yes')"
     >
         {!! trans('packages/theme::theme.remove_theme_confirm_message') !!}
-    </x-core-base::modal>
+    </x-core::modal>
 @stop

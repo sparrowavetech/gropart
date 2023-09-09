@@ -120,6 +120,12 @@ class SocialLoginController extends BaseController
         $account = $model->where('email', $oAuth->getEmail())->first();
 
         if (! $account) {
+            $beforeProcessData = apply_filters('social_login_before_creating_account', null, $oAuth, $providerData);
+
+            if ($beforeProcessData instanceof BaseHttpResponse) {
+                return $beforeProcessData;
+            }
+
             $avatarId = null;
 
             try {

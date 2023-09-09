@@ -39,6 +39,28 @@
                 </div>
                 <div id="payment-stripe-key" data-value="{{ setting('payment_stripe_client_id') }}"></div>
             @endif
+
+            @php $supportedCurrencies = (new \Botble\Stripe\Services\Gateways\StripePaymentService)->supportedCurrencyCodes(); @endphp
+            @if (!in_array(get_application_currency()->title, $supportedCurrencies) && ! get_application_currency()->replicate()->newQuery()->where('title', 'USD')->exists())
+                <div class="alert alert-warning" style="margin-top: 15px;">
+                    {{ __(":name doesn't support :currency. List of currencies supported by :name: :currencies.", ['name' => 'Stripe', 'currency' => get_application_currency()->title, 'currencies' => implode(', ', $supportedCurrencies)]) }}
+                    @php
+                        $currencies = get_all_currencies();
+
+                        $currencies = $currencies->filter(function ($item) use ($supportedCurrencies) { return in_array($item->title, $supportedCurrencies); });
+                    @endphp
+                    @if (count($currencies))
+                        <div style="margin-top: 10px;">{{ __('Please switch currency to any supported currency') }}:&nbsp;&nbsp;
+                            @foreach ($currencies as $currency)
+                                <a href="{{ route('public.change-currency', $currency->title) }}" @if (get_application_currency_id() == $currency->id) class="active" @endif><span>{{ $currency->title }}</span></a>
+                                @if (!$loop->last)
+                                    &nbsp; | &nbsp;
+                                @endif
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            @endif
         </div>
     </li>
 @endif

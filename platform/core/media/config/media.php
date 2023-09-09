@@ -24,7 +24,7 @@ return [
         'javascript' => [
             'vendor/core/core/media/libraries/lodash/lodash.min.js',
             'vendor/core/core/media/libraries/clipboard/clipboard.min.js',
-            'vendor/core/core/media/libraries/dropzone/dropzone.js',
+            'vendor/core/core/base/libraries/dropzone/dropzone.js',
             'vendor/core/core/media/libraries/jquery-context-menu/jquery.ui.position.min.js',
             'vendor/core/core/media/libraries/jquery-context-menu/jquery.contextMenu.min.js',
             'vendor/core/core/media/js/media.js?v=' . time(),

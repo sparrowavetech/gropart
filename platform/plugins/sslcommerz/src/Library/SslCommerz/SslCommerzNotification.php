@@ -135,7 +135,7 @@ class SslCommerzNotification extends AbstractSslCommerz
 
     protected function verifyHash(array $postData, ?string $storePassword = ''): bool
     {
-        if (isset($postData) && isset($postData['verify_sign']) && isset($postData['verify_key'])) {
+        if (isset($postData['verify_sign']) && isset($postData['verify_key'])) {
             // NEW ARRAY DECLARED TO TAKE VALUE OF ALL POST
             $pre_define_key = explode(',', $postData['verify_key']);
 

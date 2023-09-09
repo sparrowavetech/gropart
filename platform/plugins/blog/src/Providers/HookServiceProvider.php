@@ -2,7 +2,6 @@
 
 namespace Botble\Blog\Providers;
 
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
@@ -16,7 +15,6 @@ use Botble\Language\Facades\Language;
 use Botble\Media\Facades\RvMedia;
 use Botble\Menu\Facades\Menu;
 use Botble\Page\Models\Page;
-use Botble\Page\Repositories\Interfaces\PageInterface;
 use Botble\Shortcode\Compilers\Shortcode;
 use Botble\Slug\Models\Slug;
 use Botble\Theme\Facades\AdminBar;
@@ -131,7 +129,10 @@ class HookServiceProvider extends ServiceProvider
 
     public function addThemeOptions(): void
     {
-        $pages = $this->app->make(PageInterface::class)->pluck('name', 'id', ['status' => BaseStatusEnum::PUBLISHED]);
+        $pages = Page::query()
+            ->wherePublished()
+            ->pluck('name', 'id')
+            ->all();
 
         theme_option()
             ->setSection([
@@ -147,7 +148,7 @@ class HookServiceProvider extends ServiceProvider
                         'label' => trans('plugins/blog::base.blog_page_id'),
                         'attributes' => [
                             'name' => 'blog_page_id',
-                            'list' => ['' => trans('plugins/blog::base.select')] + $pages,
+                            'list' => [0 => trans('plugins/blog::base.select')] + $pages,
                             'value' => '',
                             'options' => [
                                 'class' => 'form-control',
@@ -237,11 +238,11 @@ class HookServiceProvider extends ServiceProvider
 
     public function renderBlogPage(string|null $content, Page $page): string|null
     {
-        if ($page->id == theme_option('blog_page_id', setting('blog_page_id'))) {
+        if ($page->getKey() == $this->getBlogPageId()) {
             $view = 'plugins/blog::themes.loop';
 
-            if (view()->exists(Theme::getThemeNamespace() . '::views.loop')) {
-                $view = Theme::getThemeNamespace() . '::views.loop';
+            if (view()->exists($viewPath = Theme::getThemeNamespace() . '::views.loop')) {
+                $view = $viewPath;
             }
 
             return view($view, [
@@ -254,7 +255,7 @@ class HookServiceProvider extends ServiceProvider
 
     public function addAdditionNameToPageName(string|null $name, Page $page): string|null
     {
-        if ($page->getKey() == theme_option('blog_page_id', setting('blog_page_id'))) {
+        if ($page->getKey() == $this->getBlogPageId()) {
             $subTitle = Html::tag('span', trans('plugins/blog::base.blog_page'), ['class' => 'additional-page-name'])
                 ->toHtml();
 
@@ -266,6 +267,11 @@ class HookServiceProvider extends ServiceProvider
         }
 
         return $name;
+    }
+
+    protected function getBlogPageId(): int|string|null
+    {
+        return theme_option('blog_page_id', setting('blog_page_id'));
     }
 
     public function addLanguageChooser(string $priority, Model $model): void

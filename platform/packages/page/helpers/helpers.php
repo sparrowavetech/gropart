@@ -1,6 +1,5 @@
 <?php
 
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Supports\RepositoryHelper;
 use Botble\Page\Models\Page;
 use Botble\Page\Supports\Template;
@@ -12,9 +11,9 @@ if (! function_exists('get_all_pages')) {
     {
         $pages = Page::query()
             ->when($active, function (Builder $query) {
-                $query->where('status', BaseStatusEnum::PUBLISHED);
+                $query->wherePublished();
             })
-            ->orderBy('created_at', 'desc')
+            ->orderByDesc('created_at')
             ->with('slugable');
 
         return RepositoryHelper::applyBeforeExecuteQuery($pages, new Page())->get();

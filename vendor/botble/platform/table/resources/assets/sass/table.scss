@@ -91,6 +91,14 @@ $general-img-path: '/vendor/core/core/base/images/' !default;
         }
     }
 
+    .table.table-hover{
+        > tbody > {
+            tr.selected > td, tr.selected:hover > td {
+                background: rgba(var(--bs-primary-rgb), 0.2) !important;
+            }
+        }
+    }
+
     td, th {
         vertical-align: middle !important;
         text-align: center;

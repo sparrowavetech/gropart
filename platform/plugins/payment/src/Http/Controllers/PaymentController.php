@@ -9,6 +9,7 @@ use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Http\Requests\PaymentMethodRequest;
 use Botble\Payment\Http\Requests\UpdatePaymentRequest;
+use Botble\Payment\Models\Payment;
 use Botble\Payment\Repositories\Interfaces\PaymentInterface;
 use Botble\Payment\Tables\PaymentTable;
 use Botble\Setting\Supports\SettingStore;
@@ -33,9 +34,9 @@ class PaymentController extends Controller
     public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
-            $payment = $this->paymentRepository->findOrFail($id);
+            $payment = Payment::query()->findOrFail($id);
 
-            $this->paymentRepository->delete($payment);
+            $payment->delete();
 
             event(new DeletedContentEvent(PAYMENT_MODULE_SCREEN_NAME, $request, $payment));
 
@@ -47,27 +48,9 @@ class PaymentController extends Controller
         }
     }
 
-    public function deletes(Request $request, BaseHttpResponse $response)
-    {
-        $ids = $request->input('ids');
-        if (empty($ids)) {
-            return $response
-                ->setError()
-                ->setMessage(trans('core/base::notices.no_select'));
-        }
-
-        foreach ($ids as $id) {
-            $payment = $this->paymentRepository->findOrFail($id);
-            $this->paymentRepository->delete($payment);
-            event(new DeletedContentEvent(PAYMENT_MODULE_SCREEN_NAME, $request, $payment));
-        }
-
-        return $response->setMessage(trans('core/base::notices.delete_success_message'));
-    }
-
     public function show(int|string $id)
     {
-        $payment = $this->paymentRepository->findOrFail($id);
+        $payment = Payment::query()->findOrFail($id);
 
         PageTitle::setTitle(trans('plugins/payment::payment.view_transaction', ['charge_id' => $payment->charge_id]));
 
@@ -134,7 +117,7 @@ class PaymentController extends Controller
 
     public function update(int|string $id, UpdatePaymentRequest $request, BaseHttpResponse $response)
     {
-        $payment = $this->paymentRepository->findOrFail($id);
+        $payment = Payment::query()->findOrFail($id);
 
         $this->paymentRepository->update(['id' => $payment->id], [
             'status' => $request->input('status'),
@@ -150,7 +133,7 @@ class PaymentController extends Controller
     public function getRefundDetail(int|string $id, int|string $refundId, BaseHttpResponse $response)
     {
         $data = [];
-        $payment = $this->paymentRepository->findOrFail($id);
+        $payment = Payment::query()->findOrFail($id);
 
         $data = apply_filters(PAYMENT_FILTER_GET_REFUND_DETAIL, $data, $payment, $refundId);
 

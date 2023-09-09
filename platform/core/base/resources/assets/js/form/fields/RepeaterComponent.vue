@@ -53,26 +53,24 @@ export default {
         deleteRow: function (index) {
             this.items.splice(index, 1)
         },
-        removeSelectedItem: function () {
-            for (const item of this.items) {
-                this.items.slice(i, 1)
-            }
-        },
     },
     watch: {
-        items(value) {
-            if (value) {
-                this.$nextTick(() => {
-                    if (window.Botble) {
-                        window.Botble.initResources()
-                        window.Botble.initMediaIntegrate()
-                    }
+        items: {
+            handler: function( value) {
+                if (value) {
+                    this.$nextTick(() => {
+                        if (window.Botble) {
+                            window.Botble.initResources()
+                            window.Botble.initMediaIntegrate()
+                        }
 
-                    if (window.EditorManagement) {
-                        new EditorManagement().init()
-                    }
-                })
-            }
+                        if (window.EditorManagement) {
+                            window.EDITOR = new EditorManagement().init()
+                        }
+                    })
+                }
+            },
+            deep: true
         },
     },
 }

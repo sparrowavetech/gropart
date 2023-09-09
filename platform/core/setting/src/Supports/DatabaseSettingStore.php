@@ -55,7 +55,8 @@ class DatabaseSettingStore extends SettingStore
         }
 
         foreach ($updateData as $key => $value) {
-            $this->newQuery()->where('key', $key)
+            $this->newQuery()
+                ->where('key', $key)
                 ->update(['value' => $value]);
         }
 
@@ -71,7 +72,7 @@ class DatabaseSettingStore extends SettingStore
         foreach ($data as $key => $value) {
             $data = compact('key', 'value');
             if (BaseModel::determineIfUsingUuidsForId()) {
-                $data['id'] = BaseModel::newUniqueId();
+                $data['id'] = (new BaseModel())->newUniqueId();
             }
 
             $dbData[] = $data;

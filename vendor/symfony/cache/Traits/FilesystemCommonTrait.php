@@ -21,9 +21,9 @@ use Symfony\Component\Cache\Exception\InvalidArgumentException;
 trait FilesystemCommonTrait
 {
     private string $directory;
-    private string $tmpSuffix;
+    private string $tmp;
 
-    private function init(string $namespace, ?string $directory): void
+    private function init(string $namespace, ?string $directory)
     {
         if (!isset($directory[0])) {
             $directory = sys_get_temp_dir().\DIRECTORY_SEPARATOR.'symfony-cache';
@@ -50,6 +50,9 @@ trait FilesystemCommonTrait
         $this->directory = $directory;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function doClear(string $namespace): bool
     {
         $ok = true;
@@ -65,6 +68,9 @@ trait FilesystemCommonTrait
         return $ok;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function doDelete(array $ids): bool
     {
         $ok = true;
@@ -77,46 +83,45 @@ trait FilesystemCommonTrait
         return $ok;
     }
 
-    /**
-     * @return bool
-     */
     protected function doUnlink(string $file)
     {
         return @unlink($file);
     }
 
-    private function write(string $file, string $data, int $expiresAt = null): bool
+    private function write(string $file, string $data, int $expiresAt = null)
     {
         set_error_handler(__CLASS__.'::throwError');
         try {
-            $tmp = $this->directory.$this->tmpSuffix ??= str_replace('/', '-', base64_encode(random_bytes(6)));
+            if (!isset($this->tmp)) {
+                $this->tmp = $this->directory.bin2hex(random_bytes(6));
+            }
             try {
-                $h = fopen($tmp, 'x');
+                $h = fopen($this->tmp, 'x');
             } catch (\ErrorException $e) {
                 if (!str_contains($e->getMessage(), 'File exists')) {
                     throw $e;
                 }
 
-                $tmp = $this->directory.$this->tmpSuffix = str_replace('/', '-', base64_encode(random_bytes(6)));
-                $h = fopen($tmp, 'x');
+                $this->tmp = $this->directory.bin2hex(random_bytes(6));
+                $h = fopen($this->tmp, 'x');
             }
             fwrite($h, $data);
             fclose($h);
 
             if (null !== $expiresAt) {
-                touch($tmp, $expiresAt ?: time() + 31556952); // 1 year in seconds
+                touch($this->tmp, $expiresAt ?: time() + 31556952); // 1 year in seconds
             }
 
-            return rename($tmp, $file);
+            return rename($this->tmp, $file);
         } finally {
             restore_error_handler();
         }
     }
 
-    private function getFile(string $id, bool $mkdir = false, string $directory = null): string
+    private function getFile(string $id, bool $mkdir = false, string $directory = null)
     {
-        // Use xxh128 to favor speed over security, which is not an issue here
-        $hash = str_replace('/', '-', base64_encode(hash('xxh128', static::class.$id, true)));
+        // Use MD5 to favor speed over security, which is not an issue here
+        $hash = str_replace('/', '-', base64_encode(hash('md5', static::class.$id, true)));
         $dir = ($directory ?? $this->directory).strtoupper($hash[0].\DIRECTORY_SEPARATOR.$hash[1].\DIRECTORY_SEPARATOR);
 
         if ($mkdir && !is_dir($dir)) {
@@ -161,7 +166,7 @@ trait FilesystemCommonTrait
     /**
      * @internal
      */
-    public static function throwError(int $type, string $message, string $file, int $line): never
+    public static function throwError(int $type, string $message, string $file, int $line)
     {
         throw new \ErrorException($message, 0, $type, $file, $line);
     }
@@ -181,8 +186,8 @@ trait FilesystemCommonTrait
         if (method_exists(parent::class, '__destruct')) {
             parent::__destruct();
         }
-        if (isset($this->tmpSuffix) && is_file($this->directory.$this->tmpSuffix)) {
-            unlink($this->directory.$this->tmpSuffix);
+        if (isset($this->tmp) && is_file($this->tmp)) {
+            unlink($this->tmp);
         }
     }
 }

@@ -14,7 +14,7 @@ class PageRequest extends Request
         return [
             'name' => 'required|string|max:120',
             'description' => 'nullable|string|max:400',
-            'content' => 'required|string',
+            'content' => 'nullable|string',
             'template' => Rule::in(array_keys(Template::getPageTemplates())),
             'status' => Rule::in(BaseStatusEnum::values()),
         ];

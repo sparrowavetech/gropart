@@ -10,11 +10,9 @@ use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
-use Botble\Base\Traits\HasDeleteManyItemsTrait;
 use Botble\Blog\Forms\TagForm;
 use Botble\Blog\Http\Requests\TagRequest;
 use Botble\Blog\Models\Tag;
-use Botble\Blog\Repositories\Interfaces\TagInterface;
 use Botble\Blog\Tables\TagTable;
 use Exception;
 use Illuminate\Http\Request;
@@ -22,12 +20,6 @@ use Illuminate\Support\Facades\Auth;
 
 class TagController extends BaseController
 {
-    use HasDeleteManyItemsTrait;
-
-    public function __construct(protected TagInterface $tagRepository)
-    {
-    }
-
     public function index(TagTable $dataTable)
     {
         PageTitle::setTitle(trans('plugins/blog::tags.menu'));
@@ -44,7 +36,7 @@ class TagController extends BaseController
 
     public function store(TagRequest $request, BaseHttpResponse $response)
     {
-        $tag = $this->tagRepository->createOrUpdate(array_merge($request->input(), [
+        $tag = Tag::query()->create(array_merge($request->input(), [
             'author_id' => Auth::id(),
             'author_type' => User::class,
         ]));
@@ -66,8 +58,8 @@ class TagController extends BaseController
     public function update(Tag $tag, TagRequest $request, BaseHttpResponse $response)
     {
         $tag->fill($request->input());
+        $tag->save();
 
-        $this->tagRepository->createOrUpdate($tag);
         event(new UpdatedContentEvent(TAG_MODULE_SCREEN_NAME, $request, $tag));
 
         return $response
@@ -78,7 +70,7 @@ class TagController extends BaseController
     public function destroy(Tag $tag, Request $request, BaseHttpResponse $response)
     {
         try {
-            $this->tagRepository->delete($tag);
+            $tag->delete();
 
             event(new DeletedContentEvent(TAG_MODULE_SCREEN_NAME, $request, $tag));
 
@@ -90,13 +82,8 @@ class TagController extends BaseController
         }
     }
 
-    public function deletes(Request $request, BaseHttpResponse $response)
-    {
-        return $this->executeDeleteItems($request, $response, new Tag(), TAG_MODULE_SCREEN_NAME);
-    }
-
     public function getAllTags()
     {
-        return $this->tagRepository->pluck('name');
+        return Tag::query()->pluck('name')->all();
     }
 }

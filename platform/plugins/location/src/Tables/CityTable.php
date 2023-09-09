@@ -3,46 +3,38 @@
 namespace Botble\Location\Tables;
 
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
 use Botble\Location\Models\City;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Table\DataTables;
-use Illuminate\Contracts\Routing\UrlGenerator;
+use Botble\Table\Actions\DeleteAction;
+use Botble\Table\Actions\EditAction;
+use Botble\Table\BulkActions\DeleteBulkAction;
+use Botble\Table\Columns\Column;
+use Botble\Table\Columns\CreatedAtColumn;
+use Botble\Table\Columns\IdColumn;
+use Botble\Table\Columns\NameColumn;
+use Botble\Table\Columns\StatusColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 
 class CityTable extends TableAbstract
 {
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, City $city)
+    public function setup(): void
     {
-        parent::__construct($table, $urlGenerator);
-
-        $this->model = $city;
-
-        $this->hasActions = true;
-        $this->hasFilter = true;
-
-        if (! Auth::user()->hasAnyPermission(['city.edit', 'city.destroy'])) {
-            $this->hasOperations = false;
-            $this->hasActions = false;
-        }
+        $this
+            ->model(City::class)
+            ->addActions([
+                EditAction::make()->route('city.edit'),
+                DeleteAction::make()->route('city.destroy'),
+            ]);
     }
 
     public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('name', function (City $item) {
-                if (! Auth::user()->hasPermission('city.edit')) {
-                    return BaseHelper::clean($item->name);
-                }
-
-                return Html::link(route('city.edit', $item->getKey()), BaseHelper::clean($item->name));
-            })
             ->editColumn('state_id', function (City $item) {
                 if (! $item->state_id || ! $item->state->name) {
                     return '&mdash;';
@@ -57,17 +49,26 @@ class CityTable extends TableAbstract
 
                 return Html::link(route('country.edit', $item->country_id), $item->country->name);
             })
-            ->editColumn('checkbox', function (City $item) {
-                return $this->getCheckbox($item->getKey());
-            })
-            ->editColumn('created_at', function (City $item) {
-                return BaseHelper::formatDate($item->created_at);
-            })
-            ->editColumn('status', function (City $item) {
-                return $item->status->toHtml();
-            })
-            ->addColumn('operations', function (City $item) {
-                return $this->getOperations('city.edit', 'city.destroy', $item);
+            ->filter(function (Builder $query) {
+                $keyword = $this->request->input('search.value');
+
+                if (! $keyword) {
+                    return $query;
+                }
+
+                return $query->where(function (Builder $query) use ($keyword) {
+                    $query
+                        ->where('id', $keyword)
+                        ->orWhere('name', 'LIKE', '%' . $keyword . '%')
+                        ->orWhereHas('state', function (Builder $subQuery) use ($keyword) {
+                            return $subQuery
+                                ->where('name', 'LIKE', '%' . $keyword . '%');
+                        })
+                        ->orWhereHas('country', function (Builder $subQuery) use ($keyword) {
+                            return $subQuery
+                                ->where('name', 'LIKE', '%' . $keyword . '%');
+                        });
+                });
             });
 
         return $this->toJson($data);
@@ -93,30 +94,16 @@ class CityTable extends TableAbstract
     public function columns(): array
     {
         return [
-            'id' => [
-                'title' => trans('core/base::tables.id'),
-                'width' => '20px',
-            ],
-            'name' => [
-                'title' => trans('core/base::tables.name'),
-                'class' => 'text-start',
-            ],
-            'state_id' => [
-                'title' => trans('plugins/location::city.state'),
-                'class' => 'text-start',
-            ],
-            'country_id' => [
-                'title' => trans('plugins/location::city.country'),
-                'class' => 'text-start',
-            ],
-            'created_at' => [
-                'title' => trans('core/base::tables.created_at'),
-                'width' => '100px',
-            ],
-            'status' => [
-                'title' => trans('core/base::tables.status'),
-                'width' => '100px',
-            ],
+            IdColumn::make(),
+            NameColumn::make()->route('city.edit'),
+            Column::make('state_id')
+                ->title(trans('plugins/location::city.state'))
+                ->alignLeft(),
+            Column::make('country_id')
+                ->title(trans('plugins/location::city.country'))
+                ->alignLeft(),
+            CreatedAtColumn::make(),
+            StatusColumn::make(),
         ];
     }
 
@@ -127,7 +114,9 @@ class CityTable extends TableAbstract
 
     public function bulkActions(): array
     {
-        return $this->addDeleteAction(route('city.deletes'), 'city.destroy', parent::bulkActions());
+        return [
+            DeleteBulkAction::make()->permission('city.destroy'),
+        ];
     }
 
     public function getBulkChanges(): array

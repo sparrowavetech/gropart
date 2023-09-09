@@ -36,11 +36,13 @@ class RemoveUnusedTranslationsCommand extends Command
 
         $counter = 0;
         foreach ($groups as $group) {
-            $keys = Translation::query()->where('group', $group)
+            $keys = Translation::query()
+                ->where('group', $group)
                 ->where('locale', 'en')
                 ->pluck('key');
 
-            $counter += Translation::query()->where('locale', '!=', 'en')
+            $counter += Translation::query()
+                ->whereNot('locale', 'en')
                 ->where('group', $group)
                 ->whereNotIn('key', $keys)
                 ->delete();

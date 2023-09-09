@@ -2,36 +2,34 @@
 
 namespace Botble\Payment\Tables;
 
-use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Models\Payment;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Table\DataTables;
-use Illuminate\Contracts\Routing\UrlGenerator;
+use Botble\Table\Actions\DeleteAction;
+use Botble\Table\Actions\EditAction;
+use Botble\Table\BulkActions\DeleteBulkAction;
+use Botble\Table\Columns\Column;
+use Botble\Table\Columns\CreatedAtColumn;
+use Botble\Table\Columns\IdColumn;
+use Botble\Table\Columns\StatusColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class PaymentTable extends TableAbstract
 {
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Payment $payment)
+    public function setup(): void
     {
-        parent::__construct($table, $urlGenerator);
-
-        $this->model = $payment;
-
-        $this->hasActions = true;
-        $this->hasFilter = true;
-
-        if (! Auth::user()->hasAnyPermission(['payment.show', 'payment.destroy'])) {
-            $this->hasOperations = false;
-            $this->hasActions = false;
-        }
+        $this
+            ->model(Payment::class)
+            ->addActions([
+                EditAction::make()->route('payment.show'),
+                DeleteAction::make()->route('payment.destroy'),
+            ]);
     }
 
     public function ajax(): JsonResponse
@@ -39,10 +37,7 @@ class PaymentTable extends TableAbstract
         $data = $this->table
             ->eloquent($this->query())
             ->editColumn('charge_id', function (Payment $item) {
-                return Html::link(route('payment.show', $item->id), Str::limit($item->charge_id, 20));
-            })
-            ->editColumn('checkbox', function (Payment $item) {
-                return $this->getCheckbox($item->id);
+                return Html::link(route('payment.show', $item->getKey()), Str::limit($item->charge_id, 20));
             })
             ->editColumn('customer_id', function (Payment $item) {
                 if ($item->customer_id && $item->customer_type && class_exists($item->customer_type)) {
@@ -60,15 +55,6 @@ class PaymentTable extends TableAbstract
             })
             ->editColumn('amount', function (Payment $item) {
                 return $item->amount . ' ' . $item->currency;
-            })
-            ->editColumn('created_at', function (Payment $item) {
-                return BaseHelper::formatDate($item->created_at);
-            })
-            ->editColumn('status', function (Payment $item) {
-                return $item->status->toHtml();
-            })
-            ->addColumn('operations', function (Payment $item) {
-                return $this->getOperations('payment.show', 'payment.destroy', $item);
             });
 
         return $this->toJson($data);
@@ -76,7 +62,8 @@ class PaymentTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->getModel()
+        $query = $this
+            ->getModel()
             ->query()
             ->select([
                 'id',
@@ -101,40 +88,28 @@ class PaymentTable extends TableAbstract
     public function columns(): array
     {
         return [
-            'id' => [
-                'title' => trans('core/base::tables.id'),
-                'width' => '20px',
-            ],
-            'charge_id' => [
-                'title' => trans('plugins/payment::payment.charge_id'),
-                'class' => 'text-start',
-            ],
-            'customer_id' => [
-                'title' => trans('plugins/payment::payment.payer_name'),
-                'class' => 'text-start',
-            ],
-            'amount' => [
-                'title' => trans('plugins/payment::payment.amount'),
-                'class' => 'text-start',
-            ],
-            'payment_channel' => [
-                'title' => trans('plugins/payment::payment.payment_channel'),
-                'class' => 'text-start',
-            ],
-            'created_at' => [
-                'title' => trans('core/base::tables.created_at'),
-                'width' => '100px',
-            ],
-            'status' => [
-                'title' => trans('core/base::tables.status'),
-                'width' => '100px',
-            ],
+            IdColumn::make(),
+            Column::make('charge_id')
+                ->title(trans('plugins/payment::payment.charge_id')),
+            Column::make('customer_id')
+                ->title(trans('plugins/payment::payment.payer_name'))
+                ->alignLeft(),
+            Column::make('amount')
+                ->title(trans('plugins/payment::payment.amount'))
+                ->alignLeft(),
+            Column::make('payment_channel')
+                ->title(trans('plugins/payment::payment.payment_channel'))
+                ->alignLeft(),
+            StatusColumn::make(),
+            CreatedAtColumn::make(),
         ];
     }
 
     public function bulkActions(): array
     {
-        return $this->addDeleteAction(route('payment.deletes'), 'payment.destroy', parent::bulkActions());
+        return [
+            DeleteBulkAction::make()->permission('payment.destroy'),
+        ];
     }
 
     public function getBulkChanges(): array

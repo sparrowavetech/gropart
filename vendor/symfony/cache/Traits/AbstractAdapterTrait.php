@@ -87,6 +87,9 @@ trait AbstractAdapterTrait
      */
     abstract protected function doSave(array $values, int $lifetime): array|bool;
 
+    /**
+     * {@inheritdoc}
+     */
     public function hasItem(mixed $key): bool
     {
         $id = $this->getId($key);
@@ -104,6 +107,9 @@ trait AbstractAdapterTrait
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function clear(string $prefix = ''): bool
     {
         $this->deferred = [];
@@ -140,11 +146,17 @@ trait AbstractAdapterTrait
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function deleteItem(mixed $key): bool
     {
         return $this->deleteItems([$key]);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function deleteItems(array $keys): bool
     {
         $ids = [];
@@ -158,7 +170,7 @@ trait AbstractAdapterTrait
             if ($this->doDelete($ids)) {
                 return true;
             }
-        } catch (\Exception) {
+        } catch (\Exception $e) {
         }
 
         $ok = true;
@@ -180,6 +192,9 @@ trait AbstractAdapterTrait
         return $ok;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getItem(mixed $key): CacheItem
     {
         $id = $this->getId($key);
@@ -204,6 +219,9 @@ trait AbstractAdapterTrait
         return (self::$createCacheItem)($key, null, false);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getItems(array $keys = []): iterable
     {
         $ids = [];
@@ -229,6 +247,9 @@ trait AbstractAdapterTrait
         return $this->generateItems($items, $ids);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function save(CacheItemInterface $item): bool
     {
         if (!$item instanceof CacheItem) {
@@ -239,6 +260,9 @@ trait AbstractAdapterTrait
         return $this->commit();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function saveDeferred(CacheItemInterface $item): bool
     {
         if (!$item instanceof CacheItem) {
@@ -255,7 +279,7 @@ trait AbstractAdapterTrait
      * When versioning is enabled, clearing the cache is atomic and doesn't require listing existing keys to proceed,
      * but old keys may need garbage collection and extra round-trips to the back-end are required.
      *
-     * Calling this method also clears the memoized namespace version and thus forces a resynchronization of it.
+     * Calling this method also clears the memoized namespace version and thus forces a resynchonization of it.
      *
      * @return bool the previous state of versioning
      */
@@ -269,7 +293,10 @@ trait AbstractAdapterTrait
         return $wasEnabled;
     }
 
-    public function reset(): void
+    /**
+     * {@inheritdoc}
+     */
+    public function reset()
     {
         if ($this->deferred) {
             $this->commit();
@@ -317,10 +344,7 @@ trait AbstractAdapterTrait
         }
     }
 
-    /**
-     * @internal
-     */
-    protected function getId(mixed $key): string
+    private function getId(mixed $key)
     {
         if ($this->versioningIsEnabled && '' === $this->namespaceVersion) {
             $this->ids = [];
@@ -356,8 +380,8 @@ trait AbstractAdapterTrait
             return $this->namespace.$this->namespaceVersion.$key;
         }
         if (\strlen($id = $this->namespace.$this->namespaceVersion.$key) > $this->maxIdLength) {
-            // Use xxh128 to favor speed over security, which is not an issue here
-            $this->ids[$key] = $id = substr_replace(base64_encode(hash('xxh128', $key, true)), static::NS_SEPARATOR, -(\strlen($this->namespaceVersion) + 2));
+            // Use MD5 to favor speed over security, which is not an issue here
+            $this->ids[$key] = $id = substr_replace(base64_encode(hash('md5', $key, true)), static::NS_SEPARATOR, -(\strlen($this->namespaceVersion) + 2));
             $id = $this->namespace.$this->namespaceVersion.$id;
         }
 
@@ -367,7 +391,7 @@ trait AbstractAdapterTrait
     /**
      * @internal
      */
-    public static function handleUnserializeCallback(string $class): never
+    public static function handleUnserializeCallback(string $class)
     {
         throw new \DomainException('Class not found: '.$class);
     }

@@ -3,15 +3,11 @@
 namespace Botble\Slug\Services;
 
 use Botble\Slug\Facades\SlugHelper;
-use Botble\Slug\Repositories\Interfaces\SlugInterface;
+use Botble\Slug\Models\Slug;
 use Illuminate\Support\Str;
 
 class SlugService
 {
-    public function __construct(protected SlugInterface $slugRepository)
-    {
-    }
-
     public function create(string|null $name, int|null $slugId = 0, $model = null): string|null
     {
         $slug = Str::slug($name, '-', ! SlugHelper::turnOffAutomaticUrlTranslationIntoLatin() ? 'en' : false);
@@ -37,8 +33,7 @@ class SlugService
 
     protected function checkIfExistedSlug(string|null $slug, int|string|null $slugId, string|null $prefix): bool
     {
-        return $this->slugRepository
-            ->getModel()
+        return Slug::query()
             ->where([
                 'key' => $slug,
                 'prefix' => $prefix,

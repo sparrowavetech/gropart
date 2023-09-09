@@ -4,11 +4,12 @@ namespace Botble\Translation\Console;
 
 use Botble\Translation\Manager;
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 
 #[AsCommand('cms:translations:export', 'Export translations to PHP files')]
-class ExportCommand extends Command
+class ExportCommand extends Command implements PromptsForMissingInput
 {
     public function handle(Manager $manager): int
     {
@@ -27,10 +28,8 @@ class ExportCommand extends Command
         return self::SUCCESS;
     }
 
-    protected function getArguments(): array
+    protected function configure(): void
     {
-        return [
-            ['group', InputArgument::OPTIONAL, 'The group to export (`*` for all).'],
-        ];
+        $this->addArgument('group', InputArgument::OPTIONAL, 'The group to export (`*` for all).');
     }
 }

@@ -1,4 +1,9 @@
+@php
+    use Botble\Base\Enums\SystemUpdaterStepEnum;
+@endphp
+
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
+
 @section('content')
     <div class="container">
         <div class="col-md-8 offset-md-2">
@@ -30,18 +35,13 @@
                         <form action="{{ route('system.updater') }}?no-ajax=1&update_id={{ $latestUpdate->updateId }}&version={{ $latestUpdate->version }}" method="POST">
                             @csrf
                             <ol class="list-group list-group-numbered">
-                                <li class="list-group-item mb-2">
-                                    <button type="submit" name="step" value="1" class="btn btn-warning btn-update-new-version" data-updating-text="Updating..."><span>Download update files</span></button>
-                                </li>
-                                <li class="list-group-item mb-2">
-                                    <button type="submit" name="step" value="2" class="btn btn-warning btn-update-new-version" data-updating-text="Updating..."><span>Update files and database</span></button>
-                                </li>
-                                <li class="list-group-item mb-2">
-                                    <button type="submit" name="step" value="3" class="btn btn-warning btn-update-new-version" data-updating-text="Updating..."><span>Publish assets</span></button>
-                                </li>
-                                <li class="list-group-item mb-2">
-                                    <button type="submit" name="step" value="4" class="btn btn-warning btn-update-new-version" data-updating-text="Updating..."><span>Cleanup files</span></button>
-                                </li>
+                                @foreach(SystemUpdaterStepEnum::labels() as $step => $label)
+                                    @break($step === SystemUpdaterStepEnum::lastStep())
+
+                                    <li class="list-group-item mb-2">
+                                        <button type="submit" name="step_name" value="{{ $step }}" class="btn btn-warning btn-update-new-version" data-updating-text="Updating..."><span>{{ $label }}</span></button>
+                                    </li>
+                                @endforeach
                             </ol>
                         </form>
                     @else
@@ -49,6 +49,9 @@
                             update-url="{{ route('system.updater.post') }}"
                             update-id="{{ $latestUpdate->updateId }}"
                             version="{{ $latestUpdate->version }}"
+                            first-step="{{ SystemUpdaterStepEnum::firstStep() }}"
+                            first-step-message="{{ SystemUpdaterStepEnum::DOWNLOAD()->message() }}"
+                            last-step="{{ SystemUpdaterStepEnum::lastStep() }}"
                             :is-outdated="{{ json_encode($isOutdated) }}"
                         >
                             @if($isOutdated)
@@ -78,7 +81,7 @@
             @if (isset($isOutdated) && isset($latestUpdate) && ! $isOutdated && $latestUpdate)
                 <div class="updater-box bg-transparent shadow-none border-0 p-0" dir="ltr">
                     <div class="mb-2 bold">Latest changelog: released on {{ $latestUpdate->releasedDate->toDateString() }}</div>
-                    <pre>{!! trim(strip_tags(str_replace('<li>', '<li>- ', $latestUpdate->changelog))) !!} </pre>
+                    <pre>{!! trim(str_replace(PHP_EOL . PHP_EOL, PHP_EOL, strip_tags((str_replace(['<li>', '</li>', '<ul>'], ['<li>- ', '</li>' . PHP_EOL, PHP_EOL . '<ul>'], $latestUpdate->changelog))))) !!}</pre>
                 </div>
             @endif
         </div>

@@ -4,17 +4,13 @@ namespace Botble\Slug\Listeners;
 
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Slug\Facades\SlugHelper;
-use Botble\Slug\Repositories\Interfaces\SlugInterface;
+use Botble\Slug\Models\Slug;
 use Botble\Slug\Services\SlugService;
 use Exception;
 use Illuminate\Support\Str;
 
 class CreatedContentListener
 {
-    public function __construct(protected SlugInterface $slugRepository)
-    {
-    }
-
     public function handle(CreatedContentEvent $event): void
     {
         if (SlugHelper::isSupportedModel($class = get_class($event->data)) && $event->request->input('is_slug_editable', 0)) {
@@ -39,9 +35,9 @@ class CreatedContentListener
                     $slug = time();
                 }
 
-                $slugService = new SlugService($this->slugRepository);
+                $slugService = new SlugService();
 
-                $this->slugRepository->createOrUpdate([
+                Slug::query()->create([
                     'key' => $slugService->create($slug, (int)$event->data->slug_id, $class),
                     'reference_type' => $class,
                     'reference_id' => $event->data->getKey(),

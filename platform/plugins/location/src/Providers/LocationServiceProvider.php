@@ -238,5 +238,6 @@ class LocationServiceProvider extends ServiceProvider
 
         $this->app->register(CommandServiceProvider::class);
         $this->app->register(HookServiceProvider::class);
+        $this->app->register(EventServiceProvider::class);
     }
 }

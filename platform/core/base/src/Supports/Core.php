@@ -22,10 +22,10 @@ use Botble\Base\Events\SystemUpdateDBMigrating;
 use Botble\Base\Events\SystemUpdateDownloaded;
 use Botble\Base\Events\SystemUpdateDownloading;
 use Botble\Base\Events\SystemUpdateExtractedFiles;
-use Botble\Base\Events\SystemUpdateExtractingFiles;
 use Botble\Base\Events\SystemUpdatePublished;
 use Botble\Base\Events\SystemUpdatePublishing;
 use Botble\Base\Events\SystemUpdateUnavailable;
+use Botble\Base\Exceptions\LicenseInvalidException;
 use Botble\Base\Exceptions\LicenseIsAlreadyActivatedException;
 use Botble\Base\Exceptions\MissingCURLExtensionException;
 use Botble\Base\Facades\BaseHelper;
@@ -46,6 +46,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Throwable;
 use ZipArchive;
 
@@ -115,6 +116,7 @@ final class Core
     }
 
     /**
+     * @throws \Botble\Base\Exceptions\LicenseInvalidException
      * @throws \Botble\Base\Exceptions\LicenseIsAlreadyActivatedException
      */
     public function activateLicense(string $license, string $client): bool
@@ -129,9 +131,7 @@ final class Core
         ]);
 
         if ($response->failed()) {
-            LicenseInvalid::dispatch($license, $client);
-
-            return false;
+            throw new LicenseInvalidException('Could not activate your license. Please try again later.');
         }
 
         $data = $response->json();
@@ -139,13 +139,15 @@ final class Core
         if (! Arr::get($data, 'status')) {
             $this->files->delete($this->licenseFilePath);
 
-            if (Str::contains(Arr::get($data, 'message'), 'License is already active')) {
-                throw new LicenseIsAlreadyActivatedException();
+            $message = Arr::get($data, 'message');
+
+            if (Arr::get($data, 'status_code') === 'ACTIVATED_MAXIMUM_ALLOWED_PRODUCT_INSTANCES') {
+                throw new LicenseIsAlreadyActivatedException($message);
             }
 
             LicenseInvalid::dispatch($license, $client);
 
-            return false;
+            throw new LicenseInvalidException($message);
         }
 
         $this->files->put($this->licenseFilePath, Arr::get($data, 'lic_response'), true);
@@ -300,8 +302,11 @@ final class Core
 
     public function updateFilesAndDatabase(string $version): bool
     {
-        SystemUpdateExtractingFiles::dispatch();
+        return $this->updateFiles($version) && $this->updateDatabase();
+    }
 
+    public function updateFiles(string $version): bool
+    {
         $filePath = $this->getUpdatedFilePath($version);
 
         if (! $this->files->exists($filePath)) {
@@ -318,11 +323,10 @@ final class Core
 
             if ($zip->extract($filePath, $this->basePath)) {
                 $this->files->delete($filePath);
-                $this->files->delete($coreTempPath);
 
                 SystemUpdateExtractedFiles::dispatch();
 
-                $this->runMigrationFiles();
+                $this->files->delete($coreTempPath);
 
                 return true;
             }
@@ -333,8 +337,6 @@ final class Core
 
             return false;
         } catch (Throwable $exception) {
-            rescue(fn () => $this->runMigrationFiles());
-
             if ($this->files->exists($coreTempPath)) {
                 $this->files->move($coreTempPath, $this->coreDataFilePath);
             }
@@ -345,22 +347,54 @@ final class Core
         }
     }
 
+    public function updateDatabase(): bool
+    {
+        try {
+            $this->runMigrationFiles();
+
+            return true;
+        } catch (Throwable $exception) {
+            rescue(fn () => $this->runMigrationFiles());
+
+            $this->logError($exception);
+
+            return false;
+        }
+    }
+
     public function publishUpdateAssets(): void
+    {
+        $this->publishCoreAssets();
+        $this->publishPackagesAssets();
+        $this->publishPluginsAssets();
+        $this->publishThemesAssets();
+    }
+
+    public function publishCoreAssets(): bool
     {
         SystemUpdatePublishing::dispatch();
 
-        $publishedPaths = [
-            IlluminateServiceProvider::pathsToPublish(null, 'cms-lang'),
-            IlluminateServiceProvider::pathsToPublish(null, 'cms-public'),
-        ];
+        $this->publishAssets(core_path());
 
-        foreach ($publishedPaths as $publishedPath) {
-            foreach ($publishedPath as $from => $to) {
-                $this->files->ensureDirectoryExists(dirname($to));
-                $this->files->copyDirectory($from, $to);
-            }
-        }
+        return true;
+    }
 
+    public function publishPackagesAssets(): bool
+    {
+        $this->publishAssets(package_path());
+
+        return true;
+    }
+
+    public function publishPluginsAssets(): bool
+    {
+        $this->publishAssets(plugin_path());
+
+        return true;
+    }
+
+    public function publishThemesAssets(): bool
+    {
         $this->files->delete(theme_path(Theme::getThemeName() . '/public/css/style.integration.css'));
 
         $customCSS = Theme::getStyleIntegrationPath();
@@ -372,6 +406,8 @@ final class Core
         app(ThemeService::class)->publishAssets();
 
         SystemUpdatePublished::dispatch();
+
+        return true;
     }
 
     public function cleanCaches(): void
@@ -387,9 +423,36 @@ final class Core
         }
     }
 
+    public function cleanUp(): bool
+    {
+        $this->cleanCaches();
+
+        return true;
+    }
+
     public function logError(Exception|Throwable $exception): void
     {
         logger()->error($exception->getMessage() . ' - ' . $exception->getFile() . ':' . $exception->getLine());
+    }
+
+    private function publishPaths(): array
+    {
+        return array_merge(
+            IlluminateServiceProvider::pathsToPublish(null, 'cms-lang'),
+            IlluminateServiceProvider::pathsToPublish(null, 'cms-public')
+        );
+    }
+
+    public function publishAssets(string $path): void
+    {
+        foreach ($this->publishPaths() as $from => $to) {
+            if (! Str::contains($from, $path)) {
+                continue;
+            }
+
+            $this->files->ensureDirectoryExists(dirname($to));
+            $this->files->copyDirectory($from, $to);
+        }
     }
 
     private function runMigrationFiles(): void
@@ -404,11 +467,16 @@ final class Core
             core_path(),
             package_path(),
             plugin_path(),
+            theme_path(),
         ];
 
         foreach ($paths as $path) {
             foreach (BaseHelper::scanFolder($path) as $module) {
                 if ($path == plugin_path() && ! is_plugin_active($module)) {
+                    continue;
+                }
+
+                if ($path == theme_path() && $module !== Theme::getThemeName()) {
                     continue;
                 }
 
@@ -456,7 +524,7 @@ final class Core
                 return false;
             }
 
-            if (! Validator::make($content, [
+            $validator = Validator::make($content, [
                 'productId' => ['required', 'string'],
                 'source' => ['required', 'string'],
                 'apiUrl' => ['required', 'url'],
@@ -465,29 +533,33 @@ final class Core
                 'marketplaceUrl' => ['required', 'url'],
                 'marketplaceToken' => ['required', 'string'],
                 'minimumPhpVersion' => ['nullable', 'string'],
-            ])->stopOnFirstFailure()->fails()) {
+            ])->stopOnFirstFailure();
+
+            if ($validator->passes()) {
                 if ($content['productId'] !== $this->productId) {
                     $zip->close();
 
-                    return false;
+                    throw ValidationException::withMessages(['productId' => 'The product ID of the update does not match the product ID of your website.']);
                 }
 
                 if (version_compare($content['version'], $this->version, '<')) {
                     $zip->close();
 
-                    return false;
+                    throw ValidationException::withMessages(['version' => 'The version of the update is lower than the current version.']);
                 }
 
-                if (isset($content['minimumPhpVersion'])
-                    && version_compare($content['minimumPhpVersion'], phpversion(), '>')) {
+                if (
+                    isset($content['minimumPhpVersion']) &&
+                    version_compare($content['minimumPhpVersion'], phpversion(), '>')
+                ) {
                     $zip->close();
 
-                    return false;
+                    throw ValidationException::withMessages(['minimumPhpVersion' => sprintf('The minimum PHP version required (v%s) for the update is higher than the current PHP version.', $content['minimumPhpVersion'])]);
                 }
             } else {
                 $zip->close();
 
-                return false;
+                throw ValidationException::withMessages($validator->errors()->toArray());
             }
         }
 

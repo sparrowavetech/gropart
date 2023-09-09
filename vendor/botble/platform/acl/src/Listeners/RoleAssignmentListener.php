@@ -3,7 +3,6 @@
 namespace Botble\ACL\Listeners;
 
 use Botble\ACL\Events\RoleAssignmentEvent;
-use Illuminate\Support\Facades\Auth;
 
 class RoleAssignmentListener
 {
@@ -16,6 +15,6 @@ class RoleAssignmentListener
         $event->user->permissions = $permissions;
         $event->user->save();
 
-        cache()->forget(md5('cache-dashboard-menu-' . Auth::id()));
+        cache()->forget(md5('cache-dashboard-menu-' . $event->user->getKey()));
     }
 }

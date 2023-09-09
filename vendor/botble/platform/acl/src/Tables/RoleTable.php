@@ -4,62 +4,37 @@ namespace Botble\ACL\Tables;
 
 use Botble\ACL\Models\Role;
 use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Facades\Html;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Table\DataTables;
-use Illuminate\Contracts\Routing\UrlGenerator;
+use Botble\Table\Actions\DeleteAction;
+use Botble\Table\Actions\EditAction;
+use Botble\Table\BulkActions\DeleteBulkAction;
+use Botble\Table\Columns\Column;
+use Botble\Table\Columns\CreatedAtColumn;
+use Botble\Table\Columns\IdColumn;
+use Botble\Table\Columns\NameColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 
 class RoleTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
-    public function __construct(
-        DataTables $table,
-        UrlGenerator $urlGenerator,
-        Role $role
-    ) {
-        parent::__construct($table, $urlGenerator);
-
-        $this->model = $role;
-
-        if (! Auth::user()->hasAnyPermission(['roles.edit', 'roles.destroy'])) {
-            $this->hasOperations = false;
-            $this->hasActions = false;
-        }
+    public function setup(): void
+    {
+        $this
+            ->model(Role::class)
+            ->addActions([
+                EditAction::make()->route('roles.edit'),
+                DeleteAction::make()->route('roles.destroy'),
+            ]);
     }
 
     public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('name', function (Role $item) {
-                if (! Auth::user()->hasPermission('roles.edit')) {
-                    return BaseHelper::clean($item->name);
-                }
-
-                return Html::link(route('roles.edit', $item->getKey()), BaseHelper::clean($item->name));
-            })
-            ->editColumn('checkbox', function (Role $item) {
-                return $this->getCheckbox($item->getKey());
-            })
-            ->editColumn('description', function (Role $item) {
-                return $item->description;
-            })
-            ->editColumn('created_at', function (Role $item) {
-                return BaseHelper::formatDate($item->created_at);
-            })
             ->editColumn('created_by', function (Role $item) {
                 return BaseHelper::clean($item->author->name);
-            })
-            ->addColumn('operations', function (Role $item) {
-                return $this->getOperations('roles.edit', 'roles.destroy', $item);
             });
 
         return $this->toJson($data);
@@ -85,25 +60,15 @@ class RoleTable extends TableAbstract
     public function columns(): array
     {
         return [
-            'id' => [
-                'title' => trans('core/base::tables.id'),
-                'width' => '20px',
-            ],
-            'name' => [
-                'title' => trans('core/base::tables.name'),
-            ],
-            'description' => [
-                'title' => trans('core/base::tables.description'),
-                'class' => 'text-start',
-            ],
-            'created_at' => [
-                'title' => trans('core/base::tables.created_at'),
-                'width' => '100px',
-            ],
-            'created_by' => [
-                'title' => trans('core/acl::permissions.created_by'),
-                'width' => '100px',
-            ],
+            IdColumn::make(),
+            NameColumn::make()->route('roles.edit'),
+            Column::make('description')
+                ->title(trans('core/base::tables.description'))
+                ->alignLeft(),
+            CreatedAtColumn::make(),
+            Column::make('created_by')
+                ->title(trans('core/acl::permissions.created_by'))
+                ->width(100),
         ];
     }
 
@@ -114,7 +79,9 @@ class RoleTable extends TableAbstract
 
     public function bulkActions(): array
     {
-        return $this->addDeleteAction(route('roles.deletes'), 'roles.destroy', parent::bulkActions());
+        return [
+            DeleteBulkAction::make()->permission('roles.destroy'),
+        ];
     }
 
     public function getBulkChanges(): array

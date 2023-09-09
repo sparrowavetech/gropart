@@ -17,7 +17,7 @@ $(document).ready(() => {
             _self.addClass('button-loading')
 
             if (typeof tinymce != 'undefined') {
-                for (var instance in tinymce.editors) {
+                for (let instance in tinymce.editors) {
                     if (tinymce.editors[instance].getContent) {
                         $('#' + instance).html(tinymce.editors[instance].getContent())
                     }
@@ -45,6 +45,15 @@ $(document).ready(() => {
                     Botble.handleError(data)
                 },
             })
+        })
+
+        $('.theme-option-sidebar a[data-bs-toggle="tab"]').on('click', () => {
+            Botble.initResources()
+
+            if (typeof EditorManagement != 'undefined') {
+                window.EDITOR = new EditorManagement().init()
+                window.EditorManagement = window.EditorManagement || EditorManagement
+            }
         })
     })
 })

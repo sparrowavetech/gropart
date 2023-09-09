@@ -7,7 +7,7 @@ use Botble\Blog\Repositories\Interfaces\CategoryInterface;
 use Botble\Blog\Repositories\Interfaces\PostInterface;
 use Botble\Blog\Repositories\Interfaces\TagInterface;
 use Botble\Blog\Supports\PostFormat;
-use Botble\Page\Repositories\Interfaces\PageInterface;
+use Botble\Page\Models\Page;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -194,7 +194,7 @@ if (! function_exists('get_blog_page_url')) {
             return route('public.index');
         }
 
-        $blogPage = app(PageInterface::class)->findById($blogPageId);
+        $blogPage = Page::query()->find($blogPageId);
 
         if (! $blogPage) {
             return route('public.index');

@@ -8,12 +8,6 @@ Route::group(['namespace' => 'Botble\SimpleSlider\Http\Controllers', 'middleware
         Route::group(['prefix' => 'simple-sliders', 'as' => 'simple-slider.'], function () {
             Route::resource('', 'SimpleSliderController')->parameters(['' => 'simple-slider']);
 
-            Route::delete('items/destroy', [
-                'as' => 'deletes',
-                'uses' => 'SimpleSliderController@deletes',
-                'permission' => 'simple-slider.destroy',
-            ]);
-
             Route::post('sorting', [
                 'as' => 'sorting',
                 'uses' => 'SimpleSliderController@postSorting',

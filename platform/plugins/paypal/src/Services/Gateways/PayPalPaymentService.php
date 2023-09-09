@@ -35,7 +35,7 @@ class PayPalPaymentService extends PayPalPaymentAbstract
         return $this
             ->setReturnUrl($data['callback_url'] . '?' . http_build_query($queryParams))
             ->setCurrency($currency)
-            ->setCustomer(Arr::get($data, 'address.email'))
+            ->setCustomer(Arr::get($data, 'address.email') ?: '')
             ->setItem([
                 'name' => $description,
                 'quantity' => 1,

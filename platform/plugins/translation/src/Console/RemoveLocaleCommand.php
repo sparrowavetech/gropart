@@ -5,11 +5,12 @@ namespace Botble\Translation\Console;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Console\Command;
 use Illuminate\Console\ConfirmableTrait;
+use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 
 #[AsCommand('cms:translations:remove-locale', 'Remove a locale')]
-class RemoveLocaleCommand extends Command
+class RemoveLocaleCommand extends Command implements PromptsForMissingInput
 {
     use ConfirmableTrait;
 
@@ -45,7 +46,7 @@ class RemoveLocaleCommand extends Command
             $this->laravel['files']->delete($jsonFile);
         }
 
-        $this->components->info('Removed locale "' . $this->argument('locale') . '" successfully!');
+        $this->components->info(sprintf('Removed locale "%s" successfully!', $locale));
 
         return self::SUCCESS;
     }
@@ -72,8 +73,8 @@ class RemoveLocaleCommand extends Command
 
     protected function configure(): void
     {
-        $this->addArgument('locale', InputArgument::REQUIRED, 'The locale name that you want to remove');
-
-        $this->addOption('force', 'f', null, 'Remove locale` backup without confirmation');
+        $this
+            ->addArgument('locale', InputArgument::REQUIRED, 'The locale name that you want to remove')
+            ->addOption('force', 'f', null, 'Remove locale` backup without confirmation');
     }
 }

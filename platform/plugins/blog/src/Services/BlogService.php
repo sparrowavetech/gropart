@@ -7,9 +7,7 @@ use Botble\Base\Supports\Helper;
 use Botble\Blog\Models\Category;
 use Botble\Blog\Models\Post;
 use Botble\Blog\Models\Tag;
-use Botble\Blog\Repositories\Interfaces\CategoryInterface;
 use Botble\Blog\Repositories\Interfaces\PostInterface;
-use Botble\Blog\Repositories\Interfaces\TagInterface;
 use Botble\Media\Facades\RvMedia;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\SeoHelper\SeoOpenGraph;
@@ -39,12 +37,10 @@ class BlogService
 
         switch ($slug->reference_type) {
             case Post::class:
-                $post = app(PostInterface::class)
-                    ->getFirstBy(
-                        $condition,
-                        ['*'],
-                        ['categories', 'tags', 'slugable', 'categories.slugable', 'tags.slugable']
-                    );
+                $post = Post::query()
+                    ->where($condition)
+                    ->with(['categories', 'tags', 'slugable', 'categories.slugable', 'tags.slugable'])
+                    ->first();
 
                 if (empty($post)) {
                     abort(404);
@@ -105,8 +101,10 @@ class BlogService
                     'slug' => $post->slug,
                 ];
             case Category::class:
-                $category = app(CategoryInterface::class)
-                    ->getFirstBy($condition, ['*'], ['slugable']);
+                $category = Category::query()
+                    ->where($condition)
+                    ->with(['slugable'])
+                    ->first();
 
                 if (empty($category)) {
                     abort(404);
@@ -162,7 +160,10 @@ class BlogService
                     'slug' => $category->slug,
                 ];
             case Tag::class:
-                $tag = app(TagInterface::class)->getFirstBy($condition, ['*'], ['slugable']);
+                $tag = Tag::query()
+                    ->where($condition)
+                    ->with(['slugable'])
+                    ->first();
 
                 if (! $tag) {
                     abort(404);

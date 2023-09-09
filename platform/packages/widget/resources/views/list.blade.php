@@ -46,7 +46,7 @@
                         <div class="col sidebar-item" data-id="{{ $group->getId() }}">
                             <div class="sidebar-area">
                                 <div class="sidebar-header">
-                                    <h3 class="text-break position-relative pe-3" role="button">
+                                    <h3 class="text-break position-relative pe-3">
                                         {{ $group->getName() }}
                                         <span class="position-absolute end-0 top-0 me-1">
                                             <i class="fa fa-caret-down"></i>

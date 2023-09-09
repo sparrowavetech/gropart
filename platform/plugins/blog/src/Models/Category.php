@@ -92,7 +92,7 @@ class Category extends BaseModel
     {
         return $this
             ->children()
-            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->wherePublished()
             ->with(['slugable', 'activeChildren']);
     }
 

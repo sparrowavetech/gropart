@@ -25,6 +25,7 @@ class SelectLocationField extends FormField
             'state' => 'state_id',
             'city' => 'city_id',
         ];
+
         $this->locationKeys = array_filter(array_merge($default, Arr::get($options, 'locationKeys', [])));
 
         $this->name = $name;
@@ -69,6 +70,11 @@ class SelectLocationField extends FormField
         $countryKey = Arr::get($this->locationKeys, 'country');
         $countries = Country::query()->pluck('name', 'id')->all();
         $value = Arr::get($this->getValue(), 'country');
+
+        if (! $value && count($countries)) {
+            $value = Arr::first(array_keys($countries));
+        }
+
         $attr = array_merge($this->getOption('attr', []), [
             'id' => $countryKey,
             'class' => 'select-search-full',
@@ -89,6 +95,15 @@ class SelectLocationField extends FormField
         $states = [];
         $stateKey = Arr::get($this->locationKeys, 'state');
         $countryId = Arr::get($this->getValue(), 'country');
+
+        if (! $countryId) {
+            $countries = Country::query()->pluck('name', 'id')->all();
+
+            if (count($countries)) {
+                $countryId = Arr::first(array_keys($countries));
+            }
+        }
+
         $value = Arr::get($this->getValue(), 'state');
         if ($countryId) {
             $states = State::query()->where('country_id', $countryId)->pluck('name', 'id')->all();

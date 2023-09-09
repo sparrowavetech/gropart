@@ -2,8 +2,7 @@
 
 return [
     'name' => 'Bulk Import',
-    'loading_text' => 'Importing',
-    'imported_successfully' => 'Imported successfully.',
+    'imported_successfully' => 'Your locations have been imported successfully!',
     'please_choose_the_file_mime' => 'Please choose the file mime :types',
     'please_choose_the_file' => 'Please choose the file',
     'start_import' => 'Start Import',
@@ -43,4 +42,11 @@ return [
     'import' => 'Import',
     'import_available_data_confirmation' => 'Import available data confirmation',
     'import_available_data_confirmation_content' => 'Do you really want to import states/cities for this country?',
+    'upload_file_placeholder' => 'Drag and drop file here or click to upload',
+    'uploading' => 'Uploading...',
+    'validating' => 'Validating...',
+    'importing' => 'Importing...',
+    'validating_message' => 'Validating from :from to :to...',
+    'importing_message' => 'Importing from :from to :to...',
+    'total_rows' => 'You have imported :total rows successfully!',
 ];

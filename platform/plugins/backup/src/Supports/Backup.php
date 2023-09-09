@@ -3,14 +3,19 @@
 namespace Botble\Backup\Supports;
 
 use Botble\Backup\Supports\MySql\MySqlDump;
+use Botble\Backup\Supports\PgSql\Backup as PgSqlBackup;
+use Botble\Backup\Supports\PgSql\Restore as PgSqlRestore;
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Supports\Database;
 use Botble\Base\Supports\Zipper;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 use Symfony\Component\Process\Process;
+use Throwable;
 
 class Backup
 {
@@ -86,21 +91,39 @@ class Backup
         $file = 'database-' . Carbon::now()->format('Y-m-d-H-i-s');
         $path = $this->folder . DIRECTORY_SEPARATOR . $file;
 
-        $mysqlPath = rtrim(config('plugins.backup.general.backup_mysql_execute_path'), '/');
+        $driver = DB::getConfig('driver');
 
-        if (! empty($mysqlPath)) {
-            $mysqlPath = $mysqlPath . '/';
-        }
-
-        $config = DB::connection('mysql')->getConfig();
-
-        if (! $config) {
+        if (! $driver) {
             return false;
         }
 
-        $sql = $mysqlPath . 'mysqldump --user="' . $config['username'] . '" --password="' . $config['password'] . '"';
+        try {
+            return match ($driver) {
+                'mysql' => $this->backupDbMySql($path),
+                'pgsql' => $this->backupDbPgSql($path),
+                default => throw new RuntimeException(sprintf('Driver [%s] is not supported', $driver)),
+            };
+        } catch (Throwable $exception) {
+            report($exception);
 
-        $sql .= ' --host=' . $config['host'] . ' --port=' . $config['port'] . ' ' . $config['database'] . ' > ' . $path . '.sql';
+            return false;
+        }
+    }
+
+    protected function backupDbMySql(string $path): bool
+    {
+        $config = DB::getConfig();
+        $mysqlPath = rtrim(config('plugins.backup.general.mysql.execute_path'), '/');
+        $command = $mysqlPath . 'mysqldump --user="%s" --password="%s" --host="%s" --port="%s" "%s" > "%s"';
+        $sql = sprintf(
+            $command,
+            $config['username'],
+            $config['password'],
+            $config['host'],
+            $config['port'],
+            $config['database'],
+            $filePath = $path . '.sql'
+        );
 
         try {
             Process::fromShellCommandline($sql)->mustRun();
@@ -116,14 +139,14 @@ class Backup
             }
         }
 
-        if (! $this->files->exists($path . '.sql') || $this->files->size($path . '.sql') < 1024) {
+        if (! $this->files->exists($filePath) || $this->files->size($filePath) < 1024) {
             $this->processMySqlDumpPHP($path, $config);
         }
 
-        $this->compressFileToZip($path, $path . '.zip');
+        $this->compressFileToZip($filePath, $fileZip = $path . '.zip');
 
-        if ($this->files->exists($path . '.zip')) {
-            chmod($path . '.zip', 0755);
+        if ($this->files->exists($fileZip)) {
+            chmod($fileZip . '.zip', 0755);
         }
 
         return true;
@@ -132,16 +155,30 @@ class Backup
     protected function processMySqlDumpPHP(string $path, array $config): bool
     {
         $dump = new MySqlDump('mysql:host=' . $config['host'] . ';dbname=' . $config['database'], $config['username'], $config['password']);
+
         $dump->start($path . '.sql');
+
+        return true;
+    }
+
+    protected function backupDbPgSql(string $path): bool
+    {
+        $file = (new PgSqlBackup())->backup($path);
+
+        $this->compressFileToZip($file, $fileZip = $path . '.zip');
+
+        if ($this->files->exists($fileZip)) {
+            chmod($fileZip . '.zip', 0755);
+        }
 
         return true;
     }
 
     public function compressFileToZip(string $path, string $destination): void
     {
-        $this->zipper->compress($path . '.sql', $destination);
+        $this->zipper->compress($path, $destination);
 
-        $this->deleteFile($path . '.sql');
+        $this->deleteFile($path);
     }
 
     protected function deleteFile(string $file): void
@@ -171,6 +208,7 @@ class Backup
     public function deleteFolderBackup(string $path): void
     {
         $backupFolder = $this->getBackupPath();
+
         if ($this->files->isDirectory($backupFolder) && $this->files->isDirectory($path)) {
             foreach (BaseHelper::scanFolder($path) as $item) {
                 $this->files->delete($path . DIRECTORY_SEPARATOR . $item);
@@ -197,21 +235,47 @@ class Backup
 
     public function restoreDatabase(string $file, string $path): bool
     {
+        $driver = DB::getConfig('driver');
+
+        if (! $driver) {
+            return false;
+        }
+
         $this->extractFileTo($file, $path);
-        $file = $path . DIRECTORY_SEPARATOR . $this->files->name($file) . '.sql';
+
+        $file = $path . DIRECTORY_SEPARATOR . $this->files->name($file) . (
+            $driver === 'mysql' ? '.sql' : '.dump'
+        );
 
         if (! file_exists($file)) {
             return false;
         }
 
-        $databaseName = DB::connection('mysql')->getConfig()['database'];
+        try {
+            return match ($driver) {
+                'mysql' => $this->restoreDbMySql($file),
+                'pgsql' => $this->restoreDbPgSql($file),
+                default => throw new RuntimeException(sprintf('Driver [%s] is not supported', $driver)),
+            };
+        } catch (Throwable $exception) {
+            report($exception);
 
-        // Force the new login to be used
-        DB::purge();
-        DB::unprepared('USE `' . $databaseName . '`');
-        DB::connection()->setDatabaseName($databaseName);
-        DB::getSchemaBuilder()->dropAllTables();
-        DB::unprepared(file_get_contents($file));
+            return false;
+        }
+    }
+
+    protected function restoreDbMySql(string $file): bool
+    {
+        Database::restoreFromPath($file);
+
+        $this->deleteFile($file);
+
+        return true;
+    }
+
+    protected function restoreDbPgSql(string $file): bool
+    {
+        (new PgSqlRestore())->restore($file);
 
         $this->deleteFile($file);
 

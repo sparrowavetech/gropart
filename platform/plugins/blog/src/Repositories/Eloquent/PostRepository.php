@@ -25,7 +25,7 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
             ])
             ->limit($limit)
             ->with(array_merge(['slugable'], $with))
-            ->orderBy('created_at', 'desc');
+            ->orderByDesc('created_at');
 
         return $this->applyBeforeExecuteQuery($data)->get();
     }
@@ -33,11 +33,11 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
     public function getListPostNonInList(array $selected = [], int $limit = 7, array $with = []): Collection
     {
         $data = $this->model
-            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->wherePublished()
             ->whereNotIn('id', $selected)
             ->limit($limit)
             ->with($with)
-            ->orderBy('created_at', 'desc');
+            ->orderByDesc('created_at');
 
         return $this->applyBeforeExecuteQuery($data)->get();
     }
@@ -50,11 +50,11 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         $model = $this->model;
 
         $data = $model
-            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->wherePublished()
             ->where('id', '!=', $id)
             ->limit($limit)
             ->with('slugable')
-            ->orderBy('created_at', 'desc')
+            ->orderByDesc('created_at')
             ->whereHas('categories', function (Builder $query) use ($id) {
                 $query->whereIn('categories.id', $this->getRelatedCategoryIds($id));
             });
@@ -83,14 +83,14 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         int $limit = 0
     ): Collection|LengthAwarePaginator {
         $data = $this->model
-            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->wherePublished()
             ->whereHas('categories', function (Builder $query) use ($categoryId) {
                 $query->whereIn('categories.id', array_filter((array)$categoryId));
             })
             ->select('*')
             ->distinct()
             ->with('slugable')
-            ->orderBy('created_at', 'desc');
+            ->orderByDesc('created_at');
 
         if ($paginate != 0) {
             return $this->applyBeforeExecuteQuery($data)->paginate($paginate);
@@ -107,7 +107,7 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
                 'author_id' => $authorId,
             ])
             ->with('slugable')
-            ->orderBy('created_at', 'desc');
+            ->orderByDesc('created_at');
 
         return $this->applyBeforeExecuteQuery($data)->paginate($paginate);
     }
@@ -116,8 +116,8 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
     {
         $data = $this->model
             ->with('slugable')
-            ->where('status', BaseStatusEnum::PUBLISHED)
-            ->orderBy('created_at', 'desc');
+            ->wherePublished()
+            ->orderByDesc('created_at');
 
         return $this->applyBeforeExecuteQuery($data)->get();
     }
@@ -126,11 +126,11 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
     {
         $data = $this->model
             ->with(['slugable', 'categories', 'categories.slugable', 'author'])
-            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->wherePublished()
             ->whereHas('tags', function (Builder $query) use ($tag) {
                 $query->where('tags.id', $tag);
             })
-            ->orderBy('created_at', 'desc');
+            ->orderByDesc('created_at');
 
         return $this->applyBeforeExecuteQuery($data)->paginate($paginate);
     }
@@ -149,7 +149,7 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         $data = $data->limit($limit)
             ->with('slugable')
             ->select('*')
-            ->orderBy('created_at', 'desc');
+            ->orderByDesc('created_at');
 
         return $this->applyBeforeExecuteQuery($data)->get();
     }
@@ -161,8 +161,8 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
     ): Collection|LengthAwarePaginator {
         $data = $this->model
             ->with('slugable')
-            ->where('status', BaseStatusEnum::PUBLISHED)
-            ->orderBy('created_at', 'desc');
+            ->wherePublished()
+            ->orderByDesc('created_at');
 
         $data = $this->search($data, $keyword);
 
@@ -184,10 +184,10 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
     ): Collection|LengthAwarePaginator {
         $data = $this->model
             ->with($with)
-            ->orderBy('created_at', 'desc');
+            ->orderByDesc('created_at');
 
         if ($active) {
-            $data = $data->where('status', BaseStatusEnum::PUBLISHED);
+            $data = $data->wherePublished();
         }
 
         return $this->applyBeforeExecuteQuery($data)->paginate($perPage);
@@ -198,7 +198,7 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         $data = $this->model
             ->with('slugable')
             ->orderBy('views', 'desc')
-            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->wherePublished()
             ->limit($limit);
 
         if (! empty(Arr::get($args, 'where'))) {
@@ -255,15 +255,15 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         $order = Arr::get($filters, 'order', 'desc');
 
         $data = $data
-            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->wherePublished()
             ->orderBy($orderBy, $order);
 
         return $this->applyBeforeExecuteQuery($data)->paginate((int)$filters['per_page']);
     }
 
-    protected function search(BaseQueryBuilder|Builder $model, string $keyword): BaseQueryBuilder|Builder
+    protected function search(BaseQueryBuilder|Builder $model, string|null $keyword): BaseQueryBuilder|Builder
     {
-        if (! $model instanceof BaseQueryBuilder) {
+        if (! $model instanceof BaseQueryBuilder || ! $keyword) {
             return $model;
         }
 

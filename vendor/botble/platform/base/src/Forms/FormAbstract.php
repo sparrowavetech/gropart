@@ -10,6 +10,7 @@ use Botble\Base\Forms\Fields\ColorField;
 use Botble\Base\Forms\Fields\CustomRadioField;
 use Botble\Base\Forms\Fields\CustomSelectField;
 use Botble\Base\Forms\Fields\DatePickerField;
+use Botble\Base\Forms\Fields\DatetimeField;
 use Botble\Base\Forms\Fields\EditorField;
 use Botble\Base\Forms\Fields\HtmlField;
 use Botble\Base\Forms\Fields\MediaFileField;
@@ -198,6 +199,7 @@ abstract class FormAbstract extends Form
             'customColor' => ColorField::class,
             'time' => TimeField::class,
             'datePicker' => DatePickerField::class,
+            'datetime' => DatetimeField::class,
             'autocomplete' => AutocompleteField::class,
             'html' => HtmlField::class,
             'repeater' => RepeaterField::class,

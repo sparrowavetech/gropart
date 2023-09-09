@@ -1,5 +1,5 @@
-!(function ($) {
-    $.fn.filetree = function (i) {
+!(function($) {
+    $.fn.filetree = function(i) {
         const options = {
             animationSpeed: 'slow',
             console: false,
@@ -7,17 +7,17 @@
 
         function init(i) {
             i = $.extend(options, i)
-            return this.each(function () {
+            return this.each(function() {
                 $(this)
                     .find('li')
-                    .on('click', '.file-opener-i', function (e) {
+                    .on('click', '.file-opener-i', function(e) {
                         return (
                             e.preventDefault(),
-                            $(this).hasClass('fa-plus-square')
-                                ? ($(this).addClass('fa-minus-square'), $(this).removeClass('fa-plus-square'))
-                                : ($(this).addClass('fa-plus-square'), $(this).removeClass('fa-minus-square')),
-                            $(this).parent().toggleClass('closed').toggleClass('open'),
-                            !1
+                                $(this).hasClass('fa-plus-square')
+                                    ? ($(this).addClass('fa-minus-square'), $(this).removeClass('fa-plus-square'))
+                                    : ($(this).addClass('fa-plus-square'), $(this).removeClass('fa-minus-square')),
+                                $(this).parent().toggleClass('closed').toggleClass('open'),
+                                !1
                         )
                     })
             })
@@ -29,8 +29,8 @@
     }
 })(jQuery)
 
-;(function ($) {
-    $.fn.dragScroll = function (options) {
+;(function($) {
+    $.fn.dragScroll = function(options) {
         function init() {
             const $el = $(this)
             let settings = $.extend(
@@ -39,41 +39,41 @@
                     scrollHorizontal: true,
                     cursor: null,
                 },
-                options
+                options,
             )
 
             let clicked = false,
                 clickY,
                 clickX
 
-            let getCursor = function () {
+            let getCursor = function() {
                 if (settings.cursor) return settings.cursor
                 if (settings.scrollVertical && settings.scrollHorizontal) return 'move'
                 if (settings.scrollVertical) return 'row-resize'
                 if (settings.scrollHorizontal) return 'col-resize'
             }
 
-            let updateScrollPos = function (e, el) {
+            let updateScrollPos = function(e, el) {
                 let $el = $(el)
                 settings.scrollVertical && $el.scrollTop($el.scrollTop() + (clickY - e.pageY))
                 settings.scrollHorizontal && $el.scrollLeft($el.scrollLeft() + (clickX - e.pageX))
             }
 
             $el.on({
-                mousemove: function (e) {
+                mousemove: function(e) {
                     clicked && updateScrollPos(e, this)
                 },
-                mousedown: function (e) {
+                mousedown: function(e) {
                     $el.css('cursor', getCursor())
                     clicked = true
                     clickY = e.pageY
                     clickX = e.pageX
                 },
-                mouseup: function () {
+                mouseup: function() {
                     clicked = false
                     $el.css('cursor', 'auto')
                 },
-                mouseleave: function () {
+                mouseleave: function() {
                     clicked = false
                     $el.css('cursor', 'auto')
                 },
@@ -87,7 +87,7 @@
 })(jQuery)
 
 $(() => {
-    $treeWrapper = $('.file-tree-wrapper')
+    const $treeWrapper = $('.file-tree-wrapper')
 
     $treeWrapper.dragScroll()
 
@@ -110,20 +110,22 @@ $(() => {
         $('.tree-form-body').html(data)
         Botble.initResources()
         Botble.handleCounterUp()
-        Botble.initMediaIntegrate()
         if (window.EditorManagement) {
-            new EditorManagement().init()
+            window.EDITOR = new EditorManagement().init()
         }
+        Botble.initMediaIntegrate()
     }
 
-    $(document).on('click', '.tree-categories-container .toggle-tree', function (e) {
+    $(document).on('click', '.tree-categories-container .toggle-tree', function(e) {
         const $this = $(e.currentTarget)
+        const $treeCategoryContainer = $('.tree-categories-container')
+
         if ($this.hasClass('open-tree')) {
             $this.text($this.data('collapse'))
-            $('.tree-categories-container').find('.folder-root.closed').removeClass('closed').addClass('open')
+            $treeCategoryContainer.find('.folder-root.closed').removeClass('closed').addClass('open')
         } else {
             $this.text($this.data('expand'))
-            $('.tree-categories-container').find('.folder-root.open').removeClass('open').addClass('closed')
+            $treeCategoryContainer.find('.folder-root.open').removeClass('open').addClass('closed')
         }
         $this.toggleClass('open-tree')
     })
@@ -272,17 +274,19 @@ $(() => {
                     Botble.showSuccess(data.message)
                     $formLoading.addClass('d-none')
 
+                    let $createButton = $('.tree-categories-create')
+
                     const activeId = saveAndEdit && data.data.model ? data.data.model.id : null
-                    reloadTree(activeId, function () {
+                    reloadTree(activeId, function() {
                         if (activeId) {
-                            let fetchDataButton = $('.folder-root[data-id="' + activeId + '"] a.fetch-data')
+                            let fetchDataButton = $('.folder-root[data-id="' + activeId + '"] > a.fetch-data')
                             if (fetchDataButton.length) {
                                 fetchDataButton.trigger('click')
                             } else {
                                 location.reload()
                             }
-                        } else if ($('.tree-categories-create').length) {
-                            $('.tree-categories-create').trigger('click')
+                        } else if ($createButton.length) {
+                            $createButton.trigger('click')
                         } else {
                             reloadForm(data.data?.form)
                             $formLoading.addClass('d-none')

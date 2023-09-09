@@ -5,13 +5,14 @@ namespace Botble\Language\Commands;
 use Botble\Language\Facades\Language;
 use Botble\Language\Models\LanguageMeta;
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 
 #[AsCommand('cms:language:sync', 'Set default language for old objects')]
-class SyncOldDataCommand extends Command
+class SyncOldDataCommand extends Command implements PromptsForMissingInput
 {
     public function handle(): int
     {

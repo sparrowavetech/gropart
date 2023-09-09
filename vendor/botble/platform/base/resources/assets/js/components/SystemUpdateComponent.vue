@@ -25,13 +25,17 @@
                     <div class="loader" v-if="loading">
                         <half-circle-spinner :animation-duration="1000" :size="32" />
                     </div>
+
                     <div class="information">
                         <p v-for="result in results" v-text="result.text" :class="result.error ? 'bold text-danger' : 'bold'"></p>
                     </div>
 
-                    <div class="important text-danger" v-if="loading">
+                    <div class="percent" v-text="`${percent}%`"></div>
+
+                    <div class="important" v-if="loading">
                         <strong>DO NOT CLOSE WINDOWS DURING UPDATE!</strong>
                     </div>
+
                     <div v-else>
                         <div class="btn btn-info" @click="refresh">Click Here To Exit</div>
                     </div>
@@ -53,6 +57,9 @@ export default {
         updateUrl: String,
         updateId: String,
         version: String,
+        firstStep: String,
+        firstStepMessage: String,
+        lastStep: String,
         isOutdated: Boolean,
     },
 
@@ -61,44 +68,79 @@ export default {
             askToProcessUpdate: false,
             performingUpdate: false,
             results: [],
+            realPercent: 0,
+            percent: 0,
+            percentInterval: 0,
+            step: this.firstStep,
             loading: false,
         }
+    },
+
+    watch: {
+        realPercent() {
+            if (this.percentInterval) {
+                return
+            }
+
+            this.percentInterval = setInterval(() => {
+                if (this.percent >= this.realPercent) {
+                    return
+                }
+
+                if (this.percent === 100) {
+                    clearInterval(this.percentInterval)
+                    return
+                }
+
+                this.percent += 1
+            }, 100)
+        },
     },
 
     methods: {
         async performUpdate() {
             this.loading = true
             this.performingUpdate = true
+            this.realPercent = 5
+
+            this.results.push({text: this.firstStepMessage, error: false})
 
             try {
-                this.results.push({text: 'Downloading update...', error: false})
-                await this.triggerUpdate(1)
-
-                this.results.push({text: 'Copying files & database...', error: false})
-                await this.triggerUpdate(2)
-
-                this.results.push({text: 'Publishing assets...', error: false})
-                await this.triggerUpdate(3)
-
-                this.results.push({text: 'Cleaning up...', error: false})
-                await this.triggerUpdate(4)
-
-                this.loading = false
-                this.results.push({text: 'Done! Your browser will be refreshed in 30 seconds.', error: false})
+                await this.triggerUpdate()
 
                 setTimeout(() => this.refresh(), 30000)
             } catch (e) {
                 this.loading = false
-                this.results.push({text: e.response.data.message, error: true})
+                this.results.push({ text: e.message, error: true })
             }
         },
 
-        async triggerUpdate(step = 1) {
-            return axios.post(this.updateUrl, {
-                step: step,
-                update_id: this.updateId,
-                version: this.version,
-            })
+        async triggerUpdate() {
+            return axios
+                .post(this.updateUrl, {
+                    step_name: this.step,
+                    update_id: this.updateId,
+                    version: this.version,
+                })
+                .then(({ data }) => {
+                    this.step = data.data.next_step
+                    this.realPercent = data.data.current_percent
+                    this.results.push({ text: data.data.next_message, error: false })
+
+                    if (data.data.next_step !== this.lastStep) {
+                        return this.triggerUpdate()
+                    }
+
+                    this.percent = 100
+                    this.loading = false
+                    clearInterval(this.percentInterval)
+                })
+                .catch(error => {
+                    this.loading = false
+                    this.results.push({ text: error.response.data.message, error: true })
+
+                    throw error
+                })
         },
 
         refresh() {
@@ -122,7 +164,7 @@ export default {
 
     > .updating-wrapper {
         position: absolute;
-        top: calc(50% - 100px);
+        top: calc(30% - 100px);
         height: 100%;
         width: 100%;
 
@@ -131,10 +173,22 @@ export default {
             margin: 0 auto;
             text-align: center;
 
+            .percent {
+                font-size: 64px;
+                color: #fefefe;
+                font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+                margin-bottom: 24px;
+            }
+
             .information {
                 padding: 0 8px;
                 margin: 32px 0;
                 font-size: 18px;
+                color: #efefef;
+            }
+
+            .important {
+                text-shadow: 0 0 16px #ef0012;
                 color: #efefef;
             }
         }

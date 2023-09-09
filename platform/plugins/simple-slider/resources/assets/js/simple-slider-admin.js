@@ -1,6 +1,8 @@
 class SimpleSliderAdminManagement {
-    init() {
-        $.each($('#simple-slider-items-table_wrapper tbody'), (index, el) => {
+    init(tableId) {
+        const $table = $(document).find('#' + tableId + '_wrapper')
+
+        $.each($table.find('tbody'), (index, el) => {
             Sortable.create(el, {
                 group: el + '_' + index, // or { name: "...", pull: [true, false, clone], put: [true, false, array] }
                 sort: true, // sorting inside list
@@ -34,7 +36,7 @@ class SimpleSliderAdminManagement {
             })
         })
 
-        $('.btn-save-sort-order')
+        $table.closest('.widget-body').find('.btn-save-sort-order')
             .off('click')
             .on('click', (event) => {
                 event.preventDefault()
@@ -43,7 +45,6 @@ class SimpleSliderAdminManagement {
                     let $box = _self.closest('.widget-body')
                     $box.find('.btn-save-sort-order').addClass('button-loading')
                     let items = []
-                    console.log($box.find('tbody tr'))
                     $.each($box.find('tbody tr'), (index, sort) => {
                         items.push(parseInt($(sort).find('td:first-child').text()))
                         $(sort)
@@ -73,5 +74,7 @@ class SimpleSliderAdminManagement {
 }
 
 $(document).ready(() => {
-    new SimpleSliderAdminManagement().init()
+    document.addEventListener('core-table-init-completed', function(event) {
+        new SimpleSliderAdminManagement().init(event.detail.table.prop('id'))
+    })
 })

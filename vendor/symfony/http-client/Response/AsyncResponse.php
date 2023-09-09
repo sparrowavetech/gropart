@@ -27,15 +27,15 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
  *
  * @author Nicolas Grekas <p@tchwork.com>
  */
-class AsyncResponse implements ResponseInterface, StreamableInterface
+final class AsyncResponse implements ResponseInterface, StreamableInterface
 {
     use CommonResponseTrait;
 
     private const FIRST_CHUNK_YIELDED = 1;
     private const LAST_CHUNK_YIELDED = 2;
 
-    private ?HttpClientInterface $client;
-    private ResponseInterface $response;
+    private $client;
+    private $response;
     private array $info = ['canceled' => false];
     private $passthru;
     private $stream;
@@ -124,7 +124,7 @@ class AsyncResponse implements ResponseInterface, StreamableInterface
     }
 
     /**
-     * @return resource
+     * {@inheritdoc}
      */
     public function toStream(bool $throw = true)
     {
@@ -146,6 +146,9 @@ class AsyncResponse implements ResponseInterface, StreamableInterface
         return $stream;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function cancel(): void
     {
         if ($this->info['canceled']) {
@@ -168,7 +171,7 @@ class AsyncResponse implements ResponseInterface, StreamableInterface
             }
 
             $this->passthru = null;
-        } catch (ExceptionInterface) {
+        } catch (ExceptionInterface $e) {
             // ignore any errors when canceling
         }
     }
@@ -193,7 +196,7 @@ class AsyncResponse implements ResponseInterface, StreamableInterface
                 foreach (self::passthru($this->client, $this, new LastChunk()) as $chunk) {
                     // no-op
                 }
-            } catch (ExceptionInterface) {
+            } catch (ExceptionInterface $e) {
                 // ignore any errors when destructing
             }
         }

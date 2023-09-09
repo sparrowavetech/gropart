@@ -54,7 +54,7 @@
         </div>
     </div>
 
-    <x-core-base::modal
+    <x-core::modal
         id="remove-plugin-modal"
         :title="trans('packages/plugin-management::plugin.remove_plugin')"
         type="danger"
@@ -62,9 +62,9 @@
         :button-label="trans('packages/plugin-management::plugin.remove_plugin_confirm_yes')"
     >
         {!! trans('packages/plugin-management::plugin.remove_plugin_confirm_message') !!}
-    </x-core-base::modal>
+    </x-core::modal>
 
-    <x-core-base::modal
+    <x-core::modal
         id="confirm-install-plugin-modal"
         :title="trans('packages/plugin-management::plugin.install_plugin')"
         button-id="confirm-install-plugin-button"
@@ -73,5 +73,5 @@
         <input type="hidden" name="plugin_name" value="">
         <input type="hidden" name="ids" value="">
         <p id="requirement-message"></p>
-    </x-core-base::modal>
+    </x-core::modal>
 @endsection

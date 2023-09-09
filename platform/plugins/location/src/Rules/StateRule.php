@@ -3,7 +3,7 @@
 namespace Botble\Location\Rules;
 
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Location\Repositories\Interfaces\StateInterface;
+use Botble\Location\Models\State;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Arr;
@@ -39,7 +39,7 @@ class StateRule implements DataAwareRule, Rule
             $condition['country_id'] = $countryId;
         }
 
-        return app(StateInterface::class)->getModel()->where($condition)->exists();
+        return State::query()->where($condition)->exists();
     }
 
     public function message(): string

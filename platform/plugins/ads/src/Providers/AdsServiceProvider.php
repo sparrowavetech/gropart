@@ -8,7 +8,6 @@ use Botble\Ads\Repositories\Eloquent\AdsRepository;
 use Botble\Ads\Repositories\Interfaces\AdsInterface;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\DashboardMenu;
-use Botble\Base\Supports\Helper;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Illuminate\Foundation\AliasLoader;
@@ -26,8 +25,6 @@ class AdsServiceProvider extends ServiceProvider
             return new AdsRepository(new Ads());
         });
 
-        Helper::autoload(__DIR__ . '/../../helpers');
-
         AliasLoader::getInstance()->alias('AdsManager', AdsManager::class);
     }
 
@@ -38,6 +35,7 @@ class AdsServiceProvider extends ServiceProvider
             ->loadMigrations()
             ->loadAndPublishTranslations()
             ->loadRoutes()
+            ->loadHelpers()
             ->loadAndPublishViews();
 
         $this->app['events']->listen(RouteMatched::class, function () {

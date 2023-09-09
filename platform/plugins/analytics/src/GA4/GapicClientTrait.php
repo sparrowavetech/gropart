@@ -180,9 +180,11 @@ trait GapicClientTrait
         if ('always' === $mtlsEndpointEnvVar) {
             return true;
         }
+
         if ('never' === $mtlsEndpointEnvVar) {
             return false;
         }
+
         // For all other cases, assume "auto" and return true if clientCertSource exists
         return ! empty($options['clientCertSource']);
     }

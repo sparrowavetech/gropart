@@ -1,4 +1,4 @@
-<div class="help-ts">
+<div class="help-ts" v-pre>
     @if(! $icon)
         <i class="fa fa-info-circle me-1"></i>
     @else

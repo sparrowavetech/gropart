@@ -11,13 +11,9 @@ use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
-use Botble\Base\Traits\HasDeleteManyItemsTrait;
 use Botble\Blog\Forms\PostForm;
 use Botble\Blog\Http\Requests\PostRequest;
 use Botble\Blog\Models\Post;
-use Botble\Blog\Repositories\Interfaces\CategoryInterface;
-use Botble\Blog\Repositories\Interfaces\PostInterface;
-use Botble\Blog\Repositories\Interfaces\TagInterface;
 use Botble\Blog\Services\StoreCategoryService;
 use Botble\Blog\Services\StoreTagService;
 use Botble\Blog\Tables\PostTable;
@@ -27,15 +23,6 @@ use Illuminate\Support\Facades\Auth;
 
 class PostController extends BaseController
 {
-    use HasDeleteManyItemsTrait;
-
-    public function __construct(
-        protected PostInterface $postRepository,
-        protected TagInterface $tagRepository,
-        protected CategoryInterface $categoryRepository
-    ) {
-    }
-
     public function index(PostTable $dataTable)
     {
         PageTitle::setTitle(trans('plugins/blog::posts.menu_name'));
@@ -56,10 +43,7 @@ class PostController extends BaseController
         StoreCategoryService $categoryService,
         BaseHttpResponse $response
     ) {
-        /**
-         * @var Post $post
-         */
-        $post = $this->postRepository->createOrUpdate(
+        $post = Post::query()->create(
             array_merge($request->input(), [
                 'author_id' => Auth::id(),
                 'author_type' => User::class,
@@ -76,7 +60,7 @@ class PostController extends BaseController
 
         return $response
             ->setPreviousUrl(route('posts.index'))
-            ->setNextUrl(route('posts.edit', $post->id))
+            ->setNextUrl(route('posts.edit', $post->getKey()))
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
@@ -97,8 +81,7 @@ class PostController extends BaseController
         event(new BeforeUpdateContentEvent($request, $post));
 
         $post->fill($request->input());
-
-        $this->postRepository->createOrUpdate($post);
+        $post->save();
 
         event(new UpdatedContentEvent(POST_MODULE_SCREEN_NAME, $request, $post));
 
@@ -114,7 +97,7 @@ class PostController extends BaseController
     public function destroy(Post $post, Request $request, BaseHttpResponse $response)
     {
         try {
-            $this->postRepository->delete($post);
+            $post->delete();
 
             event(new DeletedContentEvent(POST_MODULE_SCREEN_NAME, $request, $post));
 
@@ -127,24 +110,15 @@ class PostController extends BaseController
         }
     }
 
-    public function deletes(Request $request, BaseHttpResponse $response)
-    {
-        return $this->executeDeleteItems($request, $response, new Post(), POST_MODULE_SCREEN_NAME);
-    }
-
     public function getWidgetRecentPosts(Request $request, BaseHttpResponse $response)
     {
         $limit = $request->integer('paginate', 10);
         $limit = $limit > 0 ? $limit : 10;
 
-        $posts = $this->postRepository->advancedGet([
-            'with' => ['slugable'],
-            'order_by' => ['created_at' => 'desc'],
-            'paginate' => [
-                'per_page' => $limit,
-                'current_paged' => $request->integer('page', 1),
-            ],
-        ]);
+        $posts = Post::query()
+            ->with(['slugable'])
+            ->orderByDesc('created_at')
+            ->paginate($limit);
 
         return $response
             ->setData(view('plugins/blog::posts.widgets.posts', compact('posts', 'limit'))->render());

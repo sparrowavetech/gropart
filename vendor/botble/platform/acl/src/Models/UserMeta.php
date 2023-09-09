@@ -35,10 +35,13 @@ class UserMeta extends BaseModel
             $userId = Auth::id();
         }
 
-        $meta = self::where([
-            'user_id' => $userId,
-            'key' => $key,
-        ])->select('value')->first();
+        $meta = self::query()
+            ->where([
+                'user_id' => $userId,
+                'key' => $key,
+            ])
+            ->select('value')
+            ->first();
 
         if (! empty($meta)) {
             return $meta->value;

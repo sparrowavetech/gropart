@@ -290,11 +290,12 @@
                 let _self = $(event.currentTarget)
                 let set = _self.attr('data-set')
                 let checked = _self.prop('checked')
+
                 $(set).each((index, el) => {
                     if (checked) {
-                        $(el).prop('checked', true)
+                        $(el).prop('checked', true).trigger('change')
                     } else {
-                        $(el).prop('checked', false)
+                        $(el).prop('checked', false).trigger('change')
                     }
                 })
             })
@@ -304,17 +305,34 @@
             $(document).on('change', '.checkboxes', (event) => {
                 let _self = $(event.currentTarget)
                 let table = _self.closest('.table-wrapper').find('.table').prop('id')
+                let checkboxAll = _self.closest('.table-wrapper').find('.table-check-all')
 
                 let ids = []
                 let $table = $('#' + table)
+
                 $table.find('.checkboxes:checked').each((i, el) => {
                     ids[i] = $(el).val()
                 })
 
-                if (ids.length !== $table.find('.checkboxes').length) {
-                    _self.closest('.table-wrapper').find('.table-check-all').prop('checked', false)
+                let row = _self.closest('tr')
+
+                if (_self.prop('checked')) {
+                    row.addClass('selected')
                 } else {
-                    _self.closest('.table-wrapper').find('.table-check-all').prop('checked', true)
+                    row.removeClass('selected')
+                }
+
+                if (ids.length !== $table.find('.checkboxes').length) {
+                    checkboxAll.prop('checked', false)
+
+                    if (ids.length > 0) {
+                        checkboxAll.prop('indeterminate', true)
+                    } else {
+                        checkboxAll.prop('indeterminate', false)
+                    }
+                } else {
+                    checkboxAll.prop('checked', true)
+                    checkboxAll.prop('indeterminate', false)
                 }
             })
 
@@ -405,6 +423,7 @@
                     .data('href', _self.prop('href'))
                     .data('parent-table', table)
                     .data('class-item', _self.data('class-item'))
+
                 $('.delete-many-modal').modal('show')
             })
 
@@ -437,7 +456,7 @@
                             Botble.showSuccess(data.message)
                         }
 
-                        $table.find('.table-check-all').prop('checked', false)
+                        $table.find('.table-check-all').prop('checked', false).prop('indeterminate', false)
                         window.LaravelDataTables[_self.data('parent-table')].draw()
                         _self.closest('.modal').modal('hide')
                         _self.removeClass('button-loading')
@@ -448,6 +467,177 @@
                     },
                 })
             })
+
+            $(document).on('click', '[data-trigger-bulk-action]', (event) => {
+                event.preventDefault()
+
+                const _self = $(event.currentTarget)
+
+                const tableId = _self.closest('.table-wrapper').find('.table').prop('id')
+
+                const ids = []
+
+                $(`#${tableId}`)
+                    .find('.checkboxes:checked')
+                    .each((i, el) => ids.push($(el).val()))
+
+                if (ids.length === 0) {
+                    Botble.showError(
+                        BotbleVariables.languages.tables.please_select_record
+                            ? BotbleVariables.languages.tables.please_select_record
+                            : 'Please select at least one record to perform this action!'
+                    )
+
+                    return false
+                }
+
+                $('.confirm-trigger-bulk-actions-button')
+                    .data('href', _self.prop('href'))
+                    .data('method', _self.data('method'))
+                    .data('table-id', tableId)
+                    .data('table-target', _self.data('table-target'))
+                    .data('target', _self.data('target'))
+
+                const modal = $('.bulk-action-confirm-modal')
+
+                modal.find('.modal-title > strong').text(_self.data('confirmation-modal-title'))
+                modal.find('.modal-body > div').text(_self.data('confirmation-modal-message'))
+                modal.find('button.btn-warning').text(_self.data('confirmation-modal-cancel-button'))
+                modal.find('button.confirm-trigger-bulk-actions-button').text(_self.data('confirmation-modal-button'))
+
+                modal.modal('show')
+            })
+
+            $(document).on('click', '.confirm-trigger-bulk-actions-button', (event) => {
+                event.preventDefault()
+
+                const _self = $(event.currentTarget)
+
+                _self.addClass('button-loading')
+
+                const tableId = _self.data('table-id')
+                const method = _self.data('method')
+
+                const $table = $(`#${tableId}`)
+
+                const ids = []
+
+                $table.find('.checkboxes:checked').each((i, el) => ids.push($(el).val()))
+
+                $.ajax({
+                    url: _self.data('href'),
+                    type: 'POST',
+                    data: {
+                        _method: method ? method : 'POST',
+                        ids: ids,
+                        bulk_action: 1,
+                        bulk_action_table: _self.data('table-target'),
+                        bulk_action_target: _self.data('target'),
+                    },
+                    success: (data) => {
+                        if (data.error) {
+                            Botble.showError(data.message)
+                        } else {
+                            Botble.showSuccess(data.message)
+                        }
+
+                        $table.find('.table-check-all').prop('checked', false).prop('indeterminate', false)
+
+                        window.LaravelDataTables[tableId].draw()
+
+                        _self.closest('.modal').modal('hide')
+
+                        _self.removeClass('button-loading')
+                    },
+                    error: (data) => {
+                        Botble.handleError(data)
+
+                        _self.removeClass('button-loading')
+                    },
+                })
+            })
+
+            $(document).on('click', '[data-dt-single-action]', (event) => {
+                event.preventDefault()
+
+                const _self = $(event.currentTarget)
+
+                const tableId = _self.closest('.table-wrapper').find('.table').prop('id')
+
+                if (_self.data('confirmation-modal')) {
+                    $('.confirm-trigger-single-action-button')
+                        .data('href', _self.prop('href'))
+                        .data('method', _self.data('method'))
+                        .data('table-id', tableId)
+
+                    const modal = $('.single-action-confirm-modal')
+
+                    modal.find('.modal-title > strong').text(_self.data('confirmation-modal-title'))
+                    modal.find('.modal-body > div').text(_self.data('confirmation-modal-message'))
+                    modal.find('button.btn-warning').text(_self.data('confirmation-modal-cancel-button'))
+                    modal.find('button.confirm-trigger-single-action-button').text(_self.data('confirmation-modal-button'))
+
+                    modal.modal('show')
+                } else {
+                    triggerSingleAction(
+                        tableId,
+                        _self.prop('href'),
+                        _self.data('method')
+                    );
+                }
+            })
+
+            $(document).on('click', '.confirm-trigger-single-action-button', (event) => {
+                event.preventDefault()
+
+                const _self = $(event.currentTarget)
+
+                _self.addClass('button-loading')
+
+                triggerSingleAction(
+                    _self.data('table-id'),
+                    _self.data('href'),
+                    _self.data('method'),
+                    () => {
+                        _self.closest('.modal').modal('hide')
+
+                        _self.removeClass('button-loading')
+                    },
+                    () => {
+                        _self.removeClass('button-loading')
+                    }
+                )
+            })
+
+            const triggerSingleAction = (tableId, url, method, onSuccess, onError) => {
+                const $table = $(`#${tableId}`)
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: {
+                        _method: method ? method : 'POST',
+                    },
+                    success: (data) => {
+                        if (data.error) {
+                            Botble.showError(data.message)
+                        } else {
+                            Botble.showSuccess(data.message)
+                        }
+
+                        $table.find('.table-check-all').prop('checked', false).prop('indeterminate', false)
+
+                        window.LaravelDataTables[tableId].draw()
+
+                        typeof onSuccess === 'function' && onSuccess.apply(this, data)
+                    },
+                    error: (error) => {
+                        Botble.handleError(error)
+
+                        typeof onError === 'function' && onError.apply(this, error)
+                    },
+                })
+            }
 
             $(document).on('click', '.bulk-change-item', (event) => {
                 event.preventDefault()
@@ -512,7 +702,8 @@
                             Botble.showSuccess(data.message)
                         }
 
-                        $table.find('.table-check-all').prop('checked', false)
+                        $table.find('.table-check-all').prop('checked', false).prop('indeterminate', false)
+
                         $.each(ids, (index, item) => {
                             window.LaravelDataTables[_self.data('parent-table')]
                                 .row($table.find('.checkboxes[value="' + item + '"]').closest('tr'))

@@ -17,6 +17,7 @@ use Botble\Base\Http\Middleware\DisableInDemoModeMiddleware;
 use Botble\Base\Http\Middleware\HttpsProtocolMiddleware;
 use Botble\Base\Http\Middleware\LocaleMiddleware;
 use Botble\Base\Models\AdminNotification;
+use Botble\Base\Models\BaseModel;
 use Botble\Base\Models\MetaBox as MetaBoxModel;
 use Botble\Base\Repositories\Eloquent\MetaBoxRepository;
 use Botble\Base\Repositories\Interfaces\MetaBoxInterface;
@@ -48,6 +49,7 @@ use Illuminate\Routing\ResourceRegistrar;
 use Illuminate\Routing\Route;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
 use Throwable;
@@ -146,11 +148,11 @@ class BaseServiceProvider extends ServiceProvider
             /**
              * @var Route $this
              */
-            if (config('core.base.general.using_uuids_for_id')) {
+            if (BaseModel::determineIfUsingUuidsForId()) {
                 return $this->whereUuid($name);
             }
 
-            if (config('core.base.general.using_ulids_for_id')) {
+            if (BaseModel::determineIfUsingUlidsForId()) {
                 return $this->whereUlid($name);
             }
 
@@ -176,6 +178,8 @@ class BaseServiceProvider extends ServiceProvider
             ->loadRoutes()
             ->loadMigrations()
             ->publishAssets();
+
+        $this->app['blade.compiler']->anonymousComponentPath($this->getViewsPath() . '/components', 'core');
 
         Schema::defaultStringLength(191);
 
@@ -205,6 +209,10 @@ class BaseServiceProvider extends ServiceProvider
             }, 99);
 
             add_filter(BASE_FILTER_FOOTER_LAYOUT_TEMPLATE, function ($html) {
+                if (! Auth::check()) {
+                    return $html;
+                }
+
                 return $html . view('core/base::notification.notification-content');
             }, 99);
 

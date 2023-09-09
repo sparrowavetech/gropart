@@ -190,6 +190,7 @@ return [
         'News Cycle',
         'Nixie One',
         'Nobile',
+        'Noto Nastaliq Urdu',
         'Noto Sans',
         'Noto Sans JP',
         'Noto Sans Bengali',
@@ -612,7 +613,7 @@ return [
             'HTML.SafeIframe' => 'true',
             // Add to .env if you want to allow all.
             // CMS_IFRAME_FILTER_URL_REGEX=/^(.*)/
-            'URI.SafeIframeRegexp' => env('CMS_IFRAME_FILTER_URL_REGEX', '%^(http://|https://|//)(' . env('CMS_IFRAME_ALLOWED_URLS', 'www.youtube.com/embed/|player.vimeo.com/video/|maps.google.com/maps|www.google.com/maps') . ')%'),
+            'URI.SafeIframeRegexp' => env('CMS_IFRAME_FILTER_URL_REGEX', '%^(http://|https://|//)(' . env('CMS_IFRAME_ALLOWED_URLS', 'www.youtube.com/embed/|player.vimeo.com/video/|maps.google.com/maps|www.google.com/maps|docs.google.com/|drive.google.com/|view.officeapps.live.com/op/embed.aspx|onedrive.live.com/embed') . ')%'),
             'Attr.AllowedFrameTargets' => ['_blank'],
             'CSS.AllowedProperties' => [
                 'font',

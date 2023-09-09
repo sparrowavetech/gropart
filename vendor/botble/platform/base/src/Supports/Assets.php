@@ -82,4 +82,12 @@ class Assets extends BaseAssets
 
         return $this;
     }
+
+    /**
+     * @deprecated since v5.13
+     */
+    public function getAdminLocales(): array
+    {
+        return Language::getAvailableLocales();
+    }
 }

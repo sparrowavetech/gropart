@@ -10,7 +10,6 @@ use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
-use Botble\Base\Traits\HasDeleteManyItemsTrait;
 use Botble\Page\Forms\PageForm;
 use Botble\Page\Http\Requests\PageRequest;
 use Botble\Page\Models\Page;
@@ -21,8 +20,6 @@ use Illuminate\Support\Facades\Auth;
 
 class PageController extends BaseController
 {
-    use HasDeleteManyItemsTrait;
-
     public function index(PageTable $dataTable)
     {
         PageTitle::setTitle(trans('packages/page::pages.menu_name'));
@@ -84,10 +81,5 @@ class PageController extends BaseController
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
-    }
-
-    public function deletes(Request $request, BaseHttpResponse $response)
-    {
-        return $this->executeDeleteItems($request, $response, new Page(), PAGE_MODULE_SCREEN_NAME);
     }
 }

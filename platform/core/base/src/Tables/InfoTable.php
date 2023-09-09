@@ -4,15 +4,18 @@ namespace Botble\Base\Tables;
 
 use Botble\Base\Supports\SystemManagement;
 use Botble\Table\Abstracts\TableAbstract;
+use Botble\Table\Columns\Column;
+use Botble\Table\Columns\NameColumn;
 use Illuminate\Http\JsonResponse;
 
 class InfoTable extends TableAbstract
 {
-    protected $view = 'core/table::simple-table';
+    public function setup(): void
+    {
+        parent::setup();
 
-    protected $hasCheckbox = false;
-
-    protected $hasOperations = false;
+        $this->view = $this->simpleTableView();
+    }
 
     public function ajax(): JsonResponse
     {
@@ -32,16 +35,12 @@ class InfoTable extends TableAbstract
     public function columns(): array
     {
         return [
-            'name' => [
-                'name' => 'name',
-                'title' => trans('core/base::system.package_name') . ' : ' . trans('core/base::system.version'),
-                'class' => 'text-start',
-            ],
-            'dependencies' => [
-                'name' => 'dependencies',
-                'title' => trans('core/base::system.dependency_name') . ' : ' . trans('core/base::system.version'),
-                'class' => 'text-start',
-            ],
+            NameColumn::make()
+                ->title(trans('core/base::system.package_name') . ' : ' . trans('core/base::system.version'))
+                ->alignLeft(),
+            Column::make('dependencies')
+                ->title(trans('core/base::system.dependency_name') . ' : ' . trans('core/base::system.version'))
+                ->alignLeft(),
         ];
     }
 

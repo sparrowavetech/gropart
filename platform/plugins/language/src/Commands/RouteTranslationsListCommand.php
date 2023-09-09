@@ -5,10 +5,11 @@ namespace Botble\Language\Commands;
 use Botble\Language\LanguageManager;
 use Botble\Language\Traits\TranslatedRouteCommandContext;
 use Illuminate\Contracts\Console\Kernel;
+use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Foundation\Console\RouteListCommand;
 use Symfony\Component\Console\Input\InputArgument;
 
-class RouteTranslationsListCommand extends RouteListCommand
+class RouteTranslationsListCommand extends RouteListCommand implements PromptsForMissingInput
 {
     use TranslatedRouteCommandContext;
 
@@ -48,10 +49,8 @@ class RouteTranslationsListCommand extends RouteListCommand
         $this->router = $app['router'];
     }
 
-    protected function getArguments(): array
+    protected function configure(): void
     {
-        return [
-            ['locale', InputArgument::REQUIRED, 'The locale to list routes for.'],
-        ];
+        $this->addArgument('locale', InputArgument::REQUIRED, 'The locale to list routes for.');
     }
 }

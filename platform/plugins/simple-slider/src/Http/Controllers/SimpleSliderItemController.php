@@ -10,17 +10,13 @@ use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\SimpleSlider\Forms\SimpleSliderItemForm;
 use Botble\SimpleSlider\Http\Requests\SimpleSliderItemRequest;
-use Botble\SimpleSlider\Repositories\Interfaces\SimpleSliderItemInterface;
+use Botble\SimpleSlider\Models\SimpleSliderItem;
 use Botble\SimpleSlider\Tables\SimpleSliderItemTable;
 use Exception;
 use Illuminate\Http\Request;
 
 class SimpleSliderItemController extends BaseController
 {
-    public function __construct(protected SimpleSliderItemInterface $simpleSliderItemRepository)
-    {
-    }
-
     public function index(SimpleSliderItemTable $dataTable)
     {
         return $dataTable->renderTable();
@@ -36,7 +32,7 @@ class SimpleSliderItemController extends BaseController
 
     public function store(SimpleSliderItemRequest $request, BaseHttpResponse $response)
     {
-        $simpleSlider = $this->simpleSliderItemRepository->createOrUpdate($request->input());
+        $simpleSlider = SimpleSliderItem::query()->create($request->input());
 
         event(new CreatedContentEvent(SIMPLE_SLIDER_ITEM_MODULE_SCREEN_NAME, $request, $simpleSlider));
 
@@ -45,20 +41,19 @@ class SimpleSliderItemController extends BaseController
 
     public function edit(int|string $id, FormBuilder $formBuilder)
     {
-        $simpleSliderItem = $this->simpleSliderItemRepository->findOrFail($id);
+        $simpleSliderItem = SimpleSliderItem::query()->findOrFail($id);
 
         return $formBuilder->create(SimpleSliderItemForm::class, ['model' => $simpleSliderItem])
-            ->setTitle(trans('plugins/simple-slider::simple-slider.edit_slide', ['id' => $simpleSliderItem->id]))
+            ->setTitle(trans('plugins/simple-slider::simple-slider.edit_slide', ['id' => $simpleSliderItem->getKey()]))
             ->setUseInlineJs(true)
             ->renderForm();
     }
 
     public function update(int|string $id, SimpleSliderItemRequest $request, BaseHttpResponse $response)
     {
-        $simpleSliderItem = $this->simpleSliderItemRepository->findOrFail($id);
+        $simpleSliderItem = SimpleSliderItem::query()->findOrFail($id);
         $simpleSliderItem->fill($request->input());
-
-        $this->simpleSliderItemRepository->createOrUpdate($simpleSliderItem);
+        $simpleSliderItem->save();
 
         event(new UpdatedContentEvent(SIMPLE_SLIDER_ITEM_MODULE_SCREEN_NAME, $request, $simpleSliderItem));
 
@@ -67,7 +62,7 @@ class SimpleSliderItemController extends BaseController
 
     public function getDelete(int|string $id)
     {
-        $simpleSliderItem = $this->simpleSliderItemRepository->findOrFail($id);
+        $simpleSliderItem = SimpleSliderItem::query()->findOrFail($id);
 
         return view('plugins/simple-slider::partials.delete', ['slider' => $simpleSliderItem])->render();
     }
@@ -75,8 +70,8 @@ class SimpleSliderItemController extends BaseController
     public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
-            $simpleSliderItem = $this->simpleSliderItemRepository->findOrFail($id);
-            $this->simpleSliderItemRepository->delete($simpleSliderItem);
+            $simpleSliderItem = SimpleSliderItem::query()->findOrFail($id);
+            $simpleSliderItem->delete();
 
             event(new DeletedContentEvent(SIMPLE_SLIDER_ITEM_MODULE_SCREEN_NAME, $request, $simpleSliderItem));
 

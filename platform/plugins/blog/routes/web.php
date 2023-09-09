@@ -13,12 +13,6 @@ Route::group(['namespace' => 'Botble\Blog\Http\Controllers', 'middleware' => ['w
             Route::resource('', 'PostController')
                 ->parameters(['' => 'post']);
 
-            Route::delete('items/destroy', [
-                'as' => 'deletes',
-                'uses' => 'PostController@deletes',
-                'permission' => 'posts.destroy',
-            ]);
-
             Route::get('widgets/recent-posts', [
                 'as' => 'widget.recent-posts',
                 'uses' => 'PostController@getWidgetRecentPosts',
@@ -29,23 +23,11 @@ Route::group(['namespace' => 'Botble\Blog\Http\Controllers', 'middleware' => ['w
         Route::group(['prefix' => 'categories', 'as' => 'categories.'], function () {
             Route::resource('', 'CategoryController')
                 ->parameters(['' => 'category']);
-
-            Route::delete('items/destroy', [
-                'as' => 'deletes',
-                'uses' => 'CategoryController@deletes',
-                'permission' => 'categories.destroy',
-            ]);
         });
 
         Route::group(['prefix' => 'tags', 'as' => 'tags.'], function () {
             Route::resource('', 'TagController')
                 ->parameters(['' => 'tag']);
-
-            Route::delete('items/destroy', [
-                'as' => 'deletes',
-                'uses' => 'TagController@deletes',
-                'permission' => 'tags.destroy',
-            ]);
 
             Route::get('all', [
                 'as' => 'all',

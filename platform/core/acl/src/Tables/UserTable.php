@@ -10,9 +10,10 @@ use Botble\Base\Exceptions\DisabledInDemoModeException;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Table\DataTables;
+use Botble\Table\BulkActions\DeleteBulkAction;
+use Botble\Table\Columns\Column;
+use Botble\Table\Columns\CreatedAtColumn;
 use Exception;
-use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -22,60 +23,41 @@ use Illuminate\Support\Facades\Auth;
 
 class UserTable extends TableAbstract
 {
-    public function __construct(
-        DataTables $table,
-        UrlGenerator $urlGenerator,
-        User $user,
-        protected ActivateUserService $service
-    ) {
-        parent::__construct($table, $urlGenerator);
-
-        $this->model = $user;
-
-        $this->hasActions = true;
-        $this->hasFilter = true;
-
-        if (! Auth::user()->hasAnyPermission(['users.edit', 'users.destroy'])) {
-            $this->hasOperations = false;
-            $this->hasActions = false;
-        }
+    public function setup(): void
+    {
+        $this->model(User::class);
     }
 
     public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('checkbox', function (User $item) {
-                return $this->getCheckbox($item->getKey());
-            })
             ->editColumn('username', function (User $item) {
-                if (! Auth::user()->hasPermission('users.edit')) {
+                if (! $this->hasPermission('users.edit')) {
                     return $item->username;
                 }
 
                 return Html::link(route('users.profile.view', $item->getKey()), $item->username);
             })
-            ->editColumn('created_at', function (User $item) {
-                return BaseHelper::formatDate($item->created_at);
-            })
             ->editColumn('role_name', function (User $item) {
-                if (! Auth::user()->hasPermission('users.edit')) {
-                    return $item->role_name;
+                $role = $item->roles->first();
+
+                if (! $this->hasPermission('users.edit')) {
+                    return $role?->name ?: trans('core/acl::users.no_role_assigned');
                 }
 
-                return view('core/acl::users.partials.role', ['item' => $item])->render();
+                return view('core/acl::users.partials.role', compact('item', 'role'))->render();
             })
             ->editColumn('super_user', function (User $item) {
                 return $item->super_user ? trans('core/base::base.yes') : trans('core/base::base.no');
             })
-            ->editColumn('status', function (User $item) {
+            ->editColumn('status_name', function (User $item) {
                 if ($item->activations()->where('completed', true)->exists()) {
                     return UserStatusEnum::ACTIVATED()->toHtml();
                 }
 
                 return UserStatusEnum::DEACTIVATED()->toHtml();
             })
-            ->removeColumn('role_id')
             ->addColumn('operations', function (User $item) {
                 $action = null;
                 if (Auth::user()->isSuperUser()) {
@@ -96,7 +78,7 @@ class UserTable extends TableAbstract
 
                 return apply_filters(
                     ACL_FILTER_USER_TABLE_ACTIONS,
-                    $action . view('core/acl::users.partials.actions', ['item' => $item])->render(),
+                    $action . view('core/acl::users.partials.actions', compact('item'))->render(),
                     $item
                 );
             });
@@ -109,18 +91,15 @@ class UserTable extends TableAbstract
         $query = $this
             ->getModel()
             ->query()
-            ->leftJoin('role_users', 'users.id', '=', 'role_users.user_id')
-            ->leftJoin('roles', 'roles.id', '=', 'role_users.role_id')
             ->select([
-                'users.id as id',
+                'id',
                 'username',
                 'email',
-                'roles.name as role_name',
-                'roles.id as role_id',
-                'users.updated_at as updated_at',
-                'users.created_at as created_at',
+                'updated_at',
+                'created_at',
                 'super_user',
-            ]);
+            ])
+            ->with(['roles']);
 
         return $this->applyScopes($query);
     }
@@ -128,31 +107,25 @@ class UserTable extends TableAbstract
     public function columns(): array
     {
         return [
-            'username' => [
-                'title' => trans('core/acl::users.username'),
-                'class' => 'text-start',
-            ],
-            'email' => [
-                'title' => trans('core/acl::users.email'),
-                'class' => 'text-start',
-            ],
-            'role_name' => [
-                'title' => trans('core/acl::users.role'),
-                'searchable' => false,
-            ],
-            'created_at' => [
-                'title' => trans('core/base::tables.created_at'),
-                'width' => '100px',
-            ],
-            'status' => [
-                'name' => 'users.updated_at',
-                'title' => trans('core/base::tables.status'),
-                'width' => '100px',
-            ],
-            'super_user' => [
-                'title' => trans('core/acl::users.is_super'),
-                'width' => '100px',
-            ],
+            Column::make('username')
+                ->title(trans('core/acl::users.username'))
+                ->alignLeft(),
+            Column::make('email')
+                ->title(trans('core/acl::users.email'))
+                ->alignLeft(),
+            Column::make('role_name')
+                ->title(trans('core/acl::users.role'))
+                ->searchable(false)
+                ->orderable(false),
+            CreatedAtColumn::make(),
+            Column::make('status_name')
+                ->title(trans('core/base::tables.status'))
+                ->width(100)
+                ->searchable(false)
+                ->orderable(false),
+            Column::make('super_user')
+                ->title(trans('core/acl::users.is_super'))
+                ->width(100),
         ];
     }
 
@@ -168,12 +141,27 @@ class UserTable extends TableAbstract
 
     public function bulkActions(): array
     {
-        return $this->addDeleteAction(route('users.deletes'), 'users.destroy', parent::bulkActions());
+        return [
+            DeleteBulkAction::make()
+                ->permission('users.destroy')
+                ->beforeDispatch(function (User $user, array $ids) {
+                    foreach ($ids as $id) {
+                        if (Auth::id() == $id) {
+                            abort(403, trans('core/acl::users.delete_user_logged_in'));
+                        }
+
+                        $user = User::query()->findOrFail($id);
+                        if (! Auth::user()->isSuperUser() && $user->isSuperUser()) {
+                            abort(403, trans('core/acl::users.cannot_delete_super_user'));
+                        }
+                    }
+                }),
+        ];
     }
 
     public function getFilters(): array
     {
-        $filters = $this->getBulkChanges();
+        $filters = $this->getAllBulkChanges();
         Arr::forget($filters, 'status');
 
         return $filters;
@@ -229,20 +217,23 @@ class UserTable extends TableAbstract
         if ($inputKey === 'status') {
             $hasWarning = false;
 
+            $service = app(ActivateUserService::class);
+
             foreach ($ids as $id) {
                 if ($inputValue == UserStatusEnum::DEACTIVATED && Auth::id() == $id) {
                     $hasWarning = true;
                 }
 
-                /**
-                 * @var User $user
-                 */
                 $user = $this->getModel()->query()->findOrFail($id);
 
+                if (! $user instanceof User) {
+                    continue;
+                }
+
                 if ($inputValue == UserStatusEnum::ACTIVATED) {
-                    $this->service->activate($user);
+                    $service->activate($user);
                 } else {
-                    $this->service->remove($user);
+                    $service->remove($user);
                 }
 
                 event(new UpdatedContentEvent(USER_MODULE_SCREEN_NAME, request(), $user));

@@ -34,7 +34,7 @@ class ShippoController extends BaseController
 
     public function show(int $id, BaseHttpResponse $response)
     {
-        $shipment = $this->shipmentRepository->findOrFail($id);
+        $shipment = Shipment::query()->findOrFail($id);
         $this->check($shipment);
 
         $order = $shipment->order;
@@ -97,7 +97,7 @@ class ShippoController extends BaseController
 
     public function createTransaction(int $id, BaseHttpResponse $response)
     {
-        $shipment = $this->shipmentRepository->findOrFail($id);
+        $shipment = Shipment::query()->findOrFail($id);
 
         $this->check($shipment);
 
@@ -182,7 +182,7 @@ class ShippoController extends BaseController
 
     public function getRates(int $id, BaseHttpResponse $response)
     {
-        $shipment = $this->shipmentRepository->findOrFail($id);
+        $shipment = Shipment::query()->findOrFail($id);
 
         $this->check($shipment);
 
@@ -223,7 +223,7 @@ class ShippoController extends BaseController
 
     public function updateRate(int $id, Request $request, BaseHttpResponse $response)
     {
-        $shipment = $this->shipmentRepository->findOrFail($id);
+        $shipment = Shipment::query()->findOrFail($id);
 
         $this->check($shipment);
 

@@ -2,7 +2,6 @@
 
 namespace Botble\Page\Listeners;
 
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Supports\RepositoryHelper;
 use Botble\Page\Models\Page;
 use Botble\Theme\Events\RenderingSiteMapEvent;
@@ -14,8 +13,8 @@ class RenderingSiteMapListener
     {
         if ($event->key == 'pages') {
             $pages = Page::query()
-                ->where('status', BaseStatusEnum::PUBLISHED)
-                ->orderBy('created_at', 'desc')
+                ->wherePublished()
+                ->orderByDesc('created_at')
                 ->select(['id', 'name', 'updated_at'])
                 ->with('slugable');
 

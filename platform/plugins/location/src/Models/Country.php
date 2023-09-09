@@ -39,7 +39,7 @@ class Country extends BaseModel
 
     protected static function booted(): void
     {
-        static::deleting(function (Country $country) {
+        static::deleted(function (Country $country) {
             $country->states()->delete();
             $country->cities()->delete();
         });

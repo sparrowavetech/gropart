@@ -5,63 +5,37 @@ namespace Botble\Media\Repositories\Eloquent;
 use Botble\Base\Models\BaseModel;
 use Botble\Media\Facades\RvMedia;
 use Botble\Media\Models\MediaFile;
+use Botble\Media\Models\MediaFolder;
 use Botble\Media\Repositories\Interfaces\MediaFileInterface;
-use Botble\Media\Repositories\Interfaces\MediaFolderInterface;
 use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 use Exception;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Str;
 
 /**
  * @since 19/08/2015 07:45 AM
  */
 class MediaFileRepository extends RepositoriesAbstract implements MediaFileInterface
 {
-    public function createName(string $name, int|string|null $folder)
+    public function createName(string $name, int|string|null $folder): string
     {
-        $index = 1;
-        $baseName = $name;
-        while ($this->checkIfExistsName($name, $folder)) {
-            $name = $baseName . '-' . $index++;
-        }
-
-        return $name;
-    }
-
-    protected function checkIfExistsName(string|null $name, int|string|null $folder): bool
-    {
-        $count = $this->model
-            ->where('name', $name)
-            ->where('folder_id', $folder)
-            ->withTrashed()
-            ->count();
-
-        return $count > 0;
+        return MediaFile::createName($name, $folder);
     }
 
     public function createSlug(string $name, string $extension, string|null $folderPath): string
     {
-        $slug = Str::slug($name, '-', ! RvMedia::turnOffAutomaticUrlTranslationIntoLatin() ? 'en' : false);
-        $index = 1;
-        $baseSlug = $slug;
-        while (File::exists(RvMedia::getRealPath(rtrim($folderPath, '/') . '/' . $slug . '.' . $extension))) {
-            $slug = $baseSlug . '-' . $index++;
-        }
-
-        if (empty($slug)) {
-            $slug = $slug . '-' . time();
-        }
-
-        return $slug . '.' . $extension;
+        return MediaFile::createSlug($name, $extension, $folderPath);
     }
 
-    public function getFilesByFolderId(int|string $folderId, array $params = [], bool $withFolders = true, array $folderParams = [])
-    {
+    public function getFilesByFolderId(
+        int|string $folderId,
+        array $params = [],
+        bool $withFolders = true,
+        array $folderParams = []
+    ) {
         $params = array_merge([
             'order_by' => [
                 'name' => 'ASC',
@@ -114,7 +88,7 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
                 ],
             ], $folderParams);
 
-            $folder = app(MediaFolderInterface::class)->getModel();
+            $folder = new MediaFolder();
 
             $folder = $folder
                 ->where('parent_id', $folderId)
@@ -269,8 +243,12 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
         return $result;
     }
 
-    public function getTrashed(int|string $folderId, array $params = [], bool $withFolders = true, array $folderParams = [])
-    {
+    public function getTrashed(
+        int|string $folderId,
+        array $params = [],
+        bool $withFolders = true,
+        array $folderParams = []
+    ): Collection {
         $params = array_merge([
             'order_by' => [
                 'name' => 'ASC',
@@ -320,7 +298,7 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
                 ],
             ], $folderParams);
 
-            $folder = app(MediaFolderInterface::class)->getModel();
+            $folder = new MediaFolder();
 
             $folder = $folder
                 ->withTrashed()
@@ -373,22 +351,7 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
 
     public function emptyTrash(): bool
     {
-        $files = $this->model->onlyTrashed();
-
-        /**
-         * @var MediaFile $files
-         */
-        $files = $files->get();
-
-        /**
-         * @var Collection $files
-         */
-        foreach ($files as $file) {
-            /**
-             * @var MediaFile $file
-             */
-            $file->forceDelete();
-        }
+        $this->model->onlyTrashed()->each(fn (MediaFile $file) => $file->forceDelete());
 
         return true;
     }

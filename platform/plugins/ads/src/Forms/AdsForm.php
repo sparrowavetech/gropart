@@ -5,7 +5,6 @@ namespace Botble\Ads\Forms;
 use Botble\Ads\Facades\AdsManager;
 use Botble\Ads\Http\Requests\AdsRequest;
 use Botble\Ads\Models\Ads;
-use Botble\Ads\Repositories\Interfaces\AdsInterface;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Forms\FormAbstract;
@@ -14,11 +13,6 @@ use Illuminate\Support\Str;
 
 class AdsForm extends FormAbstract
 {
-    public function __construct(protected AdsInterface $adsRepository)
-    {
-        parent::__construct();
-    }
-
     public function buildForm(): void
     {
         $this
@@ -95,7 +89,7 @@ class AdsForm extends FormAbstract
     {
         do {
             $key = strtoupper(Str::random(12));
-        } while ($this->adsRepository->count(compact('key')) > 0);
+        } while (Ads::query()->where('key', $key)->exists());
 
         return $key;
     }

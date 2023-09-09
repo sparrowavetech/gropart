@@ -6,8 +6,6 @@ use Botble\Base\Facades\BaseHelper;
 use Botble\Media\Http\Resources\FileResource;
 use Botble\Media\Models\MediaFile;
 use Botble\Media\Models\MediaFolder;
-use Botble\Media\Repositories\Interfaces\MediaFileInterface;
-use Botble\Media\Repositories\Interfaces\MediaFolderInterface;
 use Botble\Media\Services\ThumbnailService;
 use Botble\Media\Services\UploadsManager;
 use Exception;
@@ -29,12 +27,8 @@ class RvMedia
 {
     protected array $permissions = [];
 
-    public function __construct(
-        protected MediaFileInterface $fileRepository,
-        protected MediaFolderInterface $folderRepository,
-        protected UploadsManager $uploadManager,
-        protected ThumbnailService $thumbnailService
-    ) {
+    public function __construct(protected UploadsManager $uploadManager, protected ThumbnailService $thumbnailService)
+    {
         $this->permissions = $this->getConfig('permissions', []);
     }
 
@@ -168,9 +162,12 @@ class RvMedia
         if (array_key_exists($size, $this->getSizes()) &&
             $this->canGenerateThumbnails($this->getMimeType($url))
         ) {
+            $fileName = File::name($url);
+            $fileExtension = File::extension($url);
+
             $url = str_replace(
-                File::name($url) . '.' . File::extension($url),
-                File::name($url) . '-' . $this->getSize($size) . '.' . File::extension($url),
+                $fileName . '.' . $fileExtension,
+                $fileName . '-' . $this->getSize($size) . '.' . $fileExtension,
                 $url
             );
         }
@@ -416,8 +413,6 @@ class RvMedia
         }
 
         try {
-            $file = $this->fileRepository->getModel();
-
             $fileExtension = $fileUpload->getClientOriginalExtension();
 
             if (! $skipValidation && ! in_array(strtolower($fileExtension), explode(',', $allowedMimeTypes))) {
@@ -438,14 +433,16 @@ class RvMedia
                 }
             }
 
-            $file->name = $this->fileRepository->createName(
+            $file = new MediaFile();
+
+            $file->name = MediaFile::createName(
                 File::name($fileUpload->getClientOriginalName()),
                 $folderId
             );
 
-            $folderPath = $this->folderRepository->getFullPath($folderId);
+            $folderPath = MediaFolder::getFullPath($folderId);
 
-            $fileName = $this->fileRepository->createSlug(
+            $fileName = MediaFile::createSlug(
                 $file->name,
                 $fileExtension,
                 Storage::path($folderPath ?: '')
@@ -579,13 +576,13 @@ class RvMedia
         $watermarkImage = setting('media_watermark_source', $this->getConfig('watermark.source'));
 
         if (! $watermarkImage) {
-            return true;
+            return false;
         }
 
         $watermarkPath = $this->getRealPath($watermarkImage);
 
         if (! File::exists($watermarkPath)) {
-            return true;
+            return false;
         }
 
         $watermark = Image::make($watermarkPath);
@@ -683,21 +680,7 @@ class RvMedia
         $path = $path . '/' . $info['basename'];
         file_put_contents($path, $contents);
 
-        $mimeType = $this->getMimeType($url);
-
-        if (empty($mimeType)) {
-            $mimeType = $defaultMimetype;
-        }
-
-        $fileName = File::name($info['basename']);
-        $fileExtension = File::extension($info['basename']);
-        if (empty($fileExtension)) {
-            $mimeTypeDetection = new MimeTypes();
-
-            $fileExtension = $mimeTypeDetection->getExtension($mimeType);
-        }
-
-        $fileUpload = new UploadedFile($path, $fileName . '.' . $fileExtension, $mimeType, null, true);
+        $fileUpload = $this->newUploadedFile($path, $defaultMimetype);
 
         $result = $this->handleUpload($fileUpload, $folderId, $folderSlug);
 
@@ -719,6 +702,13 @@ class RvMedia
             ];
         }
 
+        $fileUpload = $this->newUploadedFile($path, $defaultMimetype);
+
+        return $this->handleUpload($fileUpload, $folderId, $folderSlug);
+    }
+
+    protected function newUploadedFile(string $path, string $defaultMimetype = null): UploadedFile
+    {
         $mimeType = $this->getMimeType($path);
 
         if (empty($mimeType)) {
@@ -727,15 +717,14 @@ class RvMedia
 
         $fileName = File::name($path);
         $fileExtension = File::extension($path);
+
         if (empty($fileExtension)) {
             $mimeTypeDetection = new MimeTypes();
 
             $fileExtension = $mimeTypeDetection->getExtension($mimeType);
         }
 
-        $fileUpload = new UploadedFile($path, $fileName . '.' . $fileExtension, $mimeType, null, true);
-
-        return $this->handleUpload($fileUpload, $folderId, $folderSlug);
+        return new UploadedFile($path, $fileName . '.' . $fileExtension, $mimeType, null, true);
     }
 
     public function getUploadPath(): string
@@ -784,23 +773,27 @@ class RvMedia
 
     public function createFolder(string $folderSlug, int|string|null $parentId = 0, bool $force = false): int|string
     {
-        $folder = $this->folderRepository->getFirstBy([
-            'slug' => $folderSlug,
-            'parent_id' => $parentId,
-        ]);
+        $folder = MediaFolder::query()
+            ->where([
+                'slug' => $folderSlug,
+                'parent_id' => $parentId,
+            ])
+            ->first();
 
         if (! $folder) {
             if ($force) {
-                $this->folderRepository->forceDelete([
-                    'slug' => $folderSlug,
-                    'parent_id' => $parentId,
-                ]);
+                MediaFolder::query()
+                    ->where([
+                        'slug' => $folderSlug,
+                        'parent_id' => $parentId,
+                    ])
+                    ->each(fn (MediaFolder $folder) => $folder->forceDelete());
             }
 
             $folder = MediaFolder::query()->create([
                 'user_id' => Auth::check() ? Auth::id() : 0,
-                'name' => $this->folderRepository->createName($folderSlug, 0),
-                'slug' => $this->folderRepository->createSlug($folderSlug, 0),
+                'name' => MediaFolder::createName($folderSlug, 0),
+                'slug' => MediaFolder::createSlug($folderSlug, 0),
                 'parent_id' => $parentId,
             ]);
         }

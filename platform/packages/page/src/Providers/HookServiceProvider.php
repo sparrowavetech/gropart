@@ -2,7 +2,6 @@
 
 namespace Botble\Page\Providers;
 
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\Html;
 use Botble\Base\Supports\RepositoryHelper;
 use Botble\Base\Supports\ServiceProvider;
@@ -61,7 +60,7 @@ class HookServiceProvider extends ServiceProvider
     public function addThemeOptions(): void
     {
         $pages = Page::query()
-            ->where('status', BaseStatusEnum::PUBLISHED);
+            ->wherePublished();
 
         $pages = RepositoryHelper::applyBeforeExecuteQuery($pages, new Page())
             ->pluck('name', 'id')
@@ -81,7 +80,7 @@ class HookServiceProvider extends ServiceProvider
                         'label' => trans('packages/page::pages.settings.show_on_front'),
                         'attributes' => [
                             'name' => 'homepage_id',
-                            'list' => ['' => trans('packages/page::pages.settings.select')] + $pages,
+                            'list' => [0 => trans('packages/page::pages.settings.select')] + $pages,
                             'value' => '',
                             'options' => [
                                 'class' => 'form-control',
@@ -101,7 +100,7 @@ class HookServiceProvider extends ServiceProvider
 
     public function addPageStatsWidget(array $widgets, Collection $widgetSettings): array
     {
-        $pages = Page::query()->where('status', BaseStatusEnum::PUBLISHED)->count();
+        $pages = Page::query()->wherePublished()->count();
 
         return (new DashboardWidgetInstance())
             ->setType('stats')

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Str;
 
@@ -136,5 +137,32 @@ class MediaFile extends BaseModel
     public function canGenerateThumbnails(): bool
     {
         return RvMedia::canGenerateThumbnails($this->mime_type);
+    }
+
+    public static function createName(string $name, int|string|null $folder): string
+    {
+        $index = 1;
+        $baseName = $name;
+        while (self::query()->where('name', $name)->where('folder_id', $folder)->withTrashed()->exists()) {
+            $name = $baseName . '-' . $index++;
+        }
+
+        return $name;
+    }
+
+    public static function createSlug(string $name, string $extension, string|null $folderPath): string
+    {
+        $slug = Str::slug($name, '-', ! RvMedia::turnOffAutomaticUrlTranslationIntoLatin() ? 'en' : false);
+        $index = 1;
+        $baseSlug = $slug;
+        while (File::exists(RvMedia::getRealPath(rtrim($folderPath, '/') . '/' . $slug . '.' . $extension))) {
+            $slug = $baseSlug . '-' . $index++;
+        }
+
+        if (empty($slug)) {
+            $slug = $slug . '-' . time();
+        }
+
+        return $slug . '.' . $extension;
     }
 }

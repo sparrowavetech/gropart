@@ -123,7 +123,7 @@ class MenuController extends BaseController
         $this->saveMenuLocations($menu, $request);
 
         $deletedNodes = ltrim((string)$request->input('deleted_nodes', ''));
-        if ($deletedNodes = explode(' ', $deletedNodes)) {
+        if ($deletedNodes && $deletedNodes = array_filter(explode(' ', $deletedNodes))) {
             $menu->menuNodes()->whereIn('id', $deletedNodes)->delete();
         }
 
@@ -151,26 +151,6 @@ class MenuController extends BaseController
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
-    }
-
-    public function deletes(Request $request, BaseHttpResponse $response)
-    {
-        $ids = $request->input('ids');
-
-        if (empty($ids)) {
-            return $response
-                ->setError()
-                ->setMessage(trans('core/base::notices.no_select'));
-        }
-
-        foreach ($ids as $id) {
-            $menu = MenuModel::query()->findOrFail($id);
-            $menu->delete();
-
-            event(new DeletedContentEvent(MENU_MODULE_SCREEN_NAME, $request, $menu));
-        }
-
-        return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
     public function getNode(MenuNodeRequest $request, BaseHttpResponse $response)

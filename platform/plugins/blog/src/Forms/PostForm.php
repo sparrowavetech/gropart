@@ -7,8 +7,8 @@ use Botble\Base\Forms\Fields\TagField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Blog\Forms\Fields\CategoryMultiField;
 use Botble\Blog\Http\Requests\PostRequest;
+use Botble\Blog\Models\Category;
 use Botble\Blog\Models\Post;
-use Botble\Blog\Repositories\Interfaces\CategoryInterface;
 
 class PostForm extends FormAbstract
 {
@@ -22,8 +22,7 @@ class PostForm extends FormAbstract
         }
 
         if (empty($selectedCategories)) {
-            $selectedCategories = app(CategoryInterface::class)
-                ->getModel()
+            $selectedCategories = Category::query()
                 ->where('is_default', 1)
                 ->pluck('id')
                 ->all();

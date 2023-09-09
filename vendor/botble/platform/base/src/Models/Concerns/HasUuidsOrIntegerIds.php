@@ -13,11 +13,11 @@ trait HasUuidsOrIntegerIds
                 return;
             }
 
-            $model->{$model->getKeyName()} = $model::newUniqueId();
+            $model->{$model->getKeyName()} = $model->newUniqueId();
         });
     }
 
-    public static function newUniqueId(): string
+    public function newUniqueId(): string
     {
         return (string) Str::orderedUuid();
     }
@@ -45,8 +45,21 @@ trait HasUuidsOrIntegerIds
         return (bool)config('core.base.general.using_uuids_for_id', false);
     }
 
+    public static function determineIfUsingUlidsForId(): bool
+    {
+        return (bool)config('core.base.general.using_ulids_for_id', false);
+    }
+
     public static function getTypeOfId(): string
     {
+        if (self::determineIfUsingUuidsForId()) {
+            return 'UUID';
+        }
+
+        if (self::determineIfUsingUlidsForId()) {
+            return 'ULID';
+        }
+
         return strtoupper(config('core.base.general.type_id', 'BIGINT'));
     }
 }

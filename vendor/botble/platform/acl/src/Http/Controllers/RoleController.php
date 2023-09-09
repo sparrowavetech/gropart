@@ -10,13 +10,11 @@ use Botble\ACL\Http\Requests\RoleCreateRequest;
 use Botble\ACL\Models\Role;
 use Botble\ACL\Models\User;
 use Botble\ACL\Tables\RoleTable;
-use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Supports\Helper;
-use Illuminate\Http\Request;
 
 class RoleController extends BaseController
 {
@@ -38,30 +36,11 @@ class RoleController extends BaseController
         return $response->setMessage(trans('core/acl::permissions.delete_success'));
     }
 
-    public function deletes(Request $request, BaseHttpResponse $response)
-    {
-        $ids = $request->input('ids');
-        if (empty($ids)) {
-            return $response
-                ->setError()
-                ->setMessage(trans('core/base::notices.no_select'));
-        }
-
-        foreach ($ids as $id) {
-            $role = Role::query()->findOrFail($id);
-            $role->delete();
-        }
-
-        Helper::clearCache();
-
-        return $response->setMessage(trans('core/base::notices.delete_success_message'));
-    }
-
     public function edit(int|string $id, FormBuilder $formBuilder)
     {
         $role = Role::query()->findOrFail($id);
 
-        PageTitle::setTitle(trans('core/acl::permissions.details') . ' - ' . BaseHelper::clean($role->name));
+        PageTitle::setTitle(trans('core/acl::permissions.details', ['name' => $role->name]));
 
         return $formBuilder->create(RoleForm::class, ['model' => $role])->renderForm();
     }
@@ -71,7 +50,7 @@ class RoleController extends BaseController
         $role = Role::query()->findOrFail($id);
 
         if ($request->input('is_default')) {
-            Role::query()->getModel()->where('id', '!=', $role->getKey())->update(['is_default' => 0]);
+            Role::query()->where('id', '!=', $role->getKey())->update(['is_default' => 0]);
         }
 
         $role->name = $request->input('name');
@@ -115,7 +94,7 @@ class RoleController extends BaseController
     public function store(RoleCreateRequest $request, BaseHttpResponse $response)
     {
         if ($request->input('is_default')) {
-            Role::query()->getModel()->where('id', '>', 0)->update(['is_default' => 0]);
+            Role::query()->where('id', '>', 0)->update(['is_default' => 0]);
         }
 
         $role = Role::query()->create([

@@ -5,10 +5,12 @@ namespace Botble\Table\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Botble\Base\Facades\Form;
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Http\Requests\BulkChangeRequest;
 use Botble\Table\Http\Requests\FilterRequest;
 use Botble\Table\TableBuilder;
 use Exception;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -35,7 +37,7 @@ class TableController extends Controller
             return $data;
         }
 
-        $column = Arr::get($object->getBulkChanges(), $request->input('key'));
+        $column = Arr::get($object->getAllBulkChanges(), $request->input('key'));
         if (empty($column)) {
             return $data;
         }
@@ -81,13 +83,12 @@ class TableController extends Controller
         $class = $request->input('class');
 
         if (! $class || ! class_exists($class)) {
-            return $response
-                ->setError();
+            return $response->setError();
         }
 
         $object = $this->tableBuilder->create($class);
 
-        $columns = $object->getBulkChanges();
+        $columns = $object->getAllBulkChanges();
 
         if (! empty($columns[$inputKey]['validate'])) {
             $validator = Validator::make($request->input(), [
@@ -110,6 +111,41 @@ class TableController extends Controller
         }
 
         return $response->setMessage(trans('core/table::table.save_bulk_change_success'));
+    }
+
+    public function postDispatchBulkAction(Request $request, BaseHttpResponse $response): BaseHttpResponse
+    {
+        $request->validate([
+            'bulk_action' => ['sometimes', 'required', 'boolean'],
+            'bulk_action_table' => ['required_with:bulk_action', 'string'],
+            'bulk_action_target' => ['required_with:bulk_action', 'string'],
+            'ids' => ['required_with:bulk_action', 'array'],
+            'ids.*' => ['required'],
+        ]);
+
+        if (
+            ! class_exists($request->input('bulk_action_table')) ||
+            ! class_exists($request->input('bulk_action_target'))
+        ) {
+            return $response
+                ->setError()
+                ->setMessage(trans('core/table::invalid_bulk_action'));
+        }
+
+        try {
+            /**
+             * @var TableAbstract $table
+             */
+            $table = app()->make($request->input('bulk_action_table'));
+
+            abort_unless($table instanceof TableAbstract, 400);
+
+            return $table->dispatchBulkAction();
+        } catch (BindingResolutionException) {
+            return $response
+                ->setError()
+                ->setMessage(__('Something went wrong.'));
+        }
     }
 
     public function getFilterInput(FilterRequest $request)

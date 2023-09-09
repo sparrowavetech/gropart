@@ -2,7 +2,6 @@
 
 namespace Botble\Page\Repositories\Eloquent;
 
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Page\Repositories\Interfaces\PageInterface;
 use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -13,8 +12,8 @@ class PageRepository extends RepositoriesAbstract implements PageInterface
     public function getDataSiteMap(): Collection
     {
         $data = $this->model
-            ->where('status', BaseStatusEnum::PUBLISHED)
-            ->orderBy('created_at', 'desc')
+            ->wherePublished()
+            ->orderByDesc('created_at')
             ->select(['id', 'name', 'updated_at'])
             ->with('slugable');
 
@@ -25,7 +24,7 @@ class PageRepository extends RepositoriesAbstract implements PageInterface
     {
         $pages = $this->model
             ->whereIn('id', $array)
-            ->where('status', BaseStatusEnum::PUBLISHED);
+            ->wherePublished();
 
         if (empty($select)) {
             $select = ['*'];
@@ -40,13 +39,13 @@ class PageRepository extends RepositoriesAbstract implements PageInterface
 
     public function getSearch(string|null $query, int $limit = 10): Collection|LengthAwarePaginator
     {
-        $pages = $this->model->where('status', BaseStatusEnum::PUBLISHED);
+        $pages = $this->model->wherePublished();
         foreach (explode(' ', $query) as $term) {
             $pages = $pages->where('name', 'LIKE', '%' . $term . '%');
         }
 
         $data = $pages
-            ->orderBy('created_at', 'desc')
+            ->orderByDesc('created_at')
             ->limit($limit);
 
         return $this->applyBeforeExecuteQuery($data)->get();
@@ -57,7 +56,7 @@ class PageRepository extends RepositoriesAbstract implements PageInterface
         $data = $this->model;
 
         if ($active) {
-            $data = $data->where('status', BaseStatusEnum::PUBLISHED);
+            $data = $data->wherePublished();
         }
 
         return $this->applyBeforeExecuteQuery($data)->get();

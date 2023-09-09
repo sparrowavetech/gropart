@@ -11,7 +11,7 @@ class ContactPluginManagement {
                 answerWrapper.fadeIn()
             }
 
-            new EditorManagement().init()
+            window.EDITOR = new EditorManagement().init()
         })
 
         $(document).on('click', '.answer-send-button', (event) => {

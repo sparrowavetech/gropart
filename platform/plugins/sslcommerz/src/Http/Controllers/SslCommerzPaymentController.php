@@ -82,7 +82,7 @@ class SslCommerzPaymentController extends BaseController
         $transactionId = $request->input('tran_id');
 
         // Check order status in order table against the transaction id or order id.
-        $transaction = Payment::where('charge_id', $transactionId)
+        $transaction = Payment::query()->where('charge_id', $transactionId)
             ->select(['charge_id', 'status'])->first();
 
         if (! $transaction) {
@@ -106,7 +106,8 @@ class SslCommerzPaymentController extends BaseController
                 in order table as Processing or Complete.
                 Here you can also send sms or email for successful transaction to customer
                 */
-                Payment::where('charge_id', $transactionId)
+                Payment::query()
+                    ->where('charge_id', $transactionId)
                     ->update(['status' => PaymentStatusEnum::COMPLETED]);
 
                 return $response
@@ -117,7 +118,8 @@ class SslCommerzPaymentController extends BaseController
                That means IPN worked, but Transaction validation failed.
                Here you need to update order status as Failed in order table.
                */
-            Payment::where('charge_id', $transactionId)
+            Payment::query()
+                ->where('charge_id', $transactionId)
                 ->update(['status' => PaymentStatusEnum::FAILED]);
 
             return $response

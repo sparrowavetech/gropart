@@ -118,7 +118,7 @@ class LanguageManagement {
                             route('languages.set.default') +
                             '?lang_id=' +
                             star.data('id') +
-                            '" class="set-language-default tip" data-bs-original-title="Choose ' +
+                            '" class="set-language-default" data-bs-toggle="tooltip" data-bs-original-title="Choose ' +
                             star.data('name') +
                             ' as default language">' +
                             star.closest('td').html() +

@@ -9,7 +9,7 @@ use Botble\Menu\Facades\Menu;
 use Botble\Setting\Supports\SettingStore;
 use Botble\Slug\Http\Requests\SlugRequest;
 use Botble\Slug\Http\Requests\SlugSettingsRequest;
-use Botble\Slug\Repositories\Interfaces\SlugInterface;
+use Botble\Slug\Models\Slug;
 use Botble\Slug\Services\SlugService;
 use Illuminate\Support\Str;
 
@@ -33,7 +33,6 @@ class SlugController extends BaseController
 
     public function postSettings(
         SlugSettingsRequest $request,
-        SlugInterface $slugRepository,
         BaseHttpResponse $response,
         SettingStore $settingStore
     ) {
@@ -53,10 +52,9 @@ class SlugController extends BaseController
             }
 
             if ($settingStore->get($settingKey) !== (string)$settingValue) {
-                $slugRepository->update(
-                    ['reference_type' => $request->input($settingKey . '-model-key')],
-                    ['prefix' => (string)$settingValue]
-                );
+                Slug::query()
+                    ->where('reference_type', $request->input($settingKey . '-model-key'))
+                    ->update(['prefix' => (string)$settingValue]);
 
                 Menu::clearCacheMenuItems();
             }

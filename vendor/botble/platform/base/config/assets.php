@@ -153,6 +153,13 @@ return [
                     'cdn' => '//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js',
                 ],
             ],
+            'dropzone' => [
+                'use_cdn' => false,
+                'location' => 'footer',
+                'src' => [
+                    'local' => '/vendor/core/core/base/libraries/dropzone/dropzone.js',
+                ],
+            ],
             'jqueryTree' => [
                 'use_cdn' => false,
                 'location' => 'footer',
@@ -372,6 +379,13 @@ return [
                 'location' => 'header',
                 'src' => [
                     'local' => '/vendor/core/core/base/css/core.css',
+                ],
+            ],
+            'dropzone' => [
+                'use_cdn' => false,
+                'location' => 'footer',
+                'src' => [
+                    'local' => '/vendor/core/core/base/libraries/dropzone/dropzone.css',
                 ],
             ],
             'jqueryTree' => [

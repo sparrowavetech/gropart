@@ -8,16 +8,16 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::table('posts', function (Blueprint $table) {
-            $table->index('status', 'status');
-            $table->index('author_id', 'author_id');
-            $table->index('author_type', 'author_type');
-            $table->index('created_at', 'created_at');
+            $table->index('status');
+            $table->index('author_id');
+            $table->index('author_type');
+            $table->index('created_at');
         });
 
         Schema::table('categories', function (Blueprint $table) {
-            $table->index('parent_id', 'parent_id');
-            $table->index('status', 'status');
-            $table->index('created_at', 'created_at');
+            $table->index('parent_id');
+            $table->index('status');
+            $table->index('created_at');
         });
     }
 

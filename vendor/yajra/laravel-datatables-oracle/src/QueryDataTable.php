@@ -129,7 +129,7 @@ class QueryDataTable extends DataTableAbstract
      *
      * @return $this
      */
-    protected function prepareQuery(): static
+    public function prepareQuery(): static
     {
         if (! $this->prepared) {
             $this->totalRecords = $this->totalCount();
@@ -850,15 +850,15 @@ class QueryDataTable extends DataTableAbstract
         return $this->getQuery();
     }
 
-   /**
-    * Ignore the selects in count query.
-    *
-    * @return $this
-    */
-   public function ignoreSelectsInCountQuery(): static
-   {
-       $this->ignoreSelectInCountQuery = true;
+    /**
+     * Ignore the selects in count query.
+     *
+     * @return $this
+     */
+    public function ignoreSelectsInCountQuery(): static
+    {
+        $this->ignoreSelectInCountQuery = true;
 
-       return $this;
-   }
+        return $this;
+    }
 }

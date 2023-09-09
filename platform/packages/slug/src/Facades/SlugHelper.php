@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static bool isSupportedModel(string $model)
  * @method static \Botble\Slug\SlugHelper disablePreview(array|string $model)
  * @method static bool canPreview(string $model)
+ * @method static \Botble\Base\Contracts\BaseModel|\Botble\Slug\Models\Slug createSlug(\Botble\Base\Contracts\BaseModel $model, string|null $name = null)
  * @method static mixed getSlug(string|null $key, string|null $prefix = null, string|null $model = null, $referenceId = null)
  * @method static string|null getPrefix(string $model, string $default = '', bool $translate = true)
  * @method static string|null getColumnNameToGenerateSlug(object|string $model)

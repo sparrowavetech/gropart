@@ -3,7 +3,7 @@
 namespace Botble\Media\Commands;
 
 use Botble\Media\Facades\RvMedia;
-use Botble\Media\Repositories\Interfaces\MediaFileInterface;
+use Botble\Media\Models\MediaFile;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
@@ -12,13 +12,13 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand('cms:media:thumbnail:delete', 'Delete thumbnails for all images')]
 class DeleteThumbnailCommand extends Command
 {
-    public function handle(MediaFileInterface $fileRepository): int
+    public function handle(): int
     {
-        $files = $fileRepository->allBy([], [], ['url', 'mime_type', 'folder_id']);
+        $files = MediaFile::query()->select(['url', 'mime_type', 'folder_id'])->get();
 
         $errors = [];
 
-        $description = sprintf('Processing %d %s...', $files->count(), Str::plural('file', $files->count()));
+        $description = sprintf('Processing %s %s...', number_format($files->count()), Str::plural('file', $files->count()));
 
         $this->newLine();
         $this->components->task($description, function () use ($files, &$errors) {

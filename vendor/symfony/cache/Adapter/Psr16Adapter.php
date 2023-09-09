@@ -40,6 +40,9 @@ class Psr16Adapter extends AbstractAdapter implements PruneableInterface, Resett
         $this->miss = new \stdClass();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function doFetch(array $ids): iterable
     {
         foreach ($this->pool->getMultiple($ids, $this->miss) as $key => $value) {
@@ -49,21 +52,33 @@ class Psr16Adapter extends AbstractAdapter implements PruneableInterface, Resett
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function doHave(string $id): bool
     {
         return $this->pool->has($id);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function doClear(string $namespace): bool
     {
         return $this->pool->clear();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function doDelete(array $ids): bool
     {
         return $this->pool->deleteMultiple($ids);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function doSave(array $values, int $lifetime): array|bool
     {
         return $this->pool->setMultiple($values, 0 === $lifetime ? null : $lifetime);

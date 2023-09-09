@@ -25,7 +25,7 @@ return [
     'reset' => 'Reset',
     'save' => 'Save',
     'global_role_msg' => 'This is a global role and cannot be modified.  You can use the Duplicate button to make a copy of this role that you can then modify.',
-    'details' => 'Details',
+    'details' => 'Details ":name"',
     'duplicate' => 'Duplicate',
     'all' => 'All Permissions',
     'list_role' => 'List Roles',

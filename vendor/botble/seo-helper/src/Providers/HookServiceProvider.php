@@ -2,13 +2,14 @@
 
 namespace Botble\SeoHelper\Providers;
 
+use Botble\Base\Contracts\BaseModel;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\MetaBox;
-use Botble\Base\Models\BaseModel;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Page\Models\Page;
 use Botble\SeoHelper\Facades\SeoHelper;
+use Illuminate\Database\Eloquent\Model;
 
 class HookServiceProvider extends ServiceProvider
 {
@@ -62,13 +63,14 @@ class HookServiceProvider extends ServiceProvider
         return view('packages/seo-helper::meta-box', compact('meta', 'object'));
     }
 
-    public function setSeoMeta(string $screen, BaseModel|null $object): bool
+    public function setSeoMeta(string $screen, BaseModel|Model|null $object): bool
     {
-        if (get_class($object) == Page::class && BaseHelper::isHomepage($object->id)) {
+        if (get_class($object) == Page::class && BaseHelper::isHomepage($object->getKey())) {
             return false;
         }
 
         $object->loadMissing('metadata');
+
         $meta = $object->getMetaData('seo_meta', true);
 
         if (! empty($meta)) {

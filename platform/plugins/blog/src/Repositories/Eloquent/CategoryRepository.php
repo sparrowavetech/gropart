@@ -16,9 +16,9 @@ class CategoryRepository extends RepositoriesAbstract implements CategoryInterfa
     {
         $data = $this->model
             ->with('slugable')
-            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->wherePublished()
             ->select(['id', 'name', 'updated_at'])
-            ->orderBy('created_at', 'DESC');
+            ->orderByDesc('created_at');
 
         return $this->applyBeforeExecuteQuery($data)->get();
     }
@@ -37,8 +37,8 @@ class CategoryRepository extends RepositoriesAbstract implements CategoryInterfa
                 'description',
                 'icon',
             ])
-            ->orderBy('order', 'ASC')
-            ->orderBy('created_at', 'DESC')
+            ->orderBy('order')
+            ->orderByDesc('created_at')
             ->limit($limit);
 
         return $this->applyBeforeExecuteQuery($data)->get();
@@ -52,9 +52,9 @@ class CategoryRepository extends RepositoriesAbstract implements CategoryInterfa
         }
 
         $data = $data
-            ->where('status', BaseStatusEnum::PUBLISHED)
-            ->orderBy('order', 'ASC')
-            ->orderBy('created_at', 'DESC');
+            ->wherePublished()
+            ->orderBy('order')
+            ->orderByDesc('created_at');
 
         if ($with) {
             $data = $data->with($with);
@@ -132,7 +132,7 @@ class CategoryRepository extends RepositoriesAbstract implements CategoryInterfa
 
         $order = $filters['order'] ?? 'ASC';
 
-        $data = $this->model->where('status', BaseStatusEnum::PUBLISHED)->orderBy($orderBy, $order);
+        $data = $this->model->wherePublished()->orderBy($orderBy, $order);
 
         return $this->applyBeforeExecuteQuery($data)->paginate((int)$filters['per_page']);
     }
@@ -143,9 +143,9 @@ class CategoryRepository extends RepositoriesAbstract implements CategoryInterfa
             ->with($with)
             ->withCount($withCount)
             ->orderBy('posts_count', 'DESC')
-            ->orderBy('order', 'ASC')
-            ->orderBy('created_at', 'DESC')
-            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->orderBy('order')
+            ->orderByDesc('created_at')
+            ->wherePublished()
             ->limit($limit);
 
         return $this->applyBeforeExecuteQuery($data)->get();

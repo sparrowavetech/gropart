@@ -15,10 +15,6 @@ use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
-    public function __construct(protected CategoryInterface $categoryRepository)
-    {
-    }
-
     /**
      * List categories
      *
@@ -26,15 +22,11 @@ class CategoryController extends Controller
      */
     public function index(Request $request, BaseHttpResponse $response)
     {
-        $data = $this->categoryRepository
-            ->advancedGet([
-                'with' => ['slugable'],
-                'condition' => ['status' => BaseStatusEnum::PUBLISHED],
-                'paginate' => [
-                    'per_page' => $request->integer('per_page', 10),
-                    'current_paged' => $request->integer('page', 1),
-                ],
-            ]);
+        $data = Category::query()
+            ->wherePublished()
+            ->orderByDesc('created_at')
+            ->with(['slugable'])
+            ->paginate($request->integer('per_page', 10) ?: 10);
 
         return $response
             ->setData(ListCategoryResource::collection($data))
@@ -46,10 +38,10 @@ class CategoryController extends Controller
      *
      * @group Blog
      */
-    public function getFilters(Request $request, BaseHttpResponse $response)
+    public function getFilters(Request $request, BaseHttpResponse $response, CategoryInterface $categoryRepository)
     {
         $filters = FilterCategory::setFilters($request->input());
-        $data = $this->categoryRepository->getFilters($filters);
+        $data = $categoryRepository->getFilters($filters);
 
         return $response
             ->setData(CategoryResource::collection($data))
@@ -70,7 +62,13 @@ class CategoryController extends Controller
             return $response->setError()->setCode(404)->setMessage('Not found');
         }
 
-        $category = $this->categoryRepository->getCategoryById($slug->reference_id);
+        $category = Category::query()
+            ->with('slugable')
+            ->where([
+                'id' => $slug->reference_id,
+                'status' => BaseStatusEnum::PUBLISHED,
+            ])
+            ->first();
 
         if (! $category) {
             return $response->setError()->setCode(404)->setMessage('Not found');

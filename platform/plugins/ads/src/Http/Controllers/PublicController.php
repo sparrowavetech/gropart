@@ -2,19 +2,15 @@
 
 namespace Botble\Ads\Http\Controllers;
 
-use Botble\Ads\Repositories\Interfaces\AdsInterface;
+use Botble\Ads\Models\Ads;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 
 class PublicController extends BaseController
 {
-    public function __construct(protected AdsInterface $adsRepository)
-    {
-    }
-
     public function getAdsClick(string $key, BaseHttpResponse $response)
     {
-        $ads = $this->adsRepository->getFirstBy(compact('key'));
+        $ads = Ads::query()->where('key', $key)->first();
 
         if (! $ads || ! $ads->url) {
             return $response->setNextUrl(route('public.single'));

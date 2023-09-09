@@ -6,7 +6,6 @@ use Botble\Media\Chunks\Exceptions\UploadMissingFileException;
 use Botble\Media\Chunks\Handler\DropZoneUploadHandler;
 use Botble\Media\Chunks\Receiver\FileReceiver;
 use Botble\Media\Facades\RvMedia;
-use Botble\Media\Repositories\Interfaces\MediaFileInterface;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,10 +19,6 @@ use Illuminate\Support\Facades\Validator;
  */
 class MediaFileController extends Controller
 {
-    public function __construct(protected MediaFileInterface $fileRepository)
-    {
-    }
-
     public function postUpload(Request $request)
     {
         if (! RvMedia::isChunkUploadEnabled()) {

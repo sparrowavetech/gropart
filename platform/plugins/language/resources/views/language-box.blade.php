@@ -51,7 +51,7 @@
 
     <div data-change-language-route="{{ route('languages.change.item.language') }}"></div>
 
-    <x-core-base::modal
+    <x-core::modal
         id="confirm-change-language-modal"
         :title="trans('plugins/language::language.confirm-change-language')"
         type="warning"
@@ -59,7 +59,7 @@
         :button-label="trans('plugins/language::language.confirm-change-language-btn')"
     >
         {!! BaseHelper::clean(trans('plugins/language::language.confirm-change-language-message')) !!}
-    </x-core-base::modal>
+    </x-core::modal>
 @endif
 
 @push('header')

@@ -15,9 +15,9 @@ return new class () extends Migration {
         }
 
         Schema::dropIfExists('role_users_tmp');
-        DB::statement('CREATE TABLE IF NOT EXISTS role_users_tmp LIKE role_users');
-        DB::statement('TRUNCATE TABLE role_users_tmp');
-        DB::statement('INSERT role_users_tmp SELECT * FROM role_users');
+
+        DB::statement('CREATE TABLE role_users_tmp AS SELECT * FROM role_users');
+
         DB::statement('TRUNCATE TABLE role_users');
 
         Schema::table('role_users', function (Blueprint $table) {

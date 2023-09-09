@@ -6,11 +6,12 @@ use Botble\PluginManagement\Commands\Concern\HasPluginNameValidation;
 use Botble\PluginManagement\Services\PluginService;
 use Illuminate\Console\Command;
 use Illuminate\Console\ConfirmableTrait;
+use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 
 #[AsCommand('cms:plugin:remove', 'Remove a plugin in the /platform/plugins directory.')]
-class PluginRemoveCommand extends Command
+class PluginRemoveCommand extends Command implements PromptsForMissingInput
 {
     use ConfirmableTrait;
     use HasPluginNameValidation;

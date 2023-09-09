@@ -45,12 +45,6 @@ Route::group(['namespace' => 'Botble\Payment\Http\Controllers', 'middleware' => 
                 'permission' => 'payment.index',
             ]);
 
-            Route::delete('items/destroy', [
-                'as' => 'deletes',
-                'uses' => 'PaymentController@deletes',
-                'permission' => 'payment.destroy',
-            ]);
-
             Route::get('refund-detail/{id}/{refundId}', [
                 'as' => 'refund-detail',
                 'uses' => 'PaymentController@getRefundDetail',

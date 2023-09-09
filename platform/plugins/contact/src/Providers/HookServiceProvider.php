@@ -6,7 +6,7 @@ use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\Html;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Contact\Enums\ContactStatusEnum;
-use Botble\Contact\Repositories\Interfaces\ContactInterface;
+use Botble\Contact\Models\Contact;
 use Botble\Shortcode\Compilers\Shortcode;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Support\Facades\Auth;
@@ -48,20 +48,13 @@ class HookServiceProvider extends ServiceProvider
     public function registerTopHeaderNotification(string|null $options): string|null
     {
         if (Auth::user()->hasPermission('contacts.edit')) {
-            $contacts = $this->app[ContactInterface::class]
-                ->advancedGet([
-                    'condition' => [
-                        'status' => ContactStatusEnum::UNREAD,
-                    ],
-                    'paginate' => [
-                        'per_page' => 10,
-                        'current_paged' => 1,
-                    ],
-                    'select' => ['id', 'name', 'email', 'phone', 'created_at'],
-                    'order_by' => ['created_at' => 'DESC'],
-                ]);
+            $contacts = Contact::query()
+                ->where('status', ContactStatusEnum::UNREAD)
+                ->select(['id', 'name', 'email', 'phone', 'created_at'])
+                ->orderByDesc('created_at')
+                ->paginate(10);
 
-            if ($contacts->count() == 0) {
+            if ($contacts->total() == 0) {
                 return $options;
             }
 
@@ -90,7 +83,7 @@ class HookServiceProvider extends ServiceProvider
         if (Auth::user()->hasPermission('contacts.index')) {
             $data[] = [
                 'key' => 'unread-contacts',
-                'value' => app(ContactInterface::class)->countUnread(),
+                'value' => Contact::query()->where('status', ContactStatusEnum::UNREAD)->count(),
             ];
         }
 

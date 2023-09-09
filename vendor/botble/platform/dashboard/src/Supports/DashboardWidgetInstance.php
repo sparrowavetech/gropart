@@ -2,8 +2,8 @@
 
 namespace Botble\Dashboard\Supports;
 
-use Botble\Dashboard\Repositories\Interfaces\DashboardWidgetInterface;
-use Botble\Dashboard\Repositories\Interfaces\DashboardWidgetSettingInterface;
+use Botble\Dashboard\Models\DashboardWidget;
+use Botble\Dashboard\Models\DashboardWidgetSetting;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -199,8 +199,7 @@ class DashboardWidgetInstance
         $widgetSetting = $widget ? $widget->settings->first() : null;
 
         if (! $widget) {
-            $widget = app(DashboardWidgetInterface::class)
-                ->firstOrCreate(['name' => $this->key]);
+            $widget = DashboardWidget::query()->firstOrCreate(['name' => $this->key]);
         }
 
         $widget->title = $this->title;
@@ -328,13 +327,13 @@ class DashboardWidgetInstance
 
     public function saveSettings(string $widgetName, array $settings): bool
     {
-        $widget = app(DashboardWidgetInterface::class)->getFirstBy(['name' => $widgetName]);
+        $widget = DashboardWidget::query()->where('name', $widgetName)->first();
 
         if (! $widget) {
             return false;
         }
 
-        $widgetSetting = app(DashboardWidgetSettingInterface::class)->firstOrCreate([
+        $widgetSetting = DashboardWidgetSetting::query()->firstOrCreate([
             'widget_id' => $widget->id,
             'user_id' => Auth::id(),
         ]);

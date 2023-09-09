@@ -30,10 +30,10 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
  */
 final class HttplugWaitLoop
 {
-    private HttpClientInterface $client;
+    private $client;
     private ?\SplObjectStorage $promisePool;
-    private ResponseFactoryInterface $responseFactory;
-    private StreamFactoryInterface $streamFactory;
+    private $responseFactory;
+    private $streamFactory;
 
     /**
      * @param \SplObjectStorage<ResponseInterface, array{Psr7RequestInterface, Promise}>|null $promisePool
@@ -120,11 +120,7 @@ final class HttplugWaitLoop
 
         foreach ($response->getHeaders(false) as $name => $values) {
             foreach ($values as $value) {
-                try {
-                    $psrResponse = $psrResponse->withAddedHeader($name, $value);
-                } catch (\InvalidArgumentException $e) {
-                    // ignore invalid header
-                }
+                $psrResponse = $psrResponse->withAddedHeader($name, $value);
             }
         }
 

@@ -2,10 +2,10 @@
 
 namespace Botble\Language\Providers;
 
+use Botble\Base\Contracts\BaseModel;
 use Botble\Base\Facades\Html;
 use Botble\Base\Facades\MetaBox;
 use Botble\Base\Forms\FormAbstract;
-use Botble\Base\Models\BaseModel;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Language\Facades\Language;
 use Botble\Language\Models\Language as LanguageModel;
@@ -551,7 +551,7 @@ class HookServiceProvider extends ServiceProvider
             $refLang = Language::getRefLang();
             $refFrom = Language::getRefFrom();
 
-            if ($refLang && $refFrom) {
+            if ($refLang && $refFrom && $data instanceof Builder) {
                 $data = $data->getModel()->find($refFrom);
 
                 if ($data) {

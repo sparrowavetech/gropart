@@ -2,12 +2,10 @@
 
 namespace Botble\Media\Repositories\Eloquent;
 
-use Botble\Media\Facades\RvMedia;
 use Botble\Media\Models\MediaFolder;
 use Botble\Media\Repositories\Interfaces\MediaFolderInterface;
 use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 use Illuminate\Database\Query\Builder;
-use Illuminate\Support\Str;
 
 /**
  * @since 19/08/2015 07:45 AM
@@ -33,33 +31,14 @@ class MediaFolderRepository extends RepositoriesAbstract implements MediaFolderI
         return $this->advancedGet($params);
     }
 
-    public function createSlug(string $name, int|string|null $parentId)
+    public function createSlug(string $name, int|string|null $parentId): string
     {
-        $slug = Str::slug($name, '-', ! RvMedia::turnOffAutomaticUrlTranslationIntoLatin() ? 'en' : false);
-        $index = 1;
-        $baseSlug = $slug;
-        while ($this->checkIfExists('slug', $slug, $parentId)) {
-            $slug = $baseSlug . '-' . $index++;
-        }
-
-        return $slug;
+        return MediaFolder::createSlug($name, $parentId);
     }
 
-    public function createName(string $name, int|string|null $parentId)
+    public function createName(string $name, int|string|null $parentId): string
     {
-        $newName = $name;
-        $index = 1;
-        $baseSlug = $newName;
-        while ($this->checkIfExists('name', $newName, $parentId)) {
-            $newName = $baseSlug . '-' . $index++;
-        }
-
-        return $newName;
-    }
-
-    protected function checkIfExists(string $key, string $value, int|string|null $parentId): bool
-    {
-        return $this->model->where($key, $value)->where('parent_id', $parentId)->withTrashed()->exists();
+        return MediaFolder::createName($name, $parentId);
     }
 
     public function getBreadcrumbs(int|string|null $parentId, array $breadcrumbs = [])
@@ -149,25 +128,9 @@ class MediaFolderRepository extends RepositoriesAbstract implements MediaFolderI
         return $child;
     }
 
-    public function getFullPath(int|string|null $folderId, string|null $path = '')
+    public function getFullPath(int|string|null $folderId, string|null $path = ''): string|null
     {
-        if (! $folderId) {
-            return $path;
-        }
-
-        $folder = $this->getFirstByWithTrash(['id' => $folderId]);
-
-        if (empty($folder)) {
-            return $path;
-        }
-
-        $parent = $this->getFullPath($folder->parent_id, $path);
-
-        if (! $parent) {
-            return $folder->slug;
-        }
-
-        return rtrim($parent, '/') . '/' . $folder->slug;
+        return MediaFolder::getFullPath($folderId, $path);
     }
 
     public function restoreFolder(int|string|null $folderId)
@@ -182,15 +145,7 @@ class MediaFolderRepository extends RepositoriesAbstract implements MediaFolderI
 
     public function emptyTrash(): bool
     {
-        $folders = $this->model->onlyTrashed();
-
-        $folders = $folders->get();
-        foreach ($folders as $folder) {
-            /**
-             * @var MediaFolder $folder
-             */
-            $folder->forceDelete();
-        }
+        $this->model->onlyTrashed()->each(fn (MediaFolder $folder) => $folder->forceDelete());
 
         return true;
     }

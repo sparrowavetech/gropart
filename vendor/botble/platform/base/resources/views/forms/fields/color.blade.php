@@ -9,7 +9,7 @@
 @endif
 
 @if ($showField)
-    {!! Form::color($name, $options['value'], $options['attr'])) !!}
+    {!! Form::customColor($name, $options['value'], $options['attr']) !!}
     @include('core/base::forms.partials.help-block')
 @endif
 

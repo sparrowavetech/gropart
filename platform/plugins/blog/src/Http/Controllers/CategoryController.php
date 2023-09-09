@@ -15,28 +15,24 @@ use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Blog\Forms\CategoryForm;
 use Botble\Blog\Http\Requests\CategoryRequest;
 use Botble\Blog\Models\Category;
-use Botble\Blog\Repositories\Interfaces\CategoryInterface;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class CategoryController extends BaseController
 {
-    public function __construct(protected CategoryInterface $categoryRepository)
-    {
-    }
-
     public function index(FormBuilder $formBuilder, Request $request, BaseHttpResponse $response)
     {
         PageTitle::setTitle(trans('plugins/blog::categories.menu'));
 
-        $categories = $this->categoryRepository->getCategories(['*'], [
-            'created_at' => 'DESC',
-            'is_default' => 'DESC',
-            'order' => 'ASC',
-        ], []);
-
-        $categories->load('slugable')->loadCount('posts');
+        $categories = Category::query()
+            ->wherePublished()
+            ->orderByDesc('created_at')
+            ->orderByDesc('is_default')
+            ->orderBy('order')
+            ->with('slugable')
+            ->withCount('posts')
+            ->get();
 
         if ($request->ajax()) {
             $data = view('core/base::forms.partials.tree-categories', $this->getOptions(compact('categories')))
@@ -68,10 +64,10 @@ class CategoryController extends BaseController
     public function store(CategoryRequest $request, BaseHttpResponse $response)
     {
         if ($request->input('is_default')) {
-            $this->categoryRepository->getModel()->where('id', '>', 0)->update(['is_default' => 0]);
+            Category::query()->where('id', '>', 0)->update(['is_default' => 0]);
         }
 
-        $category = $this->categoryRepository->createOrUpdate(
+        $category = Category::query()->create(
             array_merge($request->input(), [
                 'author_id' => Auth::id(),
                 'author_type' => User::class,
@@ -113,12 +109,11 @@ class CategoryController extends BaseController
     public function update(Category $category, CategoryRequest $request, BaseHttpResponse $response)
     {
         if ($request->input('is_default')) {
-            $this->categoryRepository->getModel()->where('id', '!=', $category->id)->update(['is_default' => 0]);
+            Category::query()->where('id', '!=', $category->getKey())->update(['is_default' => 0]);
         }
 
         $category->fill($request->input());
-
-        $this->categoryRepository->createOrUpdate($category);
+        $category->save();
 
         event(new UpdatedContentEvent(CATEGORY_MODULE_SCREEN_NAME, $request, $category));
 
@@ -143,7 +138,8 @@ class CategoryController extends BaseController
     public function destroy(Category $category, Request $request, BaseHttpResponse $response)
     {
         try {
-            $this->categoryRepository->delete($category);
+            $category->delete();
+
             event(new DeletedContentEvent(CATEGORY_MODULE_SCREEN_NAME, $request, $category));
 
             return $response->setMessage(trans('core/base::notices.delete_success_message'));
@@ -154,24 +150,7 @@ class CategoryController extends BaseController
         }
     }
 
-    public function deletes(Request $request, BaseHttpResponse $response)
-    {
-        $ids = $request->input('ids');
-        if (empty($ids)) {
-            return $response->setMessage(trans('core/base::notices.no_select'));
-        }
-
-        foreach ($ids as $id) {
-            $category = $this->categoryRepository->findOrFail($id);
-            $this->categoryRepository->delete($category);
-
-            event(new DeletedContentEvent(CATEGORY_MODULE_SCREEN_NAME, $request, $category));
-        }
-
-        return $response->setMessage(trans('core/base::notices.delete_success_message'));
-    }
-
-    protected function getForm(?Category $model = null): string
+    protected function getForm(Category|null $model = null): string
     {
         $options = ['template' => 'core/base::forms.form-no-wrap'];
 

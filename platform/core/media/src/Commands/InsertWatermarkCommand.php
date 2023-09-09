@@ -3,7 +3,7 @@
 namespace Botble\Media\Commands;
 
 use Botble\Media\Facades\RvMedia;
-use Botble\Media\Repositories\Interfaces\MediaFileInterface;
+use Botble\Media\Models\MediaFile;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
@@ -14,7 +14,7 @@ use Symfony\Component\Console\Input\InputOption;
 #[AsCommand('cms:media:insert-watermark', 'Insert watermark for existing images')]
 class InsertWatermarkCommand extends Command
 {
-    public function handle(MediaFileInterface $fileRepository): int
+    public function handle(): int
     {
         $this->components->info('Starting to insert watermark...');
 
@@ -41,13 +41,14 @@ class InsertWatermarkCommand extends Command
         }
 
         if ($this->option('folder')) {
-            $files = $fileRepository->allBy(
-                ['folder_id' => $this->option('folder')],
-                [],
-                ['url', 'mime_type', 'folder_id']
-            );
+            $files = MediaFile::query()
+                ->where('folder_id', $this->option('folder'))
+                ->select(['url', 'mime_type', 'folder_id'])
+                ->get();
         } else {
-            $files = $fileRepository->allBy([], [], ['url', 'mime_type', 'folder_id']);
+            $files = MediaFile::query()
+                ->select(['url', 'mime_type', 'folder_id'])
+                ->get();
         }
 
         $this->components->info(sprintf('Processing %d %s...', $files->count(), Str::plural('file', $files->count())));

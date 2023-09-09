@@ -45,7 +45,7 @@
         </div>
     </div>
 
-    <x-core-base::modal
+    <x-core::modal
         id="cleanup-modal"
         :title="trans('core/base::system.cleanup.title')"
         type="danger"
@@ -53,5 +53,5 @@
         :button-label="trans('core/base::system.cleanup.submit_button')"
     >
         {!! trans('core/base::system.cleanup.messenger_confirm_cleanup') !!}
-    </x-core-base::modal>
+    </x-core::modal>
 @stop

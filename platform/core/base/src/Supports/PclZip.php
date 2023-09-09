@@ -674,6 +674,7 @@ class PclZip
                     // ----- Look for options that request an EREG or PREG expression
                 case PCLZIP_OPT_BY_EREG:
                     $p_options_list[$index] = PCLZIP_OPT_BY_PREG;
+
                     // ereg() is deprecated starting with PHP 5.3. Move PCLZIP_OPT_BY_EREG
                     // to PCLZIP_OPT_BY_PREG
                     break;

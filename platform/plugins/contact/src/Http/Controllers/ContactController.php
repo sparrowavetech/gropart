@@ -4,31 +4,24 @@ namespace Botble\Contact\Http\Controllers;
 
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
-use Botble\Base\Traits\HasDeleteManyItemsTrait;
 use Botble\Contact\Enums\ContactStatusEnum;
 use Botble\Contact\Forms\ContactForm;
 use Botble\Contact\Http\Requests\ContactReplyRequest;
 use Botble\Contact\Http\Requests\EditContactRequest;
 use Botble\Contact\Models\Contact;
-use Botble\Contact\Repositories\Interfaces\ContactInterface;
-use Botble\Contact\Repositories\Interfaces\ContactReplyInterface;
+use Botble\Contact\Models\ContactReply;
 use Botble\Contact\Tables\ContactTable;
 use Exception;
 use Illuminate\Http\Request;
 
 class ContactController extends BaseController
 {
-    use HasDeleteManyItemsTrait;
-
-    public function __construct(protected ContactInterface $contactRepository)
-    {
-    }
-
     public function index(ContactTable $dataTable)
     {
         PageTitle::setTitle(trans('plugins/contact::contact.menu'));
@@ -46,8 +39,7 @@ class ContactController extends BaseController
     public function update(Contact $contact, EditContactRequest $request, BaseHttpResponse $response)
     {
         $contact->fill($request->input());
-
-        $this->contactRepository->createOrUpdate($contact);
+        $contact->save();
 
         event(new UpdatedContentEvent(CONTACT_MODULE_SCREEN_NAME, $request, $contact));
 
@@ -59,7 +51,7 @@ class ContactController extends BaseController
     public function destroy(Contact $contact, Request $request, BaseHttpResponse $response)
     {
         try {
-            $this->contactRepository->delete($contact);
+            $contact->delete();
             event(new DeletedContentEvent(CONTACT_MODULE_SCREEN_NAME, $request, $contact));
 
             return $response->setMessage(trans('core/base::notices.delete_success_message'));
@@ -70,28 +62,28 @@ class ContactController extends BaseController
         }
     }
 
-    public function deletes(Request $request, BaseHttpResponse $response)
+    public function postReply(int|string $id, ContactReplyRequest $request, BaseHttpResponse $response)
     {
-        return $this->executeDeleteItems($request, $response, new Contact(), CONTACT_MODULE_SCREEN_NAME);
-    }
+        $contact = Contact::query()->findOrFail($id);
 
-    public function postReply(
-        int|string $id,
-        ContactReplyRequest $request,
-        BaseHttpResponse $response,
-        ContactReplyInterface $contactReplyRepository
-    ) {
-        $contact = $this->contactRepository->findOrFail($id);
+        $message = BaseHelper::clean($request->input('message'));
 
-        EmailHandler::send($request->input('message'), 'Re: ' . $contact->subject, $contact->email);
+        if (! $message) {
+            return $response
+                ->setError()
+                ->setCode(422)
+                ->setMessage(trans('validation.required', ['attribute' => 'message']));
+        }
 
-        $contactReplyRepository->create([
-            'message' => $request->input('message'),
-            'contact_id' => $contact->id,
+        EmailHandler::send($message, 'Re: ' . $contact->subject, $contact->email);
+
+        ContactReply::query()->create([
+            'message' => $message,
+            'contact_id' => $contact->getKey(),
         ]);
 
         $contact->status = ContactStatusEnum::READ();
-        $this->contactRepository->createOrUpdate($contact);
+        $contact->save();
 
         return $response
             ->setMessage(trans('plugins/contact::contact.message_sent_success'));

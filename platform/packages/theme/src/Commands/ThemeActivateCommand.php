@@ -5,12 +5,13 @@ namespace Botble\Theme\Commands;
 use Botble\Theme\Commands\Traits\ThemeTrait;
 use Botble\Theme\Services\ThemeService;
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
 #[AsCommand('cms:theme:activate', 'Activate a theme')]
-class ThemeActivateCommand extends Command
+class ThemeActivateCommand extends Command implements PromptsForMissingInput
 {
     use ThemeTrait;
 

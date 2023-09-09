@@ -19,7 +19,6 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Composer;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
-use Mimey\MimeTypes;
 use Symfony\Component\Process\Process;
 use Throwable;
 
@@ -38,8 +37,6 @@ class BaseSeeder extends Seeder
         MediaFile::query()->where('url', 'LIKE', $folder . '/%')->forceDelete();
         MediaFolder::query()->where('name', $folder)->forceDelete();
 
-        $mimeType = new MimeTypes();
-
         $files = [];
 
         $folderPath = ($basePath ?: database_path('seeders/files/' . $folder));
@@ -49,8 +46,7 @@ class BaseSeeder extends Seeder
         }
 
         foreach (File::allFiles($folderPath) as $file) {
-            $type = $mimeType->getMimeType(File::extension($file));
-            $files[] = RvMedia::uploadFromPath($file, 0, $folder, $type);
+            $files[] = RvMedia::uploadFromPath($file, 0, $folder);
         }
 
         return $files;
@@ -67,6 +63,8 @@ class BaseSeeder extends Seeder
                 $pluginService->activate($plugin);
             }
 
+            $this->command->call('migrate', ['--force' => true]);
+
             return $plugins;
         } catch (Exception) {
             return [];
@@ -75,26 +73,7 @@ class BaseSeeder extends Seeder
 
     public function prepareRun(): void
     {
-        if (! class_exists(\Faker\Factory::class)) {
-            $this->command->warn('It requires <info>fakerphp/faker</info> to run seeder. Need to run <info>composer install</info> to install it first.');
-
-            try {
-                $composer = new Composer($this->command->getLaravel()['files']);
-
-                $process = new Process(array_merge($composer->findComposer(), ['install']));
-
-                $process->start();
-
-                $process->wait(function ($type, $buffer) {
-                    $this->command->line($buffer);
-                });
-
-                $this->command->warn('Please re-run <info>php artisan db:seed</info> command.');
-            } catch (Throwable) {
-            }
-
-            exit(1);
-        }
+        $this->faker = $this->fake();
 
         Setting::newQuery()->truncate();
 
@@ -110,6 +89,7 @@ class BaseSeeder extends Seeder
         ])->save();
 
         Slug::query()->truncate();
+
         MetaBoxModel::query()->truncate();
     }
 
@@ -137,7 +117,11 @@ class BaseSeeder extends Seeder
     protected function prepareThemeOptions(array $options, string $locale = null, string $defaultLocale = null): array
     {
         return collect($options)
-            ->mapWithKeys(function (string $value, string $key) use ($locale, $defaultLocale) {
+            ->mapWithKeys(function (string|array $value, string $key) use ($locale, $defaultLocale) {
+                if (is_array($value)) {
+                    $value = json_encode($value);
+                }
+
                 return [ThemeOption::getOptionKey($key, $locale != $defaultLocale ? $locale : null) => $value];
             })
             ->all();
@@ -147,6 +131,27 @@ class BaseSeeder extends Seeder
     {
         if (isset($this->faker)) {
             return $this->faker;
+        }
+
+        if (! class_exists(\Faker\Factory::class)) {
+            $this->command->warn('It requires <info>fakerphp/faker</info> to run seeder. Need to run <info>composer install</info> to install it first.');
+
+            try {
+                $composer = new Composer($this->command->getLaravel()['files']);
+
+                $process = new Process(array_merge($composer->findComposer(), ['install']));
+
+                $process->start();
+
+                $process->wait(function ($type, $buffer) {
+                    $this->command->line($buffer);
+                });
+
+                $this->command->warn('Please re-run <info>php artisan db:seed</info> command.');
+            } catch (Throwable) {
+            }
+
+            exit(1);
         }
 
         $this->faker = fake();

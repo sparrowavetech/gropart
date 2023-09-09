@@ -4,10 +4,11 @@ namespace Botble\Blog;
 
 use Botble\Blog\Models\Category;
 use Botble\Blog\Models\Tag;
-use Botble\Dashboard\Repositories\Interfaces\DashboardWidgetInterface;
-use Botble\Menu\Repositories\Interfaces\MenuNodeInterface;
+use Botble\Dashboard\Models\DashboardWidget;
+use Botble\Menu\Models\MenuNode;
 use Botble\PluginManagement\Abstracts\PluginOperationAbstract;
 use Botble\Setting\Facades\Setting;
+use Botble\Widget\Models\Widget;
 use Illuminate\Support\Facades\Schema;
 
 class Plugin extends PluginOperationAbstract
@@ -24,10 +25,11 @@ class Plugin extends PluginOperationAbstract
         Schema::dropIfExists('categories_translations');
         Schema::dropIfExists('tags_translations');
 
-        app(DashboardWidgetInterface::class)->deleteBy(['name' => 'widget_posts_recent']);
+        Widget::query()->where('name', 'widget_posts_recent')
+            ->each(fn (DashboardWidget $dashboardWidget) => $dashboardWidget->delete());
 
-        app(MenuNodeInterface::class)->deleteBy(['reference_type' => Category::class]);
-        app(MenuNodeInterface::class)->deleteBy(['reference_type' => Tag::class]);
+        MenuNode::query()->whereIn('reference_type', [Category::class, Tag::class])
+            ->each(fn (MenuNode $menuNode) => $menuNode->delete());
 
         Setting::delete([
             'blog_post_schema_enabled',

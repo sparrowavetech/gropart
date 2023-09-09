@@ -372,6 +372,24 @@ class TranslationController extends BaseController
                         $pathLength = strlen(implode(DIRECTORY_SEPARATOR, $arrSource) . DIRECTORY_SEPARATOR);
 
                         $this->recurseZip($source, $zip, $pathLength);
+
+                        continue;
+                    }
+
+                    $source = $item . '/' . $locale . '.json';
+
+                    if (File::exists($source)) {
+                        $arrSource = explode(
+                            DIRECTORY_SEPARATOR,
+                            str_replace(
+                                '/vendor/' . File::basename($module) . '/' . File::basename($item) . '/' . $locale . '.json',
+                                '',
+                                $source
+                            )
+                        );
+                        $pathLength = strlen(implode(DIRECTORY_SEPARATOR, $arrSource) . DIRECTORY_SEPARATOR);
+
+                        $this->recurseZip($source, $zip, $pathLength);
                     }
                 }
             }

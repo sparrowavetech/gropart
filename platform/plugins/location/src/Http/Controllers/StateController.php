@@ -2,7 +2,6 @@
 
 namespace Botble\Location\Http\Controllers;
 
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
@@ -81,24 +80,6 @@ class StateController extends BaseController
         }
     }
 
-    public function deletes(Request $request, BaseHttpResponse $response)
-    {
-        $ids = $request->input('ids');
-        if (empty($ids)) {
-            return $response
-                ->setError()
-                ->setMessage(trans('core/base::notices.no_select'));
-        }
-
-        foreach ($ids as $id) {
-            $state = State::query()->findOrFail($id);
-            $state->delete();
-            event(new DeletedContentEvent(STATE_MODULE_SCREEN_NAME, $request, $state));
-        }
-
-        return $response->setMessage(trans('core/base::notices.delete_success_message'));
-    }
-
     public function getList(Request $request, BaseHttpResponse $response)
     {
         $keyword = BaseHelper::stringify($request->input('q'));
@@ -111,7 +92,7 @@ class StateController extends BaseController
             ->where('name', 'LIKE', '%' . $keyword . '%')
             ->select(['id', 'name'])
             ->take(10)
-            ->orderBy('order', 'ASC')
+            ->orderBy('order')
             ->orderBy('name', 'ASC')
             ->get();
 
@@ -124,12 +105,14 @@ class StateController extends BaseController
     {
         $data = State::query()
             ->select(['id', 'name'])
-            ->where('status', BaseStatusEnum::PUBLISHED)
-            ->orderBy('order', 'ASC')
+            ->wherePublished()
+            ->orderBy('order')
             ->orderBy('name', 'ASC');
 
-        if ($request->input('country_id') && $request->input('country_id') != 'null') {
-            $data = $data->where('country_id', $request->input('country_id'));
+        $countryId = $request->input('country_id');
+
+        if ($countryId && $countryId != 'null') {
+            $data = $data->where('country_id', $countryId);
         }
 
         $data = $data->get();

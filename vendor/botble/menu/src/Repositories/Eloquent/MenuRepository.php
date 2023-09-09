@@ -2,7 +2,6 @@
 
 namespace Botble\Menu\Repositories\Eloquent;
 
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
 use Botble\Menu\Models\Menu;
 use Botble\Menu\Repositories\Interfaces\MenuInterface;
@@ -15,7 +14,7 @@ class MenuRepository extends RepositoriesAbstract implements MenuInterface
         $data = $this->model->where('slug', $slug);
 
         if ($active) {
-            $data = $data->where('status', BaseStatusEnum::PUBLISHED);
+            $data = $data->wherePublished();
         }
 
         if (! empty($select)) {

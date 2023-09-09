@@ -2,7 +2,6 @@
 
 namespace Botble\Location\Http\Controllers;
 
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
@@ -81,24 +80,6 @@ class CityController extends BaseController
         }
     }
 
-    public function deletes(Request $request, BaseHttpResponse $response)
-    {
-        $ids = $request->input('ids');
-        if (empty($ids)) {
-            return $response
-                ->setError()
-                ->setMessage(trans('core/base::notices.no_select'));
-        }
-
-        foreach ($ids as $id) {
-            $city = City::query()->findOrFail($id);
-            $city->delete();
-            event(new DeletedContentEvent(CITY_MODULE_SCREEN_NAME, $request, $city));
-        }
-
-        return $response->setMessage(trans('core/base::notices.delete_success_message'));
-    }
-
     public function getList(Request $request, BaseHttpResponse $response)
     {
         $keyword = BaseHelper::stringify($request->input('q'));
@@ -111,7 +92,7 @@ class CityController extends BaseController
             ->where('name', 'LIKE', '%' . $keyword . '%')
             ->select(['id', 'name'])
             ->take(10)
-            ->orderBy('order', 'ASC')
+            ->orderBy('order')
             ->orderBy('name', 'ASC')
             ->get();
 
@@ -124,8 +105,8 @@ class CityController extends BaseController
     {
         $data = City::query()
             ->select(['id', 'name'])
-            ->where('status', BaseStatusEnum::PUBLISHED)
-            ->orderBy('order', 'ASC')
+            ->wherePublished()
+            ->orderBy('order')
             ->orderBy('name', 'ASC');
 
         $stateId = $request->input('state_id');

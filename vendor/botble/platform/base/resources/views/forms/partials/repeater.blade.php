@@ -1,6 +1,6 @@
 @php
     Assets::addScriptsDirectly('vendor/core/core/base/js/repeater-field.js')
-    ->usingVueJS();
+        ->usingVueJS();
 
     $group = '';
     foreach ($fields as $key => $field) {

@@ -14,6 +14,8 @@ class ShortcodeController extends BaseController
     {
         $registered = shortcode()->getAll();
 
+        $key = $key ?: $request->input('key');
+
         $data = Arr::get($registered, $key . '.admin_config');
 
         $attributes = [];

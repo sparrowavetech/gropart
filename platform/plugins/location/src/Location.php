@@ -26,7 +26,7 @@ class Location
     public function getStates(): array
     {
         $states = State::query()
-            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->wherePublished()
             ->orderBy('order')
             ->orderBy('name')
             ->get();
@@ -41,7 +41,7 @@ class Location
         }
 
         return City::query()
-            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->wherePublished()
             ->where('state_id', $stateId)
             ->orderBy('order')
             ->orderBy('name')
@@ -140,7 +140,7 @@ class Location
                 ->acceptJson()
                 ->get('https://api.github.com/repos/botble/locations/git/trees/master');
 
-            if (! $info->ok()) {
+            if ($info->failed()) {
                 return ['us', 'ca', 'vn'];
             }
 
@@ -284,7 +284,7 @@ class Location
         ];
     }
 
-    public function filter($model, int|string $cityId = null, string $location = null)
+    public function filter($model, int|string $cityId = null, string $location = null, int|string $stateId = null)
     {
         $className = get_class($model);
         if ($className == BaseQueryBuilder::class) {
@@ -294,6 +294,8 @@ class Location
         if ($this->isSupported($className)) {
             if ($cityId) {
                 $model = $model->where('city_id', $cityId);
+            } elseif ($stateId) {
+                $model = $model->where('state_id', $stateId);
             } elseif ($location) {
                 $locationData = explode(',', $location);
 

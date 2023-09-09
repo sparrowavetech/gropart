@@ -3,64 +3,29 @@
 namespace Botble\Blog\Tables;
 
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Facades\Html;
 use Botble\Blog\Models\Tag;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Table\DataTables;
-use Illuminate\Contracts\Routing\UrlGenerator;
+use Botble\Table\Actions\DeleteAction;
+use Botble\Table\Actions\EditAction;
+use Botble\Table\BulkActions\DeleteBulkAction;
+use Botble\Table\Columns\CreatedAtColumn;
+use Botble\Table\Columns\IdColumn;
+use Botble\Table\Columns\NameColumn;
+use Botble\Table\Columns\StatusColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 
 class TagTable extends TableAbstract
 {
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Tag $tag)
+    public function setup(): void
     {
-        parent::__construct($table, $urlGenerator);
-
-        $this->model = $tag;
-
-        $this->hasActions = true;
-        $this->hasFilter = true;
-
-        if (! Auth::user()->hasAnyPermission(['tags.edit', 'tags.destroy'])) {
-            $this->hasOperations = false;
-            $this->hasActions = false;
-        }
-    }
-
-    public function ajax(): JsonResponse
-    {
-        $data = $this->table
-            ->eloquent($this->query())
-            ->editColumn('name', function (Tag $item) {
-                if (! Auth::user()->hasPermission('tags.edit')) {
-                    return BaseHelper::clean($item->name);
-                }
-
-                return Html::link(route('tags.edit', $item->getKey()), BaseHelper::clean($item->name));
-            })
-            ->editColumn('checkbox', function (Tag $item) {
-                return $this->getCheckbox($item->getKey());
-            })
-            ->editColumn('created_at', function (Tag $item) {
-                return BaseHelper::formatDate($item->created_at);
-            })
-            ->editColumn('status', function (Tag $item) {
-                if ($this->request()->input('action') === 'excel') {
-                    return $item->status->getValue();
-                }
-
-                return BaseHelper::clean($item->status->toHtml());
-            })
-            ->addColumn('operations', function (Tag $item) {
-                return $this->getOperations('tags.edit', 'tags.destroy', $item);
-            });
-
-        return $this->toJson($data);
+        $this
+            ->model(Tag::class)
+            ->addActions([
+                EditAction::make()->route('tags.edit'),
+                DeleteAction::make()->route('tags.destroy'),
+            ]);
     }
 
     public function query(): Relation|Builder|QueryBuilder
@@ -81,22 +46,10 @@ class TagTable extends TableAbstract
     public function columns(): array
     {
         return [
-            'id' => [
-                'title' => trans('core/base::tables.id'),
-                'width' => '20px',
-            ],
-            'name' => [
-                'title' => trans('core/base::tables.name'),
-                'class' => 'text-start',
-            ],
-            'status' => [
-                'title' => trans('core/base::tables.status'),
-                'width' => '100px',
-            ],
-            'created_at' => [
-                'title' => trans('core/base::tables.created_at'),
-                'width' => '100px',
-            ],
+            IdColumn::make(),
+            NameColumn::make()->route('tags.edit'),
+            CreatedAtColumn::make(),
+            StatusColumn::make(),
         ];
     }
 
@@ -107,7 +60,9 @@ class TagTable extends TableAbstract
 
     public function bulkActions(): array
     {
-        return $this->addDeleteAction(route('tags.deletes'), 'tags.destroy', parent::bulkActions());
+        return [
+            DeleteBulkAction::make()->permission('tags.destroy'),
+        ];
     }
 
     public function getBulkChanges(): array
