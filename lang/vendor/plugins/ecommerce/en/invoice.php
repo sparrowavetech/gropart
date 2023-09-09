@@ -38,4 +38,6 @@ return [
     'payment_status' => 'Payment Status',
     'generate_invoices' => 'Generate Invoices',
     'generate_success_message' => 'Generated :count invoices successfully',
+    'generate_invoice' => 'Generate invoice',
+    'order' => 'Order',
 ];

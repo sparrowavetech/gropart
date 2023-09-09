@@ -14,7 +14,7 @@ return new class () extends Migration {
             $table->string('email_verify_token', 120)->nullable();
         });
 
-        Customer::whereNull('confirmed_at')->update(['confirmed_at' => Carbon::now()]);
+        Customer::query()->whereNull('confirmed_at')->update(['confirmed_at' => Carbon::now()]);
     }
 
     public function down(): void

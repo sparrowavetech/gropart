@@ -18,7 +18,7 @@ return new class () extends Migration {
         }
 
         try {
-            $products = Product::where('is_variation', 0)->withCount(['taxes'])->get();
+            $products = Product::query()->where('is_variation', 0)->withCount(['taxes'])->get();
             $defaultTaxRate = get_ecommerce_setting('default_tax_rate');
 
             foreach ($products as $product) {

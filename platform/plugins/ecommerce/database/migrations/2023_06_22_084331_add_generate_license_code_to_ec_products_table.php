@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class () extends Migration
 {
-    public function up()
+    public function up(): void
     {
         if (! Schema::hasColumn('ec_products', 'generate_license_code')) {
             Schema::table('ec_products', function (Blueprint $table) {
@@ -49,7 +49,7 @@ return new class () extends Migration
         }
     }
 
-    public function down()
+    public function down(): void
     {
         if (Schema::hasColumn('ec_products', 'generate_license_code')) {
             Schema::table('ec_products', function (Blueprint $table) {

@@ -11,4 +11,12 @@ return [
     'total_city' => 'Total cities',
     'export_location' => 'Export location',
     'start_export' => 'Start exporting',
+
+    'enums' => [
+        'import_type' => [
+            'country' => 'Country',
+            'state' => 'State',
+            'city' => 'City',
+        ],
+    ],
 ];

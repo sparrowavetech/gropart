@@ -26,5 +26,8 @@ return [
     'important_message2' => 'If you have more than 1GB images/files in local storage, you should use backup feature of your hosting or VPS.',
     'important_message3' => 'To backup your database, function <strong>proc_open()</strong> or <strong>system()</strong> must be enabled. Contact your hosting provider to enable it if it is disabled.',
     'important_message4' => 'It is not a full backup, it is just back up uploaded files and your database.',
+    'important_message_pgsql1' => 'Currently, we cannot backup <strong>PostgreSQL</strong> database on the web due to PostgreSQL doesnt have option to enter database password directly when exporting database.',
+    'important_message_pgsql2' => 'You can run a command <strong>php artisan cms:backup:create {name}</strong> to generate the backup or <strong>php artisan cms:backup:restore</strong> to restore the latest backup.',
     'cannot_restore_database' => 'Cannot restore database. The database backup is missing!',
+    'database_driver_not_supported' => 'Database driver is not supported.',
 ];

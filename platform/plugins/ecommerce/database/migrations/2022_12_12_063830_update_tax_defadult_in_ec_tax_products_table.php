@@ -15,7 +15,7 @@ return new class () extends Migration {
                 $defaultTaxRate = get_ecommerce_setting('default_tax_rate');
 
                 if ($defaultTaxRate) {
-                    foreach (Product::where('is_variation', 0)->withCount(['taxes'])->get() as $product) {
+                    foreach (Product::query()->where('is_variation', 0)->withCount(['taxes'])->get() as $product) {
                         $taxId = $product->tax_id ?: $defaultTaxRate;
                         if ($taxId && ! $product->taxes_count) {
                             DB::table('ec_tax_products')->insertOrIgnore([

@@ -310,4 +310,6 @@ return [
         'success' => 'Mark order as completed successfully!',
         'history' => 'Order is marked as completed by :admin at :time',
     ],
+    'generate_invoice' => 'Generate invoice',
+    'generated_invoice_successfully' => 'Generated invoice successfully!',
 ];

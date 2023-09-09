@@ -21,7 +21,7 @@ return new class () extends Migration {
                         ->whereNotIn('parent_id', $categoryIds)
                         ->whereNotIn(
                             'id',
-                            MenuNode::where('reference_type', ProductCategory::class)->pluck('reference_id')->all()
+                            MenuNode::query()->where('reference_type', ProductCategory::class)->pluck('reference_id')->all()
                         );
                 })
                 ->delete();

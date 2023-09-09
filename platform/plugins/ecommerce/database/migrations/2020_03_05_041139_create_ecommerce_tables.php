@@ -68,12 +68,8 @@ return new class () extends Migration {
             $table->tinyInteger('allow_checkout_when_out_of_stock')->unsigned()->default(0);
             $table->tinyInteger('with_storehouse_management')->unsigned()->default(0);
             $table->tinyInteger('is_featured')->unsigned()->default(0);
-            $table->text('options')->nullable();
-            $table->foreignId('category_id')->nullable();
             $table->foreignId('brand_id')->nullable();
             $table->tinyInteger('is_variation')->default(0);
-            $table->tinyInteger('is_searchable')->default(0);
-            $table->tinyInteger('is_show_on_list')->default(0);
             $table->tinyInteger('sale_type')->default(0);
             $table->double('price')->unsigned()->nullable();
             $table->double('sale_price')->unsigned()->nullable();
@@ -83,11 +79,6 @@ return new class () extends Migration {
             $table->float('wide')->nullable();
             $table->float('height')->nullable();
             $table->float('weight')->nullable();
-            $table->string('barcode')->nullable();
-            $table->string('length_unit', 20)->nullable();
-            $table->string('wide_unit', 20)->nullable();
-            $table->string('height_unit', 20)->nullable();
-            $table->string('weight_unit', 20)->nullable();
             $table->foreignId('tax_id')->nullable();
             $table->bigInteger('views')->default(0);
             $table->timestamps();
@@ -290,7 +281,7 @@ return new class () extends Migration {
             $table->string('password');
             $table->string('avatar', 255)->nullable();
             $table->date('dob')->nullable();
-            $table->string('phone', 25)->nullable();
+            $table->string('phone', 20)->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
@@ -305,11 +296,11 @@ return new class () extends Migration {
             $table->id();
             $table->string('name');
             $table->string('email', 60)->nullable();
-            $table->string('phone');
+            $table->string('phone', 20);
             $table->string('country', 120)->nullable();
             $table->string('state', 120)->nullable();
             $table->string('city', 120)->nullable();
-            $table->string('address');
+            $table->string('address', 255);
             $table->foreignId('customer_id');
             $table->tinyInteger('is_default')->default(0)->unsigned();
             $table->timestamps();

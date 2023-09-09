@@ -18,7 +18,7 @@ return new class () extends Migration {
                 ->pluck('id')
                 ->all();
 
-            Review::whereNotIn('id', $reviews)->delete();
+            Review::query()->whereNotIn('id', $reviews)->delete();
 
             Schema::table('ec_reviews', function (Blueprint $table) {
                 $table->unique(['product_id', 'customer_id']);
