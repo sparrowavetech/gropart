@@ -3,9 +3,9 @@
 namespace Botble\Marketplace\Tables;
 
 use Html;
-use Botble\Base\Facades\BaseHelper;
-use Botble\Ecommerce\Facades\EcommerceHelper;
-use Botble\Marketplace\Facades\MarketplaceHelper;
+use BaseHelper;
+use EcommerceHelper;
+use MarketplaceHelper;
 use Yajra\DataTables\DataTables;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Contracts\View\View;
@@ -57,7 +57,7 @@ class EnquiryTable extends TableAbstract
             ->eloquent($this->query())
             ->editColumn('product', function ($item) {
                 return Html::link(route('marketplace.vendor.products.edit', $item->product_id), BaseHelper::clean($item->product->name));
-
+               
             })
             ->editColumn('checkbox', function ($item) {
                 return $this->getCheckbox($item->id);
@@ -147,7 +147,7 @@ class EnquiryTable extends TableAbstract
                 'width' => '100px',
                 'class' => 'text-start',
             ],
-
+           
         ];
     }
 

@@ -279,7 +279,8 @@
     margin-bottom: 20px;
 }
 
-.ui-feed__item--message, .ui-feed__item--date {
+.ui-feed__item--message,
+.ui-feed__item--date {
     margin-left: 19px;
 }
 
@@ -382,7 +383,10 @@
     padding-bottom: 0;
 }
 
-.label.carrier-status, .label.codstatus_2, .label.codstatus_3, .label.codstatus_5 {
+.label.carrier-status,
+.label.codstatus_2,
+.label.codstatus_3,
+.label.codstatus_5 {
     background-color: #f4c58f;
     color: #bd6a03;
     border: solid 1px #e6b77f;
@@ -390,7 +394,7 @@
 
 .label {
     display: inline;
-    padding: .2em .6em .3em;
+    padding: 0.2em 0.6em 0.3em;
     font-size: 75%;
     font-weight: 500;
     line-height: 1;
@@ -398,16 +402,20 @@
     text-align: center;
     white-space: nowrap;
     vertical-align: baseline;
-    border-radius: .25em;
+    border-radius: 0.25em;
 }
 
-.label.carrier-status, .label.codstatus_2, .label.codstatus_3, .label.codstatus_5 {
+.label.carrier-status,
+.label.codstatus_2,
+.label.codstatus_3,
+.label.codstatus_5 {
     background-color: #f4c58f;
     color: #bd6a03;
     border: solid 1px #e6b77f;
 }
 
-.label.carrier-status.carrier-status-not_delivered, .label.carrier-status.carrier-status-canceled {
+.label.carrier-status.carrier-status-not_delivered,
+.label.carrier-status.carrier-status-canceled {
     background: #f6f6f6;
     color: #db7878;
     border: solid 1px #eeeeee;
@@ -422,14 +430,16 @@
     display: none;
 }
 
-.timeline-dropdown th, .timeline-dropdown td {
+.timeline-dropdown th,
+.timeline-dropdown td {
     border-top: 1px solid #ebeef3;
     padding: 15px;
     font-weight: normal;
     min-width: 180px;
 }
 
-.timeline-dropdown tr:first-child th, .timeline-dropdown tr:first-child td {
+.timeline-dropdown tr:first-child th,
+.timeline-dropdown tr:first-child td {
     border-top: 0;
 }
 
@@ -464,20 +474,28 @@
     left: 0;
     max-width: 100%;
     margin-top: 5px;
-    background-color: rgba(255, 255, 255, .98);
+    background-color: rgba(255, 255, 255, 0.98);
     border-radius: 3px;
     opacity: 0;
-    -webkit-transition: -webkit-transform .3s ease, opacity .3s ease;
-    -moz-transition: all .3s ease, opacity .3s ease;
-    -o-transition: all .3s ease, opacity .3s ease;
-    transition: all .3s ease, opacity .3s ease;
+    -webkit-transition:
+        -webkit-transform 0.3s ease,
+        opacity 0.3s ease;
+    -moz-transition:
+        all 0.3s ease,
+        opacity 0.3s ease;
+    -o-transition:
+        all 0.3s ease,
+        opacity 0.3s ease;
+    transition:
+        all 0.3s ease,
+        opacity 0.3s ease;
     width: 100%;
     -moz-transform-origin: 50% -20px;
     -ms-transform-origin: 50% -20px;
     -o-transform-origin: 50% -20px;
     -webkit-transform-origin: 50% -20px;
     transform-origin: 50% -20px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, .1) !important;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1) !important;
     -moz-transform: translate3d(0, -2px, 0);
     -ms-transform: translate3d(0, -2px, 0);
     -o-transform: translate3d(0, -2px, 0);
@@ -509,7 +527,7 @@
     border-right: 7px solid transparent;
     border-bottom: 7px solid #f3faff;
     border-left: 7px solid transparent;
-    border-bottom-color: rgba(175, 166, 166, .2);
+    border-bottom-color: rgba(175, 166, 166, 0.2);
     content: '';
     width: 3px;
 }
@@ -538,7 +556,8 @@
     vertical-align: top;
 }
 
-.box-search-advance .panel-default .list-search-data .wrap-img, .box-search-advance .panel-default .list-search-data .img-empty {
+.box-search-advance .panel-default .list-search-data .wrap-img,
+.box-search-advance .panel-default .list-search-data .img-empty {
     min-height: 32px;
     min-width: 32px;
     height: 30px;
@@ -615,7 +634,8 @@ img.thumb-image {
     width: 100%;
 }
 
-.table-normal tr:first-child td, .table-normal.table-none-border td {
+.table-normal tr:first-child td,
+.table-normal.table-none-border td {
     border: 0;
 }
 
@@ -791,7 +811,7 @@ img.thumb-image {
         .discount-text-color {
             color: #f3ec33;
             font-style: italic;
-            font-size: .9em;
+            font-size: 0.9em;
         }
     }
 }
@@ -840,11 +860,13 @@ img.thumb-image {
     color: #ffffff;
 }
 
-.findcustomer .box-search-advance .panel-default .list-search-data > ul > li.active, .findcustomer .box-search-advance .panel-default .list-search-data > ul > li:hover {
+.findcustomer .box-search-advance .panel-default .list-search-data > ul > li.active,
+.findcustomer .box-search-advance .panel-default .list-search-data > ul > li:hover {
     background: #0078bd;
 }
 
-.findcustomer .box-search-advance .panel-default .list-search-data > ul > li.active *, .findcustomer .box-search-advance .panel-default .list-search-data > ul > li:hover * {
+.findcustomer .box-search-advance .panel-default .list-search-data > ul > li.active *,
+.findcustomer .box-search-advance .panel-default .list-search-data > ul > li:hover * {
     color: #ffffff !important;
 }
 
@@ -886,7 +908,6 @@ Product option
     }
 }
 
-
 @keyframes table-loading {
     0% {
         background-position: 0;
@@ -910,35 +931,36 @@ Product option
     }
 
     thead {
-        tr th[scope=col][data-column] {
+        tr th[scope='col'][data-column] {
             cursor: pointer;
             position: relative;
             padding-right: 1.5em;
 
-            &::before, &::after {
+            &::before,
+            &::after {
                 position: absolute;
                 bottom: 7px;
                 display: block;
-                opacity: .3;
+                opacity: 0.3;
             }
 
             &::before {
                 right: 7px;
-                content: "\2191";
+                content: '\2191';
             }
 
             &::after {
                 right: 2px;
-                content: "\2193";
+                content: '\2193';
             }
 
-            &[data-dir=ASC] {
+            &[data-dir='ASC'] {
                 &::after {
                     opacity: 1;
                 }
             }
 
-            &[data-dir=DESC] {
+            &[data-dir='DESC'] {
                 &::before {
                     opacity: 1;
                 }
@@ -953,15 +975,16 @@ Product option
             tbody {
                 > tr {
                     &:nth-of-type(odd) {
-                        background-image: linear-gradient(to right, transparent 50%, rgba(0, 0, 0, .05) 50%);
+                        background-image: linear-gradient(to right, transparent 50%, rgba(0, 0, 0, 0.05) 50%);
                         background-size: 200% 100%;
                         animation: table-loading 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
                     }
                 }
             }
 
-            tr th, tr td {
-                opacity: .45;
+            tr th,
+            tr td {
+                opacity: 0.45;
                 pointer-events: none;
             }
         }
@@ -992,7 +1015,7 @@ Product option
 
 @keyframes loading-skeleton {
     from {
-        opacity: .4;
+        opacity: 0.4;
     }
 
     to {

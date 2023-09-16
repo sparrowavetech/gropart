@@ -7,8 +7,8 @@ use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Enums\ShippingRuleTypeEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Http\Requests\ShippingRuleItemRequest;
+use Botble\Ecommerce\Models\ShippingRule;
 use Botble\Ecommerce\Models\ShippingRuleItem;
-use Botble\Ecommerce\Repositories\Interfaces\ShippingRuleInterface;
 use Illuminate\Database\Eloquent\Builder;
 
 class ShippingRuleItemForm extends FormAbstract
@@ -22,7 +22,7 @@ class ShippingRuleItemForm extends FormAbstract
         Assets::addScriptsDirectly(['vendor/core/plugins/ecommerce/js/shipping.js'])
             ->addScripts(['input-mask']);
 
-        $rules = app(ShippingRuleInterface::class)->getModel()
+        $rules = ShippingRule::query()
             ->whereIn('type', ShippingRuleTypeEnum::keysAllowRuleItems())
             ->whereHas('shipping', function (Builder $query) {
                 $query->whereNotNull('country');

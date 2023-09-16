@@ -1,8 +1,16 @@
 @if ($productAttributeSets->count() > 0)
     <div class="add-new-product-attribute-wrap">
-        <input type="hidden" name="is_added_attributes" id="is_added_attributes" value="0">
-        <a href="#" class="btn-trigger-add-attribute"
-            data-toggle-text="{{ trans('plugins/ecommerce::products.form.cancel') }}">{{ trans('plugins/ecommerce::products.form.add_new_attributes') }}</a>
+        <input
+            id="is_added_attributes"
+            name="is_added_attributes"
+            type="hidden"
+            value="0"
+        >
+        <a
+            class="btn-trigger-add-attribute"
+            data-toggle-text="{{ trans('plugins/ecommerce::products.form.cancel') }}"
+            href="#"
+        >{{ trans('plugins/ecommerce::products.form.add_new_attributes') }}</a>
         <p>{{ trans('plugins/ecommerce::products.form.add_new_attributes_description') }}</p>
         <div class="list-product-attribute-values-wrap hidden">
             <div class="product-select-attribute-item-template">
@@ -15,12 +23,18 @@
             </div>
 
             <div>
-                <a href="#" class="btn btn-secondary me-2 btn-trigger-add-attribute-item @if ($productAttributeSets->count() < 2) hidden @endif">{{ trans('plugins/ecommerce::products.form.add_more_attribute') }}</a>
-                @if (! empty($addAttributeToProductUrl))
-                    <a href="#" class="btn btn-info btn-trigger-add-attribute-to-simple-product"
+                <a
+                    class="btn btn-secondary me-2 btn-trigger-add-attribute-item @if ($productAttributeSets->count() < 2) hidden @endif"
+                    href="#"
+                >{{ trans('plugins/ecommerce::products.form.add_more_attribute') }}</a>
+                @if (!empty($addAttributeToProductUrl))
+                    <a
+                        class="btn btn-info btn-trigger-add-attribute-to-simple-product"
                         data-target="{{ $addAttributeToProductUrl }}"
                         data-bs-toggle="tooltip"
-                        title="{{ trans('plugins/ecommerce::products.this_action_will_reload_page') }}">{{ trans('plugins/ecommerce::products.form.continue') }}</a>
+                        href="#"
+                        title="{{ trans('plugins/ecommerce::products.this_action_will_reload_page') }}"
+                    >{{ trans('plugins/ecommerce::products.form.continue') }}</a>
                 @endif
             </div>
             @if ($product && is_object($product) && $product->id)
@@ -32,7 +46,10 @@
     </div>
 @elseif (is_in_admin(true) && Auth::check() && Auth::user()->hasPermission('product-attribute-sets.create'))
     <p>{!! trans('plugins/ecommerce::products.form.create_product_variations', [
-        'link' => Html::link(route('product-attribute-sets.create'), trans('plugins/ecommerce::products.form.add_new_attributes'))
+        'link' => Html::link(
+            route('product-attribute-sets.create'),
+            trans('plugins/ecommerce::products.form.add_new_attributes'),
+        ),
     ]) !!}</p>
 @endif
 

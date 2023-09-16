@@ -1,4 +1,4 @@
-body[dir="rtl"] {
+body[dir='rtl'] {
     direction: rtl;
     text-align: right;
 }
@@ -66,36 +66,40 @@ body[dir="rtl"] {
     float: right;
 }
 
-.page-sidebar .page-sidebar-menu > li > a > i, .page-sidebar-closed.page-sidebar-fixed .page-sidebar:hover .page-sidebar-menu > li > a > i {
+.page-sidebar .page-sidebar-menu > li > a > i,
+.page-sidebar-closed.page-sidebar-fixed .page-sidebar:hover .page-sidebar-menu > li > a > i {
     margin-right: 0;
     margin-left: 5px;
 }
 
-input[type=radio], input[type=checkbox] {
+input[type='radio'],
+input[type='checkbox'] {
     margin: 0 0 0 0.5rem;
 }
 
-input[type=radio]:checked:before {
+input[type='radio']:checked:before {
     left: 0;
     right: 2px;
 }
 
-input[type=radio]:checked:after {
+input[type='radio']:checked:after {
     left: 0;
     right: -1px;
 }
 
-.select2-container--default[dir="rtl"] .select2-selection--single .select2-selection__arrow {
+.select2-container--default[dir='rtl'] .select2-selection--single .select2-selection__arrow {
     right: 1px;
     left: auto;
 }
 
-.ui-select-wrapper .svg-next-icon, .ui-select-wrapper .next-icon-text {
+.ui-select-wrapper .svg-next-icon,
+.ui-select-wrapper .next-icon-text {
     right: auto;
     left: 7px;
 }
 
-.page-sidebar .page-sidebar-menu li > a > .arrow:before, .page-sidebar-closed.page-sidebar-fixed .page-sidebar:hover .page-sidebar-menu li > a > .arrow:before {
+.page-sidebar .page-sidebar-menu li > a > .arrow:before,
+.page-sidebar-closed.page-sidebar-fixed .page-sidebar:hover .page-sidebar-menu li > a > .arrow:before {
     float: left;
     right: auto;
     left: 14px;
@@ -106,7 +110,8 @@ input[type=radio]:checked:after {
     margin-right: 235px;
 }
 
-.page-header.navbar .page-logo > .logo-image, .page-header.navbar .page-logo > a {
+.page-header.navbar .page-logo > .logo-image,
+.page-header.navbar .page-logo > a {
     float: right;
 }
 
@@ -176,7 +181,8 @@ input[type=radio]:checked:after {
     }
 }
 
-.modal-header strong, .modal-header h5.modal-title {
+.modal-header strong,
+.modal-header h5.modal-title {
     float: right;
     margin: 0 15px 0 0;
 }
@@ -346,12 +352,16 @@ div.dataTables_wrapper {
     text-align: right;
 }
 
-.dropdown > .dropdown-menu:before, .dropdown-toggle > .dropdown-menu:before, .btn-group > .dropdown-menu:before {
+.dropdown > .dropdown-menu:before,
+.dropdown-toggle > .dropdown-menu:before,
+.btn-group > .dropdown-menu:before {
     left: auto;
     right: 9px;
 }
 
-.dropdown > .dropdown-menu:after, .dropdown-toggle > .dropdown-menu:after, .btn-group > .dropdown-menu:after {
+.dropdown > .dropdown-menu:after,
+.dropdown-toggle > .dropdown-menu:after,
+.btn-group > .dropdown-menu:after {
     left: auto;
     right: 10px;
 }
@@ -360,7 +370,10 @@ div.dataTables_wrapper {
     margin: 8px 0 0 15px !important;
 }
 
-.dropdown-menu[x-placement^=top], .dropdown-menu[x-placement^=right], .dropdown-menu[x-placement^=bottom], .dropdown-menu[x-placement^=left] {
+.dropdown-menu[x-placement^='top'],
+.dropdown-menu[x-placement^='right'],
+.dropdown-menu[x-placement^='bottom'],
+.dropdown-menu[x-placement^='left'] {
     left: auto;
     right: 0;
 }
@@ -374,7 +387,7 @@ div.dataTables_wrapper {
     left: 5px;
 
     &:before {
-        content: "\f104";
+        content: '\f104';
     }
 }
 
@@ -386,11 +399,13 @@ div.dataTables_wrapper {
     }
 }
 
-.btn-group > .btn:not(:first-child), .btn-group > .btn-group:not(:first-child) > .btn {
+.btn-group > .btn:not(:first-child),
+.btn-group > .btn-group:not(:first-child) > .btn {
     border-radius: 3px 0 0 3px;
 }
 
-.btn-group > .btn:not(:last-child):not(.dropdown-toggle), .btn-group > .btn-group:not(:last-child) > .btn {
+.btn-group > .btn:not(:last-child):not(.dropdown-toggle),
+.btn-group > .btn-group:not(:last-child) > .btn {
     border-radius: 0 3px 3px 0;
 }
 
@@ -437,7 +452,8 @@ small.charcounter {
     left: 0;
 }
 
-.widget-title > h4 span, .widget-title > h4 label {
+.widget-title > h4 span,
+.widget-title > h4 label {
     margin-left: 0;
     margin-right: 10px;
 }
@@ -486,7 +502,7 @@ small.charcounter {
 
     .toast-close-button {
         right: auto;
-        left: -.3em;
+        left: -0.3em;
         float: left;
     }
 }

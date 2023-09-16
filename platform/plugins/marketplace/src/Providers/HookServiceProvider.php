@@ -2,54 +2,48 @@
 
 namespace Botble\Marketplace\Providers;
 
-use Assets;
-use Auth;
-use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Http\Responses\BaseHttpResponse;
-use Botble\Base\Models\BaseModel;
 use Botble\Ecommerce\Enums\CustomerStatusEnum;
 use Botble\Ecommerce\Models\Customer;
 use Botble\Ecommerce\Models\Discount;
+use Botble\Ecommerce\Models\Invoice;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\Product;
-use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
-use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
+use Botble\Language\Facades\Language;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Botble\Marketplace\Enums\RevenueTypeEnum;
 use Botble\Marketplace\Enums\WithdrawalStatusEnum;
+use Botble\Marketplace\Facades\MarketplaceHelper;
+use Botble\Marketplace\Models\Revenue;
 use Botble\Marketplace\Models\Store;
+use Botble\Marketplace\Models\VendorInfo;
 use Botble\Marketplace\Models\Withdrawal;
-use Botble\Marketplace\Repositories\Interfaces\RevenueInterface;
-use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
-use Botble\Marketplace\Repositories\Interfaces\VendorInfoInterface;
-use Botble\Marketplace\Repositories\Interfaces\WithdrawalInterface;
+use Botble\Media\Facades\RvMedia;
+use Botble\Slug\Facades\SlugHelper;
 use Botble\Slug\Models\Slug;
+use Botble\Table\CollectionDataTable;
+use Botble\Table\EloquentDataTable;
 use Exception;
-use Html;
-use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Language;
-use MarketplaceHelper;
-use Route;
-use SlugHelper;
 use Throwable;
-use Yajra\DataTables\CollectionDataTable;
-use Yajra\DataTables\EloquentDataTable;
 
 class HookServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         $this->app->booted(function () {
             add_filter(BASE_FILTER_AFTER_FORM_CREATED, [$this, 'registerAdditionalData'], 128, 2);
@@ -104,30 +98,46 @@ class HookServiceProvider extends ServiceProvider
             add_filter(ACTION_BEFORE_POST_ORDER_REFUND_ECOMMERCE, [$this, 'beforeOrderRefund'], 120, 3);
             add_filter(ACTION_AFTER_POST_ORDER_REFUNDED_ECOMMERCE, [$this, 'afterOrderRefunded'], 120, 3);
 
+            add_filter('ecommerce_customer_registration_form_validation_rules', function (array $rules): array {
+                return $rules + [
+                        'shop_name' => [
+                            'nullable',
+                            'required_if:is_vendor,1',
+                            'string',
+                            'min:2',
+                        ],
+                        'shop_phone' => [
+                            'nullable',
+                            'required_if:is_vendor,1',
+                        ] + explode('|', BaseHelper::getPhoneValidationRule()),
+                        'shop_url' => [
+                            'nullable',
+                            'required_if:is_vendor,1',
+                            'string',
+                            'min:2',
+                        ],
+                    ];
+            }, 45, 2);
+
+            add_filter('ecommerce_customer_registration_form_validation_attributes', function (array $attributes): array {
+                return $attributes + [
+                        'shop_name' => __('Shop Name'),
+                        'shop_phone' => __('Shop Phone'),
+                        'shop_url' => __('Shop URL'),
+                    ];
+            }, 45);
+
+            add_filter('ecommerce_customer_registration_form_validation_messages', function (array $attributes): array {
+                return $attributes + [
+                        'shop_name.required_if' => __('Shop Name is required.'),
+                        'shop_phone.required_if' => __('Shop Phone is required.'),
+                        'shop_url.required_if' => __('Shop URL is required.'),
+                    ];
+            }, 45);
+
             add_action('customer_register_validation', function ($request) {
                 if (is_plugin_active('marketplace') && $request->input('is_vendor') == 1) {
-                    Validator::make(
-                        $request->input(),
-                        [
-                            'shop_name' => 'required|min:2',
-                            'shop_phone' => 'required|' . BaseHelper::getPhoneValidationRule(),
-                            'shop_url' => 'required',
-                            'shop_category'   => 'required',
-                        ],
-                        [],
-                        [
-                            'shop_name' => __('Shop Name'),
-                            'shop_phone' => __('Shop Phone'),
-                            'shop_url' => __('Shop URL'),
-                            'shop_category'   => __('Shop Type'),
-                        ]
-                    )->validate();
-
-                    $existing = SlugHelper::getSlug(
-                        $request->input('shop_url'),
-                        SlugHelper::getPrefix(Store::class),
-                        Store::class
-                    );
+                    $existing = SlugHelper::getSlug($request->input('shop_url'), SlugHelper::getPrefix(Store::class));
 
                     if ($existing) {
                         throw ValidationException::withMessages([
@@ -138,6 +148,39 @@ class HookServiceProvider extends ServiceProvider
             }, 45, 2);
 
             add_filter('ecommerce_import_product_row_data', [$this, 'setStoreToRow'], 45);
+
+            add_filter('ecommerce_invoice_variables', function (array $variables, Invoice $invoice): array {
+                if (! $invoice->reference) {
+                    return $variables;
+                }
+
+                $store = $invoice->reference->store;
+
+                if (! $store || ! $store->id) {
+                    return $variables;
+                }
+
+                if ($store->logo) {
+                    $variables['logo_full_path'] = RvMedia::getRealPath($store->logo);
+                    $variables['company_logo_full_path'] = RvMedia::getRealPath($store->logo);
+                }
+
+                if ($store->name) {
+                    $variables['site_title'] = $store->name;
+                }
+
+                return array_merge($variables, [
+                    'company_name' => $store->name,
+                    'company_address' => $store->address,
+                    'company_phone' => $store->phone,
+                    'company_email' => $store->email,
+                    'company_tax_id' => $store->tax_id,
+                ]);
+            }, 45, 2);
+
+            add_filter('ecommerce_product_eager_loading_relations', function (array $with) {
+                return array_merge($with, ['store', 'store.slugable']);
+            }, 120);
         });
     }
 
@@ -177,9 +220,6 @@ class HookServiceProvider extends ServiceProvider
                     $vendorInfo = $vendor->vendorInfo;
 
                     if ($vendor->balance > $refundAmount) {
-                        $revenueRepository = app(RevenueInterface::class);
-                        $revenue = $revenueRepository->getModel();
-
                         $vendorInfo->total_revenue -= $refundAmount;
                         $vendorInfo->balance -= $refundAmount;
 
@@ -188,7 +228,7 @@ class HookServiceProvider extends ServiceProvider
                             'currency' => get_application_currency()->title,
                             'current_balance' => $vendor->balance,
                             'customer_id' => $vendor->getKey(),
-                            'order_id' => $order->id,
+                            'order_id' => $order->getKey(),
                             'user_id' => Auth::id(),
                             'type' => RevenueTypeEnum::SUBTRACT_AMOUNT,
                             'description' => trans('plugins/marketplace::order.refund.description', [
@@ -201,8 +241,8 @@ class HookServiceProvider extends ServiceProvider
                         try {
                             DB::beginTransaction();
 
-                            $revenue->fill($data);
-                            $revenue->save();
+                            Revenue::query()->create($data);
+
                             $vendorInfo->save();
 
                             DB::commit();
@@ -258,7 +298,7 @@ class HookServiceProvider extends ServiceProvider
     public function registerAdditionalData(FormAbstract $form, Model|string|null $data): FormAbstract
     {
         if (get_class($data) == Product::class && request()->segment(1) === BaseHelper::getAdminPrefix()) {
-            $stores = $this->app->make(StoreInterface::class)->pluck('name', 'id');
+            $stores = Store::query()->pluck('name', 'id')->all();
 
             $form->addAfter('status', 'store_id', 'customSelect', [
                 'label' => trans('plugins/marketplace::store.forms.store'),
@@ -305,9 +345,11 @@ class HookServiceProvider extends ServiceProvider
 
                 $customer->save();
             }
-        } elseif ($type == PRODUCT_MODULE_SCREEN_NAME && $request->has('store_id') && request()->segment(
-            1
-        ) !== 'vendor') {
+        } elseif (
+            $type == PRODUCT_MODULE_SCREEN_NAME &&
+            $request->has('store_id') &&
+            request()->segment(1) !== 'vendor'
+        ) {
             $object->store_id = $request->input('store_id');
             $object->save();
         } elseif (in_array($type, [CUSTOMER_MODULE_SCREEN_NAME, (new Customer())->getTable()])
@@ -322,10 +364,7 @@ class HookServiceProvider extends ServiceProvider
 
             // Create vendor info
             if ($object->is_vendor && ! $object->vendorInfo->id) {
-                $this->app->make(VendorInfoInterface::class)
-                    ->createOrUpdate([
-                        'customer_id' => $object->id,
-                    ]);
+                VendorInfo::query()->create(['customer_id' => $object->id]);
             }
 
             if ($object->is_vendor) {
@@ -352,7 +391,7 @@ class HookServiceProvider extends ServiceProvider
                 $store->save();
 
                 if (! $store->slug) {
-                    Slug::create([
+                    Slug::query()->create([
                         'reference_type' => Store::class,
                         'reference_id' => $store->id,
                         'key' => Str::slug($store->name),
@@ -371,6 +410,16 @@ class HookServiceProvider extends ServiceProvider
     {
         if (! $model || ! is_in_admin(true)) {
             return $data;
+        }
+
+        if ($model::class === Customer::class && Route::is('marketplace.vendors.index')) {
+            return $data->addColumn('store_name', function ($item) {
+                if (! $item->store->name) {
+                    return '&mdash;';
+                }
+
+                return Html::link(route('marketplace.store.edit', $item->store->id), $item->store->name);
+            });
         }
 
         return match (get_class($model)) {
@@ -402,10 +451,16 @@ class HookServiceProvider extends ServiceProvider
                         if (get_class($model) == Order::class) {
                             $query = $query
                                 ->whereHas('address', function ($subQuery) use ($keyword) {
-                                    return $subQuery->where('name', 'LIKE', '%' . $keyword . '%');
+                                    return $subQuery
+                                        ->where('name', 'LIKE', '%' . $keyword . '%')
+                                        ->orWhere('email', 'LIKE', '%' . $keyword . '%')
+                                        ->orWhere('phone', 'LIKE', '%' . $keyword . '%');
                                 })
                                 ->orWhereHas('user', function ($subQuery) use ($keyword) {
-                                    return $subQuery->where('name', 'LIKE', '%' . $keyword . '%');
+                                    return $subQuery
+                                        ->where('name', 'LIKE', '%' . $keyword . '%')
+                                        ->orWhere('email', 'LIKE', '%' . $keyword . '%')
+                                        ->orWhere('phone', 'LIKE', '%' . $keyword . '%');
                                 })
                                 ->orWhere('code', 'LIKE', '%' . $keyword . '%');
                         }
@@ -425,7 +480,7 @@ class HookServiceProvider extends ServiceProvider
 
                     return Html::link($store->url, $store->name, ['target' => '_blank']);
                 })
-                ->filter(function ($query) use ($model) {
+                ->filter(function ($query) {
                     $keyword = request()->input('search.value');
                     if ($keyword) {
                         $query
@@ -499,6 +554,10 @@ class HookServiceProvider extends ServiceProvider
 
     public function addBankInfoTab(?string $tabs, Model|string|null $data = null): ?string
     {
+        if (is_plugin_active('language') && is_plugin_active('language-advanced') && Language::getCurrentAdminLocaleCode() != Language::getDefaultLocaleCode()) {
+            return $tabs;
+        }
+
         if (! empty($data) && get_class($data) == Store::class && $data->customer->is_vendor) {
             return $tabs .
                 view('plugins/marketplace::customers.tax-info-tab')->render() .
@@ -595,10 +654,10 @@ class HookServiceProvider extends ServiceProvider
         if (Auth::user()->hasPermission('marketplace.unverified-vendor.index') &&
             MarketplaceHelper::getSetting('verify_vendor', 1)
         ) {
-            $countUnverifiedVendors = app(CustomerInterface::class)->count([
-                'is_vendor' => true,
-                'vendor_verified_at' => null,
-            ]);
+            $countUnverifiedVendors = Customer::query()
+                ->where('is_vendor', true)
+                ->whereNull('vendor_verified_at')
+                ->count();
 
             $data[] = [
                 'key' => 'unverified-vendors',
@@ -609,9 +668,9 @@ class HookServiceProvider extends ServiceProvider
         $countPendingWithdrawals = 0;
 
         if (Auth::user()->hasPermission('marketplace.withdrawal.index')) {
-            $countPendingWithdrawals = app(WithdrawalInterface::class)->count([
-                ['status', 'IN', [WithdrawalStatusEnum::PENDING, WithdrawalStatusEnum::PROCESSING]],
-            ]);
+            $countPendingWithdrawals = Withdrawal::query()
+                ->where('status', 'IN', [WithdrawalStatusEnum::PENDING, WithdrawalStatusEnum::PROCESSING])
+                ->count();
 
             $data[] = [
                 'key' => 'pending-withdrawals',
@@ -627,22 +686,22 @@ class HookServiceProvider extends ServiceProvider
         }
 
         if (Auth::user()->hasPermission('products.index')) {
-            $countPendingProducts = app(ProductInterface::class)->count([
-                'status' => BaseStatusEnum::PENDING,
-                'created_by_type' => Customer::class,
-                ['created_by_id', '!=', 0],
-                'approved_by' => 0,
-            ]);
+            $countPendingProducts = Product::query()
+                ->where('status', BaseStatusEnum::PENDING)
+                ->where('created_by_type', Customer::class)
+                ->where('created_by_id', '!=', 0)
+                ->where('approved_by', 0)
+                ->count();
 
             $data[] = [
                 'key' => 'pending-products',
                 'value' => $countPendingProducts,
             ];
 
-            $pendingOrders = app(OrderInterface::class)->count([
-                'status' => BaseStatusEnum::PENDING,
-                'is_finished' => 1,
-            ]);
+            $pendingOrders = Order::query()
+                ->where('status', BaseStatusEnum::PENDING)
+                ->where('is_finished', 1)
+                ->count();
 
             $data[] = [
                 'key' => 'ecommerce-count',
@@ -704,12 +763,10 @@ class HookServiceProvider extends ServiceProvider
         if (! empty($row['vendor'])) {
             $row['vendor'] = trim($row['vendor']);
 
-            $storeRepository = app(StoreInterface::class);
-
             if (is_numeric($row['vendor'])) {
-                $store = $storeRepository->findById($row['vendor']);
+                $store = Store::query()->find($row['vendor']);
             } else {
-                $store = $storeRepository->getFirstBy(['name' => $row['vendor']]);
+                $store = Store::query()->where('name', $row['vendor'])->first();
             }
 
             $row['store_id'] = $store ? $store->id : 0;

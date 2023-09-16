@@ -42,6 +42,8 @@ class ShortcodeServiceProvider extends ServiceProvider
 
         $this->setNamespace('packages/shortcode')
             ->loadRoutes()
-            ->loadHelpers();
+            ->loadHelpers()
+            ->loadAndPublishViews()
+            ->publishAssets();
     }
 }

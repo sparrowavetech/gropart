@@ -372,29 +372,22 @@
 
                 let deleteURL = _self.data('section')
 
-                $.ajax({
-                    url: deleteURL,
-                    type: 'POST',
-                    data: { _method: 'DELETE' },
-                    success: (data) => {
-                        if (data.error) {
-                            Botble.showError(data.message)
-                        } else {
-                            window.LaravelDataTables[_self.data('parent-table')]
-                                .row($('a[data-section="' + deleteURL + '"]').closest('tr'))
-                                .remove()
-                                .draw()
-                            Botble.showSuccess(data.message)
-                        }
+                $httpClient
+                    .make()
+                    .delete(deleteURL)
+                    .then(({ data }) => {
+                        window.LaravelDataTables[_self.data('parent-table')]
+                            .row($('a[data-section="' + deleteURL + '"]').closest('tr'))
+                            .remove()
+                            .draw()
+
+                        Botble.showSuccess(data.message)
 
                         _self.closest('.modal').modal('hide')
+                    })
+                    .finally(() => {
                         _self.removeClass('button-loading')
-                    },
-                    error: (data) => {
-                        Botble.handleError(data)
-                        _self.removeClass('button-loading')
-                    },
-                })
+                    })
             })
 
             $(document).on('click', '.delete-many-entry-trigger', (event) => {
@@ -404,6 +397,7 @@
                 let table = _self.closest('.table-wrapper').find('.table').prop('id')
 
                 let ids = []
+
                 $('#' + table)
                     .find('.checkboxes:checked')
                     .each((i, el) => {
@@ -441,31 +435,24 @@
                     ids[i] = $(el).val()
                 })
 
-                $.ajax({
-                    url: _self.data('href'),
-                    type: 'POST',
-                    data: {
-                        _method: 'DELETE',
+                $httpClient
+                    .make()
+                    .delete(_self.data('href'), {
                         ids: ids,
                         class: _self.data('class-item'),
-                    },
-                    success: (data) => {
-                        if (data.error) {
-                            Botble.showError(data.message)
-                        } else {
-                            Botble.showSuccess(data.message)
-                        }
+                    })
+                    .then(({ data }) => {
+                        Botble.showSuccess(data.message)
 
                         $table.find('.table-check-all').prop('checked', false).prop('indeterminate', false)
+
                         window.LaravelDataTables[_self.data('parent-table')].draw()
+
                         _self.closest('.modal').modal('hide')
+                    })
+                    .finally(() => {
                         _self.removeClass('button-loading')
-                    },
-                    error: (data) => {
-                        Botble.handleError(data)
-                        _self.removeClass('button-loading')
-                    },
-                })
+                    })
             })
 
             $(document).on('click', '[data-trigger-bulk-action]', (event) => {
@@ -516,7 +503,7 @@
                 _self.addClass('button-loading')
 
                 const tableId = _self.data('table-id')
-                const method = _self.data('method')
+                const method = _self.data('method').toLowerCase() || 'post'
 
                 const $table = $(`#${tableId}`)
 
@@ -524,37 +511,26 @@
 
                 $table.find('.checkboxes:checked').each((i, el) => ids.push($(el).val()))
 
-                $.ajax({
-                    url: _self.data('href'),
-                    type: 'POST',
-                    data: {
-                        _method: method ? method : 'POST',
+                $httpClient
+                    .make()
+                    [method](_self.data('href'), {
                         ids: ids,
                         bulk_action: 1,
                         bulk_action_table: _self.data('table-target'),
                         bulk_action_target: _self.data('target'),
-                    },
-                    success: (data) => {
-                        if (data.error) {
-                            Botble.showError(data.message)
-                        } else {
-                            Botble.showSuccess(data.message)
-                        }
+                    })
+                    .then(({ data }) => {
+                        Botble.showSuccess(data.message)
 
                         $table.find('.table-check-all').prop('checked', false).prop('indeterminate', false)
 
                         window.LaravelDataTables[tableId].draw()
 
                         _self.closest('.modal').modal('hide')
-
+                    })
+                    .finally(() => {
                         _self.removeClass('button-loading')
-                    },
-                    error: (data) => {
-                        Botble.handleError(data)
-
-                        _self.removeClass('button-loading')
-                    },
-                })
+                    })
             })
 
             $(document).on('click', '[data-dt-single-action]', (event) => {
@@ -575,15 +551,13 @@
                     modal.find('.modal-title > strong').text(_self.data('confirmation-modal-title'))
                     modal.find('.modal-body > div').text(_self.data('confirmation-modal-message'))
                     modal.find('button.btn-warning').text(_self.data('confirmation-modal-cancel-button'))
-                    modal.find('button.confirm-trigger-single-action-button').text(_self.data('confirmation-modal-button'))
+                    modal
+                        .find('button.confirm-trigger-single-action-button')
+                        .text(_self.data('confirmation-modal-button'))
 
                     modal.modal('show')
                 } else {
-                    triggerSingleAction(
-                        tableId,
-                        _self.prop('href'),
-                        _self.data('method')
-                    );
+                    triggerSingleAction(tableId, _self.prop('href'), _self.data('method'))
                 }
             })
 
@@ -611,32 +585,23 @@
 
             const triggerSingleAction = (tableId, url, method, onSuccess, onError) => {
                 const $table = $(`#${tableId}`)
+                const $method = method.toLowerCase() || 'post'
 
-                $.ajax({
-                    url: url,
-                    type: 'POST',
-                    data: {
-                        _method: method ? method : 'POST',
-                    },
-                    success: (data) => {
-                        if (data.error) {
-                            Botble.showError(data.message)
-                        } else {
-                            Botble.showSuccess(data.message)
-                        }
+                $httpClient
+                    .make()
+                    [$method](url)
+                    .then(({ data }) => {
+                        Botble.showSuccess(data.message)
 
                         $table.find('.table-check-all').prop('checked', false).prop('indeterminate', false)
 
                         window.LaravelDataTables[tableId].draw()
 
                         typeof onSuccess === 'function' && onSuccess.apply(this, data)
-                    },
-                    error: (error) => {
-                        Botble.handleError(error)
-
+                    })
+                    .catch((error) => {
                         typeof onError === 'function' && onError.apply(this, error)
-                    },
-                })
+                    })
             }
 
             $(document).on('click', '.bulk-change-item', (event) => {
@@ -686,21 +651,16 @@
 
                 _self.addClass('button-loading')
 
-                $.ajax({
-                    url: _self.data('url'),
-                    type: 'POST',
-                    data: {
+                $httpClient
+                    .make()
+                    .post(_self.data('url'), {
                         ids: ids,
                         key: inputKey,
                         value: value,
                         class: _self.data('class-item'),
-                    },
-                    success: (data) => {
-                        if (data.error) {
-                            Botble.showError(data.message)
-                        } else {
-                            Botble.showSuccess(data.message)
-                        }
+                    })
+                    .then(({ data }) => {
+                        Botble.showSuccess(data.message)
 
                         $table.find('.table-check-all').prop('checked', false).prop('indeterminate', false)
 
@@ -711,31 +671,30 @@
                                 .draw()
                         })
                         _self.closest('.modal').modal('hide')
+                    })
+                    .finally(() => {
                         _self.removeClass('button-loading')
-                    },
-                    error: (data) => {
-                        Botble.handleError(data)
-                        _self.removeClass('button-loading')
-                    },
-                })
+                    })
             })
         }
 
         loadBulkChangeData($element) {
             let $modal = $('.modal-bulk-change-items')
-            $.ajax({
-                type: 'GET',
-                url: $modal.find('.confirm-bulk-change-button').data('load-url'),
-                data: {
+
+            $httpClient
+                .make()
+                .get($modal.find('.confirm-bulk-change-button').data('load-url'), {
                     class: $element.data('class-item'),
                     key: $element.data('key'),
-                },
-                success: (res) => {
-                    let data = $.map(res.data, (value, key) => {
+                })
+                .then((response) => {
+                    let data = $.map(response.data.data, (value, key) => {
                         return { id: key, name: value }
                     })
+
                     let $parent = $('.modal-bulk-change-content')
-                    $parent.html(res.html)
+
+                    $parent.html(response.data.html)
 
                     let $input = $modal.find('input[type=text].input-value')
                     if ($input.length) {
@@ -744,11 +703,7 @@
                     }
 
                     Botble.initResources()
-                },
-                error: (error) => {
-                    Botble.handleError(error)
-                },
-            })
+                })
         }
 
         handleActionsExport() {
@@ -764,24 +719,20 @@
                     })
 
                 event.preventDefault()
-                $.ajax({
-                    type: 'POST',
-                    url: _self.prop('href'),
-                    data: {
+
+                $httpClient
+                    .make()
+                    .post(_self.prop('href'), {
                         'ids-checked': ids,
-                    },
-                    success: (response) => {
+                    })
+                    .then(({ data }) => {
                         let a = document.createElement('a')
-                        a.href = response.file
-                        a.download = response.name
+                        a.href = data.file
+                        a.download = data.name
                         document.body.appendChild(a)
                         a.trigger('click')
                         a.remove()
-                    },
-                    error: (error) => {
-                        Botble.handleError(error)
-                    },
-                })
+                    })
             })
         }
     }

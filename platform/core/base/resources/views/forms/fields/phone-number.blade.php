@@ -9,7 +9,11 @@
 @endif
 
 @if ($showField)
-    {!! Form::text($name, $options['value'], array_merge_recursive($options['attr'], ['class' => 'js-phone-number-mask form-control'])) !!}
+    {!! Form::text(
+        $name,
+        $options['value'],
+        array_merge_recursive($options['attr'], ['class' => 'js-phone-number-mask form-control']),
+    ) !!}
     @include('core/base::forms.partials.help-block')
 @endif
 

@@ -228,15 +228,7 @@ class Layout {
     }
 
     _toggleSidebarMenu(status = false) {
-        $.ajax({
-            url: route('admin.sidebar-menu.toggle'),
-            type: 'POST',
-            dataType: 'json',
-            data: { status },
-            error: (data) => {
-                Botble.handleError(data)
-            },
-        })
+        $httpClient.makeWithoutErrorHandler().post(route('admin.sidebar-menu.toggle'), { status })
     }
 
     // Handles Bootstrap Tabs.

@@ -15,31 +15,25 @@ $(document).ready(function () {
         let deleteURL = $(event.currentTarget).data('url')
         $(this).prop('disabled', true).addClass('button-loading')
 
-        $.ajax({
-            url: deleteURL,
-            type: 'POST',
-            data: { _method: 'DELETE' },
-            success: (data) => {
-                if (data.error) {
-                    Botble.showError(data.message)
-                } else {
-                    if (data.data) {
-                        languageTable.find('i[data-locale=' + data.data + ']').unwrap()
-                        $('.tooltip').remove()
-                    }
-                    languageTable
-                        .find('a[data-url="' + deleteURL + '"]')
-                        .closest('tr')
-                        .remove()
-                    Botble.showSuccess(data.message)
+        $httpClient
+            .make()
+            .delete(deleteURL)
+            .then(({ data }) => {
+                if (data.data) {
+                    languageTable.find('i[data-locale=' + data.data + ']').unwrap()
+                    $('.tooltip').remove()
                 }
+
+                languageTable
+                    .find('a[data-url="' + deleteURL + '"]')
+                    .closest('tr')
+                    .remove()
+
+                Botble.showSuccess(data.message)
+            })
+            .finally(() => {
                 $(this).prop('disabled', false).removeClass('button-loading')
-            },
-            error: (data) => {
-                $(this).prop('disabled', false).removeClass('button-loading')
-                Botble.handleError(data)
-            },
-        })
+            })
     })
 
     $(document).on('click', '.add-locale-form button[type=submit]', function (event) {
@@ -47,49 +41,31 @@ $(document).ready(function () {
         event.stopPropagation()
         $(this).prop('disabled', true).addClass('button-loading')
 
-        $.ajax({
-            type: 'POST',
-            cache: false,
-            url: $(this).closest('form').prop('action'),
-            data: new FormData($(this).closest('form')[0]),
-            contentType: false,
-            processData: false,
-            success: (res) => {
-                if (!res.error) {
-                    Botble.showSuccess(res.message)
-                    languageTable.load(window.location.href + ' .table-language > *')
-                } else {
-                    Botble.showError(res.message)
-                }
+        let formData = new FormData($(this).closest('form')[0])
 
+        $httpClient
+            .make()
+            .postForm($(this).closest('form').prop('action'), formData)
+            .then(({ data }) => {
+                Botble.showSuccess(data.message)
+                languageTable.load(window.location.href + ' .table-language > *')
+            })
+            .finally(() => {
                 $(this).prop('disabled', false).removeClass('button-loading')
-            },
-            error: (res) => {
-                $(this).prop('disabled', false).removeClass('button-loading')
-                Botble.handleError(res)
-            },
-        })
+            })
     })
 
     let $availableRemoteLocales = $('#available-remote-locales')
 
     if ($availableRemoteLocales.length) {
         let getRemoteLocales = () => {
-            $.ajax({
-                url: $availableRemoteLocales.data('url'),
-                type: 'GET',
-                success: (res) => {
-                    if (res.error) {
-                        Botble.showError(res.message)
-                    } else {
-                        languageTable.load(window.location.href + ' .table-language > *')
-                        $availableRemoteLocales.html(res.data)
-                    }
-                },
-                error: (res) => {
-                    Botble.handleError(res)
-                },
-            })
+            $httpClient
+                .make()
+                .get($availableRemoteLocales.data('url'))
+                .then(({ data }) => {
+                    languageTable.load(window.location.href + ' .table-language > *')
+                    $availableRemoteLocales.html(data.data)
+                })
         }
 
         getRemoteLocales()
@@ -109,25 +85,17 @@ $(document).ready(function () {
 
             let url = _self.data('url')
 
-            $.ajax({
-                url: url,
-                type: 'POST',
-                success: (res) => {
-                    if (res.error) {
-                        Botble.showError(res.message)
-                    } else {
-                        Botble.showSuccess(res.message)
-                        getRemoteLocales()
-                    }
-
+            $httpClient
+                .make()
+                .post(url)
+                .then((res) => {
+                    Botble.showSuccess(res.message)
+                    getRemoteLocales()
+                })
+                .finally(() => {
                     _self.closest('.modal').modal('hide')
                     _self.removeClass('button-loading')
-                },
-                error: (data) => {
-                    Botble.handleError(data)
-                    _self.removeClass('button-loading')
-                },
-            })
+                })
         })
     }
 })

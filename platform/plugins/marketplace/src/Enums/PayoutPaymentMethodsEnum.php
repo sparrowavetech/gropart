@@ -2,8 +2,8 @@
 
 namespace Botble\Marketplace\Enums;
 
-use Botble\Base\Supports\Enum;
 use Botble\Base\Facades\Html;
+use Botble\Base\Supports\Enum;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Illuminate\Support\Arr;
 use Illuminate\Support\HtmlString;
@@ -66,7 +66,7 @@ class PayoutPaymentMethodsEnum extends Enum
                         'rules' => 'max:50',
                     ],
                     'paypal_id' => [
-                        'title' => __('PayPal ID'),
+                        'title' => 'PayPal ID',
                         'rules' => 'max:120',
                     ],
                     'upi_id' => [
@@ -85,7 +85,7 @@ class PayoutPaymentMethodsEnum extends Enum
                 'label' => self::PAYPAL()->label(),
                 'fields' => [
                     'paypal_id' => [
-                        'title' => __('PayPal ID'),
+                        'title' => 'PayPal ID',
                         'rules' => 'max:120',
                     ],
                 ],

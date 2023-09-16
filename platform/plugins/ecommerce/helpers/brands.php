@@ -1,40 +1,33 @@
 <?php
 
-use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Ecommerce\Repositories\Interfaces\BrandInterface;
+use Botble\Ecommerce\Models\Brand;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 if (! function_exists('get_featured_brands')) {
     function get_featured_brands(int $limit = 8, array $with = ['slugable'], array $withCount = []): Collection|LengthAwarePaginator
     {
-        return app(BrandInterface::class)->advancedGet([
-            'condition' => [
-                'is_featured' => 1,
-                'status' => BaseStatusEnum::PUBLISHED,
-            ],
-            'order_by' => [
-                'order' => 'ASC',
-                'created_at' => 'DESC',
-            ],
-            'with' => $with,
-            'withCount' => $withCount,
-            'take' => $limit,
-        ]);
+        return Brand::query()
+            ->where('is_featured', true)
+            ->wherePublished()
+            ->orderBy('order')
+            ->orderByDesc('created_at')
+            ->with($with)
+            ->withCount($withCount)
+            ->take($limit)
+            ->get();
     }
 }
 
 if (! function_exists('get_all_brands')) {
     function get_all_brands(array $conditions = [], array $with = ['slugable'], array $withCount = []): Collection
     {
-        return app(BrandInterface::class)->advancedGet([
-            'condition' => $conditions,
-            'order_by' => [
-                'order' => 'ASC',
-                'created_at' => 'DESC',
-            ],
-            'with' => $with,
-            'withCount' => $withCount,
-        ]);
+        return Brand::query()
+            ->where($conditions)
+            ->orderBy('order')
+            ->orderByDesc('created_at')
+            ->with($with)
+            ->withCount($withCount)
+            ->get();
     }
 }

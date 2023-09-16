@@ -1,4 +1,4 @@
-body[dir="rtl"] {
+body[dir='rtl'] {
     text-align: right;
 
     .show-cart-link {
@@ -27,16 +27,19 @@ body[dir="rtl"] {
         padding-right: 0;
     }
 
-    .hrv-checkbox, input[type=checkbox] {
+    .hrv-checkbox,
+    input[type='checkbox'] {
         margin: 0 0 0 0.5rem;
     }
 
-    .hrv-checkbox:before, input[type=checkbox]:not(.hrv-checkbox):before {
+    .hrv-checkbox:before,
+    input[type='checkbox']:not(.hrv-checkbox):before {
         left: 0;
         right: 2px;
     }
 
-    .magic-checkbox + label:before, .magic-radio + label:before {
+    .magic-checkbox + label:before,
+    .magic-radio + label:before {
         left: auto;
         right: 0;
     }
@@ -46,7 +49,8 @@ body[dir="rtl"] {
         right: 6px;
     }
 
-    .magic-checkbox + label, .magic-radio + label {
+    .magic-checkbox + label,
+    .magic-radio + label {
         padding-left: 0;
         padding-right: 30px;
     }
@@ -61,7 +65,8 @@ body[dir="rtl"] {
         }
     }
 
-    .price-text, .total-text {
+    .price-text,
+    .total-text {
         float: left;
     }
 

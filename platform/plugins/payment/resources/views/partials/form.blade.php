@@ -2,16 +2,40 @@
 
 <div class="checkout-wrapper">
     <div>
-        <form action="{{ $action }}" method="post" class="payment-checkout-form">
+        <form
+            class="payment-checkout-form"
+            action="{{ $action }}"
+            method="post"
+        >
             @csrf
-            <input type="hidden" name="name" value="{{ $name }}">
-            <input type="hidden" name="amount" value="{{ $amount }}">
-            <input type="hidden" name="currency" value="{{ $currency }}">
+            <input
+                name="name"
+                type="hidden"
+                value="{{ $name }}"
+            >
+            <input
+                name="amount"
+                type="hidden"
+                value="{{ $amount }}"
+            >
+            <input
+                name="currency"
+                type="hidden"
+                value="{{ $currency }}"
+            >
             @if (isset($returnUrl))
-                <input type="hidden" name="return_url" value="{{ $returnUrl }}">
+                <input
+                    name="return_url"
+                    type="hidden"
+                    value="{{ $returnUrl }}"
+                >
             @endif
             @if (isset($callbackUrl))
-                <input type="hidden" name="callback_url" value="{{ $callbackUrl }}">
+                <input
+                    name="callback_url"
+                    type="hidden"
+                    value="{{ $callbackUrl }}"
+                >
             @endif
 
             {!! apply_filters(PAYMENT_FILTER_PAYMENT_PARAMETERS, null) !!}
@@ -22,7 +46,11 @@
 
             <br>
             <div class="text-center">
-                <button class="payment-checkout-btn btn btn-info" data-processing-text="{{ __('Processing. Please wait...') }}" data-error-header="{{ __('Error') }}">{{ __('Checkout') }}</button>
+                <button
+                    class="payment-checkout-btn btn btn-info"
+                    data-processing-text="{{ __('Processing. Please wait...') }}"
+                    data-error-header="{{ __('Error') }}"
+                >{{ __('Checkout') }}</button>
             </div>
         </form>
     </div>

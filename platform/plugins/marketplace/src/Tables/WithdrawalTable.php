@@ -7,34 +7,27 @@ use Botble\Base\Facades\Html;
 use Botble\Marketplace\Enums\WithdrawalStatusEnum;
 use Botble\Marketplace\Models\Withdrawal;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Table\DataTables;
-use Illuminate\Contracts\Routing\UrlGenerator;
+use Botble\Table\Actions\DeleteAction;
+use Botble\Table\Actions\EditAction;
+use Botble\Table\Columns\CreatedAtColumn;
+use Botble\Table\Columns\IdColumn;
+use Botble\Table\Columns\StatusColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class WithdrawalTable extends TableAbstract
 {
-    protected $hasActions = true;
-
-    protected $hasFilter = true;
-
-    public function __construct(
-        DataTables $table,
-        UrlGenerator $urlGenerator,
-        Withdrawal $model
-    ) {
-        parent::__construct($table, $urlGenerator);
-
-        $this->model = $model;
-
-        if (! Auth::user()->hasAnyPermission(['marketplace.withdrawal.edit', 'marketplace.withdrawal.destroy'])) {
-            $this->hasOperations = false;
-            $this->hasActions = false;
-        }
+    public function setup(): void
+    {
+        $this
+            ->model(Withdrawal::class)
+            ->addActions([
+                EditAction::make()->route('marketplace.withdrawal.edit'),
+                DeleteAction::make()->route('marketplace.withdrawal.destroy'),
+            ]);
     }
 
     public function ajax(): JsonResponse
@@ -42,7 +35,7 @@ class WithdrawalTable extends TableAbstract
         $data = $this->table
             ->eloquent($this->query())
             ->editColumn('customer_id', function ($item) {
-                if (! Auth::user()->hasPermission('customers.edit')) {
+                if (! $this->hasPermission('customers.edit')) {
                     return BaseHelper::clean($item->customer->name);
                 }
 
@@ -57,18 +50,6 @@ class WithdrawalTable extends TableAbstract
             })
             ->editColumn('amount', function ($item) {
                 return format_price($item->amount);
-            })
-            ->editColumn('checkbox', function ($item) {
-                return $this->getCheckbox($item->id);
-            })
-            ->editColumn('created_at', function ($item) {
-                return BaseHelper::formatDate($item->created_at);
-            })
-            ->editColumn('status', function ($item) {
-                return BaseHelper::clean($item->status->toHtml());
-            })
-            ->addColumn('operations', function ($item) {
-                return $this->getOperations('marketplace.withdrawal.edit', 'marketplace.withdrawal.destroy', $item);
             });
 
         return $this->toJson($data);
@@ -76,7 +57,9 @@ class WithdrawalTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->getModel()->query()
+        $query = $this
+            ->getModel()
+            ->query()
             ->select([
                 'id',
                 'customer_id',
@@ -94,10 +77,7 @@ class WithdrawalTable extends TableAbstract
     public function columns(): array
     {
         return [
-            'id' => [
-                'title' => trans('core/base::tables.id'),
-                'width' => '20px',
-            ],
+            IdColumn::make(),
             'customer_id' => [
                 'title' => trans('plugins/marketplace::withdrawal.vendor'),
                 'class' => 'text-start',
@@ -110,14 +90,8 @@ class WithdrawalTable extends TableAbstract
                 'title' => trans('plugins/ecommerce::shipping.fee'),
                 'class' => 'text-start',
             ],
-            'created_at' => [
-                'title' => trans('core/base::tables.created_at'),
-                'width' => '100px',
-            ],
-            'status' => [
-                'title' => trans('core/base::tables.status'),
-                'width' => '100px',
-            ],
+            CreatedAtColumn::make(),
+            StatusColumn::make(),
         ];
     }
 

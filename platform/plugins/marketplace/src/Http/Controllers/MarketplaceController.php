@@ -7,21 +7,17 @@ use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Supports\Helper;
-use Botble\Ecommerce\Repositories\Interfaces\ProductCategoryInterface;
+use Botble\Ecommerce\Models\ProductCategory;
 use Botble\JsValidation\Facades\JsValidator;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Http\Requests\MarketPlaceSettingFormRequest;
-use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
+use Botble\Marketplace\Models\Store;
 use Botble\Setting\Supports\SettingStore;
 use Illuminate\Support\Str;
 
 class MarketplaceController extends BaseController
 {
-    public function __construct(protected StoreInterface $storeRepository)
-    {
-    }
-
-    public function getSettings(ProductCategoryInterface $productCategoryRepository)
+    public function getSettings()
     {
         Assets::addScriptsDirectly('vendor/core/core/setting/js/setting.js')
             ->addStylesDirectly('vendor/core/core/setting/css/setting.css');
@@ -36,11 +32,11 @@ class MarketplaceController extends BaseController
 
         PageTitle::setTitle(trans('plugins/marketplace::marketplace.settings.name'));
 
-        $productCategories = $productCategoryRepository->all();
+        $productCategories = ProductCategory::query()->get();
         $commissionEachCategory = [];
 
         if (MarketplaceHelper::isCommissionCategoryFeeBasedEnabled()) {
-            $commissionEachCategory = $this->storeRepository->getCommissionEachCategory();
+            $commissionEachCategory = Store::getCommissionEachCategory();
         }
 
         $jsValidation = JsValidator::formRequest(MarketPlaceSettingFormRequest::class);
@@ -60,7 +56,7 @@ class MarketplaceController extends BaseController
 
         if ($request->input('marketplace_enable_commission_fee_for_each_category')) {
             $commissionByCategories = $request->input('commission_by_category');
-            $this->storeRepository->handleCommissionEachCategory($commissionByCategories);
+            Store::handleCommissionEachCategory($commissionByCategories);
         }
 
         $preVerifyVendor = MarketplaceHelper::getSetting('verify_vendor', 1);

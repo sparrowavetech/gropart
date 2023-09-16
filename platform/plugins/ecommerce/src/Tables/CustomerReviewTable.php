@@ -2,9 +2,6 @@
 
 namespace Botble\Ecommerce\Tables;
 
-use Botble\Ecommerce\Models\Review;
-use Botble\Table\DataTables;
-use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -16,16 +13,11 @@ class CustomerReviewTable extends ReviewTable
 {
     protected int|string $customerId;
 
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Review $model)
+    public function setup(): void
     {
-        parent::__construct($table, $urlGenerator, $model);
+        parent::setup();
 
-        $this->hasFilter = false;
-        $this->hasOperations = false;
-        $this->hasActions = false;
-        $this->hasCheckbox = false;
-
-        $this->view = 'core/table::simple-table';
+        $this->view = $this->simpleTableView();
     }
 
     public function query(): Relation|Builder|QueryBuilder

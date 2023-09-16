@@ -71,8 +71,8 @@ class RenderingSiteMapListener
             ->selectRaw('YEAR(updated_at) as updated_year, MONTH(updated_at) as updated_month, MAX(updated_at) as updated_at')
             ->wherePublished()
             ->groupBy('updated_year', 'updated_month')
-            ->orderBy('updated_year', 'desc')
-            ->orderBy('updated_month', 'desc')
+            ->orderByDesc('updated_year')
+            ->orderByDesc('updated_month')
             ->get();
 
         if ($posts->isNotEmpty()) {

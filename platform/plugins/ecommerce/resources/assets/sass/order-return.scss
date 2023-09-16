@@ -17,7 +17,8 @@
     width: 100%;
 }
 
-.product-button .quantity .decrease, .product-button .quantity .increase {
+.product-button .quantity .decrease,
+.product-button .quantity .increase {
     align-items: center;
     border-bottom-left-radius: 3px;
     border-top-left-radius: 3px;
@@ -32,7 +33,7 @@
     position: absolute;
     text-align: center;
     top: 0;
-    transition: .5s;
+    transition: 0.5s;
     width: 30px;
     margin: 0;
     min-width: 0;
@@ -43,7 +44,8 @@
     left: auto;
 }
 
-.product-button .quantity .increase svg, .product-button .quantity .decrease svg {
+.product-button .quantity .increase svg,
+.product-button .quantity .decrease svg {
     fill: currentColor;
     display: inline-block;
     height: 1em;

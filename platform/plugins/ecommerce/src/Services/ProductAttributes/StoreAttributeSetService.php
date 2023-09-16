@@ -7,12 +7,11 @@ use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Ecommerce\Models\ProductAttribute;
 use Botble\Ecommerce\Models\ProductAttributeSet;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 
 class StoreAttributeSetService
 {
-    public function execute(Request $request, ProductAttributeSet $productAttributeSet): Model|bool
+    public function execute(Request $request, ProductAttributeSet $productAttributeSet): ProductAttributeSet
     {
         $existing = $productAttributeSet->exists;
 

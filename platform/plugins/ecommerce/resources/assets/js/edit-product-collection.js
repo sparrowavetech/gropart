@@ -1,4 +1,4 @@
-$(document).on('click', '.list-search-data .selectable-item', event => {
+$(document).on('click', '.list-search-data .selectable-item', (event) => {
     event.preventDefault()
     let _self = $(event.currentTarget)
     let $input = _self.closest('.form-group').find('input[type=hidden]')
@@ -29,7 +29,7 @@ $(document).on('click', '.list-search-data .selectable-item', event => {
     _self.closest('.panel').addClass('hidden')
 })
 
-$(document).on('click', '.textbox-advancesearch', event => {
+$(document).on('click', '.textbox-advancesearch', (event) => {
     let _self = $(event.currentTarget)
     let $formBody = _self.closest('.box-search-advance').find('.panel')
     $formBody.removeClass('hidden')
@@ -44,7 +44,7 @@ $(document).on('click', '.textbox-advancesearch', event => {
         $.ajax({
             url: _self.data('target'),
             type: 'GET',
-            success: res => {
+            success: (res) => {
                 if (res.error) {
                     Botble.showError(res.message)
                 } else {
@@ -52,7 +52,7 @@ $(document).on('click', '.textbox-advancesearch', event => {
                     Botble.unblockUI($formBody)
                 }
             },
-            error: data => {
+            error: (data) => {
                 Botble.handleError(data)
                 Botble.unblockUI($formBody)
             },
@@ -62,7 +62,7 @@ $(document).on('click', '.textbox-advancesearch', event => {
 
 let ajaxRequest
 let hasAjaxSearchRequested = false
-$(document).on('keyup', '.textbox-advancesearch', event => {
+$(document).on('keyup', '.textbox-advancesearch', (event) => {
     event.preventDefault()
     let _self = $(event.currentTarget)
     let $formBody = _self.closest('.box-search-advance').find('.panel')
@@ -83,7 +83,7 @@ $(document).on('keyup', '.textbox-advancesearch', event => {
             url: _self.data('target'),
             data: { keyword: _self.val() },
             type: 'GET',
-            success: res => {
+            success: (res) => {
                 if (res.error) {
                     Botble.showError(res.message)
                 } else {
@@ -92,7 +92,7 @@ $(document).on('keyup', '.textbox-advancesearch', event => {
                 }
                 hasAjaxSearchRequested = false
             },
-            error: data => {
+            error: (data) => {
                 if (data.statusText !== 'abort') {
                     Botble.handleError(data)
                     Botble.unblockUI($formBody)
@@ -102,7 +102,7 @@ $(document).on('keyup', '.textbox-advancesearch', event => {
     }, 500)
 })
 
-$(document).on('click', '.box-search-advance .page-link', event => {
+$(document).on('click', '.box-search-advance .page-link', (event) => {
     event.preventDefault()
     let $searchBox = $(event.currentTarget).closest('.box-search-advance').find('.textbox-advancesearch')
     if (!$searchBox.closest('.page-item').hasClass('disabled') && $searchBox.data('target')) {
@@ -117,7 +117,7 @@ $(document).on('click', '.box-search-advance .page-link', event => {
             url: $(event.currentTarget).prop('href'),
             data: { keyword: $searchBox.val() },
             type: 'GET',
-            success: res => {
+            success: (res) => {
                 if (res.error) {
                     Botble.showError(res.message)
                 } else {
@@ -125,7 +125,7 @@ $(document).on('click', '.box-search-advance .page-link', event => {
                     Botble.unblockUI($formBody)
                 }
             },
-            error: data => {
+            error: (data) => {
                 Botble.handleError(data)
                 Botble.unblockUI($formBody)
             },
@@ -133,7 +133,7 @@ $(document).on('click', '.box-search-advance .page-link', event => {
     }
 })
 
-$(document).on('click', 'body', e => {
+$(document).on('click', 'body', (e) => {
     let container = $('.box-search-advance')
 
     if (!container.is(e.target) && container.has(e.target).length === 0) {
@@ -141,7 +141,7 @@ $(document).on('click', 'body', e => {
     }
 })
 
-$(document).on('click', '.btn-trigger-remove-selected-product', event => {
+$(document).on('click', '.btn-trigger-remove-selected-product', (event) => {
     event.preventDefault()
     let $input = $(event.currentTarget).closest('.form-group').find('input[type=hidden]')
 
@@ -177,7 +177,7 @@ let loadRelationBoxes = () => {
         $.ajax({
             url: $wrapBody.data('target'),
             type: 'GET',
-            success: res => {
+            success: (res) => {
                 if (res.error) {
                     Botble.showError(res.message)
                 } else {
@@ -185,7 +185,7 @@ let loadRelationBoxes = () => {
                     Botble.unblockUI($wrapBody)
                 }
             },
-            error: data => {
+            error: (data) => {
                 Botble.handleError(data)
                 Botble.unblockUI($wrapBody)
             },
@@ -193,6 +193,6 @@ let loadRelationBoxes = () => {
     }
 }
 
-$(function() {
+$(function () {
     loadRelationBoxes()
 })

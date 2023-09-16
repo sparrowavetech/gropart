@@ -1,10 +1,11 @@
 /* --------- description list --------*/
-[class*="dlist"] {
+[class*='dlist'] {
     margin-bottom: 5px;
 }
 
 .dlist-inline {
-    dt, dd {
+    dt,
+    dd {
         display: inline-block;
     }
 }
@@ -27,16 +28,17 @@
 }
 
 /* -------------------- list.row--------------------- */
-ul.row, ul.row-sm {
+ul.row,
+ul.row-sm {
     list-style: none;
     padding: 0;
 }
 
 /* ================= lists ================= */
-[class*="list-"] li:after {
+[class*='list-'] li:after {
     visibility: hidden;
     display: block;
-    content: "";
+    content: '';
     overflow: hidden;
     height: 0;
     clear: both;
@@ -65,7 +67,7 @@ ul.row, ul.row-sm {
     }
 
     span {
-        vertical-align: middle
+        vertical-align: middle;
     }
 }
 
@@ -81,7 +83,7 @@ ul.row, ul.row-sm {
 }
 
 .list-bullet li::before {
-    content: " ";
+    content: ' ';
     position: absolute;
     top: 8px;
     left: 0;
@@ -89,7 +91,6 @@ ul.row, ul.row-sm {
     border-radius: 100%;
     height: 7px;
     background: $primary;
-
 }
 
 .list-check {
@@ -110,10 +111,9 @@ ul.row, ul.row-sm {
         position: absolute;
         top: 2px;
         left: 0;
-        content: "\f00c";
+        content: '\f00c';
     }
 }
-
 
 .list-normal {
     list-style: none;
@@ -125,11 +125,11 @@ ul.row, ul.row-sm {
     }
 
     li:before {
-        content: "\2022";
+        content: '\2022';
         color: $primary;
         display: inline-block;
         width: 1em;
-        margin-left: -1em
+        margin-left: -1em;
     }
 }
 
@@ -146,7 +146,7 @@ ul.row, ul.row-sm {
         color: $body-color;
 
         &:hover {
-            color: $primary
+            color: $primary;
         }
     }
 }

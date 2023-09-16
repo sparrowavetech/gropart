@@ -6,11 +6,11 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Enums\StockStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
-use Botble\Ecommerce\Repositories\Interfaces\BrandInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeSetInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductCategoryInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductTagInterface;
-use Botble\Ecommerce\Repositories\Interfaces\TaxInterface;
+use Botble\Ecommerce\Models\Brand;
+use Botble\Ecommerce\Models\ProductAttributeSet;
+use Botble\Ecommerce\Models\ProductCategory;
+use Botble\Ecommerce\Models\ProductTag;
+use Botble\Ecommerce\Models\Tax;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -69,14 +69,14 @@ class TemplateProductExport implements
 
         $productName = $productNames->random();
 
-        $categories = app(ProductCategoryInterface::class)->getModel()->inRandomOrder()->limit(2)->get();
-        $brands = app(BrandInterface::class)->pluck('name', 'id');
+        $categories = ProductCategory::query()->inRandomOrder()->limit(2)->get();
+        $brands = Brand::query()->pluck('name', 'id')->all();
         $this->brands = collect($brands);
-        $taxes = app(TaxInterface::class)->getModel()->inRandomOrder()->limit(2)->get();
+        $taxes = Tax::query()->inRandomOrder()->limit(2)->get();
 
-        $productTags = app(ProductTagInterface::class)->getModel()->inRandomOrder()->limit(2)->get();
+        $productTags = ProductTag::query()->inRandomOrder()->limit(2)->get();
 
-        $productAttributeSets = app(ProductAttributeSetInterface::class)->getModel()->inRandomOrder()->limit(2)->get();
+        $productAttributeSets = ProductAttributeSet::query()->inRandomOrder()->limit(2)->get();
         $price = rand(20, 100);
 
         $attributeSets = $productAttributeSets->sortByDesc('order');

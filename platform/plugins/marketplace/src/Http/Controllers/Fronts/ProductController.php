@@ -13,11 +13,13 @@ use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Http\Requests\ProductRequest;
 use Botble\Ecommerce\Http\Requests\ProductVersionRequest;
 use Botble\Ecommerce\Models\Customer;
-use Botble\Ecommerce\Repositories\Interfaces\GlobalOptionInterface;
-use Botble\Ecommerce\Repositories\Interfaces\GroupedProductInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeSetInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductVariationInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductVariationItemInterface;
+use Botble\Ecommerce\Models\GlobalOption;
+use Botble\Ecommerce\Models\GroupedProduct;
+use Botble\Ecommerce\Models\Product;
+use Botble\Ecommerce\Models\ProductAttribute;
+use Botble\Ecommerce\Models\ProductAttributeSet;
+use Botble\Ecommerce\Models\ProductVariation;
+use Botble\Ecommerce\Models\ProductVariationItem;
 use Botble\Ecommerce\Services\Products\StoreAttributesOfProductService;
 use Botble\Ecommerce\Services\Products\StoreProductService;
 use Botble\Ecommerce\Services\StoreProductTagService;
@@ -27,7 +29,6 @@ use Botble\Marketplace\Forms\ProductForm;
 use Botble\Marketplace\Tables\ProductTable;
 use Botble\Marketplace\Tables\ProductVariationTable;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 
 class ProductController extends BaseController
 {
@@ -63,15 +64,12 @@ class ProductController extends BaseController
         ProductRequest $request,
         StoreProductService $service,
         BaseHttpResponse $response,
-        ProductVariationInterface $variationRepository,
-        ProductVariationItemInterface $productVariationItemRepository,
-        GroupedProductInterface $groupedProductRepository,
         StoreAttributesOfProductService $storeAttributesOfProductService,
         StoreProductTagService $storeProductTagService
     ) {
         $request = $this->processRequestData($request);
 
-        $product = $this->productRepository->getModel();
+        $product = new Product();
 
         $product->status = MarketplaceHelper::getSetting(
             'enable_product_approval',
@@ -96,12 +94,12 @@ class ProductController extends BaseController
         if ($request->input('is_added_attributes') == 1 && $addedAttributes) {
             $storeAttributesOfProductService->execute($product, array_keys($addedAttributes), array_values($addedAttributes));
 
-            $variation = $variationRepository->create([
-                'configurable_product_id' => $product->id,
+            $variation = ProductVariation::query()->create([
+                'configurable_product_id' => $product->getKey(),
             ]);
 
             foreach ($addedAttributes as $attribute) {
-                $productVariationItemRepository->createOrUpdate([
+                ProductVariationItem::query()->create([
                     'attribute_id' => $attribute,
                     'variation_id' => $variation->id,
                 ]);
@@ -113,17 +111,17 @@ class ProductController extends BaseController
 
             $variation['sku'] = $product->sku ?? time();
             foreach ($addedAttributes as $attributeId) {
-                $attribute = $this->productAttributeRepository->findById($attributeId);
+                $attribute = ProductAttribute::query()->find($attributeId);
                 if ($attribute) {
                     $variation['sku'] .= '-' . $attribute->slug;
                 }
             }
 
-            $this->postSaveAllVersions([$variation['id'] => $variation], $variationRepository, $product->id, $response);
+            $this->postSaveAllVersions([$variation['id'] => $variation], $product->getKey(), $response);
         }
 
         if ($request->has('grouped_products')) {
-            $groupedProductRepository->createGroupedProducts($product->id, array_map(function ($item) {
+            GroupedProduct::createGroupedProducts($product->getKey(), array_map(function ($item) {
                 return [
                     'id' => $item,
                     'qty' => 1,
@@ -143,13 +141,13 @@ class ProductController extends BaseController
 
         return $response
             ->setPreviousUrl(route('marketplace.vendor.products.index'))
-            ->setNextUrl(route('marketplace.vendor.products.edit', $product->id))
+            ->setNextUrl(route('marketplace.vendor.products.edit', $product->getKey()))
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
     public function edit(int|string $id, FormBuilder $formBuilder)
     {
-        $product = $this->productRepository->findOrFail($id);
+        $product = Product::query()->findOrFail($id);
 
         if ($product->is_variation || $product->store_id != auth('customer')->user()->store->id) {
             abort(404);
@@ -166,13 +164,10 @@ class ProductController extends BaseController
         int|string $id,
         ProductRequest $request,
         StoreProductService $service,
-        GroupedProductInterface $groupedProductRepository,
         BaseHttpResponse $response,
-        ProductVariationInterface $variationRepository,
-        ProductVariationItemInterface $productVariationItemRepository,
         StoreProductTagService $storeProductTagService
     ) {
-        $product = $this->productRepository->findOrFail($id);
+        $product = Product::query()->findOrFail($id);
 
         if ($product->is_variation || $product->store_id != auth('customer')->user()->store->id) {
             abort(404);
@@ -186,12 +181,11 @@ class ProductController extends BaseController
         $storeProductTagService->execute($request, $product);
 
         if ($request->has('variation_default_id')) {
-            $variationRepository
-                ->getModel()
-                ->where('configurable_product_id', $product->id)
+            ProductVariation::query()
+                ->where('configurable_product_id', $product->getKey())
                 ->update(['is_default' => 0]);
 
-            $defaultVariation = $variationRepository->findById($request->input('variation_default_id'));
+            $defaultVariation = ProductVariation::query()->find($request->input('variation_default_id'));
             if ($defaultVariation) {
                 $defaultVariation->is_default = true;
                 $defaultVariation->save();
@@ -201,17 +195,17 @@ class ProductController extends BaseController
         $addedAttributes = $request->input('added_attributes', []);
 
         if ($request->input('is_added_attributes') == 1 && $addedAttributes) {
-            $result = $variationRepository->getVariationByAttributesOrCreate($id, $addedAttributes);
+            $result = ProductVariation::getVariationByAttributesOrCreate($id, $addedAttributes);
 
             /**
-             * @var Collection $variation
+             * @var ProductVariation $variation
              */
             $variation = $result['variation'];
 
             foreach ($addedAttributes as $attribute) {
-                $productVariationItemRepository->createOrUpdate([
+                ProductVariationItem::query()->create([
                     'attribute_id' => $attribute,
-                    'variation_id' => $variation->id,
+                    'variation_id' => $variation->getKey(),
                 ]);
             }
 
@@ -222,19 +216,19 @@ class ProductController extends BaseController
 
             $variation['sku'] = $product->sku ?? time();
             foreach (array_keys($addedAttributes) as $attributeId) {
-                $attribute = $this->productAttributeRepository->findById($attributeId);
+                $attribute = ProductAttribute::query()->find($attributeId);
                 if ($attribute) {
                     $variation['sku'] .= '-' . $attribute->slug;
                 }
             }
 
-            $this->postSaveAllVersions([$variation['id'] => $variation], $variationRepository, $product->id, $response);
+            $this->postSaveAllVersions([$variation['id'] => $variation], $product->getKey(), $response);
         } elseif ($product->variations()->count() === 0) {
             $product->productAttributeSets()->detach();
         }
 
         if ($request->has('grouped_products')) {
-            $groupedProductRepository->createGroupedProducts($product->id, array_map(function ($item) {
+            GroupedProduct::createGroupedProducts($product->getKey(), array_map(function ($item) {
                 return [
                     'id' => $item,
                     'qty' => 1,
@@ -253,7 +247,7 @@ class ProductController extends BaseController
 
         $request->merge([
             'content' => $shortcodeCompiler->strip($request->input('content'), $shortcodeCompiler->whitelistShortcodes()),
-            'images' => array_filter($request->input('images', [])),
+            'images' => array_filter((array)$request->input('images', [])),
         ]);
 
         $except = [
@@ -272,7 +266,7 @@ class ProductController extends BaseController
     {
         $product = null;
         if ($id) {
-            $product = $this->productRepository->findById($id);
+            $product = Product::query()->find($id);
         }
 
         $dataUrl = route(
@@ -288,54 +282,46 @@ class ProductController extends BaseController
 
     public function postAddVersion(
         ProductVersionRequest $request,
-        ProductVariationInterface $productVariation,
-        $id,
+        int|string $id,
         BaseHttpResponse $response
     ) {
         $request->merge([
-            'images' => array_filter($request->input('images', [])),
+            'images' => array_filter((array)$request->input('images', [])),
         ]);
 
-        return $this->basePostAddVersion($request, $productVariation, $id, $response);
+        return $this->basePostAddVersion($request, $id, $response);
     }
 
     public function postUpdateVersion(
         ProductVersionRequest $request,
-        ProductVariationInterface $productVariation,
         $id,
         BaseHttpResponse $response
     ) {
         $request->merge([
-            'images' => array_filter($request->input('images', [])),
+            'images' => array_filter((array)$request->input('images', [])),
         ]);
 
-        return $this->basePostUpdateVersion($request, $productVariation, $id, $response);
+        return $this->basePostUpdateVersion($request, $id, $response);
     }
 
-    public function getVersionForm(
-        $id,
-        Request $request,
-        ProductVariationInterface $productVariation,
-        BaseHttpResponse $response,
-        ProductAttributeSetInterface $productAttributeSetRepository,
-        ProductVariationItemInterface $productVariationItemRepository
-    ) {
+    public function getVersionForm(int|string|null $id, Request $request, BaseHttpResponse $response)
+    {
         $product = null;
         $variation = null;
         $productVariationsInfo = [];
 
         if ($id) {
-            $variation = $productVariation->findOrFail($id);
-            $product = $this->productRepository->findOrFail($variation->product_id);
-            $productVariationsInfo = $productVariationItemRepository->getVariationsInfo([$id]);
+            $variation = ProductVariation::query()->findOrFail($id);
+            $product = Product::query()->findOrFail($variation->product_id);
+            $productVariationsInfo = ProductVariationItem::getVariationsInfo([$id]);
         }
 
         $productId = $variation ? $variation->configurable_product_id : $request->input('product_id');
 
         if ($productId) {
-            $productAttributeSets = $productAttributeSetRepository->getByProductId($productId);
+            $productAttributeSets = ProductAttributeSet::getByProductId($productId);
         } else {
-            $productAttributeSets = $productAttributeSetRepository->getAllWithSelected($productId);
+            $productAttributeSets = ProductAttributeSet::getAllWithSelected($productId);
         }
 
         $originalProduct = $product;
@@ -351,12 +337,9 @@ class ProductController extends BaseController
             );
     }
 
-    protected function deleteVersionItem(
-        ProductVariationInterface $productVariation,
-        ProductVariationItemInterface $productVariationItem,
-        $variationId
-    ) {
-        $variation = $productVariation->findOrFail($variationId);
+    protected function deleteVersionItem(int|string $variationId)
+    {
+        $variation = ProductVariation::query()->findOrFail($variationId);
 
         $product = $variation->product()->first();
 
@@ -364,33 +347,25 @@ class ProductController extends BaseController
             abort(404);
         }
 
-        return $this->baseDeleteVersionItem($productVariation, $productVariationItem, $variationId);
+        return $this->baseDeleteVersionItem($variationId);
     }
 
     public function getListProductForSearch(Request $request, BaseHttpResponse $response)
     {
-        $availableProducts = $this->productRepository
-            ->advancedGet([
-                'condition' => [
-                    'status' => BaseStatusEnum::PUBLISHED,
-                    ['is_variation', '<>', 1],
-                    ['id', '<>', $request->input('product_id', 0)],
-                    ['name', 'LIKE', '%' . $request->input('keyword') . '%'],
-                    'store_id' => auth('customer')->user()->store->id,
-                ],
-                'select' => [
-                    'id',
-                    'name',
-                    'images',
-                    'image',
-                    'price',
-                ],
-                'paginate' => [
-                    'per_page' => 5,
-                    'type' => 'simplePaginate',
-                    'current_paged' => $request->integer('page', 1),
-                ],
-            ]);
+        $availableProducts = Product::query()
+            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->where('is_variation', 0)
+            ->where('id', '!=', $request->input('product_id', 0))
+            ->where('name', 'LIKE', '%' . $request->input('keyword') . '%')
+            ->where('store_id', auth('customer')->user()->store->id)
+            ->select([
+                'id',
+                'name',
+                'images',
+                'image',
+                'price',
+            ])
+            ->simplePaginate(5);
 
         $includeVariation = $request->input('include_variation', 0);
 
@@ -405,17 +380,15 @@ class ProductController extends BaseController
     public function ajaxProductOptionInfo(
         Request $request,
         BaseHttpResponse $response,
-        GlobalOptionInterface $globalOptionRepository
     ): BaseHttpResponse {
-        $optionsValues = $globalOptionRepository->findOrFail($request->input('id'), ['values']);
+        $optionsValues = GlobalOption::query()->with(['values'])->findOrFail($request->input('id'));
 
         return $response->setData($optionsValues);
     }
 
     public function getProductVariations(int|string $id, ProductVariationTable $dataTable)
     {
-        $product = $this->productRepository
-            ->getModel()
+        $product = Product::query()
             ->where([
                 'is_variation' => 0,
                 'store_id' => auth('customer')->user()->store->id,
@@ -431,16 +404,15 @@ class ProductController extends BaseController
         return $dataTable->renderTable();
     }
 
-    public function setDefaultProductVariation(int|string $id, ProductVariationInterface $variationRepository, BaseHttpResponse $response)
+    public function setDefaultProductVariation(int|string $id, BaseHttpResponse $response)
     {
-        $variation = $variationRepository->findOrFail($id);
+        $variation = ProductVariation::query()->findOrFail($id);
 
         if ($variation->configurableProduct->store_id != auth('customer')->user()->store->id) {
             abort(404);
         }
 
-        $variationRepository
-            ->getModel()
+        ProductVariation::query()
             ->where('configurable_product_id', $variation->configurable_product_id)
             ->update(['is_default' => 0]);
 

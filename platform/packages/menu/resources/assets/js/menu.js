@@ -106,22 +106,12 @@ class MenuNestable {
         })
 
         let createMenuNode = (params, current, parent) => {
-            $.ajax({
-                url: route('menus.get-node'),
-                type: 'GET',
-                data: { data: params },
-                async: false,
-                success: (res) => {
-                    if (!res.error) {
-                        current.appendMenuNode(res.data.html, parent)
-                    } else {
-                        Botble.showError(res.message)
-                    }
-                },
-                error: (res) => {
-                    Botble.handleError(res)
-                },
-            })
+            $httpClient
+                .make()
+                .get(route('menus.get-node'), { data: params })
+                .then(({ data }) => {
+                    current.appendMenuNode(data.data.html, parent)
+                })
         }
 
         // Remove nodes

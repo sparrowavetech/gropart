@@ -37,35 +37,32 @@ class BDashboard {
             data.predefined_range = predefinedRange.val()
         }
 
-        $.ajax({
-            type: 'GET',
-            cache: false,
-            url: url,
-            data: data,
-            success: (res) => {
-                Botble.unblockUI(el)
-                if (!res.error) {
-                    el.html(res.data)
-                    if (typeof callback !== 'undefined') {
-                        callback()
-                    } else if (callbackWidgets[widgetId]) {
-                        callbackWidgets[widgetId]()
-                    }
-                    if (el.find('.scroller').length !== 0) {
-                        Botble.callScroll(el.find('.scroller'))
-                    }
-                    $('.equal-height').equalHeights()
+        $httpClient
+            .makeWithoutErrorHandler()
+            .get(url, data)
+            .then(({ data }) => {
+                el.html(data.data)
 
-                    BDashboard.initSortable()
-                } else {
-                    el.html('<div class="dashboard_widget_msg col-12"><p>' + res.message + '</p>')
+                if (typeof callback !== 'undefined') {
+                    callback()
+                } else if (callbackWidgets[widgetId]) {
+                    callbackWidgets[widgetId]()
                 }
-            },
-            error: (res) => {
+
+                if (el.find('.scroller').length !== 0) {
+                    Botble.callScroll(el.find('.scroller'))
+                }
+
+                $('.equal-height').equalHeights()
+
+                BDashboard.initSortable()
+            })
+            .catch((error) => {
+                el.html('<div class="dashboard_widget_msg col-12"><p>' + error.response.data.message + '</p>')
+            })
+            .finally(() => {
                 Botble.unblockUI(el)
-                Botble.handleError(res)
-            },
-        })
+            })
     }
 
     static initSortable() {
@@ -97,24 +94,13 @@ class BDashboard {
                     $.each($('.widget_item'), (index, widget) => {
                         items.push($(widget).prop('id'))
                     })
-                    $.ajax({
-                        type: 'POST',
-                        cache: false,
-                        url: route('dashboard.update_widget_order'),
-                        data: {
-                            items: items,
-                        },
-                        success: (res) => {
-                            if (!res.error) {
-                                Botble.showSuccess(res.message)
-                            } else {
-                                Botble.showError(res.message)
-                            }
-                        },
-                        error: (data) => {
-                            Botble.handleError(data)
-                        },
-                    })
+
+                    $httpClient
+                        .makeWithoutErrorHandler()
+                        .post(route('dashboard.update_widget_order'), { items: items })
+                        .then(({ data }) => {
+                            Botble.showSuccess(data.message)
+                        })
                 },
             })
         }
@@ -185,18 +171,18 @@ class BDashboard {
         $('#hide-widget-confirm-bttn').on('click', (event) => {
             event.preventDefault()
             let name = $(event.currentTarget).data('id')
-            $.ajax({
-                type: 'GET',
-                cache: false,
-                url: route('dashboard.hide_widget', { name: name }),
-                success: (res) => {
-                    if (!res.error) {
-                        $('#' + name).fadeOut()
-                        Botble.showSuccess(res.message)
-                    } else {
-                        Botble.showError(res.message)
-                    }
+
+            $httpClient
+                .makeWithoutErrorHandler()
+                .get(route('dashboard.hide_widget', { name: name }))
+                .then(({ data }) => {
+                    $('#' + name).fadeOut()
+
+                    Botble.showSuccess(data.message)
+                })
+                .finally(() => {
                     $('#hide_widget_modal').modal('hide')
+
                     let portlet = $(event.currentTarget).closest('.portlet')
 
                     if ($(document).hasClass('page-portlet-fullscreen')) {
@@ -206,11 +192,7 @@ class BDashboard {
                     portlet.find('[data-bs-toggle=tooltip]').tooltip('destroy')
 
                     portlet.remove()
-                },
-                error: (data) => {
-                    Botble.handleError(data)
-                },
-            })
+                })
         })
 
         $(document).on('click', '.portlet:not(.widget-load-has-callback) > .portlet-title .tools > a.reload', (e) => {
@@ -240,16 +222,14 @@ class BDashboard {
                     $portlet.find('.portlet-body').removeClass('expand').addClass('collapse')
                 }
 
-                $.ajax({
-                    type: 'POST',
-                    cache: false,
-                    url: route('dashboard.edit_widget_setting_item'),
-                    data: {
+                $httpClient
+                    .makeWithoutErrorHandler()
+                    .post(route('dashboard.edit_widget_setting_item'), {
                         name: _self.closest('.widget_item').prop('id'),
                         setting_name: 'state',
                         setting_value: state,
-                    },
-                    success: () => {
+                    })
+                    .then(() => {
                         if (state === 'collapse') {
                             _self.data('state', 'expand')
                             $portlet.find('.predefined-ranges').addClass('d-none')
@@ -261,11 +241,7 @@ class BDashboard {
                             $portlet.find('a.reload').removeClass('d-none')
                             $portlet.find('a.fullscreen').removeClass('d-none')
                         }
-                    },
-                    error: (data) => {
-                        Botble.handleError(data)
-                    },
-                })
+                    })
             }
         )
 

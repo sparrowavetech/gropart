@@ -1,16 +1,19 @@
-@foreach($attributeSets as $attributeSet)
+@foreach ($attributeSets as $attributeSet)
+    @php($selected = Arr::get($selectedAttrs, $attributeSet->slug, $selectedAttrs))
+
     <ul class="widget-content widget-sidebar widget-filter-color">
-        @if(view()->exists('plugins/ecommerce::themes.attributes._layouts-filter.' . $attributeSet->display_layout))
-            @include('plugins/ecommerce::themes.attributes._layouts-filter.' . $attributeSet->display_layout, [
-                'set'        => $attributeSet,
-                'attributes' => $attributeSet->attributes,
-                'selected'   => (array)request()->query('attributes', []),
-            ])
+        @if (view()->exists('plugins/ecommerce::themes.attributes._layouts-filter.' . $attributeSet->display_layout))
+            @include(
+                'plugins/ecommerce::themes.attributes._layouts-filter.' . $attributeSet->display_layout,
+                [
+                    'set' => $attributeSet,
+                    'attributes' => $attributeSet->attributes,
+                ]
+            )
         @else
             @include('plugins/ecommerce::themes.attributes._layouts.dropdown', [
-                'set'        => $attributeSet,
+                'set' => $attributeSet,
                 'attributes' => $attributeSet->attributes,
-                'selected'   => (array)request()->query('attributes', []),
             ])
         @endif
     </ul>

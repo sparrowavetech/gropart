@@ -31,7 +31,8 @@ Page footer
     }
 }
 
-@media (min-width: $screen-md-min) { /* 992px */
+@media (min-width: $screen-md-min) {
+    /* 992px */
 
     /* Default footer */
     .page-footer {
@@ -107,7 +108,8 @@ Page footer
     }
 }
 
-@media (max-width: $screen-xs-max) { /* 767px */
+@media (max-width: $screen-xs-max) {
+    /* 767px */
 
     /* Default footer & boxed footer */
     .page-footer {
@@ -153,13 +155,15 @@ Page footer
     }
 }
 
-@media (min-width: $screen-md-min) { /* 992px */
+@media (min-width: $screen-md-min) {
+    /* 992px */
     .scroll-to-top {
         right: 20px;
     }
 }
 
-@media (max-width: $screen-sm-max) { /* 991px */
+@media (max-width: $screen-sm-max) {
+    /* 991px */
     .scroll-to-top {
         bottom: 10px;
         right: 10px;

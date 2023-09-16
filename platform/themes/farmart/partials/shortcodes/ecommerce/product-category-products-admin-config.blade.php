@@ -1,25 +1,28 @@
 <div class="form-group">
     <label class="control-label">{{ __('Select category') }}</label>
-    <div class="ui-select-wrapper form-group">
-        <select name="category_id" class="ui-select">
-            @foreach ($categories as $category)
-                <option value="{{ $category->id }}" @if ($category->id == Arr::get($attributes, 'category_id')) selected @endif>{!! BaseHelper::clean($category->indent_text) !!} {!! BaseHelper::clean($category->name) !!}</option>
-            @endforeach
-        </select>
-        <svg class="svg-next-icon svg-next-icon-size-16">
-            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#select-chevron"></use>
-        </svg>
-    </div>
+    {!! Form::customSelect('category_id', $categories, Arr::get($attributes, 'category_id')) !!}
 </div>
 
 <div class="form-group">
     <label class="control-label">{{ __('Limit number of categories') }}</label>
-    <input type="number" name="number_of_categories" value="{{ Arr::get($attributes, 'number_of_categories', 3) }}" class="form-control" placeholder="{{ __('Default: 3') }}">
+    <input
+        class="form-control"
+        name="number_of_categories"
+        type="number"
+        value="{{ Arr::get($attributes, 'number_of_categories', 3) }}"
+        placeholder="{{ __('Default: 3') }}"
+    >
 </div>
 
 <div class="form-group">
     <label class="control-label">{{ __('Limit number of products') }}</label>
-    <input type="number" name="limit" value="{{ Arr::get($attributes, 'limit') }}" class="form-control" placeholder="{{ __('Unlimited by default') }}">
+    <input
+        class="form-control"
+        name="limit"
+        type="number"
+        value="{{ Arr::get($attributes, 'limit') }}"
+        placeholder="{{ __('Unlimited by default') }}"
+    >
 </div>
 
 {!! Theme::partial('shortcodes.includes.autoplay-settings', compact('attributes')) !!}

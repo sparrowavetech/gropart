@@ -20,11 +20,17 @@
                         @foreach ($orderProducts as $orderProduct)
                             <tr>
                                 <td>
-                                    <img src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}" width="50" alt="{{ $orderProduct->product_name }}">
+                                    <img
+                                        src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}"
+                                        alt="{{ $orderProduct->product_name }}"
+                                        width="50"
+                                    >
                                 </td>
                                 <td>
                                     {{ $orderProduct->product_name }}
-                                    @if ($sku = Arr::get($orderProduct->options, 'sku')) ({{ $sku }}) @endif
+                                    @if ($sku = Arr::get($orderProduct->options, 'sku'))
+                                        ({{ $sku }})
+                                    @endif
                                     @if ($attributes = Arr::get($orderProduct->options, 'attributes'))
                                         <p class="mb-0">
                                             <small>{{ $attributes }}</small>
@@ -37,13 +43,21 @@
                                 <td>{{ $orderProduct->created_at->translatedFormat('M d, Y h:m') }}</td>
                                 <td class="text-right">
                                     @if ($orderProduct->product_file_internal_count)
-                                        <a class="btn btn-primary mb-2" style="white-space: nowrap" href="{{ route('customer.downloads.product', $orderProduct->id) }}">
+                                        <a
+                                            class="btn btn-primary mb-2"
+                                            href="{{ route('customer.downloads.product', $orderProduct->id) }}"
+                                            style="white-space: nowrap"
+                                        >
                                             <i class="icon icon-download mr-1"></i>&nbsp;
                                             <span>{{ __('Download all files') }}</span>
                                         </a>
                                     @endif
                                     @if ($orderProduct->product_file_external_count)
-                                        <a class="btn btn-info mb-2" style="white-space: nowrap" href="{{ route('customer.downloads.product', [$orderProduct->id, 'external' => true]) }}">
+                                        <a
+                                            class="btn btn-info mb-2"
+                                            href="{{ route('customer.downloads.product', [$orderProduct->id, 'external' => true]) }}"
+                                            style="white-space: nowrap"
+                                        >
                                             <i class="icon icon-link2"></i>&nbsp;
                                             <span>{{ __('External link downloads') }}</span>
                                         </a>
@@ -53,7 +67,10 @@
                         @endforeach
                     @else
                         <tr>
-                            <td colspan="5" class="text-center">{{ __('No digital products!') }}</td>
+                            <td
+                                class="text-center"
+                                colspan="5"
+                            >{{ __('No digital products!') }}</td>
                         </tr>
                     @endif
                 </tbody>

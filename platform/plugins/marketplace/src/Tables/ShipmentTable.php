@@ -6,8 +6,11 @@ use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
 use Botble\Ecommerce\Models\Shipment;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Table\DataTables;
-use Illuminate\Contracts\Routing\UrlGenerator;
+use Botble\Table\Actions\DeleteAction;
+use Botble\Table\Actions\EditAction;
+use Botble\Table\Columns\CreatedAtColumn;
+use Botble\Table\Columns\IdColumn;
+use Botble\Table\Columns\StatusColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -15,21 +18,20 @@ use Illuminate\Http\JsonResponse;
 
 class ShipmentTable extends TableAbstract
 {
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Shipment $model)
+    public function setup(): void
     {
-        parent::__construct($table, $urlGenerator);
-
-        $this->model = $model;
-        $this->hasCheckbox = false;
+        $this
+            ->model(Shipment::class)
+            ->addActions([
+                EditAction::make()->route('marketplace.vendor.shipments.edit'),
+                DeleteAction::make()->route('marketplace.vendor.shipments.destroy'),
+            ]);
     }
 
     public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('checkbox', function ($item) {
-                return $this->getCheckbox($item->id);
-            })
             ->editColumn('order_id', function ($item) {
                 return Html::link(
                     route('marketplace.vendor.orders.edit', $item->order->id),
@@ -45,12 +47,6 @@ class ShipmentTable extends TableAbstract
             ->editColumn('price', function ($item) {
                 return format_price($item->price);
             })
-            ->editColumn('created_at', function ($item) {
-                return BaseHelper::formatDate($item->created_at);
-            })
-            ->editColumn('status', function ($item) {
-                return BaseHelper::clean($item->status->toHtml());
-            })
             ->editColumn('cod_status', function ($item) {
                 if (! (float)$item->cod_amount) {
                     return Html::tag(
@@ -62,13 +58,6 @@ class ShipmentTable extends TableAbstract
                 }
 
                 return BaseHelper::clean($item->cod_status->toHtml());
-            })
-            ->addColumn('operations', function ($item) {
-                return $this->getOperations(
-                    'marketplace.vendor.shipments.edit',
-                    'marketplace.vendor.shipments.destroy',
-                    $item
-                );
             });
 
         return $this->toJson($data);
@@ -99,14 +88,9 @@ class ShipmentTable extends TableAbstract
     public function columns(): array
     {
         return [
-            'id' => [
-                'title' => trans('core/base::tables.id'),
-                'width' => '20px',
-                'class' => 'text-start',
-            ],
+            IdColumn::make(),
             'order_id' => [
                 'title' => trans('plugins/ecommerce::shipping.order_id'),
-                'class' => 'text-center',
             ],
             'user_id' => [
                 'title' => trans('plugins/ecommerce::order.customer_label'),
@@ -114,21 +98,12 @@ class ShipmentTable extends TableAbstract
             ],
             'price' => [
                 'title' => trans('plugins/ecommerce::shipping.shipping_amount'),
-                'class' => 'text-center',
             ],
-            'status' => [
-                'title' => trans('core/base::tables.status'),
-                'class' => 'text-center',
-            ],
+            StatusColumn::make(),
             'cod_status' => [
                 'title' => trans('plugins/ecommerce::shipping.cod_status'),
-                'class' => 'text-center',
             ],
-            'created_at' => [
-                'title' => trans('core/base::tables.created_at'),
-                'width' => '100px',
-                'class' => 'text-start',
-            ],
+            CreatedAtColumn::make(),
         ];
     }
 }

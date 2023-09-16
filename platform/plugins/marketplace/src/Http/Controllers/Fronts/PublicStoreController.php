@@ -9,7 +9,6 @@ use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Services\Products\GetProductService;
 use Botble\Marketplace\Http\Requests\CheckStoreUrlRequest;
 use Botble\Marketplace\Models\Store;
-use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
 use Botble\Media\Facades\RvMedia;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\SeoHelper\SeoOpenGraph;
@@ -22,10 +21,6 @@ use Illuminate\Support\Str;
 
 class PublicStoreController
 {
-    public function __construct(protected StoreInterface $storeRepository)
-    {
-    }
-
     public function getStores(Request $request)
     {
         Theme::breadcrumb()->add(__('Home'), route('public.index'))
@@ -33,7 +28,7 @@ class PublicStoreController
 
         SeoHelper::setTitle(__('Stores'))->setDescription(__('Stores'));
 
-        $condition = ['status' => BaseStatusEnum::PUBLISHED];
+        $condition = [];
 
         $search = BaseHelper::stringify(BaseHelper::clean($request->input('q')));
         if ($search) {
@@ -50,20 +45,17 @@ class PublicStoreController
             };
         }
 
-        $stores = $this->storeRepository->advancedGet([
-            'condition' => $condition,
-            'order_by' => ['created_at' => 'desc'],
-            'paginate' => [
-                'per_page' => 12,
-                'current_paged' => $request->integer('page'),
-            ],
-            'with' => $with,
-            'withCount' => [
+        $stores = Store::query()
+            ->wherePublished()
+            ->where($condition)
+            ->with($with)
+            ->withCount([
                 'products' => function ($query) {
-                    $query->where(['status' => BaseStatusEnum::PUBLISHED]);
+                    $query->wherePublished();
                 },
-            ],
-        ]);
+            ])
+            ->orderByDesc('created_at')
+            ->paginate(12);
 
         return Theme::scope('marketplace.stores', compact('stores'), 'plugins/marketplace::themes.stores')->render();
     }
@@ -89,11 +81,7 @@ class PublicStoreController
             Arr::forget($condition, 'status');
         }
 
-        $store = $this->storeRepository->getFirstBy($condition, ['*'], ['slugable', 'metadata']);
-
-        if (! $store) {
-            abort(404);
-        }
+        $store = Store::query()->with(['slugable', 'metadata'])->where($condition)->firstOrFail();
 
         if ($store->slugable->key !== $slug->key) {
             return redirect()->to($store->url);

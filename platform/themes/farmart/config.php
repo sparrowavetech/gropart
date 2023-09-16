@@ -2,7 +2,6 @@
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\Ecommerce\Facades\ProductCategoryHelper;
-use Botble\Language\Facades\Language;
 use Botble\Shortcode\View\View;
 use Botble\Theme\Theme;
 use Illuminate\Support\Arr;
@@ -49,7 +48,6 @@ return [
         // this event should call to assign some assets,
         // breadcrumb template.
         'beforeRenderTheme' => function (Theme $theme) {
-            ;
             $categories = collect();
             $currencies = collect();
 
@@ -57,16 +55,7 @@ return [
             if (is_plugin_active('ecommerce')) {
                 $categories = ProductCategoryHelper::getActiveTreeCategories();
 
-                $with = ['slugable', 'metadata'];
-                if (
-                    is_plugin_active('language') &&
-                    is_plugin_active('language-advanced') &&
-                    Language::getCurrentLocaleCode() != Language::getDefaultLocaleCode()
-                ) {
-                    $with[] = 'translations';
-                }
-
-                $categories->loadMissing($with);
+                $categories->loadMissing(['slugable', 'metadata']);
 
                 $currencies = get_all_currencies();
             }
@@ -145,12 +134,6 @@ return [
                 'style-css' => [
                     'local' => [
                         'source' => 'css/style.css',
-                        'version' => $version,
-                    ],
-                ],
-                'swiper-css' => [
-                    'local' => [
-                        'source' => 'plugins/swiper-bundle.min.css',
                         'version' => $version,
                     ],
                 ],
@@ -258,13 +241,6 @@ return [
                         'source' => 'js/main.js',
                         'dependencies' => ['jquery'],
                         'version' => $version,
-                    ],
-                    'container' => 'footer',
-                ],
-                'swiper-js' => [
-                    'local' => [
-                        'source' => 'js/swiper-bundle.min.js',
-                        'dependencies' => ['jquery'],
                     ],
                     'container' => 'footer',
                 ],

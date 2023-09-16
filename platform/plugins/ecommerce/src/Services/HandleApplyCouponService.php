@@ -95,6 +95,7 @@ class HandleApplyCouponService
         OrderHelper::setOrderSessionData($token, $sessionData);
 
         session()->put('applied_coupon_code', $couponCode);
+        session()->forget('auto_apply_coupon_code');
 
         return [
             'error' => false,
@@ -108,11 +109,12 @@ class HandleApplyCouponService
         ];
     }
 
-    public function getCouponData(string $couponCode, array $sessionData = []): Discount|null
+    public function getCouponData(string $couponCode, array $sessionData = []): Discount|Model|null
     {
         $couponCode = trim($couponCode);
 
-        return Discount::where('code', $couponCode)
+        return Discount::query()
+            ->where('code', $couponCode)
             ->where('type', DiscountTypeEnum::COUPON)
             ->where('start_date', '<=', Carbon::now())
             ->where(function (Builder $query) use ($sessionData) {

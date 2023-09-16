@@ -97,7 +97,7 @@ export class ActionsService {
     static handleCopyLink() {
         let links = ''
         Helpers.each(Helpers.getSelectedFiles(), (value) => {
-            if (! Helpers.isEmpty(links)) {
+            if (!Helpers.isEmpty(links)) {
                 links += '\n'
             }
             links += value.full_url
@@ -186,36 +186,21 @@ export class ActionsService {
     }
 
     static processAction(data, callback = null) {
-        $.ajax({
-            url: RV_MEDIA_URL.global_actions,
-            type: 'POST',
-            data: data,
-            dataType: 'json',
-            beforeSend: () => {
-                Helpers.showAjaxLoading()
-            },
-            success: (res) => {
+        Helpers.showAjaxLoading()
+
+        $httpClient
+            .make()
+            .post(RV_MEDIA_URL.global_actions, data)
+            .then(({ data }) => {
                 Helpers.resetPagination()
-                if (!res.error) {
-                    MessageService.showMessage(
-                        'success',
-                        res.message,
-                        Helpers.trans('message.success_header')
-                    )
-                } else {
-                    MessageService.showMessage('error', res.message, Helpers.trans('message.error_header'))
-                }
+
+                MessageService.showMessage('success', data.message, Helpers.trans('message.success_header'))
+
                 if (callback) {
-                    callback(res)
+                    callback(data)
                 }
-            },
-            complete: () => {
-                Helpers.hideAjaxLoading()
-            },
-            error: (data) => {
-                MessageService.handleError(data)
-            },
-        })
+            })
+            .finally(() => Helpers.hideAjaxLoading())
     }
 
     static renderRenameItems() {
@@ -275,13 +260,13 @@ export class ActionsService {
                 return item.action === 'copy_link'
             })
 
-            if (! Helpers.hasPermission('folders.create')) {
+            if (!Helpers.hasPermission('folders.create')) {
                 actionsList.file = Helpers.arrayReject(actionsList.file, (item) => {
                     return item.action === 'make_copy'
                 })
             }
 
-            if (! Helpers.hasPermission('folders.edit')) {
+            if (!Helpers.hasPermission('folders.edit')) {
                 actionsList.file = Helpers.arrayReject(actionsList.file, (item) => {
                     return Helpers.inArray(['rename'], item.action)
                 })
@@ -291,13 +276,13 @@ export class ActionsService {
                 })
             }
 
-            if (! Helpers.hasPermission('folders.trash')) {
+            if (!Helpers.hasPermission('folders.trash')) {
                 actionsList.other = Helpers.arrayReject(actionsList.other, (item) => {
                     return Helpers.inArray(['trash', 'restore'], item.action)
                 })
             }
 
-            if (! Helpers.hasPermission('folders.destroy')) {
+            if (!Helpers.hasPermission('folders.destroy')) {
                 actionsList.other = Helpers.arrayReject(actionsList.other, (item) => {
                     return Helpers.inArray(['delete'], item.action)
                 })
@@ -419,42 +404,27 @@ export class ActionsService {
     static handleDownload(files) {
         const html = $('.media-download-popup')
         let downloadTimeout = null
-        $.ajax({
-            url: RV_MEDIA_URL.download,
-            method: 'POST',
-            data: { selected: files },
-            xhrFields: {
-                responseType: 'blob',
-            },
-            beforeSend: () => {
-                downloadTimeout = setTimeout(() => {
-                    html.show()
-                }, 1000)
-            },
-            success: (response, status, xhr) => {
-                if (response.error) {
-                    MessageService.showMessage('error', response.message)
 
-                    return
-                }
-
-                const downloadUrl = URL.createObjectURL(response)
+        $httpClient
+            .make()
+            .withResponseType('blob')
+            .post(RV_MEDIA_URL.download, { selected: files })
+            .then((response) => {
+                const fileName = (response.headers['content-disposition'] || '').split('filename=')[1].split(';')[0]
+                const objectUrl = URL.createObjectURL(response.data)
                 const a = document.createElement('a')
-                const fileName = xhr.getResponseHeader('Content-Disposition').split('filename=')[1].split(';')[0]
-                a.href = downloadUrl
+
+                a.href = objectUrl
                 a.download = fileName
                 document.body.appendChild(a)
                 a.click()
                 a.remove()
-                window.URL.revokeObjectURL(downloadUrl)
-            },
-            complete: () => {
+
+                URL.revokeObjectURL(objectUrl)
+            })
+            .finally(() => {
                 html.hide()
                 clearTimeout(downloadTimeout)
-            },
-            error: (data) => {
-                MessageService.handleError(data)
-            },
-        })
+            })
     }
 }

@@ -1,15 +1,20 @@
 <div
     class="form-group mb-3 variant-radio product-option product-option-{{ Str::slug($option->name) }} product-option-{{ $option->id }}"
-    style="margin-bottom:10px">
+    style="margin-bottom:10px"
+>
     <div class="product-option-item-wrapper">
         <div class="product-option-item-label">
-            <label class="{{ ($option->required) ? 'required' : '' }}">
+            <label class="{{ $option->required ? 'required' : '' }}">
                 {{ $option->name }}
             </label>
         </div>
         <div class="product-option-item-values">
-            <input type="hidden" name="options[{{ $option->id }}][option_type]" value="checkbox"/>
-            @foreach($option->values as $value)
+            <input
+                name="options[{{ $option->id }}][option_type]"
+                type="hidden"
+                value="checkbox"
+            />
+            @foreach ($option->values as $value)
                 @php
                     $price = 0;
                     if (!empty($value->affect_price) && doubleval($value->affect_price) > 0) {
@@ -17,9 +22,14 @@
                     }
                 @endphp
                 <div class="form-checkbox">
-                    <input data-extra-price="{{ $price }}" type="checkbox" name="options[{{ $option->id }}][values][]"
-                           value="{{ $value->option_value }}"
-                           id="option-{{ $option->id}}-value-{{ Str::slug($value->option_value) }}"  @if ($option->required && $loop->first) checked @endif>
+                    <input
+                        id="option-{{ $option->id }}-value-{{ Str::slug($value->option_value) }}"
+                        name="options[{{ $option->id }}][values][]"
+                        data-extra-price="{{ $price }}"
+                        type="checkbox"
+                        value="{{ $value->option_value }}"
+                        @if ($option->required && $loop->first) checked @endif
+                    >
                     <label for="option-{{ $option->id }}-value-{{ Str::slug($value->option_value) }}">
                         &nbsp;{{ $value->option_value }}
                         @if ($price > 0)

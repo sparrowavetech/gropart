@@ -1,4 +1,7 @@
-<div class="note note-success mb-0" role="alert">
+<div
+    class="note note-success mb-0"
+    role="alert"
+>
     <p class="mb-2 uppercase"><strong>{{ __('PayPal payout info') }}</strong>:</p>
     <p>{{ __('Transaction ID') }}: <strong>{{ $transactionId }}</strong></p>
     <p>{{ __('Status') }}: <strong>{{ $status }}</strong></p>

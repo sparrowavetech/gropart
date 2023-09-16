@@ -81,7 +81,7 @@ class TemplateShippingRuleItemExport implements
 
         $results = [];
 
-        $shippingRule = ShippingRule::where('type', ShippingRuleTypeEnum::BASED_ON_ZIPCODE)
+        $shippingRule = ShippingRule::query()->where('type', ShippingRuleTypeEnum::BASED_ON_ZIPCODE)
             ->whereHas('shipping', function (Builder $query) use ($countryCode) {
                 $query->where('country', $countryCode);
             })
@@ -109,14 +109,14 @@ class TemplateShippingRuleItemExport implements
                 }
             }
         } else {
-            $shippingRule = ShippingRule::where('type', ShippingRuleTypeEnum::BASED_ON_ZIPCODE)->first();
+            $shippingRule = ShippingRule::query()->where('type', ShippingRuleTypeEnum::BASED_ON_ZIPCODE)->first();
 
             if ($shippingRule) {
                 $shippingRuleName = $shippingRule->name;
 
                 if ($shippingRule->shipping->country) {
                     if ($this->isLoadFromLocation) {
-                        $country = Country::where('code', $shippingRule->shipping->country)
+                        $country = Country::query()->where('code', $shippingRule->shipping->country)
                             ->with([
                                 'states' => function ($query) {
                                     $query->limit(3);

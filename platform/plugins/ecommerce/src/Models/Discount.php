@@ -25,12 +25,14 @@ class Discount extends BaseModel
         'min_order_price',
         'discount_on',
         'product_quantity',
+        'apply_via_url',
     ];
 
     protected $casts = [
         'start_date' => 'datetime',
         'end_date' => 'datetime',
         'can_use_with_promotion' => 'bool',
+        'apply_via_url' => 'bool',
     ];
 
     public function isExpired(): bool

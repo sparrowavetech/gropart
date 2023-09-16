@@ -26,28 +26,19 @@ export class DownloadService {
                 filename = url
             }
             let ok = onProgress(`${index} / ${urls.length}`, filename, url)
-            await new Promise((resolve) => {
-                $.ajax({
-                    url: RV_MEDIA_URL.download_url,
-                    type: 'POST',
-                    data: {
+            await new Promise((resolve, reject) => {
+                $httpClient
+                    .make()
+                    .post(RV_MEDIA_URL.download_url, {
                         folderId: Helpers.getRequestParams().folder_id,
                         url,
-                    },
-                    dataType: 'json',
-                    success: (res) => {
-                        if (res.error) {
-                            hasError = true
-                            ok(false, res.message ?? res.data?.message)
-                        } else {
-                            ok(true, res.message ?? res.data?.message)
-                        }
+                    })
+                    .then(({ data }) => {
+                        ok(true, data.message || data.data?.message)
+
                         resolve()
-                    },
-                    error: (data) => {
-                        MessageService.handleError(data)
-                    },
-                })
+                    })
+                    .catch((error) => reject(error))
             })
 
             index += 1

@@ -19,35 +19,24 @@ class WidgetManagement {
                     items.push($(widget).find('form').serialize())
                 })
 
-                $.ajax({
-                    type: 'POST',
-                    cache: false,
-                    url: BWidget.routes.save_widgets_sidebar,
-                    data: {
+                Botble.showNotice('info', BotbleVariables.languages.notices_msg.processing_request)
+
+                $httpClient
+                    .make()
+                    .post(BWidget.routes.save_widgets_sidebar, {
                         items: items,
                         sidebar_id: parentElement.data('id'),
-                    },
-                    beforeSend: () => {
-                        Botble.showNotice('info', BotbleVariables.languages.notices_msg.processing_request)
-                    },
-                    success: (data) => {
-                        if (data.error) {
-                            Botble.showError(data.message)
-                        } else {
-                            parentElement.find('ul').html(data.data)
-                            Botble.callScroll($('.list-page-select-widget'))
-                            Botble.initResources()
-                            Botble.initMediaIntegrate()
-                            Botble.showSuccess(data.message)
-                        }
-                    },
-                    error: (data) => {
-                        Botble.handleError(data)
-                    },
-                    complete: () => {
+                    })
+                    .then(({ data }) => {
+                        parentElement.find('ul').html(data.data)
+                        Botble.callScroll($('.list-page-select-widget'))
+                        Botble.initResources()
+                        Botble.initMediaIntegrate()
+                        Botble.showSuccess(data.message)
+                    })
+                    .finally(() => {
                         parentElement.find('.widget_save i').remove()
-                    },
-                })
+                    })
             }
         }
 
@@ -96,34 +85,22 @@ class WidgetManagement {
             let widget = _self.closest('li')
             _self.addClass('button-loading')
 
-            $.ajax({
-                type: 'POST',
-                cache: false,
-                url: BWidget.routes.delete,
-                data: {
-                    _method: 'DELETE',
+            Botble.showNotice('info', BotbleVariables.languages.notices_msg.processing_request)
+
+            $httpClient
+                .make()
+                .delete(BWidget.routes.delete, {
                     widget_id: widget.data('id'),
                     position: widget.data('position'),
                     sidebar_id: _self.closest('.sidebar-item').data('id'),
-                },
-                beforeSend: () => {
-                    Botble.showNotice('info', BotbleVariables.languages.notices_msg.processing_request)
-                },
-                success: (data) => {
-                    if (data.error) {
-                        Botble.showError(data.message)
-                    } else {
-                        Botble.showSuccess(data.message)
-                        widget.fadeOut().remove()
-                    }
-                },
-                error: (data) => {
-                    Botble.handleError(data)
-                },
-                complete: () => {
+                })
+                .then(({ data }) => {
+                    Botble.showSuccess(data.message)
+                    widget.fadeOut().remove()
+                })
+                .finally(() => {
                     widget.find('.widget-control-delete').removeClass('button-loading')
-                },
-            })
+                })
         })
 
         widgetWrap.on('click', '#added-widget .widget-handle', (event) => {

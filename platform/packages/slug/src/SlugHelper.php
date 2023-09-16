@@ -5,6 +5,7 @@ namespace Botble\Slug;
 use Botble\Base\Contracts\BaseModel;
 use Botble\Page\Models\Page;
 use Botble\Slug\Models\Slug;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
@@ -139,7 +140,10 @@ class SlugHelper
             $condition['prefix'] = $prefix;
         }
 
-        return Slug::query()->where($condition)->first();
+        /** @var Builder $query */
+        $query = apply_filters('slug_helper_get_slug_query', Slug::query()->where($condition), $condition, (string) $key, (string) $prefix, $model);
+
+        return $query->first();
     }
 
     public function getPrefix(string $model, string $default = '', bool $translate = true): string|null
@@ -178,19 +182,24 @@ class SlugHelper
 
     public function getPermalinkSettingKey(string $model): string
     {
-        return 'permalink-' . Str::slug(str_replace('\\', '_', $model));
+        return $this->getSettingKey('permalink-' . Str::slug(str_replace('\\', '_', $model)));
     }
 
     public function turnOffAutomaticUrlTranslationIntoLatin(): bool
     {
-        return setting('slug_turn_off_automatic_url_translation_into_latin', 0) == 1;
+        return setting($this->getSettingKey('slug_turn_off_automatic_url_translation_into_latin'), 0) == 1;
     }
 
     public function getPublicSingleEndingURL(): string|null
     {
-        $endingURL = setting('public_single_ending_url', config('packages.theme.general.public_single_ending_url'));
+        $endingURL = setting($this->getSettingKey('public_single_ending_url'), config('packages.theme.general.public_single_ending_url'));
 
         return ! empty($endingURL) ? '.' . $endingURL : null;
+    }
+
+    public function getSettingKey(string $key): string
+    {
+        return apply_filters('slug_helper_get_permalink_setting_key', $key);
     }
 
     public function getCanEmptyPrefixes(): array

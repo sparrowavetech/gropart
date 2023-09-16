@@ -25,7 +25,8 @@
                 margin-bottom: 0.4rem;
             }
 
-            .dropzone.dz-clickable a, .dropzone.dz-clickable i {
+            .dropzone.dz-clickable a,
+            .dropzone.dz-clickable i {
                 cursor: pointer;
             }
 
@@ -50,33 +51,48 @@
                 <div class="widget-body">
                     <div class="upload-form">
                         <div class="form-group mb-3 @if ($errors->has('file')) has-error @endif">
-                            <label class="form-label required" for="input-group-file">
-                                {{ trans('plugins/location::bulk-import.choose_file')}}
+                            <label
+                                class="form-label required"
+                                for="input-group-file"
+                            >
+                                {{ trans('plugins/location::bulk-import.choose_file') }}
                             </label>
-                            <div class="location-dropzone dropzone" data-mimetypes="{{ $mimetypes }}">
+                            <div
+                                class="location-dropzone dropzone"
+                                data-mimetypes="{{ $mimetypes }}"
+                            >
                                 <div class="dz-message">
                                     {{ trans('plugins/location::bulk-import.upload_file_placeholder') }}<br>
                                 </div>
                             </div>
-                            <label class="d-block mt-1 help-block" for="input-group-file">
-                                {{ trans('plugins/location::bulk-import.choose_file_with_mime', ['types' =>  implode(', ', config('plugins.location.general.bulk-import.mimes', []))])}}
+                            <label
+                                class="d-block mt-1 help-block"
+                                for="input-group-file"
+                            >
+                                {{ trans('plugins/location::bulk-import.choose_file_with_mime', ['types' => implode(', ', config('plugins.location.general.bulk-import.mimes', []))]) }}
                             </label>
 
                             {!! Form::error('file', $errors) !!}
                             <div class="mt-3 text-center p-2 border bg-light">
-                                <a href="#" class="download-template"
-                                   data-url="{{ route('location.bulk-import.download-template') }}"
-                                   data-extension="csv"
-                                   data-filename="template_locations_import.csv"
-                                   data-downloading="<i class='fas fa-spinner fa-spin'></i> {{ trans('plugins/location::bulk-import.downloading') }}">
+                                <a
+                                    class="download-template"
+                                    data-url="{{ route('location.bulk-import.download-template') }}"
+                                    data-extension="csv"
+                                    data-filename="template_locations_import.csv"
+                                    data-downloading="<i class='fas fa-spinner fa-spin'></i> {{ trans('plugins/location::bulk-import.downloading') }}"
+                                    href="#"
+                                >
                                     <i class="fas fa-file-csv"></i>
                                     {{ trans('plugins/location::bulk-import.download-csv-file') }}
                                 </a> &nbsp; | &nbsp;
-                                <a href="#" class="download-template"
-                                   data-url="{{ route('location.bulk-import.download-template') }}"
-                                   data-extension="xlsx"
-                                   data-filename="template_locations_import.xlsx"
-                                   data-downloading="<i class='fas fa-spinner fa-spin'></i> {{ trans('plugins/location::bulk-import.downloading') }}">
+                                <a
+                                    class="download-template"
+                                    data-url="{{ route('location.bulk-import.download-template') }}"
+                                    data-extension="xlsx"
+                                    data-filename="template_locations_import.xlsx"
+                                    data-downloading="<i class='fas fa-spinner fa-spin'></i> {{ trans('plugins/location::bulk-import.downloading') }}"
+                                    href="#"
+                                >
                                     <i class="fas fa-file-excel"></i>
                                     {{ trans('plugins/location::bulk-import.download-excel-file') }}
                                 </a>
@@ -85,31 +101,43 @@
                     </div>
                     <div class="form-group mb-3 d-grid">
                         <button
-                            type="submit"
                             class="btn btn-info"
+                            id="input-group-addon"
                             data-uploading-text="{{ __('plugins/location::bulk-import.uploading') }}"
                             data-validating-text="{{ __('plugins/location::bulk-import.validating') }}"
                             data-importing-text="{{ __('plugins/location::bulk-import.importing') }}"
-                            id="input-group-addon"
+                            type="submit"
                         >
                             {{ trans('plugins/location::bulk-import.start_import') }}
                         </button>
                     </div>
 
-                    <p class="text-center status-text text-success fw-semibold" style="display: none"></p>
+                    <p
+                        class="text-center status-text text-success fw-semibold"
+                        style="display: none"
+                    ></p>
                 </div>
             </div>
             {!! Form::close() !!}
-            <div class="main-form-message mb-3" style="display: none">
-                <div class="alert alert-success success-message" style="display: none"></div>
-                <div class="show-errors" style="display: none">
+            <div
+                class="main-form-message mb-3"
+                style="display: none"
+            >
+                <div
+                    class="alert alert-success success-message"
+                    style="display: none"
+                ></div>
+                <div
+                    class="show-errors"
+                    style="display: none"
+                >
                     <h3 class="text-warning text-center">{{ trans('plugins/location::bulk-import.failures') }}</h3>
                     <table class="table table-striped">
                         <thead>
-                        <tr>
-                            <th scope="col">#_Row</th>
-                            <th scope="col">Errors</th>
-                        </tr>
+                            <tr>
+                                <th scope="col">#_Row</th>
+                                <th scope="col">Errors</th>
+                            </tr>
                         </thead>
                         <tbody id="imported-listing"></tbody>
                     </table>
@@ -123,93 +151,93 @@
                     <div class="table-responsive">
                         <table class="table text-start table-striped table-bordered">
                             <thead>
-                            <tr>
-                                <th scope="col">Name</th>
-                                <th scope="col">Slug</th>
-                                <th scope="col">Abbreviation</th>
-                                <th scope="col">State</th>
-                                <th scope="col">Country</th>
-                                <th scope="col">Import Type</th>
-                                <th scope="col">Status</th>
-                                <th scope="col">Order</th>
-                                @if (defined('LANGUAGE_MODULE_SCREEN_NAME'))
-                                    @foreach ($supportedLocales as $localeCode => $properties)
-                                        @continue($localeCode === Language::getCurrentLocale())
+                                <tr>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Slug</th>
+                                    <th scope="col">Abbreviation</th>
+                                    <th scope="col">State</th>
+                                    <th scope="col">Country</th>
+                                    <th scope="col">Import Type</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Order</th>
+                                    @if (defined('LANGUAGE_MODULE_SCREEN_NAME'))
+                                        @foreach ($supportedLocales as $localeCode => $properties)
+                                            @continue($localeCode === Language::getCurrentLocale())
 
-                                        <th scope="col">Name {{ Str::upper($properties['lang_code']) }}</th>
-                                    @endforeach
-                                @endif
-                            </tr>
+                                            <th scope="col">Name {{ Str::upper($properties['lang_code']) }}</th>
+                                        @endforeach
+                                    @endif
+                                </tr>
                             </thead>
                             <tbody>
-                            <tr>
-                                <td>Texas</td>
-                                <td></td>
-                                <td>TX</td>
-                                <td></td>
-                                <td>United States</td>
-                                <td>state</td>
-                                <td>published</td>
-                                <td>0</td>
-                                @if (defined('LANGUAGE_MODULE_SCREEN_NAME'))
-                                    @foreach ($supportedLocales as $localeCode => $properties)
-                                        @continue($localeCode === Language::getCurrentLocale())
+                                <tr>
+                                    <td>Texas</td>
+                                    <td></td>
+                                    <td>TX</td>
+                                    <td></td>
+                                    <td>United States</td>
+                                    <td>state</td>
+                                    <td>published</td>
+                                    <td>0</td>
+                                    @if (defined('LANGUAGE_MODULE_SCREEN_NAME'))
+                                        @foreach ($supportedLocales as $localeCode => $properties)
+                                            @continue($localeCode === Language::getCurrentLocale())
 
-                                        <td>Texas {{ Str::upper($properties['lang_code']) }}</td>
-                                    @endforeach
-                                @endif
-                            </tr>
-                            <tr>
-                                <td>Washington</td>
-                                <td></td>
-                                <td>WA</td>
-                                <td></td>
-                                <td>United States</td>
-                                <td>state</td>
-                                <td>published</td>
-                                <td>0</td>
-                                @if (defined('LANGUAGE_MODULE_SCREEN_NAME'))
-                                    @foreach ($supportedLocales as $localeCode => $properties)
-                                        @continue($localeCode === Language::getCurrentLocale())
+                                            <td>Texas {{ Str::upper($properties['lang_code']) }}</td>
+                                        @endforeach
+                                    @endif
+                                </tr>
+                                <tr>
+                                    <td>Washington</td>
+                                    <td></td>
+                                    <td>WA</td>
+                                    <td></td>
+                                    <td>United States</td>
+                                    <td>state</td>
+                                    <td>published</td>
+                                    <td>0</td>
+                                    @if (defined('LANGUAGE_MODULE_SCREEN_NAME'))
+                                        @foreach ($supportedLocales as $localeCode => $properties)
+                                            @continue($localeCode === Language::getCurrentLocale())
 
-                                        <td></td>
-                                    @endforeach
-                                @endif
-                            </tr>
-                            <tr>
-                                <td>Houston</td>
-                                <td>houston</td>
-                                <td></td>
-                                <td>Texas</td>
-                                <td>United States</td>
-                                <td>city</td>
-                                <td>published</td>
-                                <td>0</td>
-                                @if (defined('LANGUAGE_MODULE_SCREEN_NAME'))
-                                    @foreach ($supportedLocales as $localeCode => $properties)
-                                        @if ($localeCode != Language::getCurrentLocale())
                                             <td></td>
-                                        @endif
-                                    @endforeach
-                                @endif
-                            </tr>
-                            <tr>
-                                <td>San Antonio</td>
-                                <td>san-antonio</td>
-                                <td></td>
-                                <td>Texas</td>
-                                <td>United States</td>
-                                <td>city</td>
-                                <td>published</td>
-                                <td>0</td>
-                                @if (defined('LANGUAGE_MODULE_SCREEN_NAME'))
-                                    @foreach ($supportedLocales as $localeCode => $properties)
-                                        @continue($localeCode === Language::getCurrentLocale())
+                                        @endforeach
+                                    @endif
+                                </tr>
+                                <tr>
+                                    <td>Houston</td>
+                                    <td>houston</td>
+                                    <td></td>
+                                    <td>Texas</td>
+                                    <td>United States</td>
+                                    <td>city</td>
+                                    <td>published</td>
+                                    <td>0</td>
+                                    @if (defined('LANGUAGE_MODULE_SCREEN_NAME'))
+                                        @foreach ($supportedLocales as $localeCode => $properties)
+                                            @if ($localeCode != Language::getCurrentLocale())
+                                                <td></td>
+                                            @endif
+                                        @endforeach
+                                    @endif
+                                </tr>
+                                <tr>
+                                    <td>San Antonio</td>
+                                    <td>san-antonio</td>
+                                    <td></td>
+                                    <td>Texas</td>
+                                    <td>United States</td>
+                                    <td>city</td>
+                                    <td>published</td>
+                                    <td>0</td>
+                                    @if (defined('LANGUAGE_MODULE_SCREEN_NAME'))
+                                        @foreach ($supportedLocales as $localeCode => $properties)
+                                            @continue($localeCode === Language::getCurrentLocale())
 
-                                        <td></td>
-                                    @endforeach
-                                @endif
-                            </tr>
+                                            <td></td>
+                                        @endforeach
+                                    @endif
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -222,61 +250,66 @@
                 <div class="widget-body">
                     <table class="table text-start table-bordered">
                         <thead>
-                        <tr>
-                            <th scope="col">Column</th>
-                            <th scope="col">Rules</th>
-                        </tr>
+                            <tr>
+                                <th scope="col">Column</th>
+                                <th scope="col">Rules</th>
+                            </tr>
                         </thead>
                         <tbody>
-                        <tr>
-                            <th scope="row">Name</th>
-                            <td>(required)</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Slug</th>
-                            <td>(nullable)</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Abbreviation</th>
-                            <td>(nullable|max:2)</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">State</th>
-                            <td>(nullable|required_if:type,city)</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Country</th>
-                            <td>(nullable|required_if:type,state,city)</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Import Type</th>
-                            <td>(nullable|enum:country,state,city|default:state)</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Status</th>
-                            <td>(required|enum:{{ implode(',', Botble\Base\Enums\BaseStatusEnum::values()) }}|default:{{ Botble\Base\Enums\BaseStatusEnum::PUBLISHED }})</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Order</th>
-                            <td>(nullable|integer|min:0|max:127|default:0)</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Nationality</th>
-                            <td>(required_if:import_type,country|max:120)</td>
-                        </tr>
-                        @if (defined('LANGUAGE_MODULE_SCREEN_NAME'))
-                            @foreach ($supportedLocales as $localeCode => $properties)
-                                @continue($localeCode === Language::getCurrentLocale())
+                            <tr>
+                                <th scope="row">Name</th>
+                                <td>(required)</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Slug</th>
+                                <td>(nullable)</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Abbreviation</th>
+                                <td>(nullable|max:2)</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">State</th>
+                                <td>(nullable|required_if:type,city)</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Country</th>
+                                <td>(nullable|required_if:type,state,city)</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Import Type</th>
+                                <td>(nullable|enum:country,state,city|default:state)</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Status</th>
+                                <td>(required|enum:{{ implode(',', Botble\Base\Enums\BaseStatusEnum::values()) }}|default:{{ Botble\Base\Enums\BaseStatusEnum::PUBLISHED }})
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Order</th>
+                                <td>(nullable|integer|min:0|max:127|default:0)</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Nationality</th>
+                                <td>(required_if:import_type,country|max:120)</td>
+                            </tr>
+                            @if (defined('LANGUAGE_MODULE_SCREEN_NAME'))
+                                @foreach ($supportedLocales as $localeCode => $properties)
+                                    @continue($localeCode === Language::getCurrentLocale())
 
-                                <tr>
-                                    <th scope="row">Name {{ $properties['lang_code'] }}
-                                        <i class="fas fa-info-circle" data-bs-toggle="tooltip" data-bs-placement="top"
-                                           title="{{ trans('plugins/location::bulk-import.available_enable_multi_language') }}"></i>
-                                    </th>
-                                    <td>(nullable|default:{Name})</td>
-                                </tr>
-                            @endforeach
-                        @endif
+                                    <tr>
+                                        <th scope="row">Name {{ $properties['lang_code'] }}
+                                            <i
+                                                class="fas fa-info-circle"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-placement="top"
+                                                title="{{ trans('plugins/location::bulk-import.available_enable_multi_language') }}"
+                                            ></i>
+                                        </th>
+                                        <td>(nullable|default:{Name})</td>
+                                    </tr>
+                                @endforeach
+                            @endif
                         </tbody>
                     </table>
                 </div>
@@ -288,8 +321,10 @@
                     <h4 class="text-info">{{ trans('plugins/location::bulk-import.import_available_data') }}</h4>
                 </div>
                 <div class="widget-body">
-                    <div id="available-remote-locations"
-                         data-url="{{ route('location.bulk-import.available-remote-locations') }}">
+                    <div
+                        id="available-remote-locations"
+                        data-url="{{ route('location.bulk-import.available-remote-locations') }}"
+                    >
                         @include('core/base::elements.loading')
                     </div>
                 </div>
@@ -326,8 +361,8 @@
     @push('footer')
         <x-core::modal
             class="modal-confirm-import"
-            :title="trans('plugins/location::bulk-import.import_available_data_confirmation')"
             type="info"
+            :title="trans('plugins/location::bulk-import.import_available_data_confirmation')"
             button-class="button-confirm-import"
             :button-label="trans('plugins/location::bulk-import.import')"
         >

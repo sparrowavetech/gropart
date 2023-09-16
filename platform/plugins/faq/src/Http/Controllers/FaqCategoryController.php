@@ -12,17 +12,12 @@ use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Faq\Forms\FaqCategoryForm;
 use Botble\Faq\Http\Requests\FaqCategoryRequest;
 use Botble\Faq\Models\FaqCategory;
-use Botble\Faq\Repositories\Interfaces\FaqCategoryInterface;
 use Botble\Faq\Tables\FaqCategoryTable;
 use Exception;
 use Illuminate\Http\Request;
 
 class FaqCategoryController extends BaseController
 {
-    public function __construct(protected FaqCategoryInterface $faqCategoryRepository)
-    {
-    }
-
     public function index(FaqCategoryTable $table)
     {
         PageTitle::setTitle(trans('plugins/faq::faq-category.name'));
@@ -39,7 +34,7 @@ class FaqCategoryController extends BaseController
 
     public function store(FaqCategoryRequest $request, BaseHttpResponse $response)
     {
-        $faqCategory = $this->faqCategoryRepository->createOrUpdate($request->input());
+        $faqCategory = FaqCategory::query()->create($request->input());
 
         event(new CreatedContentEvent(FAQ_CATEGORY_MODULE_SCREEN_NAME, $request, $faqCategory));
 
@@ -59,8 +54,7 @@ class FaqCategoryController extends BaseController
     public function update(FaqCategory $faqCategory, FaqCategoryRequest $request, BaseHttpResponse $response)
     {
         $faqCategory->fill($request->input());
-
-        $this->faqCategoryRepository->createOrUpdate($faqCategory);
+        $faqCategory->save();
 
         event(new UpdatedContentEvent(FAQ_CATEGORY_MODULE_SCREEN_NAME, $request, $faqCategory));
 
@@ -72,7 +66,7 @@ class FaqCategoryController extends BaseController
     public function destroy(FaqCategory $faqCategory, Request $request, BaseHttpResponse $response)
     {
         try {
-            $this->faqCategoryRepository->delete($faqCategory);
+            $faqCategory->delete();
 
             event(new DeletedContentEvent(FAQ_CATEGORY_MODULE_SCREEN_NAME, $request, $faqCategory));
 
@@ -82,23 +76,5 @@ class FaqCategoryController extends BaseController
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
-    }
-
-    public function deletes(Request $request, BaseHttpResponse $response)
-    {
-        $ids = $request->input('ids');
-        if (empty($ids)) {
-            return $response
-                ->setError()
-                ->setMessage(trans('core/base::notices.no_select'));
-        }
-
-        foreach ($ids as $id) {
-            $faqCategory = $this->faqCategoryRepository->findOrFail($id);
-            $this->faqCategoryRepository->delete($faqCategory);
-            event(new DeletedContentEvent(FAQ_CATEGORY_MODULE_SCREEN_NAME, $request, $faqCategory));
-        }
-
-        return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 }

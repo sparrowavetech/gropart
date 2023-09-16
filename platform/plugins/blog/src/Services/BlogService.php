@@ -40,11 +40,7 @@ class BlogService
                 $post = Post::query()
                     ->where($condition)
                     ->with(['categories', 'tags', 'slugable', 'categories.slugable', 'tags.slugable'])
-                    ->first();
-
-                if (empty($post)) {
-                    abort(404);
-                }
+                    ->firstOrFail();
 
                 Helper::handleViewCount($post, 'viewed_post');
 
@@ -104,11 +100,7 @@ class BlogService
                 $category = Category::query()
                     ->where($condition)
                     ->with(['slugable'])
-                    ->first();
-
-                if (empty($category)) {
-                    abort(404);
-                }
+                    ->firstOrFail();
 
                 SeoHelper::setTitle($category->name)
                     ->setDescription($category->description);
@@ -163,11 +155,7 @@ class BlogService
                 $tag = Tag::query()
                     ->where($condition)
                     ->with(['slugable'])
-                    ->first();
-
-                if (! $tag) {
-                    abort(404);
-                }
+                    ->firstOrFail();
 
                 SeoHelper::setTitle($tag->name)
                     ->setDescription($tag->description);

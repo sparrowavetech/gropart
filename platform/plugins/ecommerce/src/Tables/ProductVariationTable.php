@@ -5,19 +5,19 @@ namespace Botble\Ecommerce\Tables;
 use Botble\Base\Facades\Form;
 use Botble\Base\Facades\Html;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
+use Botble\Ecommerce\Models\ProductAttributeSet;
 use Botble\Ecommerce\Models\ProductVariation;
-use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeSetInterface;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Table\DataTables;
+use Botble\Table\Columns\CheckboxColumn;
+use Botble\Table\Columns\IdColumn;
+use Botble\Table\Columns\ImageColumn;
 use Botble\Table\EloquentDataTable;
-use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 
 class ProductVariationTable extends TableAbstract
 {
@@ -25,27 +25,24 @@ class ProductVariationTable extends TableAbstract
 
     protected Collection $productAttributeSets;
 
-    protected $view = 'core/table::simple-table';
-
     protected bool $bStateSave = false;
-
-    protected $hasOperations = true;
 
     protected bool $hasResponsive = false;
 
     protected bool $hasDigitalProduct = false;
 
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, ProductVariation $model)
+    public function setup(): void
     {
-        parent::__construct($table, $urlGenerator);
+        $this->model(ProductVariation::class);
 
-        $this->model = $model;
         $this->productAttributeSets = collect();
         $this->setOption('class', $this->getOption('class') . ' table-hover-variants');
 
-        if (is_in_admin(true) && ! Auth::user()->hasPermission('products.edit')) {
+        if (is_in_admin(true) && ! $this->hasPermission('products.edit')) {
             $this->hasOperations = false;
         }
+
+        $this->view = $this->simpleTableView();
     }
 
     public function ajax(): JsonResponse
@@ -53,6 +50,100 @@ class ProductVariationTable extends TableAbstract
         $data = $this->loadDataTable();
 
         return $this->toJson($data);
+    }
+
+    protected function loadDataTable(): EloquentDataTable
+    {
+        $data = $this->table
+            ->eloquent($this->query());
+
+        foreach ($this->getProductAttributeSets()->whereNotNull('is_selected') as $attributeSet) {
+            $data
+                ->editColumn('set_' . $attributeSet->id, function (ProductVariation $item) use ($attributeSet) {
+                    return $item->variationItems->firstWhere(function ($item) use ($attributeSet) {
+                        return $item->attribute->attribute_set_id == $attributeSet->id;
+                    })->attribute->title ?? '-';
+                });
+        }
+
+        $data
+            ->editColumn('price', function (ProductVariation $item) {
+                $salePrice = '';
+                if ($item->product->front_sale_price != $item->product->price) {
+                    $salePrice = Html::tag(
+                        'del',
+                        format_price($item->product->price),
+                        ['class' => 'text-danger small']
+                    );
+                }
+
+                return Html::tag('div', format_price($item->product->front_sale_price)) . $salePrice;
+            })
+            ->editColumn('is_default', function (ProductVariation $item) {
+                return Html::tag(
+                    'label',
+                    Form::radio('variation_default_id', $item->getKey(), $item->is_default, [
+                        'data-url' => route('products.set-default-product-variation', $item->getKey()),
+                        'data-bs-toggle' => 'tooltip',
+                        'title' => trans('plugins/ecommerce::products.set_this_variant_as_default'),
+                    ])
+                );
+            })
+            ->editColumn('operations', function (ProductVariation $item) {
+                $update = route('products.update-version', $item->getKey());
+                $loadForm = route('products.get-version-form', $item->getKey());
+                $delete = route('products.delete-version', $item->getKey());
+
+                if (is_in_admin(true) && ! $this->hasPermission('products.edit')) {
+                    $update = null;
+                    $delete = null;
+                }
+
+                return view(
+                    'plugins/ecommerce::products.variations.actions',
+                    compact('update', 'loadForm', 'delete', 'item')
+                );
+            });
+
+        if ($this->hasDigitalProduct) {
+            $data
+                ->editColumn('digital_product', function (ProductVariation $item) {
+                    $internal = Html::tag(
+                        'div',
+                        $item->product->product_file_internal_count . Html::tag(
+                            'i',
+                            '',
+                            ['class' => 'ms-1 fas fa-paperclip']
+                        )
+                    );
+
+                    $external = Html::tag(
+                        'div',
+                        $item->product->product_file_external_count . Html::tag(
+                            'i',
+                            '',
+                            ['class' => 'ms-1 fas fa-link']
+                        )
+                    );
+
+                    return $internal . $external;
+                });
+        }
+
+        foreach ($this->getProductAttributeSets()->whereNotNull('is_selected') as $attributeSet) {
+            $data
+                ->filterColumn('set_' . $attributeSet->id, function ($query, $keyword) {
+                    if ($keyword) {
+                        $query->whereHas('variationItems', function ($query) use ($keyword) {
+                            $query->whereHas('attribute', function ($query) use ($keyword) {
+                                $query->where('id', $keyword);
+                            });
+                        });
+                    }
+                });
+        }
+
+        return $data;
     }
 
     public function query(): Relation|Builder|QueryBuilder
@@ -107,79 +198,20 @@ class ProductVariationTable extends TableAbstract
             });
     }
 
-    protected function loadDataTable(): EloquentDataTable
+    public function getProductAttributeSets(): Collection
     {
-        $data = $this->table
-            ->eloquent($this->query());
-
-        foreach ($this->getProductAttributeSets()->whereNotNull('is_selected') as $attributeSet) {
-            $data
-                ->editColumn('set_' . $attributeSet->id, function (ProductVariation $item) use ($attributeSet) {
-                    return $item->variationItems->firstWhere(function ($item) use ($attributeSet) {
-                        return $item->attribute->attribute_set_id == $attributeSet->id;
-                    })->attribute->title ?? '-';
-                });
+        if (! $this->productAttributeSets->count()) {
+            $this->productAttributeSets = ProductAttributeSet::getAllWithSelected($this->productId, []);
         }
 
-        $data
-            ->editColumn('checkbox', function (ProductVariation $item) {
-                return $this->getCheckbox($item->id);
-            })
-            ->editColumn('image', function (ProductVariation $item) {
-                return $this->displayThumbnail($item->image);
-            })
-            ->editColumn('price', function (ProductVariation $item) {
-                $salePrice = '';
-                if ($item->product->front_sale_price != $item->product->price) {
-                    $salePrice = Html::tag('del', format_price($item->product->price), ['class' => 'text-danger small']);
-                }
+        return $this->productAttributeSets;
+    }
 
-                return Html::tag('div', format_price($item->product->front_sale_price)) . $salePrice;
-            })
-            ->editColumn('is_default', function (ProductVariation $item) {
-                return Html::tag('label', Form::radio('variation_default_id', $item->id, $item->is_default, [
-                    'data-url' => route('products.set-default-product-variation', $item->id),
-                    'data-bs-toggle' => 'tooltip',
-                    'title' => trans('plugins/ecommerce::products.set_this_variant_as_default'),
-                ]));
-            })
-            ->editColumn('operations', function (ProductVariation $item) {
-                $update = route('products.update-version', $item->id);
-                $loadForm = route('products.get-version-form', $item->id);
-                $delete = route('products.delete-version', $item->id);
+    public function setProductAttributeSets(Collection $productAttributeSets): self
+    {
+        $this->productAttributeSets = $productAttributeSets;
 
-                if (is_in_admin(true) && ! Auth::user()->hasPermission('products.edit')) {
-                    $update = null;
-                    $delete = null;
-                }
-
-                return view('plugins/ecommerce::products.variations.actions', compact('update', 'loadForm', 'delete', 'item'));
-            });
-
-        if ($this->hasDigitalProduct) {
-            $data
-                ->editColumn('digital_product', function (ProductVariation $item) {
-                    $internal = Html::tag('div', $item->product->product_file_internal_count . Html::tag('i', '', ['class' => 'ms-1 fas fa-paperclip']));
-                    $external = Html::tag('div', $item->product->product_file_external_count . Html::tag('i', '', ['class' => 'ms-1 fas fa-link']));
-
-                    return $internal . $external;
-                });
-        }
-
-        foreach ($this->getProductAttributeSets()->whereNotNull('is_selected') as $attributeSet) {
-            $data
-                ->filterColumn('set_' . $attributeSet->id, function ($query, $keyword) {
-                    if ($keyword) {
-                        $query->whereHas('variationItems', function ($query) use ($keyword) {
-                            $query->whereHas('attribute', function ($query) use ($keyword) {
-                                $query->where('id', $keyword);
-                            });
-                        });
-                    }
-                });
-        }
-
-        return $data;
+        return $this;
     }
 
     public function setProductId(int|string $productId): self
@@ -198,36 +230,14 @@ class ProductVariationTable extends TableAbstract
         return $this;
     }
 
-    public function setProductAttributeSets(Collection $productAttributeSets): self
-    {
-        $this->productAttributeSets = $productAttributeSets;
-
-        return $this;
-    }
-
-    public function getProductAttributeSets(): Collection
-    {
-        if (! $this->productAttributeSets->count()) {
-            $this->productAttributeSets = app(ProductAttributeSetInterface::class)->getAllWithSelected($this->productId, []);
-        }
-
-        return $this->productAttributeSets;
-    }
-
     public function columns(): array
     {
         $columns = [
-            'id' => [
-                'title' => trans('core/base::tables.id'),
-                'width' => '20px',
-            ],
-            'image' => [
-                'title' => trans('plugins/ecommerce::products.image'),
-                'width' => '100px',
-                'class' => 'text-center',
-                'searchable' => false,
-                'orderable' => false,
-            ],
+            CheckboxColumn::make(),
+            IdColumn::make(),
+            ImageColumn::make()
+                ->orderable(false)
+                ->searchable(false),
         ];
 
         foreach ($this->getProductAttributeSets()->whereNotNull('is_selected') as $attributeSet) {
@@ -262,7 +272,6 @@ class ProductVariationTable extends TableAbstract
             'is_default' => [
                 'title' => trans('plugins/ecommerce::products.form.is_default'),
                 'width' => '100px',
-                'class' => 'text-center',
                 'searchable' => false,
             ],
         ]);
@@ -278,5 +287,10 @@ class ProductVariationTable extends TableAbstract
     protected function getDom(): string|null
     {
         return $this->simpleDom();
+    }
+
+    protected function isSimpleTable(): bool
+    {
+        return false;
     }
 }

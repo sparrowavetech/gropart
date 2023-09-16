@@ -1,6 +1,11 @@
 @import '~bootstrap/scss/bootstrap';
 
-html, body, .container, .page-wrap, .left, .right {
+html,
+body,
+.container,
+.page-wrap,
+.left,
+.right {
     height: 100%;
     min-height: 100%;
 }
@@ -13,7 +18,8 @@ a {
     margin: 30px 0;
 }
 
-.price-text, .total-text {
+.price-text,
+.total-text {
     float: right;
     color: #4b4b4b;
     font-weight: bold;
@@ -33,19 +39,19 @@ a {
     width: 100%;
 }
 
-input[type="checkbox"] {
+input[type='checkbox'] {
     position: relative;
     top: 0;
-    margin: 0 .5rem 0 0;
+    margin: 0 0.5rem 0 0;
     cursor: pointer;
 
     &:before {
-        -webkit-transition: -webkit-transform .4s cubic-bezier(.45, 1.8, .5, .75);
-        -moz-transition: -moz-transform .4s cubic-bezier(.45, 1.8, .5, .75);
-        transition: transform .4s cubic-bezier(.45, 1.8, .5, .75);
+        -webkit-transition: -webkit-transform 0.4s cubic-bezier(0.45, 1.8, 0.5, 0.75);
+        -moz-transition: -moz-transform 0.4s cubic-bezier(0.45, 1.8, 0.5, 0.75);
+        transition: transform 0.4s cubic-bezier(0.45, 1.8, 0.5, 0.75);
         -ms-transform: rotate(-45deg) scale(0, 0);
         transform: rotate(-45deg) scale(0, 0);
-        content: "";
+        content: '';
         position: absolute;
         left: 2px;
         right: 0;
@@ -60,7 +66,7 @@ input[type="checkbox"] {
     }
 
     &:after {
-        content: "";
+        content: '';
         position: absolute;
         left: -1px;
         right: 0;
@@ -134,7 +140,6 @@ input[type="checkbox"] {
     }
 }
 
-
 label {
     font-weight: normal;
 }
@@ -159,7 +164,8 @@ label {
     }
 }
 
-input.form-control, select.form-control {
+input.form-control,
+select.form-control {
     height: 45px;
 }
 
@@ -182,7 +188,8 @@ input.form-control, select.form-control {
     height: 45px;
 }
 
-.payment-checkout-btn, .payment-checkout-btn-step {
+.payment-checkout-btn,
+.payment-checkout-btn-step {
     background-color: #1fa4d1;
     color: #ffffff;
     padding: 15px 15px;
@@ -191,7 +198,6 @@ input.form-control, select.form-control {
         background-color: #0f7091 !important;
         color: #ffffff !important;
     }
-
 }
 
 .label-success {
@@ -270,12 +276,12 @@ input.form-control, select.form-control {
 }
 
 .error {
-    font-size: .8em;
+    font-size: 0.8em;
     color: red;
 }
 
 #checkout-form::after {
-    content: "";
+    content: '';
     display: block;
     clear: both;
 }
@@ -338,21 +344,27 @@ input.form-control, select.form-control {
 
 .field-has-error {
     border: 1px solid #a94442 !important;
-    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
-    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
 }
 
-body, .form-control, .btn {
+body,
+.form-control,
+.btn {
     font-size: 14px;
 }
 
-.payment-info-loading, .shipping-info-loading {
+.payment-info-loading,
+.shipping-info-loading {
     i {
         font-size: 40px;
     }
 }
 
-.payment-info-loading, .payment-info-loading-content, .shipping-info-loading, .shipping-info-loading-content {
+.payment-info-loading,
+.payment-info-loading-content,
+.shipping-info-loading,
+.shipping-info-loading-content {
     position: absolute;
     top: 0;
     right: 0;
@@ -362,7 +374,8 @@ body, .form-control, .btn {
     text-align: center;
 }
 
-.payment-info-loading-content, .shipping-info-loading-content {
+.payment-info-loading-content,
+.shipping-info-loading-content {
     top: 45%;
 }
 
@@ -418,11 +431,13 @@ body, .form-control, .btn {
 }
 
 @media screen and (max-width: 768px) {
-    .left, .right {
+    .left,
+    .right {
         padding: 0 15px;
         height: auto;
     }
-    .order-1, .order-md-2 {
+    .order-1,
+    .order-md-2 {
         order: initial !important;
     }
 
@@ -479,7 +494,9 @@ body, .form-control, .btn {
     }
 }
 
-.customer-address-payment-form, .billing-address-form-wrapper, .customer-tax-information-form, {
+.customer-address-payment-form,
+.billing-address-form-wrapper,
+.customer-tax-information-form {
     .form-input-wrapper.select--arrow label,
     .form-control:not(:placeholder-shown):focus + label,
     .form-control:-webkit-autofill + label,

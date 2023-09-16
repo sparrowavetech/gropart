@@ -1,1 +1,5 @@
-<input type="hidden" name="{{ $name }}" id="{{ $uniqueId }}">
+<input
+    id="{{ $uniqueId }}"
+    name="{{ $name }}"
+    type="hidden"
+>

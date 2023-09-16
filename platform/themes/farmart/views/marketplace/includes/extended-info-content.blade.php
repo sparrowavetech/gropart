@@ -1,4 +1,7 @@
-<div class="tab-pane" id="tab_extended_info">
+<div
+    class="tab-pane"
+    id="tab_extended_info"
+>
     <div class="form-group">
         <div class="form__content">
             <div class="row">
@@ -10,7 +13,7 @@
                         {!! Form::error('background', $errors) !!}
                     </div>
                 </div>
-                @if (! MarketplaceHelper::hideStoreSocialLinks())
+                @if (!MarketplaceHelper::hideStoreSocialLinks())
                     <div class="col-12 border p-3">
                         <div>
                             <h2 class="h4 text-primary">{{ __('Socials') }}</h2>
@@ -24,7 +27,7 @@
                                             'class' => 'form-control',
                                             'id' => 'socials_' . $k,
                                             'placeholder' => __('Enter link for :name', ['name' => $name]),
-                                            'maxlength'=> 255,
+                                            'maxlength' => 255,
                                         ]) !!}
                                         {!! Form::error('socials.' . $k, $errors) !!}
                                     </div>

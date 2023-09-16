@@ -6,7 +6,6 @@ Page sidebar
 
 .page-sidebar,
 .page-sidebar-closed.page-sidebar-fixed .page-sidebar:hover {
-
     &.navbar-collapse {
         padding: 0;
         box-shadow: none;
@@ -63,7 +62,7 @@ Page sidebar
                     margin-right: 4px;
                 }
 
-                > [class^="icon-"] {
+                > [class^='icon-'] {
                     margin-left: 1px;
                     margin-right: 4px;
                 }
@@ -145,16 +144,15 @@ Page sidebar
                 position: relative;
 
                 > .arrow {
-
                     &:before {
                         float: right;
                         width: 20px;
                         text-align: center;
                         display: inline;
                         font-size: $sidebar-menu-link-icon-font-size;
-                        font-family: Font Awesome\ 5 Free;
+                        font-family: 'Font Awesome 6 Free';
                         height: auto;
-                        content: "\f104";
+                        content: '\f104';
                         font-weight: 900;
                         text-shadow: none;
                         position: absolute;
@@ -163,7 +161,7 @@ Page sidebar
                     }
 
                     &.open:before {
-                        content: "\f107";
+                        content: '\f107';
                     }
                 }
 
@@ -310,7 +308,8 @@ Page sidebar
     }
 }
 
-@media (min-width: $screen-md-min) { /* 992px */
+@media (min-width: $screen-md-min) {
+    /* 992px */
 
     .page-sidebar {
         width: $sidebar-width;
@@ -346,7 +345,6 @@ Page sidebar
     }
 
     .page-sidebar-fixed {
-
         .page-sidebar {
             position: fixed !important;
             margin-left: 0;
@@ -373,12 +371,10 @@ Page sidebar
             width: $sidebar-collapsed-width !important;
 
             .page-sidebar-menu.page-sidebar-menu-closed {
-
                 /* sidebar */
                 width: $sidebar-collapsed-width !important;
 
                 > li {
-
                     /* hide opened sub menu */
                     &.open > .sub-menu,
                     > .sub-menu {
@@ -501,13 +497,11 @@ Page sidebar
         }
 
         &.page-sidebar-reversed {
-
             .page-sidebar {
                 margin-left: -$sidebar-collapsed-width;
                 width: $sidebar-collapsed-width;
 
                 .page-sidebar-menu.page-sidebar-menu-closed {
-
                     /* sidebar */
                     > li {
                         > .sub-menu {
@@ -681,7 +675,6 @@ Page sidebar
                 }
 
                 > li {
-
                     > a {
                         padding-left: 15px;
                     }
@@ -728,7 +721,8 @@ Page sidebar
     }
 }
 
-@media (max-width: $screen-sm-max) { /* 991px */
+@media (max-width: $screen-sm-max) {
+    /* 991px */
 
     .page-sidebar {
         border-top: 0 !important;
@@ -816,10 +810,10 @@ Page sidebar
     }
 }
 
-@media (min-width: $screen-sm-min) and (max-width: $screen-sm-max) { /* 768px & 991px */
+@media (min-width: $screen-sm-min) and (max-width: $screen-sm-max) {
+    /* 768px & 991px */
     .page-sidebar {
         .btn-navbar {
-
             &.collapsed .arrow {
                 display: none;
             }
@@ -838,7 +832,8 @@ Page sidebar
     }
 }
 
-@media (max-width: $screen-xs-min) { /* 480px */
+@media (max-width: $screen-xs-min) {
+    /* 480px */
 
     /* Page sidebar */
 

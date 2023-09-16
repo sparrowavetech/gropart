@@ -3,14 +3,20 @@
     :description="trans('packages/optimize::optimize.settings.description')"
 >
     <x-core-setting::on-off
+        class="setting-selection-option"
         name="optimize_page_speed_enable"
+        data-target="#pagespeed-optimize-settings"
         :label="trans('packages/optimize::optimize.settings.enable')"
         :value="setting('optimize_page_speed_enable', false)"
-        class="setting-selection-option"
-        data-target="#pagespeed-optimize-settings"
     />
 
-    <div id="pagespeed-optimize-settings" @class(['mb-4 border rounded-top rounded-bottom p-3 bg-light', 'd-none' => ! setting('optimize_page_speed_enable', false)])>
+    <div
+        id="pagespeed-optimize-settings"
+        @class([
+            'mb-4 border rounded-top rounded-bottom p-3 bg-light',
+            'd-none' => !setting('optimize_page_speed_enable', false),
+        ])
+    >
         <x-core-setting::checkbox
             name="optimize_collapse_white_space"
             :label="trans('packages/optimize::optimize.collapse_white_space')"

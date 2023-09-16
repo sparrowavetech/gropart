@@ -6,8 +6,8 @@ use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Facades\Cart;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Product;
+use Botble\Ecommerce\Models\Wishlist;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
-use Botble\Ecommerce\Repositories\Interfaces\WishlistInterface;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Http\Request;
@@ -16,11 +16,7 @@ use Illuminate\Routing\Controller;
 
 class WishlistController extends Controller
 {
-    public function __construct(protected WishlistInterface $wishlistRepository, protected ProductInterface $productRepository)
-    {
-    }
-
-    public function index(Request $request)
+    public function index(Request $request, ProductInterface $productRepository)
     {
         if (! EcommerceHelper::isWishlistEnabled()) {
             abort(404);
@@ -31,13 +27,13 @@ class WishlistController extends Controller
         $queryParams = array_merge([
             'paginate' => [
                 'per_page' => 10,
-                'current_paged' => $request->integer('page'),
+                'current_paged' => $request->integer('page', 1) ?: 1,
             ],
             'with' => ['slugable'],
         ], EcommerceHelper::withReviewsParams());
 
         if (auth('customer')->check()) {
-            $products = $this->productRepository->getProductsWishlist(auth('customer')->id(), $queryParams);
+            $products = $productRepository->getProductsWishlist(auth('customer')->id(), $queryParams);
         } else {
             $products = new LengthAwarePaginator([], 0, 10);
 
@@ -47,7 +43,7 @@ class WishlistController extends Controller
                 ->all();
 
             if ($itemIds) {
-                $products = $this->productRepository->getProductsByIds($itemIds, $queryParams);
+                $products = $productRepository->getProductsByIds($itemIds, $queryParams);
             }
         }
 
@@ -62,7 +58,12 @@ class WishlistController extends Controller
             abort(404);
         }
 
-        $product = $this->productRepository->findOrFail($productId);
+        $product = Product::query()->findOrFail($productId);
+
+        if ($product->is_variation) {
+            $product = $product->original_product;
+            $productId = $product->getKey();
+        }
 
         $duplicates = Cart::instance('wishlist')->search(function ($cartItem) use ($productId) {
             return $cartItem->id == $productId;
@@ -89,7 +90,7 @@ class WishlistController extends Controller
                 ->setError();
         }
 
-        $this->wishlistRepository->createOrUpdate([
+        Wishlist::query()->create([
             'product_id' => $productId,
             'customer_id' => auth('customer')->id(),
         ]);
@@ -105,7 +106,7 @@ class WishlistController extends Controller
             abort(404);
         }
 
-        $product = $this->productRepository->findOrFail($productId);
+        $product = Product::query()->findOrFail($productId);
 
         if (! auth('customer')->check()) {
             Cart::instance('wishlist')->search(function ($cartItem, $rowId) use ($productId) {
@@ -123,10 +124,12 @@ class WishlistController extends Controller
                 ->setData(['count' => Cart::instance('wishlist')->count()]);
         }
 
-        $this->wishlistRepository->deleteBy([
-            'product_id' => $productId,
-            'customer_id' => auth('customer')->id(),
-        ]);
+        Wishlist::query()
+            ->where([
+                'product_id' => $productId,
+                'customer_id' => auth('customer')->id(),
+            ])
+            ->delete();
 
         return $response
             ->setMessage(__('Removed product :product from wishlist successfully!', ['product' => $product->name]))

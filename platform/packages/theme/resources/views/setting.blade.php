@@ -3,14 +3,20 @@
     :description="trans('packages/theme::theme.settings.description')"
 >
     <x-core-setting::on-off
+        class="setting-selection-option"
         name="enable_cache_site_map"
+        data-target="#cache-sitemap-settings"
         :label="trans('core/setting::setting.general.enable_cache_site_map')"
         :value="setting('enable_cache_site_map', true)"
-        class="setting-selection-option"
-        data-target="#cache-sitemap-settings"
     />
 
-    <div id="cache-sitemap-settings" @class(['mb-4 border rounded-top rounded-bottom p-3 bg-light', 'd-none' => ! setting('enable_cache_site_map', true)])>
+    <div
+        id="cache-sitemap-settings"
+        @class([
+            'mb-4 border rounded-top rounded-bottom p-3 bg-light',
+            'd-none' => !setting('enable_cache_site_map', true),
+        ])
+    >
         <x-core-setting::text-input
             name="cache_time_site_map"
             type="number"

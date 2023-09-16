@@ -4,7 +4,10 @@
         <div class="widget-title">
             <h4>&nbsp; {{ trans('plugins/translation::translation.theme-translations') }}</h4>
         </div>
-        <div class="widget-body box-translation" v-pre>
+        <div
+            class="widget-body box-translation"
+            v-pre
+        >
             @if (count($groups) > 0 && $group)
                 <div class="row">
                     <div class="col-md-6">
@@ -16,11 +19,16 @@
                     </div>
                     <div class="col-md-6">
                         <div class="text-end">
-                            @include('plugins/translation::partials.list-theme-languages-to-translate', compact('groups', 'group'))
+                            @include(
+                                'plugins/translation::partials.list-theme-languages-to-translate',
+                                compact('groups', 'group'))
                         </div>
                     </div>
                 </div>
-                <p class="note note-warning" style="margin-bottom: 65px;">{{ trans('plugins/translation::translation.theme_translations_instruction') }}</p>
+                <p
+                    class="note note-warning"
+                    style="margin-bottom: 65px;"
+                >{{ trans('plugins/translation::translation.theme_translations_instruction') }}</p>
 
                 {!! apply_filters('translation_theme_translation_header', null, $groups, $group) !!}
 
@@ -28,10 +36,17 @@
                 <br>
 
                 {!! Form::open(['role' => 'form', 'route' => 'translations.theme-translations.post', 'method' => 'POST']) !!}
-                    <input type="hidden" name="locale" value="{{ $group['locale'] }}">
-                    <div class="form-group mb-3">
-                        <button type="submit" class="btn btn-info button-save-theme-translations">{{ trans('core/base::forms.save') }}</button>
-                    </div>
+                <input
+                    name="locale"
+                    type="hidden"
+                    value="{{ $group['locale'] }}"
+                >
+                <div class="form-group mb-3">
+                    <button
+                        class="btn btn-info button-save-theme-translations"
+                        type="submit"
+                    >{{ trans('core/base::forms.save') }}</button>
+                </div>
                 {!! Form::close() !!}
             @else
                 <p class="text-warning">{{ trans('plugins/translation::translation.no_other_languages') }}</p>

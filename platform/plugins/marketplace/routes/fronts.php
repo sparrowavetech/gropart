@@ -1,6 +1,9 @@
 <?php
 
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Marketplace\Models\Store;
+use Botble\Slug\Facades\SlugHelper;
+use Illuminate\Support\Facades\Route;
 
 Route::group([
     'namespace' => 'Botble\Marketplace\Http\Controllers\Fronts',
@@ -65,10 +68,8 @@ Route::group([
                 ->parameters(['' => 'revenue'])
                 ->only(['index']);
 
-            Route::match(['GET', 'POST'], 'statements', [
-                'as' => 'statements.index',
-                'uses' => 'StatementController@index',
-            ]);
+            Route::get('statements', fn () => to_route('marketplace.vendor.revenues.index'))
+                ->name('statements.index');
 
             Route::resource('withdrawals', 'WithdrawalController')
                 ->parameters(['' => 'withdrawal'])
@@ -84,7 +85,7 @@ Route::group([
                 Route::get('show/{id}', [
                     'as' => 'withdrawals.show',
                     'uses' => 'WithdrawalController@show',
-                ]);
+                ])->wherePrimaryKey();
             });
 
             if (EcommerceHelper::isReviewEnabled()) {
@@ -97,25 +98,20 @@ Route::group([
                 Route::resource('', 'ProductController')
                     ->parameters(['' => 'product']);
 
-                Route::delete('items/destroy', [
-                    'as' => 'deletes',
-                    'uses' => 'ProductController@deletes',
-                ]);
-
                 Route::post('add-attribute-to-product/{id}', [
                     'as' => 'add-attribute-to-product',
                     'uses' => 'ProductController@postAddAttributeToProduct',
-                ]);
+                ])->wherePrimaryKey();
 
                 Route::post('delete-version/{id}', [
                     'as' => 'delete-version',
                     'uses' => 'ProductController@deleteVersion',
-                ]);
+                ])->wherePrimaryKey();
 
                 Route::post('add-version/{id}', [
                     'as' => 'add-version',
                     'uses' => 'ProductController@postAddVersion',
-                ]);
+                ])->wherePrimaryKey();
 
                 Route::get('get-version-form/{id?}', [
                     'as' => 'get-version-form',
@@ -125,12 +121,12 @@ Route::group([
                 Route::post('update-version/{id}', [
                     'as' => 'update-version',
                     'uses' => 'ProductController@postUpdateVersion',
-                ]);
+                ])->wherePrimaryKey();
 
                 Route::post('generate-all-version/{id}', [
                     'as' => 'generate-all-versions',
                     'uses' => 'ProductController@postGenerateAllVersions',
-                ]);
+                ])->wherePrimaryKey();
 
                 Route::post('store-related-attributes/{id}', [
                     'as' => 'store-related-attributes',
@@ -140,7 +136,7 @@ Route::group([
                 Route::post('save-all-version/{id}', [
                     'as' => 'save-all-versions',
                     'uses' => 'ProductController@postSaveAllVersions',
-                ]);
+                ])->wherePrimaryKey();
 
                 Route::get('get-list-product-for-search', [
                     'as' => 'get-list-product-for-search',
@@ -171,20 +167,30 @@ Route::group([
                     'as' => 'update-order-by',
                     'uses' => 'ProductController@postUpdateOrderby',
                 ]);
+
+                Route::post('product-variations/{id}', [
+                    'as' => 'product-variations',
+                    'uses' => 'ProductController@getProductVariations',
+                ])->wherePrimaryKey();
+
+                Route::get('product-attribute-sets/{id?}', [
+                    'as' => 'product-attribute-sets',
+                    'uses' => 'ProductController@getProductAttributeSets',
+                ])->wherePrimaryKey();
+
+                Route::post('set-default-product-variation/{id}', [
+                    'as' => 'set-default-product-variation',
+                    'uses' => 'ProductController@setDefaultProductVariation',
+                ])->wherePrimaryKey();
             });
 
             Route::group(['prefix' => 'orders', 'as' => 'orders.'], function () {
                 Route::resource('', 'OrderController')->parameters(['' => 'order'])->except(['create', 'store']);
 
-                Route::delete('items/destroy', [
-                    'as' => 'deletes',
-                    'uses' => 'OrderController@deletes',
-                ]);
-
                 Route::get('generate-invoice/{id}', [
                     'as' => 'generate-invoice',
                     'uses' => 'OrderController@getGenerateInvoice',
-                ]);
+                ])->wherePrimaryKey();
 
                 Route::post('confirm', [
                     'as' => 'confirm',
@@ -194,50 +200,46 @@ Route::group([
                 Route::post('send-order-confirmation-email/{id}', [
                     'as' => 'send-order-confirmation-email',
                     'uses' => 'OrderController@postResendOrderConfirmationEmail',
-                ]);
+                ])->wherePrimaryKey();
 
                 Route::post('update-shipping-address/{id}', [
                     'as' => 'update-shipping-address',
                     'uses' => 'OrderController@postUpdateShippingAddress',
-                ]);
+                ])->wherePrimaryKey();
 
                 Route::post('cancel-order/{id}', [
                     'as' => 'cancel',
                     'uses' => 'OrderController@postCancelOrder',
-                ]);
+                ])->wherePrimaryKey();
 
                 Route::post('update-shipping-status/{id}', [
                     'as' => 'update-shipping-status',
-                    'uses' => 'OrderController@updateShippingStatus',
-                    'permission' => 'orders.edit',
-                ]);
+                    'uses' => 'ShipmentController@postUpdateStatus',
+                ])->wherePrimaryKey();
             });
 
             Route::group(['prefix' => 'order-returns', 'as' => 'order-returns.'], function () {
                 Route::resource('', 'OrderReturnController')->parameters(['' => 'order'])->except(['create', 'store']);
+            });
 
-                Route::delete('items/destroy', [
-                    'as' => 'deletes',
-                    'uses' => 'OrderReturnController@deletes',
-                ]);
+            Route::group(['prefix' => 'shipments', 'as' => 'shipments.'], function () {
+                Route::resource('', 'ShipmentController')
+                    ->parameters(['' => 'shipment'])
+                    ->except(['create', 'store']);
+
+                Route::post('update-cod-status/{id}', [
+                    'as' => 'update-cod-status',
+                    'uses' => 'ShipmentController@postUpdateCodStatus',
+                ])->wherePrimaryKey();
             });
 
             Route::group(['prefix' => 'coupons', 'as' => 'discounts.'], function () {
                 Route::resource('', 'DiscountController')->parameters(['' => 'coupon'])->except(['edit', 'update']);
 
-                Route::delete('items/destroy', [
-                    'as' => 'deletes',
-                    'uses' => 'DiscountController@deletes',
-                ]);
-
                 Route::post('generate-coupon', [
                     'as' => 'generate-coupon',
                     'uses' => 'DiscountController@postGenerateCoupon',
                 ]);
-            });
-            Route::group(['prefix' => 'enquiries', 'as' => 'enquiries.'], function () {
-                Route::resource('', 'EnquiryController')
-                    ->parameters(['' => 'product']);
             });
 
             Route::get('ajax/product-options', [
@@ -276,22 +278,6 @@ Route::group([
         Route::get('tags/all', [
             'as' => 'tags.all',
             'uses' => 'ProductTagController@getAllTags',
-        ]);
-    });
-});
-
-Route::group([
-    'namespace' => 'Botble\LanguageAdvanced\Http\Controllers',
-    'middleware' => ['web', 'core'],
-], function () {
-    Route::group([
-        'prefix' => 'vendor',
-        'as' => 'marketplace.vendor.',
-        'middleware' => ['vendor'],
-    ], function () {
-        Route::post('language-advanced/save/{id}', [
-            'as' => 'language-advanced.save',
-            'uses' => 'LanguageAdvancedController@save',
         ]);
     });
 });

@@ -64,18 +64,18 @@ Dropdown Menu
             line-height: 18px;
             white-space: nowrap;
 
-            > [class^="fa-"],
-            > [class*=" fa-"] {
+            > [class^='fa-'],
+            > [class*=' fa-'] {
                 color: #888888;
             }
 
-            > [class^="icon-"],
-            > [class*=" icon-"] {
+            > [class^='icon-'],
+            > [class*=' icon-'] {
                 color: #666666;
             }
 
-            > [class^="glyphicon-"],
-            > [class*=" glyphicon-"] {
+            > [class^='glyphicon-'],
+            > [class*=' glyphicon-'] {
                 color: #888888;
             }
         }
@@ -124,7 +124,6 @@ Dropdown Menu
 .dropdown-toggle,
 .btn-group {
     > .dropdown-menu {
-
         margin-top: 10px;
 
         &:before {
@@ -206,9 +205,9 @@ Dropdown Menu
         font-size: 14px;
         right: 7px;
         top: 7px;
-        font-family: Font Awesome\ 5 Free;
+        font-family: 'Font Awesome 6 Free';
         height: auto;
-        content: "\f105";
+        content: '\f105';
         font-weight: 900;
     }
 
@@ -259,10 +258,10 @@ Dropdown Menu
         margin-right: -1px;
         margin-left: 0;
     }
-
 }
 
-@media (max-width: $screen-xs-max) { /* 767px */
+@media (max-width: $screen-xs-max) {
+    /* 767px */
 
     .navbar-nav {
         .open {

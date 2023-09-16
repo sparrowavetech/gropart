@@ -73,5 +73,4 @@ Notes
     &.note-danger {
         @include note-variant($state-danger-text, $state-danger-bg, $state-danger-border);
     }
-
 }

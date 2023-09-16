@@ -27,7 +27,7 @@ class ShortcodeController extends BaseController
             $content = $compiler->getContent();
         }
 
-        if ($data instanceof Closure) {
+        if ($data instanceof Closure || is_callable($data)) {
             $data = call_user_func($data, $attributes, $content);
         }
 

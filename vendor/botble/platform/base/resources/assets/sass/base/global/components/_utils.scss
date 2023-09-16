@@ -80,7 +80,7 @@ Utilities
 }
 
 .fix-margin {
-    margin-left: 0px !important
+    margin-left: 0px !important;
 }
 
 .border {
@@ -355,13 +355,13 @@ Separated List
     margin-bottom: 15px;
 
     > div {
-
         &:last-child {
             border-right: 0;
         }
     }
 
-    @media (max-width: $screen-xs-max) { /* 767px */
+    @media (max-width: $screen-xs-max) {
+        /* 767px */
         > div {
             margin-bottom: 20px;
         }
@@ -446,7 +446,6 @@ General User Record Listing
 ***/
 
 .general-item-list {
-
     > .item {
         padding: 10px 0;
         border-bottom: 1px solid #f1f4f7;

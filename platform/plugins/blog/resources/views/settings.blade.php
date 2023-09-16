@@ -16,7 +16,7 @@
             'NewsArticle' => 'NewsArticle',
             'News' => 'News',
             'Article' => 'Article',
-            'BlogPosting' => 'BlogPosting'
+            'BlogPosting' => 'BlogPosting',
         ]"
         :value="setting('blog_post_schema_type', 'NewsArticle')"
     />

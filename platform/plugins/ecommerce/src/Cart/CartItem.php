@@ -3,21 +3,17 @@
 namespace Botble\Ecommerce\Cart;
 
 use Botble\Ecommerce\Cart\Contracts\Buyable;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Carbon\Carbon;
-use EcommerceHelper;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use InvalidArgumentException;
 
 class CartItem implements Arrayable, Jsonable
 {
-    /**
-     * The rowID of the cart item.
-     *
-     * @var string
-     */
-    public $rowId;
+    public string $rowId;
 
     /**
      * The ID of the cart item.
@@ -50,7 +46,7 @@ class CartItem implements Arrayable, Jsonable
     /**
      * The options for this cart item.
      *
-     * @var array
+     * @var array|Collection
      */
     public $options;
 
@@ -81,16 +77,16 @@ class CartItem implements Arrayable, Jsonable
         if (empty($id)) {
             throw new InvalidArgumentException('Please supply a valid identifier.');
         }
+
         if (empty($name)) {
             throw new InvalidArgumentException('Please supply a valid name.');
         }
-        if (! is_numeric($price)) {
-            throw new InvalidArgumentException('Please supply a valid price.');
-        }
+
+        $price = floatval($price);
 
         $this->id = $id;
         $this->name = $name;
-        $this->price = floatval($price);
+        $this->price = $price;
         $this->options = new CartItemOptions($options);
         $this->rowId = $this->generateRowId($id, $options);
         $this->created_at = Carbon::now();
@@ -99,20 +95,16 @@ class CartItem implements Arrayable, Jsonable
 
     /**
      * Returns the formatted price without TAX.
-     *
-     * @return string
      */
-    public function price()
+    public function price(): string
     {
         return format_price($this->price);
     }
 
     /**
      * Returns the formatted price with TAX.
-     *
-     * @return string
      */
-    public function priceTax()
+    public function priceTax(): string
     {
         return format_price($this->priceTax);
     }
@@ -209,7 +201,7 @@ class CartItem implements Arrayable, Jsonable
      * Associate the cart item with the given model.
      *
      * @param mixed $model
-     * @return CartItem
+     * @return \Botble\Ecommerce\Cart\CartItem
      */
     public function associate($model)
     {
@@ -222,13 +214,18 @@ class CartItem implements Arrayable, Jsonable
      * Set the tax rate.
      *
      * @param int|float $taxRate
-     * @return CartItem
+     * @return \Botble\Ecommerce\Cart\CartItem
      */
     public function setTaxRate($taxRate)
     {
         $this->taxRate = $taxRate;
 
         return $this;
+    }
+
+    public function getTaxRate(): float
+    {
+        return $this->taxRate;
     }
 
     /**
@@ -247,21 +244,12 @@ class CartItem implements Arrayable, Jsonable
             if (! EcommerceHelper::isTaxEnabled()) {
                 return 0;
             }
-            if(setting('ecommerce_display_product_price_including_taxes') == 1){
-                return $this->price;
-            }else{
-                return $this->price + $this->tax;
-            }
 
+            return $this->price + $this->tax;
         }
 
         if ($attribute === 'subtotal') {
-            if(setting('ecommerce_display_product_price_including_taxes') == 1){
-                return $this->qty * ($this->price - $this->tax);
-            }else{
-                return $this->qty * $this->price;
-            }
-
+            return $this->qty * $this->price;
         }
 
         if ($attribute === 'total') {
@@ -272,11 +260,8 @@ class CartItem implements Arrayable, Jsonable
             if (! EcommerceHelper::isTaxEnabled()) {
                 return 0;
             }
-            if(setting('ecommerce_display_product_price_including_taxes') == 1){
-                return $this->price - ($this->price * (100/(100 + $this->taxRate)));
-            }else{
-                return $this->price * ($this->taxRate / 100);
-            }
+
+            return $this->price * ($this->taxRate / 100);
         }
 
         if ($attribute === 'taxTotal') {
@@ -288,7 +273,7 @@ class CartItem implements Arrayable, Jsonable
         }
 
         if ($attribute === 'model') {
-            return with(new $this->associatedModel())->find($this->id);
+            return (new $this->associatedModel())->find($this->id);
         }
 
         return null;
@@ -299,7 +284,7 @@ class CartItem implements Arrayable, Jsonable
      *
      * @param Buyable $item
      * @param array $options
-     * @return CartItem
+     * @return \Botble\Ecommerce\Cart\CartItem
      */
     public static function fromBuyable(Buyable $item, array $options = [])
     {
@@ -315,7 +300,7 @@ class CartItem implements Arrayable, Jsonable
      * Create a new instance from the given array.
      *
      * @param array $attributes
-     * @return CartItem
+     * @return \Botble\Ecommerce\Cart\CartItem
      */
     public static function fromArray(array $attributes)
     {
@@ -331,7 +316,7 @@ class CartItem implements Arrayable, Jsonable
      * @param string $name
      * @param float $price
      * @param array $options
-     * @return CartItem
+     * @return \Botble\Ecommerce\Cart\CartItem
      */
     public static function fromAttributes($id, $name, $price, array $options = [])
     {

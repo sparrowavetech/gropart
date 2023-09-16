@@ -12,7 +12,10 @@
         </div>
         <div class="col-md-3">
             <div class="primary-sidebar">
-                <aside class="widget-area" id="primary-sidebar">
+                <aside
+                    class="widget-area"
+                    id="primary-sidebar"
+                >
                     {!! dynamic_sidebar('primary_sidebar') !!}
                 </aside>
             </div>

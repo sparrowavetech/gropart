@@ -15,7 +15,11 @@
         @foreach ($order->digitalProducts() as $orderProduct)
             <tr>
                 <td>
-                    <img src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb') }}" alt="{{ $orderProduct->product_image }}" width="50">
+                    <img
+                        src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb') }}"
+                        alt="{{ $orderProduct->product_image }}"
+                        width="50"
+                    >
                 </td>
                 <td>
                     <span>{{ $orderProduct->product_name }}</span>
@@ -36,4 +40,3 @@
         @endforeach
     </table><br>
 </div>
-

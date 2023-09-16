@@ -12,7 +12,11 @@
         @foreach ($products as $product)
             <tr>
                 <td>
-                    <img src="{{ RvMedia::getImageUrl($product->image, 'thumb') }}" alt="{{ $product->name }}" width="50">
+                    <img
+                        src="{{ RvMedia::getImageUrl($product->image, 'thumb') }}"
+                        alt="{{ $product->name }}"
+                        width="50"
+                    >
                 </td>
                 <td>
                     <a href="{{ route('public.product.review', $product->slug) }}">{{ $product->name }}</a>
@@ -21,4 +25,3 @@
         @endforeach
     </table><br>
 </div>
-

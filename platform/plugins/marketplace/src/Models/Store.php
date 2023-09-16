@@ -4,24 +4,24 @@ namespace Botble\Marketplace\Models;
 
 use Botble\Base\Casts\SafeContent;
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Marketplace\Enums\ShopTypeEnum;
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Supports\Avatar;
-use Botble\Base\Traits\EnumCastable;
 use Botble\Ecommerce\Models\Customer;
 use Botble\Ecommerce\Models\Discount;
 use Botble\Ecommerce\Models\Order;
-use Botble\Ecommerce\Models\Enquiry;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Traits\LocationTrait;
+use Botble\Media\Facades\RvMedia;
 use Exception;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use RvMedia;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class Store extends BaseModel
 {
-    use EnumCastable;
     use LocationTrait;
 
     protected $table = 'mp_stores';
@@ -41,27 +41,29 @@ class Store extends BaseModel
         'status',
         'company',
         'zip_code',
-        'is_verified',
-        'shop_category'
     ];
 
     protected $casts = [
         'status' => BaseStatusEnum::class,
-        'shop_category' => ShopTypeEnum::class,
         'name' => SafeContent::class,
         'description' => SafeContent::class,
         'content' => SafeContent::class,
         'address' => SafeContent::class,
     ];
 
-    protected static function boot()
+    protected static function booted(): void
     {
-        parent::boot();
-
         self::deleting(function (Store $store) {
-            Product::where('store_id', $store->id)->delete();
-            Discount::where('store_id', $store->id)->delete();
-            Order::where('store_id', $store->id)->update(['store_id' => null]);
+            $store->products()->delete();
+            $store->discounts()->delete();
+            $store->orders()->update(['store_id' => null]);
+        });
+
+        static::deleted(function (Store $store) {
+            $folder = Storage::path($store->upload_folder);
+            if (File::isDirectory($folder) && Str::endsWith($store->upload_folder, '/' . $store->id)) {
+                File::deleteDirectory($folder);
+            }
         });
     }
 
@@ -78,6 +80,11 @@ class Store extends BaseModel
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class)->where('is_finished', 1);
+    }
+
+    public function discounts(): HasMany
+    {
+        return $this->hasMany(Discount::class, 'store_id');
     }
 
     public function getLogoUrlAttribute(): ?string
@@ -100,8 +107,66 @@ class Store extends BaseModel
             ->join('ec_reviews', 'ec_products.id', '=', 'ec_reviews.product_id');
     }
 
-    public function enquires(): HasMany
+    protected function uploadFolder(): Attribute
     {
-        return $this->hasMany(Enquiry::class);
+        return Attribute::make(
+            get: function () {
+                $folder = $this->id ? 'stores/' . $this->id : 'stores';
+
+                return apply_filters('marketplace_store_upload_folder', $folder, $this);
+            }
+        );
+    }
+
+    public static function handleCommissionEachCategory(array $data): array
+    {
+        $commissions = [];
+        CategoryCommission::query()->truncate();
+        foreach ($data as $datum) {
+            if (! $datum['categories']) {
+                continue;
+            }
+
+            $categories = json_decode($datum['categories'], true);
+
+            if (! is_array($categories) || ! count($categories)) {
+                continue;
+            }
+
+            foreach ($categories as $category) {
+                $commission = CategoryCommission::query()->firstOrNew([
+                    'product_category_id' => $category['id'],
+                ]);
+
+                if (! $commission) {
+                    continue;
+                }
+
+                $commission->commission_percentage = $datum['commission_fee'];
+                $commission->save();
+                $commissions[] = $commission;
+            }
+        }
+
+        return $commissions;
+    }
+
+    public static function getCommissionEachCategory(): array
+    {
+        $commissions = CategoryCommission::query()->with(['category'])->get();
+        $data = [];
+        foreach ($commissions as $commission) {
+            if (! $commission->category) {
+                continue;
+            }
+
+            $data[$commission->commission_percentage]['commission_fee'] = $commission->commission_percentage;
+            $data[$commission->commission_percentage]['categories'][] = [
+                'id' => $commission->product_category_id,
+                'value' => $commission->category->name,
+            ];
+        }
+
+        return $data;
     }
 }

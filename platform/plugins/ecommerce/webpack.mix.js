@@ -48,6 +48,7 @@ const scripts = [
     'bulk-import.js',
     'export.js',
     'address.js',
+    'tax.js',
 ];
 
 scripts.forEach(item => {

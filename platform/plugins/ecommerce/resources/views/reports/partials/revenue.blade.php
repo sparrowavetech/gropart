@@ -4,6 +4,7 @@
         top: -52px;
         right: 80px;
     }
+
     .change-date-range .btn {
         padding: 5px 10px;
         border-radius: 0 !important;
@@ -11,8 +12,16 @@
 </style>
 <div class="col-12">
     <div class="btn-group change-date-range">
-        <a class="btn btn-sm btn-secondary" href="javascript:;" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="fa fa-filter" aria-hidden="true"></i>
+        <a
+            class="btn btn-sm btn-secondary"
+            data-bs-toggle="dropdown"
+            href="javascript:;"
+            aria-expanded="false"
+        >
+            <i
+                class="fa fa-filter"
+                aria-hidden="true"
+            ></i>
             <span>{{ $defaultRange }}</span>
             <i class="fa fa-angle-down "></i>
         </a>
@@ -45,4 +54,3 @@
         @include('core/dashboard::partials.no-data')
     @endif
 </div>
-

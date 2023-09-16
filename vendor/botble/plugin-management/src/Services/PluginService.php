@@ -76,22 +76,14 @@ class PluginService
         if (! in_array($plugin, $activatedPlugins)) {
             $requiredPlugins = $this->getDependencies($plugin);
 
-            if ($requiredPlugins) {
-                $installedPluginIds = $this->getInstalledPluginIds();
-
-                foreach ($requiredPlugins as $requiredPlugin) {
-                    if (! array_key_exists($requiredPlugin, $installedPluginIds)) {
-                        return [
-                            'error' => true,
-                            'message' => trans(
-                                'packages/plugin-management::plugin.missing_required_plugins',
-                                ['plugins' => implode(',', $requiredPlugins)]
-                            ),
-                        ];
-                    }
-
-                    $this->activate(Str::afterLast('/', $requiredPlugin));
-                }
+            if ($missingPlugins = array_diff($requiredPlugins, $activatedPlugins)) {
+                return [
+                    'error' => true,
+                    'message' => trans(
+                        'packages/plugin-management::plugin.missing_required_plugins',
+                        ['plugins' => implode(',', $missingPlugins)]
+                    ),
+                ];
             }
 
             if (! class_exists($content['provider'])) {

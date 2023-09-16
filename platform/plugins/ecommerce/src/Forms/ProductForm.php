@@ -2,62 +2,47 @@
 
 namespace Botble\Ecommerce\Forms;
 
-use Assets;
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\Html;
 use Botble\Base\Forms\Fields\MultiCheckListField;
 use Botble\Base\Forms\Fields\TagField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Enums\GlobalOptionEnum;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
+use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Facades\ProductCategoryHelper;
 use Botble\Ecommerce\Forms\Fields\CategoryMultiField;
 use Botble\Ecommerce\Http\Requests\ProductRequest;
+use Botble\Ecommerce\Models\Brand;
+use Botble\Ecommerce\Models\GlobalOption;
 use Botble\Ecommerce\Models\Product;
-use Botble\Ecommerce\Repositories\Interfaces\BrandInterface;
-use Botble\Ecommerce\Repositories\Interfaces\GlobalOptionInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeSetInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductCollectionInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductLabelInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductVariationInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductVariationItemInterface;
-use Botble\Ecommerce\Repositories\Interfaces\TaxInterface;
-use EcommerceHelper;
-use Html;
-use Illuminate\Support\Collection;
-use ProductCategoryHelper;
+use Botble\Ecommerce\Models\ProductAttributeSet;
+use Botble\Ecommerce\Models\ProductCollection;
+use Botble\Ecommerce\Models\ProductLabel;
+use Botble\Ecommerce\Models\ProductVariation;
+use Botble\Ecommerce\Models\Tax;
+use Botble\Ecommerce\Tables\ProductVariationTable;
 
 class ProductForm extends FormAbstract
 {
-    public function buildForm()
+    public function buildForm(): void
     {
-        Assets::addStyles(['datetimepicker'])
-            ->addScripts([
-                'moment',
-                'datetimepicker',
-                'jquery-ui',
-                'input-mask',
-                'blockui',
-            ])
-            ->addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
-            ->addScriptsDirectly([
-                'vendor/core/plugins/ecommerce/js/edit-product.js',
-                'vendor/core/plugins/ecommerce/js/product-option.js',
-            ]);
+        $this->addAssets();
 
-        $brands = app(BrandInterface::class)->pluck('name', 'id');
+        $brands = Brand::query()->pluck('name', 'id')->all();
         $brands = [0 => trans('plugins/ecommerce::brands.no_brand')] + $brands;
 
-        $productCollections = app(ProductCollectionInterface::class)->pluck('name', 'id');
+        $productCollections = ProductCollection::query()->pluck('name', 'id')->all();
 
-        $productLabels = app(ProductLabelInterface::class)->pluck('name', 'id');
+        $productLabels = ProductLabel::query()->pluck('name', 'id')->all();
 
         $productId = null;
         $selectedCategories = [];
         $selectedProductCollections = [];
         $selectedProductLabels = [];
-        $productVariations = [];
         $tags = null;
+        $totalProductVariations = 0;
 
         if ($this->getModel()) {
             $productId = $this->getModel()->id;
@@ -68,15 +53,11 @@ class ProductForm extends FormAbstract
                 ->pluck('product_collection_id')
                 ->all();
             $selectedProductLabels = $this->getModel()->productLabels()->pluck('product_label_id')->all();
-            $productVariations = app(ProductVariationInterface::class)->allBy([
-                'configurable_product_id' => $productId,
-            ]);
 
-            $tags = $this->getModel()->tags()->pluck('name')->all();
-            $tags = implode(',', $tags);
+            $totalProductVariations = ProductVariation::query()->where('configurable_product_id', $productId)->count();
+
+            $tags = $this->getModel()->tags()->pluck('name')->implode(',');
         }
-
-        $productAttributeSets = app(ProductAttributeSetInterface::class)->getAllWithSelected($productId);
 
         $this
             ->setupModel(new Product())
@@ -140,15 +121,10 @@ class ProductForm extends FormAbstract
                 'label_attr' => ['class' => 'control-label'],
                 'default_value' => false,
             ])
-            ->add('is_enquiry', 'onOff', [
-                'label'         => trans('plugins/ecommerce::products.form.is_enquiry'),
-                'label_attr'    => ['class' => 'control-label'],
-                'default_value' => false,
-            ])
             ->add('categories[]', 'categoryMulti', [
                 'label' => trans('plugins/ecommerce::products.form.categories'),
                 'label_attr' => ['class' => 'control-label'],
-                'choices' => ProductCategoryHelper::getAllProductCategoriesWithChildren(),
+                'choices' => ProductCategoryHelper::getActiveTreeCategories(),
                 'value' => old('categories', $selectedCategories),
             ])
             ->add('brand_id', 'customSelect', [
@@ -174,7 +150,7 @@ class ProductForm extends FormAbstract
             ]);
 
         if (EcommerceHelper::isTaxEnabled()) {
-            $taxes = app(TaxInterface::class)->all()->pluck('title_with_percentage', 'id');
+            $taxes = Tax::query()->get()->pluck('title_with_percentage', 'id')->all();
 
             $selectedTaxes = [];
             if ($this->getModel() && $this->getModel()->id) {
@@ -191,14 +167,6 @@ class ProductForm extends FormAbstract
             ]);
         }
 
-        $globalOptions = app(GlobalOptionInterface::class)->select(['name', 'id'])->get();
-
-        $globalOptionArray = [];
-
-        foreach ($globalOptions as $globalOption) {
-            $globalOptionArray[$globalOption->id] = $globalOption->name;
-        }
-
         $this
             ->add('tag', 'tags', [
                 'label' => trans('plugins/ecommerce::products.form.tags'),
@@ -209,24 +177,39 @@ class ProductForm extends FormAbstract
                     'data-url' => route('product-tag.all'),
                 ],
             ])
-            ->setBreakFieldPoint('status')
+            ->setBreakFieldPoint('status');
+
+        if (EcommerceHelper::isEnabledProductOptions()) {
+            $this
+                ->addMetaBoxes([
+                    'product_options_box' => [
+                        'title' => trans('plugins/ecommerce::product-option.name'),
+                        'content' => view('plugins/ecommerce::products.partials.product-option-form', [
+                            'options' => GlobalOptionEnum::options(),
+                            'globalOptions' => GlobalOption::query()->pluck('name', 'id')->all(),
+                            'product' => $this->getModel(),
+                            'routes' => [
+                                'ajax_option_info' => route('global-option.ajaxInfo'),
+                            ],
+                        ]),
+                        'priority' => 4,
+                    ],
+                ]);
+        }
+
+        $productAttributeSets = ProductAttributeSet::getAllWithSelected($productId, []);
+
+        $this
             ->addMetaBoxes([
-                'product_options_box' => [
-                    'title' => trans('plugins/ecommerce::product-option.name'),
-                    'content' => view('plugins/ecommerce::products.partials.product-option-form', [
-                        'options' => GlobalOptionEnum::options(),
-                        'globalOptions' => $globalOptionArray,
-                        'product' => $this->getModel(),
-                        'routes' => [
-                            'ajax_option_info' => route('global-option.ajaxInfo'),
-                        ],
-                    ]),
-                    'priority' => 4,
+                'attribute-sets' => [
+                    'content' => '',
+                    'before_wrapper' => '<div class="d-none product-attribute-sets-url" data-url="' . route('products.product-attribute-sets') . '">',
+                    'after_wrapper' => '</div>',
+                    'priority' => 3,
                 ],
             ]);
 
-        if (empty($productVariations) || $productVariations->isEmpty()) {
-            $attributeSetId = $productAttributeSets->first() ? $productAttributeSets->first()->id : 0;
+        if (! $totalProductVariations) {
             $this
                 ->removeMetaBox('variations')
                 ->addMetaBoxes([
@@ -239,63 +222,69 @@ class ProductForm extends FormAbstract
                                 'isVariation' => false,
                                 'originalProduct' => null,
                             ]
-                        )->render(),
+                        ),
                         'before_wrapper' => '<div id="main-manage-product-type">',
                         'priority' => 2,
                     ],
                     'attributes' => [
                         'title' => trans('plugins/ecommerce::products.attributes'),
                         'content' => view('plugins/ecommerce::products.partials.add-product-attributes', [
-                            'productAttributeSets' => $productAttributeSets,
-                            'productAttributes' => $this->getProductAttributes($attributeSetId),
-                            'attributeSetId' => $attributeSetId,
                             'product' => $this->getModel(),
-                        ])->render(),
+                            'productAttributeSets' => $productAttributeSets,
+                            'addAttributeToProductUrl' => $this->getModel()->id ? route('products.add-attribute-to-product', $this->getModel()->id) : null,
+                        ]),
                         'after_wrapper' => '</div>',
                         'priority' => 3,
                     ],
                 ]);
         } elseif ($productId) {
-            $productVariationsInfo = [];
-            $productsRelatedToVariation = [];
+            $productVariationTable = app(ProductVariationTable::class)
+                ->setProductId($productId)
+                ->setProductAttributeSets($productAttributeSets);
 
-            if ($this->getModel()) {
-                $productVariationsInfo = app(ProductVariationItemInterface::class)
-                    ->getVariationsInfo($productVariations->pluck('id')->toArray());
-
-                $productsRelatedToVariation = app(ProductInterface::class)->getProductVariations($productId);
+            if (EcommerceHelper::isEnabledSupportDigitalProducts() && $this->getModel()->isTypeDigital()) {
+                $productVariationTable->isDigitalProduct();
             }
+
             $this
                 ->removeMetaBox('general')
-                ->removeMetaBox('attributes')
                 ->addMetaBoxes([
                     'variations' => [
                         'title' => trans('plugins/ecommerce::products.product_has_variations'),
                         'content' => view('plugins/ecommerce::products.partials.configurable', [
-                            'productAttributeSets' => $productAttributeSets,
-                            'productVariations' => $productVariations,
-                            'productVariationsInfo' => $productVariationsInfo,
-                            'productsRelatedToVariation' => $productsRelatedToVariation,
                             'product' => $this->getModel(),
-                        ])->render(),
+                            'productAttributeSets' => $productAttributeSets,
+                            'productVariationTable' => $productVariationTable,
+                        ]),
                         'before_wrapper' => '<div id="main-manage-product-type">',
                         'after_wrapper' => '</div>',
-                        'priority' => 4,
+                        'priority' => 3,
+                        'render' => false,
                     ],
                 ]);
         }
+
+        if ($productId && is_in_admin(true)) {
+            add_filter('base_action_form_actions_extra', function () {
+                return view('plugins/ecommerce::forms.duplicate-action', ['product' => $this->getModel()])->render();
+            });
+        }
     }
 
-    public function getProductAttributes(?int $attributeSetId): Collection
+    public function addAssets(): void
     {
-        $params = ['order_by' => ['order' => 'ASC']];
-
-        if ($attributeSetId) {
-            $params['condition'] = [
-                ['attribute_set_id', '=', $attributeSetId],
-            ];
-        }
-
-        return app(ProductAttributeInterface::class)->advancedGet($params);
+        Assets::addStyles(['datetimepicker'])
+            ->addScripts([
+                'moment',
+                'datetimepicker',
+                'jquery-ui',
+                'input-mask',
+                'blockui',
+            ])
+            ->addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
+            ->addScriptsDirectly([
+                'vendor/core/plugins/ecommerce/js/edit-product.js',
+                'vendor/core/plugins/ecommerce/js/product-option.js',
+            ]);
     }
 }

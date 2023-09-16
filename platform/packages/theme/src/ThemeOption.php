@@ -6,9 +6,9 @@ use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Form;
 use Botble\Language\Facades\Language;
 use Botble\Setting\Facades\Setting;
-use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
+use Throwable;
 
 class ThemeOption
 {
@@ -433,12 +433,14 @@ class ThemeOption
     public function renderField(array $field): string|null
     {
         try {
-            if ($this->hasOption($field['attributes']['name'])) {
-                $field['attributes']['value'] = $this->getOption($field['attributes']['name']);
+            $attributes = $field['attributes'];
+
+            if ($this->hasOption($attributes['name'])) {
+                $attributes['value'] = $this->getOption($attributes['name']);
             }
 
-            return call_user_func_array([Form::class, $field['type']], array_values($field['attributes']));
-        } catch (Exception $exception) {
+            return call_user_func_array([Form::class, $field['type']], array_values($attributes));
+        } catch (Throwable $exception) {
             info($exception->getMessage());
 
             return null;

@@ -78,4 +78,106 @@ class ProductVariation extends BaseModel
             }
         });
     }
+
+    public static function getVariationByAttributes(int|string $configurableProductId, array $attributes)
+    {
+        return self::query()
+            ->where('configurable_product_id', $configurableProductId)
+            ->whereHas('variationItems', function ($query) use ($attributes) {
+                $query->whereIn('attribute_id', array_unique($attributes));
+            }, '=', count(array_unique($attributes)))
+            ->with('variationItems')
+            ->first();
+    }
+
+    public static function getVariationByAttributesOrCreate(int|string $configurableProductId, array $attributes): array
+    {
+        $variation = self::getVariationByAttributes($configurableProductId, $attributes);
+
+        if (! $variation) {
+            $variation = self::query()->create([
+                'configurable_product_id' => $configurableProductId,
+            ]);
+
+            foreach ($attributes as $attribute) {
+                ProductVariationItem::query()->create([
+                    'attribute_id' => $attribute,
+                    'variation_id' => $variation->id,
+                ]);
+            }
+
+            return [
+                'variation' => $variation,
+                'created' => true,
+            ];
+        }
+
+        return [
+            'variation' => $variation,
+            'created' => false,
+        ];
+    }
+
+    public static function correctVariationItems($configurableProductId, array $attributes)
+    {
+        if (! $attributes) {
+            $attributes = [0];
+        }
+
+        $items = ProductVariationItem::query()
+            ->join(
+                'ec_product_variations',
+                'ec_product_variations.id',
+                '=',
+                'ec_product_variation_items.variation_id'
+            )
+            ->whereRaw(
+                'ec_product_variation_items.id IN
+                (
+                    SELECT ec_product_variation_items.id
+                    FROM ec_product_variation_items
+                    JOIN ec_product_variations ON ec_product_variations.id = ec_product_variation_items.variation_id
+                    WHERE ec_product_variations.configurable_product_id = ' . $configurableProductId . '
+                    AND ec_product_variation_items.attribute_id NOT IN (' . implode(',', $attributes) . ')
+                )
+            '
+            )
+            ->where('ec_product_variations.configurable_product_id', $configurableProductId)
+            ->distinct()
+            ->pluck('ec_product_variation_items.id')
+            ->all();
+
+        return ProductVariationItem::query()->whereIn('id', $items)->delete();
+    }
+
+    public static function getParentOfVariation(int|string $variationId, array $with = []): Product|null
+    {
+        $variation = self::query()
+            ->where('product_id', $variationId);
+
+        $variation = $variation->first();
+
+        if (empty($variation)) {
+            return Product::query()->with($with)->find($variationId);
+        }
+
+        return Product::query()->with($with)->find($variation->configurable_product_id);
+    }
+
+    public static function getAttributeIdsOfChildrenProduct(int|string $productId): array
+    {
+        return self::query()
+            ->join(
+                'ec_product_variation_items',
+                'ec_product_variation_items.variation_id',
+                '=',
+                'ec_product_variations.id'
+            )
+            ->distinct()
+            ->select('ec_product_variation_items.attribute_id')
+            ->where('ec_product_variations.product_id', $productId)
+            ->get()
+            ->pluck('attribute_id')
+            ->toArray();
+    }
 }

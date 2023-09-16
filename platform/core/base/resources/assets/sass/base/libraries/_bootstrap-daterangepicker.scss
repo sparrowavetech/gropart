@@ -30,7 +30,7 @@ Bootstrap Daterangepicker
     font-size: 14px;
 }
 
-.daterangepicker .ranges input[type="text"] {
+.daterangepicker .ranges input[type='text'] {
     width: 70px !important;
     font-size: 11px;
     vertical-align: middle;
@@ -73,9 +73,9 @@ Bootstrap Daterangepicker
 }
 
 .daterangepicker .fa-angle-right:before {
-    content: "\f105"#{'/*rtl:"\f104"*/'};
+    content: '\f105' #{'/*rtl:"\f104"*/'};
 }
 
 .daterangepicker .fa-angle-left:before {
-    content: "\f104"#{'/*rtl:"\f105"*/'};
+    content: '\f104' #{'/*rtl:"\f105"*/'};
 }

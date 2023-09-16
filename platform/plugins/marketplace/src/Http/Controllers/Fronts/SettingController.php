@@ -9,7 +9,6 @@ use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Http\Requests\SettingRequest;
 use Botble\Marketplace\Models\Store;
-use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
 use Botble\Media\Facades\RvMedia;
 use Botble\Slug\Facades\SlugHelper;
 use Illuminate\Contracts\Config\Repository;
@@ -32,7 +31,7 @@ class SettingController
         return MarketplaceHelper::view('dashboard.settings', compact('store'));
     }
 
-    public function saveSettings(SettingRequest $request, StoreInterface $storeRepository, BaseHttpResponse $response)
+    public function saveSettings(SettingRequest $request, BaseHttpResponse $response)
     {
         $store = auth('customer')->user()->store;
 
@@ -51,8 +50,7 @@ class SettingController
         }
 
         $store->fill($request->input());
-
-        $storeRepository->createOrUpdate($store);
+        $store->save();
 
         $customer = $store->customer;
 

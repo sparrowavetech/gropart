@@ -7,7 +7,11 @@
                     <div class="row align-items-center">
                         <div class="col-md-6">
                             @if ($invoice->company_logo)
-                                <img src="{{ RvMedia::getImageUrl($invoice->company_logo) }}" style="max-height: 150px;" alt="{{ $invoice->company_name }}">
+                                <img
+                                    src="{{ RvMedia::getImageUrl($invoice->company_logo) }}"
+                                    alt="{{ $invoice->company_name }}"
+                                    style="max-height: 150px;"
+                                >
                             @endif
                         </div>
                         <div class="col-md-6 text-end">
@@ -39,7 +43,8 @@
                         <hr>
                     </div>
                     <div class="col-lg-4">
-                        <strong class="text-brand">{{ trans('plugins/ecommerce::invoice.detail.code') }}:</strong> {{ $invoice->code }}
+                        <strong class="text-brand">{{ trans('plugins/ecommerce::invoice.detail.code') }}:</strong>
+                        {{ $invoice->code }}
                     </div>
                     @if ($invoice->created_at)
                         <div class="col-lg-4">
@@ -59,60 +64,77 @@
                 </div>
                 <table class="table table-striped mb-3">
                     <thead>
-                    <tr>
-                        <th>{{ trans('plugins/ecommerce::invoice.detail.description') }}</th>
-                        <th>{{ trans('plugins/ecommerce::invoice.detail.qty') }}</th>
-                        <th class="text-center">{{ trans('plugins/ecommerce::invoice.total_amount') }}</th>
-                    </tr>
+                        <tr>
+                            <th>{{ trans('plugins/ecommerce::invoice.detail.description') }}</th>
+                            <th>{{ trans('plugins/ecommerce::invoice.detail.qty') }}</th>
+                            <th class="text-center">{{ trans('plugins/ecommerce::invoice.total_amount') }}</th>
+                        </tr>
                     </thead>
                     <tbody>
-                    @foreach($invoice->items as $item)
-                        <tr>
-                            <td style="width: 70%">
-                                <p class="mb-0">{{ $item->name }}</p>
-                                @if ($item->description)
-                                    <small>{{ $item->description }}</small>
-                                @endif
-                            </td>
-                            <td style="width: 5%">{{ $item->qty }}</td>
-                            <td style="width: 25%" class="text-center">{{ format_price($item->amount) }}</td>
-                        </tr>
-                    @endforeach
+                        @foreach ($invoice->items as $item)
+                            <tr>
+                                <td style="width: 70%">
+                                    <p class="mb-0">{{ $item->name }}</p>
+                                    @if ($item->description)
+                                        <small>{{ $item->description }}</small>
+                                    @endif
+                                </td>
+                                <td style="width: 5%">{{ $item->qty }}</td>
+                                <td
+                                    class="text-center"
+                                    style="width: 25%"
+                                >{{ format_price($item->amount) }}</td>
+                            </tr>
+                        @endforeach
                     </tbody>
                     <tfoot>
-                    <tr>
-                        <th colspan="2" class="text-end">{{ trans('plugins/ecommerce::invoice.detail.sub_total') }}:</th>
-                        <th class="text-center">{{ format_price($invoice->sub_total) }}</th>
-                    </tr>
+                        <tr>
+                            <th
+                                class="text-end"
+                                colspan="2"
+                            >{{ trans('plugins/ecommerce::invoice.detail.sub_total') }}:</th>
+                            <th class="text-center">{{ format_price($invoice->sub_total) }}</th>
+                        </tr>
 
-                    @if ((float)$invoice->tax_amount > 0)
-                        <tr>
-                            <th colspan="2" class="text-end">{{ trans('plugins/ecommerce::invoice.detail.tax') }}:</th>
-                            <th class="text-center">{{ format_price($invoice->tax_amount) }}</th>
-                        </tr>
-                    @endif
+                        @if ((float) $invoice->tax_amount > 0)
+                            <tr>
+                                <th
+                                    class="text-end"
+                                    colspan="2"
+                                >{{ trans('plugins/ecommerce::invoice.detail.tax') }}:</th>
+                                <th class="text-center">{{ format_price($invoice->tax_amount) }}</th>
+                            </tr>
+                        @endif
 
-                    @if ((float)$invoice->shipping_amount > 0)
+                        @if ((float) $invoice->shipping_amount > 0)
+                            <tr>
+                                <th
+                                    class="text-end"
+                                    colspan="2"
+                                >{{ trans('plugins/ecommerce::invoice.detail.shipping_fee') }}:
+                                </th>
+                                <th class="text-center">{{ format_price($invoice->shipping_amount) }}</th>
+                            </tr>
+                        @endif
+                        @if ((float) $invoice->discount_amount > 0)
+                            <tr>
+                                <th
+                                    class="text-end"
+                                    colspan="2"
+                                >{{ trans('plugins/ecommerce::invoice.detail.discount') }}
+                                    :
+                                </th>
+                                <th class="text-center">{{ format_price($invoice->discount_amount) }}</th>
+                            </tr>
+                        @endif
                         <tr>
-                            <th colspan="2"
-                                class="text-end">{{ trans('plugins/ecommerce::invoice.detail.shipping_fee') }}:
+                            <th
+                                class="text-end"
+                                colspan="2"
+                            >{{ trans('plugins/ecommerce::invoice.detail.grand_total') }}:
                             </th>
-                            <th class="text-center">{{ format_price($invoice->shipping_amount) }}</th>
+                            <th class="text-center">{{ format_price($invoice->amount) }}</th>
                         </tr>
-                    @endif
-                    @if ((float)$invoice->discount_amount > 0)
-                        <tr>
-                            <th colspan="2" class="text-end">{{ trans('plugins/ecommerce::invoice.detail.discount') }}
-                                :
-                            </th>
-                            <th class="text-center">{{ format_price($invoice->discount_amount) }}</th>
-                        </tr>
-                    @endif
-                    <tr>
-                        <th colspan="2" class="text-end">{{ trans('plugins/ecommerce::invoice.detail.grand_total') }}:
-                        </th>
-                        <th class="text-center">{{ format_price($invoice->amount) }}</th>
-                    </tr>
                     </tfoot>
                 </table>
                 <div class="row">
@@ -120,13 +142,16 @@
                         <h5>{{ trans('plugins/ecommerce::invoice.detail.invoice_for') }}</h5>
                         <p class="font-sm">
                             @if ($invoice->created_at)
-                             <strong>{{ trans('plugins/ecommerce::invoice.detail.issue_at') }}:</strong> {{ $invoice->created_at->format('j F, Y') }}<br>
+                                <strong>{{ trans('plugins/ecommerce::invoice.detail.issue_at') }}:</strong>
+                                {{ $invoice->created_at->format('j F, Y') }}<br>
                             @endif
                             @if ($invoice->company_name)
-                                <strong>{{ trans('plugins/ecommerce::invoice.detail.invoice_to') }}:</strong> {{ $invoice->company_name }}<br>
+                                <strong>{{ trans('plugins/ecommerce::invoice.detail.invoice_to') }}:</strong>
+                                {{ $invoice->company_name }}<br>
                             @endif
                             @if ($invoice->customer_tax_id)
-                                <strong>{{ trans('plugins/ecommerce::invoice.detail.tax_id') }}:</strong> {{ $invoice->customer_tax_id }}<br>
+                                <strong>{{ trans('plugins/ecommerce::invoice.detail.tax_id') }}:</strong>
+                                {{ $invoice->customer_tax_id }}<br>
                             @endif
                         </p>
                     </div>
@@ -139,12 +164,18 @@
             </div>
         </div>
         <div class="card-footer text-center">
-            <a href="{{ route('customer.invoices.generate_invoice', ['id' => $invoice->id, 'type' => 'print']) }}" target="_blank"
-               class="btn btn-danger">
+            <a
+                class="btn btn-danger"
+                href="{{ route('customer.invoices.generate_invoice', ['id' => $invoice->id, 'type' => 'print']) }}"
+                target="_blank"
+            >
                 {{ trans('plugins/ecommerce::invoice.print') }}
             </a>
-            <a href="{{ route('customer.invoices.generate_invoice', ['id' => $invoice->id, 'type' => 'download']) }}"
-               target="_blank" class="btn btn-success">
+            <a
+                class="btn btn-success"
+                href="{{ route('customer.invoices.generate_invoice', ['id' => $invoice->id, 'type' => 'download']) }}"
+                target="_blank"
+            >
                 {{ trans('plugins/ecommerce::invoice.download') }}
             </a>
         </div>

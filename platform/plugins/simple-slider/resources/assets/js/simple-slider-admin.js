@@ -36,7 +36,9 @@ class SimpleSliderAdminManagement {
             })
         })
 
-        $table.closest('.widget-body').find('.btn-save-sort-order')
+        $table
+            .closest('.widget-body')
+            .find('.btn-save-sort-order')
             .off('click')
             .on('click', (event) => {
                 event.preventDefault()
@@ -74,7 +76,7 @@ class SimpleSliderAdminManagement {
 }
 
 $(document).ready(() => {
-    document.addEventListener('core-table-init-completed', function(event) {
+    document.addEventListener('core-table-init-completed', function (event) {
         new SimpleSliderAdminManagement().init(event.detail.table.prop('id'))
     })
 })

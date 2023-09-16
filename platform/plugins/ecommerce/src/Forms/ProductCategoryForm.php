@@ -4,21 +4,21 @@ namespace Botble\Ecommerce\Forms;
 
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Forms\FormAbstract;
+use Botble\Ecommerce\Facades\ProductCategoryHelper;
 use Botble\Ecommerce\Http\Requests\ProductCategoryRequest;
 use Botble\Ecommerce\Models\ProductCategory;
-use Botble\Ecommerce\Repositories\Interfaces\ProductCategoryInterface;
-use ProductCategoryHelper;
 
 class ProductCategoryForm extends FormAbstract
 {
-    public function buildForm()
+    public function buildForm(): void
     {
-        $categories = ProductCategoryHelper::getProductCategoriesWithIndentName();
+        $categories = ProductCategoryHelper::getTreeCategoriesOptions(ProductCategoryHelper::getActiveTreeCategories()->toArray());
+
         $categories = [0 => trans('plugins/ecommerce::product-categories.none')] + $categories;
 
-        $maxOrder = app(ProductCategoryInterface::class)->getModel()
+        $maxOrder = ProductCategory::query()
             ->whereIn('parent_id', [0, null])
-            ->orderBy('order', 'DESC')
+            ->orderByDesc('order')
             ->value('order');
 
         $this
@@ -72,12 +72,6 @@ class ProductCategoryForm extends FormAbstract
                 'label_attr' => ['class' => 'control-label'],
                 'default_value' => false,
             ])
-            ->add('is_enquiry', 'onOff', [
-                'label' => trans('plugins/ecommerce::products.form.is_enquiry'),
-                'label_attr' => ['class' => 'control-label'],
-                'default_value' => false,
-            ])
-
             ->setBreakFieldPoint('status');
     }
 }

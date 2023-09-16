@@ -22,7 +22,7 @@ class Option extends BaseModel
     {
         return $this
             ->hasMany(OptionValue::class, 'option_id')
-            ->orderBy('order', 'ASC');
+            ->orderBy('order');
     }
 
     public function product(): BelongsTo

@@ -234,7 +234,7 @@ class MediaManagement {
 
                 MediaConfig.request_params[data.type] = data.value
 
-                if (window.rvMedia.options) {
+                if (window.rvMedia.options && data.type === 'view_in') {
                     window.rvMedia.options.view_in = data.value
                 }
 
@@ -603,14 +603,6 @@ class MediaManagement {
         })
     }
 
-    static setupSecurity() {
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-            },
-        })
-    }
-
     // Scroll get more media
     scrollGetMore() {
         let _self = this
@@ -640,6 +632,5 @@ class MediaManagement {
 $(document).ready(() => {
     window.rvMedia = window.rvMedia || {}
 
-    MediaManagement.setupSecurity()
     new MediaManagement().init()
 })

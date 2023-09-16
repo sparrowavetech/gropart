@@ -9,7 +9,7 @@ class ChangeProductSwatches {
         let _self = this
         let $body = $('body')
 
-        $body.on('click', '.product-attributes .visual-swatch label, .product-attributes .text-swatch label', e => {
+        $body.on('click', '.product-attributes .visual-swatch label, .product-attributes .text-swatch label', (e) => {
             e.preventDefault()
             let $this = $(e.currentTarget)
             let $radio = $this.find('input[type=radio]')
@@ -27,8 +27,9 @@ class ChangeProductSwatches {
             $radio.trigger('change')
         })
 
-        $body.off('change')
-            .on('change', '.product-attributes input, .product-attributes select', event => {
+        $body
+            .off('change', '.product-attributes input, .product-attributes select')
+            .on('change', '.product-attributes input, .product-attributes select', (event) => {
                 let $this = $(event.currentTarget)
 
                 let $parent = $this.closest('.product-attributes')
@@ -38,7 +39,7 @@ class ChangeProductSwatches {
         if ($('.product-attribute-swatches').length) {
             window.addEventListener(
                 'popstate',
-                function(e) {
+                function (e) {
                     if (e.state?.product_attributes_id) {
                         let $el = $('#' + e.state.product_attributes_id)
 
@@ -50,21 +51,21 @@ class ChangeProductSwatches {
                             _self.updateSelectingAttributes(e.state.slugAttributes, $el)
                         }
                     } else {
-                        $('.product-attribute-swatches').each(function(i, el) {
+                        $('.product-attribute-swatches').each(function (i, el) {
                             let params = _self.parseParamsSearch()
                             let attributes = []
                             let slugAttributes = {}
                             let $el = $(el)
 
                             if (params && Object.keys(params).length) {
-                                $.each(params, function(key, slug) {
-                                    let $parent = $el.find('.attribute-swatches-wrapper[data-slug=' + key + ']')
+                                $.each(params, function (key, slug) {
+                                    let $parent = $el.find('.attribute-swatches-wrapper[data-slug="' + key + '"]')
                                     if ($parent.length) {
                                         let value
-                                        if ($parent.data('type') == 'dropdown') {
-                                            value = $parent.find('option[data-slug=' + slug + ']').val()
+                                        if ($parent.data('type') === 'dropdown') {
+                                            value = $parent.find('option[data-slug="' + slug + '"]').val()
                                         } else {
-                                            value = $parent.find('input[data-slug=' + slug + ']').val()
+                                            value = $parent.find('input[data-slug="' + slug + '"]').val()
                                         }
 
                                         if (value) {
@@ -79,7 +80,7 @@ class ChangeProductSwatches {
                         })
                     }
                 },
-                false,
+                false
             )
         }
     }
@@ -126,7 +127,7 @@ class ChangeProductSwatches {
         _self.callAjax(attributes, $productAttributes, slugAttributes)
     }
 
-    callAjax = function(attributes, $productAttributes, slugAttributes, updateUrl = true) {
+    callAjax = function (attributes, $productAttributes, slugAttributes, updateUrl = true) {
         let _self = this
         let formData = {
             attributes,
@@ -144,7 +145,7 @@ class ChangeProductSwatches {
                     window.onBeforeChangeSwatches(attributes, $productAttributes)
                 }
             },
-            success: res => {
+            success: (res) => {
                 if (window.onChangeSwatchesSuccess && typeof window.onChangeSwatchesSuccess === 'function') {
                     window.onChangeSwatchesSuccess(res, $productAttributes)
                 }
@@ -169,23 +170,23 @@ class ChangeProductSwatches {
                         window.history.pushState(
                             { formData, data: res, product_attributes_id: id, slugAttributes },
                             res.message,
-                            url,
+                            url
                         )
                     } else {
                         window.history.replaceState(
                             { formData, data: res, product_attributes_id: id, slugAttributes },
                             res.message,
-                            url,
+                            url
                         )
                     }
                 }
             },
-            complete: res => {
+            complete: (res) => {
                 if (window.onChangeSwatchesComplete && typeof window.onChangeSwatchesComplete === 'function') {
                     window.onChangeSwatchesComplete(res, $productAttributes)
                 }
             },
-            error: res => {
+            error: (res) => {
                 if (window.onChangeSwatchesError && typeof window.onChangeSwatchesError === 'function') {
                     window.onChangeSwatchesError(res, $productAttributes)
                 }
@@ -193,13 +194,13 @@ class ChangeProductSwatches {
         })
     }
 
-    updateSelectingAttributes = function(slugAttributes, $el) {
-        $.each(slugAttributes, function(key, slug) {
-            let $parent = $el.find('.attribute-swatches-wrapper[data-slug=' + key + ']')
+    updateSelectingAttributes = function (slugAttributes, $el) {
+        $.each(slugAttributes, function (key, slug) {
+            let $parent = $el.find('.attribute-swatches-wrapper[data-slug="' + key + '"]')
 
             if ($parent.length) {
-                if ($parent.data('type') == 'dropdown') {
-                    let selected = $parent.find('select option[data-slug=' + slug + ']').val()
+                if ($parent.data('type') === 'dropdown') {
+                    let selected = $parent.find('select option[data-slug="' + slug + '"]').val()
                     $parent.find('select').val(selected)
                 } else {
                     $parent.find('input:checked').prop('checked', false)
@@ -209,21 +210,23 @@ class ChangeProductSwatches {
         })
     }
 
-    parseParamsSearch = function(query, includeArray = false) {
+    parseParamsSearch = function (query, includeArray = false) {
         let pairs = query || window.location.search.substring(1)
         let re = /([^&=]+)=?([^&]*)/g
-        let decodeRE = /\+/g  // Regex for replacing addition symbol with a space
-        let decode = function(str) {
+        let decodeRE = /\+/g // Regex for replacing addition symbol with a space
+        let decode = function (str) {
             return decodeURIComponent(str.replace(decodeRE, ' '))
         }
-        let params = {}, e
-        while (e = re.exec(pairs)) {
-            let k = decode(e[1]), v = decode(e[2])
-            if (k.substring(k.length - 2) == '[]') {
+        let params = {},
+            e
+        while ((e = re.exec(pairs))) {
+            let k = decode(e[1]),
+                v = decode(e[2])
+            if (k.substring(k.length - 2) === '[]') {
                 if (includeArray) {
                     k = k.substring(0, k.length - 2)
                 }
-                (params[k] || (params[k] = [])).push(v)
+                ;(params[k] || (params[k] = [])).push(v)
             } else params[k] = v
         }
         return params

@@ -18,8 +18,13 @@
     @if (setting('language_switcher_display', 'dropdown') == 'dropdown')
         {!! Arr::get($options, 'before') !!}
         <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                    aria-haspopup="true" aria-expanded="true">
+            <button
+                class="btn btn-secondary dropdown-toggle"
+                data-bs-toggle="dropdown"
+                type="button"
+                aria-haspopup="true"
+                aria-expanded="true"
+            >
                 @if (Arr::get($options, 'lang_flag', true) && ($languageDisplay == 'all' || $languageDisplay == 'flag'))
                     {!! language_flag(Language::getCurrentLocaleFlag(), Language::getCurrentLocaleName()) !!}
                 @endif

@@ -13,8 +13,8 @@ if (is_plugin_active('ecommerce')) {
                 $iconImage = null;
                 $args = func_get_args();
                 if (! empty($args[0])) {
-                    $icon = MetaBox::getMetaData($args[0], 'icon', true);
-                    $iconImage = MetaBox::getMetaData($args[0], 'icon_image', true);
+                    $icon = $args[0]->getMetaData('icon', true);
+                    $iconImage = $args[0]->getMetaData('icon_image', true);
                 }
 
                 return Theme::partial('product-category-fields', compact('icon', 'iconImage'));

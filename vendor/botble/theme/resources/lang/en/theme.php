@@ -61,4 +61,5 @@ return [
     'theme_option_logo' => 'Logo',
     'theme_option_favicon' => 'Favicon',
     'folder_is_not_writeable' => 'Cannot write files! Folder :name is not writable. Please chmod to make it writable!',
+    'breadcrumb_enabled' => 'Enable breadcrumb?',
 ];

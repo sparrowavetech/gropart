@@ -4,7 +4,6 @@ Customized Bootstrap Panels
 $general-img-path: '/vendor/core/core/base/images/' !default;
 
 .panel {
-
     -webkit-box-shadow: none !important;
     -moz-box-shadow: none !important;
     box-shadow: none !important;
@@ -34,7 +33,7 @@ $general-img-path: '/vendor/core/core/base/images/' !default;
         }
 
         .accordion-toggle.accordion-toggle-styled {
-            background: url("#{$general-img-path}accordion-plusminus.png") no-repeat;
+            background: url('#{$general-img-path}accordion-plusminus.png') no-repeat;
             background-position: right -19px;
             margin-right: 15px;
         }

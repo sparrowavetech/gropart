@@ -375,9 +375,15 @@ class BaseHelper
         return null;
     }
 
-    public function getGoogleFontsURL(): string
+    public function getGoogleFontsURL(string $path = null): string
     {
-        return config('core.base.general.google_fonts_url', 'https://fonts.bunny.net');
+        $url = config('core.base.general.google_fonts_url', 'https://fonts.bunny.net');
+
+        if (! $path) {
+            return $url;
+        }
+
+        return $url . '/' . ltrim($path, '/');
     }
 
     public function googleFonts(string $font, bool $inline = true)

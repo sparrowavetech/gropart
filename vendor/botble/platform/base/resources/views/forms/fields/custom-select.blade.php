@@ -12,7 +12,14 @@
     @php
         $emptyVal = $options['empty_value'] ? ['' => $options['empty_value']] : null;
     @endphp
-    {!! Form::customSelect($name, (array)$emptyVal + $options['choices'], $options['selected'], $options['attr'], Arr::get($options, 'optionAttrs', []), Arr::get($options, 'optgroupsAttributes', [])) !!}
+    {!! Form::customSelect(
+        $name,
+        (array) $emptyVal + $options['choices'],
+        $options['selected'],
+        $options['attr'],
+        Arr::get($options, 'optionAttrs', []),
+        Arr::get($options, 'optgroupsAttributes', []),
+    ) !!}
     @include('core/base::forms.partials.help-block')
 @endif
 

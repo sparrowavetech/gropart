@@ -246,19 +246,14 @@ class EditorManagement {
             formData.append('upload', blobInfo)
         }
 
-        $.ajax({
-            type: 'POST',
-            data: formData,
-            url: RV_MEDIA_URL.media_upload_from_editor,
-            processData: false,
-            contentType: false,
-            cache: false,
-            success(res) {
-                if (res.uploaded) {
-                    callback(res.url)
+        $httpClient
+            .make()
+            .postForm(RV_MEDIA_URL.media_upload_from_editor, formData)
+            .then(({ data }) => {
+                if (data.uploaded) {
+                    callback(data.url)
                 }
-            },
-        })
+            })
     }
 
     initTinyMce(element) {
@@ -377,27 +372,18 @@ class EditorManagement {
         $('.short_code_modal').modal('show')
         $('.half-circle-spinner').show()
 
-        $.ajax({
-            type: 'POST',
-            data: data,
-            url: href,
-            success: (res) => {
-                if (res.error) {
-                    Botble.showError(res.message)
-                    return false
-                }
-
+        $httpClient
+            .make()
+            .post(href, data)
+            .then(({ data }) => {
                 $('.short-code-data-form').trigger('reset')
                 $('.short_code_input_key').val(key)
                 $('.half-circle-spinner').hide()
-                $('.short-code-admin-config').html(res.data)
+                $('.short-code-admin-config').html(data.data)
+
                 Botble.initResources()
                 Botble.initMediaIntegrate()
-            },
-            error: (data) => {
-                Botble.handleError(data)
-            },
-        })
+            })
     }
 
     manageShortCode() {

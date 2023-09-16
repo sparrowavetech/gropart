@@ -8,8 +8,17 @@ class Breadcrumb
 {
     public array $crumbs = [];
 
+    public function enabled(): bool
+    {
+        return (bool)theme_option('theme_breadcrumb_enabled', 1) == 1;
+    }
+
     public function add(string|array|null $label, string|null $url = ''): self
     {
+        if (! $this->enabled()) {
+            return $this;
+        }
+
         if (is_array($label)) {
             if (count($label) > 0) {
                 foreach ($label as $crumb) {
@@ -40,6 +49,10 @@ class Breadcrumb
 
     public function getCrumbs(): array
     {
+        if (! $this->enabled()) {
+            return [];
+        }
+
         return $this->crumbs;
     }
 }

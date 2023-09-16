@@ -10,12 +10,6 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
                 ->parameters(['' => 'shipment'])
                 ->except(['create', 'store']);
 
-            Route::delete('items/destroy', [
-                'as' => 'deletes',
-                'uses' => 'ShipmentController@deletes',
-                'permission' => 'ecommerce.shipments.destroy',
-            ]);
-
             Route::post('update-status/{id}', [
                 'as' => 'update-status',
                 'uses' => 'ShipmentController@postUpdateStatus',

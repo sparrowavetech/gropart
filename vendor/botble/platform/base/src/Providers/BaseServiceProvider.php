@@ -39,6 +39,7 @@ use Botble\Support\Http\Middleware\BaseMiddleware;
 use DateTimeZone;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Database\Schema\Builder;
 use Illuminate\Filesystem\FilesystemManager;
 use Illuminate\Foundation\AliasLoader;
@@ -50,6 +51,8 @@ use Illuminate\Routing\Route;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
 use Throwable;
@@ -304,6 +307,16 @@ class BaseServiceProvider extends ServiceProvider
         $this->app->resolving(Core::class, function () {
             require_once __DIR__ . '/../Supports/Core.php';
         });
+
+        if ($this->app->environment('local')) {
+            DB::listen(function (QueryExecuted $queryExecuted) {
+                if ($queryExecuted->time < 50) {
+                    return;
+                }
+
+                Log::warning(sprintf('DB query exceeded %s ms. SQL: %s', $queryExecuted->time, $queryExecuted->sql));
+            });
+        }
     }
 
     /**

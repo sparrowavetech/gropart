@@ -1,5 +1,5 @@
-$(document).ready(function() {
-    $(document).on('click', '.list-search-data .selectable-item', event => {
+$(document).ready(function () {
+    $(document).on('click', '.list-search-data .selectable-item', (event) => {
         event.preventDefault()
         let _self = $(event.currentTarget)
         let $input = _self.closest('.form-group').find('input[type=hidden]')
@@ -34,7 +34,7 @@ $(document).ready(function() {
         _self.closest('.panel').addClass('hidden')
     })
 
-    $(document).on('click', '.textbox-advancesearch', event => {
+    $(document).on('click', '.textbox-advancesearch', (event) => {
         let _self = $(event.currentTarget)
         let $formBody = _self.closest('.box-search-advance').find('.panel')
         $formBody.removeClass('hidden')
@@ -49,7 +49,7 @@ $(document).ready(function() {
             $.ajax({
                 url: _self.data('target'),
                 type: 'GET',
-                success: res => {
+                success: (res) => {
                     if (res.error) {
                         Botble.showError(res.message)
                     } else {
@@ -57,7 +57,7 @@ $(document).ready(function() {
                         Botble.unblockUI($formBody)
                     }
                 },
-                error: data => {
+                error: (data) => {
                     Botble.handleError(data)
                     Botble.unblockUI($formBody)
                 },
@@ -65,7 +65,7 @@ $(document).ready(function() {
         }
     })
 
-    $(document).on('keyup', '.textbox-advancesearch', event => {
+    $(document).on('keyup', '.textbox-advancesearch', (event) => {
         let _self = $(event.currentTarget)
         let $formBody = _self.closest('.box-search-advance').find('.panel')
         setTimeout(() => {
@@ -78,7 +78,7 @@ $(document).ready(function() {
             $.ajax({
                 url: _self.data('target') + '?keyword=' + _self.val(),
                 type: 'GET',
-                success: res => {
+                success: (res) => {
                     if (res.error) {
                         Botble.showError(res.message)
                     } else {
@@ -86,7 +86,7 @@ $(document).ready(function() {
                         Botble.unblockUI($formBody)
                     }
                 },
-                error: data => {
+                error: (data) => {
                     Botble.handleError(data)
                     Botble.unblockUI($formBody)
                 },
@@ -94,7 +94,7 @@ $(document).ready(function() {
         }, 500)
     })
 
-    $(document).on('click', '.box-search-advance .page-link', event => {
+    $(document).on('click', '.box-search-advance .page-link', (event) => {
         event.preventDefault()
         let $searchBox = $(event.currentTarget).closest('.box-search-advance').find('.textbox-advancesearch')
         if (!$searchBox.closest('.page-item').hasClass('disabled') && $searchBox.data('target')) {
@@ -108,7 +108,7 @@ $(document).ready(function() {
             $.ajax({
                 url: $(event.currentTarget).prop('href') + '&keyword=' + $searchBox.val(),
                 type: 'GET',
-                success: res => {
+                success: (res) => {
                     if (res.error) {
                         Botble.showError(res.message)
                     } else {
@@ -116,7 +116,7 @@ $(document).ready(function() {
                         Botble.unblockUI($formBody)
                     }
                 },
-                error: data => {
+                error: (data) => {
                     Botble.handleError(data)
                     Botble.unblockUI($formBody)
                 },
@@ -132,7 +132,7 @@ $(document).ready(function() {
         }
     })
 
-    $(document).on('click', '.btn-trigger-remove-selected-product', event => {
+    $(document).on('click', '.btn-trigger-remove-selected-product', (event) => {
         event.preventDefault()
         let $input = $(event.currentTarget).closest('.form-group').find('input[type=hidden]')
 
@@ -155,7 +155,9 @@ $(document).ready(function() {
         if ($(event.currentTarget).closest('tbody').find('tr').length < 2) {
             $(event.currentTarget).closest('.list-selected-products').addClass('hidden')
         }
-        $(event.currentTarget).closest('tbody').find('tr[data-product-id=' + $(event.currentTarget).data('id') + ']').remove()
+        $(event.currentTarget)
+            .closest('tbody')
+            .find('tr[data-product-id=' + $(event.currentTarget).data('id') + ']')
+            .remove()
     })
 })
-

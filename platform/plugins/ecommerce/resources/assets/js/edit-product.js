@@ -20,41 +20,38 @@ class EcommerceProduct {
 
         let pageSizeSelect2 = 50
 
-        $.fn.select2.amd.require(
-            ['select2/data/array', 'select2/utils'],
-            function(ArrayData, Utils) {
-                function CustomData($element, options) {
-                    CustomData.__super__.constructor.call(this, $element, options)
+        $.fn.select2.amd.require(['select2/data/array', 'select2/utils'], function (ArrayData, Utils) {
+            function CustomData($element, options) {
+                CustomData.__super__.constructor.call(this, $element, options)
+            }
+
+            Utils.Extend(CustomData, ArrayData)
+
+            CustomData.prototype.query = function (params, callback) {
+                let $this = this
+                results = []
+                if (params.term && params.term !== '') {
+                    results = _.filter($this.options.options.data, function (e) {
+                        return e.text.toUpperCase().indexOf(params.term.toUpperCase()) >= 0
+                    })
+                } else {
+                    results = $this.options.options.data
                 }
 
-                Utils.Extend(CustomData, ArrayData)
-
-                CustomData.prototype.query = function(params, callback) {
-                    let $this = this
-                    results = []
-                    if (params.term && params.term !== '') {
-                        results = _.filter($this.options.options.data, function(e) {
-                            return e.text.toUpperCase().indexOf(params.term.toUpperCase()) >= 0
-                        })
-                    } else {
-                        results = $this.options.options.data
-                    }
-
-                    if (!('page' in params)) {
-                        params.page = 1
-                    }
-                    let data = {
-                        results: results.slice((params.page - 1) * pageSizeSelect2, params.page * pageSizeSelect2),
-                        pagination: {
-                            more: params.page * pageSizeSelect2 < results.length,
-                        },
-                    }
-                    callback(data)
+                if (!('page' in params)) {
+                    params.page = 1
                 }
+                let data = {
+                    results: results.slice((params.page - 1) * pageSizeSelect2, params.page * pageSizeSelect2),
+                    pagination: {
+                        more: params.page * pageSizeSelect2 < results.length,
+                    },
+                }
+                callback(data)
+            }
 
-                window.CustomDataApdapterSelect2 = CustomData
-            },
-        )
+            window.CustomDataApdapterSelect2 = CustomData
+        })
     }
 
     productAttributeSets() {
@@ -82,21 +79,21 @@ class EcommerceProduct {
     handleEvents() {
         let _self = this
 
-        _self.$body.on('click', '.select-all', event => {
+        _self.$body.on('click', '.select-all', (event) => {
             event.preventDefault()
             let $select = $($(event.currentTarget).attr('href'))
             $select.find('option').attr('selected', true)
             $select.trigger('change')
         })
 
-        _self.$body.on('click', '.deselect-all', event => {
+        _self.$body.on('click', '.deselect-all', (event) => {
             event.preventDefault()
             let $select = $($(event.currentTarget).attr('href'))
             $select.find('option').removeAttr('selected')
             $select.trigger('change')
         })
 
-        _self.$body.on('change', '#attribute_sets', event => {
+        _self.$body.on('change', '#attribute_sets', (event) => {
             let $groupContainer = $('#attribute_set_group')
 
             let value = $(event.currentTarget).val()
@@ -104,7 +101,7 @@ class EcommerceProduct {
             $groupContainer.find('.panel').hide()
 
             if (value) {
-                _.forEach(value, value => {
+                _.forEach(value, (value) => {
                     $groupContainer.find('.panel[data-id="' + value + '"]').show()
                 })
             }
@@ -113,7 +110,7 @@ class EcommerceProduct {
 
         $('#attribute_sets').trigger('change')
 
-        _self.$body.on('change', '.is-variation-default input', event => {
+        _self.$body.on('change', '.is-variation-default input', (event) => {
             let $current = $(event.currentTarget)
             let isChecked = $current.is(':checked')
             $('.is-variation-default input').prop('checked', false)
@@ -122,17 +119,16 @@ class EcommerceProduct {
             }
         })
 
-        $(document).on('change', '.table-check-all', event => {
+        $(document).on('change', '.table-check-all', (event) => {
             let $current = $(event.currentTarget)
             if ($current.prop('checked')) {
                 $('.btn-trigger-delete-selected-variations').show()
             } else {
                 $('.btn-trigger-delete-selected-variations').hide()
             }
-
         })
 
-        $(document).on('change', '.checkboxes', event => {
+        $(document).on('change', '.checkboxes', (event) => {
             let $current = $(event.currentTarget)
             let $table = $current.closest('.table-hover-variants')
 
@@ -143,14 +139,16 @@ class EcommerceProduct {
             }
         })
 
-        $(document).on('click', '.btn-trigger-delete-selected-variations', event => {
+        $(document).on('click', '.btn-trigger-delete-selected-variations', (event) => {
             event.preventDefault()
             let $current = $(event.currentTarget)
 
             let ids = []
-            $('.table-hover-variants').find('.checkboxes:checked').each((i, el) => {
-                ids[i] = $(el).val()
-            })
+            $('.table-hover-variants')
+                .find('.checkboxes:checked')
+                .each((i, el) => {
+                    ids[i] = $(el).val()
+                })
 
             if (ids.length === 0) {
                 Botble.showError(BotbleVariables.languages.tables.please_select_record)
@@ -162,46 +160,48 @@ class EcommerceProduct {
             $('#delete-variations-modal').modal('show')
         })
 
-        $('#delete-selected-variations-button').off('click').on('click', event => {
-            event.preventDefault()
+        $('#delete-selected-variations-button')
+            .off('click')
+            .on('click', (event) => {
+                event.preventDefault()
 
-            let $current = $(event.currentTarget)
+                let $current = $(event.currentTarget)
 
-            $current.addClass('button-loading')
+                $current.addClass('button-loading')
 
-            let $table = $('.table-hover-variants')
+                let $table = $('.table-hover-variants')
 
-            let ids = []
-            $table.find('.checkboxes:checked').each((i, el) => {
-                ids[i] = $(el).val()
+                let ids = []
+                $table.find('.checkboxes:checked').each((i, el) => {
+                    ids[i] = $(el).val()
+                })
+
+                $.ajax({
+                    url: $current.data('href'),
+                    type: 'POST',
+                    data: {
+                        _method: 'DELETE',
+                        ids,
+                    },
+                    success: (res) => {
+                        if (res.error) {
+                            Botble.showError(res.message)
+                        } else {
+                            Botble.showSuccess(res.message)
+                            _self.afterDeleteVersion(res, $table)
+
+                            $('.btn-trigger-delete-selected-variations').hide()
+                            $current.closest('.modal').modal('hide')
+                        }
+                    },
+                    error: (data) => {
+                        Botble.handleError(data)
+                    },
+                    complete: () => {
+                        $current.removeClass('button-loading')
+                    },
+                })
             })
-
-            $.ajax({
-                url: $current.data('href'),
-                type: 'POST',
-                data: {
-                    _method: 'DELETE',
-                    ids,
-                },
-                success: res => {
-                    if (res.error) {
-                        Botble.showError(res.message)
-                    } else {
-                        Botble.showSuccess(res.message)
-                        _self.afterDeleteVersion(res, $table)
-
-                        $('.btn-trigger-delete-selected-variations').hide()
-                        $current.closest('.modal').modal('hide')
-                    }
-                },
-                error: data => {
-                    Botble.handleError(data)
-                },
-                complete: () => {
-                    $current.removeClass('button-loading')
-                },
-            })
-        })
     }
 
     afterDeleteVersion(res, $table) {
@@ -216,7 +216,9 @@ class EcommerceProduct {
                 _self.handleEvents()
             })
         } else if ($table.length) {
-            window.LaravelDataTables && LaravelDataTables[$table.attr('id')] && LaravelDataTables[$table.attr('id')].draw()
+            window.LaravelDataTables &&
+                LaravelDataTables[$table.attr('id')] &&
+                LaravelDataTables[$table.attr('id')].draw()
         }
     }
 
@@ -242,7 +244,7 @@ class EcommerceProduct {
     handleChangeSaleType() {
         let _self = this
 
-        _self.$body.on('click', '.turn-on-schedule', event => {
+        _self.$body.on('click', '.turn-on-schedule', (event) => {
             event.preventDefault()
             let $current = $(event.currentTarget)
             let $group = $current.closest('.price-group')
@@ -252,7 +254,7 @@ class EcommerceProduct {
             $group.find('.scheduled-time').removeClass('hidden')
         })
 
-        _self.$body.on('click', '.turn-off-schedule', event => {
+        _self.$body.on('click', '.turn-off-schedule', (event) => {
             event.preventDefault()
             let $current = $(event.currentTarget)
             let $group = $current.closest('.price-group')
@@ -266,7 +268,7 @@ class EcommerceProduct {
     handleStorehouse() {
         let _self = this
 
-        _self.$body.on('click', 'input.storehouse-management-status', event => {
+        _self.$body.on('click', 'input.storehouse-management-status', (event) => {
             let $storehouseInfo = $('.storehouse-info')
             if ($(event.currentTarget).prop('checked') === true) {
                 $storehouseInfo.removeClass('hidden')
@@ -281,7 +283,7 @@ class EcommerceProduct {
     handleShipping() {
         let _self = this
 
-        _self.$body.on('click', '.change-measurement .dropdown-menu a', event => {
+        _self.$body.on('click', '.change-measurement .dropdown-menu a', (event) => {
             event.preventDefault()
             let $current = $(event.currentTarget)
             let $parent = $current.closest('.change-measurement')
@@ -294,15 +296,18 @@ class EcommerceProduct {
     handleModifyAttributeSets() {
         let _self = this
 
-        _self.$body.on('click', '#store-related-attributes-button', event => {
+        _self.$body.on('click', '#store-related-attributes-button', (event) => {
             event.preventDefault()
 
             let $current = $(event.currentTarget)
 
             let attributeSets = []
-            $current.closest('.modal-content').find('.attribute-set-item:checked').each((index, item) => {
-                attributeSets[index] = $(item).val()
-            })
+            $current
+                .closest('.modal-content')
+                .find('.attribute-set-item:checked')
+                .each((index, item) => {
+                    attributeSets[index] = $(item).val()
+                })
 
             $.ajax({
                 url: $current.data('target'),
@@ -313,7 +318,7 @@ class EcommerceProduct {
                 beforeSend: () => {
                     $current.addClass('button-loading')
                 },
-                success: res => {
+                success: (res) => {
                     if (res.error) {
                         Botble.showError(res.message)
                     } else {
@@ -324,7 +329,7 @@ class EcommerceProduct {
                         window.location.reload()
                     }
                 },
-                error: data => {
+                error: (data) => {
                     Botble.handleError(data)
                 },
                 complete: () => {
@@ -337,11 +342,11 @@ class EcommerceProduct {
     handleAddVariations() {
         let _self = this
 
-        let createOrUpdateVariation = $current => {
+        let createOrUpdateVariation = ($current) => {
             let $form = $current.closest('.modal-content').find('.variation-form-wrapper form')
             let formData = new FormData($form[0])
             if (jQuery().inputmask) {
-                $form.find('input.input-mask-number').map(function(i, e) {
+                $form.find('input.input-mask-number').map(function (i, e) {
                     const $input = $(e)
                     if ($input.inputmask) {
                         formData.append($input.attr('name'), $input.inputmask('unmaskedvalue'))
@@ -358,7 +363,7 @@ class EcommerceProduct {
                 beforeSend: () => {
                     $current.addClass('button-loading')
                 },
-                success: res => {
+                success: (res) => {
                     if (res.error) {
                         Botble.showError(res.message)
                     } else {
@@ -367,7 +372,9 @@ class EcommerceProduct {
 
                         let $table = $('#product-variations-wrapper').find('table')
                         if ($table.length) {
-                            window.LaravelDataTables && LaravelDataTables[$table.attr('id')] && LaravelDataTables[$table.attr('id')].draw()
+                            window.LaravelDataTables &&
+                                LaravelDataTables[$table.attr('id')] &&
+                                LaravelDataTables[$table.attr('id')].draw()
                         }
 
                         $current.closest('.modal-content').find('.variation-form-wrapper').remove()
@@ -376,31 +383,31 @@ class EcommerceProduct {
                 complete: () => {
                     $current.removeClass('button-loading')
                 },
-                error: data => {
+                error: (data) => {
                     Botble.handleError(data)
                 },
             })
         }
 
-        _self.$body.on('click', '#store-product-variation-button', event => {
+        _self.$body.on('click', '#store-product-variation-button', (event) => {
             event.preventDefault()
             createOrUpdateVariation($(event.currentTarget))
         })
 
-        _self.$body.on('click', '#update-product-variation-button', event => {
+        _self.$body.on('click', '#update-product-variation-button', (event) => {
             event.preventDefault()
             createOrUpdateVariation($(event.currentTarget))
         })
 
-        $('#add-new-product-variation-modal').on('hidden.bs.modal', function(e) {
+        $('#add-new-product-variation-modal').on('hidden.bs.modal', function (e) {
             $(this).find('.modal-content .variation-form-wrapper').remove()
         })
 
-        $('#edit-product-variation-modal').on('hidden.bs.modal', function(e) {
+        $('#edit-product-variation-modal').on('hidden.bs.modal', function (e) {
             $(this).find('.modal-content .variation-form-wrapper').remove()
         })
 
-        _self.$body.on('click', '#generate-all-versions-button', event => {
+        _self.$body.on('click', '#generate-all-versions-button', (event) => {
             event.preventDefault()
             let $current = $(event.currentTarget)
 
@@ -410,7 +417,7 @@ class EcommerceProduct {
                 beforeSend: () => {
                     $current.addClass('button-loading')
                 },
-                success: res => {
+                success: (res) => {
                     if (res.error) {
                         Botble.showError(res.message)
                     } else {
@@ -418,19 +425,21 @@ class EcommerceProduct {
 
                         $('#generate-all-versions-modal').modal('hide')
 
-                        window.LaravelDataTables[$('#product-variations-wrapper .dataTables_wrapper table').prop('id')].draw()
+                        window.LaravelDataTables[
+                            $('#product-variations-wrapper .dataTables_wrapper table').prop('id')
+                        ].draw()
                     }
                 },
                 complete: () => {
                     $current.removeClass('button-loading')
                 },
-                error: data => {
+                error: (data) => {
                     Botble.handleError(data)
                 },
             })
         })
 
-        $(document).on('click', '.btn-trigger-add-new-product-variation', event => {
+        $(document).on('click', '.btn-trigger-add-new-product-variation', (event) => {
             event.preventDefault()
             let $current = $(event.currentTarget)
 
@@ -441,7 +450,7 @@ class EcommerceProduct {
             $.ajax({
                 url: $current.data('load-form'),
                 type: 'GET',
-                success: res => {
+                success: (res) => {
                     if (res.error) {
                         Botble.showError(res.message)
                     } else {
@@ -478,13 +487,13 @@ class EcommerceProduct {
                         })
                     }
                 },
-                error: data => {
+                error: (data) => {
                     Botble.handleError(data)
                 },
             })
         })
 
-        $(document).on('click', '.btn-trigger-edit-product-version', event => {
+        $(document).on('click', '.btn-trigger-edit-product-version', (event) => {
             event.preventDefault()
             $('#update-product-variation-button').data('target', $(event.currentTarget).data('target'))
             let $current = $(event.currentTarget)
@@ -496,7 +505,7 @@ class EcommerceProduct {
             $.ajax({
                 url: $current.data('load-form'),
                 type: 'GET',
-                success: res => {
+                success: (res) => {
                     if (res.error) {
                         Botble.showError(res.message)
                     } else {
@@ -531,13 +540,13 @@ class EcommerceProduct {
                         })
                     }
                 },
-                error: data => {
+                error: (data) => {
                     Botble.handleError(data)
                 },
             })
         })
 
-        _self.$body.on('click', '.btn-trigger-add-attribute-to-simple-product', event => {
+        _self.$body.on('click', '.btn-trigger-add-attribute-to-simple-product', (event) => {
             event.preventDefault()
             let $current = $(event.currentTarget)
 
@@ -563,7 +572,7 @@ class EcommerceProduct {
                     beforeSend: () => {
                         $current.addClass('button-loading')
                     },
-                    success: res => {
+                    success: (res) => {
                         if (res.error) {
                             Botble.showError(res.message)
                         } else {
@@ -575,7 +584,7 @@ class EcommerceProduct {
                     complete: () => {
                         $current.removeClass('button-loading')
                     },
-                    error: data => {
+                    error: (data) => {
                         Botble.handleError(data)
                     },
                 })
@@ -586,14 +595,15 @@ class EcommerceProduct {
     handleDeleteVariations() {
         let _self = this
 
-        $(document).on('click', '.btn-trigger-delete-version', event => {
+        $(document).on('click', '.btn-trigger-delete-version', (event) => {
             event.preventDefault()
-            $('#delete-version-button').data('target', $(event.currentTarget).data('target'))
+            $('#delete-version-button')
+                .data('target', $(event.currentTarget).data('target'))
                 .data('id', $(event.currentTarget).data('id'))
             $('#confirm-delete-version-modal').modal('show')
         })
 
-        _self.$body.on('click', '#delete-version-button', event => {
+        _self.$body.on('click', '#delete-version-button', (event) => {
             event.preventDefault()
             let $current = $(event.currentTarget)
 
@@ -603,7 +613,7 @@ class EcommerceProduct {
                 beforeSend: () => {
                     $current.addClass('button-loading')
                 },
-                success: res => {
+                success: (res) => {
                     if (res.error) {
                         Botble.showError(res.message)
                     } else {
@@ -616,7 +626,7 @@ class EcommerceProduct {
                 complete: () => {
                     $current.removeClass('button-loading')
                 },
-                error: data => {
+                error: (data) => {
                     Botble.handleError(data)
                 },
             })
@@ -624,7 +634,7 @@ class EcommerceProduct {
     }
 
     setProductVariationDefault = () => {
-        $(document).on('click', '.table-hover-variants input[name=variation_default_id]', function(e) {
+        $(document).on('click', '.table-hover-variants input[name=variation_default_id]', function (e) {
             let $this = $(e.currentTarget)
             let url = $this.data('url')
             if (url) {
@@ -675,17 +685,17 @@ class EcommerceProduct {
         const _fnThrottle = $.fn.dataTable.util.throttle
         const wrapper = $(settings.nTableWrapper)
 
-        const searchFn = function(column, val) {
-            searchDelay ?
-                _fnThrottle(function() {
-                    column.search(val).draw()
-                }, searchDelay)() :
-                function() {
-                    column.search(val).draw()
-                }
+        const searchFn = function (column, val) {
+            searchDelay
+                ? _fnThrottle(function () {
+                      column.search(val).draw()
+                  }, searchDelay)()
+                : function () {
+                      column.search(val).draw()
+                  }
         }
 
-        table.columns().every(function(index) {
+        table.columns().every(function (index) {
             const column = this
 
             const setting = column.settings()[0].aoColumns[index]
@@ -694,20 +704,26 @@ class EcommerceProduct {
             if (setting.searchable) {
                 if (setting?.search_data?.type == 'customSelect') {
                     let select = $(
-                        `<div><select class='form-select input-sm' data-placeholder='${setting.search_data.placeholder || 'Select'}'></select></div>`,
+                        `<div><select class='form-select input-sm' data-placeholder='${
+                            setting.search_data.placeholder || 'Select'
+                        }'></select></div>`
                     )
 
                     th.append(select)
 
                     select = th.find('select')
 
-                    let attributeSet = productAttributeSets.find((item) => item.id == setting.search_data.attribute_set_id)
+                    let attributeSet = productAttributeSets.find(
+                        (item) => item.id == setting.search_data.attribute_set_id
+                    )
 
                     let data = [{ id: '', text: '' }]
                     if (attributeSet) {
-                        data = data.concat(attributeSet.attributes.map((item, index) => {
-                            return { id: item.id, text: item.title }
-                        }))
+                        data = data.concat(
+                            attributeSet.attributes.map((item, index) => {
+                                return { id: item.id, text: item.title }
+                            })
+                        )
                     }
 
                     select.select2({
@@ -719,10 +735,9 @@ class EcommerceProduct {
                         dataAdapter: CustomDataApdapterSelect2,
                     })
 
-                    select.on('change', function() {
+                    select.on('change', function () {
                         searchFn(column, $(this).val() || '')
                     })
-
                 }
             }
             if (settings.oInit.responsive) {
@@ -735,20 +750,16 @@ class EcommerceProduct {
         $(tr).appendTo(wrapper.find('thead'))
 
         if (settings.oInit.responsive) {
-            table.on('responsive-resize', function(e, dt, columns) {
+            table.on('responsive-resize', function (e, dt, columns) {
                 hideSearchInputs(columns)
             })
 
             function hideSearchInputs(columns) {
                 for (let i = 0; i < columns.length; i++) {
                     if (columns[i]) {
-                        wrapper
-                            .find('.dataTable-custom-filter th:eq(' + i + ')')
-                            .show()
+                        wrapper.find('.dataTable-custom-filter th:eq(' + i + ')').show()
                     } else {
-                        wrapper
-                            .find('.dataTable-custom-filter th:eq(' + i + ')')
-                            .hide()
+                        wrapper.find('.dataTable-custom-filter th:eq(' + i + ')').hide()
                     }
                 }
             }
@@ -760,24 +771,24 @@ $(() => {
     new EcommerceProduct()
     window.EcommerceProduct = EcommerceProduct
 
-    $('body').on('click', '.list-gallery-media-images .btn_remove_image', event => {
+    $('body').on('click', '.list-gallery-media-images .btn_remove_image', (event) => {
         event.preventDefault()
         $(event.currentTarget).closest('li').remove()
     })
 
-    $(document).on('click', '.btn-trigger-select-product-attributes', event => {
+    $(document).on('click', '.btn-trigger-select-product-attributes', (event) => {
         event.preventDefault()
         $('#store-related-attributes-button').data('target', $(event.currentTarget).data('target'))
         $('#select-attribute-sets-modal').modal('show')
     })
 
-    $(document).on('click', '.btn-trigger-generate-all-versions', event => {
+    $(document).on('click', '.btn-trigger-generate-all-versions', (event) => {
         event.preventDefault()
         $('#generate-all-versions-button').data('target', $(event.currentTarget).data('target'))
         $('#generate-all-versions-modal').modal('show')
     })
 
-    $(document).on('click', '.btn-trigger-add-attribute', event => {
+    $(document).on('click', '.btn-trigger-add-attribute', (event) => {
         event.preventDefault()
 
         $('.list-product-attribute-wrap').toggleClass('hidden')
@@ -801,12 +812,20 @@ $(() => {
     })
 
     let handleChangeAttributeSet = () => {
-        let $options = $('.list-product-attribute-items-wrap .product-attribute-set-item .product-select-attribute-item option')
+        let $options = $(
+            '.list-product-attribute-items-wrap .product-attribute-set-item .product-select-attribute-item option'
+        )
         $.each($options, (index, el) => {
             let $el = $(el)
             let value = $el.prop('value')
             if (value !== $el.closest('select').val()) {
-                if ($('.list-product-attribute-items-wrap .product-attribute-set-item .product-select-attribute-item[data-set-id=' + value + ']').length === 0) {
+                if (
+                    $(
+                        '.list-product-attribute-items-wrap .product-attribute-set-item .product-select-attribute-item[data-set-id=' +
+                            value +
+                            ']'
+                    ).length === 0
+                ) {
                     $el.prop('disabled', false)
                 } else {
                     $el.prop('disabled', true)
@@ -828,7 +847,7 @@ $(() => {
         }
     }
 
-    $(document).on('change', '.product-select-attribute-item', event => {
+    $(document).on('change', '.product-select-attribute-item', (event) => {
         let $this = $(event.currentTarget)
         let $attrSetItem = $this.closest('.product-attribute-set-item')
         let selectedValue = $this.val()
@@ -839,9 +858,11 @@ $(() => {
         $attributeValue = $attrSetItem.find('.product-select-attribute-item-value')
 
         $attributeValue.prop('name', 'added_attributes[' + selectedValue + ']')
-        let data = productAttributeSets.find((item) => item.id == selectedValue).attributes.map(item => {
-            return { id: item.id, text: item.title }
-        })
+        let data = productAttributeSets
+            .find((item) => item.id == selectedValue)
+            .attributes.map((item) => {
+                return { id: item.id, text: item.title }
+            })
         $attributeValue.empty().select2({
             data,
             ajax: {},
@@ -874,7 +895,7 @@ $(() => {
 
         let $attributeSet = $('#' + id).find('.product-select-attribute-item')
         $attributeSet.select2({
-            data: productAttributeSets.map(item => {
+            data: productAttributeSets.map((item) => {
                 return { id: item.id, text: item.title }
             }),
         })
@@ -890,7 +911,7 @@ $(() => {
         }
     }
 
-    $(document).on('click', '.btn-trigger-add-attribute-item', event => {
+    $(document).on('click', '.btn-trigger-add-attribute-item', (event) => {
         event.preventDefault()
 
         addAttributeSet()
@@ -900,7 +921,7 @@ $(() => {
         handleChangeAttributeSet()
     })
 
-    $(document).on('click', '.product-set-item-delete-action a', event => {
+    $(document).on('click', '.product-set-item-delete-action a', (event) => {
         event.preventDefault()
         $(event.currentTarget).closest('.product-attribute-set-item').remove()
         let totalAttributeSets = $('.list-product-attribute-items-wrap .product-attribute-set-item').length
@@ -933,8 +954,7 @@ $(() => {
                     }
                     let template = $(document).find('#product_select_image_template').html()
 
-                    let imageBox = template
-                        .replace(/__name__/gi, $currentBox.find('.image-data').attr('name'))
+                    let imageBox = template.replace(/__name__/gi, $currentBox.find('.image-data').attr('name'))
 
                     let $template = $('<li class="product-image-item-handler">' + imageBox + '</li>')
 
@@ -947,7 +967,7 @@ $(() => {
         })
     }
 
-    $(document).on('click', '.btn-trigger-remove-product-image', event => {
+    $(document).on('click', '.btn-trigger-remove-product-image', (event) => {
         event.preventDefault()
         $(event.currentTarget).closest('.product-image-item-handler').remove()
         if ($('.list-gallery-media-images').find('.product-image-item-handler').length === 0) {
@@ -955,7 +975,7 @@ $(() => {
         }
     })
 
-    $(document).on('click', '.list-search-data .selectable-item', event => {
+    $(document).on('click', '.list-search-data .selectable-item', (event) => {
         event.preventDefault()
         let _self = $(event.currentTarget)
         let $input = _self.closest('.form-group').find('input[type=hidden]')
@@ -986,7 +1006,7 @@ $(() => {
         _self.closest('.panel').addClass('hidden')
     })
 
-    $(document).on('click', '.textbox-advancesearch', event => {
+    $(document).on('click', '.textbox-advancesearch', (event) => {
         let _self = $(event.currentTarget)
         let $formBody = _self.closest('.box-search-advance').find('.panel')
         $formBody.removeClass('hidden')
@@ -1001,7 +1021,7 @@ $(() => {
             $.ajax({
                 url: _self.data('target'),
                 type: 'GET',
-                success: res => {
+                success: (res) => {
                     if (res.error) {
                         Botble.showError(res.message)
                     } else {
@@ -1009,7 +1029,7 @@ $(() => {
                         Botble.unblockUI($formBody)
                     }
                 },
-                error: data => {
+                error: (data) => {
                     Botble.handleError(data)
                     Botble.unblockUI($formBody)
                 },
@@ -1019,7 +1039,7 @@ $(() => {
 
     let ajaxRequest
     let hasAjaxSearchRequested = false
-    $(document).on('keyup', '.textbox-advancesearch', event => {
+    $(document).on('keyup', '.textbox-advancesearch', (event) => {
         event.preventDefault()
         let _self = $(event.currentTarget)
         let $formBody = _self.closest('.box-search-advance').find('.panel')
@@ -1040,7 +1060,7 @@ $(() => {
                 url: _self.data('target'),
                 data: { keyword: _self.val() },
                 type: 'GET',
-                success: res => {
+                success: (res) => {
                     if (res.error) {
                         Botble.showError(res.message)
                     } else {
@@ -1049,7 +1069,7 @@ $(() => {
                     }
                     hasAjaxSearchRequested = false
                 },
-                error: data => {
+                error: (data) => {
                     if (data.statusText !== 'abort') {
                         Botble.handleError(data)
                         Botble.unblockUI($formBody)
@@ -1059,7 +1079,7 @@ $(() => {
         }, 500)
     })
 
-    $(document).on('click', '.box-search-advance .page-link', event => {
+    $(document).on('click', '.box-search-advance .page-link', (event) => {
         event.preventDefault()
         let $searchBox = $(event.currentTarget).closest('.box-search-advance').find('.textbox-advancesearch')
         if (!$searchBox.closest('.page-item').hasClass('disabled') && $searchBox.data('target')) {
@@ -1074,7 +1094,7 @@ $(() => {
                 url: $(event.currentTarget).prop('href'),
                 data: { keyword: $searchBox.val() },
                 type: 'GET',
-                success: res => {
+                success: (res) => {
                     if (res.error) {
                         Botble.showError(res.message)
                     } else {
@@ -1082,7 +1102,7 @@ $(() => {
                         Botble.unblockUI($formBody)
                     }
                 },
-                error: data => {
+                error: (data) => {
                     Botble.handleError(data)
                     Botble.unblockUI($formBody)
                 },
@@ -1090,7 +1110,7 @@ $(() => {
         }
     })
 
-    $(document).on('click', 'body', e => {
+    $(document).on('click', 'body', (e) => {
         let container = $('.box-search-advance')
 
         if (!container.is(e.target) && container.has(e.target).length === 0) {
@@ -1098,7 +1118,7 @@ $(() => {
         }
     })
 
-    $(document).on('click', '.btn-trigger-remove-selected-product', event => {
+    $(document).on('click', '.btn-trigger-remove-selected-product', (event) => {
         event.preventDefault()
         let $input = $(event.currentTarget).closest('.form-group').find('input[type=hidden]')
 
@@ -1134,7 +1154,7 @@ $(() => {
             $.ajax({
                 url: $wrapBody.data('target'),
                 type: 'GET',
-                success: res => {
+                success: (res) => {
                     if (res.error) {
                         Botble.showError(res.message)
                     } else {
@@ -1142,7 +1162,7 @@ $(() => {
                         Botble.unblockUI($wrapBody)
                     }
                 },
-                error: data => {
+                error: (data) => {
                     Botble.handleError(data)
                     Botble.unblockUI($wrapBody)
                 },
@@ -1150,11 +1170,11 @@ $(() => {
         }
     }
 
-    $(function() {
+    $(function () {
         loadRelationBoxes()
     })
 
-    $(document).on('click', '.digital_attachments_btn', function(e) {
+    $(document).on('click', '.digital_attachments_btn', function (e) {
         e.preventDefault()
         const $this = $(e.currentTarget)
         const $box = $this.closest('.product-type-digital-management')
@@ -1162,7 +1182,7 @@ $(() => {
         $inputFile.trigger('click')
     })
 
-    $(document).on('change', 'input[name^=product_files_input]', function(e) {
+    $(document).on('change', 'input[name^=product_files_input]', function (e) {
         const $this = $(e.currentTarget)
         const file = $this[0].files[0]
         if (file) {
@@ -1177,11 +1197,13 @@ $(() => {
             let newId = Math.floor(Math.random() * 26) + Date.now()
 
             $box.find('table tbody').append($template)
-            $box.find('.digital_attachments_input').append(`<input type="file" name="product_files_input[]" data-id="${newId}">`)
+            $box.find('.digital_attachments_input').append(
+                `<input type="file" name="product_files_input[]" data-id="${newId}">`
+            )
         }
     })
 
-    $(document).on('change', 'input.digital-attachment-checkbox', function(e) {
+    $(document).on('change', 'input.digital-attachment-checkbox', function (e) {
         const $this = $(e.currentTarget)
         const $tr = $this.closest('tr')
         if ($this.is(':checked')) {
@@ -1191,25 +1213,23 @@ $(() => {
         }
     })
 
-    $(document).on('click', '.remove-attachment-input', function(e) {
+    $(document).on('click', '.remove-attachment-input', function (e) {
         const $this = $(e.currentTarget)
         const $tr = $this.closest('tr')
         let id = $tr.data('id')
         $('input[data-id=' + id + ']').remove()
-        $tr.fadeOut(300, function() {
+        $tr.fadeOut(300, function () {
             $(this).remove()
         })
     })
 
-    $(document).on('click', '.digital_attachments_external_btn', function(e) {
+    $(document).on('click', '.digital_attachments_external_btn', function (e) {
         e.preventDefault()
         const $this = $(e.currentTarget)
         const $box = $this.closest('.product-type-digital-management')
         let id = Math.floor(Math.random() * 26) + Date.now()
         let $template = $('#digital_attachment_external_template').html()
-        $template = $template
-            .replace(/__id__/gi, id)
-
+        $template = $template.replace(/__id__/gi, id)
 
         $box.find('table tbody').append($template)
     })
@@ -1269,7 +1289,7 @@ $(() => {
                     Botble.showSuccess(message)
                     $('#duplicate-product-modal').modal('hide')
 
-                    setTimeout(() => window.location.href = data.next_url, 1000)
+                    setTimeout(() => (window.location.href = data.next_url), 1000)
                 },
                 error: (error) => {
                     Botble.handleError(error)

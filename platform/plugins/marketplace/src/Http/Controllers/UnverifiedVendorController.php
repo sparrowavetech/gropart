@@ -8,7 +8,7 @@ use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
-use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
+use Botble\Ecommerce\Models\Customer;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Tables\UnverifiedVendorTable;
 use Carbon\Carbon;
@@ -16,10 +16,6 @@ use Illuminate\Http\Request;
 
 class UnverifiedVendorController extends BaseController
 {
-    public function __construct(protected CustomerInterface $customerRepository)
-    {
-    }
-
     public function index(UnverifiedVendorTable $table)
     {
         PageTitle::setTitle(trans('plugins/marketplace::unverified-vendor.name'));
@@ -29,14 +25,12 @@ class UnverifiedVendorController extends BaseController
 
     public function view(int|string $id)
     {
-        $vendor = $this->customerRepository->getFirstBy([
-            'id' => $id,
-            'is_vendor' => true,
-        ]);
-
-        if (! $vendor) {
-            abort(404);
-        }
+        $vendor = Customer::query()
+            ->where([
+                'id' => $id,
+                'is_vendor' => true,
+            ])
+            ->findOrFail($id);
 
         if ($vendor->vendor_verified_at) {
             return route('customers.edit', $vendor->id);
@@ -51,16 +45,13 @@ class UnverifiedVendorController extends BaseController
 
     public function approveVendor(int|string $id, Request $request, BaseHttpResponse $response)
     {
-        $vendor = $this->customerRepository
-            ->getFirstBy([
+        $vendor = Customer::query()
+            ->where([
                 'id' => $id,
                 'is_vendor' => true,
                 'vendor_verified_at' => null,
-            ]);
-
-        if (! $vendor) {
-            abort(404);
-        }
+            ])
+            ->firstOrFail();
 
         $vendor->vendor_verified_at = Carbon::now();
         $vendor->save();

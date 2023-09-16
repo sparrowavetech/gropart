@@ -3,19 +3,14 @@
 namespace Botble\Ecommerce\Http\Controllers\Fronts;
 
 use Botble\Base\Http\Responses\BaseHttpResponse;
-use Botble\Ecommerce\Repositories\Interfaces\CurrencyInterface;
+use Botble\Ecommerce\Models\Currency;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 
 class PublicEcommerceController
 {
-    protected CurrencyInterface $currencyRepository;
-
-    public function __construct(CurrencyInterface $currencyRepository)
-    {
-        $this->currencyRepository = $currencyRepository;
-    }
-
-    public function changeCurrency(Request $request, BaseHttpResponse $response, ?string $title = null)
+    public function changeCurrency(Request $request, BaseHttpResponse $response, string|null $title = null)
     {
         if (empty($title)) {
             $title = $request->input('currency');
@@ -25,12 +20,23 @@ class PublicEcommerceController
             return $response;
         }
 
-        $currency = $this->currencyRepository->getFirstBy(['title' => $title]);
+        $currency = Currency::query()->where('title', $title)->first();
 
         if ($currency) {
             cms_currency()->setApplicationCurrency($currency);
         }
 
-        return $response;
+        $url = URL::previous();
+
+        if (! $url || $url === URL::current()) {
+            return $response->setNextUrl(route('public.index'));
+        }
+
+        if (Str::contains($url, ['min_price', 'max_price'])) {
+            $url = preg_replace('/&min_price=[0-9]+/', '', $url);
+            $url = preg_replace('/&max_price=[0-9]+/', '', $url);
+        }
+
+        return $response->setNextUrl($url);
     }
 }

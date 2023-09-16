@@ -15,7 +15,7 @@
                 <span>
                     <span>{{ trans('plugins/ecommerce::reports.date_range_format_value', [
                         'from' => $startDate->format('Y-m-d'),
-                        'to'   => $endDate->format('Y-m-d')
+                        'to' => $endDate->format('Y-m-d'),
                     ]) }}</span>
                 </span>
             </button>

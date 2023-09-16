@@ -93,7 +93,7 @@ class CountryController extends BaseController
             ->select(['id', 'name'])
             ->take(10)
             ->orderBy('order')
-            ->orderBy('name', 'ASC')
+            ->orderBy('name')
             ->get();
 
         $data->prepend(new Country(['id' => 0, 'name' => trans('plugins/location::city.select_country')]));

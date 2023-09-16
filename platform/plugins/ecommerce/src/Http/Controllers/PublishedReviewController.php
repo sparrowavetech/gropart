@@ -23,7 +23,7 @@ class PublishedReviewController extends BaseController
     public function destroy(string|int $id, BaseHttpResponse $response): BaseHttpResponse
     {
         $review = Review::query()
-            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->wherePublished()
             ->findOrFail($id);
 
         $review->update(['status' => BaseStatusEnum::DRAFT]);

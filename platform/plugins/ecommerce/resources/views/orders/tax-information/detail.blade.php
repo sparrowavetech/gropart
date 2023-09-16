@@ -13,6 +13,10 @@
     <div>{{ $tax->company_address }}</div>
 
     <div>
-        <a target="_blank" class="hover-underline" href="https://maps.google.com/?q={{ $tax->company_address }}">{{ trans('plugins/ecommerce::order.see_on_maps') }}</a>
+        <a
+            class="hover-underline"
+            href="https://maps.google.com/?q={{ $tax->company_address }}"
+            target="_blank"
+        >{{ trans('plugins/ecommerce::order.see_on_maps') }}</a>
     </div>
 </li>

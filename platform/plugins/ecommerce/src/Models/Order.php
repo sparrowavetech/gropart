@@ -7,16 +7,18 @@ use Botble\Ecommerce\Enums\OrderAddressTypeEnum;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Enums\ShippingMethodEnum;
 use Botble\Ecommerce\Enums\ShippingStatusEnum;
-use Botble\Ecommerce\Repositories\Interfaces\ShipmentInterface;
+use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Facades\OrderHelper;
+use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Models\Payment;
-use Botble\Payment\Repositories\Interfaces\PaymentInterface;
 use Carbon\Carbon;
-use EcommerceHelper;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use OrderHelper;
+use Illuminate\Support\Facades\DB;
 
 class Order extends BaseModel
 {
@@ -47,16 +49,18 @@ class Order extends BaseModel
         'completed_at' => 'datetime',
     ];
 
-    protected static function boot()
+    protected static function booted(): void
     {
-        parent::boot();
-
         self::deleting(function (Order $order) {
-            app(ShipmentInterface::class)->deleteBy(['order_id' => $order->id]);
-            OrderHistory::where('order_id', $order->id)->delete();
-            OrderProduct::where('order_id', $order->id)->delete();
-            OrderAddress::where('order_id', $order->id)->delete();
-            app(PaymentInterface::class)->deleteBy(['order_id' => $order->id]);
+            $order->shipment()->each(fn (Shipment $item) => $item->delete());
+            $order->histories()->delete();
+            $order->products()->delete();
+            $order->address()->delete();
+            $order->invoice()->each(fn (Invoice $item) => $item->delete());
+
+            if (is_plugin_active('payment')) {
+                $order->payment()->delete();
+            }
         });
 
         static::creating(function (Order $order) {
@@ -144,6 +148,11 @@ class Order extends BaseModel
         return $this->hasOne(Invoice::class, 'reference_id')->withDefault();
     }
 
+    public function taxInformation(): HasOne
+    {
+        return $this->hasOne(OrderTaxInformation::class, 'order_id');
+    }
+
     public function canBeCanceled(): bool
     {
         if ($this->shipment && in_array(
@@ -223,6 +232,10 @@ class Order extends BaseModel
 
     public function canBeReturned(): bool
     {
+        if (! EcommerceHelper::isOrderReturnEnabled()) {
+            return false;
+        }
+
         if ($this->status != OrderStatusEnum::COMPLETED || ! $this->completed_at) {
             return false;
         }
@@ -244,7 +257,9 @@ class Order extends BaseModel
 
     public static function generateUniqueCode(): string
     {
-        $nextInsertId = static::query()->max('id') + 1;
+        $nextInsertId = BaseModel::determineIfUsingUuidsForId() ? static::query()->count() + 1 : static::query()->max(
+            'id'
+        ) + 1;
 
         do {
             $code = get_order_code($nextInsertId);
@@ -252,5 +267,42 @@ class Order extends BaseModel
         } while (static::query()->where('code', $code)->exists());
 
         return $code;
+    }
+
+    public function digitalProducts(): Collection
+    {
+        return $this->products->filter(fn ($item) => $item->isTypeDigital());
+    }
+
+    public static function countRevenueByDateRange(CarbonInterface $startDate, CarbonInterface $endDate): float
+    {
+        return self::query()
+            ->join('payments', 'payments.id', '=', 'ec_orders.payment_id')
+            ->whereDate('payments.created_at', '>=', $startDate)
+            ->whereDate('payments.created_at', '<=', $endDate)
+            ->where('payments.status', PaymentStatusEnum::COMPLETED)
+            ->sum(DB::raw('COALESCE(payments.amount, 0) - COALESCE(payments.refunded_amount, 0)'));
+    }
+
+    public static function getRevenueData(
+        CarbonInterface $startDate,
+        CarbonInterface $endDate,
+        $select = []
+    ): Collection {
+        if (empty($select)) {
+            $select = [
+                DB::raw('DATE(payments.created_at) AS date'),
+                DB::raw('SUM(COALESCE(payments.amount, 0) - COALESCE(payments.refunded_amount, 0)) as revenue'),
+            ];
+        }
+
+        return self::query()
+            ->join('payments', 'payments.id', '=', 'ec_orders.payment_id')
+            ->whereDate('payments.created_at', '>=', $startDate)
+            ->whereDate('payments.created_at', '<=', $endDate)
+            ->where('payments.status', PaymentStatusEnum::COMPLETED)
+            ->groupBy('date')
+            ->select($select)
+            ->get();
     }
 }

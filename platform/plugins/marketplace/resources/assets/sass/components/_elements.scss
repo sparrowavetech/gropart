@@ -27,7 +27,8 @@
         }
     }
 
-    small, .title {
+    small,
+    .title {
         display: block;
     }
 
@@ -55,7 +56,6 @@
     font-size: 85%;
 }
 
-
 .price {
     font-weight: 600;
 }
@@ -65,7 +65,7 @@
     top: -4px;
     right: -10px;
     display: inline-block;
-    padding: .25em .6em;
+    padding: 0.25em 0.6em;
     font-size: 75%;
     line-height: 1;
     text-align: center;
@@ -73,7 +73,6 @@
     color: #fff;
     background-color: $red;
 }
-
 
 .map-pin {
     border-radius: 3rem;
@@ -84,7 +83,7 @@
     height: 16px;
 
     &:after {
-        content: "";
+        content: '';
         position: absolute;
         width: 50px;
         height: 50px;
@@ -93,7 +92,7 @@
         left: 8px;
         border-radius: 100%;
         transform: translate(-50%, -50%);
-        background-color: rgba(255, 0, 0, .3);
+        background-color: rgba(255, 0, 0, 0.3);
     }
 }
 
@@ -101,7 +100,6 @@
     margin-top: 5px;
     float: right;
 }
-
 
 /* ====================== box ==================== */
 .box {
@@ -123,7 +121,7 @@
 .label-rating {
     margin-left: 7px;
     display: inline-block;
-    vertical-align: middle
+    vertical-align: middle;
 }
 
 /* rating-stars */
@@ -187,22 +185,22 @@
 
 .dropdown-menu {
     min-width: 10rem;
-    padding: .5rem 0;
+    padding: 0.5rem 0;
     margin: 0;
     font-size: 13px;
-    color: $gray-600;;
+    color: $gray-600;
     text-align: left;
     list-style: none;
     background-color: #fff;
     border: 0;
-    border-radius: .25rem;
+    border-radius: 0.25rem;
     -webkit-box-shadow: 0 -3px 23px rgba(0, 0, 0, 0.06);
     box-shadow: 0 -3px 23px rgba(0, 0, 0, 0.06);
 
     .dropdown-item {
         display: flex;
         width: 100%;
-        padding: .35rem 1.5rem;
+        padding: 0.35rem 1.5rem;
         clear: both;
         font-weight: 400;
         text-align: inherit;
@@ -301,250 +299,250 @@
 
 .badge[href]:focus,
 .badge[href]:hover {
-    color: #fff
+    color: #fff;
 }
 
 .badge.bg-primary[href]:focus,
 .badge.bg-primary[href]:hover {
-    background-color: $brand !important
+    background-color: $brand !important;
 }
 
 .badge.bg-light {
-    color: #495057
+    color: #495057;
 }
 
 .badge.bg-light[href]:focus,
 .badge.bg-light[href]:hover {
-    color: #495057
+    color: #495057;
 }
 
 .badge-soft-primary {
     color: $brand;
-    background-color: rgba(85, 230, 150, 0.18)
+    background-color: rgba(85, 230, 150, 0.18);
 }
 
 .badge-soft-primary[href]:focus,
 .badge-soft-primary[href]:hover {
     color: $brand;
     text-decoration: none;
-    background-color: rgba(85, 230, 150, 0.18)
+    background-color: rgba(85, 230, 150, 0.18);
 }
 
 .badge.bg-secondary[href]:focus,
 .badge.bg-secondary[href]:hover {
-    background-color: #6b6e82 !important
+    background-color: #6b6e82 !important;
 }
 
 .badge.bg-light {
-    color: #495057
+    color: #495057;
 }
 
 .badge.bg-light[href]:focus,
 .badge.bg-light[href]:hover {
-    color: #495057
+    color: #495057;
 }
 
 .badge-soft-secondary {
     color: #74788d;
-    background-color: rgba(116, 120, 141, .18)
+    background-color: rgba(116, 120, 141, 0.18);
 }
 
 .badge-soft-secondary[href]:focus,
 .badge-soft-secondary[href]:hover {
     color: #74788d;
     text-decoration: none;
-    background-color: rgba(116, 120, 141, .4)
+    background-color: rgba(116, 120, 141, 0.4);
 }
 
 .badge.bg-success[href]:focus,
 .badge.bg-success[href]:hover {
-    background-color: #30b383 !important
+    background-color: #30b383 !important;
 }
 
 .badge.bg-light {
-    color: #495057
+    color: #495057;
 }
 
 .badge.bg-light[href]:focus,
 .badge.bg-light[href]:hover {
-    color: #495057
+    color: #495057;
 }
 
 .badge-soft-success {
     color: #34c38f;
-    background-color: rgba(52, 195, 143, .18)
+    background-color: rgba(52, 195, 143, 0.18);
 }
 
 .badge-soft-success[href]:focus,
 .badge-soft-success[href]:hover {
     color: #34c38f;
     text-decoration: none;
-    background-color: rgba(52, 195, 143, .4)
+    background-color: rgba(52, 195, 143, 0.4);
 }
 
 .badge.bg-info[href]:focus,
 .badge.bg-info[href]:hover {
-    background-color: #3d9bef !important
+    background-color: #3d9bef !important;
 }
 
 .badge.bg-light {
-    color: #495057
+    color: #495057;
 }
 
 .badge.bg-light[href]:focus,
 .badge.bg-light[href]:hover {
-    color: #495057
+    color: #495057;
 }
 
 .badge-soft-info {
     color: #50a5f1;
-    background-color: rgba(80, 165, 241, .18)
+    background-color: rgba(80, 165, 241, 0.18);
 }
 
 .badge-soft-info[href]:focus,
 .badge-soft-info[href]:hover {
     color: #50a5f1;
     text-decoration: none;
-    background-color: rgba(80, 165, 241, .4)
+    background-color: rgba(80, 165, 241, 0.4);
 }
 
 .badge.bg-warning[href]:focus,
 .badge.bg-warning[href]:hover {
-    background-color: #f0ac39 !important
+    background-color: #f0ac39 !important;
 }
 
 .badge.bg-light {
-    color: #495057
+    color: #495057;
 }
 
 .badge.bg-light[href]:focus,
 .badge.bg-light[href]:hover {
-    color: #495057
+    color: #495057;
 }
 
 .badge-soft-warning {
     color: #f1b44c;
-    background-color: rgba(241, 180, 76, .18)
+    background-color: rgba(241, 180, 76, 0.18);
 }
 
 .badge-soft-warning[href]:focus,
 .badge-soft-warning[href]:hover {
     color: #f1b44c;
     text-decoration: none;
-    background-color: rgba(241, 180, 76, .4)
+    background-color: rgba(241, 180, 76, 0.4);
 }
 
 .badge.bg-danger[href]:focus,
 .badge.bg-danger[href]:hover {
-    background-color: #f35757 !important
+    background-color: #f35757 !important;
 }
 
 .badge.bg-light {
-    color: #495057
+    color: #495057;
 }
 
 .badge.bg-light[href]:focus,
 .badge.bg-light[href]:hover {
-    color: #495057
+    color: #495057;
 }
 
 .badge-soft-danger {
     color: #f46a6a;
-    background-color: rgba(244, 106, 106, .18)
+    background-color: rgba(244, 106, 106, 0.18);
 }
 
 .badge-soft-danger[href]:focus,
 .badge-soft-danger[href]:hover {
     color: #f46a6a;
     text-decoration: none;
-    background-color: rgba(244, 106, 106, .4)
+    background-color: rgba(244, 106, 106, 0.4);
 }
 
 .badge.bg-pink[href]:focus,
 .badge.bg-pink[href]:hover {
-    background-color: #e62c81 !important
+    background-color: #e62c81 !important;
 }
 
 .badge.bg-light {
-    color: #495057
+    color: #495057;
 }
 
 .badge.bg-light[href]:focus,
 .badge.bg-light[href]:hover {
-    color: #495057
+    color: #495057;
 }
 
 .badge-soft-pink {
     color: #e83e8c;
-    background-color: rgba(232, 62, 140, .18)
+    background-color: rgba(232, 62, 140, 0.18);
 }
 
 .badge-soft-pink[href]:focus,
 .badge-soft-pink[href]:hover {
     color: #e83e8c;
     text-decoration: none;
-    background-color: rgba(232, 62, 140, .4)
+    background-color: rgba(232, 62, 140, 0.4);
 }
 
 .badge.bg-light[href]:focus,
 .badge.bg-light[href]:hover {
-    background-color: #e1e7f0 !important
+    background-color: #e1e7f0 !important;
 }
 
 .badge.bg-light {
-    color: #495057
+    color: #495057;
 }
 
 .badge.bg-light[href]:focus,
 .badge.bg-light[href]:hover {
-    color: #495057
+    color: #495057;
 }
 
 .badge-soft-light {
     color: #eff2f7;
-    background-color: rgba(239, 242, 247, .18)
+    background-color: rgba(239, 242, 247, 0.18);
 }
 
 .badge-soft-light[href]:focus,
 .badge-soft-light[href]:hover {
     color: #eff2f7;
     text-decoration: none;
-    background-color: rgba(239, 242, 247, .4)
+    background-color: rgba(239, 242, 247, 0.4);
 }
 
 .badge.bg-dark[href]:focus,
 .badge.bg-dark[href]:hover {
-    background-color: #2b3035 !important
+    background-color: #2b3035 !important;
 }
 
 .badge.bg-light {
-    color: #495057
+    color: #495057;
 }
 
 .badge.bg-light[href]:focus,
 .badge.bg-light[href]:hover {
-    color: #495057
+    color: #495057;
 }
 
 .badge-soft-dark {
     color: #343a40;
-    background-color: rgba(52, 58, 64, .18)
+    background-color: rgba(52, 58, 64, 0.18);
 }
 
 .badge-soft-dark[href]:focus,
 .badge-soft-dark[href]:hover {
     color: #343a40;
     text-decoration: none;
-    background-color: rgba(52, 58, 64, .4)
+    background-color: rgba(52, 58, 64, 0.4);
 }
 
 .rounded-pill {
-    padding-right: .6em;
-    padding-left: .6em
+    padding-right: 0.6em;
+    padding-left: 0.6em;
 }
 
 .badge.bg-dark {
-    color: #eff2f7
+    color: #eff2f7;
 }
 
 .img-thumbnail {
@@ -567,76 +565,76 @@
 @-webkit-keyframes shake {
     from {
         -webkit-transform: scale3d(1, 1, 1);
-        transform: scale3d(1, 1, 1)
+        transform: scale3d(1, 1, 1);
     }
     10%,
     20% {
-        -webkit-transform: scale3d(.95, .95, .95) rotate3d(0, 0, 1, -10deg);
-        transform: scale3d(.95, .95, .95) rotate3d(0, 0, 1, -10deg)
+        -webkit-transform: scale3d(0.95, 0.95, 0.95) rotate3d(0, 0, 1, -10deg);
+        transform: scale3d(0.95, 0.95, 0.95) rotate3d(0, 0, 1, -10deg);
     }
     30%,
     50%,
     70%,
     90% {
         -webkit-transform: scale3d(1, 1, 1) rotate3d(0, 0, 1, 10deg);
-        transform: scale3d(1, 1, 1) rotate3d(0, 0, 1, 10deg)
+        transform: scale3d(1, 1, 1) rotate3d(0, 0, 1, 10deg);
     }
     40%,
     60%,
     80% {
         -webkit-transform: scale3d(1, 1, 1) rotate3d(0, 0, 1, -10deg);
-        transform: scale3d(1, 1, 1) rotate3d(0, 0, 1, -10deg)
+        transform: scale3d(1, 1, 1) rotate3d(0, 0, 1, -10deg);
     }
     to {
         -webkit-transform: scale3d(1, 1, 1);
-        transform: scale3d(1, 1, 1)
+        transform: scale3d(1, 1, 1);
     }
 }
 
 @keyframes shake {
     from {
         -webkit-transform: scale3d(1, 1, 1);
-        transform: scale3d(1, 1, 1)
+        transform: scale3d(1, 1, 1);
     }
     10%,
     20% {
-        -webkit-transform: scale3d(.95, .95, .95) rotate3d(0, 0, 1, -10deg);
-        transform: scale3d(.95, .95, .95) rotate3d(0, 0, 1, -10deg)
+        -webkit-transform: scale3d(0.95, 0.95, 0.95) rotate3d(0, 0, 1, -10deg);
+        transform: scale3d(0.95, 0.95, 0.95) rotate3d(0, 0, 1, -10deg);
     }
     30%,
     50%,
     70%,
     90% {
         -webkit-transform: scale3d(1, 1, 1) rotate3d(0, 0, 1, 10deg);
-        transform: scale3d(1, 1, 1) rotate3d(0, 0, 1, 10deg)
+        transform: scale3d(1, 1, 1) rotate3d(0, 0, 1, 10deg);
     }
     40%,
     60%,
     80% {
         -webkit-transform: rotate3d(0, 0, 1, -10deg);
-        transform: rotate3d(0, 0, 1, -10deg)
+        transform: rotate3d(0, 0, 1, -10deg);
     }
     to {
         -webkit-transform: scale3d(1, 1, 1);
-        transform: scale3d(1, 1, 1)
+        transform: scale3d(1, 1, 1);
     }
 }
 
 .animation-fade-right {
     -webkit-animation: fade-right 1.5s infinite linear;
-    animation: fade-right 1.5s infinite linear
+    animation: fade-right 1.5s infinite linear;
 }
 
 @-webkit-keyframes fade-right {
     0% {
         -webkit-transform: translateX(0);
         transform: translateX(0);
-        opacity: 1
+        opacity: 1;
     }
     75% {
         -webkit-transform: translateX(20px);
         transform: translateX(20px);
-        opacity: 0
+        opacity: 0;
     }
 }
 
@@ -644,11 +642,11 @@
     0% {
         -webkit-transform: translateX(0);
         transform: translateX(0);
-        opacity: 1
+        opacity: 1;
     }
     75% {
         -webkit-transform: translateX(20px);
         transform: translateX(20px);
-        opacity: 0
+        opacity: 0;
     }
 }

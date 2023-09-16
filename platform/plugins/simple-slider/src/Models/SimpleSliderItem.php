@@ -23,4 +23,11 @@ class SimpleSliderItem extends BaseModel
         'description' => SafeContent::class,
         'link' => SafeContent::class,
     ];
+
+    protected static function booted(): void
+    {
+        self::deleting(function (SimpleSliderItem $item) {
+            $item->metadata()->delete();
+        });
+    }
 }

@@ -3,7 +3,7 @@
 //
 
 // Generate the extra small columns
-@use "sass:math";
+@use 'sass:math';
 
 @mixin make-xs-column($columns) {
     width: percentage(math.div($columns, $m-grid-columns));
@@ -31,9 +31,12 @@
 }
 
 // Generate grid columns
-@mixin make-grid-columns($i: 1, $list: ".m-grid-col-xs-#{$i}, .m-grid-col-sm-#{$i}, .m-grid-col-md-#{$i}, .m-grid-col-lg-#{$i}") {
+@mixin make-grid-columns(
+    $i: 1,
+    $list: '.m-grid-col-xs-#{$i}, .m-grid-col-sm-#{$i}, .m-grid-col-md-#{$i}, .m-grid-col-lg-#{$i}'
+) {
     @for $i from (1 + 1) through $m-grid-columns {
-        $list: "#{$list}, .m-grid-col-xs-#{$i}, .m-grid-col-sm-#{$i}, .m-grid-col-md-#{$i}, .m-grid-col-lg-#{$i}";
+        $list: '#{$list}, .m-grid-col-xs-#{$i}, .m-grid-col-sm-#{$i}, .m-grid-col-md-#{$i}, .m-grid-col-lg-#{$i}';
     }
 }
 
@@ -163,7 +166,6 @@
 // Demo grid
 
 .m-grid.m-grid-demo {
-
     .m-grid-col {
         border: 1px solid #dddddd;
         background: #fafafa;
@@ -189,7 +191,7 @@
     @include make-grid(lg);
 }
 
-// Responsive grids 
+// Responsive grids
 
 //== convert to block below LG resolution
 @each $breakpoint, $breakpoint-width in $m-layout-breakpoints {

@@ -3,8 +3,7 @@
 let Shippo = Shippo || {}
 
 Shippo.init = () => {
-
-    $(document).on('show.bs.modal', '#shippo-view-n-create-transaction', function(e) {
+    $(document).on('show.bs.modal', '#shippo-view-n-create-transaction', function (e) {
         const $self = $(e.currentTarget)
         const $related = $(e.relatedTarget)
         $self.find('.modal-body').html('')
@@ -15,14 +14,14 @@ Shippo.init = () => {
             beforeSend: () => {
                 $related.addClass('button-loading')
             },
-            success: res => {
+            success: (res) => {
                 if (res.error) {
                     Botble.showError(res.message)
                 } else {
                     $self.find('.modal-body').html(res.data.html)
                 }
             },
-            error: res => {
+            error: (res) => {
                 Botble.handleError(res)
             },
             complete: () => {
@@ -31,7 +30,7 @@ Shippo.init = () => {
         })
     })
 
-    $(document).on('click', '#shippo-view-n-create-transaction .create-transaction', function(e) {
+    $(document).on('click', '#shippo-view-n-create-transaction .create-transaction', function (e) {
         const $self = $(e.currentTarget)
 
         $.ajax({
@@ -40,7 +39,7 @@ Shippo.init = () => {
             beforeSend: () => {
                 $self.addClass('button-loading')
             },
-            success: res => {
+            success: (res) => {
                 if (res.error) {
                     Botble.showError(res.message)
                 } else {
@@ -49,7 +48,7 @@ Shippo.init = () => {
                     Botble.showSuccess(res.message)
                 }
             },
-            error: res => {
+            error: (res) => {
                 Botble.handleError(res)
             },
             complete: () => {
@@ -58,7 +57,7 @@ Shippo.init = () => {
         })
     })
 
-    $(document).on('click', '#shippo-view-n-create-transaction .get-new-rates', function(e) {
+    $(document).on('click', '#shippo-view-n-create-transaction .get-new-rates', function (e) {
         const $self = $(e.currentTarget)
 
         $.ajax({
@@ -67,7 +66,7 @@ Shippo.init = () => {
             beforeSend: () => {
                 $self.addClass('button-loading')
             },
-            success: res => {
+            success: (res) => {
                 if (res.error) {
                     Botble.showError(res.message)
                 } else {
@@ -76,7 +75,7 @@ Shippo.init = () => {
                     $self.parent().append(res.data.html)
                 }
             },
-            error: res => {
+            error: (res) => {
                 Botble.handleError(res)
             },
             complete: () => {
@@ -85,7 +84,7 @@ Shippo.init = () => {
         })
     })
 
-    $(document).on('submit', '.update-rate-shipment', function(e) {
+    $(document).on('submit', '.update-rate-shipment', function (e) {
         e.preventDefault()
         const $self = $(e.currentTarget)
         const $button = $self.find('button[type=submit]')
@@ -97,7 +96,7 @@ Shippo.init = () => {
             beforeSend: () => {
                 $button.addClass('button-loading')
             },
-            success: res => {
+            success: (res) => {
                 if (res.error) {
                     Botble.showError(res.message)
                 } else {
@@ -105,7 +104,7 @@ Shippo.init = () => {
                     $('#shippo-view-n-create-transaction').find('.modal-body').html(res.data.html)
                 }
             },
-            error: res => {
+            error: (res) => {
                 Botble.handleError(res)
             },
             complete: () => {

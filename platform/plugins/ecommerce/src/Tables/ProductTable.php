@@ -9,12 +9,17 @@ use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Enums\StockStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Product;
-use Botble\Ecommerce\Repositories\Interfaces\ProductCategoryInterface;
-use Botble\Media\Facades\RvMedia;
+use Botble\Ecommerce\Models\ProductCategory;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Table\DataTables;
+use Botble\Table\Actions\DeleteAction;
+use Botble\Table\Actions\EditAction;
+use Botble\Table\BulkActions\DeleteBulkAction;
+use Botble\Table\Columns\CreatedAtColumn;
+use Botble\Table\Columns\IdColumn;
+use Botble\Table\Columns\ImageColumn;
+use Botble\Table\Columns\NameColumn;
+use Botble\Table\Columns\StatusColumn;
 use Carbon\Carbon;
-use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -24,23 +29,18 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\Relations\Relation as EloquentRelation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class ProductTable extends TableAbstract
 {
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Product $model)
+    public function setup(): void
     {
-        parent::__construct($table, $urlGenerator);
-
-        $this->model = $model;
-        $this->hasActions = true;
-        $this->hasFilter = true;
-
-        if (! Auth::user()->hasAnyPermission(['products.edit', 'products.destroy'])) {
-            $this->hasOperations = false;
-            $this->hasActions = false;
-        }
+        $this
+            ->model(Product::class)
+            ->addActions([
+                EditAction::make()->route('products.edit'),
+                DeleteAction::make()->route('products.destroy'),
+            ]);
     }
 
     public function ajax(): JsonResponse
@@ -54,25 +54,11 @@ class ProductTable extends TableAbstract
                     $productType = Html::tag('small', ' &mdash; ' . $item->product_type->label())->toHtml();
                 }
 
-                if (! Auth::user()->hasPermission('products.edit')) {
+                if (! $this->hasPermission('products.edit')) {
                     return BaseHelper::clean($item->name) . $productType;
                 }
 
-                return Html::link(route('products.edit', $item->id), BaseHelper::clean($item->name)) . $productType;
-            })
-            ->editColumn('image', function (Product $item) {
-                if ($this->request()->input('action') == 'csv') {
-                    return RvMedia::getImageUrl($item->image, null, false, RvMedia::getDefaultImage());
-                }
-
-                if ($this->request()->input('action') == 'excel') {
-                    return RvMedia::getImageUrl($item->image, 'thumb', false, RvMedia::getDefaultImage());
-                }
-
-                return $this->displayThumbnail($item->image);
-            })
-            ->editColumn('checkbox', function (Product $item) {
-                return $this->getCheckbox($item->id);
+                return Html::link(route('products.edit', $item->getKey()), BaseHelper::clean($item->name)) . $productType;
             })
             ->editColumn('price', function (Product $item) {
                 return $item->price_in_table;
@@ -86,17 +72,8 @@ class ProductTable extends TableAbstract
             ->editColumn('order', function (Product $item) {
                 return view('plugins/ecommerce::products.partials.sort-order', compact('item'))->render();
             })
-            ->editColumn('created_at', function (Product $item) {
-                return BaseHelper::formatDate($item->created_at);
-            })
-            ->editColumn('status', function (Product $item) {
-                return BaseHelper::clean($item->status->toHtml());
-            })
             ->editColumn('stock_status', function (Product $item) {
                 return BaseHelper::clean($item->stock_status_html);
-            })
-            ->addColumn('operations', function (Product $item) {
-                return $this->getOperations('products.edit', 'products.destroy', $item);
             });
 
         return $this->toJson($data);
@@ -137,27 +114,15 @@ class ProductTable extends TableAbstract
     public function columns(): array
     {
         return [
-            'id' => [
-                'title' => trans('core/base::tables.id'),
-                'width' => '20px',
-            ],
-            'image' => [
-                'name' => 'images',
-                'title' => trans('plugins/ecommerce::products.image'),
-                'width' => '100px',
-                'class' => 'text-center',
-            ],
-            'name' => [
-                'title' => trans('core/base::tables.name'),
-                'class' => 'text-start',
-            ],
+            IdColumn::make(),
+            ImageColumn::make(),
+            NameColumn::make(),
             'price' => [
                 'title' => trans('plugins/ecommerce::products.price'),
                 'class' => 'text-start',
             ],
             'stock_status' => [
                 'title' => trans('plugins/ecommerce::products.stock_status'),
-                'class' => 'text-center',
             ],
             'quantity' => [
                 'title' => trans('plugins/ecommerce::products.quantity'),
@@ -170,44 +135,43 @@ class ProductTable extends TableAbstract
             'order' => [
                 'title' => trans('core/base::tables.order'),
                 'width' => '50px',
-                'class' => 'text-center',
             ],
-            'created_at' => [
-                'title' => trans('core/base::tables.created_at'),
-                'width' => '100px',
-                'class' => 'text-center',
-            ],
-            'status' => [
-                'title' => trans('core/base::tables.status'),
-                'width' => '100px',
-                'class' => 'text-center',
-            ],
+            CreatedAtColumn::make(),
+            StatusColumn::make(),
         ];
     }
 
     public function buttons(): array
     {
         $buttons = [];
-        if (EcommerceHelper::isEnabledSupportDigitalProducts() && Auth::user()->hasPermission('products.create')) {
+        if (EcommerceHelper::isEnabledSupportDigitalProducts() && $this->hasPermission('products.create')) {
             $buttons['create'] = [
                 'extend' => 'collection',
                 'text' => view('core/table::partials.create')->render(),
                 'buttons' => [
                     [
                         'className' => 'action-item',
-                        'text' => ProductTypeEnum::PHYSICAL()->toIcon() . ' ' . Html::tag('span', ProductTypeEnum::PHYSICAL()->label(), [
-                            'data-action' => 'physical-product',
-                            'data-href' => route('products.create'),
-                            'class' => 'ms-1',
-                        ])->toHtml(),
+                        'text' => ProductTypeEnum::PHYSICAL()->toIcon() . ' ' . Html::tag(
+                            'span',
+                            ProductTypeEnum::PHYSICAL()->label(),
+                            [
+                                'data-action' => 'physical-product',
+                                'data-href' => route('products.create'),
+                                'class' => 'ms-1',
+                            ]
+                        )->toHtml(),
                     ],
                     [
                         'className' => 'action-item',
-                        'text' => ProductTypeEnum::DIGITAL()->toIcon() . ' ' . Html::tag('span', ProductTypeEnum::DIGITAL()->label(), [
-                            'data-action' => 'digital-product',
-                            'data-href' => route('products.create', ['product_type' => 'digital']),
-                            'class' => 'ms-1',
-                        ])->toHtml(),
+                        'text' => ProductTypeEnum::DIGITAL()->toIcon() . ' ' . Html::tag(
+                            'span',
+                            ProductTypeEnum::DIGITAL()->label(),
+                            [
+                                'data-action' => 'digital-product',
+                                'data-href' => route('products.create', ['product_type' => 'digital']),
+                                'class' => 'ms-1',
+                            ]
+                        )->toHtml(),
                     ],
                 ],
             ];
@@ -215,18 +179,22 @@ class ProductTable extends TableAbstract
             $buttons = $this->addCreateButton(route('products.create'), 'products.create');
         }
 
-        if (Auth::user()->hasPermission('ecommerce.import.products.index')) {
+        if ($this->hasPermission('ecommerce.import.products.index')) {
             $buttons['import'] = [
                 'link' => route('ecommerce.import.products.index'),
-                'text' => '<i class="fas fa-cloud-upload-alt"></i> ' . trans('plugins/ecommerce::bulk-import.import_products'),
+                'text' => '<i class="fas fa-cloud-upload-alt"></i> ' . trans(
+                    'plugins/ecommerce::bulk-import.import_products'
+                ),
                 'class' => 'btn-warning',
             ];
         }
 
-        if (Auth::user()->hasPermission('ecommerce.export.products.index')) {
+        if ($this->hasPermission('ecommerce.export.products.index')) {
             $buttons['export'] = [
                 'link' => route('ecommerce.export.products.index'),
-                'text' => '<i class="fas fa-cloud-download-alt"></i> ' . trans('plugins/ecommerce::export.products.name'),
+                'text' => '<i class="fas fa-cloud-download-alt"></i> ' . trans(
+                    'plugins/ecommerce::export.products.name'
+                ),
                 'class' => 'btn-warning',
             ];
         }
@@ -236,7 +204,9 @@ class ProductTable extends TableAbstract
 
     public function bulkActions(): array
     {
-        return $this->addDeleteAction(route('products.deletes'), 'products.destroy', parent::bulkActions());
+        return [
+            DeleteBulkAction::make()->permission('products.destroy'),
+        ];
     }
 
     public function renderTable($data = [], $mergeData = []): View|Factory|Response
@@ -259,9 +229,9 @@ class ProductTable extends TableAbstract
     {
         $categorySelected = [];
         if ($value) {
-            $category = app(ProductCategoryInterface::class)->findById($value);
+            $category = ProductCategory::query()->find($value);
             if ($category) {
-                $categorySelected = [$category->id => $category->name];
+                $categorySelected = [$category->getKey() => $category->name];
             }
         }
 
@@ -330,8 +300,12 @@ class ProductTable extends TableAbstract
         ];
     }
 
-    public function applyFilterCondition(EloquentBuilder|QueryBuilder|EloquentRelation $query, string $key, string $operator, string|null $value): EloquentRelation|EloquentBuilder|QueryBuilder
-    {
+    public function applyFilterCondition(
+        EloquentBuilder|QueryBuilder|EloquentRelation $query,
+        string $key,
+        string $operator,
+        string|null $value
+    ): EloquentRelation|EloquentBuilder|QueryBuilder {
         switch ($key) {
             case 'created_at':
                 if (! $value) {
@@ -340,7 +314,7 @@ class ProductTable extends TableAbstract
 
                 $value = Carbon::createFromFormat(config('core.base.general.date_format.date'), $value)->toDateString();
 
-                return $query->whereDate($key, $operator, $value);
+                return $query->whereDate('ec_products.' . $key, $operator, $value);
             case 'category':
                 if (! $value) {
                     break;

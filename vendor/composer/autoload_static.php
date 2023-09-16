@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit4c01e180744a375d2f064d900b133445
+class ComposerStaticInitc1ddf2d71d14f7da9383f8942c9fb604
 {
     public static $files = array (
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
@@ -1870,12 +1870,14 @@ class ComposerStaticInit4c01e180744a375d2f064d900b133445
         'Botble\\Shortcode\\Http\\Requests\\GetShortcodeDataRequest' => __DIR__ . '/..' . '/botble/shortcode/src/Http/Requests/GetShortcodeDataRequest.php',
         'Botble\\Shortcode\\Providers\\ShortcodeServiceProvider' => __DIR__ . '/..' . '/botble/shortcode/src/Providers/ShortcodeServiceProvider.php',
         'Botble\\Shortcode\\Shortcode' => __DIR__ . '/..' . '/botble/shortcode/src/Shortcode.php',
+        'Botble\\Shortcode\\ShortcodeField' => __DIR__ . '/..' . '/botble/shortcode/src/ShortcodeField.php',
         'Botble\\Shortcode\\View\\Factory' => __DIR__ . '/..' . '/botble/shortcode/src/View/Factory.php',
         'Botble\\Shortcode\\View\\View' => __DIR__ . '/..' . '/botble/shortcode/src/View/View.php',
         'Botble\\Sitemap\\Model' => __DIR__ . '/..' . '/botble/sitemap/src/Model.php',
         'Botble\\Sitemap\\Providers\\SitemapServiceProvider' => __DIR__ . '/..' . '/botble/sitemap/src/Providers/SitemapServiceProvider.php',
         'Botble\\Sitemap\\Sitemap' => __DIR__ . '/..' . '/botble/sitemap/src/Sitemap.php',
         'Botble\\Slug\\Commands\\ChangeSlugPrefixCommand' => __DIR__ . '/..' . '/botble/slug/src/Commands/ChangeSlugPrefixCommand.php',
+        'Botble\\Slug\\Events\\UpdatedPermalinkSettings' => __DIR__ . '/..' . '/botble/slug/src/Events/UpdatedPermalinkSettings.php',
         'Botble\\Slug\\Events\\UpdatedSlugEvent' => __DIR__ . '/..' . '/botble/slug/src/Events/UpdatedSlugEvent.php',
         'Botble\\Slug\\Facades\\SlugHelper' => __DIR__ . '/..' . '/botble/slug/src/Facades/SlugHelper.php',
         'Botble\\Slug\\Http\\Controllers\\SlugController' => __DIR__ . '/..' . '/botble/slug/src/Http/Controllers/SlugController.php',
@@ -3047,6 +3049,13 @@ class ComposerStaticInit4c01e180744a375d2f064d900b133445
         'Google\\ApiCore\\Middleware\\ResponseMetadataMiddleware' => __DIR__ . '/..' . '/google/gax/src/Middleware/ResponseMetadataMiddleware.php',
         'Google\\ApiCore\\Middleware\\RetryMiddleware' => __DIR__ . '/..' . '/google/gax/src/Middleware/RetryMiddleware.php',
         'Google\\ApiCore\\OperationResponse' => __DIR__ . '/..' . '/google/gax/src/OperationResponse.php',
+        'Google\\ApiCore\\Options\\CallOptions' => __DIR__ . '/..' . '/google/gax/src/Options/CallOptions.php',
+        'Google\\ApiCore\\Options\\ClientOptions' => __DIR__ . '/..' . '/google/gax/src/Options/ClientOptions.php',
+        'Google\\ApiCore\\Options\\OptionsTrait' => __DIR__ . '/..' . '/google/gax/src/Options/OptionsTrait.php',
+        'Google\\ApiCore\\Options\\TransportOptions' => __DIR__ . '/..' . '/google/gax/src/Options/TransportOptions.php',
+        'Google\\ApiCore\\Options\\TransportOptions\\GrpcFallbackTransportOptions' => __DIR__ . '/..' . '/google/gax/src/Options/TransportOptions/GrpcFallbackTransportOptions.php',
+        'Google\\ApiCore\\Options\\TransportOptions\\GrpcTransportOptions' => __DIR__ . '/..' . '/google/gax/src/Options/TransportOptions/GrpcTransportOptions.php',
+        'Google\\ApiCore\\Options\\TransportOptions\\RestTransportOptions' => __DIR__ . '/..' . '/google/gax/src/Options/TransportOptions/RestTransportOptions.php',
         'Google\\ApiCore\\Page' => __DIR__ . '/..' . '/google/gax/src/Page.php',
         'Google\\ApiCore\\PageStreamingDescriptor' => __DIR__ . '/..' . '/google/gax/src/PageStreamingDescriptor.php',
         'Google\\ApiCore\\PagedListResponse' => __DIR__ . '/..' . '/google/gax/src/PagedListResponse.php',
@@ -3198,8 +3207,11 @@ class ComposerStaticInit4c01e180744a375d2f064d900b133445
         'Google\\Auth\\Cache\\MemoryCacheItemPool' => __DIR__ . '/..' . '/google/auth/src/Cache/MemoryCacheItemPool.php',
         'Google\\Auth\\Cache\\SysVCacheItemPool' => __DIR__ . '/..' . '/google/auth/src/Cache/SysVCacheItemPool.php',
         'Google\\Auth\\Cache\\TypedItem' => __DIR__ . '/..' . '/google/auth/src/Cache/TypedItem.php',
+        'Google\\Auth\\CredentialSource\\FileSource' => __DIR__ . '/..' . '/google/auth/src/CredentialSource/FileSource.php',
+        'Google\\Auth\\CredentialSource\\UrlSource' => __DIR__ . '/..' . '/google/auth/src/CredentialSource/UrlSource.php',
         'Google\\Auth\\CredentialsLoader' => __DIR__ . '/..' . '/google/auth/src/CredentialsLoader.php',
         'Google\\Auth\\Credentials\\AppIdentityCredentials' => __DIR__ . '/..' . '/google/auth/src/Credentials/AppIdentityCredentials.php',
+        'Google\\Auth\\Credentials\\ExternalAccountCredentials' => __DIR__ . '/..' . '/google/auth/src/Credentials/ExternalAccountCredentials.php',
         'Google\\Auth\\Credentials\\GCECredentials' => __DIR__ . '/..' . '/google/auth/src/Credentials/GCECredentials.php',
         'Google\\Auth\\Credentials\\IAMCredentials' => __DIR__ . '/..' . '/google/auth/src/Credentials/IAMCredentials.php',
         'Google\\Auth\\Credentials\\ImpersonatedServiceAccountCredentials' => __DIR__ . '/..' . '/google/auth/src/Credentials/ImpersonatedServiceAccountCredentials.php',
@@ -3207,6 +3219,7 @@ class ComposerStaticInit4c01e180744a375d2f064d900b133445
         'Google\\Auth\\Credentials\\ServiceAccountCredentials' => __DIR__ . '/..' . '/google/auth/src/Credentials/ServiceAccountCredentials.php',
         'Google\\Auth\\Credentials\\ServiceAccountJwtAccessCredentials' => __DIR__ . '/..' . '/google/auth/src/Credentials/ServiceAccountJwtAccessCredentials.php',
         'Google\\Auth\\Credentials\\UserRefreshCredentials' => __DIR__ . '/..' . '/google/auth/src/Credentials/UserRefreshCredentials.php',
+        'Google\\Auth\\ExternalAccountCredentialSourceInterface' => __DIR__ . '/..' . '/google/auth/src/ExternalAccountCredentialSourceInterface.php',
         'Google\\Auth\\FetchAuthTokenCache' => __DIR__ . '/..' . '/google/auth/src/FetchAuthTokenCache.php',
         'Google\\Auth\\FetchAuthTokenInterface' => __DIR__ . '/..' . '/google/auth/src/FetchAuthTokenInterface.php',
         'Google\\Auth\\GCECache' => __DIR__ . '/..' . '/google/auth/src/GCECache.php',
@@ -3226,6 +3239,7 @@ class ComposerStaticInit4c01e180744a375d2f064d900b133445
         'Google\\Auth\\ServiceAccountSignerTrait' => __DIR__ . '/..' . '/google/auth/src/ServiceAccountSignerTrait.php',
         'Google\\Auth\\SignBlobInterface' => __DIR__ . '/..' . '/google/auth/src/SignBlobInterface.php',
         'Google\\Auth\\UpdateMetadataInterface' => __DIR__ . '/..' . '/google/auth/src/UpdateMetadataInterface.php',
+        'Google\\Auth\\UpdateMetadataTrait' => __DIR__ . '/..' . '/google/auth/src/UpdateMetadataTrait.php',
         'Google\\Client' => __DIR__ . '/..' . '/google/apiclient/src/Client.php',
         'Google\\Cloud\\Iam\\V1\\AuditConfig' => __DIR__ . '/..' . '/google/common-protos/src/Cloud/Iam/V1/AuditConfig.php',
         'Google\\Cloud\\Iam\\V1\\AuditConfigDelta' => __DIR__ . '/..' . '/google/common-protos/src/Cloud/Iam/V1/AuditConfigDelta.php',
@@ -7288,11 +7302,13 @@ class ComposerStaticInit4c01e180744a375d2f064d900b133445
         'Predis\\Command\\Redis\\BloomFilter\\BFRESERVE' => __DIR__ . '/..' . '/predis/predis/src/Command/Redis/BloomFilter/BFRESERVE.php',
         'Predis\\Command\\Redis\\BloomFilter\\BFSCANDUMP' => __DIR__ . '/..' . '/predis/predis/src/Command/Redis/BloomFilter/BFSCANDUMP.php',
         'Predis\\Command\\Redis\\CLIENT' => __DIR__ . '/..' . '/predis/predis/src/Command/Redis/CLIENT.php',
+        'Predis\\Command\\Redis\\CLUSTER' => __DIR__ . '/..' . '/predis/predis/src/Command/Redis/CLUSTER.php',
         'Predis\\Command\\Redis\\COMMAND' => __DIR__ . '/..' . '/predis/predis/src/Command/Redis/COMMAND.php',
         'Predis\\Command\\Redis\\CONFIG' => __DIR__ . '/..' . '/predis/predis/src/Command/Redis/CONFIG.php',
         'Predis\\Command\\Redis\\COPY' => __DIR__ . '/..' . '/predis/predis/src/Command/Redis/COPY.php',
         'Predis\\Command\\Redis\\Container\\ACL' => __DIR__ . '/..' . '/predis/predis/src/Command/Redis/Container/ACL.php',
         'Predis\\Command\\Redis\\Container\\AbstractContainer' => __DIR__ . '/..' . '/predis/predis/src/Command/Redis/Container/AbstractContainer.php',
+        'Predis\\Command\\Redis\\Container\\CLUSTER' => __DIR__ . '/..' . '/predis/predis/src/Command/Redis/Container/CLUSTER.php',
         'Predis\\Command\\Redis\\Container\\ContainerFactory' => __DIR__ . '/..' . '/predis/predis/src/Command/Redis/Container/ContainerFactory.php',
         'Predis\\Command\\Redis\\Container\\ContainerInterface' => __DIR__ . '/..' . '/predis/predis/src/Command/Redis/Container/ContainerInterface.php',
         'Predis\\Command\\Redis\\Container\\FunctionContainer' => __DIR__ . '/..' . '/predis/predis/src/Command/Redis/Container/FunctionContainer.php',
@@ -8140,6 +8156,7 @@ class ComposerStaticInit4c01e180744a375d2f064d900b133445
         'Razorpay\\Tests\\CoverageTest' => __DIR__ . '/..' . '/razorpay/razorpay/tests/CoverageTest.php',
         'Razorpay\\Tests\\CustomerTest' => __DIR__ . '/..' . '/razorpay/razorpay/tests/CustomerTest.php',
         'Razorpay\\Tests\\EmandateTest' => __DIR__ . '/..' . '/razorpay/razorpay/tests/EmandateTest.php',
+        'Razorpay\\Tests\\ExceptionTest' => __DIR__ . '/..' . '/razorpay/razorpay/tests/ExceptionTest.php',
         'Razorpay\\Tests\\FundTest' => __DIR__ . '/..' . '/razorpay/razorpay/tests/FundTest.php',
         'Razorpay\\Tests\\InvoiceTest' => __DIR__ . '/..' . '/razorpay/razorpay/tests/InvoiceTest.php',
         'Razorpay\\Tests\\ItemTest' => __DIR__ . '/..' . '/razorpay/razorpay/tests/ItemTest.php',
@@ -10303,10 +10320,10 @@ class ComposerStaticInit4c01e180744a375d2f064d900b133445
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit4c01e180744a375d2f064d900b133445::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit4c01e180744a375d2f064d900b133445::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit4c01e180744a375d2f064d900b133445::$prefixesPsr0;
-            $loader->classMap = ComposerStaticInit4c01e180744a375d2f064d900b133445::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitc1ddf2d71d14f7da9383f8942c9fb604::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitc1ddf2d71d14f7da9383f8942c9fb604::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInitc1ddf2d71d14f7da9383f8942c9fb604::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInitc1ddf2d71d14f7da9383f8942c9fb604::$classMap;
 
         }, null, ClassLoader::class);
     }

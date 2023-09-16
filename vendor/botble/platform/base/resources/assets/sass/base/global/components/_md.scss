@@ -15,16 +15,13 @@ $input-icon-color: #999999 !default;
 // Floating & Form Line Input
 
 @mixin input-variant($color) {
-
     .form-control {
-
         border-bottom: 1px solid $color;
 
         &.edited:not([readonly]),
         &.form-control-static,
         &:focus:not([readonly]),
         &.focus:not([readonly]) {
-
             ~ label,
             ~ .form-control-focus {
                 &:after {
@@ -193,7 +190,6 @@ $input-icon-color: #999999 !default;
 
     &.form-md-floating-label {
         .form-control {
-
             ~ label {
                 font-size: 16px;
                 top: 25px;
@@ -287,7 +283,6 @@ $input-icon-color: #999999 !default;
     // Input icons
 
     > .input-icon {
-
         > i {
             left: 0;
             bottom: 0;

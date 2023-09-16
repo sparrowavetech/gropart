@@ -16,14 +16,14 @@
         overflow-x: hidden;
         padding-top: 25px;
         transform: translate3d(350px, 0, 0);
-        transition: all .5s cubic-bezier(.7, 0, .3, 1) 0s;
+        transition: all 0.5s cubic-bezier(0.7, 0, 0.3, 1) 0s;
 
         &.active {
             transform: none;
         }
 
         .title-notification-heading {
-            letter-spacing: -.025em;
+            letter-spacing: -0.025em;
             font-weight: 700;
             font-size: 20px;
             line-height: 1.75rem;
@@ -118,7 +118,7 @@
     }
 
     #main {
-        transition: margin-left .5s;
+        transition: margin-left 0.5s;
         padding: 16px;
     }
 
@@ -138,7 +138,7 @@
         }
 
         .fa-bell:before {
-            content: "\f0f3";
+            content: '\f0f3';
             padding: 8px 10px;
             background-color: #fffbec;
             border-radius: 9999px;
@@ -170,4 +170,3 @@
     background-color: var(--bs-backdrop-bg);
     backdrop-filter: blur(2px);
 }
-

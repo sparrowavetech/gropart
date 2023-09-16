@@ -7,7 +7,7 @@ use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Marketplace\Enums\RevenueTypeEnum;
 use Botble\Marketplace\Facades\MarketplaceHelper;
-use Botble\Marketplace\Repositories\Interfaces\RevenueInterface;
+use Botble\Marketplace\Models\Revenue;
 use Botble\Marketplace\Tables\StoreRevenueTable;
 use Botble\Table\Abstracts\TableAbstract;
 use Carbon\CarbonPeriod;
@@ -28,14 +28,13 @@ class RevenueController
         return $table->render(MarketplaceHelper::viewPath('dashboard.table.base'));
     }
 
-    public function getMonthChart(Request $request, BaseHttpResponse $response, RevenueInterface $revenueRepository)
+    public function getMonthChart(Request $request, BaseHttpResponse $response)
     {
         [$startDate, $endDate] = EcommerceHelper::getDateRangeInReport($request);
 
         $customerId = auth('customer')->id();
 
-        $revenues = $revenueRepository
-            ->getModel()
+        $revenues = Revenue::query()
             ->selectRaw(
                 'SUM(CASE WHEN type IS NULL OR type = ? THEN amount WHEN type = ? THEN amount * -1 ELSE 0 END) as amount,
                 DATE(created_at) as date,

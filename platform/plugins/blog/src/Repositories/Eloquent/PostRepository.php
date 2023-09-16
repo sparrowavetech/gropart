@@ -197,7 +197,7 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
     {
         $data = $this->model
             ->with('slugable')
-            ->orderBy('views', 'desc')
+            ->orderByDesc('views')
             ->wherePublished()
             ->limit($limit);
 

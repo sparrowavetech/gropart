@@ -9,9 +9,8 @@ use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Widgets\Contracts\AdminWidget;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
-use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
-use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
+use Botble\Ecommerce\Models\Order;
+use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Tables\Reports\RecentOrdersTable;
 use Botble\Ecommerce\Tables\Reports\TopSellingProductsTable;
 use Botble\Ecommerce\Tables\Reports\TrendingProductsTable;
@@ -20,13 +19,6 @@ use Illuminate\Http\Request;
 
 class ReportController extends BaseController
 {
-    public function __construct(
-        protected OrderInterface $orderRepository,
-        protected ProductInterface $productRepository,
-        protected CustomerInterface $customerRepository
-    ) {
-    }
-
     public function getIndex(
         Request $request,
         AdminWidget $widget,
@@ -77,31 +69,27 @@ class ReportController extends BaseController
         $startOfMonth = Carbon::now()->startOfMonth();
         $today = Carbon::now();
 
-        $processingOrders = $this->orderRepository
-            ->getModel()
+        $processingOrders = Order::query()
             ->where('status', OrderStatusEnum::PENDING)
             ->whereDate('created_at', '>=', $startOfMonth)
             ->whereDate('created_at', '<=', $today)
             ->count();
 
-        $completedOrders = $this->orderRepository
-            ->getModel()
+        $completedOrders = Order::query()
             ->where('status', OrderStatusEnum::COMPLETED)
             ->whereDate('created_at', '>=', $startOfMonth)
             ->whereDate('created_at', '<=', $today)
             ->count();
 
-        $revenue = $this->orderRepository->countRevenueByDateRange($startOfMonth, $today);
+        $revenue = Order::countRevenueByDateRange($startOfMonth, $today);
 
-        $lowStockProducts = $this->productRepository
-            ->getModel()
+        $lowStockProducts = Product::query()
             ->where('with_storehouse_management', 1)
             ->where('quantity', '<', 2)
             ->where('quantity', '>', 0)
             ->count();
 
-        $outOfStockProducts = $this->productRepository
-            ->getModel()
+        $outOfStockProducts = Product::query()
             ->where('with_storehouse_management', 1)
             ->where('quantity', '<', 1)
             ->count();

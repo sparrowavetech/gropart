@@ -3,62 +3,46 @@
 namespace Botble\Ecommerce\Tables;
 
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
 use Botble\Ecommerce\Models\Invoice;
+use Botble\Ecommerce\Tables\Formatters\PriceFormatter;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Table\DataTables;
-use Illuminate\Contracts\Routing\UrlGenerator;
+use Botble\Table\Actions\DeleteAction;
+use Botble\Table\Actions\EditAction;
+use Botble\Table\BulkActions\DeleteBulkAction;
+use Botble\Table\Columns\Column;
+use Botble\Table\Columns\CreatedAtColumn;
+use Botble\Table\Columns\IdColumn;
+use Botble\Table\Columns\LinkableColumn;
+use Botble\Table\Columns\StatusColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 
 class InvoiceTable extends TableAbstract
 {
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Invoice $model)
+    public function setup(): void
     {
-        parent::__construct($table, $urlGenerator);
-
-        $this->model = $model;
-        $this->hasActions = true;
-        $this->hasFilter = true;
-
-        if (! Auth::user()->hasAnyPermission(['ecommerce.invoice.edit', 'ecommerce.invoice.destroy'])) {
-            $this->hasOperations = false;
-            $this->hasActions = false;
-        }
+        $this
+            ->model(Invoice::class)
+            ->addActions([
+                EditAction::make()->route('ecommerce.invoice.edit'),
+                DeleteAction::make()->route('ecommerce.invoice.destroy'),
+            ]);
     }
 
     public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('customer_name', function (Invoice $item) {
-                return $item->customer_name;
-            })
-            ->editColumn('checkbox', function (Invoice $item) {
-                return $this->getCheckbox($item->id);
-            })
-            ->editColumn('amount', function (Invoice $item) {
-                return format_price($item->amount);
-            })
-            ->editColumn('code', function (Invoice $item) {
-                if (! Auth::user()->hasPermission('ecommerce.invoice.edit')) {
-                    return $item->code;
+            ->formatColumn('amount', PriceFormatter::class)
+            ->editColumn('reference_id', function (Invoice $item) {
+                if (! $item->reference || ! $item->reference->id) {
+                    return '&mdash;';
                 }
 
-                return Html::link(route('ecommerce.invoice.edit', $item->id), $item->code);
-            })
-            ->editColumn('created_at', function (Invoice $item) {
-                return BaseHelper::formatDate($item->created_at);
-            })
-            ->editColumn('status', function (Invoice $item) {
-                return $item->status->toHtml();
-            })
-            ->addColumn('operations', function (Invoice $item) {
-                return $this->getOperations('ecommerce.invoice.edit', 'ecommerce.invoice.destroy', $item);
+                return Html::link(route('orders.edit', $item->reference->id), $item->reference->code)->toHtml();
             });
 
         return $this->toJson($data);
@@ -66,12 +50,15 @@ class InvoiceTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->getModel()
+        $query = $this
+            ->getModel()
             ->query()
             ->select([
                 'id',
                 'customer_name',
                 'code',
+                'reference_id',
+                'reference_type',
                 'amount',
                 'created_at',
                 'updated_at',
@@ -84,30 +71,22 @@ class InvoiceTable extends TableAbstract
     public function columns(): array
     {
         return [
-            'id' => [
-                'title' => trans('core/base::tables.id'),
-                'width' => '20px',
-            ],
-            'customer_name' => [
-                'title' => trans('core/base::tables.name'),
-                'class' => 'text-start',
-            ],
-            'code' => [
-                'title' => trans('plugins/ecommerce::invoice.table.code'),
-                'class' => 'text-start',
-            ],
-            'amount' => [
-                'title' => trans('plugins/ecommerce::invoice.table.amount'),
-                'class' => 'text-start',
-            ],
-            'created_at' => [
-                'title' => trans('core/base::tables.created_at'),
-                'width' => '100px',
-            ],
-            'status' => [
-                'title' => trans('core/base::tables.status'),
-                'width' => '100px',
-            ],
+            IdColumn::make(),
+            Column::make('customer_name')
+                ->title(trans('core/base::tables.name'))
+                ->alignLeft(),
+            Column::make('reference_id')
+                ->title(trans('plugins/ecommerce::invoice.order'))
+                ->alignLeft(),
+            LinkableColumn::make('code')
+                ->title(trans('plugins/ecommerce::invoice.table.code'))
+                ->route('ecommerce.invoice.edit')
+                ->alignLeft(),
+            Column::formatted('amount')
+                ->title(trans('plugins/ecommerce::invoice.table.amount'))
+                ->alignLeft(),
+            CreatedAtColumn::make(),
+            StatusColumn::make(),
         ];
     }
 
@@ -115,7 +94,7 @@ class InvoiceTable extends TableAbstract
     {
         $buttons = [];
 
-        if (Auth::user()->hasPermission('ecommerce.invoice.edit')) {
+        if ($this->hasPermission('ecommerce.invoice.edit')) {
             $buttons['generate-invoices'] = [
                 'link' => route('ecommerce.invoice.generate-invoices'),
                 'text' => '<i class="fas fa-file-export"></i> ' . trans('plugins/ecommerce::invoice.generate_invoices'),
@@ -128,7 +107,14 @@ class InvoiceTable extends TableAbstract
 
     public function bulkActions(): array
     {
-        return $this->addDeleteAction(route('ecommerce.invoice.deletes'), 'ecommerce.invoice.destroy', parent::bulkActions());
+        return [
+            DeleteBulkAction::make()->permission('ecommerce.invoice.destroy'),
+        ];
+    }
+
+    public function getFilters(): array
+    {
+        return $this->getBulkChanges();
     }
 
     public function getBulkChanges(): array
@@ -150,10 +136,5 @@ class InvoiceTable extends TableAbstract
                 'type' => 'datePicker',
             ],
         ];
-    }
-
-    public function getFilters(): array
-    {
-        return $this->getBulkChanges();
     }
 }

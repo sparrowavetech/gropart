@@ -1,5 +1,10 @@
 <div class="text-start">
     <div class="checkbox checkbox-primary table-checkbox">
-        <input type="checkbox" class="checkboxes" name="id[]" value="{{ $id }}"/>
+        <input
+            class="checkboxes"
+            name="id[]"
+            type="checkbox"
+            value="{{ $id }}"
+        />
     </div>
 </div>

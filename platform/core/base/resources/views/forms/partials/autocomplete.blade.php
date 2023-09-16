@@ -4,7 +4,7 @@
     @push('footer')
         <script>
             'use strict';
-            $(document).ready(function () {
+            $(document).ready(function() {
                 $('#' + '{{ Arr::get($selectAttributes, 'id') }}').select2({
                     minimumInputLength: 1,
                     ajax: {

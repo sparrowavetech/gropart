@@ -2,8 +2,8 @@
     max-width: 100px;
 }
 
-
-.form-control, .form-select {
+.form-control,
+.form-select {
     background-color: #f4f5f9;
     border: 2px solid #f4f5f9;
     font-size: 13px;
@@ -149,7 +149,6 @@ textarea.form-control {
             padding-left: 20px;
         }
     }
-
 }
 
 .select2-container--open .select2-dropdown--below {
@@ -164,7 +163,7 @@ textarea.form-control {
 }
 
 .select2-results__options::-webkit-scrollbar-track {
-    background-color: #F4F4F4;
+    background-color: #f4f4f4;
     height: 8px;
     background-clip: padding-box;
     border-right: 10px solid rgba(0, 0, 0, 0);
@@ -190,9 +189,9 @@ textarea.form-control {
     scrollbar-width: thin;
 }
 
-.select2-container--default .select2-results__option[aria-selected="true"] {
+.select2-container--default .select2-results__option[aria-selected='true'] {
     background-color: #ececec;
-    color: unset
+    color: unset;
 }
 
 .card-login {

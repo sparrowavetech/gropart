@@ -1,35 +1,34 @@
 <template>
     <div>
-        <div class='btn-group d-block text-end' v-if='filters.length'>
-            <a class='btn btn-sm btn-secondary' href='javascript:' data-bs-toggle='dropdown' aria-expanded='false'>
-                <i class='fa fa-filter' aria-hidden='true'></i>
+        <div class="btn-group d-block text-end" v-if="filters.length">
+            <a class="btn btn-sm btn-secondary" href="javascript:" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa fa-filter" aria-hidden="true"></i>
                 <span>{{ filtering }}</span>
-                <i class='fa fa-angle-down '></i>
+                <i class="fa fa-angle-down"></i>
             </a>
-            <ul class='dropdown-menu float-end'>
-                <li v-for='(filter) in filters' :key='filter.key'>
-                    <a href='#' v-on:click='clickFilter(filter.key, $event)'>
+            <ul class="dropdown-menu float-end">
+                <li v-for="filter in filters" :key="filter.key">
+                    <a href="#" v-on:click="clickFilter(filter.key, $event)">
                         {{ filter.text }}
                     </a>
                 </li>
             </ul>
         </div>
-        <div class='sales-reports-chart'></div>
-        <div class='row' v-if='earningSales.length'>
-            <div class='col-12'>
+        <div class="sales-reports-chart"></div>
+        <div class="row" v-if="earningSales.length">
+            <div class="col-12">
                 <ul>
-                    <li v-for='earningSale in earningSales' :key='earningSale.text'>
-                        <i class='fas fa-circle' :style='{ color: earningSale.color }'></i> {{ earningSale.text }}
+                    <li v-for="earningSale in earningSales" :key="earningSale.text">
+                        <i class="fas fa-circle" :style="{ color: earningSale.color }"></i> {{ earningSale.text }}
                     </li>
                 </ul>
             </div>
         </div>
-        <div class='loading'></div>
+        <div class="loading"></div>
     </div>
 </template>
 
 <script>
-
 export default {
     props: {
         url: {
@@ -74,7 +73,7 @@ export default {
             chartToDate: null,
         }
     },
-    mounted: function() {
+    mounted: function () {
         this.setFiltering()
 
         this.chartFromDate = this.date_from
@@ -89,7 +88,7 @@ export default {
         })
     },
     methods: {
-        setFiltering: function(f = '') {
+        setFiltering: function (f = '') {
             if (!f) {
                 f = this.filterDefault
             }
@@ -102,15 +101,16 @@ export default {
                 }
             }
         },
-        renderChart: function() {
+        renderChart: function () {
             if (this.url) {
-                axios.get(this.url + '?date_from=' + this.chartFromDate + '&date_to=' + this.chartToDate)
-                    .then(res => {
+                axios
+                    .get(this.url + '?date_from=' + this.chartFromDate + '&date_to=' + this.chartToDate)
+                    .then((res) => {
                         if (res.data.error) {
                             Botble.showError(res.data.message)
                         } else {
                             this.earningSales = res.data.data.earningSales
-                            const series =  res.data.data.series
+                            const series = res.data.data.series
                             const colors = res.data.data.colors
                             const categories = res.data.data.dates
 
@@ -133,26 +133,31 @@ export default {
 
                                 this.chart.render()
                             } else {
-                                this.chart.updateOptions({ series, colors, xaxis: {
-                                    type: 'datetime',
-                                    categories: categories,
-                                }})
+                                this.chart.updateOptions({
+                                    series,
+                                    colors,
+                                    xaxis: {
+                                        type: 'datetime',
+                                        categories: categories,
+                                    },
+                                })
                             }
                         }
                     })
             }
         },
-        clickFilter: function(filter, event) {
+        clickFilter: function (filter, event) {
             event.preventDefault()
             this.setFiltering('...')
 
             const that = this
-            axios.get(that.url + '?date_from=' + this.chartFromDate + '&date_to=' + this.chartToDate, {
-                params: {
-                    filter,
-                },
-            })
-                .then(res => {
+            axios
+                .get(that.url + '?date_from=' + this.chartFromDate + '&date_to=' + this.chartToDate, {
+                    params: {
+                        filter,
+                    },
+                })
+                .then((res) => {
                     if (res.data.error) {
                         Botble.showError(res.data.message)
                     } else {
@@ -171,7 +176,6 @@ export default {
                     }
                     this.setFiltering(filter)
                 })
-
         },
     },
 }

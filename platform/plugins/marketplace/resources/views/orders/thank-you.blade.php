@@ -11,7 +11,10 @@
                 @include('plugins/ecommerce::orders.partials.logo')
 
                 <div class="thank-you">
-                    <i class="fa fa-check-circle" aria-hidden="true"></i>
+                    <i
+                        class="fa fa-check-circle"
+                        aria-hidden="true"
+                    ></i>
                     <div class="d-inline-block">
                         <h3 class="thank-you-sentence">
                             {{ __('Your order is successfully placed') }}
@@ -20,13 +23,15 @@
                     </div>
                 </div>
 
-                <div class="thank-you-links mb-4">
-                    <span class="link-text"><a href="{{ route('customer.overview') }}">{{ __('Customer dashboard') }}</a></span>
-                </div>
+                @include('plugins/ecommerce::orders.thank-you.customer-info', [
+                    'order' => $orders,
+                    'isShowShipping' => false,
+                ])
 
-                @include('plugins/ecommerce::orders.thank-you.customer-info', ['order' => Arr::first($orders), 'isShowShipping' => false])
-
-                <a href="{{ route('public.index') }}" class="btn payment-checkout-btn"> {{ __('Continue shopping') }} </a>
+                <a
+                    class="btn payment-checkout-btn"
+                    href="{{ route('public.index') }}"
+                > {{ __('Continue shopping') }} </a>
             </div>
             <!---------------------- start right column ------------------>
             <div class="col-lg-5 col-md-6 right">
@@ -53,7 +58,10 @@
                             </div>
                         </div>
 
-                        @if ($orders->filter(function ($order) {return $order->shipment->id;})->count())
+                        @if (
+                            $orders->filter(function ($order) {
+                                    return $order->shipment->id;
+                                })->count())
                             <div class="row total-price">
                                 <div class="col-6">
                                     <p>{{ __('Shipping fee') }}:</p>
@@ -91,7 +99,8 @@
                                 <p>{{ __('Total amount') }}:</p>
                             </div>
                             <div class="col-6">
-                                <p class="total-text raw-total-text text-end"> {{ format_price($orders->sum('amount')) }} </p>
+                                <p class="total-text raw-total-text text-end"> {{ format_price($orders->sum('amount')) }}
+                                </p>
                             </div>
                         </div>
                     </div>

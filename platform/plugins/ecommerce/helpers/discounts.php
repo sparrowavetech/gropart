@@ -2,6 +2,7 @@
 
 use Botble\Base\Facades\Html;
 use Botble\Ecommerce\Enums\DiscountTargetEnum;
+use Botble\Ecommerce\Enums\DiscountTypeOptionEnum;
 use Botble\Ecommerce\Models\Discount;
 use Botble\Ecommerce\Models\DiscountCustomer;
 use Botble\Ecommerce\Models\DiscountProduct;
@@ -20,7 +21,7 @@ if (! function_exists('get_discount_description')) {
         $description = [];
 
         switch ($type) {
-            case 'shipping':
+            case DiscountTypeOptionEnum::SHIPPING:
                 if ($target) {
                     $description[] = __('Free shipping to <strong>:target</strong>', ['target' => $target]);
                 } else {
@@ -30,7 +31,7 @@ if (! function_exists('get_discount_description')) {
                 $description[] = __('when shipping fee less than or equal :amount', ['amount' => format_price($value)]);
 
                 break;
-            case 'same-price':
+            case DiscountTypeOptionEnum::SAME_PRICE:
                 $description[] = __('Same fee :amount', ['amount' => format_price($value)]);
                 switch ($target) {
                     case DiscountTargetEnum::PRODUCT_COLLECTIONS:
@@ -44,7 +45,7 @@ if (! function_exists('get_discount_description')) {
                             ->pluck('ec_product_collections.name')
                             ->all();
 
-                        $description[] = __('for all product in collection') . ' ' . implode(', ', $collections);
+                        $description[] = __('for all product in collection :collections', ['collections' => implode(', ', $collections)]);
 
                         break;
                     default:
@@ -55,7 +56,7 @@ if (! function_exists('get_discount_description')) {
 
                 break;
             default:
-                if ($type === 'percentage') {
+                if ($type === DiscountTypeOptionEnum::PERCENTAGE) {
                     $description[] = __('Discount :percentage%', ['percentage' => $value]);
                 } else {
                     $description[] = __('Discount :amount', ['amount' => format_price($value)]);
@@ -124,7 +125,7 @@ if (! function_exists('get_discount_description')) {
 
                         $productLinks = [];
                         foreach ($products as $variant) {
-                            $productLinks[] = Html::link(route('products.edit', $variant->originalProduct->id), $variant->originalProduct->name . ' ' . $variant->variation_attributes, ['target' => '_blank'])->toHtml();
+                            $productLinks[] = Html::link(route('products.edit', $variant->originalProduct->getKey()), $variant->originalProduct->name . ' ' . $variant->variation_attributes, ['target' => '_blank'])->toHtml();
                         }
 
                         $description[] = __('for product variant(s) :variants', ['variants' => implode(', ', $productLinks)]);

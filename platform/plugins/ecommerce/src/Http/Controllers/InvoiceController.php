@@ -47,24 +47,6 @@ class InvoiceController extends BaseController
         }
     }
 
-    public function deletes(Request $request, BaseHttpResponse $response)
-    {
-        $ids = $request->input('ids');
-        if (empty($ids)) {
-            return $response
-                ->setError()
-                ->setMessage(trans('core/base::notices.no_select'));
-        }
-
-        foreach ($ids as $id) {
-            $invoice = Invoice::query()->findOrFail($id);
-            $invoice->delete();
-            event(new DeletedContentEvent(INVOICE_MODULE_SCREEN_NAME, $request, $invoice));
-        }
-
-        return $response->setMessage(trans('core/base::notices.delete_success_message'));
-    }
-
     public function getGenerateInvoice(Invoice $invoice, Request $request)
     {
         if ($request->input('type') === 'print') {

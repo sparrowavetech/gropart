@@ -3,7 +3,7 @@
 namespace Botble\Ecommerce\Widgets;
 
 use Botble\Base\Widgets\Chart;
-use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
+use Botble\Ecommerce\Models\Customer;
 use Botble\Ecommerce\Widgets\Traits\HasCategory;
 
 class CustomerChart extends Chart
@@ -19,8 +19,7 @@ class CustomerChart extends Chart
 
     public function getOptions(): array
     {
-        $data = app(CustomerInterface::class)
-            ->getModel()
+        $data = Customer::query()
             ->groupBy('period')
             ->selectRaw('count(id) as total, date_format(created_at, "' . $this->dateFormat . '") as period')
             ->whereDate('created_at', '>=', $this->startDate)

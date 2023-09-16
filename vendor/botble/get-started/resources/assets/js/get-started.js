@@ -33,32 +33,20 @@ $(document).ready(function () {
         event.stopPropagation()
 
         let _self = $(this)
+        let _form = _self.closest('form')
 
         _self.addClass('button-loading')
 
-        $.ajax({
-            method: 'POST',
-            cache: false,
-            url: _self.closest('form').prop('action'),
-            data: new FormData(_self.closest('form')[0]),
-            contentType: false,
-            processData: false,
-            success: (res) => {
-                if (res.error) {
-                    _self.removeClass('button-loading')
-                    Botble.showError(res.message)
-                    return false
-                }
-
-                _self.removeClass('button-loading')
+        $httpClient
+            .make()
+            .postForm(_form.prop('action'), new FormData(_form[0]))
+            .then(({ data }) => {
                 _self.closest('.get-started-modal').modal('hide')
-                $('.get-started-modal[data-step="' + res.data.step + '"]').modal('show')
-            },
-            error: (error) => {
+                $('.get-started-modal[data-step="' + data.step + '"]').modal('show')
+            })
+            .finally(() => {
                 _self.removeClass('button-loading')
-                Botble.handleError(error)
-            },
-        })
+            })
     })
 
     $('.get-started-modal .btn-close').on('click', function (event) {

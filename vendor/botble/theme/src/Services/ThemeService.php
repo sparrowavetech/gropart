@@ -114,7 +114,13 @@ class ThemeService
             $themes = BaseHelper::scanFolder(theme_path());
         }
 
-        foreach ($themes as $theme) {
+        foreach ($themes as $key => $theme) {
+            if (! $this->files->isDirectory(theme_path($theme))) {
+                unset($themes[$key]);
+
+                continue;
+            }
+
             $resourcePath = $this->getPath($theme, 'public');
 
             $themePath = public_path('themes');
@@ -135,6 +141,13 @@ class ThemeService
 
             $this->files->copyDirectory($resourcePath, $publishPath);
             $this->files->copy($this->getPath($theme, 'screenshot.png'), $publishPath . '/screenshot.png');
+        }
+
+        if (! count($themes)) {
+            return [
+                'error' => true,
+                'message' => 'No themes to publish assets.',
+            ];
         }
 
         return [

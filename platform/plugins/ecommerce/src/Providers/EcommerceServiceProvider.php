@@ -2,16 +2,19 @@
 
 namespace Botble\Ecommerce\Providers;
 
-use ApiHelper;
+use Botble\Api\Facades\ApiHelper;
+use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Ecommerce\Commands\SendAbandonedCartsEmailCommand;
-use Botble\Ecommerce\Facades\CartFacade;
-use Botble\Ecommerce\Facades\CurrencyFacade;
-use Botble\Ecommerce\Facades\EcommerceHelperFacade;
-use Botble\Ecommerce\Facades\InvoiceHelperFacade;
-use Botble\Ecommerce\Facades\OrderHelperFacade;
-use Botble\Ecommerce\Facades\OrderReturnHelperFacade;
-use Botble\Ecommerce\Facades\ProductCategoryHelperFacade;
+use Botble\Ecommerce\Facades\Cart;
+use Botble\Ecommerce\Facades\Currency as CurrencyFacade;
+use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Facades\InvoiceHelper;
+use Botble\Ecommerce\Facades\OrderHelper;
+use Botble\Ecommerce\Facades\OrderReturnHelper;
+use Botble\Ecommerce\Facades\ProductCategoryHelper;
+use Botble\Ecommerce\Http\Middleware\CaptureCouponMiddleware;
 use Botble\Ecommerce\Http\Middleware\CaptureFootprintsMiddleware;
 use Botble\Ecommerce\Http\Middleware\RedirectIfCustomer;
 use Botble\Ecommerce\Http\Middleware\RedirectIfNotCustomer;
@@ -19,7 +22,6 @@ use Botble\Ecommerce\Models\Address;
 use Botble\Ecommerce\Models\Brand;
 use Botble\Ecommerce\Models\Currency;
 use Botble\Ecommerce\Models\Customer;
-use Botble\Ecommerce\Models\Enquiry;
 use Botble\Ecommerce\Models\Discount;
 use Botble\Ecommerce\Models\FlashSale;
 use Botble\Ecommerce\Models\GlobalOption;
@@ -52,45 +54,10 @@ use Botble\Ecommerce\Models\ShippingRuleItem;
 use Botble\Ecommerce\Models\StoreLocator;
 use Botble\Ecommerce\Models\Tax;
 use Botble\Ecommerce\Models\Wishlist;
-use Botble\Ecommerce\Repositories\Caches\AddressCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\BrandCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\CurrencyCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\CustomerCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\EnquiryCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\DiscountCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\FlashSaleCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\GlobalOptionCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\GroupedProductCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\InvoiceCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\OrderAddressCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\OrderCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\OrderHistoryCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\OrderProductCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\OrderReturnCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\OrderReturnItemCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\ProductAttributeCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\ProductAttributeSetCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\ProductCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\ProductCategoryCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\ProductCollectionCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\ProductLabelCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\ProductTagCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\ProductVariationCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\ProductVariationItemCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\ReviewCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\ShipmentCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\ShipmentHistoryCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\ShippingCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\ShippingRuleCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\ShippingRuleItemCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\StoreLocatorCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\TaxCacheDecorator;
-use Botble\Ecommerce\Repositories\Caches\WishlistCacheDecorator;
 use Botble\Ecommerce\Repositories\Eloquent\AddressRepository;
 use Botble\Ecommerce\Repositories\Eloquent\BrandRepository;
 use Botble\Ecommerce\Repositories\Eloquent\CurrencyRepository;
 use Botble\Ecommerce\Repositories\Eloquent\CustomerRepository;
-use Botble\Ecommerce\Repositories\Eloquent\EnquiryRepository;
 use Botble\Ecommerce\Repositories\Eloquent\DiscountRepository;
 use Botble\Ecommerce\Repositories\Eloquent\FlashSaleRepository;
 use Botble\Ecommerce\Repositories\Eloquent\GlobalOptionRepository;
@@ -124,7 +91,6 @@ use Botble\Ecommerce\Repositories\Interfaces\AddressInterface;
 use Botble\Ecommerce\Repositories\Interfaces\BrandInterface;
 use Botble\Ecommerce\Repositories\Interfaces\CurrencyInterface;
 use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
-use Botble\Ecommerce\Repositories\Interfaces\EnquiryInterface;
 use Botble\Ecommerce\Repositories\Interfaces\DiscountInterface;
 use Botble\Ecommerce\Repositories\Interfaces\FlashSaleInterface;
 use Botble\Ecommerce\Repositories\Interfaces\GlobalOptionInterface;
@@ -154,6 +120,9 @@ use Botble\Ecommerce\Repositories\Interfaces\ShippingRuleItemInterface;
 use Botble\Ecommerce\Repositories\Interfaces\StoreLocatorInterface;
 use Botble\Ecommerce\Repositories\Interfaces\TaxInterface;
 use Botble\Ecommerce\Repositories\Interfaces\WishlistInterface;
+use Botble\Ecommerce\Services\ExchangeRates\ApiLayerExchangeRateService;
+use Botble\Ecommerce\Services\ExchangeRates\ExchangeRateInterface;
+use Botble\Ecommerce\Services\ExchangeRates\OpenExchangeRatesService;
 use Botble\Ecommerce\Services\Footprints\Footprinter;
 use Botble\Ecommerce\Services\Footprints\FootprinterInterface;
 use Botble\Ecommerce\Services\Footprints\TrackingFilter;
@@ -164,21 +133,18 @@ use Botble\Ecommerce\Services\HandleApplyCouponService;
 use Botble\Ecommerce\Services\HandleRemoveCouponService;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Botble\Payment\Models\Payment;
-use Cart;
-use EcommerceHelper;
-use EmailHandler;
+use Botble\SeoHelper\Facades\SeoHelper;
+use Botble\Slug\Facades\SlugHelper;
+use Botble\SocialLogin\Facades\SocialService;
+use Botble\Theme\Facades\SiteMapManager;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Events\RouteMatched;
-use Illuminate\Routing\Router;
-use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
-use SeoHelper;
-use SlugHelper;
-use SocialService;
 
 class EcommerceServiceProvider extends ServiceProvider
 {
@@ -202,218 +168,135 @@ class EcommerceServiceProvider extends ServiceProvider
             ],
         ]);
 
-        /**
-         * @var Router $router
-         */
-        $router = $this->app['router'];
-
-        $router->aliasMiddleware('customer', RedirectIfNotCustomer::class);
-        $router->aliasMiddleware('customer.guest', RedirectIfCustomer::class);
-        $router->pushMiddlewareToGroup('web', CaptureFootprintsMiddleware::class);
-
         $this->app->bind(ProductInterface::class, function () {
-            return new ProductCacheDecorator(
-                new ProductRepository(new Product())
-            );
+            return new ProductRepository(new Product());
         });
 
         $this->app->bind(ProductCategoryInterface::class, function () {
-            return new ProductCategoryCacheDecorator(
-                new ProductCategoryRepository(new ProductCategory())
-            );
+            return new ProductCategoryRepository(new ProductCategory());
         });
 
         $this->app->bind(ProductTagInterface::class, function () {
-            return new ProductTagCacheDecorator(
-                new ProductTagRepository(new ProductTag())
-            );
+            return new ProductTagRepository(new ProductTag());
         });
 
         $this->app->bind(GlobalOptionInterface::class, function () {
-            return new GlobalOptionCacheDecorator(
-                new GlobalOptionRepository(new GlobalOption())
-            );
+            return new GlobalOptionRepository(new GlobalOption());
         });
 
         $this->app->bind(BrandInterface::class, function () {
-            return new BrandCacheDecorator(
-                new BrandRepository(new Brand())
-            );
+            return new BrandRepository(new Brand());
         });
 
         $this->app->bind(ProductCollectionInterface::class, function () {
-            return new ProductCollectionCacheDecorator(
-                new ProductCollectionRepository(new ProductCollection())
-            );
+            return new ProductCollectionRepository(new ProductCollection());
         });
 
         $this->app->bind(CurrencyInterface::class, function () {
-            return new CurrencyCacheDecorator(
-                new CurrencyRepository(new Currency())
-            );
+            return new CurrencyRepository(new Currency());
         });
 
         $this->app->bind(ProductAttributeSetInterface::class, function () {
-            return new ProductAttributeSetCacheDecorator(
-                new ProductAttributeSetRepository(new ProductAttributeSet()),
-                ECOMMERCE_GROUP_CACHE_KEY
-            );
+            return new ProductAttributeSetRepository(new ProductAttributeSet());
         });
 
         $this->app->bind(ProductAttributeInterface::class, function () {
-            return new ProductAttributeCacheDecorator(
-                new ProductAttributeRepository(new ProductAttribute()),
-                ECOMMERCE_GROUP_CACHE_KEY
-            );
+            return new ProductAttributeRepository(new ProductAttribute());
         });
 
         $this->app->bind(ProductVariationInterface::class, function () {
-            return new ProductVariationCacheDecorator(
-                new ProductVariationRepository(new ProductVariation()),
-                ECOMMERCE_GROUP_CACHE_KEY
-            );
+            return new ProductVariationRepository(new ProductVariation());
         });
 
         $this->app->bind(ProductVariationItemInterface::class, function () {
-            return new ProductVariationItemCacheDecorator(
-                new ProductVariationItemRepository(new ProductVariationItem()),
-                ECOMMERCE_GROUP_CACHE_KEY
-            );
+            return new ProductVariationItemRepository(new ProductVariationItem());
         });
 
         $this->app->bind(TaxInterface::class, function () {
-            return new TaxCacheDecorator(
-                new TaxRepository(new Tax())
-            );
+            return new TaxRepository(new Tax());
         });
 
         $this->app->bind(ReviewInterface::class, function () {
-            return new ReviewCacheDecorator(
-                new ReviewRepository(new Review())
-            );
+            return new ReviewRepository(new Review());
         });
 
         $this->app->bind(ShippingInterface::class, function () {
-            return new ShippingCacheDecorator(
-                new ShippingRepository(new Shipping())
-            );
+            return new ShippingRepository(new Shipping());
         });
 
         $this->app->bind(ShippingRuleInterface::class, function () {
-            return new ShippingRuleCacheDecorator(
-                new ShippingRuleRepository(new ShippingRule())
-            );
+            return new ShippingRuleRepository(new ShippingRule());
         });
 
         $this->app->bind(ShippingRuleItemInterface::class, function () {
-            return new ShippingRuleItemCacheDecorator(
-                new ShippingRuleItemRepository(new ShippingRuleItem())
-            );
+            return new ShippingRuleItemRepository(new ShippingRuleItem());
         });
 
         $this->app->bind(ShipmentInterface::class, function () {
-            return new ShipmentCacheDecorator(
-                new ShipmentRepository(new Shipment())
-            );
+            return new ShipmentRepository(new Shipment());
         });
 
         $this->app->bind(ShipmentHistoryInterface::class, function () {
-            return new ShipmentHistoryCacheDecorator(
-                new ShipmentHistoryRepository(new ShipmentHistory())
-            );
+            return new ShipmentHistoryRepository(new ShipmentHistory());
         });
 
         $this->app->bind(OrderInterface::class, function () {
-            return new OrderCacheDecorator(
-                new OrderRepository(new Order())
-            );
+            return new OrderRepository(new Order());
         });
 
         $this->app->bind(OrderHistoryInterface::class, function () {
-            return new OrderHistoryCacheDecorator(
-                new OrderHistoryRepository(new OrderHistory())
-            );
+            return new OrderHistoryRepository(new OrderHistory());
         });
 
         $this->app->bind(OrderProductInterface::class, function () {
-            return new OrderProductCacheDecorator(
-                new OrderProductRepository(new OrderProduct())
-            );
+            return new OrderProductRepository(new OrderProduct());
         });
 
         $this->app->bind(OrderAddressInterface::class, function () {
-            return new OrderAddressCacheDecorator(
-                new OrderAddressRepository(new OrderAddress())
-            );
+            return new OrderAddressRepository(new OrderAddress());
         });
 
         $this->app->bind(OrderReturnInterface::class, function () {
-            return new OrderReturnCacheDecorator(
-                new OrderReturnRepository(new OrderReturn())
-            );
+            return new OrderReturnRepository(new OrderReturn());
         });
 
         $this->app->bind(OrderReturnItemInterface::class, function () {
-            return new OrderReturnItemCacheDecorator(
-                new OrderReturnItemRepository(new OrderReturnItem())
-            );
+            return new OrderReturnItemRepository(new OrderReturnItem());
         });
 
         $this->app->bind(DiscountInterface::class, function () {
-            return new DiscountCacheDecorator(
-                new DiscountRepository(new Discount())
-            );
+            return new DiscountRepository(new Discount());
         });
 
         $this->app->bind(WishlistInterface::class, function () {
-            return new WishlistCacheDecorator(
-                new WishlistRepository(new Wishlist())
-            );
+            return new WishlistRepository(new Wishlist());
         });
 
         $this->app->bind(AddressInterface::class, function () {
-            return new AddressCacheDecorator(
-                new AddressRepository(new Address())
-            );
+            return new AddressRepository(new Address());
         });
         $this->app->bind(CustomerInterface::class, function () {
-            return new CustomerCacheDecorator(
-                new CustomerRepository(new Customer())
-            );
-        });
-
-        $this->app->bind(EnquiryInterface::class, function () {
-            return new EnquiryCacheDecorator(
-                new EnquiryRepository(new Enquiry())
-            );
+            return new CustomerRepository(new Customer());
         });
 
         $this->app->bind(GroupedProductInterface::class, function () {
-            return new GroupedProductCacheDecorator(
-                new GroupedProductRepository(new GroupedProduct())
-            );
+            return new GroupedProductRepository(new GroupedProduct());
         });
 
         $this->app->bind(StoreLocatorInterface::class, function () {
-            return new StoreLocatorCacheDecorator(
-                new StoreLocatorRepository(new StoreLocator())
-            );
+            return new StoreLocatorRepository(new StoreLocator());
         });
 
         $this->app->bind(FlashSaleInterface::class, function () {
-            return new FlashSaleCacheDecorator(
-                new FlashSaleRepository(new FlashSale())
-            );
+            return new FlashSaleRepository(new FlashSale());
         });
 
         $this->app->bind(ProductLabelInterface::class, function () {
-            return new ProductLabelCacheDecorator(
-                new ProductLabelRepository(new ProductLabel())
-            );
+            return new ProductLabelRepository(new ProductLabel());
         });
 
         $this->app->bind(InvoiceInterface::class, function () {
-            return new InvoiceCacheDecorator(new InvoiceRepository(new Invoice()));
+            return new InvoiceRepository(new Invoice());
         });
 
         $this->app->bind(TrackingFilterInterface::class, function ($app) {
@@ -428,20 +311,28 @@ class EcommerceServiceProvider extends ServiceProvider
             return $app->make(Footprinter::class);
         });
 
+        $this->app->singleton(ExchangeRateInterface::class, function () {
+            if (get_ecommerce_setting('exchange_rate_api_provider') === 'api_layer') {
+                return new ApiLayerExchangeRateService();
+            }
+
+            return new OpenExchangeRatesService();
+        });
+
         Request::macro('footprint', function () {
-            return app(FootprinterInterface::class)->footprint($this);
+            return app(FootprinterInterface::class)->footprint(app()->make('request'));
         });
 
         $this->setNamespace('plugins/ecommerce')->loadHelpers();
 
         $loader = AliasLoader::getInstance();
-        $loader->alias('Cart', CartFacade::class);
-        $loader->alias('OrderHelper', OrderHelperFacade::class);
-        $loader->alias('OrderReturnHelper', OrderReturnHelperFacade::class);
-        $loader->alias('EcommerceHelper', EcommerceHelperFacade::class);
-        $loader->alias('ProductCategoryHelper', ProductCategoryHelperFacade::class);
+        $loader->alias('Cart', Cart::class);
+        $loader->alias('OrderHelper', OrderHelper::class);
+        $loader->alias('OrderReturnHelper', OrderReturnHelper::class);
+        $loader->alias('EcommerceHelper', EcommerceHelper::class);
+        $loader->alias('ProductCategoryHelper', ProductCategoryHelper::class);
         $loader->alias('CurrencyHelper', CurrencyFacade::class);
-        $loader->alias('InvoiceHelper', InvoiceHelperFacade::class);
+        $loader->alias('InvoiceHelper', InvoiceHelper::class);
     }
 
     public function boot(): void
@@ -450,12 +341,17 @@ class EcommerceServiceProvider extends ServiceProvider
         SlugHelper::registerModule(Brand::class, 'Brands');
         SlugHelper::registerModule(ProductCategory::class, 'Product Categories');
         SlugHelper::registerModule(ProductTag::class, 'Product Tags');
-        SlugHelper::registerModule(Enquiry::class, 'Enquiry Product');
         SlugHelper::setPrefix(Product::class, 'products');
         SlugHelper::setPrefix(Brand::class, 'brands');
         SlugHelper::setPrefix(ProductTag::class, 'product-tags');
         SlugHelper::setPrefix(ProductCategory::class, 'product-categories');
-        SlugHelper::setPrefix(Enquiry::class, 'enquiry-product');
+
+        SiteMapManager::registerKey([
+            'product-categories',
+            'product-tags',
+            'product-brands',
+            'products-((?:19|20|21|22)\d{2})-(0?[1-9]|1[012])',
+        ]);
 
         $this
             ->loadAndPublishConfigurations(['permissions'])
@@ -510,10 +406,13 @@ class EcommerceServiceProvider extends ServiceProvider
             if (config('plugins.ecommerce.general.enable_faq_in_product_details', false)) {
                 LanguageAdvancedManager::addTranslatableMetaBox('faq_schema_config_wrapper');
 
-                LanguageAdvancedManager::registerModule(Product::class, array_merge(
-                    LanguageAdvancedManager::getTranslatableColumns(Product::class),
-                    ['faq_schema_config']
-                ));
+                LanguageAdvancedManager::registerModule(
+                    Product::class,
+                    array_merge(
+                        LanguageAdvancedManager::getTranslatableColumns(Product::class),
+                        ['faq_schema_config']
+                    )
+                );
             }
 
             LanguageAdvancedManager::registerModule(ProductCategory::class, [
@@ -527,10 +426,13 @@ class EcommerceServiceProvider extends ServiceProvider
 
             LanguageAdvancedManager::addTranslatableMetaBox('attributes_list');
 
-            LanguageAdvancedManager::registerModule(ProductAttribute::class, array_merge(
-                LanguageAdvancedManager::getTranslatableColumns(ProductAttribute::class),
-                ['attributes']
-            ));
+            LanguageAdvancedManager::registerModule(
+                ProductAttribute::class,
+                array_merge(
+                    LanguageAdvancedManager::getTranslatableColumns(ProductAttribute::class),
+                    ['attributes']
+                )
+            );
 
             LanguageAdvancedManager::registerModule(ProductAttributeSet::class, [
                 'title',
@@ -605,7 +507,7 @@ class EcommerceServiceProvider extends ServiceProvider
                         ]);
 
                         foreach ($options as $item) {
-                            $option = Option::find($item['id']);
+                            $option = Option::query()->find($item['id']);
 
                             $newRequest->merge(['name' => $item['name']]);
 
@@ -625,7 +527,7 @@ class EcommerceServiceProvider extends ServiceProvider
                                     continue;
                                 }
 
-                                $optionValue = OptionValue::find($value['id']);
+                                $optionValue = OptionValue::query()->find($value['id']);
 
                                 $newRequest->merge([
                                     'option_value' => $value['option_value'],
@@ -657,7 +559,7 @@ class EcommerceServiceProvider extends ServiceProvider
                                 'title' => $item['title'],
                             ]);
 
-                            $attribute = $this->app->make(ProductAttributeInterface::class)->findById($item['id']);
+                            $attribute = ProductAttribute::query()->find($item['id']);
 
                             if ($attribute) {
                                 LanguageAdvancedManager::save($attribute, $request);
@@ -667,7 +569,7 @@ class EcommerceServiceProvider extends ServiceProvider
                         break;
                     case GlobalOption::class:
 
-                        $option = GlobalOption::find($request->input('id'));
+                        $option = GlobalOption::query()->find($request->input('id'));
 
                         if ($option) {
                             LanguageAdvancedManager::save($option, $request);
@@ -691,7 +593,7 @@ class EcommerceServiceProvider extends ServiceProvider
                                 continue;
                             }
 
-                            $optionValue = GlobalOptionValue::find($value['id']);
+                            $optionValue = GlobalOptionValue::query()->find($value['id']);
 
                             $newRequest->merge([
                                 'option_value' => $value['option_value'],
@@ -707,12 +609,17 @@ class EcommerceServiceProvider extends ServiceProvider
             }, 1234, 2);
         }
 
-        EmailHandler::addTemplateSettings(ECOMMERCE_MODULE_SCREEN_NAME, config('plugins.ecommerce.email', []));
-
         $this->app->register(HookServiceProvider::class);
 
-        Event::listen(RouteMatched::class, function () {
-            dashboard_menu()
+        $this->app['events']->listen(RouteMatched::class, function () {
+            $router = $this->app['router'];
+
+            $router->aliasMiddleware('customer', RedirectIfNotCustomer::class);
+            $router->aliasMiddleware('customer.guest', RedirectIfCustomer::class);
+            $router->pushMiddlewareToGroup('web', CaptureFootprintsMiddleware::class);
+            $router->pushMiddlewareToGroup('web', CaptureCouponMiddleware::class);
+
+            DashboardMenu::make()
                 ->registerItem([
                     'id' => 'cms-plugins-ecommerce',
                     'priority' => 8,
@@ -748,15 +655,6 @@ class EcommerceServiceProvider extends ServiceProvider
                     'icon' => 'fa fa-shopping-bag',
                     'url' => route('orders.index'),
                     'permissions' => ['orders.index'],
-                ])
-                ->registerItem([
-                    'id'          => 'cms-plugins-ecommerce-enquiry',
-                    'priority'    => 1,
-                    'parent_id'   => 'cms-plugins-ecommerce',
-                    'name'        => 'plugins/ecommerce::enquiry.name',
-                    'icon'        => 'fa fa-question-circle',
-                    'url'         => route('enquires.index'),
-                    'permissions' => ['enquires.index'],
                 ])
                 ->registerItem([
                     'id' => 'cms-plugins-ecommerce-invoice',
@@ -940,7 +838,7 @@ class EcommerceServiceProvider extends ServiceProvider
                 ]);
 
             if (EcommerceHelper::isTaxEnabled()) {
-                dashboard_menu()->registerItem([
+                DashboardMenu::registerItem([
                     'id' => 'cms-plugins-ecommerce-tax',
                     'priority' => 14,
                     'parent_id' => 'cms-plugins-ecommerce',
@@ -951,37 +849,17 @@ class EcommerceServiceProvider extends ServiceProvider
                 ]);
             }
 
-            if (! dashboard_menu()->hasItem('cms-core-tools')) {
-                dashboard_menu()->registerItem([
-                    'id' => 'cms-core-tools',
-                    'priority' => 96,
-                    'parent_id' => null,
-                    'name' => 'core/base::base.tools',
-                    'icon' => 'fas fa-tools',
-                    'url' => '',
-                    'permissions' => [],
-                ]);
+            $emailConfig = config('plugins.ecommerce.email', []);
+
+            if (! EcommerceHelper::isEnabledSupportDigitalProducts()) {
+                Arr::forget($emailConfig, 'templates.download_digital_products');
             }
 
-            dashboard_menu()
-                ->registerItem([
-                    'id' => 'cms-core-tools-ecommerce-bulk-import',
-                    'priority' => 1,
-                    'parent_id' => 'cms-core-tools',
-                    'name' => 'plugins/ecommerce::bulk-import.menu',
-                    'icon' => 'fas fa-file-import',
-                    'url' => route('ecommerce.bulk-import.index'),
-                    'permissions' => ['ecommerce.bulk-import.index'],
-                ])
-                ->registerItem([
-                    'id' => 'cms-core-tools-ecommerce-export-products',
-                    'priority' => 2,
-                    'parent_id' => 'cms-core-tools',
-                    'name' => 'plugins/ecommerce::export.products.name',
-                    'icon' => 'fas fa-file-export',
-                    'url' => route('ecommerce.export.products.index'),
-                    'permissions' => ['ecommerce.export.products.index'],
-                ]);
+            if (! EcommerceHelper::isReviewEnabled()) {
+                Arr::forget($emailConfig, 'templates.review_products');
+            }
+
+            EmailHandler::addTemplateSettings(ECOMMERCE_MODULE_SCREEN_NAME, $emailConfig);
         });
 
         $this->app->booted(function () {
@@ -992,15 +870,15 @@ class EcommerceServiceProvider extends ServiceProvider
                 ProductTag::class,
             ]);
 
-            $this->app->make(Schedule::class)->command(SendAbandonedCartsEmailCommand::class)->weekly('23:30');
-
             if (is_plugin_active('payment')) {
                 Payment::resolveRelationUsing('order', function ($model) {
                     return $model->belongsTo(Order::class, 'order_id')->withDefault();
                 });
             }
 
-            if (defined('SOCIAL_LOGIN_MODULE_SCREEN_NAME') && Route::has('customer.login')) {
+            if (defined('SOCIAL_LOGIN_MODULE_SCREEN_NAME') && Route::has('customer.login') && Route::has(
+                'public.index'
+            )) {
                 SocialService::registerModule([
                     'guard' => 'customer',
                     'model' => Customer::class,
@@ -1013,14 +891,21 @@ class EcommerceServiceProvider extends ServiceProvider
         $this->app->register(EventServiceProvider::class);
         $this->app->register(CommandServiceProvider::class);
 
-        Event::listen(['cart.removed', 'cart.stored', 'cart.restored', 'cart.updated'], function ($cart) {
-            $coupon = session('applied_coupon_code');
-            if ($coupon) {
-                $this->app->make(HandleRemoveCouponService::class)->execute();
-                if (Cart::count() || ($cart instanceof \Botble\Ecommerce\Cart\Cart && $cart->count())) {
-                    $this->app->make(HandleApplyCouponService::class)->execute($coupon);
+        $this->app['events']->listen(
+            ['cart.removed', 'cart.stored', 'cart.restored', 'cart.updated'],
+            function ($cart) {
+                $coupon = session('applied_coupon_code');
+                if ($coupon) {
+                    $this->app->make(HandleRemoveCouponService::class)->execute();
+                    if (Cart::count() || ($cart instanceof \Botble\Ecommerce\Cart\Cart && $cart->count())) {
+                        $this->app->make(HandleApplyCouponService::class)->execute($coupon);
+                    }
                 }
             }
+        );
+
+        $this->app->afterResolving(Schedule::class, function (Schedule $schedule) {
+            $schedule->command(SendAbandonedCartsEmailCommand::class)->weekly();
         });
     }
 }

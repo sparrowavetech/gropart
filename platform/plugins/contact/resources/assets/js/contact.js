@@ -25,41 +25,35 @@ class ContactPluginManagement {
                 message = tinymce.get('message').getContent()
             }
 
-            $.ajax({
-                type: 'POST',
-                cache: false,
-                url: route('contacts.reply', $('#input_contact_id').val()),
-                data: {
-                    message: message,
-                },
-                success: (res) => {
-                    if (!res.error) {
-                        $('.answer-wrapper').fadeOut()
-                        if (typeof tinymce != 'undefined') {
-                            tinymce.get('message').setContent('')
-                        } else {
-                            $('#message').val('')
-                            const domEditableElement = document.querySelector('.answer-wrapper .ck-editor__editable')
-                            if (domEditableElement) {
-                                const editorInstance = domEditableElement.ckeditorInstance
+            $httpClient
+                .make()
+                .post(route('contacts.reply', $('#input_contact_id').val()), {
+                    message,
+                })
+                .then(({ data }) => {
+                    $('.answer-wrapper').fadeOut()
 
-                                if (editorInstance) {
-                                    editorInstance.setData('')
-                                }
+                    if (typeof tinymce != 'undefined') {
+                        tinymce.get('message').setContent('')
+                    } else {
+                        $('#message').val('')
+                        const domEditableElement = document.querySelector('.answer-wrapper .ck-editor__editable')
+                        if (domEditableElement) {
+                            const editorInstance = domEditableElement.ckeditorInstance
+
+                            if (editorInstance) {
+                                editorInstance.setData('')
                             }
                         }
-
-                        Botble.showSuccess(res.message)
-                        $('#reply-wrapper').load(window.location.href + ' #reply-wrapper > *')
                     }
 
+                    Botble.showSuccess(data.message)
+
+                    $('#reply-wrapper').load(window.location.href + ' #reply-wrapper > *')
+                })
+                .finally(() => {
                     $(event.currentTarget).removeClass('button-loading')
-                },
-                error: (res) => {
-                    $(event.currentTarget).removeClass('button-loading')
-                    Botble.handleError(res)
-                },
-            })
+                })
         })
     }
 }

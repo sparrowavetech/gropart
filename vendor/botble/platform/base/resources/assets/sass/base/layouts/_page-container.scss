@@ -28,7 +28,6 @@ Page container
 }
 
 @media (max-width: $screen-sm-max) {
-
     /* Page container */
     .page-container {
         margin: 0 !important;
@@ -41,7 +40,6 @@ Page container
 }
 
 @media (max-width: $screen-xs-min) {
-
     /* Page container */
     .page-container {
         .page-header-fixed.page-header-fixed-mobile & {

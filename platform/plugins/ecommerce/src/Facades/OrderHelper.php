@@ -7,8 +7,11 @@ use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static \Illuminate\Support\Collection|\Illuminate\Database\Eloquent\Model|array|bool processOrder(array|string|null $orderIds, string|null $chargeId = null)
+ * @method static bool decreaseProductQuantity(\Botble\Ecommerce\Models\Order $order)
  * @method static \Botble\Base\Supports\EmailHandler setEmailVariables(\Botble\Ecommerce\Models\Order $order)
  * @method static bool sendOrderConfirmationEmail(\Botble\Ecommerce\Models\Order $order, bool $saveHistory = false)
+ * @method static void sendEmailForDigitalProducts(\Botble\Ecommerce\Models\Order $order)
+ * @method static \Botble\Ecommerce\Models\Order setOrderCompleted(string|int $orderId, \Illuminate\Http\Request $request, string|int $userId = 0)
  * @method static array|string|null getShippingMethod(string $method, array|string|null $option = null)
  * @method static string|null processHistoryVariables(\Botble\Ecommerce\Models\OrderHistory|\Botble\Ecommerce\Models\ShipmentHistory $history)
  * @method static array setOrderSessionData(string|null $token, array|string $data)
@@ -25,11 +28,8 @@ use Illuminate\Support\Facades\Facade;
  * @method static array processOrderInCheckout($sessionData, $request, $cartItems, $order, array $generalData)
  * @method static mixed createOrder(\Illuminate\Http\Request $request, string|int $currentUserId, string $token, array $cartItems)
  * @method static bool confirmPayment(\Botble\Ecommerce\Models\Order $order)
- * @method static void sendEmailForDigitalProducts(\Botble\Ecommerce\Models\Order $order)
  * @method static \Botble\Ecommerce\Models\Order cancelOrder(\Botble\Ecommerce\Models\Order $order)
- * @method static bool decreaseProductQuantity(\Botble\Ecommerce\Models\Order $order)
  * @method static \Botble\Ecommerce\Models\Order shippingStatusDelivered(\Botble\Ecommerce\Models\Shipment $shipment, \Illuminate\Http\Request $request, string|int $userId = 0)
- * @method static \Botble\Ecommerce\Models\Order setOrderCompleted(string|int $orderId, \Illuminate\Http\Request $request, string|int $userId = 0)
  * @method static string|null getOrderBankInfo(\Botble\Ecommerce\Models\Order|\Illuminate\Database\Eloquent\Collection $orders)
  *
  * @see \Botble\Ecommerce\Supports\OrderHelper

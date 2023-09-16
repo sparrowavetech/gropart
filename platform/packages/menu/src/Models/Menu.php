@@ -29,6 +29,7 @@ class Menu extends BaseModel
     {
         static::deleted(function (self $model) {
             $model->menuNodes()->delete();
+            $model->locations()->delete();
         });
 
         self::saving(function (self $model) {

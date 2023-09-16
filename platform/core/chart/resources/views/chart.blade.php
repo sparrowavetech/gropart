@@ -1,8 +1,11 @@
-<div id="{{ $chart->getElementId() }}" style="width: 100%; display: block; min-height: 300px;"></div>
+<div
+    id="{{ $chart->getElementId() }}"
+    style="width: 100%; display: block; min-height: 300px;"
+></div>
 
 @push('footer')
     <script type="text/javascript">
-        jQuery(function () {
+        jQuery(function() {
             `use strict`;
 
             Morris.{{ $chart->chartType }}(
@@ -18,22 +21,22 @@
     {!! Assets::scriptToHtml('morris') !!}
 
     <script type="text/javascript">
-        jQuery(function () {
+        jQuery(function() {
             `use strict`;
 
             Morris.{{ $chart->chartType }}(
-               {!! $chart->toJSON() !!}
+                {!! $chart->toJSON() !!}
             );
         });
     </script>
 @else
     @push('footer')
         <script type="text/javascript">
-            jQuery(function () {
+            jQuery(function() {
                 `use strict`;
 
                 Morris.{{ $chart->chartType }}(
-                   {!! $chart->toJSON() !!}
+                    {!! $chart->toJSON() !!}
                 );
             });
         </script>

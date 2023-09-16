@@ -22,16 +22,13 @@ class TagsManager {
                         tagify.settings.whitelist.length = 0 // reset current whitelist
                         tagify.loading(true).dropdown.hide.call(tagify) // show the loader animation
 
-                        $.ajax({
-                            type: 'GET',
-                            url: $(element).data('url'),
-                            success: (data) => {
+                        $httpClient
+                            .make()
+                            .get($(element).data('url'))
+                            .then(({ data }) => {
                                 tagify.settings.whitelist = data
-
-                                // render the suggestions dropdown.
                                 tagify.loading(false).dropdown.show.call(tagify, e.detail.value)
-                            },
-                        })
+                            })
                     })
                 }
             })
@@ -41,20 +38,20 @@ class TagsManager {
             let whiteList = []
 
             for (const [key, value] of Object.entries(list)) {
-                whiteList.push({value: key, name: value});
+                whiteList.push({ value: key, name: value })
             }
 
             let listChosen = String(element.value).split(',')
 
             let arrayChosen = whiteList.filter((obj) => {
                 if (listChosen.includes(String(obj.value))) {
-                    return {value: obj.id, name: obj.name}
+                    return { value: obj.id, name: obj.name }
                 }
             })
 
             const tagTemplate = function (tagData) {
                 return `
-                <tag title="${(tagData.title || tagData.name)}"
+                <tag title="${tagData.title || tagData.name}"
                         contenteditable='false'
                         spellcheck='false'
                         tabIndex="-1"
@@ -90,14 +87,14 @@ class TagsManager {
                     closeOnSelect: false,
                     enabled: 0,
                     classname: 'users-list',
-                    searchKeys: ['value', 'name']
+                    searchKeys: ['value', 'name'],
                 },
                 templates: {
                     tag: tagTemplate,
                     dropdownItem: suggestionTemplate,
                 },
                 whitelist: whiteList,
-                originalInputValueFormat: valuesArr => valuesArr.map(item => item.value).join(',')
+                originalInputValueFormat: (valuesArr) => valuesArr.map((item) => item.value).join(','),
             })
 
             tagify.loadOriginalValues(arrayChosen)

@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static void setAdminConfig(string $key, callable|array|string|null $html)
  * @method static string generateShortcode(string $name, array $attributes = [])
  * @method static \Botble\Shortcode\Compilers\ShortcodeCompiler getCompiler()
+ * @method static \Botble\Shortcode\ShortcodeField fields()
  *
  * @see \Botble\Shortcode\Shortcode
  */

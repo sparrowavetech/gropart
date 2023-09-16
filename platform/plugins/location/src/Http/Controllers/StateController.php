@@ -93,7 +93,7 @@ class StateController extends BaseController
             ->select(['id', 'name'])
             ->take(10)
             ->orderBy('order')
-            ->orderBy('name', 'ASC')
+            ->orderBy('name')
             ->get();
 
         $data->prepend(new State(['id' => 0, 'name' => trans('plugins/location::city.select_state')]));
@@ -107,7 +107,7 @@ class StateController extends BaseController
             ->select(['id', 'name'])
             ->wherePublished()
             ->orderBy('order')
-            ->orderBy('name', 'ASC');
+            ->orderBy('name');
 
         $countryId = $request->input('country_id');
 

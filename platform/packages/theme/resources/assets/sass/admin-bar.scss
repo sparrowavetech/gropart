@@ -11,7 +11,7 @@ body.show-admin-bar {
     left: 0;
     width: 100%;
     min-width: 960px;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     z-index: 1049; // Bootstrap modal is 1050
     direction: ltr !important;
 
@@ -88,7 +88,7 @@ body.show-admin-bar {
             > a {
                 &:after {
                     content: '';
-                    $left-right: 8px*0.5;
+                    $left-right: 8px * 0.5;
                     $top: 6px;
                     border-left: $left-right solid transparent;
                     border-right: $left-right solid transparent;
@@ -127,7 +127,7 @@ body.show-admin-bar {
             &:before {
                 content: '';
                 display: inline-block;
-                $left-right: 10px*0.5;
+                $left-right: 10px * 0.5;
                 $bottom: 8px;
                 border-left: $left-right solid transparent;
                 border-right: $left-right solid transparent;

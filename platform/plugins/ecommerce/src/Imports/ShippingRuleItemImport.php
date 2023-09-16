@@ -6,9 +6,7 @@ use Botble\Ecommerce\Enums\ShippingRuleTypeEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Shipping;
 use Botble\Ecommerce\Models\ShippingRule;
-use Botble\Ecommerce\Repositories\Interfaces\ShippingInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ShippingRuleInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ShippingRuleItemInterface;
+use Botble\Ecommerce\Models\ShippingRuleItem;
 use Botble\Location\Models\Country;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -55,12 +53,8 @@ class ShippingRuleItemImport implements
 
     protected Request $validatorClass;
 
-    public function __construct(
-        protected ShippingInterface $shippingRepository,
-        protected ShippingRuleInterface $shippingRuleRepository,
-        protected ShippingRuleItemInterface $shippingRuleItemRepository,
-        protected Request $request
-    ) {
+    public function __construct(protected Request $request)
+    {
         $this->availableCountries = EcommerceHelper::getAvailableCountries();
         $this->isLoadFromLocation = EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation();
 
@@ -94,8 +88,8 @@ class ShippingRuleItemImport implements
             if ($shippingRuleRef && $shippingRuleRef['shipping_rule_id']) {
                 $row['shipping_rule_id'] = $shippingRuleRef['shipping_rule_id'];
             } else {
-                $shippingRule = $this->shippingRuleRepository
-                    ->createOrUpdate([
+                $shippingRule = ShippingRule::query()
+                    ->create([
                         'name' => $row['shipping_rule'],
                         'type' => $row['type'],
                         'price' => 0,
@@ -128,26 +122,32 @@ class ShippingRuleItemImport implements
         $shippingRuleItem = null;
         $isCreateOrUpdate = false;
         if ($importType == 'add_new') {
-            $shippingRuleItem = $this->shippingRuleItemRepository->createOrUpdate(array_merge($condition, [
-                'adjustment_price' => $row['adjustment_price'],
-                'is_enabled' => $row['is_enabled'],
-            ]));
+            $shippingRuleItem = ShippingRuleItem::query()->create(
+                array_merge($condition, [
+                    'adjustment_price' => $row['adjustment_price'],
+                    'is_enabled' => $row['is_enabled'],
+                ])
+            );
             $isCreateOrUpdate = true;
         } else {
-            $shippingRuleCount = $this->shippingRuleItemRepository->count($condition);
+            $shippingRuleCount = ShippingRuleItem::query()->where($condition)->count();
             if ($shippingRuleCount) {
                 if ($importType == 'overwrite') {
-                    $shippingRuleItem = $this->shippingRuleItemRepository->createOrUpdate([
+                    $shippingRuleItem = ShippingRuleItem::query()
+                        ->where($condition)
+                        ->create([
                             'adjustment_price' => $row['adjustment_price'],
                             'is_enabled' => $row['is_enabled'],
-                        ], $condition);
+                        ]);
                     $isCreateOrUpdate = true;
                 }
             } else {
-                $shippingRuleItem = $this->shippingRuleItemRepository->createOrUpdate(array_merge($condition, [
-                    'adjustment_price' => $row['adjustment_price'],
-                    'is_enabled' => $row['is_enabled'],
-                ]));
+                $shippingRuleItem = ShippingRuleItem::query()->create(
+                    array_merge($condition, [
+                        'adjustment_price' => $row['adjustment_price'],
+                        'is_enabled' => $row['is_enabled'],
+                    ])
+                );
                 $isCreateOrUpdate = true;
             }
         }
@@ -161,8 +161,7 @@ class ShippingRuleItemImport implements
 
     public function getShippingRule(string $name, string|null $country, string|null $type): ShippingRule|null
     {
-        return $this->shippingRuleRepository
-            ->getModel()
+        return ShippingRule::query()
             ->where([
                 'name' => $name,
                 'type' => $type,
@@ -175,7 +174,7 @@ class ShippingRuleItemImport implements
 
     public function getShipping(string|null $country): Shipping|null
     {
-        return $this->shippingRepository->getFirstBy(['country' => $country]);
+        return Shipping::query()->where('country', $country)->first();
     }
 
     /**

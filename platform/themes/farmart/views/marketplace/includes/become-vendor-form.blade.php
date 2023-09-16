@@ -1,47 +1,56 @@
 <div class="mb-3">
-    <label class="form-label required" for="shop-name-register">{{ __('Shop Name') }}</label>
-    <input class="form-control @if ($errors->has('shop_name')) is-invalid @endif"
-        id="shop-name-register" type="text" name="shop_name" placeholder="{{ __('Store Name') }}" value="{{ old('shop_name') }}">
+    <label
+        class="form-label required"
+        for="shop-name-register"
+    >{{ __('Shop Name') }}</label>
+    <input
+        class="form-control @if ($errors->has('shop_name')) is-invalid @endif"
+        id="shop-name-register"
+        name="shop_name"
+        type="text"
+        value="{{ old('shop_name') }}"
+        placeholder="{{ __('Store Name') }}"
+    >
     @if ($errors->has('shop_name'))
         <div class="invalid-feedback">{{ $errors->first('shop_name') }}</div>
     @endif
 </div>
 <div class="form-group mb-3 position-relative">
-    <label class="form-label required" for="shop-url-register">{{ __('Shop URL') }}</label>
-    <input class="form-control @if ($errors->has('shop_url')) is-invalid @endif" id="shop-url-register" type="text"
+    <label
+        class="form-label required"
+        for="shop-url-register"
+    >{{ __('Shop URL') }}</label>
+    <input
+        class="form-control @if ($errors->has('shop_url')) is-invalid @endif"
+        id="shop-url-register"
         name="shop_url"
-        placeholder="{{ __('Store URL') }}" value="{{ old('shop_url') }}"
-        data-url="{{ route('public.ajax.check-store-url') }}">
+        data-url="{{ route('public.ajax.check-store-url') }}"
+        type="text"
+        value="{{ old('shop_url') }}"
+        placeholder="{{ __('Store URL') }}"
+    >
     @if ($errors->has('shop_url'))
         <div class="invalid-feedback">{{ $errors->first('shop_url') }}</div>
     @else
         <span class="d-inline-block">
-            <small data-base-url="{{ route('public.store', '') }}">{{ route('public.store', (string)old('shop_url')) }}</small>
+            <small
+                data-base-url="{{ route('public.store', '') }}">{{ route('public.store', (string) old('shop_url')) }}</small>
         </span>
     @endif
     <span class="position-absolute top-0 end-0 shop-url-status"></span>
 </div>
-
 <div class="mb-3">
-    <label class="form-label required" for="shop-phone-register">{{ __('Are You A ?') }}</label>
-    @php
-     $shoptype = \Botble\Marketplace\Enums\ShopTypeEnum::labels();
-    @endphp
-    <select class="form-control form-select @if ($errors->has('shop_category')) is-invalid @endif" id="shop_category" name="shop_category">
-        <option value="">Select Your Type</option>
-        @foreach($shoptype as $index => $type)
-            <option value="{{ $index }}">{{ $type }}</option>
-        @endforeach
-    </select>
-    @if ($errors->has('shop_category'))
-        <div class="invalid-feedback">{{ $errors->first('shop_category') }}</div>
-    @endif
-</div>
-
-<div class="mb-3">
-    <label class="form-label required" for="shop-phone-register">{{ __('Phone Number') }}</label>
-    <input class="form-control @if ($errors->has('shop_phone')) is-invalid @endif" id="shop-phone-register" type="text" name="shop_phone"
-        placeholder="{{ __('Ex: 0943243332') }}">
+    <label
+        class="form-label required"
+        for="shop-phone-register"
+    >{{ __('Phone Number') }}</label>
+    <input
+        class="form-control @if ($errors->has('shop_phone')) is-invalid @endif"
+        id="shop-phone-register"
+        name="shop_phone"
+        type="text"
+        placeholder="{{ __('Ex: 0943243332') }}"
+    >
     @if ($errors->has('shop_phone'))
         <div class="invalid-feedback">{{ $errors->first('shop_phone') }}</div>
     @endif

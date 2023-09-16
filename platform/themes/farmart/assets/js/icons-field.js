@@ -1,4 +1,4 @@
-$(document).ready(function() {
+$(document).ready(function () {
     'use strict'
     let icons = [
         'icon-home',
@@ -1100,20 +1100,13 @@ $(document).ready(function() {
         'icon-copyright',
     ]
 
-    let initIconsField = function() {
-        $('.icon-select').each(function(index, el) {
+    let initIconsField = function () {
+        $('.icon-select').each(function (index, el) {
             let value = $(el).children('option:selected').val()
 
-            let options = ''
+            let options = '<option value="">' + $(el).data('empty-value') + '</option>'
 
-            const $this = $(el)
-            if ($this.data('empty-value')) {
-                options = '<option value="">' + $this.data('empty-value') + '</option>'
-            } else if (!value) {
-                options = '<option value="">&nbsp;</option>'
-            }
-
-            icons.forEach(function(value) {
+            icons.forEach(function (value) {
                 options += '<option value="' + value + '">' + value + '</option>'
             })
 
@@ -1121,18 +1114,22 @@ $(document).ready(function() {
             $(el).val(value)
 
             let select2Options = {
-                templateResult: function(state) {
+                templateResult: function (state) {
                     if (!state.id) {
                         return state.text
                     }
-                    return $('<span><i class="elegant-icon ' + state.id + '"></i></span>&nbsp; ' + state.text + '</span>')
+                    return $(
+                        '<span><i class="elegant-icon ' + state.id + '"></i></span>&nbsp; ' + state.text + '</span>'
+                    )
                 },
                 width: '100%',
-                templateSelection: function(state) {
+                templateSelection: function (state) {
                     if (!state.id) {
                         return state.text
                     }
-                    return $('<span><i class="elegant-icon ' + state.id + '"></i></span>&nbsp; ' + state.text + '</span>')
+                    return $(
+                        '<span><i class="elegant-icon ' + state.id + '"></i></span>&nbsp; ' + state.text + '</span>'
+                    )
                 },
             }
 
@@ -1147,7 +1144,7 @@ $(document).ready(function() {
 
     initIconsField()
 
-    document.addEventListener('core-init-resources', function() {
+    document.addEventListener('core-init-resources', function () {
         initIconsField()
     })
 })

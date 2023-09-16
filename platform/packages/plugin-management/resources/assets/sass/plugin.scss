@@ -49,12 +49,11 @@
     }
 
     .app-grid--blank-slate {
-
         .app-card-item {
             margin-bottom: 20px;
         }
 
-        .app-card-item:nth-child(2n+1) {
+        .app-card-item:nth-child(2n + 1) {
             clear: none;
         }
 
@@ -64,7 +63,7 @@
             border: none !important;
             overflow: hidden;
             border-radius: 3px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, .1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             background: #ffffff;
 
             .app-icon {

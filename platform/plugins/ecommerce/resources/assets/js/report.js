@@ -31,10 +31,7 @@ $(() => {
         [rangesTrans.last_7_days]: [moment().subtract(6, 'days'), today],
         [rangesTrans.last_30_days]: [moment().subtract(29, 'days'), today],
         [rangesTrans.this_month]: [moment().startOf('month'), endDate],
-        [rangesTrans.this_year]: [
-            moment().startOf('year'),
-            moment().endOf('year'),
-        ],
+        [rangesTrans.this_year]: [moment().startOf('year'), moment().endOf('year')],
     }
 
     $dateRange.daterangepicker(
@@ -51,7 +48,7 @@ $(() => {
             },
             autoUpdateInput: false,
         },
-        function(start, end, label) {
+        function (start, end, label) {
             $.ajax({
                 url: $dateRange.data('href'),
                 data: {
@@ -60,11 +57,11 @@ $(() => {
                     predefined_range: label,
                 },
                 type: 'GET',
-                success: data => {
+                success: (data) => {
                     if (data.error) {
                         Botble.showError(data.message)
                     } else {
-                        if (! $('#report-stats-content').length) {
+                        if (!$('#report-stats-content').length) {
                             const newUrl = new URL(window.location.href)
 
                             newUrl.searchParams.set('date_from', start.format('YYYY-MM-DD'))
@@ -81,32 +78,24 @@ $(() => {
                         }
 
                         if (window.LaravelDataTables) {
-                            Object.keys(window.LaravelDataTables).map(
-                                (key) => {
-                                    let table = window.LaravelDataTables[key]
-                                    let url = new URL(table.ajax.url())
-                                    url.searchParams.set(
-                                        'date_from',
-                                        start.format('YYYY-MM-DD'),
-                                    )
-                                    url.searchParams.set(
-                                        'date_to',
-                                        end.format('YYYY-MM-DD'),
-                                    )
-                                    table.ajax.url(url.href).load()
-                                },
-                            )
+                            Object.keys(window.LaravelDataTables).map((key) => {
+                                let table = window.LaravelDataTables[key]
+                                let url = new URL(table.ajax.url())
+                                url.searchParams.set('date_from', start.format('YYYY-MM-DD'))
+                                url.searchParams.set('date_to', end.format('YYYY-MM-DD'))
+                                table.ajax.url(url.href).load()
+                            })
                         }
                     }
                 },
-                error: data => {
+                error: (data) => {
                     Botble.handleError(data)
                 },
             })
-        },
+        }
     )
 
-    $dateRange.on('apply.daterangepicker', function(ev, picker) {
+    $dateRange.on('apply.daterangepicker', function (ev, picker) {
         let $this = $(this)
         let formatValue = $this.data('format-value')
         if (!formatValue) {

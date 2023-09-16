@@ -6,8 +6,8 @@ class SlugBoxManagement {
             let $slugInput = $('#editable-post-name')
             $slugInput.html(
                 '<input type="text" id="new-post-slug" class="form-control" value="' +
-                $slugInput.text() +
-                '" autocomplete="off">'
+                    $slugInput.text() +
+                    '" autocomplete="off">'
             )
             $('#edit-slug-box .cancel').show()
             $('#edit-slug-box .save').show()
@@ -19,11 +19,11 @@ class SlugBoxManagement {
             let $permalink = $('#sample-permalink')
             $permalink.html(
                 '<a class="permalink" href="' +
-                $('#slug_id').data('view') +
-                currentSlug.replace('/', '') +
-                '">' +
-                $permalink.html() +
-                '</a>'
+                    $('#slug_id').data('view') +
+                    currentSlug.replace('/', '') +
+                    '">' +
+                    $permalink.html() +
+                    '</a>'
             )
             $('#editable-post-name').text(currentSlug)
             $('#edit-slug-box .cancel').hide()
@@ -32,27 +32,27 @@ class SlugBoxManagement {
         })
 
         let createSlug = (name, id, exist) => {
-            $.ajax({
-                url: $('#slug_id').data('url'),
-                type: 'POST',
-                data: {
+            $httpClient
+                .make()
+                .post($('#slug_id').data('url'), {
                     value: name,
-                    slug_id: id,
+                    slug_id: id.toString(),
                     model: $('input[name=model]').val(),
-                },
-                success: (data) => {
+                })
+                .then(({ data }) => {
                     let $permalink = $('#sample-permalink')
                     let $slugId = $('#slug_id')
+
                     if (exist) {
                         $permalink.find('.permalink').prop('href', $slugId.data('view') + data.replace('/', ''))
                     } else {
                         $permalink.html(
                             '<a class="permalink" target="_blank" href="' +
-                            $slugId.data('view') +
-                            data.replace('/', '') +
-                            '">' +
-                            $permalink.html() +
-                            '</a>'
+                                $slugId.data('view') +
+                                data.replace('/', '') +
+                                '">' +
+                                $permalink.html() +
+                                '</a>'
                         )
                     }
 
@@ -64,11 +64,7 @@ class SlugBoxManagement {
                     $('#edit-slug-box .save').hide()
                     $('#change_slug').show()
                     $slugBox.removeClass('hidden')
-                },
-                error: (data) => {
-                    Botble.handleError(data)
-                },
-            })
+                })
         }
 
         $(document).on('click', '#edit-slug-box .save', () => {

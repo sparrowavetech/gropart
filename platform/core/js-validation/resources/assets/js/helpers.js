@@ -1,7 +1,5 @@
 $.extend(true, laravelValidation, {
-
     helpers: {
-
         /**
          * Numeric rules
          */
@@ -15,21 +13,20 @@ $.extend(true, laravelValidation, {
          * @returns {{file: *, extension: string, size: number}}
          */
         fileinfo: function (fieldObj, index) {
-            var FileName = fieldObj.value;
-            index = typeof index !== 'undefined' ? index : 0;
-            if ( fieldObj.files !== null ) {
+            var FileName = fieldObj.value
+            index = typeof index !== 'undefined' ? index : 0
+            if (fieldObj.files !== null) {
                 if (typeof fieldObj.files[index] !== 'undefined') {
                     return {
                         file: FileName,
                         extension: FileName.substr(FileName.lastIndexOf('.') + 1),
                         size: fieldObj.files[index].size / 1024,
-                        type: fieldObj.files[index].type
-                    };
+                        type: fieldObj.files[index].type,
+                    }
                 }
             }
-            return false;
+            return false
         },
-
 
         /**
          * Gets the selectors for th specified field names.
@@ -38,16 +35,15 @@ $.extend(true, laravelValidation, {
          * @returns {string}
          */
         selector: function (names) {
-            var selector = [];
-            if (!$.isArray(names))  {
-                names = [names];
+            var selector = []
+            if (!$.isArray(names)) {
+                names = [names]
             }
             for (var i = 0; i < names.length; i++) {
-                selector.push("[name='" + names[i] + "']");
+                selector.push("[name='" + names[i] + "']")
             }
-            return selector.join();
+            return selector.join()
         },
-
 
         /**
          * Check if element has numeric rules.
@@ -56,7 +52,7 @@ $.extend(true, laravelValidation, {
          * @returns {boolean}
          */
         hasNumericRules: function (element) {
-            return this.hasRules(element, this.numericRules);
+            return this.hasRules(element, this.numericRules)
         },
 
         /**
@@ -67,36 +63,35 @@ $.extend(true, laravelValidation, {
          * @returns {boolean}
          */
         hasRules: function (element, rules) {
-
-            var found = false;
+            var found = false
             if (typeof rules === 'string') {
-                rules = [rules];
+                rules = [rules]
             }
 
-            var validator = $.data(element.form, "validator");
-            var listRules = [];
-            var cache = validator.arrayRulesCache;
+            var validator = $.data(element.form, 'validator')
+            var listRules = []
+            var cache = validator.arrayRulesCache
             if (element.name in cache) {
                 $.each(cache[element.name], function (index, arrayRule) {
-                    listRules.push(arrayRule);
-                });
+                    listRules.push(arrayRule)
+                })
             }
             if (element.name in validator.settings.rules) {
-                listRules.push(validator.settings.rules[element.name]);
+                listRules.push(validator.settings.rules[element.name])
             }
-            $.each(listRules, function(index,objRules){
+            $.each(listRules, function (index, objRules) {
                 if ('laravelValidation' in objRules) {
-                    var _rules=objRules.laravelValidation;
+                    var _rules = objRules.laravelValidation
                     for (var i = 0; i < _rules.length; i++) {
-                        if ($.inArray(_rules[i][0],rules) !== -1) {
-                            found = true;
-                            return false;
+                        if ($.inArray(_rules[i][0], rules) !== -1) {
+                            found = true
+                            return false
                         }
                     }
                 }
-            });
+            })
 
-            return found;
+            return found
         },
 
         /**
@@ -107,7 +102,7 @@ $.extend(true, laravelValidation, {
          * @param string
          */
         strlen: function (string) {
-            return strlen(string);
+            return strlen(string)
         },
 
         /**
@@ -119,18 +114,16 @@ $.extend(true, laravelValidation, {
          * @returns int
          */
         getSize: function getSize(obj, element, value) {
-
             if (this.hasNumericRules(element) && this.is_numeric(value)) {
-                return parseFloat(value);
+                return parseFloat(value)
             } else if ($.isArray(value)) {
-                return parseFloat(value.length);
+                return parseFloat(value.length)
             } else if (element.type === 'file') {
-                return parseFloat(Math.floor(this.fileinfo(element).size));
+                return parseFloat(Math.floor(this.fileinfo(element).size))
             }
 
-            return parseFloat(this.strlen(value));
+            return parseFloat(this.strlen(value))
         },
-
 
         /**
          * Return specified rule from element.
@@ -139,20 +132,19 @@ $.extend(true, laravelValidation, {
          * @param element
          * @returns object
          */
-        getLaravelValidation: function(rule, element) {
-
-            var found = undefined;
-            $.each($.validator.staticRules(element), function(key, rules) {
-                if (key==="laravelValidation") {
+        getLaravelValidation: function (rule, element) {
+            var found = undefined
+            $.each($.validator.staticRules(element), function (key, rules) {
+                if (key === 'laravelValidation') {
                     $.each(rules, function (i, value) {
-                        if (value[0]===rule) {
-                            found=value;
+                        if (value[0] === rule) {
+                            found = value
                         }
-                    });
+                    })
                 }
-            });
+            })
 
-            return found;
+            return found
         },
 
         /**
@@ -163,33 +155,32 @@ $.extend(true, laravelValidation, {
          * @returns {boolean|int}
          */
         parseTime: function (value, format) {
-
-            var timeValue = false;
-            var fmt = new DateFormatter();
+            var timeValue = false
+            var fmt = new DateFormatter()
 
             if (typeof value === 'number' && typeof format === 'undefined') {
-                return value;
+                return value
             }
 
             if ($.type(format) === 'object') {
-                var dateRule=this.getLaravelValidation('DateFormat', format);
+                var dateRule = this.getLaravelValidation('DateFormat', format)
                 if (dateRule !== undefined) {
-                    format = dateRule[1][0];
+                    format = dateRule[1][0]
                 } else {
-                    format = null;
+                    format = null
                 }
             }
 
             if (format == null) {
-                timeValue = this.strtotime(value);
+                timeValue = this.strtotime(value)
             } else {
-                timeValue = fmt.parseDate(value, format);
+                timeValue = fmt.parseDate(value, format)
                 if (timeValue) {
-                    timeValue = Math.round((timeValue.getTime() / 1000));
+                    timeValue = Math.round(timeValue.getTime() / 1000)
                 }
             }
 
-            return timeValue;
+            return timeValue
         },
 
         /**
@@ -200,7 +191,7 @@ $.extend(true, laravelValidation, {
          * @returns {Date}
          */
         guessDate: function (value, format) {
-            var fmt = new DateFormatter();
+            var fmt = new DateFormatter()
             return fmt.guessDate(value, format)
         },
 
@@ -239,7 +230,7 @@ $.extend(true, laravelValidation, {
          * @returns {*}
          */
         arrayDiff: function (arr1, arr2) {
-            return array_diff(arr1, arr2);
+            return array_diff(arr1, arr2)
         },
 
         /**
@@ -250,15 +241,15 @@ $.extend(true, laravelValidation, {
          * @returns {*}
          */
         arrayEquals: function (arr1, arr2) {
-            if (! $.isArray(arr1) || ! $.isArray(arr2)) {
-                return false;
+            if (!$.isArray(arr1) || !$.isArray(arr2)) {
+                return false
             }
 
             if (arr1.length !== arr2.length) {
-                return false;
+                return false
             }
 
-            return $.isEmptyObject(this.arrayDiff(arr1, arr2));
+            return $.isEmptyObject(this.arrayDiff(arr1, arr2))
         },
 
         /**
@@ -269,29 +260,29 @@ $.extend(true, laravelValidation, {
          * @param name
          * @returns {*}
          */
-        dependentElement: function(validator, element, name) {
+        dependentElement: function (validator, element, name) {
+            var el = validator.findByName(name)
 
-            var el=validator.findByName(name);
-
-            if ( el[0]!==undefined  && validator.settings.onfocusout ) {
-                var event = 'blur';
-                if (el[0].tagName === 'SELECT' ||
+            if (el[0] !== undefined && validator.settings.onfocusout) {
+                var event = 'blur'
+                if (
+                    el[0].tagName === 'SELECT' ||
                     el[0].tagName === 'OPTION' ||
                     el[0].type === 'checkbox' ||
                     el[0].type === 'radio'
                 ) {
-                    event = 'click';
+                    event = 'click'
                 }
 
-                var ruleName = '.validate-laravelValidation';
-                el.off( ruleName )
+                var ruleName = '.validate-laravelValidation'
+                el.off(ruleName)
                     .off(event + ruleName + '-' + element.name)
-                    .on( event + ruleName + '-' + element.name, function() {
-                        $( element ).valid();
-                    });
+                    .on(event + ruleName + '-' + element.name, function () {
+                        $(element).valid()
+                    })
             }
 
-            return el[0];
+            return el[0]
         },
 
         /**
@@ -301,14 +292,14 @@ $.extend(true, laravelValidation, {
          * @returns {string[]}
          */
         parseErrorResponse: function (response) {
-            var newResponse = ['Whoops, looks like something went wrong.'];
+            var newResponse = ['Whoops, looks like something went wrong.']
             if ('responseText' in response) {
-                var errorMsg = response.responseText.match(/<h1\s*>(.*)<\/h1\s*>/i);
+                var errorMsg = response.responseText.match(/<h1\s*>(.*)<\/h1\s*>/i)
                 if ($.isArray(errorMsg)) {
-                    newResponse = [errorMsg[1]];
+                    newResponse = [errorMsg[1]]
                 }
             }
-            return newResponse;
+            return newResponse
         },
 
         /**
@@ -318,7 +309,7 @@ $.extend(true, laravelValidation, {
          * @returns string
          */
         escapeRegExp: function (str) {
-            return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+            return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&')
         },
 
         /**
@@ -327,22 +318,22 @@ $.extend(true, laravelValidation, {
          * @param name
          * @returns {RegExp}
          */
-        regexFromWildcard: function(name) {
-            var nameParts = name.split("[*]");
+        regexFromWildcard: function (name) {
+            var nameParts = name.split('[*]')
             if (nameParts.length === 1) {
-                nameParts.push('');
+                nameParts.push('')
             }
-            var regexpParts = nameParts.map(function(currentValue, index) {
+            var regexpParts = nameParts.map(function (currentValue, index) {
                 if (index % 2 === 0) {
-                    currentValue = currentValue + '[';
+                    currentValue = currentValue + '['
                 } else {
-                    currentValue = ']' +currentValue;
+                    currentValue = ']' + currentValue
                 }
 
-                return laravelValidation.helpers.escapeRegExp(currentValue);
-            });
+                return laravelValidation.helpers.escapeRegExp(currentValue)
+            })
 
-            return new RegExp('^'+regexpParts.join('[^\\]]*')+'$');
-        }
-    }
-});
+            return new RegExp('^' + regexpParts.join('[^\\]]*') + '$')
+        },
+    },
+})

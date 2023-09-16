@@ -3,60 +3,29 @@
 namespace Botble\Faq\Tables;
 
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Facades\Html;
 use Botble\Faq\Models\FaqCategory;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Table\DataTables;
-use Illuminate\Contracts\Routing\UrlGenerator;
+use Botble\Table\Actions\DeleteAction;
+use Botble\Table\Actions\EditAction;
+use Botble\Table\BulkActions\DeleteBulkAction;
+use Botble\Table\Columns\CreatedAtColumn;
+use Botble\Table\Columns\IdColumn;
+use Botble\Table\Columns\NameColumn;
+use Botble\Table\Columns\StatusColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 
 class FaqCategoryTable extends TableAbstract
 {
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, FaqCategory $faqCategory)
+    public function setup(): void
     {
-        parent::__construct($table, $urlGenerator);
-
-        $this->model = $faqCategory;
-
-        $this->hasActions = true;
-        $this->hasFilter = true;
-
-        if (! Auth::user()->hasAnyPermission(['faq_category.edit', 'faq_category.destroy'])) {
-            $this->hasOperations = false;
-            $this->hasActions = false;
-        }
-    }
-
-    public function ajax(): JsonResponse
-    {
-        $data = $this->table
-            ->eloquent($this->query())
-            ->editColumn('name', function (FaqCategory $item) {
-                if (! Auth::user()->hasPermission('faq_category.edit')) {
-                    return BaseHelper::clean($item->name);
-                }
-
-                return Html::link(route('faq_category.edit', $item->getKey()), BaseHelper::clean($item->name));
-            })
-            ->editColumn('checkbox', function (FaqCategory $item) {
-                return $this->getCheckbox($item->getKey());
-            })
-            ->editColumn('created_at', function (FaqCategory $item) {
-                return BaseHelper::formatDate($item->created_at);
-            })
-            ->editColumn('status', function (FaqCategory $item) {
-                return $item->status->toHtml();
-            })
-            ->addColumn('operations', function (FaqCategory $item) {
-                return $this->getOperations('faq_category.edit', 'faq_category.destroy', $item);
-            });
-
-        return $this->toJson($data);
+        $this
+            ->model(FaqCategory::class)
+            ->addActions([
+                EditAction::make()->route('faq_category.edit'),
+                DeleteAction::make()->route('faq_category.destroy'),
+            ]);
     }
 
     public function query(): Relation|Builder|QueryBuilder
@@ -77,22 +46,10 @@ class FaqCategoryTable extends TableAbstract
     public function columns(): array
     {
         return [
-            'id' => [
-                'title' => trans('core/base::tables.id'),
-                'width' => '20px',
-            ],
-            'name' => [
-                'title' => trans('core/base::tables.name'),
-                'class' => 'text-start',
-            ],
-            'created_at' => [
-                'title' => trans('core/base::tables.created_at'),
-                'width' => '100px',
-            ],
-            'status' => [
-                'title' => trans('core/base::tables.status'),
-                'width' => '100px',
-            ],
+            IdColumn::make(),
+            NameColumn::make()->route('faq_category.edit'),
+            CreatedAtColumn::make(),
+            StatusColumn::make(),
         ];
     }
 
@@ -103,7 +60,9 @@ class FaqCategoryTable extends TableAbstract
 
     public function bulkActions(): array
     {
-        return $this->addDeleteAction(route('faq_category.deletes'), 'faq_category.destroy', parent::bulkActions());
+        return [
+            DeleteBulkAction::make()->permission('faq_category.destroy'),
+        ];
     }
 
     public function getBulkChanges(): array

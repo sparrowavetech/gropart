@@ -6,27 +6,21 @@ use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Events\ProductQuantityUpdatedEvent;
+use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Models\Option;
+use Botble\Ecommerce\Models\OptionValue;
 use Botble\Ecommerce\Models\Product;
-use Botble\Ecommerce\Repositories\Eloquent\ProductRepository;
-use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
-use Botble\Media\Repositories\Interfaces\MediaFileInterface;
+use Botble\Media\Models\MediaFile;
 use Botble\Media\Services\UploadsManager;
-use EcommerceHelper;
 use Exception;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\File;
 use Illuminate\Http\Request;
-use Storage;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class StoreProductService
 {
-    protected ProductRepository|ProductInterface $productRepository;
-
-    public function __construct(ProductInterface $product)
-    {
-        $this->productRepository = $product;
-    }
-
     public function execute(Request $request, Product $product, bool $forceUpdateAll = false): Product
     {
         $data = $request->input();
@@ -49,6 +43,7 @@ class StoreProductService
                 'wide',
                 'height',
                 'weight',
+                'generate_license_code',
             ]);
         }
 
@@ -56,8 +51,8 @@ class StoreProductService
 
         $images = [];
 
-        if ($request->input('images', [])) {
-            $images = array_values(array_filter($request->input('images', [])));
+        if ($imagesInput = $request->input('images', [])) {
+            $images = array_values(array_filter((array)$imagesInput));
         }
 
         $product->images = json_encode($images);
@@ -73,18 +68,15 @@ class StoreProductService
             }
         }
 
-        $exists = $product->id;
+        $exists = $product->getKey();
 
         if (! $exists && EcommerceHelper::isEnabledCustomerRecentlyViewedProducts() && $request->input('product_type')) {
-            if (in_array($request->input('product_type'), ProductTypeEnum::values())) {
+            if (in_array($request->input('product_type'), ProductTypeEnum::toArray())) {
                 $product->product_type = $request->input('product_type');
             }
         }
 
-        /**
-         * @var Product $product
-         */
-        $product = $this->productRepository->createOrUpdate($product);
+        $product->save();
 
         if (! $exists) {
             event(new CreatedContentEvent(PRODUCT_MODULE_SCREEN_NAME, $request, $product));
@@ -92,48 +84,44 @@ class StoreProductService
             event(new UpdatedContentEvent(PRODUCT_MODULE_SCREEN_NAME, $request, $product));
         }
 
-        if ($product) {
-            $product->categories()->sync($request->input('categories', []));
+        $product->categories()->sync($request->input('categories', []));
 
-            $product->productCollections()->sync($request->input('product_collections', []));
+        $product->productCollections()->sync($request->input('product_collections', []));
 
-            $product->productLabels()->sync($request->input('product_labels', []));
+        $product->productLabels()->sync($request->input('product_labels', []));
 
-            $product->taxes()->sync($request->input('taxes', []));
+        $product->taxes()->sync($request->input('taxes', []));
 
-            if ($request->has('related_products')) {
-                $product->products()->detach();
-                if ($relatedProducts = $request->input('related_products', '')) {
-                    $product->products()->attach(array_filter(explode(',', $relatedProducts)));
-                }
+        if ($request->has('related_products')) {
+            $product->products()->detach();
+
+            if ($relatedProducts = $request->input('related_products', '')) {
+                $product->products()->attach(array_filter(explode(',', $relatedProducts)));
             }
+        }
 
-            if ($request->has('frequently_bought_together')) {
-                $product->frequentlyBoughtTogether()->detach();
-                $product->frequentlyBoughtTogether()->attach(array_filter(explode(',', $request->input('frequently_bought_together', ''))));
-            }
+        if ($request->has('cross_sale_products')) {
+            $product->crossSales()->detach();
 
-            if ($request->has('cross_sale_products')) {
-                $product->crossSales()->detach();
-                if ($crossSaleProducts = $request->input('cross_sale_products', '')) {
-                    $product->crossSales()->attach(array_filter(explode(',', $crossSaleProducts)));
-                }
+            if ($crossSaleProducts = $request->input('cross_sale_products', '')) {
+                $product->crossSales()->attach(array_filter(explode(',', $crossSaleProducts)));
             }
+        }
 
-            if ($request->has('up_sale_products')) {
-                $product->upSales()->detach();
-                if ($upSaleProducts = $request->input('up_sale_products', '')) {
-                    $product->upSales()->attach(array_filter(explode(',', $upSaleProducts)));
-                }
-            }
+        if ($request->has('up_sale_products')) {
+            $product->upSales()->detach();
 
-            if (EcommerceHelper::isEnabledSupportDigitalProducts() && $product->isTypeDigital()) {
-                $this->saveProductFiles($request, $product);
+            if ($upSaleProducts = $request->input('up_sale_products', '')) {
+                $product->upSales()->attach(array_filter(explode(',', $upSaleProducts)));
             }
+        }
 
-            if ($request->input('has_product_options')) {
-                $this->productRepository->saveProductOptions((array)$request->input('options', []), $product);
-            }
+        if (EcommerceHelper::isEnabledSupportDigitalProducts() && $product->isTypeDigital()) {
+            $this->saveProductFiles($request, $product);
+        }
+
+        if (EcommerceHelper::isEnabledProductOptions() && $request->input('has_product_options')) {
+            $this->saveProductOptions((array)$request->input('options', []), $product);
         }
 
         event(new ProductQuantityUpdatedEvent($product));
@@ -162,6 +150,31 @@ class StoreProductService
             }
         }
 
+        if ($filesExternal = (array) $request->input('product_files_external', [])) {
+            foreach ($filesExternal as $fileExternal) {
+                $size = Arr::get($fileExternal, 'size');
+                if ($size) {
+                    $unit = Arr::get($fileExternal, 'unit');
+                    $size = match ($unit) {
+                        'kB' => $size * 1024,
+                        'MB' => $size * 1024 * 1024,
+                        'GB' => $size * 1024 * 1024 * 1024,
+                        'TB' => $size * 1024 * 1024 * 1024 * 1024,
+                        default => $size
+                    };
+                }
+
+                $product->productFiles()->create([
+                    'url' => Arr::get($fileExternal, 'link'),
+                    'extras' => [
+                        'is_external' => true,
+                        'name' => Arr::get($fileExternal, 'name'),
+                        'size' => $size,
+                    ],
+                ]);
+            }
+        }
+
         return $product;
     }
 
@@ -171,7 +184,7 @@ class StoreProductService
         $fileExtension = $file->getClientOriginalExtension();
         $content = File::get($file->getRealPath());
         $name = File::name($file->getClientOriginalName());
-        $fileName = app(MediaFileInterface::class)->createSlug(
+        $fileName = MediaFile::createSlug(
             $name,
             $fileExtension,
             Storage::path($folderPath)
@@ -187,5 +200,48 @@ class StoreProductService
             'url' => $filePath,
             'extras' => $data,
         ];
+    }
+
+    protected function saveProductOptions(array $options, Product $product): void
+    {
+        $optionIds = [];
+
+        try {
+            foreach ($options as $opt) {
+                $option = $product->options()->find($opt['id']);
+
+                if (! $option) {
+                    $option = new Option();
+                }
+
+                $opt['required'] = isset($opt['required']) && $opt['required'] === 'on';
+                $option->fill($opt);
+                $option->product_id = $product->getKey();
+                $option->save();
+                $option->values()->delete();
+
+                if (! empty($opt['values'])) {
+                    $optionValues = [];
+                    foreach ($opt['values'] as $value) {
+                        $optionValue = new OptionValue();
+                        if (! isset($value['option_value'])) {
+                            $value['option_value'] = '';
+                        }
+                        $optionValue->fill($value);
+                        $optionValues[] = $optionValue;
+                    }
+
+                    $option->values()->saveMany($optionValues);
+                }
+
+                $optionIds[] = $option->id;
+            }
+
+            $product->options()->whereNotIn('id', $optionIds)->get()->each(function (Option $deletedOption) {
+                $deletedOption->delete();
+            });
+        } catch (Exception $exception) {
+            info($exception->getMessage());
+        }
     }
 }

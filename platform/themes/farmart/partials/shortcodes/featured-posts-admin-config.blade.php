@@ -1,6 +1,12 @@
 <div class="form-group">
     <label class="control-label">{{ __('Title') }}</label>
-    <input type="text" name="title" value="{{ Arr::get($attributes, 'title') }}" class="form-control" placeholder="{{ __('Title') }}">
+    <input
+        class="form-control"
+        name="title"
+        type="text"
+        value="{{ Arr::get($attributes, 'title') }}"
+        placeholder="{{ __('Title') }}"
+    >
 </div>
 
 @php
@@ -10,29 +16,57 @@
 <div class="form-group">
     <label class="control-label">{{ __('Show Mobile App Available') }}</label>
     <div class="ui-select-wrapper form-group">
-        <select name="app_enabled" class="ui-select" id="app_enabled_{{ $random }}">
-            <option value="0" @if (0 == Arr::get($attributes, 'app_enabled')) selected @endif>{{ __('No') }}</option>
-            <option value="1" @if (1 == Arr::get($attributes, 'app_enabled')) selected @endif>{{ __('Yes') }}</option>
+        <select
+            class="ui-select"
+            id="app_enabled_{{ $random }}"
+            name="app_enabled"
+        >
+            <option
+                value="0"
+                @if (0 == Arr::get($attributes, 'app_enabled')) selected @endif
+            >{{ __('No') }}</option>
+            <option
+                value="1"
+                @if (1 == Arr::get($attributes, 'app_enabled')) selected @endif
+            >{{ __('Yes') }}</option>
         </select>
         <svg class="svg-next-icon svg-next-icon-size-16">
-            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#select-chevron"></use>
+            <use
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                xlink:href="#select-chevron"
+            ></use>
         </svg>
     </div>
 </div>
 
-<div class="mobile_app_available border p-2" @if (0 == Arr::get($attributes, 'app_enabled')) style="display: none" @endif>
+<div
+    class="mobile_app_available border p-2"
+    @if (0 == Arr::get($attributes, 'app_enabled')) style="display: none" @endif
+>
     <div class="form-group">
         <label class="control-label">{{ __('App Background') }}</label>
         {!! Form::mediaImage('app_bg', Arr::get($attributes, 'app_bg')) !!}
     </div>
     <div class="form-group">
         <label class="control-label">{{ __('App Title') }}</label>
-        <input type="text" name="app_title" value="{{ Arr::get($attributes, 'app_title') }}" class="form-control" placeholder="{{ __('App Title') }}">
+        <input
+            class="form-control"
+            name="app_title"
+            type="text"
+            value="{{ Arr::get($attributes, 'app_title') }}"
+            placeholder="{{ __('App Title') }}"
+        >
     </div>
 
     <div class="form-group">
         <label class="control-label">{{ __('App Description') }}</label>
-        <input type="text" name="app_description" value="{{ Arr::get($attributes, 'app_description') }}" class="form-control" placeholder="{{ __('App Description') }}">
+        <input
+            class="form-control"
+            name="app_description"
+            type="text"
+            value="{{ Arr::get($attributes, 'app_description') }}"
+            placeholder="{{ __('App Description') }}"
+        >
     </div>
 
     <div class="row">
@@ -43,7 +77,13 @@
             </div>
             <div class="form-group">
                 <label class="control-label">{{ __('App Android Link') }}</label>
-                <input type="text" name="app_android_link" value="{{ Arr::get($attributes, 'app_android_link') }}" class="form-control" placeholder="{{ __('App Android Link') }}">
+                <input
+                    class="form-control"
+                    name="app_android_link"
+                    type="text"
+                    value="{{ Arr::get($attributes, 'app_android_link') }}"
+                    placeholder="{{ __('App Android Link') }}"
+                >
             </div>
         </div>
         <div class="col-md-6">
@@ -53,7 +93,13 @@
             </div>
             <div class="form-group">
                 <label class="control-label">{{ __('App Title') }}</label>
-                <input type="text" name="app_ios_link" value="{{ Arr::get($attributes, 'app_ios_link') }}" class="form-control" placeholder="{{ __('App iOS Link') }}">
+                <input
+                    class="form-control"
+                    name="app_ios_link"
+                    type="text"
+                    value="{{ Arr::get($attributes, 'app_ios_link') }}"
+                    placeholder="{{ __('App iOS Link') }}"
+                >
             </div>
         </div>
     </div>

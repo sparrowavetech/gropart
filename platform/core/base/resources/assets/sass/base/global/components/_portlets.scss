@@ -122,7 +122,7 @@ Portlets
                     }
 
                     &.fullscreen {
-                        font-family: Font Awesome\ 5 Free;
+                        font-family: 'Font Awesome 6 Free';
                         font-weight: 900;
                         color: lighten(#8c8c8c, 8%);
 
@@ -135,12 +135,12 @@ Portlets
                         }
 
                         &:before {
-                            content: "\f065";
+                            content: '\f065';
                         }
 
                         &.on {
                             &:before {
-                                content: "\f066";
+                                content: '\f066';
                             }
                         }
                     }
@@ -157,7 +157,7 @@ Portlets
                 display: inline-block;
                 height: 16px;
                 margin-left: 5px;
-                @include opacity(1)
+                @include opacity(1);
             }
 
             > a.remove {
@@ -194,17 +194,17 @@ Portlets
                 top: -3px;
                 position: relative;
                 font-size: 13px;
-                font-family: Font Awesome\ 5 Free;
+                font-family: 'Font Awesome 6 Free';
                 font-weight: 900;
                 color: #acacac;
 
                 &:before {
-                    content: "\f065";
+                    content: '\f065';
                 }
 
                 &.on {
                     &:before {
-                        content: "\f066";
+                        content: '\f066';
                     }
                 }
             }
@@ -276,18 +276,15 @@ Portlets
 /* Portlet background colors */
 
 @mixin porlet-background($name, $color) {
-
     .portlet > .portlet-body.#{$name},
     .portlet.#{$name} {
         background-color: $color;
     }
-
 }
 
 /* Side bordered portlet */
 
 .portlet.bordered {
-
     border-left: 2px solid #e6e9ec !important;
 
     > .portlet-title {
@@ -320,9 +317,7 @@ Portlets
 }
 
 @mixin porlet-solid($name, $color) {
-
     .portlet.solid.#{$name} {
-
         > .portlet-title,
         > .portlet-body {
             border: 0;
@@ -426,7 +421,6 @@ Portlets
 }
 
 @mixin porlet-box($name, $color, $text-color) {
-
     .portlet.box.#{$name} {
         border: 1px solid lighten($color, 10%);
         border-top: 0;
@@ -459,7 +453,6 @@ Portlets
                         border: 1px solid lighten($color, 32%);
                         color: lighten($color, 37%);
                     }
-
                 }
             }
         }
@@ -684,7 +677,8 @@ Portlets
     display: none;
 }
 
-@media (max-width: $screen-sm-max) { /* 991px */
+@media (max-width: $screen-sm-max) {
+    /* 991px */
     .portlet-collapsed-on-mobile {
         display: none;
     }

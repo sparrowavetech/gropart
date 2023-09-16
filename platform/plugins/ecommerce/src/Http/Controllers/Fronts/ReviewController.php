@@ -2,14 +2,13 @@
 
 namespace Botble\Ecommerce\Http\Controllers\Fronts;
 
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Http\Requests\ReviewRequest;
+use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\Product;
-use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ReviewInterface;
+use Botble\Ecommerce\Models\Review;
 use Botble\Media\Facades\RvMedia;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Slug\Facades\SlugHelper;
@@ -19,12 +18,6 @@ use Illuminate\Support\Arr;
 
 class ReviewController extends Controller
 {
-    public function __construct(
-        protected  ReviewInterface $reviewRepository,
-        protected OrderInterface $orderRepository
-    ) {
-    }
-
     public function store(ReviewRequest $request, BaseHttpResponse $response): BaseHttpResponse
     {
         if (! EcommerceHelper::isReviewEnabled()) {
@@ -58,7 +51,7 @@ class ReviewController extends Controller
             'images' => $results ? collect($results)->pluck('data.url')->values()->toArray() : null,
         ]);
 
-        $this->reviewRepository->createOrUpdate($data);
+        Review::query()->create($data);
 
         return $response->setMessage(__('Added review successfully!'));
     }
@@ -69,10 +62,10 @@ class ReviewController extends Controller
             abort(404);
         }
 
-        $review = $this->reviewRepository->findOrFail($id);
+        $review = Review::query()->findOrFail($id);
 
         if (auth()->check() || (auth('customer')->check() && auth('customer')->id() == $review->customer_id)) {
-            $this->reviewRepository->delete($review);
+            $review->delete();
 
             return $response->setMessage(__('Deleted review successfully!'));
         }
@@ -94,7 +87,6 @@ class ReviewController extends Controller
 
         $condition = [
             'ec_products.id' => $slug->reference_id,
-            'ec_products.status' => BaseStatusEnum::PUBLISHED,
         ];
 
         $product = get_products(array_merge([
@@ -137,11 +129,12 @@ class ReviewController extends Controller
     {
         $customerId = auth('customer')->id();
 
-        $exists = $this->reviewRepository
-            ->count([
+        $exists = Review::query()
+            ->where([
                 'customer_id' => $customerId,
                 'product_id' => $productId,
-            ]);
+            ])
+        ->count();
 
         if ($exists > 0) {
             return [
@@ -151,8 +144,7 @@ class ReviewController extends Controller
         }
 
         if (EcommerceHelper::onlyAllowCustomersPurchasedToReview()) {
-            $order = $this->orderRepository
-                ->getModel()
+            $order = Order::query()
                 ->where([
                     'user_id' => $customerId,
                     'status' => OrderStatusEnum::COMPLETED,

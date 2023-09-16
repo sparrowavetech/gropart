@@ -1,15 +1,12 @@
 <?php
 
+use Botble\Base\Facades\BaseHelper;
+use Illuminate\Support\Facades\Route;
+
 Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' => ['web', 'core']], function () {
     Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {
         Route::group(['prefix' => 'orders', 'as' => 'orders.'], function () {
             Route::resource('', 'OrderController')->parameters(['' => 'order']);
-
-            Route::delete('items/destroy', [
-                'as' => 'deletes',
-                'uses' => 'OrderController@deletes',
-                'permission' => 'orders.destroy',
-            ]);
 
             Route::get('reorder', [
                 'as' => 'reorder',
@@ -21,7 +18,7 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
                 'as' => 'generate-invoice',
                 'uses' => 'OrderController@getGenerateInvoice',
                 'permission' => 'orders.edit',
-            ]);
+            ])->wherePrimaryKey();
 
             Route::post('confirm', [
                 'as' => 'confirm',
@@ -33,64 +30,61 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
                 'as' => 'send-order-confirmation-email',
                 'uses' => 'OrderController@postResendOrderConfirmationEmail',
                 'permission' => 'orders.edit',
-            ]);
-            Route::get('create-shipment-pickrr/{id}', [
-                'as' => 'pickrr-create-shipment',
-                'uses' => 'OrderController@pickrrCreateShipment',
-                'permission' => 'orders.edit',
-            ]);
-            Route::get('cancel-shipment-pickrr/{id}', [
-                'as' => 'pickrr-cancel-shipment',
-                'uses' => 'OrderController@postPickrrCancelShipment',
-                'permission' => 'orders.edit',
-            ]);
+            ])->wherePrimaryKey();
+
             Route::post('create-shipment/{id}', [
                 'as' => 'create-shipment',
                 'uses' => 'OrderController@postCreateShipment',
                 'permission' => 'orders.edit',
-            ]);
+            ])->wherePrimaryKey();
 
             Route::post('cancel-shipment/{id}', [
                 'as' => 'cancel-shipment',
                 'uses' => 'OrderController@postCancelShipment',
                 'permission' => 'orders.edit',
-            ]);
+            ])->wherePrimaryKey();
 
             Route::post('update-shipping-address/{id}', [
                 'as' => 'update-shipping-address',
                 'uses' => 'OrderController@postUpdateShippingAddress',
                 'permission' => 'orders.edit',
-            ]);
+            ])->wherePrimaryKey();
+
+            Route::post('update-tax-information/{id}', [
+                'as' => 'update-tax-information',
+                'uses' => 'OrderController@postUpdateTaxInformation',
+                'permission' => 'orders.edit',
+            ])->wherePrimaryKey();
 
             Route::post('cancel-order/{id}', [
                 'as' => 'cancel',
                 'uses' => 'OrderController@postCancelOrder',
                 'permission' => 'orders.edit',
-            ]);
+            ])->wherePrimaryKey();
 
             Route::get('print-shipping-order/{id}', [
                 'as' => 'print-shipping-order',
                 'uses' => 'OrderController@getPrintShippingOrder',
                 'permission' => 'orders.edit',
-            ]);
+            ])->wherePrimaryKey();
 
             Route::post('confirm-payment/{id}', [
                 'as' => 'confirm-payment',
                 'uses' => 'OrderController@postConfirmPayment',
                 'permission' => 'orders.edit',
-            ]);
+            ])->wherePrimaryKey();
 
             Route::get('get-shipment-form/{id}', [
                 'as' => 'get-shipment-form',
                 'uses' => 'OrderController@getShipmentForm',
                 'permission' => 'orders.edit',
-            ]);
+            ])->wherePrimaryKey();
 
             Route::post('refund/{id}', [
                 'as' => 'refund',
                 'uses' => 'OrderController@postRefund',
                 'permission' => 'orders.edit',
-            ]);
+            ])->wherePrimaryKey();
 
             Route::get('get-available-shipping-methods', [
                 'as' => 'get-available-shipping-methods',
@@ -103,6 +97,18 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
                 'uses' => 'OrderController@postApplyCoupon',
                 'permission' => 'orders.create',
             ]);
+
+            Route::post('check-data-before-create-order', [
+                'as' => 'check-data-before-create-order',
+                'uses' => 'OrderController@checkDataBeforeCreateOrder',
+                'permission' => 'orders.create',
+            ]);
+
+            Route::get('orders/{order}/generate', [
+                'as' => 'invoice.generate',
+                'uses' => 'OrderController@generateInvoice',
+                'permission' => 'orders.edit',
+            ])->wherePrimaryKey('order');
         });
 
         Route::group(['prefix' => 'incomplete-orders', 'as' => 'orders.'], function () {
@@ -116,23 +122,23 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
                 'as' => 'view-incomplete-order',
                 'uses' => 'OrderController@getViewIncompleteOrder',
                 'permission' => 'orders.index',
-            ]);
+            ])->wherePrimaryKey();
+
+            Route::post('mark-as-completed/{id}', [
+                'as' => 'mark-as-completed',
+                'uses' => 'OrderController@markIncompleteOrderAsCompleted',
+                'permission' => 'orders.index',
+            ])->wherePrimaryKey();
 
             Route::post('send-order-recover-email/{id}', [
                 'as' => 'send-order-recover-email',
                 'uses' => 'OrderController@postSendOrderRecoverEmail',
                 'permission' => 'orders.index',
-            ]);
+            ])->wherePrimaryKey();
         });
 
         Route::group(['prefix' => 'order-returns', 'as' => 'order_returns.'], function () {
             Route::resource('', 'OrderReturnController')->parameters(['' => 'order_returns'])->except(['create', 'store']);
-
-            Route::delete('items/destroy', [
-                'as' => 'deletes',
-                'uses' => 'OrderReturnController@deletes',
-                'permission' => 'order_returns.destroy',
-            ]);
         });
     });
 });

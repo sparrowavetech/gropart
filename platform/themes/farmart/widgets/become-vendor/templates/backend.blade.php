@@ -1,4 +1,10 @@
 <div class="form-group">
     <label for="widget-name">{{ __('Name') }}</label>
-    <input type="text" id="widget-name" class="form-control" name="name" value="{{ $config['name'] }}">
+    <input
+        class="form-control"
+        id="widget-name"
+        name="name"
+        type="text"
+        value="{{ $config['name'] }}"
+    >
 </div>

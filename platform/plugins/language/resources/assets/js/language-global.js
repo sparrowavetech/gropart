@@ -23,16 +23,15 @@ class LanguageGlobalManagement {
             _self.addClass('button-loading')
             languageChoiceSelect = $('#post_lang_choice')
 
-            $.ajax({
-                url: $('div[data-change-language-route]').data('change-language-route'),
-                data: {
+            $httpClient
+                .make()
+                .post($('div[data-change-language-route]').data('change-language-route'), {
                     lang_meta_current_language: languageChoiceSelect.val(),
                     reference_id: $('#reference_id').val(),
                     reference_type: $('#reference_type').val(),
                     lang_meta_created_from: $('#lang_meta_created_from').val(),
-                },
-                type: 'POST',
-                success: (data) => {
+                })
+                .then(({ data }) => {
                     $('.active-language').html(
                         '<img src="' +
                             flagPath +
@@ -81,13 +80,8 @@ class LanguageGlobalManagement {
                         $('#confirm-change-language-modal').modal('hide')
                         languageChoiceSelect.data('prev', languageChoiceSelect.val()).trigger('change')
                     }
-                    _self.removeClass('button-loading')
-                },
-                error: (data) => {
-                    Botble.showError(data.message)
-                    _self.removeClass('button-loading')
-                },
-            })
+                })
+                .finally(() => _self.removeClass('button-loading'))
         })
 
         $(document).on('click', '.change-data-language-item', (event) => {
@@ -100,10 +94,24 @@ class LanguageGlobalManagement {
 $(document).ready(() => {
     new LanguageGlobalManagement().init()
 
-    $.ajaxSetup({
-        data: {
-            ref_from: $('meta[name="ref_from"]').attr('content'),
-            ref_lang: $('meta[name="ref_lang"]').attr('content'),
-        },
+    $httpClient.setup(function (request) {
+        request.axios.interceptors.request.use(function (config) {
+            const refFrom = $('meta[name="ref_from"]').attr('content')
+            const refLang = $('meta[name="ref_lang"]').attr('content')
+
+            if (!refFrom && !refLang) {
+                return config
+            }
+
+            if (config.data instanceof FormData) {
+                config.data.set('ref_from', refFrom)
+                config.data.set('ref_lang', refLang)
+            } else if (typeof config.data === 'object') {
+                config.data.ref_from = refFrom
+                config.data.ref_lang = refLang
+            }
+
+            return config
+        })
     })
 })

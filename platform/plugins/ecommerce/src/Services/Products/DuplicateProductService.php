@@ -9,6 +9,7 @@ use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductVariation;
 use Botble\Slug\Facades\SlugHelper;
 use Botble\Slug\Models\Slug;
+use Carbon\Carbon;
 use Illuminate\Support\Str;
 
 class DuplicateProductService
@@ -22,6 +23,8 @@ class DuplicateProductService
         }
 
         $product->views = 0;
+        $product->created_at = Carbon::now();
+        $product->updated_at = Carbon::now();
 
         $product->save();
 
@@ -125,7 +128,7 @@ class DuplicateProductService
         Slug::query()->create([
             'reference_type' => Product::class,
             'reference_id' => $product->getKey(),
-            'key' => Str::slug($product->name),
+            'key' => Str::slug($product->name) . '-' . $product->getKey(),
             'prefix' => SlugHelper::getPrefix(Product::class),
         ]);
 

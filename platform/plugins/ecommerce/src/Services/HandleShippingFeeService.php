@@ -7,11 +7,7 @@ use Botble\Ecommerce\Enums\ShippingMethodEnum;
 use Botble\Ecommerce\Enums\ShippingRuleTypeEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Shipping;
-use Botble\Ecommerce\Repositories\Interfaces\AddressInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ShippingInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ShippingRuleInterface;
-use Botble\Ecommerce\Repositories\Interfaces\StoreLocatorInterface;
+use Botble\Ecommerce\Models\ShippingRule;
 use Botble\Support\Services\Cache\Cache;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Database\Eloquent\Builder;
@@ -29,13 +25,8 @@ class HandleShippingFeeService
 
     protected Cache $cache;
 
-    public function __construct(
-        protected ShippingInterface $shippingRepository,
-        protected AddressInterface $addressRepository,
-        protected ShippingRuleInterface $shippingRuleRepository,
-        protected ProductInterface $productRepository,
-        protected StoreLocatorInterface $storeLocatorRepository
-    ) {
+    public function __construct()
+    {
         $this->shipping = [];
         $this->shippingRules = [];
 
@@ -124,7 +115,9 @@ class HandleShippingFeeService
             if (Arr::has($this->shipping, $methodKey)) {
                 $shipping = Arr::get($this->shipping, $methodKey);
             } else {
-                $shipping = $this->shippingRepository->getFirstBy(['country' => $country]);
+                $shipping = Shipping::query()
+                    ->where('country', $country)
+                    ->first();
                 Arr::set($this->shipping, $methodKey, $shipping);
             }
 
@@ -142,8 +135,7 @@ class HandleShippingFeeService
                 if ($this->shippingDefault) {
                     $default = $this->shippingDefault;
                 } else {
-                    $default = $this->shippingRepository
-                        ->getModel()
+                    $default = Shipping::query()
                         ->whereNull('country')
                         ->first();
                     $this->shippingDefault = $default;
@@ -180,7 +172,7 @@ class HandleShippingFeeService
             if (Arr::has($this->shippingRules, $ruleKey)) {
                 $rule = Arr::get($this->shippingRules, $ruleKey);
             } else {
-                $rule = $this->shippingRuleRepository->findById($option, ['items']);
+                $rule = ShippingRule::query()->with(['items'])->find($option);
                 Arr::set($this->shippingRules, $ruleKey, $rule);
             }
             $city = Arr::get($data, 'city');
@@ -206,8 +198,7 @@ class HandleShippingFeeService
             } else {
                 $zipCode = Arr::get($data, 'address_to.zip_code');
 
-                $rules = $this->shippingRuleRepository
-                    ->getModel()
+                $rules = ShippingRule::query()
                     ->where(function (Builder $query) use ($orderTotal, $shipping) {
                         $query
                             ->where('shipping_id', $shipping->id)

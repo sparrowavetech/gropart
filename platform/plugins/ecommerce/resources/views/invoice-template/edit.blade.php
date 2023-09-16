@@ -18,16 +18,27 @@
             <div class="flexbox-annotated-section-content">
                 <div class="wrapper-content pd-all-20 email-template-edit-wrap">
                     <div class="form-group mb-3">
-                        <label class="text-title-field" for="email_content">{{ trans('plugins/ecommerce::invoice-template.setting_content') }}</label>
+                        <label
+                            class="text-title-field"
+                            for="email_content"
+                        >{{ trans('plugins/ecommerce::invoice-template.setting_content') }}</label>
                         <div class="d-inline-flex mb-3">
                             <div class="dropdown me-2">
-                                <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <button
+                                    class="btn btn-primary dropdown-toggle"
+                                    data-bs-toggle="dropdown"
+                                    type="button"
+                                >
                                     <i class="fa fa-code"></i> {{ __('Variables') }}
                                 </button>
                                 <ul class="dropdown-menu">
-                                    @foreach($variables as $key => $label)
+                                    @foreach ($variables as $key => $label)
                                         <li>
-                                            <a href="#" class="js-select-mail-variable" data-key="{{ $key }}">
+                                            <a
+                                                class="js-select-mail-variable"
+                                                data-key="{{ $key }}"
+                                                href="#"
+                                            >
                                                 <span class="text-danger">{{ $key }}</span>: {{ trans($label) }}
                                             </a>
                                         </li>
@@ -35,21 +46,36 @@
                                 </ul>
                             </div>
                             <div class="dropdown">
-                                <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <button
+                                    class="btn btn-primary dropdown-toggle"
+                                    data-bs-toggle="dropdown"
+                                    type="button"
+                                >
                                     <i class="fa fa-code"></i> {{ __('Functions') }}
                                 </button>
                                 <ul class="dropdown-menu">
-                                    @foreach(EmailHandler::getFunctions() as $key => $function)
+                                    @foreach (EmailHandler::getFunctions() as $key => $function)
                                         <li>
-                                            <a href="#" class="js-select-mail-function" data-key="{{ $key }}" data-sample="{{ $function['sample'] }}">
-                                                <span class="text-danger">{{ $key }}</span>: {{ trans($function['label']) }}
+                                            <a
+                                                class="js-select-mail-function"
+                                                data-key="{{ $key }}"
+                                                data-sample="{{ $function['sample'] }}"
+                                                href="#"
+                                            >
+                                                <span class="text-danger">{{ $key }}</span>:
+                                                {{ trans($function['label']) }}
                                             </a>
                                         </li>
                                     @endforeach
                                 </ul>
                             </div>
                         </div>
-                        <textarea id="mail-template-editor" name="content" class="form-control" style="overflow-y:scroll; height: 500px;">{{ $content }}</textarea>
+                        <textarea
+                            class="form-control"
+                            id="mail-template-editor"
+                            name="content"
+                            style="overflow-y:scroll; height: 500px;"
+                        >{{ $content }}</textarea>
                         <p>
                             {{ Form::helper(__('Learn more about Twig template: :url', ['url' => Html::link('https://twig.symfony.com/doc/3.x/', null, ['target' => '_blank'])])) }}
                         </p>
@@ -59,19 +85,34 @@
 
         </div>
 
-        <div class="flexbox-annotated-section" style="border: none">
+        <div
+            class="flexbox-annotated-section"
+            style="border: none"
+        >
             <div class="flexbox-annotated-section-annotation">
                 &nbsp
             </div>
             <div class="flexbox-annotated-section-content">
-                <button type="button" class="btn btn-warning btn-trigger-reset-to-default" data-target="{{ route('invoice-template.reset') }}">
+                <button
+                    class="btn btn-warning btn-trigger-reset-to-default"
+                    data-target="{{ route('invoice-template.reset') }}"
+                    type="button"
+                >
                     {{ trans('core/setting::setting.email.reset_to_default') }}
                 </button>
-                <a href="{{ route('invoice-template.preview') }}" target="_blank" class="btn btn-primary btn-trigger-preview-invoice-template">
+                <a
+                    class="btn btn-primary btn-trigger-preview-invoice-template"
+                    href="{{ route('invoice-template.preview') }}"
+                    target="_blank"
+                >
                     {{ trans('plugins/ecommerce::invoice-template.preview') }}
                     <i class="fa fa-external-link"></i>
                 </a>
-                <button class="btn btn-info" type="submit" name="submit">
+                <button
+                    class="btn btn-info"
+                    name="submit"
+                    type="submit"
+                >
                     {{ trans('core/setting::setting.save_settings') }}
                 </button>
             </div>

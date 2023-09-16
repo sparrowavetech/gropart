@@ -2,7 +2,6 @@
 
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\StoreLocator;
-use Botble\Ecommerce\Repositories\Interfaces\StoreLocatorInterface;
 use Botble\Media\Facades\RvMedia;
 
 if (! function_exists('array_equal')) {
@@ -57,9 +56,7 @@ if (! function_exists('get_shipment_code')) {
 if (! function_exists('get_primary_store_locator')) {
     function get_primary_store_locator(): StoreLocator
     {
-        $defaultStore = app(StoreLocatorInterface::class)->getFirstBy(['is_primary' => 1]);
-
-        return $defaultStore ?? new StoreLocator();
+        return StoreLocator::query()->firstOrNew(['is_primary' => 1]);
     }
 }
 

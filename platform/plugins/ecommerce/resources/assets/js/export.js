@@ -1,8 +1,7 @@
 $(() => {
-
     let isExporting = false
 
-    $(document).on('click', '.btn-export-data', function(event) {
+    $(document).on('click', '.btn-export-data', function (event) {
         event.preventDefault()
 
         if (isExporting) {
@@ -23,7 +22,7 @@ $(() => {
                 $this.attr('disabled', 'true')
                 isExporting = true
             },
-            success: data => {
+            success: (data) => {
                 let a = document.createElement('a')
                 let url = window.URL.createObjectURL(data)
                 a.href = url
@@ -33,7 +32,7 @@ $(() => {
                 a.remove()
                 window.URL.revokeObjectURL(url)
             },
-            error: data => {
+            error: (data) => {
                 Botble.handleError(data)
             },
             complete: () => {

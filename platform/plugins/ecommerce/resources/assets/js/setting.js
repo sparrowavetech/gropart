@@ -1,5 +1,5 @@
 $(document).ready(() => {
-    $(document).on('keyup', '#store_order_prefix', event => {
+    $(document).on('keyup', '#store_order_prefix', (event) => {
         if ($(event.currentTarget).val()) {
             $('.sample-order-code-prefix').text($(event.currentTarget).val() + '-')
         } else {
@@ -7,7 +7,7 @@ $(document).ready(() => {
         }
     })
 
-    $(document).on('keyup', '#store_order_suffix', event => {
+    $(document).on('keyup', '#store_order_suffix', (event) => {
         if ($(event.currentTarget).val()) {
             $('.sample-order-code-suffix').text('-' + $(event.currentTarget).val())
         } else {
@@ -15,7 +15,7 @@ $(document).ready(() => {
         }
     })
 
-    $(document).on('change', '.check-all', event => {
+    $(document).on('change', '.check-all', (event) => {
         let _self = $(event.currentTarget)
         let set = _self.attr('data-set')
         let checked = _self.prop('checked')
@@ -28,7 +28,7 @@ $(document).ready(() => {
         })
     })
 
-    $('.trigger-input-option').on('change', function() {
+    $('.trigger-input-option').on('change', function () {
         let $settingContentContainer = $($(this).data('setting-container'))
         if ($(this).val() == '1') {
             $settingContentContainer.removeClass('d-none')

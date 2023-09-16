@@ -1,6 +1,6 @@
 class ShippingManagement {
     init() {
-        $(document).on('click', '.btn-confirm-delete-region-item-modal-trigger', event => {
+        $(document).on('click', '.btn-confirm-delete-region-item-modal-trigger', (event) => {
             event.preventDefault()
             let $modal = $('#confirm-delete-region-item-modal')
             $modal.find('.region-item-label').text($(event.currentTarget).data('name'))
@@ -8,7 +8,7 @@ class ShippingManagement {
             $modal.modal('show')
         })
 
-        $(document).on('click', '#confirm-delete-region-item-button', event => {
+        $(document).on('click', '#confirm-delete-region-item-button', (event) => {
             event.preventDefault()
             let _self = $(event.currentTarget)
             _self.addClass('button-loading')
@@ -20,7 +20,7 @@ class ShippingManagement {
                     _method: 'DELETE',
                     id: _self.data('id'),
                 },
-                success: res => {
+                success: (res) => {
                     if (!res.error) {
                         $('.wrap-table-shipping-' + _self.data('id')).remove()
                         Botble.showSuccess(res.message)
@@ -29,7 +29,7 @@ class ShippingManagement {
                     }
                     $('#confirm-delete-region-item-modal').modal('hide')
                 },
-                error: error => {
+                error: (error) => {
                     Botble.handleError(error)
                 },
                 complete: () => {
@@ -38,7 +38,7 @@ class ShippingManagement {
             })
         })
 
-        $(document).on('click', '.btn-confirm-delete-price-item-modal-trigger', event => {
+        $(document).on('click', '.btn-confirm-delete-price-item-modal-trigger', (event) => {
             event.preventDefault()
             let $modal = $('#confirm-delete-price-item-modal')
             $modal.find('.region-price-item-label').text($(event.currentTarget).data('name'))
@@ -46,7 +46,7 @@ class ShippingManagement {
             $modal.modal('show')
         })
 
-        $(document).on('click', '#confirm-delete-price-item-button', event => {
+        $(document).on('click', '#confirm-delete-price-item-button', (event) => {
             event.preventDefault()
             let _self = $(event.currentTarget)
             _self.addClass('button-loading')
@@ -58,7 +58,7 @@ class ShippingManagement {
                     _method: 'DELETE',
                     id: _self.data('id'),
                 },
-                success: res => {
+                success: (res) => {
                     if (!res.error) {
                         $('.box-table-shipping-item-' + _self.data('id')).remove()
                         if (res.data.count === 0) {
@@ -70,7 +70,7 @@ class ShippingManagement {
                     }
                     $('#confirm-delete-price-item-modal').modal('hide')
                 },
-                error: error => {
+                error: (error) => {
                     Botble.handleError(error)
                 },
                 complete: () => {
@@ -80,7 +80,6 @@ class ShippingManagement {
         })
 
         let saveRuleItem = ($this, $form, method, shippingId) => {
-
             $(document).find('.field-has-error').removeClass('field-has-error')
             let _self = $this
             _self.addClass('button-loading')
@@ -110,11 +109,13 @@ class ShippingManagement {
                 type: 'POST',
                 url: $form.prop('action'),
                 data: formData,
-                success: res => {
+                success: (res) => {
                     if (!res.error) {
                         Botble.showSuccess(res.message)
                         if (res?.data?.rule?.shipping_id && res?.data?.html) {
-                            const $box = $('.wrap-table-shipping-' + res.data.rule.shipping_id + ' .pd-all-20.border-bottom')
+                            const $box = $(
+                                '.wrap-table-shipping-' + res.data.rule.shipping_id + ' .pd-all-20.border-bottom'
+                            )
                             const $item = $box.find('.box-table-shipping-item-' + res.data.rule.id)
 
                             if ($item.length) {
@@ -132,7 +133,7 @@ class ShippingManagement {
                         _self.closest('.modal').modal('hide')
                     }
                 },
-                error: error => {
+                error: (error) => {
                     Botble.handleError(error)
                 },
                 complete: () => {
@@ -141,13 +142,13 @@ class ShippingManagement {
             })
         }
 
-        $(document).on('click', '.btn-save-rule', event => {
+        $(document).on('click', '.btn-save-rule', (event) => {
             event.preventDefault()
             const $this = $(event.currentTarget)
             saveRuleItem($this, $this.closest('form'), 'PUT', null)
         })
 
-        $(document).on('change', '.select-rule-type', event => {
+        $(document).on('change', '.select-rule-type', (event) => {
             event.preventDefault()
             let _self = $(event.currentTarget)
 
@@ -164,21 +165,24 @@ class ShippingManagement {
             $box.find('.rule-from-to-label').text($option.data('text'))
         })
 
-        $(document).on('keyup', '.input-sync-item', event => {
+        $(document).on('keyup', '.input-sync-item', (event) => {
             const $this = $(event.currentTarget)
             let number = $this.val()
             if (!number || isNaN(number)) {
                 number = 0
             }
-            $this.closest('.input-shipping-sync-wrapper').find($this.data('target')).text(Botble.numberFormat(parseFloat(number), 2))
+            $this
+                .closest('.input-shipping-sync-wrapper')
+                .find($this.data('target'))
+                .text(Botble.numberFormat(parseFloat(number), 2))
         })
 
-        $(document).on('keyup', '.input-sync-text-item', event => {
+        $(document).on('keyup', '.input-sync-text-item', (event) => {
             const $this = $(event.currentTarget)
             $this.closest('.input-shipping-sync-wrapper').find($this.data('target')).text($this.val())
         })
 
-        $(document).on('keyup', '.input-to-value-field', event => {
+        $(document).on('keyup', '.input-to-value-field', (event) => {
             const $this = $(event.currentTarget)
             const $parent = $this.closest('.input-shipping-sync-wrapper')
             if ($this.val()) {
@@ -190,7 +194,7 @@ class ShippingManagement {
             }
         })
 
-        $(document).on('click', '.btn-add-shipping-rule-trigger', event => {
+        $(document).on('click', '.btn-add-shipping-rule-trigger', (event) => {
             event.preventDefault()
             const $this = $(event.currentTarget)
             const $modal = $('#add-shipping-rule-item-modal')
@@ -208,7 +212,7 @@ class ShippingManagement {
             $modal.modal('show')
         })
 
-        $(document).on('click', '.btn-shipping-rule-item-trigger', event => {
+        $(document).on('click', '.btn-shipping-rule-item-trigger', (event) => {
             event.preventDefault()
             const $this = $(event.currentTarget)
             const $modal = $('#form-shipping-rule-item-detail-modal')
@@ -220,11 +224,12 @@ class ShippingManagement {
                 url: $this.data('url'),
                 beforeSend: () => {
                     $modal.find('.modal-title strong').html('')
-                    $modal.find('.modal-body').html(`<div class='w-100 text-center py-3'><div class='spinner-border' role='status'>
+                    $modal.find('.modal-body')
+                        .html(`<div class='w-100 text-center py-3'><div class='spinner-border' role='status'>
                     <span class='visually-hidden'>Loading...</span>
                   </div></div>`)
                 },
-                success: res => {
+                success: (res) => {
                     if (!res.error) {
                         $modal.find('.modal-body').html(res.data.html)
                         $modal.find('.modal-title strong').html(res.message)
@@ -233,13 +238,13 @@ class ShippingManagement {
                         Botble.showError(res.message)
                     }
                 },
-                error: error => {
+                error: (error) => {
                     Botble.handleError(error)
                 },
             })
         })
 
-        $(document).on('click', '#save-shipping-rule-item-detail-button', event => {
+        $(document).on('click', '#save-shipping-rule-item-detail-button', (event) => {
             event.preventDefault()
             const $this = $(event.currentTarget)
             const $modal = $('#form-shipping-rule-item-detail-modal')
@@ -252,7 +257,7 @@ class ShippingManagement {
                 beforeSend: () => {
                     $this.addClass('button-loading')
                 },
-                success: res => {
+                success: (res) => {
                     if (!res.error) {
                         const $table = $('.table-shipping-rule-' + res.data.shipping_rule_id)
                         if ($table.find('.shipping-rule-item-' + res.data.id).length) {
@@ -266,7 +271,7 @@ class ShippingManagement {
                         Botble.showError(res.message)
                     }
                 },
-                error: error => {
+                error: (error) => {
                     Botble.handleError(error)
                 },
                 complete: () => {
@@ -275,7 +280,7 @@ class ShippingManagement {
             })
         })
 
-        $(document).on('click', '.btn-confirm-delete-rule-item-modal-trigger', event => {
+        $(document).on('click', '.btn-confirm-delete-rule-item-modal-trigger', (event) => {
             event.preventDefault()
             let $modal = $('#confirm-delete-shipping-rule-item-modal')
             $modal.find('.item-label').text($(event.currentTarget).data('name'))
@@ -283,7 +288,7 @@ class ShippingManagement {
             $modal.modal('show')
         })
 
-        $(document).on('click', '#confirm-delete-shipping-rule-item-button', event => {
+        $(document).on('click', '#confirm-delete-shipping-rule-item-button', (event) => {
             event.preventDefault()
             let _self = $(event.currentTarget)
             _self.addClass('button-loading')
@@ -294,11 +299,11 @@ class ShippingManagement {
                 data: {
                     _method: 'DELETE',
                 },
-                success: res => {
+                success: (res) => {
                     if (!res.error) {
                         const $table = $('.table-shipping-rule-' + res.data.shipping_rule_id)
                         if ($table.find('.shipping-rule-item-' + res.data.id).length) {
-                            $table.find('.shipping-rule-item-' + res.data.id).fadeOut(500, function() {
+                            $table.find('.shipping-rule-item-' + res.data.id).fadeOut(500, function () {
                                 $(this).remove()
                             })
                         }
@@ -308,7 +313,7 @@ class ShippingManagement {
                     }
                     $('#confirm-delete-shipping-rule-item-modal').modal('hide')
                 },
-                error: error => {
+                error: (error) => {
                     Botble.handleError(error)
                 },
                 complete: () => {
@@ -317,17 +322,19 @@ class ShippingManagement {
             })
         })
 
-        $(document).find('.select-country-search').select2({
-            width: '100%',
-            dropdownParent: $('#select-country-modal'),
-        })
+        $(document)
+            .find('.select-country-search')
+            .select2({
+                width: '100%',
+                dropdownParent: $('#select-country-modal'),
+            })
 
-        $(document).on('click', '.btn-select-country', event => {
+        $(document).on('click', '.btn-select-country', (event) => {
             event.preventDefault()
             $('#select-country-modal').modal('show')
         })
 
-        $(document).on('click', '#add-shipping-region-button', event => {
+        $(document).on('click', '#add-shipping-region-button', (event) => {
             event.preventDefault()
             let _self = $(event.currentTarget)
             _self.addClass('button-loading')
@@ -338,7 +345,7 @@ class ShippingManagement {
                 type: 'POST',
                 url: $form.prop('action'),
                 data: $form.serialize(),
-                success: res => {
+                success: (res) => {
                     if (!res.error) {
                         Botble.showSuccess(res.message)
                         $('.wrapper-content').load(window.location.href + ' .wrapper-content > *')
@@ -348,19 +355,24 @@ class ShippingManagement {
                     _self.removeClass('button-loading')
                     $('#select-country-modal').modal('hide')
                 },
-                error: error => {
+                error: (error) => {
                     Botble.handleError(error)
                     _self.removeClass('button-loading')
                 },
             })
         })
 
-        $(document).on('click', '#add-shipping-rule-item-button', event => {
+        $(document).on('click', '#add-shipping-rule-item-button', (event) => {
             event.preventDefault()
-            saveRuleItem($(event.currentTarget), $(event.currentTarget).closest('.modal-content').find('form'), 'POST', $(event.currentTarget).data('shipping-id'))
+            saveRuleItem(
+                $(event.currentTarget),
+                $(event.currentTarget).closest('.modal-content').find('form'),
+                'POST',
+                $(event.currentTarget).data('shipping-id')
+            )
         })
 
-        $(document).on('keyup', '.base-price-rule-item', event => {
+        $(document).on('keyup', '.base-price-rule-item', (event) => {
             let _self = $(event.currentTarget)
             let basePrice = _self.val()
 
@@ -377,7 +389,7 @@ class ShippingManagement {
             })
         })
 
-        $(document).on('change', 'select[name=shipping_rule_id].shipping-rule-id', function(e) {
+        $(document).on('change', 'select[name=shipping_rule_id].shipping-rule-id', function (e) {
             e.preventDefault()
             const $this = $(e.currentTarget)
             const $form = $this.closest('form')
@@ -395,16 +407,7 @@ class ShippingManagement {
             }
         })
 
-        $(document).on('click', '.table-shipping-rule-items .shipping-rule-load-items', event => {
-            event.preventDefault()
-
-            let $this = $(event.currentTarget)
-            const $table = $this.closest('.table-shipping-rule-items')
-            loadRuleItems($this.attr('href'), $table, $this)
-
-        })
-
-        $(document).on('click', '.table-shipping-rule-items a.page-link', event => {
+        $(document).on('click', '.table-shipping-rule-items .shipping-rule-load-items', (event) => {
             event.preventDefault()
 
             let $this = $(event.currentTarget)
@@ -412,7 +415,15 @@ class ShippingManagement {
             loadRuleItems($this.attr('href'), $table, $this)
         })
 
-        $(document).on('change', '.table-shipping-rule-items .number-record .numb', e => {
+        $(document).on('click', '.table-shipping-rule-items a.page-link', (event) => {
+            event.preventDefault()
+
+            let $this = $(event.currentTarget)
+            const $table = $this.closest('.table-shipping-rule-items')
+            loadRuleItems($this.attr('href'), $table, $this)
+        })
+
+        $(document).on('change', '.table-shipping-rule-items .number-record .numb', (e) => {
             e.preventDefault()
             const $this = $(e.currentTarget)
             let per_page = $this.val()
@@ -432,7 +443,7 @@ class ShippingManagement {
             }
         })
 
-        $(document).on('click', '.table-shipping-rule-items thead tr th[data-column]', e => {
+        $(document).on('click', '.table-shipping-rule-items thead tr th[data-column]', (e) => {
             e.preventDefault()
             const $this = $(e.currentTarget)
             let order_by = $this.data('column')
@@ -456,14 +467,14 @@ class ShippingManagement {
                     $button && $button.addClass('button-loading')
                     $table.addClass('table-loading')
                 },
-                success: res => {
+                success: (res) => {
                     if (!res.error) {
                         $table.replaceWith(res.data.html)
                     } else {
                         Botble.showError(res.message)
                     }
                 },
-                error: error => {
+                error: (error) => {
                     Botble.handleError(error)
                 },
                 complete: () => {

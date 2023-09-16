@@ -2,14 +2,13 @@
 
 namespace Botble\LanguageAdvanced\Providers;
 
-use Botble\Base\Facades\Assets;
+use Botble\Base\Contracts\BaseModel;
 use Botble\Base\Facades\MetaBox;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Language\Facades\Language;
 use Botble\Language\Models\Language as LanguageModel;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
-use Botble\Slug\Facades\SlugHelper;
 use Botble\Table\CollectionDataTable;
 use Botble\Table\EloquentDataTable;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
@@ -19,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Throwable;
 
 class HookServiceProvider extends ServiceProvider
 {
@@ -33,9 +33,22 @@ class HookServiceProvider extends ServiceProvider
         add_filter(BASE_FILTER_GET_LIST_DATA, [$this, 'addLanguageColumn'], 1134, 2);
         add_filter(BASE_FILTER_BEFORE_GET_FRONT_PAGE_ITEM, [$this, 'checkItemLanguageBeforeShow'], 1134, 2);
         add_filter(BASE_FILTER_BEFORE_RENDER_FORM, [$this, 'changeFormDataBeforeRendering'], 1134, 2);
-        add_filter(BASE_FILTER_SLUG_AREA, [$this, 'changeSlugField'], 25, 2);
         add_filter(BASE_FILTER_BEFORE_GET_ADMIN_LIST_ITEM, [$this, 'checkItemLanguageBeforeGetAdminListItem'], 50, 2);
         add_filter('stored_meta_box_key', [$this, 'storeMetaBoxKey'], 1134, 2);
+        add_filter('slug_helper_get_slug_query', [$this, 'getSlugQuery'], 1134, 2);
+        add_filter('setting_permalink_meta_boxes', [$this, 'addPermalinkMetaBox'], 1134, 2);
+        add_filter(['model_after_execute_get', 'model_after_execute_paginate'], function ($data, BaseModel $model) {
+            if (
+                is_plugin_active('language') &&
+                is_plugin_active('language-advanced') &&
+                Language::getCurrentLocaleCode() != Language::getDefaultLocaleCode() &&
+                LanguageAdvancedManager::isSupported($model)
+            ) {
+                $data->loadMissing('translations');
+            }
+
+            return $data;
+        }, 1134, 2);
     }
 
     public function addLanguageBox(string $priority, Model|string|null $object): void
@@ -230,13 +243,18 @@ class HookServiceProvider extends ServiceProvider
         return $this->getDataByCurrentLanguageCode($query, $model, Language::getCurrentLocaleCode());
     }
 
-    public function checkItemLanguageBeforeGetAdminListItem(EloquentBuilder|Model $query, Model|string|null $model): EloquentBuilder|Model
-    {
+    public function checkItemLanguageBeforeGetAdminListItem(
+        EloquentBuilder|Model $query,
+        Model|string|null $model
+    ): EloquentBuilder|Model {
         return $this->getDataByCurrentLanguageCode($query, $model, Language::getCurrentAdminLocaleCode());
     }
 
-    protected function getDataByCurrentLanguageCode($query, Model|string|null $model, string $currentLocale): Builder|EloquentBuilder|Model
-    {
+    protected function getDataByCurrentLanguageCode(
+        $query,
+        Model|string|null $model,
+        string $currentLocale
+    ): Builder|EloquentBuilder|Model {
         if ($query instanceof Builder || $query instanceof EloquentBuilder) {
             $model = $query->getModel();
         }
@@ -315,25 +333,6 @@ class HookServiceProvider extends ServiceProvider
         }
     }
 
-    public function changeSlugField(string|null $html = null, Model|string|null $object = null): string|null
-    {
-        if (
-            is_in_admin() &&
-            Language::getRefLang() &&
-            Language::getCurrentAdminLocaleCode() != Language::getDefaultLocaleCode() &&
-            LanguageAdvancedManager::isSupported($object) &&
-            SlugHelper::isSupportedModel(get_class($object))
-        ) {
-            Assets::addStylesDirectly('vendor/core/packages/slug/css/slug.css');
-
-            $prefix = SlugHelper::getPrefix(get_class($object));
-
-            return view('plugins/language-advanced::slug', compact('object', 'prefix'))->render();
-        }
-
-        return $html;
-    }
-
     public function storeMetaBoxKey(string $key, Model|string|null $object): string
     {
         $locale = is_in_admin() ? Language::getCurrentAdminLocaleCode() : Language::getCurrentLocaleCode();
@@ -342,13 +341,45 @@ class HookServiceProvider extends ServiceProvider
 
         $translatableColumns[] = 'seo_meta';
 
-        if (is_plugin_active('language') && $locale != Language::getDefaultLocaleCode() && in_array(
-            $key,
-            $translatableColumns
-        )) {
+        if (
+            $locale != Language::getDefaultLocaleCode() &&
+            in_array($key, $translatableColumns)
+        ) {
             $key = $locale . '_' . $key;
         }
 
         return $key;
+    }
+
+    public function getSlugQuery(EloquentBuilder $query, array $condition = []): EloquentBuilder
+    {
+        if (Language::getCurrentLocaleCode() === Language::getDefaultLocaleCode()) {
+            return $query;
+        }
+
+        try {
+            return $query
+                ->orWhere(function (EloquentBuilder $query) use ($condition) {
+                    $query
+                        ->whereHas('translations', function (EloquentBuilder $query) use ($condition) {
+                            return $query->where($condition);
+                        });
+                });
+        } catch (Throwable) {
+            return $query;
+        }
+    }
+
+    public function addPermalinkMetaBox(string|null $data, array $params = []): string
+    {
+        $languages = Language::getActiveLanguage(['lang_id', 'lang_name', 'lang_code', 'lang_flag']);
+
+        if ($languages->count() < 2) {
+            return $data;
+        }
+
+        $route = 'slug.settings';
+
+        return $data . view('plugins/language::partials.admin-list-language-chooser', compact('route', 'params', 'languages'))->render();
     }
 }

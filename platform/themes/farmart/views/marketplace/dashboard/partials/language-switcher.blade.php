@@ -19,14 +19,14 @@
         <li>
             {!! Arr::get($options, 'before') !!}
             <div class="ps-dropdown language">
-            <span>
-                @if (Arr::get($options, 'lang_flag', true) && ($languageDisplay == 'all' || $languageDisplay == 'flag'))
-                    {!! language_flag(Language::getCurrentLocaleFlag(), Language::getCurrentLocaleName()) !!}
-                @endif
-                @if (Arr::get($options, 'lang_name', true) && ($languageDisplay == 'all' || $languageDisplay == 'name'))
-                    {{ Language::getCurrentLocaleName() }}
-                @endif
-            </span>
+                <span>
+                    @if (Arr::get($options, 'lang_flag', true) && ($languageDisplay == 'all' || $languageDisplay == 'flag'))
+                        {!! language_flag(Language::getCurrentLocaleFlag(), Language::getCurrentLocaleName()) !!}
+                    @endif
+                    @if (Arr::get($options, 'lang_name', true) && ($languageDisplay == 'all' || $languageDisplay == 'name'))
+                        {{ Language::getCurrentLocaleName() }}
+                    @endif
+                </span>
                 <ul class="ps-dropdown-menu {{ Arr::get($options, 'class') }}">
                     @foreach ($supportedLocales as $localeCode => $properties)
                         @if ($localeCode != Language::getCurrentLocale())

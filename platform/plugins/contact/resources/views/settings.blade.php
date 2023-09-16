@@ -3,14 +3,34 @@
     :description="trans('plugins/contact::contact.settings.description')"
 >
     <x-core-setting::form-group>
-        <label class="text-title-field" for="blacklist_keywords">{{ trans('plugins/contact::contact.settings.blacklist_keywords') }}</label>
-        <textarea data-counter="250" class="next-input tags" name="blacklist_keywords" id="blacklist_keywords" rows="3" placeholder="{{ trans('plugins/contact::contact.settings.blacklist_keywords_placeholder') }}">{{ setting('blacklist_keywords') }}</textarea>
+        <label
+            class="text-title-field"
+            for="blacklist_keywords"
+        >{{ trans('plugins/contact::contact.settings.blacklist_keywords') }}</label>
+        <textarea
+            class="next-input tags"
+            id="blacklist_keywords"
+            name="blacklist_keywords"
+            data-counter="250"
+            rows="3"
+            placeholder="{{ trans('plugins/contact::contact.settings.blacklist_keywords_placeholder') }}"
+        >{{ setting('blacklist_keywords') }}</textarea>
         {{ Form::helper(trans('plugins/contact::contact.settings.blacklist_keywords_helper')) }}
     </x-core-setting::form-group>
 
     <x-core-setting::form-group>
-        <label class="text-title-field" for="blacklist_email_domains">{{ trans('plugins/contact::contact.settings.blacklist_email_domains') }}</label>
-        <textarea data-counter="250" class="next-input tags" name="blacklist_email_domains" id="blacklist_email_domains" rows="3" placeholder="{{ trans('plugins/contact::contact.settings.blacklist_email_domains_placeholder') }}">{{ setting('blacklist_email_domains') }}</textarea>
+        <label
+            class="text-title-field"
+            for="blacklist_email_domains"
+        >{{ trans('plugins/contact::contact.settings.blacklist_email_domains') }}</label>
+        <textarea
+            class="next-input tags"
+            id="blacklist_email_domains"
+            name="blacklist_email_domains"
+            data-counter="250"
+            rows="3"
+            placeholder="{{ trans('plugins/contact::contact.settings.blacklist_email_domains_placeholder') }}"
+        >{{ setting('blacklist_email_domains') }}</textarea>
         {{ Form::helper(trans('plugins/contact::contact.settings.blacklist_email_domains_helper')) }}
     </x-core-setting::form-group>
 

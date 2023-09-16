@@ -3,14 +3,20 @@
     :description="trans('plugins/captcha::captcha.settings.description')"
 >
     <x-core-setting::on-off
+        class="setting-selection-option"
         name="enable_captcha"
+        data-target="#captcha-settings"
         :label="trans('plugins/captcha::captcha.settings.enable_captcha')"
         :value="Captcha::isEnabled()"
-        class="setting-selection-option"
-        data-target="#captcha-settings"
     />
 
-    <div id="captcha-settings" @class(['mb-4 border rounded-top rounded-bottom p-3 bg-light', 'd-none' => ! Captcha::isEnabled()])>
+    <div
+        id="captcha-settings"
+        @class([
+            'mb-4 border rounded-top rounded-bottom p-3 bg-light',
+            'd-none' => !Captcha::isEnabled(),
+        ])
+    >
         <x-core-setting::radio
             name="captcha_type"
             :label="trans('plugins/captcha::captcha.settings.type')"
@@ -29,18 +35,18 @@
 
         <x-core-setting::text-input
             name="captcha_site_key"
+            data-counter="120"
             :label="trans('plugins/captcha::captcha.settings.captcha_site_key')"
             :value="setting('captcha_site_key')"
             :placeholder="trans('plugins/captcha::captcha.settings.captcha_site_key')"
-            data-counter="120"
         />
 
         <x-core-setting::text-input
             name="captcha_secret"
+            data-counter="120"
             :label="trans('plugins/captcha::captcha.settings.captcha_secret')"
             :value="setting('captcha_secret')"
             :placeholder="trans('plugins/captcha::captcha.settings.captcha_secret')"
-            data-counter="120"
         />
 
         <x-core-setting::form-group>

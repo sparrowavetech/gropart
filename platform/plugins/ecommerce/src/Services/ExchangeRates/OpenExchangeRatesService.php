@@ -3,7 +3,7 @@
 namespace Botble\Ecommerce\Services\ExchangeRates;
 
 use Botble\Ecommerce\Facades\Currency;
-use Botble\Ecommerce\Repositories\Interfaces\CurrencyInterface;
+use Botble\Ecommerce\Models\Currency as CurrencyModel;
 use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -16,6 +16,7 @@ class OpenExchangeRatesService implements ExchangeRateInterface
         if (! get_ecommerce_setting('open_exchange_app_id')) {
             throw new Exception(trans('plugins/ecommerce::currency.no_api_key'));
         }
+
         $rates = $this->cacheExchangeRates();
 
         $defaultCurrency = Currency::getDefaultCurrency();
@@ -24,8 +25,7 @@ class OpenExchangeRatesService implements ExchangeRateInterface
             $defaultCurrency->update(['exchange_rate' => 1]);
         }
 
-        $currencies = app(CurrencyInterface::class)
-            ->getModel()
+        $currencies = CurrencyModel::query()
             ->where('is_default', 0)
             ->get();
 
@@ -33,7 +33,7 @@ class OpenExchangeRatesService implements ExchangeRateInterface
             $currency->update(['exchange_rate' => number_format($rates[strtoupper($currency->title)], 8, '.', '')]);
         }
 
-        return app(CurrencyInterface::class)->getAllCurrencies();
+        return Currency::currencies();
     }
 
     public function cacheExchangeRates(): array

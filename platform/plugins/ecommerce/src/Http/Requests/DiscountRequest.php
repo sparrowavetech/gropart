@@ -12,16 +12,21 @@ class DiscountRequest extends Request
 {
     protected function prepareForValidation(): void
     {
+        $dateFormat = config('core.base.general.date_format.date_time');
+
         $this->merge([
             'can_use_with_promotion' => $this->boolean('can_use_with_promotion'),
             'quantity' => $this->boolean('is_unlimited') ? null : $this->input('quantity'),
-            'start_date' => Carbon::parse("{$this->input('start_date')} {$this->input('start_time')}")->toDateTimeString(),
-            'end_date' => $this->has('end_date') && ! $this->has('unlimited_time') ? Carbon::parse("{$this->input('end_date')} {$this->input('end_time')}")->toDateTimeString() : null,
+            'start_date' => Carbon::parse("{$this->input('start_date')} {$this->input('start_time')}")->format($dateFormat),
+            'end_date' => $this->has('end_date') && ! $this->has('unlimited_time') ? Carbon::parse("{$this->input('end_date')} {$this->input('end_time')}")->format($dateFormat) : null,
+            'apply_via_url' => $this->boolean('apply_via_url'),
         ]);
     }
 
     public function rules(): array
     {
+        $dateFormat = config('core.base.general.date_format.date_time');
+
         return [
             'title' => ['nullable', 'string', 'required_if:type,promotion', 'max:255'],
             'code' => 'nullable|string|required_if:type,coupon|max:20|unique:ec_discounts,code,' . $this->route('discount'),
@@ -30,12 +35,13 @@ class DiscountRequest extends Request
             'can_use_with_promotion' => ['nullable', 'boolean'],
             'type' => ['required', Rule::in(DiscountTypeEnum::values())],
             'type_option' => ['required', Rule::in(DiscountTypeOptionEnum::values())],
-            'quantity' => ['required_without:is_unlimited', 'nullable', 'numeric', 'min:1'],
+            'quantity' => ['required_if:is_unlimited,0', 'required_if:type,coupon', 'nullable', 'numeric', 'min:1'],
             'min_order_price' => ['nullable', 'numeric', 'min:0'],
             'product_quantity' => ['nullable', 'numeric', 'min:0'],
             'discount_on' => ['nullable', 'string', 'max:40'],
-            'start_date' => ['nullable', 'date', 'date_format:' . config('core.base.general.date_format.date_time')],
-            'end_date' => ['nullable', 'date', 'date_format:' . config('core.base.general.date_format.date_time') . '|after:start_date'],
+            'start_date' => ['nullable', 'date', 'date_format:' . $dateFormat],
+            'end_date' => ['nullable', 'date', 'date_format:' . $dateFormat, 'after_or_equal:start_date'],
+            'apply_via_url' => ['nullable', 'boolean'],
         ];
     }
 

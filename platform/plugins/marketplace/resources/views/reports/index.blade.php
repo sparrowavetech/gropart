@@ -9,12 +9,13 @@
                 data-format="{{ Str::upper(config('core.base.general.date_format.js.date')) }}"
                 data-href="{{ route('marketplace.reports.index') }}"
                 data-start-date="{{ $startDate }}"
-                data-end-date="{{ $endDate }}">
+                data-end-date="{{ $endDate }}"
+            >
                 <i class="fa fa-calendar me-1"></i>
                 <span>
                     <span>{{ trans('plugins/ecommerce::reports.date_range_format_value', [
                         'from' => $startDate->format('Y-m-d'),
-                        'to' => $endDate->format('Y-m-d')
+                        'to' => $endDate->format('Y-m-d'),
                     ]) }}</span>
                 </span>
             </button>

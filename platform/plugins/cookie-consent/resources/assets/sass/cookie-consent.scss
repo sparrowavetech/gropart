@@ -71,7 +71,7 @@
     }
 }
 
-body[dir="rtl"] {
+body[dir='rtl'] {
     .cookie-consent {
         &.cookie-consent-minimal {
             right: 1em;
@@ -109,9 +109,8 @@ body[dir="rtl"] {
         }
     }
 
-    body[dir="rtl"] {
+    body[dir='rtl'] {
         .cookie-consent {
-
             .cookie-consent__agree {
                 float: none;
             }

@@ -18,10 +18,13 @@
                         </div>
                     </div>
                     <div class="form-group mb-3 d-grid">
-                        <button type="button" href="{{ route('ecommerce.export.products.index') }}"
+                        <button
                             class="btn btn-info btn-export-data"
                             data-loading-text="{{ trans('plugins/ecommerce::export.exporting') }}"
-                            data-filename="export_products.csv">
+                            data-filename="export_products.csv"
+                            type="button"
+                            href="{{ route('ecommerce.export.products.index') }}"
+                        >
                             {{ trans('plugins/ecommerce::export.start_export') }}
                         </button>
                     </div>

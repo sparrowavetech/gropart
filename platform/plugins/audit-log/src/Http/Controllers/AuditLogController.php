@@ -34,12 +34,12 @@ class AuditLogController extends BaseController
         return $dataTable->renderTable();
     }
 
-    public function destroy(AuditHistory $log, Request $request, BaseHttpResponse $response)
+    public function destroy(AuditHistory $auditLog, Request $request, BaseHttpResponse $response)
     {
         try {
-            $log->delete();
+            $auditLog->delete();
 
-            event(new DeletedContentEvent(AUDIT_LOG_MODULE_SCREEN_NAME, $request, $log));
+            event(new DeletedContentEvent(AUDIT_LOG_MODULE_SCREEN_NAME, $request, $auditLog));
 
             return $response->setMessage(trans('core/base::notices.delete_success_message'));
         } catch (Exception $ex) {

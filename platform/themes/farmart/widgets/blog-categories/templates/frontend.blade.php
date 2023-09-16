@@ -1,13 +1,12 @@
 @if (is_plugin_active('blog'))
     @php
-        $categories = app(\Botble\Blog\Repositories\Interfaces\CategoryInterface::class)
-            ->advancedGet([
-                'condition' => [
-                    'status' => \Botble\Base\Enums\BaseStatusEnum::PUBLISHED
-                ],
-                'take' => (int)$config['number_display'] ?? 10,
-                'with' => ['slugable'],
-            ]);
+        $categories = app(\Botble\Blog\Repositories\Interfaces\CategoryInterface::class)->advancedGet([
+            'condition' => [
+                'status' => \Botble\Base\Enums\BaseStatusEnum::PUBLISHED,
+            ],
+            'take' => (int) $config['number_display'] ?? 10,
+            'with' => ['slugable'],
+        ]);
     @endphp
     @if ($categories->count())
         <div class="widget-sidebar widget-blog-categories">
@@ -16,7 +15,10 @@
                 <ul>
                     @foreach ($categories as $category)
                         <li class="cat-item">
-                            <a href="{{ $category->url }}" title="{{ $category->name }}">{{ $category->name }}</a>
+                            <a
+                                href="{{ $category->url }}"
+                                title="{{ $category->name }}"
+                            >{{ $category->name }}</a>
                         </li>
                     @endforeach
                 </ul>

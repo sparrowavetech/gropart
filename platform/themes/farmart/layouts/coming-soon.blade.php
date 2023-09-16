@@ -1,11 +1,22 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, user-scalable=1" name="viewport"/>
+    <meta
+        http-equiv="X-UA-Compatible"
+        content="IE=edge"
+    >
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, user-scalable=1"
+    />
 
-    {!! BaseHelper::googleFonts('https://fonts.googleapis.com/css2?family=' . urlencode(theme_option('primary_font', 'Muli')) . ':wght@400;600;700&display=swap') !!}
+    {!! BaseHelper::googleFonts(
+        'https://fonts.googleapis.com/css2?family=' .
+            urlencode(theme_option('primary_font', 'Muli')) .
+            ':wght@400;600;700&display=swap',
+    ) !!}
 
     <style>
         :root {
@@ -27,9 +38,13 @@
 
     {!! Theme::header() !!}
 </head>
+
 <body @if (BaseHelper::isRtlEnabled()) dir="rtl" @endif>
     @if (theme_option('preloader_enabled', 'yes') == 'yes')
-        <div class="preloader" id="preloader">
+        <div
+            class="preloader"
+            id="preloader"
+        >
             <div class="preloader-loading"></div>
         </div>
     @endif
@@ -42,9 +57,9 @@
         'use strict';
 
         window.siteConfig = {
-            "countdown_text" : {
-                "days"   : "{{ __('days') }}",
-                "hours"  : "{{ __('hours') }}",
+            "countdown_text": {
+                "days": "{{ __('days') }}",
+                "hours": "{{ __('hours') }}",
                 "minutes": "{{ __('mins') }}",
                 "seconds": "{{ __('secs') }}"
             }
@@ -53,5 +68,5 @@
 
     {!! Theme::footer() !!}
 </body>
-</html>
 
+</html>

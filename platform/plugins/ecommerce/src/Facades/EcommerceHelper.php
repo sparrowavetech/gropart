@@ -76,8 +76,15 @@ use Illuminate\Support\Facades\Facade;
  * @method static array getHiddenFieldsAtCheckout()
  * @method static array withProductEagerLoadingRelations()
  * @method static bool isDisplayTaxFieldsAtCheckoutPage()
- * @method static int getProductMaxPrice()
+ * @method static int getProductMaxPrice(string|int|null $categoryId = null)
  * @method static void clearProductMaxPriceCache()
+ * @method static bool isEnabledFilterProductsByBrands()
+ * @method static bool isEnabledFilterProductsByTags()
+ * @method static bool isEnabledFilterProductsByAttributes()
+ * @method static \Illuminate\Support\Collection brandsForFilter(string|int|null $categoryId = null)
+ * @method static \Illuminate\Support\Collection tagsForFilter(string|int|null $categoryId = null)
+ * @method static array dataForFilter(\Botble\Ecommerce\Models\ProductCategory|null $category)
+ * @method static bool useCityFieldAsTextField()
  *
  * @see \Botble\Ecommerce\Supports\EcommerceHelper
  */

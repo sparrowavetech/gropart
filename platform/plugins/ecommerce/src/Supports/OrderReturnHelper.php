@@ -7,11 +7,10 @@ use Botble\Ecommerce\Enums\OrderReturnStatusEnum;
 use Botble\Ecommerce\Events\OrderReturnedEvent;
 use Botble\Ecommerce\Facades\OrderHelper as OrderHelperFacade;
 use Botble\Ecommerce\Models\Order;
+use Botble\Ecommerce\Models\OrderProduct;
 use Botble\Ecommerce\Models\OrderReturn;
-use Botble\Ecommerce\Repositories\Interfaces\OrderProductInterface;
-use Botble\Ecommerce\Repositories\Interfaces\OrderReturnInterface;
-use Botble\Ecommerce\Repositories\Interfaces\OrderReturnItemInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
+use Botble\Ecommerce\Models\OrderReturnItem;
+use Botble\Ecommerce\Models\Product;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -33,14 +32,14 @@ class OrderReturnHelper
         try {
             DB::beginTransaction();
 
-            $orderReturn = app(OrderReturnInterface::class)->create($orderReturnData);
+            $orderReturn = OrderReturn::query()->create($orderReturnData);
 
             $orderReturnItemData = [];
 
             $orderProductIds = [];
 
             foreach ($data['items'] as $returnItem) {
-                $orderProduct = app(OrderProductInterface::class)->findById($returnItem['order_item_id']);
+                $orderProduct = OrderProduct::query()->find($returnItem['order_item_id']);
                 if (! $orderProduct) {
                     continue;
                 }
@@ -61,7 +60,7 @@ class OrderReturnHelper
                 $orderProductIds[] = $orderProduct->product_id;
             }
 
-            app(OrderReturnItemInterface::class)->insert($orderReturnItemData);
+            OrderReturnItem::query()->insert($orderReturnItemData);
 
             event(new OrderReturnedEvent($orderReturn));
 
@@ -69,12 +68,10 @@ class OrderReturnHelper
             if ($mailer->templateEnabled('order-return-request')) {
                 $mailer = OrderHelperFacade::setEmailVariables($order);
 
-                $orderProducts = app(OrderProductInterface::class)->advancedGet([
-                    'condition' => [
-                        'order_id' => $order->id,
-                        ['product_id', 'IN', $orderProductIds],
-                    ],
-                ]);
+                $orderProducts = OrderProduct::query()
+                    ->where('order_id', $order->id)
+                    ->whereIn('product_id', $orderProductIds)
+                    ->get();
 
                 $order->dont_show_order_info_in_product_list = true;
 
@@ -125,7 +122,7 @@ class OrderReturnHelper
 
             if ($orderReturn->return_status == OrderReturnStatusEnum::COMPLETED) {
                 foreach ($orderReturn->items as $item) {
-                    $product = app(ProductInterface::class)->findById($item->product_id);
+                    $product = Product::query()->find($item->product_id);
                     if ($product) {
                         $product->quantity += $item->qty;
                         $product->save();

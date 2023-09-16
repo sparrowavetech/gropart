@@ -16,19 +16,21 @@ class ThemeAssetsPublishCommand extends Command
 
     public function handle(File $files, ThemeService $themeService): int
     {
-        if ($this->option('name') && ! preg_match('/^[a-z0-9\-]+$/i', $this->option('name'))) {
+        $name = $this->option('name');
+
+        if ($name && ! preg_match('/^[a-z0-9\-]+$/i', $name)) {
             $this->components->error('Only alphabetic characters are allowed.');
 
             return self::FAILURE;
         }
 
-        if ($this->option('name') && ! $files->isDirectory($this->getPath())) {
-            $this->components->error('Theme "' . $this->getTheme() . '" is not exists.');
+        if ($name && ! $files->isDirectory($this->getPath())) {
+            $this->components->error(sprintf('Theme "%s" is not exists.', $this->getTheme()));
 
             return self::FAILURE;
         }
 
-        $result = $themeService->publishAssets($this->option('name'));
+        $result = $themeService->publishAssets($name);
 
         if ($result['error']) {
             $this->components->error($result['message']);

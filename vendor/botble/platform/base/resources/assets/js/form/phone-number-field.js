@@ -11,9 +11,13 @@ class PhoneNumberField {
                     // excludeCountries: ["us"],
                     // formatOnDisplay: false,
                     geoIpLookup: function (callback) {
-                        $.get('https://ipinfo.io', function () {}, 'jsonp').always(function (resp) {
-                            callback(resp && resp.country ? resp.country : '')
-                        })
+                        $httpClient
+                            .make()
+                            .withCredentials(false)
+                            .get('https://ipinfo.io')
+                            .then(function ({ data }) {
+                                callback(data && data.country ? data.country : '')
+                            })
                     },
                     // hiddenInput: "full_number",
                     initialCountry: 'auto',

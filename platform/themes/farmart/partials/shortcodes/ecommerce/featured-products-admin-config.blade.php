@@ -1,12 +1,23 @@
 <div class="form-group">
     <label class="control-label">{{ __('Title') }}</label>
-    <input type="text" name="title" value="{{ Arr::get($attributes, 'title') }}" class="form-control"
-           placeholder="{{ __('Title') }}">
+    <input
+        class="form-control"
+        name="title"
+        type="text"
+        value="{{ Arr::get($attributes, 'title') }}"
+        placeholder="{{ __('Title') }}"
+    >
 </div>
 
 <div class="form-group">
     <label class="control-label">{{ __('Limit') }}</label>
-    <input type="number" name="limit" value="{{ Arr::get($attributes, 'limit') }}" class="form-control" placeholder="{{ __('Limit') }}">
+    <input
+        class="form-control"
+        name="limit"
+        type="number"
+        value="{{ Arr::get($attributes, 'limit') }}"
+        placeholder="{{ __('Limit') }}"
+    >
 </div>
 
 {!! Theme::partial('shortcodes.includes.autoplay-settings', compact('attributes')) !!}

@@ -1,104 +1,178 @@
 @extends(EcommerceHelper::viewPath('customers.master'))
 
 @section('content')
-   <h2 class="customer-page-title">{{ __('Address books') }}</h2>
+    <h2 class="customer-page-title">{{ __('Address books') }}</h2>
     <br>
     <div class="profile-content">
 
         {!! Form::open(['route' => ['customer.address.edit', $address->id]]) !!}
         <div class="input-group">
             <span class="input-group-prepend">{{ __('Full Name') }}:</span>
-            <input id="name" type="text" class="form-control" name="name" value="{{ old('name', $address->name) }}">
+            <input
+                class="form-control"
+                id="name"
+                name="name"
+                type="text"
+                value="{{ old('name', $address->name) }}"
+            >
             {!! Form::error('name', $errors) !!}
         </div>
 
         <div class="input-group">
             <span class="input-group-prepend">{{ __('Email') }}:</span>
-            <input id="email" type="text" class="form-control" name="email" value="{{ old('email', $address->email) }}">
+            <input
+                class="form-control"
+                id="email"
+                name="email"
+                type="text"
+                value="{{ old('email', $address->email) }}"
+            >
             {!! Form::error('email', $errors) !!}
         </div>
 
-       <div class="input-group">
+        <div class="input-group">
             <span class="input-group-prepend">{{ __('Phone') }}:</span>
-           {!! Form::phoneNumber('phone', old('phone', $address->phone), ['id' => 'phone']) !!}
+            {!! Form::text('phone', old('phone', $address->phone), ['id' => 'phone']) !!}
             {!! Form::error('phone', $errors) !!}
         </div>
 
         @if (EcommerceHelper::isUsingInMultipleCountries())
             <div class="form-group mb-3 @if ($errors->has('country')) has-error @endif">
                 <label for="country">{{ __('Country') }}:</label>
-                <select name="country" class="form-control" id="country" data-type="country">
-                    @foreach(EcommerceHelper::getAvailableCountries() as $countryCode => $countryName)
-                        <option value="{{ $countryCode }}" @if ($address->country == $countryCode) selected @endif>{{ $countryName }}</option>
+                <select
+                    class="form-control"
+                    id="country"
+                    name="country"
+                    data-type="country"
+                >
+                    @foreach (EcommerceHelper::getAvailableCountries() as $countryCode => $countryName)
+                        <option
+                            value="{{ $countryCode }}"
+                            @if ($address->country == $countryCode) selected @endif
+                        >{{ $countryName }}</option>
                     @endforeach
                 </select>
             </div>
             {!! Form::error('country', $errors) !!}
         @else
-            <input type="hidden" name="country" value="{{ EcommerceHelper::getFirstCountryId() }}">
+            <input
+                name="country"
+                type="hidden"
+                value="{{ EcommerceHelper::getFirstCountryId() }}"
+            >
         @endif
 
         <div class="input-group @if ($errors->has('state')) has-error @endif">
             <span class="input-group-prepend required ">{{ __('State') }}:</span>
             @if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation())
-                <select name="state" class="form-control" id="state" data-type="state" data-url="{{ route('ajax.states-by-country') }}">
+                <select
+                    class="form-control"
+                    id="state"
+                    name="state"
+                    data-type="state"
+                    data-url="{{ route('ajax.states-by-country') }}"
+                >
                     <option value="">{{ __('Select state...') }}</option>
                     @if (old('country', $address->country) || !EcommerceHelper::isUsingInMultipleCountries())
-                        @foreach(EcommerceHelper::getAvailableStatesByCountry(old('country', $address->country)) as $stateId => $stateName)
-                            <option value="{{ $stateId }}" @if (old('state', $address->state) == $stateId) selected @endif>{{ $stateName }}</option>
+                        @foreach (EcommerceHelper::getAvailableStatesByCountry(old('country', $address->country)) as $stateId => $stateName)
+                            <option
+                                value="{{ $stateId }}"
+                                @if (old('state', $address->state) == $stateId) selected @endif
+                            >{{ $stateName }}</option>
                         @endforeach
                     @endif
                 </select>
             @else
-                <input id="state" type="text" class="form-control" name="state" value="{{ $address->state }}">
+                <input
+                    class="form-control"
+                    id="state"
+                    name="state"
+                    type="text"
+                    value="{{ $address->state }}"
+                >
             @endif
             {!! Form::error('state', $errors) !!}
         </div>
 
         <div class="input-group @if ($errors->has('city')) has-error @endif">
             <span class="input-group-prepend required ">{{ __('City') }}:</span>
-            @if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation())
-                <select name="city" class="form-control" id="city" data-type="city" data-url="{{ route('ajax.cities-by-state') }}">
+            @if (EcommerceHelper::useCityFieldAsTextField())
+                <input
+                    class="form-control"
+                    id="city"
+                    name="city"
+                    type="text"
+                    value="{{ $address->city }}"
+                >
+            @else
+                <select
+                    class="form-control"
+                    id="city"
+                    name="city"
+                    data-type="city"
+                    data-using-select2="false"
+                    data-url="{{ route('ajax.cities-by-state') }}"
+                >
                     <option value="">{{ __('Select city...') }}</option>
                     @if (old('state', $address->state))
-                        @foreach(EcommerceHelper::getAvailableCitiesByState(old('state', $address->state)) as $cityId => $cityName)
-                            <option value="{{ $cityId }}" @if (old('city', $address->city) == $cityId) selected @endif>{{ $cityName }}</option>
+                        @foreach (EcommerceHelper::getAvailableCitiesByState(old('state', $address->state)) as $cityId => $cityName)
+                            <option
+                                value="{{ $cityId }}"
+                                @if (old('city', $address->city) == $cityId) selected @endif
+                            >{{ $cityName }}</option>
                         @endforeach
                     @endif
                 </select>
-            @else
-                <input id="city" type="text" class="form-control" name="city" value="{{ $address->city }}">
             @endif
             {!! Form::error('city', $errors) !!}
         </div>
 
         <div class="input-group">
             <span class="input-group-prepend required ">{{ __('Address') }}:</span>
-            <input id="address" type="text" class="form-control" name="address" value="{{ $address->address }}">
+            <input
+                class="form-control"
+                id="address"
+                name="address"
+                type="text"
+                value="{{ $address->address }}"
+            >
             {!! Form::error('address', $errors) !!}
         </div>
 
         @if (EcommerceHelper::isZipCodeEnabled())
-            @php
-                $fromZipcode  = EcommerceHelper::isZipCodeEnabled() ? get_ecommerce_setting('store_zip_code') : '313001';
-            @endphp
-            <div class="form-group mb-3">
+            <div class="mb-3 form-group">
                 <label>{{ __('Zip code') }}:</label>
-                <input id="zip_code" minlength="6" maxlength="6" data-pincode="{{ $fromZipcode }}" type="text" class="form-control @if ($errors->has('zip_code')) is-invalid @endif" name="zip_code" value="{{ $address->zip_code }}" placeholder="{{ __('Enter Zip code') }}">
+                <input
+                    class="form-control"
+                    id="zip_code"
+                    name="zip_code"
+                    type="text"
+                    value="{{ $address->zip_code }}"
+                >
                 {!! Form::error('zip_code', $errors) !!}
             </div>
         @endif
 
-        <div class="form-group mb-3">
+        <div class="mb-3 form-group">
             <label for="is_default">
-                <input class="customer-checkbox" type="checkbox" name="is_default" value="1" @if ($address->is_default) checked @endif id="is_default">
+                <input
+                    class="customer-checkbox"
+                    id="is_default"
+                    name="is_default"
+                    type="checkbox"
+                    value="1"
+                    @if ($address->is_default) checked @endif
+                >
                 {{ __('Use this address as default.') }}
                 {!! Form::error('is_default', $errors) !!}
             </label>
         </div>
 
-        <div class="form-group mb-3">
-            <button class="btn btn-primary customer-address-button" type="submit">{{ __('Update') }}</button>
+        <div class="mb-3 form-group">
+            <button
+                class="btn btn-primary"
+                type="submit"
+            >{{ __('Update') }}</button>
         </div>
         {!! Form::close() !!}
     </div>

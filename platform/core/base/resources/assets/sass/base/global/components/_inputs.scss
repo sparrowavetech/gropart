@@ -55,8 +55,12 @@ Custom color buttons
     border: 1px solid $input-border;
     -webkit-box-shadow: none;
     box-shadow: none;
-    -webkit-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
-    transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+    -webkit-transition:
+        border-color ease-in-out 0.15s,
+        box-shadow ease-in-out 0.15s;
+    transition:
+        border-color ease-in-out 0.15s,
+        box-shadow ease-in-out 0.15s;
 }
 
 .form-control-static {
@@ -90,7 +94,8 @@ Custom color buttons
     width: 420px !important;
 }
 
-@media (max-width: $screen-sm-min) { /* 768px */
+@media (max-width: $screen-sm-min) {
+    /* 768px */
     .input-large {
         width: 250px !important;
     }
@@ -120,7 +125,8 @@ Custom color buttons
     }
 }
 
-@media (max-width: $screen-sm-min) { /* 768px */
+@media (max-width: $screen-sm-min) {
+    /* 768px */
 
     .input-lg {
         width: 250px !important;
@@ -129,7 +135,6 @@ Custom color buttons
     .input-xlg {
         width: 300px !important;
     }
-
 }
 
 /* Circle Inputs */
@@ -183,7 +188,8 @@ $color-checked: $color-hover;
         @include opacity(0);
     }
 
-    > span:not(.text), > span:not(.text) {
+    > span:not(.text),
+    > span:not(.text) {
         border: 1px solid transparent;
         position: absolute;
         top: 1px;
@@ -304,7 +310,6 @@ $color-checked: $color-hover;
     }
 
     &.mt-checkbox-single {
-
         th > &,
         td > & {
             right: -5px;

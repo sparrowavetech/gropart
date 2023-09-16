@@ -13,7 +13,10 @@
                     <tr>
                         <td>{{ $loop->index + 1 }}</td>
                         <td class="text-start">{{ Str::limit($referrer['url'], 80) }}</td>
-                        <td style="width: 160px" class="text-center">{{ $referrer['pageViews'] }} ({{ ucfirst(trans('plugins/analytics::analytics.views')) }})</td>
+                        <td
+                            class="text-center"
+                            style="width: 160px"
+                        >{{ $referrer['pageViews'] }} ({{ ucfirst(trans('plugins/analytics::analytics.views')) }})</td>
                     </tr>
                 @endforeach
             </tbody>

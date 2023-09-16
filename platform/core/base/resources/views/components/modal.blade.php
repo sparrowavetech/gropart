@@ -13,12 +13,25 @@
     'options' => [],
 ])
 
-<div @if ($id) id="{{ $id }}" @endif @class(['modal fade', $class => $class]) tabindex="-1" role="dialog" aria-labelledby="{{ $id }}"
-     aria-hidden="true" @if ($options) {!! Html::attributes(array_merge(['data-backdrop' => 'static', 'data-keyboard' => 'false'], $options)) !!} @else data-backdrop="static" data-keyboard="false" @endif>
-    <div @class(['modal-dialog', 'modal-xs' => ! $size && strlen($slot) < 120, 'modal-lg' => ! $size && strlen($slot) > 1000, 'modal-' . str_replace('modal-', '', (string)$size) => $size])>
+<div
+    data-backdrop="static"
+    data-keyboard="false"
+    role="dialog"
+    aria-labelledby="{{ $id }}"
+    aria-hidden="true"
+    tabindex="-1"
+    @if ($id) id="{{ $id }}" @endif
+    @class(['modal fade', $class => $class])
+    @if ($options) {!! Html::attributes(array_merge(['data-backdrop' => 'static', 'data-keyboard' => 'false'], $options)) !!} @else @endif>
+    <div @class([
+        'modal-dialog',
+        'modal-xs' => !$size && strlen($slot) < 120,
+        'modal-lg' => !$size && strlen($slot) > 1000,
+        'modal-' . str_replace('modal-', '', (string) $size) => $size,
+    ])>
         <div class="modal-content">
-            @if($header !== false)
-                @if($header)
+            @if ($header !== false)
+                @if ($header)
                     {!! $header !!}
                 @else
                     <div class="modal-header bg-{{ $type }}">
@@ -32,7 +45,12 @@
                                 <strong>{!! $title !!}</strong>
                             @endif
                         </h4>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+                        <button
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            type="button"
+                            aria-hidden="true"
+                        ></button>
                     </div>
                 @endif
             @endif
@@ -46,8 +64,16 @@
                     @if ($footer)
                         {!! $footer !!}
                     @else
-                        <button type="button" class="float-start btn btn-{{ $type != 'warning' ? 'warning' : 'info' }}" data-bs-dismiss="modal">{{ trans('core/base::tables.cancel') }}</button>
-                        <button type="submit" class="float-end btn btn-{{ $type }} @if ($buttonClass) {{ $buttonClass }} @endif" @if ($buttonId) id="{{ $buttonId }}" @endif>{!! $buttonLabel !!}</button>
+                        <button
+                            class="float-start btn btn-{{ $type != 'warning' ? 'warning' : 'info' }}"
+                            data-bs-dismiss="modal"
+                            type="button"
+                        >{{ trans('core/base::tables.cancel') }}</button>
+                        <button
+                            class="float-end btn btn-{{ $type }} @if ($buttonClass) {{ $buttonClass }} @endif"
+                            type="submit"
+                            @if ($buttonId) id="{{ $buttonId }}" @endif
+                        >{!! $buttonLabel !!}</button>
                     @endif
                 </div>
             @endif

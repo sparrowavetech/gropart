@@ -2,12 +2,13 @@
 
 namespace Botble\Ecommerce;
 
-use Botble\Dashboard\Repositories\Interfaces\DashboardWidgetInterface;
+use Botble\Dashboard\Models\DashboardWidget;
 use Botble\Ecommerce\Models\Brand;
 use Botble\Ecommerce\Models\ProductCategory;
-use Botble\Menu\Repositories\Interfaces\MenuNodeInterface;
+use Botble\Menu\Models\MenuNode;
 use Botble\PluginManagement\Abstracts\PluginOperationAbstract;
 use Botble\Setting\Facades\Setting;
+use Botble\Widget\Models\Widget;
 use Illuminate\Support\Facades\Schema;
 
 class Plugin extends PluginOperationAbstract
@@ -71,12 +72,6 @@ class Plugin extends PluginOperationAbstract
         Schema::dropIfExists('ec_discount_product_collections');
         Schema::dropIfExists('ec_flash_sales');
         Schema::dropIfExists('ec_flash_sale_products');
-
-        app(DashboardWidgetInterface::class)->deleteBy(['name' => 'widget_ecommerce_report_general']);
-
-        app(MenuNodeInterface::class)->deleteBy(['reference_type' => Brand::class]);
-        app(MenuNodeInterface::class)->deleteBy(['reference_type' => ProductCategory::class]);
-
         Schema::dropIfExists('ec_products_translations');
         Schema::dropIfExists('ec_product_categories_translations');
         Schema::dropIfExists('ec_product_attributes_translations');
@@ -101,5 +96,11 @@ class Plugin extends PluginOperationAbstract
         Schema::dropIfExists('ec_product_views');
         Schema::dropIfExists('ec_customer_used_coupons');
         Schema::dropIfExists('ec_order_tax_information');
+
+        Widget::query()->where('name', 'widget_ecommerce_report_general')
+            ->each(fn (DashboardWidget $dashboardWidget) => $dashboardWidget->delete());
+
+        MenuNode::query()->whereIn('reference_type', [Brand::class, ProductCategory::class])
+            ->each(fn (MenuNode $menuNode) => $menuNode->delete());
     }
 }

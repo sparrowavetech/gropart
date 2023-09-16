@@ -7,8 +7,8 @@ use Botble\Ecommerce\Facades\EcommerceHelper as EcommerceHelper;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductView;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Table\DataTables;
-use Illuminate\Contracts\Routing\UrlGenerator;
+use Botble\Table\Columns\Column;
+use Botble\Table\Columns\IdColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -16,18 +16,11 @@ use Illuminate\Http\JsonResponse;
 
 class TrendingProductsTable extends TableAbstract
 {
-    protected string $type = self::TABLE_TYPE_SIMPLE;
+    public function setup(): void
+    {
+        $this->model(Product::class);
 
-    protected $view = 'core/table::simple-table';
-
-    public function __construct(
-        DataTables $table,
-        UrlGenerator $urlGenerator,
-        Product $model
-    ) {
-        parent::__construct($table, $urlGenerator);
-
-        $this->model = $model;
+        $this->view = $this->simpleTableView();
     }
 
     public function ajax(): JsonResponse
@@ -38,7 +31,9 @@ class TrendingProductsTable extends TableAbstract
                 return Html::link($product->url, $product->name, ['target' => '_blank']);
             })
             ->editColumn('views', function (Product $product) {
-                return Html::tag('i', '', ['class' => 'fa fa-eye'])->toHtml() . ' ' . number_format((float)$product->views_count);
+                return Html::tag('i', '', ['class' => 'fa fa-eye'])->toHtml() . ' ' . number_format(
+                    (float)$product->views_count
+                );
             });
 
         return $data->escapeColumns([])->make();
@@ -48,11 +43,12 @@ class TrendingProductsTable extends TableAbstract
     {
         [$startDate, $endDate] = EcommerceHelper::getDateRangeInReport(request());
 
-        $query = $this->getModel()
+        $query = $this
+            ->getModel()
             ->query()
             ->select([
-                'ec_products.id',
-                'ec_products.name',
+                'id',
+                'name',
                 'views_count' => ProductView::query()
                     ->selectRaw('SUM(views) as views_count')
                     ->whereColumn('product_id', 'ec_products.id')
@@ -60,6 +56,8 @@ class TrendingProductsTable extends TableAbstract
                     ->whereDate('date', '<=', $endDate)
                     ->groupBy('product_id'),
             ])
+            ->wherePublished()
+            ->where('is_variation', false)
             ->orderByDesc('views_count')
             ->limit(5);
 
@@ -74,19 +72,21 @@ class TrendingProductsTable extends TableAbstract
     public function columns(): array
     {
         return [
-            'id' => [
-                'title' => trans('core/base::tables.id'),
-                'width' => '20px',
-                'class' => 'text-start no-sort',
-            ],
-            'name' => [
-                'title' => trans('plugins/ecommerce::reports.product_name'),
-                'class' => 'text-start no-sort',
-            ],
-            'views' => [
-                'title' => trans('plugins/ecommerce::reports.views'),
-                'class' => 'text-start no-sort',
-            ],
+            IdColumn::make(),
+            Column::make('name')
+                ->title(trans('plugins/ecommerce::reports.product_name'))
+                ->alignLeft()
+                ->orderable(false)
+                ->searchable(false),
+            Column::make('views')
+                ->title(trans('plugins/ecommerce::reports.views'))
+                ->orderable(false)
+                ->searchable(false),
         ];
+    }
+
+    public function isSimpleTable(): bool
+    {
+        return true;
     }
 }

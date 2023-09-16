@@ -11,7 +11,7 @@ use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Forms\VendorWithdrawalForm;
 use Botble\Marketplace\Http\Requests\VendorEditWithdrawalRequest;
 use Botble\Marketplace\Http\Requests\VendorWithdrawalRequest;
-use Botble\Marketplace\Repositories\Interfaces\WithdrawalInterface;
+use Botble\Marketplace\Models\Withdrawal;
 use Botble\Marketplace\Tables\VendorWithdrawalTable;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -19,10 +19,6 @@ use Throwable;
 
 class WithdrawalController
 {
-    public function __construct(protected WithdrawalInterface $withdrawalRepository)
-    {
-    }
-
     public function index(VendorWithdrawalTable $table)
     {
         PageTitle::setTitle(__('Withdrawals'));
@@ -56,7 +52,7 @@ class WithdrawalController
         try {
             DB::beginTransaction();
 
-            $withdrawal = $this->withdrawalRepository->create([
+            $withdrawal = Withdrawal::query()->create([
                 'fee' => $fee,
                 'amount' => $request->input('amount'),
                 'customer_id' => $vendor->getKey(),
@@ -88,15 +84,13 @@ class WithdrawalController
 
     public function edit(int|string $id, FormBuilder $formBuilder)
     {
-        $withdrawal = $this->withdrawalRepository->getFirstBy([
-            'id' => $id,
-            'customer_id' => auth('customer')->id(),
-            'status' => WithdrawalStatusEnum::PENDING,
-        ]);
-
-        if (! $withdrawal) {
-            abort(404);
-        }
+        $withdrawal = Withdrawal::query()
+            ->where([
+                'id' => $id,
+                'customer_id' => auth('customer')->id(),
+                'status' => WithdrawalStatusEnum::PENDING,
+            ])
+            ->firstOrFail();
 
         PageTitle::setTitle(__('Update withdrawal request #' . $id));
 
@@ -105,15 +99,13 @@ class WithdrawalController
 
     public function update(int|string $id, VendorEditWithdrawalRequest $request, BaseHttpResponse $response)
     {
-        $withdrawal = $this->withdrawalRepository->getFirstBy([
-            'id' => $id,
-            'customer_id' => auth('customer')->id(),
-            'status' => WithdrawalStatusEnum::PENDING,
-        ]);
-
-        if (! $withdrawal) {
-            abort(404);
-        }
+        $withdrawal = Withdrawal::query()
+            ->where([
+                'id' => $id,
+                'customer_id' => auth('customer')->id(),
+                'status' => WithdrawalStatusEnum::PENDING,
+            ])
+            ->firstOrFail();
 
         $status = WithdrawalStatusEnum::PENDING;
         if ($request->input('cancel')) {
@@ -126,7 +118,7 @@ class WithdrawalController
             'description' => $request->input('description'),
         ]);
 
-        $this->withdrawalRepository->createOrUpdate($withdrawal);
+        $withdrawal->save();
 
         return $response
             ->setPreviousUrl(route('marketplace.vendor.withdrawals.index'))
@@ -135,16 +127,11 @@ class WithdrawalController
 
     public function show(int|string $id, FormBuilder $formBuilder)
     {
-        $withdrawal = $this->withdrawalRepository
-            ->getFirstBy([
-                ['id', '=', $id],
-                ['customer_id', '=', auth('customer')->id()],
-                ['status', '!=', WithdrawalStatusEnum::PENDING],
-            ]);
-
-        if (! $withdrawal) {
-            abort(404);
-        }
+        $withdrawal = Withdrawal::query()
+            ->where('id', $id)
+            ->where('customer_id', auth('customer')->id())
+            ->where('status', '!=', WithdrawalStatusEnum::PENDING)
+            ->firstOrFail();
 
         PageTitle::setTitle(__('View withdrawal request #' . $id));
 

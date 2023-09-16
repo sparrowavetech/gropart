@@ -33,25 +33,14 @@ jQuery(document).ready(($) => {
 
         let $form = _self.closest('form')
 
-        $.ajax({
-            url: $form.prop('action'),
-            type: 'POST',
-            data: $form.serialize(),
-            success: (data) => {
-                _self.removeClass('button-loading')
-
-                if (data.error) {
-                    Botble.showError(data.message)
-                } else {
-                    Botble.showSuccess(data.message)
-                    $form.removeClass('dirty')
-                }
-            },
-            error: (data) => {
-                _self.removeClass('button-loading')
-                Botble.handleError(data)
-            },
-        })
+        $httpClient
+            .make()
+            .postForm($form.prop('action'), new FormData($form[0]))
+            .then((response) => {
+                Botble.showSuccess(response.message)
+                $form.removeClass('dirty')
+            })
+            .finally(() => _self.removeClass('button-loading'))
     })
 
     $(document).on('click', '.button-publish-groups', function (event) {
@@ -67,26 +56,13 @@ jQuery(document).ready(($) => {
 
         let $form = $('.button-publish-groups').closest('form')
 
-        $.ajax({
-            url: $form.prop('action'),
-            type: 'POST',
-            data: $form.serialize(),
-            success: (data) => {
-                _self.removeClass('button-loading')
-
-                if (data.error) {
-                    Botble.showError(data.message)
-                } else {
-                    Botble.showSuccess(data.message)
-                    $form.removeClass('dirty')
-                }
-
-                _self.closest('.modal').modal('hide')
-            },
-            error: (data) => {
-                _self.removeClass('button-loading')
-                Botble.handleError(data)
-            },
-        })
+        $httpClient
+            .make()
+            .postForm($form.prop('action'), new FormData($form[0]))
+            .then((response) => {
+                Botble.showSuccess(response.message)
+                $form.removeClass('dirty')
+            })
+            .finally(() => _self.removeClass('button-loading'))
     })
 })

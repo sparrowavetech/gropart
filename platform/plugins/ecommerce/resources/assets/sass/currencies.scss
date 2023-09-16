@@ -96,17 +96,23 @@
         width: 50px;
     }
 
-    .swatch-exchange-rate, .swatch-is-prefix-symbol, .swatch-decimals {
+    .swatch-exchange-rate,
+    .swatch-is-prefix-symbol,
+    .swatch-decimals {
         max-width: 145px;
     }
 }
 
-
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
-#btn-update-currencies, #btn-clear-cache-rates {
+#btn-update-currencies,
+#btn-clear-cache-rates {
     margin-top: 18px;
 }

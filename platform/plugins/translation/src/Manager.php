@@ -95,7 +95,6 @@ class Manager
         string|null $group,
         bool $replace = false
     ): bool {
-        // process only string values
         if (is_array($value)) {
             return false;
         }
@@ -187,7 +186,7 @@ class Manager
 
     public function exportAllTranslations(): bool
     {
-        $groups = Translation::query()->whereNotNull('value')->selectDistinctGroup()->get('group');
+        $groups = Translation::selectDistinctGroup()->whereNotNull('value')->get('group');
 
         foreach ($groups as $group) {
             $this->exportTranslations($group->group);

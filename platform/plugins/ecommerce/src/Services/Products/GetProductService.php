@@ -2,14 +2,12 @@
 
 namespace Botble\Ecommerce\Services\Products;
 
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class GetProductService
 {
@@ -51,14 +49,6 @@ class GetProductService
 
         if ($brand) {
             $queryVar['brands'] = array_merge(($queryVar['brands']), [$brand]);
-        }
-
-        $countAttributeGroups = 1;
-        if (count($queryVar['attributes'])) {
-            $countAttributeGroups = DB::table('ec_product_attributes')
-                ->whereIn('id', $queryVar['attributes'])
-                ->distinct('attribute_set_id')
-                ->count('attribute_set_id');
         }
 
         $orderBy = [
@@ -135,10 +125,7 @@ class GetProductService
         }
 
         if (! empty($conditions)) {
-            $params['condition'] = array_merge([
-                'ec_products.status' => BaseStatusEnum::PUBLISHED,
-                'ec_products.is_variation' => 0,
-            ], $conditions);
+            $params['condition'] = $conditions;
         }
 
         $products = $this->productRepository->filterProducts([
@@ -150,7 +137,6 @@ class GetProductService
             'collections' => $queryVar['collections'],
             'brands' => $queryVar['brands'],
             'attributes' => $queryVar['attributes'],
-            'count_attribute_groups' => $countAttributeGroups,
             'order_by' => $orderBy,
         ], $params);
 

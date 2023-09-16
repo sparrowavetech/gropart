@@ -51,7 +51,9 @@ class CurrencySupport
             $currency = $this->getDefaultCurrency();
         }
 
-        $this->currency = $this->setCurrencyExchangeRate($currency);
+        if (! $currency->is_default) {
+            $this->currency = $this->setCurrencyExchangeRate($currency);
+        }
 
         return $currency;
     }
@@ -101,7 +103,7 @@ class CurrencySupport
 
         if ($this->currencies->count() == 0) {
             $this->currencies = Currency::query()
-                ->orderBy('order', 'ASC')
+                ->orderBy('order')
                 ->get();
         }
 

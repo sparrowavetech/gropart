@@ -4,11 +4,17 @@
             <aside class="ps-block--store-banner">
                 <div class="ps-block__user">
                     <div class="ps-block__user-avatar">
-                        <img src="{{ $store->logo_url }}" alt="{{ $store->name }}">
+                        <img
+                            src="{{ $store->logo_url }}"
+                            alt="{{ $store->name }}"
+                        >
                         @if (EcommerceHelper::isReviewEnabled())
                             <div class="rating_wrap">
                                 <div class="rating">
-                                    <div class="product_rate" style="width: {{ $store->reviews()->avg('star') * 20 }}%"></div>
+                                    <div
+                                        class="product_rate"
+                                        style="width: {{ $store->reviews()->avg('star') * 20 }}%"
+                                    ></div>
                                 </div>
                                 <span class="rating_num">({{ $store->reviews()->count() }})</span>
                             </div>
@@ -23,7 +29,8 @@
                             <p><i class="icon-telephone"></i>&nbsp;{{ $store->phone }}</p>
                         @endif
                         @if (!MarketplaceHelper::hideStoreEmail() && $store->email)
-                            <p><i class="icon-envelope"></i>&nbsp;<a href="mailto:{{ $store->email }}">{{ $store->email }}</a></p>
+                            <p><i class="icon-envelope"></i>&nbsp;<a
+                                    href="mailto:{{ $store->email }}">{{ $store->email }}</a></p>
                         @endif
                     </div>
                 </div>
@@ -43,11 +50,14 @@
                         </div>
                     </div>
                     <div class="ps-tabs">
-                        <div class="ps-tab active" id="tab-1">
+                        <div
+                            class="ps-tab active"
+                            id="tab-1"
+                        >
                             <div class="ps-shopping-product">
                                 <div class="row">
                                     @if ($products->count() > 0)
-                                        @foreach($products as $product)
+                                        @foreach ($products as $product)
                                             <div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-6 ">
                                                 <div class="ps-product">
                                                     {!! Theme::partial('ecommerce.product-item', compact('product')) !!}
@@ -61,7 +71,10 @@
                                 {!! $products->withQueryString()->links() !!}
                             </div>
                         </div>
-                        <div class="ps-tab" id="tab-2">
+                        <div
+                            class="ps-tab"
+                            id="tab-2"
+                        >
                             @include('plugins/marketplace::themes.stores.items')
                         </div>
                     </div>

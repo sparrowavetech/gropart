@@ -1,7 +1,9 @@
 @if (!$order->dont_show_order_info_in_product_list)
-    <a href="{{ route('public.orders.tracking', ['order_id' => $order->code, 'email' => $order->user->email ?: $order->address->email]) }}"
-        class="button button-blue">{{ trans('plugins/ecommerce::email.view_order') }}</a>
-        {!! trans('plugins/ecommerce::email.link_go_to_our_shop', ['link' => route('public.index')]) !!}
+    <a
+        class="button button-blue"
+        href="{{ route('public.orders.tracking', ['order_id' => $order->code, 'email' => $order->user->email ?: $order->address->email]) }}"
+    >{{ trans('plugins/ecommerce::email.view_order') }}</a>
+    {!! trans('plugins/ecommerce::email.link_go_to_our_shop', ['link' => route('public.index')]) !!}
 
     <br />
 
@@ -31,10 +33,14 @@
             </th>
         </tr>
 
-        @foreach (($products ?? $order->products) as $orderProduct)
+        @foreach ($products ?? $order->products as $orderProduct)
             <tr>
                 <td>
-                    <img src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb') }}" alt="{{ $orderProduct->product_name }}" width="50">
+                    <img
+                        src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb') }}"
+                        alt="{{ $orderProduct->product_name }}"
+                        width="50"
+                    >
                 </td>
                 <td>
                     {{ $orderProduct->product_name }}
@@ -42,7 +48,15 @@
                         <small>{{ $attributes }}</small>
                     @endif
 
-                    @include('plugins/ecommerce::themes.includes.cart-item-options-extras', ['options' => $orderProduct->options])
+                    @if (!empty($orderProduct->product_options) && is_array($orderProduct->product_options))
+                        <div style="font-size: 80%; margin-top: 10px">
+                            {!! render_product_options_html($orderProduct->product_options) !!}
+                        </div>
+                    @endif
+
+                    @include('plugins/ecommerce::themes.includes.cart-item-options-extras', [
+                        'options' => $orderProduct->options,
+                    ])
                 </td>
 
                 <td>
@@ -107,7 +121,9 @@
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
 
-                <td><h3>{{ trans('plugins/ecommerce::products.form.total') }}</h3></td>
+                <td>
+                    <h3>{{ trans('plugins/ecommerce::products.form.total') }}</h3>
+                </td>
                 <td>
                     <h3>{{ format_price($order->amount) }}</h3>
                 </td>
@@ -115,4 +131,3 @@
         @endif
     </table><br>
 </div>
-

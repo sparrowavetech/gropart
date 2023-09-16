@@ -6,13 +6,13 @@ use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Forms\FlashSaleForm;
 use Botble\Ecommerce\Http\Requests\FlashSaleRequest;
 use Botble\Ecommerce\Models\FlashSale;
-use Botble\Ecommerce\Repositories\Interfaces\FlashSaleInterface;
 use Botble\Ecommerce\Tables\FlashSaleTable;
 use Exception;
 use Illuminate\Http\Request;
@@ -20,30 +20,23 @@ use Illuminate\Support\Arr;
 
 class FlashSaleController extends BaseController
 {
-    protected FlashSaleInterface $flashSaleRepository;
-
-    public function __construct(FlashSaleInterface $flashSaleRepository)
-    {
-        $this->flashSaleRepository = $flashSaleRepository;
-    }
-
     public function index(FlashSaleTable $table)
     {
-        page_title()->setTitle(trans('plugins/ecommerce::flash-sale.name'));
+        PageTitle::setTitle(trans('plugins/ecommerce::flash-sale.name'));
 
         return $table->renderTable();
     }
 
     public function create(FormBuilder $formBuilder)
     {
-        page_title()->setTitle(trans('plugins/ecommerce::flash-sale.create'));
+        PageTitle::setTitle(trans('plugins/ecommerce::flash-sale.create'));
 
         return $formBuilder->create(FlashSaleForm::class)->renderForm();
     }
 
     public function store(FlashSaleRequest $request, BaseHttpResponse $response)
     {
-        $flashSale = $this->flashSaleRepository->createOrUpdate($request->input());
+        $flashSale = FlashSale::query()->create($request->input());
 
         event(new CreatedContentEvent(FLASH_SALE_MODULE_SCREEN_NAME, $request, $flashSale));
 
@@ -85,24 +78,19 @@ class FlashSaleController extends BaseController
         return count($products);
     }
 
-    public function edit(int $id, FormBuilder $formBuilder, Request $request)
+    public function edit(FlashSale $flashSale, FormBuilder $formBuilder, Request $request)
     {
-        $flashSale = $this->flashSaleRepository->findOrFail($id);
-
         event(new BeforeEditContentEvent($request, $flashSale));
 
-        page_title()->setTitle(trans('plugins/ecommerce::flash-sale.edit') . ' "' . $flashSale->name . '"');
+        PageTitle::setTitle(trans('core/base::forms.edit_item', ['name' => $flashSale->name]));
 
         return $formBuilder->create(FlashSaleForm::class, ['model' => $flashSale])->renderForm();
     }
 
-    public function update(int $id, FlashSaleRequest $request, BaseHttpResponse $response)
+    public function update(FlashSale $flashSale, FlashSaleRequest $request, BaseHttpResponse $response)
     {
-        $flashSale = $this->flashSaleRepository->findOrFail($id);
-
         $flashSale->fill($request->input());
-
-        $this->flashSaleRepository->createOrUpdate($flashSale);
+        $flashSale->save();
 
         $this->storeProducts($request, $flashSale);
 
@@ -113,12 +101,10 @@ class FlashSaleController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(Request $request, int $id, BaseHttpResponse $response)
+    public function destroy(FlashSale $flashSale, Request $request, BaseHttpResponse $response)
     {
         try {
-            $flashSale = $this->flashSaleRepository->findOrFail($id);
-
-            $this->flashSaleRepository->delete($flashSale);
+            $flashSale->delete();
 
             event(new DeletedContentEvent(FLASH_SALE_MODULE_SCREEN_NAME, $request, $flashSale));
 
@@ -128,23 +114,5 @@ class FlashSaleController extends BaseController
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
-    }
-
-    public function deletes(Request $request, BaseHttpResponse $response)
-    {
-        $ids = $request->input('ids');
-        if (empty($ids)) {
-            return $response
-                ->setError()
-                ->setMessage(trans('core/base::notices.no_select'));
-        }
-
-        foreach ($ids as $id) {
-            $flashSale = $this->flashSaleRepository->findOrFail($id);
-            $this->flashSaleRepository->delete($flashSale);
-            event(new DeletedContentEvent(FLASH_SALE_MODULE_SCREEN_NAME, $request, $flashSale));
-        }
-
-        return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 }

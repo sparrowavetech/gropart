@@ -5,7 +5,7 @@
 @mixin clearfix() {
     &:before,
     &:after {
-        content: " "; // 1
+        content: ' '; // 1
         display: table; // 2
     }
     &:after {
@@ -74,7 +74,8 @@
 
 @mixin pulsate($animation-name, $start-size: 0.75, $end-size: 1, $duration: 1.5s) {
     @keyframes #{$animationName} {
-        0%, 100% {
+        0%,
+        100% {
             transform: scale($start-size);
         }
         50% {
@@ -120,7 +121,15 @@
     transition: #{$transition};
 }
 
-@mixin burger-icon($line-color, $line-color-hover, $line-width, $line-height, $base-top: -5px, $above-top: 5px, $below-top: -5px) {
+@mixin burger-icon(
+    $line-color,
+    $line-color-hover,
+    $line-width,
+    $line-height,
+    $base-top: -5px,
+    $above-top: 5px,
+    $below-top: -5px
+) {
     > span {
         outline: none !important;
 
@@ -143,7 +152,7 @@
         background: $line-color;
         position: relative;
         top: $base-top;
-        transition: all ease .3s;
+        transition: all ease 0.3s;
     }
 
     > span:before,

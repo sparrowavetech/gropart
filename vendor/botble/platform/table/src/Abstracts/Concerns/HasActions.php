@@ -4,6 +4,7 @@ namespace Botble\Table\Abstracts\Concerns;
 
 use Botble\Base\Models\BaseModel;
 use Botble\Table\Abstracts\TableActionAbstract;
+use Botble\Table\Columns\Column;
 use Botble\Table\Columns\RowActionsColumn;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
@@ -54,6 +55,8 @@ trait HasActions
         }
 
         $this->rowActions = array_merge($this->rowActions, $newActions);
+
+        $this->hasOperations = false;
 
         return $this;
     }
@@ -147,9 +150,15 @@ trait HasActions
     public function getOperationsHeading()
     {
         return [
-            RowActionsColumn::make('operations')
+            Column::make('operations')
                 ->title(trans('core/base::tables.operations'))
-                ->width(134),
+                ->width(134)
+                ->alignCenter()
+                ->orderable(false)
+                ->searchable(false)
+                ->exportable(false)
+                ->printable(false)
+                ->responsivePriority(99),
         ];
     }
 

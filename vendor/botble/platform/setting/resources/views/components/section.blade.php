@@ -7,12 +7,12 @@
 
 <div class="flexbox-annotated-section">
     <div class="flexbox-annotated-section-annotation">
-        @if($title)
+        @if ($title)
             <div class="annotated-section-title pd-all-20">
                 <h2>{!! $title !!}</h2>
             </div>
         @endif
-        @if($description)
+        @if ($description)
             <div class="annotated-section-description pd-all-20 p-none-t">
                 <p class="color-note">{!! $description !!}</p>
             </div>

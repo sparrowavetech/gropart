@@ -9,21 +9,19 @@ use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Models\Discount;
-use Botble\Ecommerce\Repositories\Interfaces\DiscountInterface;
+use Botble\Ecommerce\Models\OrderReturn;
+use Botble\JsValidation\Facades\JsValidator;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Http\Requests\DiscountRequest;
 use Botble\Marketplace\Tables\DiscountTable;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class DiscountController extends BaseController
 {
-    public function __construct(protected DiscountInterface $discountRepository)
-    {
-    }
-
     public function index(DiscountTable $table)
     {
         PageTitle::setTitle(__('Coupons'));
@@ -44,7 +42,11 @@ class DiscountController extends BaseController
 
         Assets::usingVueJS();
 
-        return MarketplaceHelper::view('dashboard.discounts.create');
+        Assets::addScripts(['form-validation']);
+
+        $jsValidation = JsValidator::formRequest(DiscountRequest::class, '#marketplace-vendor-discount');
+
+        return MarketplaceHelper::view('dashboard.discounts.create', compact('jsValidation'));
     }
 
     protected function getStore()
@@ -78,10 +80,9 @@ class DiscountController extends BaseController
             ]);
         }
 
-        /**
-         * @var Discount $discount
-         */
-        $discount = $this->discountRepository->createOrUpdate($request->input());
+        $discount = new Discount();
+
+        $discount->fill($request->input());
 
         $discount->store_id = $this->getStore()->id;
         $discount->save();
@@ -95,14 +96,10 @@ class DiscountController extends BaseController
 
     public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
-        try {
-            $discount = $this->discountRepository->findOrFail($id);
-            if ($discount->store_id != $this->getStore()->id) {
-                return $response
-                    ->setError();
-            }
+        $discount = $this->findOrFail($id);
 
-            $this->discountRepository->delete($discount);
+        try {
+            $discount->delete();
 
             event(new DeletedContentEvent(DISCOUNT_MODULE_SCREEN_NAME, $request, $discount));
 
@@ -114,35 +111,20 @@ class DiscountController extends BaseController
         }
     }
 
-    public function deletes(Request $request, BaseHttpResponse $response)
-    {
-        $ids = $request->input('ids');
-        if (empty($ids)) {
-            return $response
-                ->setError()
-                ->setMessage(trans('core/base::notices.no_select'));
-        }
-
-        foreach ($ids as $id) {
-            $discount = $this->discountRepository->findOrFail($id);
-
-            if ($discount->store_id != $this->getStore()->id) {
-                continue;
-            }
-
-            $this->discountRepository->delete($discount);
-            event(new DeletedContentEvent(DISCOUNT_MODULE_SCREEN_NAME, $request, $discount));
-        }
-
-        return $response->setMessage(trans('core/base::notices.delete_success_message'));
-    }
-
     public function postGenerateCoupon(BaseHttpResponse $response)
     {
         do {
             $code = strtoupper(Str::random(12));
-        } while ($this->discountRepository->count(['code' => $code]) > 0);
+        } while (Discount::query()->where('code', $code)->exists());
 
         return $response->setData($code);
+    }
+
+    protected function findOrFail(int|string $id): OrderReturn|Model|null
+    {
+        return Discount::query()
+            ->where('id', $id)
+            ->where('store_id', $this->getStore()->id)
+            ->firstOrFail();
     }
 }

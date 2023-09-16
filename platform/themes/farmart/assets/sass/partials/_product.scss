@@ -187,12 +187,6 @@
         }
     }
 
-    .star-rating-wrapper {
-        .star-customers-review {
-            display: none;
-        }
-    }
-
     .meta-sku {
         display: none;
     }
@@ -1110,10 +1104,24 @@
         padding-inline-end: 12px;
 
         li {
+            > .widget-layered-nav-list__item {
+                .cat-menu-close {
+                    &.opened-icon {
+                        display: none;
+                    }
+                }
+            }
+
             &.opened {
                 > .widget-layered-nav-list__item {
                     .cat-menu-close {
-                        transform: rotateX(180deg);
+                        &.closed-icon {
+                            display: none;
+                        }
+
+                        &.opened-icon {
+                            display: block;
+                        }
                     }
                 }
 
@@ -1127,7 +1135,7 @@
             }
 
             position: relative;
-            margin: 6px 0px;
+            margin: 6px 0;
 
             .widget-layered-nav-list__item {
                 padding: 0;

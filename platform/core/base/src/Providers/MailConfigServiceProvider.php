@@ -46,6 +46,8 @@ class MailConfigServiceProvider extends ServiceProvider
                             ),
                             'username' => $setting->get('email_username', $config->get('mail.mailers.smtp.username')),
                             'password' => $setting->get('email_password', $config->get('mail.mailers.smtp.password')),
+                            'auth_mode' => null,
+                            'verify_peer' => false,
                         ]),
                     ]);
 

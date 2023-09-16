@@ -10,7 +10,10 @@
                 @include('plugins/ecommerce::orders.partials.logo')
 
                 <div class="thank-you">
-                    <i class="fa fa-check-circle" aria-hidden="true"></i>
+                    <i
+                        class="fa fa-check-circle"
+                        aria-hidden="true"
+                    ></i>
                     <div class="d-inline-block">
                         <h3 class="thank-you-sentence">
                             {{ __('Your order is successfully placed') }}
@@ -19,13 +22,12 @@
                     </div>
                 </div>
 
-                <div class="thank-you-links mb-4">
-                    <span class="link-text"><a href="{{ route('customer.overview') }}">{{ __('Customer dashboard') }}</a></span>
-                </div>
-
                 @include('plugins/ecommerce::orders.thank-you.customer-info', compact('order'))
 
-                <a href="{{ route('public.index') }}" class="btn payment-checkout-btn"> {{ __('Continue shopping') }} </a>
+                <a
+                    class="btn payment-checkout-btn"
+                    href="{{ route('public.index') }}"
+                > {{ __('Continue shopping') }} </a>
             </div>
             <div class="col-lg-5 col-md-6 d-none d-md-block right">
 

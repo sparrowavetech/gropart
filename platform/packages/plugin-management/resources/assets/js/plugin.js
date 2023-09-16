@@ -12,26 +12,17 @@ class PluginManagement {
             _self.addClass('button-loading')
             const $modal = $('#remove-plugin-modal')
 
-            $.ajax({
-                url: route('plugins.remove', { plugin: _self.data('plugin') }),
-                type: 'POST',
-                data: { _method: 'DELETE' },
-                success: (data) => {
-                    if (data.error) {
-                        Botble.showError(data.message)
-                    } else {
-                        Botble.showSuccess(data.message)
-                        window.location.reload()
-                    }
+            $httpClient
+                .make()
+                .delete(route('plugins.remove', { plugin: _self.data('plugin') }))
+                .then(({ data }) => {
+                    Botble.showSuccess(data.message)
+                    window.location.reload()
+                })
+                .finally(() => {
                     _self.removeClass('button-loading')
                     $modal.modal('hide')
-                },
-                error: (data) => {
-                    Botble.handleError(data)
-                    _self.removeClass('button-loading')
-                    $modal.modal('hide')
-                },
-            })
+                })
         })
 
         $(document).on('click', '.btn-trigger-update-plugin', (event) => {
@@ -44,32 +35,19 @@ class PluginManagement {
             _self.addClass('button-loading')
             _self.attr('disabled', true)
 
-            $.ajax({
-                url: route('plugins.marketplace.ajax.update', { id: uuid, name: name }),
-                type: 'POST',
-                success: (data) => {
-                    if (data.error) {
-                        Botble.showError(data.message)
-
-                        _self.removeClass('button-loading')
-                        _self.removeAttr('disabled', true)
-
-                        if (data.data && data.data.redirect) {
-                            window.location.href
-                        }
-                    } else {
-                        Botble.showSuccess(data.message)
-                        setTimeout(() => {
-                            window.location.reload()
-                        }, 2000)
-                    }
-                },
-                error: (data) => {
-                    Botble.handleError(data)
+            $httpClient
+                .make()
+                .post(route('plugins.marketplace.ajax.update', { id: uuid, name: name }))
+                .then(({ data }) => {
+                    Botble.showSuccess(data.message)
+                    setTimeout(() => {
+                        window.location.reload()
+                    }, 2000)
+                })
+                .finally(() => {
                     _self.removeClass('button-loading')
                     _self.removeAttr('disabled', true)
-                },
-            })
+                })
         })
 
         $(document).on('click', '.btn-trigger-change-status', async (event) => {
@@ -84,32 +62,31 @@ class PluginManagement {
                 return
             }
 
-            $.ajax({
-                url: route('plugins.check-requirement', { name: pluginName }),
-                type: 'POST',
-                success: async (response) => {
-                    const { error, data, message } = response
-                    if (error) {
-                        if (data && data.existing_plugins_on_marketplace) {
-                            const $modal = $('#confirm-install-plugin-modal')
-                            $modal.find('.modal-body #requirement-message').html(message)
-                            $modal.find('input[name="plugin_name"]').val(pluginName)
-                            $modal.find('input[name="ids"]').val(data.existing_plugins_on_marketplace)
-                            $modal.modal('show')
-                            _self.removeClass('button-loading')
-                            return
-                        }
-                        Botble.showError(message)
-                    } else {
-                        await this.activateOrDeactivatePlugin(pluginName)
+            $httpClient
+                .makeWithoutErrorHandler()
+                .post(route('plugins.check-requirement', { name: pluginName }))
+                .then(async ({ data }) => {
+                    await this.activateOrDeactivatePlugin(pluginName)
+                })
+                .catch((e) => {
+                    const { data, message } = e.response.data
+
+                    if (data && data.existing_plugins_on_marketplace) {
+                        const $modal = $('#confirm-install-plugin-modal')
+                        $modal.find('.modal-body #requirement-message').html(message)
+                        $modal.find('input[name="plugin_name"]').val(pluginName)
+                        $modal.find('input[name="ids"]').val(data.existing_plugins_on_marketplace)
+                        $modal.modal('show')
+                        _self.removeClass('button-loading')
+
+                        return
                     }
+
+                    Botble.showError(message)
+                })
+                .finally(() => {
                     _self.removeClass('button-loading')
-                },
-                error: (error) => {
-                    Botble.handleError(error)
-                    _self.removeClass('button-loading')
-                },
-            })
+                })
         })
 
         $(document).on('click', '#confirm-install-plugin-button', async (event) => {
@@ -144,10 +121,10 @@ class PluginManagement {
     }
 
     checkUpdate() {
-        $.ajax({
-            url: route('plugins.marketplace.ajax.check-update'),
-            type: 'POST',
-            success: (data) => {
+        $httpClient
+            .make()
+            .post(route('plugins.marketplace.ajax.check-update'))
+            .then(({ data }) => {
                 if (!data.data) {
                     return
                 }
@@ -155,49 +132,34 @@ class PluginManagement {
                 Object.keys(data.data).forEach((key) => {
                     const plugin = data.data[key]
 
-                    $('button[data-check-update="' + plugin.name + '"]').data('uuid', plugin.id).show()
+                    $('button[data-check-update="' + plugin.name + '"]')
+                        .data('uuid', plugin.id)
+                        .show()
                 })
-            },
-        })
+            })
     }
 
     async activateOrDeactivatePlugin(pluginName, reload = true) {
-        await $.ajax({
-            url: route('plugins.change.status', { name: pluginName }),
-            type: 'POST',
-            data: { _method: 'PUT' },
-            success: (data) => {
-                if (!data.error) {
-                    Botble.showSuccess(data.message)
-                    if (reload) {
-                        $('#plugin-list #app-' + pluginName).load(
-                            window.location.href + ' #plugin-list #app-' + pluginName + ' > *',
-                        )
-                        window.location.reload()
-                    }
-                    return
+        return $httpClient
+            .make()
+            .put(route('plugins.change.status', { name: pluginName }))
+            .then(({ data }) => {
+                Botble.showSuccess(data.message)
+
+                if (reload) {
+                    $('#plugin-list #app-' + pluginName).load(
+                        window.location.href + ' #plugin-list #app-' + pluginName + ' > *'
+                    )
+                    window.location.reload()
                 }
-                Botble.showError(data.message)
-            },
-            error: (data) => {
-                Botble.handleError(data)
-            },
-        })
+            })
     }
 
     async installPlugin(id) {
-        let data = null
-
-        await $.ajax({
-            method: 'POST',
-            url: route('plugins.marketplace.ajax.install', { id }),
-            success: (response) => (data = response.error ? [] : response.data),
-            error: (error) => {
-                Botble.handleError(error)
-            },
-        })
-
-        return data
+        return await $httpClient
+            .make()
+            .post(route('plugins.marketplace.ajax.install', { id }))
+            .then(({ data }) => (data.error ? [] : data.data))
     }
 }
 

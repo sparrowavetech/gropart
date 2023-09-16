@@ -15,29 +15,13 @@ $(document).ready(function () {
         const $form = $('#form-cleanup-database')
         const $modal = $('#cleanup-modal')
 
-        $.ajax({
-            type: 'POST',
-            cache: false,
-            url: $form.prop('action'),
-            data: new FormData($form[0]),
-            contentType: false,
-            processData: false,
-            success: (res) => {
-                if (!res.error) {
-                    Botble.showSuccess(res.message)
-                } else {
-                    Botble.showError(res.message)
-                }
-
+        $httpClient
+            .make()
+            .post($form.prop('action'), new FormData($form[0]))
+            .then(({ data }) => Botble.showSuccess(data.message))
+            .finally(() => {
                 _self.removeClass('button-loading')
                 $modal.modal('hide')
-            },
-            error: (res) => {
-                _self.removeClass('button-loading')
-                $modal.modal('hide')
-
-                Botble.handleError(res)
-            },
-        })
+            })
     })
 })

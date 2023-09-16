@@ -56,7 +56,7 @@ export default {
     },
     watch: {
         items: {
-            handler: function( value) {
+            handler: function (value) {
                 if (value) {
                     this.$nextTick(() => {
                         if (window.Botble) {
@@ -70,7 +70,7 @@ export default {
                     })
                 }
             },
-            deep: true
+            deep: true,
         },
     },
 }

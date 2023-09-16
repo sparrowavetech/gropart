@@ -1,18 +1,26 @@
 <?php
 
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\EmailHandler;
+use Botble\Base\Facades\Form;
+use Botble\Base\Facades\MetaBox;
 use Botble\Base\Forms\FormAbstract;
-use Botble\SimpleSlider\Models\SimpleSliderItem;
-use Kris\LaravelFormBuilder\FormHelper;
-use Theme\Farmart\Fields\ThemeIconField;
+use Botble\Base\Forms\FormHelper;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Models\Store;
+use Botble\Media\Facades\RvMedia;
+use Botble\Menu\Facades\Menu;
+use Botble\SimpleSlider\Models\SimpleSliderItem;
+use Botble\SocialLogin\Facades\SocialService;
+use Botble\Theme\Facades\Theme;
+use Illuminate\Support\Facades\Route;
+use Theme\Farmart\Fields\ThemeIconField;
 
 register_page_template([
     'default' => __('Default'),
-    'default-sidebar' => __('Default with Sidebar'),
     'homepage' => __('Homepage'),
     'full-width' => __('Full Width'),
     'coming-soon' => __('Coming Soon'),
-    'blog-right-sidebar' => __('Blog with Sidebar'),
 ]);
 
 register_sidebar([
@@ -31,12 +39,6 @@ register_sidebar([
     'id' => 'bottom_footer_sidebar',
     'name' => __('Bottom footer sidebar'),
     'description' => __('Widgets in bottom footer sidebar'),
-]);
-
-register_sidebar([
-    'id' => 'default_page_sidebar',
-    'name' => __('Default Page sidebar'),
-    'description' => __('Widgets in Default Page sidebar'),
 ]);
 
 if (is_plugin_active('ecommerce')) {
@@ -81,8 +83,12 @@ app()->booted(function () {
     add_filter('marketplace_vendor_settings_register_content_tab_inside', function ($html, $object) {
         if (get_class($object) == Store::class) {
             $background = $object->getMetaData('background', true);
-            $socials = $object->getMetaData('socials', true);
-            $availableSocials = available_socials_store();
+            $socials = [];
+            $availableSocials = [];
+            if (! MarketplaceHelper::hideStoreSocialLinks()) {
+                $socials = $object->getMetaData('socials', true);
+                $availableSocials = available_socials_store();
+            }
             $view = Theme::getThemeNamespace() . '::views.marketplace.includes.extended-info-content';
 
             return $html . view($view, compact('background', 'socials', 'availableSocials'))->render();
@@ -109,7 +115,7 @@ app()->booted(function () {
                     }
                 }
 
-                if ($request->has('socials')) {
+                if (! MarketplaceHelper::hideStoreSocialLinks() && $request->has('socials')) {
                     $availableSocials = available_socials_store();
                     $socials = collect((array)$request->input('socials', []))->filter(function ($value, $key) use ($availableSocials) {
                         return filter_var($value, FILTER_VALIDATE_URL) && in_array($key, array_keys($availableSocials));
@@ -197,7 +203,9 @@ add_filter(BASE_FILTER_BEFORE_RENDER_FORM, function ($form, $data) {
 if (! function_exists('theme_get_autoplay_speed_options')) {
     function theme_get_autoplay_speed_options(): array
     {
-        return array_combine([2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000], [2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]);
+        $options = [2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000];
+
+        return array_combine($options, $options);
     }
 }
 

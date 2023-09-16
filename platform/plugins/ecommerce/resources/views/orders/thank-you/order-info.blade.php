@@ -1,86 +1,60 @@
 <div class="pt-3 mb-4">
-    <div class="align-items-center order-number-data">
-        <h6 class="d-block od-no">{{ __('Order number') }}: {{ $order->code }}</h6>
+    <div class="align-items-center">
+        <h6 class="d-inline-block">{{ __('Order number') }}: {{ $order->code }}</h6>
     </div>
 
     <div class="checkout-success-products">
         <div class="row show-cart-row d-md-none p-2">
             <div class="col-9">
-                <a class="show-cart-link"
-                   href="javascript:void(0);"
-                   data-bs-toggle="collapse"
-                   data-bs-target="{{ '#cart-item-' . $order->id }}">
-                    {{ __('Order information :order_id', ['order_id' => $order->code]) }} <i class="fa fa-angle-down" aria-hidden="true"></i>
+                <a
+                    class="show-cart-link"
+                    data-bs-toggle="collapse"
+                    data-bs-target="{{ '#cart-item-' . $order->id }}"
+                    href="javascript:void(0);"
+                >
+                    {{ __('Order information :order_id', ['order_id' => $order->code]) }} <i
+                        class="fa fa-angle-down"
+                        aria-hidden="true"
+                    ></i>
                 </a>
             </div>
             <div class="col-3">
                 <p class="text-end mobile-total"> {{ format_price($order->amount) }} </p>
             </div>
         </div>
-        <div id="{{ 'cart-item-' . $order->id }}" class="collapse collapse-products">
+        <div
+            class="collapse collapse-products"
+            id="{{ 'cart-item-' . $order->id }}"
+        >
             @foreach ($order->products as $orderProduct)
-                @php
-                    $product = get_products([
-                        'condition' => [
-                            'ec_products.id' => $orderProduct->product_id,
-                        ],
-                        'take'   => 1,
-                        'select' => [
-                            'ec_products.id',
-                            'ec_products.image',
-                            'ec_products.images',
-                            'ec_products.name',
-                            'ec_products.price',
-                            'ec_products.sale_price',
-                            'ec_products.sale_type',
-                            'ec_products.start_date',
-                            'ec_products.end_date',
-                            'ec_products.sku',
-                            'ec_products.is_variation',
-                            'ec_products.status',
-                            'ec_products.order',
-                            'ec_products.created_at',
-                        ],
-                    ]);
-                @endphp
-
-                @if ($product)
-                    <div class="row cart-item">
-                    <div class="col-lg-2 col-md-3 col-12">
+                <div class="row cart-item">
+                    <div class="col-lg-3 col-md-3">
                         <div class="checkout-product-img-wrapper">
-                            <img class="item-thumb img-thumbnail img-rounded"
-                                 src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}"
-                                 alt="{{ $product->name . '(' . $product->sku . ')'}}">
+                            <img
+                                class="item-thumb img-thumbnail img-rounded"
+                                src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}"
+                                alt="{{ $orderProduct->product_name }}"
+                            >
                             <span class="checkout-quantity">{{ $orderProduct->qty }}</span>
                         </div>
                     </div>
-                    <div class="col-lg-7 col-md-6 col-8">
-                        <p class="mb-0 fw-bold">{{ $product->name }}</p>
+                    <div class="col-lg-5 col-md-5">
+                        <p class="mb-0">{{ $orderProduct->product_name }}</p>
                         <p class="mb-0">
-                            <small><em>{{ $product->variation_attributes }}</em></small>
+                            <small>{{ Arr::get($orderProduct->options, 'attributes', '') }}</small>
                         </p>
                         @if (!empty($orderProduct->product_options) && is_array($orderProduct->product_options))
-                            {!! render_product_options_info($orderProduct->product_options, $product, true) !!}
+                            {!! render_product_options_html($orderProduct->product_options, $orderProduct->price) !!}
                         @endif
-                        @if (!empty($orderProduct->options) && is_array($orderProduct->options))
-                            @foreach($orderProduct->options as $option)
-                                @if (!empty($option['key']) && !empty($option['value']))
-                                    <p class="mb-0">
-                                        <small>{{ $option['key'] }}: <strong> {{ $option['value'] }}</strong></small>
-                                    </p>
-                                @endif
-                            @endforeach
-                        @endif
+
+                        @include('plugins/ecommerce::themes.includes.cart-item-options-extras', [
+                            'options' => $orderProduct->options,
+                        ])
                     </div>
-                    <div class="col-lg-3 col-md-3 col-4 float-end text-end">
-                        @if(setting('ecommerce_display_product_price_including_taxes') == 1)
-                            <p>{{ format_price($orderProduct->price + $orderProduct->tax_amount) }}</p>
-                        @else
-                            <p>{{ format_price($orderProduct->price) }}</p>
-                        @endif
+                    <div class="col-lg-4 col-md-4 col-4 float-end text-end">
+                        <p>{{ format_price($orderProduct->price) }}</p>
                     </div>
-                </div> <!--  /item -->
-                @endif
+                </div>
             @endforeach
 
             @if (!empty($isShowTotalInfo))

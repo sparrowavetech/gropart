@@ -1,38 +1,58 @@
 @if (get_payment_setting('status', RAZORPAY_PAYMENT_METHOD_NAME) == 1)
     <li class="list-group-item">
-        <input class="magic-radio js_payment_method" type="radio" name="payment_method" id="payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}"
-               value="{{ RAZORPAY_PAYMENT_METHOD_NAME }}"
-               @if ($selecting == RAZORPAY_PAYMENT_METHOD_NAME) checked @endif
+        <input
+            class="magic-radio js_payment_method"
+            id="payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}"
+            name="payment_method"
+            type="radio"
+            value="{{ RAZORPAY_PAYMENT_METHOD_NAME }}"
+            @if ($selecting == RAZORPAY_PAYMENT_METHOD_NAME) checked @endif
         >
-        <label for="payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}">{{ get_payment_setting('name', RAZORPAY_PAYMENT_METHOD_NAME) }}</label>
-        <div class="payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}_wrap payment_collapse_wrap collapse @if ($selecting == RAZORPAY_PAYMENT_METHOD_NAME) show @endif">
+        <label
+            for="payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}">{{ get_payment_setting('name', RAZORPAY_PAYMENT_METHOD_NAME) }}</label>
+        <div
+            class="payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}_wrap payment_collapse_wrap collapse @if ($selecting == RAZORPAY_PAYMENT_METHOD_NAME) show @endif">
             @if ($errorMessage)
                 <div class="text-danger my-2">
                     {!! BaseHelper::clean($errorMessage) !!}
                 </div>
             @else
-                <p>{!! get_payment_setting('description', RAZORPAY_PAYMENT_METHOD_NAME, __('Payment with :paymentType', ['paymentType' => 'Razorpay'])) !!}</p>
+                <p>{!! get_payment_setting(
+                    'description',
+                    RAZORPAY_PAYMENT_METHOD_NAME,
+                    __('Payment with :paymentType', ['paymentType' => 'Razorpay']),
+                ) !!}</p>
             @endif
 
             @php $supportedCurrencies = (new \Botble\Razorpay\Services\Gateways\RazorpayPaymentService)->supportedCurrencyCodes(); @endphp
             @if (!in_array(get_application_currency()->title, $supportedCurrencies))
-                <div class="alert alert-warning" style="margin-top: 15px;">
+                <div
+                    class="alert alert-warning"
+                    style="margin-top: 15px;"
+                >
                     {{ __(":name doesn't support :currency. List of currencies supported by :name: :currencies.", ['name' => 'Razorpay', 'currency' => get_application_currency()->title, 'currencies' => implode(', ', $supportedCurrencies)]) }}
 
                     <div style="margin-top: 10px;">
-                        {{ __('Learn more') }}: <a href="https://razorpay.com/docs/payments/payments/international-payments/#supported-currencies" target="_blank" rel="nofollow">https://razorpay.com/docs/payments/payments/international-payments/#supported-currencies</a>
+                        {{ __('Learn more') }}: <a
+                            href="https://razorpay.com/docs/payments/payments/international-payments/#supported-currencies"
+                            target="_blank"
+                            rel="nofollow"
+                        >https://razorpay.com/docs/payments/payments/international-payments/#supported-currencies</a>
                     </div>
 
                     @php
-                        $currencies = get_all_currencies()
-                            ->filter(function ($item) use ($supportedCurrencies) {
-                                return in_array($item->title, $supportedCurrencies);
-                            });
+                        $currencies = get_all_currencies()->filter(function ($item) use ($supportedCurrencies) {
+                            return in_array($item->title, $supportedCurrencies);
+                        });
                     @endphp
                     @if (count($currencies))
-                        <div style="margin-top: 10px;">{{ __('Please switch currency to any supported currency') }}:&nbsp;&nbsp;
+                        <div style="margin-top: 10px;">
+                            {{ __('Please switch currency to any supported currency') }}:&nbsp;&nbsp;
                             @foreach ($currencies as $currency)
-                                <a href="{{ route('public.change-currency', $currency->title) }}" @if (get_application_currency_id() == $currency->id) class="active" @endif><span>{{ $currency->title }}</span></a>
+                                <a
+                                    href="{{ route('public.change-currency', $currency->title) }}"
+                                    @if (get_application_currency_id() == $currency->id) class="active" @endif
+                                ><span>{{ $currency->title }}</span></a>
                                 @if (!$loop->last)
                                     &nbsp; | &nbsp;
                                 @endif
@@ -42,17 +62,22 @@
                 </div>
             @endif
         </div>
-        <input type="hidden" id="rzp_order_id" value="{{ $orderId }}">
+        <input
+            id="rzp_order_id"
+            type="hidden"
+            value="{{ $orderId }}"
+        >
     </li>
 
     @if (EcommerceHelper::isValidToProcessCheckout())
         <script>
-            $(document).ready(function () {
+            $(document).ready(function() {
 
                 var $paymentCheckoutForm = $('.payment-checkout-form');
 
-                $paymentCheckoutForm.on('submit', function (e) {
-                    if ($('#checkout-form').valid() && $('input[name=payment_method]:checked').val() === 'razorpay' && !$('input[name=razorpay_payment_id]').val()) {
+                $paymentCheckoutForm.on('submit', function(e) {
+                    if ($('#checkout-form').valid() && $('input[name=payment_method]:checked').val() ===
+                        'razorpay' && !$('input[name=razorpay_payment_id]').val()) {
                         e.preventDefault();
                     }
                 });
@@ -90,12 +115,19 @@
                             name: '{{ $name }}',
                             description: '{{ $name }}',
                             order_id: $('#rzp_order_id').val(),
-                            handler: function (transaction) {
+                            handler: function(transaction) {
                                 var form = $paymentCheckoutForm;
-                                if (transaction.razorpay_payment_id && transaction.razorpay_order_id && transaction.razorpay_signature) {
-                                    form.append($('<input type="hidden" name="razorpay_payment_id">').val(transaction.razorpay_payment_id));
-                                    form.append($('<input type="hidden" name="razorpay_order_id">').val(transaction.razorpay_order_id));
-                                    form.append($('<input type="hidden" name="razorpay_signature">').val(transaction.razorpay_signature));
+                                if (transaction.razorpay_payment_id && transaction
+                                    .razorpay_order_id && transaction.razorpay_signature) {
+                                    form.append($(
+                                        '<input type="hidden" name="razorpay_payment_id">'
+                                    ).val(transaction.razorpay_payment_id));
+                                    form.append($(
+                                        '<input type="hidden" name="razorpay_order_id">'
+                                    ).val(transaction.razorpay_order_id));
+                                    form.append($(
+                                        '<input type="hidden" name="razorpay_signature">'
+                                    ).val(transaction.razorpay_signature));
                                     form.submit();
                                 }
                             },
@@ -109,13 +141,13 @@
                     });
                 }
 
-                $(document).off('click', '.payment-checkout-btn').on('click', '.payment-checkout-btn', function (event) {
+                $(document).off('click', '.payment-checkout-btn').on('click', '.payment-checkout-btn', function(event) {
                     event.preventDefault();
 
                     var _self = $(this);
                     var form = _self.closest('form');
 
-                    if (form.valid && ! form.valid()) {
+                    if (form.valid && !form.valid()) {
                         return;
                     }
 
@@ -127,17 +159,19 @@
 
                     if (method === 'stripe' && $('.stripe-card-wrapper').length > 0) {
                         Stripe.setPublishableKey($('#payment-stripe-key').data('value'));
-                        Stripe.card.createToken(form, function (status, response) {
+                        Stripe.card.createToken(form, function(status, response) {
                             if (response.error) {
                                 if (typeof Botble != 'undefined') {
-                                    Botble.showError(response.error.message, _self.data('error-header'));
+                                    Botble.showError(response.error.message, _self.data(
+                                        'error-header'));
                                 } else {
                                     alert(response.error.message);
                                 }
                                 _self.removeAttr('disabled');
                                 _self.html(submitInitialText);
                             } else {
-                                form.append($('<input type="hidden" name="stripeToken">').val(response.id));
+                                form.append($('<input type="hidden" name="stripeToken">').val(response
+                                    .id));
                                 form.submit();
                             }
                         });

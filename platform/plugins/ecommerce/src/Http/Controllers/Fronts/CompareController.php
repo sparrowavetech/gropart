@@ -6,7 +6,7 @@ use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Facades\Cart;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Product;
-use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeSetInterface;
+use Botble\Ecommerce\Models\ProductAttributeSet;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Theme\Facades\Theme;
@@ -43,7 +43,7 @@ class CompareController extends Controller
                     'with' => EcommerceHelper::withProductEagerLoadingRelations(),
                 ], EcommerceHelper::withReviewsParams()));
 
-            $attributeSets = app(ProductAttributeSetInterface::class)->getAllWithSelected($itemIds);
+            $attributeSets = ProductAttributeSet::getAllWithSelected($itemIds);
         }
 
         return Theme::scope(
@@ -59,7 +59,12 @@ class CompareController extends Controller
             abort(404);
         }
 
-        $product = $this->productRepository->findOrFail($productId);
+        $product = Product::query()->findOrFail($productId);
+
+        if ($product->is_variation) {
+            $product = $product->original_product;
+            $productId = $product->getKey();
+        }
 
         $duplicates = Cart::instance('compare')->search(function ($cartItem) use ($productId) {
             return $cartItem->id == $productId;
@@ -85,7 +90,7 @@ class CompareController extends Controller
             abort(404);
         }
 
-        $product = $this->productRepository->findOrFail($productId);
+        $product = Product::query()->findOrFail($productId);
 
         Cart::instance('compare')->search(function ($cartItem, $rowId) use ($productId) {
             if ($cartItem->id == $productId) {

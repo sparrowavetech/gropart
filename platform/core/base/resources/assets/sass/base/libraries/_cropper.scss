@@ -23,7 +23,8 @@
     }
 }
 
-.cropper-modal, .cropper-canvas {
+.cropper-modal,
+.cropper-canvas {
     position: absolute;
     top: 0;
     right: 0;
@@ -40,7 +41,7 @@
 .cropper-modal {
     background-color: #000000;
     filter: alpha(opacity=50);
-    opacity: .5;
+    opacity: 0.5;
 }
 
 .cropper-dragger {
@@ -59,7 +60,7 @@
     outline-width: 1px;
     outline-style: solid;
     outline-color: #6699ff;
-    outline-color: rgba(51, 102, 255, .75);
+    outline-color: rgba(51, 102, 255, 0.75);
 }
 
 .cropper-dashed {
@@ -67,7 +68,7 @@
     display: block;
     filter: alpha(opacity=50);
     border: 0 dashed #ffffff;
-    opacity: .5;
+    opacity: 0.5;
 
     &.dashed-h {
         top: 33.3%;
@@ -88,13 +89,15 @@
     }
 }
 
-.cropper-face, .cropper-line, .cropper-point {
+.cropper-face,
+.cropper-line,
+.cropper-point {
     position: absolute;
     display: block;
     width: 100%;
     height: 100%;
     filter: alpha(opacity=10);
-    opacity: .1;
+    opacity: 0.1;
 }
 
 .cropper-face {
@@ -141,7 +144,7 @@
     height: 5px;
     background-color: #6699ff;
     filter: alpha(opacity=75);
-    opacity: .75;
+    opacity: 0.75;
 
     &.point-e {
         top: 50%;
@@ -205,7 +208,7 @@
             display: block;
             width: 200%;
             height: 200%;
-            content: " ";
+            content: ' ';
             background-color: #6699ff;
             filter: alpha(opacity=0);
             opacity: 0;
@@ -237,7 +240,7 @@
             width: 5px;
             height: 5px;
             filter: alpha(opacity=75);
-            opacity: .75;
+            opacity: 0.75;
         }
     }
 }
@@ -267,7 +270,10 @@
     cursor: crosshair;
 }
 
-.cropper-disabled .cropper-canvas, .cropper-disabled .cropper-face, .cropper-disabled .cropper-line, .cropper-disabled .cropper-point {
+.cropper-disabled .cropper-canvas,
+.cropper-disabled .cropper-face,
+.cropper-disabled .cropper-line,
+.cropper-disabled .cropper-point {
     cursor: not-allowed;
 }
 
@@ -301,7 +307,7 @@
     height: 364px;
     width: 100%;
     margin-top: 15px;
-    box-shadow: inset 0 0 5px rgba(0, 0, 0, .25);
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.25);
     background-color: #fcfcfc;
     overflow: hidden;
 
@@ -323,7 +329,7 @@
 
     &:hover {
         border-color: #ccccff;
-        box-shadow: 0 0 5px rgba(0, 0, 0, .15);
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.15);
     }
 
     img {
@@ -360,8 +366,8 @@
     right: 0;
     bottom: 0;
     left: 0;
-    background: #ffffff url("#{$general-img-path}/loading.gif") no-repeat center center;
-    opacity: .75;
+    background: #ffffff url('#{$general-img-path}/loading.gif') no-repeat center center;
+    opacity: 0.75;
     filter: alpha(opacity=75);
     z-index: 20140628;
 }

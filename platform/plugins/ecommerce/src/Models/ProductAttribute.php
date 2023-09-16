@@ -2,8 +2,8 @@
 
 namespace Botble\Ecommerce\Models;
 
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
+use Botble\Base\Models\Concerns\HasSlug;
 use Botble\Media\Facades\RvMedia;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -11,21 +11,18 @@ use Illuminate\Support\Collection;
 
 class ProductAttribute extends BaseModel
 {
+    use HasSlug;
+
     protected $table = 'ec_product_attributes';
 
     protected $fillable = [
         'title',
         'slug',
         'color',
-        'status',
         'order',
         'attribute_set_id',
         'image',
         'is_default',
-    ];
-
-    protected $casts = [
-        'status' => BaseStatusEnum::class,
     ];
 
     public function getAttributeSetIdAttribute(int|string|null $value): int|string|null
@@ -45,6 +42,10 @@ class ProductAttribute extends BaseModel
 
     protected static function booted(): void
     {
+        self::saving(function (self $model) {
+            $model->slug = self::createSlug($model->slug ?: $model->title, $model->getKey());
+        });
+
         self::deleting(function (ProductAttribute $productAttribute) {
             $productAttribute->productVariationItems()->delete();
         });
@@ -60,8 +61,8 @@ class ProductAttribute extends BaseModel
         if ($attributeSet && $attributeSet->use_image_from_product_variation) {
             foreach ($productVariations as $productVariation) {
                 $attribute = $productVariation->productAttributes->where('attribute_set_id', $attributeSet->id)->first();
-                if ($attribute && $attribute->id == $this->id && $productVariation->product->image) {
-                    return 'background-image: url(' . RvMedia::getImageUrl($productVariation->product->image) . '); background-size: cover; background-repeat: no-repeat; background-position: center;';
+                if ($attribute && $attribute->id == $this->id && ($image = $productVariation->product->image)) {
+                    return 'background-image: url(' . RvMedia::getImageUrl($image) . '); background-size: cover; background-repeat: no-repeat; background-position: center;';
                 }
             }
         }
@@ -70,6 +71,6 @@ class ProductAttribute extends BaseModel
             return 'background-image: url(' . RvMedia::getImageUrl($this->image) . '); background-size: cover; background-repeat: no-repeat; background-position: center;';
         }
 
-        return 'background-color: ' . ($this->color ?: '#000') . ';';
+        return 'background-color: ' . ($this->color ?: '#000') . ' !important;';
     }
 }

@@ -8,12 +8,6 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
         Route::group(['prefix' => 'discounts', 'as' => 'discounts.'], function () {
             Route::resource('', 'DiscountController')->parameters(['' => 'discount']);
 
-            Route::delete('items/destroy', [
-                'as' => 'deletes',
-                'uses' => 'DiscountController@deletes',
-                'permission' => 'discounts.destroy',
-            ]);
-
             Route::post('generate-coupon', [
                 'as' => 'generate-coupon',
                 'uses' => 'DiscountController@postGenerateCoupon',

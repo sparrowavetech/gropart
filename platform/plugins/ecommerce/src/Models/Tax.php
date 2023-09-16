@@ -6,6 +6,7 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Tax extends BaseModel
 {
@@ -25,6 +26,11 @@ class Tax extends BaseModel
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'ec_tax_products', 'tax_id', 'product_id');
+    }
+
+    public function rules(): HasMany
+    {
+        return $this->hasMany(TaxRule::class);
     }
 
     protected function defaultTitle(): Attribute
@@ -52,6 +58,7 @@ class Tax extends BaseModel
     {
         self::deleting(function (Tax $tax) {
             $tax->products()->detach();
+            $tax->rules()->delete();
         });
     }
 }

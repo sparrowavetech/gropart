@@ -2,8 +2,7 @@ try {
     window.$ = window.jQuery = require('jquery')
 
     require('bootstrap')
-} catch (e) {
-}
+} catch (e) {}
 
 import { CheckoutAddress } from './partials/address'
 import { DiscountManagement } from './partials/discount'
@@ -46,15 +45,15 @@ class MainCheckout {
     }
 
     static handleError(data, $container) {
-        if (typeof (data.errors) !== 'undefined' && !_.isArray(data.errors)) {
+        if (typeof data.errors !== 'undefined' && !_.isArray(data.errors)) {
             MainCheckout.handleValidationError(data.errors, $container)
         } else {
-            if (typeof (data.responseJSON) !== 'undefined') {
-                if (typeof (data.responseJSON.errors) !== 'undefined') {
+            if (typeof data.responseJSON !== 'undefined') {
+                if (typeof data.responseJSON.errors !== 'undefined') {
                     if (data.status === 422) {
                         MainCheckout.handleValidationError(data.responseJSON.errors, $container)
                     }
-                } else if (typeof (data.responseJSON.message) !== 'undefined') {
+                } else if (typeof data.responseJSON.message !== 'undefined') {
                     MainCheckout.showError(data.responseJSON.message)
                 } else {
                     $.each(data.responseJSON, (index, el) => {
@@ -72,7 +71,7 @@ class MainCheckout {
     static dotArrayToJs(str) {
         const splittedStr = str.split('.')
 
-        return splittedStr.length === 1 ? str : (splittedStr[0] + '[' + splittedStr.splice(1).join('][') + ']')
+        return splittedStr.length === 1 ? str : splittedStr[0] + '[' + splittedStr.splice(1).join('][') + ']'
     }
 
     static handleValidationError(errors, $container) {
@@ -141,10 +140,12 @@ class MainCheckout {
                 baseUrl = baseUrl + '&'
             }
 
+            baseUrl = baseUrl + $.param($('form.checkout-form').serializeArray())
+
             return baseUrl
         }
 
-        let reloadAddressForm = url => {
+        let reloadAddressForm = (url) => {
             disablePaymentMethodsForm()
 
             $('.shipping-info-loading').show()
@@ -162,7 +163,6 @@ class MainCheckout {
             }
 
             if (shippingMethod.length) {
-
                 $('.mobile-total').text('...')
 
                 let params = {
@@ -241,7 +241,7 @@ class MainCheckout {
             loadShippingFeeAtTheSecondTime()
         })
 
-        $(document).on('change', 'input[name=shipping_method]', event => {
+        $(document).on('change', 'input[name=shipping_method]', (event) => {
             // Fixed: set shipping_option value based on shipping_method change:
             const $this = $(event.currentTarget)
             $('input[name=shipping_option]').val($this.data('option'))
@@ -265,7 +265,7 @@ class MainCheckout {
             reloadAddressForm(getBaseUrl() + $.param(params) + ' ' + shippingForm + ' > *')
         })
 
-        $(document).on('change', 'input[name=payment_method]', event => {
+        $(document).on('change', 'input[name=payment_method]', (event) => {
             const $this = $(event.currentTarget)
 
             $('.mobile-total').text('...')
@@ -278,7 +278,6 @@ class MainCheckout {
         })
 
         let validatedFormFields = () => {
-
             let addressId = $('#address_id').val()
             if (addressId && addressId !== 'new') {
                 return true
@@ -294,8 +293,8 @@ class MainCheckout {
             return validated
         }
 
-        $(document).on('change', customerShippingAddressForm + ' .form-control', event => {
-            setTimeout(function() {
+        $(document).on('change', customerShippingAddressForm + ' .form-control', (event) => {
+            setTimeout(function () {
                 let _self = $(event.currentTarget)
                 _self.closest('.form-group').find('.text-danger').remove()
                 let $form = _self.closest('form')
@@ -308,7 +307,7 @@ class MainCheckout {
                         data: new FormData($form[0]),
                         contentType: false,
                         processData: false,
-                        success: res => {
+                        success: (res) => {
                             if (!res.error) {
                                 disablePaymentMethodsForm()
 
@@ -328,7 +327,7 @@ class MainCheckout {
                                 loadShippingFeeAtTheSecondTime() // marketplace
                             }
                         },
-                        error: res => {
+                        error: (res) => {
                             MainCheckout.handleError(res, $form)
                         },
                     })
@@ -336,7 +335,7 @@ class MainCheckout {
             }, 1000)
         })
 
-        $(document).on('change', customerBillingAddressForm + ' #billing_address_same_as_shipping_address', event => {
+        $(document).on('change', customerBillingAddressForm + ' #billing_address_same_as_shipping_address', (event) => {
             let _self = $(event.currentTarget)
             let val = _self.find(':selected').val()
             if (val) {
@@ -346,7 +345,7 @@ class MainCheckout {
             }
         })
 
-        $(document).on('change', customerTaxInformationForm + ' #with_tax_information', event => {
+        $(document).on('change', customerTaxInformationForm + ' #with_tax_information', (event) => {
             let _self = $(event.currentTarget)
 
             $('.tax-information-form-wrapper').toggle(_self.is(':checked'))

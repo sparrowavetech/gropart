@@ -2,11 +2,16 @@
 
 namespace Botble\LanguageAdvanced\Supports;
 
+use Botble\Base\Facades\MacroableModels;
+use Botble\Base\Models\BaseModel;
 use Botble\Language\Facades\Language;
+use Botble\LanguageAdvanced\Models\TranslationResolver;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class LanguageAdvancedManager
 {
@@ -106,7 +111,7 @@ class LanguageAdvancedManager
             $model = get_class($model);
         }
 
-        return Arr::get(LanguageAdvancedManager::getSupported(), $model, []);
+        return Arr::get(self::getSupported(), $model, []);
     }
 
     public static function registerModule(string $model, array $columns): bool
@@ -143,5 +148,65 @@ class LanguageAdvancedManager
         config(['plugins.language-advanced.general.translatable_meta_boxes' => $metaBoxes]);
 
         return true;
+    }
+
+    public static function initModelRelations(): void
+    {
+        foreach (self::getSupported() as $item => $columns) {
+            if (! class_exists($item)) {
+                continue;
+            }
+
+            /**
+             * @var BaseModel $item
+             */
+            $item::resolveRelationUsing('translations', function ($model) {
+                $instance = tap(
+                    new TranslationResolver(),
+                    function ($instance) {
+                        if (! $instance->getConnectionName()) {
+                            $instance->setConnection(DB::getDefaultConnection());
+                        }
+                    }
+                );
+
+                $instance->setTable($model->getTable() . '_translations');
+
+                $instance->fillable(array_merge([
+                    'lang_code',
+                    $model->getTable() . '_id',
+                ], self::getTranslatableColumns(get_class($model))));
+
+                return (new HasMany(
+                    $instance->newQuery(),
+                    $model,
+                    $model->getTable() . '_translations.' . $model->getTable() . '_id',
+                    $model->getKeyName()
+                ))->where('lang_code', is_in_admin() ? Language::getCurrentAdminLocaleCode() : Language::getCurrentLocaleCode());
+            });
+
+            foreach ($columns as $column) {
+                MacroableModels::addMacro(
+                    $item,
+                    'get' . ucfirst(Str::camel($column)) . 'Attribute',
+                    function () use ($column) {
+                        /**
+                         * @var BaseModel $this
+                         */
+
+                        $locale = is_in_admin() ? Language::getCurrentAdminLocaleCode() : Language::getCurrentLocaleCode();
+                        if (! $this->lang_code && $locale != Language::getDefaultLocaleCode()) {
+                            $translation = $this->translations->where('lang_code', $locale)->first();
+
+                            if ($translation) {
+                                return $translation->{$column};
+                            }
+                        }
+
+                        return $this->getAttribute($column);
+                    }
+                );
+            }
+        }
     }
 }

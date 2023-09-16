@@ -1,12 +1,11 @@
 <template>
     <div>
-        <div ref='chartRef' class='revenue-chart'></div>
+        <div ref="chartRef" class="revenue-chart"></div>
     </div>
 </template>
 
 <script>
-
-const { nextTick } = Vue;
+const { nextTick } = Vue
 
 export default {
     props: {
@@ -19,7 +18,7 @@ export default {
     data() {
         return {
             chartData: this.data,
-            chartInstance: null
+            chartInstance: null,
         }
     },
     mounted() {
@@ -52,7 +51,7 @@ export default {
                 })
             } else {
                 this.chartData.map((x) => {
-                    series.push(100 / total * parseFloat(x.value))
+                    series.push((100 / total) * parseFloat(x.value))
                 })
             }
 
@@ -63,7 +62,7 @@ export default {
                     chart: { height: '250', type: 'donut' },
                     chartOptions: { labels },
                     plotOptions: { pie: { donut: { size: '71%', polygons: { strokeWidth: 0 } }, expandOnClick: true } },
-                    states: { hover: { filter: { type: 'darken', value: .9 } } },
+                    states: { hover: { filter: { type: 'darken', value: 0.9 } } },
                     dataLabels: { enabled: false },
                     legend: { show: false },
                     tooltip: { enabled: false },

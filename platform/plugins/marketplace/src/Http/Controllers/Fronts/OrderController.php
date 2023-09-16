@@ -16,23 +16,19 @@ use Botble\Ecommerce\Facades\OrderHelper;
 use Botble\Ecommerce\Http\Requests\AddressRequest;
 use Botble\Ecommerce\Http\Requests\UpdateOrderRequest;
 use Botble\Ecommerce\Models\Order;
-use Botble\Ecommerce\Repositories\Interfaces\OrderAddressInterface;
-use Botble\Ecommerce\Repositories\Interfaces\OrderHistoryInterface;
-use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
+use Botble\Ecommerce\Models\OrderAddress;
+use Botble\Ecommerce\Models\OrderHistory;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Tables\OrderTable;
-use Botble\Payment\Repositories\Interfaces\PaymentInterface;
+use Botble\Payment\Models\Payment;
 use Exception;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 
 class OrderController extends BaseController
 {
-    public function __construct(
-        protected OrderInterface $orderRepository,
-        protected OrderHistoryInterface $orderHistoryRepository,
-        protected OrderAddressInterface $orderAddressRepository,
-        protected PaymentInterface $paymentRepository
-    ) {
+    public function __construct()
+    {
         Assets::setConfig(config('plugins.marketplace.assets', []));
     }
 
@@ -71,7 +67,9 @@ class OrderController extends BaseController
 
     public function update(int|string $id, UpdateOrderRequest $request, BaseHttpResponse $response)
     {
-        $order = $this->orderRepository->createOrUpdate($request->input(), ['id' => $id]);
+        $order = $this->findOrFail($id);
+        $order->fill($request->input());
+        $order->save();
 
         event(new UpdatedContentEvent(ORDER_MODULE_SCREEN_NAME, $request, $order));
 
@@ -85,7 +83,7 @@ class OrderController extends BaseController
         $order = $this->findOrFail($id);
 
         try {
-            $this->orderRepository->deleteBy(['id' => $id]);
+            $order->delete();
             event(new DeletedContentEvent(ORDER_MODULE_SCREEN_NAME, $request, $order));
 
             return $response->setMessage(trans('core/base::notices.delete_success_message'));
@@ -94,25 +92,6 @@ class OrderController extends BaseController
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
-    }
-
-    public function deletes(Request $request, BaseHttpResponse $response)
-    {
-        $ids = $request->input('ids');
-        if (empty($ids)) {
-            return $response
-                ->setError()
-                ->setMessage(trans('core/base::notices.no_select'));
-        }
-
-        foreach ($ids as $id) {
-            $order = $this->findOrFail($id);
-
-            $this->orderRepository->delete($order);
-            event(new DeletedContentEvent(ORDER_MODULE_SCREEN_NAME, $request, $order));
-        }
-
-        return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
     public function getGenerateInvoice(int|string $orderId)
@@ -131,16 +110,16 @@ class OrderController extends BaseController
             $order->status = OrderStatusEnum::PROCESSING;
         }
 
-        $this->orderRepository->createOrUpdate($order);
+        $order->save();
 
-        $this->orderHistoryRepository->createOrUpdate([
+        OrderHistory::query()->create([
             'action' => 'confirm_order',
             'description' => trans('plugins/ecommerce::order.order_was_verified_by'),
             'order_id' => $order->id,
             'user_id' => 0,
         ]);
 
-        $payment = $this->paymentRepository->getFirstBy(['order_id' => $order->id]);
+        $payment = Payment::query()->where('order_id', $order->id)->first();
 
         if ($payment) {
             $payment->user_id = 0;
@@ -176,8 +155,7 @@ class OrderController extends BaseController
 
     public function postUpdateShippingAddress(int|string $id, AddressRequest $request, BaseHttpResponse $response)
     {
-        $address = $this->orderAddressRepository
-            ->getModel()
+        $address = OrderAddress::query()
             ->where('id', $id)
             ->whereHas('order', function ($query) {
                 $query->where('store_id', auth('customer')->user()->store->id);
@@ -196,7 +174,7 @@ class OrderController extends BaseController
             if ($order->address->id) {
                 $address = $order->address;
             } else {
-                $address = $this->orderAddressRepository->getModel();
+                $address = new OrderAddress();
                 $address->order_id = $order->id;
             }
         }
@@ -206,7 +184,7 @@ class OrderController extends BaseController
         }
 
         $address->fill($request->validated());
-        $address = $this->orderAddressRepository->createOrUpdate($address);
+        $address->save();
 
         return $response
             ->setData([
@@ -226,7 +204,7 @@ class OrderController extends BaseController
 
         OrderHelper::cancelOrder($order);
 
-        $this->orderHistoryRepository->createOrUpdate([
+        OrderHistory::query()->create([
             'action' => 'cancel_order',
             'description' => trans('plugins/ecommerce::order.order_was_canceled_by'),
             'order_id' => $order->id,
@@ -236,10 +214,9 @@ class OrderController extends BaseController
         return $response->setMessage(trans('plugins/ecommerce::order.customer.messages.cancel_success'));
     }
 
-    protected function findOrFail(int|string $id): Order
+    protected function findOrFail(int|string $id): Order|Model|null
     {
-        return $this->orderRepository
-            ->getModel()
+        return Order::query()
             ->where([
                 'id' => $id,
                 'is_finished' => 1,

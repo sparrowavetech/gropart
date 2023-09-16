@@ -109,7 +109,8 @@ Form Layouts
             display: inline-block;
         }
 
-        @media (max-width: $screen-xs-max) { /* 767px */
+        @media (max-width: $screen-xs-max) {
+            /* 767px */
             .btn-set {
                 margin-bottom: 3px;
                 margin-top: 3px;
@@ -171,7 +172,6 @@ Form Layouts
 /* Radio buttons in horizontal forms */
 
 .form-horizontal {
-
     .radio-list {
         .radio {
             padding-top: 1px;

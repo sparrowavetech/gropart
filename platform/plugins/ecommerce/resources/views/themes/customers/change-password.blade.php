@@ -7,26 +7,59 @@
         </div>
         <div class="panel-body">
             {!! Form::open(['route' => 'customer.post.change-password', 'method' => 'post']) !!}
-            <div class="input-group @if ($errors->has('old_password')) has-error @endif">
-                <span class="input-group-prepend">{{ __('Old password:') }}</span>
-                <input type="password" class="form-control" name="old_password" id="old_password"
-                       placeholder="{{ __('Current Password') }}">
+
+            <div class="form-group mb-20">
+                <label
+                    class="input-group-prepend"
+                    for="old_password"
+                >{{ __('Current Password') }}: </label>
+                <input
+                    class="form-control"
+                    id="old_password"
+                    name="old_password"
+                    type="password"
+                    placeholder="{{ __('Current Password') }}"
+                >
                 {!! Form::error('old_password', $errors) !!}
             </div>
-            <div class="input-group @if ($errors->has('password')) has-error @endif">
-                <span class="input-group-prepend">{{ __('New password:') }}</span>
-                <input type="password" class="form-control" name="password" id="password"
-                       placeholder="{{ __('New Password') }}">
-                {!! Form::error('password', $errors) !!}
+
+            <div class="row">
+                <div class="col-12 col-lg-6 form-group mb-20">
+                    <label
+                        class="input-group-prepend"
+                        for="password"
+                    >{{ __('New password') }}: </label>
+                    <input
+                        class="form-control"
+                        id="password"
+                        name="password"
+                        type="password"
+                        placeholder="{{ __('New Password') }}"
+                    >
+                    {!! Form::error('password', $errors) !!}
+                </div>
+
+                <div class="col-12 col-lg-6 form-group mb-20">
+                    <label
+                        class="input-group-prepend"
+                        for="password_confirmation"
+                    >{{ __('Password confirmation') }}: </label>
+                    <input
+                        class="form-control"
+                        id="password_confirmation"
+                        name="password_confirmation"
+                        type="password"
+                        placeholder="{{ __('New Password') }}"
+                    >
+                    {!! Form::error('password_confirmation', $errors) !!}
+                </div>
             </div>
-            <div class="input-group @if ($errors->has('password_confirmation')) has-error @endif">
-                <span class="input-group-prepend">{{ __('Password confirmation:') }}</span>
-                <input type="password" class="form-control" name="password_confirmation" id="password_confirmation"
-                       placeholder="{{ __('Password Confirmation') }}">
-                {!! Form::error('password_confirmation', $errors) !!}
-            </div>
+
             <div class="form-group text-center">
-                <button type="submit" class="btn btn-primary btn-sm">{{ __('Change password') }}</button>
+                <button
+                    class="btn btn-primary btn-sm"
+                    type="submit"
+                >{{ __('Change password') }}</button>
             </div>
             {!! Form::close() !!}
         </div>

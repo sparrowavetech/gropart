@@ -6,7 +6,7 @@ use Botble\Ecommerce\Enums\ShippingCodStatusEnum;
 use Botble\Ecommerce\Enums\ShippingStatusEnum;
 use Botble\Ecommerce\Events\OrderCreated;
 use Botble\Ecommerce\Events\OrderPlacedEvent;
-use Botble\Ecommerce\Repositories\Interfaces\ShipmentInterface;
+use Botble\Ecommerce\Models\Shipment;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Illuminate\Support\Arr;
@@ -38,8 +38,8 @@ class OrderCreatedEmailNotification
         $order->store_id = Arr::first($storeIds);
         $order->save();
 
-        app(ShipmentInterface::class)->createOrUpdate([
-            'order_id' => $order->id,
+        Shipment::query()->create([
+            'order_id' => $order->getKey(),
             'user_id' => 0,
             'weight' => $order->products_weight,
             'cod_amount' => $order->payment->status != PaymentStatusEnum::COMPLETED ? $order->amount : 0,

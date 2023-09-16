@@ -352,11 +352,13 @@ class Botble {
                 locale = 'vn'
             }
 
-            $(document).find(element).flatpickr({
-                dateFormat: format,
-                wrap: true,
-                locale: locale || 'en'
-            })
+            $(document)
+                .find(element)
+                .flatpickr({
+                    dateFormat: format,
+                    wrap: true,
+                    locale: locale || 'en',
+                })
         }
     }
 
@@ -470,28 +472,30 @@ class Botble {
                 }
             })
 
-            $(document).find('.select2_google_fonts_picker').each(function (i, obj) {
-                if (!$(obj).hasClass('select2-hidden-accessible')) {
-                    let options = {
-                        templateResult: function (opt) {
-                            if (!opt.id) {
-                                return opt.text
-                            }
+            $(document)
+                .find('.select2_google_fonts_picker')
+                .each(function (i, obj) {
+                    if (!$(obj).hasClass('select2-hidden-accessible')) {
+                        let options = {
+                            templateResult: function (opt) {
+                                if (!opt.id) {
+                                    return opt.text
+                                }
 
-                            return $('<span style="font-family:\'' + opt.id + '\';"> ' + opt.text + '</span>')
-                        },
-                        width: '100%',
+                                return $('<span style="font-family:\'' + opt.id + '\';"> ' + opt.text + '</span>')
+                            },
+                            width: '100%',
+                        }
+
+                        let parent = $(obj).closest('div[data-select2-dropdown-parent]') || $(obj).closest('.modal')
+                        if (parent.length) {
+                            options.dropdownParent = parent
+                            options.minimumResultsForSearch = -1
+                        }
+
+                        $(obj).select2(options)
                     }
-
-                    let parent = $(obj).closest('div[data-select2-dropdown-parent]') || $(obj).closest('.modal')
-                    if (parent.length) {
-                        options.dropdownParent = parent
-                        options.minimumResultsForSearch = -1
-                    }
-
-                    $(obj).select2(options)
-                }
-            })
+                })
         }
 
         if (jQuery().timepicker) {
@@ -1044,34 +1048,25 @@ class Botble {
     }
 
     processAuthorize() {
-        $.ajax({
-            url: route('membership.authorize'),
-            type: 'POST',
-        })
+        $httpClient.makeWithoutErrorHandler().post(route('membership.authorize'))
     }
 
     countMenuItemNotifications() {
         let $menuItems = $('.menu-item-count')
         if ($menuItems.length) {
-            $.ajax({
-                type: 'GET',
-                url: route('menu-items-count'),
-                success: (res) => {
-                    if (!res.error) {
-                        res.data.map((x) => {
-                            if (x.value > 0) {
-                                $('.menu-item-count.' + x.key)
-                                    .text(x.value)
-                                    .show()
-                                    .removeClass('hidden')
-                            }
-                        })
-                    }
-                },
-                error: (err) => {
-                    Botble.handleError(err)
-                },
-            })
+            $httpClient
+                .make()
+                .get(route('menu-items-count'))
+                .then(({ data }) => {
+                    data.data.map((x) => {
+                        if (x.value > 0) {
+                            $('.menu-item-count.' + x.key)
+                                .text(x.value)
+                                .show()
+                                .removeClass('hidden')
+                        }
+                    })
+                })
         }
     }
 }

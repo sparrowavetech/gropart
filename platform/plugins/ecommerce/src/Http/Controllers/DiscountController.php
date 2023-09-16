@@ -13,6 +13,7 @@ use Botble\Ecommerce\Http\Requests\DiscountRequest;
 use Botble\Ecommerce\Models\Discount;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Tables\DiscountTable;
+use Botble\JsValidation\Facades\JsValidator;
 use Botble\Media\Facades\RvMedia;
 use Exception;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -43,8 +44,11 @@ class DiscountController extends BaseController
             ->addStyles(['timepicker']);
 
         Assets::usingVueJS();
+        Assets::addScripts(['form-validation']);
 
-        return view('plugins/ecommerce::discounts.create');
+        $jsValidation = JsValidator::formRequest(DiscountRequest::class);
+
+        return view('plugins/ecommerce::discounts.create', compact('jsValidation'));
     }
 
     public function store(DiscountRequest $request, BaseHttpResponse $response)
@@ -268,25 +272,6 @@ class DiscountController extends BaseController
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
-    }
-
-    public function deletes(Request $request, BaseHttpResponse $response)
-    {
-        $ids = $request->input('ids');
-        if (empty($ids)) {
-            return $response
-                ->setError()
-                ->setMessage(trans('core/base::notices.no_select'));
-        }
-
-        foreach ($ids as $id) {
-            $discount = Discount::query()->findOrFail($id);
-            $discount->delete();
-
-            event(new DeletedContentEvent(DISCOUNT_MODULE_SCREEN_NAME, $request, $discount));
-        }
-
-        return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
     public function postGenerateCoupon(BaseHttpResponse $response)

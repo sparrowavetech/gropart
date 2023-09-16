@@ -1,5 +1,6 @@
 @if ($displayBasePrice)
-    <small style="display:block">{{ trans('plugins/ecommerce::product-option.price') }}: <strong style="float: right">{{ format_price($product->original_product->front_sale_price_with_taxes) }}</strong></small>
+    <small style="display:block">{{ trans('plugins/ecommerce::product-option.price') }}: <strong
+            style="float: right">{{ format_price($product->original_product->front_sale_price_with_taxes) }}</strong></small>
 @endif
 
 @foreach ($productOptions['optionCartValue'] as $key => $optionValue)
@@ -21,7 +22,9 @@
             @endphp
 
             <strong>{{ $value['option_value'] }}</strong>
-            @if ($key + 1 < $totalOptionValue) , @endif
+            @if ($key + 1 < $totalOptionValue)
+                ,
+            @endif
         @endforeach
 
         @if ($price > 0)

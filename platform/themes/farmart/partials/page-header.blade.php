@@ -1,5 +1,5 @@
 <div class="page-header">
-    @if (!Theme::get('breadcrumbRendered', false))
+    @if (!Theme::get('breadcrumbRendered', false) && Theme::breadcrumb()->getCrumbs())
         <div class="page-breadcrumbs">
             <div class="container-{{ $size ?? 'xxxl' }}">
                 {!! Theme::partial('breadcrumbs') !!}
@@ -9,9 +9,10 @@
             Theme::set('breadcrumbRendered', true);
         @endphp
     @endif
+
     @if (!empty($withTitle) && !Theme::get('titleRendered', false))
         <div class="page-title text-center">
-            <div class="container-fluid pt-5">
+            <div class="container py-2 my-4">
                 <h1>{{ $title ?? SeoHelper::getTitle() }}</h1>
             </div>
         </div>

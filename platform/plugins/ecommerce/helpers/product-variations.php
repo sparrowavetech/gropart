@@ -1,12 +1,13 @@
 <?php
 
-use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Facades\Html;
 use Botble\Ecommerce\Models\Product;
-use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeSetInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductVariationInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductVariationItemInterface;
+use Botble\Ecommerce\Models\ProductAttributeSet;
+use Botble\Ecommerce\Models\ProductVariation;
+use Botble\Ecommerce\Models\ProductVariationItem;
 use Botble\Ecommerce\Supports\RenderProductAttributeSetsOnSearchPageSupport;
 use Botble\Ecommerce\Supports\RenderProductSwatchesSupport;
+use Botble\Theme\Facades\Theme;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
@@ -46,26 +47,19 @@ if (! function_exists('render_product_swatches_filter')) {
 if (! function_exists('get_ecommerce_attribute_set')) {
     function get_ecommerce_attribute_set(): LengthAwarePaginator|Collection
     {
-        return app(ProductAttributeSetInterface::class)
-            ->advancedGet([
-                'condition' => [
-                    'status' => BaseStatusEnum::PUBLISHED,
-                    'is_searchable' => 1,
-                ],
-                'order_by' => [
-                    'order' => 'ASC',
-                ],
-                'with' => [
-                    'attributes',
-                ],
-            ]);
+        return ProductAttributeSet::query()
+            ->wherePublished()
+            ->where('is_searchable', true)
+            ->orderBy('order')
+            ->with('attributes')
+            ->get();
     }
 }
 
 if (! function_exists('get_parent_product')) {
     function get_parent_product(int|string $variationId, array $with = ['slugable']): Product
     {
-        return app(ProductVariationInterface::class)->getParentOfVariation($variationId, $with);
+        return ProductVariation::getParentOfVariation($variationId, $with);
     }
 }
 
@@ -74,20 +68,20 @@ if (! function_exists('get_parent_product_id')) {
     {
         $parent = get_parent_product($variationId);
 
-        return $parent->id;
+        return $parent->getKey();
     }
 }
 
 if (! function_exists('get_product_info')) {
     function get_product_info(int|string $variationId): Collection
     {
-        return app(ProductVariationItemInterface::class)->getVariationsInfo([$variationId]);
+        return ProductVariationItem::getVariationsInfo([$variationId]);
     }
 }
 
 if (! function_exists('get_product_attributes')) {
     function get_product_attributes(int|string $productId): Collection
     {
-        return app(ProductVariationItemInterface::class)->getProductAttributes($productId);
+        return ProductVariationItem::getProductAttributes($productId);
     }
 }

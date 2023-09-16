@@ -5,6 +5,7 @@ namespace Botble\Blog\Tables;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
+use Botble\Base\Models\BaseQueryBuilder;
 use Botble\Blog\Exports\PostExport;
 use Botble\Blog\Models\Category;
 use Botble\Blog\Models\Post;
@@ -160,7 +161,7 @@ class PostTable extends TableAbstract
         string|null $value
     ): EloquentRelation|EloquentBuilder|QueryBuilder {
         if ($key === 'category' && $value) {
-            return $query->whereHas('categories', fn (BelongsToMany $query) => $query->where('categories.id', $value));
+            return $query->whereHas('categories', fn (BaseQueryBuilder $query) => $query->where('categories.id', $value));
         }
 
         return parent::applyFilterCondition($query, $key, $operator, $value);

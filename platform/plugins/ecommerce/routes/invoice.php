@@ -10,12 +10,6 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
                 ->parameters(['' => 'invoice'])
                 ->except(['create', 'store', 'update']);
 
-            Route::delete('items/destroy', [
-                'as' => 'deletes',
-                'uses' => 'InvoiceController@deletes',
-                'permission' => 'ecommerce.invoice.destroy',
-            ]);
-
             Route::get('generate-invoice/{invoice}', [
                 'as' => 'generate-invoice',
                 'uses' => 'InvoiceController@getGenerateInvoice',

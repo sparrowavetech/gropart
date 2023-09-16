@@ -2,7 +2,14 @@
     <div class="row g-0">
         <div class="col-3 number_record">
             <div class="f_com">
-                <input type="number" class="numb" value="{{ $limit }}" step="5" min="5" max="{{ $data->total() }}">
+                <input
+                    class="numb"
+                    type="number"
+                    value="{{ $limit }}"
+                    step="5"
+                    min="5"
+                    max="{{ $data->total() }}"
+                >
                 <div class="btn_grey btn_change_paginate btn_up"></div>
                 <div class="btn_grey btn_change_paginate btn_down"></div>
             </div>
@@ -15,8 +22,14 @@
                     $info .= trans('core/base::tables.in') . ' ' . $data->total() . ' ' . trans('core/base::tables.records');
                 @endphp
                 <span class="d-flex align-items-center">{{ $info }}</span>
-                <a class="btn btn_grey page_previous @if ($data->onFirstPage()) disabled @endif" href="{{ $data->previousPageUrl() }}"></a>
-                <a class="btn btn_grey page_next @if (!$data->hasMorePages()) disabled @endif" href="{{ $data->nextPageUrl() }}"></a>
+                <a
+                    class="btn btn_grey page_previous @if ($data->onFirstPage()) disabled @endif"
+                    href="{{ $data->previousPageUrl() }}"
+                ></a>
+                <a
+                    class="btn btn_grey page_next @if (!$data->hasMorePages()) disabled @endif"
+                    href="{{ $data->nextPageUrl() }}"
+                ></a>
             </div>
         </div>
     </div>

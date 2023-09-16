@@ -1,4 +1,4 @@
-function strlen (string) {
+function strlen(string) {
     //  discuss at: http://phpjs.org/functions/strlen/
     // original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
     // improved by: Sakimori
@@ -20,8 +20,12 @@ function strlen (string) {
         chr = '',
         lgth = 0
 
-    if (!this.php_js || !this.php_js.ini || !this.php_js.ini['unicode.semantics'] || this.php_js.ini[
-        'unicode.semantics'].local_value.toLowerCase() !== 'on') {
+    if (
+        !this.php_js ||
+        !this.php_js.ini ||
+        !this.php_js.ini['unicode.semantics'] ||
+        this.php_js.ini['unicode.semantics'].local_value.toLowerCase() !== 'on'
+    ) {
         return string.length
     }
 
@@ -29,23 +33,23 @@ function strlen (string) {
         var code = str.charCodeAt(i)
         var next = '',
             prev = ''
-        if (0xD800 <= code && code <= 0xDBFF) {
+        if (0xd800 <= code && code <= 0xdbff) {
             // High surrogate (could change last hex to 0xDB7F to treat high private surrogates as single characters)
-            if (str.length <= (i + 1)) {
+            if (str.length <= i + 1) {
                 throw 'High surrogate without following low surrogate'
             }
             next = str.charCodeAt(i + 1)
-            if (0xDC00 > next || next > 0xDFFF) {
+            if (0xdc00 > next || next > 0xdfff) {
                 throw 'High surrogate without following low surrogate'
             }
             return str.charAt(i) + str.charAt(i + 1)
-        } else if (0xDC00 <= code && code <= 0xDFFF) {
+        } else if (0xdc00 <= code && code <= 0xdfff) {
             // Low surrogate
             if (i === 0) {
                 throw 'Low surrogate without preceding high surrogate'
             }
             prev = str.charCodeAt(i - 1)
-            if (0xD800 > prev || prev > 0xDBFF) {
+            if (0xd800 > prev || prev > 0xdbff) {
                 // (could change last hex to 0xDB7F to treat high private surrogates as single characters)
                 throw 'Low surrogate without preceding high surrogate'
             }

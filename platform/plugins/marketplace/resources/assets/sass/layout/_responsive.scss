@@ -1,5 +1,5 @@
 .mobile-block {
-    display: none
+    display: none;
 }
 
 .btn-mobile {
@@ -15,16 +15,14 @@
     .navbar-aside {
         max-width: 220px;
     }
-
 }
 
 @media (max-width: 992px) {
     /* small tablet devices */
 
-
     .itemlist {
         .col-price {
-            text-align: right
+            text-align: right;
         }
 
         .col-check {
@@ -36,17 +34,15 @@
             display: none;
         }
     }
-
-
 }
 
 @media all and (max-width: 768px) {
     /* mobile devices */
     .mobile-block {
-        display: block !important
+        display: block !important;
     }
     .mobile-hide {
-        display: none !important
+        display: none !important;
     }
     .btn-mobile {
         display: inline-block !important;
@@ -56,7 +52,9 @@
         z-index: 900;
         transform: translateX(-100%);
         overflow-x: hidden;
-        transition: visibility .2s ease-in-out, transform .2s ease-in-out;
+        transition:
+            visibility 0.2s ease-in-out,
+            transform 0.2s ease-in-out;
 
         .aside-top {
             .logo {
@@ -82,7 +80,9 @@
         width: 80%;
         overflow-y: scroll;
         overflow-x: hidden;
-        transition: visibility .2s ease-in-out, transform .2s ease-in-out;
+        transition:
+            visibility 0.2s ease-in-out,
+            transform 0.2s ease-in-out;
     }
 
     .mobile-offcanvas.show {
@@ -117,7 +117,6 @@
         }
     }
 
-
     .main-wrap {
         margin-left: 0 !important;
     }
@@ -128,17 +127,17 @@
         margin-bottom: $spacer;
 
         .content-title {
-            margin-bottom: $spacer
+            margin-bottom: $spacer;
         }
     }
 
     .card-header input.form-control {
-        margin-bottom: $spacer
+        margin-bottom: $spacer;
     }
 
     .order-info-wrap {
         .icontext {
-            margin-bottom: $spacer
+            margin-bottom: $spacer;
         }
     }
     .btn.btn-xs {
@@ -157,7 +156,7 @@
             text-align: center;
 
             &::before {
-                content: attr(data-title) " ";
+                content: attr(data-title) ' ';
                 float: left;
                 text-transform: capitalize;
                 margin-right: 15px;

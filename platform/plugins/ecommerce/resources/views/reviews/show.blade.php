@@ -7,7 +7,9 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="card-title d-flex justify-content-between align-items-center mb-3">
-                            @include('plugins/ecommerce::reviews.partials.rating', ['star' => $review->star])
+                            @include('plugins/ecommerce::reviews.partials.rating', [
+                                'star' => $review->star,
+                            ])
 
                             {!! $review->status->toHtml() !!}
                         </div>
@@ -17,11 +19,20 @@
                         </p>
 
                         <div class="text-end">
-                            <button class="btn btn-outline-danger btn-trigger-delete-review" data-target="{{ route('reviews.destroy', $review) }}">{{ trans('plugins/ecommerce::review.delete') }}</button>
-                            @if($review->status == \Botble\Base\Enums\BaseStatusEnum::PUBLISHED)
-                                <button class="btn btn-outline-warning btn-trigger-unpublish-review" data-id="{{ $review->getKey() }}">{{ trans('plugins/ecommerce::review.unpublish') }}</button>
+                            <button
+                                class="btn btn-outline-danger btn-trigger-delete-review"
+                                data-target="{{ route('reviews.destroy', $review) }}"
+                            >{{ trans('plugins/ecommerce::review.delete') }}</button>
+                            @if ($review->status == \Botble\Base\Enums\BaseStatusEnum::PUBLISHED)
+                                <button
+                                    class="btn btn-outline-warning btn-trigger-unpublish-review"
+                                    data-id="{{ $review->getKey() }}"
+                                >{{ trans('plugins/ecommerce::review.unpublish') }}</button>
                             @else
-                                <button class="btn btn-outline-warning btn-trigger-publish-review" data-id="{{ $review->getKey() }}">{{ trans('plugins/ecommerce::review.publish') }}</button>
+                                <button
+                                    class="btn btn-outline-warning btn-trigger-publish-review"
+                                    data-id="{{ $review->getKey() }}"
+                                >{{ trans('plugins/ecommerce::review.publish') }}</button>
                             @endif
                         </div>
                     </div>
@@ -39,7 +50,12 @@
                         </h5>
 
                         <div class="d-flex gap-3 align-items-start">
-                            <img src="{{ RvMedia::getImageUrl($review->product->image, 'thumb', false, RvMedia::getDefaultImage()) }}" alt="{{ $review->product->name }}" class="img-thumbnail" style="width: 15%">
+                            <img
+                                class="img-thumbnail"
+                                src="{{ RvMedia::getImageUrl($review->product->image, 'thumb', false, RvMedia::getDefaultImage()) }}"
+                                alt="{{ $review->product->name }}"
+                                style="width: 15%"
+                            >
                             <div>
                                 <h5>
                                     <a href="{{ route('products.edit', $review->product) }}">
@@ -47,7 +63,9 @@
                                     </a>
                                 </h5>
                                 <div>
-                                    @include('plugins/ecommerce::reviews.partials.rating', ['star' => $review->product->reviews_avg_star])
+                                    @include('plugins/ecommerce::reviews.partials.rating', [
+                                        'star' => $review->product->reviews_avg_star,
+                                    ])
                                     <span>({{ number_format($review->product->reviews_count) }})</span>
                                 </div>
                             </div>
@@ -59,8 +77,8 @@
 
         <x-core-base::modal
             id="delete-review-modal"
-            :title="trans('plugins/ecommerce::review.delete_modal.title')"
             type="danger"
+            :title="trans('plugins/ecommerce::review.delete_modal.title')"
             button-id="confirm-delete-review-button"
             :button-label="trans('plugins/ecommerce::review.delete')"
         >

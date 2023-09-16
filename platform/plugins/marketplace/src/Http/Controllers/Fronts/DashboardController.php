@@ -2,23 +2,19 @@
 
 namespace Botble\Marketplace\Http\Controllers\Fronts;
 
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Facades\EcommerceHelper;
-use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
-use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
+use Botble\Ecommerce\Models\Order;
+use Botble\Ecommerce\Models\Product;
 use Botble\Marketplace\Enums\RevenueTypeEnum;
 use Botble\Marketplace\Enums\WithdrawalStatusEnum;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Http\Requests\BecomeVendorRequest;
+use Botble\Marketplace\Models\Revenue;
 use Botble\Marketplace\Models\Store;
-use Botble\Marketplace\Repositories\Interfaces\RevenueInterface;
-use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
-use Botble\Marketplace\Repositories\Interfaces\VendorInfoInterface;
-use Botble\Marketplace\Repositories\Interfaces\WithdrawalInterface;
+use Botble\Marketplace\Models\Withdrawal;
 use Botble\Media\Chunks\Exceptions\UploadMissingFileException;
 use Botble\Media\Chunks\Handler\DropZoneUploadHandler;
 use Botble\Media\Chunks\Receiver\FileReceiver;
@@ -36,16 +32,8 @@ use Illuminate\Support\Facades\Validator;
 
 class DashboardController
 {
-    public function __construct(
-        protected Repository $config,
-        protected CustomerInterface $customerRepository,
-        protected StoreInterface $storeRepository,
-        protected VendorInfoInterface $vendorInfoRepository,
-        protected RevenueInterface $revenueRepository,
-        protected ProductInterface $productRepository,
-        protected WithdrawalInterface $withdrawalRepository,
-        protected OrderInterface $orderRepository
-    ) {
+    public function __construct(protected Repository $config)
+    {
         Assets::setConfig($config->get('plugins.marketplace.assets', []));
 
         Theme::asset()
@@ -82,8 +70,7 @@ class DashboardController
         $store = $user->store;
         $data = compact('startDate', 'endDate', 'predefinedRange');
 
-        $revenue = $this->revenueRepository
-            ->getModel()
+        $revenue = Revenue::query()
             ->selectRaw(
                 'SUM(CASE WHEN type IS NULL OR type = ? THEN sub_amount WHEN type = ? THEN sub_amount * -1 ELSE 0 END) as sub_amount,
                 SUM(CASE WHEN type IS NULL OR type = ? THEN amount WHEN type = ? THEN amount * -1 ELSE 0 END) as amount,
@@ -98,8 +85,7 @@ class DashboardController
             ->groupBy('customer_id')
             ->first();
 
-        $withdrawal = $this->withdrawalRepository
-            ->getModel()
+        $withdrawal = Withdrawal::query()
             ->select([
                 DB::raw('SUM(mp_customer_withdrawals.amount) as amount'),
                 DB::raw('SUM(mp_customer_withdrawals.fee)'),
@@ -126,8 +112,7 @@ class DashboardController
 
         $data['revenue'] = $revenues;
 
-        $data['orders'] = $this->orderRepository
-            ->getModel()
+        $data['orders'] = Order::query()
             ->select([
                 'id',
                 'status',
@@ -145,12 +130,11 @@ class DashboardController
             ])
             ->whereDate('created_at', '>=', $startDate)
             ->whereDate('created_at', '<=', $endDate)
-            ->orderBy('created_at', 'desc')
+            ->orderByDesc('created_at')
             ->limit(10)
             ->get();
 
-        $data['products'] = $this->productRepository
-            ->getModel()
+        $data['products'] = Product::query()
             ->select([
                 'id',
                 'name',
@@ -170,10 +154,10 @@ class DashboardController
             ->whereDate('created_at', '>=', $startDate)
             ->whereDate('created_at', '<=', $endDate)
             ->where([
-                'status' => BaseStatusEnum::PUBLISHED,
                 'is_variation' => false,
                 'store_id' => $store->id,
             ])
+            ->wherePublished()
             ->limit(10)
             ->get();
 
@@ -193,6 +177,8 @@ class DashboardController
 
     public function postUpload(Request $request, BaseHttpResponse $response)
     {
+        $uploadFolder = auth('customer')->user()->upload_folder;
+
         if (! RvMedia::isChunkUploadEnabled()) {
             $validator = Validator::make($request->all(), [
                 'file.0' => 'required|image|mimes:jpg,jpeg,png',
@@ -201,8 +187,6 @@ class DashboardController
             if ($validator->fails()) {
                 return $response->setError()->setMessage($validator->getMessageBag()->first());
             }
-
-            $uploadFolder = auth('customer')->user()->upload_folder;
 
             $result = RvMedia::handleUpload(Arr::first($request->file('file')), 0, $uploadFolder);
 

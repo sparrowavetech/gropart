@@ -5,6 +5,7 @@ namespace Botble\Ecommerce\Models;
 use Botble\Base\Casts\SafeContent;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
+use Botble\Base\Models\Concerns\HasSlug;
 use Botble\Ecommerce\Enums\DiscountTargetEnum;
 use Botble\Ecommerce\Enums\DiscountTypeEnum;
 use Carbon\Carbon;
@@ -12,6 +13,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class ProductCollection extends BaseModel
 {
+    use HasSlug;
+
     protected $table = 'ec_product_collections';
 
     protected $fillable = [
@@ -30,6 +33,10 @@ class ProductCollection extends BaseModel
 
     protected static function booted(): void
     {
+        self::saving(function (self $model) {
+            $model->slug = self::createSlug($model->slug ?: $model->name, $model->getKey());
+        });
+
         self::deleting(function (ProductCollection $collection) {
             $collection->discounts()->detach();
         });

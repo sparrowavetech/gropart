@@ -2,14 +2,15 @@
 
 namespace Botble\Marketplace\Tables;
 
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
+use Botble\Base\Models\BaseQueryBuilder;
 use Botble\Ecommerce\Models\Review;
-use Botble\Media\Facades\RvMedia;
+use Botble\Ecommerce\Tables\Formatters\ReviewImagesFormatter;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Table\DataTables;
-use Illuminate\Contracts\Routing\UrlGenerator;
+use Botble\Table\Columns\Column;
+use Botble\Table\Columns\CreatedAtColumn;
+use Botble\Table\Columns\IdColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -17,13 +18,11 @@ use Illuminate\Http\JsonResponse;
 
 class ReviewTable extends TableAbstract
 {
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Review $model)
+    public function setup(): void
     {
-        parent::__construct($table, $urlGenerator);
-
-        $this->model = $model;
-        $this->hasOperations = false;
-        $this->hasCheckbox = false;
+        $this
+            ->model(Review::class)
+            ->addActions([]);
     }
 
     public function ajax(): JsonResponse
@@ -47,105 +46,33 @@ class ReviewTable extends TableAbstract
             ->editColumn('star', function ($item) {
                 return view('plugins/ecommerce::reviews.partials.rating', ['star' => $item->star])->render();
             })
-            ->editColumn('images', function (Review $item) {
-                if (! is_array($item->images)) {
-                    return '&mdash;';
-                }
-
-                $count = count($item->images);
-
-                if ($count == 0) {
-                    return '&mdash;';
-                }
-
-                $galleryID = 'images-group-' . $item->id;
-
-                $html = Html::image(
-                    RvMedia::getImageUrl($item->images[0], 'thumb'),
-                    RvMedia::getImageUrl($item->images[0]),
-                    [
-                        'width' => 60,
-                        'class' => 'fancybox m-1 rounded-top rounded-end rounded-bottom rounded-start border d-inline-block',
-                        'href' => RvMedia::getImageUrl($item->images[0]),
-                        'data-fancybox' => $galleryID,
-                    ]
-                );
-
-                if (isset($item->images[1])) {
-                    if ($count == 2) {
-                        $html .= Html::image(
-                            RvMedia::getImageUrl($item->images[1], 'thumb'),
-                            RvMedia::getImageUrl($item->images[1]),
-                            [
-                                'width' => 60,
-                                'class' => 'fancybox m-1 rounded-top rounded-end rounded-bottom rounded-start border d-inline-block',
-                                'href' => RvMedia::getImageUrl($item->images[1]),
-                                'data-fancybox' => $galleryID,
-                            ]
-                        );
-                    } elseif ($count > 2) {
-                        $html .= Html::tag('a', Html::image(
-                            RvMedia::getImageUrl($item->images[1], 'thumb'),
-                            RvMedia::getImageUrl($item->images[1]),
-                            [
-                                    'width' => 60,
-                                    'class' => 'm-1 rounded-top rounded-end rounded-bottom rounded-start border',
-                                    'src' => RvMedia::getImageUrl($item->images[1]),
-                                ]
-                        )->toHtml() . Html::tag('span', '+' . ($count - 2))->toHtml(), [
-                            'class' => 'fancybox more-review-images',
-                            'href' => RvMedia::getImageUrl($item->images[1]),
-                            'data-fancybox' => $galleryID,
-                        ]);
-                    }
-                }
-
-                if ($count > 2) {
-                    foreach ($item->images as $index => $image) {
-                        if ($index > 1) {
-                            $html .= Html::image(
-                                RvMedia::getImageUrl($item->images[$index], 'thumb'),
-                                RvMedia::getImageUrl($item->images[$index]),
-                                [
-                                    'width' => 60,
-                                    'class' => 'fancybox d-none',
-                                    'href' => RvMedia::getImageUrl($item->images[$index]),
-                                    'data-fancybox' => $galleryID,
-                                ]
-                            );
-                        }
-                    }
-                }
-
-                return $html;
-            })
-            ->editColumn('created_at', function (Review $item) {
-                return BaseHelper::formatDate($item->created_at);
-            });
+            ->formatColumn('images', ReviewImagesFormatter::class);
 
         return $this->toJson($data);
     }
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->getModel()->query()
+        $query = $this
+            ->getModel()
+            ->query()
             ->select([
-                'ec_reviews.id',
-                'ec_reviews.star',
-                'ec_reviews.comment',
-                'ec_reviews.product_id',
-                'ec_reviews.customer_id',
-                'ec_reviews.status',
-                'ec_reviews.created_at',
-                'ec_reviews.images',
+                'id',
+                'star',
+                'comment',
+                'product_id',
+                'customer_id',
+                'status',
+                'created_at',
+                'images',
             ])
             ->with(['user', 'product'])
-            ->join('ec_products', 'ec_products.id', 'ec_reviews.product_id')
-            ->where([
-                'ec_products.store_id' => auth('customer')->user()->store->id,
-                'ec_reviews.status' => BaseStatusEnum::PUBLISHED,
-                'ec_products.status' => BaseStatusEnum::PUBLISHED,
-            ]);
+            ->wherePublished()
+            ->whereHas('product', function (BaseQueryBuilder $query) {
+                $query
+                    ->wherePublished()
+                    ->where('store_id', auth('customer')->user()->store->id);
+            });
 
         return $this->applyScopes($query);
     }
@@ -153,39 +80,25 @@ class ReviewTable extends TableAbstract
     public function columns(): array
     {
         return [
-            'id' => [
-                'title' => trans('core/base::tables.id'),
-                'width' => '20px',
-                'class' => 'text-start',
-            ],
-            'product_id' => [
-                'title' => trans('plugins/ecommerce::review.product'),
-                'class' => 'text-start',
-            ],
-            'customer_id' => [
-                'title' => trans('plugins/ecommerce::review.user'),
-                'class' => 'text-start',
-            ],
-            'star' => [
-                'title' => trans('plugins/ecommerce::review.star'),
-                'class' => 'text-center',
-            ],
-            'comment' => [
-                'title' => trans('plugins/ecommerce::review.comment'),
-                'class' => 'text-start',
-            ],
-            'images' => [
-                'title' => trans('plugins/ecommerce::review.images'),
-                'width' => '150px',
-                'class' => 'text-start',
-                'searchable' => false,
-                'orderable' => false,
-            ],
-            'created_at' => [
-                'title' => trans('core/base::tables.created_at'),
-                'width' => '70px',
-                'class' => 'text-start',
-            ],
+            IdColumn::make(),
+            Column::make('product_id')
+                ->title(trans('plugins/ecommerce::review.product'))
+                ->alignLeft(),
+            Column::make('customer_id')
+                ->title(trans('plugins/ecommerce::review.user'))
+                ->alignLeft(),
+            Column::make('star')
+                ->title(trans('plugins/ecommerce::review.star')),
+            Column::make('comment')
+                ->title(trans('plugins/ecommerce::review.comment'))
+                ->alignLeft(),
+            Column::formatted('images')
+                ->title(trans('plugins/ecommerce::review.images'))
+                ->width(150)
+                ->orderable(false)
+                ->searchable(false)
+                ->alignLeft(),
+            CreatedAtColumn::make(),
         ];
     }
 

@@ -1,5 +1,5 @@
 @mixin triangle-up($_width, $_height, $_background-color: transparent) {
-    $left-right: $_width*0.5;
+    $left-right: $_width * 0.5;
     $bottom: $_height;
     border-left: $left-right solid transparent;
     border-right: $left-right solid transparent;
@@ -7,7 +7,7 @@
 }
 
 @mixin triangle-down($_width, $_height, $_background-color: transparent) {
-    $left-right: $_width*0.5;
+    $left-right: $_width * 0.5;
     $top: $_height;
     border-left: $left-right solid transparent;
     border-right: $left-right solid transparent;
@@ -15,7 +15,7 @@
 }
 
 @mixin triangle-left($_width, $_height, $_background-color: transparent) {
-    $top-bottom: $_width*0.5;
+    $top-bottom: $_width * 0.5;
     $right: $_height;
     border-top: $top-bottom solid transparent;
     border-bottom: $top-bottom solid transparent;
@@ -23,7 +23,7 @@
 }
 
 @mixin triangle-right($_width, $_height, $_background-color: transparent) {
-    $top-bottom: $_height*0.5;
+    $top-bottom: $_height * 0.5;
     $left: $_width;
     border-top: $top-bottom solid transparent;
     border-bottom: $top-bottom solid transparent;

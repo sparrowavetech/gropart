@@ -35,7 +35,10 @@
             <div>
                 <article>
                     <div><a href="{{ $relatedItem->url }}"></a>
-                        <img src="{{ RvMedia::getImageUrl($relatedItem->image, null, false, RvMedia::getDefaultImage()) }}" alt="{{ $relatedItem->name }}">
+                        <img
+                            src="{{ RvMedia::getImageUrl($relatedItem->image, null, false, RvMedia::getDefaultImage()) }}"
+                            alt="{{ $relatedItem->name }}"
+                        >
                     </div>
                     <header><a href="{{ $relatedItem->url }}"> {{ $relatedItem->name }}</a></header>
                 </article>

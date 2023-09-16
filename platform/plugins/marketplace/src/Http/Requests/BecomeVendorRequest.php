@@ -2,7 +2,7 @@
 
 namespace Botble\Marketplace\Http\Requests;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Support\Http\Requests\Request;
 
 class BecomeVendorRequest extends Request
@@ -13,7 +13,6 @@ class BecomeVendorRequest extends Request
             'shop_name' => 'required|min:2',
             'shop_phone' => 'required|' . BaseHelper::getPhoneValidationRule(),
             'shop_url' => 'required|max:200',
-            'shop_catergory'   => 'required',
         ];
     }
 }

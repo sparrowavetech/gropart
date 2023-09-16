@@ -1,10 +1,11 @@
-@if ($payment && $data = Arr::get($payment, 'element.0', []))
+@if ($payment && ($data = Arr::get($payment, 'element.0', [])))
     <hr>
     @if (Arr::get($data, 'tran_id'))
         <p>{{ trans('plugins/payment::payment.payment_id') }}: {{ Arr::get($data, 'tran_id') }}</p>
     @endif
     @if (Arr::get($data, 'currency_amount'))
-        <p>{{ trans('plugins/payment::payment.amount') }}: {{ Arr::get($data, 'currency_amount') }} {{ Arr::get($data, 'currency_type') }}</p>
+        <p>{{ trans('plugins/payment::payment.amount') }}: {{ Arr::get($data, 'currency_amount') }}
+            {{ Arr::get($data, 'currency_type') }}</p>
     @endif
     @if (Arr::get($data, 'status'))
         <p>{{ trans('plugins/payment::payment.status') }}: {{ Arr::get($data, 'status') }}</p>
@@ -17,7 +18,8 @@
     @endif
 
     @if (Arr::get($data, 'tran_date'))
-        <p>{{ trans('core/base::tables.created_at') }}: {{ Carbon\Carbon::now()->parse(Arr::get($data, 'tran_date')) }}</p>
+        <p>{{ trans('core/base::tables.created_at') }}:
+            {{ Carbon\Carbon::now()->parse(Arr::get($data, 'tran_date')) }}</p>
         <hr>
     @endif
     @if ($refunds = Arr::get($paymentModel->metadata, 'refunds', []))

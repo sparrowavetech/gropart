@@ -24,27 +24,18 @@ $(document).ready(() => {
                 }
             }
 
-            let $form = _self.closest('form')
+            const $form = _self.closest('form')
 
-            $.ajax({
-                url: $form.prop('action'),
-                type: 'POST',
-                data: $form.serialize(),
-                success: (data) => {
+            $httpClient
+                .make()
+                .post($form.prop('action'), new FormData($form[0]))
+                .then(({ data }) => {
+                    Botble.showSuccess(data.message)
+                    $form.removeClass('dirty')
+                })
+                .finally(() => {
                     _self.removeClass('button-loading')
-
-                    if (data.error) {
-                        Botble.showError(data.message)
-                    } else {
-                        Botble.showSuccess(data.message)
-                        $form.removeClass('dirty')
-                    }
-                },
-                error: (data) => {
-                    _self.removeClass('button-loading')
-                    Botble.handleError(data)
-                },
-            })
+                })
         })
 
         $('.theme-option-sidebar a[data-bs-toggle="tab"]').on('click', () => {

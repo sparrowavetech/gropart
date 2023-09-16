@@ -6,8 +6,11 @@
             <div class="row">
                 <div class="col-md-3 col-sm-12">
                     <h4>{{ trans('plugins/ecommerce::shipping.shipping_rules') }}</h4>
-                    <p>{{trans('plugins/ecommerce::shipping.shipping_rules_description') }}</p>
-                    <p><a href="#" class="btn btn-secondary btn-select-country">{{ trans('plugins/ecommerce::shipping.select_country') }}</a></p>
+                    <p>{{ trans('plugins/ecommerce::shipping.shipping_rules_description') }}</p>
+                    <p><a
+                            class="btn btn-secondary btn-select-country"
+                            href="#"
+                        >{{ trans('plugins/ecommerce::shipping.select_country') }}</a></p>
                 </div>
                 <div class="col-md-9 col-sm-12">
                     <div class="wrapper-content">
@@ -15,15 +18,26 @@
                             @foreach ($shipping as $shippingItem)
                                 <div class="wrap-table-shipping-{{ $shippingItem->id }}">
                                     <div class="pd-all-20 p-none-b">
-                                        <label class="p-none-r">{{ trans('plugins/ecommerce::shipping.country') }}: <strong>{{ Arr::get(EcommerceHelper::getAvailableCountries(), $shippingItem->title, $shippingItem->title) }}</strong></label>
-                                        <a href="#" class="btn-change-link float-end pl20 btn-add-shipping-rule-trigger"
-                                            data-shipping-id="{{ $shippingItem->id }}" data-country="{{ $shippingItem->country }}">{{ trans('plugins/ecommerce::shipping.add_shipping_rule') }}</a>
-                                        <a href="#" class="btn-change-link float-end excerpt btn-confirm-delete-region-item-modal-trigger text-danger"
-                                            data-id="{{ $shippingItem->id }}" data-name="{{ Arr::get(EcommerceHelper::getAvailableCountries(), $shippingItem->title, $shippingItem->title) }}">{{ trans('plugins/ecommerce::shipping.delete') }}</a>
+                                        <label class="p-none-r">{{ trans('plugins/ecommerce::shipping.country') }}:
+                                            <strong>{{ Arr::get(EcommerceHelper::getAvailableCountries(), $shippingItem->title, $shippingItem->title) }}</strong></label>
+                                        <a
+                                            class="btn-change-link float-end pl20 btn-add-shipping-rule-trigger"
+                                            data-shipping-id="{{ $shippingItem->id }}"
+                                            data-country="{{ $shippingItem->country }}"
+                                            href="#"
+                                        >{{ trans('plugins/ecommerce::shipping.add_shipping_rule') }}</a>
+                                        <a
+                                            class="btn-change-link float-end excerpt btn-confirm-delete-region-item-modal-trigger text-danger"
+                                            data-id="{{ $shippingItem->id }}"
+                                            data-name="{{ Arr::get(EcommerceHelper::getAvailableCountries(), $shippingItem->title, $shippingItem->title) }}"
+                                            href="#"
+                                        >{{ trans('plugins/ecommerce::shipping.delete') }}</a>
                                     </div>
                                     <div class="pd-all-20 p-none-t p-b10 border-bottom">
-                                        @foreach($shippingItem->rules as $rule)
-                                            @include('plugins/ecommerce::shipping.rules.item', compact('rule'))
+                                        @foreach ($shippingItem->rules as $rule)
+                                            @include(
+                                                'plugins/ecommerce::shipping.rules.item',
+                                                compact('rule'))
                                         @endforeach
                                     </div>
                                 </div>

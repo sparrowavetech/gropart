@@ -1,5 +1,5 @@
 @php
-    Theme::layout('full-width')
+    Theme::layout('full-width');
 @endphp
 
 @if ($posts->count() > 0)

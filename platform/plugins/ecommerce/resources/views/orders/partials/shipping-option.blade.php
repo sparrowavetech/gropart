@@ -3,10 +3,14 @@
     <label for="{{ Arr::get($attributes, 'id') }}">
         <div>
             @if ($image = Arr::get($shippingItem, 'image'))
-                <img src="{{ $image }}" alt="{{ $shippingItem['name'] }}" style="max-height: 40px; max-width: 55px">
+                <img
+                    src="{{ $image }}"
+                    alt="{{ $shippingItem['name'] }}"
+                    style="max-height: 40px; max-width: 55px"
+                >
             @endif
             <span>
-                {{ $shippingItem['name'] }} - 
+                {{ $shippingItem['name'] }} -
                 @if ($shippingItem['price'] > 0)
                     {{ format_price($shippingItem['price']) }}
                 @else

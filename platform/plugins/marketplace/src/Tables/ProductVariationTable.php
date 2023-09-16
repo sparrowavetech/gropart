@@ -7,8 +7,6 @@ use Botble\Base\Facades\Html;
 use Botble\Ecommerce\Models\ProductVariation;
 use Botble\Ecommerce\Tables\ProductVariationTable as EcommerceProductVariationTable;
 use Botble\Marketplace\Exports\ProductExport;
-use Botble\Table\DataTables;
-use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -16,9 +14,9 @@ use Illuminate\Http\JsonResponse;
 
 class ProductVariationTable extends EcommerceProductVariationTable
 {
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, ProductVariation $productVariation)
+    public function setup(): void
     {
-        parent::__construct($table, $urlGenerator, $productVariation);
+        parent::setup();
 
         $this->exportClass = ProductExport::class;
     }
@@ -28,14 +26,14 @@ class ProductVariationTable extends EcommerceProductVariationTable
         $data = $this->loadDataTable();
         $data
             ->editColumn('is_default', function (ProductVariation $item) {
-                return Html::tag('label', Form::radio('variation_default_id', $item->id, $item->is_default, [
-                    'data-url' => route('marketplace.vendor.products.set-default-product-variation', $item->id),
+                return Html::tag('label', Form::radio('variation_default_id', $item->getKey(), $item->is_default, [
+                    'data-url' => route('marketplace.vendor.products.set-default-product-variation', $item->getKey()),
                 ]));
             })
             ->editColumn('operations', function (ProductVariation $item) {
-                $update = route('marketplace.vendor.products.update-version', $item->id);
-                $loadForm = route('marketplace.vendor.products.get-version-form', $item->id);
-                $delete = route('marketplace.vendor.products.delete-version', $item->id);
+                $update = route('marketplace.vendor.products.update-version', $item->getKey());
+                $loadForm = route('marketplace.vendor.products.get-version-form', $item->getKey());
+                $delete = route('marketplace.vendor.products.delete-version', $item->getKey());
 
                 return view('plugins/ecommerce::products.variations.actions', compact('update', 'loadForm', 'delete', 'item'));
             });

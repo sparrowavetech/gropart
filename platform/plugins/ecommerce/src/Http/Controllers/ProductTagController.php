@@ -12,17 +12,13 @@ use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Forms\ProductTagForm;
 use Botble\Ecommerce\Http\Requests\ProductTagRequest;
-use Botble\Ecommerce\Repositories\Interfaces\ProductTagInterface;
+use Botble\Ecommerce\Models\ProductTag;
 use Botble\Ecommerce\Tables\ProductTagTable;
 use Exception;
 use Illuminate\Http\Request;
 
 class ProductTagController extends BaseController
 {
-    public function __construct(protected ProductTagInterface $productTagRepository)
-    {
-    }
-
     public function index(ProductTagTable $table)
     {
         PageTitle::setTitle(trans('plugins/ecommerce::product-tag.name'));
@@ -39,7 +35,7 @@ class ProductTagController extends BaseController
 
     public function store(ProductTagRequest $request, BaseHttpResponse $response)
     {
-        $productTag = $this->productTagRepository->createOrUpdate($request->input());
+        $productTag = ProductTag::query()->create($request->input());
 
         event(new CreatedContentEvent(PRODUCT_TAG_MODULE_SCREEN_NAME, $request, $productTag));
 
@@ -51,7 +47,7 @@ class ProductTagController extends BaseController
 
     public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
     {
-        $productTag = $this->productTagRepository->findOrFail($id);
+        $productTag = ProductTag::query()->findOrFail($id);
 
         event(new BeforeEditContentEvent($request, $productTag));
 
@@ -62,11 +58,10 @@ class ProductTagController extends BaseController
 
     public function update(int|string $id, ProductTagRequest $request, BaseHttpResponse $response)
     {
-        $productTag = $this->productTagRepository->findOrFail($id);
+        $productTag = ProductTag::query()->findOrFail($id);
 
         $productTag->fill($request->input());
-
-        $this->productTagRepository->createOrUpdate($productTag);
+        $productTag->save();
 
         event(new UpdatedContentEvent(PRODUCT_TAG_MODULE_SCREEN_NAME, $request, $productTag));
 
@@ -78,9 +73,9 @@ class ProductTagController extends BaseController
     public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
-            $productTag = $this->productTagRepository->findOrFail($id);
+            $productTag = ProductTag::query()->findOrFail($id);
 
-            $this->productTagRepository->delete($productTag);
+            $productTag->delete();
 
             event(new DeletedContentEvent(PRODUCT_TAG_MODULE_SCREEN_NAME, $request, $productTag));
 
@@ -92,26 +87,8 @@ class ProductTagController extends BaseController
         }
     }
 
-    public function deletes(Request $request, BaseHttpResponse $response)
-    {
-        $ids = $request->input('ids');
-        if (empty($ids)) {
-            return $response
-                ->setError()
-                ->setMessage(trans('core/base::notices.no_select'));
-        }
-
-        foreach ($ids as $id) {
-            $productTag = $this->productTagRepository->findOrFail($id);
-            $this->productTagRepository->delete($productTag);
-            event(new DeletedContentEvent(PRODUCT_TAG_MODULE_SCREEN_NAME, $request, $productTag));
-        }
-
-        return $response->setMessage(trans('core/base::notices.delete_success_message'));
-    }
-
     public function getAllTags()
     {
-        return $this->productTagRepository->pluck('name');
+        return ProductTag::query()->pluck('name')->all();
     }
 }

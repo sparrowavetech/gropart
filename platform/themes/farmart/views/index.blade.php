@@ -10,7 +10,8 @@
         <div style="margin: 20px 0;">
             <div>- Content:</div>
             <div style="border: 1px solid rgba(0,0,0,.1); padding: 10px; margin-top: 10px;direction: ltr;">
-                <div>[simple-slider key="home-slider" ads="VC2C8Q1UGCBG" background="general/slider-bg.jpg"][/simple-slider]</div>
+                <div>[simple-slider key="home-slider" ads="VC2C8Q1UGCBG"
+                    background="general/slider-bg.jpg"][/simple-slider]</div>
                 <div>[featured-product-categories title="Browse by Category"][/featured-product-categories]</div>
                 <div>[featured-brands title="Featured Brands"][/featured-brands]</div>
                 <div>[flash-sale title="Top Saver Today" flash_sale_id="1"][/flash-sale]</div>
@@ -20,14 +21,14 @@
                 <div>[product-collections title="Essential Products"][/product-collections]</div>
                 <div>[product-category-products category_id="18"][/product-category-products]</div>
                 <div>[featured-posts title="Health Daily" background="general/blog-bg.jpg"
-                app_enabled="1"
-                app_title="Shop faster with Farmart App"
-                app_description="Available on both iOS & Android"
-                app_bg="general/app-bg.png"
-                app_android_img="general/app-android.png"
-                app_android_link="#"
-                app_ios_img="general/app-ios.png"
-                app_ios_link="#"][/featured-posts]</div>
+                    app_enabled="1"
+                    app_title="Shop faster with Farmart App"
+                    app_description="Available on both iOS & Android"
+                    app_bg="general/app-bg.png"
+                    app_android_img="general/app-android.png"
+                    app_android_link="#"
+                    app_ios_img="general/app-ios.png"
+                    app_ios_link="#"][/featured-posts]</div>
             </div>
             <br>
             <div>- Template: <strong>Homepage</strong>.</div>

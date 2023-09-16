@@ -13,21 +13,33 @@
                                     <i class="fa fa-truck"></i>
                                 </td>
                                 <td class="order-border p-small">
-                                    <div class="flexbox-grid-default pl5 p-r5" style="align-items: center">
+                                    <div
+                                        class="flexbox-grid-default pl5 p-r5"
+                                        style="align-items: center"
+                                    >
                                         <div class="flexbox-auto-50">
                                             <div class="wrap-img">
-                                                <img class="thumb-image thumb-image-cartorderlist" src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}" alt="{{ $product->name }}" />
+                                                <img
+                                                    class="thumb-image thumb-image-cartorderlist"
+                                                    src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}"
+                                                    alt="{{ $product->name }}"
+                                                />
                                             </div>
                                         </div>
                                         <div class="flexbox-content">
                                             <div>
-                                                <a class="wordwrap hide-print" title="{{ $orderProduct->product_name }}"
-                                                    href="{{ $productEditRouteName && $product && $product->id ? route($productEditRouteName, $product->id) : '#' }}">{{ $orderProduct->product_name }}</a>
+                                                <a
+                                                    class="wordwrap hide-print"
+                                                    href="{{ $productEditRouteName && $product && $product->id ? route($productEditRouteName, $product->id) : '#' }}"
+                                                    title="{{ $orderProduct->product_name }}"
+                                                >{{ $orderProduct->product_name }}</a>
                                                 <p class="mb-0">
                                                     <small>{{ Arr::get($orderProduct->options, 'attributes', '') }}</small>
                                                 </p>
                                                 @if ($sku = Arr::get($orderProduct->options, 'sku'))
-                                                    <p>{{ trans('plugins/ecommerce::shipping.sku') }} : <span>{{ $sku }}</span></p>
+                                                    <p>{{ trans('plugins/ecommerce::shipping.sku') }} :
+                                                        <span>{{ $sku }}</span>
+                                                    </p>
                                                 @endif
                                             </div>
                                         </div>
@@ -50,8 +62,15 @@
                         <table>
                             <tbody>
                                 <tr>
-                                    <td colspan="4" class="text-center p-sm-r border-none">
-                                        <a href="{{ $orderEditRouteName ? route($orderEditRouteName, $shipment->order_id) : '#' }}" target="_blank" class="d-inline-block mt-2">
+                                    <td
+                                        class="text-center p-sm-r border-none"
+                                        colspan="4"
+                                    >
+                                        <a
+                                            class="d-inline-block mt-2"
+                                            href="{{ $orderEditRouteName ? route($orderEditRouteName, $shipment->order_id) : '#' }}"
+                                            target="_blank"
+                                        >
                                             {{ trans('plugins/ecommerce::shipping.view_order', ['order_id' => $shipment->order->code]) }}
                                             <i class="fa fa-external-link-alt"></i>
                                         </a>

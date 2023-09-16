@@ -1,16 +1,20 @@
-<link rel="stylesheet" href="{{ asset('vendor/core/core/media/libraries/dropzone/dropzone.css') }}">
+<link
+    href="{{ asset('vendor/core/core/media/libraries/dropzone/dropzone.css') }}"
+    rel="stylesheet"
+>
 <script src="{{ asset('vendor/core/core/media/libraries/dropzone/dropzone.js') }}"></script>
 <style>
     .dropzone {
         border-radius: 5px;
         border: 1px dashed rgb(0, 135, 247);
     }
+
     .dropzone .dz-preview:not(.dz-processing) .dz-progress {
         display: none;
     }
 
     .dropzone .dz-message {
-        margin : 50px 0;
+        margin: 50px 0;
     }
 
     .dropzone.dz-clickable * {
@@ -21,7 +25,7 @@
     'use strict';
     Dropzone.autoDiscover = false;
 
-    $(document).ready(function () {
+    $(document).ready(function() {
         var dropzone = new Dropzone('#{{ $id }}-upload', {
             previewTemplate: document.querySelector('#preview-template').innerHTML,
             parallelUploads: 1,
@@ -54,14 +58,18 @@
                         thumbnailElement.alt = file.name;
                         thumbnailElement.src = dataUrl;
                     }
-                    setTimeout(function() { file.previewElement.classList.add('dz-image-preview'); }, 1);
+                    setTimeout(function() {
+                        file.previewElement.classList.add('dz-image-preview');
+                    }, 1);
 
                     if (file.url) {
-                        $(file.previewElement).append('<input type="hidden" name="{{ $name }}[]" value="' + file.url + '" />');
+                        $(file.previewElement).append(
+                            '<input type="hidden" name="{{ $name }}[]" value="' + file
+                            .url + '" />');
                     }
                 }
             },
-            success: function (file, response) {
+            success: function(file, response) {
                 if (response.error) {
                     Botble.showError(response.message);
                 } else {
@@ -70,37 +78,46 @@
                     }
                 }
 
-                $(file.previewElement).append('<input type="hidden" name="{{ $name }}[]" value="' + response.data.url + '" />');
+                $(file.previewElement).append(
+                    '<input type="hidden" name="{{ $name }}[]" value="' + response.data
+                    .url + '" />');
 
                 $('.dz-sortable').sortable();
             },
             removedfile: function(file) {
-                if (! confirm('{{ __('Do you want to delete this image?') }}'))  {
+                if (!confirm('{{ __('Do you want to delete this image?') }}')) {
                     return false;
                 }
                 dropzone.options.maxFiles = dropzone.options.maxFiles + 1;
                 $('.dz-message.needsclick').hide();
-                if (dropzone.options.maxFiles === {{ MarketplaceHelper::maxProductImagesUploadByVendor() }}) {
+                if (dropzone.options.maxFiles ===
+                    {{ MarketplaceHelper::maxProductImagesUploadByVendor() }}) {
                     $('.dz-message.needsclick').show();
                 }
 
-                return file.previewElement != null ? file.previewElement.parentNode.removeChild(file.previewElement) : void 0;
+                return file.previewElement != null ? file.previewElement.parentNode.removeChild(file
+                    .previewElement) : void 0;
             }
         });
 
         @if ($values)
-        var files = [];
-        @foreach($values as $item)
-        files.push({name: '{{ File::name($item) }}', size: '{{ Storage::exists($item) ? Storage::size($item) : 0 }}', url: '{{ $item }}', full_url: '{{ RvMedia::getImageUrl($item, 'thumb') }}'});
-        @endforeach
+            var files = [];
+            @foreach ($values as $item)
+                files.push({
+                    name: '{{ File::name($item) }}',
+                    size: '{{ Storage::exists($item) ? Storage::size($item) : 0 }}',
+                    url: '{{ $item }}',
+                    full_url: '{{ RvMedia::getImageUrl($item, 'thumb') }}'
+                });
+            @endforeach
 
-        $.each(files, function(key, file) {
-            dropzone.options.addedfile.call(dropzone, file);
-            dropzone.options.thumbnail.call(dropzone, file, file.full_url);
-            dropzone.options.maxFiles = dropzone.options.maxFiles - 1;
-        });
+            $.each(files, function(key, file) {
+                dropzone.options.addedfile.call(dropzone, file);
+                dropzone.options.thumbnail.call(dropzone, file, file.full_url);
+                dropzone.options.maxFiles = dropzone.options.maxFiles - 1;
+            });
 
-        $('.dz-sortable').sortable();
+            $('.dz-sortable').sortable();
         @endif
     });
 </script>

@@ -2,7 +2,6 @@
 
 namespace Botble\Ecommerce\Repositories\Eloquent;
 
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Ecommerce\Repositories\Interfaces\ProductCategoryInterface;
 use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 
@@ -21,7 +20,7 @@ class ProductCategoryRepository extends RepositoriesAbstract implements ProductC
         $data = $this->model;
 
         if ($param['active']) {
-            $data = $data->where('status', BaseStatusEnum::PUBLISHED);
+            $data = $data->wherePublished();
         }
 
         if ($param['is_child'] !== null) {
@@ -48,8 +47,8 @@ class ProductCategoryRepository extends RepositoriesAbstract implements ProductC
     public function getDataSiteMap()
     {
         $data = $this->model
-            ->where('status', BaseStatusEnum::PUBLISHED)
-            ->orderBy('created_at', 'desc');
+            ->wherePublished()
+            ->orderByDesc('created_at');
 
         return $this->applyBeforeExecuteQuery($data)->get();
     }
@@ -57,10 +56,8 @@ class ProductCategoryRepository extends RepositoriesAbstract implements ProductC
     public function getFeaturedCategories($limit)
     {
         $data = $this->model
-            ->where([
-                'status' => BaseStatusEnum::PUBLISHED,
-                'is_featured' => 1,
-            ])
+            ->where('is_featured', true)
+            ->wherePublished()
             ->select([
                 'id',
                 'name',
@@ -77,7 +74,7 @@ class ProductCategoryRepository extends RepositoriesAbstract implements ProductC
     {
         $data = $this->model;
         if ($active) {
-            $data = $data->where(['status' => BaseStatusEnum::PUBLISHED]);
+            $data = $data->wherePublished();
         }
 
         return $this->applyBeforeExecuteQuery($data)->get();
@@ -113,8 +110,8 @@ class ProductCategoryRepository extends RepositoriesAbstract implements ProductC
         }
 
         $data = $data
-            ->orderBy('order', 'ASC')
-            ->orderBy('created_at', 'DESC');
+            ->orderBy('order')
+            ->orderByDesc('created_at');
 
         if ($select) {
             $data = $data->select($select);

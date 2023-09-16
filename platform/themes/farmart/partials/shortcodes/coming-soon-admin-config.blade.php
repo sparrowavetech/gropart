@@ -1,21 +1,45 @@
 <div class="form-group">
     <label class="control-label">{{ __('Title') }}</label>
-    <input type="text" name="title" value="{{ Arr::get($attributes, 'title') }}" class="form-control" placeholder="{{ __('Title') }}">
+    <input
+        class="form-control"
+        name="title"
+        type="text"
+        value="{{ Arr::get($attributes, 'title') }}"
+        placeholder="{{ __('Title') }}"
+    >
 </div>
 
 <div class="form-group">
     <label class="control-label">{{ __('Subtitle') }}</label>
-    <input type="text" name="subtitle" value="{{ Arr::get($attributes, 'subtitle') }}" class="form-control" placeholder="{{ __('Subtitle') }}">
+    <input
+        class="form-control"
+        name="subtitle"
+        type="text"
+        value="{{ Arr::get($attributes, 'subtitle') }}"
+        placeholder="{{ __('Subtitle') }}"
+    >
 </div>
 
 <div class="form-group">
     <label class="control-label">Time</label>
-    <input type="text" name="time" value="{{ Arr::get($attributes, 'time') }}" class="form-control" placeholder="Time">
+    <input
+        class="form-control"
+        name="time"
+        type="text"
+        value="{{ Arr::get($attributes, 'time') }}"
+        placeholder="Time"
+    >
 </div>
 
 <div class="form-group">
     <label class="control-label">{{ __('Connect social networks title') }}</label>
-    <input type="text" name="social_title" value="{{ Arr::get($attributes, 'social_title') }}" class="form-control" placeholder="{{ __('Connect social networks title') }}">
+    <input
+        class="form-control"
+        name="social_title"
+        type="text"
+        value="{{ Arr::get($attributes, 'social_title') }}"
+        placeholder="{{ __('Connect social networks title') }}"
+    >
 </div>
 
 <div class="form-group">

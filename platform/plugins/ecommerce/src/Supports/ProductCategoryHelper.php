@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Supports;
 
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Ecommerce\Repositories\Interfaces\ProductCategoryInterface;
+use Botble\Language\Facades\Language;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Arr;
 
@@ -21,7 +22,7 @@ class ProductCategoryHelper
                 Arr::get($params, 'with', []),
                 Arr::get($params, 'withCount', []),
                 $onlyParent,
-                Arr::get($params, 'select', ['id', 'name', 'status']),
+                Arr::get($params, 'select', ['id', 'name', 'status', 'is_featured', 'image']),
             );
         }
 
@@ -54,7 +55,20 @@ class ProductCategoryHelper
 
     public function getActiveTreeCategories(): EloquentCollection
     {
-        return $this->getTreeCategories(true);
+        $categories = $this->getTreeCategories(true);
+
+        if (
+            is_plugin_active('language') &&
+            is_plugin_active('language-advanced') &&
+            Language::getCurrentLocaleCode() != Language::getDefaultLocaleCode()
+        ) {
+            $categories->loadMissing([
+                'activeChildren.translations',
+                'activeChildren.activeChildren.translations',
+            ]);
+        }
+
+        return $categories;
     }
 
     public function getTreeCategories(bool $activeOnly = false): EloquentCollection

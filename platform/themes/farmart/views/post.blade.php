@@ -13,8 +13,11 @@
                 @if ($post->categories->count())
                     <div class="entry-meta-categories">
                         <span>{{ __('in') }}</span>
-                        @foreach($post->categories as $category)
-                            <a href="{{ $category->url }}">{{ $category->name }}</a> @if (!$loop->last) , @endif
+                        @foreach ($post->categories as $category)
+                            <a href="{{ $category->url }}">{{ $category->name }}</a>
+                            @if (!$loop->last)
+                                ,
+                            @endif
                         @endforeach
                     </div>
                 @endif
@@ -30,8 +33,14 @@
             @if ($post->tags->count())
                 <div class="entry-meta-tags">
                     <strong>{{ __('Tags') }}:</strong>
-                    @foreach($post->tags as $tag)
-                        <a href="{{ $tag->url }}" class="text-link">{{ $tag->name }}</a>@if (!$loop->last), @endif
+                    @foreach ($post->tags as $tag)
+                        <a
+                            class="text-link"
+                            href="{{ $tag->url }}"
+                        >{{ $tag->name }}</a>
+                        @if (!$loop->last)
+                            ,
+                        @endif
                     @endforeach
                 </div>
             @endif
@@ -49,29 +58,32 @@
                     <h3>{{ __('Related Posts') }}</h3>
                 </div>
                 <div class="list-post--wrapper">
-                    <div class="slick-slides-carousel" data-slick="{{ json_encode([
-                        'slidesToShow'   => 3,
-                        'slidesToScroll' => 1,
-                        'arrows'         => true,
-                        'dots'           => true,
-                        'infinite'        => false,
-                        'responsive'     => [
-                            [
-                                'breakpoint' => 1200,
-                                'settings'   => [
-                                    'slidesToShow'   => 2,
-                                    'slidesToScroll' => 1
+                    <div
+                        class="slick-slides-carousel"
+                        data-slick="{{ json_encode([
+                            'slidesToShow' => 3,
+                            'slidesToScroll' => 1,
+                            'arrows' => true,
+                            'dots' => true,
+                            'infinite' => false,
+                            'responsive' => [
+                                [
+                                    'breakpoint' => 1200,
+                                    'settings' => [
+                                        'slidesToShow' => 2,
+                                        'slidesToScroll' => 1,
+                                    ],
+                                ],
+                                [
+                                    'breakpoint' => 480,
+                                    'settings' => [
+                                        'slidesToShow' => 1,
+                                        'slidesToScroll' => 1,
+                                    ],
                                 ],
                             ],
-                            [
-                                'breakpoint' => 480,
-                                'settings'   => [
-                                    'slidesToShow'   => 1,
-                                    'slidesToScroll' => 1
-                                ],
-                            ],
-                        ],
-                    ]) }}">
+                        ]) }}"
+                    >
                         @foreach ($relatedPosts as $item)
                             {!! Theme::partial('post-item', ['post' => $item]) !!}
                         @endforeach
@@ -82,7 +94,10 @@
     </div>
     <div class="col-md-3">
         <div class="primary-sidebar">
-            <aside class="widget-area" id="primary-sidebar">
+            <aside
+                class="widget-area"
+                id="primary-sidebar"
+            >
                 {!! dynamic_sidebar('primary_sidebar') !!}
             </aside>
         </div>

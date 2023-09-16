@@ -6,33 +6,38 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
 use Botble\Ecommerce\Models\Review;
-use Botble\Media\Facades\RvMedia;
+use Botble\Ecommerce\Tables\Formatters\ReviewImagesFormatter;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Table\DataTables;
-use Illuminate\Contracts\Routing\UrlGenerator;
+use Botble\Table\Actions\Action;
+use Botble\Table\Actions\DeleteAction;
+use Botble\Table\BulkActions\DeleteBulkAction;
+use Botble\Table\Columns\Column;
+use Botble\Table\Columns\CreatedAtColumn;
+use Botble\Table\Columns\IdColumn;
+use Botble\Table\Columns\LinkableColumn;
+use Botble\Table\Columns\StatusColumn;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class ReviewTable extends TableAbstract
 {
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Review $model)
+    public function setup(): void
     {
-        parent::__construct($table, $urlGenerator);
-
-        $this->model = $model;
-        $this->hasActions = true;
-        $this->hasFilter = true;
-
-        if (! Auth::user()->hasAnyPermission(['review.edit', 'review.destroy'])) {
-            $this->hasOperations = false;
-            $this->hasActions = false;
-        }
+        $this
+            ->model(Review::class)
+            ->addActions([
+                Action::make('view')
+                    ->route('reviews.show')
+                    ->permission('reviews.index')
+                    ->label(__('View'))
+                    ->icon('fas fa-eye'),
+                DeleteAction::make()->route('reviews.destroy'),
+            ]);
     }
 
     public function ajax(): JsonResponse
@@ -55,98 +60,15 @@ class ReviewTable extends TableAbstract
                     return null;
                 }
 
-                return Html::link(route('customers.edit', $item->user->id), BaseHelper::clean($item->user->name))->toHtml();
+                return Html::link(
+                    route('customers.edit', $item->user->id),
+                    BaseHelper::clean($item->user->name)
+                )->toHtml();
             })
             ->editColumn('star', function (Review $item) {
                 return view('plugins/ecommerce::reviews.partials.rating', ['star' => $item->star])->render();
             })
-            ->editColumn('checkbox', function (Review $item) {
-                return $this->getCheckbox($item->id);
-            })
-            ->editColumn('status', function (Review $item) {
-                return BaseHelper::clean($item->status->toHtml());
-            })
-            ->editColumn('comment', function (Review $review) {
-                return Html::link(route('reviews.show', $review), $review->comment);
-            })
-            ->editColumn('images', function (Review $item) {
-                if (! is_array($item->images)) {
-                    return '&mdash;';
-                }
-
-                $count = count($item->images);
-
-                if ($count == 0) {
-                    return '&mdash;';
-                }
-
-                $galleryID = 'images-group-' . $item->id;
-
-                $html = Html::image(
-                    RvMedia::getImageUrl($item->images[0], 'thumb'),
-                    RvMedia::getImageUrl($item->images[0]),
-                    [
-                        'width' => 60,
-                        'class' => 'fancybox m-1 rounded-top rounded-end rounded-bottom rounded-start border d-inline-block',
-                        'href' => RvMedia::getImageUrl($item->images[0]),
-                        'data-fancybox' => $galleryID,
-                    ]
-                );
-
-                if (isset($item->images[1])) {
-                    if ($count == 2) {
-                        $html .= Html::image(
-                            RvMedia::getImageUrl($item->images[1], 'thumb'),
-                            RvMedia::getImageUrl($item->images[1]),
-                            [
-                                'width' => 60,
-                                'class' => 'fancybox m-1 rounded-top rounded-end rounded-bottom rounded-start border d-inline-block',
-                                'href' => RvMedia::getImageUrl($item->images[1]),
-                                'data-fancybox' => $galleryID,
-                            ]
-                        );
-                    } elseif ($count > 2) {
-                        $html .= Html::tag('a', Html::image(
-                            RvMedia::getImageUrl($item->images[1], 'thumb'),
-                            RvMedia::getImageUrl($item->images[1]),
-                            [
-                                    'width' => 60,
-                                    'class' => 'm-1 rounded-top rounded-end rounded-bottom rounded-start border',
-                                    'src' => RvMedia::getImageUrl($item->images[1]),
-                                ]
-                        )->toHtml() . Html::tag('span', '+' . ($count - 2))->toHtml(), [
-                            'class' => 'fancybox more-review-images',
-                            'href' => RvMedia::getImageUrl($item->images[1]),
-                            'data-fancybox' => $galleryID,
-                        ]);
-                    }
-                }
-
-                if ($count > 2) {
-                    foreach ($item->images as $index => $image) {
-                        if ($index > 1) {
-                            $html .= Html::image(
-                                RvMedia::getImageUrl($item->images[$index], 'thumb'),
-                                RvMedia::getImageUrl($item->images[$index]),
-                                [
-                                    'width' => 60,
-                                    'class' => 'fancybox d-none',
-                                    'href' => RvMedia::getImageUrl($item->images[$index]),
-                                    'data-fancybox' => $galleryID,
-                                ]
-                            );
-                        }
-                    }
-                }
-
-                return $html;
-            })
-            ->editColumn('created_at', function (Review $item) {
-                return BaseHelper::formatDate($item->created_at);
-            })
-            ->addColumn('operations', function (Review $item) {
-                return view('plugins/ecommerce::reviews.partials.actions', compact('item'))->render();
-            })
+            ->formatColumn('images', ReviewImagesFormatter::class)
             ->filter(function ($query) {
                 $keyword = $this->request->input('search.value');
                 if ($keyword) {
@@ -190,43 +112,27 @@ class ReviewTable extends TableAbstract
     public function columns(): array
     {
         return [
-            'id' => [
-                'title' => trans('core/base::tables.id'),
-                'width' => '20px',
-                'class' => 'text-start',
-            ],
-            'product_id' => [
-                'title' => trans('plugins/ecommerce::review.product'),
-                'class' => 'text-start',
-            ],
-            'customer_id' => [
-                'title' => trans('plugins/ecommerce::review.user'),
-                'class' => 'text-start',
-            ],
-            'star' => [
-                'title' => trans('plugins/ecommerce::review.star'),
-                'class' => 'text-center',
-            ],
-            'comment' => [
-                'title' => trans('plugins/ecommerce::review.comment'),
-                'class' => 'text-start',
-            ],
-            'images' => [
-                'title' => trans('plugins/ecommerce::review.images'),
-                'width' => '150px',
-                'class' => 'text-start',
-                'searchable' => false,
-                'orderable' => false,
-            ],
-            'status' => [
-                'title' => trans('plugins/ecommerce::review.status'),
-                'class' => 'text-center',
-            ],
-            'created_at' => [
-                'title' => trans('core/base::tables.created_at'),
-                'width' => '70px',
-                'class' => 'text-start',
-            ],
+            IdColumn::make(),
+            Column::make('product_id')
+                ->title(trans('plugins/ecommerce::review.product'))
+                ->alignLeft(),
+            Column::make('customer_id')
+                ->title(trans('plugins/ecommerce::review.user'))
+                ->alignLeft(),
+            Column::make('star')
+                ->title(trans('plugins/ecommerce::review.star')),
+            LinkableColumn::make('comment')
+                ->title(trans('plugins/ecommerce::review.comment'))
+                ->route('reviews.show')
+                ->alignLeft(),
+            Column::formatted('images')
+                ->title(trans('plugins/ecommerce::review.images'))
+                ->alignLeft()
+                ->width(150)
+                ->orderable(false)
+                ->searchable(false),
+            StatusColumn::make(),
+            CreatedAtColumn::make(),
         ];
     }
 
@@ -247,7 +153,9 @@ class ReviewTable extends TableAbstract
 
     public function bulkActions(): array
     {
-        return $this->addDeleteAction(route('reviews.deletes'), 'review.destroy', parent::bulkActions());
+        return [
+            DeleteBulkAction::make()->permission('review.destroy'),
+        ];
     }
 
     public function getBulkChanges(): array

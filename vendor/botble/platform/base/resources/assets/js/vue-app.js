@@ -10,7 +10,7 @@ class VueApp {
                 $event.on('vue-app:force-update', () => {
                     this.$forceUpdate()
                 })
-            }
+            },
         })
 
         this.vue.use({
@@ -24,7 +24,8 @@ class VueApp {
                 }
 
                 app.config.globalProperties.$sanitize = sanitizeHTML
-            }
+                app.config.globalProperties.$httpClient = window.$httpClient
+            },
         })
 
         this.eventBus = {
@@ -75,7 +76,7 @@ window.vueApp = new VueApp()
 window.$event = emitter
 
 document.addEventListener('DOMContentLoaded', () => {
-    if (! window.vueApp.hasBooted) {
+    if (!window.vueApp.hasBooted) {
         window.vueApp.boot()
     }
 })

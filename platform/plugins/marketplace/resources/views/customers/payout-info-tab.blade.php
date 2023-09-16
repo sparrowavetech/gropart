@@ -1,3 +1,7 @@
 <li class="nav-item">
-    <a href="#tab_payout_info" class="nav-link" data-bs-toggle="tab">{{ __('Payout info') }} </a>
+    <a
+        class="nav-link"
+        data-bs-toggle="tab"
+        href="#tab_payout_info"
+    >{{ __('Payout info') }} </a>
 </li>

@@ -7,24 +7,10 @@ class SettingManagement {
             let key = _self.prop('id')
             let url = _self.data('change-url')
 
-            $.ajax({
-                type: 'POST',
-                url: url,
-                data: {
-                    key: key,
-                    value: _self.prop('checked') ? 1 : 0,
-                },
-                success: (res) => {
-                    if (!res.error) {
-                        Botble.showSuccess(res.message)
-                    } else {
-                        Botble.showError(res.message)
-                    }
-                },
-                error: (res) => {
-                    Botble.handleError(res)
-                },
-            })
+            $httpClient
+                .make()
+                .post(url, { key: key, value: _self.prop('checked') ? 1 : 0 })
+                .then(({ data }) => Botble.showSuccess(data.message))
         })
 
         $(document).on('change', '.setting-select-options', (event) => {
@@ -36,28 +22,20 @@ class SettingManagement {
             event.preventDefault()
             let _self = $(event.currentTarget)
             let defaultText = _self.text()
+            let form = new FormData(_self.closest('form')[0])
 
             _self.text(_self.data('saving'))
 
-            $.ajax({
-                type: 'POST',
-                url: route('settings.email.edit'),
-                data: _self.closest('form').serialize(),
-                success: (res) => {
-                    if (!res.error) {
-                        Botble.showSuccess(res.message)
-                        $('#send-test-email-modal').modal('show')
-                    } else {
-                        Botble.showError(res.message)
-                    }
-
+            $httpClient
+                .make()
+                .postForm(route('settings.email.edit'), form)
+                .then(({ data }) => {
+                    Botble.showSuccess(data.message)
+                    $('#send-test-email-modal').modal('show')
+                })
+                .finally(() => {
                     _self.text(defaultText)
-                },
-                error: (res) => {
-                    Botble.handleError(res)
-                    _self.text(defaultText)
-                },
-            })
+                })
         })
 
         $('#send-test-email-btn').on('click', (event) => {
@@ -66,27 +44,18 @@ class SettingManagement {
 
             _self.addClass('button-loading')
 
-            $.ajax({
-                type: 'POST',
-                url: route('setting.email.send.test'),
-                data: {
+            $httpClient
+                .make()
+                .post(route('setting.email.send.test'), {
                     email: _self.closest('.modal-content').find('input[name=email]').val(),
-                },
-                success: (res) => {
-                    if (!res.error) {
-                        Botble.showSuccess(res.message)
-                    } else {
-                        Botble.showError(res.message)
-                    }
-                    _self.removeClass('button-loading')
+                })
+                .then(({ data }) => {
+                    Botble.showSuccess(data.message)
                     _self.closest('.modal').modal('hide')
-                },
-                error: (res) => {
-                    Botble.handleError(res)
+                })
+                .finally(() => {
                     _self.removeClass('button-loading')
-                    _self.closest('.modal').modal('hide')
-                },
-            })
+                })
         })
 
         $('.generate-thumbnails-trigger-button').on('click', (event) => {
@@ -96,24 +65,13 @@ class SettingManagement {
 
             _self.text(_self.data('saving'))
 
-            $.ajax({
-                type: 'POST',
-                url: route('settings.media.post'),
-                data: _self.closest('form').serialize(),
-                success: (res) => {
-                    if (!res.error) {
-                        $('#generate-thumbnails-modal').modal('show')
-                    } else {
-                        Botble.showError(res.message)
-                    }
-
+            $httpClient
+                .make()
+                .postForm(route('settings.media.post'), new FormData(_self.closest('form')[0]))
+                .then(() => $('#generate-thumbnails-modal').modal('show'))
+                .finally(() => {
                     _self.text(defaultText)
-                },
-                error: (res) => {
-                    Botble.handleError(res)
-                    _self.text(defaultText)
-                },
-            })
+                })
         })
 
         $('#generate-thumbnails-button').on('click', (event) => {
@@ -122,24 +80,14 @@ class SettingManagement {
 
             _self.addClass('button-loading')
 
-            $.ajax({
-                type: 'POST',
-                url: route('settings.media.generate-thumbnails'),
-                success: (res) => {
-                    if (!res.error) {
-                        Botble.showSuccess(res.message)
-                    } else {
-                        Botble.showError(res.message)
-                    }
+            $httpClient
+                .make()
+                .post(route('settings.media.generate-thumbnails'))
+                .then(({ data }) => Botble.showSuccess(data.message))
+                .finally(() => {
                     _self.removeClass('button-loading')
                     _self.closest('.modal').modal('hide')
-                },
-                error: (res) => {
-                    Botble.handleError(res)
-                    _self.removeClass('button-loading')
-                    _self.closest('.modal').modal('hide')
-                },
-            })
+                })
         })
 
         if (typeof CodeMirror !== 'undefined') {
@@ -204,32 +152,25 @@ class SettingManagement {
 
             _self.addClass('button-loading')
 
-            $.ajax({
-                type: 'POST',
-                cache: false,
-                url: _self.data('target'),
-                data: {
+            $httpClient
+                .make()
+                .post(_self.data('target'), {
                     email_subject_key: $('input[name=email_subject_key]').val(),
                     module: $('input[name=module]').val(),
                     template_file: $('input[name=template_file]').val(),
-                },
-                success: (res) => {
-                    if (!res.error) {
-                        Botble.showSuccess(res.message)
-                        setTimeout(() => {
-                            window.location.reload()
-                        }, 1000)
-                    } else {
-                        Botble.showError(res.message)
-                    }
-                    _self.removeClass('button-loading')
+                })
+                .then(({ data }) => {
+                    Botble.showSuccess(data.message)
+
+                    setTimeout(() => {
+                        window.location.reload()
+                    }, 1000)
+
                     $('#reset-template-to-default-modal').modal('hide')
-                },
-                error: (res) => {
-                    Botble.handleError(res)
+                })
+                .finally(() => {
                     _self.removeClass('button-loading')
-                },
-            })
+                })
         })
 
         $(document).on('change', '.check-all', (event) => {
@@ -325,7 +266,7 @@ class SettingManagement {
         if (navigator.clipboard && window.isSecureContext) {
             await navigator.clipboard.writeText(textToCopy)
 
-            Botble.showSuccess(input.data('copied'));
+            Botble.showSuccess(input.data('copied'))
         } else {
             const textarea = document.createElement('textarea')
             textarea.value = textToCopy
@@ -337,7 +278,7 @@ class SettingManagement {
             try {
                 document.execCommand('copy')
 
-                Botble.showSuccess(input.data('copied'));
+                Botble.showSuccess(input.data('copied'))
             } catch (error) {
                 console.error(error)
             } finally {

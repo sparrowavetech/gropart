@@ -13,7 +13,7 @@ use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Marketplace\Enums\WithdrawalStatusEnum;
 use Botble\Marketplace\Forms\WithdrawalForm;
 use Botble\Marketplace\Http\Requests\WithdrawalRequest;
-use Botble\Marketplace\Repositories\Interfaces\WithdrawalInterface;
+use Botble\Marketplace\Models\Withdrawal;
 use Botble\Marketplace\Tables\WithdrawalTable;
 use Exception;
 use Illuminate\Http\Request;
@@ -21,10 +21,6 @@ use Illuminate\Support\Facades\Auth;
 
 class WithdrawalController extends BaseController
 {
-    public function __construct(protected WithdrawalInterface $withdrawalRepository)
-    {
-    }
-
     public function index(WithdrawalTable $table)
     {
         PageTitle::setTitle(trans('plugins/marketplace::withdrawal.name'));
@@ -34,7 +30,7 @@ class WithdrawalController extends BaseController
 
     public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
     {
-        $withdrawal = $this->withdrawalRepository->findOrFail($id);
+        $withdrawal = Withdrawal::query()->findOrFail($id);
 
         event(new BeforeEditContentEvent($request, $withdrawal));
 
@@ -45,10 +41,10 @@ class WithdrawalController extends BaseController
 
     public function update(int|string $id, WithdrawalRequest $request, BaseHttpResponse $response)
     {
-        $withdrawal = $this->withdrawalRepository->findOrFail($id);
+        $withdrawal = Withdrawal::query()->findOrFail($id);
 
         $data = [
-            'images' => array_filter($request->input('images', [])),
+            'images' => array_filter((array)$request->input('images', [])),
             'user_id' => Auth::id(),
             'description' => $request->input('description'),
             'payment_channel' => $request->input('payment_channel'),
@@ -73,8 +69,7 @@ class WithdrawalController extends BaseController
         }
 
         $withdrawal->fill($data);
-
-        $this->withdrawalRepository->createOrUpdate($withdrawal);
+        $withdrawal->save();
 
         event(new UpdatedContentEvent(WITHDRAWAL_MODULE_SCREEN_NAME, $request, $withdrawal));
 
@@ -86,9 +81,9 @@ class WithdrawalController extends BaseController
     public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
-            $withdrawal = $this->withdrawalRepository->findOrFail($id);
+            $withdrawal = Withdrawal::query()->findOrFail($id);
 
-            $this->withdrawalRepository->delete($withdrawal);
+            $withdrawal->delete();
 
             event(new DeletedContentEvent(WITHDRAWAL_MODULE_SCREEN_NAME, $request, $withdrawal));
 
@@ -98,23 +93,5 @@ class WithdrawalController extends BaseController
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
-    }
-
-    public function deletes(Request $request, BaseHttpResponse $response)
-    {
-        $ids = $request->input('ids');
-        if (empty($ids)) {
-            return $response
-                ->setError()
-                ->setMessage(trans('core/base::notices.no_select'));
-        }
-
-        foreach ($ids as $id) {
-            $withdrawal = $this->withdrawalRepository->findOrFail($id);
-            $this->withdrawalRepository->delete($withdrawal);
-            event(new DeletedContentEvent(WITHDRAWAL_MODULE_SCREEN_NAME, $request, $withdrawal));
-        }
-
-        return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 }

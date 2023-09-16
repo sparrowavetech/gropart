@@ -52,7 +52,6 @@ Page Header
 
             /* Extended Dropdowns */
             > li.dropdown-extended {
-
                 .dropdown-menu {
                     border-color: $header-top-menu-extended-dropdown-border-color;
 
@@ -139,7 +138,6 @@ Page Header
 
             /* Tasks */
             > li.dropdown-tasks {
-
                 .dropdown-menu {
                     .dropdown-menu-list {
                         .progress {
@@ -152,7 +150,6 @@ Page Header
             /* User */
             > li.dropdown-user {
                 > .dropdown-toggle {
-
                     > .username {
                         color: $header-top-menu-user-font-color;
                     }
@@ -169,7 +166,6 @@ Page Header
 
             /* Language */
             > li.dropdown-language {
-
                 > .dropdown-toggle {
                     > .langname {
                         color: $header-top-menu-user-font-color;
@@ -244,7 +240,10 @@ Page Header
 
                                 &:hover {
                                     .time {
-                                        background: darken($header-top-menu-dropdown-dark-notification-time-bg-color, 5%);
+                                        background: darken(
+                                            $header-top-menu-dropdown-dark-notification-time-bg-color,
+                                            5%
+                                        );
                                     }
                                 }
                             }
@@ -269,7 +268,6 @@ Page Header
 
     /* Default sidebar */
     .page-sidebar-menu {
-
         /* 1st level links */
 
         > li {
@@ -281,11 +279,11 @@ Page Header
                     color: $sidebar-menu-link-icon-font-color;
                 }
 
-                > i[class^="icon-"],
-                > i[class*="icon-"] {
-                    @if $theme-name == "light" {
+                > i[class^='icon-'],
+                > i[class*='icon-'] {
+                    @if $theme-name == 'light' {
                         color: darken($sidebar-menu-link-icon-font-color, 15%);
-                    } @else if $theme-name == "light2" {
+                    } @else if $theme-name == 'light2' {
                         color: darken($sidebar-menu-link-icon-font-color, 15%);
                     } @else {
                         color: lighten($sidebar-menu-link-icon-font-color, 5%);
@@ -418,11 +416,11 @@ Page Header
                         color: $sidebar-menu-sub-menu-link-icon-font-color;
                     }
 
-                    > i[class^="icon-"],
-                    > i[class*="icon-"] {
-                        @if $theme-name == "light" {
+                    > i[class^='icon-'],
+                    > i[class*='icon-'] {
+                        @if $theme-name == 'light' {
                             color: darken($sidebar-menu-link-icon-font-color, 15%);
-                        } @else if $theme-name == "light2" {
+                        } @else if $theme-name == 'light2' {
                             color: darken($sidebar-menu-link-icon-font-color, 15%);
                         } @else {
                             color: lighten($sidebar-menu-link-icon-font-color, 5%);
@@ -445,9 +443,9 @@ Page Header
 
                         > i {
                             color: $sidebar-menu-sub-menu-link-icon-font-color-on-hover;
-                            @if $theme-name == "light" {
+                            @if $theme-name == 'light' {
                                 color: darken($sidebar-menu-link-icon-font-color, 15%);
-                            } @else if $theme-name == "light2" {
+                            } @else if $theme-name == 'light2' {
                                 color: darken($sidebar-menu-link-icon-font-color, 15%);
                             } @else {
                                 color: lighten($sidebar-menu-link-icon-font-color, 20%);
@@ -468,7 +466,6 @@ Page Header
 
     /* light sidebar */
     .page-sidebar-menu.page-sidebar-menu-light {
-
         /* 1st level links */
         > li {
             &:hover,
@@ -533,7 +530,6 @@ Page Header
 }
 
 .page-sidebar-reversed {
-
     .page-sidebar-menu.page-sidebar-menu-light {
         /* 1st level links */
         > li {
@@ -567,7 +563,8 @@ Page Footer
     }
 }
 
-@media (min-width: $screen-md-min) { /* 992px */
+@media (min-width: $screen-md-min) {
+    /* 992px */
 
     /* Sidebar menu closed */
     .page-sidebar-menu.page-sidebar-menu-hover-submenu {
@@ -649,7 +646,8 @@ Page Footer
     }
 }
 
-@media (max-width: $screen-sm-max) { /* 991px */
+@media (max-width: $screen-sm-max) {
+    /* 991px */
     /* Page sidebar */
     .page-sidebar {
         background-color: $mobile-sidebar-menu-bg-color;
@@ -677,12 +675,10 @@ Page Footer
                     background-color: $mobile-sidebar-menu-bg-color !important;
                 }
             }
-
         }
 
         /* light sidebar */
         .page-sidebar-menu.page-sidebar-menu-light {
-
             /* 1st level links */
             > li {
                 &:hover,
@@ -721,7 +717,8 @@ Page Footer
     }
 }
 
-@media (max-width: $screen-xs-min) { /* 480px */
+@media (max-width: $screen-xs-min) {
+    /* 480px */
 
     .page-header.navbar {
         .top-menu {

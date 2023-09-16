@@ -2,7 +2,6 @@
 
 use Botble\Ecommerce\Facades\Currency as CurrencyFacade;
 use Botble\Ecommerce\Models\Currency;
-use Botble\Ecommerce\Repositories\Interfaces\CurrencyInterface;
 use Botble\Ecommerce\Supports\CurrencySupport;
 use Illuminate\Support\Collection;
 
@@ -15,14 +14,14 @@ if (! function_exists('format_price')) {
     ): string {
         if ($currency) {
             if (! $currency instanceof Currency) {
-                $currency = app(CurrencyInterface::class)->getFirstBy(['id' => $currency]);
+                $currency = Currency::query()->find($currency);
             }
 
             if (! $currency) {
                 return human_price_text($price, $currency);
             }
 
-            if ($currency->id != get_application_currency_id() && $currency->exchange_rate > 0) {
+            if ($currency->getKey() != get_application_currency_id() && $currency->exchange_rate > 0) {
                 $currentCurrency = get_application_currency();
 
                 if ($currentCurrency->is_default) {
@@ -60,7 +59,7 @@ if (! function_exists('format_price')) {
 }
 
 if (! function_exists('human_price_text')) {
-    function human_price_text(float|null|string $price, Currency|null|string $currency, string $priceUnit = ''): string
+    function human_price_text(float|null|string $price, Currency|null|string $currency, string|null $priceUnit = ''): string
     {
         $numberAfterDot = ($currency instanceof Currency) ? $currency->decimals : 0;
 
@@ -111,7 +110,7 @@ if (! function_exists('get_current_exchange_rate')) {
         if (! $currency) {
             $currency = get_application_currency();
         } elseif (! $currency instanceof Currency) {
-            $currency = app(CurrencyInterface::class)->getFirstBy(['id' => $currency]);
+            $currency = Currency::query()->find($currency);
         }
 
         if (! $currency->is_default && $currency->exchange_rate > 0) {
@@ -152,6 +151,6 @@ if (! function_exists('get_application_currency')) {
 if (! function_exists('get_application_currency_id')) {
     function get_application_currency_id(): int|string|null
     {
-        return get_application_currency()->id;
+        return get_application_currency()->getKey();
     }
 }

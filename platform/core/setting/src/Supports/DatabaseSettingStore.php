@@ -71,7 +71,7 @@ class DatabaseSettingStore extends SettingStore
 
         foreach ($data as $key => $value) {
             $data = compact('key', 'value');
-            if (BaseModel::determineIfUsingUuidsForId()) {
+            if (BaseModel::getTypeOfId() !== 'BIGINT') {
                 $data['id'] = (new BaseModel())->newUniqueId();
             }
 

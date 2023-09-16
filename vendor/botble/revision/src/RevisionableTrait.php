@@ -141,7 +141,7 @@ trait RevisionableTrait
                     'updated_at' => new DateTime(),
                 ];
 
-                if (BaseModel::determineIfUsingUuidsForId()) {
+                if (BaseModel::getTypeOfId() !== 'BIGINT') {
                     $data['id'] = (new BaseModel())->newUniqueId();
                 }
 

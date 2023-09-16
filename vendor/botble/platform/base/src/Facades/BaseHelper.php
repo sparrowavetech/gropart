@@ -39,7 +39,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static string getInputValueFromQueryString(string $name)
  * @method static string|null cleanShortcodes(string|null $content)
  * @method static string|null stringify($content)
- * @method static string getGoogleFontsURL()
+ * @method static string getGoogleFontsURL(string|null $path = null)
  * @method static mixed googleFonts(string $font, bool $inline = true)
  * @method static bool hasDemoModeEnabled()
  *

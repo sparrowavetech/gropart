@@ -1,18 +1,86 @@
 /*RESET*/
 
-html, body, div, span, applet, object, iframe,
-h1, h2, h3, h4, h5, h6, p, blockquote, pre,
-a, abbr, acronym, address, big, cite, code,
-del, dfn, em, img, ins, kbd, q, s, samp,
-small, strike, strong, sub, sup, tt, var,
-b, u, i, center,
-dl, dt, dd, ol, ul, li,
-fieldset, form, label, legend,
-table, caption, tbody, tfoot, thead, tr, th, td,
-article, aside, canvas, details, embed,
-figure, figcaption, footer, header, hgroup,
-menu, nav, output, ruby, section, summary,
-time, mark, audio, video {
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video {
     margin: 0;
     padding: 0;
     border: 0;
@@ -25,8 +93,17 @@ thead {
     font-weight: 600;
 }
 
-article, aside, details, figcaption, figure,
-footer, header, hgroup, menu, nav, section {
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
     display: block;
 }
 
@@ -34,16 +111,20 @@ body {
     line-height: 1;
 }
 
-ol, ul {
+ol,
+ul {
     list-style: none;
 }
 
-blockquote, q {
+blockquote,
+q {
     quotes: none;
 }
 
-blockquote:before, blockquote:after,
-q:before, q:after {
+blockquote:before,
+blockquote:after,
+q:before,
+q:after {
     content: '';
     content: none;
 }
@@ -64,14 +145,14 @@ button:focus,
 textarea:focus,
 textarea.form-control:focus,
 input.form-control:focus,
-input[type=text]:focus,
-input[type=password]:focus,
-input[type=email]:focus,
-input[type=number]:focus,
-[type=text].form-control:focus,
-[type=password].form-control:focus,
-[type=email].form-control:focus,
-[type=tel].form-control:focus,
+input[type='text']:focus,
+input[type='password']:focus,
+input[type='email']:focus,
+input[type='number']:focus,
+[type='text'].form-control:focus,
+[type='password'].form-control:focus,
+[type='email'].form-control:focus,
+[type='tel'].form-control:focus,
 [contenteditable].form-control:focus {
     outline: none !important;
     box-shadow: none;
@@ -79,14 +160,14 @@ input[type=number]:focus,
 
 input:focus::-moz-placeholder {
     opacity: 0;
-    -webkit-transition: .4s;
-    -o-transition: .4s;
-    transition: .4s
+    -webkit-transition: 0.4s;
+    -o-transition: 0.4s;
+    transition: 0.4s;
 }
 
 /*--- Common Classes---------------------*/
 ::placeholder {
-    color: #838383
+    color: #838383;
 }
 
 .fix {
@@ -138,14 +219,14 @@ button:focus,
 textarea:focus,
 textarea.form-control:focus,
 input.form-control:focus,
-input[type=text]:focus,
-input[type=password]:focus,
-input[type=email]:focus,
-input[type=number]:focus,
-[type=text].form-control:focus,
-[type=password].form-control:focus,
-[type=email].form-control:focus,
-[type=tel].form-control:focus,
+input[type='text']:focus,
+input[type='password']:focus,
+input[type='email']:focus,
+input[type='number']:focus,
+[type='text'].form-control:focus,
+[type='password'].form-control:focus,
+[type='email'].form-control:focus,
+[type='tel'].form-control:focus,
 [contenteditable].form-control:focus {
     outline: none !important;
     box-shadow: none;
@@ -206,7 +287,8 @@ table {
 }
 
 .table-lg {
-    td, th {
+    td,
+    th {
         padding: 0.8rem 1rem;
     }
 }
@@ -241,7 +323,8 @@ table {
     background-color: $primary-light !important;
 }
 
-.dropdown-item.active, .dropdown-item:active {
+.dropdown-item.active,
+.dropdown-item:active {
     background-color: $brand;
 }
 
@@ -255,19 +338,26 @@ table {
     opacity: 0;
     visibility: hidden;
     background-color: rgba(34, 34, 34, 0.6);
-    transition: opacity .2s linear, visibility .1s, width 1s ease-in;
+    transition:
+        opacity 0.2s linear,
+        visibility 0.1s,
+        width 1s ease-in;
 }
 
 .screen-overlay.show {
-    transition: opacity .5s ease, width 0s;
+    transition:
+        opacity 0.5s ease,
+        width 0s;
     opacity: 1;
     width: 100%;
     visibility: visible;
 }
 
-
 /* =================  DEFINED VARIABLES =================== */
-.icon-xs, .icon-sm, .icon-md, .icon-lg {
+.icon-xs,
+.icon-sm,
+.icon-md,
+.icon-lg {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -309,7 +399,10 @@ table {
     border: 3px solid #fff;
 }
 
-.img-xs, .img-sm, .img-md, .img-lg {
+.img-xs,
+.img-sm,
+.img-md,
+.img-lg {
     object-fit: cover;
     flex-shrink: 0;
     flex-grow: 0;
@@ -335,7 +428,6 @@ table {
     height: 196px;
 }
 
-
 .center-xy {
     top: 50%;
     left: 50%;
@@ -346,13 +438,13 @@ table {
 .center-y {
     top: 50%;
     position: absolute;
-    transform: translateY(-50%)
+    transform: translateY(-50%);
 }
 
 .center-x {
     left: 50%;
     position: absolute;
-    transform: translateX(-50%)
+    transform: translateX(-50%);
 }
 
 .hover-up {

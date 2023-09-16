@@ -11,7 +11,6 @@ use Botble\Blog\Models\Post;
 use Botble\Blog\Models\Tag;
 use Botble\Blog\Services\BlogService;
 use Botble\Dashboard\Supports\DashboardWidgetInstance;
-use Botble\Language\Facades\Language;
 use Botble\Media\Facades\RvMedia;
 use Botble\Menu\Facades\Menu;
 use Botble\Page\Models\Page;
@@ -19,7 +18,6 @@ use Botble\Shortcode\Compilers\Shortcode;
 use Botble\Slug\Models\Slug;
 use Botble\Theme\Facades\AdminBar;
 use Botble\Theme\Facades\Theme;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -68,10 +66,6 @@ class HookServiceProvider extends ServiceProvider
 
         if (function_exists('theme_option')) {
             add_action(RENDERING_THEME_OPTIONS_PAGE, [$this, 'addThemeOptions'], 35);
-        }
-
-        if (defined('LANGUAGE_MODULE_SCREEN_NAME')) {
-            add_action(BASE_ACTION_META_BOXES, [$this, 'addLanguageChooser'], 55, 2);
         }
 
         if (defined('THEME_FRONT_HEADER') && setting('blog_post_schema_enabled', 1)) {
@@ -272,21 +266,6 @@ class HookServiceProvider extends ServiceProvider
     protected function getBlogPageId(): int|string|null
     {
         return theme_option('blog_page_id', setting('blog_page_id'));
-    }
-
-    public function addLanguageChooser(string $priority, Model $model): void
-    {
-        if ($priority == 'head' && $model instanceof Category) {
-            $route = 'categories.index';
-
-            $languages = Language::getActiveLanguage(['lang_id', 'lang_name', 'lang_code', 'lang_flag']);
-
-            if ($languages->count() < 2) {
-                return;
-            }
-
-            echo view('plugins/language::partials.admin-list-language-chooser', compact('route', 'languages'))->render();
-        }
     }
 
     public function addSettings(string|null $data = null): string

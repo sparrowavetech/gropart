@@ -7,4 +7,3 @@ if (typeof vueApp !== 'undefined') {
         vue.component('marketplace-card-plugin', CardPlugin)
     })
 }
-

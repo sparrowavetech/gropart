@@ -3,12 +3,9 @@
 namespace Botble\Ecommerce\Repositories\Interfaces;
 
 use Botble\Support\Repositories\Interfaces\RepositoryInterface;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
 
 interface CurrencyInterface extends RepositoryInterface
 {
-    /**
-     * @return Collection
-     */
-    public function getAllCurrencies();
+    public function getAllCurrencies(): Collection;
 }

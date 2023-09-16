@@ -31,7 +31,7 @@ export class MessageService {
     }
 
     static handleError(data) {
-        if (typeof data.responseJSON !== 'undefined' && ! Helpers.isArray(data.errors)) {
+        if (typeof data.responseJSON !== 'undefined' && !Helpers.isArray(data.errors)) {
             MessageService.handleValidationError(data.responseJSON.errors)
         } else {
             if (typeof data.responseJSON !== 'undefined') {

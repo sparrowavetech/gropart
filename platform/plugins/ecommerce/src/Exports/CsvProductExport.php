@@ -5,7 +5,6 @@ namespace Botble\Ecommerce\Exports;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductVariation;
-use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -46,7 +45,7 @@ class CsvProductExport implements FromCollection, WithHeadings
             $with[] = 'store';
         }
 
-        app(ProductInterface::class)
+        Product::query()
             ->select(['*'])
             ->where('is_variation', 0)
             ->with($with)

@@ -20,29 +20,21 @@ class BackupManagement {
 
             let deleteURL = $(event.currentTarget).data('section')
 
-            $.ajax({
-                url: deleteURL,
-                type: 'POST',
-                data: { _method: 'DELETE' },
-                success: (data) => {
-                    if (data.error) {
-                        Botble.showError(data.message)
-                    } else {
-                        if (backupTable.find('tbody tr').length <= 1) {
-                            backupTable.load(window.location.href + ' #table-backups > *')
-                        }
-
-                        backupTable
-                            .find('a[data-section="' + deleteURL + '"]')
-                            .closest('tr')
-                            .remove()
-                        Botble.showSuccess(data.message)
+            $httpClient
+                .make()
+                .delete(deleteURL)
+                .then(({ data }) => {
+                    if (backupTable.find('tbody tr').length <= 1) {
+                        backupTable.load(window.location.href + ' #table-backups > *')
                     }
-                },
-                error: (data) => {
-                    Botble.handleError(data)
-                },
-            })
+
+                    backupTable
+                        .find('a[data-section="' + deleteURL + '"]')
+                        .closest('tr')
+                        .remove()
+
+                    Botble.showSuccess(data.message)
+                })
         })
 
         $('#restore-backup-button').on('click', (event) => {
@@ -50,25 +42,17 @@ class BackupManagement {
             let _self = $(event.currentTarget)
             _self.addClass('button-loading')
 
-            $.ajax({
-                url: _self.data('section'),
-                type: 'GET',
-                success: (data) => {
-                    _self.removeClass('button-loading')
+            $httpClient
+                .make()
+                .get(_self.data('section'))
+                .then(({ data }) => {
                     _self.closest('.modal').modal('hide')
-
-                    if (data.error) {
-                        Botble.showError(data.message)
-                    } else {
-                        Botble.showSuccess(data.message)
-                        window.location.reload()
-                    }
-                },
-                error: (data) => {
+                    Botble.showSuccess(data.message)
+                    window.location.reload()
+                })
+                .finally(() => {
                     _self.removeClass('button-loading')
-                    Botble.handleError(data)
-                },
-            })
+                })
         })
 
         $(document).on('click', '#generate_backup', (event) => {
@@ -92,30 +76,21 @@ class BackupManagement {
             }
 
             if (!error) {
-                $.ajax({
-                    url: $('div[data-route-create]').data('route-create'),
-                    type: 'POST',
-                    data: {
+                $httpClient
+                    .make()
+                    .post($('div[data-route-create]').data('route-create'), {
                         name: name,
                         description: description,
-                    },
-                    success: (data) => {
+                    })
+                    .then(({ data }) => {
+                        backupTable.find('.no-backup-row').remove()
+                        backupTable.find('tbody').append(data.data)
+                        Botble.showSuccess(data.message)
+                    })
+                    .finally(() => {
                         _self.removeClass('button-loading')
                         _self.closest('.modal').modal('hide')
-
-                        if (data.error) {
-                            Botble.showError(data.message)
-                        } else {
-                            backupTable.find('.no-backup-row').remove()
-                            backupTable.find('tbody').append(data.data)
-                            Botble.showSuccess(data.message)
-                        }
-                    },
-                    error: (data) => {
-                        _self.removeClass('button-loading')
-                        Botble.handleError(data)
-                    },
-                })
+                    })
             } else {
                 _self.removeClass('button-loading')
             }

@@ -7,6 +7,8 @@ use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\LanguageAdvanced\Http\Requests\LanguageAdvancedRequest;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
+use Botble\Slug\Facades\SlugHelper;
+use Illuminate\Support\Facades\DB;
 
 class LanguageAdvancedController extends BaseController
 {
@@ -22,9 +24,39 @@ class LanguageAdvancedController extends BaseController
 
         LanguageAdvancedManager::save($data, $request);
 
+        $request->merge([
+            'is_slug_editable' => 0,
+        ]);
+
         do_action(LANGUAGE_ADVANCED_ACTION_SAVED, $data, $request);
 
         event(new UpdatedContentEvent('', $request, $data));
+
+        $slugId = $request->input('slug_id');
+
+        $language = $request->input('language');
+
+        if ($slugId && $language) {
+            $table = 'slugs_translations';
+
+            $condition = [
+                'lang_code' => $language,
+                'slugs_id' => $slugId,
+            ];
+
+            $data = array_merge($condition, [
+                'key' => $request->input('slug'),
+                'prefix' => SlugHelper::getPrefix($model),
+            ]);
+
+            $translate = DB::table($table)->where($condition)->first();
+
+            if ($translate) {
+                DB::table($table)->where($condition)->update($data);
+            } else {
+                DB::table($table)->insert($data);
+            }
+        }
 
         return $response
             ->setMessage(trans('core/base::notices.update_success_message'));

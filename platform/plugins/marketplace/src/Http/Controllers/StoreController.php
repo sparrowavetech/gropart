@@ -12,18 +12,13 @@ use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Marketplace\Forms\StoreForm;
 use Botble\Marketplace\Http\Requests\StoreRequest;
-use Botble\Marketplace\Repositories\Interfaces\RevenueInterface;
-use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
+use Botble\Marketplace\Models\Store;
 use Botble\Marketplace\Tables\StoreTable;
 use Exception;
 use Illuminate\Http\Request;
 
 class StoreController extends BaseController
 {
-    public function __construct(protected StoreInterface $storeRepository, protected RevenueInterface $revenueRepository)
-    {
-    }
-
     public function index(StoreTable $table)
     {
         PageTitle::setTitle(trans('plugins/marketplace::store.name'));
@@ -40,7 +35,7 @@ class StoreController extends BaseController
 
     public function store(StoreRequest $request, BaseHttpResponse $response)
     {
-        $store = $this->storeRepository->createOrUpdate($request->input());
+        $store = Store::query()->create($request->input());
 
         event(new CreatedContentEvent(STORE_MODULE_SCREEN_NAME, $request, $store));
 
@@ -52,7 +47,7 @@ class StoreController extends BaseController
 
     public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
     {
-        $store = $this->storeRepository->findOrFail($id);
+        $store = Store::query()->findOrFail($id);
 
         event(new BeforeEditContentEvent($request, $store));
 
@@ -63,11 +58,10 @@ class StoreController extends BaseController
 
     public function update(int|string $id, StoreRequest $request, BaseHttpResponse $response)
     {
-        $store = $this->storeRepository->findOrFail($id);
+        $store = Store::query()->findOrFail($id);
 
         $store->fill($request->input());
-
-        $this->storeRepository->createOrUpdate($store);
+        $store->save();
 
         $customer = $store->customer;
         if ($customer && $customer->id) {
@@ -88,9 +82,9 @@ class StoreController extends BaseController
     public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
-            $store = $this->storeRepository->findOrFail($id);
+            $store = Store::query()->findOrFail($id);
 
-            $this->storeRepository->delete($store);
+            $store->delete();
 
             event(new DeletedContentEvent(STORE_MODULE_SCREEN_NAME, $request, $store));
 
@@ -100,23 +94,5 @@ class StoreController extends BaseController
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
-    }
-
-    public function deletes(Request $request, BaseHttpResponse $response)
-    {
-        $ids = $request->input('ids');
-        if (empty($ids)) {
-            return $response
-                ->setError()
-                ->setMessage(trans('core/base::notices.no_select'));
-        }
-
-        foreach ($ids as $id) {
-            $store = $this->storeRepository->findOrFail($id);
-            $this->storeRepository->delete($store);
-            event(new DeletedContentEvent(STORE_MODULE_SCREEN_NAME, $request, $store));
-        }
-
-        return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 }

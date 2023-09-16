@@ -63,7 +63,7 @@ class PageService
             $meta->setTitle($page->name);
             $meta->setDescription($page->description);
         } else {
-            $siteTitle = theme_option('seo_title') ? theme_option('seo_title') : theme_option('site_title');
+            $siteTitle = theme_option('seo_title') ?: theme_option('site_title');
             $seoDescription = theme_option('seo_description');
 
             SeoHelper::setTitle($siteTitle)

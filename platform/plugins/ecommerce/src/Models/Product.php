@@ -2,33 +2,36 @@
 
 namespace Botble\Ecommerce\Models;
 
-use Botble\Base\Casts\SafeContent;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Support\Facades\Auth;
 use Botble\ACL\Models\User;
+use Botble\Base\Casts\SafeContent;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
-use Botble\Base\Traits\EnumCastable;
+use Botble\Ecommerce\Enums\DiscountTargetEnum;
+use Botble\Ecommerce\Enums\DiscountTypeEnum;
+use Botble\Ecommerce\Enums\DiscountTypeOptionEnum;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Enums\StockStatusEnum;
-use Botble\Ecommerce\Facades\DiscountFacade;
-use Botble\Ecommerce\Facades\FlashSaleFacade;
+use Botble\Ecommerce\Facades\Discount as DiscountFacade;
+use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Facades\FlashSale as FlashSaleFacade;
 use Botble\Ecommerce\Services\Products\UpdateDefaultProductService;
 use Carbon\Carbon;
-use EcommerceHelper;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 
+/**
+ * @method notOutOfStock()
+ */
 class Product extends BaseModel
 {
-    use EnumCastable;
-
     protected $table = 'ec_products';
 
     protected $fillable = [
@@ -57,9 +60,9 @@ class Product extends BaseModel
         'tax_id',
         'views',
         'stock_status',
-        'is_enquiry',
         'barcode',
         'cost_per_item',
+        'generate_license_code',
     ];
 
     protected $appends = [
@@ -78,52 +81,45 @@ class Product extends BaseModel
         'content' => SafeContent::class,
     ];
 
-    protected static function boot()
+    protected static function booted(): void
     {
-        parent::boot();
-
-        self::creating(function (Product $product) {
+        self::creating(function (self $product) {
             $product->created_by_id = Auth::check() ? Auth::id() : 0;
             $product->created_by_type = User::class;
         });
 
-        self::deleting(function (Product $product) {
-            $variation = ProductVariation::where('product_id', $product->id)->first();
-            $variation?->delete();
-
-            $productVariations = ProductVariation::where('configurable_product_id', $product->id)->get();
-
-            foreach ($productVariations as $productVariation) {
-                $productVariation->delete();
-            }
-
+        self::deleting(function (self $product) {
+            $product->variations()->each(fn (ProductVariation $item) => $item->delete());
+            $product->variationInfo()->delete();
             $product->categories()->detach();
             $product->productAttributeSets()->detach();
             $product->productCollections()->detach();
             $product->discounts()->detach();
             $product->crossSales()->detach();
-            $product->frequentlyBoughtTogether()->detach();
             $product->upSales()->detach();
             $product->groupedProduct()->detach();
             $product->taxes()->detach();
             $product->views()->delete();
             $product->reviews()->delete();
-
-            if (is_plugin_active('language') && is_plugin_active('language-advanced')) {
-                $product->translations()->delete();
-            }
+            $product->flashSales()->detach();
+            $product->productFiles()->delete();
+            $product->productLabels()->detach();
+            $product->tags()->detach();
         });
 
-        self::updated(function (Product $product) {
+        self::updated(function (self $product) {
             if ($product->is_variation && $product->original_product->defaultVariation->product_id == $product->id) {
                 app(UpdateDefaultProductService::class)->execute($product);
             }
 
-            if (! $product->is_variation && $product->variations()->pluck('product_id')->count() > 0) {
-                Product::whereIn('id', $product->variations()->pluck('product_id')->all())
+            if (! $product->is_variation && $product->variations()->exists()) {
+                Product::query()
+                    ->whereIn('id', $product->variations()->pluck('product_id')->all())
                     ->where('is_variation', 1)
                     ->update(['name' => $product->name]);
             }
+
+            EcommerceHelper::clearProductMaxPriceCache();
         });
     }
 
@@ -159,7 +155,7 @@ class Product extends BaseModel
 
     public function discounts(): BelongsToMany
     {
-        return $this->belongsToMany(Discount::class, 'ec_discount_products', 'product_id', 'id');
+        return $this->belongsToMany(Discount::class, 'ec_discount_products', 'product_id', 'discount_id');
     }
 
     public function crossSales(): BelongsToMany
@@ -167,16 +163,6 @@ class Product extends BaseModel
         return $this->belongsToMany(
             Product::class,
             'ec_product_cross_sale_relations',
-            'from_product_id',
-            'to_product_id'
-        );
-    }
-
-    public function frequentlyBoughtTogether(): BelongsToMany
-    {
-        return $this->belongsToMany(
-            Product::class,
-            'ec_product_frequently_bought_together',
             'from_product_id',
             'to_product_id'
         );
@@ -204,7 +190,7 @@ class Product extends BaseModel
 
     public function taxes(): BelongsToMany
     {
-        return $this->original_product->belongsToMany(Tax::class, 'ec_tax_products', 'product_id', 'tax_id');
+        return $this->original_product->belongsToMany(Tax::class, 'ec_tax_products')->with(['rules']);
     }
 
     public function user(): BelongsTo
@@ -290,29 +276,33 @@ class Product extends BaseModel
         return $this->hasMany(GroupedProduct::class, 'parent_product_id');
     }
 
-    public function getImagesAttribute(?string $value): array
+    protected function images(): Attribute
     {
-        try {
-            if ($value === '[null]') {
-                return [];
+        return Attribute::make(
+            get: function (string|null $value): array {
+                try {
+                    if ($value === '[null]') {
+                        return [];
+                    }
+
+                    $images = json_decode((string)$value, true);
+
+                    if (is_array($images)) {
+                        $images = array_filter($images);
+                    }
+
+                    return $images ?: [];
+                } catch (Exception) {
+                    return [];
+                }
             }
-
-            $images = json_decode((string)$value, true);
-
-            if (is_array($images)) {
-                $images = array_filter($images);
-            }
-
-            return $images ?: [];
-        } catch (Exception) {
-            return [];
-        }
+        );
     }
 
     protected function image(): Attribute
     {
         return Attribute::make(
-            get: function (?string $value) {
+            get: function (string|null $value) {
                 $firstImage = Arr::first($this->images) ?: null;
 
                 if ($this->is_variation) {
@@ -324,21 +314,75 @@ class Product extends BaseModel
         );
     }
 
-    public function getFrontSalePriceAttribute(): float|false|null
+    protected function frontSalePrice(): Attribute
     {
-        $price = $this->getDiscountPrice();
+        return Attribute::make(
+            get: function (): float|false|null {
+                $price = $this->getDiscountPrice();
 
-        if ($price != $this->price) {
-            return $this->getComparePrice($price, $this->sale_price ?: $this->price);
-        }
+                if ($price != $this->price) {
+                    return $this->getComparePrice($price, $this->sale_price ?: $this->price);
+                }
 
-        $price = $this->getFlashSalePrice();
+                return $this->original_price;
+            }
+        );
+    }
 
-        if ($price != $this->price) {
-            return $this->getComparePrice($price, $this->sale_price ?: $this->price);
-        }
+    protected function originalPrice(): Attribute
+    {
+        return Attribute::make(
+            get: function (): float|null {
+                $price = $this->getFlashSalePrice();
 
-        return $this->getComparePrice($this->price, $this->sale_price);
+                if ($price != $this->price) {
+                    return $this->getComparePrice($price, $this->sale_price ?: $this->price);
+                }
+
+                return $this->getComparePrice($this->price, $this->sale_price);
+            }
+        );
+    }
+
+    protected function stockStatusLabel(): Attribute
+    {
+        return Attribute::make(
+            get: function (): string|null {
+                if ($this->with_storehouse_management) {
+                    return $this->isOutOfStock() ? StockStatusEnum::OUT_OF_STOCK()->label() : StockStatusEnum::IN_STOCK()
+                        ->label();
+                }
+
+                return $this->stock_status->label();
+            }
+        );
+    }
+
+    protected function stockStatusHtml(): Attribute
+    {
+        return Attribute::make(
+            get: function (): string|null {
+                if ($this->with_storehouse_management) {
+                    return $this->isOutOfStock() ? StockStatusEnum::OUT_OF_STOCK()->toHtml() : StockStatusEnum::IN_STOCK()
+                        ->toHtml();
+                }
+
+                return $this->stock_status->toHtml();
+            }
+        );
+    }
+
+    protected function originalProduct(): Attribute
+    {
+        return Attribute::make(
+            get: function (): int|null|self {
+                if (! $this->is_variation) {
+                    return $this;
+                }
+
+                return $this->variationInfo->id ? $this->variationInfo->configurableProduct : $this;
+            }
+        );
     }
 
     public function getFlashSalePrice(): float|false|null
@@ -369,18 +413,18 @@ class Product extends BaseModel
 
         $price = $this->price;
         switch ($promotion->type_option) {
-            case 'same-price':
+            case DiscountTypeOptionEnum::SAME_PRICE:
                 $price = $promotion->value;
 
                 break;
-            case 'amount':
+            case DiscountTypeOptionEnum::AMOUNT:
                 $price = $price - $promotion->value;
                 if ($price < 0) {
                     $price = 0;
                 }
 
                 break;
-            case 'percentage':
+            case DiscountTypeOptionEnum::PERCENTAGE:
                 $price = $price - ($price * $promotion->value / 100);
                 if ($price < 0) {
                     $price = 0;
@@ -410,21 +454,6 @@ class Product extends BaseModel
         return $price;
     }
 
-    public function getOriginalPriceAttribute(): ?float
-    {
-        return $this->front_sale_price ?? $this->price ?? 0;
-    }
-
-    public function getStockStatusLabelAttribute(): ?string
-    {
-        if ($this->with_storehouse_management) {
-            return $this->isOutOfStock() ? StockStatusEnum::OUT_OF_STOCK()->label() : StockStatusEnum::IN_STOCK()
-                ->label();
-        }
-
-        return $this->stock_status->label();
-    }
-
     public function isOutOfStock(): bool
     {
         if (! $this->with_storehouse_management) {
@@ -432,16 +461,6 @@ class Product extends BaseModel
         }
 
         return $this->quantity <= 0 && ! $this->allow_checkout_when_out_of_stock;
-    }
-
-    public function getStockStatusHtmlAttribute(): ?string
-    {
-        if ($this->with_storehouse_management) {
-            return $this->isOutOfStock() ? StockStatusEnum::OUT_OF_STOCK()->toHtml() : StockStatusEnum::IN_STOCK()
-                ->toHtml();
-        }
-
-        return $this->stock_status->toHtml();
     }
 
     public function canAddToCart(int $quantity): bool
@@ -455,24 +474,15 @@ class Product extends BaseModel
     {
         return $this
             ->belongsToMany(Discount::class, 'ec_discount_products', 'product_id')
-            ->where('type', 'promotion')
+            ->where('type', DiscountTypeEnum::PROMOTION)
             ->where('start_date', '<=', Carbon::now())
-            ->whereIn('target', ['specific-product', 'product-variant'])
+            ->whereIn('target', [DiscountTargetEnum::SPECIFIC_PRODUCT, DiscountTargetEnum::PRODUCT_VARIANT])
             ->where(function ($query) {
                 return $query
                     ->whereNull('end_date')
                     ->orWhere('end_date', '>=', Carbon::now());
             })
             ->where('product_quantity', 1);
-    }
-
-    public function getOriginalProductAttribute(): int|null|self
-    {
-        if (! $this->is_variation) {
-            return $this;
-        }
-
-        return $this->variationInfo->id ? $this->variationInfo->configurableProduct : $this;
     }
 
     public function tax(): BelongsTo
@@ -486,7 +496,7 @@ class Product extends BaseModel
 
     public function reviews(): HasMany
     {
-        return $this->hasMany(Review::class, 'product_id')->where('status', BaseStatusEnum::PUBLISHED);
+        return $this->hasMany(Review::class, 'product_id')->wherePublished();
     }
 
     public function views(): HasMany
@@ -494,12 +504,18 @@ class Product extends BaseModel
         return $this->hasMany(ProductView::class, 'product_id');
     }
 
-    public function latestFlashSales(): BelongsToMany
+    public function flashSales(): BelongsToMany
     {
         return $this->original_product
             ->belongsToMany(FlashSale::class, 'ec_flash_sale_products', 'product_id', 'flash_sale_id')
-            ->withPivot(['price', 'quantity', 'sold'])
-            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->withPivot(['price', 'quantity', 'sold']);
+    }
+
+    public function latestFlashSales(): BelongsToMany
+    {
+        return $this
+            ->flashSales()
+            ->wherePublished()
             ->notExpired()
             ->latest();
     }
@@ -510,8 +526,7 @@ class Product extends BaseModel
             return $this->front_sale_price;
         }
 
-        //return $this->front_sale_price + $this->front_sale_price * ($this->total_taxes_percentage / 100);
-        return $this->front_sale_price;
+        return $this->front_sale_price + $this->front_sale_price * ($this->total_taxes_percentage / 100);
     }
 
     public function getPriceWithTaxesAttribute(): ?float
@@ -520,13 +535,15 @@ class Product extends BaseModel
             return $this->price;
         }
 
-        //return $this->price + $this->price * ($this->total_taxes_percentage / 100);
-        return $this->price;
+        return $this->price + $this->price * ($this->total_taxes_percentage / 100);
     }
 
     public function getTotalTaxesPercentageAttribute()
     {
-        return $this->taxes->where('status', BaseStatusEnum::PUBLISHED)->sum('percentage');
+        return $this->taxes
+            ->where(fn ($item) => ! $item->rules || $item->rules->isEmpty())
+            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->sum('percentage');
     }
 
     public function variationProductAttributes(): HasMany
@@ -622,6 +639,20 @@ class Product extends BaseModel
         return $this->hasMany(ProductFile::class, 'product_id');
     }
 
+    public function productFileExternalCount(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->productFiles->filter(fn (ProductFile $file) => $file->is_external_link)->count(),
+        );
+    }
+
+    public function productFileInternalCount(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->productFiles->filter(fn (ProductFile $file) => ! $file->is_external_link)->count(),
+        );
+    }
+
     public function scopeNotOutOfStock(Builder $query): Builder
     {
         if (EcommerceHelper::showOutOfStockProducts() || is_in_admin()) {
@@ -652,5 +683,10 @@ class Product extends BaseModel
     public function options(): HasMany
     {
         return $this->hasMany(Option::class)->orderBy('order');
+    }
+
+    public function isOnSale(): bool
+    {
+        return $this->front_sale_price !== $this->price;
     }
 }

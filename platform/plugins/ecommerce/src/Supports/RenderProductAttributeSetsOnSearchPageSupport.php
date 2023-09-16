@@ -2,17 +2,18 @@
 
 namespace Botble\Ecommerce\Supports;
 
-use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeSetInterface;
+use Botble\Ecommerce\Facades\EcommerceHelper as EcommerceHelperFacade;
+use Botble\Ecommerce\Models\ProductAttributeSet;
+use Illuminate\Support\Arr;
 
 class RenderProductAttributeSetsOnSearchPageSupport
 {
-    public function __construct(protected ProductAttributeSetInterface $productAttributeSetRepository)
-    {
-    }
-
     public function render(array $params = []): string
     {
+        if (! EcommerceHelperFacade::isEnabledFilterProductsByAttributes()) {
+            return '';
+        }
+
         $params = array_merge(['view' => 'plugins/ecommerce::themes.attributes.attributes-filter-renderer'], $params);
 
         $with = ['attributes', 'categories:id'];
@@ -21,18 +22,25 @@ class RenderProductAttributeSetsOnSearchPageSupport
             $with[] = 'attributes.translations';
         }
 
-        $attributeSets = $this->productAttributeSetRepository
-            ->advancedGet([
-                'condition' => [
-                    'status' => BaseStatusEnum::PUBLISHED,
-                    'is_searchable' => 1,
-                ],
-                'order_by' => [
-                    'order' => 'ASC',
-                ],
-                'with' => $with,
-            ]);
+        $attributeSets = ProductAttributeSet::query()
+            ->where('is_searchable', true)
+            ->wherePublished()
+            ->orderBy('order')
+            ->with($with)
+            ->get();
 
-        return view($params['view'], array_merge($params, compact('attributeSets')))->render();
+        $selectedAttrs = [];
+
+        $attributesInput = (array) request()->input('attributes', []);
+
+        if (! array_is_list($attributesInput)) {
+            foreach ($attributeSets as $attributeSet) {
+                $selectedAttrs[$attributeSet->slug] = Arr::get($attributesInput, $attributeSet->slug, []);
+            }
+        } else {
+            $selectedAttrs = $attributesInput;
+        }
+
+        return view($params['view'], array_merge($params, compact('attributeSets', 'selectedAttrs')))->render();
     }
 }

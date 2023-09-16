@@ -1,11 +1,11 @@
 export class DiscountManagement {
     init() {
-        $(document).on('click', '.btn-open-coupon-form', event => {
+        $(document).on('click', '.btn-open-coupon-form', (event) => {
             event.preventDefault()
             $(document).find('.coupon-wrapper').toggle()
         })
 
-        $('.coupon-wrapper .coupon-code').keypress(event => {
+        $('.coupon-wrapper .coupon-code').keypress((event) => {
             if (event.keyCode === 13) {
                 $('.apply-coupon-code').trigger('click')
                 event.preventDefault()
@@ -16,7 +16,7 @@ export class DiscountManagement {
 
         let target = '#main-checkout-product-info'
 
-        $(document).on('click', '.apply-coupon-code', event => {
+        $(document).on('click', '.apply-coupon-code', (event) => {
             event.preventDefault()
             let _self = $(event.currentTarget)
             _self.find('i').remove()
@@ -32,9 +32,9 @@ export class DiscountManagement {
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
                 },
-                success: res => {
+                success: (res) => {
                     if (!res.error) {
-                        $(target).load(window.location.href + '?applied_coupon=1 ' + target + ' > *', function() {
+                        $(target).load(window.location.href + '?applied_coupon=1 ' + target + ' > *', function () {
                             _self.find('i').remove()
                         })
                     } else {
@@ -42,15 +42,15 @@ export class DiscountManagement {
                         _self.find('i').remove()
                     }
                 },
-                error: data => {
-                    if (typeof (data.responseJSON) !== 'undefined') {
+                error: (data) => {
+                    if (typeof data.responseJSON !== 'undefined') {
                         if (data.responseJSON.errors !== 'undefined') {
                             $.each(data.responseJSON.errors, (index, el) => {
                                 $.each(el, (key, item) => {
                                     $('.coupon-error-msg .text-danger').text(item)
                                 })
                             })
-                        } else if (typeof (data.responseJSON.message) !== 'undefined') {
+                        } else if (typeof data.responseJSON.message !== 'undefined') {
                             $('.coupon-error-msg .text-danger').text(data.responseJSON.message)
                         }
                     } else {
@@ -61,7 +61,7 @@ export class DiscountManagement {
             })
         })
 
-        $(document).on('click', '.remove-coupon-code', event => {
+        $(document).on('click', '.remove-coupon-code', (event) => {
             event.preventDefault()
             let _self = $(event.currentTarget)
             _self.find('i').remove()
@@ -76,10 +76,9 @@ export class DiscountManagement {
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
                 },
-                success: res => {
+                success: (res) => {
                     if (!res.error) {
-
-                        $(target).load(window.location.href + ' ' + target + ' > *', function() {
+                        $(target).load(window.location.href + ' ' + target + ' > *', function () {
                             _self.find('i').remove()
                         })
                     } else {
@@ -87,15 +86,15 @@ export class DiscountManagement {
                         _self.find('i').remove()
                     }
                 },
-                error: data => {
-                    if (typeof (data.responseJSON) !== 'undefined') {
+                error: (data) => {
+                    if (typeof data.responseJSON !== 'undefined') {
                         if (data.responseJSON.errors !== 'undefined') {
                             $.each(data.responseJSON.errors, (index, el) => {
                                 $.each(el, (key, item) => {
                                     $('.coupon-error-msg .text-danger').text(item)
                                 })
                             })
-                        } else if (typeof (data.responseJSON.message) !== 'undefined') {
+                        } else if (typeof data.responseJSON.message !== 'undefined') {
                             $('.coupon-error-msg .text-danger').text(data.responseJSON.message)
                         }
                     } else {

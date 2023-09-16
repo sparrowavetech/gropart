@@ -60,6 +60,10 @@ if (! defined('TAX_MODULE_SCREEN_NAME')) {
     define('TAX_MODULE_SCREEN_NAME', 'ecommerce-tax');
 }
 
+if (! defined('TAX_RULE_MODULE_SCREEN_NAME')) {
+    define('TAX_RULE_MODULE_SCREEN_NAME', 'ecommerce-tax-rule');
+}
+
 if (! defined('REVIEW_MODULE_SCREEN_NAME')) {
     define('REVIEW_MODULE_SCREEN_NAME', 'plugin-review');
 }
@@ -203,9 +207,7 @@ if (! defined('INVOICE_MODULE_SCREEN_NAME')) {
 if (! defined('INVOICE_PAYMENT_CREATED')) {
     define('INVOICE_PAYMENT_CREATED', 'invoice_payment_created');
 }
-if (! defined('ENQUIRY_DELETED')) {
-    define('ENQUIRY_DELETED', 'enquiry_deleted');
-}
-if (! defined('ENQUIRY_STATUS_UPDATE')) {
-    define('ENQUIRY_STATUS_UPDATE', 'enquiry_update');
+
+if (! defined('ACTION_AFTER_ORDER_RETURN_STATUS_COMPLETED')) {
+    define('ACTION_AFTER_ORDER_RETURN_STATUS_COMPLETED', 'after_order_return_status_completed');
 }

@@ -5,7 +5,10 @@
     <div class="customer-address py-3">
         <div class="d-flex justify-content-between py-2">
             <h4>{{ SeoHelper::getTitle() }}</h4>
-            <a class="text-primary" href="{{ route('customer.address.create') }}">{{ __('Add') }}</a>
+            <a
+                class="text-primary"
+                href="{{ route('customer.address.create') }}"
+            >{{ __('Add') }}</a>
         </div>
         @include(Theme::getThemeNamespace() . '::views.ecommerce.customers.address.items')
         <div class="row">

@@ -3,15 +3,14 @@
 namespace Botble\Ecommerce\Widgets;
 
 use Botble\Base\Widgets\Card;
-use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
+use Botble\Ecommerce\Models\Customer;
 use Carbon\CarbonPeriod;
 
 class NewCustomerCard extends Card
 {
     public function getOptions(): array
     {
-        $data = app(CustomerInterface::class)
-            ->getModel()
+        $data = Customer::query()
             ->whereDate('created_at', '>=', $this->startDate)
             ->whereDate('created_at', '<=', $this->endDate)
             ->selectRaw('count(id) as total, date_format(created_at, "' . $this->dateFormat . '") as period')
@@ -30,8 +29,7 @@ class NewCustomerCard extends Card
 
     public function getViewData(): array
     {
-        $count = app(CustomerInterface::class)
-            ->getModel()
+        $count = Customer::query()
             ->whereDate('created_at', '>=', $this->startDate)
             ->whereDate('created_at', '<=', $this->endDate)
             ->count();
@@ -42,14 +40,12 @@ class NewCustomerCard extends Card
         $currentPeriod = CarbonPeriod::create($startDate, $endDate);
         $previousPeriod = CarbonPeriod::create($startDate->subDays($currentPeriod->count()), $endDate->subDays($currentPeriod->count()));
 
-        $currentCustomers = app(CustomerInterface::class)
-            ->getModel()
+        $currentCustomers = Customer::query()
             ->whereDate('created_at', '>=', $currentPeriod->getStartDate())
             ->whereDate('created_at', '<=', $currentPeriod->getEndDate())
             ->count();
 
-        $previousCustomers = app(CustomerInterface::class)
-            ->getModel()
+        $previousCustomers = Customer::query()
             ->whereDate('created_at', '>=', $previousPeriod->getStartDate())
             ->whereDate('created_at', '<=', $previousPeriod->getEndDate())
             ->count();

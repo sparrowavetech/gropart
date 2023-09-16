@@ -15,38 +15,21 @@ export class FolderService {
     create(folderName) {
         let _self = this
 
-        $.ajax({
-            url: RV_MEDIA_URL.create_folder,
-            type: 'POST',
-            data: {
+        Helpers.showAjaxLoading()
+
+        $httpClient
+            .make()
+            .post(RV_MEDIA_URL.create_folder, {
                 parent_id: Helpers.getRequestParams().folder_id,
                 name: folderName,
-            },
-            dataType: 'json',
-            beforeSend: () => {
-                Helpers.showAjaxLoading()
-            },
-            success: (res) => {
-                if (res.error) {
-                    MessageService.showMessage('error', res.message, Helpers.trans('message.error_header'))
-                } else {
-                    MessageService.showMessage(
-                        'success',
-                        res.message,
-                        Helpers.trans('message.success_header')
-                    )
-                    Helpers.resetPagination()
-                    _self.MediaService.getMedia(true)
-                    FolderService.closeModal()
-                }
-            },
-            complete: () => {
-                Helpers.hideAjaxLoading()
-            },
-            error: (data) => {
-                MessageService.handleError(data)
-            },
-        })
+            })
+            .then(({ data }) => {
+                MessageService.showMessage('success', data.message, Helpers.trans('message.success_header'))
+                Helpers.resetPagination()
+                _self.MediaService.getMedia(true)
+                FolderService.closeModal()
+            })
+            .finally(() => Helpers.hideAjaxLoading())
     }
 
     changeFolder(folderId) {

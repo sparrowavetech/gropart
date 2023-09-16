@@ -164,7 +164,6 @@
                 font-weight: 600;
                 text-transform: uppercase;
             }
-
         }
 
         .icon {
@@ -241,7 +240,6 @@
 }
 
 .morris-hover.morris-default-style {
-
     .morris-hover-row-label {
         text-align: left;
         font-weight: 400;
@@ -278,7 +276,6 @@
     margin-top: 10px;
     margin-bottom: 0;
 }
-
 
 .box {
     position: relative;
@@ -317,17 +314,22 @@
         right: 10px;
         top: 5px;
 
-        [data-bs-toggle="tooltip"] {
+        [data-bs-toggle='tooltip'] {
             position: relative;
         }
     }
 }
 
-.box-header > .fa, .box-header > .glyphicon, .box-header > .ion {
+.box-header > .fa,
+.box-header > .glyphicon,
+.box-header > .ion {
     margin-right: 5px;
 }
 
-.box-header > .fa, .box-header > .glyphicon, .box-header > .ion, .box-header .box-title {
+.box-header > .fa,
+.box-header > .glyphicon,
+.box-header > .ion,
+.box-header .box-title {
     display: inline-block;
     font-size: 14px;
     margin: 0;
@@ -415,7 +417,7 @@
 }
 
 .sortable-ghost {
-    opacity: .5;
+    opacity: 0.5;
 }
 
 .portlet-title {
@@ -471,7 +473,6 @@
             }
         }
     }
-
 }
 
 .log-icon {
@@ -598,7 +599,8 @@
     -moz-appearance: textfield;
     appearance: textfield;
     -webkit-appearance: textfield;
-    &::-webkit-inner-spin-button, &::-webkit-outer-spin-button {
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
         -webkit-appearance: none;
         margin: 0;
     }
@@ -642,7 +644,7 @@
         .btn {
             width: 25px;
             height: 24px;
-            background-image: url("#{$general-img-path}img.png");
+            background-image: url('#{$general-img-path}img.png');
             filter: alpha(opacity=80);
             margin-left: 5px;
         }

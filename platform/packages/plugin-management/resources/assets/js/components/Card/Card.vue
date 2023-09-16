@@ -6,8 +6,12 @@
                 <h5 class="card-title">{{ data.name }}</h5>
                 <div class="card-text text-truncate">{{ data.description }}</div>
                 <div>
-                    <span class="badge rounded-pill bg-info me-1">{{ __('base.version') }} {{ data.latest_version }}</span>
-                    <span class="badge rounded-pill bg-info">{{ __('base.minimum_core_version') }} {{ data.minimum_core_version }}</span>
+                    <span class="badge rounded-pill bg-info me-1"
+                        >{{ __('base.version') }} {{ data.latest_version }}</span
+                    >
+                    <span class="badge rounded-pill bg-info"
+                        >{{ __('base.minimum_core_version') }} {{ data.minimum_core_version }}</span
+                    >
                 </div>
 
                 <div class="mt-2 card-text d-flex justify-content-between flex-wrap">
@@ -24,10 +28,12 @@
 
             <div class="card-footer d-flex">
                 <button v-if="!installed" class="btn btn-warning" @click.prevent="install()">
-                    <i :class="{
-                        'fa-solid fa-download': !installing,
-                        'fas fa-circle-notch fa-spin': installing,
-                    }"></i>
+                    <i
+                        :class="{
+                            'fa-solid fa-download': !installing,
+                            'fas fa-circle-notch fa-spin': installing,
+                        }"
+                    ></i>
                     <span
                         class="d-inline-block d-md-none d-xl-inline-block ms-1"
                         v-text="!installing ? __('base.install_now') : __('base.installing')"
@@ -35,10 +41,12 @@
                 </button>
 
                 <button v-if="installed && !activated" class="btn btn-success" @click.prevent="changeStatus()">
-                    <i :class="{
-                        'fa-solid fa-check': !activating,
-                        'fas fa-circle-notch fa-spin': activating,
-                    }"></i>
+                    <i
+                        :class="{
+                            'fa-solid fa-check': !activating,
+                            'fas fa-circle-notch fa-spin': activating,
+                        }"
+                    ></i>
                     <span
                         class="d-inline-block d-md-none d-xl-inline-block ms-1"
                         v-text="!activating ? __('base.activate') : __('base.activating')"
@@ -130,7 +138,7 @@ export default {
             this.activating = false
         },
         checkVersion() {
-            return this.versionCheck = this.data.version_check
+            return (this.versionCheck = this.data.version_check)
         },
         checkInstalled() {
             if (Object.values(window.marketplace.installed).indexOf(this.pluginName) > -1) {

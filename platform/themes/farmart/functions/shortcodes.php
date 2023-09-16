@@ -1,34 +1,42 @@
 <?php
 
-use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Ecommerce\Repositories\Interfaces\FlashSaleInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductCategoryInterface;
-use Botble\Faq\Repositories\Interfaces\FaqCategoryInterface;
+use Botble\Ads\Facades\AdsManager;
+use Botble\Ads\Models\Ads;
+use Botble\Base\Facades\Html;
+use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Facades\ProductCategoryHelper;
+use Botble\Ecommerce\Models\FlashSale;
+use Botble\Ecommerce\Models\ProductCategory;
+use Botble\Ecommerce\Models\ProductCollection;
+use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
+use Botble\Faq\Models\FaqCategory;
+use Botble\Media\Facades\RvMedia;
+use Botble\Shortcode\Compilers\Shortcode;
+use Botble\Theme\Facades\Theme;
 use Botble\Theme\Supports\ThemeSupport;
-use Botble\Testimonial\Repositories\Interfaces\TestimonialInterface;
-use Theme\Farmart\Http\Resources\ProductCategoryResource;
-use Theme\Farmart\Http\Resources\ProductCollectionResource;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
+use Theme\Farmart\Supports\Wishlist;
 
 app()->booted(function () {
     ThemeSupport::registerGoogleMapsShortcode();
     ThemeSupport::registerYoutubeShortcode();
 
-    /**
-     * @param string|null $default
-     * @param string|null $size
-     * @return string
-     */
     function image_placeholder(?string $default = null, ?string $size = null): string
     {
         if (theme_option('lazy_load_image_enabled', 'yes') != 'yes' && $default) {
+            if (Str::contains($default, ['https://', 'http://'])) {
+                return $default;
+            }
+
             return RvMedia::getImageUrl($default, $size);
         }
 
-        if (! theme_option('image-placeholder')) {
-            return Theme::asset()->url('images/placeholder.png');
+        if ($placeholder = theme_option('image-placeholder')) {
+            return RvMedia::getImageUrl($placeholder);
         }
 
-        return RvMedia::getImageUrl(theme_option('image-placeholder'));
+        return Theme::asset()->url('images/placeholder.png');
     }
 
     if (is_plugin_active('simple-slider')) {
@@ -36,13 +44,14 @@ app()->booted(function () {
             return Theme::getThemeNamespace() . '::partials.shortcodes.sliders';
         }, 120);
 
-        add_filter(SHORTCODE_REGISTER_CONTENT_IN_ADMIN, function ($data, $key, $attributes) {
+        add_filter(SHORTCODE_REGISTER_CONTENT_IN_ADMIN, function (string|null $data, string $key, array $attributes) {
             if ($key == 'simple-slider' && is_plugin_active('ads')) {
                 $ads = AdsManager::getData(true, true);
 
                 $defaultAutoplay = 'yes';
 
-                return $data . Theme::partial('shortcodes.includes.autoplay-settings', compact('attributes', 'defaultAutoplay')) . Theme::partial('shortcodes.select-ads-admin-config', compact('ads', 'attributes'));
+                return $data . Theme::partial('shortcodes.includes.autoplay-settings', compact('attributes', 'defaultAutoplay')) .
+                    Theme::partial('shortcodes.select-ads-admin-config', compact('ads', 'attributes'));
             }
 
             return $data;
@@ -50,11 +59,7 @@ app()->booted(function () {
     }
 
     if (is_plugin_active('ads')) {
-        /**
-         * @param string|null $key
-         * @return mixed|null
-         */
-        function get_ads_from_key(?string $key)
+        function get_ads_from_key(string|null $key): Ads|null
         {
             if (! $key) {
                 return null;
@@ -69,11 +74,6 @@ app()->booted(function () {
             return $ads;
         }
 
-        /**
-         * @param string|null $key
-         * @param array $attributes
-         * @return string|null
-         */
         function display_ads_advanced(?string $key, array $attributes = []): ?string
         {
             $ads = get_ads_from_key($key);
@@ -85,7 +85,7 @@ app()->booted(function () {
             $image = Html::image(image_placeholder($ads->image), $ads->name, ['class' => 'lazyload', 'data-src' => RvMedia::getImageUrl($ads->image)])->toHtml();
 
             if ($ads->url) {
-                $image = Html::link(route('public.ads-click', $ads->key), $image, array_merge($attributes, ['target' => '_SELF']), null, false)
+                $image = Html::link(route('public.ads-click', $ads->key), $image, array_merge($attributes, ['target' => '_blank']), null, false)
                     ->toHtml();
             } elseif ($attributes) {
                 $image = Html::tag('div', $image, $attributes)->toHtml();
@@ -94,7 +94,7 @@ app()->booted(function () {
             return $image;
         }
 
-        add_shortcode('theme-ads', __('Theme ads'), __('Theme ads'), function ($shortcode) {
+        add_shortcode('theme-ads', __('Theme ads'), __('Theme ads'), function (Shortcode $shortcode) {
             $ads = [];
             $attributes = $shortcode->toArray();
 
@@ -109,10 +109,14 @@ app()->booted(function () {
 
             $ads = array_filter($ads);
 
+            if (! count($ads)) {
+                return null;
+            }
+
             return Theme::partial('shortcodes.ads.theme-ads', compact('ads'));
         });
 
-        shortcode()->setAdminConfig('theme-ads', function ($attributes) {
+        shortcode()->setAdminConfig('theme-ads', function (array $attributes) {
             $ads = AdsManager::getData(true, true);
 
             return Theme::partial('shortcodes.ads.theme-ads-admin-config', compact('ads', 'attributes'));
@@ -120,53 +124,61 @@ app()->booted(function () {
     }
 
     if (is_plugin_active('ecommerce')) {
-        add_shortcode('all-brands', __('All Brands'), __('All Brands'), function($shortcode){
-            return Theme::partial('shortcodes.ecommerce.all-brands', compact('shortcode'));
-        });
-        shortcode()->setAdminConfig('all-brands', function ($attributes) {
-            return Theme::partial('shortcodes.ecommerce.all-brands-admin-config', compact('attributes'));
-        });
         add_shortcode(
             'featured-product-categories',
             __('Featured Product Categories'),
             __('Featured Product Categories'),
-            function ($shortcode) {
+            function (Shortcode $shortcode) {
                 return Theme::partial('shortcodes.ecommerce.featured-product-categories', compact('shortcode'));
             }
         );
 
-        shortcode()->setAdminConfig('featured-product-categories', function ($attributes) {
+        shortcode()->setAdminConfig('featured-product-categories', function (array $attributes) {
             return Theme::partial('shortcodes.ecommerce.featured-product-categories-admin-config', compact('attributes'));
         });
 
-        add_shortcode('featured-brands', __('Featured Brands'), __('Featured Brands'), function ($shortcode) {
+        add_shortcode('featured-brands', __('Featured Brands'), __('Featured Brands'), function (Shortcode $shortcode) {
             return Theme::partial('shortcodes.ecommerce.featured-brands', compact('shortcode'));
         });
 
-        shortcode()->setAdminConfig('featured-brands', function ($attributes) {
+        shortcode()->setAdminConfig('featured-brands', function (array $attributes) {
             return Theme::partial('shortcodes.ecommerce.featured-brands-admin-config', compact('attributes'));
         });
 
-        add_shortcode('flash-sale', __('Flash sale'), __('Flash sale'), function ($shortcode) {
-            $flashSale = app(FlashSaleInterface::class)->getModel()
-                ->where('id', $shortcode->flash_sale_id)
+        add_shortcode('flash-sale', __('Flash sale'), __('Flash sale'), function (Shortcode $shortcode) {
+            $flashSale = FlashSale::query()
                 ->notExpired()
+                ->where('id', $shortcode->flash_sale_id)
+                ->wherePublished()
+                ->with([
+                    'products' => function ($query) {
+                        $reviewParams = EcommerceHelper::withReviewsParams();
+
+                        if (EcommerceHelper::isReviewEnabled()) {
+                            $query->withAvg($reviewParams['withAvg'][0], $reviewParams['withAvg'][1]);
+                        }
+
+                        return $query
+                            ->wherePublished()
+                            ->with(EcommerceHelper::withProductEagerLoadingRelations())
+                            ->withCount($reviewParams['withCount']);
+                    },
+                ])
                 ->first();
 
-            if (! $flashSale || ! $flashSale->products()->count()) {
+            if (! $flashSale || $flashSale->products->isEmpty()) {
                 return null;
             }
 
-            return Theme::partial('shortcodes.ecommerce.flash-sale', [
-                'shortcode' => $shortcode,
-                'flashSale' => $flashSale,
-            ]);
+            $isFlashSale = true;
+            $wishlistIds = Wishlist::getWishlistIds($flashSale->products->pluck('id')->all());
+
+            return Theme::partial('shortcodes.ecommerce.flash-sale', compact('shortcode', 'flashSale', 'isFlashSale', 'wishlistIds'));
         });
 
-        shortcode()->setAdminConfig('flash-sale', function ($attributes) {
-            $flashSales = app(FlashSaleInterface::class)
-                ->getModel()
-                ->where('status', BaseStatusEnum::PUBLISHED)
+        shortcode()->setAdminConfig('flash-sale', function (array $attributes) {
+            $flashSales = FlashSale::query()
+                ->wherePublished()
                 ->notExpired()
                 ->get();
 
@@ -177,98 +189,127 @@ app()->booted(function () {
             'product-collections',
             __('Product Collections'),
             __('Product Collections'),
-            function ($shortcode) {
-                $condition = [
-                    'status' => BaseStatusEnum::PUBLISHED,
-                ];
-
-                if ((int)$shortcode->collection_id) {
-                    $condition['id'] = (int)$shortcode->collection_id;
+            function (Shortcode $shortcode) {
+                if ($shortcode->collection_id) {
+                    $collectionIds = [$shortcode->collection_id];
+                } else {
+                    $collectionIds = ProductCollection::query()
+                        ->wherePublished()
+                        ->pluck('id')
+                        ->all();
                 }
 
-                $productCollections = get_product_collections(
-                    $condition,
-                    [],
-                    ['id', 'name', 'slug']
-                );
+                $limit = (int)$shortcode->limit ?: 8;
+
+                $products = get_products_by_collections(array_merge([
+                    'collections' => [
+                        'by' => 'id',
+                        'value_in' => $collectionIds,
+                    ],
+                    'take' => $limit,
+                    'with' => EcommerceHelper::withProductEagerLoadingRelations(),
+                ], EcommerceHelper::withReviewsParams()));
+
+                if ($products->isEmpty()) {
+                    return null;
+                }
+
+                $wishlistIds = Wishlist::getWishlistIds($products->pluck('id')->all());
 
                 return Theme::partial('shortcodes.ecommerce.product-collections', [
+                    'title' => $shortcode->title,
+                    'limit' => $limit,
                     'shortcode' => $shortcode,
-                    'productCollections' => ProductCollectionResource::collection($productCollections),
+                    'products' => $products,
+                    'wishlistIds' => $wishlistIds,
                 ]);
             }
         );
 
-        shortcode()->setAdminConfig('product-collections', function ($attributes) {
-            $collections = get_product_collections(
-                ['status' => BaseStatusEnum::PUBLISHED],
-                [],
-                ['id', 'name', 'slug']
-            );
+        shortcode()->setAdminConfig('product-collections', function (array $attributes) {
+            $productCollections = get_product_collections(select: ['id', 'name', 'slug']);
 
-            return Theme::partial('shortcodes.ecommerce.product-collections-admin-config', compact('attributes', 'collections'));
+            return Theme::partial('shortcodes.ecommerce.product-collections-admin-config', compact('attributes', 'productCollections'));
         });
 
         add_shortcode(
             'product-category-products',
             __('Product category products'),
             __('Product category products'),
-            function ($shortcode) {
-                $category = app(ProductCategoryInterface::class)->getFirstBy([
-                    'status' => BaseStatusEnum::PUBLISHED,
-                    'id' => $shortcode->category_id,
-                ], ['*'], [
-                    'activeChildren' => function ($query) use ($shortcode) {
-                        $query->limit($shortcode->number_of_categories ? (int)$shortcode->number_of_categories : 3);
-                    },
-                    'activeChildren.slugable',
-                ]);
+            function (Shortcode $shortcode) {
+                $category = ProductCategory::query()
+                    ->wherePublished()
+                    ->where('id', (int)$shortcode->category_id)
+                    ->with([
+                        'activeChildren' => function (HasMany $query) {
+                            return $query->limit(3);
+                        },
+                    ])
+                    ->first();
 
                 if (! $category) {
                     return null;
                 }
 
-                $category = new ProductCategoryResource($category);
-                $category->activeChildren = ProductCategoryResource::collection($category->activeChildren);
+                $limit = (int)$shortcode->limit ?: 8;
 
-                return Theme::partial('shortcodes.ecommerce.product-category-products', compact('category', 'shortcode'));
+                $products = app(ProductInterface::class)->getProductsByCategories(array_merge([
+                    'categories' => [
+                        'by' => 'id',
+                        'value_in' => array_merge([$category->id], $category->activeChildren->pluck('id')->all()),
+                    ],
+                    'take' => $limit,
+                ], EcommerceHelper::withReviewsParams()));
+
+                if ($products->isEmpty()) {
+                    return null;
+                }
+
+                $wishlistIds = Wishlist::getWishlistIds($products->pluck('id')->all());
+
+                return Theme::partial('shortcodes.ecommerce.product-category-products', compact('category', 'products', 'shortcode', 'limit', 'wishlistIds'));
             }
         );
 
-        shortcode()->setAdminConfig('product-category-products', function ($attributes) {
-            $categories = ProductCategoryHelper::getProductCategoriesWithIndent();
+        shortcode()->setAdminConfig('product-category-products', function (array $attributes) {
+            $categories = ProductCategoryHelper::getTreeCategoriesOptions(ProductCategoryHelper::getActiveTreeCategories()->toArray());
 
             return Theme::partial('shortcodes.ecommerce.product-category-products-admin-config', compact('attributes', 'categories'));
         });
 
-        add_shortcode('featured-products', __('Featured products'), __('Featured products'), function ($shortcode) {
+        add_shortcode('featured-products', __('Featured products'), __('Featured products'), function (Shortcode $shortcode) {
+            $request = request();
+
+            $products = get_featured_products([
+                    'take' => $request->integer('limit', 10),
+                    'with' => EcommerceHelper::withProductEagerLoadingRelations(),
+                ] + EcommerceHelper::withReviewsParams());
+
+            if ($products->isEmpty()) {
+                return null;
+            }
+
+            $wishlistIds = Wishlist::getWishlistIds(collect($products->toArray())->pluck('id')->all());
+
             return Theme::partial('shortcodes.ecommerce.featured-products', [
                 'shortcode' => $shortcode,
+                'products' => $products,
+                'wishlistIds' => $wishlistIds,
             ]);
         });
 
-        shortcode()->setAdminConfig('featured-products', function ($attributes) {
+        shortcode()->setAdminConfig('featured-products', function (array $attributes) {
             return Theme::partial('shortcodes.ecommerce.featured-products-admin-config', compact('attributes'));
         });
     }
 
     if (is_plugin_active('blog')) {
-        add_shortcode('featured-posts', __('Featured Blog Posts'), __('Featured Blog Posts'), function ($shortcode) {
+        add_shortcode('featured-posts', __('Featured Blog Posts'), __('Featured Blog Posts'), function (Shortcode $shortcode) {
             return Theme::partial('shortcodes.featured-posts', compact('shortcode'));
         });
 
-        shortcode()->setAdminConfig('featured-posts', function ($attributes) {
+        shortcode()->setAdminConfig('featured-posts', function (array $attributes) {
             return Theme::partial('shortcodes.featured-posts-admin-config', compact('attributes'));
-        });
-    }
-
-    if (is_plugin_active('blog')) {
-        add_shortcode('blog-posts-by-category', __('Blog Posts by Category'), __('Blog Posts by Category'), function ($shortcode) {
-            return Theme::partial('shortcodes.blog-posts-by-category', compact('shortcode'));
-        });
-
-        shortcode()->setAdminConfig('blog-posts-by-category', function ($attributes) {
-            return Theme::partial('shortcodes.blog-posts-by-category-admin-config', compact('attributes'));
         });
     }
 
@@ -278,31 +319,26 @@ app()->booted(function () {
         }, 120);
     }
 
-    add_shortcode('contact-info-boxes', __('Contact info boxes'), __('Contact info boxes'), function ($shortcode) {
+    add_shortcode('contact-info-boxes', __('Contact info boxes'), __('Contact info boxes'), function (Shortcode $shortcode) {
         return Theme::partial('shortcodes.contact-info-boxes', compact('shortcode'));
     });
 
-    shortcode()->setAdminConfig('contact-info-boxes', function ($attributes) {
+    shortcode()->setAdminConfig('contact-info-boxes', function (array $attributes) {
         return Theme::partial('shortcodes.contact-info-boxes-admin-config', compact('attributes'));
     });
 
     if (is_plugin_active('faq')) {
-        add_shortcode('faq', __('FAQs'), __('FAQs'), function ($shortcode) {
-            $categories = app(FaqCategoryInterface::class)
-                ->advancedGet([
-                    'condition' => [
-                        'status' => BaseStatusEnum::PUBLISHED,
-                    ],
-                    'with' => [
-                        'faqs' => function ($query) {
-                            $query->where('status', BaseStatusEnum::PUBLISHED);
-                        },
-                    ],
-                    'order_by' => [
-                        'faq_categories.order' => 'ASC',
-                        'faq_categories.created_at' => 'DESC',
-                    ],
-                ]);
+        add_shortcode('faq', __('FAQs'), __('FAQs'), function (Shortcode $shortcode) {
+            $categories = FaqCategory::query()
+                ->wherePublished()
+                ->with([
+                    'faqs' => function (HasMany $query) {
+                        $query->wherePublished();
+                    },
+                ])
+                ->orderBy('order')
+                ->orderByDesc('created_at')
+                ->get();
 
             return Theme::partial('shortcodes.faq', [
                 'title' => $shortcode->title,
@@ -310,70 +346,16 @@ app()->booted(function () {
             ]);
         });
 
-        shortcode()->setAdminConfig('faq', function ($attributes) {
+        shortcode()->setAdminConfig('faq', function (array $attributes) {
             return Theme::partial('shortcodes.faq-admin-config', compact('attributes'));
         });
     }
 
-    add_shortcode('coming-soon', __('Coming Soon'), __('Coming Soon'), function ($shortcode) {
+    add_shortcode('coming-soon', __('Coming Soon'), __('Coming Soon'), function (Shortcode $shortcode) {
         return Theme::partial('shortcodes.coming-soon', compact('shortcode'));
     });
 
-    shortcode()->setAdminConfig('coming-soon', function ($attributes) {
+    shortcode()->setAdminConfig('coming-soon', function (array $attributes) {
         return Theme::partial('shortcodes.coming-soon-admin-config', compact('attributes'));
     });
-
-    add_shortcode('site-features', __('Site Features'), __('Site Features'), function ($shortcode) {
-        return Theme::partial('shortcodes.site-features', compact('shortcode'));
-    });
-
-    shortcode()->setAdminConfig('site-features', function ($attributes) {
-        return Theme::partial('shortcodes.site-features-admin-config', compact('attributes'));
-    });
-
-    add_shortcode('newsletter-home', __('Newsletter Form'), __('Newsletter Form'), function ($shortcode) {
-        return Theme::partial('shortcodes.newsletter-home', compact('shortcode'));
-    });
-
-    shortcode()->setAdminConfig('newsletter-home', function ($attributes) {
-        return Theme::partial('shortcodes.newsletter-home-admin-config', compact('attributes'));
-    });
-
-    if (is_plugin_active('faq')) {
-        add_shortcode('faq-by-group', __('Group FAQs'), __('Group FAQs'), function ($shortcode) {
-            return Theme::partial('shortcodes.faq-by-group', compact('shortcode'));
-        });
-
-        shortcode()->setAdminConfig('faq-by-group', function ($attributes) {
-            return Theme::partial('shortcodes.faq-by-group-admin-config', compact('attributes'));
-        });
-    }
-
-    if (is_plugin_active('testimonial')) {
-        add_shortcode('testimonials', __('Testimonials'), __('Testimonials'), function ($shortcode) {
-            $testimonials = app(TestimonialInterface::class)->advancedGet([
-                'condition' => [
-                    'status' => BaseStatusEnum::PUBLISHED,
-                ],
-                'take' => (int)$shortcode->number_of_displays,
-            ]);
-
-            return Theme::partial('shortcodes.testimonials.index', compact('shortcode', 'testimonials'));
-        });
-
-        shortcode()->setAdminConfig('testimonials', function ($attributes) {
-            return Theme::partial('shortcodes.testimonials.admin-config', compact('attributes'));
-        });
-    }
-
-    if (is_plugin_active('faq')) {
-
-        add_shortcode('faq-by-category', __('FAQs by Category'), __('FAQs by Category'), function ($shortcode) {
-            return Theme::partial('shortcodes.faq-by-category', compact('shortcode'));
-        });
-
-        shortcode()->setAdminConfig('faq-by-category', function ($attributes) {
-            return Theme::partial('shortcodes.faq-by-category-admin-config', compact('attributes'));
-        });
-    }
 });

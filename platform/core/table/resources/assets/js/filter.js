@@ -1,15 +1,14 @@
 class TableFilter {
     loadData($element) {
-        $.ajax({
-            type: 'GET',
-            url: $('.filter-data-url').val(),
-            data: {
+        $httpClient
+            .make()
+            .get($('.filter-data-url').val(), {
                 class: $('.filter-data-class').val(),
                 key: $element.val(),
                 value: $element.closest('.filter-item').find('.filter-column-value').val(),
-            },
-            success: (res) => {
-                let data = $.map(res.data, (value, key) => {
+            })
+            .then(({ data: res }) => {
+                const data = $.map(res.data, (value, key) => {
                     return { id: key, name: value }
                 })
                 $element.closest('.filter-item').find('.filter-column-value-wrap').html(res.html)
@@ -21,11 +20,7 @@ class TableFilter {
                 }
 
                 Botble.initResources()
-            },
-            error: (error) => {
-                Botble.handleError(error)
-            },
-        })
+            })
     }
 
     init() {

@@ -26,13 +26,17 @@
                         <half-circle-spinner :animation-duration="1000" :size="32" />
                     </div>
 
-                    <div class="information">
-                        <p v-for="result in results" v-text="result.text" :class="result.error ? 'bold text-danger' : 'bold'"></p>
-                    </div>
-
                     <div class="percent" v-text="`${percent}%`"></div>
 
-                    <div class="important" v-if="loading">
+                    <div class="information">
+                        <p
+                            v-for="result in results"
+                            v-text="result.text"
+                            :class="result.error ? 'bold text-pink red-shadow' : 'bold'"
+                        ></p>
+                    </div>
+
+                    <div class="important red-shadow" v-if="loading">
                         <strong>DO NOT CLOSE WINDOWS DURING UPDATE!</strong>
                     </div>
 
@@ -103,7 +107,7 @@ export default {
             this.performingUpdate = true
             this.realPercent = 5
 
-            this.results.push({text: this.firstStepMessage, error: false})
+            this.results.push({ text: this.firstStepMessage, error: false })
 
             try {
                 await this.triggerUpdate()
@@ -111,18 +115,22 @@ export default {
                 setTimeout(() => this.refresh(), 30000)
             } catch (e) {
                 this.loading = false
-                this.results.push({ text: e.message, error: true })
             }
         },
 
         async triggerUpdate() {
-            return axios
+            return this.$httpClient
+                .makeWithoutErrorHandler()
                 .post(this.updateUrl, {
                     step_name: this.step,
                     update_id: this.updateId,
                     version: this.version,
                 })
                 .then(({ data }) => {
+                    if (!data.data || !data.data.next_step || !data.data.next_message) {
+                        throw new Error('Something went wrong, could not update the system.')
+                    }
+
                     this.step = data.data.next_step
                     this.realPercent = data.data.current_percent
                     this.results.push({ text: data.data.next_message, error: false })
@@ -135,9 +143,17 @@ export default {
                     this.loading = false
                     clearInterval(this.percentInterval)
                 })
-                .catch(error => {
+                .catch((error) => {
+                    let message = error.message
                     this.loading = false
-                    this.results.push({ text: error.response.data.message, error: true })
+
+                    if (error.data && error.data.message) {
+                        message = error.data.message
+                    } else if (error.response && error.response.data.message) {
+                        message = error.response.data.message
+                    }
+
+                    this.results.push({ text: message, error: true })
 
                     throw error
                 })
@@ -174,9 +190,10 @@ export default {
             text-align: center;
 
             .percent {
-                font-size: 64px;
+                font-size: 86px;
                 color: #fefefe;
-                font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+                font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+                    monospace;
                 margin-bottom: 24px;
             }
 
@@ -188,10 +205,17 @@ export default {
             }
 
             .important {
-                text-shadow: 0 0 16px #ef0012;
                 color: #efefef;
             }
         }
+    }
+
+    .red {
+        color: #fdc9c9;
+    }
+
+    .red-shadow {
+        text-shadow: 0 0 16px #ef0012;
     }
 }
 </style>

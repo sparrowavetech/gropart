@@ -84,7 +84,7 @@ class DiscountSupport
             $this->promotions = collect();
         }
 
-        if ($this->promotions->count() == 0) {
+        if ($this->promotions->isEmpty()) {
             $this->promotions = app(DiscountInterface::class)
                 ->getAvailablePromotions(['products', 'customers', 'productCollections'], $forProductSingle);
         }
@@ -101,7 +101,7 @@ class DiscountSupport
             ->where('type', DiscountTypeEnum::COUPON)
             ->where('start_date', '<=', $now)
             ->where(function (Builder $query) use ($now) {
-                return $query
+                $query
                     ->whereNull('end_date')
                     ->orWhere('end_date', '>', $now);
             })
@@ -116,7 +116,7 @@ class DiscountSupport
             }
 
             if ($discount->target === DiscountTargetEnum::ONCE_PER_CUSTOMER && $customerId) {
-                $discount->usedByCustomers()->syncWithoutDetaching($customerId);
+                $discount->usedByCustomers()->syncWithoutDetaching([$customerId]);
             }
         }
     }

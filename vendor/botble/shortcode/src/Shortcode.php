@@ -69,4 +69,9 @@ class Shortcode
     {
         return $this->compiler;
     }
+
+    public function fields(): ShortcodeField
+    {
+        return new ShortcodeField();
+    }
 }

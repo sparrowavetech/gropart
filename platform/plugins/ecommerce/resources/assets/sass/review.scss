@@ -1,5 +1,5 @@
 .rating_wrap {
-    font-family: "Font Awesome 6 Free" !important;
+    font-family: 'Font Awesome 6 Free' !important;
     vertical-align: top;
     overflow: hidden;
     position: relative;
@@ -9,7 +9,7 @@
 
     &::before {
         font-size: 12px;
-        content: "\f005\f005\f005\f005\f005";
+        content: '\f005\f005\f005\f005\f005';
         top: 0;
         position: absolute;
         left: 0;
@@ -21,16 +21,16 @@
 
     .product_rate {
         overflow: hidden;
-        font-family: "Font Awesome 6 Free" !important;
+        font-family: 'Font Awesome 6 Free' !important;
         top: 0;
         left: 0;
         position: absolute;
         padding-top: 1.5em;
-        color: #EDB867;
+        color: #edb867;
 
         &::before {
             font-size: 12px;
-            content: "\f005\f005\f005\f005\f005";
+            content: '\f005\f005\f005\f005\f005';
             top: 0;
             position: absolute;
             left: 0;
@@ -58,7 +58,7 @@
 
                 span {
                     position: absolute;
-                    background: rgba(0, 0, 0, .5);
+                    background: rgba(0, 0, 0, 0.5);
                     left: 0.25rem;
                     right: 0.25rem;
                     top: 0.25rem;
@@ -107,7 +107,8 @@
 
         > input:checked ~ label, /* show gold star when clicked */
         &:not(:checked) > label:hover, /* hover current star */
-        &:not(:checked) > label:hover ~ label { /* hover previous stars in list */
+        &:not(:checked) > label:hover ~ label {
+            /* hover previous stars in list */
             color: var(--primary-color, #fab528);
         }
 
@@ -130,10 +131,12 @@
             height: 1em;
             padding: 0.25em 0.25em;
             color: #000;
-            background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e") center/1em auto no-repeat;
+            background: transparent
+                url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e")
+                center/1em auto no-repeat;
             border: 0;
             border-radius: 0.25rem;
-            opacity: .5;
+            opacity: 0.5;
         }
     }
 
@@ -148,7 +151,7 @@
 
             .btn-check {
                 position: absolute;
-                clip: rect(0,0,0,0);
+                clip: rect(0, 0, 0, 0);
                 pointer-events: none;
             }
 
@@ -161,7 +164,8 @@
 
             > input:checked ~ label, /* show gold star when clicked */
             &:not(:checked) > label:hover, /* hover current star */
-            &:not(:checked) > label:hover ~ label { /* hover previous stars in list */
+            &:not(:checked) > label:hover ~ label {
+                /* hover previous stars in list */
                 color: var(--primary-color, #fab528);
             }
 
@@ -175,8 +179,8 @@
 
         .ecommerce-image-viewer__item {
             position: relative;
-            -webkit-transition: all .3s cubic-bezier(.46, .03, .52, .96);
-            transition: all .3s cubic-bezier(.46, .03, .52, .96);
+            -webkit-transition: all 0.3s cubic-bezier(0.46, 0.03, 0.52, 0.96);
+            transition: all 0.3s cubic-bezier(0.46, 0.03, 0.52, 0.96);
             text-align: initial;
             margin-right: 2px;
             background-color: #eee;

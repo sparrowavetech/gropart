@@ -6,21 +6,29 @@
 <div class="table-responsive">
     <table class="table table-hover">
         <thead>
-        <tr>
-            <th>{{ __('Image') }}</th>
-            <th>{{ __('Product') }}</th>
-            <th>{{ __('Price') }}</th>
-            <th></th>
-        </tr>
+            <tr>
+                <th>{{ __('Image') }}</th>
+                <th>{{ __('Product') }}</th>
+                <th>{{ __('Price') }}</th>
+                <th></th>
+            </tr>
         </thead>
         <tbody>
             @if ($products->total())
-                @foreach($products as $product)
+                @foreach ($products as $product)
                     <tr>
                         <td>
-                            <img alt="{{ $product->original_product->name }}" width="50" height="70" class="img-fluid" style="max-height: 75px" src="{{ RvMedia::getImageUrl($product->image, 'thumb', false, RvMedia::getDefaultImage()) }}">
+                            <img
+                                class="img-fluid"
+                                src="{{ RvMedia::getImageUrl($product->image, 'thumb', false, RvMedia::getDefaultImage()) }}"
+                                alt="{{ $product->original_product->name }}"
+                                style="max-height: 75px"
+                                width="50"
+                                height="70"
+                            >
                         </td>
-                        <td><a href="{{ $product->original_product->url }}">{{ $product->original_product->name }}</a></td>
+                        <td><a href="{{ $product->original_product->url }}">{{ $product->original_product->name }}</a>
+                        </td>
 
                         <td>
                             <div class="product__price @if ($product->front_sale_price != $product->price) sale @endif">
@@ -38,7 +46,10 @@
                 @endforeach
             @else
                 <tr>
-                    <td colspan="4" class="text-center">{{ __('No product in wishlist!') }}</td>
+                    <td
+                        class="text-center"
+                        colspan="4"
+                    >{{ __('No product in wishlist!') }}</td>
                 </tr>
             @endif
         </tbody>

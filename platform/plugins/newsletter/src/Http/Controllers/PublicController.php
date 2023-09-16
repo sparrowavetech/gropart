@@ -7,23 +7,19 @@ use Botble\Newsletter\Enums\NewsletterStatusEnum;
 use Botble\Newsletter\Events\SubscribeNewsletterEvent;
 use Botble\Newsletter\Events\UnsubscribeNewsletterEvent;
 use Botble\Newsletter\Http\Requests\NewsletterRequest;
-use Botble\Newsletter\Repositories\Interfaces\NewsletterInterface;
+use Botble\Newsletter\Models\Newsletter;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\URL;
 
 class PublicController extends Controller
 {
-    public function __construct(protected NewsletterInterface $newsletterRepository)
-    {
-    }
-
     public function postSubscribe(NewsletterRequest $request, BaseHttpResponse $response)
     {
-        $newsletter = $this->newsletterRepository->getFirstBy(['email' => $request->input('email')]);
+        $newsletter = Newsletter::query()->where('email', $request->input('email'))->first();
 
         if (! $newsletter) {
-            $newsletter = $this->newsletterRepository->createOrUpdate($request->input());
+            $newsletter = Newsletter::query()->create($request->input());
         } else {
             $newsletter->status = NewsletterStatusEnum::SUBSCRIBED;
             $newsletter->save();
@@ -40,14 +36,16 @@ class PublicController extends Controller
             abort(404);
         }
 
-        $newsletter = $this->newsletterRepository->getFirstBy([
-            'id' => $id,
-            'status' => NewsletterStatusEnum::SUBSCRIBED,
-        ]);
+        $newsletter = Newsletter::query()
+            ->where([
+                'id' => $id,
+                'status' => NewsletterStatusEnum::SUBSCRIBED,
+            ])
+            ->first();
 
         if ($newsletter) {
             $newsletter->status = NewsletterStatusEnum::UNSUBSCRIBED;
-            $this->newsletterRepository->createOrUpdate($newsletter);
+            $newsletter->save();
 
             event(new UnsubscribeNewsletterEvent($newsletter));
 

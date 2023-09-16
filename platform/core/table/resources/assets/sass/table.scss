@@ -23,7 +23,8 @@ table.dataTable {
 $brand-main-color: #36c6d3;
 $general-img-path: '/vendor/core/core/base/images/' !default;
 
-.table-has-actions, .table-has-filter {
+.table-has-actions,
+.table-has-filter {
     .dataTables_filter {
         left: 125px;
     }
@@ -91,15 +92,17 @@ $general-img-path: '/vendor/core/core/base/images/' !default;
         }
     }
 
-    .table.table-hover{
+    .table.table-hover {
         > tbody > {
-            tr.selected > td, tr.selected:hover > td {
+            tr.selected > td,
+            tr.selected:hover > td {
                 background: rgba(var(--bs-primary-rgb), 0.2) !important;
             }
         }
     }
 
-    td, th {
+    td,
+    th {
         vertical-align: middle !important;
         text-align: center;
     }
@@ -188,7 +191,11 @@ $general-img-path: '/vendor/core/core/base/images/' !default;
             }
 
             .dt-button-background {
-                background: radial-gradient(ellipse farthest-corner at center, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.7) 100%);
+                background: radial-gradient(
+                    ellipse farthest-corner at center,
+                    rgba(0, 0, 0, 0.3) 0%,
+                    rgba(0, 0, 0, 0.7) 100%
+                );
             }
         }
 
@@ -200,7 +207,8 @@ $general-img-path: '/vendor/core/core/base/images/' !default;
             text-align: center;
         }
 
-        th, td {
+        th,
+        td {
             outline: none !important;
         }
 
@@ -211,7 +219,7 @@ $general-img-path: '/vendor/core/core/base/images/' !default;
         }
 
         .btn {
-            margin: 0 10px 10px 0;
+            margin: 5px 10px 5px 0;
         }
 
         .dataTables_paginate {
@@ -229,10 +237,10 @@ $general-img-path: '/vendor/core/core/base/images/' !default;
                         color: #777777 !important;
                         border-radius: 0 !important;
                         margin-left: 3px;
-                        -webkit-transition: .3s;
-                        -moz-transition: .3s;
-                        -o-transition: .3s;
-                        transition: .3s;
+                        -webkit-transition: 0.3s;
+                        -moz-transition: 0.3s;
+                        -o-transition: 0.3s;
+                        transition: 0.3s;
                         padding: 2px 5px;
                         min-width: 24px;
                         width: auto;
@@ -326,7 +334,7 @@ $general-img-path: '/vendor/core/core/base/images/' !default;
             a {
                 width: 25px;
                 height: 24px;
-                background-image: url("#{$general-img-path}img.png");
+                background-image: url('#{$general-img-path}img.png');
                 opacity: 0.8;
                 filter: alpha(opacity=80);
                 background-position: -54px -203px;
@@ -339,7 +347,7 @@ $general-img-path: '/vendor/core/core/base/images/' !default;
             a {
                 width: 25px;
                 height: 24px;
-                background-image: url("#{$general-img-path}img.png");
+                background-image: url('#{$general-img-path}img.png');
                 background-position: -10px -203px;
                 opacity: 0.8;
                 filter: alpha(opacity=80);
@@ -351,7 +359,6 @@ $general-img-path: '/vendor/core/core/base/images/' !default;
         i {
             display: none;
         }
-
     }
 }
 
@@ -397,7 +404,7 @@ div.dataTables_info {
     top: -50px;
     left: 10px;
 
-    input[type=search] {
+    input[type='search'] {
         margin-top: 3px;
         height: 36px;
         width: 250px;
@@ -406,8 +413,8 @@ div.dataTables_info {
 
     label {
         &::after {
-            font: normal normal normal 14px/1 Font Awesome\ 5 Free;
-            content: "\f002";
+            font: normal normal normal 14px/1 'Font Awesome 6 Free';
+            content: '\f002';
             position: absolute;
             right: -4px;
             top: 6px;
@@ -427,8 +434,8 @@ div.dataTables_info {
     }
 }
 
-
-.dataTables_wrapper td, .dataTables_wrapper th {
+.dataTables_wrapper td,
+.dataTables_wrapper th {
     vertical-align: middle !important;
     text-align: center;
 }
@@ -487,15 +494,24 @@ div.dataTables_info {
 }
 
 .dataTables_wrapper {
-    .table-bordered > tbody > tr > td, .table-bordered > tbody > tr > th, .table-bordered > tfoot > tr > td, .table-bordered > tfoot > tr > th, .table-bordered > thead > tr > td, .table-bordered > thead > tr > th {
+    .table-bordered > tbody > tr > td,
+    .table-bordered > tbody > tr > th,
+    .table-bordered > tfoot > tr > td,
+    .table-bordered > tfoot > tr > th,
+    .table-bordered > thead > tr > td,
+    .table-bordered > thead > tr > th {
         border: 1px solid #f4f4f4;
     }
 
     .form-control:focus {
         border-color: #93a1bb;
         outline: 0;
-        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(147, 161, 187, .6);
-        box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(147, 161, 187, .6);
+        -webkit-box-shadow:
+            inset 0 1px 1px rgba(0, 0, 0, 0.075),
+            0 0 8px rgba(147, 161, 187, 0.6);
+        box-shadow:
+            inset 0 1px 1px rgba(0, 0, 0, 0.075),
+            0 0 8px rgba(147, 161, 187, 0.6);
     }
 
     select.form-control {
@@ -503,7 +519,6 @@ div.dataTables_info {
         line-height: 17px;
     }
 }
-
 
 .dropdown-hover {
     a {
@@ -616,7 +631,8 @@ div.dataTables_info {
                 }
             }
 
-            .btn-reset-filter-item, .btn-remove-filter-item {
+            .btn-reset-filter-item,
+            .btn-remove-filter-item {
                 cursor: pointer;
             }
         }
@@ -660,7 +676,12 @@ div.dataTables_info {
     }
 }
 
-.table-striped > thead > tr > th, .table-striped > tbody > tr > th, .table-striped > tfoot > tr > th, .table-striped > thead > tr > td, .table-striped > tbody > tr > td, .table-striped > tfoot > tr > td {
+.table-striped > thead > tr > th,
+.table-striped > tbody > tr > th,
+.table-striped > tfoot > tr > th,
+.table-striped > thead > tr > td,
+.table-striped > tbody > tr > td,
+.table-striped > tfoot > tr > td {
     border: none;
 }
 

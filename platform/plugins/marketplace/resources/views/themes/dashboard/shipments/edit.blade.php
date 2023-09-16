@@ -6,19 +6,21 @@
         <div class="flexbox-grid no-pd-none">
             <div class="flexbox-content">
                 @include('plugins/ecommerce::shipments.products', [
-                        'productEditRouteName' => 'marketplace.vendor.products.edit',
-                        'orderEditRouteName' => 'marketplace.vendor.orders.edit',
-                    ])
+                    'productEditRouteName' => 'marketplace.vendor.products.edit',
+                    'orderEditRouteName' => 'marketplace.vendor.orders.edit',
+                ])
 
                 @include('plugins/ecommerce::shipments.form', [
-                        'updateStatusRouteName' => 'marketplace.vendor.orders.update-shipping-status',
-                        'updateCodStatusRouteName' => 'marketplace.vendor.shipments.update-cod-status',
-                    ])
+                    'updateStatusRouteName' => 'marketplace.vendor.orders.update-shipping-status',
+                    'updateCodStatusRouteName' => 'marketplace.vendor.shipments.update-cod-status',
+                ])
 
                 @include('plugins/ecommerce::shipments.histories')
             </div>
 
-            @include('plugins/ecommerce::shipments.information', ['orderEditRouteName' => 'marketplace.vendor.orders.edit'])
+            @include('plugins/ecommerce::shipments.information', [
+                'orderEditRouteName' => 'marketplace.vendor.orders.edit',
+            ])
         </div>
     </div>
 

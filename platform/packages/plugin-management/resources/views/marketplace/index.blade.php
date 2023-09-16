@@ -1,7 +1,10 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
 
 @section('content')
-    <div class="card" id="marketplace">
+    <div
+        class="card"
+        id="marketplace"
+    >
         <marketplace-plugins></marketplace-plugins>
     </div>
 @stop
@@ -26,4 +29,3 @@
         };
     </script>
 @endpush
-

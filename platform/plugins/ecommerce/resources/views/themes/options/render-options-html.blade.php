@@ -10,7 +10,7 @@
         $price = 0;
         $totalOptionValue = count($optionValue);
     @endphp
-    @continue(! $totalOptionValue)
+    @continue(!$totalOptionValue)
     <div class="small d-flex justify-content-between">
         <span>
             {{ $productOptions['optionInfo'][$key] }}:
@@ -25,7 +25,9 @@
                     }
                 @endphp
                 <strong>{{ $value['option_value'] }}</strong>
-                @if ($key + 1 < $totalOptionValue) , @endif
+                @if ($key + 1 < $totalOptionValue)
+                    ,
+                @endif
             @endforeach
         </span>
         @if ($price > 0)

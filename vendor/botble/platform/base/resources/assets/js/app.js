@@ -1,13 +1,7 @@
-import Axios from 'axios'
+import { axios, HttpClient } from './utilities'
 
 window._ = require('lodash')
 
-const axios = Axios.create({
-    baseURL: window.location.origin,
-    headers: {
-        'X-Requested-With': 'XMLHttpRequest',
-    },
-    withCredentials: true,
-})
-
 window.axios = axios
+
+window.$httpClient = new HttpClient()

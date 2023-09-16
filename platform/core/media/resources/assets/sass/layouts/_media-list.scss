@@ -1,5 +1,5 @@
 /*Table*/
-@use "sass:math";
+@use 'sass:math';
 
 .rv-media-list {
     border-bottom: 1px solid $color-lighter-black;
@@ -142,13 +142,15 @@
             }
         }
 
-        input[type=checkbox]:checked + .rv-media-item {
+        input[type='checkbox']:checked + .rv-media-item {
             .media-item-selected {
                 display: block;
             }
 
             &:after {
-                box-shadow: -2px -2px 0px $color-secondary inset, 2px 2px 0px $color-secondary inset;
+                box-shadow:
+                    -2px -2px 0px $color-secondary inset,
+                    2px 2px 0px $color-secondary inset;
             }
 
             .rv-media-description {
@@ -207,7 +209,10 @@
         margin: 0 !important;
         text-align: center;
 
-        .fa, .fas, .far, .fab {
+        .fa,
+        .fas,
+        .far,
+        .fab {
             font-size: 150px;
             line-height: 1;
             margin-bottom: 20px;
@@ -226,18 +231,18 @@
         display: none !important;
     }
 
-    .rv-media-container[data-breadcrumb-count="0"] &,
-    .rv-media-container[data-breadcrumb-count="1"] & {
+    .rv-media-container[data-breadcrumb-count='0'] &,
+    .rv-media-container[data-breadcrumb-count='1'] & {
         li.up-one-level {
             display: none !important;
         }
     }
 
-    .rv-media-container:not([data-view-in="all_media"]) & li.no-items {
+    .rv-media-container:not([data-view-in='all_media']) & li.no-items {
         @include lib-css(pointer-events, none);
     }
 
-    .rv-media-container[data-view-in="all_media"] & li.no-items {
+    .rv-media-container[data-view-in='all_media'] & li.no-items {
         width: 400px;
         height: 400px;
         border-radius: 50% !important;

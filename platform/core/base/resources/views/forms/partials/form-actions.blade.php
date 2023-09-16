@@ -10,13 +10,23 @@
     <div class="widget-body">
         <div class="btn-set">
             @php do_action(BASE_ACTION_FORM_ACTIONS, 'default') @endphp
-            @if (!isset($onlySave) || ! $onlySave)
-                <button type="submit" name="submit" value="save" class="btn btn-info">
+            @if (!isset($onlySave) || !$onlySave)
+                <button
+                    class="btn btn-info"
+                    name="submit"
+                    type="submit"
+                    value="save"
+                >
                     <i class="{{ $saveIcon ?? 'fa fa-save' }}"></i> {{ $saveTitle ?? trans('core/base::forms.save') }}
                 </button>
             @endif
             &nbsp;
-            <button type="submit" name="submit" value="apply" class="btn btn-success">
+            <button
+                class="btn btn-success"
+                name="submit"
+                type="submit"
+                value="apply"
+            >
                 <i class="fa fa-check-circle"></i> {{ trans('core/base::forms.save_and_continue') }}
             </button>
 
@@ -30,13 +40,23 @@
     <div class="btn-set">
         @php do_action(BASE_ACTION_FORM_ACTIONS, 'fixed-top') @endphp
         @if (!isset($onlySave) || !$onlySave)
-            <button type="submit" name="submit" value="save" class="btn btn-info">
+            <button
+                class="btn btn-info"
+                name="submit"
+                type="submit"
+                value="save"
+            >
                 <i class="{{ $saveIcon ?? 'fa fa-save' }}"></i> {{ $saveTitle ?? trans('core/base::forms.save') }}
             </button>
         @endif
 
         &nbsp;
-        <button type="submit" name="submit" value="apply" class="btn btn-success">
+        <button
+            class="btn btn-success"
+            name="submit"
+            type="submit"
+            value="apply"
+        >
             <i class="fa fa-check-circle"></i> {{ trans('core/base::forms.save_and_continue') }}
         </button>
 

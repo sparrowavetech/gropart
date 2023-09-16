@@ -2,18 +2,25 @@
 
 namespace Botble\Ecommerce\Forms;
 
-use BaseHelper;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Enums\CustomerStatusEnum;
 use Botble\Ecommerce\Http\Requests\CustomerCreateRequest;
 use Botble\Ecommerce\Models\Customer;
+use Carbon\Carbon;
 
 class CustomerForm extends FormAbstract
 {
-    protected $template = 'core/base::forms.form-tabs';
+    protected $template = 'plugins/ecommerce::customers.form';
 
-    public function buildForm()
+    public function buildForm(): void
     {
+        Assets::addScriptsDirectly('vendor/core/plugins/ecommerce/js/address.js')
+            ->addScriptsDirectly('vendor/core/plugins/location/js/location.js')
+            ->addStylesDirectly('vendor/core/plugins/ecommerce/css/customer-admin.css')
+            ->addStylesDirectly('vendor/core/plugins/ecommerce/css/review.css');
+
         $this
             ->setupModel(new Customer())
             ->setValidatorClass(CustomerCreateRequest::class)
@@ -45,10 +52,7 @@ class CustomerForm extends FormAbstract
             ->add('dob', 'datePicker', [
                 'label' => trans('plugins/ecommerce::customer.dob'),
                 'label_attr' => ['class' => 'control-label'],
-                'attr' => [
-                    'data-date-format' => config('core.base.general.date_format.js.date'),
-                ],
-                'default_value' => BaseHelper::formatDate(now()),
+                'default_value' => BaseHelper::formatDate(Carbon::now()),
             ])
             ->add('is_change_password', 'checkbox', [
                 'label' => trans('plugins/ecommerce::customer.change_password'),
@@ -62,7 +66,8 @@ class CustomerForm extends FormAbstract
                     'data-counter' => 60,
                 ],
                 'wrapper' => [
-                    'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ($this->getModel()->id ? ' hidden' : null),
+                    'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ($this->getModel(
+                    )->id ? ' hidden' : null),
                 ],
             ])
             ->add('password_confirmation', 'password', [
@@ -72,7 +77,8 @@ class CustomerForm extends FormAbstract
                     'data-counter' => 60,
                 ],
                 'wrapper' => [
-                    'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ($this->getModel()->id ? ' hidden' : null),
+                    'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ($this->getModel(
+                    )->id ? ' hidden' : null),
                 ],
             ])
             ->add('status', 'customSelect', [
@@ -85,5 +91,27 @@ class CustomerForm extends FormAbstract
                 'label_attr' => ['class' => 'control-label'],
             ])
             ->setBreakFieldPoint('status');
+
+        if ($this->getModel()->id) {
+            $this
+                ->addMetaBoxes([
+                    'addresses' => [
+                        'title' => trans('plugins/ecommerce::addresses.addresses'),
+                        'content' => view('plugins/ecommerce::customers.addresses.addresses', [
+                            'addresses' => $this->model->addresses()->get(),
+                        ])->render(),
+                        'wrap' => true,
+                    ],
+                ])
+                ->addMetaBoxes([
+                    'payments' => [
+                        'title' => trans('plugins/ecommerce::payment.name'),
+                        'content' => view('plugins/ecommerce::customers.payments.payments', [
+                            'payments' => $this->model->payments()->get(),
+                        ])->render(),
+                        'wrap' => true,
+                    ],
+                ]);
+        }
     }
 }

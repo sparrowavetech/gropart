@@ -1,6 +1,6 @@
 class OrderIncompleteManagement {
     init() {
-        $(document).on('click', '.btn-update-order', event => {
+        $(document).on('click', '.btn-update-order', (event) => {
             event.preventDefault()
             let _self = $(event.currentTarget)
 
@@ -11,7 +11,7 @@ class OrderIncompleteManagement {
                 cache: false,
                 url: _self.closest('form').prop('action'),
                 data: _self.closest('form').serialize(),
-                success: res => {
+                success: (res) => {
                     if (!res.error) {
                         Botble.showSuccess(res.message)
                     } else {
@@ -19,27 +19,27 @@ class OrderIncompleteManagement {
                     }
                     _self.removeClass('button-loading')
                 },
-                error: res => {
+                error: (res) => {
                     Botble.handleError(res)
                     _self.removeClass('button-loading')
                 },
             })
         })
 
-        $(document).on('click', '.btn-trigger-send-order-recover-modal', event => {
+        $(document).on('click', '.btn-trigger-send-order-recover-modal', (event) => {
             event.preventDefault()
             $('#confirm-send-recover-email-button').data('action', $(event.currentTarget).data('action'))
             $('#send-order-recover-email-modal').modal('show')
         })
 
-        $(document).on('click', '.btn-mark-order-as-completed-modal', event => {
+        $(document).on('click', '.btn-mark-order-as-completed-modal', (event) => {
             event.preventDefault()
 
             $('#confirm-mark-as-completed-button').data('action', $(event.currentTarget).data('action'))
             $('#mark-order-as-completed-modal').modal('show')
         })
 
-        $(document).on('click', '#confirm-send-recover-email-button', event => {
+        $(document).on('click', '#confirm-send-recover-email-button', (event) => {
             event.preventDefault()
             let _self = $(event.currentTarget)
 
@@ -49,7 +49,7 @@ class OrderIncompleteManagement {
                 type: 'POST',
                 cache: false,
                 url: _self.data('action'),
-                success: res => {
+                success: (res) => {
                     if (!res.error) {
                         Botble.showSuccess(res.message)
                     } else {
@@ -58,14 +58,14 @@ class OrderIncompleteManagement {
                     _self.removeClass('button-loading')
                     $('#send-order-recover-email-modal').modal('hide')
                 },
-                error: res => {
+                error: (res) => {
                     Botble.handleError(res)
                     _self.removeClass('button-loading')
                 },
             })
         })
 
-        $(document).on('click', '#confirm-mark-as-completed-button', event => {
+        $(document).on('click', '#confirm-mark-as-completed-button', (event) => {
             event.preventDefault()
 
             const button = $(event.currentTarget)
@@ -87,7 +87,7 @@ class OrderIncompleteManagement {
                     Botble.showSuccess(message)
 
                     if (data.next_url) {
-                        setTimeout(() => window.location.href = data.next_url, 2000)
+                        setTimeout(() => (window.location.href = data.next_url), 2000)
                     }
                 },
                 error: (error) => {
@@ -95,7 +95,7 @@ class OrderIncompleteManagement {
                 },
                 completed: () => {
                     button.removeClass('button-loading')
-                }
+                },
             })
         })
     }

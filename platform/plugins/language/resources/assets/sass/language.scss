@@ -1,7 +1,9 @@
 .table-language {
     background: #f1f1f1;
 
-    thead, tbody, tr {
+    thead,
+    tbody,
+    tr {
         width: 100% !important;
     }
 
@@ -10,7 +12,8 @@
         color: #ffffff !important;
     }
 
-    th, td {
+    th,
+    td {
         text-align: center;
     }
 
@@ -31,7 +34,8 @@
     }
 }
 
-#btn-language-submit, #btn-language-submit-edit {
+#btn-language-submit,
+#btn-language-submit-edit {
     margin: 10px 0;
 }
 
@@ -72,6 +76,6 @@
 
     &.button-loading:before {
         border-color: #ffffff;
-        border-bottom-color: transparent
+        border-bottom-color: transparent;
     }
 }

@@ -64,38 +64,38 @@
 }
 
 .btn-facebook {
-    background-color: #405D9D;
+    background-color: #405d9d;
     color: #fff;
 
     &:hover {
-        color: #fff
+        color: #fff;
     }
 }
 
 .btn-instagram {
-    background-color: #E52D27;
+    background-color: #e52d27;
     color: #fff;
 
     &:hover {
-        color: #fff
+        color: #fff;
     }
 }
 
 .btn-youtube {
-    background-color: #C8046C;
+    background-color: #c8046c;
     color: #fff;
 
     &:hover {
-        color: #fff
+        color: #fff;
     }
 }
 
 .btn-twitter {
-    background-color: #42AEEC;
+    background-color: #42aeec;
     color: #fff;
 
     &:hover {
-        color: #fff
+        color: #fff;
     }
 }
 
@@ -104,7 +104,7 @@
     color: #fff;
 
     &:hover {
-        color: #fff
+        color: #fff;
     }
 }
 
@@ -114,7 +114,7 @@
     padding-right: 0.5em;
 
     &:hover {
-        background-color: rgba($gray-600, .15);
+        background-color: rgba($gray-600, 0.15);
     }
 
     &:focus {
@@ -140,7 +140,6 @@
     i {
         color: $gray-500;
     }
-
 }
 
 .rounded {
@@ -174,7 +173,8 @@
     }
 }
 
-.btn-check:focus + .btn, .btn:focus {
+.btn-check:focus + .btn,
+.btn:focus {
     outline: 0;
     -webkit-box-shadow: none;
     box-shadow: none;

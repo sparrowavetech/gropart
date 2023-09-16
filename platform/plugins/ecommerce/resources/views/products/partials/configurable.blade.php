@@ -1,17 +1,32 @@
 <div id="product-variations-wrapper">
     <div class="variation-actions">
-        <a href="#" class="btn-trigger-delete-selected-variations text-danger" style="display: none" data-target="{{ route('products.delete-versions') }}">{{ trans('plugins/ecommerce::products.delete_selected_variations') }}</a>
-        <a href="#" class="btn-trigger-select-product-attributes" data-target="{{ route('products.store-related-attributes', $product->id) }}">{{ trans('plugins/ecommerce::products.edit_attribute') }}</a>
-        <a href="#" class="btn-trigger-generate-all-versions" data-target="{{ route('products.generate-all-versions', $product->id) }}">{{ trans('plugins/ecommerce::products.generate_all_variations') }}</a>
+        <a
+            class="btn-trigger-delete-selected-variations text-danger"
+            data-target="{{ route('products.delete-versions') }}"
+            href="#"
+            style="display: none"
+        >{{ trans('plugins/ecommerce::products.delete_selected_variations') }}</a>
+        <a
+            class="btn-trigger-select-product-attributes"
+            data-target="{{ route('products.store-related-attributes', $product->id) }}"
+            href="#"
+        >{{ trans('plugins/ecommerce::products.edit_attribute') }}</a>
+        <a
+            class="btn-trigger-generate-all-versions"
+            data-target="{{ route('products.generate-all-versions', $product->id) }}"
+            href="#"
+        >{{ trans('plugins/ecommerce::products.generate_all_variations') }}</a>
     </div>
 
     {!! $productVariationTable->renderTable() !!}
 
     <br>
-    <a href="#" class="btn-trigger-add-new-product-variation"
-       data-target="{{ route('products.add-version', $product->id) }}"
-       data-load-form="{{ route('products.get-version-form', ['id' => 0, 'product_id' => $product->id]) }}"
-       data-processing="{{ trans('plugins/ecommerce::products.processing') }}"
+    <a
+        class="btn-trigger-add-new-product-variation"
+        data-target="{{ route('products.add-version', $product->id) }}"
+        data-load-form="{{ route('products.get-version-form', ['id' => 0, 'product_id' => $product->id]) }}"
+        data-processing="{{ trans('plugins/ecommerce::products.processing') }}"
+        href="#"
     >{{ trans('plugins/ecommerce::products.add_new_variation') }}</a>
 </div>
 
@@ -56,8 +71,8 @@
 
     <x-core-base::modal
         id="confirm-delete-version-modal"
-        :title="trans('plugins/ecommerce::products.delete_variation')"
         type="danger"
+        :title="trans('plugins/ecommerce::products.delete_variation')"
         button-id="delete-version-button"
         :button-label="trans('plugins/ecommerce::products.continue')"
     >
@@ -66,8 +81,8 @@
 
     <x-core-base::modal
         id="delete-variations-modal"
-        :title="trans('plugins/ecommerce::products.delete_variations')"
         type="danger"
+        :title="trans('plugins/ecommerce::products.delete_variations')"
         button-id="delete-selected-variations-button"
         :button-label="trans('plugins/ecommerce::products.continue')"
     >

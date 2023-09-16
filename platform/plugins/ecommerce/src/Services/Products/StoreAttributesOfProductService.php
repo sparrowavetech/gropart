@@ -3,24 +3,17 @@
 namespace Botble\Ecommerce\Services\Products;
 
 use Botble\Ecommerce\Models\Product;
-use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductVariationInterface;
+use Botble\Ecommerce\Models\ProductAttribute;
+use Botble\Ecommerce\Models\ProductVariation;
 
 class StoreAttributesOfProductService
 {
-    public function __construct(
-        protected ProductAttributeInterface $productAttributeRepository,
-        protected ProductVariationInterface $productVariationRepository
-    ) {
-    }
-
     public function execute(Product $product, array $attributeSets, array $attributes = []): Product
     {
         $product->productAttributeSets()->sync($attributeSets);
 
         if (! $attributes) {
-            $attributes = $this->productAttributeRepository
-                ->getModel()
+            $attributes = ProductAttribute::query()
                 ->whereIn('attribute_set_id', $attributeSets)
                 ->pluck('id')
                 ->all();
@@ -28,7 +21,7 @@ class StoreAttributesOfProductService
             $attributes = $this->getSelectedAttributes($product, $attributes);
         }
 
-        $this->productVariationRepository->correctVariationItems($product->getKey(), $attributes);
+        ProductVariation::correctVariationItems($product->getKey(), $attributes);
 
         return $product;
     }
@@ -40,12 +33,10 @@ class StoreAttributesOfProductService
             ->pluck('attribute_set_id')
             ->toArray();
 
-        $allRelatedAttributeBySet = $this->productAttributeRepository
-            ->allBy([
-                ['attribute_set_id', 'IN', $attributeSets],
-            ], [], ['id'])
+        $allRelatedAttributeBySet = ProductAttribute::query()
+            ->whereIn('attribute_set_id', $attributeSets)
             ->pluck('id')
-            ->toArray();
+            ->all();
 
         $newAttributes = [];
 

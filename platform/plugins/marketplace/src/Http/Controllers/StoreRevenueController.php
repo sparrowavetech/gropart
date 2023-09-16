@@ -9,8 +9,8 @@ use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Marketplace\Enums\RevenueTypeEnum;
 use Botble\Marketplace\Http\Requests\StoreRevenueRequest;
-use Botble\Marketplace\Repositories\Interfaces\RevenueInterface;
-use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
+use Botble\Marketplace\Models\Revenue;
+use Botble\Marketplace\Models\Store;
 use Botble\Marketplace\Tables\StoreRevenueTable;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -19,10 +19,6 @@ use Throwable;
 
 class StoreRevenueController extends BaseController
 {
-    public function __construct(protected StoreInterface $storeRepository, protected RevenueInterface $revenueRepository)
-    {
-    }
-
     public function index(StoreRevenueTable $table)
     {
         return $table->renderTable();
@@ -30,7 +26,7 @@ class StoreRevenueController extends BaseController
 
     public function view(int|string $id, StoreRevenueTable $table)
     {
-        $store = $this->storeRepository->findOrFail($id);
+        $store = Store::query()->findOrFail($id);
         $customer = $store->customer;
 
         if (! $customer->id) {
@@ -46,7 +42,7 @@ class StoreRevenueController extends BaseController
 
     public function store(int|string $id, StoreRevenueRequest $request, BaseHttpResponse $response)
     {
-        $store = $this->storeRepository->findOrFail($id);
+        $store = Store::query()->findOrFail($id);
 
         $customer = $store->customer;
 
@@ -56,7 +52,6 @@ class StoreRevenueController extends BaseController
 
         $vendorInfo = $customer->vendorInfo;
 
-        $revenue = $this->revenueRepository->getModel();
         $amount = $request->input('amount');
         $data = [
             'fee' => 0,
@@ -82,8 +77,8 @@ class StoreRevenueController extends BaseController
         try {
             DB::beginTransaction();
 
-            $revenue->fill($data);
-            $revenue->save();
+            Revenue::query()->create($data);
+
             $vendorInfo->save();
 
             DB::commit();

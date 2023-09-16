@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Botble\Base\Facades\PageTitle;
 use Botble\Ecommerce\Facades\InvoiceHelper;
 use Botble\Ecommerce\Models\Invoice;
-use Botble\Ecommerce\Repositories\Interfaces\InvoiceInterface;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Http\Request;
@@ -25,9 +24,9 @@ class InvoiceController extends Controller
         return '';
     }
 
-    public function show($id, InvoiceInterface $invoiceRepository)
+    public function show($id)
     {
-        $invoice = $invoiceRepository->findOrFail($id);
+        $invoice = Invoice::query()->findOrFail($id);
 
         abort_unless($this->canViewInvoice($invoice), 404);
 
@@ -44,9 +43,9 @@ class InvoiceController extends Controller
         )->render();
     }
 
-    public function getGenerateInvoice(int|string $invoiceId, Request $request, InvoiceInterface $invoiceRepository)
+    public function getGenerateInvoice(int|string $invoiceId, Request $request)
     {
-        $invoice = $invoiceRepository->findOrFail($invoiceId);
+        $invoice = Invoice::query()->findOrFail($invoiceId);
 
         abort_unless($this->canViewInvoice($invoice), 404);
 

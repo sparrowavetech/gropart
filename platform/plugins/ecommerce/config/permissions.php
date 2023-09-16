@@ -41,6 +41,11 @@ return [
         'flag' => 'products.destroy',
         'parent_flag' => 'products.index',
     ],
+    [
+        'name' => 'Duplicate',
+        'flag' => 'products.duplicate',
+        'parent_flag' => 'products.index',
+    ],
     /**
      * Categories
      */
@@ -209,6 +214,11 @@ return [
         'flag' => 'reviews.destroy',
         'parent_flag' => 'reviews.index',
     ],
+    [
+        'name' => 'Publish/Unpublish Review',
+        'flag' => 'reviews.publish',
+        'parent_flag' => 'reviews.index',
+    ],
 
     [
         'name' => 'Shipping',
@@ -367,8 +377,8 @@ return [
     ],
 
     [
-        'name' => 'Bulk Import Products',
-        'flag' => 'ecommerce.bulk-import.index',
+        'name' => 'Import Products',
+        'flag' => 'ecommerce.import.products.index',
         'parent_flag' => 'plugins.ecommerce',
     ],
 
@@ -438,15 +448,5 @@ return [
         'name' => 'Invoice Template',
         'flag' => 'ecommerce.invoice-template.index',
         'parent_flag' => 'plugins.ecommerce',
-    ],
-    [
-        'name' => 'Enquiry',
-        'flag' => 'ecommerce.enquires.index',
-        'parent_flag' => 'plugins.ecommerce',
-    ],
-    [
-        'name' => 'Edit',
-        'flag' => 'ecommerce.enquires.edit',
-        'parent_flag' => 'ecommerce.enquires.index',
     ],
 ];

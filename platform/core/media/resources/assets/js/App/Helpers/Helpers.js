@@ -166,7 +166,7 @@ export class Helpers {
     }
 
     static each(array, callback) {
-        return _.each(array, callback);
+        return _.each(array, callback)
     }
 
     static forEach(array, callback) {
@@ -194,6 +194,6 @@ export class Helpers {
     }
 
     static size(item) {
-        return _.size(item);
+        return _.size(item)
     }
 }

@@ -1,7 +1,7 @@
 'use strict'
 
-$(document).ready(function() {
-    $(document).on('click', '.btn-payout-button', event => {
+$(document).ready(function () {
+    $(document).on('click', '.btn-payout-button', (event) => {
         event.preventDefault()
         event.stopPropagation()
 
@@ -12,7 +12,7 @@ $(document).ready(function() {
         $.ajax({
             type: 'POST',
             url: $this.prop('href'),
-            success: res => {
+            success: (res) => {
                 if (!res.error) {
                     Botble.showSuccess(res.message)
 
@@ -25,7 +25,7 @@ $(document).ready(function() {
 
                 $this.removeClass('button-loading')
             },
-            error: res => {
+            error: (res) => {
                 $this.removeClass('button-loading')
                 Botble.handleError(res)
             },
@@ -38,14 +38,14 @@ $(document).ready(function() {
         $.ajax({
             type: 'GET',
             url: $transactionDetail.data('url'),
-            success: res => {
+            success: (res) => {
                 if (!res.error) {
                     $transactionDetail.html(res.data.html)
                 } else {
                     $transactionDetail.html('')
                 }
             },
-            error: res => {
+            error: (res) => {
                 console.log(res)
             },
         })

@@ -2,35 +2,26 @@
 
 namespace Botble\Ecommerce\Listeners;
 
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
-use Botble\Ecommerce\Repositories\Interfaces\BrandInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductCategoryInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductTagInterface;
+use Botble\Ecommerce\Models\Brand;
+use Botble\Ecommerce\Models\Product;
+use Botble\Ecommerce\Models\ProductCategory;
+use Botble\Ecommerce\Models\ProductTag;
 use Botble\Theme\Events\RenderingSiteMapEvent;
 use Botble\Theme\Facades\SiteMapManager;
 use Illuminate\Support\Arr;
 
 class RenderingSiteMapListener
 {
-    public function __construct(
-        protected ProductInterface $productRepository,
-        protected ProductCategoryInterface $productCategoryRepository,
-        protected BrandInterface $brandRepository,
-        protected ProductTagInterface $tagRepository
-    ) {
-    }
-
     public function handle(RenderingSiteMapEvent $event): void
     {
         if ($key = $event->key) {
             switch ($key) {
                 case 'product-tags':
-                    $tags = $this->tagRepository->getModel()
+                    $tags = ProductTag::query()
                         ->with('slugable')
-                        ->where('status', BaseStatusEnum::PUBLISHED)
-                        ->orderBy('created_at', 'desc')
+                        ->wherePublished()
+                        ->orderByDesc('created_at')
                         ->select(['id', 'name', 'updated_at'])
                         ->get();
 
@@ -44,10 +35,10 @@ class RenderingSiteMapListener
 
                     break;
                 case 'product-categories':
-                    $productCategories = $this->productCategoryRepository->getModel()
+                    $productCategories = ProductCategory::query()
                         ->with('slugable')
-                        ->where('status', BaseStatusEnum::PUBLISHED)
-                        ->orderBy('created_at', 'desc')
+                        ->wherePublished()
+                        ->orderByDesc('created_at')
                         ->select(['id', 'name', 'updated_at'])
                         ->get();
 
@@ -61,10 +52,10 @@ class RenderingSiteMapListener
 
                     break;
                 case 'product-brands':
-                    $brands = $this->brandRepository->getModel()
+                    $brands = Brand::query()
                         ->with('slugable')
-                        ->where('status', BaseStatusEnum::PUBLISHED)
-                        ->orderBy('created_at', 'desc')
+                        ->wherePublished()
+                        ->orderByDesc('created_at')
                         ->select(['id', 'name', 'updated_at'])
                         ->get();
 
@@ -88,13 +79,13 @@ class RenderingSiteMapListener
 
             if (preg_match('/^products-((?:19|20|21|22)\d{2})-(0?[1-9]|1[012])$/', $key, $matches)) {
                 if (($year = Arr::get($matches, 1)) && ($month = Arr::get($matches, 2))) {
-                    $products = $this->productRepository->getModel()
+                    $products = Product::query()
                         ->with('slugable')
-                        ->where('status', BaseStatusEnum::PUBLISHED)
+                        ->wherePublished()
                         ->where('is_variation', 0)
                         ->whereYear('updated_at', $year)
                         ->whereMonth('updated_at', $month)
-                        ->orderBy('updated_at', 'desc')
+                        ->orderByDesc('updated_at')
                         ->select(['id', 'name', 'updated_at'])
                         ->get();
 
@@ -108,39 +99,45 @@ class RenderingSiteMapListener
                 }
             }
         } else {
-            $products = $this->productRepository->getModel()
-                ->selectRaw('YEAR(updated_at) as updated_year, MONTH(updated_at) as updated_month, MAX(updated_at) as updated_at')
+            $products = Product::query()
+                ->selectRaw(
+                    'YEAR(updated_at) as updated_year, MONTH(updated_at) as updated_month, MAX(updated_at) as updated_at'
+                )
                 ->where('is_variation', 0)
                 ->groupBy('updated_year', 'updated_month')
-                ->orderBy('updated_year', 'desc')
-                ->orderBy('updated_month', 'desc')
+                ->orderByDesc('updated_year')
+                ->orderByDesc('updated_month')
                 ->get();
 
             foreach ($products as $product) {
-                $key = sprintf('products-%s-%s', $product->updated_year, str_pad($product->updated_month, 2, '0', STR_PAD_LEFT));
+                $key = sprintf(
+                    'products-%s-%s',
+                    $product->updated_year,
+                    str_pad($product->updated_month, 2, '0', STR_PAD_LEFT)
+                );
                 SiteMapManager::addSitemap(SiteMapManager::route($key), $product->updated_at);
             }
 
-            $productCategory = $this->productCategoryRepository->getModel()
-                    ->selectRaw('MAX(updated_at) as updated_at')
-                    ->where('status', BaseStatusEnum::PUBLISHED)
-                    ->first();
+            $productCategory = ProductCategory::query()
+                ->selectRaw('MAX(updated_at) as updated_at')
+                ->wherePublished()
+                ->first();
             if ($productCategory) {
                 SiteMapManager::addSitemap(SiteMapManager::route('product-categories'), $productCategory->updated_at);
             }
 
-            $brand = $this->brandRepository->getModel()
-                    ->selectRaw('MAX(updated_at) as updated_at')
-                    ->where('status', BaseStatusEnum::PUBLISHED)
-                    ->first();
+            $brand = Brand::query()
+                ->selectRaw('MAX(updated_at) as updated_at')
+                ->wherePublished()
+                ->first();
             if ($brand) {
                 SiteMapManager::addSitemap(SiteMapManager::route('product-brands'), $brand->updated_at);
             }
 
-            $productTag = $this->tagRepository->getModel()
-                    ->selectRaw('MAX(updated_at) as updated_at')
-                    ->where('status', BaseStatusEnum::PUBLISHED)
-                    ->first();
+            $productTag = ProductTag::query()
+                ->selectRaw('MAX(updated_at) as updated_at')
+                ->wherePublished()
+                ->first();
             if ($productTag) {
                 SiteMapManager::addSitemap(SiteMapManager::route('product-tags'), $productTag->updated_at);
             }

@@ -21,8 +21,10 @@
         right: 0;
         width: 100px;
         height: 100%;
-        box-shadow: 0 0 10px #2299dd, 0 0 5px #2299dd;
-        opacity: 1.0;
+        box-shadow:
+            0 0 10px #2299dd,
+            0 0 5px #2299dd;
+        opacity: 1;
         -webkit-transform: rotate(3deg) translate(0px, -4px);
         -moz-transform: rotate(3deg) translate(0px, -4px);
         -ms-transform: rotate(3deg) translate(0px, -4px);

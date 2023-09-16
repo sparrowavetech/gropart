@@ -6,10 +6,5 @@ use Botble\Support\Repositories\Interfaces\RepositoryInterface;
 
 interface ProductCollectionInterface extends RepositoryInterface
 {
-    /**
-     * @param string $name
-     * @param int $id
-     * @return mixed
-     */
-    public function createSlug($name, $id);
+    public function createSlug(string $name, int|string|null $id): string;
 }

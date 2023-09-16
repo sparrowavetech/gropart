@@ -1628,7 +1628,7 @@ small.charcounter {
 
 .breadcrumb > li:first-child:before {
   content: "\f015";
-  font: normal normal normal 14px/1 Font Awesome\ 5 Free;
+  font: normal normal normal 14px/1 'Font Awesome 6 Free';
   font-weight: 900;
   display: inline-block;
   padding-right: 4px;

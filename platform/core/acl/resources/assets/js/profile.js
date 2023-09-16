@@ -188,32 +188,16 @@ class CropAvatar {
     }
 
     ajaxUpload() {
-        let url = this.$avatarForm.attr('action'),
-            data = new FormData(this.$avatarForm[0]),
-            _this = this
+        let url = this.$avatarForm.attr('action')
+        const data = new FormData(this.$avatarForm[0])
 
-        $.ajax(url, {
-            type: 'POST',
-            data: data,
-            processData: false,
-            contentType: false,
+        this.submitStart()
 
-            beforeSend: () => {
-                _this.submitStart()
-            },
-
-            success: (data) => {
-                _this.submitDone(data)
-            },
-
-            error: (errors) => {
-                Botble.handleError(errors)
-            },
-
-            complete: () => {
-                _this.submitEnd()
-            },
-        })
+        $httpClient
+            .make()
+            .post(url, data)
+            .then((response) => this.submitDone(response.data))
+            .finally(() => this.submitEnd())
     }
 
     syncUpload() {

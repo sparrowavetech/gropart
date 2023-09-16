@@ -47,7 +47,7 @@
     }
 
     .menu-link:hover {
-        transition: .2s linear;
+        transition: 0.2s linear;
         background-color: $gray-200;
     }
 
@@ -69,7 +69,7 @@
             }
 
             &:before {
-                content: "";
+                content: '';
                 width: 5px;
                 height: 5px;
                 position: absolute;
@@ -92,17 +92,15 @@
         position: absolute;
         right: 10px;
         top: 15px;
-        margin-top: .6em;
+        margin-top: 0.6em;
         vertical-align: middle;
-        content: "";
+        content: '';
         border-top: 5px solid $gray-500;
         border-right: 5px solid transparent;
         border-bottom: 0;
         border-left: 5px solid transparent;
     }
-
 }
-
 
 /// override bootstrap nav-pills
 .nav-pills {
@@ -112,7 +110,7 @@
 
         &:hover {
             color: $dark;
-            background-color: rgba($gray-500, .15);
+            background-color: rgba($gray-500, 0.15);
         }
     }
 }
@@ -138,13 +136,13 @@
             }
         }
 
-        &.active, &:hover {
+        &.active,
+        &:hover {
             .page-link {
                 color: #fff;
                 background: $brand;
             }
         }
-
 
         .page-link {
             border: 0;
@@ -180,7 +178,8 @@
     }
 }
 
-.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link {
     color: $brand;
     background-color: $primary-light;
 }

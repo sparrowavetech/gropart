@@ -4,7 +4,7 @@ namespace Botble\Marketplace\Widgets;
 
 use Botble\Base\Widgets\Html;
 use Botble\Marketplace\Enums\RevenueTypeEnum;
-use Botble\Marketplace\Repositories\Interfaces\RevenueInterface;
+use Botble\Marketplace\Models\Revenue;
 use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
@@ -18,8 +18,7 @@ class SaleCommissionHtml extends Html
             'endDate' => $this->endDate,
         ]);
 
-        $revenues = app(RevenueInterface::class)
-            ->getModel()
+        $revenues = Revenue::query()
             ->selectRaw('DATE(created_at) AS date, SUM(COALESCE(fee, 0)) as total_fee, SUM(COALESCE(amount, 0)) as total_amount')
             ->whereDate('created_at', '>=', $this->startDate)
             ->whereDate('created_at', '<=', $this->endDate)

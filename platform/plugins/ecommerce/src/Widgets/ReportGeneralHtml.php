@@ -3,7 +3,7 @@
 namespace Botble\Ecommerce\Widgets;
 
 use Botble\Base\Widgets\Html;
-use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
+use Botble\Ecommerce\Models\Order;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Arr;
@@ -22,8 +22,7 @@ class ReportGeneralHtml extends Html
             'endDate' => $this->endDate,
         ];
 
-        $revenues = app(OrderInterface::class)
-            ->getModel()
+        $revenues = Order::query()
             ->select([
                 DB::raw('SUM(COALESCE(payments.amount, 0) - COALESCE(payments.refunded_amount, 0)) as revenue'),
                 'payments.status',
@@ -53,7 +52,7 @@ class ReportGeneralHtml extends Html
             ],
         ];
 
-        $revenues = app(OrderInterface::class)->getRevenueData($this->startDate, $this->endDate);
+        $revenues = Order::getRevenueData($this->startDate, $this->endDate);
 
         $series = [];
         $dates = [];
@@ -92,6 +91,8 @@ class ReportGeneralHtml extends Html
 
         $salesReport = compact('dates', 'series', 'earningSales', 'colors');
 
-        return view('plugins/ecommerce::reports.widgets.revenues', compact('count', 'salesReport'))->render();
+        $revenues = fn (string $key): array => collect($count['revenues'])->pluck($key)->toArray();
+
+        return view('plugins/ecommerce::reports.widgets.revenues', compact('count', 'salesReport', 'revenues'))->render();
     }
 }

@@ -18,7 +18,7 @@ class CheckoutRequest extends Request
             'amount' => 'required|min:0',
         ];
 
-        if (is_plugin_active('payment')) {
+        if (is_plugin_active('payment') && Cart::instance('cart')->rawTotal()) {
             $paymentMethods = Arr::where(PaymentMethodEnum::values(), function ($value) {
                 return get_payment_setting('status', $value) == 1;
             });

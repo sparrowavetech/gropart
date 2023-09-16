@@ -6,7 +6,12 @@
     </div>
     <div class="widget-body">
         <div class="btn-set">
-            <button type="submit" name="submit" value="save" class="btn btn-info">
+            <button
+                class="btn btn-info"
+                name="submit"
+                type="submit"
+                value="save"
+            >
                 <i class="{{ $saveIcon ?? 'fas fa-money-bill' }}"></i> {{ $saveTitle ?? __('Request') }}
             </button>
         </div>
@@ -15,7 +20,12 @@
 <div id="waypoint"></div>
 <div class="form-actions form-actions-fixed-top hidden">
     <div class="btn-set">
-        <button type="submit" name="submit" value="save" class="btn btn-info">
+        <button
+            class="btn btn-info"
+            name="submit"
+            type="submit"
+            value="save"
+        >
             <i class="{{ $saveIcon ?? 'fas fa-money-bill' }}"></i> {{ $saveTitle ?? __('Request') }}
         </button>
     </div>

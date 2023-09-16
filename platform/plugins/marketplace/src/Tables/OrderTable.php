@@ -5,10 +5,12 @@ namespace Botble\Marketplace\Tables;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Order;
-use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Table\DataTables;
-use Illuminate\Contracts\Routing\UrlGenerator;
+use Botble\Table\Actions\DeleteAction;
+use Botble\Table\Actions\EditAction;
+use Botble\Table\Columns\CreatedAtColumn;
+use Botble\Table\Columns\IdColumn;
+use Botble\Table\Columns\StatusColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -16,25 +18,20 @@ use Illuminate\Http\JsonResponse;
 
 class OrderTable extends TableAbstract
 {
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Order $model)
+    public function setup(): void
     {
-        parent::__construct($table, $urlGenerator);
-
-        $this->model = $model;
-
-        $this->hasCheckbox = false;
+        $this
+            ->model(Order::class)
+            ->addActions([
+                EditAction::make()->route('marketplace.vendor.orders.edit'),
+                DeleteAction::make()->route('marketplace.vendor.orders.destroy'),
+            ]);
     }
 
     public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('checkbox', function ($item) {
-                return $this->getCheckbox($item->id);
-            })
-            ->editColumn('status', function ($item) {
-                return $item->status->toHtml();
-            })
             ->editColumn('payment_status', function ($item) {
                 return $item->payment->status->label() ? BaseHelper::clean($item->payment->status->toHtml()) : '&mdash;';
             })
@@ -49,9 +46,6 @@ class OrderTable extends TableAbstract
             })
             ->editColumn('user_id', function ($item) {
                 return BaseHelper::clean($item->user->name ?: $item->address->name);
-            })
-            ->editColumn('created_at', function ($item) {
-                return BaseHelper::formatDate($item->created_at);
             });
 
         if (EcommerceHelper::isTaxEnabled()) {
@@ -59,15 +53,6 @@ class OrderTable extends TableAbstract
                 return format_price($item->tax_amount);
             });
         }
-
-        $data = $data
-            ->addColumn('operations', function ($item) {
-                return view(MarketplaceHelper::viewPath('dashboard.table.actions'), [
-                    'edit' => 'marketplace.vendor.orders.edit',
-                    'delete' => 'marketplace.vendor.orders.destroy',
-                    'item' => $item,
-                ])->render();
-            });
 
         return $this->toJson($data);
     }
@@ -95,52 +80,36 @@ class OrderTable extends TableAbstract
     public function columns(): array
     {
         $columns = [
-            'id' => [
-                'title' => trans('core/base::tables.id'),
-                'width' => '20px',
-                'class' => 'text-start',
-            ],
+            IdColumn::make(),
             'user_id' => [
                 'title' => trans('plugins/ecommerce::order.customer_label'),
                 'class' => 'text-start',
             ],
             'amount' => [
                 'title' => trans('plugins/ecommerce::order.amount'),
-                'class' => 'text-center',
             ],
         ];
 
         if (EcommerceHelper::isTaxEnabled()) {
             $columns['tax_amount'] = [
                 'title' => trans('plugins/ecommerce::order.tax_amount'),
-                'class' => 'text-center',
             ];
         }
 
         $columns += [
             'shipping_amount' => [
                 'title' => trans('plugins/ecommerce::order.shipping_amount'),
-                'class' => 'text-center',
             ],
             'payment_method' => [
                 'name' => 'payment_id',
                 'title' => trans('plugins/ecommerce::order.payment_method'),
-                'class' => 'text-center',
             ],
             'payment_status' => [
                 'name' => 'payment_id',
                 'title' => trans('plugins/ecommerce::order.payment_status_label'),
-                'class' => 'text-center',
             ],
-            'status' => [
-                'title' => trans('core/base::tables.status'),
-                'class' => 'text-center',
-            ],
-            'created_at' => [
-                'title' => trans('core/base::tables.created_at'),
-                'width' => '100px',
-                'class' => 'text-start',
-            ],
+            'status' => StatusColumn::make(),
+            'created_at' => CreatedAtColumn::make(),
         ];
 
         return $columns;

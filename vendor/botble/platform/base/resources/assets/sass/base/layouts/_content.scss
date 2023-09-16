@@ -54,7 +54,8 @@ Page content
     }
 }
 
-@media (min-width: $screen-md-min) { /* 992px */
+@media (min-width: $screen-md-min) {
+    /* 992px */
 
     /* Page content */
     .page-content-wrapper {
@@ -109,7 +110,8 @@ Page content
     }
 }
 
-@media (max-width: $screen-sm-max) { /* 991px */
+@media (max-width: $screen-sm-max) {
+    /* 991px */
     // disable mobile vertical scroll
     html,
     body {
@@ -153,7 +155,8 @@ Page content
     }
 }
 
-@media (max-width: $screen-xs-max) { /* 767px */
+@media (max-width: $screen-xs-max) {
+    /* 767px */
 
     /* Page content */
     .page-content-wrapper {
@@ -175,7 +178,8 @@ Page content
     }
 }
 
-@media (max-width: $screen-xs-min) { /* 480px */
+@media (max-width: $screen-xs-min) {
+    /* 480px */
 
     /* Dashboard date range panel */
     .page-content-wrapper {

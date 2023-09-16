@@ -20,22 +20,17 @@ class PublicController extends Controller
 {
     public function getIndex()
     {
-        if (defined('PAGE_MODULE_SCREEN_NAME')) {
-            $homepageId = BaseHelper::getHomepageId();
-            if ($homepageId) {
-                $slug = SlugHelper::getSlug(null, SlugHelper::getPrefix(Page::class), Page::class, $homepageId);
+        if (defined('PAGE_MODULE_SCREEN_NAME') && $homepageId = BaseHelper::getHomepageId()) {
+            if ($slug = SlugHelper::getSlug(null, null, Page::class, $homepageId)) {
+                $data = (new PageService())->handleFrontRoutes($slug);
 
-                if ($slug) {
-                    $data = (new PageService())->handleFrontRoutes($slug);
-
-                    if (! $data) {
-                        return Theme::scope('index')->render();
-                    }
-
-                    event(new RenderingSingleEvent($slug));
-
-                    return Theme::scope($data['view'], $data['data'], $data['default_view'])->render();
+                if (! $data) {
+                    return Theme::scope('index')->render();
                 }
+
+                event(new RenderingSingleEvent($slug));
+
+                return Theme::scope($data['view'], $data['data'], $data['default_view'])->render();
             }
         }
 
@@ -48,28 +43,38 @@ class PublicController extends Controller
         return Theme::scope('index')->render();
     }
 
-    public function getView(string|null $key = null)
+    public function getView(string|null $key = null, string $prefix = '')
     {
         if (empty($key)) {
             return $this->getIndex();
         }
 
-        $slug = SlugHelper::getSlug($key, '');
+        $slug = SlugHelper::getSlug($key, $prefix);
 
         if (! $slug) {
             abort(404);
         }
 
-        if (defined('PAGE_MODULE_SCREEN_NAME')) {
-            if ($slug->reference_type == Page::class && BaseHelper::isHomepage($slug->reference_id)) {
-                return redirect()->route('public.index');
-            }
+        if (
+            defined('PAGE_MODULE_SCREEN_NAME') &&
+            $slug->reference_type === Page::class &&
+            BaseHelper::isHomepage($slug->reference_id)
+        ) {
+            return redirect()->route('public.index');
         }
 
         $result = apply_filters(BASE_FILTER_PUBLIC_SINGLE_DATA, $slug);
 
-        if (isset($result['slug']) && $result['slug'] !== Str::replaceLast(SlugHelper::getPublicSingleEndingURL(), '', $key)) {
-            return redirect()->route('public.single', $result['slug']);
+        $extension = SlugHelper::getPublicSingleEndingURL();
+
+        if ($extension) {
+            $key = Str::replaceLast($extension, '', $key);
+        }
+
+        if (isset($result['slug']) && $result['slug'] !== $key) {
+            $prefix = SlugHelper::getPrefix(get_class(Arr::first($result['data'])));
+
+            return redirect()->route('public.single', empty($prefix) ? $result['slug'] : "$prefix/{$result['slug']}");
         }
 
         event(new RenderingSingleEvent($slug));
@@ -98,5 +103,10 @@ class PublicController extends Controller
 
         // show your site map (options: 'xml' (default), 'html', 'txt', 'ror-rss', 'ror-rdf')
         return SiteMapManager::render($key ? $extension : 'sitemapindex');
+    }
+
+    public function getViewWithPrefix(string $prefix, string|null $slug = null)
+    {
+        return $this->getView($slug, $prefix);
     }
 }

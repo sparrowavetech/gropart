@@ -1,7 +1,10 @@
 {!! SeoHelper::render() !!}
 
 @if ($favicon = theme_option('favicon'))
-    <link rel="shortcut icon" href="{{ RvMedia::getImageUrl($favicon) }}">
+    <link
+        href="{{ RvMedia::getImageUrl($favicon) }}"
+        rel="shortcut icon"
+    >
 @endif
 
 @if (Theme::has('headerMeta'))

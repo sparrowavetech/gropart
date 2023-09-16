@@ -9,23 +9,15 @@ use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
-use Botble\Base\Traits\HasDeleteManyItemsTrait;
 use Botble\Faq\Forms\FaqForm;
 use Botble\Faq\Http\Requests\FaqRequest;
 use Botble\Faq\Models\Faq;
-use Botble\Faq\Repositories\Interfaces\FaqInterface;
 use Botble\Faq\Tables\FaqTable;
 use Exception;
 use Illuminate\Http\Request;
 
 class FaqController extends BaseController
 {
-    use HasDeleteManyItemsTrait;
-
-    public function __construct(protected FaqInterface $faqRepository)
-    {
-    }
-
     public function index(FaqTable $table)
     {
         PageTitle::setTitle(trans('plugins/faq::faq.name'));
@@ -42,7 +34,7 @@ class FaqController extends BaseController
 
     public function store(FaqRequest $request, BaseHttpResponse $response)
     {
-        $faq = $this->faqRepository->createOrUpdate($request->input());
+        $faq = Faq::query()->create($request->input());
 
         event(new CreatedContentEvent(FAQ_MODULE_SCREEN_NAME, $request, $faq));
 
@@ -62,8 +54,7 @@ class FaqController extends BaseController
     public function update(Faq $faq, FaqRequest $request, BaseHttpResponse $response)
     {
         $faq->fill($request->input());
-
-        $this->faqRepository->createOrUpdate($faq);
+        $faq->save();
 
         event(new UpdatedContentEvent(FAQ_MODULE_SCREEN_NAME, $request, $faq));
 
@@ -75,7 +66,7 @@ class FaqController extends BaseController
     public function destroy(Faq $faq, Request $request, BaseHttpResponse $response)
     {
         try {
-            $this->faqRepository->delete($faq);
+            $faq->delete();
 
             event(new DeletedContentEvent(FAQ_MODULE_SCREEN_NAME, $request, $faq));
 
@@ -85,10 +76,5 @@ class FaqController extends BaseController
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
-    }
-
-    public function deletes(Request $request, BaseHttpResponse $response)
-    {
-        return $this->executeDeleteItems($request, $response, new Faq(), FAQ_MODULE_SCREEN_NAME);
     }
 }

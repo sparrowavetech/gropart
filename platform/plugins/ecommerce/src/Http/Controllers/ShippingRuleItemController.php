@@ -2,12 +2,13 @@
 
 namespace Botble\Ecommerce\Http\Controllers;
 
-use Assets;
-use BaseHelper;
 use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
@@ -17,8 +18,8 @@ use Botble\Ecommerce\Http\Requests\ShippingRuleItemImportRequest;
 use Botble\Ecommerce\Http\Requests\ShippingRuleItemRequest;
 use Botble\Ecommerce\Imports\ShippingRuleItemImport;
 use Botble\Ecommerce\Imports\ValidateShippingRuleItemImport;
-use Botble\Ecommerce\Repositories\Interfaces\ShippingRuleInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ShippingRuleItemInterface;
+use Botble\Ecommerce\Models\ShippingRule;
+use Botble\Ecommerce\Models\ShippingRuleItem;
 use Botble\Ecommerce\Tables\ShippingRuleItemTable;
 use Exception;
 use Illuminate\Http\Request;
@@ -27,29 +28,15 @@ use Maatwebsite\Excel\Excel;
 
 class ShippingRuleItemController extends BaseController
 {
-    protected ShippingRuleInterface $ruleRepository;
-
-    protected ShippingRuleItemInterface $itemRepository;
-
-    protected ShippingRuleItemImport $itemImport;
-
-    protected ValidateShippingRuleItemImport $validateItemImport;
-
     public function __construct(
-        ShippingRuleInterface $ruleRepository,
-        ShippingRuleItemInterface $itemRepository,
-        ShippingRuleItemImport $itemImport,
-        ValidateShippingRuleItemImport $validateItemImport
+        protected ShippingRuleItemImport $itemImport,
+        protected ValidateShippingRuleItemImport $validateItemImport
     ) {
-        $this->ruleRepository = $ruleRepository;
-        $this->itemRepository = $itemRepository;
-        $this->itemImport = $itemImport;
-        $this->validateItemImport = $validateItemImport;
     }
 
     public function index(ShippingRuleItemTable $dataTable)
     {
-        page_title()->setTitle(trans('plugins/ecommerce::shipping.rule.item.name'));
+        PageTitle::setTitle(trans('plugins/ecommerce::shipping.rule.item.name'));
 
         return $dataTable->renderTable();
     }
@@ -57,7 +44,7 @@ class ShippingRuleItemController extends BaseController
     public function create(Request $request, FormBuilder $formBuilder, BaseHttpResponse $response)
     {
         if ($request->ajax() && ($shippingRuleId = $request->input('shipping_rule_id'))) {
-            $this->ruleRepository->findOrFail($shippingRuleId);
+            ShippingRule::query()->findOrFail($shippingRuleId);
 
             $html = $formBuilder->create(ShippingRuleItemForm::class)
                 ->setFormOption('template', 'core/base::forms.form-content-only')
@@ -67,7 +54,7 @@ class ShippingRuleItemController extends BaseController
                 ->setMessage(trans('plugins/ecommerce::shipping.rule.item.create'));
         }
 
-        page_title()->setTitle(trans('plugins/ecommerce::shipping.rule.item.create'));
+        PageTitle::setTitle(trans('plugins/ecommerce::shipping.rule.item.create'));
 
         return $formBuilder->create(ShippingRuleItemForm::class)->renderForm();
     }
@@ -75,12 +62,12 @@ class ShippingRuleItemController extends BaseController
     public function store(ShippingRuleItemRequest $request, BaseHttpResponse $response)
     {
         $ruleId = $request->input('shipping_rule_id');
-        $rule = $this->ruleRepository->findOrFail($ruleId);
+        $rule = ShippingRule::query()->findOrFail($ruleId);
         $request->merge([
             'country' => $rule->shipping->country,
         ]);
 
-        $item = $this->itemRepository->createOrUpdate($request->input());
+        $item = ShippingRuleItem::query()->create($request->input());
 
         event(new CreatedContentEvent(SHIPPING_RULE_ITEM_MODULE_SCREEN_NAME, $request, $item));
 
@@ -97,9 +84,9 @@ class ShippingRuleItemController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int $id, FormBuilder $formBuilder, Request $request, BaseHttpResponse $response)
+    public function edit(int|string $id, FormBuilder $formBuilder, Request $request, BaseHttpResponse $response)
     {
-        $item = $this->itemRepository->findOrFail($id);
+        $item = ShippingRuleItem::query()->findOrFail($id);
 
         event(new BeforeEditContentEvent($request, $item));
         $title = trans('plugins/ecommerce::shipping.rule.item.edit') . $item->name_item;
@@ -112,21 +99,21 @@ class ShippingRuleItemController extends BaseController
             return $response->setData(compact('html'))->setMessage($title);
         }
 
-        page_title()->setTitle($title);
+        PageTitle::setTitle($title);
 
         return $formBuilder->create(ShippingRuleItemForm::class, ['model' => $item])->renderForm();
     }
 
-    public function update(int $id, ShippingRuleItemRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, ShippingRuleItemRequest $request, BaseHttpResponse $response)
     {
-        $item = $this->itemRepository->findOrFail($id);
+        $item = ShippingRuleItem::query()->findOrFail($id);
+
         $request->merge([
             'country' => $item->shippingRule->shipping->country,
         ]);
 
         $item->fill($request->input());
-
-        $this->itemRepository->createOrUpdate($item);
+        $item->save();
 
         event(new UpdatedContentEvent(SHIPPING_RULE_ITEM_MODULE_SCREEN_NAME, $request, $item));
 
@@ -142,12 +129,12 @@ class ShippingRuleItemController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(Request $request, int $id, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
-            $item = $this->itemRepository->findOrFail($id);
+            $item = ShippingRuleItem::query()->findOrFail($id);
 
-            $this->itemRepository->delete($item);
+            $item->delete();
 
             event(new DeletedContentEvent(SHIPPING_RULE_ITEM_MODULE_SCREEN_NAME, $request, $item));
 
@@ -163,27 +150,9 @@ class ShippingRuleItemController extends BaseController
         }
     }
 
-    public function deletes(Request $request, BaseHttpResponse $response)
-    {
-        $ids = $request->input('ids');
-        if (empty($ids)) {
-            return $response
-                ->setError()
-                ->setMessage(trans('core/base::notices.no_select'));
-        }
-
-        foreach ($ids as $id) {
-            $item = $this->itemRepository->findOrFail($id);
-            $this->itemRepository->delete($item);
-            event(new DeletedContentEvent(SHIPPING_RULE_ITEM_MODULE_SCREEN_NAME, $request, $item));
-        }
-
-        return $response->setMessage(trans('core/base::notices.delete_success_message'));
-    }
-
     public function import()
     {
-        page_title()->setTitle(trans('plugins/ecommerce::shipping.rule.item.bulk-import.menu'));
+        PageTitle::setTitle(trans('plugins/ecommerce::shipping.rule.item.bulk-import.menu'));
 
         Assets::addScriptsDirectly(['vendor/core/plugins/ecommerce/js/bulk-import.js']);
 
@@ -256,13 +225,12 @@ class ShippingRuleItemController extends BaseController
 
     public function items($ruleId, Request $request, BaseHttpResponse $response)
     {
-        $html = '';
-        $rule = $this->ruleRepository->findOrFail($ruleId);
+        $rule = ShippingRule::query()->findOrFail($ruleId);
 
         $orderBy = $request->input('order_by');
         $orderDir = $request->input('order_dir');
         if ($orderBy) {
-            $fillable = array_merge($this->itemRepository->getModel()->getFillable(), ['id', 'created_at', 'updated_at']);
+            $fillable = array_merge(ShippingRuleItem::query()->getModel()->getFillable(), ['id', 'created_at', 'updated_at']);
             if (in_array($orderBy, $fillable)) {
                 if ($orderDir != 'DESC') {
                     $orderDir = 'ASC';
@@ -271,9 +239,8 @@ class ShippingRuleItemController extends BaseController
                 $orderBy = '';
             }
         }
-        $perPage = (int) $request->input('per_page', 12);
-        $items = $this->itemRepository
-            ->getModel()
+        $perPage = $request->integer('per_page', 12);
+        $items = ShippingRuleItem::query()
             ->where('shipping_rule_id', $ruleId);
 
         if ($orderBy) {
@@ -281,8 +248,8 @@ class ShippingRuleItemController extends BaseController
         }
         if (! in_array($orderBy, ['created_at', 'id'])) {
             $items = $items
-                ->orderBy('created_at', 'desc')
-                ->orderBy('id', 'desc');
+                ->orderByDesc('created_at')
+                ->orderByDesc('id');
         }
 
         $items = $items->paginate($perPage ?: 12);

@@ -1,10 +1,6 @@
 <?php
 
 use Botble\Base\Facades\BaseHelper;
-use Botble\Blog\Models\Category;
-use Botble\Blog\Models\Post;
-use Botble\Blog\Models\Tag;
-use Botble\Slug\Facades\SlugHelper;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['namespace' => 'Botble\Blog\Http\Controllers', 'middleware' => ['web', 'core']], function () {
@@ -43,25 +39,6 @@ Route::group(['namespace' => 'Botble\Blog\Http\Controllers', 'middleware' => ['w
                 'as' => 'public.search',
                 'uses' => 'PublicController@getSearch',
             ]);
-
-            if (SlugHelper::getPrefix(Tag::class, 'tag')) {
-                Route::get(SlugHelper::getPrefix(Tag::class, 'tag') . '/{slug}', [
-                    'as' => 'public.tag',
-                    'uses' => 'PublicController@getTag',
-                ]);
-            }
-
-            if (SlugHelper::getPrefix(Post::class)) {
-                Route::get(SlugHelper::getPrefix(Post::class) . '/{slug}', [
-                    'uses' => 'PublicController@getPost',
-                ]);
-            }
-
-            if (SlugHelper::getPrefix(Category::class)) {
-                Route::get(SlugHelper::getPrefix(Category::class) . '/{slug}', [
-                    'uses' => 'PublicController@getCategory',
-                ]);
-            }
         });
     }
 });

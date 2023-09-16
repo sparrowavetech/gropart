@@ -16,23 +16,29 @@
                     </tr>
                 </thead>
                 <tbody>
-                @if (count($orders) > 0)
-                    @foreach ($orders as $order)
+                    @if (count($orders) > 0)
+                        @foreach ($orders as $order)
+                            <tr>
+                                <th scope="row">{{ get_order_code($order->id) }}</th>
+                                <td>{{ $order->created_at->translatedFormat('M d, Y h:m') }}</td>
+                                <td>{{ format_price($order->amount) }}</td>
+                                <td>{!! BaseHelper::clean($order->status->toHtml()) !!}</td>
+                                <td>
+                                    <a
+                                        class="btn btn-primary btn-sm"
+                                        href="{{ route('customer.orders.view', $order->id) }}"
+                                    >{{ __('View') }}</a>
+                                </td>
+                            </tr>
+                        @endforeach
+                    @else
                         <tr>
-                            <th scope="row">{{ get_order_code($order->id) }}</th>
-                            <td>{{ $order->created_at->translatedFormat('M d, Y h:m') }}</td>
-                            <td>{{ format_price($order->amount) }}</td>
-                            <td>{!! BaseHelper::clean($order->status->toHtml()) !!}</td>
-                            <td>
-                                <a class="btn btn-primary btn-sm" href="{{ route('customer.orders.view', $order->id) }}">{{ __('View') }}</a>
-                            </td>
+                            <td
+                                class="text-center"
+                                colspan="5"
+                            >{{ __('No orders!') }}</td>
                         </tr>
-                    @endforeach
-                @else
-                    <tr>
-                        <td colspan="5" class="text-center">{{ __('No orders!') }}</td>
-                    </tr>
-                @endif
+                    @endif
                 </tbody>
             </table>
         </div>

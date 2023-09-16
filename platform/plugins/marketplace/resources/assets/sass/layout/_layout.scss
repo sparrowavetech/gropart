@@ -8,7 +8,6 @@ body.offcanvas-active {
     overflow: hidden;
 }
 
-
 .main-wrap {
     margin-left: 300px;
     background-color: #f8f9fa;
@@ -40,7 +39,7 @@ body.offcanvas-active {
     border-right: 1px solid $border-color;
 
     .aside-top {
-        padding: 12px .5rem;
+        padding: 12px 0.5rem;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -59,7 +58,6 @@ body.offcanvas-active {
             min-width: 120px;
         }
     }
-
 }
 
 .main-header {
@@ -106,7 +104,7 @@ body.offcanvas-active {
 
     .nav-link:hover {
         background-color: transparent;
-        color: $primary
+        color: $primary;
     }
 
     .col-search {
@@ -131,7 +129,7 @@ body.offcanvas-active {
         border: 2px solid #eee;
 
         &:hover {
-            border-color: $primary
+            border-color: $primary;
         }
     }
 }
@@ -171,8 +169,9 @@ body.aside-mini {
             }
         }
 
-        .brand-wrap, .logo {
-            display: none
+        .brand-wrap,
+        .logo {
+            display: none;
         }
     }
 
@@ -271,7 +270,7 @@ footer.main-footer {
             padding-left: 20px;
 
             strong {
-                margin-right: 30px
+                margin-right: 30px;
             }
 
             &:before {
@@ -282,24 +281,24 @@ footer.main-footer {
                 left: 0;
                 width: 6px;
                 height: 6px;
-                border-radius: 50%
+                border-radius: 50%;
             }
 
             &.yellow {
                 &:before {
-                    background-color: #fcb800
+                    background-color: #fcb800;
                 }
             }
 
             &.red {
                 &:before {
-                    background-color: #fc6b00
+                    background-color: #fc6b00;
                 }
             }
 
             &.green {
                 &:before {
-                    background-color: #80bc00
+                    background-color: #80bc00;
                 }
             }
         }
@@ -307,6 +306,6 @@ footer.main-footer {
 
     .card-chart {
         position: relative;
-        z-index: 10
+        z-index: 10;
     }
 }

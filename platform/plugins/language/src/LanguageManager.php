@@ -1115,12 +1115,15 @@ class LanguageManager
              * @var BaseModel $item
              */
             $item::resolveRelationUsing('languageMeta', function ($model) {
-                return $model->morphOne(LanguageMeta::class, 'reference')->select([
-                    'lang_meta_code',
-                    'lang_meta_origin',
-                    'reference_id',
-                    'reference_type',
-                ]);
+                return $model
+                    ->morphOne(LanguageMeta::class, 'reference')
+                    ->select([
+                        'lang_meta_code',
+                        'lang_meta_origin',
+                        'reference_id',
+                        'reference_type',
+                    ])
+                    ->where('lang_meta_code', is_in_admin() ? $this->getCurrentAdminLocaleCode() : $this->getCurrentLocaleCode());
             });
         }
     }

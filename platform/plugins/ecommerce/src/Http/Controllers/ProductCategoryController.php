@@ -2,10 +2,11 @@
 
 namespace Botble\Ecommerce\Http\Controllers;
 
-use Assets;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
@@ -21,18 +22,15 @@ use Illuminate\Support\Facades\Auth;
 
 class ProductCategoryController extends BaseController
 {
-    protected ProductCategoryInterface $productCategoryRepository;
+    public function index(
+        FormBuilder $formBuilder,
+        Request $request,
+        BaseHttpResponse $response,
+        ProductCategoryInterface $productCategoryRepository
+    ) {
+        PageTitle::setTitle(trans('plugins/ecommerce::product-categories.name'));
 
-    public function __construct(ProductCategoryInterface $productCategoryRepository)
-    {
-        $this->productCategoryRepository = $productCategoryRepository;
-    }
-
-    public function index(FormBuilder $formBuilder, Request $request, BaseHttpResponse $response)
-    {
-        page_title()->setTitle(trans('plugins/ecommerce::product-categories.name'));
-
-        $categories = $this->productCategoryRepository->getProductCategories([], ['slugable'], ['products']);
+        $categories = $productCategoryRepository->getProductCategories([], ['slugable'], ['products']);
 
         if ($request->ajax()) {
             $data = view('core/base::forms.partials.tree-categories', $this->getOptions(compact('categories')))
@@ -52,7 +50,7 @@ class ProductCategoryController extends BaseController
 
     public function create(FormBuilder $formBuilder, Request $request, BaseHttpResponse $response)
     {
-        page_title()->setTitle(trans('plugins/ecommerce::product-categories.create'));
+        PageTitle::setTitle(trans('plugins/ecommerce::product-categories.create'));
 
         if ($request->ajax()) {
             return $response->setData($this->getForm());
@@ -63,12 +61,12 @@ class ProductCategoryController extends BaseController
 
     public function store(ProductCategoryRequest $request, BaseHttpResponse $response)
     {
-        $productCategory = $this->productCategoryRepository->createOrUpdate($request->input());
+        $productCategory = ProductCategory::query()->create($request->input());
 
         event(new CreatedContentEvent(PRODUCT_CATEGORY_MODULE_SCREEN_NAME, $request, $productCategory));
 
         if ($request->ajax()) {
-            $productCategory = $this->productCategoryRepository->findOrFail($productCategory->id);
+            $productCategory = ProductCategory::query()->findOrFail($productCategory->id);
 
             if ($request->input('submit') == 'save') {
                 $form = $this->getForm();
@@ -83,34 +81,34 @@ class ProductCategoryController extends BaseController
         }
 
         return $response
-                ->setPreviousUrl(route('product-categories.index'))
-                ->setNextUrl(route('product-categories.edit', $productCategory->id))
-                ->setMessage(trans('core/base::notices.create_success_message'));
+            ->setPreviousUrl(route('product-categories.index'))
+            ->setNextUrl(route('product-categories.edit', $productCategory->id))
+            ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int $id, FormBuilder $formBuilder, Request $request, BaseHttpResponse $response)
+    public function edit(int|string $id, FormBuilder $formBuilder, Request $request, BaseHttpResponse $response)
     {
-        $productCategory = $this->productCategoryRepository->findOrFail($id);
+        $productCategory = ProductCategory::query()->findOrFail($id);
 
         if ($request->ajax()) {
             return $response->setData($this->getForm($productCategory));
         }
 
-        page_title()->setTitle(trans('plugins/ecommerce::product-categories.edit') . ' "' . $productCategory->name . '"');
+        PageTitle::setTitle(trans('core/base::forms.edit_item', ['name' => $productCategory->name]));
 
         return $formBuilder->create(ProductCategoryForm::class, ['model' => $productCategory])->renderForm();
     }
 
-    public function update(int $id, ProductCategoryRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, ProductCategoryRequest $request, BaseHttpResponse $response)
     {
-        $productCategory = $this->productCategoryRepository->findOrFail($id);
+        $productCategory = ProductCategory::query()->findOrFail($id);
         $productCategory->fill($request->input());
+        $productCategory->save();
 
-        $this->productCategoryRepository->createOrUpdate($productCategory);
         event(new UpdatedContentEvent(PRODUCT_CATEGORY_MODULE_SCREEN_NAME, $request, $productCategory));
 
         if ($request->ajax()) {
-            $productCategory = $this->productCategoryRepository->findOrFail($id);
+            $productCategory = ProductCategory::query()->findOrFail($id);
 
             if ($request->input('submit') == 'save') {
                 $form = $this->getForm();
@@ -124,16 +122,16 @@ class ProductCategoryController extends BaseController
         }
 
         return $response
-                ->setPreviousUrl(route('product-categories.index'))
-                ->setMessage(trans('core/base::notices.update_success_message'));
+            ->setPreviousUrl(route('product-categories.index'))
+            ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(Request $request, int $id, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
-            $productCategory = $this->productCategoryRepository->findOrFail($id);
+            $productCategory = ProductCategory::query()->findOrFail($id);
 
-            $this->productCategoryRepository->delete($productCategory);
+            $productCategory->delete();
             event(new DeletedContentEvent(PRODUCT_CATEGORY_MODULE_SCREEN_NAME, $request, $productCategory));
 
             return $response->setMessage(trans('core/base::notices.delete_success_message'));
@@ -142,24 +140,6 @@ class ProductCategoryController extends BaseController
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
-    }
-
-    public function deletes(Request $request, BaseHttpResponse $response)
-    {
-        $ids = $request->input('ids');
-        if (empty($ids)) {
-            return $response
-                ->setError()
-                ->setMessage(trans('core/base::notices.no_select'));
-        }
-
-        foreach ($ids as $id) {
-            $productCategory = $this->productCategoryRepository->findOrFail($id);
-            $this->productCategoryRepository->delete($productCategory);
-            event(new DeletedContentEvent(PRODUCT_CATEGORY_MODULE_SCREEN_NAME, $request, $productCategory));
-        }
-
-        return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
     protected function getForm(?ProductCategory $model = null): string
@@ -208,10 +188,10 @@ class ProductCategoryController extends BaseController
     {
         $term = $request->input('search');
 
-        $categories = $this->productCategoryRepository
-                ->select(['id', 'name'])
-                ->where('name', 'LIKE', '%' . $term . '%')
-                ->paginate(10);
+        $categories = ProductCategory::query()
+            ->select(['id', 'name'])
+            ->where('name', 'LIKE', '%' . $term . '%')
+            ->paginate(10);
 
         $data = ProductCategoryResource::collection($categories);
 

@@ -4,11 +4,11 @@ namespace Botble\Marketplace\Tables;
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\Ecommerce\Models\OrderReturn;
-use Botble\Ecommerce\Repositories\Interfaces\OrderReturnItemInterface;
-use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Table\DataTables;
-use Illuminate\Contracts\Routing\UrlGenerator;
+use Botble\Table\Actions\DeleteAction;
+use Botble\Table\Actions\EditAction;
+use Botble\Table\Columns\CreatedAtColumn;
+use Botble\Table\Columns\IdColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -16,17 +16,14 @@ use Illuminate\Http\JsonResponse;
 
 class OrderReturnTable extends TableAbstract
 {
-    public function __construct(
-        DataTables $table,
-        UrlGenerator $urlGenerator,
-        OrderReturn $model,
-        protected OrderReturnItemInterface $orderReturnItemRepository
-    ) {
-        parent::__construct($table, $urlGenerator);
-
-        $this->model = $model;
-
-        $this->hasCheckbox = false;
+    public function setup(): void
+    {
+        $this
+            ->model(OrderReturn::class)
+            ->addActions([
+                EditAction::make()->route('marketplace.vendor.order-returns.edit'),
+                DeleteAction::make()->route('marketplace.vendor.order-returns.destroy'),
+            ]);
     }
 
     public function ajax(): JsonResponse
@@ -49,11 +46,6 @@ class OrderReturnTable extends TableAbstract
 
                 return BaseHelper::clean($item->customer->name);
             })
-            ->editColumn('created_at', function ($item) {
-                return BaseHelper::formatDate($item->created_at);
-            });
-
-        $data = $data
             ->filter(function ($query) {
                 $keyword = $this->request->input('search.value');
                 if ($keyword) {
@@ -66,15 +58,6 @@ class OrderReturnTable extends TableAbstract
                 }
 
                 return $query;
-            });
-
-        $data = $data
-            ->addColumn('operations', function ($item) {
-                return view(MarketplaceHelper::viewPath('dashboard.table.actions'), [
-                    'edit' => 'marketplace.vendor.order-returns.edit',
-                    'delete' => 'marketplace.vendor.order-returns.destroy',
-                    'item' => $item,
-                ])->render();
             });
 
         return $this->toJson($data);
@@ -95,7 +78,7 @@ class OrderReturnTable extends TableAbstract
             ->with(['customer', 'order', 'items'])
             ->withCount('items')
             ->where('store_id', auth('customer')->user()->store->id)
-            ->orderBy('id', 'desc');
+            ->orderByDesc('id');
 
         return $this->applyScopes($query);
     }
@@ -103,11 +86,7 @@ class OrderReturnTable extends TableAbstract
     public function columns(): array
     {
         return [
-            'id' => [
-                'title' => trans('core/base::tables.id'),
-                'width' => '20px',
-                'class' => 'text-start',
-            ],
+            IdColumn::make(),
             'order_id' => [
                 'title' => trans('plugins/ecommerce::order.order_id'),
                 'class' => 'text-start',
@@ -118,17 +97,11 @@ class OrderReturnTable extends TableAbstract
             ],
             'items_count' => [
                 'title' => trans('plugins/ecommerce::order.order_return_items_count'),
-                'class' => 'text-center',
             ],
             'return_status' => [
                 'title' => trans('core/base::tables.status'),
-                'class' => 'text-center',
             ],
-            'created_at' => [
-                'title' => trans('core/base::tables.created_at'),
-                'width' => '100px',
-                'class' => 'text-start',
-            ],
+            CreatedAtColumn::make(),
         ];
     }
 

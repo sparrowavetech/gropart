@@ -8,11 +8,17 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
         Route::group(['prefix' => 'taxes', 'as' => 'tax.'], function () {
             Route::resource('', 'TaxController')->parameters(['' => 'tax']);
 
-            Route::delete('items/destroy', [
-                'as' => 'deletes',
-                'uses' => 'TaxController@deletes',
-                'permission' => 'tax.destroy',
-            ]);
+            Route::group(['prefix' => '{tax}/rules', 'as' => 'rule.'], function () {
+                Route::resource('', 'TaxRuleController')
+                    ->parameters(['' => 'rule'])
+                    ->only(['index']);
+            });
+
+            Route::group(['prefix' => 'rules', 'as' => 'rule.'], function () {
+                Route::resource('', 'TaxRuleController')
+                    ->parameters(['' => 'rule'])
+                    ->except(['index']);
+            });
         });
     });
 });

@@ -7,19 +7,14 @@ use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Enums\StockStatusEnum;
+use Botble\Ecommerce\Models\Brand;
 use Botble\Ecommerce\Models\Product;
+use Botble\Ecommerce\Models\ProductAttributeSet;
+use Botble\Ecommerce\Models\ProductCategory;
+use Botble\Ecommerce\Models\ProductCollection;
+use Botble\Ecommerce\Models\ProductLabel;
 use Botble\Ecommerce\Models\ProductVariation;
 use Botble\Ecommerce\Models\Tax;
-use Botble\Ecommerce\Repositories\Interfaces\BrandInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductAttributeSetInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductCategoryInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductCollectionInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductLabelInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductTagInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductVariationInterface;
-use Botble\Ecommerce\Repositories\Interfaces\TaxInterface;
 use Botble\Ecommerce\Services\Products\StoreProductService;
 use Botble\Ecommerce\Services\StoreProductTagService;
 use Botble\Media\Facades\RvMedia;
@@ -90,16 +85,6 @@ class ProductImport implements
     protected Collection $barcodes;
 
     public function __construct(
-        protected ProductInterface $productRepository,
-        protected ProductCategoryInterface $productCategoryRepository,
-        protected ProductTagInterface $productTagRepository,
-        protected ProductLabelInterface $productLabelRepository,
-        protected TaxInterface $taxRepository,
-        protected ProductCollectionInterface $productCollectionRepository,
-        protected ProductAttributeSetInterface $productAttributeSetRepository,
-        protected ProductAttributeInterface $productAttributeRepository,
-        protected ProductVariationInterface $productVariationRepository,
-        protected BrandInterface $brandRepository,
         protected StoreProductTagService $storeProductTagService,
         protected Request $request
     ) {
@@ -109,8 +94,10 @@ class ProductImport implements
         $this->labels = collect();
         $this->productCollections = collect();
         $this->productLabels = collect();
-        $this->productAttributeSets = $this->productAttributeSetRepository->all(['attributes']);
-        $this->allTaxes = $this->taxRepository->all();
+        $this->productAttributeSets = ProductAttributeSet::query()
+            ->with('attributes')
+            ->get();
+        $this->allTaxes = Tax::query()->get();
         $this->barcodes = collect();
 
         config(['excel.imports.ignore_empty' => true]);
@@ -176,15 +163,16 @@ class ProductImport implements
             $slug = SlugHelper::getSlug($slug, SlugHelper::getPrefix(Product::class), Product::class);
 
             if ($slug) {
-                return $this->productRepository->getFirstBy([
-                    'id' => $slug->reference_id,
-                    'is_variation' => 0,
-                ]);
+                return Product::query()
+                    ->where([
+                        'id' => $slug->reference_id,
+                        'is_variation' => 0,
+                    ])
+                    ->first();
             }
         }
 
-        return $this->productRepository
-            ->getModel()
+        return Product::query()
             ->where(function ($query) use ($name) {
                 $query
                     ->where('name', $name)
@@ -196,7 +184,7 @@ class ProductImport implements
 
     public function storeProduct(): ?Product
     {
-        $product = $this->productRepository->getModel();
+        $product = new Product();
 
         $this->request->merge(['images' => $this->getImageURLs((array)$this->request->input('images', []))]);
 
@@ -314,7 +302,7 @@ class ProductImport implements
         }
 
         $addedAttributes = $this->request->input('attribute_sets', []);
-        $result = $this->productVariationRepository->getVariationByAttributesOrCreate($product->id, $addedAttributes);
+        $result = ProductVariation::getVariationByAttributesOrCreate($product->id, $addedAttributes);
         if (! $result['created']) {
             if (method_exists($this, 'onFailure')) {
                 $failures[] = new Failure(
@@ -347,7 +335,7 @@ class ProductImport implements
             $version['content'] = BaseHelper::clean($version['content']);
         }
 
-        $productRelatedToVariation = $this->productRepository->getModel();
+        $productRelatedToVariation = new Product();
         $productRelatedToVariation->fill($version);
 
         $productRelatedToVariation->name = $product->name;
@@ -406,8 +394,7 @@ class ProductImport implements
         $productRelatedToVariation->status = strtolower(Arr::get($version, 'status', $product->status));
 
         $productRelatedToVariation->product_type = $product->product_type;
-
-        $productRelatedToVariation = $this->productRepository->createOrUpdate($productRelatedToVariation);
+        $productRelatedToVariation->save();
 
         event(new CreatedContentEvent(PRODUCT_MODULE_SCREEN_NAME, $this->request, $productRelatedToVariation));
 
@@ -415,19 +402,21 @@ class ProductImport implements
 
         $variation->is_default = Arr::get($version, 'variation_default_id', 0) == $variation->id;
 
-        $this->productVariationRepository->createOrUpdate($variation);
+        $variation->save();
 
         if ($version['attribute_sets']) {
             $variation->productAttributes()->sync($version['attribute_sets']);
         }
 
-        $this->onSuccess(collect([
-            'name' => $variation->name,
-            'slug' => '',
-            'import_type' => 'variation',
-            'attribute_sets' => [],
-            'model' => $variation,
-        ]));
+        $this->onSuccess(
+            collect([
+                'name' => $variation->name,
+                'slug' => '',
+                'import_type' => 'variation',
+                'attribute_sets' => [],
+                'model' => $variation,
+            ])
+        );
 
         return $variation;
     }
@@ -498,12 +487,12 @@ class ProductImport implements
                 $brandId = $brand['brand_id'];
             } else {
                 if (is_numeric($row['brand'])) {
-                    $brand = $this->brandRepository->findById($row['brand']);
+                    $brand = Brand::query()->find($row['brand']);
                 } else {
-                    $brand = $this->brandRepository->getFirstBy(['name' => $row['brand']]);
+                    $brand = Brand::query()->where('name', $row['brand'])->first();
                 }
 
-                $brandId = $brand ? $brand->id : 0;
+                $brandId = $brand ? $brand->getKey() : 0;
                 $this->brands->push([
                     'keyword' => $row['brand'],
                     'brand_id' => $brandId,
@@ -529,12 +518,12 @@ class ProductImport implements
                     $categoryId = $category['category_id'];
                 } else {
                     if (is_numeric($value)) {
-                        $category = $this->productCategoryRepository->findById($value);
+                        $category = ProductCategory::query()->find($value);
                     } else {
-                        $category = $this->productCategoryRepository->getFirstBy(['name' => $value]);
+                        $category = ProductCategory::query()->where('name', $value)->first();
                     }
 
-                    $categoryId = $category ? $category->id : 0;
+                    $categoryId = $category ? $category->getKey() : 0;
                     $this->categories->push([
                         'keyword' => $value,
                         'category_id' => $categoryId,
@@ -562,12 +551,12 @@ class ProductImport implements
                     $collectionId = $collection['collection_id'];
                 } else {
                     if (is_numeric($value)) {
-                        $collection = $this->productCollectionRepository->findById($value);
+                        $collection = ProductCollection::query()->find($value);
                     } else {
-                        $collection = $this->productCollectionRepository->getFirstBy(['name' => $value]);
+                        $collection = ProductCollection::query()->where('name', $value)->first();
                     }
 
-                    $collectionId = $collection ? $collection->id : 0;
+                    $collectionId = $collection ? $collection->getKey() : 0;
                     $this->productCollections->push([
                         'keyword' => $value,
                         'collection_id' => $collectionId,
@@ -595,12 +584,12 @@ class ProductImport implements
                     $productLabelId = $productLabel['product_label_id'];
                 } else {
                     if (is_numeric($value)) {
-                        $productLabel = $this->productLabelRepository->findById($value);
+                        $productLabel = ProductLabel::query()->find($value);
                     } else {
-                        $productLabel = $this->productLabelRepository->getFirstBy(['name' => $value]);
+                        $productLabel = ProductLabel::query()->where('name', $value)->first();
                     }
 
-                    $productLabelId = $productLabel ? $productLabel->id : 0;
+                    $productLabelId = $productLabel ? $productLabel->getKey() : 0;
                     $this->productLabels->push([
                         'keyword' => $value,
                         'product_label_id' => $productLabelId,
@@ -777,7 +766,12 @@ class ProductImport implements
                     $failures[] = new Failure(
                         $this->rowCurrent,
                         'Barcode',
-                        [__('Barcode ":value" has been duplicated on row #:row', ['value' => $value, 'row' => Arr::get($barcode, 'row')])],
+                        [
+                            __(
+                                'Barcode ":value" has been duplicated on row #:row',
+                                ['value' => $value, 'row' => Arr::get($barcode, 'row')]
+                            ),
+                        ],
                         [$value]
                     );
                     $this->onFailure(...$failures);

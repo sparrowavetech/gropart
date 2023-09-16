@@ -4,36 +4,30 @@ namespace Botble\Marketplace\Tables;
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
-use Botble\Base\Models\BaseQueryBuilder;
 use Botble\Marketplace\Enums\RevenueTypeEnum;
 use Botble\Marketplace\Models\Revenue;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Table\DataTables;
-use Illuminate\Contracts\Routing\UrlGenerator;
+use Botble\Table\Columns\CreatedAtColumn;
+use Botble\Table\Columns\IdColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 
 class StoreRevenueTable extends TableAbstract
 {
     protected ?int $customerId;
 
-    public function __construct(
-        DataTables $table,
-        UrlGenerator $urlGenerator,
-        Revenue $model
-    ) {
-        parent::__construct($table, $urlGenerator);
+    public function setup(): void
+    {
+        $this
+            ->model(Revenue::class)
+            ->addActions([]);
 
         $this->setCustomerId(request()->route()->parameter('id'));
-        $this->model = $model;
         $this->pageLength = 10;
-        $this->hasCheckbox = false;
-        $this->hasOperations = false;
         $this->type = self::TABLE_TYPE_SIMPLE;
-        $this->view = 'core/table::simple-table';
+        $this->view = $this->simpleTableView();
     }
 
     public function ajax(): JsonResponse
@@ -56,7 +50,7 @@ class StoreRevenueTable extends TableAbstract
 
                 $url = '';
                 if (is_in_admin(true)) {
-                    if (Auth::user()->hasPermission('orders.edit')) {
+                    if ($this->hasPermission('orders.edit')) {
                         $url = route('orders.edit', $item->order->id);
                     }
                 } else {
@@ -67,9 +61,6 @@ class StoreRevenueTable extends TableAbstract
             })
             ->editColumn('type', function (Revenue $item) {
                 return $item->type->toHtml();
-            })
-            ->editColumn('created_at', function (Revenue $item) {
-                return BaseHelper::formatDate($item->created_at);
             })
             ->filterColumn('id', function (Builder $query, $keyword) {
                 if ($keyword) {
@@ -99,7 +90,7 @@ class StoreRevenueTable extends TableAbstract
                     $store = $item->customer->store;
                     $logo = Html::image($store->logo_url, $store->name, ['width' => 20, 'class' => 'rounded me-2']);
                     $storeName = $store->name;
-                    if (is_in_admin(true) && Auth::user()->hasPermission('marketplace.store.view')) {
+                    if (is_in_admin(true) && $this->hasPermission('marketplace.store.view')) {
                         $storeName = Html::link(route('marketplace.store.view', $store->id), $storeName);
                     }
 
@@ -127,9 +118,8 @@ class StoreRevenueTable extends TableAbstract
             ])
             ->with(['order:id,code'])
             ->when($this->customerId, function (Builder $query) {
-                $query->where('customer_id', $this->customerId);
-            }, function (BaseQueryBuilder $query) {
                 $query
+                    ->where('customer_id', $this->customerId)
                     ->with([
                         'customer:id,name,avatar',
                         'customer.store:id,name,logo,customer_id',
@@ -143,11 +133,7 @@ class StoreRevenueTable extends TableAbstract
     public function columns(): array
     {
         $columns = [
-            'id' => [
-                'title' => trans('core/base::tables.id'),
-                'width' => '20px',
-                'class' => 'text-start',
-            ],
+            IdColumn::make(),
             'order_id' => [
                 'title' => trans('plugins/ecommerce::order.description'),
                 'class' => 'text-start',
@@ -178,11 +164,7 @@ class StoreRevenueTable extends TableAbstract
                 'title' => trans('plugins/marketplace::revenue.forms.type'),
                 'class' => 'text-start',
             ],
-            'created_at' => [
-                'title' => trans('core/base::tables.created_at'),
-                'class' => 'text-start',
-                'width' => '100px',
-            ],
+            CreatedAtColumn::make(),
         ]);
     }
 

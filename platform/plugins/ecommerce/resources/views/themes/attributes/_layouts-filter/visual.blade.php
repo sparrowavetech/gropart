@@ -1,15 +1,29 @@
-<li class="visual-swatches-wrapper" data-type="visual">
-    <h6 class="widget-title" data-title="{{ $set->title }}">{{ $set->title }}</h6>
+<li
+    class="visual-swatches-wrapper"
+    data-type="visual"
+>
+    <h6
+        class="widget-title"
+        data-title="{{ $set->title }}"
+    >{{ $set->title }}</h6>
     <div class="attribute-values">
         <ul class="visual-swatch">
-            @foreach($attributes->where('attribute_set_id', $set->id) as $attribute)
-                <li data-slug="{{ $attribute->slug }}"
+            @foreach ($attributes->where('attribute_set_id', $set->id) as $attribute)
+                <li
+                    data-slug="{{ $attribute->slug }}"
                     data-bs-toggle="tooltip"
                     data-placement="top"
-                    title="{{ $attribute->title }}">
+                    title="{{ $attribute->title }}"
+                >
                     <div class="custom-checkbox">
                         <label>
-                            <input class="product-filter-item" type="checkbox" name="attributes[]" value="{{ $attribute->id }}" @checked(in_array($attribute->id, $selected))>
+                            <input
+                                class="product-filter-item"
+                                name="attributes[{{ $set->slug }}][]"
+                                type="checkbox"
+                                value="{{ $attribute->id }}"
+                                @checked(in_array($attribute->id, $selected))
+                            >
                             <span style="{{ $attribute->getAttributeStyle() }}"></span>
                         </label>
                     </div>

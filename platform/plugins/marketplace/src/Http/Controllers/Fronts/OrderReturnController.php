@@ -11,20 +11,17 @@ use Botble\Ecommerce\Enums\OrderReturnStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\OrderReturnHelper;
 use Botble\Ecommerce\Http\Requests\UpdateOrderReturnRequest;
-use Botble\Ecommerce\Repositories\Interfaces\OrderReturnInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
+use Botble\Ecommerce\Models\OrderReturn;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Tables\OrderReturnTable;
 use Exception;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 
 class OrderReturnController extends BaseController
 {
-    public function __construct(
-        protected OrderReturnInterface $orderReturnRepository,
-        protected OrderReturnInterface $orderReturnItemRepository,
-        protected ProductInterface $productRepository
-    ) {
+    public function __construct()
+    {
         if (! EcommerceHelper::isOrderReturnEnabled()) {
             abort(404);
         }
@@ -44,11 +41,9 @@ class OrderReturnController extends BaseController
 
     public function edit(int|string $id)
     {
-        $returnRequest = $this->orderReturnRepository->findOrFail($id, ['items', 'customer', 'order']);
+        $returnRequest = $this->findOrFail($id);
 
-        if ($returnRequest->store_id != $this->getStore()->id) {
-            abort(404);
-        }
+        $returnRequest->load(['items', 'customer', 'order']);
 
         Assets::addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
             ->addScriptsDirectly([
@@ -70,11 +65,9 @@ class OrderReturnController extends BaseController
 
     public function update(int|string $id, UpdateOrderReturnRequest $request, BaseHttpResponse $response)
     {
-        $returnRequest = $this->orderReturnRepository->findOrFail($id, ['items', 'customer', 'order']);
+        $returnRequest = $this->findOrFail($id);
 
-        if ($returnRequest->store_id != $this->getStore()->id) {
-            abort(404);
-        }
+        $returnRequest->load(['items', 'customer', 'order']);
 
         $data['return_status'] = $request->input('return_status');
 
@@ -101,14 +94,10 @@ class OrderReturnController extends BaseController
 
     public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
-        $orderReturn = $this->orderReturnRepository->findOrFail($id);
-
-        if ($orderReturn->store_id != $this->getStore()->id) {
-            abort(404);
-        }
+        $orderReturn = $this->findOrFail($id);
 
         try {
-            $this->orderReturnRepository->deleteBy(['id' => $id]);
+            $orderReturn->delete();
             event(new DeletedContentEvent(ORDER_RETURN_MODULE_SCREEN_NAME, $request, $orderReturn));
 
             return $response->setMessage(trans('core/base::notices.delete_success_message'));
@@ -119,26 +108,11 @@ class OrderReturnController extends BaseController
         }
     }
 
-    public function deletes(Request $request, BaseHttpResponse $response)
+    protected function findOrFail(int|string $id): OrderReturn|Model|null
     {
-        $ids = $request->input('ids');
-        if (empty($ids)) {
-            return $response
-                ->setError()
-                ->setMessage(trans('core/base::notices.no_select'));
-        }
-
-        foreach ($ids as $id) {
-            $orderReturn = $this->orderReturnRepository->findOrFail($id);
-
-            if ($orderReturn->store_id != $this->getStore()->id) {
-                continue;
-            }
-
-            $this->orderReturnRepository->delete($orderReturn);
-            event(new DeletedContentEvent(ORDER_RETURN_MODULE_SCREEN_NAME, $request, $orderReturn));
-        }
-
-        return $response->setMessage(trans('core/base::notices.delete_success_message'));
+        return OrderReturn::query()
+            ->where('id', $id)
+            ->where('store_id', $this->getStore()->id)
+            ->firstOrFail();
     }
 }

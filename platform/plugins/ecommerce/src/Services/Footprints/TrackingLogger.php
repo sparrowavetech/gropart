@@ -98,10 +98,12 @@ class TrackingLogger implements TrackingLoggerInterface
         $referrer = [];
 
         $referrer['referrer_url'] = $this->request->headers->get('referer');
+        $referrer['referrer_domain'] = null;
 
-        $parsedUrl = parse_url($referrer['referrer_url']);
-
-        $referrer['referrer_domain'] = $parsedUrl['host'] ?? null;
+        if ($referrer['referrer_url']) {
+            $parsedUrl = parse_url($referrer['referrer_url']);
+            $referrer['referrer_domain'] = $parsedUrl['host'] ?? null;
+        }
 
         return $referrer;
     }

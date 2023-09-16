@@ -21,7 +21,7 @@
                     <span>{{ __('Status') }}: </span>
                     <strong class="text-warning">{{ $orderReturn->return_status->label() }}</strong>
                 </p>
-                @if (! EcommerceHelper::allowPartialReturn())
+                @if (!EcommerceHelper::allowPartialReturn())
                     <p>
                         <span>{{ __('Reason') }}: </span>
                         <strong class="text-warning">{{ $orderReturn->reason->label() }}</strong>
@@ -29,7 +29,7 @@
                 @endif
             </div>
         </div>
-        <br/>
+        <br />
         <h5>{{ __('Return items') }}</h5>
         <div class="row">
             <div class="col-md-12">
@@ -48,15 +48,18 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($orderReturn->items as $item)
+                            @foreach ($orderReturn->items as $item)
                                 @php
                                     $orderProduct = $item->orderProduct;
                                 @endphp
                                 <tr>
                                     <td class="text-center">{{ $loop->iteration }}</td>
                                     <td class="text-center">
-                                        <img src="{{ RvMedia::getImageUrl($item->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}"
-                                            alt="{{ $item->product_name }}" width="50">
+                                        <img
+                                            src="{{ RvMedia::getImageUrl($item->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}"
+                                            alt="{{ $item->product_name }}"
+                                            width="50"
+                                        >
                                     </td>
                                     <td>
                                         {{ $item->product_name }}

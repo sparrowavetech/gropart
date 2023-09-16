@@ -1,6 +1,6 @@
 class StoreLocatorManagement {
     init() {
-        $(document).on('click', '.btn-trigger-show-store-locator', event => {
+        $(document).on('click', '.btn-trigger-show-store-locator', (event) => {
             event.preventDefault()
             let $current = $(event.currentTarget)
             let $modalBody
@@ -17,7 +17,7 @@ class StoreLocatorManagement {
                     $current.addClass('button-loading')
                     $modalBody.html('')
                 },
-                success: res => {
+                success: (res) => {
                     if (res.error) {
                         Botble.showError(res.message)
                     } else {
@@ -30,15 +30,14 @@ class StoreLocatorManagement {
                 complete: () => {
                     $current.removeClass('button-loading')
                 },
-                error: data => {
+                error: (data) => {
                     $current.removeClass('button-loading')
                     Botble.handleError(data)
                 },
             })
         })
 
-        let createOrUpdateStoreLocator = _self => {
-
+        let createOrUpdateStoreLocator = (_self) => {
             _self.addClass('button-loading')
 
             $.ajax({
@@ -46,7 +45,7 @@ class StoreLocatorManagement {
                 cache: false,
                 url: _self.closest('.modal-content').find('form').prop('action'),
                 data: _self.closest('.modal-content').find('form').serialize(),
-                success: res => {
+                success: (res) => {
                     if (!res.error) {
                         Botble.showSuccess(res.message)
                         $('.store-locator-wrap').load(window.location.href + ' .store-locator-wrap > *')
@@ -57,30 +56,30 @@ class StoreLocatorManagement {
                         _self.removeClass('button-loading')
                     }
                 },
-                error: res => {
+                error: (res) => {
                     Botble.handleError(res)
                     _self.removeClass('button-loading')
                 },
             })
         }
 
-        $(document).on('click', '#add-store-locator-button', event => {
+        $(document).on('click', '#add-store-locator-button', (event) => {
             event.preventDefault()
             createOrUpdateStoreLocator($(event.currentTarget))
         })
 
-        $(document).on('click', '#update-store-locator-button', event => {
+        $(document).on('click', '#update-store-locator-button', (event) => {
             event.preventDefault()
             createOrUpdateStoreLocator($(event.currentTarget))
         })
 
-        $(document).on('click', '.btn-trigger-delete-store-locator', event => {
+        $(document).on('click', '.btn-trigger-delete-store-locator', (event) => {
             event.preventDefault()
             $('#delete-store-locator-button').data('target', $(event.currentTarget).data('target'))
             $('#delete-store-locator-modal').modal('show')
         })
 
-        $(document).on('click', '#delete-store-locator-button', event => {
+        $(document).on('click', '#delete-store-locator-button', (event) => {
             event.preventDefault()
 
             let _self = $(event.currentTarget)
@@ -91,7 +90,7 @@ class StoreLocatorManagement {
                 type: 'POST',
                 cache: false,
                 url: _self.data('target'),
-                success: res => {
+                success: (res) => {
                     if (!res.error) {
                         Botble.showSuccess(res.message)
                         $('.store-locator-wrap').load(window.location.href + ' .store-locator-wrap > *')
@@ -102,14 +101,14 @@ class StoreLocatorManagement {
                         _self.removeClass('button-loading')
                     }
                 },
-                error: res => {
+                error: (res) => {
                     Botble.handleError(res)
                     _self.removeClass('button-loading')
                 },
             })
         })
 
-        $(document).on('click', '#change-primary-store-locator-button', event => {
+        $(document).on('click', '#change-primary-store-locator-button', (event) => {
             event.preventDefault()
 
             let _self = $(event.currentTarget)
@@ -121,7 +120,7 @@ class StoreLocatorManagement {
                 cache: false,
                 url: _self.closest('.modal-content').find('form').prop('action'),
                 data: _self.closest('.modal-content').find('form').serialize(),
-                success: res => {
+                success: (res) => {
                     if (!res.error) {
                         Botble.showSuccess(res.message)
                         $('.store-locator-wrap').load(window.location.href + ' .store-locator-wrap > *')
@@ -132,7 +131,7 @@ class StoreLocatorManagement {
                         _self.removeClass('button-loading')
                     }
                 },
-                error: res => {
+                error: (res) => {
                     Botble.handleError(res)
                     _self.removeClass('button-loading')
                 },

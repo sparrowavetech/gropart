@@ -56,12 +56,6 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
             ], function () {
                 Route::resource('', 'ShippingRuleItemController')->parameters(['' => 'item']);
 
-                Route::delete('items/destroy', [
-                    'as' => 'deletes',
-                    'uses' => 'ShippingRuleItemController@deletes',
-                    'permission' => 'ecommerce.shipping-rule-items.destroy',
-                ]);
-
                 Route::get('items/{rule_id}', [
                     'as' => 'items',
                     'uses' => 'ShippingRuleItemController@items',

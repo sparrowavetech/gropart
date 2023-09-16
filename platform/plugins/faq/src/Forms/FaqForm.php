@@ -6,7 +6,7 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Faq\Http\Requests\FaqRequest;
 use Botble\Faq\Models\Faq;
-use Botble\Faq\Repositories\Interfaces\FaqCategoryInterface;
+use Botble\Faq\Models\FaqCategory;
 
 class FaqForm extends FormAbstract
 {
@@ -19,7 +19,7 @@ class FaqForm extends FormAbstract
             ->add('category_id', 'customSelect', [
                 'label' => trans('plugins/faq::faq.category'),
                 'label_attr' => ['class' => 'control-label required'],
-                'choices' => ['' => trans('plugins/faq::faq.select_category')] + app(FaqCategoryInterface::class)->pluck('name', 'id'),
+                'choices' => ['' => trans('plugins/faq::faq.select_category')] + FaqCategory::query()->pluck('name', 'id')->all(),
             ])
             ->add('question', 'text', [
                 'label' => trans('plugins/faq::faq.question'),

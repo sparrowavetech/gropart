@@ -41,6 +41,10 @@ class HandleRemoveCouponService
             session()->forget('applied_coupon_code');
         }
 
+        if (session()->has('auto_apply_coupon_code') && session('auto_apply_coupon_code') === $couponCode) {
+            session()->forget('auto_apply_coupon_code');
+        }
+
         return [
             'error' => false,
         ];

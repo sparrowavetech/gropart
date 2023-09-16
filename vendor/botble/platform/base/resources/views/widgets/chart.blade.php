@@ -1,4 +1,7 @@
-<div @class(['mb-3', 'widget-item', 'col-md-' . $columns => $columns]) id="{{ $id . '-parent' }}">
+<div
+    id="{{ $id . '-parent' }}"
+    @class(['mb-3', 'widget-item', 'col-md-' . $columns => $columns])
+>
     <div class="bg-white p-3">
         <h5>{{ $label }}</h5>
         <div id="{{ $id }}"></div>

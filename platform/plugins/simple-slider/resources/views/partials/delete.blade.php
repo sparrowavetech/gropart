@@ -1,5 +1,9 @@
 <div class="modal-box-container">
-    <form action="{{ route('simple-slider-item.destroy', $slider->id) }}" method="post" class="form-xs">
+    <form
+        class="form-xs"
+        action="{{ route('simple-slider-item.destroy', $slider->id) }}"
+        method="post"
+    >
         @csrf
         @method('DELETE')
         <div class="modal-title">
@@ -13,8 +17,15 @@
             </div>
         </div>
         <div class="modal-footer">
-            <a href="javascript:;" class="btn btn-primary" data-fancybox-close>{{ trans('core/base::tables.cancel') }}</a>
-            <button type="submit" class="btn btn-info btn-delete-slider">{{ trans('core/base::tables.delete') }}</button>
+            <a
+                class="btn btn-primary"
+                data-fancybox-close
+                href="javascript:;"
+            >{{ trans('core/base::tables.cancel') }}</a>
+            <button
+                class="btn btn-info btn-delete-slider"
+                type="submit"
+            >{{ trans('core/base::tables.delete') }}</button>
         </div>
     </form>
 </div>

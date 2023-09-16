@@ -26,12 +26,6 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
                 'permission' => 'reviews.destroy',
             ]);
 
-            Route::delete('items/destroy', [
-                'as' => 'deletes',
-                'uses' => 'ReviewController@deletes',
-                'permission' => 'reviews.destroy',
-            ]);
-
             Route::post('{review}/publish', [
                 'as' => 'publish',
                 'uses' => 'PublishedReviewController@store',

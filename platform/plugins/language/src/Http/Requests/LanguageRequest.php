@@ -25,7 +25,7 @@ class LanguageRequest extends Request
                 Rule::in($languages->pluck('0')->unique()->all()),
             ],
             'lang_flag' => 'required|string',
-            'lang_is_rtl' => 'required|string',
+            'lang_is_rtl' => 'required|boolean',
             'lang_order' => 'required|numeric',
         ];
     }

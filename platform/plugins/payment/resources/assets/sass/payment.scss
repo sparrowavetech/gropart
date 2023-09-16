@@ -64,7 +64,9 @@
     color: #e4e4e4;
 }
 
-.magic-radio[disabled] + label:hover, .magic-radio[disabled] + label:before, .magic-radio[disabled] + label:after,
+.magic-radio[disabled] + label:hover,
+.magic-radio[disabled] + label:before,
+.magic-radio[disabled] + label:after,
 .magic-checkbox[disabled] + label:hover,
 .magic-checkbox[disabled] + label:before,
 .magic-checkbox[disabled] + label:after {
@@ -175,7 +177,7 @@
         border-bottom: none;
 
         &:last-child {
-            border-bottom: 1px solid rgba(0, 0, 0, .125);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.125);
         }
     }
 }

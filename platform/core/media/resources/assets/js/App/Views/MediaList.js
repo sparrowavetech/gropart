@@ -26,9 +26,9 @@ export class MediaList {
         }
 
         template = template
-            .replace(/__noItemIcon__/gi, Helpers.trans('no_item.' + view_in +'.icon') || '')
-            .replace(/__noItemTitle__/gi, Helpers.trans('no_item.' + view_in +'.title') || '')
-            .replace(/__noItemMessage__/gi, Helpers.trans('no_item.' + view_in +'.message') || '')
+            .replace(/__noItemIcon__/gi, Helpers.trans('no_item.' + view_in + '.icon') || '')
+            .replace(/__noItemTitle__/gi, Helpers.trans('no_item.' + view_in + '.title') || '')
+            .replace(/__noItemMessage__/gi, Helpers.trans('no_item.' + view_in + '.message') || '')
 
         let $result = $(template)
         let $itemsWrapper = $result.find('ul')

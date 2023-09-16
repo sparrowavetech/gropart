@@ -1,10 +1,22 @@
 <div class="table-actions">
     @if (!empty($edit))
-        <a href="{{ route($edit, $item->id) }}" class="btn btn-icon btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-original-title="{{ trans('core/base::tables.edit') }}"><i class="fa fa-edit"></i></a>
+        <a
+            class="btn btn-icon btn-sm btn-primary"
+            data-bs-toggle="tooltip"
+            data-bs-original-title="{{ trans('core/base::tables.edit') }}"
+            href="{{ route($edit, $item->id) }}"
+        ><i class="fa fa-edit"></i></a>
     @endif
 
     @if (!empty($delete))
-        <a href="#" class="btn btn-icon btn-sm btn-danger deleteDialog" data-section="{{ route($delete, $item->id) }}" role="button" data-bs-toggle="tooltip" data-bs-original-title="{{ trans('core/base::tables.delete_entry') }}" >
+        <a
+            class="btn btn-icon btn-sm btn-danger deleteDialog"
+            data-section="{{ route($delete, $item->id) }}"
+            data-bs-toggle="tooltip"
+            data-bs-original-title="{{ trans('core/base::tables.delete_entry') }}"
+            href="#"
+            role="button"
+        >
             <i class="fa fa-trash"></i>
         </a>
     @endif

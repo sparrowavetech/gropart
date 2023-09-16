@@ -5,6 +5,7 @@ namespace Botble\Location;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseQueryBuilder;
 use Botble\Base\Supports\Zipper;
+use Botble\Language\Facades\Language;
 use Botble\Location\Events\DownloadedCities;
 use Botble\Location\Events\DownloadedCountry;
 use Botble\Location\Events\DownloadedStates;
@@ -25,13 +26,12 @@ class Location
 {
     public function getStates(): array
     {
-        $states = State::query()
+        return State::query()
             ->wherePublished()
             ->orderBy('order')
             ->orderBy('name')
-            ->get();
-
-        return $states->pluck('name', 'id')->all();
+            ->pluck('name', 'id')
+            ->all();
     }
 
     public function getCitiesByState(int|string|null $stateId): array
@@ -78,10 +78,10 @@ class Location
             return null;
         }
 
-        return State::query()->where([
-            'id' => $stateId,
-            'status' => BaseStatusEnum::PUBLISHED,
-        ])->value('name');
+        return State::query()
+            ->wherePublished()
+            ->where('id', $stateId)
+            ->value('name');
     }
 
     public function isSupported(string|object $model): bool
@@ -286,9 +286,10 @@ class Location
 
     public function filter($model, int|string $cityId = null, string $location = null, int|string $stateId = null)
     {
-        $className = get_class($model);
-        if ($className == BaseQueryBuilder::class) {
+        if ($model instanceof BaseQueryBuilder) {
             $className = get_class($model->getModel());
+        } else {
+            $className = get_class($model);
         }
 
         if ($this->isSupported($className)) {
@@ -299,22 +300,36 @@ class Location
             } elseif ($location) {
                 $locationData = explode(',', $location);
 
+                $cityRelation = 'city';
+                $stateRelation = 'state';
+
+                if (
+                    is_plugin_active('language') &&
+                    is_plugin_active('language-advanced') &&
+                    Language::getCurrentLocale() != Language::getDefaultLocale()
+                ) {
+                    $cityRelation = 'city.translations';
+                    $stateRelation = 'state.translations';
+                }
+
                 if (count($locationData) > 1) {
                     $model = $model
-                        ->whereHas('city', function ($query) use ($locationData) {
+                        ->whereHas($cityRelation, function ($query) use ($locationData) {
                             $query->where('name', 'LIKE', '%' . trim($locationData[0]) . '%');
                         })
-                        ->whereHas('state', function ($query) use ($locationData) {
+                        ->whereHas($stateRelation, function ($query) use ($locationData) {
                             $query->where('name', 'LIKE', '%' . trim($locationData[1]) . '%');
                         });
                 } else {
                     $model = $model
-                        ->where(function (Builder $query) use ($location) {
-                            $query->whereHas('city', function ($q) use ($location) {
-                                $q->where('name', 'LIKE', '%' . $location . '%');
-                            })->orWhereHas('state', function ($q) use ($location) {
-                                $q->where('name', 'LIKE', '%' . $location . '%');
-                            });
+                        ->where(function (Builder $query) use ($cityRelation, $stateRelation, $location) {
+                            $query
+                                ->whereHas($cityRelation, function ($query) use ($location) {
+                                    $query->where('name', 'LIKE', '%' . $location . '%');
+                                })
+                                ->orWhereHas($stateRelation, function ($query) use ($location) {
+                                    $query->where('name', 'LIKE', '%' . $location . '%');
+                                });
                         });
                 }
             }

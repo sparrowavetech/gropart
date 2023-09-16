@@ -7,44 +7,35 @@ use Botble\Ecommerce\Enums\OrderReturnStatusEnum;
 use Botble\Ecommerce\Facades\OrderReturnHelper;
 use Botble\Ecommerce\Models\OrderReturn;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Table\DataTables;
-use Illuminate\Contracts\Routing\UrlGenerator;
+use Botble\Table\Actions\DeleteAction;
+use Botble\Table\Actions\EditAction;
+use Botble\Table\BulkActions\DeleteBulkAction;
+use Botble\Table\Columns\Column;
+use Botble\Table\Columns\CreatedAtColumn;
+use Botble\Table\Columns\EnumColumn;
+use Botble\Table\Columns\IdColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 
 class OrderReturnTable extends TableAbstract
 {
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, OrderReturn $model)
+    public function setup(): void
     {
-        parent::__construct($table, $urlGenerator);
-
-        $this->model = $model;
-        $this->hasActions = true;
-        $this->hasFilter = true;
-
-        if (! Auth::user()->hasAnyPermission(['order_returns.edit', 'order_returns.destroy'])) {
-            $this->hasOperations = false;
-            $this->hasActions = false;
-        }
+        $this
+            ->model(OrderReturn::class)
+            ->addActions([
+                EditAction::make()->route('order_returns.edit'),
+                DeleteAction::make()->route('order_returns.destroy'),
+            ]);
     }
 
     public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('checkbox', function (OrderReturn $item) {
-                return $this->getCheckbox($item->id);
-            })
-            ->editColumn('return_status', function (OrderReturn $item) {
-                return BaseHelper::clean($item->return_status->toHtml());
-            })
-            ->editColumn('reason', function (OrderReturn $item) {
-                return BaseHelper::clean($item->reason->toHtml());
-            })
             ->editColumn('order_id', function (OrderReturn $item) {
                 return BaseHelper::clean($item->order->code);
             })
@@ -54,15 +45,9 @@ class OrderReturnTable extends TableAbstract
                 }
 
                 return BaseHelper::clean($item->customer->name);
-            })
-            ->editColumn('created_at', function (OrderReturn $item) {
-                return BaseHelper::formatDate($item->created_at);
             });
 
         $data = $data
-            ->addColumn('operations', function (OrderReturn $item) {
-                return $this->getOperations('order_returns.edit', 'order_returns.destroy', $item);
-            })
             ->filter(function ($query) {
                 $keyword = $this->request->input('search.value');
                 if ($keyword) {
@@ -82,7 +67,8 @@ class OrderReturnTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->getModel()
+        $query = $this
+            ->getModel()
             ->query()
             ->select([
                 'id',
@@ -95,7 +81,7 @@ class OrderReturnTable extends TableAbstract
             ])
             ->with(['customer', 'order', 'items'])
             ->withCount('items')
-            ->orderBy('id', 'desc');
+            ->orderByDesc('id');
 
         return $this->applyScopes($query);
     }
@@ -103,32 +89,22 @@ class OrderReturnTable extends TableAbstract
     public function columns(): array
     {
         return [
-            'id' => [
-                'title' => trans('core/base::tables.id'),
-                'width' => '20px',
-                'class' => 'text-start',
-            ],
-            'order_id' => [
-                'title' => trans('plugins/ecommerce::order.order_id'),
-                'class' => 'text-start',
-            ],
-            'user_id' => [
-                'title' => trans('plugins/ecommerce::order.customer_label'),
-                'class' => 'text-start',
-            ],
-            'items_count' => [
-                'title' => trans('plugins/ecommerce::order.order_return_items_count'),
-                'class' => 'text-center',
-            ],
-            'return_status' => [
-                'title' => trans('core/base::tables.status'),
-                'class' => 'text-center',
-            ],
-            'created_at' => [
-                'title' => trans('core/base::tables.created_at'),
-                'width' => '100px',
-                'class' => 'text-start',
-            ],
+            IdColumn::make(),
+            Column::make('order_id')
+                ->title(trans('plugins/ecommerce::order.order_id'))
+                ->alignLeft(),
+            Column::make('user_id')
+                ->title(trans('plugins/ecommerce::order.customer_label'))
+                ->alignLeft(),
+            Column::make('items_count')
+                ->title(trans('plugins/ecommerce::order.order_return_items_count'))
+                ->orderable(false)
+                ->searchable(false),
+            EnumColumn::make('reason')
+                ->title(trans('plugins/ecommerce::order.return_reason')),
+            EnumColumn::make('return_status')
+                ->title(trans('core/base::tables.status')),
+            CreatedAtColumn::make(),
         ];
     }
 
@@ -158,7 +134,9 @@ class OrderReturnTable extends TableAbstract
 
     public function bulkActions(): array
     {
-        return $this->addDeleteAction(route('order_returns.deletes'), 'order_returns.destroy', parent::bulkActions());
+        return [
+            DeleteBulkAction::make()->permission('order_returns.destroy'),
+        ];
     }
 
     public function saveBulkChangeItem(Model|OrderReturn $item, string $inputKey, string|null $inputValue): Model|bool

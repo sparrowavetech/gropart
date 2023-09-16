@@ -1,8 +1,7 @@
 <?php
 
 use Botble\Ecommerce\Models\Address;
-use Botble\Ecommerce\Repositories\Interfaces\AddressInterface;
-use Botble\Ecommerce\Repositories\Interfaces\WishlistInterface;
+use Botble\Ecommerce\Models\Wishlist;
 use Illuminate\Support\Collection;
 
 if (! function_exists('is_added_to_wishlist')) {
@@ -12,10 +11,12 @@ if (! function_exists('is_added_to_wishlist')) {
             return false;
         }
 
-        return app(WishlistInterface::class)->count([
+        return Wishlist::query()
+            ->where([
                 'product_id' => $productId,
                 'customer_id' => auth('customer')->id(),
-            ]) > 0;
+            ])
+            ->exists();
     }
 }
 
@@ -26,7 +27,7 @@ if (! function_exists('count_customer_addresses')) {
             return 0;
         }
 
-        return app(AddressInterface::class)->count(['customer_id' => auth('customer')->id()]);
+        return Address::query()->where('customer_id', auth('customer')->id())->count();
     }
 }
 
@@ -37,14 +38,10 @@ if (! function_exists('get_customer_addresses')) {
             return collect();
         }
 
-        return app(AddressInterface::class)->advancedGet([
-            'condition' => [
-                'customer_id' => auth('customer')->id(),
-            ],
-            'order_by' => [
-                'is_default' => 'DESC',
-            ],
-        ]);
+        return Address::query()
+            ->where('customer_id', auth('customer')->id())
+            ->orderByDesc('created_at')
+            ->get();
     }
 }
 
@@ -55,9 +52,11 @@ if (! function_exists('get_default_customer_address')) {
             return null;
         }
 
-        return app(AddressInterface::class)->getFirstBy([
-            'is_default' => 1,
-            'customer_id' => auth('customer')->id(),
-        ]);
+        return Address::query()
+            ->where([
+                'is_default' => 1,
+                'customer_id' => auth('customer')->id(),
+            ])
+            ->first();
     }
 }

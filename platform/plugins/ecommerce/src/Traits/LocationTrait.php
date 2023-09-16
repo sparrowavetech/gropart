@@ -6,6 +6,7 @@ use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Location\Models\City;
 use Botble\Location\Models\Country;
 use Botble\Location\Models\State;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -17,7 +18,7 @@ trait LocationTrait
     {
         $value = $this->country;
 
-        if (! $value || ! is_plugin_active('location')) {
+        if (! $value || ! EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
             return $value;
         }
 
@@ -51,7 +52,7 @@ trait LocationTrait
     {
         $value = $this->state;
 
-        if (! $value || ! is_plugin_active('location')) {
+        if (! $value || ! EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
             return $value;
         }
 
@@ -70,7 +71,7 @@ trait LocationTrait
     {
         $value = $this->city;
 
-        if (! $value || ! is_plugin_active('location')) {
+        if (! $value || ! EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
             return $value;
         }
 
@@ -85,12 +86,16 @@ trait LocationTrait
         return $value;
     }
 
-    public function getFullAddressAttribute(): string
+    public function fullAddress(): Attribute
     {
-        return ($this->address ? ($this->address . ', ') : null) .
-            ($this->city_name ? ($this->city_name . ', ') : null) .
-            ($this->state_name ? ($this->state_name . ', ') : null) .
-            ($this->country_name ?: null) .
-            (EcommerceHelper::isZipCodeEnabled() && $this->zip_code ? ', ' . $this->zip_code : '');
+        return Attribute::make(
+            get: fn () => implode(', ', array_filter([
+                $this->address,
+                $this->city_name,
+                $this->state_name,
+                EcommerceHelper::isUsingInMultipleCountries() ? $this->country_name : '',
+                EcommerceHelper::isZipCodeEnabled() ? $this->zip_code : '',
+            ])),
+        );
     }
 }

@@ -1,6 +1,9 @@
 <div class="col-lg-7 mb-2">
     @if ($stats->isNotEmpty())
-        <div class="chart" id="stats-chart"></div>
+        <div
+            class="chart"
+            id="stats-chart"
+        ></div>
     @else
         <div class="h-100 d-flex align-items-center justify-content-center bg-light">
             <div>{{ trans('core/base::tables.no_data') }}</div>
@@ -19,7 +22,10 @@
         </div>
         <div class="info-box-content">
             <span class="info-box-text">{{ trans('plugins/analytics::analytics.sessions') }}</span>
-            <span class="info-box-number" id="sessions_total">{{ number_format($total['ga:sessions']) }}</span>
+            <span
+                class="info-box-number"
+                id="sessions_total"
+            >{{ number_format($total['ga:sessions']) }}</span>
         </div>
     </div>
 </div>
@@ -31,7 +37,10 @@
         </div>
         <div class="info-box-content">
             <span class="info-box-text">{{ trans('plugins/analytics::analytics.visitors') }}</span>
-            <span class="info-box-number" id="users_total">{{ number_format($total['ga:users']) }}</span>
+            <span
+                class="info-box-number"
+                id="users_total"
+            >{{ number_format($total['ga:users']) }}</span>
         </div>
     </div>
 </div>
@@ -43,7 +52,10 @@
         </div>
         <div class="info-box-content">
             <span class="info-box-text">{{ trans('plugins/analytics::analytics.pageviews') }}</span>
-            <span class="info-box-number" id="page_views_total">{{ number_format($total['ga:pageviews']) }}</span>
+            <span
+                class="info-box-number"
+                id="page_views_total"
+            >{{ number_format($total['ga:pageviews']) }}</span>
         </div>
     </div>
 </div>
@@ -55,7 +67,10 @@
         </div>
         <div class="info-box-content">
             <span class="info-box-text">{{ trans('plugins/analytics::analytics.bounce_rate') }}</span>
-            <span class="info-box-number" id="bounce_rate_total">{{ round($total['ga:bounceRate'], 2) }}%</span>
+            <span
+                class="info-box-number"
+                id="bounce_rate_total"
+            >{{ round($total['ga:bounceRate'], 2) }}%</span>
         </div>
     </div>
 </div>

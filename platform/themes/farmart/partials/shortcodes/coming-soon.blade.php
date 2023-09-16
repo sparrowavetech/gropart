@@ -9,22 +9,33 @@
                     <p class="mb-4">{{ $shortcode->subtitle }}</p>
                     @if ($shortcode->time)
                         <div class="countdown-wrapper mt-3">
-                            <div class="expire-countdown" data-expire="{{ now()->diffInSeconds($shortcode->time) }}">
+                            <div
+                                class="expire-countdown"
+                                data-expire="{{ now()->diffInSeconds($shortcode->time) }}"
+                            >
 
                             </div>
                         </div>
                     @endif
                     @if (theme_option('social_links'))
                         <div class="footer-socials mt-5">
-                            <p class="me-3 mb-0">{!! BaseHelper::clean($shortcode->social_title)!!}:</p>
+                            <p class="me-3 mb-0">{!! BaseHelper::clean($shortcode->social_title) !!}:</p>
                             <div class="footer-socials-container mt-3">
                                 <ul class="ps-0 mb-0">
-                                    @foreach(json_decode(theme_option('social_links'), true) as $socialLink)
+                                    @foreach (json_decode(theme_option('social_links'), true) as $socialLink)
                                         @if (count($socialLink) == 3)
-                                            <li class="d-inline-block @if (!$loop->first) ps-1 @endif pe-2">
-                                                <a target="_blank" href="{{ Arr::get($socialLink[2], 'value') }}" title="{{ Arr::get($socialLink[0], 'value') }}">
-                                                    <img class="lazyload" data-src="{{ RvMedia::getImageUrl(Arr::get($socialLink[1], 'value')) }}"
-                                                         alt="{{ Arr::get($socialLink[0], 'value') }}" />
+                                            <li
+                                                class="d-inline-block @if (!$loop->first) ps-1 @endif pe-2">
+                                                <a
+                                                    href="{{ Arr::get($socialLink[2], 'value') }}"
+                                                    title="{{ Arr::get($socialLink[0], 'value') }}"
+                                                    target="_blank"
+                                                >
+                                                    <img
+                                                        class="lazyload"
+                                                        data-src="{{ RvMedia::getImageUrl(Arr::get($socialLink[1], 'value')) }}"
+                                                        alt="{{ Arr::get($socialLink[0], 'value') }}"
+                                                    />
                                                 </a>
                                             </li>
                                         @endif
@@ -37,7 +48,11 @@
             </div>
         </div>
         @if ($shortcode->image)
-            <div class="col-md-6 d-none d-md-block"><img class="lazyload img-cover h-100 w-100" data-src="{{ RvMedia::getImageUrl($shortcode->image) }}" alt="coming-soon"></div>
+            <div class="col-md-6 d-none d-md-block"><img
+                    class="lazyload img-cover h-100 w-100"
+                    data-src="{{ RvMedia::getImageUrl($shortcode->image) }}"
+                    alt="coming-soon"
+                ></div>
         @endif
     </div>
 </div>

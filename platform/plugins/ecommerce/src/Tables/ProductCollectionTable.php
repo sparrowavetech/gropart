@@ -3,89 +3,49 @@
 namespace Botble\Ecommerce\Tables;
 
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Facades\Html;
 use Botble\Ecommerce\Models\ProductCollection;
-use Botble\Media\Facades\RvMedia;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Table\DataTables;
-use Illuminate\Contracts\Routing\UrlGenerator;
+use Botble\Table\Actions\DeleteAction;
+use Botble\Table\Actions\EditAction;
+use Botble\Table\BulkActions\DeleteBulkAction;
+use Botble\Table\Columns\Column;
+use Botble\Table\Columns\CreatedAtColumn;
+use Botble\Table\Columns\IdColumn;
+use Botble\Table\Columns\ImageColumn;
+use Botble\Table\Columns\NameColumn;
+use Botble\Table\Columns\StatusColumn;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class ProductCollectionTable extends TableAbstract
 {
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, ProductCollection $model)
+    public function setup(): void
     {
-        parent::__construct($table, $urlGenerator);
-
-        $this->model = $model;
-        $this->hasActions = true;
-        $this->hasFilter = true;
-
-        if (! Auth::user()->hasAnyPermission([
-            'product-collections.edit',
-            'product-collections.destroy',
-        ])) {
-            $this->hasOperations = false;
-            $this->hasActions = false;
-        }
-    }
-
-    public function ajax(): JsonResponse
-    {
-        $data = $this->table
-            ->eloquent($this->query())
-            ->editColumn('name', function (ProductCollection $item) {
-                if (! Auth::user()->hasPermission('product-collections.edit')) {
-                    return BaseHelper::clean($item->name);
-                }
-
-                return Html::link(route('product-collections.edit', $item->id), BaseHelper::clean($item->name));
-            })
-            ->editColumn('image', function (ProductCollection $item) {
-                return Html::image(
-                    RvMedia::getImageUrl($item->image, 'thumb', false, RvMedia::getDefaultImage()),
-                    BaseHelper::clean($item->name),
-                    ['width' => 50]
-                );
-            })
-            ->editColumn('checkbox', function (ProductCollection $item) {
-                return $this->getCheckbox($item->id);
-            })
-            ->editColumn('created_at', function (ProductCollection $item) {
-                return BaseHelper::formatDate($item->created_at);
-            })
-            ->editColumn('status', function (ProductCollection $item) {
-                return BaseHelper::clean($item->status->toHtml());
-            })
-            ->addColumn('operations', function (ProductCollection $item) {
-                return $this->getOperations(
-                    'product-collections.edit',
-                    'product-collections.destroy',
-                    $item
-                );
-            });
-
-        return $this->toJson($data);
+        $this
+            ->model(ProductCollection::class)
+            ->addActions([
+                EditAction::make()->route('product-collections.edit'),
+                DeleteAction::make()->route('product-collections.destroy'),
+            ]);
     }
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->getModel()->query()->select([
-            'id',
-            'name',
-            'image',
-            'slug',
-            'created_at',
-            'status',
-        ]);
+        $query = $this
+            ->getModel()
+            ->query()
+            ->select([
+                'id',
+                'name',
+                'image',
+                'slug',
+                'created_at',
+                'status',
+            ]);
 
         return $this->applyScopes($query);
     }
@@ -93,34 +53,14 @@ class ProductCollectionTable extends TableAbstract
     public function columns(): array
     {
         return [
-            'id' => [
-                'title' => trans('core/base::tables.id'),
-                'width' => '20px',
-                'class' => 'text-start',
-            ],
-            'image' => [
-                'title' => trans('core/base::tables.image'),
-                'width' => '70px',
-                'class' => 'text-start',
-            ],
-            'name' => [
-                'title' => trans('core/base::tables.name'),
-                'class' => 'text-start',
-            ],
-            'slug' => [
-                'title' => trans('core/base::forms.slug'),
-                'class' => 'text-start',
-            ],
-            'created_at' => [
-                'title' => trans('core/base::tables.created_at'),
-                'width' => '100px',
-                'class' => 'text-start',
-            ],
-            'status' => [
-                'title' => trans('core/base::tables.status'),
-                'width' => '100px',
-                'class' => 'text-start',
-            ],
+            IdColumn::make(),
+            ImageColumn::make(),
+            NameColumn::make()->route('product-collections.edit'),
+            Column::make('slug')
+                ->title(trans('core/base::forms.slug'))
+                ->alignLeft(),
+            CreatedAtColumn::make(),
+            StatusColumn::make(),
         ];
     }
 
@@ -131,11 +71,9 @@ class ProductCollectionTable extends TableAbstract
 
     public function bulkActions(): array
     {
-        return $this->addDeleteAction(
-            route('product-collections.deletes'),
-            'product-collections.destroy',
-            parent::bulkActions()
-        );
+        return [
+            DeleteBulkAction::make()->permission('product-collections.destroy'),
+        ];
     }
 
     public function getBulkChanges(): array

@@ -11,7 +11,7 @@ class AddShippingRegionRequest extends Request
     public function rules(): array
     {
         return [
-            'region' => ['sometimes', 'string', Rule::in(array_keys(EcommerceHelper::getAvailableCountries()))],
+            'region' => ['nullable', 'string', Rule::in(array_keys(EcommerceHelper::getAvailableCountries()))],
         ];
     }
 }

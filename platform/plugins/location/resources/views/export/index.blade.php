@@ -22,10 +22,13 @@
                         </div>
                     </div>
                     <div class="form-group mb-3 d-grid">
-                        <button type="button" href="{{ route('location.export.process') }}"
+                        <button
                             class="btn btn-info btn-export-data"
                             data-loading-text="{{ trans('plugins/location::location.exporting') }}"
-                            data-filename="exported_location.csv">
+                            data-filename="exported_location.csv"
+                            type="button"
+                            href="{{ route('location.export.process') }}"
+                        >
                             {{ trans('plugins/location::location.start_export') }}
                         </button>
                     </div>

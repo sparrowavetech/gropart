@@ -1,7 +1,7 @@
 @if ($contact)
     <div id="reply-wrapper">
         @if (count($contact->replies) > 0)
-            @foreach($contact->replies as $reply)
+            @foreach ($contact->replies as $reply)
                 <p>{{ trans('plugins/contact::contact.tables.time') }}: <i>{{ $reply->created_at }}</i></p>
                 <p>{{ trans('plugins/contact::contact.tables.content') }}:</p>
                 <pre class="message-content">{!! BaseHelper::clean($reply->message) !!}</pre>
@@ -19,8 +19,13 @@
         </div>
 
         <div class="form-group mb-3">
-            <input type="hidden" value="{{ $contact->id }}" id="input_contact_id">
-            <button class="btn btn-success answer-send-button"><i class="fas fa-reply"></i> {{ trans('plugins/contact::contact.send') }}</button>
+            <input
+                id="input_contact_id"
+                type="hidden"
+                value="{{ $contact->id }}"
+            >
+            <button class="btn btn-success answer-send-button"><i class="fas fa-reply"></i>
+                {{ trans('plugins/contact::contact.send') }}</button>
         </div>
     </div>
 @endif

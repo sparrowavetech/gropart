@@ -8,7 +8,6 @@ use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Models\Review;
-use Botble\Ecommerce\Repositories\Interfaces\ReviewInterface;
 use Botble\Ecommerce\Tables\ReviewTable;
 use Exception;
 use Illuminate\Contracts\View\View;
@@ -17,10 +16,6 @@ use Illuminate\Http\Request;
 
 class ReviewController extends BaseController
 {
-    public function __construct(protected ReviewInterface $reviewRepository)
-    {
-    }
-
     public function index(ReviewTable $dataTable)
     {
         PageTitle::setTitle(trans('plugins/ecommerce::review.name'));
@@ -49,8 +44,8 @@ class ReviewController extends BaseController
     public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
-            $review = $this->reviewRepository->findOrFail($id);
-            $this->reviewRepository->delete($review);
+            $review = Review::query()->findOrFail($id);
+            $review->delete();
 
             event(new DeletedContentEvent(REVIEW_MODULE_SCREEN_NAME, $request, $review));
 
@@ -64,24 +59,5 @@ class ReviewController extends BaseController
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
-    }
-
-    public function deletes(Request $request, BaseHttpResponse $response)
-    {
-        $ids = $request->input('ids');
-        if (empty($ids)) {
-            return $response
-                ->setError()
-                ->setMessage(trans('core/base::notices.no_select'));
-        }
-
-        foreach ($ids as $id) {
-            $review = $this->reviewRepository->findOrFail($id);
-            $this->reviewRepository->delete($review);
-
-            event(new DeletedContentEvent(REVIEW_MODULE_SCREEN_NAME, $request, $review));
-        }
-
-        return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 }

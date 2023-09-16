@@ -15,6 +15,7 @@ use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -58,7 +59,6 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
                 'ec_product_variations.id'
             )
             ->where('configurable_product_id', $product->getKey())
-            ->where('ec_product_attributes.status', BaseStatusEnum::PUBLISHED)
             ->select('ec_product_attributes.*')
             ->distinct();
 
@@ -69,7 +69,6 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
     {
         $params = array_merge([
             'condition' => [
-                'status' => BaseStatusEnum::PUBLISHED,
                 'is_variation' => 0,
             ],
             'order_by' => [
@@ -95,10 +94,6 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
             'categories' => [
                 'by' => 'id',
                 'value_in' => [],
-            ],
-            'condition' => [
-                'ec_products.status' => BaseStatusEnum::PUBLISHED,
-                'ec_products.is_variation' => 0,
             ],
             'order_by' => [
                 'ec_products.order' => 'ASC',
@@ -130,7 +125,6 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
 
         $params = array_merge([
             'condition' => [
-                'status' => BaseStatusEnum::PUBLISHED,
                 'is_variation' => 0,
             ],
             'order_by' => [
@@ -146,6 +140,7 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
         ], $params);
 
         $this->model = $this->model
+            ->wherePublished()
             ->where(function (EloquentBuilder $query) {
                 return $query
                     ->where(function (EloquentBuilder $subQuery) {
@@ -212,10 +207,6 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
                 'by' => 'id',
                 'value_in' => [],
             ],
-            'condition' => [
-                'ec_products.status' => BaseStatusEnum::PUBLISHED,
-                'ec_products.is_variation' => 0,
-            ],
             'order_by' => [
                 'ec_products.order' => 'ASC',
                 'ec_products.created_at' => 'DESC',
@@ -243,10 +234,7 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
     {
         $params = array_merge([
             'brand_id' => null,
-            'condition' => [
-                'status' => BaseStatusEnum::PUBLISHED,
-                'is_variation' => 0,
-            ],
+            'condition' => [],
             'order_by' => [
                 'order' => 'ASC',
                 'created_at' => 'DESC',
@@ -278,10 +266,6 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
                 'by' => 'id',
                 'value_in' => [],
             ],
-            'condition' => [
-                'ec_products.status' => BaseStatusEnum::PUBLISHED,
-                'ec_products.is_variation' => 0,
-            ],
             'order_by' => [
                 'ec_products.order' => 'ASC',
                 'ec_products.created_at' => 'DESC',
@@ -311,10 +295,6 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
             'product_tag' => [
                 'by' => 'id',
                 'value_in' => [],
-            ],
-            'condition' => [
-                'ec_products.status' => BaseStatusEnum::PUBLISHED,
-                'ec_products.is_variation' => 0,
             ],
             'order_by' => [
                 'ec_products.order' => 'ASC',
@@ -350,7 +330,6 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
             'brands' => [],
             'attributes' => [],
             'collections' => [],
-            'count_attribute_groups' => null,
         ], $filters);
 
         $isUsingDefaultCurrency = get_application_currency_id() == cms_currency()->getDefaultCurrency()->getKey();
@@ -367,7 +346,6 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
 
         $params = array_merge([
             'condition' => [
-                'ec_products.status' => BaseStatusEnum::PUBLISHED,
                 'ec_products.is_variation' => 0,
             ],
             'order_by' => Arr::get($filters, 'order_by'),
@@ -392,10 +370,11 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
 
         $this->model = $this->model
             ->distinct()
+            ->wherePublished()
             ->join(DB::raw('
                 (
                     SELECT DISTINCT
-                        `ec_products`.id,
+                        ec_products.id,
                         CASE
                             WHEN (
                                 ec_products.sale_type = 0 AND
@@ -429,7 +408,7 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
                             ) THEN ec_products.sale_price
                             ELSE ec_products.price
                         END AS final_price
-                    FROM `ec_products`
+                    FROM ec_products
                 ) AS products_with_final_price
             '), function ($join) {
                 return $join->on('products_with_final_price.id', '=', 'ec_products.id');
@@ -620,46 +599,39 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
 
         // Filter product by attributes
         $filters['attributes'] = array_filter($filters['attributes']);
-        if ($filters['attributes']) {
-            foreach ($filters['attributes'] as &$attributeId) {
-                $attributeId = (int)$attributeId;
+        $attributes = $filters['attributes'];
+        if ($attributes) {
+            $attributesIsList = array_is_list($attributes);
+
+            if ($attributesIsList) {
+                $attributes = array_map(fn ($attributeId) => (int) $attributeId, $attributes);
             }
 
-            $this->model = $this->model
-                ->join(
-                    DB::raw('
-                    (
-                        SELECT DISTINCT
-                            ec_product_variations.id,
-                            ec_product_variations.configurable_product_id,
-                            COUNT(ec_product_variation_items.attribute_id) AS count_attr
-
-                        FROM ec_product_variation_items
-
-                        INNER JOIN ec_product_variations ON ec_product_variations.id = ec_product_variation_items.variation_id
-                        JOIN ec_products ON ec_products.id = ec_product_variations.product_id
-
-                        WHERE ec_product_variation_items.attribute_id IN (' . implode(',', $filters['attributes']) . ')
-
-                        AND (ec_products.quantity > 0 OR (ec_products.with_storehouse_management = 0 AND ec_products.stock_status = "in_stock"))
-
-                        GROUP BY
-                            ec_product_variations.id,
-                            ec_product_variations.configurable_product_id
-                    ) AS t2'),
-                    function ($join) use ($filters) {
-                        /**
-                         * @var JoinClause $join
-                         */
-                        $join = $join->on('t2.configurable_product_id', '=', 'ec_products.id');
-
-                        if ($filters['count_attribute_groups'] > 1) {
-                            $join = $join->on('t2.count_attr', '=', DB::raw($filters['count_attribute_groups']));
-                        }
-
-                        return $join;
-                    }
-                );
+            if (! $attributesIsList) {
+                foreach ($attributes as $attributeSet => $attributeIds) {
+                    $this
+                        ->model
+                        ->whereExists(function (Builder $query) use ($attributeSet, $attributeIds) {
+                            $query
+                                ->select(DB::raw(1))
+                                ->from('ec_product_variations')
+                                ->whereColumn('ec_product_variations.configurable_product_id', 'ec_products.id')
+                                ->join('ec_product_variation_items', 'ec_product_variation_items.variation_id', 'ec_product_variations.id')
+                                ->join('ec_product_attributes', 'ec_product_attributes.id', 'ec_product_variation_items.attribute_id')
+                                ->join('ec_product_attribute_sets', 'ec_product_attribute_sets.id', 'ec_product_attributes.attribute_set_id')
+                                ->where('ec_product_attribute_sets.slug', $attributeSet)
+                                ->whereIn('ec_product_attributes.id', $attributeIds);
+                        });
+                }
+            } else {
+                $this
+                    ->model
+                    ->whereHas('variations', function ($query) use ($attributes) {
+                        $query->whereHas('variationItems', function ($query) use ($attributes) {
+                            $query->whereIn('attribute_id', $attributes);
+                        });
+                    });
+            }
         }
 
         if (! Arr::get($params, 'include_out_of_stock_products')) {
@@ -779,7 +751,7 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
             ->whereDoesntHave('reviews', function (EloquentBuilder $query) use ($customerId) {
                 $query->where('ec_reviews.customer_id', $customerId);
             })
-            ->orderBy('order_completed_at', 'desc')
+            ->orderByDesc('order_completed_at')
             ->groupBy('ec_products.id', 'ec_products.name', 'ec_products.image');
 
         return $data->limit($limit)->get();

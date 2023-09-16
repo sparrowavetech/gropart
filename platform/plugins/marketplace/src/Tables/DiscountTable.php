@@ -3,11 +3,12 @@
 namespace Botble\Marketplace\Tables;
 
 use Botble\Base\Facades\BaseHelper;
+use Botble\Ecommerce\Enums\DiscountTypeEnum;
 use Botble\Ecommerce\Models\Discount;
-use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Table\DataTables;
-use Illuminate\Contracts\Routing\UrlGenerator;
+use Botble\Table\Actions\DeleteAction;
+use Botble\Table\BulkActions\DeleteBulkAction;
+use Botble\Table\Columns\IdColumn;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -18,13 +19,13 @@ use Symfony\Component\HttpFoundation\Response;
 
 class DiscountTable extends TableAbstract
 {
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Discount $model)
+    public function setup(): void
     {
-        parent::__construct($table, $urlGenerator);
-
-        $this->model = $model;
-
-        $this->hasCheckbox = false;
+        $this
+            ->model(Discount::class)
+            ->addActions([
+                DeleteAction::make()->route('marketplace.vendor.discounts.destroy'),
+            ]);
     }
 
     public function ajax(): JsonResponse
@@ -32,10 +33,9 @@ class DiscountTable extends TableAbstract
         $data = $this->table
             ->eloquent($this->query())
             ->editColumn('detail', function ($item) {
-                return view('plugins/ecommerce::discounts.detail', compact('item'))->render();
-            })
-            ->editColumn('checkbox', function ($item) {
-                return $this->getCheckbox($item->id);
+                $isCoupon = $item->type === DiscountTypeEnum::COUPON;
+
+                return view('plugins/ecommerce::discounts.detail', compact('item', 'isCoupon'))->render();
             })
             ->editColumn('total_used', function ($item) {
                 if ($item->type === 'promotion') {
@@ -53,13 +53,6 @@ class DiscountTable extends TableAbstract
             })
             ->editColumn('end_date', function ($item) {
                 return $item->end_date ?: '&mdash;';
-            })
-            ->addColumn('operations', function ($item) {
-                return view(MarketplaceHelper::viewPath('dashboard.table.actions'), [
-                    'edit' => '',
-                    'delete' => 'marketplace.vendor.discounts.destroy',
-                    'item' => $item,
-                ])->render();
             });
 
         return $this->toJson($data);
@@ -79,11 +72,7 @@ class DiscountTable extends TableAbstract
     public function columns(): array
     {
         return [
-            'id' => [
-                'title' => trans('core/base::tables.id'),
-                'width' => '20px',
-                'class' => 'text-start',
-            ],
+            IdColumn::make(),
             'detail' => [
                 'name' => 'code',
                 'title' => trans('plugins/ecommerce::discount.detail'),
@@ -95,11 +84,9 @@ class DiscountTable extends TableAbstract
             ],
             'start_date' => [
                 'title' => trans('plugins/ecommerce::discount.start_date'),
-                'class' => 'text-center',
             ],
             'end_date' => [
                 'title' => trans('plugins/ecommerce::discount.end_date'),
-                'class' => 'text-center',
             ],
         ];
     }
@@ -111,7 +98,17 @@ class DiscountTable extends TableAbstract
 
     public function bulkActions(): array
     {
-        return $this->addDeleteAction(route('marketplace.vendor.discounts.deletes'), null, parent::bulkActions());
+        return [
+            DeleteBulkAction::make()->beforeDispatch(function (Discount $discount, array $ids) {
+                foreach ($ids as $id) {
+                    $discount = Discount::query()->findOrFail($id);
+
+                    if ($discount->store_id !== auth('customer')->user()->store->id) {
+                        abort(403);
+                    }
+                }
+            }),
+        ];
     }
 
     public function renderTable($data = [], $mergeData = []): View|Factory|Response

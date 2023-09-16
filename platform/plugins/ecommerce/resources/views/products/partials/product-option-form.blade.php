@@ -1,7 +1,9 @@
 @php
-    $product = $product->loadMissing(['options' => function ($query) {
-        return $query->with(['values']);
-    }]);
+    $product = $product->loadMissing([
+        'options' => function ($query) {
+            return $query->with(['values']);
+        },
+    ]);
     $oldOption = old('options', []) ?? [];
     $currentProductOption = $product->options;
     foreach ($currentProductOption as $key => $option) {
@@ -10,14 +12,12 @@
             $currentProductOption[$key]['values'][$valueKey]['option_value'] = $value->option_value;
         }
     }
-
+    
     if (!empty($oldOption)) {
         $currentProductOption = $oldOption;
     }
-
-    $isDefaultLanguage = ! defined('LANGUAGE_ADVANCED_MODULE_SCREEN_NAME') ||
-        ! request()->input('ref_lang') ||
-        request()->input('ref_lang') == Language::getDefaultLocaleCode();
+    
+    $isDefaultLanguage = !defined('LANGUAGE_ADVANCED_MODULE_SCREEN_NAME') || !request()->input('ref_lang') || request()->input('ref_lang') == Language::getDefaultLocaleCode();
 @endphp
 
 @push('header')
@@ -28,7 +28,7 @@
             currentProductOption: {!! Js::from($currentProductOption) !!},
             options: {!! Js::from($options) !!},
             routes: {!! Js::from($routes) !!},
-            isDefaultLanguage: {{ (int)$isDefaultLanguage }}
+            isDefaultLanguage: {{ (int) $isDefaultLanguage }}
         }
     </script>
 @endpush
@@ -36,30 +36,55 @@
 <div class="product-option-form-wrap">
     <div class="product-option-form-group">
         <div class="product-option-form-body">
-            <input type="hidden" name="has_product_options" value="1">
-            <div class="accordion" id="accordion-product-option"></div>
+            <input
+                name="has_product_options"
+                type="hidden"
+                value="1"
+            >
+            <div
+                class="accordion"
+                id="accordion-product-option"
+            ></div>
         </div>
         <div class="row">
             @if ($isDefaultLanguage)
                 <div class="col-12 col-md-6">
-                    <button type="button" class="btn btn-info add-new-option"
-                            id="add-new-option">{{ trans('plugins/ecommerce::product-option.add_new_option') }}</button>
+                    <button
+                        class="btn btn-info add-new-option"
+                        id="add-new-option"
+                        type="button"
+                    >{{ trans('plugins/ecommerce::product-option.add_new_option') }}</button>
                 </div>
                 @if (count($globalOptions))
                     <div class="col-12 col-md-6 d-flex justify-content-end">
-                        <div class="ui-select-wrapper d-inline-block" style="width: 200px;">
-                            <select id="global-option" class="form-control ui-select">
-                                <option
-                                    value="-1">{{ trans('plugins/ecommerce::product-option.select_global_option') }}</option>
-                                @foreach($globalOptions as $id => $name)
+                        <div
+                            class="ui-select-wrapper d-inline-block"
+                            style="width: 200px;"
+                        >
+                            <select
+                                class="form-control ui-select"
+                                id="global-option"
+                            >
+                                <option value="-1">
+                                    {{ trans('plugins/ecommerce::product-option.select_global_option') }}</option>
+                                @foreach ($globalOptions as $id => $name)
                                     <option value="{{ $id }}">{{ $name }}</option>
                                 @endforeach
                             </select>
                             <svg class="svg-next-icon svg-next-icon-size-16">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M10 16l-4-4h8l-4 4zm0-12L6 8h8l-4-4z"></path></svg>
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                >
+                                    <path d="M10 16l-4-4h8l-4 4zm0-12L6 8h8l-4-4z"></path>
+                                </svg>
                             </svg>
                         </div>
-                        <button type="button" role="button" class="btn btn-info add-from-global-option ms-3">{{ trans('plugins/ecommerce::product-option.add_global_option') }}</button>
+                        <button
+                            class="btn btn-info add-from-global-option ms-3"
+                            type="button"
+                            role="button"
+                        >{{ trans('plugins/ecommerce::product-option.add_global_option') }}</button>
                     </div>
                 @endif
             @endif

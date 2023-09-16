@@ -24,6 +24,7 @@ class UpdateDefaultProductService
     public function updateColumns(Product $parent, Product $product): Product
     {
         $data = [
+            'barcode',
             'sku',
             'sale_type',
             'price',

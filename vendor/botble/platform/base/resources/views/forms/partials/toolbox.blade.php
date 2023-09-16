@@ -1,4 +1,16 @@
 <div class="tools">
-    <a href="#" class="collapse" data-bs-toggle="tooltip" title="Collapse/Expand" data-bs-original-title="Collapse/Expand"></a>
-    <a href="#" class="fullscreen" data-bs-toggle="tooltip" title="Full screen" data-bs-original-title="Full screen"> </a>
+    <a
+        class="collapse"
+        data-bs-toggle="tooltip"
+        data-bs-original-title="Collapse/Expand"
+        href="#"
+        title="Collapse/Expand"
+    ></a>
+    <a
+        class="fullscreen"
+        data-bs-toggle="tooltip"
+        data-bs-original-title="Full screen"
+        href="#"
+        title="Full screen"
+    > </a>
 </div>

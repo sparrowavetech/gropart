@@ -3,12 +3,9 @@
 namespace Botble\Ecommerce\Repositories\Interfaces;
 
 use Botble\Support\Repositories\Interfaces\RepositoryInterface;
+use Illuminate\Database\Eloquent\Collection;
 
 interface BrandInterface extends RepositoryInterface
 {
-    /**
-     * @param array $condition
-     * @return mixed
-     */
-    public function getAll(array $condition = []);
+    public function getAll(array $condition = []): Collection;
 }

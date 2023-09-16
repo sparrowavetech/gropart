@@ -3,24 +3,28 @@
     $products->loadMissing('defaultVariation');
 @endphp
 
-@if($condition['is_enquiry'] == 0)
 {!! $widgets = dynamic_sidebar('products_list_sidebar') !!}
-@endif
 
 @if (empty($widgets))
     {!! Theme::partial('page-header', ['size' => 'xxxl', 'withTitle' => false]) !!}
 @endif
 
 <div class="container-xxxl">
-    <div class="row mt-4 mb-3">
+    <div class="row my-5">
         <div class="col-12">
             <div class="row catalog-header justify-content-between">
                 <div class="col-auto catalog-header__left d-flex align-items-center">
-                    <h1 class="h2 catalog-header__title d-none d-lg-block">{{ __('Products') }}</h1>
-                    <a class="d-lg-none sidebar-filter-mobile" href="#">
+                    <h1 class="h2 catalog-header__title d-none d-lg-block">{{ SeoHelper::getTitle() }}</h1>
+                    <a
+                        class="d-lg-none sidebar-filter-mobile"
+                        href="#"
+                    >
                         <span class="svg-icon me-2">
                             <svg>
-                                <use href="#svg-icon-filter" xlink:href="#svg-icon-filter"></use>
+                                <use
+                                    href="#svg-icon-filter"
+                                    xlink:href="#svg-icon-filter"
+                                ></use>
                             </svg>
                         </span>
                         <span>{{ __('Filter') }}</span>
@@ -28,23 +32,26 @@
                 </div>
                 <div class="col-auto catalog-header__right">
                     <div class="catalog-toolbar row align-items-center">
-                        @include(Theme::getThemeNamespace() . '::views.ecommerce.includes.sort')
-                        @include(Theme::getThemeNamespace() . '::views.ecommerce.includes.layout')
+                        @include(Theme::getThemeNamespace('views.ecommerce.includes.sort'))
+                        @include(Theme::getThemeNamespace('views.ecommerce.includes.layout'))
                     </div>
                 </div>
             </div>
         </div>
     </div>
     <div class="row">
-        <div class="col-lg-3">
-            <form action="{{ URL::current() }}"
+        <div class="col-xxl-2 col-lg-3">
+            <form
+                id="products-filter-form"
                 data-action="{{ route('public.products') }}"
+                data-title="{{ __('Products') }}"
+                action="{{ URL::current() }}"
                 method="GET"
-                id="products-filter-form">
-                @include(Theme::getThemeNamespace() . '::views.ecommerce.includes.filters')
+            >
+                @include(Theme::getThemeNamespace('views.ecommerce.includes.filters'))
             </form>
         </div>
-        <div class="col-lg-9 products-listing position-relative">
+        <div class="col-xxl-10 col-lg-9 products-listing position-relative">
             @include(Theme::getThemeNamespace('views.ecommerce.includes.product-items'))
         </div>
     </div>

@@ -22,8 +22,8 @@
 
         window.trans.discount = JSON.parse('{!! addslashes(json_encode(trans('plugins/ecommerce::discount'))) !!}');
 
-        $(document).ready(function () {
-            $(document).on('click', 'body', function (e) {
+        $(document).ready(function() {
+            $(document).on('click', 'body', function(e) {
                 let container = $('.box-search-advance');
 
                 if (!container.is(e.target) && container.has(e.target).length === 0) {

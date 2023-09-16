@@ -17,6 +17,9 @@ class StoreProductTagService
 
         if (count($tags) != count($tagsInput) || count(array_diff($tags, $tagsInput)) > 0) {
             $product->tags()->detach();
+
+            $tagIds = [];
+
             foreach ($tagsInput as $tagName) {
                 if (! trim($tagName)) {
                     continue;
@@ -33,9 +36,11 @@ class StoreProductTagService
                 }
 
                 if (! empty($tag)) {
-                    $product->tags()->attach($tag->id);
+                    $tagIds[] = $tag->getKey();
                 }
             }
+
+            $product->tags()->sync(array_unique($tagIds));
         }
     }
 }

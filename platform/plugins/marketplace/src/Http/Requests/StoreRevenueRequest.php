@@ -3,7 +3,7 @@
 namespace Botble\Marketplace\Http\Requests;
 
 use Botble\Marketplace\Enums\RevenueTypeEnum;
-use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
+use Botble\Marketplace\Models\Store;
 use Botble\Support\Http\Requests\Request;
 use Illuminate\Validation\Rule;
 
@@ -18,7 +18,7 @@ class StoreRevenueRequest extends Request
         ];
 
         if ($this->input('type') == RevenueTypeEnum::SUBTRACT_AMOUNT) {
-            $store = app(StoreInterface::class)->findById($this->route('id'));
+            $store = Store::query()->find($this->route('id'));
             if ($store && $store->customer) {
                 $customer = $store->customer;
                 $rules['amount'] = 'numeric|min:0|max:' . $customer->balance;

@@ -125,7 +125,8 @@
                     </div>
                     <div v-if="!isLoading && verified">
                         <p class="text-info">
-                            <span v-if="license.licensed_to">Licensed to {{ license.licensed_to }}. </span>Activated since {{ license.activated_at }}.
+                            <span v-if="license.licensed_to">Licensed to {{ license.licensed_to }}. </span>Activated
+                            since {{ license.activated_at }}.
                         </p>
                         <div class="form-group mb-3">
                             <button

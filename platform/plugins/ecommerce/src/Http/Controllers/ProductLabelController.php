@@ -12,17 +12,13 @@ use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Forms\ProductLabelForm;
 use Botble\Ecommerce\Http\Requests\ProductLabelRequest;
-use Botble\Ecommerce\Repositories\Interfaces\ProductLabelInterface;
+use Botble\Ecommerce\Models\ProductLabel;
 use Botble\Ecommerce\Tables\ProductLabelTable;
 use Exception;
 use Illuminate\Http\Request;
 
 class ProductLabelController extends BaseController
 {
-    public function __construct(protected ProductLabelInterface $productLabelRepository)
-    {
-    }
-
     public function index(ProductLabelTable $table)
     {
         PageTitle::setTitle(trans('plugins/ecommerce::product-label.name'));
@@ -39,7 +35,7 @@ class ProductLabelController extends BaseController
 
     public function store(ProductLabelRequest $request, BaseHttpResponse $response)
     {
-        $productLabel = $this->productLabelRepository->createOrUpdate($request->input());
+        $productLabel = ProductLabel::query()->create($request->input());
 
         event(new CreatedContentEvent(PRODUCT_LABEL_MODULE_SCREEN_NAME, $request, $productLabel));
 
@@ -51,7 +47,7 @@ class ProductLabelController extends BaseController
 
     public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
     {
-        $productLabel = $this->productLabelRepository->findOrFail($id);
+        $productLabel = ProductLabel::query()->findOrFail($id);
 
         event(new BeforeEditContentEvent($request, $productLabel));
 
@@ -62,11 +58,10 @@ class ProductLabelController extends BaseController
 
     public function update(int|string $id, ProductLabelRequest $request, BaseHttpResponse $response)
     {
-        $productLabel = $this->productLabelRepository->findOrFail($id);
+        $productLabel = ProductLabel::query()->findOrFail($id);
 
         $productLabel->fill($request->input());
-
-        $this->productLabelRepository->createOrUpdate($productLabel);
+        $productLabel->save();
 
         event(new UpdatedContentEvent(PRODUCT_LABEL_MODULE_SCREEN_NAME, $request, $productLabel));
 
@@ -78,9 +73,9 @@ class ProductLabelController extends BaseController
     public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
         try {
-            $productLabel = $this->productLabelRepository->findOrFail($id);
+            $productLabel = ProductLabel::query()->findOrFail($id);
 
-            $this->productLabelRepository->delete($productLabel);
+            $productLabel->delete();
 
             event(new DeletedContentEvent(PRODUCT_LABEL_MODULE_SCREEN_NAME, $request, $productLabel));
 
@@ -90,23 +85,5 @@ class ProductLabelController extends BaseController
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
-    }
-
-    public function deletes(Request $request, BaseHttpResponse $response)
-    {
-        $ids = $request->input('ids');
-        if (empty($ids)) {
-            return $response
-                ->setError()
-                ->setMessage(trans('core/base::notices.no_select'));
-        }
-
-        foreach ($ids as $id) {
-            $productLabel = $this->productLabelRepository->findOrFail($id);
-            $this->productLabelRepository->delete($productLabel);
-            event(new DeletedContentEvent(PRODUCT_LABEL_MODULE_SCREEN_NAME, $request, $productLabel));
-        }
-
-        return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 }

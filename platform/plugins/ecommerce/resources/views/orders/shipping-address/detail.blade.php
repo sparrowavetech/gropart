@@ -26,9 +26,13 @@
     @if (EcommerceHelper::isZipCodeEnabled() && $address->zip_code)
         <div>{{ $address->zip_code }}</div>
     @endif
-    @if($address->country || $address->state || $address->city || $address->address)
+    @if ($address->country || $address->state || $address->city || $address->address)
         <div>
-            <a target="_blank" class="hover-underline" href="https://maps.google.com/?q={{ $address->address }}, {{ $address->city_name }}, {{ $address->state_name }}, {{ $address->country_name }}@if (EcommerceHelper::isZipCodeEnabled()), {{ $address->zip_code }} @endif">{{ trans('plugins/ecommerce::order.see_on_maps') }}</a>
+            <a
+                class="hover-underline"
+                href="https://maps.google.com/?q={{ $address->address }}, {{ $address->city_name }}, {{ $address->state_name }}, {{ $address->country_name }}@if (EcommerceHelper::isZipCodeEnabled()) , {{ $address->zip_code }} @endif"
+                target="_blank"
+            >{{ trans('plugins/ecommerce::order.see_on_maps') }}</a>
         </div>
     @endif
 </li>

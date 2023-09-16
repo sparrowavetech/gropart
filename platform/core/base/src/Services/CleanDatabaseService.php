@@ -3,6 +3,7 @@
 namespace Botble\Base\Services;
 
 use Botble\Setting\Facades\Setting;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
@@ -43,20 +44,24 @@ class CleanDatabaseService
 
         Schema::disableForeignKeyConstraints();
 
-        foreach ($tables as $table) {
+        foreach (Arr::except($tables, 'settings') as $table) {
             DB::table($table)->truncate();
         }
 
         Schema::enableForeignKeyConstraints();
 
-        Setting::delete(except: [
-            'theme',
-            'activated_plugins',
-            'licensed_to',
-            'media_random_hash',
-        ]);
+        if (in_array('settings', $tables)) {
+            Setting::delete(except: [
+                'theme',
+                'activated_plugins',
+                'licensed_to',
+                'media_random_hash',
+            ]);
+        }
 
-        File::cleanDirectory(Storage::disk()->path(''));
+        if (in_array('media_files', $tables)) {
+            File::cleanDirectory(Storage::disk()->path(''));
+        }
 
         return true;
     }

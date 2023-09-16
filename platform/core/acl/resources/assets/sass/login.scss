@@ -7,7 +7,7 @@ body {
         background-position: center center;
         background-repeat: no-repeat;
         overflow: hidden;
-        background-color: #FFFFFF;
+        background-color: #ffffff;
 
         .faded-bg {
             position: absolute;
@@ -15,8 +15,15 @@ body {
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(50, 50, 50, .5);
-            background: linear-gradient(to bottom, rgba(21, 21, 28, 0) 0, rgba(21, 21, 28, .1) 40%, rgba(21, 21, 28, .3) 55%, rgba(21, 21, 28, .61) 75%, #15151c 100%);
+            background: rgba(50, 50, 50, 0.5);
+            background: linear-gradient(
+                to bottom,
+                rgba(21, 21, 28, 0) 0,
+                rgba(21, 21, 28, 0.1) 40%,
+                rgba(21, 21, 28, 0.3) 55%,
+                rgba(21, 21, 28, 0.61) 75%,
+                #15151c 100%
+            );
             filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#0015151c', endColorstr='#15151c', GradientType=0);
         }
 
@@ -56,7 +63,7 @@ body {
                 color: #fff;
                 font-size: 13px;
                 max-width: 650px;
-                opacity: .9;
+                opacity: 0.9;
                 z-index: 99;
                 font-weight: 300;
                 margin-top: 0;
@@ -92,7 +99,7 @@ body {
                 font-weight: 700;
                 margin-bottom: 0;
                 margin-top: 3px;
-                color: #757C85;
+                color: #757c85;
                 border-radius: 2px;
                 font-size: 10px;
                 text-transform: uppercase;
@@ -116,7 +123,7 @@ body {
             color: #eee !important;
             padding: 12px 20px;
             outline: 0 !important;
-            opacity: .8;
+            opacity: 0.8;
             border: 0;
             width: auto;
             border-radius: 2px;
@@ -124,7 +131,7 @@ body {
             font-size: 11px;
             font-weight: 400;
             text-transform: uppercase;
-            transition: width .3s ease;
+            transition: width 0.3s ease;
             background: #02192d;
 
             &:hover {
@@ -137,10 +144,10 @@ body {
         .form-group {
             background-color: #fff;
             position: relative;
-            border: 2px solid rgba(28, 43, 54, .07);
+            border: 2px solid rgba(28, 43, 54, 0.07);
             border-radius: 3px;
             padding: 7px 12px 4px;
-            transition: border .3s ease-in;
+            transition: border 0.3s ease-in;
             font-weight: 400;
 
             &.has-error {
@@ -163,7 +170,7 @@ body {
                 margin: 0 0 3px;
                 display: block;
                 opacity: 1;
-                transition: opacity .2s ease;
+                transition: opacity 0.2s ease;
                 font-weight: 500;
                 font-size: 10px;
                 color: #58666e;
@@ -185,7 +192,11 @@ body {
                 padding: 0;
                 margin-top: -4px;
                 background: 0 0;
-                transition: box-shadow .25s linear, border .25s linear, color .25s linear, background-color .25s linear;
+                transition:
+                    box-shadow 0.25s linear,
+                    border 0.25s linear,
+                    color 0.25s linear,
+                    background-color 0.25s linear;
 
                 &:focus {
                     outline: 0 !important;
@@ -194,38 +205,38 @@ body {
 
                 &::-webkit-input-placeholder {
                     color: #ccc;
-                    font-weight: 300
+                    font-weight: 300;
                 }
 
                 &::-moz-placeholder {
                     color: #ccc;
-                    font-weight: 300
+                    font-weight: 300;
                 }
 
                 &:-ms-input-placeholder {
                     color: #ccc;
-                    font-weight: 300
+                    font-weight: 300;
                 }
 
                 &:-moz-placeholder {
                     color: #ccc;
-                    font-weight: 300
+                    font-weight: 300;
                 }
 
                 &:focus::-webkit-input-placeholder {
-                    color: #8c9bA6
+                    color: #8c9ba6;
                 }
 
                 &:focus::-moz-placeholder {
-                    color: #8c9bA6
+                    color: #8c9ba6;
                 }
 
                 &:focus:-ms-input-placeholder {
-                    color: #8c9bA6
+                    color: #8c9ba6;
                 }
 
                 &:focus:-moz-placeholder {
-                    color: #8c9bA6
+                    color: #8c9ba6;
                 }
             }
         }

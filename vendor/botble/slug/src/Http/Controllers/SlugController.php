@@ -7,6 +7,7 @@ use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Menu\Facades\Menu;
 use Botble\Setting\Supports\SettingStore;
+use Botble\Slug\Events\UpdatedPermalinkSettings;
 use Botble\Slug\Http\Requests\SlugRequest;
 use Botble\Slug\Http\Requests\SlugSettingsRequest;
 use Botble\Slug\Models\Slug;
@@ -38,7 +39,7 @@ class SlugController extends BaseController
     ) {
         $hasChangedEndingUrl = false;
 
-        foreach ($request->except(['_token']) as $settingKey => $settingValue) {
+        foreach ($request->except(['_token', 'ref_lang']) as $settingKey => $settingValue) {
             if (Str::contains($settingKey, '-model-key')) {
                 continue;
             }
@@ -51,15 +52,22 @@ class SlugController extends BaseController
                 }
             }
 
-            if ($settingStore->get($settingKey) !== (string)$settingValue) {
-                Slug::query()
-                    ->where('reference_type', $request->input($settingKey . '-model-key'))
-                    ->update(['prefix' => (string)$settingValue]);
+            $prefix = (string)$settingValue;
+            $reference = $request->input($settingKey . '-model-key');
+
+            if ($reference && $settingStore->get($settingKey) !== $prefix) {
+                if (! $request->filled('ref_lang')) {
+                    Slug::query()
+                        ->where('reference_type', $reference)
+                        ->update(['prefix' => $prefix]);
+                }
+
+                event(new UpdatedPermalinkSettings($reference, $prefix, $request));
 
                 Menu::clearCacheMenuItems();
             }
 
-            $settingStore->set($settingKey, (string)$settingValue);
+            $settingStore->set($settingKey, $prefix);
         }
 
         $settingStore->save();

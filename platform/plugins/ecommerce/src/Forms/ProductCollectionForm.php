@@ -29,7 +29,7 @@ class ProductCollectionForm extends FormAbstract
                     'data-counter' => 120,
                 ],
                 'help_block' => [
-                    'text' => $this->getModel() ? trans(
+                    'text' => $this->getModel()->id ? trans(
                         'plugins/ecommerce::product-collections.slug_help_block',
                         ['slug' => $this->getModel()->slug]
                     ) : null,

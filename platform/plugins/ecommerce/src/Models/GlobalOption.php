@@ -20,7 +20,7 @@ class GlobalOption extends BaseModel
     {
         return $this
             ->hasMany(GlobalOptionValue::class, 'option_id')
-            ->orderBy('order', 'ASC');
+            ->orderBy('order');
     }
 
     protected function optionName(): Attribute

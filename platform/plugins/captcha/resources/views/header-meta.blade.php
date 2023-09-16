@@ -1,2 +1,9 @@
-<link rel="preconnect" href="https://www.google.com">
-<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link
+    href="https://www.google.com"
+    rel="preconnect"
+>
+<link
+    href="https://www.gstatic.com"
+    rel="preconnect"
+    crossorigin
+>

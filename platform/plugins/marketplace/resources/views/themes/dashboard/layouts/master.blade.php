@@ -1,16 +1,35 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="format-detection" content="telephone=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta
+        http-equiv="X-UA-Compatible"
+        content="IE=edge"
+    >
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+    <meta
+        name="format-detection"
+        content="telephone=no"
+    >
+    <meta
+        name="apple-mobile-web-app-capable"
+        content="yes"
+    >
     @if (theme_option('favicon'))
-        <link rel="shortcut icon" href="{{ RvMedia::getImageUrl(theme_option('favicon')) }}">
+        <link
+            href="{{ RvMedia::getImageUrl(theme_option('favicon')) }}"
+            rel="shortcut icon"
+        >
     @endif
 
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta
+        name="csrf-token"
+        content="{{ csrf_token() }}"
+    >
 
     <title>{{ page_title()->getTitle(false) }}</title>
 
@@ -52,25 +71,44 @@
 
     @stack('pre-footer')
 
-    @if (session()->has('status') || session()->has('success_msg') || session()->has('error_msg') || (isset($errors) && $errors->count() > 0) || isset($error_msg))
+    @if (session()->has('status') ||
+            session()->has('success_msg') ||
+            session()->has('error_msg') ||
+            (isset($errors) && $errors->count() > 0) ||
+            isset($error_msg))
         <script type="text/javascript">
             'use strict';
             window.noticeMessages = [];
             @if (session()->has('success_msg'))
-                noticeMessages.push({'type': 'success', 'message': "{!! addslashes(session('success_msg')) !!}"});
+                noticeMessages.push({
+                    'type': 'success',
+                    'message': "{!! addslashes(session('success_msg')) !!}"
+                });
             @endif
             @if (session()->has('status'))
-                noticeMessages.push({'type': 'success', 'message': "{!! addslashes(session('status')) !!}"});
+                noticeMessages.push({
+                    'type': 'success',
+                    'message': "{!! addslashes(session('status')) !!}"
+                });
             @endif
             @if (session()->has('error_msg'))
-                noticeMessages.push({'type': 'error', 'message': "{!! addslashes(session('error_msg')) !!}"});
+                noticeMessages.push({
+                    'type': 'error',
+                    'message': "{!! addslashes(session('error_msg')) !!}"
+                });
             @endif
             @if (isset($error_msg))
-                noticeMessages.push({'type': 'error', 'message': "{!! addslashes($error_msg) !!}"});
+                noticeMessages.push({
+                    'type': 'error',
+                    'message': "{!! addslashes($error_msg) !!}"
+                });
             @endif
             @if (isset($errors))
                 @foreach ($errors->all() as $error)
-                    noticeMessages.push({'type': 'error', 'message': "{!! addslashes($error) !!}"});
+                    noticeMessages.push({
+                        'type': 'error',
+                        'message': "{!! addslashes($error) !!}"
+                    });
                 @endforeach
             @endif
         </script>
@@ -83,4 +121,5 @@
     @stack('footer')
     {!! apply_filters(THEME_FRONT_FOOTER, null) !!}
 </body>
+
 </html>

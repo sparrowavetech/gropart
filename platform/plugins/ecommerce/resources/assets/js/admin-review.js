@@ -22,7 +22,7 @@ const toggleReviewStatus = (url, button) => {
         complete: () => {
             button.removeClass('button-loading')
             button.prop('disabled', false)
-        }
+        },
     })
 }
 
@@ -53,7 +53,7 @@ $(document)
                 Botble.showSuccess(message)
                 $('#delete-review-modal').modal('hide')
 
-                setTimeout(() => window.location.href = data.next_url, 2000)
+                setTimeout(() => (window.location.href = data.next_url), 2000)
             },
             error: (error) => {
                 Botble.handleError(error)

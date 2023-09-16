@@ -6,8 +6,6 @@ use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductVariation;
 use Botble\Ecommerce\Models\ProductVariationItem;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductVariationInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductVariationItemInterface;
 
 class RenderProductSwatchesSupport
 {
@@ -37,14 +35,12 @@ class RenderProductSwatchesSupport
 
         $attributes = $this->productRepository->getRelatedProductAttributes($this->product)->sortBy('order');
 
-        $productVariations = app(ProductVariationInterface::class)->allBy([
-            'configurable_product_id' => $product->id,
-        ], ['productAttributes']);
+        $productVariations = ProductVariation::query()
+            ->where('configurable_product_id', $product->getKey())
+            ->with(['productAttributes', 'product'])
+            ->get();
 
-        $productVariations->each(fn (ProductVariation $productVariation) => $productVariation->setRelation('product', $product));
-
-        $productVariationsInfo = app(ProductVariationItemInterface::class)
-            ->getVariationsInfo($productVariations->pluck('id')->toArray());
+        $productVariationsInfo = ProductVariationItem::getVariationsInfo($productVariations->pluck('id')->toArray());
 
         if ($productVariationsInfo->count()) {
             $productVariationsInfo->loadMissing(['productVariation.product']);

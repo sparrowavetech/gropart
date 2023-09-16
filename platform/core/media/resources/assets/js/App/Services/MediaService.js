@@ -56,17 +56,15 @@ export class MediaService {
             params.paged = RV_MEDIA_CONFIG.pagination.paged
             params.posts_per_page = RV_MEDIA_CONFIG.pagination.posts_per_page
         }
-        $.ajax({
-            url: RV_MEDIA_URL.get_media,
-            type: 'GET',
-            data: params,
-            dataType: 'json',
-            beforeSend: () => {
-                Helpers.showAjaxLoading()
-            },
-            success: (res) => {
-                _self.MediaList.renderData(res.data, reload, load_more_file)
-                _self.renderBreadcrumbs(res.data.breadcrumbs)
+
+        Helpers.showAjaxLoading()
+
+        $httpClient
+            .make()
+            .get(RV_MEDIA_URL.get_media, params)
+            .then(({ data }) => {
+                _self.MediaList.renderData(data.data, reload, load_more_file)
+                _self.renderBreadcrumbs(data.data.breadcrumbs)
                 MediaService.refreshFilter()
                 ActionsService.renderActions()
 
@@ -81,20 +79,14 @@ export class MediaService {
 
                     if (
                         typeof RV_MEDIA_CONFIG.pagination.posts_per_page != 'undefined' &&
-                        res.data.files.length + res.data.folders.length < RV_MEDIA_CONFIG.pagination.posts_per_page &&
+                        data.data.files.length + data.data.folders.length < RV_MEDIA_CONFIG.pagination.posts_per_page &&
                         typeof RV_MEDIA_CONFIG.pagination.has_more != 'undefined'
                     ) {
                         RV_MEDIA_CONFIG.pagination.has_more = false
                     }
                 }
-            },
-            complete: () => {
-                Helpers.hideAjaxLoading()
-            },
-            error: (data) => {
-                MessageService.handleError(data)
-            },
-        })
+            })
+            .finally(() => Helpers.hideAjaxLoading())
     }
 
     getFileDetails(data) {

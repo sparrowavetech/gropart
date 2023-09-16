@@ -28,8 +28,8 @@
             width: 50px;
             height: 50px;
             background-color: transparent;
-            transition: all .4s ease;
-            transform: translateY(-50%)
+            transition: all 0.4s ease;
+            transform: translateY(-50%);
         }
 
         > * i {
@@ -38,12 +38,12 @@
             left: 50%;
             transform: translate(-50%, -50%);
             font-size: 30px;
-            color: #282828
+            color: #282828;
         }
 
         > :hover {
-            box-shadow: 0 0 10px 5px rgba(0, 0, 0, .1);
-            background-color: #ffffff
+            box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
         }
 
         .owl-prev {
@@ -73,12 +73,12 @@
             border-radius: 50%;
 
             &:last-child {
-                margin-right: 0
+                margin-right: 0;
             }
 
             &.active {
                 background-color: #000000;
-                border-color: #000000
+                border-color: #000000;
             }
         }
     }
@@ -89,7 +89,7 @@
             height: 0;
 
             > * {
-                transform: translateY(-50%)
+                transform: translateY(-50%);
             }
         }
 
@@ -97,7 +97,7 @@
             margin-left: 0;
 
             i {
-                padding-right: 5px
+                padding-right: 5px;
             }
         }
 
@@ -106,17 +106,16 @@
             margin-right: 0;
 
             i {
-                padding-left: 5px
+                padding-left: 5px;
             }
         }
     }
 }
 
-
 @media (min-width: 1200px) {
     .carousel--nav {
         .owl-nav {
-            display: block
+            display: block;
         }
     }
 }
@@ -134,7 +133,7 @@
         width: calc(100% - 40px);
         padding: 20px;
         z-index: 20;
-        background-color: rgba(0, 0, 0, .6);
+        background-color: rgba(0, 0, 0, 0.6);
 
         .slider-item-title {
             color: #ffffff;

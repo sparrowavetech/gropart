@@ -53,7 +53,7 @@ class HandleApplyPromotionsService
 
             $promotion = Discount::promotionForProduct([$product->id], $productCollections->pluck('id')->all());
 
-            if ($promotion) {
+            if ($promotion && $availablePromotions->doesntContain($promotion)) {
                 $availablePromotions = $availablePromotions->push($promotion);
             }
         }
@@ -145,7 +145,7 @@ class HandleApplyPromotionsService
                             }
 
                             if ($product = $productItems->firstWhere('id', $item->id)) {
-                                $productCollections = $product
+                                $productCollections = $product->original_product
                                     ->productCollections()
                                     ->pluck('ec_product_collections.id')->all();
 
@@ -154,7 +154,10 @@ class HandleApplyPromotionsService
                                     ->pluck('ec_product_collections.id')
                                     ->all();
 
-                                if (! empty(array_intersect($productCollections, $discountProductCollections))) {
+                                if (
+                                    ! empty(array_intersect($productCollections, $discountProductCollections)) &&
+                                    $item->price > $promotion->value
+                                ) {
                                     $promotionDiscountAmount += ($item->price - $promotion->value) * $item->qty;
                                 }
                             }

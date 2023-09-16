@@ -30,8 +30,8 @@ class ImportLocationService
         foreach ($rows as $row) {
             match ($row['import_type'] ?: ImportType::STATE) {
                 ImportType::COUNTRY => $this->storeCountry($row),
-                ImportType::STATE => $this->storeState($row),
                 ImportType::CITY => $this->storeCity($row),
+                default => $this->storeState($row)
             };
         }
     }

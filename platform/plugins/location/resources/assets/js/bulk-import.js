@@ -16,7 +16,7 @@ $(() => {
         maxFiles: 1,
         maxfilesexceeded: function (file) {
             this.removeFile(file)
-        }
+        },
     })
 
     $(document).on('submit', '.form-import-data', function (event) {

@@ -30,7 +30,7 @@ class Brand extends BaseModel
         return $this
             ->hasMany(Product::class, 'brand_id')
             ->where('is_variation', 0)
-            ->where('status', BaseStatusEnum::PUBLISHED);
+            ->wherePublished();
     }
 
     public function categories(): MorphToMany

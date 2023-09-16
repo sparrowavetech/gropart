@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+
 Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Fronts', 'middleware' => ['web', 'core']], function () {
     Route::group(apply_filters(BASE_FILTER_GROUP_PUBLIC_ROUTE, []), function () {
         Route::get('compare', [
@@ -10,11 +12,11 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Fronts', 'middle
         Route::post('compare/{productId}', [
             'as' => 'public.compare.add',
             'uses' => 'CompareController@store',
-        ]);
+        ])->wherePrimaryKey('productId');
 
         Route::delete('compare/{productId}', [
             'as' => 'public.compare.remove',
             'uses' => 'CompareController@destroy',
-        ]);
+        ])->wherePrimaryKey('productId');
     });
 });

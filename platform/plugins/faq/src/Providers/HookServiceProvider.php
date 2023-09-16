@@ -51,7 +51,21 @@ class HookServiceProvider extends ServiceProvider
 
                     $hasValue = ! empty($value);
 
-                    $value = json_encode((array)$value);
+                    $value = (array)$value;
+
+                    foreach ($value as $key => $item) {
+                        if (! is_array($item)) {
+                            continue;
+                        }
+
+                        foreach ($item as $subItem) {
+                            if (is_array($subItem['value'])) {
+                                Arr::forget($value, $key);
+                            }
+                        }
+                    }
+
+                    $value = json_encode($value);
 
                     return view('plugins/faq::schema-config-box', compact('value', 'hasValue'))->render();
                 },

@@ -1,4 +1,7 @@
-<div class="mx-0 bg-white row report-chart-content pt-3 mb-3" id="report-chart">
+<div
+    class="mx-0 bg-white row report-chart-content pt-3 mb-3"
+    id="report-chart"
+>
     <div class="row">
         <div class="col-md-8 mb-2">
             <div class="rp-card rp-card-sale-report">
@@ -30,7 +33,10 @@
                             @foreach ($count['revenues'] as $item)
                                 <p>
                                     <small>
-                                        <i class="fas fa-circle me-2" style="color: {{ Arr::get($item, 'color') }}"></i>
+                                        <i
+                                            class="fas fa-circle me-2"
+                                            style="color: {{ Arr::get($item, 'color') }}"
+                                        ></i>
                                     </small>
                                     <strong>{{ format_price($item['value']) }}</strong>
                                     <span>{{ $item['label'] }}</span>
@@ -49,7 +55,7 @@
 </div>
 
 @php
-    $revenues = fn (string $key): array => $count['revenues']->pluck($key)->toArray();
+    $revenues = fn(string $key): array => $count['revenues']->pluck($key)->toArray();
 @endphp
 
 @if (request()->ajax())

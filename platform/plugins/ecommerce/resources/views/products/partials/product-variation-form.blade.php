@@ -2,9 +2,16 @@
     <form action="">
         @include('plugins/ecommerce::products.partials.product-attribute-sets')
 
-        @include('plugins/ecommerce::products.partials.general', ['product' => $product, 'originalProduct' => $originalProduct, 'isVariation' => true])
+        @include('plugins/ecommerce::products.partials.general', [
+            'product' => $product,
+            'originalProduct' => $originalProduct,
+            'isVariation' => true,
+        ])
         <div class="variation-images">
-            @include('core/base::forms.partials.images', ['name' => 'images[]', 'values' => isset($product) ? $product->images : []])
+            @include('core/base::forms.partials.images', [
+                'name' => 'images[]',
+                'values' => isset($product) ? $product->images : [],
+            ])
         </div>
     </form>
 

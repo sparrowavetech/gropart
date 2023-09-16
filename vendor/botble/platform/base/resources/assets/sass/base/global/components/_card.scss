@@ -1,7 +1,6 @@
 // General mode
 
 .mt-element-card {
-
     .mt-card-item {
         border: 1px solid;
         border-color: $general-panel-border-color;
@@ -27,7 +26,6 @@
             }
 
             .mt-card-social {
-
                 > ul {
                     padding: 0;
                     margin-bottom: 10px;
@@ -60,7 +58,6 @@
     }
 
     &.mt-card-round {
-
         .mt-card-item {
             padding: 40px 40px 10px 40px;
 
@@ -74,7 +71,4 @@
             }
         }
     }
-
 }
-
-

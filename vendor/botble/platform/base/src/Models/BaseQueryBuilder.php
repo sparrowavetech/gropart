@@ -6,10 +6,6 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
-/**
- * @template TModelClass of \Illuminate\Database\Eloquent\Model
- * @extends Builder<TModelClass>
- */
 class BaseQueryBuilder extends Builder
 {
     public function addSearch(string $column, string|null $term, bool $isPartial = true, bool $or = true): self
@@ -49,5 +45,12 @@ class BaseQueryBuilder extends Builder
         $this->where($column, BaseStatusEnum::PUBLISHED);
 
         return $this;
+    }
+
+    public function get($columns = ['*'])
+    {
+        $data = parent::get($columns);
+
+        return apply_filters('model_after_execute_get', $data, $this->getModel(), $columns);
     }
 }

@@ -1,5 +1,10 @@
-<div class="note note-info" role="alert">
-    <p class="mb-2 uppercase"><strong>{{ $title ?? __('You will receive money through the information below') }}</strong>:</p>
+<div
+    class="note note-info"
+    role="alert"
+>
+    <p class="mb-2 uppercase">
+        <strong>{{ $title ?? __('You will receive money through the information below') }}</strong>:
+    </p>
     @foreach (\Botble\Marketplace\Enums\PayoutPaymentMethodsEnum::getFields($paymentChannel) as $key => $field)
         @if (Arr::get($bankInfo, $key))
             <p>{{ Arr::get($field, 'title') }}: <strong>{{ Arr::get($bankInfo, $key) }}</strong></p>

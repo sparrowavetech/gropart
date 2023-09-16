@@ -1,5 +1,5 @@
-$(function() {
-    $(document).on('click', '.btn-trigger-add-address', function(e) {
+$(function () {
+    $(document).on('click', '.btn-trigger-add-address', function (e) {
         e.preventDefault()
         $('#add-address-modal').modal('show')
     })
@@ -93,14 +93,14 @@ $(function() {
         })
     })
 
-    $(document).on('click', '.deleteDialog', function(event) {
+    $(document).on('click', '.deleteDialog', function (event) {
         event.preventDefault()
         var _self = $(event.currentTarget)
         $('.delete-crud-entry').data('section', _self.data('section'))
         $('.modal-confirm-delete').modal('show')
     })
 
-    $('.delete-crud-entry').on('click', function(event) {
+    $('.delete-crud-entry').on('click', function (event) {
         event.preventDefault()
         const _self = $(event.currentTarget)
         _self.addClass('button-loading')
@@ -109,9 +109,9 @@ $(function() {
             url: deleteURL,
             type: 'POST',
             data: {
-                '_method': 'DELETE',
+                _method: 'DELETE',
             },
-            success: function(data) {
+            success: function (data) {
                 if (data.error) {
                     Botble.showError(data.message)
                 } else {

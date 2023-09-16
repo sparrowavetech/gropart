@@ -21,7 +21,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Throwable;
 use ZipArchive;
@@ -231,7 +230,7 @@ class TranslationController extends BaseController
             $this->removeLocaleInPath(lang_path('vendor/packages'), $locale);
             $this->removeLocaleInPath(lang_path('vendor/plugins'), $locale);
 
-            DB::table('translations')->where('locale', $locale)->delete();
+            Translation::query()->where('locale', $locale)->delete();
         }
 
         return $response->setMessage(trans('core/base::notices.delete_success_message'));

@@ -25,6 +25,10 @@ Route::group(['controller' => PublicController::class, 'middleware' => ['web', '
             'uses' => 'getView',
         ]);
 
+        Route::get('{prefix}/{slug?}', [
+            'uses' => 'getViewWithPrefix',
+        ]);
+
         event(new ThemeRoutingAfterEvent(app()->make('router')));
     });
 });

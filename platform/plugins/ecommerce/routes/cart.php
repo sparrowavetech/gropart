@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+
 Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Fronts', 'middleware' => ['web', 'core']], function () {
     Route::group(apply_filters(BASE_FILTER_GROUP_PUBLIC_ROUTE, []), function () {
         Route::get('cart', [
@@ -25,10 +27,6 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Fronts', 'middle
         Route::get('cart/destroy', [
             'as' => 'public.cart.destroy',
             'uses' => 'PublicCartController@getDestroy',
-        ]);
-        Route::post('add-to-cart-multiple', [
-            'uses' => 'PublicCartController@addMultipleIncart',
-            'as'   => 'public.cart.multiple',
         ]);
     });
 });

@@ -112,16 +112,12 @@ select:not([multiple]) {
 
 .page-sidebar-closed.page-sidebar-fixed .page-sidebar:hover,
 .page-sidebar {
-
     .page-sidebar-menu {
-
         /* Adjust "selected" arrow */
         > li {
-
             &.active.open,
             &.active {
                 > a {
-
                     > .selected {
                         top: 0;
                         right: -8px;
@@ -210,11 +206,11 @@ select:not([multiple]) {
                 border-radius: 5px 5px 0 0;
             }
         }
-
     }
 }
 
-@media (max-width: $screen-sm-max) { /* 991px */
+@media (max-width: $screen-sm-max) {
+    /* 991px */
 
     .page-content {
         border-left: 0;
@@ -237,7 +233,8 @@ select:not([multiple]) {
     }
 }
 
-@media (max-width: $screen-xs-min) { /* 480px */
+@media (max-width: $screen-xs-min) {
+    /* 480px */
 
     body {
         background: lighten($header-bg-color, 13%);

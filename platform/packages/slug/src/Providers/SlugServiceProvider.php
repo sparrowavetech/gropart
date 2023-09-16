@@ -84,50 +84,56 @@ class SlugServiceProvider extends ServiceProvider
                     ]);
                 });
 
-                MacroableModels::addMacro($item, 'getSlugAttribute', function () {
-                    /**
-                     * @var BaseModel $this
-                     */
-                    return $this->slugable ? $this->slugable->key : '';
-                });
-
-                MacroableModels::addMacro($item, 'getSlugIdAttribute', function () {
-                    /**
-                     * @var BaseModel $this
-                     */
-                    return $this->slugable ? $this->slugable->getKey() : '';
-                });
-
-                MacroableModels::addMacro(
-                    $item,
-                    'getUrlAttribute',
-                    function () {
+                if (! method_exists($item, 'getSlugAttribute') && ! method_exists($item, 'slug') && ! property_exists($item, 'slug')) {
+                    MacroableModels::addMacro($item, 'getSlugAttribute', function () {
                         /**
                          * @var BaseModel $this
                          */
-                        $model = $this;
+                        return $this->slugable ? $this->slugable->key : '';
+                    });
+                }
 
-                        $slug = $model->slugable;
+                if (! method_exists($item, 'getSlugIdAttribute') && ! method_exists($item, 'slugId') && ! property_exists($item, 'slug_id')) {
+                    MacroableModels::addMacro($item, 'getSlugIdAttribute', function () {
+                        /**
+                         * @var BaseModel $this
+                         */
+                        return $this->slugable ? $this->slugable->getKey() : '';
+                    });
+                }
 
-                        if (
-                            ! $slug ||
-                            ! $slug->key ||
-                            (get_class($model) == Page::class && BaseHelper::isHomepage($model->getKey()))
-                        ) {
-                            return route('public.index');
+                if (! method_exists($item, 'getUrlAttribute') && ! method_exists($item, 'url') && ! property_exists($item, 'url')) {
+                    MacroableModels::addMacro(
+                        $item,
+                        'getUrlAttribute',
+                        function () {
+                            /**
+                             * @var BaseModel $this
+                             */
+                            $model = $this;
+
+                            $slug = $model->slugable;
+
+                            if (
+                                ! $slug ||
+                                ! $slug->key ||
+                                (get_class($model) == Page::class && BaseHelper::isHomepage($model->getKey()))
+                            ) {
+                                return route('public.index');
+                            }
+
+                            $prefix = SlugHelperFacade::getTranslator()->compile(
+                                apply_filters(FILTER_SLUG_PREFIX, $slug->prefix),
+                                $model
+                            );
+
+                            return apply_filters(
+                                'slug_filter_url',
+                                url(ltrim($prefix . '/' . $slug->key, '/')) . SlugHelperFacade::getPublicSingleEndingURL()
+                            );
                         }
-
-                        $prefix = SlugHelperFacade::getTranslator()->compile(
-                            apply_filters(FILTER_SLUG_PREFIX, $slug->prefix),
-                            $model
-                        );
-
-                        return apply_filters(
-                            'slug_filter_url',
-                            url(ltrim($prefix . '/' . $slug->key, '/')) . SlugHelperFacade::getPublicSingleEndingURL()
-                        );
-                    }
-                );
+                    );
+                }
             }
 
             $this->app->register(HookServiceProvider::class);

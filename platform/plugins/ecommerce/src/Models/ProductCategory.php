@@ -3,13 +3,14 @@
 namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Facades\Html;
 use Botble\Base\Models\BaseModel;
 use Botble\Ecommerce\Tables\ProductTable;
-use Html;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -26,7 +27,6 @@ class ProductCategory extends BaseModel
         'status',
         'image',
         'is_featured',
-        'is_enquiry',
     ];
 
     protected $casts = [
@@ -104,20 +104,29 @@ class ProductCategory extends BaseModel
     {
         return $this
             ->children()
-            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->wherePublished()
             ->with(['slugable', 'activeChildren']);
     }
 
-    protected static function boot()
+    public function brands(): MorphToMany
     {
-        parent::boot();
+        return $this->morphedByMany(Brand::class, 'reference', 'ec_product_categorizables', 'category_id');
+    }
 
+    public function productAttributeSets(): MorphToMany
+    {
+        return $this->morphedByMany(ProductAttributeSet::class, 'reference', 'ec_product_categorizables', 'category_id');
+    }
+
+    protected static function booted(): void
+    {
         self::deleting(function (ProductCategory $category) {
             $category->products()->detach();
 
-            foreach ($category->children()->get() as $child) {
-                $child->delete();
-            }
+            $category->children()->each(fn (ProductCategory $child) => $child->delete());
+
+            $category->brands()->detach();
+            $category->productAttributeSets()->detach();
         });
     }
 }

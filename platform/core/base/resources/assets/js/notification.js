@@ -1,30 +1,35 @@
-let AdminNotification = function () {
-    const adminNotification = $('#admin-notification')
+const AdminNotification = function () {
+    const http = $httpClient.clone()
+
+    const $loadingNotification = $('#loading-notification')
+    const $sidebarNotification = $('#notification-sidebar')
+    const $adminNotification = $('#admin-notification')
+    const $backdropNotification = $('#sidebar-notification-backdrop')
+    const $listNotification = $('.list-item-notification')
+
+    http.beforeSend(() => $loadingNotification.show())
+
+    http.completed(() => $loadingNotification.hide())
+
     $(document).on('click', '#open-notification', function (e) {
         e.preventDefault()
+        $sidebarNotification.addClass('active')
+        $adminNotification.find('.current-page').val(1)
 
-        $('#notification-sidebar').addClass('active')
-        adminNotification.find('.current-page').val(1)
-        $('#sidebar-notification-backdrop').addClass('sidebar-backdrop')
-        if ($('.list-item-notification').html() === '') {
-            $('#loading-notification').show()
-        }
+        $backdropNotification.addClass('sidebar-backdrop')
 
-        $.ajax({
-            url: $(this).attr('href'),
-            method: 'GET',
-            success: (res) => {
-                if ($(res).hasClass('no-data-notification')) {
-                    adminNotification.find('.action-notification').hide()
-                    adminNotification.find('.title-notification-heading').hide()
+        http.make()
+            .get($(this).prop('href'))
+            .then(({ data }) => {
+                if ($(data).hasClass('no-data-notification')) {
+                    $adminNotification.find('.action-notification').hide()
+                    $adminNotification.find('.title-notification-heading').hide()
                 }
-                $('#sidebar-notification-backdrop').addClass('sidebar-backdrop')
-                $('.list-item-notification').html(res)
-            },
-            complete: () => {
-                $('#loading-notification').hide()
-            },
-        })
+
+                $backdropNotification.addClass('sidebar-backdrop')
+
+                $listNotification.html(data)
+            })
     })
 
     $(document).on('click', '#sidebar-notification-backdrop', function (e) {
@@ -40,115 +45,79 @@ let AdminNotification = function () {
                 }
                 targetEl = targetEl.parentNode
             } while (targetEl)
-            $('#sidebar-notification-backdrop').removeClass('sidebar-backdrop')
-            $('#notification-sidebar').removeClass('active')
+            $backdropNotification.removeClass('sidebar-backdrop')
+            $sidebarNotification.removeClass('active')
         }
     })
 
-    $(adminNotification).on('click', '#close-notification', function (e) {
+    $($adminNotification).on('click', '#close-notification', function (e) {
         e.preventDefault()
 
-        $('#sidebar-notification-backdrop').removeClass('sidebar-backdrop')
-        $('#notification-sidebar').removeClass('active')
+        $backdropNotification.removeClass('sidebar-backdrop')
+        $sidebarNotification.removeClass('active')
     })
 
-    $(adminNotification).on('click', '.mark-read-all', function (e) {
+    $($adminNotification).on('click', '.mark-read-all', function (e) {
         e.preventDefault()
 
-        $.ajax({
-            url: $(this).attr('href'),
-            method: 'POST',
-            data: {
-                _method: 'PUT',
-            },
-            beforeSend: () => {
-                $('#loading-notification').show()
-            },
-            success: () => {
+        http.make()
+            .put($(this).prop('href'))
+            .then(() => {
                 $('.list-group-item').addClass('read')
                 updateNotificationsCount()
-            },
-            complete: () => {
-                $('#loading-notification').hide()
-            },
-        })
+            })
     })
 
-    $(adminNotification).on('click', '.delete-all-notifications', function (e) {
+    $($adminNotification).on('click', '.delete-all-notifications', function (e) {
         e.preventDefault()
 
-        $.ajax({
-            url: $(this).attr('href'),
-            method: 'POST',
-            data: {
-                _method: 'DELETE',
-            },
-            beforeSend: () => {
-                $('#loading-notification').show()
-            },
-            success: (res) => {
-                $('#notification-sidebar').html(res)
-                adminNotification.find('.action-notification').hide()
-                adminNotification.find('.title-notification-heading').hide()
+        http.make()
+            .delete($(this).attr('href'))
+            .then(({ data }) => {
+                $sidebarNotification.html(data)
+                $adminNotification.find('.action-notification').hide()
+                $adminNotification.find('.title-notification-heading').hide()
                 updateNotificationsCount()
-            },
-            complete: () => {
-                $('#loading-notification').hide()
-            },
-        })
+            })
     })
 
-    $(adminNotification).on('click', '.view-more-notification', function (e) {
+    $($adminNotification).on('click', '.view-more-notification', function (e) {
         e.preventDefault()
 
-        const pageNow = adminNotification.find('.current-page').val()
+        const pageNow = $adminNotification.find('.current-page').val()
         let nextPage = parseInt(pageNow) + 1
+
         $(this).hide()
 
-        $.ajax({
-            url: $('#open-notification').attr('href') + '?page=' + nextPage,
-            beforeSend: () => {
-                $('#loading-notification').show()
-            },
-            success: (res) => {
-                adminNotification.find('.current-page').val(nextPage++)
-                $('.list-item-notification').append(res)
-            },
-            complete: () => {
-                $('#loading-notification').hide()
-            },
-        })
+        http.make()
+            .get($(this).prop('href'), { page: nextPage })
+            .then(({ data }) => {
+                $adminNotification.find('.current-page').val(nextPage++)
+                $listNotification.append(data)
+            })
     })
 
-    $(adminNotification).on('click', '.btn-delete-notification', function (e) {
+    $($adminNotification).on('click', '.btn-delete-notification', function (e) {
         e.preventDefault()
 
-        $.ajax({
-            url: $(this).data('href'),
-            method: 'POST',
-            data: {
-                _method: 'DELETE',
-            },
-            beforeSend: () => {
-                $('#loading-notification').show()
-            },
-            success: (res) => {
+        http.make()
+            .delete($(this).attr('href'))
+            .then(({ data }) => {
                 $(this).closest('li.list-group-item').fadeOut(500).remove()
+
                 updateItems()
+
                 updateNotificationsCount()
-                if (res.view) {
-                    $('#notification-sidebar').html(res.view)
+
+                if (data.view) {
+                    $sidebarNotification.html(data.view)
                     $('p.action-notification').hide()
                     $('h2.title-notification-heading').hide()
                 }
-            },
-            complete: () => {
-                $('#loading-notification').hide()
-            },
-        })
+            })
     })
 
-    $(adminNotification).on('click', '.show-more-description', function (e) {
+    $($adminNotification).on('click', '.show-more-description', function (e) {
         e.preventDefault()
 
         $(`.show-less-${$(this).data('id')}`).show()
@@ -156,7 +125,7 @@ let AdminNotification = function () {
         $(`.${$(this).data('class')}`).text($(this).data('description'))
     })
 
-    $(adminNotification).on('click', '.show-less-description', function (e) {
+    $($adminNotification).on('click', '.show-less-description', function (e) {
         e.preventDefault()
 
         $(`.show-more-${$(this).data('id')}`).show()
@@ -167,24 +136,21 @@ let AdminNotification = function () {
     function updateNotificationsCount() {
         const countNotifications = $('#open-notification')
 
-        $.ajax({
-            url: countNotifications.data('href'),
-            method: 'GET',
-            success: (res) => {
-                countNotifications.html(res)
-            },
-        })
+        http.make()
+            .get(countNotifications.data('href'))
+            .then(({ data }) => {
+                countNotifications.html(data)
+            })
     }
 
     function updateItems() {
-        const pageNow = adminNotification.find('.current-page').val()
+        const pageNow = $adminNotification.find('.current-page').val()
 
-        $.ajax({
-            url: $('#open-notification').attr('href') + '?page=' + pageNow,
-            success: (res) => {
-                $('.list-item-notification').html(res)
-            },
-        })
+        http.make()
+            .get($('#open-notification').prop('href'), { page: pageNow })
+            .then(({ data }) => {
+                $listNotification.html(data)
+            })
     }
 }
 

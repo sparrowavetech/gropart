@@ -9,11 +9,17 @@ use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\OrderHelper;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\OrderHistory;
+use Botble\Ecommerce\Tables\Formatters\PriceFormatter;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Table\DataTables;
-use Illuminate\Contracts\Routing\UrlGenerator;
+use Botble\Table\Actions\DeleteAction;
+use Botble\Table\Actions\EditAction;
+use Botble\Table\BulkActions\DeleteBulkAction;
+use Botble\Table\Columns\Column;
+use Botble\Table\Columns\CreatedAtColumn;
+use Botble\Table\Columns\IdColumn;
+use Botble\Table\Columns\StatusColumn;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -27,31 +33,20 @@ use Symfony\Component\HttpFoundation\Response;
 
 class OrderTable extends TableAbstract
 {
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Order $model)
+    public function setup(): void
     {
-        parent::__construct($table, $urlGenerator);
-
-        $this->model = $model;
-
-        $this->hasActions = true;
-        $this->hasFilter = true;
-
-        if (! Auth::user()->hasPermission('orders.edit')) {
-            $this->hasOperations = false;
-            $this->hasActions = false;
-        }
+        $this
+            ->model(Order::class)
+            ->addActions([
+                EditAction::make()->route('orders.edit'),
+                DeleteAction::make()->route('orders.destroy'),
+            ]);
     }
 
     public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('checkbox', function (Order $item) {
-                return $this->getCheckbox($item->id);
-            })
-            ->editColumn('status', function (Order $item) {
-                return BaseHelper::clean($item->status->toHtml());
-            })
             ->editColumn('payment_status', function (Order $item) {
                 if (! is_plugin_active('payment')) {
                     return '&mdash;';
@@ -68,12 +63,8 @@ class OrderTable extends TableAbstract
 
                 return BaseHelper::clean($item->payment->payment_channel->label() ?: '&mdash;');
             })
-            ->editColumn('amount', function (Order $item) {
-                return format_price($item->amount);
-            })
-            ->editColumn('shipping_amount', function (Order $item) {
-                return format_price($item->shipping_amount);
-            })
+            ->formatColumn('amount', PriceFormatter::class)
+            ->formatColumn('shipping_amount', PriceFormatter::class)
             ->editColumn('user_id', function (Order $item) {
                 return BaseHelper::clean($item->user->name ?: $item->address->name);
             })
@@ -82,21 +73,13 @@ class OrderTable extends TableAbstract
             })
             ->editColumn('customer_phone', function (Order $item) {
                 return BaseHelper::clean($item->user->phone ?: $item->address->phone);
-            })
-            ->editColumn('created_at', function (Order $item) {
-                return BaseHelper::formatDate($item->created_at);
             });
 
         if (EcommerceHelper::isTaxEnabled()) {
-            $data = $data->editColumn('tax_amount', function (Order $item) {
-                return format_price($item->tax_amount);
-            });
+            $data = $data->formatColumn('tax_amount', PriceFormatter::class);
         }
 
         $data = $data
-            ->addColumn('operations', function (Order $item) {
-                return $this->getOperations('orders.edit', 'orders.destroy', $item);
-            })
             ->filter(function ($query) {
                 if ($keyword = $this->request->input('search.value')) {
                     return $query
@@ -129,7 +112,8 @@ class OrderTable extends TableAbstract
             $with[] = 'payment';
         }
 
-        $query = $this->getModel()
+        $query = $this
+            ->getModel()
             ->query()
             ->with($with)
             ->select([
@@ -150,65 +134,50 @@ class OrderTable extends TableAbstract
     public function columns(): array
     {
         $columns = [
-            'id' => [
-                'title' => trans('core/base::tables.id'),
-                'width' => '20px',
-                'class' => 'text-start',
-            ],
-            'user_id' => [
-                'title' => trans('plugins/ecommerce::order.customer_label'),
-                'class' => 'text-start',
-            ],
-            'customer_email' => [
-                'title' => trans('plugins/ecommerce::customer.email'),
-                'class' => 'text-start',
-                'sortable' => false,
-            ],
-            'customer_phone' => [
-                'title' => trans('plugins/ecommerce::customer.phone'),
-                'class' => 'text-start',
-                'sortable' => false,
-            ],
-            'amount' => [
-                'title' => trans('plugins/ecommerce::order.amount'),
-                'class' => 'text-center',
-            ],
+            IdColumn::make(),
+            Column::make('user_id')
+                ->title(trans('plugins/ecommerce::order.customer_label'))
+                ->alignLeft(),
+            Column::make('customer_email')
+                ->title(trans('plugins/ecommerce::order.email'))
+                ->alignLeft()
+                ->orderable(false),
+            Column::make('customer_phone')
+                ->title(trans('plugins/ecommerce::order.phone'))
+                ->alignLeft()
+                ->orderable(false),
+            Column::formatted('amount')
+                ->title(trans('plugins/ecommerce::order.amount')),
         ];
 
         if (EcommerceHelper::isTaxEnabled()) {
-            $columns['tax_amount'] = [
-                'title' => trans('plugins/ecommerce::order.tax_amount'),
-                'class' => 'text-center',
-            ];
+            $columns = array_merge($columns, [
+                Column::formatted('tax_amount')
+                    ->title(trans('plugins/ecommerce::order.tax_amount')),
+            ]);
         }
 
-        $columns += [
-            'shipping_amount' => [
-                'title' => trans('plugins/ecommerce::order.shipping_amount'),
-                'class' => 'text-center',
-            ],
-            'payment_method' => [
-                'name' => 'payment_id',
-                'title' => trans('plugins/ecommerce::order.payment_method'),
-                'class' => 'text-start',
-            ],
-            'payment_status' => [
-                'name' => 'payment_id',
-                'title' => trans('plugins/ecommerce::order.payment_status_label'),
-                'class' => 'text-center',
-            ],
-            'status' => [
-                'title' => trans('core/base::tables.status'),
-                'class' => 'text-center',
-            ],
-            'created_at' => [
-                'title' => trans('core/base::tables.created_at'),
-                'width' => '100px',
-                'class' => 'text-start',
-            ],
-        ];
+        $columns = array_merge($columns, [
+            Column::formatted('shipping_amount')
+                ->title(trans('plugins/ecommerce::order.shipping_amount')),
+        ]);
 
-        return $columns;
+        if (is_plugin_active('payment')) {
+            $columns = array_merge($columns, [
+                Column::make('payment_method')
+                    ->name('payment_id')
+                    ->title(trans('plugins/ecommerce::order.payment_method'))
+                    ->alignLeft(),
+                Column::make('payment_status')
+                    ->name('payment_id')
+                    ->title(trans('plugins/ecommerce::order.payment_status_label')),
+            ]);
+        }
+
+        return array_merge($columns, [
+            CreatedAtColumn::make(),
+            StatusColumn::make(),
+        ]);
     }
 
     public function buttons(): array
@@ -218,7 +187,9 @@ class OrderTable extends TableAbstract
 
     public function bulkActions(): array
     {
-        return $this->addDeleteAction(route('orders.deletes'), 'orders.destroy', parent::bulkActions());
+        return [
+            DeleteBulkAction::make()->permission('orders.destroy'),
+        ];
     }
 
     public function getBulkChanges(): array
@@ -333,8 +304,12 @@ class OrderTable extends TableAbstract
         return parent::saveBulkChangeItem($item, $inputKey, $inputValue);
     }
 
-    public function applyFilterCondition(Builder|QueryBuilder|Relation $query, string $key, string $operator, string|null $value): Builder|QueryBuilder|Relation
-    {
+    public function applyFilterCondition(
+        Builder|QueryBuilder|Relation $query,
+        string $key,
+        string $operator,
+        string|null $value
+    ): Builder|QueryBuilder|Relation {
         switch ($key) {
             case 'customer_name':
                 if (! $value) {
@@ -402,8 +377,12 @@ class OrderTable extends TableAbstract
         return parent::applyFilterCondition($query, $key, $operator, $value);
     }
 
-    protected function filterByCustomer(Builder|QueryBuilder|Relation $query, string $column, string $operator, string|null $value): Builder|QueryBuilder|Relation
-    {
+    protected function filterByCustomer(
+        Builder|QueryBuilder|Relation $query,
+        string $column,
+        string $operator,
+        string|null $value
+    ): Builder|QueryBuilder|Relation {
         if ($operator === 'like') {
             $value = '%' . $value . '%';
         } elseif ($operator !== '=') {

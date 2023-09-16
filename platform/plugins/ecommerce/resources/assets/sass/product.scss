@@ -50,7 +50,7 @@
         height: 40px;
         width: 40px;
         text-align: center;
-        border: 1px solid rgba(195, 207, 216, .3);
+        border: 1px solid rgba(195, 207, 216, 0.3);
         display: table-cell;
         vertical-align: middle;
         background: #fafbfc;
@@ -91,7 +91,6 @@
     }
 }
 
-
 table.dataTable {
     thead {
         tr.dataTable-custom-filter {
@@ -119,7 +118,7 @@ table.dataTable {
                             right: 0;
                             z-index: 1;
                             background-color: #73737382;
-                            font-size: .8rem;
+                            font-size: 0.8rem;
                         }
                     }
                 }

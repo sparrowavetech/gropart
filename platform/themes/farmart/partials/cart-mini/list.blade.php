@@ -1,7 +1,13 @@
 <div class="panel__header">
-    <span class="svg-icon close-toggle--sidebar" data-toggle-closest=".cart__content">
+    <span
+        class="svg-icon close-toggle--sidebar"
+        data-toggle-closest=".cart__content"
+    >
         <svg>
-            <use href="#svg-icon-arrow-left" xlink:href="#svg-icon-arrow-left"></use>
+            <use
+                href="#svg-icon-arrow-left"
+                xlink:href="#svg-icon-arrow-left"
+            ></use>
         </svg>
     </span>
     <h3>{{ __('Cart') }} <span class="cart-counter">({{ Cart::instance('cart')->count() }})</span></h3>
@@ -9,7 +15,7 @@
 <div class="cart__items">
     @if (Cart::instance('cart')->count() > 0 && ($products = Cart::instance('cart')->products()) && $products->count() > 0)
         <ul class="mini-product-cart-list">
-            @foreach(Cart::instance('cart')->content() as $key => $cartItem)
+            @foreach (Cart::instance('cart')->content() as $key => $cartItem)
                 @if ($product = $products->find($cartItem->id))
                     {!! Theme::partial('cart-mini.item', compact('product', 'cartItem')) !!}
                 @endif
@@ -22,7 +28,8 @@
     @endif
 </div>
 
-@if (Cart::instance('cart')->count() > 0 && Cart::instance('cart')->products()->count() > 0)
+@if (Cart::instance('cart')->count() > 0 &&
+        Cart::instance('cart')->products()->count() > 0)
     <div class="control-buttons">
         @if (EcommerceHelper::isTaxEnabled())
             <div class="mini-cart__total">
@@ -55,11 +62,17 @@
         @endif
         <div class="mini-cart__buttons row g-0">
             <div class="col me-2">
-                <a class="btn btn-light" href="{{ route('public.cart') }}">{{ __('View Cart') }}</a></div>
+                <a
+                    class="btn btn-light"
+                    href="{{ route('public.cart') }}"
+                >{{ __('View Cart') }}</a>
+            </div>
             <div class="col ms-2">
                 @if (session('tracked_start_checkout'))
-                    <a class="btn btn-primary checkout"
-                        href="{{ route('public.checkout.information', session('tracked_start_checkout')) }}">{{ __('Checkout') }}</a>
+                    <a
+                        class="btn btn-primary checkout"
+                        href="{{ route('public.checkout.information', session('tracked_start_checkout')) }}"
+                    >{{ __('Checkout') }}</a>
                 @endif
             </div>
         </div>

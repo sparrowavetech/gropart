@@ -2,17 +2,12 @@
 
 namespace Botble\Marketplace\Supports;
 
+use Botble\Base\Facades\EmailHandler;
 use Botble\Ecommerce\Enums\DiscountTypeOptionEnum;
 use Botble\Ecommerce\Models\Order as OrderModel;
-use Botble\Ecommerce\Models\Enquiry;
-use EmailHandler;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use Botble\Theme\Facades\Theme;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
-use Theme;
-use Throwable;
-use Botble\Sms\Supports\SmsHandler;
-use Botble\Sms\Enums\SmsEnum;
 
 class MarketplaceHelper
 {
@@ -32,7 +27,7 @@ class MarketplaceHelper
         return 'plugins/marketplace::themes.' . $view;
     }
 
-    public function getSetting(string $key, string|array|null|bool $default = ''): string|array|null|bool
+    public function getSetting(string $key, string|int|array|null|bool $default = ''): string|int|array|null|bool
     {
         return setting($this->getSettingKey($key), $default);
     }
@@ -49,22 +44,27 @@ class MarketplaceHelper
 
     public function getAssetVersion(): string
     {
-        return '1.1.0';
+        return '1.2.0';
     }
 
     public function hideStorePhoneNumber(): bool
     {
-        return $this->getSetting('hide_store_phone_number', 0) == 1;
+        return (bool)$this->getSetting('hide_store_phone_number', false);
     }
 
     public function hideStoreEmail(): bool
     {
-        return $this->getSetting('hide_store_email', 0) == 1;
+        return (bool)$this->getSetting('hide_store_email', false);
+    }
+
+    public function hideStoreSocialLinks(): bool
+    {
+        return (bool)$this->getSetting('hide_store_social_links', false);
     }
 
     public function allowVendorManageShipping(): bool
     {
-        return $this->getSetting('allow_vendor_manage_shipping', 0) == 1;
+        return (bool)$this->getSetting('allow_vendor_manage_shipping', false);
     }
 
     public function sendMailToVendorAfterProcessingOrder($orders)
@@ -82,17 +82,6 @@ class MarketplaceHelper
                 if ($order->store->email) {
                     $this->setEmailVendorVariables($order);
                     $mailer->sendUsingTemplate('store_new_order', $order->store->email);
-                }
-                if (is_plugin_active('sms') && $order->store->phone) {
-                    $sms = new  SmsHandler;
-                    $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
-                    if ($sms->templateEnabled(SmsEnum::VENDOR_NEW_ORDER())) {
-                        self::setSmsVariables($order, $sms);
-                        $sms->sendUsingTemplate(
-                            SmsEnum::VENDOR_NEW_ORDER(),
-                            $order->store->phone
-                        );
-                    }
                 }
             }
         }
@@ -118,85 +107,22 @@ class MarketplaceHelper
 
     public function isCommissionCategoryFeeBasedEnabled(): bool
     {
-        return MarketplaceHelper::getSetting('enable_commission_fee_for_each_category') == 1;
+        return (bool)$this->getSetting('enable_commission_fee_for_each_category');
     }
-    /**
-     * @param Collection $orders
-     * @return Collection
-     * @throws FileNotFoundException
-     * @throws Throwable
-     */
-    public static function sendEnquiryMail($enquiry)
-    {
-        $mailer = EmailHandler::setModule(MARKETPLACE_MODULE_SCREEN_NAME);
 
-        if ($mailer->templateEnabled('store_new_enquiry')) {
-            if ($enquiry->product->store->email) {
-                self::setEmailVendorVariablesForEnquiry($enquiry);
-                $mailer->sendUsingTemplate('store_new_enquiry', $enquiry->product->store->email);
-            }
+    public function maxFilesizeUploadByVendor(): int
+    {
+        $size = $this->getSetting('max_filesize_upload_by_vendor');
+
+        if (! $size) {
+            $size = setting('max_upload_filesize') ?: 10;
         }
-        return $enquiry;
+
+        return (int)$size;
     }
 
-    /**
-     * @param EnquiryrModel $order
-     * @return \Botble\Base\Supports\EmailHandler
-     * @throws Throwable
-     */
-    public static function setEmailVendorVariablesForEnquiry(Enquiry $enquiry): \Botble\Base\Supports\EmailHandler
+    public function maxProductImagesUploadByVendor(): int
     {
-        return EmailHandler::setModule(MARKETPLACE_MODULE_SCREEN_NAME)
-            ->setVariableValues([
-                'enquiry_id'    => $enquiry->code,
-                'customer_name'    => $enquiry->name,
-                'customer_email'   => $enquiry->email,
-                'customer_phone'   => $enquiry->phone,
-                'customer_address' => $enquiry->address.', '.$enquiry->cityName->name.', '.$enquiry->stateName->name.', '.$enquiry->zip_code,
-                'product_list'     => view('plugins/ecommerce::emails.partials.enquiry-detail', compact('enquiry'))
-                    ->render(),
-                'enquiry_description'      => $enquiry->description,
-                'store_name'       => $enquiry->product->store->name,
-            ]);
-    }
-     /**
-     * @param EnquiryrModel $order
-     * @return \Botble\Base\Supports\EmailHandler
-     * @throws Throwable
-     */
-    public static function setSmsVendorVariablesForEnquiry(Enquiry $enquiry, SmsHandler $sms)
-    {
-        $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME)
-            ->setVariableValues([
-                'customer_name'    => $enquiry->name,
-                'customer_email'   => $enquiry->email,
-                'customer_phone'   => $enquiry->phone,
-                'customer_address' => $enquiry->address.', '.$enquiry->cityName->name.', '.$enquiry->stateName->name.', '.$enquiry->zip_code,
-                'enquiry_id'    => $enquiry->code,
-                'enquiry_description'  => $enquiry->description,
-                'store_name'       => $enquiry->product->store->name,
-            ]);
-
-        return $sms;
-    }
-
-    /**
-     * @param Order $order
-     *
-     * @return SmsHandler
-     * @throws Throwable
-     */
-    public function setSmsVariables(OrderModel $order, SmsHandler $sms)
-    {
-        $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME)
-            ->setVariableValues([
-                'customer_name' => $order->user->name ?: $order->address->name,
-                'customer_email' => $order->user->email ?: $order->address->email,
-                'customer_phone' => $order->user->phone ?: $order->address->phone,
-                'customer_address' => $order->full_address,
-                'shipping_method' => $order->shipping_method_name,
-                'payment_method' => $order->payment->payment_channel->label(),
-                'store_name' => $order->store->name,
-            ]);
+        return (int)$this->getSetting('max_product_images_upload_by_vendor', 20);
     }
 }

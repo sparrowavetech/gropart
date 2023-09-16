@@ -8,10 +8,19 @@
         :button-label="trans('plugins/ecommerce::addresses.add')"
         size="md"
     >
-        <form action="{{ route('customers.addresses.create.store') }}" method="POST">
-            <input type="hidden" name="customer_id" value="{{ $form->getModel()->id }}">
+        <form
+            action="{{ route('customers.addresses.create.store') }}"
+            method="POST"
+        >
+            <input
+                name="customer_id"
+                type="hidden"
+                value="{{ $form->getModel()->id }}"
+            >
 
-            @include('plugins/ecommerce::customers.addresses.form', ['address' => new \Botble\Ecommerce\Models\Address()])
+            @include('plugins/ecommerce::customers.addresses.form', [
+                'address' => new \Botble\Ecommerce\Models\Address(),
+            ])
         </form>
     </x-core-base::modal>
 
@@ -50,11 +59,7 @@
                 </h4>
             </div>
             <div class="widget-body">
-                {!! app(\Botble\Ecommerce\Tables\CustomerReviewTable::class)
-                    ->customerId($customerId)
-                    ->setAjaxUrl(route('customers.ajax.reviews', $customerId))
-                    ->renderTable()
-                !!}
+                {!! app(\Botble\Ecommerce\Tables\CustomerReviewTable::class)->customerId($customerId)->setAjaxUrl(route('customers.ajax.reviews', $customerId))->renderTable() !!}
             </div>
         </div>
     @endif

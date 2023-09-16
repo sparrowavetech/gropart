@@ -12,7 +12,6 @@
     {!! $options['html'] !!}
 @endif
 
-
 @if ($showLabel && $showField)
     @if ($options['wrapper'] !== false)
         </div>

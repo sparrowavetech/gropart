@@ -27,15 +27,14 @@ Bootstrap  Datetimepicker
     background-color: #2678fc !important;
     background-image: none !important;
     filter: none !important;
-
 }
 
 .datetimepicker .fa-angle-left:before {
-    content: "\f104"#{'/*rtl:"\f105"*/'};
+    content: '\f104' #{'/*rtl:"\f105"*/'};
 }
 
 .datetimepicker .fa-angle-right:before {
-    content: "\f105"#{'/*rtl:"\f104"*/'};
+    content: '\f105' #{'/*rtl:"\f104"*/'};
 }
 
 /* change z-index when opened in modal */

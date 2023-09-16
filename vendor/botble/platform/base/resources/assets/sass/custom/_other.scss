@@ -101,13 +101,14 @@
     padding: 0;
     margin: 20px 0;
     border-radius: 0;
-    box-shadow: 0 0.1em 0.4em rgba(0, 0, 0, .3);
+    box-shadow: 0 0.1em 0.4em rgba(0, 0, 0, 0.3);
 
     &.fancybox-content {
         padding: 0 !important;
     }
 
-    .form-xs, .modal-xs {
+    .form-xs,
+    .modal-xs {
         max-width: 500px;
 
         .modal-body {
@@ -206,7 +207,9 @@ form {
                 color: inherit;
             }
 
-            .form-control, .input-group-prepend, .select2-selection {
+            .form-control,
+            .input-group-prepend,
+            .select2-selection {
                 border-color: #cccccc !important;
             }
 
@@ -232,8 +235,8 @@ form {
 
 .field-has-error {
     border: 1px solid #a94442 !important;
-    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
-    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
 }
 
 .page-header.navbar .top-menu .navbar-nav > li.dropdown .dropdown-toggle {
@@ -261,26 +264,31 @@ form {
         border-color: #adadad;
     }
 
-    &.focus, &:focus {
+    &.focus,
+    &:focus {
         color: #333333;
         background-color: #e6e6e6;
         border-color: #8c8c8c;
     }
 
-    &.active, &:active {
+    &.active,
+    &:active {
         color: #333333;
         background-color: #e6e6e6;
         border-color: #adadad;
     }
 }
 
-.btn-secondary:not(:disabled):not(.disabled).active, .btn-secondary:not(:disabled):not(.disabled):active, .show > .btn-secondary.dropdown-toggle {
+.btn-secondary:not(:disabled):not(.disabled).active,
+.btn-secondary:not(:disabled):not(.disabled):active,
+.show > .btn-secondary.dropdown-toggle {
     color: #333333;
     background-color: #e6e6e6;
     border-color: #adadad;
 }
 
-.bootstrap-datetimepicker-widget, .bootstrap-timepicker-widget {
+.bootstrap-datetimepicker-widget,
+.bootstrap-timepicker-widget {
     &.dropdown-menu {
         display: block;
         position: absolute;
@@ -296,10 +304,10 @@ form {
         background-color: #ffffff;
         -webkit-background-clip: padding-box;
         background-clip: padding-box;
-        border: 1px solid rgba(0, 0, 0, .15);
+        border: 1px solid rgba(0, 0, 0, 0.15);
         border-radius: 4px;
-        -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+        -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
     }
 
     .collapse.in {
@@ -310,7 +318,7 @@ form {
         position: relative;
         top: 1px;
         display: inline-block;
-        font: 900 normal normal 14px/1 Font Awesome\ 5 Free;
+        font: 900 normal normal 14px/1 'Font Awesome 6 Free';
         font-style: normal;
         line-height: 1;
         -webkit-font-smoothing: antialiased;
@@ -318,31 +326,32 @@ form {
     }
 
     .glyphicon-time:before {
-        content: "\f017";
+        content: '\f017';
     }
 
     .glyphicon-chevron-left:before {
-        content: "\f053";
+        content: '\f053';
     }
 
     .glyphicon-chevron-right:before {
-        content: "\f054";
+        content: '\f054';
     }
 
     .glyphicon-chevron-up:before {
-        content: "\f077";
+        content: '\f077';
     }
 
     .glyphicon-chevron-down:before {
-        content: "\f078";
+        content: '\f078';
     }
 
     .glyphicon-calendar:before {
-        content: "\f073";
+        content: '\f073';
     }
 }
 
-.mt-radio > input, .mt-checkbox > input {
+.mt-radio > input,
+.mt-checkbox > input {
     position: absolute !important;
 }
 
@@ -386,13 +395,13 @@ h4.modal-title {
     position: relative;
     overflow: hidden;
     vertical-align: bottom;
-    transition: all .2s ease-out;
+    transition: all 0.2s ease-out;
     background: linear-gradient(180deg, #fff, #f9fafb);
     border: 1px solid #c4cdd5;
-    box-shadow: 0 1px 0 0 rgba(22, 29, 37, .05);
+    box-shadow: 0 1px 0 0 rgba(22, 29, 37, 0.05);
 
     .select2-selection__rendered {
-        padding: .55rem 0.5rem !important;
+        padding: 0.55rem 0.5rem !important;
         color: #000 !important;
         font-weight: 400;
         font-size: 13px;
@@ -404,12 +413,14 @@ h4.modal-title {
         display: none !important;
     }
 
-    .select2-container--default .select2-selection--multiple, .select2-container--default .select2-selection--single {
+    .select2-container--default .select2-selection--multiple,
+    .select2-container--default .select2-selection--single {
         border: none;
     }
 }
 
-.form-group .ui-select-wrapper, .form-group.ui-select-wrapper {
+.form-group .ui-select-wrapper,
+.form-group.ui-select-wrapper {
     .select2-container {
         z-index: 0;
     }
@@ -518,7 +529,8 @@ h4.modal-title {
     }
 }
 
-.half-circle-spinner, .half-circle-spinner * {
+.half-circle-spinner,
+.half-circle-spinner * {
     box-sizing: border-box;
 }
 
@@ -531,7 +543,7 @@ h4.modal-title {
 }
 
 .half-circle-spinner .circle {
-    content: "";
+    content: '';
     position: absolute;
     width: 100%;
     height: 100%;
@@ -552,7 +564,6 @@ h4.modal-title {
 @keyframes half-circle-spinner-animation {
     0% {
         transform: rotate(0deg);
-
     }
     100% {
         transform: rotate(360deg);
@@ -591,7 +602,6 @@ h4.modal-title {
 .page-content-transparent {
     background-color: transparent;
 }
-
 
 .repeater-group {
     .repeater-item-group {
@@ -655,7 +665,9 @@ h4.modal-title {
 .updater-box {
     background-color: #fff;
     border-radius: 6px;
-    box-shadow: 0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%);
+    box-shadow:
+        0 0.5em 1em -0.125em rgb(10 10 10 / 10%),
+        0 0 0 1px rgb(10 10 10 / 2%);
     color: #4a4a4a;
     display: block;
     padding: 1.25rem;
@@ -669,9 +681,15 @@ h4.modal-title {
         padding: 15px 30px 15px 15px;
     }
 
-    code, pre {
+    code,
+    pre {
         color: #333333;
-        font: 11px Monaco, "Courier New", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", monospace;
+        font:
+            11px Monaco,
+            'Courier New',
+            'DejaVu Sans Mono',
+            'Bitstream Vera Sans Mono',
+            monospace;
         white-space: pre-wrap;
         word-wrap: break-word;
     }
@@ -679,7 +697,13 @@ h4.modal-title {
     pre {
         background-color: whitesmoke;
         background-image: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4gPHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJncmFkIiBncmFkaWVudFVuaXRzPSJvYmplY3RCb3VuZGluZ0JveCIgeDE9IjAuNSIgeTE9IjAuMCIgeDI9IjAuNSIgeTI9IjEuMCI+PHN0b3Agb2Zmc2V0PSI1MCUiIHN0b3AtY29sb3I9IiNmNWY1ZjUiLz48c3RvcCBvZmZzZXQ9IjUwJSIgc3RvcC1jb2xvcj0iI2U2ZTZlNiIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JhZCkiIC8+PC9zdmc+IA==);
-        background-image: -webkit-gradient(linear, left top, left bottom, color-stop(50%, #f5f5f5), color-stop(50%, #e6e6e6));
+        background-image: -webkit-gradient(
+            linear,
+            left top,
+            left bottom,
+            color-stop(50%, #f5f5f5),
+            color-stop(50%, #e6e6e6)
+        );
         background-image: -webkit-linear-gradient(#f5f5f5 50%, #e6e6e6 50%);
         background-image: linear-gradient(#f5f5f5 50%, #e6e6e6 50%);
         background-size: 38px 38px;
@@ -738,7 +762,8 @@ h4.modal-title {
         list-style-type: decimal;
     }
 
-    ul, ol {
+    ul,
+    ol {
         padding-left: 25px;
     }
 }
@@ -818,7 +843,11 @@ h4.modal-title {
     }
 }
 
-.select2-container--default .select2-selection--multiple .select2-selection__rendered .select2-selection__choice .select2-selection__choice__remove {
+.select2-container--default
+    .select2-selection--multiple
+    .select2-selection__rendered
+    .select2-selection__choice
+    .select2-selection__choice__remove {
     font-size: 1rem !important;
 }
 
@@ -870,7 +899,8 @@ h4.modal-title {
                     display: inline-block;
                     float: none;
 
-                    .mt-overlay, img {
+                    .mt-overlay,
+                    img {
                         width: 150px;
                         display: inline-block;
                     }

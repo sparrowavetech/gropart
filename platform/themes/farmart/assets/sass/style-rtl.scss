@@ -1,6 +1,6 @@
 @import 'utils/variables';
 
-body[dir="rtl"] {
+body[dir='rtl'] {
     direction: rtl;
     text-align: right;
 }
@@ -27,7 +27,7 @@ body[dir="rtl"] {
             .input-group-text {
                 border-right: 1px solid $footer-border-color;
                 border-left: none;
-                padding-left: .75rem;
+                padding-left: 0.75rem;
                 padding-right: 1.5em;
             }
         }
@@ -220,7 +220,8 @@ body[dir="rtl"] {
     }
 }
 
-.widget-header .link-text, .widget-blog {
+.widget-header .link-text,
+.widget-blog {
     .svg-icon {
         svg {
             transform: rotate(180deg);
@@ -299,12 +300,14 @@ body[dir="rtl"] {
 
 .text-swatch {
     li {
-        input[type=radio]:checked ~ span:before, input[type=checkbox]:checked ~ span:before {
+        input[type='radio']:checked ~ span:before,
+        input[type='checkbox']:checked ~ span:before {
             left: -16px;
             right: auto;
         }
 
-        input[type=radio]:checked ~ span:after, input[type=checkbox]:checked ~ span:after {
+        input[type='radio']:checked ~ span:after,
+        input[type='checkbox']:checked ~ span:after {
             left: -8px;
             right: auto;
         }
@@ -374,7 +377,8 @@ body[dir="rtl"] {
     }
 }
 
-.color-swatch, .text-swatch {
+.color-swatch,
+.text-swatch {
     li {
         &:first-child {
             margin-right: 0;
@@ -440,7 +444,8 @@ body[dir="rtl"] {
     }
 }
 
-i.icon-cart, i.icon-list {
+i.icon-cart,
+i.icon-list {
     &::before {
         transform: rotate3d(0, 1, 0, 180deg);
     }
@@ -507,7 +512,8 @@ i.icon-cart, i.icon-list {
     }
 }
 
-.mini-cart-content, .panel--sidebar {
+.mini-cart-content,
+.panel--sidebar {
     .panel__header {
         .close-toggle--sidebar {
             svg {

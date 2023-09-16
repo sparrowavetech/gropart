@@ -1,1 +1,5 @@
-<div class="g-recaptcha" id="{{ $name }}" data-sitekey="{{ $siteKey }}"></div>
+<div
+    class="g-recaptcha"
+    id="{{ $name }}"
+    data-sitekey="{{ $siteKey }}"
+></div>

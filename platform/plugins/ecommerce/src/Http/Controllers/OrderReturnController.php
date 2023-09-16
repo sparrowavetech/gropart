@@ -11,21 +11,13 @@ use Botble\Ecommerce\Enums\OrderReturnStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\OrderReturnHelper;
 use Botble\Ecommerce\Http\Requests\UpdateOrderReturnRequest;
-use Botble\Ecommerce\Repositories\Interfaces\OrderReturnInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
+use Botble\Ecommerce\Models\OrderReturn;
 use Botble\Ecommerce\Tables\OrderReturnTable;
 use Exception;
 use Illuminate\Http\Request;
 
 class OrderReturnController extends BaseController
 {
-    public function __construct(
-        protected OrderReturnInterface $orderReturnRepository,
-        protected OrderReturnInterface $orderReturnItemRepository,
-        protected ProductInterface $productRepository
-    ) {
-    }
-
     public function index(OrderReturnTable $orderReturnTable)
     {
         PageTitle::setTitle(trans('plugins/ecommerce::order.order_return'));
@@ -46,7 +38,7 @@ class OrderReturnController extends BaseController
             Assets::addScriptsDirectly('vendor/core/plugins/location/js/location.js');
         }
 
-        $returnRequest = $this->orderReturnRepository->findOrFail($id, ['items', 'customer', 'order']);
+        $returnRequest = OrderReturn::query()->with(['items', 'customer', 'order'])->findOrFail($id);
 
         PageTitle::setTitle(trans('plugins/ecommerce::order.edit_order_return', ['code' => $returnRequest->code]));
 
@@ -57,7 +49,7 @@ class OrderReturnController extends BaseController
 
     public function update(int|string $id, UpdateOrderReturnRequest $request, BaseHttpResponse $response)
     {
-        $returnRequest = $this->orderReturnRepository->findOrFail($id);
+        $returnRequest = OrderReturn::query()->findOrFail($id);
 
         $data['return_status'] = $request->input('return_status');
 
@@ -84,10 +76,10 @@ class OrderReturnController extends BaseController
 
     public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
     {
-        $order = $this->orderReturnRepository->findOrFail($id);
+        $order = OrderReturn::query()->findOrFail($id);
 
         try {
-            $this->orderReturnRepository->deleteBy(['id' => $id]);
+            $order->delete();
             event(new DeletedContentEvent(ORDER_RETURN_MODULE_SCREEN_NAME, $request, $order));
 
             return $response->setMessage(trans('core/base::notices.delete_success_message'));
@@ -96,24 +88,5 @@ class OrderReturnController extends BaseController
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
-    }
-
-    public function deletes(Request $request, BaseHttpResponse $response)
-    {
-        $ids = $request->input('ids');
-        if (empty($ids)) {
-            return $response
-                ->setError()
-                ->setMessage(trans('core/base::notices.no_select'));
-        }
-
-        foreach ($ids as $id) {
-            $order = $this->orderReturnRepository->findOrFail($id);
-
-            $this->orderReturnRepository->delete($order);
-            event(new DeletedContentEvent(ORDER_RETURN_MODULE_SCREEN_NAME, $request, $order));
-        }
-
-        return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }
 }

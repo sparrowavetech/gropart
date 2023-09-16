@@ -10,12 +10,22 @@
     <div class="widget-body">
         <div class="btn-set">
             @php do_action(BASE_ACTION_FORM_ACTIONS, 'default') @endphp
-            <button type="submit" name="submit" value="save" class="btn btn-sm btn-info">
+            <button
+                class="btn btn-sm btn-info"
+                name="submit"
+                type="submit"
+                value="save"
+            >
                 <i class="fa fa-save"></i> {{ trans('core/base::forms.save') }}
             </button>
             @if (!isset($only_save) || $only_save == false)
                 &nbsp;
-                <button type="submit" name="submit" value="apply" class="btn btn-sm btn-success">
+                <button
+                    class="btn btn-sm btn-success"
+                    name="submit"
+                    type="submit"
+                    value="apply"
+                >
                     <i class="fa fa-check-circle"></i> {{ trans('core/base::forms.save_and_continue') }}
                 </button>
             @endif

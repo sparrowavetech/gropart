@@ -6,13 +6,12 @@ use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Http\Requests\AddShippingRegionRequest;
 use Botble\Ecommerce\Models\Shipping;
-use Botble\Ecommerce\Repositories\Interfaces\ShippingInterface;
 
 class AddShippingRegionForm extends FormAbstract
 {
     public function buildForm(): void
     {
-        $existedCountries = app(ShippingInterface::class)->pluck('country');
+        $existedCountries = Shipping::query()->pluck('country')->all();
 
         foreach ($existedCountries as &$existedCountry) {
             if (empty($existedCountry)) {

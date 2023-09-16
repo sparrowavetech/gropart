@@ -68,13 +68,10 @@ class HookServiceProvider extends ServiceProvider
                         'attributes' => [
                             'name' => 'show_site_name',
                             'list' => [
-                                '0' => 'No',
-                                '1' => 'Yes',
+                                '0' => __('No'),
+                                '1' => __('Yes'),
                             ],
                             'value' => '0',
-                            'options' => [
-                                'class' => 'form-control',
-                            ],
                         ],
                     ],
                     [
@@ -111,6 +108,20 @@ class HookServiceProvider extends ServiceProvider
                         'attributes' => [
                             'name' => 'seo_og_image',
                             'value' => null,
+                        ],
+                    ],
+                    [
+                        'id' => 'theme_breadcrumb_enabled',
+                        'section_id' => 'opt-text-subsection-general',
+                        'type' => 'customSelect',
+                        'label' => trans('packages/theme::theme.breadcrumb_enabled'),
+                        'attributes' => [
+                            'name' => 'theme_breadcrumb_enabled',
+                            'list' => [
+                                '1' => __('Yes'),
+                                '0' => __('No'),
+                            ],
+                            'value' => '1',
                         ],
                     ],
                 ],

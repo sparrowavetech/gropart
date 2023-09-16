@@ -1,15 +1,17 @@
 class ShipmentManagement {
     init() {
-        $(document).on('click', '.shipment-actions .dropdown-menu a', event => {
+        $(document).on('click', '.shipment-actions .dropdown-menu a', (event) => {
             event.preventDefault()
             let _self = $(event.currentTarget)
-            $('#confirm-change-shipment-status-button').data('target', _self.data('target')).data('status', _self.data('value'))
+            $('#confirm-change-shipment-status-button')
+                .data('target', _self.data('target'))
+                .data('status', _self.data('value'))
             let $modal = $('#confirm-change-status-modal')
             $modal.find('.shipment-status-label').text(_self.text().toLowerCase())
             $modal.modal('show')
         })
 
-        $(document).on('click', '#confirm-change-shipment-status-button', event => {
+        $(document).on('click', '#confirm-change-shipment-status-button', (event) => {
             event.preventDefault()
             let _self = $(event.currentTarget)
 
@@ -22,7 +24,7 @@ class ShipmentManagement {
                 data: {
                     status: _self.data('status'),
                 },
-                success: res => {
+                success: (res) => {
                     if (!res.error) {
                         Botble.showSuccess(res.message)
                         $('.max-width-1200').load(window.location.href + ' .max-width-1200 > *', () => {
@@ -34,7 +36,7 @@ class ShipmentManagement {
                         _self.removeClass('button-loading')
                     }
                 },
-                error: res => {
+                error: (res) => {
                     Botble.handleError(res)
                     _self.removeClass('button-loading')
                 },

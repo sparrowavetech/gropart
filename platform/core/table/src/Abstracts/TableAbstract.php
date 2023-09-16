@@ -17,6 +17,7 @@ use Botble\Table\Abstracts\Concerns\HasBulkActions;
 use Botble\Table\Abstracts\Concerns\HasFilters;
 use Botble\Table\BulkActions\DeleteBulkAction;
 use Botble\Table\Columns\CheckboxColumn;
+use Botble\Table\Columns\Column;
 use Botble\Table\Columns\DateColumn;
 use Botble\Table\Columns\EmailColumn;
 use Botble\Table\Columns\EnumColumn;
@@ -288,6 +289,14 @@ abstract class TableAbstract extends DataTable
 
         if (! empty($this->getRowActions()) && ! $this->isSimpleTable()) {
             $columns = array_merge($columns, $this->getRowActionsHeading());
+
+            foreach ($columns as $index => $item) {
+                if ($item instanceof Column && $item->name === 'operations') {
+                    unset($columns[$index]);
+
+                    break;
+                }
+            }
         }
 
         return $columns;
@@ -706,7 +715,7 @@ abstract class TableAbstract extends DataTable
                                     return $item;
                                 }
 
-                                if (BaseModel::determineIfUsingUuidsForId()) {
+                                if (BaseModel::getTypeOfId() !== 'BIGINT') {
                                     return Str::limit($item->{$column->name}, 5);
                                 }
 

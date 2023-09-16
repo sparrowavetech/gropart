@@ -4,7 +4,7 @@ namespace Botble\Ecommerce\Widgets;
 
 use Botble\Base\Widgets\Card;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
-use Botble\Ecommerce\Repositories\Interfaces\OrderInterface;
+use Botble\Ecommerce\Models\Order;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\DB;
@@ -13,8 +13,7 @@ class RevenueCard extends Card
 {
     public function getOptions(): array
     {
-        $data = app(OrderInterface::class)
-            ->getModel()
+        $data = Order::query()
             ->whereDate('created_at', '>=', $this->startDate)
             ->whereDate('created_at', '<=', $this->endDate)
             ->select([
@@ -37,8 +36,7 @@ class RevenueCard extends Card
     public function getViewData(): array
     {
         if (is_plugin_active('payment')) {
-            $revenue = app(OrderInterface::class)
-                ->getModel()
+            $revenue = Order::query()
                 ->select([
                     DB::raw('SUM(COALESCE(payments.amount, 0) - COALESCE(payments.refunded_amount, 0)) as revenue'),
                     'payments.status',
@@ -50,8 +48,7 @@ class RevenueCard extends Card
                 ->groupBy('payments.status')
                 ->first();
         } else {
-            $revenue = app(OrderInterface::class)
-                ->getModel()
+            $revenue = Order::query()
                 ->select([
                     DB::raw('SUM(COALESCE(amount, 0)) as revenue'),
                     'status',
@@ -69,8 +66,7 @@ class RevenueCard extends Card
         $currentPeriod = CarbonPeriod::create($startDate, $endDate);
         $previousPeriod = CarbonPeriod::create($startDate->subDays($currentPeriod->count()), $endDate->subDays($currentPeriod->count()));
 
-        $currentRevenue = app(OrderInterface::class)
-            ->getModel()
+        $currentRevenue = Order::query()
             ->where('status', OrderStatusEnum::COMPLETED)
             ->whereDate('created_at', '>=', $currentPeriod->getStartDate())
             ->whereDate('created_at', '<=', $currentPeriod->getEndDate())
@@ -80,8 +76,7 @@ class RevenueCard extends Card
             ->pluck('revenue')
             ->toArray()[0];
 
-        $previousRevenue = app(OrderInterface::class)
-            ->getModel()
+        $previousRevenue = Order::query()
             ->where('status', OrderStatusEnum::COMPLETED)
             ->whereDate('created_at', '>=', $previousPeriod->getStartDate())
             ->whereDate('created_at', '<=', $previousPeriod->getEndDate())

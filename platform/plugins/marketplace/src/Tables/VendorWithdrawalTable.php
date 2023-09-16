@@ -2,9 +2,11 @@
 
 namespace Botble\Marketplace\Tables;
 
-use Botble\Base\Facades\BaseHelper;
 use Botble\Marketplace\Models\Withdrawal;
 use Botble\Table\Abstracts\TableAbstract;
+use Botble\Table\Columns\CreatedAtColumn;
+use Botble\Table\Columns\IdColumn;
+use Botble\Table\Columns\StatusColumn;
 use Botble\Table\DataTables;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
@@ -19,26 +21,19 @@ class VendorWithdrawalTable extends TableAbstract
         parent::__construct($table, $urlGenerator);
 
         $this->model = $model;
-        $this->hasCheckbox = false;
     }
 
     public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('created_at', function ($item) {
-                return BaseHelper::formatDate($item->created_at);
-            })
-            ->editColumn('fee', function ($item) {
+            ->editColumn('fee', function (Withdrawal $item) {
                 return format_price($item->fee);
             })
-            ->editColumn('amount', function ($item) {
+            ->editColumn('amount', function (Withdrawal $item) {
                 return format_price($item->amount);
             })
-            ->editColumn('status', function ($item) {
-                return BaseHelper::clean($item->status->toHtml());
-            })
-            ->addColumn('operations', function ($item) {
+            ->addColumn('operations', function (Withdrawal $item) {
                 return view('plugins/marketplace::withdrawals.tables.actions', compact('item'))->render();
             });
 
@@ -64,23 +59,15 @@ class VendorWithdrawalTable extends TableAbstract
     public function columns(): array
     {
         return [
-            'id' => [
-                'title' => trans('core/base::tables.id'),
-                'width' => '20px',
-            ],
+            IdColumn::make(),
             'amount' => [
                 'title' => trans('plugins/ecommerce::order.amount'),
             ],
             'fee' => [
                 'title' => trans('plugins/ecommerce::shipping.fee'),
             ],
-            'status' => [
-                'title' => trans('core/base::tables.status'),
-                'width' => '100px',
-            ],
-            'created_at' => [
-                'title' => trans('core/base::tables.created_at'),
-            ],
+            StatusColumn::make(),
+            CreatedAtColumn::make(),
         ];
     }
 
