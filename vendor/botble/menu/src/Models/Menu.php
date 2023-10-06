@@ -27,7 +27,7 @@ class Menu extends BaseModel
 
     protected static function booted(): void
     {
-        static::deleted(function (self $model) {
+        static::deleting(function (self $model) {
             $model->menuNodes()->delete();
             $model->locations()->delete();
         });

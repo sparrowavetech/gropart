@@ -1,7 +1,7 @@
 jQuery(document).ready(($) => {
     $('.editable')
         .editable({ mode: 'inline' })
-        .on('hidden', (e, reason) => {
+        .on('hidden', (event, reason) => {
             let locale = $(event.currentTarget).data('locale')
             if (reason === 'save') {
                 $(event.currentTarget).removeClass('status-0').addClass('status-1')
@@ -36,8 +36,8 @@ jQuery(document).ready(($) => {
         $httpClient
             .make()
             .postForm($form.prop('action'), new FormData($form[0]))
-            .then((response) => {
-                Botble.showSuccess(response.message)
+            .then(({ data }) => {
+                Botble.showSuccess(data.message)
                 $form.removeClass('dirty')
             })
             .finally(() => _self.removeClass('button-loading'))
@@ -59,9 +59,10 @@ jQuery(document).ready(($) => {
         $httpClient
             .make()
             .postForm($form.prop('action'), new FormData($form[0]))
-            .then((response) => {
-                Botble.showSuccess(response.message)
+            .then(({ data }) => {
+                Botble.showSuccess(data.message)
                 $form.removeClass('dirty')
+                _self.closest('.modal').modal('hide')
             })
             .finally(() => _self.removeClass('button-loading'))
     })

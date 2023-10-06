@@ -46,7 +46,9 @@
                         class="file-tree-wrapper"
                         data-url="{{ $indexRoute ? route($indexRoute) : '' }}"
                     >
-                        @include('core/base::forms.partials.tree-categories')
+                        @include('core/base::forms.partials.tree-categories', [
+                            'categories' => $categories,
+                        ])
                     </div>
                 </div>
             </div>

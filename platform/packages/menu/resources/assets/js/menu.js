@@ -169,7 +169,10 @@ class MenuNestable {
     }
 
     appendMenuNode(html, parent) {
-        $('.nestable-menu > ol.dd-list').append(html.replace('<script>', '').replace('<\\/script>', ''))
+        const $html = $(html)
+        $html.find('script').remove()
+
+        $('.nestable-menu > ol.dd-list').append($html)
 
         $('.nestable-menu').find('.select-full').select2({
             width: '100%',

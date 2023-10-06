@@ -383,6 +383,8 @@ class EditorManagement {
 
                 Botble.initResources()
                 Botble.initMediaIntegrate()
+
+                document.dispatchEvent(new CustomEvent('core-shortcode-config-loaded'))
             })
     }
 

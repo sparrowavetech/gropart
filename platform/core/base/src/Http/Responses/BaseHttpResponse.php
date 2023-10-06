@@ -151,4 +151,9 @@ class BaseHttpResponse extends Response implements Responsable
             ->to($url)
             ->with($this->error ? 'error_msg' : 'success_msg', $this->message);
     }
+
+    public function isSaving(): bool
+    {
+        return request()->input('submit') === $this->saveAction;
+    }
 }

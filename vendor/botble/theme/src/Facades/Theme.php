@@ -53,6 +53,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static string getStyleIntegrationPath()
  * @method static \Botble\Theme\Theme fireEventGlobalAssets()
  * @method static string getThemeScreenshot(string $theme)
+ * @method static void registerThemeIconFields(array $icons, array $css = [], array $js = [])
  *
  * @see \Botble\Theme\Theme
  */

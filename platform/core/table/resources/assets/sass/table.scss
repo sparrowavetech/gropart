@@ -197,6 +197,31 @@ $general-img-path: '/vendor/core/core/base/images/' !default;
                     rgba(0, 0, 0, 0.7) 100%
                 );
             }
+
+            .dt-button-collection {
+                .dropdown-menu {
+                    overflow: hidden;
+                    .dt-button {
+                        &.active {
+                            background: var(--bs-info);
+                        }
+                        &.buttons-columnVisibility {
+                            position: relative;
+                            padding-left: 0.75rem;
+                            padding-right: 1.5rem;
+                            &.active:after {
+                                position: absolute;
+                                top: 50%;
+                                margin-top: -10px;
+                                right: 0.25em;
+                                display: inline-block;
+                                content: '✓';
+                                color: inherit;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         .text-start {

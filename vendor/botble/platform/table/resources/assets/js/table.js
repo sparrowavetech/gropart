@@ -276,6 +276,21 @@
                 return '<i class="fa fa-eye"></i> ' + dt.i18n('buttons.colvis', 'Column visibility')
             },
         })
+        $.extend(DataTable.ext.buttons.columnVisibility, {
+            _columnText: function (b, a) {
+                let c = b.column(a.columns).index(),
+                    d = b.settings()[0].aoColumns[c].titleAttr || b.settings()[0].aoColumns[c].sTitle
+                d || (d = b.column(c).header().innerHTML)
+                d = d
+                    .replace(/\n/g, ' ')
+                    .replace(/<br\s*\/?>/gi, ' ')
+                    .replace(/<select(.*?)<\/select>/g, '')
+                    .replace(/<!\-\-.*?\-\->/g, '')
+                    .replace(/<.*?>/g, '')
+                    .replace(/^\s+|\s+$/g, '')
+                return a.columnText ? a.columnText(b, c, d) : d
+            },
+        })
     }
 
     class TableManagement {

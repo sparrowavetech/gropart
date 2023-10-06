@@ -37,7 +37,6 @@ class HookServiceProvider extends ServiceProvider
         add_filter(BASE_FILTER_AFTER_SETTING_CONTENT, [$this, 'addSetting'], 39);
 
         theme_option()
-            ->setArgs(['debug' => app()->hasDebugModeEnabled()])
             ->setSection([
                 'title' => trans('packages/theme::theme.theme_option_general'),
                 'desc' => trans('packages/theme::theme.theme_option_general_description'),

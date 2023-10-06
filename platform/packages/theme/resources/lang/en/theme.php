@@ -12,7 +12,6 @@ return [
     'appearance' => 'Appearance',
     'theme_options' => 'Theme options',
     'save_changes' => 'Save Changes',
-    'developer_mode' => 'Developer Mode Enabled',
     'custom_css' => 'Custom CSS',
     'custom_js' => 'Custom JS',
     'custom_header_js' => 'Header JS',

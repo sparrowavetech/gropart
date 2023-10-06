@@ -54,12 +54,11 @@ class MediaController extends Controller
         $folders = [];
         $breadcrumbs = [];
 
-        if ($request->has('is_popup')
-            && $request->has('selected_file_id')
-            && $request->input('selected_file_id') != null
-        ) {
+        $selectedFileId = $request->input('selected_file_id');
+
+        if ($request->has('is_popup') && $selectedFileId) {
             $currentFile = MediaFile::query()->where(
-                ['id' => $request->input('selected_file_id')],
+                ['id' => $selectedFileId],
                 ['folder_id']
             )->first();
 
@@ -78,7 +77,7 @@ class MediaController extends Controller
                 'per_page' => $request->integer('posts_per_page', 30),
                 'current_paged' => $request->integer('paged', 1),
             ],
-            'selected_file_id' => $request->input('selected_file_id'),
+            'selected_file_id' => $selectedFileId,
             'is_popup' => $request->input('is_popup'),
             'filter' => $request->input('filter'),
         ];
@@ -221,7 +220,6 @@ class MediaController extends Controller
         }
 
         $breadcrumbs = array_merge($breadcrumbs, $this->getBreadcrumbs($request));
-        $selectedFileId = $request->input('selected_file_id');
 
         return RvMedia::responseSuccess([
             'files' => $files,
@@ -567,20 +565,15 @@ class MediaController extends Controller
                         continue;
                     }
 
-                    $file = MediaFile::query()->find($item['id']);
-
-                    if ($file) {
-                        $file->alt = $item['alt'];
-                        $file->save();
-                    }
+                    MediaFile::query()->where('id', $item['id'])->update(['alt' => $item['alt']]);
                 }
 
                 $response = RvMedia::responseSuccess([], trans('core/media::media.update_alt_text_success'));
 
                 break;
             case 'empty_trash':
-                $this->folderRepository->emptyTrash();
                 $this->fileRepository->emptyTrash();
+                $this->folderRepository->emptyTrash();
 
                 $response = RvMedia::responseSuccess([], trans('core/media::media.empty_trash_success'));
 
@@ -639,7 +632,7 @@ class MediaController extends Controller
     {
         $items = $request->input('selected', []);
 
-        if (count($items) == 1 && ! $items['0']['is_folder']) {
+        if (count($items) == 1 && ! $items[0]['is_folder']) {
             $file = MediaFile::query()->withTrashed()->find($items[0]['id']);
             if (! empty($file) && $file->type != 'video') {
                 $filePath = RvMedia::getRealPath($file->url);

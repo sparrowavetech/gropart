@@ -42,7 +42,7 @@ $(document).ready(function () {
             .postForm(_form.prop('action'), new FormData(_form[0]))
             .then(({ data }) => {
                 _self.closest('.get-started-modal').modal('hide')
-                $('.get-started-modal[data-step="' + data.step + '"]').modal('show')
+                $('.get-started-modal[data-step="' + data.data.step + '"]').modal('show')
             })
             .finally(() => {
                 _self.removeClass('button-loading')

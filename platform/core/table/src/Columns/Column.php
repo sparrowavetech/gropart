@@ -15,4 +15,13 @@ class Column extends BaseColumn
     {
         return $this->addClass('text-center');
     }
+
+    public function columnVisibility(bool $has = false): static
+    {
+        if ($has) {
+            return $this->removeClass('no-column-visibility');
+        }
+
+        return $this->addClass('no-column-visibility');
+    }
 }

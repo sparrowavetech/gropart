@@ -2,12 +2,13 @@
 
 namespace Botble\Marketplace\Tables;
 
-use Botble\Base\Facades\BaseHelper;
 use Botble\Ecommerce\Enums\DiscountTypeEnum;
 use Botble\Ecommerce\Models\Discount;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Actions\DeleteAction;
 use Botble\Table\BulkActions\DeleteBulkAction;
+use Botble\Table\Columns\Column;
+use Botble\Table\Columns\DateColumn;
 use Botble\Table\Columns\IdColumn;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -47,12 +48,6 @@ class DiscountTable extends TableAbstract
                 }
 
                 return $item->total_used . '/' . $item->quantity;
-            })
-            ->editColumn('start_date', function ($item) {
-                return BaseHelper::formatDate($item->start_date);
-            })
-            ->editColumn('end_date', function ($item) {
-                return $item->end_date ?: '&mdash;';
             });
 
         return $this->toJson($data);
@@ -73,21 +68,17 @@ class DiscountTable extends TableAbstract
     {
         return [
             IdColumn::make(),
-            'detail' => [
-                'name' => 'code',
-                'title' => trans('plugins/ecommerce::discount.detail'),
-                'class' => 'text-start',
-            ],
-            'total_used' => [
-                'title' => trans('plugins/ecommerce::discount.used'),
-                'width' => '100px',
-            ],
-            'start_date' => [
-                'title' => trans('plugins/ecommerce::discount.start_date'),
-            ],
-            'end_date' => [
-                'title' => trans('plugins/ecommerce::discount.end_date'),
-            ],
+            Column::make('detail')
+                ->name('code')
+                ->title(trans('plugins/ecommerce::discount.detail'))
+                ->alignLeft(),
+            Column::make('total_used')
+                ->title(trans('plugins/ecommerce::discount.used'))
+                ->width(100),
+            DateColumn::make('start_date')
+                ->title(trans('plugins/ecommerce::discount.start_date')),
+            DateColumn::make('end_date')
+                ->title(trans('plugins/ecommerce::discount.end_date')),
         ];
     }
 
@@ -113,9 +104,7 @@ class DiscountTable extends TableAbstract
 
     public function renderTable($data = [], $mergeData = []): View|Factory|Response
     {
-        if ($this->query()->count() === 0 &&
-            $this->request()->input('filter_table_id') !== $this->getOption('id') && ! $this->request()->ajax()
-        ) {
+        if ($this->isEmpty()) {
             return view('plugins/ecommerce::discounts.intro');
         }
 

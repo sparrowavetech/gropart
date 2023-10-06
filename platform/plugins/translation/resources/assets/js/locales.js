@@ -24,10 +24,7 @@ $(document).ready(function () {
                     $('.tooltip').remove()
                 }
 
-                languageTable
-                    .find('a[data-url="' + deleteURL + '"]')
-                    .closest('tr')
-                    .remove()
+                languageTable.find(`a[data-url="${deleteURL}"]`).closest('tr').remove()
 
                 Botble.showSuccess(data.message)
             })
@@ -88,8 +85,8 @@ $(document).ready(function () {
             $httpClient
                 .make()
                 .post(url)
-                .then((res) => {
-                    Botble.showSuccess(res.message)
+                .then(({ data }) => {
+                    Botble.showSuccess(data.message)
                     getRemoteLocales()
                 })
                 .finally(() => {

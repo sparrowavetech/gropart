@@ -150,7 +150,7 @@ class LanguageManagement {
 
             $httpClient
                 .make()
-                .postForm($form.get('action'), formData)
+                .postForm($form.prop('action'), formData)
                 .then(({ data }) => {
                     Botble.showSuccess(data.message)
                     $form.removeClass('dirty')

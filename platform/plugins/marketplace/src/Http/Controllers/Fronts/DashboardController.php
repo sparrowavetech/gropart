@@ -77,7 +77,7 @@ class DashboardController
                 SUM(fee) as fee',
                 [RevenueTypeEnum::ADD_AMOUNT, RevenueTypeEnum::SUBTRACT_AMOUNT, RevenueTypeEnum::ADD_AMOUNT, RevenueTypeEnum::SUBTRACT_AMOUNT]
             )
-            ->where('customer_id', $user->id)
+            ->where('customer_id', $user->getKey())
             ->where(function ($query) use ($startDate, $endDate) {
                 $query->whereDate('created_at', '>=', $startDate)
                     ->whereDate('created_at', '<=', $endDate);
@@ -90,7 +90,7 @@ class DashboardController
                 DB::raw('SUM(mp_customer_withdrawals.amount) as amount'),
                 DB::raw('SUM(mp_customer_withdrawals.fee)'),
             ])
-            ->where('mp_customer_withdrawals.customer_id', $user->id)
+            ->where('mp_customer_withdrawals.customer_id', $user->getKey())
             ->whereIn('mp_customer_withdrawals.status', [
                 WithdrawalStatusEnum::COMPLETED,
                 WithdrawalStatusEnum::PENDING,
@@ -177,7 +177,9 @@ class DashboardController
 
     public function postUpload(Request $request, BaseHttpResponse $response)
     {
-        $uploadFolder = auth('customer')->user()->upload_folder;
+        $customer = auth('customer')->user();
+
+        $uploadFolder = $customer->store?->upload_folder ?: $customer->upload_folder;
 
         if (! RvMedia::isChunkUploadEnabled()) {
             $validator = Validator::make($request->all(), [

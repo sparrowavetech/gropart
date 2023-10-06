@@ -208,8 +208,8 @@ class RvMedia
     {
         $default = $this->getConfig('default_image');
 
-        if (setting('media_default_placeholder_image')) {
-            $default = $this->url(setting('media_default_placeholder_image'));
+        if ($placeholder = setting('media_default_placeholder_image')) {
+            $default = $this->url($placeholder);
         }
 
         if ($relative) {

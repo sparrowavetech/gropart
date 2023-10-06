@@ -25,10 +25,12 @@ class Plugin extends PluginOperationAbstract
         Schema::dropIfExists('categories_translations');
         Schema::dropIfExists('tags_translations');
 
-        Widget::query()->where('name', 'widget_posts_recent')
+        Widget::query()
+            ->where('widget_id', 'widget_posts_recent')
             ->each(fn (DashboardWidget $dashboardWidget) => $dashboardWidget->delete());
 
-        MenuNode::query()->whereIn('reference_type', [Category::class, Tag::class])
+        MenuNode::query()
+            ->whereIn('reference_type', [Category::class, Tag::class])
             ->each(fn (MenuNode $menuNode) => $menuNode->delete());
 
         Setting::delete([

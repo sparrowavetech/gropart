@@ -34,7 +34,7 @@ class AdsManager
             ->where('location', $location)
             ->sortBy('order');
 
-        if ($data->count() > 1) {
+        if ($data->isNotEmpty()) {
             $data = $data->random(1);
         }
 
@@ -58,19 +58,19 @@ class AdsManager
         return $html;
     }
 
-    public function load(bool $force = false): self
+    public function load(bool $force = false, array $with = []): self
     {
         if (! $this->loaded || $force) {
-            $this->data = $this->read();
+            $this->data = $this->read($with);
             $this->loaded = true;
         }
 
         return $this;
     }
 
-    protected function read(): Collection
+    protected function read(array $with): Collection
     {
-        return Ads::query()->get();
+        return Ads::query()->with($with)->get();
     }
 
     public function locationHasAds(string $location): bool

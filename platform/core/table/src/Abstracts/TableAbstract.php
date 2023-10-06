@@ -85,6 +85,8 @@ abstract class TableAbstract extends DataTable
 
     protected bool $hasResponsive = true;
 
+    protected bool $hasColumnVisibility = true;
+
     protected string $exportClass = TableExportHandler::class;
 
     /**
@@ -115,6 +117,8 @@ abstract class TableAbstract extends DataTable
         if (! $this->getOption('class')) {
             $this->setOption('class', 'table table-striped table-hover vertical-middle');
         }
+
+        $this->hasColumnVisibility = (bool) setting('datatables_default_show_column_visibility');
 
         $this->setup();
     }
@@ -394,6 +398,7 @@ abstract class TableAbstract extends DataTable
         $buttons = array_merge($this->getButtons(), $this->getActionsButton());
 
         $buttons = array_merge($buttons, $this->getDefaultButtons());
+
         if (! $buttons) {
             return $params;
         }
@@ -477,9 +482,22 @@ abstract class TableAbstract extends DataTable
 
     public function getDefaultButtons(): array
     {
-        return [
-            'reload',
-        ];
+        $buttons = ['reload'];
+
+        if (setting('datatables_default_show_export_button')) {
+            $buttons[] = 'export';
+        }
+
+        if ($this->hasColumnVisibility) {
+            $buttons[] = [
+                'extend' => 'colvis',
+                'text' => '<i class="fas fa-list"></i>',
+                'align' => 'button-right',
+                'columns' => ':not(.no-column-visibility)',
+            ];
+        }
+
+        return $buttons;
     }
 
     public function htmlInitComplete(): string|null
@@ -739,11 +757,17 @@ abstract class TableAbstract extends DataTable
 
                                 $value = BaseHelper::clean($item->{$column->name});
 
-                                if (! $this->hasPermission($column->getPermission() ?: $route[0])) {
-                                    return $value ?: '&mdash;';
+                                $valueTruncated = $value;
+
+                                if ($limit = $column->getLimit()) {
+                                    $valueTruncated = Str::limit($value, $limit);
                                 }
 
-                                $value = Html::link(route($route[0], $route[1] ?: $item->getKey(), $route[2]), $value);
+                                if (! $this->hasPermission($column->getPermission() ?: $route[0])) {
+                                    return $valueTruncated ?: '&mdash;';
+                                }
+
+                                $value = Html::link(route($route[0], $route[1] ?: $item->getKey(), $route[2]), $valueTruncated, ['title' => $value]);
 
                                 if ($column instanceof NameColumn && $item instanceof Page) {
                                     $value = apply_filters(PAGE_FILTER_PAGE_NAME_IN_ADMIN_LIST, $value, $item);

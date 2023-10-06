@@ -12,7 +12,7 @@ mix
     .js(source + '/resources/assets/js/custom-html.js', dist + '/js')
     .js(source + '/resources/assets/js/theme-options.js', dist + '/js')
     .js(source + '/resources/assets/js/theme.js', dist + '/js')
-
+    .js(source + '/resources/assets/js/icons-field.js', dist + '/js')
 
     .sass(source + '/resources/assets/sass/custom-css.scss', dist + '/css')
     .sass(source + '/resources/assets/sass/theme-options.scss', dist + '/css')
@@ -26,6 +26,7 @@ if (mix.inProduction()) {
         .copy(dist + '/js/custom-html.js', source + '/public/js')
         .copy(dist + '/js/theme-options.js', source + '/public/js')
         .copy(dist + '/js/theme.js', source + '/public/js')
+        .copy(dist + '/js/icons-field.js', source + '/public/js')
         .copy(dist + '/css/custom-css.css', source + '/public/css')
         .copy(dist + '/css/theme-options.css', source + '/public/css')
         .copy(dist + '/css/admin-bar.css', source + '/public/css')

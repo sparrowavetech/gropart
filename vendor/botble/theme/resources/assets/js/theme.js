@@ -7,7 +7,7 @@ class ThemeManagement {
 
             $httpClient
                 .make()
-                .get(route('theme.active', { theme: _self.data('theme') }))
+                .post(route('theme.active', { theme: _self.data('theme') }))
                 .then(({ data }) => {
                     Botble.showSuccess(data.message)
                     window.location.reload()

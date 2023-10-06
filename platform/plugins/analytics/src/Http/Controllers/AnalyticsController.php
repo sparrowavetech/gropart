@@ -101,7 +101,6 @@ class AnalyticsController extends BaseController
             }
 
             foreach ($countryStats as $key => $item) {
-                unset($item['countryIsoCode']);
                 $countryStats[$key] = array_values($item);
             }
 

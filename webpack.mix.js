@@ -8,7 +8,7 @@ mix.options({
         extractComments: false,
     },
     manifest: false,
-});
+})
 
 mix.webpackConfig({
     stats: {
@@ -17,24 +17,49 @@ mix.webpackConfig({
     externals: {
         vue: 'Vue',
     },
-});
+})
 
-mix.disableSuccessNotifications();
+mix.disableSuccessNotifications()
 
-mix.vue();
+mix.vue()
 
-// Run all webpack.mix.js in app
-glob.sync('./platform/*/*/webpack.mix.js').forEach(item => require(__dirname + '/' + item));
+let buildPaths = []
 
-// Run only for a package, replace [package] by the name of package you want to compile assets
-// require('./platform/packages/[package]/webpack.mix.js');
+function pushToPath(path, type) {
+    buildPaths.push(`${type}/${path === 'true' ? '*' : path}`)
+}
 
-// Run only for a plugin, replace [plugin] by the name of plugin you want to compile assets
-// require('./platform/plugins/[plugin]/webpack.mix.js');
+const types = [
+    {
+        key: 'npm_config_theme',
+        name: 'themes',
+    },
+    {
+        key: 'npm_config_plugin',
+        name: 'plugins',
+    },
+    {
+        key: 'npm_config_package',
+        name: 'packages',
+    },
+    {
+        key: 'npm_config_core',
+        name: 'core',
+    },
+]
 
-// Run only for themes, you shouldn't modify below config, just uncomment if you want to compile only theme's assets
-// glob.sync('./platform/themes/*/webpack.mix.js').forEach(item => require(__dirname + '/' + item));
+for (const assetType of types) {
+    const assetPath = process.env[assetType.key]
 
-// Run only for a theme, replace [theme] by the name of theme you want to compile assets
+    if (! assetPath) {
+        continue
+    }
 
-// npx mix --mix-config=platform/themes/[theme]/webpack.mix.js
+    pushToPath(assetPath, assetType.name)
+}
+
+if (! buildPaths.length) {
+    buildPaths = ['*/*']
+}
+
+buildPaths.forEach(buildPath => glob.sync(`./platform/${buildPath}/webpack.mix.js`).forEach(item => require(__dirname + '/' + item)))

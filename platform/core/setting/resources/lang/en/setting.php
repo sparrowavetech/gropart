@@ -54,6 +54,12 @@ return [
         'admin_locale_direction' => 'Admin language direction',
         'admin_login_screen_backgrounds' => 'Login screen backgrounds (~1366x768)',
         'minutes' => 'minutes',
+        'datatables' => [
+            'title' => 'Datatables',
+            'description' => 'Settings for datatables',
+            'show_column_visibility' => 'Default show column visibility?',
+            'show_export_button' => 'Default show export button?',
+        ],
     ],
     'email' => [
         'subject' => 'Subject',

@@ -10,7 +10,7 @@ class GetShortcodeDataRequest extends Request
     {
         return [
             'key' => 'nullable|string|max:255',
-            'code' => 'nullable|string|max:10000',
+            'code' => 'nullable|string|max:1000000',
         ];
     }
 }

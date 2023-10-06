@@ -31,7 +31,7 @@
                                 >
                             </span>
                             <span class="subject"><span class="from"> {{ $contact->name }} </span><span
-                                    class="time">{{ $contact->created_at->toDateTimeString() }} </span></span>
+                                    class="time">{{ BaseHelper::formatDateTime($contact->created_at) }} </span></span>
                             <span class="message"> {{ $contact->phone }} - {{ $contact->email }} </span>
                         </a>
                     </li>

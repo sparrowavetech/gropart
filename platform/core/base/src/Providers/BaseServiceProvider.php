@@ -23,7 +23,6 @@ use Botble\Base\Repositories\Eloquent\MetaBoxRepository;
 use Botble\Base\Repositories\Interfaces\MetaBoxInterface;
 use Botble\Base\Supports\Action;
 use Botble\Base\Supports\BreadcrumbsManager;
-use Botble\Base\Supports\Core;
 use Botble\Base\Supports\CustomResourceRegistrar;
 use Botble\Base\Supports\Database\Blueprint;
 use Botble\Base\Supports\Filter;
@@ -304,13 +303,9 @@ class BaseServiceProvider extends ServiceProvider
             return $schema;
         });
 
-        $this->app->resolving(Core::class, function () {
-            require_once __DIR__ . '/../Supports/Core.php';
-        });
-
         if ($this->app->environment('local')) {
             DB::listen(function (QueryExecuted $queryExecuted) {
-                if ($queryExecuted->time < 50) {
+                if ($queryExecuted->time < 500) {
                     return;
                 }
 

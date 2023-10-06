@@ -11,11 +11,6 @@
         {!! Form::open(['route' => 'theme.options', 'method' => 'POST']) !!}
         <div class="theme-option-sticky">
             <div class="info_bar">
-                <div class="float-start">
-                    @if (ThemeOption::getArg('debug'))
-                        <span class="theme-option-dev-mode-notice">{{ trans('packages/theme::theme.developer_mode') }}</span>
-                    @endif
-                </div>
                 <div class="theme-option-action_bar">
                     {!! apply_filters(THEME_OPTIONS_ACTION_META_BOXES, null, THEME_OPTIONS_MODULE_SCREEN_NAME) !!}
                     <button

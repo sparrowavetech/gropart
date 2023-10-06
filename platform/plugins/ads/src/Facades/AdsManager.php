@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static string display(string $location, array $attributes = [])
- * @method static \Botble\Ads\Supports\AdsManager load(bool $force = false)
+ * @method static \Botble\Ads\Supports\AdsManager load(bool $force = false, array $with = [])
  * @method static bool locationHasAds(string $location)
  * @method static string|null displayAds(string|null $key, array $attributes = [], array $linkAttributes = [])
  * @method static \Illuminate\Support\Collection getData(bool $isLoad = false, bool $isNotExpired = false)

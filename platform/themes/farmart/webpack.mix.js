@@ -63,7 +63,6 @@ mix
 
     .js(source + '/assets/js/marketplace.js', dist + '/js')
     .js(source + '/assets/js/main.js', dist + '/js')
-    .js(source + '/assets/js/icons-field.js', dist + '/js')
 
     .copy(dist + '/css/style.css', source + '/public/css')
     .copy(dist + '/css/style-rtl.css', source + '/public/css')
@@ -71,4 +70,3 @@ mix
     .copy(dist + '/css/marketplace-rtl.css', source + '/public/css')
     .copy(dist + '/js/marketplace.js', source + '/public/js')
     .copy(dist + '/js/main.js', source + '/public/js')
-    .copy(dist + '/js/icons-field.js', source + '/public/js');

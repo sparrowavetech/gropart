@@ -49,6 +49,10 @@ class PostTable extends TableAbstract
         $data = $this->table
             ->eloquent($this->query())
             ->editColumn('categories_name', function (Post $item) {
+                if ($item->categories->isEmpty()) {
+                    return '&mdash;';
+                }
+
                 $categories = [];
                 foreach ($item->categories as $category) {
                     $categories[] = Html::link(route('categories.edit', $category->id), $category->name);
@@ -57,7 +61,24 @@ class PostTable extends TableAbstract
                 return implode(', ', $categories);
             })
             ->editColumn('author_id', function (Post $item) {
-                return $item->author && $item->author->name ? BaseHelper::clean($item->author->name) : '&mdash;';
+                return ($item->author && $item->author->id) ? BaseHelper::clean($item->author->name) : '&mdash;';
+            })
+            ->filter(function ($query) {
+                if ($keyword = $this->request->input('search.value')) {
+                    return $query
+                        ->where('name', 'LIKE', '%' . $keyword . '%')
+                        ->orWhereHas('categories', function ($subQuery) use ($keyword) {
+                            return $subQuery
+                                ->where('name', 'LIKE', '%' . $keyword . '%');
+                        })
+                        ->orWhereHas('author', function ($subQuery) use ($keyword) {
+                            return $subQuery
+                                ->where('first_name', 'LIKE', '%' . $keyword . '%')
+                                ->orWhere('last_name', 'LIKE', '%' . $keyword . '%');
+                        });
+                }
+
+                return $query;
             });
 
         return $this->toJson($data);
@@ -176,13 +197,5 @@ class PostTable extends TableAbstract
         }
 
         return parent::saveBulkChangeItem($item, $inputKey, $inputValue);
-    }
-
-    public function getDefaultButtons(): array
-    {
-        return [
-            'export',
-            'reload',
-        ];
     }
 }

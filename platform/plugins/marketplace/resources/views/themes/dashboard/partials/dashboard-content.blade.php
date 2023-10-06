@@ -33,7 +33,7 @@
                 </span>
                 <div class="text">
                     <h6 class="mb-1 card-title">{{ __('Products') }}</h6>
-                    <span>{{ $data['products']->count() }}</span>
+                    <span>{{ $totalProducts }}</span>
                 </div>
             </article>
         </div>
@@ -76,7 +76,7 @@
                     </h4>
                     <p>{{ __('Attract your customers with the best products.') }}</p>
                     <hr>
-                    <p class="mb-0">{!! __('Create a new product <a href=":url">here</a>', ['url' => route('marketplace.vendor.products.create')]) !!}</p>
+                    <p class="mb-0">{!! BaseHelper::clean(__('Create a new product <a href=":url">here</a>', ['url' => route('marketplace.vendor.products.create')])) !!}</p>
                 </div>
             </div>
         @elseif (!$totalOrders)

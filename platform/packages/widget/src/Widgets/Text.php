@@ -17,4 +17,9 @@ class Text extends AbstractWidget
         $this->setFrontendTemplate('packages/widget::widgets.text.frontend');
         $this->setBackendTemplate('packages/widget::widgets.text.backend');
     }
+
+    public function getWidgetDirectory(): string
+    {
+        return 'text';
+    }
 }

@@ -7,6 +7,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Str;
 use ReflectionClass;
 
 abstract class AbstractWidget
@@ -86,10 +87,11 @@ abstract class AbstractWidget
         $html = null;
 
         $widgetDirectory = $this->getWidgetDirectory();
+        $namespace = Str::afterLast($this->frontendTemplate, '.');
 
-        if (View::exists(Theme::getThemeNamespace('widgets.' . $widgetDirectory . '.templates.' . $this->frontendTemplate))) {
+        if (View::exists(Theme::getThemeNamespace('widgets.' . $widgetDirectory . '.templates.' . $namespace))) {
             $html = Theme::loadPartial(
-                $this->frontendTemplate,
+                $namespace,
                 Theme::getThemeNamespace('/../widgets/' . $widgetDirectory . '/templates'),
                 $viewData
             );
@@ -126,10 +128,11 @@ abstract class AbstractWidget
         }
 
         $widgetDirectory = $this->getWidgetDirectory();
+        $namespace = Str::afterLast($this->backendTemplate, '.');
 
-        if (View::exists(Theme::getThemeNamespace('widgets.' . $widgetDirectory . '.templates.' . $this->backendTemplate))) {
+        if (View::exists(Theme::getThemeNamespace('widgets.' . $widgetDirectory . '.templates.' . $namespace))) {
             return Theme::loadPartial(
-                $this->backendTemplate,
+                $namespace,
                 Theme::getThemeNamespace('/../widgets/' . $widgetDirectory . '/templates'),
                 array_merge([
                     'config' => $this->config,

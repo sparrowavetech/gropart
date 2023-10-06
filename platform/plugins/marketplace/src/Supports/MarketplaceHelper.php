@@ -44,7 +44,7 @@ class MarketplaceHelper
 
     public function getAssetVersion(): string
     {
-        return '1.2.0';
+        return '1.2.1';
     }
 
     public function hideStorePhoneNumber(): bool
@@ -79,10 +79,12 @@ class MarketplaceHelper
 
         if ($mailer->templateEnabled('store_new_order')) {
             foreach ($orders as $order) {
-                if ($order->store->email) {
-                    $this->setEmailVendorVariables($order);
-                    $mailer->sendUsingTemplate('store_new_order', $order->store->email);
+                if (! $order->store || ! $order->store->email) {
+                    continue;
                 }
+
+                $this->setEmailVendorVariables($order);
+                $mailer->sendUsingTemplate('store_new_order', $order->store->email);
             }
         }
 

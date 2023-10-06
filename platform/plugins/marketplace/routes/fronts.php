@@ -234,7 +234,7 @@ Route::group([
             });
 
             Route::group(['prefix' => 'coupons', 'as' => 'discounts.'], function () {
-                Route::resource('', 'DiscountController')->parameters(['' => 'coupon'])->except(['edit', 'update']);
+                Route::resource('', 'DiscountController')->parameters(['' => 'discount'])->except(['edit', 'update']);
 
                 Route::post('generate-coupon', [
                     'as' => 'generate-coupon',

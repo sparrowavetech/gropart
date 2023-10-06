@@ -1,13 +1,15 @@
+@php
+    $id = $attributes['id'] ?? 'onoffswitch_' . $name . '_' . md5($name);
+@endphp
 <div class="onoffswitch">
     <input
         name="{{ $name }}"
         type="hidden"
         value="0"
-        {!! Html::attributes($attributes) !!}
     >
     <input
         class="onoffswitch-checkbox"
-        id="{{ $name }}"
+        id="{{ $id }}"
         name="{{ $name }}"
         type="checkbox"
         value="1"
@@ -16,7 +18,7 @@
     >
     <label
         class="onoffswitch-label"
-        for="{{ $name }}"
+        for="{{ $id }}"
     >
         <span class="onoffswitch-inner"></span>
         <span class="onoffswitch-switch"></span>

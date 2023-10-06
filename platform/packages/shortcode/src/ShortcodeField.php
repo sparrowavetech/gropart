@@ -41,4 +41,40 @@ class ShortcodeField
 
         return $tabs;
     }
+
+    public function ids(string $field, array $attributes = [], array $options = []): string
+    {
+        $value = Arr::get($attributes, $field);
+
+        $value = static::parseIds($value);
+
+        $multiple = true;
+
+        return view('packages/shortcode::fields.select', compact(
+            'field',
+            'value',
+            'options',
+            'multiple'
+        ))->render();
+    }
+
+    public function getIds(string $field, ShortcodeCompiler $shortcode): array
+    {
+        $value = $shortcode->{$field};
+
+        if (empty($value) || ! is_string($value)) {
+            return [];
+        }
+
+        return static::parseIds($value);
+    }
+
+    public static function parseIds(string|null $value): array
+    {
+        if (empty($value)) {
+            return [];
+        }
+
+        return explode(',', $value) ?: [];
+    }
 }

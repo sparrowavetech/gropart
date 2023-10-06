@@ -9,6 +9,7 @@ class IdColumn extends Column
         return parent::make($data ?: 'id', $name)
             ->title(trans('core/base::tables.id'))
             ->alignCenter()
-            ->width(20);
+            ->width(20)
+            ->columnVisibility();
     }
 }

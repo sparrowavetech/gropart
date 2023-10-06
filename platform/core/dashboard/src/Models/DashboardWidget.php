@@ -25,7 +25,7 @@ class DashboardWidget extends BaseModel
 
     protected static function booted(): void
     {
-        static::deleted(function (DashboardWidget $widget) {
+        static::deleting(function (DashboardWidget $widget) {
             $widget->settings()->delete();
         });
     }

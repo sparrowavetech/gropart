@@ -17,6 +17,7 @@ use Botble\Widget\Models\Widget;
 use Botble\Widget\Repositories\Eloquent\WidgetRepository;
 use Botble\Widget\Repositories\Interfaces\WidgetInterface;
 use Botble\Widget\WidgetGroupCollection;
+use Botble\Widget\Widgets\CoreSimpleMenu;
 use Botble\Widget\Widgets\Text;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Routing\Events\RouteMatched;
@@ -61,6 +62,7 @@ class WidgetServiceProvider extends ServiceProvider
                 'description' => trans('packages/widget::widget.primary_sidebar_description'),
             ]);
 
+            register_widget(CoreSimpleMenu::class);
             register_widget(Text::class);
 
             $widgetPath = theme_path(Theme::getThemeName() . '/widgets');

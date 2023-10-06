@@ -15,6 +15,13 @@ return [
         'date_time' => 'Current date time',
         'date_year' => 'Current year',
         'site_admin_email' => 'Site admin email',
+        'twig' => [
+            'tag' => [
+                'apply' => 'The apply tag allows you to apply Twig filters',
+                'for' => 'Loop over each item in a sequence',
+                'if' => 'The if statement in Twig is comparable with the if statements of PHP',
+            ],
+        ],
     ],
     'change_image' => 'Change image',
     'delete_image' => 'Delete image',

@@ -1,8 +1,7 @@
-<link
-    href="{{ asset('vendor/core/core/media/libraries/dropzone/dropzone.css') }}"
-    rel="stylesheet"
->
-<script src="{{ asset('vendor/core/core/media/libraries/dropzone/dropzone.js') }}"></script>
+@php
+    Assets::addScripts(['dropzone'])->addStyles(['dropzone']);
+@endphp
+
 <style>
     .dropzone {
         border-radius: 5px;

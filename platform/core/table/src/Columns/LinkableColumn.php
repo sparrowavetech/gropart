@@ -8,6 +8,8 @@ class LinkableColumn extends Column
 
     protected string|null $permission = null;
 
+    protected int $limit = 0;
+
     public function route(string $route, array $parameters = [], bool $absolute = true): static
     {
         $this->route = [$route, $parameters, $absolute];
@@ -30,5 +32,17 @@ class LinkableColumn extends Column
     public function getPermission(): string|null
     {
         return $this->permission;
+    }
+
+    public function limit(int $words): static
+    {
+        $this->limit = $words;
+
+        return $this;
+    }
+
+    public function getLimit(): int
+    {
+        return $this->limit;
     }
 }

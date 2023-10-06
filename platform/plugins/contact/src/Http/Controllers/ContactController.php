@@ -19,6 +19,7 @@ use Botble\Contact\Models\ContactReply;
 use Botble\Contact\Tables\ContactTable;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class ContactController extends BaseController
 {
@@ -62,17 +63,12 @@ class ContactController extends BaseController
         }
     }
 
-    public function postReply(int|string $id, ContactReplyRequest $request, BaseHttpResponse $response)
+    public function postReply(Contact $contact, ContactReplyRequest $request, BaseHttpResponse $response)
     {
-        $contact = Contact::query()->findOrFail($id);
-
         $message = BaseHelper::clean($request->input('message'));
 
         if (! $message) {
-            return $response
-                ->setError()
-                ->setCode(422)
-                ->setMessage(trans('validation.required', ['attribute' => 'message']));
+            throw ValidationException::withMessages(['message' => trans('validation.required', ['attribute' => 'message'])]);
         }
 
         EmailHandler::send($message, 'Re: ' . $contact->subject, $contact->email);

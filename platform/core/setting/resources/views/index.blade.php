@@ -215,6 +215,25 @@
             />
         </x-core-setting::section>
 
+        <x-core-setting::section
+            :title="trans('core/setting::setting.general.datatables.title')"
+            :description="trans('core/setting::setting.general.datatables.description')"
+        >
+            <x-core-setting::on-off
+                class="setting-selection-option"
+                name="datatables_default_show_column_visibility"
+                :label="trans('core/setting::setting.general.datatables.show_column_visibility')"
+                :value="setting('datatables_default_show_column_visibility', false)"
+            />
+
+            <x-core-setting::on-off
+                class="setting-selection-option"
+                name="datatables_default_show_export_button"
+                :label="trans('core/setting::setting.general.datatables.show_export_button')"
+                :value="setting('datatables_default_show_export_button', false)"
+            />
+        </x-core-setting::section>
+
         {!! apply_filters(BASE_FILTER_AFTER_SETTING_CONTENT, null) !!}
 
         <div

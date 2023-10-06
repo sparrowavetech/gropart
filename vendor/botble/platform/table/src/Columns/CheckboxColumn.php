@@ -20,6 +20,8 @@ class CheckboxColumn extends Column
             ->alignLeft()
             ->orderable(false)
             ->exportable(false)
-            ->searchable(false);
+            ->searchable(false)
+            ->columnVisibility()
+            ->titleAttr(trans('core/base::tables.checkbox'));
     }
 }

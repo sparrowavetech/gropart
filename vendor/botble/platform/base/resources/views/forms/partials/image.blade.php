@@ -4,7 +4,7 @@
         name="{{ $name }}"
         type="hidden"
         value="{{ $value }}"
-        {!! Html::attributes(Arr::except((array)$attributes, ['action'])) !!}
+        {!! Html::attributes(Arr::except((array) $attributes, ['action'])) !!}
     >
     @if (!is_in_admin(true) || !auth()->check())
         <input
@@ -13,7 +13,7 @@
             style="display: none;"
             @if ($name) name="{{ $name }}_input" @endif
             @if (!isset($attributes['action']) || $attributes['action'] == 'select-image') accept="image/*" @endif
-            {!! Html::attributes(Arr::except((array)$attributes, ['action'])) !!}
+            {!! Html::attributes(Arr::except((array) $attributes, ['action'])) !!}
         >
     @endif
     <div class="preview-image-wrapper @if (!($allowThumb = Arr::get($attributes, 'allow_thumb', true))) preview-image-wrapper-not-allow-thumb @endif">

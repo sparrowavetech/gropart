@@ -9,14 +9,11 @@ use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Models\Discount;
-use Botble\Ecommerce\Models\OrderReturn;
 use Botble\JsValidation\Facades\JsValidator;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Http\Requests\DiscountRequest;
 use Botble\Marketplace\Tables\DiscountTable;
-use Carbon\Carbon;
 use Exception;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -64,22 +61,6 @@ class DiscountController extends BaseController
             $request->merge(['quantity' => null]);
         }
 
-        $request->merge([
-            'start_date' => Carbon::parse($request->input('start_date') . ' ' . $request->input('start_time'))
-                ->toDateTimeString(),
-        ]);
-
-        if ($request->has('end_date') && ! $request->has('unlimited_time')) {
-            $request->merge([
-                'end_date' => Carbon::parse($request->input('end_date') . ' ' . $request->input('end_time'))
-                    ->toDateTimeString(),
-            ]);
-        } else {
-            $request->merge([
-                'end_date' => null,
-            ]);
-        }
-
         $discount = new Discount();
 
         $discount->fill($request->input());
@@ -94,9 +75,11 @@ class DiscountController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
+    public function destroy(Discount $discount, Request $request, BaseHttpResponse $response)
     {
-        $discount = $this->findOrFail($id);
+        if ($discount->store_id !== $this->getStore()->id) {
+            abort(403);
+        }
 
         try {
             $discount->delete();
@@ -118,13 +101,5 @@ class DiscountController extends BaseController
         } while (Discount::query()->where('code', $code)->exists());
 
         return $response->setData($code);
-    }
-
-    protected function findOrFail(int|string $id): OrderReturn|Model|null
-    {
-        return Discount::query()
-            ->where('id', $id)
-            ->where('store_id', $this->getStore()->id)
-            ->firstOrFail();
     }
 }

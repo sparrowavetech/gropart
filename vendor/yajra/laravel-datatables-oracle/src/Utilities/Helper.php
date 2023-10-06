@@ -110,6 +110,12 @@ class Helper
             return $content($param);
         }
 
+        if (is_array($content)) {
+            [$view, $viewData] = $content;
+
+            return static::compileBlade($view, static::getMixedValue($data, $param) + $viewData);
+        }
+
         return $content;
     }
 

@@ -20,18 +20,20 @@ class PublicController extends Controller
 {
     public function getIndex()
     {
-        if (defined('PAGE_MODULE_SCREEN_NAME') && $homepageId = BaseHelper::getHomepageId()) {
-            if ($slug = SlugHelper::getSlug(null, null, Page::class, $homepageId)) {
-                $data = (new PageService())->handleFrontRoutes($slug);
+        if (
+            defined('PAGE_MODULE_SCREEN_NAME') &&
+            ($homepageId = BaseHelper::getHomepageId()) &&
+            ($slug = SlugHelper::getSlug(null, null, Page::class, $homepageId))
+        ) {
+            $data = (new PageService())->handleFrontRoutes($slug);
 
-                if (! $data) {
-                    return Theme::scope('index')->render();
-                }
-
-                event(new RenderingSingleEvent($slug));
-
-                return Theme::scope($data['view'], $data['data'], $data['default_view'])->render();
+            if (! $data) {
+                return Theme::scope('index')->render();
             }
+
+            event(new RenderingSingleEvent($slug));
+
+            return Theme::scope($data['view'], $data['data'], $data['default_view'])->render();
         }
 
         SeoHelper::setTitle(theme_option('site_title'));
@@ -52,7 +54,7 @@ class PublicController extends Controller
         $slug = SlugHelper::getSlug($key, $prefix);
 
         if (! $slug) {
-            abort(404);
+            return redirect()->route('public.index');
         }
 
         if (

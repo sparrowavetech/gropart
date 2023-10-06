@@ -177,9 +177,6 @@ class HookServiceProvider extends ServiceProvider
             ]);
     }
 
-    /**
-     * Register sidebar options in menu
-     */
     public function registerMenuOptions(): void
     {
         if (Auth::user()->hasPermission('categories.index')) {

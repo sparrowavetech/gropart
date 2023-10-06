@@ -56,6 +56,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static string|null getRefLang()
  * @method static string|int|null getRefFrom()
  * @method static void initModelRelations()
+ * @method static array getTableHeading()
  *
  * @see \Botble\Language\LanguageManager
  */

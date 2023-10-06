@@ -3,10 +3,15 @@
 namespace Botble\Theme;
 
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Form;
+use Botble\Base\Facades\Html;
+use Botble\Base\Forms\FormAbstract;
+use Botble\Base\Forms\FormHelper;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Theme\Contracts\Theme as ThemeContract;
 use Botble\Theme\Exceptions\UnknownPartialFileException;
 use Botble\Theme\Exceptions\UnknownThemeException;
+use Botble\Theme\Forms\Fields\ThemeIconField;
 use Closure;
 use Illuminate\Config\Repository;
 use Illuminate\Events\Dispatcher;
@@ -817,5 +822,41 @@ class Theme implements ThemeContract
         }
 
         return 'data:image/png;base64,' . base64_encode(File::get($screenshot));
+    }
+
+    public function registerThemeIconFields(array $icons, array $css = [], array $js = []): void
+    {
+        Form::component('themeIcon', 'packages/theme::forms.fields.icons-field', [
+            'name',
+            'value' => null,
+            'attributes' => [],
+        ]);
+
+        add_filter('form_custom_fields', function (FormAbstract $form, FormHelper $formHelper) {
+            if ($formHelper->hasCustomField('themeIcon')) {
+                return $form;
+            }
+
+            return $form->addCustomField('themeIcon', ThemeIconField::class);
+        }, 29, 2);
+
+        add_filter('theme_icon_js_code', function (string|null $html) use ($css, $js) {
+            $cssHtml = '';
+            $jsHtml = '';
+
+            foreach ($css as $cssItem) {
+                $cssHtml .= Html::style($cssItem)->toHtml();
+            }
+
+            foreach ($js as $jsItem) {
+                $jsHtml .= Html::style($jsItem)->toHtml();
+            }
+
+            return $html . $cssHtml . $jsHtml;
+        });
+
+        add_filter('theme_icon_list_icons', function (array $defaultIcons) use ($icons) {
+            return array_merge($defaultIcons, $icons);
+        });
     }
 }

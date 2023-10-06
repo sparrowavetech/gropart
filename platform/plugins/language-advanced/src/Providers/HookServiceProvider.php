@@ -186,7 +186,7 @@ class HookServiceProvider extends ServiceProvider
         EloquentDataTable|CollectionDataTable $data,
         Model|string|null $model
     ): EloquentDataTable|CollectionDataTable {
-        if ($model && LanguageAdvancedManager::isSupported($model)) {
+        if ($model && LanguageAdvancedManager::isSupported($model) && count(Language::getActiveLanguage()) > 1) {
             $route = $this->getRoutes();
 
             if (is_in_admin() && Auth::check() && ! Auth::user()->hasAnyPermission($route)) {
@@ -206,7 +206,7 @@ class HookServiceProvider extends ServiceProvider
 
     public function addLanguageTableHeading(array $headings, Model|string|null $model): array
     {
-        if (! LanguageAdvancedManager::isSupported($model)) {
+        if (! LanguageAdvancedManager::isSupported($model) || count(Language::getActiveLanguage()) < 2) {
             return $headings;
         }
 
@@ -214,22 +214,7 @@ class HookServiceProvider extends ServiceProvider
             return $headings;
         }
 
-        $languages = Language::getActiveLanguage(['lang_code', 'lang_name', 'lang_flag']);
-        $heading = '';
-        foreach ($languages as $language) {
-            $heading .= language_flag($language->lang_flag, $language->lang_name);
-        }
-
-        return array_merge($headings, [
-            'language' => [
-                'name' => 'language_meta.lang_meta_id',
-                'title' => $heading,
-                'class' => 'text-center language-header no-sort',
-                'width' => (count($languages) * 40) . 'px',
-                'orderable' => false,
-                'searchable' => false,
-            ],
-        ]);
+        return array_merge($headings, Language::getTableHeading());
     }
 
     public function checkItemLanguageBeforeShow($query, Model|string|null $model): Builder|EloquentBuilder|Model

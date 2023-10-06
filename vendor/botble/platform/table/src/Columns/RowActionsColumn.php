@@ -13,6 +13,7 @@ class RowActionsColumn extends Column
             ->searchable(false)
             ->exportable(false)
             ->printable(false)
-            ->responsivePriority(99);
+            ->responsivePriority(99)
+            ->columnVisibility();
     }
 }

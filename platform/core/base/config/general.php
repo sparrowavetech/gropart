@@ -271,6 +271,7 @@ return [
         'Terminal Dosis Light',
         'The Girl Next Door',
         'Tinos',
+        'Urbanist',
         'Ubuntu',
         'Ultra',
         'Unkempt',

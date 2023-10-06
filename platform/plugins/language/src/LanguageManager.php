@@ -6,8 +6,6 @@ use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Models\BaseModel;
 use Botble\Language\Models\Language;
 use Botble\Language\Models\LanguageMeta;
-use Botble\Language\Repositories\Interfaces\LanguageInterface;
-use Botble\Language\Repositories\Interfaces\LanguageMetaInterface;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Contracts\Routing\UrlRoutable;
@@ -67,16 +65,13 @@ class LanguageManager
 
     protected array $localesMapping = [];
 
-    public function __construct(
-        protected LanguageInterface $languageRepository,
-        protected LanguageMetaInterface $languageMetaRepository,
-        HttpRequest $request
-    ) {
+    public function __construct()
+    {
         $this->app = app();
 
         $this->translator = $this->app['translator'];
         $this->router = $this->app['router'];
-        $this->request = $request;
+        $this->request = $this->app['request'];
         $this->url = $this->app['url'];
 
         $refLang = $this->getRefLang();
@@ -140,7 +135,10 @@ class LanguageManager
             return $this->activeLanguages;
         }
 
-        $this->activeLanguages = $this->languageRepository->getActiveLanguage($select);
+        $this->activeLanguages = Language::query()
+            ->orderBy('lang_order')
+            ->select($select)
+            ->get();
         $this->activeLanguageSelect = $select;
 
         return $this->activeLanguages;
@@ -194,10 +192,7 @@ class LanguageManager
 
     public function getRelatedLanguageItem(int|string $id, string|null $uniqueKey): array
     {
-        /**
-         * @var Builder $meta
-         */
-        $meta = $this->languageMetaRepository->getModel()->where('lang_meta_origin', $uniqueKey);
+        $meta = LanguageMeta::query()->where('lang_meta_origin', $uniqueKey);
 
         if ($id != $this->getRefFrom()) {
             $meta = $meta->where('reference_id', '!=', $id);
@@ -855,25 +850,25 @@ class LanguageManager
             if ($data && in_array(get_class($data), $this->supportedModels())) {
                 if ($currentLanguageCode = $request->input('language')) {
                     $uniqueKey = null;
-                    $meta = $this->languageMetaRepository->getFirstBy(
-                        [
+                    $meta = LanguageMeta::query()
+                        ->where([
                             'reference_id' => $data->getKey(),
                             'reference_type' => get_class($data),
-                        ]
-                    );
+                        ])
+                        ->first();
                     if (! $meta && ! $this->getRefFrom()) {
                         $uniqueKey = md5($data->getKey() . $screen . time());
                     } elseif ($refFrom = $this->getRefFrom()) {
-                        $uniqueKey = $this->languageMetaRepository->getFirstBy(
-                            [
+                        $uniqueKey = LanguageMeta::query()
+                            ->where([
                                 'reference_id' => $refFrom,
                                 'reference_type' => get_class($data),
-                            ]
-                        )->lang_meta_origin;
+                            ])
+                            ->value('lang_meta_origin');
                     }
 
                     if (! $meta) {
-                        $meta = $this->languageMetaRepository->getModel();
+                        $meta = new LanguageMeta();
                         $meta->reference_id = $data->getKey();
                         $meta->reference_type = get_class($data);
                         $meta->lang_meta_origin = $uniqueKey;
@@ -896,7 +891,10 @@ class LanguageManager
             return $this->defaultLanguage;
         }
 
-        $this->defaultLanguage = $this->languageRepository->getDefaultLanguage($select);
+        $this->defaultLanguage = Language::query()
+            ->where('lang_is_default', 1)
+            ->select($select)
+            ->first();
         $this->defaultLanguageSelect = $select;
 
         return $this->defaultLanguage;
@@ -914,10 +912,12 @@ class LanguageManager
     {
         $defaultLanguage = $this->getDefaultLanguage(['lang_id']);
         if (! empty($defaultLanguage) && in_array(get_class($data), $this->supportedModels())) {
-            $this->languageMetaRepository->deleteBy([
-                'reference_id' => $data->getKey(),
-                'reference_type' => get_class($data),
-            ]);
+            LanguageMeta::query()
+                ->where([
+                    'reference_id' => $data->getKey(),
+                    'reference_type' => get_class($data),
+                ])
+                ->delete();
 
             return true;
         }
@@ -1123,8 +1123,31 @@ class LanguageManager
                         'reference_id',
                         'reference_type',
                     ])
-                    ->where('lang_meta_code', is_in_admin() ? $this->getCurrentAdminLocaleCode() : $this->getCurrentLocaleCode());
+                    ->when(! is_in_admin(), function (Builder $query) {
+                        $query->where('lang_meta_code', $this->getCurrentLocaleCode());
+                    });
             });
         }
+    }
+
+    public function getTableHeading(): array
+    {
+        $languages = $this->getActiveLanguage(['lang_code', 'lang_name', 'lang_flag']);
+        $heading = '';
+        foreach ($languages as $language) {
+            $heading .= language_flag($language->lang_flag, $language->lang_name);
+        }
+
+        return [
+            'language' => [
+                'name' => 'language_meta.lang_meta_id',
+                'title' => $heading,
+                'class' => 'text-center language-header no-sort',
+                'width' => (count($languages) * 40) . 'px',
+                'orderable' => false,
+                'searchable' => false,
+                'titleAttr' => trans('plugins/language::language.name'),
+            ],
+        ];
     }
 }

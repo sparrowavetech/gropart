@@ -61,7 +61,7 @@ class Store extends BaseModel
 
         static::deleted(function (Store $store) {
             $folder = Storage::path($store->upload_folder);
-            if (File::isDirectory($folder) && Str::endsWith($store->upload_folder, '/' . $store->id)) {
+            if (File::isDirectory($folder) && Str::endsWith($store->upload_folder, '/' . ($store->slug ?: $store->id))) {
                 File::deleteDirectory($folder);
             }
         });
@@ -111,7 +111,7 @@ class Store extends BaseModel
     {
         return Attribute::make(
             get: function () {
-                $folder = $this->id ? 'stores/' . $this->id : 'stores';
+                $folder = $this->id ? 'stores/' . ($this->slug ?: $this->id) : 'stores';
 
                 return apply_filters('marketplace_store_upload_folder', $folder, $this);
             }

@@ -97,7 +97,7 @@
                                         ]) !!}
                                 @endswitch
 
-                                @if($helper = Arr::get($field, 'helper'))
+                                @if ($helper = Arr::get($field, 'helper'))
                                     {{ Form::helper($helper) }}
                                 @endif
                             </div>

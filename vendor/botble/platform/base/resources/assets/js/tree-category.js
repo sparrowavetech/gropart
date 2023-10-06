@@ -183,7 +183,7 @@ $(() => {
     function reloadTree(activeId, callback) {
         $httpClient
             .make()
-            .get($treeWrapper.data('url'))
+            .get($treeWrapper.data('url') || window.location.href)
             .then(({ data }) => {
                 $treeWrapper.html(data.data)
                 loadTree(activeId)
@@ -250,7 +250,13 @@ $(() => {
                     }
                 })
             })
-            .finally(() => $formLoading.addClass('d-none'))
+            .finally(function () {
+                $formLoading.addClass('d-none')
+                $form
+                    .find('button[type=submit]')
+                    .prop('disabled', false)
+                    .removeClass('disabled')
+            })
     })
 
     $(document).on('click', '.deleteDialog', (event) => {

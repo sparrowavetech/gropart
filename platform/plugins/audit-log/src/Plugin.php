@@ -13,7 +13,8 @@ class Plugin extends PluginOperationAbstract
     {
         Schema::dropIfExists('audit_histories');
 
-        Widget::query()->where('name', 'widget_audit_logs')
+        Widget::query()
+            ->where('widget_id', 'widget_audit_logs')
             ->each(fn (DashboardWidget $dashboardWidget) => $dashboardWidget->delete());
     }
 }

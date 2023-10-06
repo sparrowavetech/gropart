@@ -8,7 +8,7 @@ Route::group(['namespace' => 'Botble\Contact\Http\Controllers', 'middleware' => 
         Route::group(['prefix' => 'contacts', 'as' => 'contacts.'], function () {
             Route::resource('', 'ContactController')->except(['create', 'store'])->parameters(['' => 'contact']);
 
-            Route::post('reply/{id}', [
+            Route::post('reply/{contact}', [
                 'as' => 'reply',
                 'uses' => 'ContactController@postReply',
                 'permission' => 'contacts.edit',

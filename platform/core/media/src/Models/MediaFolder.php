@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class MediaFolder extends BaseModel
@@ -104,9 +105,13 @@ class MediaFolder extends BaseModel
 
     protected static function booted(): void
     {
-        static::deleted(function (MediaFolder $folder) {
+        static::deleting(function (MediaFolder $folder) {
             if ($folder->isForceDeleting()) {
                 $folder->files()->onlyTrashed()->each(fn (MediaFile $file) => $file->forceDelete());
+
+                if (Storage::directoryExists($folder->slug)) {
+                    Storage::deleteDirectory($folder->slug);
+                }
             } else {
                 $folder->files()->withTrashed()->each(fn (MediaFile $file) => $file->delete());
             }

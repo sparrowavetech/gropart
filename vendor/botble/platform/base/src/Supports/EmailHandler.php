@@ -3,6 +3,7 @@
 namespace Botble\Base\Supports;
 
 use Botble\Base\Events\SendMailEvent;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Media\Facades\RvMedia;
 use Carbon\Carbon;
 use Exception;
@@ -263,7 +264,7 @@ class EmailHandler
             'site_logo' => setting('admin_logo') ? RvMedia::getImageUrl(setting('admin_logo')) : url(
                 config('core.base.general.logo')
             ),
-            'date_time' => $now->toDateTimeString(),
+            'date_time' => BaseHelper::formatDateTime($now),
             'date_year' => $now->year,
             'site_admin_email' => get_admin_email()->first(),
             'now' => $now,

@@ -300,27 +300,12 @@ class HookServiceProvider extends ServiceProvider
 
     public function addLanguageTableHeading(array $headings, string|Model $model): array
     {
-        if (in_array(get_class($model), Language::supportedModels())) {
+        if (in_array(get_class($model), Language::supportedModels()) && count(Language::getActiveLanguage()) > 1) {
             if (is_in_admin() && Auth::check() && ! Auth::user()->hasAnyPermission($this->getRoutes())) {
                 return $headings;
             }
 
-            $languages = Language::getActiveLanguage(['lang_code', 'lang_name', 'lang_flag']);
-            $heading = '';
-            foreach ($languages as $language) {
-                $heading .= language_flag($language->lang_flag, $language->lang_name);
-            }
-
-            return array_merge($headings, [
-                'language' => [
-                    'name' => 'language_meta.lang_meta_id',
-                    'title' => $heading,
-                    'class' => 'text-center language-header no-sort',
-                    'width' => (count($languages) * 40) . 'px',
-                    'orderable' => false,
-                    'searchable' => false,
-                ],
-            ]);
+            return array_merge($headings, Language::getTableHeading());
         }
 
         return $headings;
@@ -330,7 +315,7 @@ class HookServiceProvider extends ServiceProvider
         EloquentDataTable|CollectionDataTable $data,
         string|Model $model
     ): EloquentDataTable|CollectionDataTable {
-        if ($model && in_array(get_class($model), Language::supportedModels())) {
+        if ($model && in_array(get_class($model), Language::supportedModels()) && count(Language::getActiveLanguage()) > 1) {
             $route = $this->getRoutes();
 
             if (is_in_admin() && Auth::check() && ! Auth::user()->hasAnyPermission($route)) {

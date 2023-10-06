@@ -105,7 +105,9 @@ class HookServiceProvider extends ServiceProvider
 
         $paymentData = apply_filters(PAYMENT_FILTER_PAYMENT_DATA, [], $request);
 
-        if (strtoupper($currentCurrency->title) !== 'USD') {
+        $supportedCurrencies = $stripePaymentService->supportedCurrencyCodes();
+
+        if (! in_array($paymentData['currency'], $supportedCurrencies) && strtoupper($currentCurrency->title) !== 'USD') {
             $currencyModel = $currentCurrency->replicate();
 
             $supportedCurrency = $currencyModel->query()->where('title', 'USD')->first();
@@ -123,8 +125,6 @@ class HookServiceProvider extends ServiceProvider
                 }
             }
         }
-
-        $supportedCurrencies = $stripePaymentService->supportedCurrencyCodes();
 
         if (! in_array($paymentData['currency'], $supportedCurrencies)) {
             $data['error'] = true;

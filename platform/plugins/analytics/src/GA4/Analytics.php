@@ -123,7 +123,9 @@ class Analytics extends AnalyticsAbstract implements AnalyticsContract
 
         $metrics = $this->validateMetrics($metrics);
 
-        $query = $this
+        $that = clone $this;
+
+        $query = $that
             ->dateRange($period)
             ->metrics($metrics);
 
