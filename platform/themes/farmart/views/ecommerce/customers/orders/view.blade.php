@@ -7,27 +7,12 @@
         </div>
         <div class="card-body">
             <div class="customer-order-detail">
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <div class="order-slogan">
-                            @if ($logo = theme_option('logo_in_the_checkout_page') ?: theme_option('logo'))
-                                <img
-                                    src="{{ RvMedia::getImageUrl($logo) }}"
-                                    alt="{{ theme_option('site_title') }}"
-                                    width="100"
-                                >
-                                <br />
-                            @endif
-                            {{ setting('contact_address') }}
-                        </div>
-                    </div>
-                </div>
                 @include('plugins/ecommerce::themes.includes.order-tracking-detail')
                 <br>
                 <div>
                     @if ($order->isInvoiceAvailable())
                         <a
-                            class="btn btn-small btn-secondary mr-2"
+                            class="btn btn-lg btn-secondary me-2"
                             href="{{ route('customer.print-order', $order->id) }}"
                         >
                             <i class="fa fa-download"></i> {{ __('Download invoice') }}

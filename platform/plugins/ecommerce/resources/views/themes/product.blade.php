@@ -1,24 +1,16 @@
-<!-- Page Content Wrapper -->
 <div class="page-content-wrapper">
-    <!-- Bread Crumb -->
     {!! Theme::breadcrumb()->render() !!}
-    <!-- Bread Crumb -->
-
-    <!-- Page Content -->
     <section
         class="content-page single-product-content"
         id="product-detail-page"
     >
-        <!-- Product -->
         <div
             class="container"
             id="product-detail"
         >
             <div class="row">
-                <!-- Product Image -->
                 <div class="col-lg-6 col-md-6 col-sm-12 mb-30">
                     <div class="product-page-image">
-                        <!-- Slick Image Slider -->
                         <div
                             class="product-image-slider product-image-gallery"
                             id="product-image-gallery"
@@ -36,7 +28,6 @@
                         </div>
                     </div>
 
-                    <!-- Slick Thumb Slider -->
                     <div class="product-image-slider-thumbnails">
                         @foreach ($productImages as $thumb)
                             <div class="item">
@@ -47,11 +38,7 @@
                             </div>
                         @endforeach
                     </div>
-                    <!-- End Slick Thumb Slider -->
                 </div>
-                <!-- End Product Image -->
-
-                <!-- Product Content -->
                 <div class="col-lg-6 col-md-6 col-sm-12 mb-30">
                     <div class="product-page-content">
                         <h2 class="product-title">{{ $product->name }}</h2>
@@ -174,11 +161,8 @@
                         </div>
                     </div>
                 </div>
-            </div> <!-- /row -->
-        </div> <!-- product-detail -->
-        <!-- End Product -->
-
-        <!-- Product Content Tab -->
+            </div>
+        </div>
         <div class="product-tabs-wrapper container">
             <ul
                 class="product-content-tabs nav nav-tabs"
@@ -222,21 +206,18 @@
                 </li>
 
             </ul>
-            <div class="product-content-Tabs_wraper tab-content container">
+            <div class="product-content-tabs-wrapper tab-content container">
                 <div
                     class="tab-pane fade in active"
                     id="tab_description"
                     role="tabpanel"
                 >
-                    <!-- Accordion Title -->
                     <h6
                         class="product-collapse-title"
                         data-bs-toggle="collapse"
                         data-bs-target="#tab_description-coll"
                     >
                         {{ __('Description') }}</h6>
-                    <!-- End Accordion Title -->
-                    <!-- Accordion Content -->
                     <div
                         class="shop_description product-collapse collapse container"
                         id="tab_description-coll"
@@ -249,7 +230,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- End Accordion Content -->
                 </div>
 
                 <div
@@ -257,14 +237,11 @@
                     id="tab_additional_information"
                     role="tabpanel"
                 >
-                    <!-- Accordion Title -->
                     <h6
                         class="product-collapse-title"
                         data-bs-toggle="collapse"
                         data-bs-target="#tab_additional_information-coll"
                     >{{ theme_option('product-bonus-title') }}</h6>
-                    <!-- End Accordion Title -->
-                    <!-- Accordion Content -->
                     <div
                         class="container product-collapse collapse"
                         id="tab_additional_information-coll"
@@ -273,7 +250,6 @@
                         {!! theme_option('product-bonus') !!}
 
                     </div>
-                    <!-- End Accordion Content -->
                 </div>
 
                 @if (EcommerceHelper::isReviewEnabled())
@@ -282,7 +258,6 @@
                         id="tab_reviews"
                         role="tabpanel"
                     >
-                        <!-- Accordion Title -->
                         <h6
                             class="product-collapse-title"
                             data-bs-toggle="collapse"
@@ -298,23 +273,18 @@
                     id="tab_more_products"
                     role="tabpanel"
                 >
-                    <!-- Accordion Content -->
-
                     <div class="row">
-                        <!-- Product Carousel -->
                         @php
                             $crossSaleProducts = get_cross_sale_products($product);
                         @endphp
 
-                        @if (!empty($crossSaleProducts))
+                        @if ($crossSaleProducts->isNotEmpty())
 
                             <div class="container product-carousel">
                                 <div
-                                    class="product-item-4 owl-carousel owl-theme nf-carousel-themé"
-                                    id="new-tranding"
+                                    class="product-item-4 owl-carousel owl-theme nf-carousel-theme"
+                                    id="new-trending"
                                 >
-                                    <!-- item.1 -->
-
                                     @foreach ($crossSaleProducts as $crossSaleProduct)
                                         @include('plugins/ecommerce::themes.includes.default-product', [
                                             'product' => $crossSaleProduct,
@@ -324,27 +294,21 @@
                             </div>
 
                         @endif
-                        <!-- End Product Carousel -->
                     </div>
-
-                    <!-- End Accordion Content -->
                 </div>
-
             </div>
         </div>
-        <!-- End Product Content Tab -->
 
-        <!-- Product Carousel -->
         @php
             $relatedProducts = get_related_products($product);
         @endphp
 
-        @if (!empty($relatedProducts))
+        @if ($relatedProducts->isNotEmpty())
             <div class="container product-carousel">
                 <h2 class="page-title">{{ __('Related products') }}</h2>
                 <div
                     class="product-item-4 owl-carousel owl-theme nf-carousel-theme1"
-                    id="new-tranding"
+                    id="new-trending"
                 >
                     @foreach ($relatedProducts as $related)
                         @include('plugins/ecommerce::themes.includes.default-product', [
@@ -356,7 +320,5 @@
             </div>
 
         @endif
-        <!-- End Product Carousel -->
     </section>
 </div>
-<!-- End Page Content Wrapper -->

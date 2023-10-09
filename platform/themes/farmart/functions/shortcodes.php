@@ -85,7 +85,7 @@ app()->booted(function () {
             $image = Html::image(image_placeholder($ads->image), $ads->name, ['class' => 'lazyload', 'data-src' => RvMedia::getImageUrl($ads->image)])->toHtml();
 
             if ($ads->url) {
-                $image = Html::link(route('public.ads-click', $ads->key), $image, array_merge($attributes, ['target' => '_blank']), null, false)
+                $image = Html::link(route('public.ads-click', $ads->key), $image, array_merge($attributes, $ads->open_in_new_tab ? ['target' => '_blank'] : []), null, false)
                     ->toHtml();
             } elseif ($attributes) {
                 $image = Html::tag('div', $image, $attributes)->toHtml();

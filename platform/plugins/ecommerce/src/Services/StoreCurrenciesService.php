@@ -17,8 +17,8 @@ class StoreCurrenciesService
                 continue;
             }
 
-            $item['title'] = substr(strtoupper($item['title']), 0, 3);
-            $item['decimals'] = (int)$item['decimals'];
+            $item['title'] = mb_substr(strtoupper($item['title']), 0, 3);
+            $item['symbol'] = mb_substr($item['symbol'], 0, 10);
             $item['decimals'] = $item['decimals'] < 10 ? $item['decimals'] : 2;
 
             if (count($currencies) == 1) {

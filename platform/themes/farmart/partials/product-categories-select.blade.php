@@ -1,8 +1,8 @@
 @foreach ($categories as $category)
-    <option value="{{ $category['id'] }}">{!! $indent !!}{{ $category['name'] }}</option>
-    @if (isset($category['active_children'][0]))
+    <option value="{{ $category->id }}">{!! $indent !!}{{ $category->name }}</option>
+    @if ($category->activeChildren->first())
         {!! Theme::partial('product-categories-select', [
-            'categories' => $category['active_children'],
+            'categories' => $category->activeChildren,
             'indent' => $indent . '&nbsp;&nbsp;',
         ]) !!}
     @endif

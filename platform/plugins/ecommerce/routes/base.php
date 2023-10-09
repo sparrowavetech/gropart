@@ -69,7 +69,7 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
             'permission' => 'ecommerce.settings',
         ]);
 
-        Route::post('store-locators/edit/{id}', [
+        Route::post('store-locators/edit/{locator}', [
             'as' => 'ecommerce.store-locators.edit.post',
             'uses' => 'EcommerceController@postUpdateStoreLocator',
             'permission' => 'ecommerce.settings',
@@ -81,7 +81,7 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
             'permission' => 'ecommerce.settings',
         ]);
 
-        Route::post('store-locators/delete/{id}', [
+        Route::post('store-locators/delete/{locator}', [
             'as' => 'ecommerce.store-locators.destroy',
             'uses' => 'EcommerceController@postDeleteStoreLocator',
             'permission' => 'ecommerce.settings',
@@ -100,6 +100,12 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
             Route::get('search', [
                 'as' => 'search',
                 'uses' => 'ProductCategoryController@getSearch',
+                'permission' => 'product-categories.index',
+            ]);
+
+            Route::get('get-list-product-categories-for-select', [
+                'as' => 'get-list-product-categories-for-select',
+                'uses' => 'ProductCategoryController@getListForSelect',
                 'permission' => 'product-categories.index',
             ]);
         });

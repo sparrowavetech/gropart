@@ -69,41 +69,111 @@
                     <table class="table table-striped mb-3">
                         <thead>
                             <tr>
-                                <th>{{ trans('plugins/ecommerce::invoice.detail.description') }}</th>
-                                <th>{{ trans('plugins/ecommerce::invoice.detail.qty') }}</th>
-                                <th class="text-center">{{ trans('plugins/ecommerce::invoice.total_amount') }}</th>
+                                <th class="text-center" style="width: 20px">#</th>
+                                <th class="text-center">{{ __('Image') }}</th>
+                                <th>{{ __('Product') }}</th>
+                                <th class="text-center">{{ __('Amount') }}</th>
+                                <th
+                                    class="text-end"
+                                    style="width: 100px"
+                                >{{ __('Quantity') }}</th>
+                                <th class="price text-end">{{ __('Total') }}</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($invoice->items as $item)
+                            @foreach ($invoice->items as $invoiceItem)
+                                @php
+                                    $product = get_products([
+                                        'condition' => [
+                                            'ec_products.id' => $invoiceItem->reference_id,
+                                        ],
+                                        'take'   => 1,
+                                        'select' => [
+                                            'ec_products.id',
+                                            'ec_products.images',
+                                            'ec_products.name',
+                                            'ec_products.price',
+                                            'ec_products.sale_price',
+                                            'ec_products.sale_type',
+                                            'ec_products.start_date',
+                                            'ec_products.end_date',
+                                            'ec_products.sku',
+                                            'ec_products.is_variation',
+                                            'ec_products.status',
+                                            'ec_products.order',
+                                            'ec_products.created_at',
+                                        ],
+                                    ]);
+                                @endphp
                                 <tr>
-                                    <td style="width: 70%">
-                                        <p class="mb-0">{{ $item->name }}</p>
-                                        @if ($item->description)
-                                            <small>{{ $item->description }}</small>
+                                    <td class="text-center" style="width: 20px">{{ $loop->iteration }}</td>
+                                    <td class="text-center">
+                                        <img
+                                            src="{{ RvMedia::getImageUrl($invoiceItem->image, 'thumb', false, RvMedia::getDefaultImage()) }}"
+                                            alt="{{ $invoiceItem->name }}"
+                                            width="50"
+                                        >
+                                    </td>
+                                    <td>
+                                        @if($product && $product->original_product?->url)
+                                            <a href="{{ $product->original_product->url }}">{!! BaseHelper::clean($invoiceItem->name) !!}</a>
+                                        @else
+                                            {!! BaseHelper::clean($invoiceItem->name) !!}
+                                        @endif
+                                        @if ($sku = Arr::get($invoiceItem->options, 'sku'))
+                                            ({{ $sku }})
+                                        @endif
+
+                                        @if ($attributes = Arr::get($invoiceItem->options, 'attributes'))
+                                            <p class="mb-0">
+                                                <small>{{ $attributes }}</small>
+                                            </p>
+                                        @elseif ($product && $product->is_variation)
+                                            <p>
+                                                <small>
+                                                    @php $attributes = get_product_attributes($product->id) @endphp
+                                                    @if (!empty($attributes))
+                                                        @foreach ($attributes as $attribute)
+                                                            {{ $attribute->attribute_set_title }}: {{ $attribute->title }}@if (!$loop->last), @endif
+                                                        @endforeach
+                                                    @endif
+                                                </small>
+                                            </p>
+                                        @endif
+
+                                        @include(
+                                            'plugins/ecommerce::themes.includes.cart-item-options-extras',
+                                            ['options' => $invoiceItem->options]
+                                        )
+
+                                        @if (is_plugin_active('marketplace') && ($product = $invoiceItem->reference) && $product->original_product->store->id)
+                                            <p class="d-block mb-0 sold-by">
+                                                <small>{{ __('Sold by') }}: <a href="{{ $product->original_product->store->url }}" class="text-primary">{{ $product->original_product->store->name }}</a>
+                                                </small>
+                                            </p>
                                         @endif
                                     </td>
-                                    <td style="width: 5%">{{ $item->qty }}</td>
-                                    <td
-                                        class="text-center"
-                                        style="width: 25%"
-                                    >{{ format_price($item->amount) }}</td>
+                                    <td class="text-center">{{ $invoiceItem->amount_format }}</td>
+                                    <td class="text-center">{{ $invoiceItem->qty }}</td>
+                                    <td class="money text-end">
+                                        <strong>
+                                            {{ $invoiceItem->total_format }}
+                                        </strong>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
                         <tfoot>
                             <tr>
                                 <th
-                                    class="text-end"
-                                    colspan="2"
+                                    class="text-start"
                                 >{{ trans('plugins/ecommerce::invoice.detail.quantity') }}:
                                 </th>
                                 <th class="text-center">{{ number_format($invoice->items->sum('qty')) }}</th>
                             </tr>
                             <tr>
                                 <th
-                                    class="text-end"
-                                    colspan="2"
+                                    class="text-start"
                                 >{{ trans('plugins/ecommerce::invoice.detail.sub_total') }}:
                                 </th>
                                 <th class="text-center">{{ format_price($invoice->sub_total) }}</th>
@@ -111,32 +181,28 @@
                             @if ($invoice->tax_amount > 0)
                                 <tr>
                                     <th
-                                        class="text-end"
-                                        colspan="2"
+                                        class="text-start"
                                     >{{ trans('plugins/ecommerce::invoice.detail.tax') }}:</th>
                                     <th class="text-center">{{ format_price($invoice->tax_amount) }}</th>
                                 </tr>
                             @endif
                             <tr>
                                 <th
-                                    class="text-end"
-                                    colspan="2"
+                                    class="text-start"
                                 >{{ trans('plugins/ecommerce::invoice.detail.shipping_fee') }}:
                                 </th>
                                 <th class="text-center">{{ format_price($invoice->shipping_amount) }}</th>
                             </tr>
                             <tr>
                                 <th
-                                    class="text-end"
-                                    colspan="2"
+                                    class="text-start"
                                 >{{ trans('plugins/ecommerce::invoice.detail.discount') }}:
                                 </th>
                                 <th class="text-center">{{ format_price($invoice->discount_amount) }}</th>
                             </tr>
                             <tr>
                                 <th
-                                    class="text-end"
-                                    colspan="2"
+                                    class="text-start"
                                 >{{ trans('plugins/ecommerce::invoice.detail.grand_total') }}:
                                 </th>
                                 <th class="text-center">{{ format_price($invoice->amount) }}</th>

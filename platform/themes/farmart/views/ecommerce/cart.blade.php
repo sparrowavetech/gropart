@@ -249,7 +249,8 @@
                                             <span class="fw-bold">{{ __('Discount promotion') }}:</span>
                                         </span>
 
-                                        <span class="amount fw-bold">{{ format_price($promotionDiscountAmount) }}</span>
+                                        <span
+                                            class="amount fw-bold">{{ format_price($promotionDiscountAmount) }}</span>
                                     </div>
                                 @endif
                                 <div class="order-total d-flex justify-content-between pb-3 mb-3">

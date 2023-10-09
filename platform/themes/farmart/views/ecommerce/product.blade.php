@@ -38,7 +38,7 @@
 
                         @if (is_plugin_active('marketplace') && $product->store_id)
                             <div class="product-meta-sold-by my-2">
-                                <span class="d-inline-block">{{ __('Sold By') }}: </span>
+                                <span class="d-inline-block me-1">{{ __('Sold By') }}: </span>
                                 <a href="{{ $product->store->url }}">
                                     {{ $product->store->name }}
                                 </a>
@@ -107,28 +107,22 @@
                             ],
                         ) !!}
                         <div class="meta-sku @if (!$product->sku) d-none @endif">
-                            <span class="meta-label d-inline-block">{{ __('SKU') }}:</span>
+                            <span class="meta-label d-inline-block me-1">{{ __('SKU') }}:</span>
                             <span class="meta-value">{{ $product->sku }}</span>
                         </div>
                         @if ($product->categories->count())
                             <div class="meta-categories">
-                                <span class="meta-label d-inline-block">{{ __('Categories') }}: </span>
+                                <span class="meta-label d-inline-block me-1">{{ __('Categories') }}: </span>
                                 @foreach ($product->categories as $category)
-                                    <a href="{{ $category->url }}">{{ $category->name }}</a>
-                                    @if (!$loop->last)
-                                        ,
-                                    @endif
+                                    <a href="{{ $category->url }}">{{ $category->name }}</a>@if (!$loop->last),@endif
                                 @endforeach
                             </div>
                         @endif
                         @if ($product->tags->count())
                             <div class="meta-categories">
-                                <span class="meta-label d-inline-block">{{ __('Tags') }}: </span>
+                                <span class="meta-label d-inline-block me-1">{{ __('Tags') }}: </span>
                                 @foreach ($product->tags as $tag)
-                                    <a href="{{ $tag->url }}">{{ $tag->name }}</a>
-                                    @if (!$loop->last)
-                                        ,
-                                    @endif
+                                    <a href="{{ $tag->url }}">{{ $tag->name }}</a>@if (!$loop->last),@endif
                                 @endforeach
                             </div>
                         @endif

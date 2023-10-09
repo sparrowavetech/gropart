@@ -48,4 +48,14 @@ class InvoiceItem extends BaseModel
     {
         return $this->morphTo();
     }
+
+    public function getAmountFormatAttribute(): string
+    {
+        return format_price($this->price);
+    }
+
+    public function getTotalFormatAttribute(): string
+    {
+        return format_price($this->price * $this->qty);
+    }
 }

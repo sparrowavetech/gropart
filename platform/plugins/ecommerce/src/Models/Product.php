@@ -26,6 +26,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 /**
  * @method notOutOfStock()
@@ -688,5 +689,34 @@ class Product extends BaseModel
     public function isOnSale(): bool
     {
         return $this->front_sale_price !== $this->price;
+    }
+
+    public function generateSku(): string|null
+    {
+        if (! get_ecommerce_setting('auto_generate_product_sku', true)) {
+            return null;
+        }
+
+        if (! $setting = get_ecommerce_setting('product_sku_format', null)) {
+            return null;
+        }
+
+        $isUppercase = str_contains($setting, '[%S]');
+
+        while (true) {
+            $random = Str::random(5);
+
+            $sku = str_replace(
+                ['[%s]', '[%S]'],
+                $isUppercase ? strtoupper($random) : $random,
+                $setting
+            );
+
+            if (Product::query()->where('sku', $sku)->exists()) {
+                continue;
+            }
+
+            return $sku;
+        }
     }
 }

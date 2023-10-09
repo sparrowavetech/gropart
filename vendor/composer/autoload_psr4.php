@@ -13,6 +13,7 @@ return array(
     'WpOrg\\Requests\\' => array($vendorDir . '/rmccue/requests/src'),
     'Wikimedia\\Composer\\Merge\\V2\\' => array($vendorDir . '/wikimedia/composer-merge-plugin/src'),
     'Webmozart\\Assert\\' => array($vendorDir . '/webmozart/assert/src'),
+    'VigStudio\\VigAI\\' => array($baseDir . '/platform/plugins/vig-ai/src'),
     'Unicodeveloper\\Paystack\\' => array($vendorDir . '/unicodeveloper/laravel-paystack/src'),
     'Twig\\' => array($vendorDir . '/twig/twig/src'),
     'TijsVerkoyen\\CssToInlineStyles\\' => array($vendorDir . '/tijsverkoyen/css-to-inline-styles/src'),
@@ -181,6 +182,7 @@ return array(
     'Botble\\ACL\\' => array($vendorDir . '/botble/platform/acl/src'),
     'Barryvdh\\DomPDF\\' => array($vendorDir . '/barryvdh/laravel-dompdf/src'),
     'Aws\\' => array($vendorDir . '/aws/aws-sdk-php/src'),
+    'ArchiElite\\TwoFactorAuthentication\\' => array($baseDir . '/platform/plugins/2fa/src'),
     'ArPHP\\I18N\\' => array($vendorDir . '/khaled.alshamaa/ar-php/src'),
     'App\\' => array($baseDir . '/app'),
 );

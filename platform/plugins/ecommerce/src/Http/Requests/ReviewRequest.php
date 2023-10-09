@@ -10,11 +10,11 @@ class ReviewRequest extends Request
     public function rules(): array
     {
         return [
-            'product_id' => 'required',
+            'product_id' => 'required|exists:ec_products,id',
             'star' => 'required|numeric|min:1|max:5',
-            'comment' => 'required|max:1000',
-            'images.*' => 'image|mimes:jpg,jpeg,png|max:' . EcommerceHelper::reviewMaxFileSize(true),
+            'comment' => 'required|string|max:5000',
             'images' => 'array|max:' . EcommerceHelper::reviewMaxFileNumber(),
+            'images.*' => 'image|mimes:jpg,jpeg,png|max:' . EcommerceHelper::reviewMaxFileSize(true),
         ];
     }
 }

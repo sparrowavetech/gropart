@@ -124,7 +124,8 @@ class ReviewTable extends TableAbstract
             LinkableColumn::make('comment')
                 ->title(trans('plugins/ecommerce::review.comment'))
                 ->route('reviews.show')
-                ->alignLeft(),
+                ->alignLeft()
+                ->limit(70),
             Column::formatted('images')
                 ->title(trans('plugins/ecommerce::review.images'))
                 ->alignLeft()

@@ -243,17 +243,17 @@
     <tbody>
     {% for item in invoice.items %}
         <tr>
-            <td>{{ item.name }}</td>
+            <td>{{ item.name }} {% if item.options.sku %} ({{ item.options.sku }}) {% endif %}</td>
             <td>
                 {% if item.options %}
                     {% if item.options.attributes %}
-                        <div>{{ 'plugins/ecommerce::invoice.detail.attributes'|trans }}: {{ item.options.attributes }}</div>
+                        <div><small>{{ 'plugins/ecommerce::invoice.detail.attributes'|trans }}: {{ item.options.attributes }}</small></div>
                     {% endif %}
-                    {% if item.options.product_options %}
-                        <div>{{ 'plugins/ecommerce::invoice.detail.product_options'|trans }}: {{ item.options.product_options }}</div>
+                    {% if item.options.options %}
+                        <div><small>{{ 'plugins/ecommerce::invoice.detail.product_options'|trans }}: {{ item.options.options }}</small></div>
                     {% endif %}
                     {% if item.options.license_code %}
-                        <div>{{ 'plugins/ecommerce::invoice.detail.license_code'|trans }}: {{ item.options.license_code }}</div>
+                        <div><small>{{ 'plugins/ecommerce::invoice.detail.license_code'|trans }}: {{ item.options.license_code }}</small></div>
                     {% endif %}
                 {% endif %}
             </td>

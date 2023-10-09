@@ -198,7 +198,7 @@
                                         name="categories[]"
                                     >
                                         <option value="0">{{ __('All Categories') }}</option>
-                                        {!! Theme::partial('product-categories-select', ['categories' => $categories->toArray(), 'indent' => null]) !!}
+                                        {!! Theme::partial('product-categories-select', ['categories' => $categories, 'indent' => null]) !!}
                                     </select>
                                 </div>
                                 <input

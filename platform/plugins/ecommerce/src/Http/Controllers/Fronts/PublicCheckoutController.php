@@ -53,7 +53,8 @@ class PublicCheckoutController
         HandleShippingFeeService $shippingFeeService,
         HandleApplyCouponService $applyCouponService,
         HandleRemoveCouponService $removeCouponService,
-        HandleApplyPromotionsService $applyPromotionsService
+        HandleApplyPromotionsService $applyPromotionsService,
+        HandleTaxService $handleTaxService
     ) {
         if (! EcommerceHelper::isCartEnabled()) {
             abort(404);
@@ -106,7 +107,7 @@ class PublicCheckoutController
                 ->setMessage(__('Your shopping cart has digital product(s), so you need to sign in to continue!'));
         }
 
-        app(HandleTaxService::class)->execute($products, $sessionCheckoutData);
+        $handleTaxService->execute($products, $sessionCheckoutData);
 
         $sessionCheckoutData = $this->processOrderData($token, $sessionCheckoutData, $request);
 
@@ -191,6 +192,10 @@ class PublicCheckoutController
                             'shipping_option',
                             Arr::get($sessionCheckoutData, 'shipping_option', $defaultShippingOption)
                         );
+
+                        if (! $defaultShippingOption) {
+                            $defaultShippingOption = Arr::first(array_keys(Arr::first($shipping)));
+                        }
                     }
                 }
 
@@ -471,6 +476,10 @@ class PublicCheckoutController
             foreach (Cart::instance('cart')->content() as $cartItem) {
                 $product = Product::query()->find($cartItem->id);
 
+                if (! $product) {
+                    continue;
+                }
+
                 $data = [
                     'order_id' => $sessionData['created_order_id'],
                     'product_id' => $cartItem->id,
@@ -747,6 +756,10 @@ class PublicCheckoutController
         foreach (Cart::instance('cart')->content() as $cartItem) {
             $product = Product::query()->find($cartItem->id);
 
+            if (! $product) {
+                continue;
+            }
+
             $data = [
                 'order_id' => $order->getKey(),
                 'product_id' => $cartItem->id,
@@ -983,6 +996,7 @@ class PublicCheckoutController
             $request->merge(['qty' => $orderProduct->qty]);
 
             $product = Product::query()->find($orderProduct->product_id);
+
             if ($product) {
                 OrderHelper::handleAddCart($product, $request);
             }

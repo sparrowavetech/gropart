@@ -22,6 +22,7 @@ class DiscountTargetEnum extends Enum
     public const PRODUCT_VARIANT = 'product-variant';
     public const PRODUCT_COLLECTIONS = 'group-products';
     public const SPECIFIC_PRODUCT = 'specific-product';
+    public const PRODUCT_CATEGORIES = 'products-by-category';
 
     public static $langPath = 'plugins/ecommerce::discount.enums.targets';
 }

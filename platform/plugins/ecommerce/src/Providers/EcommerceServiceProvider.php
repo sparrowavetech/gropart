@@ -509,9 +509,9 @@ class EcommerceServiceProvider extends ServiceProvider
                         foreach ($options as $item) {
                             $option = Option::query()->find($item['id']);
 
-                            $newRequest->merge(['name' => $item['name']]);
-
                             if ($option) {
+                                $newRequest->merge(['name' => $item['name']]);
+
                                 LanguageAdvancedManager::save($option, $newRequest);
                             }
 
@@ -523,17 +523,17 @@ class EcommerceServiceProvider extends ServiceProvider
                             ]);
 
                             foreach ($item['values'] as $value) {
-                                if (! $value['id']) {
+                                if (! isset($value['id']) || ! isset($value['option_value'])) {
                                     continue;
                                 }
 
                                 $optionValue = OptionValue::query()->find($value['id']);
 
-                                $newRequest->merge([
-                                    'option_value' => $value['option_value'],
-                                ]);
-
                                 if ($optionValue) {
+                                    $newRequest->merge([
+                                        'option_value' => $value['option_value'],
+                                    ]);
+
                                     LanguageAdvancedManager::save($optionValue, $newRequest);
                                 }
                             }
@@ -589,17 +589,17 @@ class EcommerceServiceProvider extends ServiceProvider
                         ]);
 
                         foreach ($options as $value) {
-                            if (! $value['id']) {
+                            if (! isset($value['id']) || ! isset($value['option_value'])) {
                                 continue;
                             }
 
                             $optionValue = GlobalOptionValue::query()->find($value['id']);
 
-                            $newRequest->merge([
-                                'option_value' => $value['option_value'],
-                            ]);
-
                             if ($optionValue) {
+                                $newRequest->merge([
+                                    'option_value' => $value['option_value'],
+                                ]);
+
                                 LanguageAdvancedManager::save($optionValue, $newRequest);
                             }
                         }

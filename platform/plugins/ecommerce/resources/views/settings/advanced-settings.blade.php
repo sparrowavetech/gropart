@@ -345,6 +345,28 @@
                 :label="trans('plugins/ecommerce::ecommerce.setting.is_enabled_product_options')"
                 :value="EcommerceHelper::isEnabledProductOptions()"
             />
+
+            <x-core-setting::on-off
+                class="trigger-input-option"
+                name="auto_generate_product_sku"
+                data-setting-container=".auto-generate-sku-container"
+                :label="trans('plugins/ecommerce::ecommerce.setting.auto_generate_product_sku')"
+                :value="get_ecommerce_setting('auto_generate_product_sku', true)"
+            />
+
+            <div @class([
+                'auto-generate-sku-container mb-4 border rounded-top rounded-bottom p-3 bg-light',
+                'd-none' => !get_ecommerce_setting('auto_generate_product_sku', true),
+            ])>
+                <x-core-setting::form-group>
+                    <x-core-setting::text-input
+                        :label="trans('plugins/ecommerce::ecommerce.setting.product_sku_format')"
+                        name="product_sku_format"
+                        :helper-text="trans('plugins/ecommerce::ecommerce.setting.product_sku_format_help')"
+                        :value="get_ecommerce_setting('product_sku_format', null)"
+                    />
+                </x-core-setting::form-group>
+            </div>
         </x-core-setting::section>
 
         <x-core-setting::section
@@ -490,13 +512,13 @@
                     <div class="multi-choices-widget list-item-checkbox">
                         <ul>
                             @foreach ([
-            'name' => trans('plugins/ecommerce::products.form.name'),
-            'sku' => trans('plugins/ecommerce::products.sku'),
-            'variation_sku' => trans('plugins/ecommerce::products.variation_sku'),
-            'description' => trans('plugins/ecommerce::products.form.description'),
-            'brand' => trans('plugins/ecommerce::products.form.brand'),
-            'tag' => trans('plugins/ecommerce::products.form.tags'),
-        ] as $key => $item)
+                                'name' => trans('plugins/ecommerce::products.form.name'),
+                                'sku' => trans('plugins/ecommerce::products.sku'),
+                                'variation_sku' => trans('plugins/ecommerce::products.variation_sku'),
+                                'description' => trans('plugins/ecommerce::products.form.description'),
+                                'brand' => trans('plugins/ecommerce::products.form.brand'),
+                                'tag' => trans('plugins/ecommerce::products.form.tags'),
+                            ] as $key => $item)
                                 <li>
                                     <input
                                         class="styled"

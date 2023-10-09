@@ -35,9 +35,7 @@
                                     </div>
                                     <div class="pd-all-20 p-none-t p-b10 border-bottom">
                                         @foreach ($shippingItem->rules as $rule)
-                                            @include(
-                                                'plugins/ecommerce::shipping.rules.item',
-                                                compact('rule'))
+                                            @include('plugins/ecommerce::shipping.rules.item', compact('rule'))
                                         @endforeach
                                     </div>
                                 </div>

@@ -40,15 +40,17 @@ class StoreLocatorManagement {
         let createOrUpdateStoreLocator = (_self) => {
             _self.addClass('button-loading')
 
+            const $form = _self.closest('.modal-content').find('form')
+
             $.ajax({
                 type: 'POST',
                 cache: false,
-                url: _self.closest('.modal-content').find('form').prop('action'),
-                data: _self.closest('.modal-content').find('form').serialize(),
+                url: $form.prop('action'),
+                data: $form.serialize(),
                 success: (res) => {
                     if (!res.error) {
                         Botble.showSuccess(res.message)
-                        $('.store-locator-wrap').load(window.location.href + ' .store-locator-wrap > *')
+                        $('.store-locator-table').load(window.location.href + ' .store-locator-table > *')
                         _self.removeClass('button-loading')
                         _self.closest('.modal.fade').modal('hide')
                     } else {
@@ -93,7 +95,7 @@ class StoreLocatorManagement {
                 success: (res) => {
                     if (!res.error) {
                         Botble.showSuccess(res.message)
-                        $('.store-locator-wrap').load(window.location.href + ' .store-locator-wrap > *')
+                        $('.store-locator-table').load(window.location.href + ' .store-locator-table > *')
                         _self.removeClass('button-loading')
                         _self.closest('.modal.fade').modal('hide')
                     } else {
@@ -113,17 +115,19 @@ class StoreLocatorManagement {
 
             let _self = $(event.currentTarget)
 
+            const $form = _self.closest('.modal-content').find('form')
+
             _self.addClass('button-loading')
 
             $.ajax({
                 type: 'POST',
                 cache: false,
-                url: _self.closest('.modal-content').find('form').prop('action'),
-                data: _self.closest('.modal-content').find('form').serialize(),
+                url: $form.prop('action'),
+                data: $form.serialize(),
                 success: (res) => {
                     if (!res.error) {
                         Botble.showSuccess(res.message)
-                        $('.store-locator-wrap').load(window.location.href + ' .store-locator-wrap > *')
+                        $('.store-locator-table').load(window.location.href + ' .store-locator-table > *')
                         _self.removeClass('button-loading')
                         _self.closest('.modal.fade').modal('hide')
                     } else {

@@ -15,7 +15,6 @@ use Botble\Ecommerce\Forms\ProductCategoryForm;
 use Botble\Ecommerce\Http\Requests\ProductCategoryRequest;
 use Botble\Ecommerce\Http\Resources\ProductCategoryResource;
 use Botble\Ecommerce\Models\ProductCategory;
-use Botble\Ecommerce\Repositories\Interfaces\ProductCategoryInterface;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -25,12 +24,17 @@ class ProductCategoryController extends BaseController
     public function index(
         FormBuilder $formBuilder,
         Request $request,
-        BaseHttpResponse $response,
-        ProductCategoryInterface $productCategoryRepository
+        BaseHttpResponse $response
     ) {
         PageTitle::setTitle(trans('plugins/ecommerce::product-categories.name'));
 
-        $categories = $productCategoryRepository->getProductCategories([], ['slugable'], ['products']);
+        $categories = ProductCategory::query()
+            ->wherePublished()
+            ->orderByDesc('created_at')
+            ->orderBy('order')
+            ->with('slugable')
+            ->withCount('products')
+            ->get();
 
         if ($request->ajax()) {
             $data = view('core/base::forms.partials.tree-categories', $this->getOptions(compact('categories')))
@@ -68,7 +72,7 @@ class ProductCategoryController extends BaseController
         if ($request->ajax()) {
             $productCategory = ProductCategory::query()->findOrFail($productCategory->id);
 
-            if ($request->input('submit') == 'save') {
+            if ($response->isSaving()) {
                 $form = $this->getForm();
             } else {
                 $form = $this->getForm($productCategory);
@@ -110,7 +114,7 @@ class ProductCategoryController extends BaseController
         if ($request->ajax()) {
             $productCategory = ProductCategory::query()->findOrFail($id);
 
-            if ($request->input('submit') == 'save') {
+            if ($response->isSaving()) {
                 $form = $this->getForm();
             } else {
                 $form = $this->getForm($productCategory);
@@ -196,5 +200,14 @@ class ProductCategoryController extends BaseController
         $data = ProductCategoryResource::collection($categories);
 
         return $response->setData($data)->toApiResponse();
+    }
+
+    public function getListForSelect(BaseHttpResponse $response)
+    {
+        $productCategories = ProductCategory::query()
+            ->select(['id', 'name'])
+            ->get();
+
+        return $response->setData($productCategories);
     }
 }

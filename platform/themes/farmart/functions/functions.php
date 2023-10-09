@@ -2,10 +2,7 @@
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\EmailHandler;
-use Botble\Base\Facades\Form;
 use Botble\Base\Facades\MetaBox;
-use Botble\Base\Forms\FormAbstract;
-use Botble\Base\Forms\FormHelper;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Models\Store;
 use Botble\Media\Facades\RvMedia;
@@ -14,7 +11,6 @@ use Botble\SimpleSlider\Models\SimpleSliderItem;
 use Botble\SocialLogin\Facades\SocialService;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Support\Facades\Route;
-use Theme\Farmart\Fields\ThemeIconField;
 
 register_page_template([
     'default' => __('Default'),
@@ -160,20 +156,6 @@ app()->booted(function () {
         }
     }
 });
-
-Form::component('themeIcon', Theme::getThemeNamespace() . '::partials.forms.icons-field', [
-    'name',
-    'value' => null,
-    'attributes' => [],
-]);
-
-add_filter('form_custom_fields', function (FormAbstract $form, FormHelper $formHelper) {
-    if (! $formHelper->hasCustomField('themeIcon')) {
-        $form->addCustomField('themeIcon', ThemeIconField::class);
-    }
-
-    return $form;
-}, 29, 2);
 
 add_filter(BASE_FILTER_BEFORE_RENDER_FORM, function ($form, $data) {
     if (get_class($data) == SimpleSliderItem::class) {

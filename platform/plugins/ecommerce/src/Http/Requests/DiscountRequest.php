@@ -35,7 +35,14 @@ class DiscountRequest extends Request
             'can_use_with_promotion' => ['nullable', 'boolean'],
             'type' => ['required', Rule::in(DiscountTypeEnum::values())],
             'type_option' => ['required', Rule::in(DiscountTypeOptionEnum::values())],
-            'quantity' => ['required_if:is_unlimited,0', 'required_if:type,coupon', 'nullable', 'numeric', 'min:1'],
+            'quantity' => [
+                Rule::requiredIf(function () {
+                    return $this->input('type') === 'coupon' && ! $this->boolean('is_unlimited');
+                }),
+                'nullable',
+                'numeric',
+                'min:1',
+            ],
             'min_order_price' => ['nullable', 'numeric', 'min:0'],
             'product_quantity' => ['nullable', 'numeric', 'min:0'],
             'discount_on' => ['nullable', 'string', 'max:40'],

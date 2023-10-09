@@ -70,6 +70,7 @@ class Plugin extends PluginOperationAbstract
         Schema::dropIfExists('ec_discount_products');
         Schema::dropIfExists('ec_discount_customers');
         Schema::dropIfExists('ec_discount_product_collections');
+        Schema::dropIfExists('ec_discount_product_categories');
         Schema::dropIfExists('ec_flash_sales');
         Schema::dropIfExists('ec_flash_sale_products');
         Schema::dropIfExists('ec_products_translations');

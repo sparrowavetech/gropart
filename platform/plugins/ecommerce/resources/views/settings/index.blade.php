@@ -363,7 +363,7 @@
             :title="trans('plugins/ecommerce::ecommerce.setting.store_locator_title')"
             :description="trans('plugins/ecommerce::ecommerce.setting.store_locator_description')"
         >
-            <table class="table table-striped table-bordered table-header-color">
+            <table class="table table-striped table-bordered table-header-color store-locator-table">
                 <thead>
                     <tr>
                         <th>{{ trans('core/base::tables.name') }}</th>

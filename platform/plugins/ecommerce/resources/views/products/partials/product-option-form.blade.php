@@ -12,11 +12,11 @@
             $currentProductOption[$key]['values'][$valueKey]['option_value'] = $value->option_value;
         }
     }
-    
+
     if (!empty($oldOption)) {
         $currentProductOption = $oldOption;
     }
-    
+
     $isDefaultLanguage = !defined('LANGUAGE_ADVANCED_MODULE_SCREEN_NAME') || !request()->input('ref_lang') || request()->input('ref_lang') == Language::getDefaultLocaleCode();
 @endphp
 
@@ -97,18 +97,19 @@
         <table class="table table-bordered setting-option mt-3">
             <thead>
             <tr>
-                <th scope="col">__priceLabel__</th>
                 @if ($isDefaultLanguage)
+                    <th scope="col">__priceLabel__</th>
                     <th scope="col" colspan="2">__priceTypeLabel__</th>
                 @endif
             </tr>
             </thead>
             <tbody>
             <tr>
-                <td>
-                    <input type="number" name="options[__index__][values][0][affect_price]" class="form-control option-label" value="__affectPrice__" placeholder="__affectPriceLabel__"/>
-                </td>
+                <input type="hidden" name="options[__index__][values][0][id]" value="__id__" />
                 @if ($isDefaultLanguage)
+                    <td>
+                        <input type="number" name="options[__index__][values][0][affect_price]" class="form-control option-label" value="__affectPrice__" placeholder="__affectPriceLabel__"/>
+                    </td>
                     <td>
                         <select class="form-select" name="options[__index__][values][0][affect_type]">
                             <option value="0" __selectedFixed__> __fixedLang__</option>

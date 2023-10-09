@@ -270,7 +270,7 @@
                 <div class="ps-block__left"><span><i class="icon-database"></i></span></div>
                 <div class="ps-block__content">
                     <p>{{ __('Products') }}</p>
-                    <h4>{{ $data['products']->count() }}</h4>
+                    <h4>{{ $totalProducts }}</h4>
                 </div>
             </div>
         </div>

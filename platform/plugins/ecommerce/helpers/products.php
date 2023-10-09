@@ -307,7 +307,7 @@ if (! function_exists('get_up_sale_products')) {
 }
 
 if (! function_exists('get_cart_cross_sale_products')) {
-    function get_cart_cross_sale_products(array $productIds, int $limit = 4, array $with = []): EloquentCollection
+    function get_cart_cross_sale_products(array $productIds, int $limit = 4, array $with = []): Collection|LengthAwarePaginator|Product|null
     {
         $crossSaleIds = DB::table('ec_product_cross_sale_relations')
             ->whereIn('from_product_id', $productIds)

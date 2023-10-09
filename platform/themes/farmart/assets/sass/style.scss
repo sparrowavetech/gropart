@@ -1176,7 +1176,7 @@ body.show-admin-bar {
     color: #fff;
     background-color: #222;
     border-radius: 3px;
-    z-index: 10000;
+    z-index: 1000;
     transition: ease 0.3s;
     @include hidden;
 
@@ -1610,6 +1610,18 @@ body.show-admin-bar {
                     left: auto;
                     right: 10px;
                 }
+            }
+        }
+    }
+}
+
+.product-details {
+    .product-attributes {
+        .attribute-values {
+            margin-bottom: 10px;
+
+            .dropdown-swatch, label {
+                width: 100%;
             }
         }
     }

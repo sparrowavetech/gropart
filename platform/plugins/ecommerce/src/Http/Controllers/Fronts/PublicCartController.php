@@ -14,7 +14,6 @@ use Botble\Ecommerce\Services\HandleApplyPromotionsService;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Theme\Facades\Theme;
 use Exception;
-use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
 
@@ -145,7 +144,6 @@ class PublicCartController extends Controller
     }
 
     public function getView(
-        Request $request,
         HandleApplyPromotionsService $applyPromotionsService,
         HandleApplyCouponService $handleApplyCouponService
     ) {
@@ -185,6 +183,10 @@ class PublicCartController extends Controller
             $parentIds = $products->pluck('original_product.id')->toArray();
 
             $crossSellProducts = get_cart_cross_sale_products($parentIds, (int)theme_option('number_of_cross_sale_product', 4));
+        }
+
+        if (! $crossSellProducts) {
+            $crossSellProducts = collect();
         }
 
         SeoHelper::setTitle(__('Shopping Cart'));

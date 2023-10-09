@@ -54,6 +54,16 @@ class Discount extends BaseModel
         );
     }
 
+    public function productCategories(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            ProductCategory::class,
+            'ec_discount_product_categories',
+            'discount_id',
+            'product_category_id'
+        );
+    }
+
     public function customers(): BelongsToMany
     {
         return $this->belongsToMany(Customer::class, 'ec_discount_customers', 'discount_id', 'customer_id');
@@ -80,6 +90,7 @@ class Discount extends BaseModel
     {
         static::deleting(function (Discount $discount) {
             $discount->productCollections()->detach();
+            $discount->productCategories()->detach();
             $discount->customers()->detach();
             $discount->products()->detach();
             $discount->usedByCustomers()->detach();

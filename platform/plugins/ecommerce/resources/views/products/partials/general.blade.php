@@ -10,7 +10,7 @@
     <div class="col-md-4">
         <div class="form-group mb-3 @if ($errors->has('sku')) has-error @endif">
             <label class="text-title-field">{{ trans('plugins/ecommerce::products.sku') }}</label>
-            {!! Form::text('sku', old('sku', $product ? $product->sku : null), ['class' => 'next-input', 'id' => 'sku']) !!}
+            {!! Form::text('sku', old('sku', $product ? $product->sku : (new \Botble\Ecommerce\Models\Product())->generateSku()), ['class' => 'next-input', 'id' => 'sku']) !!}
         </div>
         @if (($isVariation && !$product) || ($product && $product->is_variation && !$product->sku))
             <div class="form-group mb-3">
@@ -76,6 +76,30 @@
             </div>
         </div>
     </div>
+    <div class="col-md-6 scheduled-time @if (old('sale_type', $product ? $product->sale_type : $originalProduct->sale_type ?? 0) == 0) hidden @endif">
+        <div class="form-group mb-3">
+            <label class="text-title-field">{{ trans('plugins/ecommerce::products.form.date.start') }}</label>
+            <input
+                class="next-input form-date-time"
+                name="start_date"
+                type="text"
+                value="{{ old('start_date', $product ? $product->start_date : $originalProduct->start_date ?? null) }}"
+                placeholder="{{ config('core.base.general.date_format.date_time') }}"
+            >
+        </div>
+    </div>
+    <div class="col-md-6 scheduled-time @if (old('sale_type', $product ? $product->sale_type : $originalProduct->sale_type ?? 0) == 0) hidden @endif">
+        <div class="form-group mb-3">
+            <label class="text-title-field">{{ trans('plugins/ecommerce::products.form.date.end') }}</label>
+            <input
+                class="next-input form-date-time"
+                name="end_date"
+                type="text"
+                value="{{ old('end_date', $product ? $product->end_date : $originalProduct->end_date ?? null) }}"
+                placeholder="{{ config('core.base.general.date_format.date_time') }}"
+            >
+        </div>
+    </div>
     <div class="row">
         <div class="col-md-6">
             <div class="form-group mb-3">
@@ -114,28 +138,6 @@
                     >
                 </div>
             </div>
-        </div>
-    </div>
-    <div class="col-md-6 scheduled-time @if (old('sale_type', $product ? $product->sale_type : $originalProduct->sale_type ?? 0) == 0) hidden @endif">
-        <div class="form-group mb-3">
-            <label class="text-title-field">{{ trans('plugins/ecommerce::products.form.date.start') }}</label>
-            <input
-                class="next-input form-date-time"
-                name="start_date"
-                type="text"
-                value="{{ old('start_date', $product ? $product->start_date : $originalProduct->start_date ?? null) }}"
-            >
-        </div>
-    </div>
-    <div class="col-md-6 scheduled-time @if (old('sale_type', $product ? $product->sale_type : $originalProduct->sale_type ?? 0) == 0) hidden @endif">
-        <div class="form-group mb-3">
-            <label class="text-title-field">{{ trans('plugins/ecommerce::products.form.date.end') }}</label>
-            <input
-                class="next-input form-date-time"
-                name="end_date"
-                type="text"
-                value="{{ old('end_date', $product ? $product->end_date : $originalProduct->end_date ?? null) }}"
-            >
         </div>
     </div>
 </div>

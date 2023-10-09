@@ -69,8 +69,8 @@ class ProductCollectionController extends BaseController
         $productCollection->fill($request->input());
         $productCollection->save();
 
-        if ($productIds = $request->input('collection_products', [])) {
-            $productIds = explode(',', $productIds);
+        if ($productIds = $request->input('collection_products')) {
+            $productIds = array_filter(explode(',', $productIds));
         }
 
         $productCollection->products()->sync($productIds);

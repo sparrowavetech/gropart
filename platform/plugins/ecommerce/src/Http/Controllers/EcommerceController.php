@@ -221,16 +221,14 @@ class EcommerceController extends BaseController
     }
 
     public function postUpdateStoreLocator(
-        int|string $id,
+        StoreLocator $locator,
         StoreLocatorRequest $request,
         BaseHttpResponse $response,
         SettingStore $settingStore
     ) {
-        $request->merge([
-            'is_shipping_location' => $request->has('is_shipping_location'),
-        ]);
-
-        $locator = StoreLocator::query()->firstOrCreate($request->input(), compact('id'));
+        $locator->fill($request->input());
+        $locator->is_shipping_location = $request->has('is_shipping_location');
+        $locator->save();
 
         if ($locator->is_primary) {
             $prefix = EcommerceHelper::getSettingPrefix();
@@ -261,11 +259,9 @@ class EcommerceController extends BaseController
         return $response->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function postDeleteStoreLocator(int|string $id, BaseHttpResponse $response)
+    public function postDeleteStoreLocator(StoreLocator $locator, BaseHttpResponse $response)
     {
-        $storeLocator = StoreLocator::query()->findOrFail($id);
-
-        $storeLocator->delete();
+        $locator->delete();
 
         return $response->setMessage(trans('core/base::notices.delete_success_message'));
     }

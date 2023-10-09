@@ -9,7 +9,7 @@
             position: fixed;
             top: 0;
             width: 100%;
-            z-index: 1000;
+            z-index: 1001;
             border-bottom: none;
             padding: 0;
             -webkit-animation: fadeInDown .6s both;
@@ -598,7 +598,9 @@
 
 @media (max-width: 1199px) {
     .header {
-        .header-middle {
+        .header-middle, .header-middle.header-content-sticky {
+            border-bottom: none;
+
             .header-wrapper {
                 padding: 0;
 

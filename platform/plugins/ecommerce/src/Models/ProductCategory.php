@@ -105,6 +105,7 @@ class ProductCategory extends BaseModel
         return $this
             ->children()
             ->wherePublished()
+            ->orderBy('order')
             ->with(['slugable', 'activeChildren']);
     }
 

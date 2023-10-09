@@ -126,9 +126,7 @@
                                 </svg>
                             </svg>
                         </div>
-                        <span class="lb-dis">
-                            <span>{{ value_label }}</span></span
-                        >
+                        <span class="lb-dis">{{ value_label }}</span>
                         <div class="inline mb5">
                             <div class="next-input--stylized">
                                 <input
@@ -142,9 +140,9 @@
                                 <span class="next-input-add-on next-input__add-on--after">{{ discountUnit }}</span>
                             </div>
                         </div>
-                        <span class="lb-dis" v-show="type_option !== 'shipping' && type_option">
-                            {{ __('discount.apply_for') }}</span
-                        >
+                        <span class="lb-dis" v-show="type_option !== 'shipping' && type_option">{{
+                            __('discount.apply_for')
+                        }}</span>
                         <div v-show="type_option !== 'shipping' && type_option">
                             <div
                                 class="ui-select-wrapper inline_block mb5 min-width-150-px"
@@ -159,6 +157,7 @@
                                         {{ __('discount.order_amount_from') }}
                                     </option>
                                     <option value="group-products">{{ __('discount.product_collection') }}</option>
+                                    <option value="products-by-category">{{ __('discount.product_category') }}</option>
                                     <option value="specific-product">{{ __('discount.product') }}</option>
                                     <option value="customer" v-if="type_option !== 'same-price'">
                                         {{ __('discount.customer') }}
@@ -194,6 +193,28 @@
                                             :value="product_collection.id"
                                         >
                                             {{ product_collection.name }}
+                                        </option>
+                                    </select>
+                                    <svg class="svg-next-icon svg-next-icon-size-16">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                            <path d="M10 16l-4-4h8l-4 4zm0-12L6 8h8l-4-4z"></path>
+                                        </svg>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div
+                                class="inline mb5"
+                                id="div-select-collection"
+                                v-if="target === 'products-by-category' && type_option !== 'shipping'"
+                                style="margin-right: 10px"
+                            >
+                                <div class="ui-select-wrapper" style="min-width: 200px">
+                                    <select name="product_categories" class="ui-select" v-model="product_category_id">
+                                        <option
+                                            v-for="productCategory in product_categories"
+                                            :value="productCategory.id"
+                                        >
+                                            {{ productCategory.name }}
                                         </option>
                                     </select>
                                     <svg class="svg-next-icon svg-next-icon-size-16">
@@ -591,6 +612,7 @@
                                 v-if="
                                     !is_promotion &&
                                     (target === 'group-products' ||
+                                        target === 'products-by-category' ||
                                         target === 'specific-product' ||
                                         target === 'product-variant') &&
                                     type_option === 'amount'
@@ -946,6 +968,8 @@ export default {
             hidden_product_search_panel: true,
             product_collection_id: null,
             product_collections: [],
+            product_category_id: null,
+            product_categories: [],
             discount_on: 'per-order',
             min_order_price: 0,
             product_quantity: 1,
@@ -1032,6 +1056,12 @@ export default {
                 await this.getListProductCollections()
 
                 this.product_collection_id = this.discount.product_collections[0].id
+            }
+
+            if (this.discount.product_categories.length) {
+                await this.getListProductCategories()
+
+                this.product_category_id = this.discount.product_categories[0].id
             }
 
             this.discount.product_variants.forEach((variant) => {
@@ -1141,6 +1171,9 @@ export default {
                 case 'group-products':
                     context.getListProductCollections()
                     break
+                case 'products-by-category':
+                    context.getListProductCategories()
+                    break
                 case 'specific-product':
                     context.selected_variant_ids = []
                     context.selected_customers = []
@@ -1175,6 +1208,25 @@ export default {
                     .catch((res) => {
                         Botble.handleError(res.response.data)
                     })
+            }
+        },
+        getListProductCategories: async function () {
+            let context = this
+
+            if (context.product_categories.length < 1) {
+                context.loading = true
+
+                await $httpClient
+                    .make()
+                    .get(route('product-categories.get-list-product-categories-for-select'))
+                    .then(({ data }) => {
+                        context.product_categories = data.data
+                        if (data.data.length > 0) {
+                            context.product_category_id = data.data[0].id
+                        }
+                    })
+                    .catch(({ response }) => Botble.handleError(response.data))
+                    .finally(() => (context.loading = false))
             }
         },
         loadListCustomersForSearch: function (page = 1, force = false) {

@@ -142,38 +142,36 @@
 
         {!! apply_filters('ecommerce_checkout_address_form_inside', null) !!}
 
-        @if (!in_array('country', EcommerceHelper::getHiddenFieldsAtCheckout()))
-            @if (EcommerceHelper::isUsingInMultipleCountries())
-                <div class="form-group mb-3 @error('address.country') has-error @enderror">
-                    <div class="select--arrow form-input-wrapper">
-                        <select
-                            class="form-control"
-                            id="address_country"
-                            name="address[country]"
-                            data-form-parent=".customer-address-payment-form"
-                            data-type="country"
-                            required
-                        >
-                            @foreach (EcommerceHelper::getAvailableCountries() as $countryCode => $countryName)
-                                <option
-                                    value="{{ $countryCode }}"
-                                    @if (old('address.country', Arr::get($sessionCheckoutData, 'country')) == $countryCode) selected @endif
-                                >{{ $countryName }}</option>
-                            @endforeach
-                        </select>
-                        <i class="fas fa-angle-down"></i>
-                        <label for="address_country">{{ __('Country') }}</label>
-                    </div>
-                    {!! Form::error('address.country', $errors) !!}
+        @if (EcommerceHelper::isUsingInMultipleCountries() && !in_array('country', EcommerceHelper::getHiddenFieldsAtCheckout()))
+            <div class="form-group mb-3 @error('address.country') has-error @enderror">
+                <div class="select--arrow form-input-wrapper">
+                    <select
+                        class="form-control"
+                        id="address_country"
+                        name="address[country]"
+                        data-form-parent=".customer-address-payment-form"
+                        data-type="country"
+                        required
+                    >
+                        @foreach (EcommerceHelper::getAvailableCountries() as $countryCode => $countryName)
+                            <option
+                                value="{{ $countryCode }}"
+                                @if (old('address.country', Arr::get($sessionCheckoutData, 'country')) == $countryCode) selected @endif
+                            >{{ $countryName }}</option>
+                        @endforeach
+                    </select>
+                    <i class="fas fa-angle-down"></i>
+                    <label for="address_country">{{ __('Country') }}</label>
                 </div>
-            @else
-                <input
-                    id="address_country"
-                    name="address[country]"
-                    type="hidden"
-                    value="{{ EcommerceHelper::getFirstCountryId() }}"
-                >
-            @endif
+                {!! Form::error('address.country', $errors) !!}
+            </div>
+        @else
+            <input
+                id="address_country"
+                name="address[country]"
+                type="hidden"
+                value="{{ EcommerceHelper::getFirstCountryId() }}"
+            >
         @endif
 
         <div class="row">

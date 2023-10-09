@@ -56,17 +56,19 @@ class DiscountController extends BaseController
         $discount = Discount::query()->create($request->validated());
 
         if ($discount) {
-            $productCollections = $request->input('product_collections');
-            if ($productCollections) {
+            if ($productCollections = $request->input('product_collections')) {
                 if (! is_array($productCollections)) {
                     $productCollections = [$productCollections];
                     $discount->productCollections()->attach($productCollections);
                 }
             }
 
-            $products = $request->input('products');
+            if (($productCategories = $request->input('product_categories')) && ! is_array($productCategories)) {
+                $productCategories = [$productCategories];
+                $discount->productCategories()->attach($productCategories);
+            }
 
-            if ($products) {
+            if ($products = $request->input('products')) {
                 if (is_string($products) && Str::contains($products, ',')) {
                     $products = explode(',', $products);
                 }
@@ -88,8 +90,7 @@ class DiscountController extends BaseController
                 $discount->products()->attach(array_unique($products));
             }
 
-            $variants = $request->input('variants');
-            if ($variants) {
+            if ($variants = $request->input('variants')) {
                 if (is_string($variants) && Str::contains($variants, ',')) {
                     $variants = explode(',', $variants);
                 }
@@ -111,8 +112,7 @@ class DiscountController extends BaseController
                 $discount->products()->attach(array_unique($variants));
             }
 
-            $customers = $request->input('customers');
-            if ($customers) {
+            if ($customers = $request->input('customers')) {
                 if (is_string($customers) && Str::contains($customers, ',')) {
                     $customers = explode(',', $customers);
                 }
@@ -138,9 +138,8 @@ class DiscountController extends BaseController
             ->with([
                 'customers',
                 'productCollections',
-                'products' => function (BelongsToMany $query) {
-                    $query->where('is_variation', false);
-                },
+                'productCategories',
+                'products' => fn (BelongsToMany $query) => $query->where('is_variation', false),
                 'productVariants.variationInfo.variationItems.attribute',
             ])
             ->findOrFail($id);
@@ -189,6 +188,11 @@ class DiscountController extends BaseController
                 $productCollections = [$productCollections];
                 $discount->productCollections()->sync($productCollections);
             }
+        }
+
+        if (($productCategories = $request->input('product_categories')) && ! is_array($productCategories)) {
+            $productCategories = [$productCategories];
+            $discount->productCategories()->sync($productCategories);
         }
 
         if ($products = $request->input('products')) {
