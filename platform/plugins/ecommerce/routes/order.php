@@ -14,7 +14,7 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
                 'permission' => 'orders.create',
             ]);
 
-            Route::get('generate-invoice/{id}', [
+            Route::get('generate-invoice/{order}', [
                 'as' => 'generate-invoice',
                 'uses' => 'OrderController@getGenerateInvoice',
                 'permission' => 'orders.edit',
@@ -26,61 +26,61 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
                 'permission' => 'orders.edit',
             ]);
 
-            Route::post('send-order-confirmation-email/{id}', [
+            Route::post('send-order-confirmation-email/{order}', [
                 'as' => 'send-order-confirmation-email',
                 'uses' => 'OrderController@postResendOrderConfirmationEmail',
                 'permission' => 'orders.edit',
             ])->wherePrimaryKey();
 
-            Route::post('create-shipment/{id}', [
+            Route::post('create-shipment/{order}', [
                 'as' => 'create-shipment',
                 'uses' => 'OrderController@postCreateShipment',
                 'permission' => 'orders.edit',
             ])->wherePrimaryKey();
 
-            Route::post('cancel-shipment/{id}', [
+            Route::post('cancel-shipment/{shipment}', [
                 'as' => 'cancel-shipment',
                 'uses' => 'OrderController@postCancelShipment',
                 'permission' => 'orders.edit',
             ])->wherePrimaryKey();
 
-            Route::post('update-shipping-address/{id}', [
+            Route::post('update-shipping-address/{address}', [
                 'as' => 'update-shipping-address',
                 'uses' => 'OrderController@postUpdateShippingAddress',
                 'permission' => 'orders.edit',
             ])->wherePrimaryKey();
 
-            Route::post('update-tax-information/{id}', [
+            Route::post('update-tax-information/{taxInformation}', [
                 'as' => 'update-tax-information',
                 'uses' => 'OrderController@postUpdateTaxInformation',
                 'permission' => 'orders.edit',
             ])->wherePrimaryKey();
 
-            Route::post('cancel-order/{id}', [
+            Route::post('cancel-order/{order}', [
                 'as' => 'cancel',
                 'uses' => 'OrderController@postCancelOrder',
                 'permission' => 'orders.edit',
             ])->wherePrimaryKey();
 
-            Route::get('print-shipping-order/{id}', [
+            Route::get('print-shipping-order/{order}', [
                 'as' => 'print-shipping-order',
                 'uses' => 'OrderController@getPrintShippingOrder',
                 'permission' => 'orders.edit',
             ])->wherePrimaryKey();
 
-            Route::post('confirm-payment/{id}', [
+            Route::post('confirm-payment/{order}', [
                 'as' => 'confirm-payment',
                 'uses' => 'OrderController@postConfirmPayment',
                 'permission' => 'orders.edit',
             ])->wherePrimaryKey();
 
-            Route::get('get-shipment-form/{id}', [
+            Route::get('get-shipment-form/{order}', [
                 'as' => 'get-shipment-form',
                 'uses' => 'OrderController@getShipmentForm',
                 'permission' => 'orders.edit',
             ])->wherePrimaryKey();
 
-            Route::post('refund/{id}', [
+            Route::post('refund/{order}', [
                 'as' => 'refund',
                 'uses' => 'OrderController@postRefund',
                 'permission' => 'orders.edit',
@@ -118,19 +118,19 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
                 'permission' => 'orders.index',
             ]);
 
-            Route::get('view/{id}', [
+            Route::get('view/{order}', [
                 'as' => 'view-incomplete-order',
                 'uses' => 'OrderController@getViewIncompleteOrder',
                 'permission' => 'orders.index',
             ])->wherePrimaryKey();
 
-            Route::post('mark-as-completed/{id}', [
+            Route::post('mark-as-completed/{order}', [
                 'as' => 'mark-as-completed',
                 'uses' => 'OrderController@markIncompleteOrderAsCompleted',
                 'permission' => 'orders.index',
             ])->wherePrimaryKey();
 
-            Route::post('send-order-recover-email/{id}', [
+            Route::post('send-order-recover-email/{order}', [
                 'as' => 'send-order-recover-email',
                 'uses' => 'OrderController@postSendOrderRecoverEmail',
                 'permission' => 'orders.index',
@@ -138,7 +138,7 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
         });
 
         Route::group(['prefix' => 'order-returns', 'as' => 'order_returns.'], function () {
-            Route::resource('', 'OrderReturnController')->parameters(['' => 'order_returns'])->except(['create', 'store']);
+            Route::resource('', 'OrderReturnController')->parameters(['' => 'order_return'])->except(['create', 'store']);
         });
     });
 });

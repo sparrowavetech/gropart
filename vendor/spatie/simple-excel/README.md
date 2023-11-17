@@ -115,7 +115,7 @@ If your file already contains a header row, it will be ignored and replaced with
 
 If your file does not contain a header row, you should also use `noHeaderRow()`, and your headers will be used instead of numeric keys, as above.
 
-### Working with multiple sheet documents
+#### Working with multiple sheet documents
 
 Excel files can include multiple spreadsheets. You can select the sheet you want to use with the `fromSheet()` method to select by index.
 
@@ -274,6 +274,16 @@ $rows = SimpleExcelReader::create($pathToCsv)
     ->getRows();
 ```
 
+#### Reading cells that contain formulas
+
+Normally, cells containing formulas are parsed and their computed value will be returned. If you want to keep the actual formula as a string, you can use the `keepFormulas` method.
+
+```php
+$rows = SimpleExcelReader::create($pathToXlsx)
+    ->keepFormulas()
+    ->getRows();
+```
+
 ### Writing files
 
 Here's how you can write a CSV file:
@@ -316,7 +326,12 @@ $writer = SimpleExcelWriter::create($pathToCsv)
 #### Writing an Excel file
 
 Writing an Excel file is identical to writing a csv. Just make sure that the path given to the `create` method of `SimpleExcelWriter` ends with `xlsx`.
+One other thing to be aware of when writing an Excel file is that the file doesn't get written until the instance of `SimpleExcelWriter` is garbage collected.
+That's when the `close` method is called. The `close` method is what finalizes writing the file to disk. If you need to access the file before the instance is garbage collected you will need to call the `close` method first.
 
+```php
+$writer->close();
+```
 
 #### Streaming an Excel file to the browser
 
@@ -428,6 +443,25 @@ $writer->setHeaderStyle($style);
 ```
 
 For more information on styles head over to [the Spout docs](https://github.com/openspout/openspout/tree/4.x/docs).
+
+#### Setting column widths and row heights
+
+By accessing the underlying OpenSpout Writer you can set default column widths and row heights and change the width of specific columns.
+
+```php
+SimpleExcelWriter::create(
+    file: 'document.xlsx',
+    configureWriter: function ($writer) {
+        $options = $writer->getOptions();
+        $options->DEFAULT_COLUMN_WIDTH=25; // set default width
+        $options->DEFAULT_ROW_HEIGHT=15; // set default height
+        // set columns 1, 3 and 8 to width 40
+        $options->setColumnWidth(40, 1, 3, 8);
+        // set columns 9 through 12 to width 10
+        $options->setColumnWidthForRange(10, 9, 12);
+    }
+)
+```
 
 #### Creating an additional sheets
 

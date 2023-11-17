@@ -29,6 +29,8 @@ class City extends BaseModel
     protected $casts = [
         'status' => BaseStatusEnum::class,
         'name' => SafeContent::class,
+        'is_default' => 'bool',
+        'order' => 'int',
     ];
 
     public function state(): BelongsTo

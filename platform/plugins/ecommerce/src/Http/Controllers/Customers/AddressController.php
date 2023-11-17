@@ -34,7 +34,7 @@ class AddressController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function update($id, CreateAddressFromAdminRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, CreateAddressFromAdminRequest $request, BaseHttpResponse $response)
     {
         $address = Address::query()->findOrFail($id);
 
@@ -65,7 +65,7 @@ class AddressController extends BaseController
 
     public function destroy(int|string $id, BaseHttpResponse $response)
     {
-        $address = Address::findOrFail($id);
+        $address = Address::query()->findOrFail($id);
 
         $address->delete();
 
@@ -74,9 +74,9 @@ class AddressController extends BaseController
             ->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
-    public function edit($id)
+    public function edit(int|string $id)
     {
-        $address = Address::findOrFail($id);
+        $address = Address::query()->findOrFail($id);
 
         return view('plugins/ecommerce::customers.addresses.form-edit', compact('address'))->render();
     }

@@ -209,7 +209,10 @@ export default {
                     this.isLoading = false
                 })
                 .catch((res) => {
-                    Botble.handleError(res.response.data)
+                    if (res.response.status === 400) {
+                        Botble.showError(res.response.data.message)
+                    }
+
                     this.isLoading = false
                 })
         },

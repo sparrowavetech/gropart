@@ -5,9 +5,11 @@ namespace Botble\Marketplace\Tables;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
 use Botble\Ecommerce\Models\Shipment;
+use Botble\Marketplace\Tables\Traits\ForVendor;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Actions\DeleteAction;
 use Botble\Table\Actions\EditAction;
+use Botble\Table\Columns\Column;
 use Botble\Table\Columns\CreatedAtColumn;
 use Botble\Table\Columns\IdColumn;
 use Botble\Table\Columns\StatusColumn;
@@ -18,6 +20,8 @@ use Illuminate\Http\JsonResponse;
 
 class ShipmentTable extends TableAbstract
 {
+    use ForVendor;
+
     public function setup(): void
     {
         $this
@@ -89,20 +93,16 @@ class ShipmentTable extends TableAbstract
     {
         return [
             IdColumn::make(),
-            'order_id' => [
-                'title' => trans('plugins/ecommerce::shipping.order_id'),
-            ],
-            'user_id' => [
-                'title' => trans('plugins/ecommerce::order.customer_label'),
-                'class' => 'text-start',
-            ],
-            'price' => [
-                'title' => trans('plugins/ecommerce::shipping.shipping_amount'),
-            ],
+            Column::make('order_id')
+                ->title(trans('plugins/ecommerce::shipping.order_id')),
+            Column::make('user_id')
+                ->title(trans('plugins/ecommerce::order.customer_label'))
+                ->alignStart(),
+            Column::make('price')
+                ->title(trans('plugins/ecommerce::shipping.shipping_amount')),
+            Column::make('cod_status')
+                ->title(trans('plugins/ecommerce::shipping.cod_status')),
             StatusColumn::make(),
-            'cod_status' => [
-                'title' => trans('plugins/ecommerce::shipping.cod_status'),
-            ],
             CreatedAtColumn::make(),
         ];
     }

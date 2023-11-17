@@ -24,9 +24,12 @@ use Botble\JsValidation\Javascript\JavascriptValidator;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Illuminate\Support\Traits\Conditionable;
 
 abstract class FormAbstract extends Form
 {
+    use Conditionable;
+
     protected array $options = [];
 
     protected string $title = '';
@@ -333,9 +336,37 @@ abstract class FormAbstract extends Form
 
     public function add($name, $type = 'text', array $options = [], $modify = false): self
     {
-        $options['attr'][] = 'v-pre';
+        $options['attr']['v-pre'] = 1;
 
         parent::add($name, $type, $options, $modify);
+
+        return $this;
+    }
+
+    public function tap(callable $callback = null): self
+    {
+        $callback($this);
+
+        return $this;
+    }
+
+    public function template(string $template): self
+    {
+        $this->setFormOption('template', $template);
+
+        return $this;
+    }
+
+    public function contentOnly(): self
+    {
+        $this->setFormOption('template', 'core/base::forms.form-content-only');
+
+        return $this;
+    }
+
+    public function setUrl($url): self
+    {
+        $this->setFormOption('url', $url);
 
         return $this;
     }

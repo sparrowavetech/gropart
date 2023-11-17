@@ -14,10 +14,10 @@ use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Actions\DeleteAction;
 use Botble\Table\Actions\EditAction;
 use Botble\Table\BulkActions\DeleteBulkAction;
+use Botble\Table\Columns\Column;
 use Botble\Table\Columns\CreatedAtColumn;
 use Botble\Table\Columns\IdColumn;
 use Botble\Table\Columns\ImageColumn;
-use Botble\Table\Columns\NameColumn;
 use Botble\Table\Columns\StatusColumn;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\Factory;
@@ -58,7 +58,10 @@ class ProductTable extends TableAbstract
                     return BaseHelper::clean($item->name) . $productType;
                 }
 
-                return Html::link(route('products.edit', $item->getKey()), BaseHelper::clean($item->name)) . $productType;
+                return Html::link(
+                    route('products.edit', $item->getKey()),
+                    BaseHelper::clean($item->name)
+                ) . $productType;
             })
             ->editColumn('price', function (Product $item) {
                 return $item->price_in_table;
@@ -116,26 +119,23 @@ class ProductTable extends TableAbstract
         return [
             IdColumn::make(),
             ImageColumn::make(),
-            NameColumn::make(),
-            'price' => [
-                'title' => trans('plugins/ecommerce::products.price'),
-                'class' => 'text-start',
-            ],
-            'stock_status' => [
-                'title' => trans('plugins/ecommerce::products.stock_status'),
-            ],
-            'quantity' => [
-                'title' => trans('plugins/ecommerce::products.quantity'),
-                'class' => 'text-start',
-            ],
-            'sku' => [
-                'title' => trans('plugins/ecommerce::products.sku'),
-                'class' => 'text-start',
-            ],
-            'order' => [
-                'title' => trans('core/base::tables.order'),
-                'width' => '50px',
-            ],
+            Column::make('name')
+                ->title(trans('plugins/ecommerce::products.name'))
+                ->alignStart(),
+            Column::make('price')
+                ->title(trans('plugins/ecommerce::products.price'))
+                ->alignStart(),
+            Column::make('stock_status')
+                ->title(trans('plugins/ecommerce::products.stock_status')),
+            Column::make('quantity')
+                ->title(trans('plugins/ecommerce::products.quantity'))
+                ->alignStart(),
+            Column::make('sku')
+                ->title(trans('plugins/ecommerce::products.sku'))
+                ->alignStart(),
+            Column::make('order')
+                ->title(trans('core/base::tables.order'))
+                ->width(50),
             CreatedAtColumn::make(),
             StatusColumn::make(),
         ];
@@ -218,33 +218,9 @@ class ProductTable extends TableAbstract
         return parent::renderTable($data, $mergeData);
     }
 
-    public function getDefaultButtons(): array
-    {
-        return [
-            'reload',
-        ];
-    }
-
-    public function getCategories(int|string|null $value = null): array
-    {
-        $categorySelected = [];
-        if ($value) {
-            $category = ProductCategory::query()->find($value);
-            if ($category) {
-                $categorySelected = [$category->getKey() => $category->name];
-            }
-        }
-
-        return [
-            'url' => route('product-categories.search'),
-            'selected' => $categorySelected,
-            'minimum-input' => 1,
-        ];
-    }
-
     public function getFilters(): array
     {
-        $data = $this->getBulkChanges();
+        $data = parent::getFilters();
 
         $data['category'] = array_merge($data['category'], [
             'type' => 'select-ajax',
@@ -291,7 +267,18 @@ class ProductTable extends TableAbstract
                 'title' => trans('plugins/ecommerce::products.category'),
                 'type' => 'select-ajax',
                 'validate' => 'required',
-                'callback' => 'getCategories',
+                'callback' => function (int|string|null $value = null): array {
+                    $categorySelected = [];
+                    if ($value && $category = ProductCategory::query()->find($value)) {
+                        $categorySelected = [$category->getKey() => $category->name];
+                    }
+
+                    return [
+                        'url' => route('product-categories.search'),
+                        'selected' => $categorySelected,
+                        'minimum-input' => 1,
+                    ];
+                },
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
@@ -312,7 +299,7 @@ class ProductTable extends TableAbstract
                     break;
                 }
 
-                $value = Carbon::createFromFormat(config('core.base.general.date_format.date'), $value)->toDateString();
+                $value = Carbon::createFromFormat(config('core.base.general.date_format.date'), $value);
 
                 return $query->whereDate('ec_products.' . $key, $operator, $value);
             case 'category':

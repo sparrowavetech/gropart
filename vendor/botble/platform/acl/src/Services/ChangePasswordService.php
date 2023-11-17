@@ -3,6 +3,7 @@
 namespace Botble\ACL\Services;
 
 use Botble\ACL\Models\User;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Support\Services\ProduceServiceInterface;
 use Exception;
 use Illuminate\Http\Request;
@@ -33,12 +34,15 @@ class ChangePasswordService implements ProduceServiceInterface
         $user->password = Hash::make($password);
         $user->save();
 
+        /**
+         * @var User $user
+         */
         if ($user->getKey() != $currentUser->getKey()) {
             try {
                 Auth::setUser($user);
                 Auth::logoutOtherDevices($password);
             } catch (Throwable $exception) {
-                info($exception->getMessage());
+                BaseHelper::logError($exception);
             }
         }
 

@@ -33,6 +33,10 @@ trait HasBulkActions
 
     protected string $bulkChangeUrl = '';
 
+    protected string $bulkChangeDataUrl = '';
+
+    protected string $bulkActionDispatchUrl = '';
+
     public function bulkActions(): array
     {
         return [];
@@ -62,8 +66,8 @@ trait HasBulkActions
                     return $collection->merge([
                         -1 => view('core/table::bulk-changes', [
                             'bulk_changes' => $bulkChanges,
-                            'class' => get_class($this),
-                            'url' => $this->bulkChangeUrl ?: route('tables.bulk-change.save'),
+                            'class' => $this::class,
+                            'url' => $this->getBulkChangeUrl(),
                         ])->render(),
                     ]);
                 }
@@ -73,7 +77,7 @@ trait HasBulkActions
                 if (is_string($action) && class_exists($action) || $action instanceof TableBulkActionAbstract) {
                     $action = $action instanceof TableBulkActionAbstract ? $action : app($action);
                     $action->table($this);
-                    $key = get_class($action);
+                    $key = $action::class;
                 }
 
                 return [$key => $action];
@@ -199,9 +203,9 @@ trait HasBulkActions
         return true;
     }
 
-    public function saveBulkChangeItem(Model $item, string $inputKey, string|null $inputValue)
+    public function saveBulkChangeItem(Model $item, string $inputKey, string|null $inputValue): Model|bool
     {
-        $item->{Auth::check() ? 'forceFill' : 'fill'}([$inputKey => $this->prepareBulkChangeValue($inputKey, $inputValue)]);
+        $item->{Auth::guard()->check() ? 'forceFill' : 'fill'}([$inputKey => $this->prepareBulkChangeValue($inputKey, $inputValue)]);
 
         $item->save();
 
@@ -223,5 +227,41 @@ trait HasBulkActions
         }
 
         return (string)$value;
+    }
+
+    public function bulkChangeUrl(string $url): static
+    {
+        $this->bulkChangeUrl = $url;
+
+        return $this;
+    }
+
+    public function getBulkChangeUrl(): string
+    {
+        return $this->bulkChangeUrl ?: route('tables.bulk-change.save');
+    }
+
+    public function bulkChangeDataUrl(string $url): static
+    {
+        $this->bulkChangeDataUrl = $url;
+
+        return $this;
+    }
+
+    public function getBulkChangeDataUrl(): string
+    {
+        return $this->bulkChangeDataUrl ?: route('tables.bulk-change.data');
+    }
+
+    public function bulkActionDispatchUrl(string $url): static
+    {
+        $this->bulkActionDispatchUrl = $url;
+
+        return $this;
+    }
+
+    public function getBulkActionDispatchUrl(): string
+    {
+        return $this->bulkActionDispatchUrl ?: route('tables.bulk-actions.dispatch');
     }
 }

@@ -35,7 +35,7 @@ class DiscountSupport
         return $this->customerId;
     }
 
-    public function promotionForProduct(array $productIds, array $productCollectionIds): ?Discount
+    public function promotionForProduct(array $productIds, array $productCollectionIds, array $productCategoriesIds = []): ?Discount
     {
         if (! $this->promotions) {
             $this->getAvailablePromotions();
@@ -68,6 +68,15 @@ class DiscountSupport
                             if ($customer->id == $this->customerId) {
                                 return $promotion;
                             }
+                        }
+                    }
+
+                    break;
+
+                case DiscountTargetEnum::PRODUCT_CATEGORIES:
+                    foreach ($promotion->productCategories as $productCategories) {
+                        if (in_array($productCategories->id, $productCategoriesIds)) {
+                            return $promotion;
                         }
                     }
 

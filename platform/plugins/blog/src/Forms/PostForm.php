@@ -9,11 +9,10 @@ use Botble\Blog\Forms\Fields\CategoryMultiField;
 use Botble\Blog\Http\Requests\PostRequest;
 use Botble\Blog\Models\Category;
 use Botble\Blog\Models\Post;
+use Botble\Blog\Models\Tag;
 
 class PostForm extends FormAbstract
 {
-    protected $template = 'core/base::forms.form-tabs';
-
     public function buildForm(): void
     {
         $selectedCategories = [];
@@ -21,7 +20,7 @@ class PostForm extends FormAbstract
             $selectedCategories = $this->getModel()->categories()->pluck('category_id')->all();
         }
 
-        if (empty($selectedCategories)) {
+        if (! $this->getModel() && empty($selectedCategories)) {
             $selectedCategories = Category::query()
                 ->where('is_default', 1)
                 ->pluck('id')
@@ -31,22 +30,24 @@ class PostForm extends FormAbstract
         $tags = null;
 
         if ($this->getModel()) {
-            $tags = $this->getModel()->tags()->pluck('name')->all();
-            $tags = implode(',', $tags);
-        }
-
-        if (! $this->formHelper->hasCustomField('categoryMulti')) {
-            $this->formHelper->addCustomField('categoryMulti', CategoryMultiField::class);
+            $tags = $this->getModel()
+                ->tags()
+                ->select('name')
+                ->get()
+                ->map(fn (Tag $item) => $item->name)
+                ->implode(',');
         }
 
         $this
             ->setupModel(new Post())
             ->setValidatorClass(PostRequest::class)
+            ->hasTabs()
             ->withCustomFields()
             ->addCustomField('tags', TagField::class)
+            ->addCustomField('categoryMulti', CategoryMultiField::class)
             ->add('name', 'text', [
                 'label' => trans('core/base::forms.name'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'placeholder' => trans('core/base::forms.name_placeholder'),
                     'data-counter' => 150,
@@ -54,7 +55,6 @@ class PostForm extends FormAbstract
             ])
             ->add('description', 'textarea', [
                 'label' => trans('core/base::forms.description'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'rows' => 4,
                     'placeholder' => trans('core/base::forms.description_placeholder'),
@@ -63,12 +63,10 @@ class PostForm extends FormAbstract
             ])
             ->add('is_featured', 'onOff', [
                 'label' => trans('core/base::forms.is_featured'),
-                'label_attr' => ['class' => 'control-label'],
                 'default_value' => false,
             ])
             ->add('content', 'editor', [
                 'label' => trans('core/base::forms.content'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'rows' => 4,
                     'placeholder' => trans('core/base::forms.description_placeholder'),
@@ -77,22 +75,25 @@ class PostForm extends FormAbstract
             ])
             ->add('status', 'customSelect', [
                 'label' => trans('core/base::tables.status'),
-                'label_attr' => ['class' => 'control-label required'],
                 'choices' => BaseStatusEnum::labels(),
             ])
+            ->when(get_post_formats(true), function ($form, $postFormats) {
+                if (count($postFormats) > 1) {
+                    $form
+                        ->add('format_type', 'customRadio', [
+                            'label' => trans('plugins/blog::posts.form.format_type'),
+                            'choices' => $postFormats,
+                        ]);
+                }
+            })
             ->add('categories[]', 'categoryMulti', [
                 'label' => trans('plugins/blog::posts.form.categories'),
-                'label_attr' => ['class' => 'control-label required'],
                 'choices' => get_categories_with_children(),
                 'value' => old('categories', $selectedCategories),
             ])
-            ->add('image', 'mediaImage', [
-                'label' => trans('core/base::forms.image'),
-                'label_attr' => ['class' => 'control-label'],
-            ])
+            ->add('image', 'mediaImage')
             ->add('tag', 'tags', [
                 'label' => trans('plugins/blog::posts.form.tags'),
-                'label_attr' => ['class' => 'control-label'],
                 'value' => $tags,
                 'attr' => [
                     'placeholder' => trans('plugins/blog::base.write_some_tags'),
@@ -100,15 +101,5 @@ class PostForm extends FormAbstract
                 ],
             ])
             ->setBreakFieldPoint('status');
-
-        $postFormats = get_post_formats(true);
-
-        if (count($postFormats) > 1) {
-            $this->addAfter('status', 'format_type', 'customRadio', [
-                'label' => trans('plugins/blog::posts.form.format_type'),
-                'label_attr' => ['class' => 'control-label'],
-                'choices' => get_post_formats(true),
-            ]);
-        }
     }
 }

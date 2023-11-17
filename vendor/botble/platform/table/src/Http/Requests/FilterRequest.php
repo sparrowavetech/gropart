@@ -9,7 +9,9 @@ class FilterRequest extends Request
     public function rules(): array
     {
         return [
-            'class' => 'required|string',
+            'key' => ['nullable', 'string'],
+            'value' => ['nullable', 'string'],
+            'class' => ['required', 'string'],
         ];
     }
 }

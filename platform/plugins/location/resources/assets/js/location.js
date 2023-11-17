@@ -27,11 +27,12 @@ class Location {
         })
     }
 
-    static getCities($el, stateId, $button = null) {
+    static getCities($el, stateId, $button = null, countryId = null) {
         $.ajax({
             url: $el.data('url'),
             data: {
                 state_id: stateId,
+                country_id: countryId,
             },
             type: 'GET',
             beforeSend: () => {
@@ -72,11 +73,15 @@ class Location {
             $state.find('option:not([value=""]):not([value="0"])').remove()
             $city.find('option:not([value=""]):not([value="0"])').remove()
 
-            if ($state.length) {
-                const val = $(e.currentTarget).val()
-                if (val) {
-                    const $button = $(e.currentTarget).closest('form').find('button[type=submit], input[type=submit]')
-                    Location.getStates($state, val, $button)
+            const $button = $(e.currentTarget).closest('form').find('button[type=submit], input[type=submit]')
+            const countryId = $(e.currentTarget).val()
+
+            if (countryId) {
+                if ($state.length) {
+                    Location.getStates($state, countryId, $button)
+                    Location.getCities($city, null, $button, countryId)
+                } else {
+                    Location.getCities($city, null, $button, countryId)
                 }
             }
         })
@@ -89,10 +94,15 @@ class Location {
 
             if ($city.length) {
                 $city.find('option:not([value=""]):not([value="0"])').remove()
-                const val = $(e.currentTarget).val()
-                if (val) {
-                    const $button = $(e.currentTarget).closest('form').find('button[type=submit], input[type=submit]')
-                    Location.getCities($city, val, $button)
+                const stateId = $(e.currentTarget).val()
+                const $button = $(e.currentTarget).closest('form').find('button[type=submit], input[type=submit]')
+
+                if (stateId) {
+                    Location.getCities($city, stateId, $button)
+                } else {
+                    const countryId = $parent.find(country).val()
+
+                    Location.getCities($city, null, $button, countryId)
                 }
 
                 stateFieldUsingSelect2()

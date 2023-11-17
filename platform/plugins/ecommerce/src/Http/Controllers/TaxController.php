@@ -5,7 +5,6 @@ namespace Botble\Ecommerce\Http\Controllers;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
-use Botble\Base\Facades\Html;
 use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
@@ -13,7 +12,6 @@ use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Forms\TaxForm;
 use Botble\Ecommerce\Http\Requests\TaxRequest;
 use Botble\Ecommerce\Models\Tax;
-use Botble\Ecommerce\Tables\TaxRuleTable;
 use Botble\Ecommerce\Tables\TaxTable;
 use Exception;
 use Illuminate\Http\Request;
@@ -46,26 +44,15 @@ class TaxController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(Tax $tax, FormBuilder $formBuilder, TaxRuleTable $dataTable)
+    public function edit(Tax $tax, FormBuilder $formBuilder)
     {
-        $dataTable
-            ->setView('core/table::base-table')
-            ->setAjaxUrl(route('tax.rule.index', $tax->getKey()));
-
-        add_filter('core_layout_after_content', function ($html) use ($dataTable) {
-            return $html .
-                Html::tag('div', trans('plugins/ecommerce::tax.rule.name'), ['class' => 'fs-5 fw-bold pt-5 text-warning']) .
-                Html::tag('div', $dataTable->renderTable(), ['class' => 'mt-2']);
-        });
-
         PageTitle::setTitle(trans('plugins/ecommerce::tax.edit', ['title' => $tax->title]));
 
         return $formBuilder->create(TaxForm::class, ['model' => $tax])->renderForm();
     }
 
-    public function update(int|string $id, TaxRequest $request, BaseHttpResponse $response)
+    public function update(Tax $tax, TaxRequest $request, BaseHttpResponse $response)
     {
-        $tax = Tax::query()->findOrFail($id);
         $tax->fill($request->input());
         $tax->save();
 
@@ -76,10 +63,9 @@ class TaxController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
+    public function destroy(Tax $tax, Request $request, BaseHttpResponse $response)
     {
         try {
-            $tax = Tax::query()->findOrFail($id);
             $tax->delete();
             event(new DeletedContentEvent(TAX_MODULE_SCREEN_NAME, $request, $tax));
 

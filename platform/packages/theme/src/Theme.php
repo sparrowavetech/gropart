@@ -7,7 +7,7 @@ use Botble\Base\Facades\Form;
 use Botble\Base\Facades\Html;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Forms\FormHelper;
-use Botble\SeoHelper\Facades\SeoHelper;
+use Botble\Setting\Facades\Setting;
 use Botble\Theme\Contracts\Theme as ThemeContract;
 use Botble\Theme\Exceptions\UnknownPartialFileException;
 use Botble\Theme\Exceptions\UnknownThemeException;
@@ -53,8 +53,6 @@ class Theme implements ThemeContract
         protected Breadcrumb $breadcrumb
     ) {
         $this->uses($this->getThemeName())->layout(setting('layout', 'default'));
-
-        SeoHelper::meta()->setGoogle(setting('google_analytics'));
     }
 
     public function layout(string $layout): self
@@ -724,8 +722,8 @@ class Theme implements ThemeContract
 
         $content->withHeaders([
             'CMS-Version' => get_core_version(),
-            'Authorization-At' => setting('membership_authorization_at'),
-            'Activated-License' => ! empty(setting('licensed_to')) ? 'Yes' : 'No',
+            'Authorization-At' => Setting::get('membership_authorization_at'),
+            'Activated-License' => ! empty(Setting::get('licensed_to')) ? 'Yes' : 'No',
         ]);
 
         return $content;
@@ -858,5 +856,162 @@ class Theme implements ThemeContract
         add_filter('theme_icon_list_icons', function (array $defaultIcons) use ($icons) {
             return array_merge($defaultIcons, $icons);
         });
+    }
+
+    public function registerFacebookIntegration(): void
+    {
+        theme_option()
+            ->setSection([
+                'title' => __('Facebook Integration'),
+                'desc' => __('Facebook Integration'),
+                'id' => 'opt-text-subsection-facebook-integration',
+                'subsection' => true,
+                'icon' => 'fab fa-facebook',
+            ])
+            ->setField([
+                'id' => 'facebook_chat_enabled',
+                'section_id' => 'opt-text-subsection-facebook-integration',
+                'type' => 'customSelect',
+                'label' => __('Enable Facebook chat?'),
+                'attributes' => [
+                    'name' => 'facebook_chat_enabled',
+                    'list' => [
+                        'no' => trans('core/base::base.no'),
+                        'yes' => trans('core/base::base.yes'),
+                    ],
+                    'value' => 'no',
+                    'options' => [
+                        'class' => 'form-control',
+                    ],
+                ],
+                'helper' => __(
+                    'To show chat box on that website, please go to :link and add :domain to whitelist domains!',
+                    [
+                        'domain' => Html::link(url('')),
+                        'link' => Html::link(
+                            'https://www.facebook.com/' . theme_option(
+                                'facebook_page_id'
+                            ) . '/settings/?tab=messenger_platform'
+                        ),
+                    ]
+                ),
+            ])
+            ->setField([
+                'id' => 'facebook_page_id',
+                'section_id' => 'opt-text-subsection-facebook-integration',
+                'type' => 'text',
+                'label' => __('Facebook page ID'),
+                'attributes' => [
+                    'name' => 'facebook_page_id',
+                    'value' => null,
+                    'options' => [
+                        'class' => 'form-control',
+                    ],
+                ],
+                'helper' => __(
+                    'You can get fan page ID using this site :link',
+                    ['link' => Html::link('https://findidfb.com')]
+                ),
+            ])
+            ->setField([
+                'id' => 'facebook_comment_enabled_in_post',
+                'section_id' => 'opt-text-subsection-facebook-integration',
+                'type' => 'customSelect',
+                'label' => __('Enable Facebook comment in post detail page?'),
+                'attributes' => [
+                    'name' => 'facebook_comment_enabled_in_post',
+                    'list' => [
+                        'yes' => trans('core/base::base.yes'),
+                        'no' => trans('core/base::base.no'),
+                    ],
+                    'value' => 'no',
+                    'options' => [
+                        'class' => 'form-control',
+                    ],
+                ],
+            ])
+            ->setField([
+                'id' => 'facebook_app_id',
+                'section_id' => 'opt-text-subsection-facebook-integration',
+                'type' => 'text',
+                'label' => __('Facebook App ID'),
+                'attributes' => [
+                    'name' => 'facebook_app_id',
+                    'value' => null,
+                    'options' => [
+                        'class' => 'form-control',
+                    ],
+                    'placeholder' => 'Ex: 2061237023872679',
+                ],
+                'helper' => __(
+                    'You can create your app in :link',
+                    ['link' => Html::link('https://developers.facebook.com/apps')]
+                ),
+            ])
+            ->setField([
+                'id' => 'facebook_admins',
+                'section_id' => 'opt-text-subsection-facebook-integration',
+                'type' => 'repeater',
+                'label' => __('Facebook Admins'),
+                'attributes' => [
+                    'name' => 'facebook_admins',
+                    'value' => null,
+                    'fields' => [
+                        [
+                            'type' => 'text',
+                            'label' => __('Facebook Admin ID'),
+                            'attributes' => [
+                                'name' => 'text',
+                                'value' => null,
+                                'options' => [
+                                    'class' => 'form-control',
+                                    'data-counter' => 40,
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                'helper' => __(
+                    'Facebook admins to manage comments :link',
+                    ['link' => Html::link('https://developers.facebook.com/docs/plugins/comments')]
+                ),
+            ]);
+
+        add_filter(THEME_FRONT_HEADER, function (string|null $html): string|null {
+            if (theme_option('facebook_app_id')) {
+                $html .= Html::meta('', theme_option('facebook_app_id'), ['property' => 'fb:app_id'])->toHtml();
+            }
+
+            if (theme_option('facebook_admins')) {
+                foreach (json_decode(theme_option('facebook_admins'), true) as $facebookAdminId) {
+                    if (Arr::get($facebookAdminId, '0.value')) {
+                        $html .= Html::meta('', Arr::get($facebookAdminId, '0.value'), ['property' => 'fb:admins'])
+                            ->toHtml();
+                    }
+                }
+            }
+
+            if (theme_option('facebook_chat_enabled', 'no') == 'yes' && theme_option('facebook_page_id')) {
+                $html .= '<link href="//connect.facebook.net" rel="dns-prefetch" />';
+            }
+
+            return $html;
+        }, 1180);
+
+        add_filter(THEME_FRONT_FOOTER, function (string|null $html): string {
+            return $html . view('packages/theme::partials.facebook-integration')->render();
+        }, 1180);
+
+        add_filter(BASE_FILTER_PUBLIC_COMMENT_AREA, function ($html) {
+            if (
+                theme_option('facebook_comment_enabled_in_post', 'yes') == 'yes' ||
+                theme_option('facebook_comment_enabled_in_gallery', 'yes') == 'yes' ||
+                theme_option('facebook_comment_enabled_in_product', 'yes') == 'yes'
+            ) {
+                return $html . view('packages/theme::partials.facebook-comments')->render();
+            }
+
+            return $html;
+        }, 1180);
     }
 }

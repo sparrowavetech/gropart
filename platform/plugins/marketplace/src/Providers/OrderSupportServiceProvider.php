@@ -63,6 +63,7 @@ class OrderSupportServiceProvider extends ServiceProvider
             add_filter(PROCESS_CHECKOUT_MESSAGES_REQUEST_ECOMMERCE, [$this, 'processCheckoutMessagesRequest'], 100);
             add_action(ACTION_AFTER_ORDER_STATUS_COMPLETED_ECOMMERCE, [$this, 'afterOrderStatusCompleted'], 12);
             add_filter(ACTION_AFTER_ORDER_RETURN_STATUS_COMPLETED, [$this, 'afterReturnOrderCompleted'], 12);
+            add_filter('ecommerce_order_email_variables', [$this, 'addMoreOrderEmailVariables'], 12, 2);
         });
     }
 
@@ -200,7 +201,9 @@ class OrderSupportServiceProvider extends ServiceProvider
             DiscountFacade::getFacadeRoot()->afterOrderPlaced($couponCode);
         }
 
-        if (! is_plugin_active('payment')) {
+        if (! is_plugin_active('payment') || ! $orders->pluck('amount')->sum()) {
+            OrderHelper::processOrder($orders->pluck('id')->all());
+
             return $response
                 ->setNextUrl(route('public.checkout.success', $token))
                 ->setMessage(__('Checkout successfully!'));
@@ -208,27 +211,25 @@ class OrderSupportServiceProvider extends ServiceProvider
 
         $totalAmount = format_price($orders->pluck('amount')->sum(), null, true);
 
-        if ($totalAmount) {
-            do_action('ecommerce_before_processing_payment', $products, $request, $token, $mpSessionData);
+        do_action('ecommerce_before_processing_payment', $products, $request, $token, $mpSessionData);
 
-            $paymentData = $this->processPaymentMethodPostCheckout($request, (float)$totalAmount);
+        $paymentData = $this->processPaymentMethodPostCheckout($request, (float)$totalAmount);
 
-            if ($checkoutUrl = Arr::get($paymentData, 'checkoutUrl')) {
-                return $response
-                    ->setError($paymentData['error'])
-                    ->setNextUrl($checkoutUrl)
-                    ->setData(['checkoutUrl' => $checkoutUrl])
-                    ->withInput()
-                    ->setMessage($paymentData['message']);
-            }
+        if ($checkoutUrl = Arr::get($paymentData, 'checkoutUrl')) {
+            return $response
+                ->setError($paymentData['error'])
+                ->setNextUrl($checkoutUrl)
+                ->setData(['checkoutUrl' => $checkoutUrl])
+                ->withInput()
+                ->setMessage($paymentData['message']);
+        }
 
-            if ($paymentData['error'] || ! $paymentData['charge_id']) {
-                return $response
-                    ->setError()
-                    ->setNextUrl(PaymentHelper::getCancelURL($token))
-                    ->withInput()
-                    ->setMessage($paymentData['message'] ?: __('Checkout error!'));
-            }
+        if ($paymentData['error'] || ! $paymentData['charge_id']) {
+            return $response
+                ->setError()
+                ->setNextUrl(PaymentHelper::getCancelURL($token))
+                ->withInput()
+                ->setMessage($paymentData['message'] ?: __('Checkout error!'));
         }
 
         return $response
@@ -525,7 +526,7 @@ class OrderSupportServiceProvider extends ServiceProvider
 
         if ($orders->where('is_finished', false)->count()) {
             foreach ($orders->where('is_finished', false) as $order) {
-                if (! $order->payment_id) {
+                if ((float)$order->amount && ! $order->payment_id) {
                     continue;
                 }
 
@@ -560,8 +561,10 @@ class OrderSupportServiceProvider extends ServiceProvider
     {
         try {
             $mailer = EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+
             if ($mailer->templateEnabled('admin_new_order')) {
                 $this->setEmailVariables($orders);
+
                 $mailer->sendUsingTemplate('admin_new_order');
             }
 
@@ -1207,6 +1210,7 @@ class OrderSupportServiceProvider extends ServiceProvider
                     'currency' => get_application_currency()->title,
                     'current_balance' => $currentBalance,
                     'customer_id' => $customer->getKey(),
+                    'type' => RevenueTypeEnum::ADD_AMOUNT,
                 ];
 
                 try {
@@ -1322,5 +1326,13 @@ class OrderSupportServiceProvider extends ServiceProvider
                 $vendorInfo->save();
             }
         }
+    }
+
+    public function addMoreOrderEmailVariables(array $variables, Order $order): array
+    {
+        $variables['store_name'] = $order->store->name;
+        $variables['store'] = $order->store->toArray();
+
+        return $variables;
     }
 }

@@ -84,6 +84,85 @@ class HandleApplyPromotionsService
                             }
 
                             break;
+                        case DiscountTargetEnum::PRODUCT_COLLECTIONS:
+                            $products = get_products([
+                                'condition' => [
+                                    ['ec_products.id', 'IN', Cart::instance('cart')->content()->pluck('id')->all()],
+                                ],
+                                'with' => [],
+                            ]);
+
+                            foreach ($cartItems as $item) {
+                                $product = $products->find($item->id);
+
+                                if (! $product) {
+                                    continue;
+                                }
+
+                                if (
+                                    $item->qty >= $promotion->product_quantity &&
+                                    array_intersect(
+                                        $product->original_product->productCollections->pluck('id')->all(),
+                                        $promotion->productCollections()->pluck('id')->all()
+                                    )
+                                ) {
+                                    $promotionDiscountAmount += $promotion->value;
+                                }
+                            }
+
+                            break;
+                        case DiscountTargetEnum::PRODUCT_CATEGORIES:
+                            $products = get_products([
+                                'condition' => [
+                                    ['ec_products.id', 'IN', Cart::instance('cart')->content()->pluck('id')->all()],
+                                ],
+                                'with' => [],
+                            ]);
+
+                            foreach ($cartItems as $item) {
+                                $product = $products->find($item->id);
+
+                                if (! $product) {
+                                    continue;
+                                }
+
+                                if (
+                                    $item->qty >= $promotion->product_quantity &&
+                                    array_intersect(
+                                        $product->original_product->categories->pluck('id')->all(),
+                                        $promotion->productCategories()->pluck('id')->all()
+                                    )
+                                ) {
+                                    $promotionDiscountAmount += $promotion->value;
+                                }
+                            }
+
+                            break;
+                        case DiscountTargetEnum::CUSTOMER:
+                        case DiscountTargetEnum::ONCE_PER_CUSTOMER:
+                            $products = get_products([
+                                'condition' => [
+                                    ['ec_products.id', 'IN', Cart::instance('cart')->content()->pluck('id')->all()],
+                                ],
+                                'with' => [],
+                            ]);
+
+                            foreach ($cartItems as $item) {
+                                $product = $products->find($item->id);
+
+                                if (! $product) {
+                                    continue;
+                                }
+
+                                if (
+                                    $item->qty >= $promotion->product_quantity &&
+                                    $promotion->customers()->where('customer_id', auth('customer')->id())->exists()
+                                ) {
+                                    $promotionDiscountAmount += $promotion->value;
+                                }
+                            }
+
+                            break;
                         default:
                             if ($countCart >= $promotion->product_quantity) {
                                 $promotionDiscountAmount += $promotion->value;
@@ -117,6 +196,86 @@ class HandleApplyPromotionsService
                             }
 
                             break;
+                        case DiscountTargetEnum::PRODUCT_COLLECTIONS:
+                            $products = get_products([
+                                'condition' => [
+                                    ['ec_products.id', 'IN', Cart::instance('cart')->content()->pluck('id')->all()],
+                                ],
+                                'with' => [],
+                            ]);
+
+                            foreach ($cartItems as $item) {
+                                $product = $products->find($item->id);
+
+                                if (! $product) {
+                                    continue;
+                                }
+
+                                if (
+                                    $item->qty >= $promotion->product_quantity &&
+                                    array_intersect(
+                                        $product->original_product->productCollections->pluck('id')->all(),
+                                        $promotion->productCollections()->pluck('id')->all()
+                                    )
+                                ) {
+                                    $promotionDiscountAmount += $item->price * $promotion->value / 100;
+                                }
+                            }
+
+                            break;
+                        case DiscountTargetEnum::PRODUCT_CATEGORIES:
+                            $products = get_products([
+                                'condition' => [
+                                    ['ec_products.id', 'IN', Cart::instance('cart')->content()->pluck('id')->all()],
+                                ],
+                                'with' => [],
+                            ]);
+
+                            foreach ($cartItems as $item) {
+                                $product = $products->find($item->id);
+
+                                if (! $product) {
+                                    continue;
+                                }
+
+                                if (
+                                    $item->qty >= $promotion->product_quantity &&
+                                    array_intersect(
+                                        $promotion->productCategories()->pluck('id')->all(),
+                                        $product->original_product->categories->pluck('id')->all()
+                                    )
+                                ) {
+                                    $promotionDiscountAmount += $item->price * $promotion->value / 100;
+                                }
+                            }
+
+                            break;
+                        case DiscountTargetEnum::CUSTOMER:
+                        case DiscountTargetEnum::ONCE_PER_CUSTOMER:
+                            $products = get_products([
+                                'condition' => [
+                                    ['ec_products.id', 'IN', Cart::instance('cart')->content()->pluck('id')->all()],
+                                ],
+                                'with' => [],
+                            ]);
+
+                            foreach ($cartItems as $item) {
+                                $product = $products->find($item->id);
+
+                                if (! $product) {
+                                    continue;
+                                }
+
+                                if (
+                                    $item->qty >= $promotion->product_quantity &&
+                                    $promotion->customers()->where('customer_id', auth('customer')->id())->exists()
+                                ) {
+                                    $promotionDiscountAmount += $rawTotal * $promotion->value / 100;
+                                }
+                            }
+
+                            break;
+
                         default:
                             if ($countCart >= $promotion->product_quantity) {
                                 $promotionDiscountAmount += $rawTotal * $promotion->value / 100;

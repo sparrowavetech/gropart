@@ -24,7 +24,7 @@ class UserForm extends FormAbstract
             ])
             ->add('first_name', 'text', [
                 'label' => trans('core/acl::users.info.first_name'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'data-counter' => 30,
                 ],
@@ -34,7 +34,7 @@ class UserForm extends FormAbstract
             ])
             ->add('last_name', 'text', [
                 'label' => trans('core/acl::users.info.last_name'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'data-counter' => 30,
                 ],
@@ -50,7 +50,7 @@ class UserForm extends FormAbstract
             ])
             ->add('username', 'text', [
                 'label' => trans('core/acl::users.username'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'data-counter' => 30,
                 ],
@@ -60,7 +60,7 @@ class UserForm extends FormAbstract
             ])
             ->add('email', 'text', [
                 'label' => trans('core/acl::users.email'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'placeholder' => trans('core/acl::users.email_placeholder'),
                     'data-counter' => 60,
@@ -77,7 +77,7 @@ class UserForm extends FormAbstract
             ])
             ->add('password', 'password', [
                 'label' => trans('core/acl::users.password'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'data-counter' => 60,
                 ],
@@ -87,7 +87,7 @@ class UserForm extends FormAbstract
             ])
             ->add('password_confirmation', 'password', [
                 'label' => trans('core/acl::users.password_confirmation'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'data-counter' => 60,
                 ],
@@ -100,7 +100,6 @@ class UserForm extends FormAbstract
             ])
             ->add('role_id', 'customSelect', [
                 'label' => trans('core/acl::users.role'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'class' => 'form-control roles-list',
                 ],

@@ -2,10 +2,9 @@
 
 namespace Botble\SimpleSlider\Providers;
 
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Shortcode\Compilers\Shortcode;
-use Botble\SimpleSlider\Repositories\Interfaces\SimpleSliderInterface;
+use Botble\SimpleSlider\Models\SimpleSlider;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -24,8 +23,10 @@ class HookServiceProvider extends ServiceProvider
             );
 
             shortcode()->setAdminConfig('simple-slider', function ($attributes) {
-                $sliders = $this->app->make(SimpleSliderInterface::class)
-                    ->pluck('name', 'key', ['status' => BaseStatusEnum::PUBLISHED]);
+                $sliders = SimpleSlider::query()
+                    ->wherePublished()
+                    ->pluck('name', 'key')
+                    ->all();
 
                 return view('plugins/simple-slider::partials.simple-slider-admin-config', compact('sliders', 'attributes'))
                     ->render();
@@ -46,17 +47,17 @@ class HookServiceProvider extends ServiceProvider
 
     public function render(Shortcode $shortcode): View|Factory|Application|null
     {
-        $slider = $this->app->make(SimpleSliderInterface::class)->getFirstBy([
-            'key' => $shortcode->key,
-            'status' => BaseStatusEnum::PUBLISHED,
-        ]);
+        $slider = SimpleSlider::query()
+            ->wherePublished()
+            ->where('key', $shortcode->key)
+            ->first();
 
         if (empty($slider)) {
             return null;
         }
 
         if (setting('simple_slider_using_assets', true) && defined('THEME_OPTIONS_MODULE_SCREEN_NAME')) {
-            $version = '1.0.1';
+            $version = '1.0.2';
             $dist = asset('vendor/core/plugins/simple-slider');
 
             Theme::asset()

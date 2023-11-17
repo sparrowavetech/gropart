@@ -28,7 +28,6 @@ use Botble\Theme\Facades\Theme;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Contracts\Database\Query\Builder;
-use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
@@ -182,7 +181,9 @@ class EcommerceHelper
                 ->wherePublished()
                 ->orderBy('order')
                 ->orderBy('name')
-                ->pluck('name', 'id')
+                ->select('name', 'id')
+                ->get()
+                ->mapWithKeys(fn (Country $item) => [$item->getKey() => $item->name])
                 ->all();
 
             if (! empty($selectedCountries)) {
@@ -220,22 +221,18 @@ class EcommerceHelper
             return [];
         }
 
-        $condition = [];
-
-        if ($this->isUsingInMultipleCountries()) {
-            $condition['country_id'] = $countryId;
-        }
-
         return State::query()
             ->wherePublished()
-            ->where($condition)
+            ->when($this->isUsingInMultipleCountries(), fn ($query) => $query->where('country_id', $countryId))
             ->orderBy('order')
             ->orderBy('name')
-            ->pluck('name', 'id')
+            ->select('name', 'id')
+            ->get()
+            ->mapWithKeys(fn (State $item) => [$item->getKey() => $item->name])
             ->all();
     }
 
-    public function getAvailableCitiesByState(int|string|null $stateId): array
+    public function getAvailableCitiesByState(int|string|null $stateId, int|string|null $countryId = null): array
     {
         if (! $this->loadCountriesStatesCitiesFromPluginLocation()) {
             return [];
@@ -243,10 +240,13 @@ class EcommerceHelper
 
         return City::query()
             ->wherePublished()
-            ->where('state_id', $stateId)
+            ->when($stateId, fn ($query) => $query->where('state_id', $stateId))
+            ->when(! $stateId && $countryId, fn ($query) => $query->where('country_id', $countryId))
             ->orderBy('order')
             ->orderBy('name')
-            ->pluck('name', 'id')
+            ->select('name', 'id')
+            ->get()
+            ->mapWithKeys(fn (City $item) => [$item->getKey() => $item->name])
             ->all();
     }
 
@@ -505,7 +505,9 @@ class EcommerceHelper
             ->wherePublished()
             ->orderBy('order')
             ->orderBy('name')
-            ->pluck('name', 'id')
+            ->select('name', 'id')
+            ->get()
+            ->mapWithKeys(fn (State $item) => [$item->getKey() => $item->name])
             ->all();
     }
 
@@ -515,12 +517,14 @@ class EcommerceHelper
             return [];
         }
 
-        return State::query()
+        return City::query()
             ->where('state_id', $stateId)
             ->wherePublished()
             ->orderBy('order')
             ->orderBy('name')
-            ->pluck('name', 'id')
+            ->select('name', 'id')
+            ->get()
+            ->mapWithKeys(fn (City $item) => [$item->getKey() => $item->name])
             ->all();
     }
 
@@ -573,6 +577,31 @@ class EcommerceHelper
 
         if ($this->isZipCodeEnabled()) {
             $rules[$prefix . 'zip_code'] = 'required|max:20';
+        }
+
+        $availableMandatoryFields = $this->getEnabledMandatoryFieldsAtCheckout();
+        $mandatoryFields = array_keys($this->getMandatoryFieldsAtCheckout());
+        $nullableFields = array_diff($mandatoryFields, $availableMandatoryFields);
+
+        if ($nullableFields) {
+            foreach ($nullableFields as $key) {
+                if (! isset($rules[$key])) {
+                    continue;
+                }
+
+                if (is_string($rules[$key])) {
+                    $rules[$key] = str_replace('required', 'nullable', $rules[$key]);
+
+                    continue;
+                }
+
+                if (is_array($rules[$key])) {
+                    $rules[$key] = array_merge(
+                        ['nullable'],
+                        array_filter($rules[$key], fn ($item) => $item !== 'required')
+                    );
+                }
+            }
         }
 
         return $rules;
@@ -639,7 +668,7 @@ class EcommerceHelper
                     $filtered = $viewedProducts;
                     if ($exists) {
                         $filtered = $filtered->filter(function ($item) use ($product) {
-                            return $item->id != $product->id;
+                            return $item->id != $product->getKey();
                         });
                     }
 
@@ -648,14 +677,14 @@ class EcommerceHelper
             }
 
             if ($exists) {
-                $removedIds[] = $product->id;
+                $removedIds[] = $product->getKey();
             }
 
             if ($removedIds) {
                 $customer->viewedProducts()->detach($removedIds);
             }
 
-            $customer->viewedProducts()->attach([$product->id]);
+            $customer->viewedProducts()->attach([$product->getKey()]);
         }
 
         return $this;
@@ -943,7 +972,7 @@ class EcommerceHelper
 
     public function onlyAllowCustomersPurchasedToReview(): bool
     {
-        return (bool) get_ecommerce_setting('only_allow_customers_purchased_to_review', 0);
+        return (bool)get_ecommerce_setting('only_allow_customers_purchased_to_review', 0);
     }
 
     public function isValidToProcessCheckout(): bool
@@ -1112,7 +1141,7 @@ class EcommerceHelper
         $maxFilterPrice = $this->getProductMaxPrice($categoryIds) * get_current_exchange_rate();
 
         if ($category) {
-            if (! $category->activeChildren->count() && $category->parent_id) {
+            if ($category->activeChildren->isEmpty() && $category->parent_id) {
                 $category = $category->parent()->with(['activeChildren'])->first();
 
                 if ($category) {
@@ -1125,19 +1154,9 @@ class EcommerceHelper
         }
 
         if ($categoriesRequest) {
-            $categories = ProductCategory::query()
-                ->whereIn('id', $categoriesRequest)
-                ->wherePublished()
-                ->with(['slugable', 'children:id,name,parent_id', 'children.slugable'])
-                ->orderBy('parent_id')
-                ->limit(1)
-                ->get();
+            $categories = ProductCategoryHelper::getProductCategoriesWithUrl($categoriesRequest)->sortBy('parent_id');
         } else {
-            $categories = ProductCategoryHelper::getActiveTreeCategories();
-
-            if ($categories instanceof EloquentCollection) {
-                $categories->loadMissing(['slugable', 'children:id,name,parent_id', 'children.slugable']);
-            }
+            $categories = ProductCategoryHelper::getProductCategoriesWithUrl();
         }
 
         return [

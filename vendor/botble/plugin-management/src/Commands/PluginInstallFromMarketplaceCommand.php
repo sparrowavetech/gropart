@@ -2,6 +2,7 @@
 
 namespace Botble\PluginManagement\Commands;
 
+use Botble\PluginManagement\Commands\Concern\HasPluginNameValidation;
 use Botble\PluginManagement\Services\MarketplaceService;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
@@ -14,15 +15,13 @@ use Throwable;
 #[AsCommand('cms:plugin:install-from-marketplace', 'Install a plugin from https://marketplace.botble.com')]
 class PluginInstallFromMarketplaceCommand extends Command implements PromptsForMissingInput
 {
+    use HasPluginNameValidation;
+
     public function handle(MarketplaceService $marketplaceService): int
     {
+        $this->validatePluginName($this->argument('name'));
+
         $plugin = strtolower($this->argument('name'));
-
-        if (! preg_match('/^[a-z0-9\-_\/]+$/i', $plugin)) {
-            $this->components->error('Only alphabetic characters are allowed.');
-
-            exit(self::FAILURE);
-        }
 
         $response = $marketplaceService->callApi('post', '/products/check-update', [
             'products' => [$plugin => '0.0.0'],

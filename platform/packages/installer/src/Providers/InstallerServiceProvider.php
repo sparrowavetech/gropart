@@ -44,7 +44,7 @@ class InstallerServiceProvider extends ServiceProvider
                 BaseHelper::saveFileData(storage_path(INSTALLED_SESSION_NAME), Carbon::now()->toDateTimeString());
             });
         } catch (Throwable $exception) {
-            info($exception->getMessage());
+            BaseHelper::logError($exception);
         }
     }
 }

@@ -12,8 +12,6 @@ use Carbon\Carbon;
 
 class CustomerForm extends FormAbstract
 {
-    protected $template = 'plugins/ecommerce::customers.form';
-
     public function buildForm(): void
     {
         Assets::addScriptsDirectly('vendor/core/plugins/ecommerce/js/address.js')
@@ -25,9 +23,10 @@ class CustomerForm extends FormAbstract
             ->setupModel(new Customer())
             ->setValidatorClass(CustomerCreateRequest::class)
             ->withCustomFields()
+            ->template('plugins/ecommerce::customers.form')
             ->add('name', 'text', [
                 'label' => trans('core/base::forms.name'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'placeholder' => trans('core/base::forms.name_placeholder'),
                     'data-counter' => 120,
@@ -35,7 +34,7 @@ class CustomerForm extends FormAbstract
             ])
             ->add('email', 'text', [
                 'label' => trans('plugins/ecommerce::customer.email'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'placeholder' => trans('plugins/ecommerce::customer.email_placeholder'),
                     'data-counter' => 60,
@@ -43,7 +42,6 @@ class CustomerForm extends FormAbstract
             ])
             ->add('phone', 'text', [
                 'label' => trans('plugins/ecommerce::customer.phone'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'placeholder' => trans('plugins/ecommerce::customer.phone_placeholder'),
                     'data-counter' => 20,
@@ -51,17 +49,15 @@ class CustomerForm extends FormAbstract
             ])
             ->add('dob', 'datePicker', [
                 'label' => trans('plugins/ecommerce::customer.dob'),
-                'label_attr' => ['class' => 'control-label'],
                 'default_value' => BaseHelper::formatDate(Carbon::now()),
             ])
             ->add('is_change_password', 'checkbox', [
                 'label' => trans('plugins/ecommerce::customer.change_password'),
-                'label_attr' => ['class' => 'control-label'],
                 'value' => 1,
             ])
             ->add('password', 'password', [
                 'label' => trans('plugins/ecommerce::customer.password'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'data-counter' => 60,
                 ],
@@ -72,7 +68,7 @@ class CustomerForm extends FormAbstract
             ])
             ->add('password_confirmation', 'password', [
                 'label' => trans('plugins/ecommerce::customer.password_confirmation'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'data-counter' => 60,
                 ],
@@ -83,13 +79,10 @@ class CustomerForm extends FormAbstract
             ])
             ->add('status', 'customSelect', [
                 'label' => trans('core/base::tables.status'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'choices' => CustomerStatusEnum::labels(),
             ])
-            ->add('avatar', 'mediaImage', [
-                'label' => trans('core/base::forms.image'),
-                'label_attr' => ['class' => 'control-label'],
-            ])
+            ->add('avatar', 'mediaImage')
             ->setBreakFieldPoint('status');
 
         if ($this->getModel()->id) {
@@ -103,15 +96,17 @@ class CustomerForm extends FormAbstract
                         'wrap' => true,
                     ],
                 ])
-                ->addMetaBoxes([
-                    'payments' => [
-                        'title' => trans('plugins/ecommerce::payment.name'),
-                        'content' => view('plugins/ecommerce::customers.payments.payments', [
-                            'payments' => $this->model->payments()->get(),
-                        ])->render(),
-                        'wrap' => true,
-                    ],
-                ]);
+                ->when(is_plugin_active('payment'), function () {
+                    $this->addMetaBoxes([
+                        'payments' => [
+                            'title' => trans('plugins/ecommerce::payment.name'),
+                            'content' => view('plugins/ecommerce::customers.payments.payments', [
+                                'payments' => $this->model->payments()->get(),
+                            ])->render(),
+                            'wrap' => true,
+                        ],
+                    ]);
+                });
         }
     }
 }

@@ -30,7 +30,7 @@
                     @if (request()->query('no-ajax'))
                         @if ($isOutdated)
                             <p class="mb-2 text-success">
-                                {{ __('A new version (:version / released on :date) is available to update!', ['version' => $latestUpdate->version, 'date' => $latestUpdate->releasedDate->toDateString()]) }}
+                                {{ __('A new version (:version / released on :date) is available to update!', ['version' => $latestUpdate->version, 'date' => BaseHelper::formatDate($latestUpdate->releasedDate)]) }}
                             </p>
 
                             <div class="note note-info changelog-info">
@@ -74,7 +74,7 @@
                         >
                             @if ($isOutdated)
                                 <p class="mb-2 text-success">
-                                    {{ __('A new version (:version / released on :date) is available to update!', ['version' => $latestUpdate->version, 'date' => $latestUpdate->releasedDate->toDateString()]) }}
+                                    {{ __('A new version (:version / released on :date) is available to update!', ['version' => $latestUpdate->version, 'date' => BaseHelper::formatDate($latestUpdate->releasedDate)]) }}
                                 </p>
 
                                 <div class="note note-info changelog-info">
@@ -108,7 +108,7 @@
                     class="updater-box bg-transparent shadow-none border-0 p-0"
                     dir="ltr"
                 >
-                    <div class="mb-2 bold">Latest changelog: released on {{ $latestUpdate->releasedDate->toDateString() }}
+                    <div class="mb-2 bold">Latest changelog: released on {{ BaseHelper::formatDate($latestUpdate->releasedDate) }}
                     </div>
                     <pre>{!! trim(
                         str_replace(

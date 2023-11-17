@@ -3,6 +3,7 @@
 namespace Botble\Revision;
 
 use Botble\ACL\Models\User;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Models\BaseModel;
 use Exception;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -123,7 +124,7 @@ class Revision extends BaseModel
             } catch (Exception $exception) {
                 // Just a fail-safe, in the case the data setup isn't as expected
                 // Nothing to do here.
-                info('Revisionable: ' . $exception);
+                BaseHelper::logError($exception);
             }
 
             // if there was an issue

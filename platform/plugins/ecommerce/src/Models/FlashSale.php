@@ -22,7 +22,7 @@ class FlashSale extends BaseModel
 
     protected $casts = [
         'status' => BaseStatusEnum::class,
-        'end_date' => 'datetime',
+        'end_date' => 'date',
         'name' => SafeContent::class,
     ];
 
@@ -33,30 +33,21 @@ class FlashSale extends BaseModel
             ->withPivot(['price', 'quantity', 'sold']);
     }
 
-    public function getEndDateAttribute($value): string|null
-    {
-        if (! $value) {
-            return $value;
-        }
-
-        return Carbon::parse($value)->format('Y/m/d');
-    }
-
     public function scopeNotExpired(Builder $query): Builder
     {
-        return $query->whereDate('end_date', '>', Carbon::now()->toDateString());
+        return $query->whereDate('end_date', '>=', Carbon::now());
     }
 
     public function scopeExpired(Builder $query): Builder
     {
-        return $query->whereDate('end_date', '=<', Carbon::now()->toDateString());
+        return $query->whereDate('end_date', '<', Carbon::now());
     }
 
     protected function expired(): Attribute
     {
         return Attribute::make(
             get: function (): bool {
-                return Carbon::parse($this->end_date)->lessThan(Carbon::now());
+                return $this->end_date->lessThan(Carbon::now()->startOfDay());
             },
         );
     }

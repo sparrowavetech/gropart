@@ -27,7 +27,17 @@
                                 height="70"
                             >
                         </td>
-                        <td><a href="{{ $product->original_product->url }}">{{ $product->original_product->name }}</a>
+                        <td>
+                            <a href="{{ $product->original_product->url }}">{{ $product->original_product->name }}</a>
+
+                            @if (is_plugin_active('marketplace') && $product->original_product->store->id)
+                                <p class="d-block mb-0">
+                                    <small>
+                                        <span>{{ __('Sold by') }}: </span>
+                                        <a href="{{ $product->original_product->store->url }}">{{ $product->original_product->store->name }}</a>
+                                    </small>
+                                </p>
+                            @endif
                         </td>
 
                         <td>

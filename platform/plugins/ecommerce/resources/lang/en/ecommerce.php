@@ -159,7 +159,7 @@ return [
         'use_city_field_as_field_text' => 'Use city field as a free text field?',
         'auto_generate_product_sku' => 'Auto generate SKU when creating product?',
         'product_sku_format' => 'SKU format',
-        'product_sku_format_help' => 'You can use [%s] in the format to generate random string. Ex: SKU-%s-HN',
+        'product_sku_format_helper' => 'You can use %s (1 string character) or %d (1 digit) in the format to generate random string. Ex: SKU-%s%s%s-HN-%d%d%d',
     ],
     'store_address' => 'Store address',
     'store_phone' => 'Store phone',

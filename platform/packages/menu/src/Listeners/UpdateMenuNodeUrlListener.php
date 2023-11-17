@@ -2,6 +2,7 @@
 
 namespace Botble\Menu\Listeners;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Menu\Facades\Menu;
 use Botble\Menu\Models\MenuNode;
 use Botble\Slug\Events\UpdatedSlugEvent;
@@ -31,7 +32,7 @@ class UpdateMenuNodeUrlListener
                 }
             }
         } catch (Exception $exception) {
-            info($exception->getMessage());
+            BaseHelper::logError($exception);
         }
     }
 }

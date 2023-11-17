@@ -27,16 +27,11 @@ use Illuminate\Http\Request;
 
 class OrderController extends BaseController
 {
-    public function __construct()
-    {
-        Assets::setConfig(config('plugins.marketplace.assets', []));
-    }
-
     public function index(OrderTable $table)
     {
         PageTitle::setTitle(__('Orders'));
 
-        return $table->render(MarketplaceHelper::viewPath('dashboard.table.base'));
+        return $table->renderTable();
     }
 
     public function edit(int|string $id)
@@ -62,7 +57,7 @@ class OrderController extends BaseController
 
         $defaultStore = get_primary_store_locator();
 
-        return MarketplaceHelper::view('dashboard.orders.edit', compact('order', 'weight', 'defaultStore'));
+        return MarketplaceHelper::view('vendor-dashboard.orders.edit', compact('order', 'weight', 'defaultStore'));
     }
 
     public function update(int|string $id, UpdateOrderRequest $request, BaseHttpResponse $response)
@@ -115,11 +110,11 @@ class OrderController extends BaseController
         OrderHistory::query()->create([
             'action' => 'confirm_order',
             'description' => trans('plugins/ecommerce::order.order_was_verified_by'),
-            'order_id' => $order->id,
+            'order_id' => $order->getKey(),
             'user_id' => 0,
         ]);
 
-        $payment = Payment::query()->where('order_id', $order->id)->first();
+        $payment = Payment::query()->where('order_id', $order->getKey())->first();
 
         if ($payment) {
             $payment->user_id = 0;
@@ -129,6 +124,7 @@ class OrderController extends BaseController
         $mailer = EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME);
         if ($mailer->templateEnabled('order_confirm')) {
             OrderHelper::setEmailVariables($order);
+
             $mailer->sendUsingTemplate(
                 'order_confirm',
                 $order->user->email ?: $order->address->email

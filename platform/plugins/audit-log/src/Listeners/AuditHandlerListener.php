@@ -4,6 +4,7 @@ namespace Botble\AuditLog\Listeners;
 
 use Botble\AuditLog\Events\AuditHandlerEvent;
 use Botble\AuditLog\Models\AuditHistory;
+use Botble\Base\Facades\BaseHelper;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -55,7 +56,7 @@ class AuditHandlerListener
 
             AuditHistory::query()->insert($data);
         } catch (Exception $exception) {
-            info($exception->getMessage());
+            BaseHelper::logError($exception);
         }
     }
 }

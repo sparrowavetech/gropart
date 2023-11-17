@@ -6,6 +6,7 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\Html;
 use Botble\Base\Models\BaseModel;
 use Botble\Ecommerce\Tables\ProductTable;
+use Botble\Media\Facades\RvMedia;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -27,6 +28,8 @@ class ProductCategory extends BaseModel
         'status',
         'image',
         'is_featured',
+        'icon',
+        'icon_image',
     ];
 
     protected $casts = [
@@ -117,6 +120,25 @@ class ProductCategory extends BaseModel
     public function productAttributeSets(): MorphToMany
     {
         return $this->morphedByMany(ProductAttributeSet::class, 'reference', 'ec_product_categorizables', 'category_id');
+    }
+
+    protected function iconHtml(): Attribute
+    {
+        return Attribute::make(
+            get: function (mixed $value, array $attributes): HtmlString|null {
+                if ($attributes['icon_image']) {
+                    return RvMedia::image($attributes['icon_image'], attributes: [
+                        'alt' => $attributes['name'],
+                    ]);
+                }
+
+                if ($attributes['icon']) {
+                    return Html::tag('i', '', $attributes['icon']);
+                }
+
+                return null;
+            }
+        );
     }
 
     protected static function booted(): void

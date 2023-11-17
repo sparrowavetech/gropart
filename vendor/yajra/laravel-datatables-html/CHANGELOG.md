@@ -8,97 +8,90 @@
 
 ## CHANGELOG
 
-### v9.4.0 - 2023-02-20
+### v10.11.0 - 2023-11-06
+
+- feat: add batch remove optimization script (optional) #212
+
+### v10.10.0 - 2023-11-04
+
+- feat: Add optional scout js script #210
+- feat: add script support when using editor #211
+
+### v10.9.1 - 2023-10-04
+
+- fix: add missing Arrayable param #208
+- fix phpstan error: Parameter #1 $value of method Yajra\DataTables\Html\Builder::searchPanes() expects array|bool|(callable(): mixed), Yajra\DataTables\Html\SearchPane given.
+
+### v10.9.0 - 2023-10-02
+
+- feat: add dtsp collapse option setter #206
+- feat: add initCollapsed option setter #207
+
+### v10.8.2 - 2023-10-02
+
+- fix: show searchPanes by default #205
+
+### v10.8.1 - 2023-08-16
+
+- Revert "fix: Mixed Content problem with updating minifiedAjax method and get current url based on http or https scheme" #202
+- Reverts #186 
+- fix: #201
+
+### v10.8.0 - 2023-07-31
+
+- fix: Mixed Content problem with updating minifiedAjax method and get current url based on http or https scheme #186
+- fix: #194
+- feat: add exportRender method #195
+
+### v10.7.0 - 2023-06-08
+
+- feat: new method for enum options #196
+
+### v10.6.0 - 2023-03-31
+
+- feat: thead class builder #191
+- fix: #169 
+- fix: [yajra/laravel-datatables#2706](https://github.com/yajra/laravel-datatables/issues/2706)
+
+### v10.5.2 - 2023-03-31
+
+- fix: backward compatibility with FormOptions class #190
+
+### v10.5.1 - 2023-03-28
+
+- fix: scripts attributes not working #189
+
+### v10.5.0 - 2023-03-02
+
+- feat: hide/show fields based on editor action #188
+  - hiddenOnCreate
+  - hiddenOnEdit
+  - hiddenOn
+
+### v10.4.0 - 2023-03-02
+
+- feat: add datetime field options #187
+  - wireFormat
+  - keyInput
+  - displayFormat
+
+### v10.3.1 - 2023-02-20
+
+- fix: too long file name check for column render #185
+
+### v10.3.0 - 2023-02-20
+
+- feat: add builder ability to use viteJs by default #184
+
+### v10.2.0 - 2023-02-20
 
 - feat: allow callable exportFormat parameter #167
-- feat: Add onPreClose Event #179
-- feat: Add onOpened Event  #177
-- feat: Add initEditor Event #176
-- feat: Add onClosed Event #175
 
-### v9.3.4 - 2022-10-06
+### v10.1.0 - 2023-02-07
 
-- fix(editor): Fix typehint to match value helper #172
+- Drop Collective\Html dependency #183
+- Copy Collective HtmlBuilder class and implemented php-stan
 
-### v9.3.3 - 2022-10-05
+### v10.0.0 - 2023-02-07
 
-- Fix ajax form search with textarea #171
-
-### v9.3.2 - 2022-07-04
-
-- Fix collection key - value
-
-### v9.3.1 - 2022-07-04
-
-- Fix magic property type
-
-### v9.3.0 - 2022-07-01
-
-- Add nullDefault() method #166
-
-### v9.2.6 - 2022-06-30
-
-- Allow array on default() method #165
-
-### v9.2.5 - 2022-06-02
-
-- Added: Builder addButton method
-- Changed: Builder buttons method will reset existing buttons
-
-### v9.2.4 - 2022-05-21
-
-- Use $this in Editor events magic method #164
-
-### v9.2.3 - 2022-05-21
-
-- Add option to override results wrap key
-
-### v9.2.2 - 2022-05-20
-
-- Fix select2 paginated results and ajax setter
-
-### v9.2.1 - 2022-05-19
-
-- Fix select2 placeholder default id value
-- Add select2 tests
-- Fix select2 placeholder compatibility
-
-### v9.2.0 - 2022-05-19
-
-- Add postAjaxWithForm
-- Fix multiple form values for select and checkbox #163
-
-### v9.1.2 - 2022-05-14
-
-- Fix Undefined property: Yajra\DataTables\Html\Builder::$instance
-
-### v9.1.1 - 2022-05-14
-
-- Fix Undefined array key "{plugin_name}"
-- More tests
-
-### v9.1.0 - 2022-05-14
-
-- A lot of tests and fixes
-- Fix #https://github.com/yajra/laravel-datatables-html/issues/162
-- Added Column authorization
-
-### v9.0.3 - 2022-05-13
-
-- Fix attr setter
-
-### v9.0.2 - 2022-05-13
-
-- Fix opts and attr setter
-
-### v9.0.1 - 2022-05-08
-
-- Allow array for orthogonal column data
-- REF: https://github.com/yajra/laravel-datatables/pull/2380
-
-### v9.0.0 - 2022-05-08
-
-- Add Laravel 9 support
-- Remove Laravel 8 and below support
-- Add phpstan static analysis
-- Improve tests
+- Add Laravel 10 specific support

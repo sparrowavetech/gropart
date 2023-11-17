@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.25.0](https://github.com/googleapis/gax-php/compare/v1.24.0...v1.25.0) (2023-11-02)
+
+
+### Features
+
+* Add custom retries ([#489](https://github.com/googleapis/gax-php/issues/489)) ([ef0789b](https://github.com/googleapis/gax-php/commit/ef0789b73ef28d79a08c354d1361a9ccc6206088))
+
+## [1.24.0](https://github.com/googleapis/gax-php/compare/v1.23.0...v1.24.0) (2023-10-10)
+
+
+### Features
+
+* Ensure NewClientSurface works for consoldiated v2 clients ([#493](https://github.com/googleapis/gax-php/issues/493)) ([cb8706e](https://github.com/googleapis/gax-php/commit/cb8706ef9211a1e43f733d2c8f272a330c2fa792))
+
 ## [1.23.0](https://github.com/googleapis/gax-php/compare/v1.22.1...v1.23.0) (2023-09-14)
 
 

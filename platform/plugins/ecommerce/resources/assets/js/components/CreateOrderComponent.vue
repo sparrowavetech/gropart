@@ -380,7 +380,7 @@
                                                 </span>
                                             </td>
                                         </tr>
-                                        <tr class="text-no-bold">
+                                        <tr class="text-no-bold" v-if="child_total_amount">
                                             <td colspan="2">
                                                 <div>{{ __('order.payment_method') }}</div>
                                                 <div class="ui-select-wrapper">
@@ -424,7 +424,7 @@
                             <button
                                 class="btn btn-success"
                                 v-ec-modal.make-paid
-                                :disabled="!child_product_ids.length || child_payment_method == 'cod'"
+                                :disabled="(!child_product_ids.length || child_payment_method == 'cod') && child_total_amount !== 0"
                             >
                                 {{ __('order.paid') }}
                             </button>
@@ -659,7 +659,7 @@
                             </li>
                         </ul>
                     </div>
-                    <div class="next-card-section">
+                    <div class="next-card-section" v-if="is_available_shipping">
                         <ul class="ws-nm">
                             <li class="clearfix">
                                 <div class="flexbox-grid-default">

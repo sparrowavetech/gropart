@@ -1,10 +1,8 @@
 <?php
 
 use Botble\Ads\Facades\AdsManager;
-use Botble\Ads\Models\Ads;
-use Botble\Base\Facades\Html;
+use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
-use Botble\Ecommerce\Facades\ProductCategoryHelper;
 use Botble\Ecommerce\Models\FlashSale;
 use Botble\Ecommerce\Models\ProductCategory;
 use Botble\Ecommerce\Models\ProductCollection;
@@ -15,6 +13,8 @@ use Botble\Shortcode\Compilers\Shortcode;
 use Botble\Theme\Facades\Theme;
 use Botble\Theme\Supports\ThemeSupport;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Theme\Farmart\Supports\Wishlist;
 
@@ -59,39 +59,9 @@ app()->booted(function () {
     }
 
     if (is_plugin_active('ads')) {
-        function get_ads_from_key(string|null $key): Ads|null
-        {
-            if (! $key) {
-                return null;
-            }
-
-            $ads = AdsManager::getData(true)->firstWhere('key', $key);
-
-            if (! $ads || ! $ads->image) {
-                return null;
-            }
-
-            return $ads;
-        }
-
         function display_ads_advanced(?string $key, array $attributes = []): ?string
         {
-            $ads = get_ads_from_key($key);
-
-            if (! $ads) {
-                return null;
-            }
-
-            $image = Html::image(image_placeholder($ads->image), $ads->name, ['class' => 'lazyload', 'data-src' => RvMedia::getImageUrl($ads->image)])->toHtml();
-
-            if ($ads->url) {
-                $image = Html::link(route('public.ads-click', $ads->key), $image, array_merge($attributes, $ads->open_in_new_tab ? ['target' => '_blank'] : []), null, false)
-                    ->toHtml();
-            } elseif ($attributes) {
-                $image = Html::tag('div', $image, $attributes)->toHtml();
-            }
-
-            return $image;
+            return AdsManager::displayAds($key, $attributes);
         }
 
         add_shortcode('theme-ads', __('Theme ads'), __('Theme ads'), function (Shortcode $shortcode) {
@@ -129,7 +99,27 @@ app()->booted(function () {
             __('Featured Product Categories'),
             __('Featured Product Categories'),
             function (Shortcode $shortcode) {
-                return Theme::partial('shortcodes.ecommerce.featured-product-categories', compact('shortcode'));
+                $categories = ProductCategory::query()
+                    ->toBase()
+                    ->where('status', BaseStatusEnum::PUBLISHED)
+                    ->select([
+                        'ec_product_categories.id',
+                        'ec_product_categories.name',
+                        'ec_product_categories.image',
+                        DB::raw('CONCAT(slugs.prefix, "/", slugs.key) as url'),
+                    ])
+                    ->where('is_featured', true)
+                    ->leftJoin('slugs', function (JoinClause $join) {
+                        $join
+                            ->on('slugs.reference_id', 'ec_product_categories.id')
+                            ->where('slugs.reference_type', ProductCategory::class);
+                    })
+                    ->orderByDesc('ec_product_categories.created_at')
+                    ->orderBy('ec_product_categories.order')
+                    ->when($shortcode->limit > 0, fn ($query) => $query->limit($shortcode->limit))
+                    ->get();
+
+                return Theme::partial('shortcodes.ecommerce.featured-product-categories', compact('shortcode', 'categories'));
             }
         );
 
@@ -272,9 +262,7 @@ app()->booted(function () {
         );
 
         shortcode()->setAdminConfig('product-category-products', function (array $attributes) {
-            $categories = ProductCategoryHelper::getTreeCategoriesOptions(ProductCategoryHelper::getActiveTreeCategories()->toArray());
-
-            return Theme::partial('shortcodes.ecommerce.product-category-products-admin-config', compact('attributes', 'categories'));
+            return Theme::partial('shortcodes.ecommerce.product-category-products-admin-config', compact('attributes'));
         });
 
         add_shortcode('featured-products', __('Featured products'), __('Featured products'), function (Shortcode $shortcode) {

@@ -115,6 +115,12 @@ class CityController extends BaseController
             $data = $data->where('state_id', $stateId);
         }
 
+        $countryId = $request->input('country_id');
+
+        if ($countryId && $countryId != 'null') {
+            $data = $data->where('country_id', $countryId);
+        }
+
         $keyword = BaseHelper::stringify($request->query('k'));
 
         if ($keyword) {

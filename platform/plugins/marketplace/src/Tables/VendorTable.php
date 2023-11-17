@@ -3,6 +3,7 @@
 namespace Botble\Marketplace\Tables;
 
 use Botble\Ecommerce\Tables\CustomerTable;
+use Botble\Table\Columns\Column;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -31,14 +32,11 @@ class VendorTable extends CustomerTable
     {
         $columns = parent::columns();
 
-        $columns['store_name'] = [
-            'title' => trans('plugins/marketplace::marketplace.store_name'),
-            'class' => 'text-start',
-            'orderable' => false,
-            'searchable' => false,
-            'exportable' => false,
-            'printable' => false,
-        ];
+        $columns[] = Column::make('store_name')
+            ->title(trans('plugins/marketplace::marketplace.store_name'))
+            ->alignStart()
+            ->orderable(false)
+            ->searchable(false);
 
         return $columns;
     }

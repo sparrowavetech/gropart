@@ -60,7 +60,7 @@ abstract class TableBulkActionAbstract implements Htmlable, Stringable
 
     public function getDispatchUrl(): string
     {
-        return $this->dispatchUrl ?? route('tables.bulk-actions.dispatch');
+        return $this->dispatchUrl ?? $this->getTable()->getBulkActionDispatchUrl();
     }
 
     public function beforeDispatch(Closure $beforeDispatch): static

@@ -55,6 +55,10 @@ class SslCommerz extends SslCommerzNotification
 
     public function callApi(): array
     {
+        if (! $this->getStoreId() || ! $this->getStorePassword()) {
+            throw new Exception('Missing store ID or password!');
+        }
+
         $response = Http::get($this->getApiUrl(), [
             'query' => $this->data,
         ]);

@@ -465,14 +465,14 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
                 success: (res) => {
                     if (res.error) {
                         MartApp.showError(res.message)
-                        if (res.data.next_url !== undefined) {
+                        if (res.data && res.data.next_url !== undefined) {
                             window.location.href = res.data.next_url
                         }
 
                         return false
                     }
 
-                    if (res.data.next_url !== undefined) {
+                    if (res.data && res.data.next_url !== undefined) {
                         window.location.href = res.data.next_url
                         return false
                     }

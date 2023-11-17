@@ -8,7 +8,7 @@
         [
             'type' => 'textarea',
             'label' => trans('plugins/faq::faq.question'),
-            'label_attr' => ['class' => 'control-label required'],
+            'required' => true,
             'attributes' => [
                 'name' => 'question',
                 'value' => null,
@@ -22,7 +22,7 @@
         [
             'type' => 'textarea',
             'label' => trans('plugins/faq::faq.answer'),
-            'label_attr' => ['class' => 'control-label required'],
+            'required' => true,
             'attributes' => [
                 'name' => 'answer',
                 'value' => null,

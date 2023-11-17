@@ -29,50 +29,53 @@
                         </a>
                     </div>
                     @php
-                        $categories = ProductCategoryHelper::getActiveTreeCategories();
+                        $categories = ProductCategoryHelper::getProductCategoriesWithUrl();
                         $categoriesRequest = (array) request()->input('categories', []);
                         $urlCurrent = URL::current();
                         $activeCategoryId = Arr::get($categoriesRequest, 0);
                     @endphp
-                    <div class="catalog-filter-sidebar-content px-3 px-md-0">
-                        <form
-                            id="products-filter-form"
-                            data-action="{{ $store->url }}"
-                            data-title="{{ $store->name }}"
-                            action="{{ URL::current() }}"
-                            method="GET"
-                        >
-                            <input
-                                class="product-filter-item"
-                                name="sort-by"
-                                type="hidden"
-                                value="{{ BaseHelper::stringify(request()->input('sort-by')) }}"
+
+                    @if($categories->isNotEmpty())
+                        <div class="catalog-filter-sidebar-content px-3 px-md-0">
+                            <form
+                                id="products-filter-form"
+                                data-action="{{ $store->url }}"
+                                data-title="{{ $store->name }}"
+                                action="{{ URL::current() }}"
+                                method="GET"
                             >
-                            <input
-                                class="product-filter-item"
-                                name="layout"
-                                type="hidden"
-                                value="{{ BaseHelper::stringify(request()->input('layout')) }}"
-                            >
-                            <div class="widget-wrapper widget-product-categories">
-                                <h4 class="widget-title">{{ __('All Categories') }}</h4>
                                 <input
                                     class="product-filter-item"
-                                    name="categories[]"
+                                    name="sort-by"
                                     type="hidden"
-                                    value="{{ $activeCategoryId }}"
+                                    value="{{ BaseHelper::stringify(request()->input('sort-by')) }}"
                                 >
-                                <div class="widget-layered-nav-list">
-                                    @include(Theme::getThemeNamespace('views.ecommerce.includes.categories'),
-                                        compact(
-                                            'categories',
-                                            'categoriesRequest',
-                                            'urlCurrent',
-                                            'activeCategoryId'))
+                                <input
+                                    class="product-filter-item"
+                                    name="layout"
+                                    type="hidden"
+                                    value="{{ BaseHelper::stringify(request()->input('layout')) }}"
+                                >
+                                <div class="widget-wrapper widget-product-categories">
+                                    <h4 class="widget-title">{{ __('All Categories') }}</h4>
+                                    <input
+                                        class="product-filter-item"
+                                        name="categories[]"
+                                        type="hidden"
+                                        value="{{ $activeCategoryId }}"
+                                    >
+                                    <div class="widget-layered-nav-list">
+                                        @include(Theme::getThemeNamespace('views.ecommerce.includes.categories'),
+                                            compact(
+                                                'categories',
+                                                'categoriesRequest',
+                                                'urlCurrent',
+                                                'activeCategoryId'))
+                                    </div>
                                 </div>
-                            </div>
-                        </form>
-                    </div>
+                            </form>
+                        </div>
+                    @endif
                 </div>
             </aside>
             <aside
@@ -108,14 +111,15 @@
                                 method="post"
                             >
                                 @csrf
+                                <input type="hidden" name="store_id" value="{{ $store->id }}">
                                 <div class="mb-3">
                                     <input
                                         class="form-control"
                                         name="name"
                                         type="text"
-                                        @if (auth('customer')->check()) value="{{ auth('customer')->user()->name }}" @endif
+                                        @if ($customer = auth('customer')->user()) value="{{ $customer->name }}" @endif
                                         placeholder="{{ __('Your Name') }}"
-                                        @if (auth('customer')->check()) disabled @else minlength="5" required="required" @endif
+                                        @if ($customer) disabled @else minlength="5" required="required" @endif
                                     >
                                 </div>
                                 <div class="mb-3">
@@ -123,9 +127,9 @@
                                         class="form-control"
                                         name="email"
                                         type="email"
-                                        @if (auth('customer')->check()) value="{{ auth('customer')->user()->email }}" @endif
+                                        @if ($customer) value="{{ $customer->email }}" @endif
                                         placeholder="you@example.com"
-                                        @if (auth('customer')->check()) disabled @else required="required" @endif
+                                        @if ($customer) disabled @else required="required" @endif
                                     >
                                 </div>
                                 <div class="mb-3">

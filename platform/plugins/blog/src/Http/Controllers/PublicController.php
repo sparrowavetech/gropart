@@ -24,7 +24,7 @@ class PublicController extends Controller
         SeoHelper::setTitle($title)
             ->setDescription($title);
 
-        $posts = $postRepository->getSearch($query, 0, 12);
+        $posts = $postRepository->getSearch($query, 0, (int)theme_option('number_of_posts_in_a_category', 12));
 
         Theme::breadcrumb()
             ->add(__('Home'), route('public.index'))

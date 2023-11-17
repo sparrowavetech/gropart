@@ -27,7 +27,7 @@ class FlashSaleForm extends FormAbstract
             ->withCustomFields()
             ->add('name', 'text', [
                 'label' => trans('core/base::forms.name'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'placeholder' => trans('core/base::forms.name_placeholder'),
                     'data-counter' => 120,
@@ -35,7 +35,7 @@ class FlashSaleForm extends FormAbstract
             ])
             ->add('status', 'customSelect', [
                 'label' => trans('core/base::tables.status'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'class' => 'form-control address',
                 ],
@@ -43,7 +43,7 @@ class FlashSaleForm extends FormAbstract
             ])
             ->add('end_date', 'datePicker', [
                 'label' => __('End date'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'default_value' => BaseHelper::formatDate(Carbon::now()->addMonth()),
             ])
             ->addMetaBoxes([

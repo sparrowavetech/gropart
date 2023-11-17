@@ -14,9 +14,15 @@ class StoreTagService extends StoreTagServiceAbstract
 {
     public function execute(Request $request, Post $post): void
     {
-        $tags = $post->tags->pluck('name')->all();
+        $tagsInput = $request->input('tag');
 
-        $tagsInput = collect(json_decode($request->input('tag'), true))->pluck('value')->all();
+        if (! $tagsInput) {
+            $tagsInput = [];
+        } else {
+            $tagsInput = collect(json_decode($tagsInput, true))->pluck('value')->all();
+        }
+
+        $tags = $post->tags->pluck('name')->all();
 
         if (count($tags) != count($tagsInput) || count(array_diff($tags, $tagsInput)) > 0) {
             $post->tags()->detach();
@@ -30,7 +36,7 @@ class StoreTagService extends StoreTagServiceAbstract
                 if ($tag === null && ! empty($tagName)) {
                     $tag = Tag::query()->create([
                         'name' => $tagName,
-                        'author_id' => Auth::check() ? Auth::id() : 0,
+                        'author_id' => Auth::guard()->check() ? Auth::guard()->id() : 0,
                         'author_type' => User::class,
                     ]);
 

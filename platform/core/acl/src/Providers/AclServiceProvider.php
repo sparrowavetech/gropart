@@ -13,6 +13,7 @@ use Botble\ACL\Repositories\Eloquent\UserRepository;
 use Botble\ACL\Repositories\Interfaces\ActivationInterface;
 use Botble\ACL\Repositories\Interfaces\RoleInterface;
 use Botble\ACL\Repositories\Interfaces\UserInterface;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Supports\ServiceProvider;
@@ -142,7 +143,7 @@ class AclServiceProvider extends ServiceProvider
             try {
                 $repository->removeExpired();
             } catch (Exception $exception) {
-                info($exception->getMessage());
+                BaseHelper::logError($exception);
             }
         }
     }

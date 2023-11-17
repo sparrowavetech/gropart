@@ -4,11 +4,13 @@ namespace Botble\Marketplace\Tables;
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
+use Botble\Ecommerce\Tables\Formatters\PriceFormatter;
 use Botble\Marketplace\Enums\WithdrawalStatusEnum;
 use Botble\Marketplace\Models\Withdrawal;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Actions\DeleteAction;
 use Botble\Table\Actions\EditAction;
+use Botble\Table\Columns\Column;
 use Botble\Table\Columns\CreatedAtColumn;
 use Botble\Table\Columns\IdColumn;
 use Botble\Table\Columns\StatusColumn;
@@ -45,12 +47,8 @@ class WithdrawalTable extends TableAbstract
 
                 return Html::link(route('customers.edit', $item->customer->id), BaseHelper::clean($item->customer->name));
             })
-            ->editColumn('fee', function ($item) {
-                return format_price($item->fee);
-            })
-            ->editColumn('amount', function ($item) {
-                return format_price($item->amount);
-            });
+            ->formatColumn('fee', PriceFormatter::class)
+            ->formatColumn('amount', PriceFormatter::class);
 
         return $this->toJson($data);
     }
@@ -78,18 +76,11 @@ class WithdrawalTable extends TableAbstract
     {
         return [
             IdColumn::make(),
-            'customer_id' => [
-                'title' => trans('plugins/marketplace::withdrawal.vendor'),
-                'class' => 'text-start',
-            ],
-            'amount' => [
-                'title' => trans('plugins/marketplace::withdrawal.amount'),
-                'class' => 'text-start',
-            ],
-            'fee' => [
-                'title' => trans('plugins/ecommerce::shipping.fee'),
-                'class' => 'text-start',
-            ],
+            Column::make('customer_id')
+                ->title(trans('plugins/marketplace::withdrawal.vendor'))
+                ->alignStart(),
+            Column::formatted('amount')->title(trans('plugins/ecommerce::order.amount')),
+            Column::formatted('fee')->title(trans('plugins/ecommerce::shipping.fee')),
             CreatedAtColumn::make(),
             StatusColumn::make(),
         ];

@@ -125,7 +125,7 @@ class ShippingMethodController extends BaseController
 
         event(new UpdatedContentEvent(SHIPPING_RULE_ITEM_MODULE_SCREEN_NAME, $request, $rule));
 
-        if ($rule->type != ShippingRuleTypeEnum::BASED_ON_ZIPCODE) {
+        if (! in_array($rule->type, [ShippingRuleTypeEnum::BASED_ON_ZIPCODE, ShippingRuleTypeEnum::BASED_ON_LOCATION])) {
             $rule->items()->delete();
 
             foreach ($request->input('shipping_rule_items', []) as $key => $item) {

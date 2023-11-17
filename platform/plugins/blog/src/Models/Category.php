@@ -34,6 +34,8 @@ class Category extends BaseModel
         'status' => BaseStatusEnum::class,
         'name' => SafeContent::class,
         'description' => SafeContent::class,
+        'is_default' => 'bool',
+        'order' => 'int',
     ];
 
     public function posts(): BelongsToMany

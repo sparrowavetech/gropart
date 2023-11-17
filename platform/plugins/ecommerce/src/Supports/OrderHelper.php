@@ -82,7 +82,7 @@ class OrderHelper
         }
 
         foreach ($orders as $order) {
-            if (! $order->payment_id) {
+            if ((float)$order->amount && (is_plugin_active('payment') && ! $order->payment_id)) {
                 continue;
             }
 
@@ -96,7 +96,7 @@ class OrderHelper
 
             $order->save();
 
-            OrderHelper::decreaseProductQuantity($order);
+            $this->decreaseProductQuantity($order);
 
             if (EcommerceHelper::isOrderAutoConfirmedEnabled()) {
                 OrderHistory::query()->create([
@@ -138,9 +138,12 @@ class OrderHelper
                 'order_id' => $order->id,
             ]);
 
-            if (is_plugin_active(
-                'payment'
-            ) && $order->payment && $order->payment->status == PaymentStatusEnum::COMPLETED) {
+            if (
+                is_plugin_active('payment') &&
+                $order->amount &&
+                $order->payment &&
+                $order->payment->status == PaymentStatusEnum::COMPLETED
+            ) {
                 $this->sendEmailForDigitalProducts($order);
             }
         }
@@ -188,6 +191,12 @@ class OrderHelper
 
     public function setEmailVariables(Order $order): EmailHandlerSupport
     {
+        return EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME)
+            ->setVariableValues($this->getEmailVariables($order));
+    }
+
+    public function getEmailVariables(Order $order): array
+    {
         $paymentMethod = '&mdash;';
 
         if (is_plugin_active('payment')) {
@@ -200,27 +209,30 @@ class OrderHelper
             }
         }
 
-        return EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME)
-            ->setVariableValues([
-                'store_address' => get_ecommerce_setting('store_address'),
-                'store_phone' => get_ecommerce_setting('store_phone'),
-                'order_id' => $order->code,
-                'order_token' => $order->token,
-                'order_note' => $order->description,
-                'customer_name' => BaseHelper::clean($order->user->name ?: $order->address->name),
-                'customer_email' => $order->user->email ?: $order->address->email,
-                'customer_phone' => $order->user->phone ?: $order->address->phone,
-                'customer_address' => $order->full_address,
-                'product_list' => view('plugins/ecommerce::emails.partials.order-detail', compact('order'))
-                    ->render(),
-                'shipping_method' => $order->shipping_method_name,
-                'payment_method' => $paymentMethod,
-                'order_delivery_notes' => view(
-                    'plugins/ecommerce::emails.partials.order-delivery-notes',
-                    compact('order')
-                )
-                    ->render(),
-            ]);
+        return apply_filters('ecommerce_order_email_variables', [
+            'store_address' => get_ecommerce_setting('store_address'),
+            'store_phone' => get_ecommerce_setting('store_phone'),
+            'order_id' => $order->code,
+            'order_token' => $order->token,
+            'order_note' => $order->description,
+            'customer_name' => BaseHelper::clean($order->user->name ?: $order->address->name),
+            'customer_email' => $order->user->email ?: $order->address->email,
+            'customer_phone' => $order->user->phone ?: $order->address->phone,
+            'customer_address' => $order->full_address,
+            'product_list' => view('plugins/ecommerce::emails.partials.order-detail', compact('order'))
+                ->render(),
+            'shipping_method' => $order->shipping_method_name,
+            'payment_method' => $paymentMethod,
+            'order_delivery_notes' => view(
+                'plugins/ecommerce::emails.partials.order-delivery-notes',
+                compact('order')
+            )
+                ->render(),
+            'order' => $order->toArray(),
+            'shipment' => $order->shipment ? $order->shipment->toArray() : [],
+            'address' => $order->address->toArray(),
+            'products' => $order->products->toArray(),
+        ], $order);
     }
 
     public function sendOrderConfirmationEmail(Order $order, bool $saveHistory = false): bool
@@ -467,8 +479,8 @@ class OrderHelper
 
         $image = $product->image ?: $parentProduct->image;
         $options = [];
-        if ($request->input('options')) {
-            $options = $this->getProductOptionData($request->input('options'));
+        if ($requestOption = $request->input('options')) {
+            $options = $this->getProductOptionData($requestOption);
         }
 
         /**
@@ -495,40 +507,49 @@ class OrderHelper
 
     public function getProductOptionData(array $data): array
     {
-        $result = [];
-        if (! empty($data)) {
-            foreach ($data as $key => $option) {
-                if (empty($option) || ! is_array($option)) {
-                    continue;
-                }
+        $result = [
+            'optionCartValue' => [],
+        ];
 
-                $optionValue = OptionValue::query()
-                    ->select(['option_value', 'affect_price', 'affect_type'])
-                    ->where('option_id', $key);
+        if (empty($data)) {
+            return $result;
+        }
 
-                if ($option['option_type'] != 'field' && isset($option['values'])) {
-                    if (is_array($option['values'])) {
-                        $optionValue->whereIn('option_value', $option['values']);
-                    } else {
-                        $optionValue->whereIn('option_value', [0 => $option['values']]);
-                    }
-                }
+        foreach ($data as $key => $option) {
+            if (empty($option) || ! is_array($option) || ! isset($option['values'])) {
+                continue;
+            }
 
-                $result['optionCartValue'][$key] = $optionValue->get()->toArray();
-                foreach ($result['optionCartValue'][$key] as &$item) {
-                    $item['option_type'] = $option['option_type'];
-                }
+            $optionValue = OptionValue::query()
+                ->select(['option_value', 'affect_price', 'affect_type'])
+                ->where('option_id', $key);
 
-                if ($option['option_type'] == 'field' && isset($option['values']) && count(
-                    $result['optionCartValue']
-                ) > 0) {
-                    $result['optionCartValue'][$key][0]['option_value'] = $option['values'];
+            if ($option['option_type'] != 'field') {
+                if (is_array($option['values'])) {
+                    $optionValue->whereIn('option_value', $option['values']);
+                } else {
+                    $optionValue->whereIn('option_value', [0 => $option['values']]);
                 }
+            }
+
+            $result['optionCartValue'][$key] = $optionValue->get()->toArray();
+
+            foreach ($result['optionCartValue'][$key] as &$item) {
+                $item['option_type'] = $option['option_type'];
+            }
+
+            if (
+                $option['option_type'] == 'field' &&
+                count($result['optionCartValue']) > 0
+            ) {
+                $result['optionCartValue'][$key][0]['option_value'] = $option['values'];
             }
         }
 
-        $result['optionInfo'] = Option::query()->whereIn('id', array_keys($data))->get()->pluck('name', 'id')->toArray(
-        );
+        $result['optionInfo'] = Option::query()
+            ->whereIn('id', array_keys($data))
+            ->pluck('name', 'id')
+            ->all();
 
         return $result;
     }
@@ -890,7 +911,7 @@ class OrderHelper
 
         $mailer = EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME);
         if ($mailer->templateEnabled('order_confirm_payment')) {
-            OrderHelper::setEmailVariables($order);
+            $this->setEmailVariables($order);
             $mailer->sendUsingTemplate(
                 'order_confirm_payment',
                 $order->user->email ?: $order->address->email
@@ -942,7 +963,7 @@ class OrderHelper
 
         $mailer = EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME);
         if ($mailer->templateEnabled('customer_cancel_order')) {
-            OrderHelper::setEmailVariables($order);
+            $this->setEmailVariables($order);
             $mailer->sendUsingTemplate(
                 'customer_cancel_order',
                 $order->user->email ?: $order->address->email

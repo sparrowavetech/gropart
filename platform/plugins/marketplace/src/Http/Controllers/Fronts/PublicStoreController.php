@@ -7,6 +7,7 @@ use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Services\Products\GetProductService;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Http\Requests\CheckStoreUrlRequest;
 use Botble\Marketplace\Models\Store;
 use Botble\Media\Facades\RvMedia;
@@ -57,7 +58,7 @@ class PublicStoreController
             ->orderByDesc('created_at')
             ->paginate(12);
 
-        return Theme::scope('marketplace.stores', compact('stores'), 'plugins/marketplace::themes.stores')->render();
+        return Theme::scope('marketplace.stores', compact('stores'), MarketplaceHelper::viewPath('stores', false))->render();
     }
 
     public function getStore(
@@ -118,7 +119,7 @@ class PublicStoreController
             $view = Theme::getThemeNamespace('views.marketplace.stores.items');
 
             if (! view()->exists($view)) {
-                $view = 'plugins/marketplace::themes.stores.items';
+                $view = MarketplaceHelper::viewPath('stores.items', false);
             }
 
             return $response
@@ -126,7 +127,7 @@ class PublicStoreController
                 ->setMessage($message);
         }
 
-        return Theme::scope('marketplace.store', compact('store', 'products'), 'plugins/marketplace::themes.store')->render();
+        return Theme::scope('marketplace.store', compact('store', 'products'), MarketplaceHelper::viewPath('store', false))->render();
     }
 
     public function checkStoreUrl(CheckStoreUrlRequest $request, BaseHttpResponse $response)

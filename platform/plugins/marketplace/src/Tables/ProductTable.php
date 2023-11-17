@@ -9,10 +9,12 @@ use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Product;
 use Botble\Marketplace\Exports\ProductExport;
+use Botble\Marketplace\Tables\Traits\ForVendor;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Actions\DeleteAction;
 use Botble\Table\Actions\EditAction;
 use Botble\Table\BulkActions\DeleteBulkAction;
+use Botble\Table\Columns\Column;
 use Botble\Table\Columns\CreatedAtColumn;
 use Botble\Table\Columns\IdColumn;
 use Botble\Table\Columns\ImageColumn;
@@ -25,6 +27,8 @@ use Illuminate\Http\JsonResponse;
 
 class ProductTable extends TableAbstract
 {
+    use ForVendor;
+
     public function setup(): void
     {
         $this->exportClass = ProductExport::class;
@@ -89,22 +93,18 @@ class ProductTable extends TableAbstract
             IdColumn::make(),
             ImageColumn::make(),
             NameColumn::make()->route('marketplace.vendor.products.edit'),
-            'price' => [
-                'title' => trans('plugins/ecommerce::products.price'),
-                'class' => 'text-start',
-            ],
-            'quantity' => [
-                'title' => trans('plugins/ecommerce::products.quantity'),
-                'class' => 'text-start',
-            ],
-            'sku' => [
-                'title' => trans('plugins/ecommerce::products.sku'),
-                'class' => 'text-start',
-            ],
-            'order' => [
-                'title' => trans('core/base::tables.order'),
-                'width' => '50px',
-            ],
+            Column::make('price')
+                ->title(trans('plugins/ecommerce::products.price'))
+                ->alignStart(),
+            Column::make('quantity')
+                ->title(trans('plugins/ecommerce::products.quantity'))
+                ->alignStart(),
+            Column::make('sku')
+                ->title(trans('plugins/ecommerce::products.sku'))
+                ->alignStart(),
+            Column::make('order')
+                ->title(trans('core/base::tables.order'))
+                ->width(50),
             CreatedAtColumn::make(),
             StatusColumn::make(),
         ];
@@ -177,9 +177,6 @@ class ProductTable extends TableAbstract
 
     public function getDefaultButtons(): array
     {
-        return [
-            'export',
-            'reload',
-        ];
+        return array_merge(['export'], parent::getDefaultButtons());
     }
 }

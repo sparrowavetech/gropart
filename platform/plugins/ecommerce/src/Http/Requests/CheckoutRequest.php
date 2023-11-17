@@ -23,7 +23,7 @@ class CheckoutRequest extends Request
                 return get_payment_setting('status', $value) == 1;
             });
 
-            $rules['payment_method'] = 'required|' . Rule::in($paymentMethods);
+            $rules['payment_method'] = 'sometimes|' . Rule::in($paymentMethods);
         }
 
         $addressId = $this->input('address.address_id');

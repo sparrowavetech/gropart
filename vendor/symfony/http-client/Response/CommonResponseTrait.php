@@ -35,9 +35,6 @@ trait CommonResponseTrait
     private int $offset = 0;
     private ?array $jsonData = null;
 
-    /**
-     * {@inheritdoc}
-     */
     public function getContent(bool $throw = true): string
     {
         if ($this->initializer) {
@@ -75,9 +72,6 @@ trait CommonResponseTrait
         return stream_get_contents($this->content);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function toArray(bool $throw = true): array
     {
         if ('' === $content = $this->getContent($throw)) {
@@ -107,7 +101,7 @@ trait CommonResponseTrait
     }
 
     /**
-     * {@inheritdoc}
+     * @return resource
      */
     public function toStream(bool $throw = true)
     {
@@ -162,7 +156,7 @@ trait CommonResponseTrait
         $response->initializer = null;
     }
 
-    private function checkStatusCode()
+    private function checkStatusCode(): void
     {
         $code = $this->getInfo('http_code');
 

@@ -157,5 +157,15 @@ class FormServiceProvider extends ServiceProvider
             'value' => null,
             'attributes' => [],
         ]);
+
+        Form::component('nestedSelectDropdown', 'core/base::forms.partials.nested-select-dropdown', [
+            'name',
+            'choices' => [],
+            'selected' => null,
+            'attributes' => [],
+            'selectAttributes' => [],
+            'optionsAttributes' => [],
+            'optgroupsAttributes' => [],
+        ]);
     }
 }

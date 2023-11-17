@@ -2,13 +2,14 @@
 
 namespace Botble\Marketplace\Tables;
 
+use Botble\Ecommerce\Tables\Formatters\PriceFormatter;
 use Botble\Marketplace\Models\Withdrawal;
+use Botble\Marketplace\Tables\Traits\ForVendor;
 use Botble\Table\Abstracts\TableAbstract;
+use Botble\Table\Columns\Column;
 use Botble\Table\Columns\CreatedAtColumn;
 use Botble\Table\Columns\IdColumn;
 use Botble\Table\Columns\StatusColumn;
-use Botble\Table\DataTables;
-use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -16,23 +17,19 @@ use Illuminate\Http\JsonResponse;
 
 class VendorWithdrawalTable extends TableAbstract
 {
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Withdrawal $model)
-    {
-        parent::__construct($table, $urlGenerator);
+    use ForVendor;
 
-        $this->model = $model;
+    public function setup(): void
+    {
+        $this->model(Withdrawal::class);
     }
 
     public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('fee', function (Withdrawal $item) {
-                return format_price($item->fee);
-            })
-            ->editColumn('amount', function (Withdrawal $item) {
-                return format_price($item->amount);
-            })
+            ->formatColumn('fee', PriceFormatter::class)
+            ->formatColumn('amount', PriceFormatter::class)
             ->addColumn('operations', function (Withdrawal $item) {
                 return view('plugins/marketplace::withdrawals.tables.actions', compact('item'))->render();
             });
@@ -60,12 +57,8 @@ class VendorWithdrawalTable extends TableAbstract
     {
         return [
             IdColumn::make(),
-            'amount' => [
-                'title' => trans('plugins/ecommerce::order.amount'),
-            ],
-            'fee' => [
-                'title' => trans('plugins/ecommerce::shipping.fee'),
-            ],
+            Column::formatted('amount')->title(trans('plugins/ecommerce::order.amount')),
+            Column::formatted('fee')->title(trans('plugins/ecommerce::shipping.fee')),
             StatusColumn::make(),
             CreatedAtColumn::make(),
         ];
@@ -73,10 +66,7 @@ class VendorWithdrawalTable extends TableAbstract
 
     public function getDefaultButtons(): array
     {
-        return [
-            'export',
-            'reload',
-        ];
+        return array_merge(['export'], parent::getDefaultButtons());
     }
 
     public function buttons(): array

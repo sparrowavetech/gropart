@@ -60,6 +60,7 @@ class Customer extends BaseModel implements
 
     protected $casts = [
         'status' => CustomerStatusEnum::class,
+        'dob' => 'date',
     ];
 
     public function sendPasswordResetNotification($token): void

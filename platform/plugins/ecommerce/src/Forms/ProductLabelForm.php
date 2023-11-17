@@ -17,7 +17,7 @@ class ProductLabelForm extends FormAbstract
             ->withCustomFields()
             ->add('name', 'text', [
                 'label' => trans('core/base::forms.name'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'placeholder' => trans('core/base::forms.name_placeholder'),
                     'data-counter' => 120,
@@ -25,14 +25,13 @@ class ProductLabelForm extends FormAbstract
             ])
             ->add('color', 'customColor', [
                 'label' => trans('plugins/ecommerce::product-label.color'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'placeholder' => trans('plugins/ecommerce::product-label.color_placeholder'),
                 ],
             ])
             ->add('status', 'customSelect', [
                 'label' => trans('core/base::tables.status'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'class' => 'form-control address',
                 ],

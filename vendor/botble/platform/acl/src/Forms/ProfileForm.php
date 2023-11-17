@@ -16,10 +16,11 @@ class ProfileForm extends FormAbstract
             ->setFormOption('id', 'profile-form')
             ->setFormOption('class', 'row')
             ->setValidatorClass(UpdateProfileRequest::class)
+            ->setMethod('PUT')
             ->withCustomFields()
             ->add('first_name', 'text', [
                 'label' => trans('core/acl::users.info.first_name'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'data-counter' => 30,
                 ],
@@ -29,7 +30,7 @@ class ProfileForm extends FormAbstract
             ])
             ->add('last_name', 'text', [
                 'label' => trans('core/acl::users.info.last_name'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'data-counter' => 30,
                 ],
@@ -39,7 +40,7 @@ class ProfileForm extends FormAbstract
             ])
             ->add('username', 'text', [
                 'label' => trans('core/acl::users.username'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'data-counter' => 30,
                 ],
@@ -49,7 +50,7 @@ class ProfileForm extends FormAbstract
             ])
             ->add('email', 'text', [
                 'label' => trans('core/acl::users.email'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'placeholder' => trans('core/acl::users.email_placeholder'),
                     'data-counter' => 60,

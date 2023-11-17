@@ -1,11 +1,9 @@
 <?php
 
-// Use to change table heading of each module
 if (! defined('BASE_FILTER_TABLE_HEADINGS')) {
     define('BASE_FILTER_TABLE_HEADINGS', 'table_headings');
 }
 
-// Use in get list data function in each repository
 if (! defined('BASE_FILTER_GET_LIST_DATA')) {
     define('BASE_FILTER_GET_LIST_DATA', 'get_list_data');
 }

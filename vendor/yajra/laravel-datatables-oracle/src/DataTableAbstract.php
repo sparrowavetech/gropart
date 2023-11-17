@@ -10,7 +10,6 @@ use Illuminate\Support\Traits\Macroable;
 use Psr\Log\LoggerInterface;
 use Yajra\DataTables\Contracts\DataTable;
 use Yajra\DataTables\Contracts\Formatter;
-use Yajra\DataTables\Exceptions\Exception;
 use Yajra\DataTables\Processors\DataProcessor;
 use Yajra\DataTables\Utilities\Helper;
 
@@ -174,10 +173,8 @@ abstract class DataTableAbstract implements DataTable
 
     /**
      * @param  string|array  $columns
-     * @param  string|\Yajra\DataTables\Contracts\Formatter  $formatter
+     * @param  string|callable|\Yajra\DataTables\Contracts\Formatter  $formatter
      * @return $this
-     *
-     * @throws \Yajra\DataTables\Exceptions\Exception
      */
     public function formatColumn($columns, $formatter): static
     {
@@ -193,7 +190,29 @@ abstract class DataTableAbstract implements DataTable
             return $this;
         }
 
-        throw new Exception('$formatter must be an instance of '.Formatter::class);
+        if (is_callable($formatter)) {
+            foreach ((array) $columns as $column) {
+                $this->addColumn(
+                    $column.'_formatted',
+                    function ($row) use ($column, $formatter) {
+                        return $formatter(data_get($row, $column), $row);
+                    }
+                );
+            }
+
+            return $this;
+        }
+
+        foreach ((array) $columns as $column) {
+            $this->addColumn(
+                $column.'_formatted',
+                function ($row) use ($column) {
+                    return data_get($row, $column);
+                }
+            );
+        }
+
+        return $this;
     }
 
     /**
@@ -662,7 +681,7 @@ abstract class DataTableAbstract implements DataTable
     public function ordering(): void
     {
         if ($this->orderCallback) {
-            call_user_func($this->orderCallback, $this->resolveCallbackParameter());
+            call_user_func_array($this->orderCallback, $this->resolveCallbackParameter());
         } else {
             $this->defaultOrdering();
         }
@@ -671,7 +690,7 @@ abstract class DataTableAbstract implements DataTable
     /**
      * Resolve callback parameter instance.
      *
-     * @return mixed
+     * @return array<int|string, mixed>
      */
     abstract protected function resolveCallbackParameter();
 
@@ -757,7 +776,7 @@ abstract class DataTableAbstract implements DataTable
         }
 
         if (is_callable($this->filterCallback)) {
-            call_user_func($this->filterCallback, $this->resolveCallbackParameter());
+            call_user_func_array($this->filterCallback, $this->resolveCallbackParameter());
         }
 
         $this->columnSearch();

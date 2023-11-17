@@ -28,12 +28,11 @@ use Botble\Base\Events\SystemUpdateUnavailable;
 use Botble\Base\Exceptions\LicenseInvalidException;
 use Botble\Base\Exceptions\LicenseIsAlreadyActivatedException;
 use Botble\Base\Exceptions\MissingCURLExtensionException;
+use Botble\Base\Exceptions\RequiresLicenseActivatedException;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Services\ClearCacheService;
 use Botble\Base\Supports\ValueObjects\CoreProduct;
 use Botble\Setting\Facades\Setting;
-use Botble\Theme\Facades\Theme;
-use Botble\Theme\Services\ThemeService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
@@ -69,7 +68,7 @@ final class Core
 
     private string $version = '1.0.0';
 
-    private string $minimumPhpVersion = '8.0.2';
+    private string $minimumPhpVersion = '8.1.0';
 
     private string $licenseUrl = 'https://license.botble.com';
 
@@ -98,11 +97,19 @@ final class Core
 
     public function checkConnection(): bool
     {
-        return $this->cache->remember(
-            "license:{$this->cacheLicenseKeyName}:check_connection",
-            Carbon::now()->addDays($this->verificationPeriod),
-            fn () => rescue(fn () => $this->createRequest('/api/check_connection_ext')->ok()) ?: false
-        );
+        $cachesKey = "license:{$this->cacheLicenseKeyName}:check_connection";
+
+        if ($this->cache->has($cachesKey)) {
+            return (bool) $this->cache->get($cachesKey);
+        }
+
+        $connected = rescue(fn () => $this->createRequest('check_connection_ext')->ok());
+
+        if ($connected) {
+            $this->cache->put($cachesKey, true, Carbon::now()->addDays($this->verificationPeriod)) ;
+        }
+
+        return $connected;
     }
 
     public function version(): string
@@ -123,7 +130,7 @@ final class Core
     {
         LicenseActivating::dispatch($license, $client);
 
-        $response = $this->createRequest('/api/activate_license', [
+        $response = $this->createRequest('activate_license', [
             'product_id' => $this->productId,
             'license_code' => $license,
             'client_name' => $client,
@@ -137,8 +144,6 @@ final class Core
         $data = $response->json();
 
         if (! Arr::get($data, 'status')) {
-            $this->files->delete($this->licenseFilePath);
-
             $message = Arr::get($data, 'message');
 
             if (Arr::get($data, 'status_code') === 'ACTIVATED_MAXIMUM_ALLOWED_PRODUCT_INSTANCES') {
@@ -163,7 +168,7 @@ final class Core
     {
         LicenseVerifying::dispatch();
 
-        if (! $this->files->exists($this->licenseFilePath)) {
+        if (! $this->isLicenseFileExists()) {
             return false;
         }
 
@@ -212,7 +217,7 @@ final class Core
 
         LicenseDeactivating::dispatch();
 
-        if (! $this->files->exists($this->licenseFilePath)) {
+        if (! $this->isLicenseFileExists()) {
             return false;
         }
 
@@ -231,7 +236,7 @@ final class Core
     {
         SystemUpdateChecking::dispatch();
 
-        $response = $this->createRequest('/api/check_update', [
+        $response = $this->createRequest('check_update', [
             'product_id' => $this->productId,
             'current_version' => $this->version,
         ]);
@@ -253,7 +258,7 @@ final class Core
 
     public function getLatestVersion(): CoreProduct|false
     {
-        $response = $this->createRequest('/api/check_update', [
+        $response = $this->createRequest('check_update', [
             'product_id' => $this->productId,
             'current_version' => '0.0.0',
         ]);
@@ -263,7 +268,7 @@ final class Core
 
     public function getUpdateSize(string $updateId): float
     {
-        $sizeUpdateResponse = $this->createRequest('/api/get_update_size/' . $updateId, method: 'HEAD');
+        $sizeUpdateResponse = $this->createRequest('get_update_size/' . $updateId, method: 'HEAD');
 
         return (float) $sizeUpdateResponse->header('Content-Length') ?: 1;
     }
@@ -272,8 +277,8 @@ final class Core
     {
         SystemUpdateDownloading::dispatch();
 
-        if (! $this->files->exists($this->licenseFilePath)) {
-            return false;
+        if (! $this->isLicenseFileExists()) {
+            throw new RequiresLicenseActivatedException();
         }
 
         $data = [
@@ -283,11 +288,9 @@ final class Core
 
         $filePath = $this->getUpdatedFilePath($version);
 
-        if (! $this->files->exists($filePath)) {
-            $response = $this->createRequest('/api/download_update/main/' . $updateId, $data);
+        $response = $this->createRequest('download_update/main/' . $updateId, $data);
 
-            $this->files->put($filePath, $response->body());
-        }
+        $this->files->put($filePath, $response->body());
 
         if ($this->validateUpdateFile($filePath)) {
             SystemUpdateDownloaded::dispatch($filePath);
@@ -366,8 +369,6 @@ final class Core
     {
         $this->publishCoreAssets();
         $this->publishPackagesAssets();
-        $this->publishPluginsAssets();
-        $this->publishThemesAssets();
     }
 
     public function publishCoreAssets(): bool
@@ -382,28 +383,6 @@ final class Core
     public function publishPackagesAssets(): bool
     {
         $this->publishAssets(package_path());
-
-        return true;
-    }
-
-    public function publishPluginsAssets(): bool
-    {
-        $this->publishAssets(plugin_path());
-
-        return true;
-    }
-
-    public function publishThemesAssets(): bool
-    {
-        $this->files->delete(theme_path(Theme::getThemeName() . '/public/css/style.integration.css'));
-
-        $customCSS = Theme::getStyleIntegrationPath();
-
-        if ($this->files->exists($customCSS)) {
-            $this->files->copy($customCSS, storage_path('app/style.integration.css.') . time());
-        }
-
-        app(ThemeService::class)->publishAssets();
 
         SystemUpdatePublished::dispatch();
 
@@ -432,7 +411,7 @@ final class Core
 
     public function logError(Exception|Throwable $exception): void
     {
-        logger()->error($exception->getMessage() . ' - ' . $exception->getFile() . ':' . $exception->getLine());
+        BaseHelper::logError($exception);
     }
 
     private function publishPaths(): array
@@ -466,20 +445,10 @@ final class Core
         $paths = [
             core_path(),
             package_path(),
-            plugin_path(),
-            theme_path(),
         ];
 
         foreach ($paths as $path) {
             foreach (BaseHelper::scanFolder($path) as $module) {
-                if ($path == plugin_path() && ! is_plugin_active($module)) {
-                    continue;
-                }
-
-                if ($path == theme_path() && $module !== Theme::getThemeName()) {
-                    continue;
-                }
-
                 $modulePath = $path . '/' . $module;
 
                 if (! $this->files->isDirectory($modulePath)) {
@@ -505,7 +474,9 @@ final class Core
 
         if ($zip->open($filePath)) {
             if ($zip->getFromName('.env')) {
-                return false;
+                throw ValidationException::withMessages([
+                    'file' => 'The update file contains a .env file. Please remove it and try again.',
+                ]);
             }
 
             /**
@@ -521,7 +492,9 @@ final class Core
             $content = json_decode($zip->getFromName('platform/core/core.json'), true);
 
             if (! $content) {
-                return false;
+                throw ValidationException::withMessages([
+                    'file' => 'The update file is invalid. Please contact us for support.',
+                ]);
             }
 
             $validator = Validator::make($content, [
@@ -570,7 +543,7 @@ final class Core
 
     public function getLicenseFile(): string|null
     {
-        if (! $this->files->exists($this->licenseFilePath)) {
+        if (! $this->isLicenseFileExists()) {
             return null;
         }
 
@@ -579,9 +552,7 @@ final class Core
 
     private function forgotLicensedInformation(): void
     {
-        Setting::delete([
-            'licensed_to',
-        ]);
+        Setting::forceDelete('licensed_to');
     }
 
     private function parseDataFromCoreDataFile(): void
@@ -615,10 +586,10 @@ final class Core
             throw new MissingCURLExtensionException();
         }
 
-        $request = Http::baseUrl($this->licenseUrl)
+        $request = Http::baseUrl(ltrim($this->licenseUrl, '/') . '/api')
             ->withHeaders([
                 'LB-API-KEY' => $this->licenseKey,
-                'LB-URL' => rtrim(url('/'), '/'),
+                'LB-URL' => rtrim(url(''), '/'),
                 'LB-IP' => $this->getClientIpAddress(),
                 'LB-LANG' => 'english',
             ])
@@ -637,7 +608,7 @@ final class Core
 
     private function createDeactivateRequest(array $data): bool
     {
-        $response = $this->createRequest('/api/deactivate_license', $data);
+        $response = $this->createRequest('deactivate_license', $data);
 
         $data = $response->json();
 
@@ -659,7 +630,7 @@ final class Core
 
     private function verifyLicenseDirectly(): bool
     {
-        if (! $this->files->exists($this->licenseFilePath)) {
+        if (! $this->isLicenseFileExists()) {
             LicenseUnverified::dispatch();
 
             return false;
@@ -670,14 +641,12 @@ final class Core
             'license_file' => $this->getLicenseFile(),
         ];
 
-        $response = $this->createRequest('/api/verify_license', $data);
+        $response = $this->createRequest('verify_license', $data);
         $data = $response->json();
 
         if ($verified = $response->ok() && Arr::get($data, 'status')) {
             LicenseVerified::dispatch();
         } else {
-            $this->files->delete($this->licenseFilePath);
-
             LicenseUnverified::dispatch();
         }
 
@@ -707,6 +676,11 @@ final class Core
         $version = str_replace('.', '_', $version);
 
         return base_path('update_main_' . $version . '.zip');
+    }
+
+    protected function isLicenseFileExists(): bool
+    {
+        return $this->files->exists($this->licenseFilePath);
     }
 
     public function getLicenseFilePath(): string

@@ -4,7 +4,7 @@
     <input
         class="filter-data-url"
         type="hidden"
-        value="{{ route('tables.get-filter-input') }}"
+        value="{{ isset($table) ? $table->getFilterInputUrl() : route('tables.get-filter-input') }}"
     >
 
     <div class="sample-filter-item-wrap hidden">

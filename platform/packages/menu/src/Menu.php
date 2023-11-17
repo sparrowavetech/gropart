@@ -5,7 +5,10 @@ namespace Botble\Menu;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
+use Botble\Base\Facades\MetaBox;
+use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Supports\RepositoryHelper;
 use Botble\Menu\Models\Menu as MenuModel;
@@ -17,6 +20,8 @@ use Illuminate\Cache\CacheManager;
 use Illuminate\Config\Repository;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Throwable;
 
@@ -75,6 +80,9 @@ class Menu
         int|string $parentId,
         bool $hasChild = false
     ): array {
+        /**
+         * @var MenuNode $node
+         */
         $node = MenuNode::query()->findOrNew(Arr::get($menuItem, 'id'));
 
         $node->fill($menuItem);
@@ -357,9 +365,92 @@ class Menu
                 $node->save();
             }
         } catch (Exception $exception) {
-            info($exception->getMessage());
+            BaseHelper::logError($exception);
         }
 
         return $this;
+    }
+
+    public function useMenuItemIconImage(): void
+    {
+        add_filter(BASE_FILTER_BEFORE_RENDER_FORM, function (FormAbstract $form, Model $data): FormAbstract {
+            if (get_class($data) == MenuNode::class) {
+                $iconImage = $data->icon_image ?: $data->getMetaData('icon_image', true);
+
+                if ($form->getFormHelper()->hasCustomField('themeIcon')) {
+                    $form
+                        ->modify('icon_font', 'themeIcon', [
+                            'attr' => [
+                                'placeholder' => null,
+                            ],
+                            'empty_value' => __('-- None --'),
+                        ]);
+                }
+
+                $form
+                    ->addAfter('icon_font', 'icon_image', 'mediaImage', [
+                        'label' => __('Icon image'),
+                        'attr' => [
+                            'data-update' => 'icon_image',
+                        ],
+                        'value' => $iconImage,
+                        'help_block' => [
+                            'text' => __('It will replace Icon Font if it is present.'),
+                        ],
+                        'wrapper' => [
+                            'style' => 'display: block;',
+                        ],
+                    ]);
+            }
+
+            return $form;
+        }, 124, 3);
+
+        add_action(
+            [BASE_ACTION_AFTER_CREATE_CONTENT, BASE_ACTION_AFTER_UPDATE_CONTENT],
+            function (string $type, Request $request, Model $object): void {
+                if (get_class($object) == MenuNode::class) {
+                    if ($request->has('data.icon_image')) {
+                        if ($iconImage = $request->input('data.icon_image')) {
+                            MetaBox::saveMetaBoxData($object, 'icon_image', $iconImage);
+                        } else {
+                            MetaBox::deleteMetaData($object, 'icon_image');
+                        }
+
+                        return;
+                    }
+
+                    if ($menuNodes = $request->input('menu_nodes')) {
+                        $menuNodes = json_decode($menuNodes, true);
+
+                        if ($menuNodes) {
+                            foreach ($menuNodes as $node) {
+                                if ($node['menuItem']['id'] == $object->getKey() && isset($node['menuItem']['icon_image'])) {
+                                    if ($iconImage = $node['menuItem']['icon_image']) {
+                                        MetaBox::saveMetaBoxData($object, 'icon_image', $iconImage);
+                                    } else {
+                                        MetaBox::deleteMetaData($object, 'icon_image');
+                                    }
+
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            170,
+            3
+        );
+
+        add_filter('menu_nodes_item_data', function (MenuNode $data): MenuNode {
+            $data->icon_image = $data->getMetaData('icon_image', true);
+
+            return $data;
+        }, 170);
+
+        add_filter('cms_menu_load_with_relations', function (array $relations): array {
+            return array_merge($relations, ['menuNodes.metadata', 'menuNodes.child.metadata']);
+        }, 170);
     }
 }

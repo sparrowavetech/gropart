@@ -10,7 +10,7 @@
             $orderAmount += (float) $shippingAmount;
         @endphp
 
-        @if (is_plugin_active('payment'))
+        @if (is_plugin_active('payment') && $orderAmount)
             @include('plugins/payment::partials.header')
         @endif
 
@@ -231,7 +231,7 @@
 
                         {!! apply_filters('ecommerce_checkout_form_before_payment_form', null, $products) !!}
 
-                        @if (is_plugin_active('payment'))
+                        @if (is_plugin_active('payment') && $orderAmount)
                             <div class="position-relative">
                                 <div
                                     class="payment-info-loading"
@@ -252,9 +252,9 @@
                                     type="hidden"
                                     value="{{ strtoupper(get_application_currency()->title) }}"
                                 >
-                                @if (is_plugin_active('payment'))
-                                    {!! apply_filters(PAYMENT_FILTER_PAYMENT_PARAMETERS, null) !!}
-                                @endif
+
+                                {!! apply_filters(PAYMENT_FILTER_PAYMENT_PARAMETERS, null) !!}
+
                                 <ul class="list-group list_payment_method">
                                     @if ($orderAmount)
                                         {!! apply_filters(PAYMENT_FILTER_ADDITIONAL_PAYMENT_METHODS, null, [

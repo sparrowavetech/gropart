@@ -17,7 +17,7 @@ class CountryForm extends FormAbstract
             ->withCustomFields()
             ->add('name', 'text', [
                 'label' => trans('core/base::forms.name'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'placeholder' => trans('core/base::forms.name_placeholder'),
                     'data-counter' => 120,
@@ -25,7 +25,6 @@ class CountryForm extends FormAbstract
             ])
             ->add('code', 'text', [
                 'label' => trans('plugins/location::country.code'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'placeholder' => trans('plugins/location::country.code_placeholder'),
                     'data-counter' => 10,
@@ -40,7 +39,6 @@ class CountryForm extends FormAbstract
             ])
             ->add('nationality', 'text', [
                 'label' => trans('plugins/location::country.nationality'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'placeholder' => trans('plugins/location::country.nationality'),
                     'data-counter' => 120,
@@ -48,7 +46,6 @@ class CountryForm extends FormAbstract
             ])
             ->add('order', 'number', [
                 'label' => trans('core/base::forms.order'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'placeholder' => trans('core/base::forms.order_by_placeholder'),
                 ],
@@ -56,12 +53,11 @@ class CountryForm extends FormAbstract
             ])
             ->add('is_default', 'onOff', [
                 'label' => trans('core/base::forms.is_default'),
-                'label_attr' => ['class' => 'control-label'],
                 'default_value' => false,
             ])
             ->add('status', 'customSelect', [
                 'label' => trans('core/base::tables.status'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'choices' => BaseStatusEnum::labels(),
             ])
             ->setBreakFieldPoint('status');

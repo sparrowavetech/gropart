@@ -13,6 +13,8 @@ trait HasFilters
 {
     protected string $filterTemplate = 'core/table::filter';
 
+    protected string $filterInputUrl = '';
+
     /**
      * @deprecated since v6.8.0, using `hasFilters` instead.
      */
@@ -73,7 +75,7 @@ trait HasFilters
                 break;
 
             default:
-                if (! $value) {
+                if ($value === null) {
                     break;
                 }
 
@@ -96,7 +98,7 @@ trait HasFilters
     public function renderFilter(): string
     {
         $tableId = $this->getOption('id');
-        $class = get_class($this);
+        $class = $this::class;
         $columns = $this->getFilters();
 
         $request = $this->request();
@@ -129,11 +131,25 @@ trait HasFilters
             }
         }
 
-        return view($this->filterTemplate, compact('columns', 'class', 'tableId', 'requestFilters'))->render();
+        $table = $this;
+
+        return view($this->filterTemplate, compact('columns', 'class', 'tableId', 'requestFilters', 'table'))->render();
     }
 
     public function getFilters(): array
     {
         return [];
+    }
+
+    public function filterInputUrl(string $url): static
+    {
+        $this->filterInputUrl = $url;
+
+        return $this;
+    }
+
+    public function getFilterInputUrl(): string
+    {
+        return $this->filterInputUrl ?: route('tables.get-filter-input');
     }
 }

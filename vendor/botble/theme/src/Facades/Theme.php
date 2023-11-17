@@ -54,6 +54,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Botble\Theme\Theme fireEventGlobalAssets()
  * @method static string getThemeScreenshot(string $theme)
  * @method static void registerThemeIconFields(array $icons, array $css = [], array $js = [])
+ * @method static void registerFacebookIntegration()
  *
  * @see \Botble\Theme\Theme
  */

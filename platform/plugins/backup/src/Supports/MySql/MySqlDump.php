@@ -363,8 +363,8 @@ class MySqlDump
                 default:
                     throw new Exception('Unsupported database type (' . $this->dbType . ')');
             }
-        } catch (PDOException $e) {
-            throw new Exception('Connection to ' . $this->dbType . ' failed with message: ' . $e->getMessage());
+        } catch (PDOException $exception) {
+            throw new Exception('Connection to ' . $this->dbType . ' failed with message: ' . $exception->getMessage());
         }
 
         if (is_null($this->dbHandler)) {

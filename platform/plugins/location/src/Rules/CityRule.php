@@ -30,11 +30,7 @@ class CityRule implements DataAwareRule, Rule
             'status' => BaseStatusEnum::PUBLISHED,
         ];
 
-        if ($this->stateKey) {
-            $stateId = Arr::get($this->data, $this->stateKey);
-            if (! $stateId) {
-                return false;
-            }
+        if ($this->stateKey && ($stateId = Arr::get($this->data, $this->stateKey))) {
             $condition['state_id'] = $stateId;
         }
 

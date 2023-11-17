@@ -140,7 +140,7 @@ if (! function_exists('get_application_currency')) {
     {
         $currency = cms_currency()->getApplicationCurrency();
 
-        if (is_in_admin() || ! $currency) {
+        if (is_in_admin(true) || ! $currency) {
             $currency = cms_currency()->getDefaultCurrency();
         }
 

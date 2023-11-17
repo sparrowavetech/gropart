@@ -23,7 +23,7 @@ class DiscountController extends BaseController
     {
         PageTitle::setTitle(__('Coupons'));
 
-        return $table->render(MarketplaceHelper::viewPath('dashboard.table.base'));
+        return $table->renderTable();
     }
 
     public function create()
@@ -43,7 +43,7 @@ class DiscountController extends BaseController
 
         $jsValidation = JsValidator::formRequest(DiscountRequest::class, '#marketplace-vendor-discount');
 
-        return MarketplaceHelper::view('dashboard.discounts.create', compact('jsValidation'));
+        return MarketplaceHelper::view('vendor-dashboard.discounts.create', compact('jsValidation'));
     }
 
     protected function getStore()

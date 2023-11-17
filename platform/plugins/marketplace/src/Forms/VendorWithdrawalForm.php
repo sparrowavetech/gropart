@@ -38,11 +38,11 @@ class VendorWithdrawalForm extends FormAbstract
         $this
             ->setupModel(new Withdrawal())
             ->setValidatorClass($exists ? VendorEditWithdrawalRequest::class : VendorWithdrawalRequest::class)
-            ->setFormOption('template', MarketplaceHelper::viewPath('dashboard.forms.base'))
+            ->setFormOption('template', MarketplaceHelper::viewPath('vendor-dashboard.forms.base'))
             ->withCustomFields()
             ->add('amount', 'number', [
                 'label' => trans('plugins/marketplace::withdrawal.forms.amount_with_balance', ['balance' => format_price($balance)]),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => array_merge([
                     'placeholder' => trans('plugins/marketplace::withdrawal.forms.amount_placeholder'),
                     'data-counter' => 120,
@@ -59,7 +59,7 @@ class VendorWithdrawalForm extends FormAbstract
         if ($exists) {
             $this->add('fee', 'number', [
                 'label' => trans('plugins/marketplace::withdrawal.forms.fee'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => $disabled,
             ]);
         }
@@ -67,7 +67,6 @@ class VendorWithdrawalForm extends FormAbstract
         $this
             ->add('description', 'textarea', [
                 'label' => trans('core/base::forms.description'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => array_merge([
                     'rows' => 3,
                     'placeholder' => trans('core/base::forms.description_placeholder'),
@@ -98,7 +97,6 @@ class VendorWithdrawalForm extends FormAbstract
             if ($this->getModel()->vendor_can_edit) {
                 $this->add('cancel', 'onOff', [
                     'label' => __('Do you want to cancel?'),
-                    'label_attr' => ['class' => 'control-label'],
                     'help_block' => [
                         'text' => __('After cancel amount and fee will be refunded back in your balance'),
                     ],

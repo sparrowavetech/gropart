@@ -17,7 +17,7 @@ class ProductTagForm extends FormAbstract
             ->withCustomFields()
             ->add('name', 'text', [
                 'label' => trans('core/base::forms.name'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'placeholder' => trans('core/base::forms.name_placeholder'),
                     'data-counter' => 120,
@@ -25,7 +25,6 @@ class ProductTagForm extends FormAbstract
             ])
             ->add('description', 'textarea', [
                 'label' => trans('core/base::forms.description'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'rows' => 4,
                     'placeholder' => trans('core/base::forms.description_placeholder'),
@@ -34,7 +33,7 @@ class ProductTagForm extends FormAbstract
             ])
             ->add('status', 'customSelect', [
                 'label' => trans('core/base::tables.status'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'class' => 'form-control address',
                 ],

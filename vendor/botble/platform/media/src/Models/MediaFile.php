@@ -111,7 +111,8 @@ class MediaFile extends BaseModel
                         }
 
                         $config = config('core.media.media.preview.document', []);
-                        if (Arr::get($config, 'enabled') &&
+                        if (
+                            Arr::get($config, 'enabled') &&
                             Request::ip() !== '127.0.0.1' &&
                             in_array($this->mime_type, Arr::get($config, 'mime_types', [])) &&
                             $url = Arr::get($config, 'providers.' . Arr::get($config, 'default'))

@@ -8,6 +8,7 @@ use Botble\Location\Repositories\Interfaces\CityInterface;
 use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Query\JoinClause;
 
 class CityRepository extends RepositoriesAbstract implements CityInterface
 {
@@ -15,12 +16,22 @@ class CityRepository extends RepositoriesAbstract implements CityInterface
     {
         $data = $this->model
             ->where('cities.status', BaseStatusEnum::PUBLISHED)
-            ->join('states', 'states.id', '=', 'cities.state_id')
-            ->join('countries', 'countries.id', '=', 'cities.country_id')
-            ->where('states.status', BaseStatusEnum::PUBLISHED)
-            ->where('countries.status', BaseStatusEnum::PUBLISHED);
+            ->leftJoin('states', function (JoinClause $query) {
+                $query
+                    ->on('states.id', '=', 'cities.state_id')
+                    ->where('states.status', BaseStatusEnum::PUBLISHED);
+            })
+            ->join('countries', function (JoinClause $query) {
+                $query
+                    ->on('countries.id', '=', 'cities.country_id')
+                    ->where('countries.status', BaseStatusEnum::PUBLISHED);
+            });
 
-        if (is_plugin_active('language') && is_plugin_active('language-advanced') && Language::getCurrentLocale() != Language::getDefaultLocale()) {
+        if (
+            is_plugin_active('language') &&
+            is_plugin_active('language-advanced') &&
+            Language::getCurrentLocale() != Language::getDefaultLocale()
+        ) {
             $data = $data
                 ->where(function (Builder $query) use ($keyword) {
                     return $query

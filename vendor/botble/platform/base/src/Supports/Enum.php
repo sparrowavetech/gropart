@@ -3,6 +3,7 @@
 namespace Botble\Base\Supports;
 
 use BadMethodCallException;
+use Botble\Base\Facades\BaseHelper;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Log;
@@ -28,7 +29,7 @@ abstract class Enum implements CastsAttributes, JsonSerializable
         }
 
         if ($value !== null && ! $this->isValid($value)) {
-            Log::error('Value ' . json_encode($value) . ' is not part of the enum ' . get_called_class());
+            Log::error(sprintf('Value %s is not part of the enum %s', json_encode($value), get_called_class()));
         } else {
             $this->value = $value;
         }
@@ -56,8 +57,8 @@ abstract class Enum implements CastsAttributes, JsonSerializable
             try {
                 $reflection = new ReflectionClass($class);
                 static::$cache[$class] = $reflection->getConstants();
-            } catch (ReflectionException $error) {
-                info($error->getMessage());
+            } catch (ReflectionException $exception) {
+                BaseHelper::logError($exception);
             }
         }
 

@@ -2,6 +2,7 @@
 
 namespace Botble\Marketplace\Http\Controllers\Fronts;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Facades\EcommerceHelper;
@@ -25,7 +26,7 @@ class RevenueController
             ->setType(TableAbstract::TABLE_TYPE_ADVANCED)
             ->setView('core/table::table');
 
-        return $table->render(MarketplaceHelper::viewPath('dashboard.table.base'));
+        return $table->render(MarketplaceHelper::viewPath('vendor-dashboard.table.base'));
     }
 
     public function getMonthChart(Request $request, BaseHttpResponse $response)
@@ -64,7 +65,7 @@ class RevenueController
 
             foreach ($period as $date) {
                 $value = $revenues
-                    ->where('date', $date->format('Y-m-d'))
+                    ->where('date', $date->toDateString())
                     ->sum('amount');
                 $data['data'][] = $value;
             }
@@ -86,7 +87,7 @@ class RevenueController
         }
 
         foreach ($period as $date) {
-            $dates[] = $date->format('Y-m-d');
+            $dates[] = BaseHelper::formatDate($date);
         }
 
         $colors = $earningSales->pluck('color');

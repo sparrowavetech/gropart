@@ -14,6 +14,13 @@
     ])
 @endif
 
+@if (EcommerceHelper::isTaxEnabled())
+    @include('plugins/ecommerce::orders.thank-you.total-row', [
+        'label' => __('Tax'),
+        'value' => format_price($order->tax_amount),
+    ])
+@endif
+
 @if ($order->discount_amount !== null)
     @include('plugins/ecommerce::orders.thank-you.total-row', [
         'label' => __('Discount'),
@@ -22,13 +29,6 @@
             ($order->coupon_code
                 ? ' <small>(' . __('Using coupon code') . ': <strong>' . $order->coupon_code . '</strong>)</small>'
                 : ''),
-    ])
-@endif
-
-@if (EcommerceHelper::isTaxEnabled())
-    @include('plugins/ecommerce::orders.thank-you.total-row', [
-        'label' => __('Tax'),
-        'value' => format_price($order->tax_amount),
     ])
 @endif
 

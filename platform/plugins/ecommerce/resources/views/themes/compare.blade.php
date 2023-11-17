@@ -22,8 +22,18 @@
 
                                     @foreach ($products as $product)
                                         <td class="product_name">
-                                            <h5><a href="{{ $product->original_product->url }}">{{ $product->name }}</a>
+                                            <h5>
+                                                <a href="{{ $product->original_product->url }}">{{ $product->name }}</a>
                                             </h5>
+
+                                            @if (is_plugin_active('marketplace') && $product->original_product->store->id)
+                                                <p class="d-block mb-0">
+                                                    <small>
+                                                        <span>{{ __('Sold by') }}: </span>
+                                                        <a href="{{ $product->original_product->store->url }}">{{ $product->original_product->store->name }}</a>
+                                                    </small>
+                                                </p>
+                                            @endif
                                         </td>
                                     @endforeach
                                 </tr>

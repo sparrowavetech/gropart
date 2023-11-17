@@ -20,14 +20,11 @@ use Botble\Ecommerce\Services\StoreProductTagService;
 use Botble\Media\Facades\RvMedia;
 use Botble\Slug\Facades\SlugHelper;
 use Carbon\Carbon;
-use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\SkipsErrors;
@@ -40,7 +37,6 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Validators\Failure;
-use Mimey\MimeTypes;
 
 class ProductImport implements
     ToModel,
@@ -182,8 +178,15 @@ class ProductImport implements
             ->first();
     }
 
-    public function storeProduct(): ?Product
+    public function storeProduct(): Product|Model|null
     {
+        if (
+            ($sku = $this->request->input('sku')) &&
+            $existingProduct = Product::query()->where('sku', $sku)->first()
+        ) {
+            return $existingProduct;
+        }
+
         $product = new Product();
 
         $this->request->merge(['images' => $this->getImageURLs((array)$this->request->input('images', []))]);
@@ -244,39 +247,7 @@ class ProductImport implements
 
     protected function uploadImageFromURL(string|null $url): string|null
     {
-        if (empty($url)) {
-            return $url;
-        }
-
-        $info = pathinfo($url);
-
-        try {
-            $contents = file_get_contents($url);
-        } catch (Exception) {
-            return $url;
-        }
-
-        if (empty($contents)) {
-            return $url;
-        }
-
-        $path = '/tmp';
-
-        if (! File::isDirectory($path)) {
-            File::makeDirectory($path);
-        }
-
-        $path = $path . '/' . $info['basename'];
-
-        file_put_contents($path, $contents);
-
-        $mimeType = (new MimeTypes())->getMimeType(File::extension($url));
-
-        $fileUpload = new UploadedFile($path, $info['basename'], $mimeType, null, true);
-
-        $result = RvMedia::handleUpload($fileUpload, 0, 'products');
-
-        File::delete($path);
+        $result = RvMedia::uploadFromUrl($url, 0, 'products');
 
         if (! $result['error']) {
             $url = $result['data']->url;
@@ -285,7 +256,7 @@ class ProductImport implements
         return $url;
     }
 
-    public function storeVariant($product): ?ProductVariation
+    public function storeVariant($product): ProductVariation|Model|null
     {
         if (! $product) {
             if (method_exists($this, 'onFailure')) {
@@ -324,6 +295,14 @@ class ProductImport implements
         $variation = $result['variation'];
 
         $version = array_merge($variation->toArray(), $this->request->toArray());
+
+        if (
+            ($sku = Arr::get($version, 'sku')) &&
+            $existingVariation = Product::query()->where('is_variation', true)->where('sku', $sku)->first()
+        ) {
+            return $existingVariation;
+        }
+
         $version['variation_default_id'] = Arr::get($version, 'is_variation_default') ? $version['id'] : null;
         $version['attribute_sets'] = $addedAttributes;
 

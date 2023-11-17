@@ -84,18 +84,16 @@ class UnverifiedVendorTable extends TableAbstract
             NameColumn::make()
                 ->route('marketplace.unverified-vendors.view')
                 ->permission('marketplace.unverified-vendors.edit'),
-            'store_name' => [
-                'title' => trans('plugins/marketplace::unverified-vendor.forms.store_name'),
-                'class' => 'text-start',
-                'searchable' => false,
-                'orderable' => false,
-            ],
-            'store_phone' => [
-                'title' => trans('plugins/marketplace::unverified-vendor.forms.store_phone'),
-                'class' => 'text-start',
-                'searchable' => false,
-                'orderable' => false,
-            ],
+            Column::make('store_name')
+                ->title(trans('plugins/marketplace::unverified-vendor.forms.store_name'))
+                ->alignStart()
+                ->orderable(false)
+                ->searchable(false),
+            Column::make('store_phone')
+                ->title(trans('plugins/marketplace::unverified-vendor.forms.store_phone'))
+                ->alignStart()
+                ->orderable(false)
+                ->searchable(false),
             CreatedAtColumn::make(),
         ];
     }

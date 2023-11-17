@@ -18,7 +18,7 @@
             <div class="container-{{ $size }}">
                 <div class="row">
                     <div class="my-5">
-                        {!! BaseHelper::clean($image) !!}
+                        {!! $image !!}
                     </div>
                 </div>
             </div>

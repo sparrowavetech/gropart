@@ -22,17 +22,12 @@
                                 <strong>{{ Str::limit($post->name, 80) }}</strong>
                             @endif
                         </td>
-                        <td>{{ BaseHelper::formatDate($post->created_at, 'd-m-Y') }}</td>
+                        <td>{{ BaseHelper::formatDate($post->created_at) }}</td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
-    @if ($posts instanceof Illuminate\Pagination\LengthAwarePaginator)
-        <div class="widget_footer">
-            @include('core/dashboard::partials.paginate', ['data' => $posts, 'limit' => $limit])
-        </div>
-    @endif
 @else
     @include('core/dashboard::partials.no-data', [
         'message' => trans('plugins/blog::posts.no_new_post_now'),

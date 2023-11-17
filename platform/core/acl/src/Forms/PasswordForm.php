@@ -16,9 +16,10 @@ class PasswordForm extends FormAbstract
             ->setValidatorClass(UpdatePasswordRequest::class)
             ->setFormOption('template', 'core/base::forms.form-no-wrap')
             ->setFormOption('id', 'password-form')
+            ->setMethod('PUT')
             ->add('old_password', 'password', [
                 'label' => trans('core/acl::users.current_password'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'data-counter' => 60,
                 ],
@@ -28,7 +29,7 @@ class PasswordForm extends FormAbstract
             ])
             ->add('password', 'password', [
                 'label' => trans('core/acl::users.new_password'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'data-counter' => 60,
                 ],
@@ -45,7 +46,7 @@ class PasswordForm extends FormAbstract
             ])
             ->add('password_confirmation', 'password', [
                 'label' => trans('core/acl::users.confirm_new_password'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'data-counter' => 60,
                 ],

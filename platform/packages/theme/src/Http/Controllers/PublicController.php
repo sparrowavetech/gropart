@@ -54,7 +54,7 @@ class PublicController extends Controller
         $slug = SlugHelper::getSlug($key, $prefix);
 
         if (! $slug) {
-            return redirect()->route('public.index');
+            abort(404);
         }
 
         if (

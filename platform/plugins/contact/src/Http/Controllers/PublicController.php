@@ -2,6 +2,7 @@
 
 namespace Botble\Contact\Http\Controllers;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Contact\Events\SentContactEvent;
@@ -37,7 +38,7 @@ class PublicController extends Controller
             $badWords = collect(json_decode($blacklistWords, true))
                 ->filter(function ($item) use ($content) {
                     $matches = [];
-                    $pattern = '/\b' . $item['value'] . '\b/iu';
+                    $pattern = '/\b' . preg_quote($item['value'], '/') . '\b/iu';
 
                     return preg_match($pattern, $content, $matches, PREG_UNMATCHED_AS_NULL);
                 })
@@ -52,6 +53,9 @@ class PublicController extends Controller
         }
 
         try {
+            /**
+             * @var Contact $contact
+             */
             $contact = Contact::query()->create($request->input());
 
             event(new SentContactEvent($contact));
@@ -75,7 +79,7 @@ class PublicController extends Controller
 
             return $response->setMessage(__('Send message successfully!'));
         } catch (Exception $exception) {
-            info($exception->getMessage());
+            BaseHelper::logError($exception);
 
             return $response
                 ->setError()

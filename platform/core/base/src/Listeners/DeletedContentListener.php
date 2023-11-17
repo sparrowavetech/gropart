@@ -3,6 +3,7 @@
 namespace Botble\Base\Listeners;
 
 use Botble\Base\Events\DeletedContentEvent;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Models\MetaBox;
 use Exception;
 
@@ -18,7 +19,7 @@ class DeletedContentListener
                 'reference_type' => get_class($event->data),
             ])->delete();
         } catch (Exception $exception) {
-            info($exception->getMessage());
+            BaseHelper::logError($exception);
         }
     }
 }

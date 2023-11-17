@@ -88,11 +88,6 @@ class FlashSaleTable extends TableAbstract
         ];
     }
 
-    public function getFilters(): array
-    {
-        return $this->getBulkChanges();
-    }
-
     public function getBulkChanges(): array
     {
         return [

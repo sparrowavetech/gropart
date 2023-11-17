@@ -2,20 +2,19 @@
     <div class="customer-order-detail">
         <div class="row">
             <div class="col-md-6">
-                <h5 class="mb-3">{{ __('Order information') }}</h5>
                 <p>
                     <span class="d-inline-block me-1">{{ __('Order number') }}: </span>
                     <strong>{{ $order->code }}</strong>
                 </p>
                 <p>
                     <span class="d-inline-block me-1">{{ __('Time') }}: </span>
-                    <strong>{{ $order->created_at->translatedFormat('h:m d/m/Y') }}</strong>
+                    <strong>{{ $order->created_at->translatedFormat('d M Y H:i:s') }}</strong>
                 </p>
                 <p>
                     <span class="d-inline-block me-1">{{ __('Order status') }}: </span>
                     <strong class="text-info">{{ $order->status->label() }}</strong>
                 </p>
-                @if (is_plugin_active('payment'))
+                @if (is_plugin_active('payment') && $order->payment->id)
                     <p>
                         <span class="d-inline-block me-1">{{ __('Payment method') }}: </span>
                         <strong class="text-info">{{ $order->payment->payment_channel->label() }}</strong>
@@ -34,7 +33,6 @@
             </div>
             @if ($order->address->name)
                 <div class="col-md-6">
-                    <h5 class="mb-3">{{ __('Customer information') }}</h5>
                     <p>
                         <span class="d-inline-block me-1">{{ __('Full Name') }}: </span>
                         <strong>{{ $order->address->name }}</strong>
@@ -119,8 +117,7 @@
                                 @elseif ($product && $product->is_variation)
                                     <p>
                                         <small>
-                                            @php $attributes = get_product_attributes($product->id) @endphp
-                                            @if (!empty($attributes))
+                                            @if ($attributes = get_product_attributes($product->getKey()))
                                                 @foreach ($attributes as $attribute)
                                                     {{ $attribute->attribute_set_title }}: {{ $attribute->title }}@if (!$loop->last), @endif
                                                 @endforeach

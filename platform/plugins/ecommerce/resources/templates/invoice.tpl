@@ -249,8 +249,8 @@
                     {% if item.options.attributes %}
                         <div><small>{{ 'plugins/ecommerce::invoice.detail.attributes'|trans }}: {{ item.options.attributes }}</small></div>
                     {% endif %}
-                    {% if item.options.options %}
-                        <div><small>{{ 'plugins/ecommerce::invoice.detail.product_options'|trans }}: {{ item.options.options }}</small></div>
+                    {% if item.options.product_options %}
+                        <div><small>{{ 'plugins/ecommerce::invoice.detail.product_options'|trans }}: {{ item.options.product_options }}</small></div>
                     {% endif %}
                     {% if item.options.license_code %}
                         <div><small>{{ 'plugins/ecommerce::invoice.detail.license_code'|trans }}: {{ item.options.license_code }}</small></div>
@@ -328,7 +328,7 @@
 
             {% if payment_status %}
                 <div>
-                    {{ 'plugins/ecommerce::order.payment_status_label'|trans }}: <strong>{{ payment_status }}</strong>
+                    {{ 'plugins/ecommerce::order.payment_status_label'|trans }}: <strong>{{ payment_status_label }}</strong>
                 </div>
             {% endif %}
 

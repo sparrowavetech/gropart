@@ -12,7 +12,7 @@ class WithdrawalForm extends FormAbstract
 {
     public function buildForm(): void
     {
-        $symbol = ' (' . get_application_currency()->symbol . ')';
+        $symbol = sprintf(' (%s)', get_application_currency()->symbol);
 
         $this
             ->setupModel(new Withdrawal())
@@ -20,27 +20,23 @@ class WithdrawalForm extends FormAbstract
             ->withCustomFields()
             ->add('amount', 'text', [
                 'label' => trans('plugins/marketplace::withdrawal.forms.amount') . $symbol,
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'disabled' => 'disabled',
                 ],
             ])
             ->add('fee', 'text', [
                 'label' => trans('plugins/marketplace::withdrawal.forms.fee') . $symbol,
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'disabled' => 'disabled',
                 ],
             ])
             ->add('payment_channel', 'customSelect', [
                 'label' => trans('plugins/marketplace::withdrawal.forms.payment_channel'),
-                'label_attr' => ['class' => 'control-label'],
                 'choices' => Arr::pluck(PayoutPaymentMethodsEnum::payoutMethodsEnabled(), 'label', 'key'),
                 'attr' => $this->model->transaction_id ? ['disabled' => 'disabled'] : [],
             ])
             ->add('transaction_id', 'text', [
                 'label' => trans('plugins/marketplace::withdrawal.forms.transaction_id'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'placeholder' => trans('plugins/marketplace::withdrawal.forms.transaction_id_placeholder'),
                     'data-counter' => 60,
@@ -48,7 +44,6 @@ class WithdrawalForm extends FormAbstract
             ])
             ->add('description', 'textarea', [
                 'label' => trans('core/base::forms.description'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'rows' => 4,
                     'placeholder' => trans('core/base::forms.description_placeholder'),
@@ -65,7 +60,6 @@ class WithdrawalForm extends FormAbstract
             ])
             ->add('images[]', 'mediaImages', [
                 'label' => trans('plugins/ecommerce::products.form.image'),
-                'label_attr' => ['class' => 'control-label'],
                 'values' => $this->getModel() ? $this->getModel()->images : [],
             ]);
 
@@ -73,7 +67,7 @@ class WithdrawalForm extends FormAbstract
             $this
                 ->add('status', 'customSelect', [
                     'label' => trans('core/base::tables.status'),
-                    'label_attr' => ['class' => 'control-label required'],
+                    'required' => true,
                     'attr' => [
                         'class' => 'form-control',
                     ],

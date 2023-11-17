@@ -15,7 +15,7 @@ final class Writer extends AbstractWriter
     /** @var string Content-Type value for the header */
     protected static string $headerContentType = 'text/csv; charset=UTF-8';
 
-    private Options $options;
+    private readonly Options $options;
 
     private int $lastWrittenRowIndex = 0;
 
@@ -49,7 +49,7 @@ final class Writer extends AbstractWriter
      */
     protected function addRowToWriter(Row $row): void
     {
-        $cells = array_map(static function (Cell\BooleanCell|Cell\EmptyCell|Cell\NumericCell|Cell\StringCell|Cell\FormulaCell $value): string {
+        $cells = array_map(static function (Cell\BooleanCell|Cell\EmptyCell|Cell\FormulaCell|Cell\NumericCell|Cell\StringCell $value): string {
             if ($value instanceof Cell\BooleanCell) {
                 return (string) (int) $value->getValue();
             }

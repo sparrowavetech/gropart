@@ -36,6 +36,10 @@ if (! function_exists('is_in_admin')) {
     {
         $prefix = BaseHelper::getAdminPrefix();
 
+        if (empty($prefix)) {
+            return true;
+        }
+
         $segments = array_slice(request()->segments(), 0, count(explode('/', $prefix)));
 
         $isInAdmin = implode('/', $segments) === $prefix;
@@ -72,7 +76,7 @@ if (! function_exists('get_cms_version')) {
 if (! function_exists('get_core_version')) {
     function get_core_version(): string
     {
-        return '6.9.6';
+        return '6.10.3';
     }
 }
 

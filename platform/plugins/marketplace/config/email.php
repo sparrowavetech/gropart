@@ -18,6 +18,11 @@ return [
                 'customer_phone' => 'plugins/ecommerce::ecommerce.customer_phone',
                 'customer_address' => 'plugins/ecommerce::ecommerce.customer_address',
                 'store_name' => 'plugins/marketplace::marketplace.store_name',
+                'store' => 'Store',
+                'order' => 'Order',
+                'shipment' => 'Shipment info',
+                'address' => 'Shipping address',
+                'products' => 'Order products',
             ],
         ],
         'verify_vendor' => [

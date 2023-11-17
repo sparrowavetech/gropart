@@ -23,7 +23,7 @@ class WithdrawalController
     {
         PageTitle::setTitle(__('Withdrawals'));
 
-        return $table->render(MarketplaceHelper::viewPath('dashboard.table.base'));
+        return $table->renderTable();
     }
 
     public function create(FormBuilder $formBuilder, BaseHttpResponse $response)

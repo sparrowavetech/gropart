@@ -9,7 +9,7 @@ class Youtube
 {
     public static function getYoutubeVideoEmbedURL(string|null $url): string
     {
-        $url = rtrim($url, '/');
+        $url = rtrim((string)$url, '/');
 
         if (! $url) {
             return $url;
@@ -32,7 +32,7 @@ class Youtube
 
     public static function getYoutubeWatchURL(string|null $url): string
     {
-        $url = rtrim($url, '/');
+        $url = rtrim((string)$url, '/');
 
         if (! $url) {
             return $url;
@@ -55,7 +55,7 @@ class Youtube
 
     public static function getYoutubeVideoID(string|null $url): string|null
     {
-        $url = rtrim($url, '/');
+        $url = rtrim((string)$url, '/');
 
         if (! $url) {
             return $url;
@@ -74,7 +74,7 @@ class Youtube
 
     public static function isYoutubeURL(string|null $url): bool
     {
-        $url = rtrim($url, '/');
+        $url = rtrim((string)$url, '/');
 
         if (! $url) {
             return false;

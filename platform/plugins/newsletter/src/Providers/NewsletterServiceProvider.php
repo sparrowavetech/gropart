@@ -2,6 +2,7 @@
 
 namespace Botble\Newsletter\Providers;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Supports\ServiceProvider;
@@ -72,7 +73,7 @@ class NewsletterServiceProvider extends ServiceProvider implements DeferrablePro
 
                     $mailchimpContactList = $contacts->pluck('name', 'id')->toArray();
                 } catch (Exception $exception) {
-                    info('Caught exception: ' . $exception->getMessage());
+                    BaseHelper::logError($exception);
                 }
             }
 
@@ -88,7 +89,7 @@ class NewsletterServiceProvider extends ServiceProvider implements DeferrablePro
 
                     $sendGridContactList = $contacts->pluck('name', 'id')->toArray();
                 } catch (Exception $exception) {
-                    info('Caught exception: ' . $exception->getMessage());
+                    BaseHelper::logError($exception);
                 }
             }
 

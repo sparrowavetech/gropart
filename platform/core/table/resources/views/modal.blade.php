@@ -28,7 +28,7 @@
     'action_name' => trans('core/base::tables.submit'),
     'action_button_attributes' => [
         'class' => 'confirm-bulk-change-button',
-        'data-load-url' => route('tables.bulk-change.data'),
+        'data-load-url' => $table->getBulkChangeDataUrl(),
     ],
 ])
 

@@ -1,7 +1,6 @@
 <?php
 
 use Botble\Base\Facades\BaseHelper;
-use Botble\Ecommerce\Facades\ProductCategoryHelper;
 use Botble\Shortcode\View\View;
 use Botble\Theme\Theme;
 use Illuminate\Support\Arr;
@@ -48,30 +47,8 @@ return [
         // this event should call to assign some assets,
         // breadcrumb template.
         'beforeRenderTheme' => function (Theme $theme) {
-            $categories = collect();
-            $currencies = collect();
-
-            // Partial composer.
-            if (is_plugin_active('ecommerce')) {
-                $categories = ProductCategoryHelper::getActiveTreeCategories();
-
-                $categories->loadMissing(['slugable', 'metadata']);
-
-                $currencies = get_all_currencies();
-            }
-
-            $theme->partialComposer('header', function (IlluminateView $view) use ($categories, $currencies) {
-                $view->with('currencies', $currencies);
-                $view->with('categories', $categories);
-            });
-
-            $theme->partialComposer('footer', function (IlluminateView $view) use ($categories, $currencies) {
-                $view->with('currencies', $currencies);
-                $view->with('categories', $categories);
-            });
-
-            $theme->composer('ecommerce.includes.filters', function (IlluminateView $view) use ($categories) {
-                $view->with(['categories' => $categories]);
+            $theme->partialComposer(['header', 'footer'], function (IlluminateView $view) {
+                $view->with('currencies', is_plugin_active('ecommerce') ? get_all_currencies() : collect());
             });
 
             // You may use this event to set up your assets.

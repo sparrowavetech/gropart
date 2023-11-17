@@ -224,7 +224,7 @@ class OrderController extends BaseController
                     continue;
                 }
 
-                $ids = [$product->id];
+                $ids = [$product->getKey()];
                 if ($product->is_variation && $product->original_product) {
                     $ids[] = $product->original_product->id;
                 }
@@ -279,7 +279,7 @@ class OrderController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int|string $id)
+    public function edit(Order $order)
     {
         Assets::addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
             ->addScriptsDirectly([
@@ -292,10 +292,7 @@ class OrderController extends BaseController
             Assets::addScriptsDirectly('vendor/core/plugins/location/js/location.js');
         }
 
-        $order = Order::query()
-            ->where(['id' => $id, 'is_finished' => 1])
-            ->with(['products', 'user', 'shippingAddress', 'taxInformation'])
-            ->firstOrFail();
+        $order->load(['products', 'user', 'shippingAddress', 'taxInformation']);
 
         PageTitle::setTitle(trans('plugins/ecommerce::order.edit_order', ['code' => $order->code]));
 
@@ -306,9 +303,8 @@ class OrderController extends BaseController
         return view('plugins/ecommerce::orders.edit', compact('order', 'weight', 'defaultStore'));
     }
 
-    public function update(int|string $id, UpdateOrderRequest $request, BaseHttpResponse $response)
+    public function update(Order $order, UpdateOrderRequest $request, BaseHttpResponse $response)
     {
-        $order = Order::query()->findOrFail($id);
         $order->fill($request->input());
         $order->save();
 
@@ -319,10 +315,8 @@ class OrderController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
+    public function destroy(Order $order, Request $request, BaseHttpResponse $response)
     {
-        $order = Order::query()->findOrFail($id);
-
         try {
             $order->delete();
             event(new DeletedContentEvent(ORDER_MODULE_SCREEN_NAME, $request, $order));
@@ -335,10 +329,8 @@ class OrderController extends BaseController
         }
     }
 
-    public function getGenerateInvoice(int|string $orderId, Request $request)
+    public function getGenerateInvoice(Order $order, Request $request)
     {
-        $order = Order::query()->findOrFail($orderId);
-
         if (! $order->isInvoiceAvailable()) {
             abort(404);
         }
@@ -388,9 +380,8 @@ class OrderController extends BaseController
         return $response->setMessage(trans('plugins/ecommerce::order.confirm_order_success'));
     }
 
-    public function postResendOrderConfirmationEmail(int|string $id, BaseHttpResponse $response)
+    public function postResendOrderConfirmationEmail(Order $order, BaseHttpResponse $response)
     {
-        $order = Order::query()->findOrFail($id);
         $result = OrderHelper::sendOrderConfirmationEmail($order);
 
         if (! $result) {
@@ -403,13 +394,11 @@ class OrderController extends BaseController
     }
 
     public function getShipmentForm(
-        int|string $orderId,
+        Order $order,
         HandleShippingFeeService $shippingFeeService,
         Request $request,
         BaseHttpResponse $response
     ) {
-        $order = Order::query()->findOrFail($orderId);
-
         if ($request->has('weight')) {
             $weight = $request->input('weight');
         } else {
@@ -429,7 +418,7 @@ class OrderController extends BaseController
 
         $storeLocators = StoreLocator::query()->where('is_shipping_location', true)->get();
 
-        $url = route('orders.create-shipment', $order->id);
+        $url = route('orders.create-shipment', $order->getKey());
 
         if ($request->has('view')) {
             return view(
@@ -446,13 +435,12 @@ class OrderController extends BaseController
         );
     }
 
-    public function postCreateShipment(int|string $id, CreateShipmentRequest $request, BaseHttpResponse $response)
+    public function postCreateShipment(Order $order, CreateShipmentRequest $request, BaseHttpResponse $response)
     {
-        $order = Order::query()->findOrFail($id);
         $result = $response;
 
         $shipment = [
-            'order_id' => $order->id,
+            'order_id' => $order->getKey(),
             'user_id' => Auth::id(),
             'weight' => $order->products_weight,
             'note' => $request->input('note'),
@@ -487,7 +475,7 @@ class OrderController extends BaseController
             OrderHistory::query()->create([
                 'action' => 'create_shipment',
                 'description' => $result->getMessage() . ' ' . trans('plugins/ecommerce::order.by_username'),
-                'order_id' => $id,
+                'order_id' => $order->getKey(),
                 'user_id' => Auth::id(),
             ]);
 
@@ -495,7 +483,7 @@ class OrderController extends BaseController
                 'action' => 'create_from_order',
                 'description' => trans('plugins/ecommerce::order.shipping_was_created_from'),
                 'shipment_id' => $shipment->id,
-                'order_id' => $id,
+                'order_id' => $order->getKey(),
                 'user_id' => Auth::id(),
             ]);
         }
@@ -503,10 +491,8 @@ class OrderController extends BaseController
         return $result;
     }
 
-    public function postCancelShipment(int|string $id, BaseHttpResponse $response)
+    public function postCancelShipment(Shipment $shipment, BaseHttpResponse $response)
     {
-        $shipment = Shipment::query()->findOrFail($id);
-
         $shipment->update(['status' => ShippingStatusEnum::CANCELED]);
 
         OrderHistory::query()->create([
@@ -524,10 +510,8 @@ class OrderController extends BaseController
             ->setMessage(trans('plugins/ecommerce::order.shipping_was_canceled_success'));
     }
 
-    public function postUpdateShippingAddress(int|string $id, AddressRequest $request, BaseHttpResponse $response)
+    public function postUpdateShippingAddress(OrderAddress $address, AddressRequest $request, BaseHttpResponse $response)
     {
-        $address = OrderAddress::query()->findOrFail($id);
-
         $address->fill($request->input());
         $address->save();
 
@@ -543,7 +527,7 @@ class OrderController extends BaseController
             ->setMessage(trans('plugins/ecommerce::order.update_shipping_address_success'));
     }
 
-    public function postUpdateTaxInformation(int|string $id, Request $request, BaseHttpResponse $response)
+    public function postUpdateTaxInformation(OrderTaxInformation $taxInformation, Request $request, BaseHttpResponse $response)
     {
         $validated = $request->validate([
             'company_tax_code' => 'required|string|min:3|max:20',
@@ -552,9 +536,7 @@ class OrderController extends BaseController
             'company_email' => 'required|email|min:6|max:60',
         ]);
 
-        $taxInformation = OrderTaxInformation::query()
-            ->with('order')
-            ->findOrFail($id);
+        $taxInformation->load(['order']);
 
         $taxInformation->update($validated);
 
@@ -567,10 +549,8 @@ class OrderController extends BaseController
             ->setMessage(trans('plugins/ecommerce::order.tax_info.update_success'));
     }
 
-    public function postCancelOrder(int|string $id, BaseHttpResponse $response)
+    public function postCancelOrder(Order $order, BaseHttpResponse $response)
     {
-        $order = Order::query()->findOrFail($id);
-
         if (! $order->canBeCanceledByAdmin()) {
             abort(403);
         }
@@ -587,24 +567,23 @@ class OrderController extends BaseController
         return $response->setMessage(trans('plugins/ecommerce::order.cancel_success'));
     }
 
-    public function postConfirmPayment(int|string $id, BaseHttpResponse $response)
+    public function postConfirmPayment(Order $order, BaseHttpResponse $response)
     {
-        $order = Order::query()->with(['payment'])->findOrFail($id);
-
         if ($order->status === OrderStatusEnum::PENDING) {
             $order->status = OrderStatusEnum::PROCESSING;
         }
 
         $order->save();
 
+        $order->load(['payment']);
+
         OrderHelper::confirmPayment($order);
 
         return $response->setMessage(trans('plugins/ecommerce::order.confirm_payment_success'));
     }
 
-    public function postRefund(int|string $id, RefundRequest $request, BaseHttpResponse $response)
+    public function postRefund(Order $order, RefundRequest $request, BaseHttpResponse $response)
     {
-        $order = Order::query()->findOrFail($id);
         if (is_plugin_active('payment') && $request->input(
             'refund_amount'
         ) > ($order->payment->amount - $order->payment->refunded_amount)) {
@@ -623,7 +602,7 @@ class OrderController extends BaseController
         foreach ($request->input('products', []) as $productId => $quantity) {
             $orderProduct = OrderProduct::query()->where([
                 'product_id' => $productId,
-                'order_id' => $id,
+                'order_id' => $order->getKey(),
             ])
                 ->first();
 
@@ -659,7 +638,7 @@ class OrderController extends BaseController
 
             $optionRefunds = [
                 'refund_note' => $request->input('refund_note'),
-                'order_id' => $order->id,
+                'order_id' => $order->getKey(),
             ];
 
             $paymentResponse = $paymentResponse->refundOrder($payment->charge_id, $refundAmount, $optionRefunds);
@@ -712,7 +691,7 @@ class OrderController extends BaseController
 
             $orderProduct = OrderProduct::query()->where([
                 'product_id' => $productId,
-                'order_id' => $id,
+                'order_id' => $order->getKey(),
             ])
                 ->first();
 
@@ -728,7 +707,7 @@ class OrderController extends BaseController
                 'description' => trans('plugins/ecommerce::order.refund_success_with_price', [
                     'price' => format_price($refundAmount),
                 ]),
-                'order_id' => $order->id,
+                'order_id' => $order->getKey(),
                 'user_id' => Auth::id(),
                 'extras' => json_encode([
                     'amount' => $refundAmount,
@@ -899,7 +878,7 @@ class OrderController extends BaseController
         return $dataTable->renderTable();
     }
 
-    public function getViewIncompleteOrder(int|string $id)
+    public function getViewIncompleteOrder(Order $order)
     {
         PageTitle::setTitle(trans('plugins/ecommerce::order.incomplete_order'));
 
@@ -909,23 +888,15 @@ class OrderController extends BaseController
                 'vendor/core/plugins/ecommerce/js/order-incomplete.js',
             ]);
 
-        $order = Order::query()
-            ->where('id', $id)
-            ->where('is_finished', 0)
-            ->with(['products', 'user'])
-            ->firstOrFail();
+        $order->load(['products', 'user']);
 
         $weight = number_format(EcommerceHelper::validateOrderWeight($order->products_weight));
 
         return view('plugins/ecommerce::orders.view-incomplete-order', compact('order', 'weight'));
     }
 
-    public function markIncompleteOrderAsCompleted(int|string $id, BaseHttpResponse $response): BaseHttpResponse
+    public function markIncompleteOrderAsCompleted(Order $order, BaseHttpResponse $response): BaseHttpResponse
     {
-        $order = Order::query()
-            ->where('is_finished', false)
-            ->findOrFail($id);
-
         DB::transaction(function () use ($order) {
             $order->update(['is_finished' => true]);
 
@@ -947,10 +918,8 @@ class OrderController extends BaseController
             ]);
     }
 
-    public function postSendOrderRecoverEmail(int|string $id, BaseHttpResponse $response)
+    public function postSendOrderRecoverEmail(Order $order, BaseHttpResponse $response)
     {
-        $order = Order::query()->findOrFail($id);
-
         $email = $order->user->email ?: $order->address->email;
 
         if (! $email) {

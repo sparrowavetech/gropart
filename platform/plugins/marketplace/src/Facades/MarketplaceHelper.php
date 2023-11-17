@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static mixed view(string $view, array $data = [])
- * @method static string viewPath(string $view)
+ * @method static string viewPath(string $view, bool $checkViewExists = true)
  * @method static array|string|int|bool|null getSetting(string $key, array|string|int|bool|null $default = '')
  * @method static string getSettingKey(string $key = '')
  * @method static array discountTypes()
@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static mixed sendMailToVendorAfterProcessingOrder($orders)
  * @method static \Botble\Base\Supports\EmailHandler setEmailVendorVariables(\Botble\Ecommerce\Models\Order $order)
  * @method static bool isCommissionCategoryFeeBasedEnabled()
- * @method static int maxFilesizeUploadByVendor()
+ * @method static float maxFilesizeUploadByVendor()
  * @method static int maxProductImagesUploadByVendor()
  *
  * @see \Botble\Marketplace\Supports\MarketplaceHelper

@@ -11,11 +11,4 @@ return new class () extends Migration {
             $table->text('comment')->change();
         });
     }
-
-    public function down(): void
-    {
-        Schema::table('ec_reviews', function (Blueprint $table) {
-            $table->string('comment')->change();
-        });
-    }
 };

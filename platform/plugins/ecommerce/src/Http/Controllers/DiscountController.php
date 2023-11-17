@@ -132,17 +132,15 @@ class DiscountController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int|string $id)
+    public function edit(Discount $discount)
     {
-        $discount = Discount::query()
-            ->with([
-                'customers',
-                'productCollections',
-                'productCategories',
-                'products' => fn (BelongsToMany $query) => $query->where('is_variation', false),
-                'productVariants.variationInfo.variationItems.attribute',
-            ])
-            ->findOrFail($id);
+        $discount->load([
+            'customers',
+            'productCollections',
+            'productCategories',
+            'products' => fn (BelongsToMany $query) => $query->where('is_variation', false),
+            'productVariants.variationInfo.variationItems.attribute',
+        ]);
 
         foreach ($discount->productVariants as $productVariant) {
             $productVariant->image_url = RvMedia::getImageUrl($productVariant->image, 'thumb', false, RvMedia::getDefaultImage());
@@ -176,11 +174,8 @@ class DiscountController extends BaseController
         return view('plugins/ecommerce::discounts.edit', compact('discount'));
     }
 
-    public function update(int|string $id, DiscountRequest $request, BaseHttpResponse $response)
+    public function update(Discount $discount, DiscountRequest $request, BaseHttpResponse $response)
     {
-        $discount = Discount::query()
-            ->findOrFail($id);
-
         $discount->update($request->validated());
 
         if ($productCollections = $request->input('product_collections')) {
@@ -262,10 +257,9 @@ class DiscountController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
+    public function destroy(Discount $discount, Request $request, BaseHttpResponse $response)
     {
         try {
-            $discount = Discount::query()->findOrFail($id);
             $discount->delete();
 
             event(new DeletedContentEvent(DISCOUNT_MODULE_SCREEN_NAME, $request, $discount));

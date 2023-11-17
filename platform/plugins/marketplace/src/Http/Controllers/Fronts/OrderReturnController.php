@@ -31,7 +31,7 @@ class OrderReturnController extends BaseController
     {
         PageTitle::setTitle(trans('plugins/ecommerce::order.order_return'));
 
-        return $orderReturnTable->render(MarketplaceHelper::viewPath('dashboard.table.base'));
+        return $orderReturnTable->renderTable();
     }
 
     protected function getStore()
@@ -60,7 +60,7 @@ class OrderReturnController extends BaseController
 
         $defaultStore = get_primary_store_locator();
 
-        return MarketplaceHelper::view('dashboard.order-returns.edit', compact('returnRequest', 'defaultStore'));
+        return MarketplaceHelper::view('vendor-dashboard.order-returns.edit', compact('returnRequest', 'defaultStore'));
     }
 
     public function update(int|string $id, UpdateOrderReturnRequest $request, BaseHttpResponse $response)

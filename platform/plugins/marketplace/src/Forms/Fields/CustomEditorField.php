@@ -9,6 +9,6 @@ class CustomEditorField extends FormField
 {
     protected function getTemplate(): string
     {
-        return MarketplaceHelper::viewPath('dashboard.forms.fields.custom-editor');
+        return MarketplaceHelper::viewPath('vendor-dashboard.forms.fields.custom-editor');
     }
 }

@@ -14,6 +14,8 @@ use Botble\Ecommerce\Models\Discount;
 use Botble\Ecommerce\Models\Invoice;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\Product;
+use Botble\Ecommerce\Tables\CustomerTable;
+use Botble\Ecommerce\Tables\ProductTable;
 use Botble\Language\Facades\Language;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Botble\Marketplace\Enums\RevenueTypeEnum;
@@ -25,8 +27,9 @@ use Botble\Marketplace\Models\VendorInfo;
 use Botble\Marketplace\Models\Withdrawal;
 use Botble\Media\Facades\RvMedia;
 use Botble\Slug\Facades\SlugHelper;
-use Botble\Slug\Models\Slug;
+use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\CollectionDataTable;
+use Botble\Table\Columns\Column;
 use Botble\Table\EloquentDataTable;
 use Exception;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
@@ -37,7 +40,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Throwable;
 
@@ -181,6 +183,28 @@ class HookServiceProvider extends ServiceProvider
             add_filter('ecommerce_product_eager_loading_relations', function (array $with) {
                 return array_merge($with, ['store', 'store.slugable']);
             }, 120);
+
+            add_filter('base_filter_table_filters', function (array $filters, TableAbstract $table) {
+                if ($table instanceof CustomerTable) {
+                    $filters['is_vendor'] = [
+                        'title' => trans('plugins/marketplace::store.forms.is_vendor'),
+                        'type' => 'select',
+                        'choices' => [1 => trans('core/base::base.yes'), 0 => trans('core/base::base.no')],
+                        'validate' => 'required|in:1,0',
+                    ];
+                }
+
+                if ($table instanceof ProductTable) {
+                    $filters['store_id'] = [
+                        'title' => trans('plugins/marketplace::store.forms.store'),
+                        'type' => 'select-search',
+                        'validate' => 'required|string',
+                        'callback' => fn () => Store::query()->pluck('name', 'id')->all(),
+                    ];
+                }
+
+                return $filters;
+            }, 120, 2);
         });
     }
 
@@ -297,15 +321,14 @@ class HookServiceProvider extends ServiceProvider
 
     public function registerAdditionalData(FormAbstract $form, Model|string|null $data): FormAbstract
     {
-        if (get_class($data) == Product::class && request()->segment(1) === BaseHelper::getAdminPrefix()) {
+        if ($data instanceof Product && request()->segment(1) === BaseHelper::getAdminPrefix()) {
             $stores = Store::query()->pluck('name', 'id')->all();
 
             $form->addAfter('status', 'store_id', 'customSelect', [
                 'label' => trans('plugins/marketplace::store.forms.store'),
-                'label_attr' => ['class' => 'control-label'],
                 'choices' => [0 => trans('plugins/marketplace::store.forms.select_store')] + $stores,
             ]);
-        } elseif (get_class($data) == Customer::class) {
+        } elseif ($data instanceof Customer) {
             if ($data->is_vendor && $form->has('status')) {
                 $statusOptions = $form->getField('status')->getOptions();
                 $statusOptions['help_block'] = [
@@ -320,7 +343,6 @@ class HookServiceProvider extends ServiceProvider
 
             $form->addAfter('email', 'is_vendor', 'onOff', [
                 'label' => trans('plugins/marketplace::store.forms.is_vendor'),
-                'label_attr' => ['class' => 'control-label'],
                 'default_value' => false,
             ]);
         }
@@ -391,12 +413,7 @@ class HookServiceProvider extends ServiceProvider
                 $store->save();
 
                 if (! $store->slug) {
-                    Slug::query()->create([
-                        'reference_type' => Store::class,
-                        'reference_id' => $store->id,
-                        'key' => Str::slug($store->name),
-                        'prefix' => SlugHelper::getPrefix(Store::class),
-                    ]);
+                    SlugHelper::createSlug($store);
                 }
             }
 
@@ -422,7 +439,7 @@ class HookServiceProvider extends ServiceProvider
             });
         }
 
-        return match (get_class($model)) {
+        return match ($model::class) {
             Customer::class => $data->addColumn('is_vendor', function ($item) {
                 if (! $item->is_vendor) {
                     return trans('core/base::base.no');
@@ -448,7 +465,7 @@ class HookServiceProvider extends ServiceProvider
                                 return $subQuery->where('name', 'LIKE', '%' . $keyword . '%');
                             });
 
-                        if (get_class($model) == Order::class) {
+                        if ($model instanceof Order) {
                             $query = $query
                                 ->whereHas('address', function ($subQuery) use ($keyword) {
                                     return $subQuery
@@ -514,22 +531,19 @@ class HookServiceProvider extends ServiceProvider
             return $headings;
         }
 
-        return match (get_class($model)) {
+        return match ($model::class) {
             Customer::class => array_merge($headings, [
-                'is_vendor' => [
-                    'name' => 'is_vendor',
-                    'title' => trans('plugins/marketplace::store.forms.is_vendor'),
-                    'class' => 'text-center',
-                    'width' => '100px',
-                ],
+                Column::make('is_vendor')
+                    ->title(trans('plugins/marketplace::store.forms.is_vendor'))
+                    ->alignCenter()
+                    ->width(100),
             ]),
             Order::class, Product::class, Discount::class => array_merge($headings, [
-                'store_id' => [
-                    'name' => 'store_id',
-                    'title' => trans('plugins/marketplace::store.forms.store'),
-                    'class' => 'text-start no-sort',
-                    'orderable' => false,
-                ],
+                Column::make('store_id')
+                    ->title(trans('plugins/marketplace::store.forms.store'))
+                    ->alignLeft()
+                    ->orderable(false)
+                    ->searchable(false),
             ]),
             default => $headings,
         };
@@ -543,7 +557,7 @@ class HookServiceProvider extends ServiceProvider
             $model = $query->getModel();
         }
 
-        return match (get_class($model)) {
+        return match ($model::class) {
             Customer::class => $query->addSelect('is_vendor'),
             Order::class, Product::class, Discount::class => $query->addSelect($model->getTable() . '.store_id')->with(
                 ['store']
@@ -558,7 +572,7 @@ class HookServiceProvider extends ServiceProvider
             return $tabs;
         }
 
-        if (! empty($data) && get_class($data) == Store::class && $data->customer->is_vendor) {
+        if (! empty($data) && $data instanceof Store && $data->customer->is_vendor) {
             return $tabs .
                 view('plugins/marketplace::customers.tax-info-tab')->render() .
                 view('plugins/marketplace::customers.payout-info-tab')->render();
@@ -569,7 +583,7 @@ class HookServiceProvider extends ServiceProvider
 
     public function addBankInfoContent(?string $tabs, Model|string|null $data = null): ?string
     {
-        if (! empty($data) && get_class($data) == Store::class) {
+        if (! empty($data) && $data instanceof Store) {
             $customer = $data->customer;
             if ($customer->is_vendor) {
                 return $tabs .

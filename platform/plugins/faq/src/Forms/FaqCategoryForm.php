@@ -17,7 +17,7 @@ class FaqCategoryForm extends FormAbstract
             ->withCustomFields()
             ->add('name', 'text', [
                 'label' => trans('core/base::forms.name'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'placeholder' => trans('core/base::forms.name_placeholder'),
                     'data-counter' => 120,
@@ -25,7 +25,6 @@ class FaqCategoryForm extends FormAbstract
             ])
             ->add('order', 'number', [
                 'label' => trans('core/base::forms.order'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'placeholder' => trans('core/base::forms.order_by_placeholder'),
                 ],
@@ -33,7 +32,7 @@ class FaqCategoryForm extends FormAbstract
             ])
             ->add('status', 'customSelect', [
                 'label' => trans('core/base::tables.status'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'choices' => BaseStatusEnum::labels(),
             ])
             ->setBreakFieldPoint('status');

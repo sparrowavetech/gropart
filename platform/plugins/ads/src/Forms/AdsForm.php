@@ -21,7 +21,7 @@ class AdsForm extends FormAbstract
             ->withCustomFields()
             ->add('name', 'text', [
                 'label' => trans('core/base::forms.name'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'placeholder' => trans('core/base::forms.name_placeholder'),
                     'data-counter' => 120,
@@ -29,7 +29,7 @@ class AdsForm extends FormAbstract
             ])
             ->add('key', 'text', [
                 'label' => trans('plugins/ads::ads.key'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'placeholder' => trans('plugins/ads::ads.key'),
                     'data-counter' => 255,
@@ -38,7 +38,6 @@ class AdsForm extends FormAbstract
             ])
             ->add('url', 'text', [
                 'label' => trans('plugins/ads::ads.url'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'placeholder' => trans('plugins/ads::ads.url'),
                     'data-counter' => 255,
@@ -46,7 +45,6 @@ class AdsForm extends FormAbstract
             ])
             ->add('order', 'number', [
                 'label' => trans('core/base::forms.order'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'placeholder' => trans('core/base::forms.order_by_placeholder'),
                 ],
@@ -54,33 +52,42 @@ class AdsForm extends FormAbstract
             ])
             ->add('open_in_new_tab', 'onOff', [
                 'label' => trans('plugins/ads::ads.open_in_new_tab'),
-                'label_attr' => ['class' => 'control-label'],
                 'default_value' => true,
+            ])
+            ->add('image', 'mediaImage')
+            ->add('tablet_image', 'mediaImage', [
+                'label' => __('Tablet Image'),
+                'help_block' => [
+                    'text' => __('For devices with width from 768px to 1200px, if empty, will use the image from the desktop.'),
+                ],
+            ])
+            ->add('mobile_image', 'mediaImage', [
+                'label' => __('Mobile Image'),
+                'help_block' => [
+                    'text' => __('For devices with width less than 768px, if empty, will use the image from the tablet.'),
+                ],
             ])
             ->add('status', 'customSelect', [
                 'label' => trans('core/base::tables.status'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'class' => 'form-control select-full',
                 ],
                 'choices' => BaseStatusEnum::labels(),
             ])
-            ->add('location', 'customSelect', [
-                'label' => trans('plugins/ads::ads.location'),
-                'label_attr' => ['class' => 'control-label required'],
-                'attr' => [
-                    'class' => 'form-control select-full',
-                ],
-                'choices' => AdsManager::getLocations(),
-            ])
+            ->when(($adLocations = AdsManager::getLocations()) && count($adLocations) > 1, function () use ($adLocations) {
+                $this->add('location', 'customSelect', [
+                    'label' => trans('plugins/ads::ads.location'),
+                    'required' => true,
+                    'attr' => [
+                        'class' => 'form-control select-full',
+                    ],
+                    'choices' => $adLocations,
+                ]);
+            })
             ->add('expired_at', 'datePicker', [
                 'label' => trans('plugins/ads::ads.expired_at'),
-                'label_attr' => ['class' => 'control-label'],
                 'default_value' => BaseHelper::formatDate(Carbon::now()->addMonth()),
-            ])
-            ->add('image', 'mediaImage', [
-                'label' => trans('core/base::forms.image'),
-                'label_attr' => ['class' => 'control-label'],
             ])
             ->setBreakFieldPoint('status');
     }

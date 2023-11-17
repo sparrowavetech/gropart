@@ -2,7 +2,6 @@
     <div class="row">
         <div class="col-sm-12">
             <article class="post-8">
-                <!-- ==================== start cart page =================== -->
                 <meta
                     name="csrf-token"
                     content="{{ csrf_token() }}"
@@ -200,13 +199,12 @@
                                                             <div
                                                                 class="product-item-4 owl-carousel owl-theme nf-carousel-theme">
                                                                 @foreach ($crossSellProducts as $crossSellProduct)
-                                                                    {!! Theme::partial('product.product_simple', ['product' => $crossSellProduct]) !!}
+                                                                    @include('plugins/ecommerce::themes.includes.default-product', ['product' => $crossSellProduct])
                                                                 @endforeach
                                                             </div>
                                                         </div>
                                                     @endif
                                                 </div>
-                                                <!-- End Product Carousel -->
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="cart_totals">
@@ -239,7 +237,7 @@
                                                                     <th>{{ __('Discount') }}</th>
                                                                     <td>
                                                                         <span
-                                                                            class="total-discount-amount-text">{{ format_price($couponDiscountAmount) }}</span>
+                                                                            class="product-price-amount amount total-discount-amount-text">{{ format_price($couponDiscountAmount) }}</span>
                                                                     </td>
                                                                 </tr>
 
@@ -248,7 +246,7 @@
                                                                         <th>{{ __('Discount promotion') }}</th>
                                                                         <td>
                                                                             <span
-                                                                                class="promotion-discount-amount-text">{{ format_price($promotionDiscountAmount) }}</span>
+                                                                                class="product-price-amount amount promotion-discount-amount-text">{{ format_price($promotionDiscountAmount) }}</span>
                                                                         </td>
                                                                     </tr>
                                                                 @endif
@@ -275,9 +273,7 @@
                         </div>
                     </div>
                 </div>
-                <!-- ==================== //end cart page =================== -->
             </article>
         </div>
     </div>
 </div>
-<!-- End Content Page -->

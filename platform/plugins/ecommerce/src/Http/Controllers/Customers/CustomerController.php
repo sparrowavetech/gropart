@@ -50,7 +50,7 @@ class CustomerController extends BaseController
         $customer->fill($request->input());
         $customer->confirmed_at = Carbon::now();
         $customer->password = Hash::make($request->input('password'));
-        $customer->dob = Carbon::parse($request->input('dob'))->toDateString();
+        $customer->dob = Carbon::parse($request->input('dob'));
         $customer->save();
 
         event(new CreatedContentEvent(CUSTOMER_MODULE_SCREEN_NAME, $request, $customer));
@@ -84,7 +84,7 @@ class CustomerController extends BaseController
             $customer->password = Hash::make($request->input('password'));
         }
 
-        $customer->dob = Carbon::parse($request->input('dob'))->toDateString();
+        $customer->dob = Carbon::parse($request->input('dob'));
 
         $customer->save();
 
@@ -189,19 +189,11 @@ class CustomerController extends BaseController
         event(new CreatedContentEvent(CUSTOMER_MODULE_SCREEN_NAME, $request, $customer));
 
         $request->merge([
-            'customer_id' => $customer->id,
+            'customer_id' => $customer->getKey(),
             'is_default' => true,
         ]);
 
         $address = Address::query()->create($request->input());
-
-        $address->country = $address->country_name;
-        $address->state = $address->state_name;
-        $address->city = $address->city_name;
-
-        $address->country_name = $address->country;
-        $address->state_name = $address->state;
-        $address->city_name = $address->city;
 
         return $response
             ->setData(compact('address', 'customer'))

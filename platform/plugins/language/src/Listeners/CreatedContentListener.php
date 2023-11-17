@@ -3,6 +3,7 @@
 namespace Botble\Language\Listeners;
 
 use Botble\Base\Events\CreatedContentEvent;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Language\Facades\Language;
 use Exception;
 
@@ -15,7 +16,7 @@ class CreatedContentListener
                 Language::saveLanguage($event->screen, $event->request, $event->data);
             }
         } catch (Exception $exception) {
-            info($exception->getMessage());
+            BaseHelper::logError($exception);
         }
     }
 }

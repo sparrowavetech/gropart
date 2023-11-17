@@ -11,6 +11,7 @@ use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Supports\Core;
+use Botble\Base\Supports\Helper;
 use Botble\Base\Supports\Language;
 use Botble\JsValidation\Facades\JsValidator;
 use Botble\Media\Facades\RvMedia;
@@ -263,7 +264,7 @@ class SettingController extends BaseController
     {
         if ($request->expectsJson() && ! $core->checkConnection()) {
             return response()->json([
-                'message' => __('Your server is not connected to the internet.'),
+                'message' => sprintf('Your IP (%s) has been blocked or your server is not connected to the internet.', Helper::getIpFromThirdParty()),
             ], 400);
         }
 
@@ -284,7 +285,7 @@ class SettingController extends BaseController
 
             $data = [
                 'activated_at' => $activatedAt->format('M d Y'),
-                'licensed_to' => setting('licensed_to'),
+                'licensed_to' => Setting::get('licensed_to'),
             ];
 
             return $response->setMessage('Your license is activated.')->setData($data);
@@ -334,7 +335,7 @@ class SettingController extends BaseController
         try {
             $core->deactivateLicense();
 
-            Setting::delete(['licensed_to']);
+            Setting::forceDelete(['licensed_to']);
 
             return $response->setMessage('Deactivated license successfully!');
         } catch (Throwable $exception) {
@@ -349,7 +350,7 @@ class SettingController extends BaseController
                 return $response->setError()->setMessage('Could not reset your license.');
             }
 
-            Setting::delete(['licensed_to']);
+            Setting::forceDelete(['licensed_to']);
 
             return $response->setMessage('Your license has been reset successfully.');
         } catch (Throwable $exception) {
@@ -367,6 +368,9 @@ class SettingController extends BaseController
 
         foreach ($files as $file) {
             try {
+                /**
+                 * @var MediaFile $file
+                 */
                 RvMedia::generateThumbnails($file);
             } catch (Exception) {
                 $errors[] = $file->url;
@@ -474,9 +478,7 @@ class SettingController extends BaseController
 
     protected function saveActivatedLicense(Core $core, string $buyer): array
     {
-        setting()
-            ->set(['licensed_to' => $buyer])
-            ->save();
+        Setting::forceSet(['licensed_to' => $buyer])->save();
 
         $activatedAt = Carbon::createFromTimestamp(filectime($core->getLicenseFilePath()));
 

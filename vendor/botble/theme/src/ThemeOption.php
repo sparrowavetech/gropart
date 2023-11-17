@@ -441,7 +441,7 @@ class ThemeOption
 
             return call_user_func_array([Form::class, $field['type']], array_values($attributes));
         } catch (Throwable $exception) {
-            info($exception->getMessage());
+            BaseHelper::logError($exception);
 
             return null;
         }
@@ -490,5 +490,18 @@ class ThemeOption
         }
 
         return false;
+    }
+
+    public function prepareFromArray(array $options, string $locale = null, string $defaultLocale = null): array
+    {
+        return collect($options)
+            ->mapWithKeys(function (string|array $value, string $key) use ($locale, $defaultLocale) {
+                if (is_array($value)) {
+                    $value = json_encode($value);
+                }
+
+                return [$this->getOptionKey($key, $locale != $defaultLocale ? $locale : null) => $value];
+            })
+            ->all();
     }
 }

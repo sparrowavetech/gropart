@@ -12,7 +12,7 @@
                         <th>{{ __('Product Name') }}</th>
                         <th class="text-center">{{ __('Times downloaded') }}</th>
                         <th>{{ __('Ordered at') }}</th>
-                        <th class="text-right">{{ __('Action') }}</th>
+                        <th class="text-right text-end">{{ __('Action') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -96,7 +96,7 @@
                                     <span>{{ $orderProduct->times_downloaded }}</span>
                                 </td>
                                 <td>{{ $orderProduct->created_at->translatedFormat('M d, Y h:m') }}</td>
-                                <td class="text-right">
+                                <td class="text-right text-end">
                                     @if ($orderProduct->product_file_internal_count)
                                         <a
                                             class="btn btn-primary mb-2"

@@ -221,7 +221,7 @@
             @endif
 
             @if (!in_array('city', EcommerceHelper::getHiddenFieldsAtCheckout()))
-                <div class="col-sm-6 col-12">
+                <div @class(['col-sm-6 col-12' => ! in_array('state', EcommerceHelper::getHiddenFieldsAtCheckout()), 'col-12' => in_array('state', EcommerceHelper::getHiddenFieldsAtCheckout())])>
                     <div class="form-group mb-3 @error('address.city') has-error @enderror">
                         @if (EcommerceHelper::useCityFieldAsTextField())
                             <div class="form-input-wrapper">
@@ -247,8 +247,8 @@
                                     required
                                 >
                                     <option value="">{{ __('Select city...') }}</option>
-                                    @if (old('address.state', Arr::get($sessionCheckoutData, 'state')))
-                                        @foreach (EcommerceHelper::getAvailableCitiesByState(old('address.state', Arr::get($sessionCheckoutData, 'state'))) as $cityId => $cityName)
+                                    @if (old('address.state', Arr::get($sessionCheckoutData, 'state')) || in_array('state', EcommerceHelper::getHiddenFieldsAtCheckout()))
+                                        @foreach (EcommerceHelper::getAvailableCitiesByState(old('address.state', Arr::get($sessionCheckoutData, 'state')), old('address.country', Arr::get($sessionCheckoutData, 'country', EcommerceHelper::getFirstCountryId()))) as $cityId => $cityName)
                                             <option
                                                 value="{{ $cityId }}"
                                                 @if (old('address.city', Arr::get($sessionCheckoutData, 'city')) == $cityId) selected @endif

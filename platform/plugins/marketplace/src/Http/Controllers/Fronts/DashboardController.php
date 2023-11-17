@@ -24,7 +24,6 @@ use Botble\Slug\Facades\SlugHelper;
 use Botble\Theme\Facades\Theme;
 use Exception;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Contracts\Config\Repository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -32,10 +31,8 @@ use Illuminate\Support\Facades\Validator;
 
 class DashboardController
 {
-    public function __construct(protected Repository $config)
+    public function __construct()
     {
-        Assets::setConfig($config->get('plugins.marketplace.assets', []));
-
         Theme::asset()
             ->add('customer-style', 'vendor/core/plugins/ecommerce/css/customer.css');
 
@@ -168,11 +165,11 @@ class DashboardController
         if ($request->ajax()) {
             return $response
                 ->setData([
-                    'html' => MarketplaceHelper::view('dashboard.partials.dashboard-content', $compact)->render(),
+                    'html' => MarketplaceHelper::view('vendor-dashboard.partials.dashboard-content', $compact)->render(),
                 ]);
         }
 
-        return MarketplaceHelper::view('dashboard.index', $compact);
+        return MarketplaceHelper::view('vendor-dashboard.index', $compact);
     }
 
     public function postUpload(Request $request, BaseHttpResponse $response)
@@ -232,7 +229,11 @@ class DashboardController
 
     public function postUploadFromEditor(Request $request)
     {
-        return RvMedia::uploadFromEditor($request);
+        $customer = auth('customer')->user();
+
+        $uploadFolder = $customer->store?->upload_folder ?: $customer->upload_folder;
+
+        return RvMedia::uploadFromEditor($request, 0, $uploadFolder);
     }
 
     public function getBecomeVendor()
@@ -246,7 +247,7 @@ class DashboardController
                     ->add(__('Home'), route('public.index'))
                     ->add(__('Approving'));
 
-                return Theme::scope('marketplace.approving-vendor', [], 'plugins/marketplace::themes.approving-vendor')
+                return Theme::scope('marketplace.approving-vendor', [], MarketplaceHelper::viewPath('approving-vendor', false))
                     ->render();
             }
 
@@ -259,7 +260,7 @@ class DashboardController
             ->add(__('Home'), route('public.index'))
             ->add(__('Become Vendor'), route('marketplace.vendor.become-vendor'));
 
-        return Theme::scope('marketplace.become-vendor', [], 'plugins/marketplace::themes.become-vendor')
+        return Theme::scope('marketplace.become-vendor', [], MarketplaceHelper::viewPath('become-vendor', false))
             ->render();
     }
 

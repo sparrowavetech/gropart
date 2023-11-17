@@ -15,6 +15,7 @@ use Botble\Media\Facades\RvMedia;
 use Botble\Menu\Facades\Menu;
 use Botble\Page\Models\Page;
 use Botble\Shortcode\Compilers\Shortcode;
+use Botble\Shortcode\Facades\Shortcode as ShortcodeFacade;
 use Botble\Slug\Models\Slug;
 use Botble\Theme\Facades\AdminBar;
 use Botble\Theme\Facades\Theme;
@@ -58,8 +59,14 @@ class HookServiceProvider extends ServiceProvider
                 trans('plugins/blog::base.short_code_description'),
                 [$this, 'renderBlogPosts']
             );
-            shortcode()->setAdminConfig('blog-posts', function ($attributes, $content) {
-                return view('plugins/blog::partials.posts-short-code-admin-config', compact('attributes', 'content'))
+
+            shortcode()->setAdminConfig('blog-posts', function (array $attributes) {
+                $categories = Category::query()
+                    ->wherePublished()
+                    ->select(['id', 'name', 'parent_id'])
+                    ->get();
+
+                return view('plugins/blog::partials.posts-short-code-admin-config', compact('attributes', 'categories'))
                     ->render();
             });
         }
@@ -179,18 +186,18 @@ class HookServiceProvider extends ServiceProvider
 
     public function registerMenuOptions(): void
     {
-        if (Auth::user()->hasPermission('categories.index')) {
+        if (Auth::guard()->user()->hasPermission('categories.index')) {
             Menu::registerMenuOptions(Category::class, trans('plugins/blog::categories.menu'));
         }
 
-        if (Auth::user()->hasPermission('tags.index')) {
+        if (Auth::guard()->user()->hasPermission('tags.index')) {
             Menu::registerMenuOptions(Tag::class, trans('plugins/blog::tags.menu'));
         }
     }
 
     public function registerDashboardWidgets(array $widgets, Collection $widgetSettings): array
     {
-        if (! Auth::user()->hasPermission('posts.index')) {
+        if (! Auth::guard()->user()->hasPermission('posts.index')) {
             return $widgets;
         }
 
@@ -215,7 +222,18 @@ class HookServiceProvider extends ServiceProvider
 
     public function renderBlogPosts(Shortcode $shortcode): array|string
     {
-        $posts = get_all_posts(true, (int)$shortcode->paginate);
+        $categoryIds = ShortcodeFacade::fields()->getIds('category_ids', $shortcode);
+
+        $posts = Post::query()
+            ->wherePublished()
+            ->orderByDesc('created_at')
+            ->with('slugable')
+            ->when(! empty($categoryIds), function ($query) use ($categoryIds) {
+                $query->whereHas('categories', function ($query) use ($categoryIds) {
+                    $query->whereIn('categories.id', $categoryIds);
+                });
+            })
+            ->paginate((int)$shortcode->paginate ?: 12);
 
         $view = 'plugins/blog::themes.templates.posts';
         $themeView = Theme::getThemeNamespace() . '::views.templates.posts';

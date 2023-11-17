@@ -79,7 +79,7 @@ class MarketplaceServiceProvider extends ServiceProvider
             return;
         }
         $this->setNamespace('plugins/marketplace')
-            ->loadAndPublishConfigurations(['permissions', 'assets', 'email', 'general'])
+            ->loadAndPublishConfigurations(['permissions', 'email', 'general'])
             ->loadMigrations()
             ->loadAndPublishTranslations()
             ->loadAndPublishViews()
@@ -191,9 +191,9 @@ class MarketplaceServiceProvider extends ServiceProvider
         $this->app->register(OrderSupportServiceProvider::class);
 
         $this->app['events']->listen('eloquent.deleted: ' . Customer::class, function (Customer $customer) {
-            Revenue::query()->where('customer_id', $customer->id)->delete();
-            Withdrawal::query()->where('customer_id', $customer->id)->delete();
-            VendorInfo::query()->where('customer_id', $customer->id)->delete();
+            Revenue::query()->where('customer_id', $customer->getKey())->delete();
+            Withdrawal::query()->where('customer_id', $customer->getKey())->delete();
+            VendorInfo::query()->where('customer_id', $customer->getKey())->delete();
         });
 
         $this->app->booted(function () {
@@ -266,19 +266,19 @@ class MarketplaceServiceProvider extends ServiceProvider
             }
         });
 
-        Form::component('customEditor', MarketplaceHelper::viewPath('dashboard.forms.partials.custom-editor'), [
+        Form::component('customEditor', MarketplaceHelper::viewPath('vendor-dashboard.forms.partials.custom-editor'), [
             'name',
             'value' => null,
             'attributes' => [],
         ]);
 
-        Form::component('customImage', MarketplaceHelper::viewPath('dashboard.forms.partials.custom-image'), [
+        Form::component('customImage', MarketplaceHelper::viewPath('vendor-dashboard.forms.partials.custom-image'), [
             'name',
             'value' => null,
             'attributes' => [],
         ]);
 
-        Form::component('customImages', MarketplaceHelper::viewPath('dashboard.forms.partials.custom-images'), [
+        Form::component('customImages', MarketplaceHelper::viewPath('vendor-dashboard.forms.partials.custom-images'), [
             'name',
             'values' => null,
             'attributes' => [],

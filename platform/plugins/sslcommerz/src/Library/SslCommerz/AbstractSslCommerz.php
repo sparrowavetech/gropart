@@ -6,9 +6,9 @@ abstract class AbstractSslCommerz implements SslCommerzInterface
 {
     protected string $apiUrl;
 
-    protected string $storeId;
+    protected string $storeId = '';
 
-    protected string $storePassword;
+    protected string $storePassword = '';
 
     public function callToApi(array $data, array $header = [], bool $setLocalhost = false): bool|string
     {

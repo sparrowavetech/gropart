@@ -101,7 +101,7 @@ class InstallController extends Controller
     public function postSaveAccount(SaveAccountRequest $request, ActivateUserService $activateUserService)
     {
         try {
-            User::truncate();
+            User::query()->truncate();
 
             $user = new User();
             $user->fill($request->only([

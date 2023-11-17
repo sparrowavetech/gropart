@@ -4,10 +4,13 @@ namespace Botble\Marketplace\Tables;
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\Ecommerce\Models\OrderReturn;
+use Botble\Marketplace\Tables\Traits\ForVendor;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Actions\DeleteAction;
 use Botble\Table\Actions\EditAction;
+use Botble\Table\Columns\Column;
 use Botble\Table\Columns\CreatedAtColumn;
+use Botble\Table\Columns\EnumColumn;
 use Botble\Table\Columns\IdColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -16,6 +19,8 @@ use Illuminate\Http\JsonResponse;
 
 class OrderReturnTable extends TableAbstract
 {
+    use ForVendor;
+
     public function setup(): void
     {
         $this
@@ -30,12 +35,6 @@ class OrderReturnTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('return_status', function ($item) {
-                return BaseHelper::clean($item->return_status->toHtml());
-            })
-            ->editColumn('reason', function ($item) {
-                return BaseHelper::clean($item->reason->toHtml());
-            })
             ->editColumn('order_id', function ($item) {
                 return BaseHelper::clean($item->order->code);
             })
@@ -87,29 +86,24 @@ class OrderReturnTable extends TableAbstract
     {
         return [
             IdColumn::make(),
-            'order_id' => [
-                'title' => trans('plugins/ecommerce::order.order_id'),
-                'class' => 'text-start',
-            ],
-            'user_id' => [
-                'title' => trans('plugins/ecommerce::order.customer_label'),
-                'class' => 'text-start',
-            ],
-            'items_count' => [
-                'title' => trans('plugins/ecommerce::order.order_return_items_count'),
-            ],
-            'return_status' => [
-                'title' => trans('core/base::tables.status'),
-            ],
+            Column::make('order_id')
+                ->title(trans('plugins/ecommerce::order.order_id'))
+                ->alignStart(),
+            Column::make('user_id')
+                ->title(trans('plugins/ecommerce::order.customer_label'))
+                ->alignStart(),
+            Column::make('items_count')
+                ->title(trans('plugins/ecommerce::order.order_return_items_count')),
+            EnumColumn::make('reason')
+                ->title(trans('plugins/ecommerce::order.return_reason')),
+            EnumColumn::make('return_status')
+                ->title(trans('core/base::tables.status')),
             CreatedAtColumn::make(),
         ];
     }
 
     public function getDefaultButtons(): array
     {
-        return [
-            'export',
-            'reload',
-        ];
+        return array_merge(['export'], parent::getDefaultButtons());
     }
 }

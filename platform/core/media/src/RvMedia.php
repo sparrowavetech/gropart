@@ -3,6 +3,7 @@
 namespace Botble\Media;
 
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
 use Botble\Media\Http\Resources\FileResource;
 use Botble\Media\Models\MediaFile;
 use Botble\Media\Models\MediaFolder;
@@ -15,8 +16,10 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Intervention\Image\Facades\Image;
 use League\Flysystem\UnableToWriteFile;
@@ -472,7 +475,7 @@ class RvMedia
             $file->size = $data['size'];
             $file->mime_type = $data['mime_type'];
             $file->folder_id = $folderId;
-            $file->user_id = Auth::check() ? Auth::id() : 0;
+            $file->user_id = Auth::guard()->check() ? Auth::guard()->id() : 0;
             $file->options = $request->input('options', []);
             $file->save();
 
@@ -660,7 +663,7 @@ class RvMedia
         $info = pathinfo($url);
 
         try {
-            $contents = file_get_contents($url);
+            $contents = Http::withoutVerifying()->get($url)->body();
         } catch (Exception $exception) {
             return [
                 'error' => true,
@@ -673,9 +676,7 @@ class RvMedia
         }
 
         $path = '/tmp';
-        if (! File::isDirectory($path)) {
-            File::makeDirectory($path);
-        }
+        File::ensureDirectoryExists($path);
 
         $path = $path . '/' . $info['basename'];
         file_put_contents($path, $contents);
@@ -791,7 +792,7 @@ class RvMedia
             }
 
             $folder = MediaFolder::query()->create([
-                'user_id' => Auth::check() ? Auth::id() : 0,
+                'user_id' => Auth::guard()->check() ? Auth::guard()->id() : 0,
                 'name' => MediaFolder::createName($folderSlug, 0),
                 'slug' => MediaFolder::createSlug($folderSlug, 0),
                 'parent_id' => $parentId,
@@ -978,5 +979,28 @@ class RvMedia
                 'region' => $config['region'],
             ],
         ]);
+    }
+
+    public function image(
+        string|null $url,
+        string $alt = null,
+        string $size = null,
+        bool $useDefaultImage = true,
+        array $attributes = [],
+        bool $secure = null
+    ): HtmlString {
+        if (! isset($attributes['loading'])) {
+            $attributes['loading'] = 'lazy';
+        }
+
+        $defaultImageUrl = $this->getDefaultImage();
+
+        if (! $url) {
+            $url = $defaultImageUrl;
+        }
+
+        $url = $this->getImageUrl($url, $size, false, $useDefaultImage ? $defaultImageUrl : null);
+
+        return Html::image($url, $alt, $attributes, $secure);
     }
 }

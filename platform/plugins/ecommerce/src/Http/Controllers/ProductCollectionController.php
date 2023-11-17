@@ -49,10 +49,8 @@ class ProductCollectionController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
+    public function edit(ProductCollection $productCollection, FormBuilder $formBuilder, Request $request)
     {
-        $productCollection = ProductCollection::query()->findOrFail($id);
-
         event(new BeforeEditContentEvent($request, $productCollection));
 
         PageTitle::setTitle(trans('core/base::forms.edit_item', ['name' => $productCollection->name]));
@@ -63,9 +61,8 @@ class ProductCollectionController extends BaseController
             ->renderForm();
     }
 
-    public function update(int|string $id, ProductCollectionRequest $request, BaseHttpResponse $response)
+    public function update(ProductCollection $productCollection, ProductCollectionRequest $request, BaseHttpResponse $response)
     {
-        $productCollection = ProductCollection::query()->findOrFail($id);
         $productCollection->fill($request->input());
         $productCollection->save();
 
@@ -82,10 +79,8 @@ class ProductCollectionController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(int|string $id, BaseHttpResponse $response, Request $request)
+    public function destroy(ProductCollection $productCollection, BaseHttpResponse $response, Request $request)
     {
-        $productCollection = ProductCollection::query()->findOrFail($id);
-
         try {
             $productCollection->delete();
 
@@ -109,9 +104,9 @@ class ProductCollectionController extends BaseController
         return $response->setData($productCollections);
     }
 
-    public function getProductCollection(int|string|null $id, BaseHttpResponse $response)
+    public function getProductCollection(ProductCollection|null $productCollection, BaseHttpResponse $response)
     {
-        $productCollection = ProductCollection::query()->with('products')->find($id);
+        $productCollection->load(['products']);
 
         return $response->setData(view(
             'plugins/ecommerce::product-collections.partials.products',

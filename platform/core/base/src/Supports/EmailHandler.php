@@ -6,13 +6,13 @@ use Botble\Base\Events\SendMailEvent;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Media\Facades\RvMedia;
 use Carbon\Carbon;
-use Exception;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\URL;
 use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
 use Throwable;
+use Twig\Extension\DebugExtension;
 
 class EmailHandler
 {
@@ -32,7 +32,10 @@ class EmailHandler
     {
         $this->twigCompiler = new TwigCompiler([
             'autoescape' => false,
+            'debug' => true,
         ]);
+
+        $this->twigCompiler->addExtension(new DebugExtension());
     }
 
     public function setModule(string $module): self
@@ -218,14 +221,14 @@ class EmailHandler
             $title = $this->prepareData($title);
 
             event(new SendMailEvent($content, $title, $to, $args, $debug));
-        } catch (Exception $exception) {
+        } catch (Throwable $throwable) {
             if ($debug) {
-                throw $exception;
+                throw $throwable;
             }
 
-            info($exception->getMessage());
+            BaseHelper::logError($throwable);
 
-            $this->sendErrorException($exception);
+            $this->sendErrorException($throwable);
         }
     }
 
@@ -311,41 +314,41 @@ class EmailHandler
         return $value;
     }
 
-    public function sendErrorException(Exception $exception): void
+    public function sendErrorException(Throwable $throwable): void
     {
         try {
-            $ex = FlattenException::create($exception);
+            $ex = FlattenException::createFromThrowable($throwable);
 
             $url = URL::full();
-            $error = $this->renderException($exception);
+            $error = $this->renderException($throwable);
 
             $this->send(
                 view('core/base::emails.error-reporting', compact('url', 'ex', 'error'))->render(),
-                $exception->getFile(),
+                $throwable->getFile(),
                 ! empty(config('core.base.general.error_reporting.to')) ?
                     config('core.base.general.error_reporting.to') :
                     get_admin_email()->toArray()
             );
-        } catch (Throwable $ex) {
-            info($ex->getMessage());
+        } catch (Throwable $throwable) {
+            BaseHelper::logError($throwable);
         }
     }
 
-    protected function renderException(Throwable|Exception $exception): string
+    protected function renderException(Throwable $throwable): string
     {
         $renderer = new HtmlErrorRenderer(true);
 
-        $exception = $renderer->render($exception);
+        $throwable = $renderer->render($throwable);
 
         if (! headers_sent()) {
-            http_response_code($exception->getStatusCode());
+            http_response_code($throwable->getStatusCode());
 
-            foreach ($exception->getHeaders() as $name => $value) {
+            foreach ($throwable->getHeaders() as $name => $value) {
                 header($name . ': ' . $value, false);
             }
         }
 
-        return $exception->getAsString();
+        return $throwable->getAsString();
     }
 
     public function getTemplateContent(string $template, string $type = 'plugins'): string|null

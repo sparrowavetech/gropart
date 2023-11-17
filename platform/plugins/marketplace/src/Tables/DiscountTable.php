@@ -4,22 +4,22 @@ namespace Botble\Marketplace\Tables;
 
 use Botble\Ecommerce\Enums\DiscountTypeEnum;
 use Botble\Ecommerce\Models\Discount;
+use Botble\Marketplace\Tables\Traits\ForVendor;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Actions\DeleteAction;
 use Botble\Table\BulkActions\DeleteBulkAction;
 use Botble\Table\Columns\Column;
 use Botble\Table\Columns\DateColumn;
 use Botble\Table\Columns\IdColumn;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
 
 class DiscountTable extends TableAbstract
 {
+    use ForVendor;
+
     public function setup(): void
     {
         $this
@@ -71,7 +71,7 @@ class DiscountTable extends TableAbstract
             Column::make('detail')
                 ->name('code')
                 ->title(trans('plugins/ecommerce::discount.detail'))
-                ->alignLeft(),
+                ->alignStart(),
             Column::make('total_used')
                 ->title(trans('plugins/ecommerce::discount.used'))
                 ->width(100),
@@ -100,14 +100,5 @@ class DiscountTable extends TableAbstract
                 }
             }),
         ];
-    }
-
-    public function renderTable($data = [], $mergeData = []): View|Factory|Response
-    {
-        if ($this->isEmpty()) {
-            return view('plugins/ecommerce::discounts.intro');
-        }
-
-        return parent::renderTable($data, $mergeData);
     }
 }

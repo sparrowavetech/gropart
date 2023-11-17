@@ -160,7 +160,7 @@ class PostTable extends TableAbstract
                 'title' => trans('plugins/blog::posts.category'),
                 'type' => 'select-search',
                 'validate' => 'required|string',
-                'callback' => 'getCategories',
+                'callback' => fn () => Category::query()->pluck('name', 'id')->all(),
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
@@ -168,11 +168,6 @@ class PostTable extends TableAbstract
                 'validate' => 'required|string|date',
             ],
         ];
-    }
-
-    public function getCategories(): array
-    {
-        return Category::query()->pluck('name', 'id')->all();
     }
 
     public function applyFilterCondition(

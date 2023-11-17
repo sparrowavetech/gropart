@@ -16,6 +16,7 @@ use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductAttributeSet;
 use Botble\Ecommerce\Models\ProductCollection;
 use Botble\Ecommerce\Models\ProductLabel;
+use Botble\Ecommerce\Models\ProductTag;
 use Botble\Ecommerce\Models\ProductVariation;
 use Botble\Ecommerce\Models\Tax;
 use Botble\Marketplace\Facades\MarketplaceHelper;
@@ -57,7 +58,12 @@ class ProductForm extends BaseProductForm
                 ->where('configurable_product_id', $productId)
                 ->count();
 
-            $tags = $this->getModel()->tags()->pluck('name')->implode(',');
+            $tags = $this->getModel()
+                ->tags()
+                ->select('name')
+                ->get()
+                ->map(fn (ProductTag $item) => $item->name)
+                ->implode(',');
         }
 
         $productAttributeSets = ProductAttributeSet::getAllWithSelected($productId, []);
@@ -70,10 +76,10 @@ class ProductForm extends BaseProductForm
             ->addCustomField('categoryMulti', CategoryMultiField::class)
             ->addCustomField('multiCheckList', MultiCheckListField::class)
             ->addCustomField('tags', TagField::class)
-            ->setFormOption('template', MarketplaceHelper::viewPath('dashboard.forms.base'))
+            ->setFormOption('template', MarketplaceHelper::viewPath('vendor-dashboard.forms.base'))
             ->setFormOption('enctype', 'multipart/form-data')
             ->setValidatorClass(ProductRequest::class)
-            ->setActionButtons(MarketplaceHelper::view('dashboard.forms.actions')->render())
+            ->setActionButtons(MarketplaceHelper::view('vendor-dashboard.forms.actions')->render())
             ->add('name', 'text', [
                 'label' => trans('plugins/ecommerce::products.form.name'),
                 'label_attr' => ['class' => 'text-title-field required'],
@@ -84,7 +90,6 @@ class ProductForm extends BaseProductForm
             ])
             ->add('description', 'customEditor', [
                 'label' => trans('core/base::forms.description'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'rows' => 2,
                     'placeholder' => trans('core/base::forms.description_placeholder'),
@@ -93,23 +98,21 @@ class ProductForm extends BaseProductForm
             ])
             ->add('content', 'customEditor', [
                 'label' => trans('core/base::forms.content'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'rows' => 4,
                 ],
             ])
             ->add('images', 'customImages', [
                 'label' => trans('plugins/ecommerce::products.form.image'),
-                'label_attr' => ['class' => 'control-label'],
                 'values' => $productId ? $this->getModel()->images : [],
             ])
             ->addMetaBoxes([
                 'with_related' => [
                     'title' => null,
-                    'content' => '<div class="wrap-relation-product" data-target="' . route(
+                    'content' => sprintf('<div class="wrap-relation-product" data-target="%s"></div>', route(
                         'marketplace.vendor.products.get-relations-boxes',
                         $productId ?: 0
-                    ) . '"></div>',
+                    )),
                     'wrap' => false,
                     'priority' => 9999,
                 ],
@@ -119,24 +122,20 @@ class ProductForm extends BaseProductForm
             ])
             ->add('categories[]', 'categoryMulti', [
                 'label' => trans('plugins/ecommerce::products.form.categories'),
-                'label_attr' => ['class' => 'control-label'],
                 'choices' => ProductCategoryHelper::getActiveTreeCategories(),
                 'value' => old('categories', $selectedCategories),
             ])
             ->add('brand_id', 'customSelect', [
                 'label' => trans('plugins/ecommerce::products.form.brand'),
-                'label_attr' => ['class' => 'control-label'],
                 'choices' => $brands,
             ])
             ->add('product_collections[]', 'multiCheckList', [
                 'label' => trans('plugins/ecommerce::products.form.collections'),
-                'label_attr' => ['class' => 'control-label'],
                 'choices' => $productCollections,
                 'value' => old('product_collections', $selectedProductCollections),
             ])
             ->add('product_labels[]', 'multiCheckList', [
                 'label' => trans('plugins/ecommerce::products.form.labels'),
-                'label_attr' => ['class' => 'control-label'],
                 'choices' => $productLabels,
                 'value' => old('product_labels', $selectedProductLabels),
             ]);
@@ -153,7 +152,6 @@ class ProductForm extends BaseProductForm
 
             $this->add('taxes[]', 'multiCheckList', [
                 'label' => trans('plugins/ecommerce::products.form.taxes'),
-                'label_attr' => ['class' => 'control-label'],
                 'choices' => $taxes,
                 'value' => old('taxes', $selectedTaxes),
             ]);
@@ -162,7 +160,6 @@ class ProductForm extends BaseProductForm
         $this
             ->add('tag', 'tags', [
                 'label' => trans('plugins/ecommerce::products.form.tags'),
-                'label_attr' => ['class' => 'control-label'],
                 'value' => $tags,
                 'attr' => [
                     'placeholder' => trans('plugins/ecommerce::products.form.write_some_tags'),
@@ -193,7 +190,7 @@ class ProductForm extends BaseProductForm
             ->addMetaBoxes([
                 'attribute-sets' => [
                     'content' => '',
-                    'before_wrapper' => '<div class="d-none product-attribute-sets-url" data-url="' . route('marketplace.vendor.products.product-attribute-sets') . '">',
+                    'before_wrapper' => sprintf('<div class="d-none product-attribute-sets-url" data-url="%s">', route('marketplace.vendor.products.product-attribute-sets')),
                     'after_wrapper' => '</div>',
                     'priority' => 3,
                 ],
@@ -241,7 +238,7 @@ class ProductForm extends BaseProductForm
                 ->addMetaBoxes([
                     'variations' => [
                         'title' => trans('plugins/ecommerce::products.product_has_variations'),
-                        'content' => MarketplaceHelper::view('dashboard.products.configurable', [
+                        'content' => MarketplaceHelper::view('vendor-dashboard.products.configurable', [
                             'productAttributeSets' => $productAttributeSets,
                             'productVariationTable' => $productVariationTable,
                             'product' => $this->getModel(),

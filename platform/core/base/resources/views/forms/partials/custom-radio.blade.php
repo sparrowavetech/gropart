@@ -11,13 +11,7 @@
         $disabled = $line[2] ?? '';
     @endphp
     <label class="me-2">
-        <input
-            name="{{ $name }}"
-            type="radio"
-            value="{{ $value }}"
-            {{ (string) $selected === (string) $value ? 'checked' : '' }}
-            {{ $disabled ? 'disabled' : '' }}
-        >
+        {!! Form::radio($name, $value, (string) $selected === (string) $value, ['disabled' => (bool) $disabled]) !!}
         {{ $label }}
     </label>
 @endforeach

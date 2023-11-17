@@ -7,7 +7,9 @@ use Botble\Base\Facades\Html;
 use Botble\Marketplace\Enums\RevenueTypeEnum;
 use Botble\Marketplace\Models\Revenue;
 use Botble\Table\Abstracts\TableAbstract;
+use Botble\Table\Columns\Column;
 use Botble\Table\Columns\CreatedAtColumn;
+use Botble\Table\Columns\EnumColumn;
 use Botble\Table\Columns\IdColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -58,9 +60,6 @@ class StoreRevenueTable extends TableAbstract
                 }
 
                 return $url ? Html::link($url, $item->order->code, ['target' => '_blank']) : $item->order->code;
-            })
-            ->editColumn('type', function (Revenue $item) {
-                return $item->type->toHtml();
             })
             ->filterColumn('id', function (Builder $query, $keyword) {
                 if ($keyword) {
@@ -134,36 +133,30 @@ class StoreRevenueTable extends TableAbstract
     {
         $columns = [
             IdColumn::make(),
-            'order_id' => [
-                'title' => trans('plugins/ecommerce::order.description'),
-                'class' => 'text-start',
-            ],
+            Column::make('order_id')
+                ->title(trans('plugins/ecommerce::order.description'))
+                ->alignStart(),
         ];
 
         if (! $this->customerId) {
-            $columns['customer_id'] = [
-                'title' => 'store',
-                'class' => 'text-start',
-            ];
+            $columns[] = Column::make('customer_id')
+                ->title(trans('plugins/marketplace::store.store'))
+                ->alignStart();
         }
 
         return array_merge($columns, [
-            'fee' => [
-                'title' => trans('plugins/ecommerce::shipping.fee'),
-                'class' => 'text-start',
-            ],
-            'sub_amount' => [
-                'title' => trans('plugins/ecommerce::order.sub_amount'),
-                'class' => 'text-start',
-            ],
-            'amount' => [
-                'title' => trans('plugins/ecommerce::order.amount'),
-                'class' => 'text-start',
-            ],
-            'type' => [
-                'title' => trans('plugins/marketplace::revenue.forms.type'),
-                'class' => 'text-start',
-            ],
+            Column::make('fee')
+                ->title(trans('plugins/ecommerce::shipping.fee'))
+                ->alignStart(),
+            Column::make('sub_amount')
+                ->title(trans('plugins/ecommerce::order.sub_amount'))
+                ->alignStart(),
+            Column::make('amount')
+                ->title(trans('plugins/ecommerce::order.amount'))
+                ->alignStart(),
+            EnumColumn::make('type')
+                ->title(trans('plugins/marketplace::revenue.forms.type'))
+                ->alignStart(),
             CreatedAtColumn::make(),
         ]);
     }
@@ -176,21 +169,9 @@ class StoreRevenueTable extends TableAbstract
         return $this;
     }
 
-    protected function getDom(): ?string
-    {
-        if ($this->type == self::TABLE_TYPE_ADVANCED) {
-            return "fBrt<'datatables__info_wrap'pli<'clearfix'>>";
-        }
-
-        return "rt<'datatables__info_wrap'pli<'clearfix'>>";
-    }
-
     public function getDefaultButtons(): array
     {
-        return [
-            'export',
-            'reload',
-        ];
+        return array_merge(['export'], parent::getDefaultButtons());
     }
 
     public function htmlDrawCallbackFunction(): ?string

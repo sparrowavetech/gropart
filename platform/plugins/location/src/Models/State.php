@@ -30,6 +30,8 @@ class State extends BaseModel
         'status' => BaseStatusEnum::class,
         'name' => SafeContent::class,
         'abbreviation' => SafeContent::class,
+        'is_default' => 'bool',
+        'order' => 'int',
     ];
 
     public function country(): BelongsTo

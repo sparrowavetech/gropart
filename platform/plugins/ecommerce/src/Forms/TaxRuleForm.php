@@ -8,29 +8,20 @@ use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Http\Requests\TaxRuleRequest;
 use Botble\Ecommerce\Models\Tax;
 use Botble\Ecommerce\Models\TaxRule;
-use Illuminate\Support\Facades\Request;
 
 class TaxRuleForm extends FormAbstract
 {
-    public function __construct()
-    {
-        parent::__construct();
-        $this->setFormOption('id', 'ecommerce-tax-rule-form');
-
-        if (Request::ajax()) {
-            $this->setFormOption('template', 'core/base::forms.form-content-only');
-        }
-    }
-
     public function buildForm(): void
     {
         $this
             ->setupModel(new TaxRule())
             ->setValidatorClass(TaxRuleRequest::class)
-            ->withCustomFields();
+            ->setFormOption('id', 'ecommerce-tax-rule-form')
+            ->withCustomFields()
+            ->when($this->request->ajax(), fn () => $this->contentOnly());
 
         if (! $this->getModel()->getKey()) {
-            if ($taxId = request()->input('tax_id')) {
+            if ($taxId = $this->request->input('tax_id')) {
                 $this
                     ->add('tax_id', 'hidden', [
                         'value' => $taxId,
@@ -40,7 +31,6 @@ class TaxRuleForm extends FormAbstract
                 $this
                     ->add('tax_id', 'customSelect', [
                         'label' => trans('plugins/ecommerce::tax.tax'),
-                        'label_attr' => ['class' => 'control-label'],
                         'choices' => $taxes,
                     ]);
             }
@@ -59,7 +49,6 @@ class TaxRuleForm extends FormAbstract
             $this
                 ->add('country', 'customSelect', [
                     'label' => trans('plugins/ecommerce::tax.state'),
-                    'label_attr' => ['class' => 'control-label'],
                     'attr' => [
                         'data-type' => 'country',
                     ],
@@ -67,14 +56,12 @@ class TaxRuleForm extends FormAbstract
                 ])
                 ->add('state', 'text', [
                     'label' => trans('plugins/ecommerce::tax.state'),
-                    'label_attr' => ['class' => 'control-label'],
                     'attr' => [
                         'placeholder' => trans('plugins/ecommerce::tax.state'),
                     ],
                 ])
                 ->add('city', 'text', [
                     'label' => trans('plugins/ecommerce::tax.city'),
-                    'label_attr' => ['class' => 'control-label'],
                     'attr' => [
                         'placeholder' => trans('plugins/ecommerce::tax.city'),
                     ],
@@ -85,7 +72,6 @@ class TaxRuleForm extends FormAbstract
             $this
                 ->add('zip_code', 'text', [
                     'label' => trans('plugins/ecommerce::tax.zip_code'),
-                    'label_attr' => ['class' => 'control-label'],
                 ]);
         }
         $this

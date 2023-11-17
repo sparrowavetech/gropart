@@ -3,6 +3,7 @@
 namespace Botble\Language\Listeners;
 
 use Botble\Base\Events\DeletedContentEvent;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Language\Facades\Language;
 use Exception;
 
@@ -13,7 +14,7 @@ class DeletedContentListener
         try {
             Language::deleteLanguage($event->screen, $event->data);
         } catch (Exception $exception) {
-            info($exception->getMessage());
+            BaseHelper::logError($exception);
         }
     }
 }

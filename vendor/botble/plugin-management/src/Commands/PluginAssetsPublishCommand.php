@@ -5,6 +5,7 @@ namespace Botble\PluginManagement\Commands;
 use Botble\PluginManagement\Commands\Concern\HasPluginNameValidation;
 use Botble\PluginManagement\Services\PluginService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 
@@ -17,7 +18,7 @@ class PluginAssetsPublishCommand extends Command
     {
         $this->validatePluginName($this->argument('name'));
 
-        $plugin = strtolower($this->argument('name'));
+        $plugin = Str::afterLast(strtolower($this->argument('name')), '/');
         $result = $pluginService->publishAssets($plugin);
 
         if ($result['error']) {

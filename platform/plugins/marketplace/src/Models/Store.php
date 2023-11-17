@@ -90,7 +90,7 @@ class Store extends BaseModel
     public function getLogoUrlAttribute(): ?string
     {
         if ($this->logo) {
-            return RvMedia::getImageUrl($this->logo, 'thumb');
+            return RvMedia::getImageUrl($this->logo);
         }
 
         try {

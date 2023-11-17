@@ -39,7 +39,7 @@
                         </div>
                     </div>
                     <div class="col-lg-5 col-md-5">
-                        <p class="mb-0">{{ $orderProduct->product_name }}</p>
+                        <p class="mb-0">{!! BaseHelper::clean($orderProduct->product_name) !!}</p>
                         <p class="mb-0">
                             <small>{{ Arr::get($orderProduct->options, 'attributes', '') }}</small>
                         </p>

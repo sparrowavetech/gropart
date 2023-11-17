@@ -2,8 +2,8 @@
 
 namespace Botble\LanguageAdvanced\Supports;
 
+use Botble\Base\Contracts\BaseModel;
 use Botble\Base\Facades\MacroableModels;
-use Botble\Base\Models\BaseModel;
 use Botble\Language\Facades\Language;
 use Botble\LanguageAdvanced\Models\TranslationResolver;
 use Illuminate\Database\Eloquent\Model;
@@ -51,10 +51,12 @@ class LanguageAdvancedManager
             DB::table($table)->insert($data);
         }
 
-        if ($language != Language::getDefaultLocaleCode()) {
+        $defaultLocale = Language::getDefaultLocaleCode();
+
+        if ($language != $defaultLocale) {
             $defaultTranslation = DB::table($table)
                 ->where([
-                    'lang_code' => Language::getDefaultLocaleCode(),
+                    'lang_code' => $defaultLocale,
                     $object->getTable() . '_id' => $object->getKey(),
                 ])
                 ->first();
@@ -73,7 +75,7 @@ class LanguageAdvancedManager
         return true;
     }
 
-    public static function isSupported(Model|string|null $model): bool
+    public static function isSupported(BaseModel|Model|string|null $model): bool
     {
         if (! $model) {
             return false;
@@ -101,7 +103,7 @@ class LanguageAdvancedManager
         return config('plugins.language-advanced.general', []);
     }
 
-    public static function getTranslatableColumns(Model|string|null $model): array
+    public static function getTranslatableColumns(BaseModel|Model|string|null $model): array
     {
         if (! $model) {
             return [];
@@ -123,7 +125,7 @@ class LanguageAdvancedManager
         return true;
     }
 
-    public static function delete(Model|string|null $object): bool
+    public static function delete(BaseModel|Model|string|null $object): bool
     {
         if (! self::isSupported($object)) {
             return false;
@@ -152,15 +154,19 @@ class LanguageAdvancedManager
 
     public static function initModelRelations(): void
     {
+        $locale = is_in_admin() ? Language::getCurrentAdminLocaleCode() : Language::getCurrentLocaleCode();
+
+        $isDefaultLocale = $locale == Language::getDefaultLocaleCode();
+
         foreach (self::getSupported() as $item => $columns) {
             if (! class_exists($item)) {
                 continue;
             }
 
             /**
-             * @var BaseModel $item
+             * @var Model $item
              */
-            $item::resolveRelationUsing('translations', function ($model) {
+            $item::resolveRelationUsing('translations', function ($model) use ($locale) {
                 $instance = tap(
                     new TranslationResolver(),
                     function ($instance) {
@@ -170,39 +176,37 @@ class LanguageAdvancedManager
                     }
                 );
 
-                $instance->setTable($model->getTable() . '_translations');
+                $modelTable = $model->getTable();
+
+                $instance->setTable($modelTable . '_translations');
 
                 $instance->fillable(array_merge([
                     'lang_code',
-                    $model->getTable() . '_id',
-                ], self::getTranslatableColumns(get_class($model))));
+                    $modelTable . '_id',
+                ], self::getTranslatableColumns($model::class)));
 
                 return (new HasMany(
                     $instance->newQuery(),
                     $model,
-                    $model->getTable() . '_translations.' . $model->getTable() . '_id',
+                    $modelTable . '_translations.' . $modelTable . '_id',
                     $model->getKeyName()
-                ))->where('lang_code', is_in_admin() ? Language::getCurrentAdminLocaleCode() : Language::getCurrentLocaleCode());
+                ))->where('lang_code', $locale);
             });
 
             foreach ($columns as $column) {
                 MacroableModels::addMacro(
                     $item,
                     'get' . ucfirst(Str::camel($column)) . 'Attribute',
-                    function () use ($column) {
-                        /**
-                         * @var BaseModel $this
-                         */
-
-                        $locale = is_in_admin() ? Language::getCurrentAdminLocaleCode() : Language::getCurrentLocaleCode();
-                        if (! $this->lang_code && $locale != Language::getDefaultLocaleCode()) {
-                            $translation = $this->translations->where('lang_code', $locale)->first();
-
-                            if ($translation) {
-                                return $translation->{$column};
-                            }
+                    function () use ($column, $locale, $isDefaultLocale) {
+                        if (
+                            ! $this->lang_code && // @phpstan-ignore-line
+                            ! $isDefaultLocale &&
+                            $translation = $this->translations->where('lang_code', $locale)->value($column) // @phpstan-ignore-line
+                        ) {
+                            return $translation;
                         }
 
+                        // @phpstan-ignore-next-line
                         return $this->getAttribute($column);
                     }
                 );

@@ -24,6 +24,7 @@ use Botble\Base\Repositories\Interfaces\MetaBoxInterface;
 use Botble\Base\Supports\Action;
 use Botble\Base\Supports\BreadcrumbsManager;
 use Botble\Base\Supports\CustomResourceRegistrar;
+use Botble\Base\Supports\DashboardMenu as DashboardMenuSupport;
 use Botble\Base\Supports\Database\Blueprint;
 use Botble\Base\Supports\Filter;
 use Botble\Base\Supports\GoogleFonts;
@@ -121,6 +122,8 @@ class BaseServiceProvider extends ServiceProvider
             'laravel-form-builder.plain_form_class' => Form::class,
             'laravel-form-builder.form_builder_class' => FormBuilder::class,
             'laravel-form-builder.form_helper_class' => FormHelper::class,
+            'laravel-form-builder.label_class' => 'control-label',
+            'laravel-form-builder.wrapper_class' => 'form-group',
         ]);
 
         $this->app->singleton('core:action', function () {
@@ -133,7 +136,7 @@ class BaseServiceProvider extends ServiceProvider
 
         $this->app->singleton(AdminWidgetContract::class, AdminWidget::class);
 
-        $this->app->singleton('core:google-fonts', function (Application $app) {
+        $this->app->singleton('core.google-fonts', function (Application $app) {
             return new GoogleFonts(
                 filesystem: $app->make(FilesystemManager::class)->disk('public'),
                 path: 'fonts',
@@ -211,7 +214,7 @@ class BaseServiceProvider extends ServiceProvider
             }, 99);
 
             add_filter(BASE_FILTER_FOOTER_LAYOUT_TEMPLATE, function ($html) {
-                if (! Auth::check()) {
+                if (! Auth::guard()->check()) {
                     return $html;
                 }
 
@@ -319,6 +322,8 @@ class BaseServiceProvider extends ServiceProvider
      */
     public function registerDefaultMenus(): void
     {
+        $config = $this->app['config'];
+
         DashboardMenu::make()
             ->registerItem([
                 'id' => 'cms-core-platform-administration',
@@ -346,31 +351,32 @@ class BaseServiceProvider extends ServiceProvider
                 'icon' => null,
                 'url' => route('system.cache'),
                 'permissions' => [ACL_ROLE_SUPER_USER],
-            ]);
-
-        if (! config('core.base.general.hide_cleanup_system_menu', false)) {
-            DashboardMenu::registerItem([
-                'id' => 'cms-core-system-cleanup',
-                'priority' => 999,
-                'parent_id' => 'cms-core-platform-administration',
-                'name' => 'core/base::system.cleanup.title',
-                'icon' => null,
-                'url' => route('system.cleanup'),
-                'permissions' => [ACL_ROLE_SUPER_USER],
-            ]);
-        }
-
-        if (config('core.base.general.enable_system_updater')) {
-            DashboardMenu::registerItem([
-                'id' => 'cms-core-system-updater',
-                'priority' => 999,
-                'parent_id' => 'cms-core-platform-administration',
-                'name' => 'core/base::system.updater',
-                'icon' => null,
-                'url' => route('system.updater'),
-                'permissions' => [ACL_ROLE_SUPER_USER],
-            ]);
-        }
+            ])
+            ->when(
+                ! $config->get('core.base.general.hide_cleanup_system_menu', false),
+                function (DashboardMenuSupport $menu) {
+                    $menu->registerItem([
+                        'id' => 'cms-core-system-cleanup',
+                        'priority' => 999,
+                        'parent_id' => 'cms-core-platform-administration',
+                        'name' => 'core/base::system.cleanup.title',
+                        'icon' => null,
+                        'url' => route('system.cleanup'),
+                        'permissions' => [ACL_ROLE_SUPER_USER],
+                    ]);
+                }
+            )
+            ->when($config->get('core.base.general.enable_system_updater'), function (DashboardMenuSupport $menu) {
+                $menu->registerItem([
+                    'id' => 'cms-core-system-updater',
+                    'priority' => 999,
+                    'parent_id' => 'cms-core-platform-administration',
+                    'name' => 'core/base::system.updater',
+                    'icon' => null,
+                    'url' => route('system.updater'),
+                    'permissions' => [ACL_ROLE_SUPER_USER],
+                ]);
+            });
     }
 
     protected function configureIni(): void

@@ -135,6 +135,20 @@ if (! function_exists('get_discount_description')) {
                         $description[] = __('limited to use coupon code per customer. This coupon can only be used once per customer!');
 
                         break;
+                    case DiscountTargetEnum::PRODUCT_CATEGORIES:
+                        $categories = $discount
+                            ->productCategories()
+                            ->pluck('ec_product_categories.name', 'ec_product_categories.id')
+                            ->all();
+
+                        $categoryLinks = [];
+                        foreach (array_unique($categories) as $categoryId => $categoryName) {
+                            $categoryLinks[] = Html::link(route('product-categories.edit', $categoryId), $categoryName, ['target' => '_blank'])->toHtml();
+                        }
+
+                        $description[] = __('for all products in category :categories', ['categories' => implode(', ', $categoryLinks)]);
+
+                        break;
                     default:
                         $description[] = __('for all orders');
 

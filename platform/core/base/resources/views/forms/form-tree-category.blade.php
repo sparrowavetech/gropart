@@ -68,5 +68,14 @@
 @stop
 
 @push('footer')
-    @include('core/table::modal')
+    @include('core/table::partials.modal-item', [
+        'type' => 'danger',
+        'name' => 'modal-confirm-delete',
+        'title' => trans('core/base::tables.confirm_delete'),
+        'content' => trans('core/base::tables.confirm_delete_msg'),
+        'action_name' => trans('core/base::tables.delete'),
+        'action_button_attributes' => [
+            'class' => 'delete-crud-entry',
+        ],
+    ])
 @endpush

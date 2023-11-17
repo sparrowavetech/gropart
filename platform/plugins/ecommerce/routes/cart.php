@@ -6,7 +6,7 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Fronts', 'middle
     Route::group(apply_filters(BASE_FILTER_GROUP_PUBLIC_ROUTE, []), function () {
         Route::get('cart', [
             'as' => 'public.cart',
-            'uses' => 'PublicCartController@getView',
+            'uses' => 'PublicCartController@index',
         ]);
 
         Route::post('cart/add-to-cart', [
@@ -16,17 +16,17 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Fronts', 'middle
 
         Route::post('cart/update', [
             'as' => 'public.cart.update',
-            'uses' => 'PublicCartController@postUpdate',
+            'uses' => 'PublicCartController@update',
         ]);
 
         Route::get('cart/remove/{id}', [
             'as' => 'public.cart.remove',
-            'uses' => 'PublicCartController@getRemove',
+            'uses' => 'PublicCartController@destroy',
         ]);
 
         Route::get('cart/destroy', [
             'as' => 'public.cart.destroy',
-            'uses' => 'PublicCartController@getDestroy',
+            'uses' => 'PublicCartController@empty',
         ]);
     });
 });

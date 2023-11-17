@@ -6,7 +6,6 @@ use Botble\Ads\Facades\AdsManager;
 use Botble\Ads\Models\Ads;
 use Botble\Ads\Repositories\Eloquent\AdsRepository;
 use Botble\Ads\Repositories\Interfaces\AdsInterface;
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
@@ -51,7 +50,7 @@ class AdsServiceProvider extends ServiceProvider
         });
 
         if (function_exists('shortcode')) {
-            add_shortcode('ads', 'Ads', 'Ads', function ($shortcode) {
+            add_shortcode('ads', __('Ads'), __('Ads'), function ($shortcode) {
                 if (! $shortcode->key) {
                     return null;
                 }
@@ -60,8 +59,10 @@ class AdsServiceProvider extends ServiceProvider
             });
 
             shortcode()->setAdminConfig('ads', function ($attributes) {
-                $ads = $this->app->make(AdsInterface::class)
-                    ->pluck('name', 'key', ['status' => BaseStatusEnum::PUBLISHED]);
+                $ads = Ads::query()
+                    ->wherePublished()
+                    ->pluck('name', 'key')
+                    ->all();
 
                 return view('plugins/ads::partials.ads-admin-config', compact('ads', 'attributes'))
                     ->render();

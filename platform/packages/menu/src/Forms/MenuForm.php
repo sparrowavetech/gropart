@@ -34,7 +34,7 @@ class MenuForm extends FormAbstract
             ->setValidatorClass(MenuRequest::class)
             ->add('name', 'text', [
                 'label' => trans('core/base::forms.name'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'placeholder' => trans('core/base::forms.name_placeholder'),
                     'data-counter' => 120,
@@ -42,7 +42,7 @@ class MenuForm extends FormAbstract
             ])
             ->add('status', 'customSelect', [
                 'label' => trans('core/base::tables.status'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'choices' => BaseStatusEnum::labels(),
             ])
             ->addMetaBoxes([

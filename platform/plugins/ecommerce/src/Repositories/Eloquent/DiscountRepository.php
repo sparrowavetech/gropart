@@ -35,6 +35,7 @@ class DiscountRepository extends RepositoriesAbstract implements DiscountInterfa
                             ->whereIn('target', [
                                 DiscountTargetEnum::CUSTOMER,
                                 DiscountTargetEnum::PRODUCT_COLLECTIONS,
+                                DiscountTargetEnum::PRODUCT_CATEGORIES,
                                 DiscountTargetEnum::SPECIFIC_PRODUCT,
                                 DiscountTargetEnum::PRODUCT_VARIANT,
                             ])
@@ -49,12 +50,12 @@ class DiscountRepository extends RepositoriesAbstract implements DiscountInterfa
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    public function getProductPriceBasedOnPromotion(array $productIds = [], array $productCollectionIds = [])
+    public function getProductPriceBasedOnPromotion(array $productIds = [], array $productCollectionIds = [], array $productCategoriesIds = [])
     {
         $data = $this->model
             ->where('type', DiscountTypeEnum::PROMOTION)
             ->where('start_date', '<=', Carbon::now())
-            ->where(function (EloquentBuilder $query) use ($productIds, $productCollectionIds) {
+            ->where(function (EloquentBuilder $query) use ($productIds, $productCollectionIds, $productCategoriesIds) {
                 return $query
                     ->where(function (EloquentBuilder $sub) use ($productIds) {
                         return $sub
@@ -68,6 +69,13 @@ class DiscountRepository extends RepositoriesAbstract implements DiscountInterfa
                             ->where('target', DiscountTargetEnum::PRODUCT_COLLECTIONS)
                             ->whereHas('productCollections', function (EloquentBuilder $whereHas) use ($productCollectionIds) {
                                 return $whereHas->whereIn('ec_discount_product_collections.product_collection_id', $productCollectionIds);
+                            });
+                    })
+                    ->orWhere(function (EloquentBuilder $sub) use ($productCategoriesIds) {
+                        return $sub
+                            ->where('target', DiscountTargetEnum::PRODUCT_CATEGORIES)
+                            ->whereHas('productCategories', function (EloquentBuilder $whereHas) use ($productCategoriesIds) {
+                                return $whereHas->whereIn('ec_discount_product_categories.product_collection_id', $productCategoriesIds);
                             });
                     })
                     ->orWhere(function (EloquentBuilder $sub) {

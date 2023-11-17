@@ -2,6 +2,7 @@
 
 namespace Botble\Marketplace\Widgets;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Widgets\Html;
 use Botble\Marketplace\Enums\RevenueTypeEnum;
 use Botble\Marketplace\Models\Revenue;
@@ -63,19 +64,17 @@ class SaleCommissionHtml extends Html
         ];
 
         foreach ($period as $date) {
-            $date = $date->format('Y-m-d');
-
             $fee = $revenues
-                ->where('date', $date)
+                ->where('date', $date->toDateString())
                 ->sum('total_fee');
 
             $amount = $revenues
-                ->where('date', $date)
+                ->where('date', $date->toDateString())
                 ->sum('total_amount');
 
             $feeData['data'][] = (float) $fee;
             $amountData['data'][] = (float) $amount;
-            $dates[] = $date;
+            $dates[] = BaseHelper::formatDate($date);
         }
 
         $series = [

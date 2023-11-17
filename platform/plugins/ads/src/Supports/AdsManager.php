@@ -4,8 +4,6 @@ namespace Botble\Ads\Supports;
 
 use Botble\Ads\Models\Ads;
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Base\Facades\Html;
-use Botble\Media\Facades\RvMedia;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -38,24 +36,7 @@ class AdsManager
             $data = $data->random(1);
         }
 
-        $html = '';
-        foreach ($data as $item) {
-            if (! $item->image) {
-                continue;
-            }
-
-            $image = Html::image(RvMedia::getImageUrl($item->image), $item->name, ['style' => 'max-width: 100%'])
-                ->toHtml();
-
-            if ($item->url) {
-                $image = Html::link(route('public.ads-click', $item->key), $image, $item->open_in_new_tab ? ['target' => '_blank'] : [], null, false)
-                    ->toHtml();
-            }
-
-            $html .= Html::tag('div', $image, $attributes)->toHtml();
-        }
-
-        return $html;
+        return view('plugins/ads::partials.ad-display', compact('data', 'attributes'))->render();
     }
 
     public function load(bool $force = false, array $with = []): self
@@ -99,14 +80,9 @@ class AdsManager
             return null;
         }
 
-        $image = Html::image(RvMedia::getImageUrl($ads->image), $ads->name, ['style' => 'max-width: 100%'])->toHtml();
+        $data = [$ads];
 
-        if ($ads->url) {
-            $image = Html::link(route('public.ads-click', $ads->key), $image, $linkAttributes + ($ads->open_in_new_tab ? ['target' => '_blank'] : []), null, false)
-                ->toHtml();
-        }
-
-        return Html::tag('div', $image, $attributes)->toHtml();
+        return view('plugins/ads::partials.ad-display', compact('data', 'attributes'))->render();
     }
 
     public function getData(bool $isLoad = false, bool $isNotExpired = false): Collection

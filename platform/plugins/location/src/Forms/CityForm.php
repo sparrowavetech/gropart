@@ -28,7 +28,7 @@ class CityForm extends FormAbstract
             ->withCustomFields()
             ->add('name', 'text', [
                 'label' => trans('core/base::forms.name'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'placeholder' => trans('core/base::forms.name_placeholder'),
                     'data-counter' => 120,
@@ -36,7 +36,6 @@ class CityForm extends FormAbstract
             ])
             ->add('slug', 'text', [
                 'label' => __('Slug'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'placeholder' => __('Slug'),
                     'data-counter' => 120,
@@ -44,7 +43,7 @@ class CityForm extends FormAbstract
             ])
             ->add('country_id', 'customSelect', [
                 'label' => trans('plugins/location::city.country'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'id' => 'country_id',
                     'class' => 'select-search-full',
@@ -54,7 +53,6 @@ class CityForm extends FormAbstract
             ])
             ->add('state_id', 'customSelect', [
                 'label' => trans('plugins/location::city.state'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'id' => 'state_id',
                     'data-url' => route('ajax.states-by-country'),
@@ -63,6 +61,7 @@ class CityForm extends FormAbstract
                 ],
                 'choices' => ($this->getModel()->state_id ?
                         [
+                            0 => trans('plugins/location::city.select_state'),
                             $this->model->state->id => $this->model->state->name,
                         ]
                         :
@@ -70,7 +69,6 @@ class CityForm extends FormAbstract
             ])
             ->add('order', 'number', [
                 'label' => trans('core/base::forms.order'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'placeholder' => trans('core/base::forms.order_by_placeholder'),
                 ],
@@ -78,18 +76,14 @@ class CityForm extends FormAbstract
             ])
             ->add('is_default', 'onOff', [
                 'label' => trans('core/base::forms.is_default'),
-                'label_attr' => ['class' => 'control-label'],
                 'default_value' => false,
             ])
             ->add('status', 'customSelect', [
                 'label' => trans('core/base::tables.status'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'choices' => BaseStatusEnum::labels(),
             ])
-            ->add('image', 'mediaImage', [
-                'label' => trans('core/base::forms.image'),
-                'label_attr' => ['class' => 'control-label'],
-            ])
+            ->add('image', 'mediaImage')
             ->setBreakFieldPoint('status');
     }
 }

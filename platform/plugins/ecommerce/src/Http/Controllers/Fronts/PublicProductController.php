@@ -40,11 +40,9 @@ class PublicProductController
             return $response->setNextUrl(route('public.products'));
         }
 
-        $query = BaseHelper::stringify($request->input('q'));
-
         $with = EcommerceHelper::withProductEagerLoadingRelations();
 
-        if ($query && ! $request->ajax()) {
+        if (($query = BaseHelper::stringify($request->input('q'))) && ! $request->ajax()) {
             $products = $productService->getProduct($request, null, null, $with);
 
             SeoHelper::setTitle(__('Search result for ":query"', compact('query')));
@@ -312,7 +310,7 @@ class PublicProductController
 
         $with = EcommerceHelper::withProductEagerLoadingRelations();
 
-        $categoryIds = [$category->id];
+        $categoryIds = [$category->getKey()];
 
         $children = $category->activeChildren;
 
@@ -323,7 +321,9 @@ class PublicProductController
             }
         }
 
-        $request->merge(['categories' => $categoryIds]);
+        if (! $request->input('categories')) {
+            $request->merge(['categories' => $categoryIds]);
+        }
 
         $products = $getProductService->getProduct($request, null, null, $with);
 

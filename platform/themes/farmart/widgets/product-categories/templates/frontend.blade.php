@@ -4,7 +4,7 @@
             <strong>{{ $config['name'] }}:</strong>
             @foreach ($categories as $category)
                 <a
-                    href="{{ $category->url }}"
+                    href="{{ route('public.single', $category->url) }}"
                     title="{{ $category->name }}"
                 >{{ $category->name }}</a>
             @endforeach

@@ -36,7 +36,7 @@
     button-id="store-related-attributes-button"
     :button-label="trans('plugins/ecommerce::products.save_changes')"
 >
-    {!! view('plugins/ecommerce::products.partials.attribute-sets', compact('productAttributeSets'))->render() !!}
+    @include('plugins/ecommerce::products.partials.attribute-sets', compact('productAttributeSets'))
 </x-core-base::modal>
 
 @push('footer')

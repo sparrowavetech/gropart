@@ -106,7 +106,7 @@ class PublicController extends Controller
          */
         $customer = auth('customer')->user();
         $customer->fill($request->except('email'));
-        $customer->dob = Carbon::parse($request->input('dob'))->toDateString();
+        $customer->dob = Carbon::parse($request->input('dob'));
         $customer->save();
 
         do_action(HANDLE_CUSTOMER_UPDATED_ECOMMERCE, $customer, $request);
@@ -585,8 +585,11 @@ class PublicController extends Controller
                     'is_finished' => 1,
                 ]);
             })
-            ->whereHas('order.payment', function (Builder $query) {
-                $query->where(['status' => PaymentStatusEnum::COMPLETED]);
+            ->when(is_plugin_active('payment'), function (Builder $query) {
+                $query
+                    ->whereHas('order.payment', function (Builder $query) {
+                        $query->where('status', PaymentStatusEnum::COMPLETED);
+                    });
             })
             ->where('product_type', ProductTypeEnum::DIGITAL)
             ->orderByDesc('created_at')
@@ -615,11 +618,14 @@ class PublicController extends Controller
                 'id' => $id,
                 'product_type' => ProductTypeEnum::DIGITAL,
             ])
-            ->whereHas('order', function ($query) {
+            ->whereHas('order', function (Builder $query) {
                 $query
-                    ->where(['is_finished' => 1])
-                    ->whereHas('payment', function ($query) {
-                        $query->where(['status' => PaymentStatusEnum::COMPLETED]);
+                    ->where('is_finished', 1)
+                    ->when(is_plugin_active('payment'), function (Builder $query) {
+                        $query
+                            ->whereHas('payment', function ($query) {
+                                $query->where('status', PaymentStatusEnum::COMPLETED);
+                            });
                     });
             })
             ->with(['order', 'product'])

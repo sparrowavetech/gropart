@@ -322,10 +322,10 @@ class Product extends BaseModel
                 $price = $this->getDiscountPrice();
 
                 if ($price != $this->price) {
-                    return $this->getComparePrice($price, $this->sale_price ?: $this->price);
+                    $price = $this->getComparePrice($price, $this->sale_price ?: $this->price);
                 }
 
-                return $this->original_price;
+                return $this->getComparePrice($price, $this->original_price);
             }
         );
     }
@@ -399,14 +399,12 @@ class Product extends BaseModel
 
     public function getDiscountPrice(): float|int|null
     {
-        if (! $this->is_variation) {
-            $productCollections = $this->productCollections;
-        } else {
-            $productCollections = $this->original_product->productCollections;
-        }
-
         $promotion = DiscountFacade::getFacadeRoot()
-            ->promotionForProduct([$this->id], $productCollections->pluck('id')->all());
+            ->promotionForProduct(
+                [$this->id],
+                $this->original_product->productCollections->pluck('id')->all(),
+                $this->original_product->categories->pluck('id')->all()
+            );
 
         if (! $promotion) {
             return $this->price;
@@ -609,7 +607,7 @@ class Product extends BaseModel
         $faqs = array_filter($faqs);
         if (! empty($faqs)) {
             foreach ($faqs as $key => $item) {
-                if (! $item[0]['value'] && ! $item[1]['value']) {
+                if (! is_array($item) || count($item) < 2 || ! $item[0]['value'] || ! $item[1]['value']) {
                     Arr::forget($faqs, $key);
                 }
             }
@@ -693,24 +691,33 @@ class Product extends BaseModel
 
     public function generateSku(): string|null
     {
-        if (! get_ecommerce_setting('auto_generate_product_sku', true)) {
+        if (
+            ! get_ecommerce_setting('auto_generate_product_sku', true) ||
+            ! $setting = get_ecommerce_setting('product_sku_format', null)
+        ) {
             return null;
         }
-
-        if (! $setting = get_ecommerce_setting('product_sku_format', null)) {
-            return null;
-        }
-
-        $isUppercase = str_contains($setting, '[%S]');
 
         while (true) {
-            $random = Str::random(5);
-
             $sku = str_replace(
                 ['[%s]', '[%S]'],
-                $isUppercase ? strtoupper($random) : $random,
+                strtoupper(Str::random(5)),
                 $setting
             );
+
+            $sku = str_replace(
+                ['[%d]', '[%D]'],
+                mt_rand(10000, 99999),
+                $sku
+            );
+
+            foreach (explode('%s', $sku) as $ignored) {
+                $sku = preg_replace('/%s/i', strtoupper(Str::random(1)), $sku, 1);
+            }
+
+            foreach (explode('%d', $sku) as $ignored) {
+                $sku = preg_replace('/%d/i', mt_rand(0, 9), $sku, 1);
+            }
 
             if (Product::query()->where('sku', $sku)->exists()) {
                 continue;

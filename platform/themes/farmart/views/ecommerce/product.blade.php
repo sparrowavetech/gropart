@@ -219,10 +219,7 @@
                             {!! BaseHelper::clean($product->content) !!}
                         </div>
 
-                        @if (theme_option('facebook_comment_enabled_in_product', 'yes') == 'yes')
-                            <br />
-                            {!! apply_filters(BASE_FILTER_PUBLIC_COMMENT_AREA, Theme::partial('comments')) !!}
-                        @endif
+                        {!! apply_filters(BASE_FILTER_PUBLIC_COMMENT_AREA, null, $product) !!}
                     </div>
                     @if (EcommerceHelper::isReviewEnabled())
                         <div

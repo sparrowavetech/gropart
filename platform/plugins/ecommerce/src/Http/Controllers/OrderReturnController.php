@@ -25,7 +25,7 @@ class OrderReturnController extends BaseController
         return $orderReturnTable->renderTable();
     }
 
-    public function edit(int|string $id)
+    public function edit(OrderReturn $orderReturn)
     {
         Assets::addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
             ->addScriptsDirectly([
@@ -38,30 +38,24 @@ class OrderReturnController extends BaseController
             Assets::addScriptsDirectly('vendor/core/plugins/location/js/location.js');
         }
 
-        $returnRequest = OrderReturn::query()->with(['items', 'customer', 'order'])->findOrFail($id);
-
-        PageTitle::setTitle(trans('plugins/ecommerce::order.edit_order_return', ['code' => $returnRequest->code]));
+        PageTitle::setTitle(trans('plugins/ecommerce::order.edit_order_return', ['code' => $orderReturn->code]));
 
         $defaultStore = get_primary_store_locator();
 
-        return view('plugins/ecommerce::order-returns.edit', compact('returnRequest', 'defaultStore'));
+        return view('plugins/ecommerce::order-returns.edit', ['returnRequest' => $orderReturn, 'defaultStore' => $defaultStore]);
     }
 
-    public function update(int|string $id, UpdateOrderReturnRequest $request, BaseHttpResponse $response)
+    public function update(OrderReturn $orderReturn, UpdateOrderReturnRequest $request, BaseHttpResponse $response)
     {
-        $returnRequest = OrderReturn::query()->findOrFail($id);
-
         $data['return_status'] = $request->input('return_status');
 
-        if ($returnRequest->return_status == $data['return_status'] ||
-            $returnRequest->return_status == OrderReturnStatusEnum::CANCELED ||
-            $returnRequest->return_status == OrderReturnStatusEnum::COMPLETED) {
+        if (in_array($orderReturn->return_status, [$data['return_status'], OrderReturnStatusEnum::CANCELED, OrderReturnStatusEnum::COMPLETED])) {
             return $response
                 ->setError()
                 ->setMessage(trans('plugins/ecommerce::order.notices.update_return_order_status_error'));
         }
 
-        [$status, $returnRequest] = OrderReturnHelper::updateReturnOrder($returnRequest, $data);
+        [$status, $orderReturn] = OrderReturnHelper::updateReturnOrder($orderReturn, $data);
 
         if (! $status) {
             return $response
@@ -70,17 +64,16 @@ class OrderReturnController extends BaseController
         }
 
         return $response
-            ->setNextUrl(route('order_returns.edit', $returnRequest->id))
+            ->setNextUrl(route('order_returns.edit', $orderReturn->getKey()))
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
+    public function destroy(OrderReturn $orderReturn, Request $request, BaseHttpResponse $response)
     {
-        $order = OrderReturn::query()->findOrFail($id);
-
         try {
-            $order->delete();
-            event(new DeletedContentEvent(ORDER_RETURN_MODULE_SCREEN_NAME, $request, $order));
+            $orderReturn->delete();
+
+            event(new DeletedContentEvent(ORDER_RETURN_MODULE_SCREEN_NAME, $request, $orderReturn));
 
             return $response->setMessage(trans('core/base::notices.delete_success_message'));
         } catch (Exception $exception) {

@@ -15,7 +15,7 @@ class ProductRequest extends Request
     public function rules(): array
     {
         $rules = [
-            'name' => 'required|string|max:220',
+            'name' => 'required|string|max:250',
             'price' => 'numeric|nullable|min:0|max:100000000000',
             'sale_price' => 'numeric|nullable|min:0|max:100000000000',
             'start_date' => 'date|nullable|required_if:sale_type,1',
@@ -25,6 +25,7 @@ class ProductRequest extends Request
             'weight' => 'numeric|nullable|min:0|max:100000000',
             'length' => 'numeric|nullable|min:0|max:100000000',
             'images' => 'sometimes|array',
+            'images.*' => 'nullable|string',
             'status' => Rule::in(BaseStatusEnum::values()),
             'quantity' => 'numeric|nullable|min:0|max:100000000',
             'product_type' => Rule::in(ProductTypeEnum::values()),
@@ -43,6 +44,10 @@ class ProductRequest extends Request
                 Rule::unique('ec_products')->ignore($this->route('product')),
             ],
             'general_license_code' => 'nullable|in:0,1',
+            'categories' => 'nullable|array',
+            'categories.*' => 'nullable|exists:ec_product_categories,id',
+            'product_collections' => 'nullable|array',
+            'product_collections.*' => 'nullable|exists:ec_product_collections,id',
         ];
 
         if (EcommerceHelper::isEnabledProductOptions()) {

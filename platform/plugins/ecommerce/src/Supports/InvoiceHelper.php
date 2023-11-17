@@ -23,6 +23,7 @@ use Dompdf\Image\Cache;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
 use Throwable;
+use Twig\Extension\DebugExtension;
 
 class InvoiceHelper
 {
@@ -118,7 +119,15 @@ class InvoiceHelper
         $content = $this->getInvoiceTemplate();
 
         if ($content) {
-            $twigCompiler = (new TwigCompiler())->addExtension(new TwigExtension());
+            $twigCompiler = new TwigCompiler([
+                'autoescape' => false,
+                'debug' => true,
+            ]);
+
+            $twigCompiler
+                ->addExtension(new TwigExtension())
+                ->addExtension(new DebugExtension());
+
             $content = $twigCompiler->compile($content, $this->getDataForInvoiceTemplate($invoice));
 
             if ((int)get_ecommerce_setting('invoice_support_arabic_language', 0) == 1) {
@@ -154,7 +163,7 @@ class InvoiceHelper
             File::makeDirectory($folderPath);
         }
 
-        $invoicePath = $folderPath . '/invoice-' . $invoice->code . '.pdf';
+        $invoicePath = sprintf('%s/invoice-%s.pdf', $folderPath, $invoice->code);
 
         if (File::exists($invoicePath)) {
             return $invoicePath;
@@ -167,7 +176,7 @@ class InvoiceHelper
 
     public function downloadInvoice(Invoice $invoice): Response
     {
-        return $this->makeInvoicePDF($invoice)->download('invoice-' . $invoice->code . '.pdf');
+        return $this->makeInvoicePDF($invoice)->download(sprintf('invoice-%s.pdf', $invoice->code));
     }
 
     public function streamInvoice(Invoice $invoice): Response
@@ -202,7 +211,9 @@ class InvoiceHelper
             $invoice->payment->payment_channel == PaymentMethodEnum::BANK_TRANSFER &&
             $invoice->payment->status == PaymentStatusEnum::PENDING
         ) {
-            $paymentDescription = BaseHelper::clean(get_payment_setting('description', $invoice->payment->payment_channel));
+            $paymentDescription = BaseHelper::clean(
+                get_payment_setting('description', $invoice->payment->payment_channel)
+            );
         }
 
         $companyName = get_ecommerce_setting('company_name_for_invoicing') ?: get_ecommerce_setting('store_name');
@@ -210,14 +221,18 @@ class InvoiceHelper
         $companyAddress = get_ecommerce_setting('company_address_for_invoicing');
 
         if (! $companyAddress) {
-            $companyAddress = get_ecommerce_setting('store_address') . ', ' . get_ecommerce_setting('store_city') . ', ' . get_ecommerce_setting('store_state') . ', ' . get_ecommerce_setting('store_country');
+            $companyAddress = get_ecommerce_setting('store_address') . ', ' . get_ecommerce_setting(
+                'store_city'
+            ) . ', ' . get_ecommerce_setting('store_state') . ', ' . get_ecommerce_setting('store_country');
         }
 
         $companyPhone = get_ecommerce_setting('company_phone_for_invoicing') ?: get_ecommerce_setting('store_phone');
 
         $companyEmail = get_ecommerce_setting('company_email_for_invoicing') ?: get_ecommerce_setting('store_email');
 
-        $companyTaxId = get_ecommerce_setting('company_tax_id_for_invoicing') ?: get_ecommerce_setting('store_vat_number');
+        $companyTaxId = get_ecommerce_setting('company_tax_id_for_invoicing') ?: get_ecommerce_setting(
+            'store_vat_number'
+        );
 
         $invoice->loadMissing(['items', 'reference']);
 
@@ -236,7 +251,7 @@ class InvoiceHelper
             'payment_description' => $paymentDescription,
             'is_tax_enabled' => EcommerceHelperFacade::isTaxEnabled(),
             'settings' => [
-                'using_custom_font_for_invoice' => (bool) get_ecommerce_setting('using_custom_font_for_invoice'),
+                'using_custom_font_for_invoice' => (bool)get_ecommerce_setting('using_custom_font_for_invoice'),
                 'custom_font_family' => get_ecommerce_setting('invoice_font_family', 'DejaVu Sans'),
                 'font_family' => (int)get_ecommerce_setting('using_custom_font_for_invoice', 0) == 1
                     ? get_ecommerce_setting('invoice_font_family', 'DejaVu Sans')
@@ -248,6 +263,21 @@ class InvoiceHelper
             'ecommerce_invoice_footer' => apply_filters('ecommerce_invoice_footer', null, $invoice),
             'invoice_payment_info_filter' => apply_filters('invoice_payment_info_filter', null, $invoice),
         ];
+
+        $order = $invoice->reference;
+
+        if ($order) {
+            $address = $order->shippingAddress;
+
+            if (EcommerceHelperFacade::isBillingAddressEnabled() && $order->billingAddress->id) {
+                $address = $order->billingAddress;
+            }
+
+            $data['customer_country'] = $address->country_name;
+            $data['customer_state'] = $address->state_name;
+            $data['customer_city'] = $address->city_name;
+            $data['customer_zip_code'] = $address->zip_code;
+        }
 
         if (is_plugin_active('payment')) {
             $invoice->loadMissing(['payment']);
@@ -307,12 +337,12 @@ class InvoiceHelper
     {
         return [
             'invoice.*' => __('Invoice information from database, ex: invoice.code, invoice.amount, ...'),
-            'logo_full_path' => __('The site logo with full url'),
-            'company_logo_full_path' => __('The company logo of invoice with full url'),
+            'logo_full_path' => __('The site logo with full URL'),
+            'company_logo_full_path' => __('The company logo of invoice with full URL'),
             'payment_method' => __('Payment method'),
             'payment_status' => __('Payment status'),
             'payment_description' => __('Payment description'),
-            'get_ecommerce_setting(\'key\')' => __('Get the ecommerce setting from database'),
+            "get_ecommerce_setting('key')" => __('Get the ecommerce setting from database'),
         ];
     }
 }

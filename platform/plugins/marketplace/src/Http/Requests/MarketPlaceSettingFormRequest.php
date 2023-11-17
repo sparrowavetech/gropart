@@ -31,8 +31,8 @@ class MarketPlaceSettingFormRequest extends BaseProductRequest
             'marketplace_allow_vendor_manage_shipping' => 'required|in:0,1',
             'marketplace_fee_per_order' => 'required|min:0|max:100|numeric',
             'marketplace_fee_withdrawal' => 'required|min:0|numeric',
-            'max_filesize_upload_by_vendor' => 'required|min:1|numeric',
-            'max_product_images_upload_by_vendor' => 'required|min:1|numeric',
+            'marketplace_max_filesize_upload_by_vendor' => 'required|min:1|numeric',
+            'marketplace_max_product_images_upload_by_vendor' => 'required|min:1|numeric',
         ];
 
         if ($this->input('marketplace_enable_commission_fee_for_each_category')) {

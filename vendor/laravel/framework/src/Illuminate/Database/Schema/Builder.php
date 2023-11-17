@@ -46,7 +46,7 @@ class Builder
     public static $defaultMorphKeyType = 'int';
 
     /**
-     * Indicates whether Doctrine DBAL usage will be prevented if possible when dropping and renaming columns.
+     * Indicates whether Doctrine DBAL usage will be prevented if possible when dropping, renaming, and modifying columns.
      *
      * @var bool
      */
@@ -113,7 +113,7 @@ class Builder
     }
 
     /**
-     * Attempt to use native schema operations for dropping and renaming columns, even if Doctrine DBAL is installed.
+     * Attempt to use native schema operations for dropping, renaming, and modifying columns, even if Doctrine DBAL is installed.
      *
      * @param  bool  $value
      * @return void
@@ -233,13 +233,26 @@ class Builder
      *
      * @param  string  $table
      * @param  string  $column
+     * @param  bool  $fullDefinition
      * @return string
      */
-    public function getColumnType($table, $column)
+    public function getColumnType($table, $column, $fullDefinition = false)
     {
-        $table = $this->connection->getTablePrefix().$table;
+        if (! $this->connection->usingNativeSchemaOperations()) {
+            $table = $this->connection->getTablePrefix().$table;
 
-        return $this->connection->getDoctrineColumn($table, $column)->getType()->getName();
+            return $this->connection->getDoctrineColumn($table, $column)->getType()->getName();
+        }
+
+        $columns = $this->getColumns($table);
+
+        foreach ($columns as $value) {
+            if (strtolower($value['name']) === $column) {
+                return $fullDefinition ? $value['type'] : $value['type_name'];
+            }
+        }
+
+        throw new InvalidArgumentException("There is no column with name '$column' on table '$table'.");
     }
 
     /**
@@ -250,11 +263,22 @@ class Builder
      */
     public function getColumnListing($table)
     {
-        $results = $this->connection->selectFromWriteConnection($this->grammar->compileColumnListing(
-            $this->connection->getTablePrefix().$table
-        ));
+        return array_column($this->getColumns($table), 'name');
+    }
 
-        return $this->connection->getPostProcessor()->processColumnListing($results);
+    /**
+     * Get the columns for a given table.
+     *
+     * @param  string  $table
+     * @return array
+     */
+    public function getColumns($table)
+    {
+        $table = $this->connection->getTablePrefix().$table;
+
+        return $this->connection->getPostProcessor()->processColumns(
+            $this->connection->selectFromWriteConnection($this->grammar->compileColumns($table))
+        );
     }
 
     /**
@@ -364,7 +388,7 @@ class Builder
     /**
      * Get all of the table names for the database.
      *
-     * @return void
+     * @return array
      *
      * @throws \LogicException
      */
@@ -421,11 +445,11 @@ class Builder
     {
         $this->disableForeignKeyConstraints();
 
-        $result = $callback();
-
-        $this->enableForeignKeyConstraints();
-
-        return $result;
+        try {
+            return $callback();
+        } finally {
+            $this->enableForeignKeyConstraints();
+        }
     }
 
     /**

@@ -198,7 +198,7 @@
                                         name="categories[]"
                                     >
                                         <option value="0">{{ __('All Categories') }}</option>
-                                        {!! Theme::partial('product-categories-select', ['categories' => $categories, 'indent' => null]) !!}
+                                        {!! ProductCategoryHelper::renderProductCategoriesSelect() !!}
                                     </select>
                                 </div>
                                 <input
@@ -345,7 +345,7 @@
                                     <div class="menu__content">
                                         <ul class="menu--dropdown">
                                             @php
-                                                Theme::set('productCategoriesDropdown', Theme::partial('product-categories-dropdown', compact('categories')));
+                                                Theme::set('productCategoriesDropdown', Theme::partial('product-categories-dropdown', ['categories' => ProductCategoryHelper::getProductCategoriesWithUrl()]));
                                             @endphp
                                             {!! Theme::get('productCategoriesDropdown') !!}
                                         </ul>

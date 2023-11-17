@@ -4,6 +4,12 @@
     @endif
 @endif
 
+@php
+    if ($showLabel && empty($options['label'])) {
+        $options['label'] = trans('core/base::forms.image');
+    }
+@endphp
+
 @if ($showLabel && $options['label'] !== false && $options['label_show'])
     {!! Form::customLabel($name, $options['label'], $options['label_attr']) !!}
 @endif

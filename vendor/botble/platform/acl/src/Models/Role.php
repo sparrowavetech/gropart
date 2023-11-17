@@ -32,6 +32,7 @@ class Role extends BaseModel
         'permissions' => 'json',
         'name' => SafeContent::class,
         'description' => SafeContent::class,
+        'is_default' => 'bool',
     ];
 
     public function delete(): bool|null

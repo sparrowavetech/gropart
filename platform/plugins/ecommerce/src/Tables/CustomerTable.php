@@ -135,6 +135,22 @@ class CustomerTable extends TableAbstract
         ];
     }
 
+    public function getFilters(): array
+    {
+        $filters = parent::getFilters();
+
+        if (EcommerceHelper::isEnableEmailVerification()) {
+            $filters['confirmed_at'] = [
+                'title' => trans('plugins/ecommerce::customer.email_verified'),
+                'type' => 'select',
+                'choices' => [1 => trans('core/base::base.yes'), 0 => trans('core/base::base.no')],
+                'validate' => 'required|in:1,0',
+            ];
+        }
+
+        return $filters;
+    }
+
     public function renderTable($data = [], $mergeData = []): View|Factory|Response
     {
         if ($this->isEmpty()) {
@@ -146,9 +162,19 @@ class CustomerTable extends TableAbstract
 
     public function getDefaultButtons(): array
     {
-        return [
-            'export',
-            'reload',
-        ];
+        return array_merge(['export'], parent::getDefaultButtons());
+    }
+
+    public function applyFilterCondition(
+        Relation|Builder|QueryBuilder $query,
+        string $key,
+        string $operator,
+        ?string $value
+    ) {
+        if (EcommerceHelper::isEnableEmailVerification() && $key === 'confirmed_at') {
+            return $value ? $query->whereNotNull($key) : $query->whereNull($key);
+        }
+
+        return parent::applyFilterCondition($query, $key, $operator, $value);
     }
 }

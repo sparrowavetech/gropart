@@ -42,10 +42,10 @@ class AuditLogController extends BaseController
             event(new DeletedContentEvent(AUDIT_LOG_MODULE_SCREEN_NAME, $request, $auditLog));
 
             return $response->setMessage(trans('core/base::notices.delete_success_message'));
-        } catch (Exception $ex) {
+        } catch (Exception $exception) {
             return $response
                 ->setError()
-                ->setMessage($ex->getMessage());
+                ->setMessage($exception->getMessage());
         }
     }
 

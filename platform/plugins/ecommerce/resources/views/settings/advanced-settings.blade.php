@@ -362,7 +362,7 @@
                     <x-core-setting::text-input
                         :label="trans('plugins/ecommerce::ecommerce.setting.product_sku_format')"
                         name="product_sku_format"
-                        :helper-text="trans('plugins/ecommerce::ecommerce.setting.product_sku_format_help')"
+                        :helper-text="trans('plugins/ecommerce::ecommerce.setting.product_sku_format_helper')"
                         :value="get_ecommerce_setting('product_sku_format', null)"
                     />
                 </x-core-setting::form-group>

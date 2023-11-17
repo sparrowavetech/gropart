@@ -21,7 +21,7 @@ class ContactForm extends FormAbstract
             ->withCustomFields()
             ->add('status', 'customSelect', [
                 'label' => trans('core/base::tables.status'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'choices' => ContactStatusEnum::labels(),
             ])
             ->setBreakFieldPoint('status')

@@ -3,6 +3,7 @@
 namespace Botble\SocialLogin\Http\Controllers;
 
 use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
@@ -137,7 +138,7 @@ class SocialLoginController extends BaseController
                     }
                 }
             } catch (Exception $exception) {
-                info($exception->getMessage());
+                BaseHelper::logError($exception);
             }
 
             $data = [

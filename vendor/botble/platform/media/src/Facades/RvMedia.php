@@ -57,6 +57,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static void setDoSpacesDisk(array $config)
  * @method static void setWasabiDisk(array $config)
  * @method static void setBunnyCdnDisk(array $config)
+ * @method static \Illuminate\Support\HtmlString image(string|null $url, string|null $alt = null, string|null $size = null, bool $useDefaultImage = true, array $attributes = [], bool|null $secure = null)
  *
  * @see \Botble\Media\RvMedia
  */

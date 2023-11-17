@@ -19,8 +19,8 @@
                     <tr>
 
                         <td>#{{ config('plugins.ecommerce.order.order_code_prefix') }}{{ $order->id }}</td>
-                        <td>{{ $order->created_at->format('h:m d/m/Y') }}</td>
-                        <td>{{ is_plugin_active('payment') ? $order->payment->payment_channel->label() : '-' }}</td>
+                        <td>{{ $order->created_at->format('d M Y H:i:s') }}</td>
+                        <td>{{ is_plugin_active('payment') && $order->payment->id ? $order->payment->payment_channel->label() : '-' }}</td>
                         <td>{{ $order->status->label() }}</td>
 
                         <td>

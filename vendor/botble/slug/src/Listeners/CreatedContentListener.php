@@ -3,6 +3,7 @@
 namespace Botble\Slug\Listeners;
 
 use Botble\Base\Events\CreatedContentEvent;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Slug\Facades\SlugHelper;
 use Botble\Slug\Models\Slug;
 use Botble\Slug\Services\SlugService;
@@ -44,7 +45,7 @@ class CreatedContentListener
                     'prefix' => SlugHelper::getPrefix($class),
                 ]);
             } catch (Exception $exception) {
-                info($exception->getMessage());
+                BaseHelper::logError($exception);
             }
         }
     }

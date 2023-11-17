@@ -3,12 +3,12 @@
 namespace Botble\Base\Listeners;
 
 use Botble\Base\Events\SendMailEvent;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Supports\EmailAbstract;
 use Exception;
 use Illuminate\Contracts\Mail\Mailer;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Support\Facades\Log;
 
 class SendMailListener implements ShouldQueue
 {
@@ -27,7 +27,7 @@ class SendMailListener implements ShouldQueue
                 throw $exception;
             }
 
-            Log::error($exception->getMessage());
+            BaseHelper::logError($exception);
         }
     }
 }

@@ -72,7 +72,7 @@ class ShippingRuleItemForm extends FormAbstract
             ->withCustomFields()
             ->add('shipping_rule_id', 'customSelect', [
                 'label' => trans('plugins/ecommerce::shipping.rule.item.forms.shipping_rule'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'class' => 'form-control shipping-rule-id',
                 ],
@@ -91,9 +91,8 @@ class ShippingRuleItemForm extends FormAbstract
             }
 
             $cities = ['' => trans('plugins/location::city.select_city')];
-            if ($state = old('state', $this->getModel()->state)) {
-                $cities += EcommerceHelper::getAvailableCitiesByState($state);
-            }
+
+            $cities += EcommerceHelper::getAvailableCitiesByState(old('state', $this->getModel()->state));
 
             $this
                 ->add('country', 'customSelect', [
@@ -106,19 +105,21 @@ class ShippingRuleItemForm extends FormAbstract
                     ],
                     'selected' => $country,
                 ])
-                ->add('state', 'customSelect', [
-                    'label' => trans('plugins/ecommerce::shipping.rule.item.forms.state'),
-                    'label_attr' => ['class' => 'control-label ' . ($isRequiredState ? 'required' : '')],
-                    'attr' => [
-                        'class' => 'form-control select-search-full',
-                        'data-type' => 'state',
-                        'data-url' => route('ajax.states-by-country'),
-                    ],
-                    'choices' => $states,
-                ])
+                ->when(count($states) > 1, function () use ($states, $isRequiredState) {
+                    $this->add('state', 'customSelect', [
+                        'label' => trans('plugins/ecommerce::shipping.rule.item.forms.state'),
+                        'label_attr' => ['class' => 'control-label ' . ($isRequiredState ? 'required' : '')],
+                        'attr' => [
+                            'class' => 'form-control select-search-full',
+                            'data-type' => 'state',
+                            'data-url' => route('ajax.states-by-country'),
+                        ],
+                        'choices' => $states,
+                    ]);
+                })
                 ->add('city', 'customSelect', [
                     'label' => trans('plugins/ecommerce::shipping.rule.item.forms.city'),
-                    'label_attr' => ['class' => 'control-label'],
+                    'required' => count($states) <= 1,
                     'attr' => [
                         'class' => 'form-control select-search-full',
                         'data-type' => 'city',
@@ -130,7 +131,6 @@ class ShippingRuleItemForm extends FormAbstract
             $this
                 ->add('country', 'text', [
                     'label' => trans('plugins/ecommerce::shipping.rule.item.forms.country'),
-                    'label_attr' => ['class' => 'control-label'],
                     'attr' => [
                         'placeholder' => trans('plugins/ecommerce::shipping.rule.item.forms.country_placeholder'),
                     ],
@@ -148,7 +148,6 @@ class ShippingRuleItemForm extends FormAbstract
                 ])
                 ->add('city', 'text', [
                     'label' => trans('plugins/ecommerce::shipping.rule.item.forms.city'),
-                    'label_attr' => ['class' => 'control-label'],
                     'attr' => [
                         'placeholder' => trans('plugins/ecommerce::shipping.rule.item.forms.city_placeholder'),
                     ],
@@ -158,14 +157,13 @@ class ShippingRuleItemForm extends FormAbstract
         $this
             ->add('zip_code', 'text', [
                 'label' => trans('plugins/ecommerce::shipping.rule.item.forms.zip_code'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'placeholder' => trans('plugins/ecommerce::shipping.rule.item.forms.zip_code_placeholder'),
                 ],
             ])
             ->add('adjustment_price', 'text', [
                 'label' => trans('plugins/ecommerce::shipping.rule.item.forms.adjustment_price'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'class' => 'form-control input-mask-number',
                     'placeholder' => trans('plugins/ecommerce::shipping.rule.item.forms.adjustment_price_placeholder'),
@@ -174,7 +172,7 @@ class ShippingRuleItemForm extends FormAbstract
             ])
             ->add('is_enabled', 'onOff', [
                 'label' => trans('plugins/ecommerce::shipping.rule.item.forms.is_enabled'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'class' => 'form-control',
                 ],

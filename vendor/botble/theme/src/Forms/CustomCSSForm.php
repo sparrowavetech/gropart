@@ -25,7 +25,6 @@ class CustomCSSForm extends FormAbstract
             ->setValidatorClass(CustomCssRequest::class)
             ->add('custom_css', 'textarea', [
                 'label' => trans('packages/theme::theme.custom_css'),
-                'label_attr' => ['class' => 'control-label'],
                 'value' => $css,
                 'help_block' => [
                     'text' => trans('packages/theme::theme.custom_css_placeholder'),

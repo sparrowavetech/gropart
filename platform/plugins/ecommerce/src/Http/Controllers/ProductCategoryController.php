@@ -17,6 +17,7 @@ use Botble\Ecommerce\Http\Resources\ProductCategoryResource;
 use Botble\Ecommerce\Models\ProductCategory;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 
 class ProductCategoryController extends BaseController
@@ -29,9 +30,8 @@ class ProductCategoryController extends BaseController
         PageTitle::setTitle(trans('plugins/ecommerce::product-categories.name'));
 
         $categories = ProductCategory::query()
-            ->wherePublished()
-            ->orderByDesc('created_at')
             ->orderBy('order')
+            ->orderByDesc('created_at')
             ->with('slugable')
             ->withCount('products')
             ->get();
@@ -90,10 +90,12 @@ class ProductCategoryController extends BaseController
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    public function edit(int|string $id, FormBuilder $formBuilder, Request $request, BaseHttpResponse $response)
-    {
-        $productCategory = ProductCategory::query()->findOrFail($id);
-
+    public function edit(
+        ProductCategory $productCategory,
+        FormBuilder $formBuilder,
+        Request $request,
+        BaseHttpResponse $response
+    ) {
         if ($request->ajax()) {
             return $response->setData($this->getForm($productCategory));
         }
@@ -103,22 +105,23 @@ class ProductCategoryController extends BaseController
         return $formBuilder->create(ProductCategoryForm::class, ['model' => $productCategory])->renderForm();
     }
 
-    public function update(int|string $id, ProductCategoryRequest $request, BaseHttpResponse $response)
-    {
-        $productCategory = ProductCategory::query()->findOrFail($id);
+    public function update(
+        ProductCategory $productCategory,
+        ProductCategoryRequest $request,
+        BaseHttpResponse $response
+    ) {
         $productCategory->fill($request->input());
         $productCategory->save();
 
         event(new UpdatedContentEvent(PRODUCT_CATEGORY_MODULE_SCREEN_NAME, $request, $productCategory));
 
         if ($request->ajax()) {
-            $productCategory = ProductCategory::query()->findOrFail($id);
-
             if ($response->isSaving()) {
                 $form = $this->getForm();
             } else {
                 $form = $this->getForm($productCategory);
             }
+
             $response->setData([
                 'model' => $productCategory,
                 'form' => $form,
@@ -130,11 +133,9 @@ class ProductCategoryController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
+    public function destroy(ProductCategory $productCategory, Request $request, BaseHttpResponse $response)
     {
         try {
-            $productCategory = ProductCategory::query()->findOrFail($id);
-
             $productCategory->delete();
             event(new DeletedContentEvent(PRODUCT_CATEGORY_MODULE_SCREEN_NAME, $request, $productCategory));
 
@@ -204,10 +205,45 @@ class ProductCategoryController extends BaseController
 
     public function getListForSelect(BaseHttpResponse $response)
     {
-        $productCategories = ProductCategory::query()
-            ->select(['id', 'name'])
+        $categories = ProductCategory::query()
+            ->toBase()
+            ->select([
+                'id',
+                'name',
+                'parent_id',
+            ])
+            ->orderByDesc('created_at')
+            ->orderBy('order')
             ->get();
 
-        return $response->setData($productCategories);
+        return $response->setData($this->buildTree($categories->groupBy('parent_id')));
+    }
+
+    protected function buildTree(
+        Collection $categories,
+        Collection $tree = null,
+        int|string $parentId = 0,
+        string $indent = null
+    ): Collection {
+        if ($tree === null) {
+            $tree = collect();
+        }
+
+        $currentCategories = $categories->get($parentId);
+
+        if ($currentCategories) {
+            foreach ($currentCategories as $category) {
+                $tree->push([
+                    'id' => $category->id,
+                    'name' => $indent . ' ' . $category->name,
+                ]);
+
+                if ($categories->has($category->id)) {
+                    $this->buildTree($categories, $tree, $category->id, $indent . '&nbsp;&nbsp;');
+                }
+            }
+        }
+
+        return $tree;
     }
 }

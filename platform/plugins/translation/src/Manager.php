@@ -7,10 +7,12 @@ use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Supports\Zipper;
 use Botble\Theme\Facades\Theme;
+use Botble\Translation\Models\QueryBuilders\TranslationQueryBuilder;
 use Botble\Translation\Models\Translation;
 use Exception;
 use GuzzleHttp\Psr7\Utils;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -34,28 +36,33 @@ class Manager
         try {
             $this->publishLocales();
         } catch (Exception $exception) {
-            info($exception->getMessage());
+            BaseHelper::logError($exception);
         }
 
         $counter = 0;
+
+        $langLoader = Lang::getLoader();
 
         foreach ($this->files->directories(lang_path()) as $langPath) {
             $locale = basename($langPath);
             foreach ($this->files->allFiles($langPath) as $file) {
                 $info = pathinfo($file);
                 $group = $info['filename'];
+
                 if (in_array($group, $this->config['exclude_groups'])) {
                     continue;
                 }
+
                 $subLangPath = str_replace($langPath . DIRECTORY_SEPARATOR, '', $info['dirname']);
                 $subLangPath = str_replace(DIRECTORY_SEPARATOR, '/', $subLangPath);
                 $langDirectory = $group;
+
                 if ($subLangPath != $langPath) {
                     $langDirectory = $subLangPath . '/' . $group;
                     $group = substr($subLangPath, 0, -3) . '/' . $group;
                 }
 
-                $translations = Lang::getLoader()->load($locale, $langDirectory);
+                $translations = $langLoader->load($locale, $langDirectory);
                 if ($translations && is_array($translations)) {
                     foreach (Arr::dot($translations) as $key => $value) {
                         $importedTranslation = $this->importTranslation(
@@ -132,8 +139,13 @@ class Manager
                     return;
                 }
 
+                /**
+                 * @var TranslationQueryBuilder $query
+                 */
+                $query = Translation::query();
+
                 $tree = $this->makeTree(
-                    Translation::ofTranslatedGroup($group)->orderByGroupKeys(
+                    $query->ofTranslatedGroup($group)->orderByGroupKeys(
                         Arr::get(
                             $this->config,
                             'sort_keys',
@@ -186,7 +198,12 @@ class Manager
 
     public function exportAllTranslations(): bool
     {
-        $groups = Translation::selectDistinctGroup()->whereNotNull('value')->get('group');
+        /**
+         * @var Builder $query
+         */
+        $query = Translation::selectDistinctGroup();
+
+        $groups = $query->whereNotNull('value')->get('group');
 
         foreach ($groups as $group) {
             $this->exportTranslations($group->group);
@@ -359,14 +376,16 @@ class Manager
 
         $theme = Theme::getThemeName();
 
-        File::ensureDirectoryExists(lang_path("vendor/themes/$theme"));
+        $themeVendorLangPath = lang_path("vendor/themes/$theme");
+
+        File::ensureDirectoryExists($themeVendorLangPath);
 
         if (File::exists($themeJsonPath = "$localePath/vendor/themes/$theme/$locale.json")) {
-            File::copy($themeJsonPath, lang_path("vendor/themes/$theme/$locale.json"));
+            File::copy($themeJsonPath, $themeVendorLangPath . "/$locale.json");
         } else {
             $jsonFile = $localePath . '/' . $locale . '.json';
 
-            File::copy($jsonFile, lang_path("vendor/themes/$theme/$locale.json"));
+            File::copy($jsonFile, $themeVendorLangPath . "/$locale.json");
 
             $this->removeUnusedThemeTranslations();
         }
@@ -393,11 +412,13 @@ class Manager
 
     public function getThemeTranslations(string $locale): array
     {
-        $translations = BaseHelper::getFileData($this->getThemeTranslationPath($locale));
+        $translations = BaseHelper::getFileData($themeTranslationsFilePath = $this->getThemeTranslationPath($locale));
 
         ksort($translations);
 
-        if ($locale !== 'en' && $defaultEnglishFile = theme_path(Theme::getThemeName() . '/lang/en.json')) {
+        $defaultEnglishFile = theme_path(Theme::getThemeName() . '/lang/en.json');
+
+        if ($defaultEnglishFile && ($locale !== 'en' || $defaultEnglishFile !== $themeTranslationsFilePath)) {
             $enTranslations = BaseHelper::getFileData($defaultEnglishFile);
             $translations = array_merge($enTranslations, $translations);
 

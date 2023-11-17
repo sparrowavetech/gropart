@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Route;
 
 class TaxRuleTable extends TableAbstract
 {
-    protected $tax;
+    protected Tax $tax;
 
     public function setup(): void
     {
@@ -35,9 +35,11 @@ class TaxRuleTable extends TableAbstract
 
         Assets::addScriptsDirectly('vendor/core/plugins/ecommerce/js/tax.js');
 
-        $this->setTax(Route::current()->parameter('tax'));
+        $tax = Route::current()->parameter('tax');
+
         $this
             ->model(TaxRule::class)
+            ->setTax($tax ?: new Tax())
             ->addActions([
                 EditAction::make()->route('tax.rule.edit')->attributes(['class' => 'btn btn-sm btn-icon btn-primary btn-edit-item']),
                 DeleteAction::make()->route('tax.rule.destroy'),

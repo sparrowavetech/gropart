@@ -77,7 +77,6 @@ class ProductForm extends FormAbstract
             ])
             ->add('description', 'editor', [
                 'label' => trans('core/base::forms.description'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'rows' => 2,
                     'placeholder' => trans('core/base::forms.description_placeholder'),
@@ -94,7 +93,6 @@ class ProductForm extends FormAbstract
             ])
             ->add('images[]', 'mediaImages', [
                 'label' => trans('plugins/ecommerce::products.form.image'),
-                'label_attr' => ['class' => 'control-label'],
                 'values' => $productId ? $this->getModel()->images : [],
             ])
             ->addMetaBoxes([
@@ -113,38 +111,32 @@ class ProductForm extends FormAbstract
             ])
             ->add('status', 'customSelect', [
                 'label' => trans('core/base::tables.status'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'choices' => BaseStatusEnum::labels(),
             ])
             ->add('is_featured', 'onOff', [
                 'label' => trans('core/base::forms.is_featured'),
-                'label_attr' => ['class' => 'control-label'],
                 'default_value' => false,
             ])
             ->add('categories[]', 'categoryMulti', [
                 'label' => trans('plugins/ecommerce::products.form.categories'),
-                'label_attr' => ['class' => 'control-label'],
                 'choices' => ProductCategoryHelper::getActiveTreeCategories(),
                 'value' => old('categories', $selectedCategories),
             ])
             ->add('brand_id', 'customSelect', [
                 'label' => trans('plugins/ecommerce::products.form.brand'),
-                'label_attr' => ['class' => 'control-label'],
                 'choices' => $brands,
             ])
             ->add('image', 'mediaImage', [
                 'label' => trans('plugins/ecommerce::products.form.featured_image'),
-                'label_attr' => ['class' => 'control-label'],
             ])
             ->add('product_collections[]', 'multiCheckList', [
                 'label' => trans('plugins/ecommerce::products.form.collections'),
-                'label_attr' => ['class' => 'control-label'],
                 'choices' => $productCollections,
                 'value' => old('product_collections', $selectedProductCollections),
             ])
             ->add('product_labels[]', 'multiCheckList', [
                 'label' => trans('plugins/ecommerce::products.form.labels'),
-                'label_attr' => ['class' => 'control-label'],
                 'choices' => $productLabels,
                 'value' => old('product_labels', $selectedProductLabels),
             ]);
@@ -161,7 +153,6 @@ class ProductForm extends FormAbstract
 
             $this->add('taxes[]', 'multiCheckList', [
                 'label' => trans('plugins/ecommerce::products.form.taxes'),
-                'label_attr' => ['class' => 'control-label'],
                 'choices' => $taxes,
                 'value' => old('taxes', $selectedTaxes),
             ]);
@@ -170,7 +161,6 @@ class ProductForm extends FormAbstract
         $this
             ->add('tag', 'tags', [
                 'label' => trans('plugins/ecommerce::products.form.tags'),
-                'label_attr' => ['class' => 'control-label'],
                 'value' => $tags,
                 'attr' => [
                     'placeholder' => trans('plugins/ecommerce::products.form.write_some_tags'),

@@ -14,8 +14,6 @@ use Botble\Marketplace\Models\Store;
 
 class StoreForm extends FormAbstract
 {
-    protected $template = 'core/base::forms.form-tabs';
-
     public function buildForm(): void
     {
         Assets::addScriptsDirectly('vendor/core/plugins/location/js/location.js');
@@ -29,9 +27,10 @@ class StoreForm extends FormAbstract
             ->setupModel(new Store())
             ->setValidatorClass(StoreRequest::class)
             ->withCustomFields()
+            ->hasTabs()
             ->add('name', 'text', [
                 'label' => trans('core/base::forms.name'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'placeholder' => trans('core/base::forms.name_placeholder'),
                     'data-counter' => 120,
@@ -39,7 +38,6 @@ class StoreForm extends FormAbstract
             ])
             ->add('company', 'text', [
                 'label' => trans('plugins/marketplace::store.forms.company'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'placeholder' => trans('plugins/marketplace::store.forms.company_placeholder'),
                     'data-counter' => 255,
@@ -50,7 +48,6 @@ class StoreForm extends FormAbstract
             ])
             ->add('country', 'customSelect', [
                 'label' => trans('plugins/marketplace::store.forms.country'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'id' => 'country_id',
                     'class' => 'form-control select-search-full',
@@ -74,7 +71,6 @@ class StoreForm extends FormAbstract
             $this
                 ->add('state', 'customSelect', [
                     'label' => trans('plugins/location::city.state'),
-                    'label_attr' => ['class' => 'control-label'],
                     'wrapper' => [
                         'class' => 'form-group col-md-4',
                     ],
@@ -116,7 +112,6 @@ class StoreForm extends FormAbstract
             $this
                 ->add('state', 'text', [
                     'label' => trans('plugins/marketplace::store.forms.state'),
-                    'label_attr' => ['class' => 'control-label'],
                     'wrapper' => [
                         'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ' col-md-4',
                     ],
@@ -127,7 +122,6 @@ class StoreForm extends FormAbstract
                 ])
                 ->add('city', 'text', [
                     'label' => trans('plugins/marketplace::store.forms.city'),
-                    'label_attr' => ['class' => 'control-label'],
                     'wrapper' => [
                         'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ' col-md-4',
                     ],
@@ -146,7 +140,6 @@ class StoreForm extends FormAbstract
             ])
             ->add('address', 'text', [
                 'label' => trans('plugins/marketplace::store.forms.address'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'placeholder' => trans('plugins/marketplace::store.forms.address_placeholder'),
                     'data-counter' => 120,
@@ -154,7 +147,6 @@ class StoreForm extends FormAbstract
             ])
             ->add('zip_code', 'text', [
                 'label' => trans('plugins/marketplace::store.forms.zip_code'),
-                'label_attr' => ['class' => 'control-label'],
                 'wrapper' => [
                     'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ' col-md-4',
                 ],
@@ -165,7 +157,6 @@ class StoreForm extends FormAbstract
             ])
             ->add('email', 'email', [
                 'label' => trans('plugins/marketplace::store.forms.email'),
-                'label_attr' => ['class' => 'control-label'],
                 'wrapper' => [
                     'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ' col-md-4',
                 ],
@@ -176,7 +167,6 @@ class StoreForm extends FormAbstract
             ])
             ->add('phone', 'text', [
                 'label' => trans('plugins/marketplace::store.forms.phone'),
-                'label_attr' => ['class' => 'control-label'],
                 'wrapper' => [
                     'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ' col-md-4',
                 ],
@@ -190,7 +180,6 @@ class StoreForm extends FormAbstract
             ])
             ->add('description', 'textarea', [
                 'label' => trans('core/base::forms.description'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'rows' => 4,
                     'placeholder' => trans('core/base::forms.description_placeholder'),
@@ -199,7 +188,6 @@ class StoreForm extends FormAbstract
             ])
             ->add('content', 'editor', [
                 'label' => trans('core/base::forms.content'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'rows' => 4,
                     'placeholder' => trans('core/base::forms.description_placeholder'),
@@ -208,7 +196,7 @@ class StoreForm extends FormAbstract
             ])
             ->add('status', 'customSelect', [
                 'label' => trans('core/base::tables.status'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'class' => 'form-control',
                 ],
@@ -222,7 +210,7 @@ class StoreForm extends FormAbstract
             ])
             ->add('customer_id', 'customSelect', [
                 'label' => trans('plugins/marketplace::store.forms.store_owner'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'class' => 'form-control',
                 ],
@@ -230,7 +218,6 @@ class StoreForm extends FormAbstract
             ])
             ->add('logo', 'mediaImage', [
                 'label' => trans('plugins/marketplace::store.forms.logo'),
-                'label_attr' => ['class' => 'control-label'],
             ])
             ->setBreakFieldPoint('status');
     }

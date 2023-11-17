@@ -16,7 +16,6 @@ class CustomHTMLForm extends FormAbstract
             ->setValidatorClass(CustomJsRequest::class)
             ->add('header_html', 'textarea', [
                 'label' => trans('packages/theme::theme.custom_header_html'),
-                'label_attr' => ['class' => 'control-label'],
                 'value' => setting('custom_header_html'),
                 'help_block' => [
                     'text' => trans('packages/theme::theme.custom_header_html_placeholder'),
@@ -27,7 +26,6 @@ class CustomHTMLForm extends FormAbstract
             ])
             ->add('body_html', 'textarea', [
                 'label' => trans('packages/theme::theme.custom_body_html'),
-                'label_attr' => ['class' => 'control-label'],
                 'value' => setting('custom_body_html'),
                 'help_block' => [
                     'text' => trans('packages/theme::theme.custom_body_html_placeholder'),
@@ -38,7 +36,6 @@ class CustomHTMLForm extends FormAbstract
             ])
             ->add('footer_html', 'textarea', [
                 'label' => trans('packages/theme::theme.custom_footer_html'),
-                'label_attr' => ['class' => 'control-label'],
                 'value' => setting('custom_footer_html'),
                 'help_block' => [
                     'text' => trans('packages/theme::theme.custom_footer_html_placeholder'),

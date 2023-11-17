@@ -3,6 +3,7 @@
 namespace Botble\Slug\Listeners;
 
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Slug\Events\UpdatedSlugEvent;
 use Botble\Slug\Facades\SlugHelper;
 use Botble\Slug\Models\Slug;
@@ -59,9 +60,12 @@ class UpdatedContentListener
                     ]);
                 }
 
+                /**
+                 * @var Slug $item
+                 */
                 event(new UpdatedSlugEvent($event->data, $item));
             } catch (Exception $exception) {
-                info($exception->getMessage());
+                BaseHelper::logError($exception);
             }
         }
     }

@@ -4,6 +4,7 @@ namespace Illuminate\Database\Schema\Grammars;
 
 use Doctrine\DBAL\Schema\Index;
 use Illuminate\Database\Connection;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Fluent;
@@ -16,7 +17,7 @@ class SQLiteGrammar extends Grammar
      *
      * @var string[]
      */
-    protected $modifiers = ['VirtualAs', 'StoredAs', 'Nullable', 'Default', 'Increment'];
+    protected $modifiers = ['Increment', 'Nullable', 'Default', 'VirtualAs', 'StoredAs'];
 
     /**
      * The columns available as serials.
@@ -38,12 +39,29 @@ class SQLiteGrammar extends Grammar
     /**
      * Compile the query to determine the list of columns.
      *
+     * @deprecated Will be removed in a future Laravel version.
+     *
      * @param  string  $table
      * @return string
      */
     public function compileColumnListing($table)
     {
         return 'pragma table_info('.$this->wrap(str_replace('.', '__', $table)).')';
+    }
+
+    /**
+     * Compile the query to determine the columns.
+     *
+     * @param  string  $table
+     * @return string
+     */
+    public function compileColumns($table)
+    {
+        return sprintf(
+            "select name, type, not 'notnull' as 'nullable', dflt_value as 'default', pk as 'primary' "
+            .'from pragma_table_info(%s) order by cid asc',
+            $this->wrap(str_replace('.', '__', $table))
+        );
     }
 
     /**
@@ -214,7 +232,7 @@ class SQLiteGrammar extends Grammar
      *
      * @param  \Illuminate\Database\Schema\Blueprint  $blueprint
      * @param  \Illuminate\Support\Fluent  $command
-     * @return string
+     * @return string|null
      */
     public function compileForeign(Blueprint $blueprint, Fluent $command)
     {
@@ -410,7 +428,7 @@ class SQLiteGrammar extends Grammar
             $index->isPrimary(), $index->getFlags(), $index->getOptions()
         );
 
-        $platform = $schemaManager->getDatabasePlatform();
+        $platform = $connection->getDoctrineConnection()->getDatabasePlatform();
 
         return [
             $platform->getDropIndexSQL($command->from, $this->getTablePrefix().$blueprint->getTable()),
@@ -727,7 +745,11 @@ class SQLiteGrammar extends Grammar
      */
     protected function typeTimestamp(Fluent $column)
     {
-        return $column->useCurrent ? 'datetime default CURRENT_TIMESTAMP' : 'datetime';
+        if ($column->useCurrent) {
+            $column->default(new Expression('CURRENT_TIMESTAMP'));
+        }
+
+        return 'datetime';
     }
 
     /**
@@ -915,7 +937,7 @@ class SQLiteGrammar extends Grammar
         }
 
         if (! is_null($virtualAs = $column->virtualAs)) {
-            return " as ({$virtualAs})";
+            return " as ({$this->getValue($virtualAs)})";
         }
     }
 
@@ -937,7 +959,7 @@ class SQLiteGrammar extends Grammar
         }
 
         if (! is_null($storedAs = $column->storedAs)) {
-            return " as ({$column->storedAs}) stored";
+            return " as ({$this->getValue($column->storedAs)}) stored";
         }
     }
 

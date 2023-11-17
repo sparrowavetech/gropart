@@ -9,7 +9,7 @@
                 href="{{ url($row->url) }}"
                 @if ($row->target !== '_self') target="{{ $row->target }}" @endif
             >
-                @if ($iconImage = $row->getMetadata('icon_image', true))
+                @if ($iconImage = $row->getMetaData('icon_image', true))
                     <img
                         src="{{ RvMedia::getImageUrl($iconImage) }}"
                         alt="icon image"

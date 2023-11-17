@@ -4,7 +4,7 @@ class SettingManagement {
 
         $('input[data-key=email-config-status-btn]').on('change', (event) => {
             let _self = $(event.currentTarget)
-            let key = _self.prop('id')
+            let key = _self.prop('name')
             let url = _self.data('change-url')
 
             $httpClient

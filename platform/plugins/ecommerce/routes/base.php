@@ -146,7 +146,7 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
                 'permission' => 'product-collections.index',
             ]);
 
-            Route::get('get-product-collection/{id?}', [
+            Route::get('get-product-collection/{productCollection?}', [
                 'as' => 'get-product-collection',
                 'uses' => 'ProductCollectionController@getProductCollection',
                 'permission' => 'product-collections.edit',

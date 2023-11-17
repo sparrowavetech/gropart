@@ -29,7 +29,7 @@ class CategoryForm extends FormAbstract
             ->withCustomFields()
             ->add('name', 'text', [
                 'label' => trans('core/base::forms.name'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'placeholder' => trans('core/base::forms.name_placeholder'),
                     'data-counter' => 120,
@@ -37,7 +37,7 @@ class CategoryForm extends FormAbstract
             ])
             ->add('parent_id', 'customSelect', [
                 'label' => trans('core/base::forms.parent'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'class' => 'select-search-full',
                 ],
@@ -45,7 +45,6 @@ class CategoryForm extends FormAbstract
             ])
             ->add('description', 'textarea', [
                 'label' => trans('core/base::forms.description'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'rows' => 4,
                     'placeholder' => trans('core/base::forms.description_placeholder'),
@@ -54,12 +53,10 @@ class CategoryForm extends FormAbstract
             ])
             ->add('is_default', 'onOff', [
                 'label' => trans('core/base::forms.is_default'),
-                'label_attr' => ['class' => 'control-label'],
                 'default_value' => false,
             ])
-            ->add('icon', 'text', [
+            ->add('icon', $this->getFormHelper()->hasCustomField('themeIcon') ? 'themeIcon' : 'text', [
                 'label' => trans('core/base::forms.icon'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'placeholder' => 'Ex: fa fa-home',
                     'data-counter' => 60,
@@ -67,7 +64,6 @@ class CategoryForm extends FormAbstract
             ])
             ->add('order', 'number', [
                 'label' => trans('core/base::forms.order'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'placeholder' => trans('core/base::forms.order_by_placeholder'),
                 ],
@@ -75,12 +71,11 @@ class CategoryForm extends FormAbstract
             ])
             ->add('is_featured', 'onOff', [
                 'label' => trans('core/base::forms.is_featured'),
-                'label_attr' => ['class' => 'control-label'],
                 'default_value' => false,
             ])
             ->add('status', 'customSelect', [
                 'label' => trans('core/base::tables.status'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'choices' => BaseStatusEnum::labels(),
             ])
             ->setBreakFieldPoint('status');

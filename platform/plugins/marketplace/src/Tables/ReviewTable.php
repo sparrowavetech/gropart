@@ -7,6 +7,7 @@ use Botble\Base\Facades\Html;
 use Botble\Base\Models\BaseQueryBuilder;
 use Botble\Ecommerce\Models\Review;
 use Botble\Ecommerce\Tables\Formatters\ReviewImagesFormatter;
+use Botble\Marketplace\Tables\Traits\ForVendor;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Columns\Column;
 use Botble\Table\Columns\CreatedAtColumn;
@@ -18,6 +19,8 @@ use Illuminate\Http\JsonResponse;
 
 class ReviewTable extends TableAbstract
 {
+    use ForVendor;
+
     public function setup(): void
     {
         $this
@@ -83,21 +86,21 @@ class ReviewTable extends TableAbstract
             IdColumn::make(),
             Column::make('product_id')
                 ->title(trans('plugins/ecommerce::review.product'))
-                ->alignLeft(),
+                ->alignStart(),
             Column::make('customer_id')
                 ->title(trans('plugins/ecommerce::review.user'))
-                ->alignLeft(),
+                ->alignStart(),
             Column::make('star')
                 ->title(trans('plugins/ecommerce::review.star')),
             Column::make('comment')
                 ->title(trans('plugins/ecommerce::review.comment'))
-                ->alignLeft(),
+                ->alignStart(),
             Column::formatted('images')
                 ->title(trans('plugins/ecommerce::review.images'))
                 ->width(150)
                 ->orderable(false)
                 ->searchable(false)
-                ->alignLeft(),
+                ->alignStart(),
             CreatedAtColumn::make(),
         ];
     }

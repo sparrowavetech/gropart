@@ -25,7 +25,7 @@
                 <ul>
                     <li>
                         <a
-                            href="https://goshippo.com/"
+                            href="https://goshippo.com"
                             target="_blank"
                         >Shippo</a>
                         <p>{{ trans('plugins/shippo::shippo.description') }}</p>
@@ -81,7 +81,7 @@
                                     <ul class="ps-3">
                                         <li style="list-style-type: circle;">
                                             <span>{!! BaseHelper::clean(
-                                                trans('plugins/shippo::shippo.note_1', ['link' => 'https://docs.botble.com/farmart/1.x/usage-location']),
+                                                trans('plugins/shippo::shippo.note_1', ['link' => 'https://docs.botble.com/farmart/usage-location.html']),
                                             ) !!}</span>
                                         </li>
                                         <li style="list-style-type: circle;">

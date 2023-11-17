@@ -2,6 +2,7 @@
 
 namespace Botble\Media\Repositories\Eloquent;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Models\BaseModel;
 use Botble\Media\Facades\RvMedia;
 use Botble\Media\Models\MediaFile;
@@ -164,7 +165,7 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
             try {
                 $result->prepend($currentFile);
             } catch (Exception $exception) {
-                info($exception->getMessage());
+                BaseHelper::logError($exception);
             }
         }
 
@@ -234,7 +235,7 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
                 /** @var BaseModel $currentFile */
                 $result->prepend($currentFile);
             } catch (Exception $exception) {
-                info($exception->getMessage());
+                BaseHelper::logError($exception);
             }
         }
 

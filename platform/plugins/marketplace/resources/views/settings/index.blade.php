@@ -238,22 +238,22 @@
             </div>
 
             <x-core-setting::text-input
-                name="max_filesize_upload_by_vendor"
+                :name="MarketplaceHelper::getSettingKey('max_filesize_upload_by_vendor')"
                 type="number"
                 :label="trans('plugins/marketplace::marketplace.settings.max_upload_filesize')"
                 :value="MarketplaceHelper::maxFilesizeUploadByVendor()"
-                step="0.01"
+                step="1"
                 :placeholder="trans('plugins/marketplace::marketplace.settings.max_upload_filesize_placeholder', [
                     'size' => ($maxSize = MarketplaceHelper::maxFilesizeUploadByVendor()),
                 ])"
             />
 
             <x-core-setting::text-input
-                name="max_product_images_upload_by_vendor"
+                :name="MarketplaceHelper::getSettingKey('max_product_images_upload_by_vendor')"
                 type="number"
                 :label="trans('plugins/marketplace::marketplace.settings.max_product_images_upload_by_vendor')"
                 :value="MarketplaceHelper::maxProductImagesUploadByVendor()"
-                step="0.01"
+                step="1"
             />
             <div class="form-group mb-3">
                 <label

@@ -1,6 +1,6 @@
 @php
     [$categories, $brands, $tags, $rand, $categoriesRequest, $urlCurrent, $categoryId, $maxFilterPrice] = EcommerceHelper::dataForFilter($category ?? null);
-    
+
     Theme::asset()
         ->usePath()
         ->add('custom-scrollbar-css', 'plugins/mcustom-scrollbar/jquery.mCustomScrollbar.css');
@@ -50,8 +50,12 @@
             <div class="widget-wrapper widget-product-categories">
                 <h4 class="widget-title">{{ __('Product Categories') }}</h4>
                 <div class="widget-layered-nav-list">
-                    @include(Theme::getThemeNamespace('views.ecommerce.includes.categories'),
-                        compact('categories', 'categoriesRequest', 'urlCurrent'))
+                    @include(Theme::getThemeNamespace('views.ecommerce.includes.categories'), [
+                        'categories' => $categories,
+                        'activeCategoryId' => $categoryId,
+                        'categoriesRequest' => $categoriesRequest,
+                        'urlCurrent' => $urlCurrent
+                    ])
                 </div>
             </div>
             @if ($brands->isNotEmpty())

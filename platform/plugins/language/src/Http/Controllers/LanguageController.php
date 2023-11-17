@@ -375,7 +375,7 @@ class LanguageController extends BaseController
                     }
                 }
             } catch (Throwable $exception) {
-                info($exception->getMessage());
+                BaseHelper::logError($exception);
             }
         }
 

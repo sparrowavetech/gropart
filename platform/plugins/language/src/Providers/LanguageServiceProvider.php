@@ -19,7 +19,6 @@ use Botble\Language\Repositories\Interfaces\LanguageMetaInterface;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
-use Illuminate\Routing\Router;
 use Illuminate\Support\Arr;
 
 class LanguageServiceProvider extends ServiceProvider
@@ -28,7 +27,8 @@ class LanguageServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        $this->setNamespace('plugins/language')
+        $this
+            ->setNamespace('plugins/language')
             ->loadAndPublishConfigurations(['general']);
 
         $this->app->bind(LanguageInterface::class, function () {
@@ -41,9 +41,6 @@ class LanguageServiceProvider extends ServiceProvider
 
         AliasLoader::getInstance()->alias('Language', Language::class);
 
-        /**
-         * @var Router $router
-         */
         $router = $this->app['router'];
         $router->aliasMiddleware('localize', LocalizationRoutes::class);
         $router->aliasMiddleware('localizationRedirect', LocalizationRedirectFilter::class);
@@ -130,7 +127,10 @@ class LanguageServiceProvider extends ServiceProvider
     {
         $locale = Language::setLocale();
 
-        if (! isset($data['prefix'])) {
+        if (
+            ! isset($data['prefix']) &&
+            (! is_in_admin() || ! Language::hideDefaultLocaleInURL() || $locale !== Language::getDefaultLocale())
+        ) {
             $data['prefix'] = trim((string)$locale);
         }
 

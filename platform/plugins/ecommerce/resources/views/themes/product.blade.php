@@ -90,7 +90,7 @@
                                 ]) !!}
                             @endif
                         </div>
-                        <form class="single-variation-wrap">
+                        <form class="single-variation-wrap" action="{{ route('public.cart.add-to-cart') }}" method="post">
                             @csrf
                             {!! apply_filters(ECOMMERCE_PRODUCT_DETAIL_EXTRA_HTML, null) !!}
                             <input
@@ -128,6 +128,7 @@
                             <button
                                 class="btn btn-lg btn-black"
                                 id="btn-add-cart"
+                                type="submit"
                             ><i
                                     class="fa fa-shopping-bag"
                                     aria-hidden="true"

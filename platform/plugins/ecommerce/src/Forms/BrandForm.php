@@ -20,7 +20,7 @@ class BrandForm extends FormAbstract
             ->withCustomFields()
             ->add('name', 'text', [
                 'label' => trans('core/base::forms.name'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'placeholder' => trans('core/base::forms.name_placeholder'),
                     'data-counter' => 120,
@@ -28,7 +28,6 @@ class BrandForm extends FormAbstract
             ])
             ->add('description', 'editor', [
                 'label' => trans('core/base::forms.description'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'rows' => 4,
                     'placeholder' => trans('plugins/ecommerce::products.form.description'),
@@ -37,7 +36,6 @@ class BrandForm extends FormAbstract
             ])
             ->add('website', 'text', [
                 'label' => trans('plugins/ecommerce::brands.form.website'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'placeholder' => 'Ex: https://example.com',
                     'data-counter' => 120,
@@ -45,7 +43,6 @@ class BrandForm extends FormAbstract
             ])
             ->add('order', 'number', [
                 'label' => trans('core/base::forms.order'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'placeholder' => trans('core/base::forms.order_by_placeholder'),
                 ],
@@ -53,21 +50,18 @@ class BrandForm extends FormAbstract
             ])
             ->add('status', 'customSelect', [
                 'label' => trans('core/base::tables.status'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'choices' => BaseStatusEnum::labels(),
             ])
             ->add('logo', 'mediaImage', [
                 'label' => trans('plugins/ecommerce::brands.logo'),
-                'label_attr' => ['class' => 'control-label'],
             ])
             ->add('is_featured', 'onOff', [
                 'label' => trans('plugins/ecommerce::brands.form.is_featured'),
-                'label_attr' => ['class' => 'control-label'],
                 'default_value' => false,
             ])
             ->add('categories[]', 'categoryMulti', [
                 'label' => trans('plugins/ecommerce::products.form.categories'),
-                'label_attr' => ['class' => 'control-label'],
                 'choices' => ProductCategoryHelper::getActiveTreeCategories(),
                 'value' => $this->getModel()->id ? $this->getModel()->categories->pluck('id')->all() : [],
             ])

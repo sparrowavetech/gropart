@@ -16,15 +16,16 @@ class UpdateProductView implements ShouldQueue
     public function handle(ProductViewed $event): void
     {
         try {
-            ProductView::upsert(
-                [
-                    'product_id' => $event->product->id,
-                    'date' => $event->dateTime->toDateString(),
-                    'views' => 1,
-                ],
-                ['product_id', 'date'],
-                ['views' => DB::raw('views + 1')],
-            );
+            ProductView::query()
+                ->upsert(
+                    [
+                        'product_id' => $event->product->getKey(),
+                        'date' => $event->dateTime->toDateString(),
+                        'views' => 1,
+                    ],
+                    ['product_id', 'date'],
+                    ['views' => DB::raw('views + 1')],
+                );
         } catch (Throwable $exception) {
             info($exception->getMessage());
         }

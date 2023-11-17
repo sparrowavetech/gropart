@@ -11,6 +11,7 @@ use Botble\Ecommerce\Models\ProductCategory;
 use Botble\Ecommerce\Models\Wishlist as WishlistModel;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Ecommerce\Services\Products\GetProductService;
+use Botble\Marketplace\Models\Store;
 use Botble\Theme\Facades\Theme;
 use Botble\Theme\Http\Controllers\PublicController;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -252,21 +253,15 @@ class FarmartController extends PublicController
 
     public function ajaxContactSeller(ContactSellerRequest $request, BaseHttpResponse $response)
     {
-        $name = $request->input('name');
-        $email = $request->input('email');
-
-        if (auth('customer')->check() && $user = auth('customer')->user()) {
-            $name = $user->name;
-            $email = $user->email;
-        }
+        $store = Store::query()->findOrFail($request->input('store_id'));
 
         EmailHandler::setModule(Theme::getThemeName())
             ->setVariableValues([
                 'contact_message' => $request->input('content'),
-                'customer_name' => $name,
-                'customer_email' => $email,
+                'customer_name' => $request->input('name'),
+                'customer_email' => $request->input('email'),
             ])
-            ->sendUsingTemplate('contact-seller', $email, [], false, 'themes');
+            ->sendUsingTemplate('contact-seller', $store->email, [], false, 'themes');
 
         return $response->setMessage(__('Send message successfully!'));
     }

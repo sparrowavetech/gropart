@@ -19,6 +19,72 @@ use Illuminate\Support\Arr;
 
 class PublicCartController extends Controller
 {
+    public function __construct(
+        protected HandleApplyPromotionsService $applyPromotionsService,
+        protected HandleApplyCouponService $handleApplyCouponService
+    ) {
+    }
+    public function index()
+    {
+        if (! EcommerceHelper::isCartEnabled()) {
+            abort(404);
+        }
+
+        Theme::asset()
+            ->container('footer')
+            ->add('ecommerce-checkout-js', 'vendor/core/plugins/ecommerce/js/checkout.js', ['jquery']);
+
+        $promotionDiscountAmount = 0;
+        $couponDiscountAmount = 0;
+
+        $products = collect();
+        $crossSellProducts = collect();
+
+        if (Cart::instance('cart')->count() > 0) {
+            [$products, $promotionDiscountAmount, $couponDiscountAmount] = $this->getCartData();
+
+            $crossSellProducts = get_cart_cross_sale_products(
+                $products->pluck('original_product.id')->all(),
+                (int)theme_option('number_of_cross_sale_product', 4)
+            ) ?: collect();
+        }
+
+        SeoHelper::setTitle(__('Shopping Cart'));
+
+        Theme::breadcrumb()->add(__('Home'), route('public.index'))->add(__('Shopping Cart'), route('public.cart'));
+
+        return Theme::scope(
+            'ecommerce.cart',
+            compact('promotionDiscountAmount', 'couponDiscountAmount', 'products', 'crossSellProducts'),
+            'plugins/ecommerce::themes.cart'
+        )->render();
+    }
+
+    protected function getCartData(): array
+    {
+        $products = Cart::instance('cart')->products();
+
+        $promotionDiscountAmount = $this->applyPromotionsService->execute();
+
+        $couponDiscountAmount = 0;
+
+        if ($couponCode = session('auto_apply_coupon_code')) {
+            $couponData = $this->handleApplyCouponService->execute($couponCode);
+
+            if (! Arr::get($couponData, 'error')) {
+                $couponDiscountAmount = Arr::get($couponData, 'data.discount_amount');
+            }
+        }
+
+        $sessionData = OrderHelper::getOrderSessionData();
+
+        if (session()->has('applied_coupon_code')) {
+            $couponDiscountAmount = Arr::get($sessionData, 'coupon_discount_amount', 0);
+        }
+
+        return [$products, $promotionDiscountAmount, $couponDiscountAmount];
+    }
+
     public function store(CartRequest $request, BaseHttpResponse $response)
     {
         if (! EcommerceHelper::isCartEnabled()) {
@@ -40,7 +106,12 @@ class PublicCartController extends Controller
         if ($product->isOutOfStock()) {
             return $response
                 ->setError()
-                ->setMessage(__('Product :product is out of stock!', ['product' => $product->original_product->name ?: $product->name]));
+                ->setMessage(
+                    __(
+                        'Product :product is out of stock!',
+                        ['product' => $product->original_product->name ?: $product->name]
+                    )
+                );
         }
 
         $maxQuantity = $product->quantity;
@@ -90,7 +161,10 @@ class PublicCartController extends Controller
 
             foreach ($requiredOptions as $requiredOption) {
                 if (! $request->input('options.' . $requiredOption->id . '.values')) {
-                    $message .= trans('plugins/ecommerce::product-option.add_to_cart_value_required', ['value' => $requiredOption->name]);
+                    $message .= trans(
+                        'plugins/ecommerce::product-option.add_to_cart_value_required',
+                        ['value' => $requiredOption->name]
+                    );
                 }
             }
 
@@ -104,16 +178,23 @@ class PublicCartController extends Controller
         if ($outOfQuantity) {
             return $response
                 ->setError()
-                ->setMessage(__('Product :product is out of stock!', ['product' => $product->original_product->name ?: $product->name]));
+                ->setMessage(
+                    __(
+                        'Product :product is out of stock!',
+                        ['product' => $product->original_product->name ?: $product->name]
+                    )
+                );
         }
 
         $cartItems = OrderHelper::handleAddCart($product, $request);
 
         $response
-            ->setMessage(__(
-                'Added product :product to cart successfully!',
-                ['product' => $product->original_product->name ?: $product->name]
-            ));
+            ->setMessage(
+                __(
+                    'Added product :product to cart successfully!',
+                    ['product' => $product->original_product->name ?: $product->name]
+                )
+            );
 
         $token = OrderHelper::getOrderSessionToken();
 
@@ -143,64 +224,7 @@ class PublicCartController extends Controller
             ]);
     }
 
-    public function getView(
-        HandleApplyPromotionsService $applyPromotionsService,
-        HandleApplyCouponService $handleApplyCouponService
-    ) {
-        if (! EcommerceHelper::isCartEnabled()) {
-            abort(404);
-        }
-
-        Theme::asset()
-            ->container('footer')
-            ->add('ecommerce-checkout-js', 'vendor/core/plugins/ecommerce/js/checkout.js', ['jquery']);
-
-        $promotionDiscountAmount = 0;
-        $couponDiscountAmount = 0;
-
-        $products = [];
-        $crossSellProducts = collect();
-
-        if (Cart::instance('cart')->count() > 0) {
-            $products = Cart::instance('cart')->products();
-
-            $promotionDiscountAmount = $applyPromotionsService->execute();
-
-            if ($couponCode = session('auto_apply_coupon_code')) {
-                $couponData = $handleApplyCouponService->execute($couponCode);
-
-                if (! Arr::get($couponData, 'error')) {
-                    $couponDiscountAmount = Arr::get($couponData, 'data.discount_amount');
-                }
-            }
-
-            $sessionData = OrderHelper::getOrderSessionData();
-
-            if (session()->has('applied_coupon_code')) {
-                $couponDiscountAmount = Arr::get($sessionData, 'coupon_discount_amount', 0);
-            }
-
-            $parentIds = $products->pluck('original_product.id')->toArray();
-
-            $crossSellProducts = get_cart_cross_sale_products($parentIds, (int)theme_option('number_of_cross_sale_product', 4));
-        }
-
-        if (! $crossSellProducts) {
-            $crossSellProducts = collect();
-        }
-
-        SeoHelper::setTitle(__('Shopping Cart'));
-
-        Theme::breadcrumb()->add(__('Home'), route('public.index'))->add(__('Shopping Cart'), route('public.cart'));
-
-        return Theme::scope(
-            'ecommerce.cart',
-            compact('promotionDiscountAmount', 'couponDiscountAmount', 'products', 'crossSellProducts'),
-            'plugins/ecommerce::themes.cart'
-        )->render();
-    }
-
-    public function postUpdate(UpdateCartRequest $request, BaseHttpResponse $response)
+    public function update(UpdateCartRequest $request, BaseHttpResponse $response)
     {
         if (! EcommerceHelper::isCartEnabled()) {
             abort(404);
@@ -262,7 +286,7 @@ class PublicCartController extends Controller
             ->setMessage(__('Update cart successfully!'));
     }
 
-    public function getRemove(string $id, BaseHttpResponse $response)
+    public function destroy(string $id, BaseHttpResponse $response)
     {
         if (! EcommerceHelper::isCartEnabled()) {
             abort(404);
@@ -283,7 +307,7 @@ class PublicCartController extends Controller
             ->setMessage(__('Removed item from cart successfully!'));
     }
 
-    public function getDestroy(BaseHttpResponse $response)
+    public function empty(BaseHttpResponse $response)
     {
         if (! EcommerceHelper::isCartEnabled()) {
             abort(404);

@@ -6,6 +6,7 @@ use Botble\Analytics\Exceptions\InvalidConfiguration;
 use Botble\Analytics\Facades\Analytics;
 use Botble\Analytics\Http\Requests\AnalyticsRequest;
 use Botble\Analytics\Period;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Dashboard\Supports\DashboardWidgetInstance;
@@ -124,8 +125,8 @@ class AnalyticsController extends BaseController
     protected function getAxisByDimensions(string $dateRow, string $dimensions = 'hour'): string
     {
         return match ($dimensions) {
-            'date' => Carbon::parse($dateRow)->toDateString(),
-            'yearMonth' => Carbon::createFromFormat('Ym', $dateRow)->format('Y-m'),
+            'date' => BaseHelper::formatDate($dateRow),
+            'yearMonth' => Carbon::createFromFormat('Ym', $dateRow)->format('M Y'),
             default => (int)$dateRow . 'h',
         };
     }

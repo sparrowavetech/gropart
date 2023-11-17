@@ -35,6 +35,6 @@ class ProductView extends BaseModel
 
     public function prunable(): Builder|BaseQueryBuilder
     {
-        return $this->whereDate('created_at', '>', Carbon::now()->subDays(90)->toDateString());
+        return $this->whereDate('created_at', '>', Carbon::now()->subDays(90));
     }
 }

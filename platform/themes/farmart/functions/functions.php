@@ -94,7 +94,7 @@ app()->booted(function () {
     }, 24, 2);
 
     add_action([BASE_ACTION_AFTER_CREATE_CONTENT, BASE_ACTION_AFTER_UPDATE_CONTENT], function ($type, $request, $object) {
-        switch (get_class($object)) {
+        switch ($object::class) {
             case Store::class:
 
                 if (request()->segment(1) === BaseHelper::getAdminPrefix()) {
@@ -136,10 +136,9 @@ app()->booted(function () {
     }, 230, 3);
 
     add_filter(BASE_FILTER_AFTER_FORM_CREATED, function ($form, $data) {
-        if (get_class($data) == Store::class && request()->segment(1) === BaseHelper::getAdminPrefix()) {
+        if ($data instanceof Store && request()->segment(1) === BaseHelper::getAdminPrefix()) {
             $form->addAfter('logo', 'background', 'mediaImage', [
                 'label' => __('Background'),
-                'label_attr' => ['class' => 'control-label'],
                 'value' => $data->getMetaData('background', true),
             ]);
         }
@@ -158,12 +157,11 @@ app()->booted(function () {
 });
 
 add_filter(BASE_FILTER_BEFORE_RENDER_FORM, function ($form, $data) {
-    if (get_class($data) == SimpleSliderItem::class) {
+    if ($data instanceof SimpleSliderItem) {
         $form
             ->remove('description')
             ->addAfter('image', 'tablet_image', 'mediaImage', [
                 'label' => __('Tablet Image'),
-                'label_attr' => ['class' => 'control-label'],
                 'value' => $data->getMetaData('tablet_image', true),
                 'help_block' => [
                     'text' => __('For devices with width from 768px to 1200px, if empty, will use the image from the desktop.'),
@@ -171,7 +169,6 @@ add_filter(BASE_FILTER_BEFORE_RENDER_FORM, function ($form, $data) {
             ])
             ->addAfter('tablet_image', 'mobile_image', 'mediaImage', [
                 'label' => __('Mobile Image'),
-                'label_attr' => ['class' => 'control-label'],
                 'value' => $data->getMetaData('mobile_image', true),
                 'help_block' => [
                     'text' => __('For devices with width less than 768px, if empty, will use the image from the tablet.'),

@@ -29,7 +29,7 @@ class DiscountRequest extends Request
 
         return [
             'title' => ['nullable', 'string', 'required_if:type,promotion', 'max:255'],
-            'code' => 'nullable|string|required_if:type,coupon|max:20|unique:ec_discounts,code,' . $this->route('discount'),
+            'code' => 'nullable|string|required_if:type,coupon|max:20|unique:ec_discounts,code,' . $this->route('discount.id'),
             'value' => ['required', 'string', 'numeric', 'min:0'],
             'target' => ['required'],
             'can_use_with_promotion' => ['nullable', 'boolean'],

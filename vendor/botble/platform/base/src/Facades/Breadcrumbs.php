@@ -6,8 +6,8 @@ use Botble\Base\Supports\BreadcrumbsManager;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @method static void register(string $name, callable $callback)
- * @method static void for(string $name, callable $callback)
+ * @method static void register(string $name, callable $callback, bool $modify = false)
+ * @method static void for(string $name, callable $callback, bool $modify = false)
  * @method static void before(callable $callback)
  * @method static void after(callable $callback)
  * @method static bool exists(string|null $name = null)

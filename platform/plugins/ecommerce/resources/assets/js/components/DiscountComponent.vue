@@ -213,8 +213,8 @@
                                         <option
                                             v-for="productCategory in product_categories"
                                             :value="productCategory.id"
+                                            v-html="productCategory.name"
                                         >
-                                            {{ productCategory.name }}
                                         </option>
                                     </select>
                                     <svg class="svg-next-icon svg-next-icon-size-16">

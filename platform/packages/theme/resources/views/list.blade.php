@@ -41,14 +41,14 @@
                                                     ><i class="fa fa-check"></i>
                                                         {{ trans('packages/theme::theme.activated') }}</a>
                                                 @else
-                                                    @if (Auth::user()->hasPermission('theme.activate'))
+                                                    @if (Auth::guard()->user()->hasPermission('theme.activate'))
                                                         <a
                                                             class="btn btn-primary btn-trigger-active-theme"
                                                             data-theme="{{ $key }}"
                                                             href="#"
                                                         >{{ trans('packages/theme::theme.active') }}</a>
                                                     @endif
-                                                    @if (Auth::user()->hasPermission('theme.remove'))
+                                                    @if (Auth::guard()->user()->hasPermission('theme.remove'))
                                                         <a
                                                             class="btn btn-danger btn-trigger-remove-theme"
                                                             data-theme="{{ $key }}"

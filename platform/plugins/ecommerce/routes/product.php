@@ -105,7 +105,7 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
                 'permission' => 'products.edit',
             ]);
 
-            Route::post('product-variations/{id}', [
+            Route::post('product-variations/{product}', [
                 'as' => 'product-variations',
                 'uses' => 'ProductController@getProductVariations',
                 'permission' => 'products.index',
@@ -117,7 +117,7 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' =
                 'permission' => 'products.index',
             ])->wherePrimaryKey();
 
-            Route::post('set-default-product-variation/{id}', [
+            Route::post('set-default-product-variation/{productVariation}', [
                 'as' => 'set-default-product-variation',
                 'uses' => 'ProductController@setDefaultProductVariation',
                 'permission' => 'products.edit',

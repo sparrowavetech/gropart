@@ -29,14 +29,14 @@ class BreadcrumbsManager
     ) {
     }
 
-    public function register(string $name, callable $callback): void
+    public function register(string $name, callable $callback, bool $modify = false): void
     {
-        $this->for($name, $callback);
+        $this->for($name, $callback, $modify);
     }
 
-    public function for(string $name, callable $callback): void
+    public function for(string $name, callable $callback, bool $modify = false): void
     {
-        if (! isset($this->callbacks[$name])) {
+        if (! isset($this->callbacks[$name]) || $modify) {
             $this->callbacks[$name] = $callback;
         }
     }

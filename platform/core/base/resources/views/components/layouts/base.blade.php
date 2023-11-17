@@ -74,7 +74,9 @@
 >
     {!! apply_filters(BASE_FILTER_HEADER_LAYOUT_TEMPLATE, null) !!}
 
-    {{ $slot }}
+    <div id="app">
+        {{ $slot }}
+    </div>
 
     @include('core/base::elements.common')
 

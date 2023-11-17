@@ -3,7 +3,9 @@
 namespace Botble\Marketplace\Supports;
 
 use Botble\Base\Facades\EmailHandler;
+use Botble\Base\Supports\EmailHandler as BaseEmailHandler;
 use Botble\Ecommerce\Enums\DiscountTypeOptionEnum;
+use Botble\Ecommerce\Facades\OrderHelper;
 use Botble\Ecommerce\Models\Order as OrderModel;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Database\Eloquent\Collection;
@@ -16,11 +18,9 @@ class MarketplaceHelper
         return view($this->viewPath($view), $data);
     }
 
-    public function viewPath(string $view): string
+    public function viewPath(string $view, bool $checkViewExists = true): string
     {
-        $themeView = Theme::getThemeNamespace() . '::views.marketplace.' . $view;
-
-        if (view()->exists($themeView)) {
+        if ($checkViewExists && view()->exists($themeView = Theme::getThemeNamespace('views.marketplace.' . $view))) {
             return $themeView;
         }
 
@@ -44,7 +44,7 @@ class MarketplaceHelper
 
     public function getAssetVersion(): string
     {
-        return '1.2.1';
+        return '1.2.2';
     }
 
     public function hideStorePhoneNumber(): bool
@@ -91,20 +91,10 @@ class MarketplaceHelper
         return $orders;
     }
 
-    public function setEmailVendorVariables(OrderModel $order): \Botble\Base\Supports\EmailHandler
+    public function setEmailVendorVariables(OrderModel $order): BaseEmailHandler
     {
         return EmailHandler::setModule(MARKETPLACE_MODULE_SCREEN_NAME)
-            ->setVariableValues([
-                'customer_name' => $order->user->name ?: $order->address->name,
-                'customer_email' => $order->user->email ?: $order->address->email,
-                'customer_phone' => $order->user->phone ?: $order->address->phone,
-                'customer_address' => $order->full_address,
-                'product_list' => view('plugins/ecommerce::emails.partials.order-detail', compact('order'))
-                    ->render(),
-                'shipping_method' => $order->shipping_method_name,
-                'payment_method' => $order->payment->payment_channel->label(),
-                'store_name' => $order->store->name,
-            ]);
+            ->setVariableValues(OrderHelper::getEmailVariables($order));
     }
 
     public function isCommissionCategoryFeeBasedEnabled(): bool
@@ -112,7 +102,7 @@ class MarketplaceHelper
         return (bool)$this->getSetting('enable_commission_fee_for_each_category');
     }
 
-    public function maxFilesizeUploadByVendor(): int
+    public function maxFilesizeUploadByVendor(): float
     {
         $size = $this->getSetting('max_filesize_upload_by_vendor');
 
@@ -120,7 +110,7 @@ class MarketplaceHelper
             $size = setting('max_upload_filesize') ?: 10;
         }
 
-        return (int)$size;
+        return $size;
     }
 
     public function maxProductImagesUploadByVendor(): int

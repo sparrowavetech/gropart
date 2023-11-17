@@ -102,7 +102,7 @@ class PayoutPaymentMethodsEnum extends Enum
         return Arr::get(static::payoutMethods(), $channel . '.fields');
     }
 
-    public static function getRules(string|null $prefix)
+    public static function getRules(string|null $prefix): array
     {
         $payoutMethodsEnabled = static::payoutMethodsEnabled();
         $rules = [
@@ -125,7 +125,7 @@ class PayoutPaymentMethodsEnum extends Enum
         return $rules;
     }
 
-    public static function getAttributes(string|null $prefix)
+    public static function getAttributes(string|null $prefix): array
     {
         $attributes = [];
         if ($prefix) {

@@ -13,7 +13,7 @@ class ApiLayerExchangeRateService implements ExchangeRateInterface
 {
     public function getCurrentExchangeRate(): Collection
     {
-        if (! get_ecommerce_setting('open_exchange_app_id')) {
+        if (! get_ecommerce_setting('api_layer_api_key')) {
             throw new Exception(trans('plugins/ecommerce::currency.no_api_key'));
         }
 

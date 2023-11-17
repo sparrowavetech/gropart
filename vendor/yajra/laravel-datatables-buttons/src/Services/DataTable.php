@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\Relation as EloquentRelation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\LazyCollection;
@@ -217,6 +218,7 @@ abstract class DataTable implements DataTableButtons
             return app()->call($callback);
         }
 
+        /** @phpstan-ignore-next-line  */
         return view($view, $data, $mergeData)->with($this->dataTableVariable, $this->getHtmlBuilder());
     }
 
@@ -487,7 +489,7 @@ abstract class DataTable implements DataTableButtons
         }
 
         if (! class_exists(ExcelServiceProvider::class)) {
-            throw new Exception('Please install maatwebsite/excel to be able to use this function.');
+            throw new Exception('Please `composer require maatwebsite/excel` to be able to use this function.');
         }
 
         if (! new $this->exportClass instanceof DataTablesExportHandler) {
@@ -610,10 +612,6 @@ abstract class DataTable implements DataTableButtons
      *
      * @return \Illuminate\Http\Response|string|\Symfony\Component\HttpFoundation\StreamedResponse
      *
-     * @throws \Box\Spout\Common\Exception\IOException
-     * @throws \Box\Spout\Common\Exception\InvalidArgumentException
-     * @throws \Box\Spout\Common\Exception\UnsupportedTypeException
-     * @throws \Box\Spout\Writer\Exception\WriterNotOpenedException
      * @throws \Exception
      */
     public function pdf()
@@ -636,7 +634,7 @@ abstract class DataTable implements DataTableButtons
     public function snappyPdf(): Response
     {
         if (! class_exists(PdfWrapper::class)) {
-            throw new Exception('You need to install barryvdh/laravel-snappy to be able to use this feature.');
+            throw new Exception('Please `composer require barryvdh/laravel-snappy` to be able to use this feature.');
         }
 
         /** @var \Barryvdh\Snappy\PdfWrapper $snappy */
@@ -712,12 +710,10 @@ abstract class DataTable implements DataTableButtons
 
     /**
      * Apply query scopes.
-     *
-     * @param  EloquentBuilder|QueryBuilder|EloquentRelation|Collection  $query
-     * @return EloquentBuilder|QueryBuilder|EloquentRelation|Collection
      */
-    protected function applyScopes(EloquentBuilder|QueryBuilder|EloquentRelation|Collection $query): EloquentBuilder|QueryBuilder|EloquentRelation|Collection
-    {
+    protected function applyScopes(
+        EloquentBuilder|QueryBuilder|EloquentRelation|Collection|AnonymousResourceCollection $query
+    ): EloquentBuilder|QueryBuilder|EloquentRelation|Collection|AnonymousResourceCollection {
         foreach ($this->scopes as $scope) {
             $scope->apply($query);
         }
@@ -787,9 +783,15 @@ abstract class DataTable implements DataTableButtons
 
     /**
      * @return \Rap2hpoutre\FastExcel\FastExcel
+     *
+     * @throws \Yajra\DataTables\Exceptions\Exception
      */
     protected function buildFastExcelFile(): FastExcel
     {
+        if (! class_exists(FastExcel::class)) {
+            throw new Exception('Please `composer require rap2hpoutre/fast-excel` to be able to use this function.');
+        }
+
         $query = null;
         if (method_exists($this, 'query')) {
             /** @var EloquentBuilder|QueryBuilder $query */
@@ -803,16 +805,13 @@ abstract class DataTable implements DataTableButtons
         $dataTable->skipPaging();
 
         if ($dataTable instanceof QueryDataTable) {
-            // @phpstan-ignore-next-line
-            function queryGenerator($dataTable): Generator
-            {
+            $queryGenerator = function ($dataTable): Generator {
                 foreach ($dataTable->getFilteredQuery()->cursor() as $row) {
                     yield $row;
                 }
-            }
+            };
 
-            // @phpstan-ignore-next-line
-            return new FastExcel(queryGenerator($dataTable));
+            return new FastExcel($queryGenerator($dataTable));
         }
 
         return new FastExcel($dataTable->toArray()['data']);

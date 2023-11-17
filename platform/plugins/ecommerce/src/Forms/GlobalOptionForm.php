@@ -22,7 +22,7 @@ class GlobalOptionForm extends FormAbstract
             ->withCustomFields()
             ->add('name', 'text', [
                 'label' => trans('core/base::forms.name'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'placeholder' => trans('core/base::forms.name_placeholder'),
                     'data-counter' => 120,
@@ -30,13 +30,12 @@ class GlobalOptionForm extends FormAbstract
             ])
             ->add('option_type', 'customSelect', [
                 'label' => trans('plugins/ecommerce::product-option.option_type'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => ['class' => 'form-control option-type'],
                 'choices' => GlobalOptionEnum::options(),
             ])
             ->add('required', 'onOff', [
                 'label' => trans('plugins/ecommerce::product-option.required'),
-                'label_attr' => ['class' => 'control-label'],
                 'default_value' => false,
             ])
             ->setBreakFieldPoint('option_type')

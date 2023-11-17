@@ -7,6 +7,7 @@ use Botble\PluginManagement\Services\PluginService;
 use Illuminate\Console\Command;
 use Illuminate\Console\ConfirmableTrait;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
+use Illuminate\Support\Str;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 
@@ -24,7 +25,8 @@ class PluginRemoveCommand extends Command implements PromptsForMissingInput
 
         $this->validatePluginName($this->argument('name'));
 
-        $plugin = strtolower($this->argument('name'));
+        $plugin = Str::afterLast(strtolower($this->argument('name')), '/');
+
         $result = $pluginService->remove($plugin);
 
         if ($result['error']) {

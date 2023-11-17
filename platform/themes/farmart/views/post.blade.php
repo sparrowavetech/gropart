@@ -45,10 +45,7 @@
                 </div>
             @endif
 
-            @if (theme_option('facebook_comment_enabled_in_post', 'yes') == 'yes')
-                <br />
-                {!! apply_filters(BASE_FILTER_PUBLIC_COMMENT_AREA, Theme::partial('comments')) !!}
-            @endif
+            {!! apply_filters(BASE_FILTER_PUBLIC_COMMENT_AREA, null, $post) !!}
         </div>
         @php $relatedPosts = get_related_posts($post->id, 4); @endphp
 

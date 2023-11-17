@@ -43,9 +43,12 @@ class PostController extends BaseController
         StoreCategoryService $categoryService,
         BaseHttpResponse $response
     ) {
+        /**
+         * @var Post $post
+         */
         $post = Post::query()->create(
             array_merge($request->input(), [
-                'author_id' => Auth::id(),
+                'author_id' => Auth::guard()->id(),
                 'author_type' => User::class,
             ])
         );
@@ -118,7 +121,8 @@ class PostController extends BaseController
         $posts = Post::query()
             ->with(['slugable'])
             ->orderByDesc('created_at')
-            ->paginate($limit);
+            ->limit($limit)
+            ->get();
 
         return $response
             ->setData(view('plugins/blog::posts.widgets.posts', compact('posts', 'limit'))->render());

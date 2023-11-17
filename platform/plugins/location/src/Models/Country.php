@@ -25,6 +25,8 @@ class Country extends BaseModel
         'name' => SafeContent::class,
         'nationality' => SafeContent::class,
         'code' => SafeContent::class,
+        'is_default' => 'bool',
+        'order' => 'int',
     ];
 
     public function states(): HasMany

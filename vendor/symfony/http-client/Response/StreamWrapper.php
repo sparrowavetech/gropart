@@ -25,14 +25,14 @@ class StreamWrapper
     /** @var resource|null */
     public $context;
 
-    private $client;
+    private HttpClientInterface|ResponseInterface $client;
 
-    private $response;
+    private ResponseInterface $response;
 
     /** @var resource|string|null */
     private $content;
 
-    /** @var resource|null */
+    /** @var resource|callable|null */
     private $handle;
 
     private bool $blocking = true;
@@ -116,7 +116,7 @@ class StreamWrapper
         return false;
     }
 
-    public function stream_read(int $count)
+    public function stream_read(int $count): string|false
     {
         if (\is_resource($this->content)) {
             // Empty the internal activity list
@@ -174,9 +174,7 @@ class StreamWrapper
 
                 if ('' !== $data = $chunk->getContent()) {
                     if (\strlen($data) > $count) {
-                        if (null === $this->content) {
-                            $this->content = substr($data, $count);
-                        }
+                        $this->content ??= substr($data, $count);
                         $data = substr($data, 0, $count);
                     }
                     $this->offset += \strlen($data);
@@ -268,6 +266,9 @@ class StreamWrapper
         return false;
     }
 
+    /**
+     * @return resource|false
+     */
     public function stream_cast(int $castAs)
     {
         if (\STREAM_CAST_FOR_SELECT === $castAs) {

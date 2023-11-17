@@ -20,7 +20,7 @@ class StateForm extends FormAbstract
             ->withCustomFields()
             ->add('name', 'text', [
                 'label' => trans('core/base::forms.name'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'placeholder' => trans('core/base::forms.name_placeholder'),
                     'data-counter' => 120,
@@ -28,7 +28,6 @@ class StateForm extends FormAbstract
             ])
             ->add('slug', 'text', [
                 'label' => __('Slug'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'placeholder' => __('Slug'),
                     'data-counter' => 120,
@@ -36,7 +35,6 @@ class StateForm extends FormAbstract
             ])
             ->add('abbreviation', 'text', [
                 'label' => trans('plugins/location::location.abbreviation'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'placeholder' => trans('plugins/location::location.abbreviation_placeholder'),
                     'data-counter' => 10,
@@ -44,7 +42,7 @@ class StateForm extends FormAbstract
             ])
             ->add('country_id', 'customSelect', [
                 'label' => trans('plugins/location::state.country'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'class' => 'select-search-full',
                 ],
@@ -52,7 +50,6 @@ class StateForm extends FormAbstract
             ])
             ->add('order', 'number', [
                 'label' => trans('core/base::forms.order'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'placeholder' => trans('core/base::forms.order_by_placeholder'),
                 ],
@@ -60,18 +57,14 @@ class StateForm extends FormAbstract
             ])
             ->add('is_default', 'onOff', [
                 'label' => trans('core/base::forms.is_default'),
-                'label_attr' => ['class' => 'control-label'],
                 'default_value' => false,
             ])
             ->add('status', 'customSelect', [
                 'label' => trans('core/base::tables.status'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'choices' => BaseStatusEnum::labels(),
             ])
-            ->add('image', 'mediaImage', [
-                'label' => trans('core/base::forms.image'),
-                'label_attr' => ['class' => 'control-label'],
-            ])
+            ->add('image', 'mediaImage')
             ->setBreakFieldPoint('status');
     }
 }

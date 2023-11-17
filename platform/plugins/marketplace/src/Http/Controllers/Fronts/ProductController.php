@@ -10,6 +10,7 @@ use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Http\Requests\DeleteProductVariationsRequest;
 use Botble\Ecommerce\Http\Requests\ProductRequest;
 use Botble\Ecommerce\Http\Requests\ProductVersionRequest;
 use Botble\Ecommerce\Models\Customer;
@@ -36,13 +37,14 @@ class ProductController extends BaseController
         ProductActionsTrait::postAddVersion as basePostAddVersion;
         ProductActionsTrait::postUpdateVersion as basePostUpdateVersion;
         ProductActionsTrait::deleteVersionItem as baseDeleteVersionItem;
+        ProductActionsTrait::deleteVersions as baseDeleteVersions;
     }
 
     public function index(ProductTable $table)
     {
         PageTitle::setTitle(__('Products'));
 
-        return $table->render(MarketplaceHelper::viewPath('dashboard.table.base'));
+        return $table->renderTable();
     }
 
     public function create(FormBuilder $formBuilder, Request $request)
@@ -133,7 +135,7 @@ class ProductController extends BaseController
             EmailHandler::setModule(MARKETPLACE_MODULE_SCREEN_NAME)
                 ->setVariableValues([
                     'product_name' => $product->name,
-                    'product_url' => route('products.edit', $product->id),
+                    'product_url' => route('products.edit', $product->getKey()),
                     'store_name' => auth('customer')->user()->store->name,
                 ])
                 ->sendUsingTemplate('pending-product-approval');
@@ -328,7 +330,7 @@ class ProductController extends BaseController
 
         return $response
             ->setData(
-                MarketplaceHelper::view('dashboard.products.product-variation-form', compact(
+                MarketplaceHelper::view('vendor-dashboard.products.product-variation-form', compact(
                     'productAttributeSets',
                     'product',
                     'productVariationsInfo',
@@ -348,6 +350,37 @@ class ProductController extends BaseController
         }
 
         return $this->baseDeleteVersionItem($variationId);
+    }
+
+    public function deleteVersions(
+        DeleteProductVariationsRequest $request,
+        BaseHttpResponse $response
+    ) {
+        $ids = (array)$request->input('ids');
+
+        if (empty($ids)) {
+            return $response
+                ->setError()
+                ->setMessage(trans('core/base::notices.no_select'));
+        }
+
+        $variations = ProductVariation::query()->whereIn('id', $ids)->with('product')->get();
+
+        if ($variations->isEmpty() || $variations->count() != count($ids)) {
+            return $response
+                ->setError()
+                ->setMessage(trans('core/base::notices.no_select'));
+        }
+
+        foreach ($variations as $variation) {
+            $product = $variation->product;
+
+            if (! $product || $product->original_product->store_id != auth('customer')->user()->store->id) {
+                abort(404);
+            }
+        }
+
+        return $this->baseDeleteVersions($request, $response);
     }
 
     public function getListProductForSearch(Request $request, BaseHttpResponse $response)

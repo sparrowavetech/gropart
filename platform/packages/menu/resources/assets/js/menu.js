@@ -76,9 +76,12 @@ class MenuNestable {
             e.preventDefault()
             let current = $(e.currentTarget)
             let parent = current.parents('.the-box')
-            let params = {}
+
+            const position = $('#nestable .dd-list .dd-item').length + 1;
 
             if (parent.attr('id') === 'external_link') {
+                const params = {}
+
                 $('#menu-node-create-form')
                     .find('input, textarea, select')
                     .serializeArray()
@@ -86,19 +89,21 @@ class MenuNestable {
                         params[x.name] = sanitizeHTML(x.value)
                     })
 
-                params.position = $('#nestable .dd-list .dd-item').length + 1
+                params.position = position + 1
 
                 createMenuNode(params, that, parent)
             } else {
                 parent.find('.list-item li.active').each((index, el) => {
-                    let find_in = $(el).find('> label')
+                    let $label = $(el).find('> label')
 
-                    params.reference_type = sanitizeHTML(find_in.data('reference-type'))
-                    params.reference_id = sanitizeHTML(find_in.data('reference-id'))
-                    params.title = sanitizeHTML(find_in.data('title'))
-                    params.menu_id = sanitizeHTML(find_in.data('menu-id'))
+                    const params = {}
 
-                    params.position = $('#nestable .dd-list .dd-item').length + 1 + index
+                    params.reference_type = sanitizeHTML($label.data('reference-type'))
+                    params.reference_id = sanitizeHTML($label.data('reference-id'))
+                    params.title = sanitizeHTML($label.data('title'))
+                    params.menu_id = sanitizeHTML($label.data('menu-id'))
+
+                    params.position = position + index
 
                     createMenuNode(params, that, parent)
                 })

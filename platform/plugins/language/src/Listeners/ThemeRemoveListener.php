@@ -2,6 +2,7 @@
 
 namespace Botble\Language\Listeners;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Language\Facades\Language;
 use Botble\Setting\Models\Setting;
 use Botble\Theme\Events\ThemeRemoveEvent;
@@ -26,7 +27,7 @@ class ThemeRemoveListener
                     ->delete();
             }
         } catch (Exception $exception) {
-            info($exception->getMessage());
+            BaseHelper::logError($exception);
         }
     }
 }

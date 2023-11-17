@@ -10,6 +10,7 @@ use Botble\Table\Actions\Action;
 use Botble\Table\Actions\DeleteAction;
 use Botble\Table\Actions\EditAction;
 use Botble\Table\BulkActions\DeleteBulkAction;
+use Botble\Table\Columns\Column;
 use Botble\Table\Columns\CreatedAtColumn;
 use Botble\Table\Columns\IdColumn;
 use Botble\Table\Columns\ImageColumn;
@@ -84,26 +85,22 @@ class StoreTable extends TableAbstract
             ImageColumn::make('logo')
                 ->title(trans('plugins/marketplace::store.forms.logo')),
             NameColumn::make()->route('marketplace.store.edit'),
-            'earnings' => [
-                'title' => trans('plugins/marketplace::marketplace.tables.earnings'),
-                'class' => 'text-start',
-                'searchable' => false,
-                'orderable' => false,
-                'width' => '100px',
-            ],
-            'products_count' => [
-                'title' => trans('plugins/marketplace::marketplace.tables.products_count'),
-                'searchable' => false,
-                'orderable' => false,
-            ],
-            'customer_name' => [
-                'title' => trans('plugins/marketplace::marketplace.vendor'),
-                'class' => 'text-start',
-                'orderable' => false,
-                'searchable' => false,
-                'exportable' => false,
-                'printable' => false,
-            ],
+            Column::make('earnings')
+                ->title(trans('plugins/marketplace::marketplace.tables.earnings'))
+                ->alignStart()
+                ->orderable(false)
+                ->searchable(false)
+                ->width('100'),
+            Column::make('products_count')
+                ->title(trans('plugins/marketplace::marketplace.tables.products_count'))
+                ->orderable(false)
+                ->searchable(false),
+            Column::make('customer_name')
+                ->title(trans('plugins/marketplace::marketplace.vendor'))
+                ->alignStart()
+                ->orderable(false)
+                ->searchable(false)
+                ->printable(false),
             CreatedAtColumn::make(),
             StatusColumn::make(),
         ];
@@ -138,21 +135,6 @@ class StoreTable extends TableAbstract
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
                 'type' => 'datePicker',
-            ],
-        ];
-    }
-
-    public function getOperationsHeading(): array
-    {
-        return [
-            'operations' => [
-                'title' => trans('core/base::tables.operations'),
-                'width' => '180px',
-                'class' => 'text-end',
-                'orderable' => false,
-                'searchable' => false,
-                'exportable' => false,
-                'printable' => false,
             ],
         ];
     }

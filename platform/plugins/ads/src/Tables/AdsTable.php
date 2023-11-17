@@ -67,10 +67,10 @@ class AdsTable extends TableAbstract
             NameColumn::make()->route('ads.edit'),
             Column::make('key')
                 ->title(trans('plugins/ads::ads.shortcode'))
-                ->alignLeft(),
+                ->alignStart(),
             Column::make('clicked')
                 ->title(trans('plugins/ads::ads.clicked'))
-                ->alignLeft(),
+                ->alignStart(),
             DateColumn::make('expired_at'),
             StatusColumn::make(),
         ];

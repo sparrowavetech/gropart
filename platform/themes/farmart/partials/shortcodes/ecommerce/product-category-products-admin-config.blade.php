@@ -1,6 +1,19 @@
 <div class="form-group">
     <label class="control-label">{{ __('Select category') }}</label>
-    {!! Form::customSelect('category_id', $categories, Arr::get($attributes, 'category_id')) !!}
+
+    <div class="ui-select-wrapper form-group">
+        <select name="category_id" class="ui-select">
+            {!! ProductCategoryHelper::renderProductCategoriesSelect(Arr::get($attributes, 'category_id')) !!}
+        </select>
+        <svg class="svg-next-icon svg-next-icon-size-16">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+            >
+                <path d="M10 16l-4-4h8l-4 4zm0-12L6 8h8l-4-4z"></path>
+            </svg>
+        </svg>
+    </div>
 </div>
 
 <div class="form-group">

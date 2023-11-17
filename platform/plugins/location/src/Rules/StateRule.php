@@ -30,12 +30,7 @@ class StateRule implements DataAwareRule, Rule
             'status' => BaseStatusEnum::PUBLISHED,
         ];
 
-        if ($this->countryKey) {
-            $countryId = Arr::get($this->data, $this->countryKey);
-            if (! $countryId) {
-                return false;
-            }
-
+        if ($this->countryKey && ($countryId = Arr::get($this->data, $this->countryKey))) {
             $condition['country_id'] = $countryId;
         }
 

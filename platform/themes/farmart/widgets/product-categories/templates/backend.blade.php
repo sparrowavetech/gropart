@@ -22,7 +22,7 @@
                         >
                         {{ $category->name }}
                     </label>
-                    @if ($category->activeChildren->count())
+                    @if ($category->activeChildren->isNotEmpty())
                         <ul style="padding-left: 20px">
                             @foreach ($category->activeChildren as $child)
                                 <li>
@@ -35,7 +35,7 @@
                                         >
                                         {{ $child->name }}
                                     </label>
-                                    @if ($child->activeChildren->count())
+                                    @if ($child->activeChildren->isNotEmpty())
                                         <ul style="padding-left: 20px">
                                             @foreach ($child->activeChildren as $item)
                                                 <li>
@@ -67,6 +67,14 @@
         background: #f1f1f1;
         margin-bottom: 20px;
         padding-left: 15px !important;
+    }
+
+    .product-categories-select .list-item-checkbox ul {
+        min-height: 0 !important;
+    }
+
+    .product-categories-select .list-item-checkbox li:last-child {
+        margin-bottom: 0 !important;
     }
 
     .product-categories-select .list-item-checkbox input[type=checkbox] {

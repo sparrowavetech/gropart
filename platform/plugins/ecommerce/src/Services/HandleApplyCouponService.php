@@ -227,7 +227,7 @@ class HandleApplyCouponService
                     'error' => true,
                     'message' => trans('plugins/ecommerce::discount.you_need_login_to_use_coupon_code'),
                 ];
-            } elseif ($discount->usedByCustomers()->where('customer_id', auth('customer')->id())->count()) {
+            } elseif ($discount->usedByCustomers()->where('customer_id', auth('customer')->id())->exists()) {
                 return [
                     'error' => true,
                     'message' => trans('plugins/ecommerce::discount.you_used_coupon_code'),

@@ -581,9 +581,10 @@ class PublicCheckoutController
 
         $products = Cart::instance('cart')->products();
 
-        if (EcommerceHelper::isEnabledSupportDigitalProducts() && ! EcommerceHelper::canCheckoutForDigitalProducts(
-            $products
-        )) {
+        if (
+            EcommerceHelper::isEnabledSupportDigitalProducts() &&
+            ! EcommerceHelper::canCheckoutForDigitalProducts($products)
+        ) {
             return $response
                 ->setError()
                 ->setNextUrl(route('customer.login'))
@@ -741,8 +742,8 @@ class PublicCheckoutController
         }
 
         if (
-            EcommerceHelper::isDisplayTaxFieldsAtCheckoutPage()
-            && $request->boolean('with_tax_information')
+            EcommerceHelper::isDisplayTaxFieldsAtCheckoutPage() &&
+            $request->boolean('with_tax_information')
         ) {
             $order->taxInformation()->create($request->input('tax_information'));
         }
@@ -787,6 +788,8 @@ class PublicCheckoutController
         do_action('ecommerce_before_processing_payment', $products, $request, $token, $sessionData);
 
         if (! is_plugin_active('payment') || ! $orderAmount) {
+            OrderHelper::processOrder($order->getKey());
+
             return redirect()->to(route('public.checkout.success', OrderHelper::getOrderSessionToken()));
         }
 

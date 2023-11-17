@@ -25,8 +25,18 @@ class SslCommerzNotification extends AbstractSslCommerz
     {
         $this->config = config('plugins.sslcommerz.sslcommerz');
 
-        $this->setStoreId($this->config['apiCredentials']['store_id']);
-        $this->setStorePassword($this->config['apiCredentials']['store_password']);
+        $isSandbox = get_payment_setting('mode', SSLCOMMERZ_PAYMENT_METHOD_NAME) == 0;
+
+        $this->config['apiDomain'] = $isSandbox ? 'https://sandbox.sslcommerz.com' : 'https://securepay.sslcommerz.com';
+        $this->config['connect_from_localhost'] = $isSandbox;
+
+        $storeID = get_payment_setting('store_id', SSLCOMMERZ_PAYMENT_METHOD_NAME);
+        $storePassword = get_payment_setting('store_password', SSLCOMMERZ_PAYMENT_METHOD_NAME);
+
+        if ($storeID && $storePassword) {
+            $this->setStoreId($storeID);
+            $this->setStorePassword($storePassword);
+        }
     }
 
     public function orderValidate(array|null $postData, string $transactionId, float $amount, string $currency = 'BDT')

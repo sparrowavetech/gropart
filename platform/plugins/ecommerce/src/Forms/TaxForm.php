@@ -6,6 +6,7 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Http\Requests\TaxRequest;
 use Botble\Ecommerce\Models\Tax;
+use Botble\Ecommerce\Tables\TaxRuleTable;
 
 class TaxForm extends FormAbstract
 {
@@ -17,7 +18,7 @@ class TaxForm extends FormAbstract
             ->withCustomFields()
             ->add('title', 'text', [
                 'label' => trans('plugins/ecommerce::tax.title'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'placeholder' => trans('plugins/ecommerce::tax.title'),
                     'data-counter' => 120,
@@ -25,7 +26,7 @@ class TaxForm extends FormAbstract
             ])
             ->add('percentage', 'number', [
                 'label' => trans('plugins/ecommerce::tax.percentage'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'placeholder' => trans('plugins/ecommerce::tax.percentage'),
                     'data-counter' => 120,
@@ -33,7 +34,7 @@ class TaxForm extends FormAbstract
             ])
             ->add('priority', 'number', [
                 'label' => trans('plugins/ecommerce::tax.priority'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'placeholder' => trans('plugins/ecommerce::tax.priority'),
                     'data-counter' => 120,
@@ -41,9 +42,20 @@ class TaxForm extends FormAbstract
             ])
             ->add('status', 'customSelect', [
                 'label' => trans('core/base::tables.status'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'choices' => BaseStatusEnum::labels(),
             ])
-            ->setBreakFieldPoint('status');
+            ->setBreakFieldPoint('status')
+            ->when($this->getModel()->id, function () {
+                $this->addMetaBoxes([
+                    'tax_rules' => [
+                        'title' => trans('plugins/ecommerce::tax.rule.name'),
+                        'content' => app(TaxRuleTable::class)
+                            ->setView('core/table::base-table')
+                            ->setAjaxUrl(route('tax.rule.index', $this->getModel()->getKey() ?: 0))->renderTable(),
+                        'wrap' => true,
+                    ],
+                ]);
+            });
     }
 }

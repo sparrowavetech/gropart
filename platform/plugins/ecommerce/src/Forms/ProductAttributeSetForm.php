@@ -38,51 +38,46 @@ class ProductAttributeSetForm extends FormAbstract
             ->withCustomFields()
             ->add('title', 'text', [
                 'label' => trans('core/base::forms.title'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'data-counter' => 120,
                 ],
             ])
             ->add('slug', 'text', [
                 'label' => trans('core/base::forms.slug'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'data-counter' => 120,
                 ],
             ])
             ->add('use_image_from_product_variation', 'onOff', [
                 'label' => trans('plugins/ecommerce::product-attribute-sets.use_image_from_product_variation'),
-                'label_attr' => ['class' => 'control-label'],
                 'default_value' => false,
             ])
             ->add('status', 'customSelect', [
                 'label' => trans('core/base::tables.status'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'choices' => BaseStatusEnum::labels(),
             ])
             ->add('display_layout', 'customSelect', [
                 'label' => trans('plugins/ecommerce::product-attribute-sets.display_layout'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'choices' => $displayLayout,
             ])
             ->add('is_searchable', 'onOff', [
                 'label' => trans('plugins/ecommerce::product-attribute-sets.searchable'),
-                'label_attr' => ['class' => 'control-label'],
                 'default_value' => false,
             ])
             ->add('is_comparable', 'onOff', [
                 'label' => trans('plugins/ecommerce::product-attribute-sets.comparable'),
-                'label_attr' => ['class' => 'control-label'],
                 'default_value' => false,
             ])
             ->add('is_use_in_product_listing', 'onOff', [
                 'label' => trans('plugins/ecommerce::product-attribute-sets.use_in_product_listing'),
-                'label_attr' => ['class' => 'control-label'],
                 'default_value' => false,
             ])
             ->add('order', 'number', [
                 'label' => trans('core/base::forms.order'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'placeholder' => trans('core/base::forms.order_by_placeholder'),
                 ],
@@ -90,7 +85,6 @@ class ProductAttributeSetForm extends FormAbstract
             ])
             ->add('categories[]', 'categoryMulti', [
                 'label' => trans('plugins/ecommerce::products.form.categories'),
-                'label_attr' => ['class' => 'control-label'],
                 'choices' => ProductCategoryHelper::getActiveTreeCategories(),
                 'value' => $this->getModel()->id ? $this->getModel()->categories->pluck('id')->all() : [],
             ])

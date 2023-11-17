@@ -16,8 +16,7 @@ class PublicController extends BaseController
             return $response->setNextUrl(route('public.single'));
         }
 
-        $ads->clicked++;
-        $ads->save();
+        $ads::withoutEvents(fn () => $ads::withoutTimestamps(fn () => $ads->increment('clicked')));
 
         return $response->setNextUrl($ads->url);
     }

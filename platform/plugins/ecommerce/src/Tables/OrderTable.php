@@ -137,14 +137,14 @@ class OrderTable extends TableAbstract
             IdColumn::make(),
             Column::make('user_id')
                 ->title(trans('plugins/ecommerce::order.customer_label'))
-                ->alignLeft(),
+                ->alignStart(),
             Column::make('customer_email')
                 ->title(trans('plugins/ecommerce::order.email'))
-                ->alignLeft()
+                ->alignStart()
                 ->orderable(false),
             Column::make('customer_phone')
                 ->title(trans('plugins/ecommerce::order.phone'))
-                ->alignLeft()
+                ->alignStart()
                 ->orderable(false),
             Column::formatted('amount')
                 ->title(trans('plugins/ecommerce::order.amount')),
@@ -167,7 +167,7 @@ class OrderTable extends TableAbstract
                 Column::make('payment_method')
                     ->name('payment_id')
                     ->title(trans('plugins/ecommerce::order.payment_method'))
-                    ->alignLeft(),
+                    ->alignStart(),
                 Column::make('payment_status')
                     ->name('payment_id')
                     ->title(trans('plugins/ecommerce::order.payment_status_label')),
@@ -273,10 +273,7 @@ class OrderTable extends TableAbstract
 
     public function getDefaultButtons(): array
     {
-        return [
-            'export',
-            'reload',
-        ];
+        return array_merge(['export'], parent::getDefaultButtons());
     }
 
     public function saveBulkChangeItem(Model|Order $item, string $inputKey, string|null $inputValue): Model|bool
@@ -294,7 +291,7 @@ class OrderTable extends TableAbstract
             OrderHistory::query()->create([
                 'action' => 'cancel_order',
                 'description' => trans('plugins/ecommerce::order.order_was_canceled_by'),
-                'order_id' => $item->id,
+                'order_id' => $item->getKey(),
                 'user_id' => Auth::id(),
             ]);
 

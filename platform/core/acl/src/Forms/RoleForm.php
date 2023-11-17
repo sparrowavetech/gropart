@@ -31,7 +31,7 @@ class RoleForm extends FormAbstract
             ->withCustomFields()
             ->add('name', 'text', [
                 'label' => trans('core/base::forms.name'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
                 'attr' => [
                     'placeholder' => trans('core/base::forms.name_placeholder'),
                     'data-counter' => 120,
@@ -39,7 +39,6 @@ class RoleForm extends FormAbstract
             ])
             ->add('description', 'textarea', [
                 'label' => trans('core/base::forms.description'),
-                'label_attr' => ['class' => 'control-label required'],
                 'attr' => [
                     'rows' => 4,
                     'placeholder' => trans('core/base::forms.description_placeholder'),
@@ -48,7 +47,6 @@ class RoleForm extends FormAbstract
             ])
             ->add('is_default', 'onOff', [
                 'label' => trans('core/base::forms.is_default'),
-                'label_attr' => ['class' => 'control-label'],
                 'default_value' => false,
             ])
             ->addMetaBoxes([

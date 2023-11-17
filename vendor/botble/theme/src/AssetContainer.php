@@ -41,7 +41,7 @@ class AssetContainer
             return $uri;
         }
 
-        $path = $this->getCurrentPath() . $uri;
+        $path = $this->getCurrentPath() . ltrim($uri, '/');
 
         return $this->configAssetUrl($path);
     }

@@ -54,10 +54,8 @@ class ProductController extends BaseController
         return $formBuilder->create(ProductForm::class)->renderForm();
     }
 
-    public function edit(int|string $id, Request $request, FormBuilder $formBuilder)
+    public function edit(Product $product, Request $request, FormBuilder $formBuilder)
     {
-        $product = Product::query()->findOrFail($id);
-
         if ($product->is_variation) {
             abort(404);
         }
@@ -143,14 +141,12 @@ class ProductController extends BaseController
     }
 
     public function update(
-        int|string $id,
+        Product $product,
         ProductRequest $request,
         StoreProductService $service,
         BaseHttpResponse $response,
         StoreProductTagService $storeProductTagService
     ) {
-        $product = Product::query()->findOrFail($id);
-
         $product->status = $request->input('status');
 
         $product = $service->execute($request, $product);
@@ -171,7 +167,7 @@ class ProductController extends BaseController
         $addedAttributes = $request->input('added_attributes', []);
 
         if ($request->input('is_added_attributes') == 1 && $addedAttributes) {
-            $result = ProductVariation::getVariationByAttributesOrCreate($id, $addedAttributes);
+            $result = ProductVariation::getVariationByAttributesOrCreate($product->getKey(), $addedAttributes);
 
             /**
              * @var ProductVariation $variation
@@ -220,12 +216,10 @@ class ProductController extends BaseController
     }
 
     public function duplicate(
-        int|string $id,
+        Product $product,
         DuplicateProductService $duplicateProductService,
         BaseHttpResponse $response
     ): BaseHttpResponse {
-        $product = Product::query()->findOrFail($id);
-
         $duplicatedProduct = $duplicateProductService->handle($product);
 
         return $response
@@ -235,13 +229,9 @@ class ProductController extends BaseController
             ->setMessage(trans('plugins/ecommerce::ecommerce.forms.duplicate_success_message'));
     }
 
-    public function getProductVariations(int|string $id, ProductVariationTable $dataTable)
+    public function getProductVariations(Product $product, ProductVariationTable $dataTable)
     {
-        $product = Product::query()
-            ->where('is_variation', 0)
-            ->findOrFail($id);
-
-        $dataTable->setProductId($id);
+        $dataTable->setProductId($product->getKey());
 
         if (EcommerceHelper::isEnabledSupportDigitalProducts() && $product->isTypeDigital()) {
             $dataTable->isDigitalProduct();
@@ -251,19 +241,15 @@ class ProductController extends BaseController
     }
 
     public function setDefaultProductVariation(
-        int|string $id,
+        ProductVariation $productVariation,
         BaseHttpResponse $response
     ) {
-        $variation = ProductVariation::query()->findOrFail($id);
-
         ProductVariation::query()
-            ->where('configurable_product_id', $variation->configurable_product_id)
+            ->where('configurable_product_id', $productVariation->configurable_product_id)
             ->update(['is_default' => 0]);
 
-        if ($variation) {
-            $variation->is_default = true;
-            $variation->save();
-        }
+        $productVariation->is_default = true;
+        $productVariation->save();
 
         return $response->setMessage(trans('core/base::notices.update_success_message'));
     }

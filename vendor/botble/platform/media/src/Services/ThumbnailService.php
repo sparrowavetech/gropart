@@ -2,9 +2,9 @@
 
 namespace Botble\Media\Services;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Media\Facades\RvMedia;
 use Exception;
-use Illuminate\Support\Facades\Log;
 use Intervention\Image\ImageManager;
 
 class ThumbnailService
@@ -187,7 +187,7 @@ class ThumbnailService
         try {
             $this->uploadManager->saveFile($destinationPath, $thumbImage->stream()->__toString());
         } catch (Exception $exception) {
-            Log::error($exception->getMessage());
+            BaseHelper::logError($exception);
 
             return false;
         }

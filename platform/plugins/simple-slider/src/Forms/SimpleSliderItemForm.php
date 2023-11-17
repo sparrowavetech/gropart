@@ -20,22 +20,19 @@ class SimpleSliderItemForm extends FormAbstract
             ])
             ->add('title', 'text', [
                 'label' => trans('core/base::forms.title'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'data-counter' => 120,
                 ],
             ])
             ->add('link', 'text', [
                 'label' => trans('core/base::forms.link'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
-                    'placeholder' => 'http://',
+                    'placeholder' => 'https://',
                     'data-counter' => 120,
                 ],
             ])
             ->add('description', 'textarea', [
                 'label' => trans('core/base::forms.description'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'rows' => 4,
                     'placeholder' => trans('core/base::forms.description_placeholder'),
@@ -44,15 +41,13 @@ class SimpleSliderItemForm extends FormAbstract
             ])
             ->add('order', 'number', [
                 'label' => trans('core/base::forms.order'),
-                'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'placeholder' => trans('core/base::forms.order_by_placeholder'),
                 ],
                 'default_value' => 0,
             ])
             ->add('image', 'mediaImage', [
-                'label' => trans('core/base::forms.image'),
-                'label_attr' => ['class' => 'control-label required'],
+                'required' => true,
             ])
             ->add('close', 'button', [
                 'label' => trans('core/base::forms.cancel'),

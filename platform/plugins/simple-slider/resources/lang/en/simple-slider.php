@@ -16,7 +16,7 @@ return [
     'update_slide_position_success' => 'Updated slide position successfully!',
     'create_new_slide' => 'Create a new slide',
     'edit_slide' => 'Edit slide #:id',
-    'simple_slider_shortcode_name' => 'Simple Slider',
+    'simple_slider_shortcode_name' => 'Simple slider',
     'simple_slider_shortcode_description' => 'Add a simple slider',
     'select_slider' => 'Select a slider',
 ];

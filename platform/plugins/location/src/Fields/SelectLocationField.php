@@ -68,7 +68,12 @@ class SelectLocationField extends FormField
     public function getCountryOptions(): array
     {
         $countryKey = Arr::get($this->locationKeys, 'country');
-        $countries = Country::query()->pluck('name', 'id')->all();
+        $countries = Country::query()
+            ->select('name', 'id')
+            ->get()
+            ->mapWithKeys(fn ($item) => [$item->getKey() => $item->name])
+            ->all();
+
         $value = Arr::get($this->getValue(), 'country');
 
         if (! $value && count($countries)) {
@@ -97,7 +102,10 @@ class SelectLocationField extends FormField
         $countryId = Arr::get($this->getValue(), 'country');
 
         if (! $countryId) {
-            $countries = Country::query()->pluck('name', 'id')->all();
+            $countries = Country::query()->select('name', 'id')
+                ->get()
+                ->mapWithKeys(fn ($item) => [$item->getKey() => $item->name])
+                ->all();
 
             if (count($countries)) {
                 $countryId = Arr::first(array_keys($countries));
@@ -106,7 +114,12 @@ class SelectLocationField extends FormField
 
         $value = Arr::get($this->getValue(), 'state');
         if ($countryId) {
-            $states = State::query()->where('country_id', $countryId)->pluck('name', 'id')->all();
+            $states = State::query()
+                ->where('country_id', $countryId)
+                ->select('name', 'id')
+                ->get()
+                ->mapWithKeys(fn ($item) => [$item->getKey() => $item->name])
+                ->all();
         }
 
         $attr = array_merge($this->getOption('attr', []), [
@@ -130,9 +143,21 @@ class SelectLocationField extends FormField
         $cities = [];
         $cityKey = Arr::get($this->locationKeys, 'city');
         $stateId = Arr::get($this->getValue(), 'state');
+        $countryId = Arr::get($this->getValue(), 'country');
         $value = Arr::get($this->getValue(), 'city');
         if ($stateId) {
-            $cities = City::query()->where('state_id', $stateId)->pluck('name', 'id')->all();
+            $cities = City::query()
+                ->where('state_id', $stateId)
+                ->select('name', 'id')->get()
+                ->mapWithKeys(fn ($item) => [$item->getKey() => $item->name])
+                ->all();
+        } elseif ($countryId) {
+            $cities = City::query()
+                ->where('country_id', $countryId)
+                ->select('name', 'id')
+                ->get()
+                ->mapWithKeys(fn ($item) => [$item->getKey() => $item->name])
+                ->all();
         }
 
         $attr = array_merge($this->getOption('attr', []), [

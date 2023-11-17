@@ -29,7 +29,7 @@ class ShipmentController extends BaseController
     {
         PageTitle::setTitle(trans('plugins/ecommerce::shipping.shipments'));
 
-        return $dataTable->render(MarketplaceHelper::viewPath('dashboard.table.base'));
+        return $dataTable->renderTable();
     }
 
     public function edit(int|string $id)
@@ -48,7 +48,7 @@ class ShipmentController extends BaseController
 
         PageTitle::setTitle(trans('plugins/ecommerce::shipping.edit_shipping', ['code' => get_shipment_code($id)]));
 
-        return MarketplaceHelper::view('dashboard.shipments.edit', compact('shipment'));
+        return MarketplaceHelper::view('vendor-dashboard.shipments.edit', compact('shipment'));
     }
 
     public function postUpdateStatus(int|string $id, UpdateShippingStatusRequest $request, BaseHttpResponse $response)

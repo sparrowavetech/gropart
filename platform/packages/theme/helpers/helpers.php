@@ -1,5 +1,6 @@
 <?php
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Theme\Contracts\Theme as ThemeContract;
 use Botble\Theme\Facades\AdminBar;
 use Botble\Theme\Facades\ThemeOption;
@@ -64,7 +65,7 @@ if (! function_exists('theme_option')) {
             try {
                 return ThemeOption::getOption($key, $default);
             } catch (Exception $exception) {
-                info($exception->getMessage());
+                BaseHelper::logError($exception);
 
                 return $default;
             }
