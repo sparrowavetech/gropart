@@ -80,6 +80,12 @@ class ComposerStaticInit4105dc0e550307db7cf5c2e496dcbdca
             'Whoops\\' => 7,
             'Webmozart\\Assert\\' => 17,
         ),
+        'V' => 
+        array (
+            'VigStudio\\VigSEO\\' => 17,
+            'VigStudio\\VigAI\\' => 16,
+            'VigStudio\\LaravelAI\\' => 20,
+        ),
         'U' => 
         array (
             'Unicodeveloper\\Paystack\\' => 24,
@@ -126,6 +132,7 @@ class ComposerStaticInit4105dc0e550307db7cf5c2e496dcbdca
             'Symfony\\Component\\Finder\\' => 25,
             'Symfony\\Component\\EventDispatcher\\' => 34,
             'Symfony\\Component\\ErrorHandler\\' => 31,
+            'Symfony\\Component\\DomCrawler\\' => 29,
             'Symfony\\Component\\CssSelector\\' => 30,
             'Symfony\\Component\\Console\\' => 26,
             'Symfony\\Component\\Cache\\' => 24,
@@ -172,6 +179,7 @@ class ComposerStaticInit4105dc0e550307db7cf5c2e496dcbdca
         ),
         'O' => 
         array (
+            'Orhanerday\\OpenAi\\' => 18,
             'OpenSpout\\' => 10,
         ),
         'N' => 
@@ -367,6 +375,18 @@ class ComposerStaticInit4105dc0e550307db7cf5c2e496dcbdca
         array (
             0 => __DIR__ . '/..' . '/webmozart/assert/src',
         ),
+        'VigStudio\\VigSEO\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/platform/plugins/vig-seo/src',
+        ),
+        'VigStudio\\VigAI\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/platform/plugins/vig-ai/src',
+        ),
+        'VigStudio\\LaravelAI\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/vigstudio/laravel-ai/src',
+        ),
         'Unicodeveloper\\Paystack\\' => 
         array (
             0 => __DIR__ . '/..' . '/unicodeveloper/laravel-paystack/src',
@@ -519,6 +539,10 @@ class ComposerStaticInit4105dc0e550307db7cf5c2e496dcbdca
         array (
             0 => __DIR__ . '/..' . '/symfony/error-handler',
         ),
+        'Symfony\\Component\\DomCrawler\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/dom-crawler',
+        ),
         'Symfony\\Component\\CssSelector\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/css-selector',
@@ -667,6 +691,10 @@ class ComposerStaticInit4105dc0e550307db7cf5c2e496dcbdca
         'ParagonIE\\ConstantTime\\' => 
         array (
             0 => __DIR__ . '/..' . '/paragonie/constant_time_encoding/src',
+        ),
+        'Orhanerday\\OpenAi\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/orhanerday/open-ai/src',
         ),
         'OpenSpout\\' => 
         array (
@@ -7867,6 +7895,8 @@ class ComposerStaticInit4105dc0e550307db7cf5c2e496dcbdca
         'OpenSpout\\Writer\\XLSX\\Options\\PageSetup' => __DIR__ . '/..' . '/openspout/openspout/src/Writer/XLSX/Options/PageSetup.php',
         'OpenSpout\\Writer\\XLSX\\Options\\PaperSize' => __DIR__ . '/..' . '/openspout/openspout/src/Writer/XLSX/Options/PaperSize.php',
         'OpenSpout\\Writer\\XLSX\\Writer' => __DIR__ . '/..' . '/openspout/openspout/src/Writer/XLSX/Writer.php',
+        'Orhanerday\\OpenAi\\OpenAi' => __DIR__ . '/..' . '/orhanerday/open-ai/src/OpenAi.php',
+        'Orhanerday\\OpenAi\\Url' => __DIR__ . '/..' . '/orhanerday/open-ai/src/Url.php',
         'Override' => __DIR__ . '/..' . '/symfony/polyfill-php83/Resources/stubs/Override.php',
         'PHPUnit\\Event\\Application\\Finished' => __DIR__ . '/..' . '/phpunit/phpunit/src/Event/Events/Application/Finished.php',
         'PHPUnit\\Event\\Application\\FinishedSubscriber' => __DIR__ . '/..' . '/phpunit/phpunit/src/Event/Events/Application/FinishedSubscriber.php',
@@ -11735,6 +11765,25 @@ class ComposerStaticInit4105dc0e550307db7cf5c2e496dcbdca
         'Symfony\\Component\\CssSelector\\XPath\\Translator' => __DIR__ . '/..' . '/symfony/css-selector/XPath/Translator.php',
         'Symfony\\Component\\CssSelector\\XPath\\TranslatorInterface' => __DIR__ . '/..' . '/symfony/css-selector/XPath/TranslatorInterface.php',
         'Symfony\\Component\\CssSelector\\XPath\\XPathExpr' => __DIR__ . '/..' . '/symfony/css-selector/XPath/XPathExpr.php',
+        'Symfony\\Component\\DomCrawler\\AbstractUriElement' => __DIR__ . '/..' . '/symfony/dom-crawler/AbstractUriElement.php',
+        'Symfony\\Component\\DomCrawler\\Crawler' => __DIR__ . '/..' . '/symfony/dom-crawler/Crawler.php',
+        'Symfony\\Component\\DomCrawler\\Field\\ChoiceFormField' => __DIR__ . '/..' . '/symfony/dom-crawler/Field/ChoiceFormField.php',
+        'Symfony\\Component\\DomCrawler\\Field\\FileFormField' => __DIR__ . '/..' . '/symfony/dom-crawler/Field/FileFormField.php',
+        'Symfony\\Component\\DomCrawler\\Field\\FormField' => __DIR__ . '/..' . '/symfony/dom-crawler/Field/FormField.php',
+        'Symfony\\Component\\DomCrawler\\Field\\InputFormField' => __DIR__ . '/..' . '/symfony/dom-crawler/Field/InputFormField.php',
+        'Symfony\\Component\\DomCrawler\\Field\\TextareaFormField' => __DIR__ . '/..' . '/symfony/dom-crawler/Field/TextareaFormField.php',
+        'Symfony\\Component\\DomCrawler\\Form' => __DIR__ . '/..' . '/symfony/dom-crawler/Form.php',
+        'Symfony\\Component\\DomCrawler\\FormFieldRegistry' => __DIR__ . '/..' . '/symfony/dom-crawler/FormFieldRegistry.php',
+        'Symfony\\Component\\DomCrawler\\Image' => __DIR__ . '/..' . '/symfony/dom-crawler/Image.php',
+        'Symfony\\Component\\DomCrawler\\Link' => __DIR__ . '/..' . '/symfony/dom-crawler/Link.php',
+        'Symfony\\Component\\DomCrawler\\Test\\Constraint\\CrawlerAnySelectorTextContains' => __DIR__ . '/..' . '/symfony/dom-crawler/Test/Constraint/CrawlerAnySelectorTextContains.php',
+        'Symfony\\Component\\DomCrawler\\Test\\Constraint\\CrawlerAnySelectorTextSame' => __DIR__ . '/..' . '/symfony/dom-crawler/Test/Constraint/CrawlerAnySelectorTextSame.php',
+        'Symfony\\Component\\DomCrawler\\Test\\Constraint\\CrawlerSelectorAttributeValueSame' => __DIR__ . '/..' . '/symfony/dom-crawler/Test/Constraint/CrawlerSelectorAttributeValueSame.php',
+        'Symfony\\Component\\DomCrawler\\Test\\Constraint\\CrawlerSelectorCount' => __DIR__ . '/..' . '/symfony/dom-crawler/Test/Constraint/CrawlerSelectorCount.php',
+        'Symfony\\Component\\DomCrawler\\Test\\Constraint\\CrawlerSelectorExists' => __DIR__ . '/..' . '/symfony/dom-crawler/Test/Constraint/CrawlerSelectorExists.php',
+        'Symfony\\Component\\DomCrawler\\Test\\Constraint\\CrawlerSelectorTextContains' => __DIR__ . '/..' . '/symfony/dom-crawler/Test/Constraint/CrawlerSelectorTextContains.php',
+        'Symfony\\Component\\DomCrawler\\Test\\Constraint\\CrawlerSelectorTextSame' => __DIR__ . '/..' . '/symfony/dom-crawler/Test/Constraint/CrawlerSelectorTextSame.php',
+        'Symfony\\Component\\DomCrawler\\UriResolver' => __DIR__ . '/..' . '/symfony/dom-crawler/UriResolver.php',
         'Symfony\\Component\\ErrorHandler\\BufferingLogger' => __DIR__ . '/..' . '/symfony/error-handler/BufferingLogger.php',
         'Symfony\\Component\\ErrorHandler\\Debug' => __DIR__ . '/..' . '/symfony/error-handler/Debug.php',
         'Symfony\\Component\\ErrorHandler\\DebugClassLoader' => __DIR__ . '/..' . '/symfony/error-handler/DebugClassLoader.php',
@@ -12881,6 +12930,36 @@ class ComposerStaticInit4105dc0e550307db7cf5c2e496dcbdca
         'Unicodeveloper\\Paystack\\PaystackServiceProvider' => __DIR__ . '/..' . '/unicodeveloper/laravel-paystack/src/PaystackServiceProvider.php',
         'Unicodeveloper\\Paystack\\TransRef' => __DIR__ . '/..' . '/unicodeveloper/laravel-paystack/src/TransRef.php',
         'ValueError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
+        'VigStudio\\LaravelAI\\Bridges\\ChatBridge' => __DIR__ . '/..' . '/vigstudio/laravel-ai/src/Bridges/ChatBridge.php',
+        'VigStudio\\LaravelAI\\Bridges\\CompletionBridge' => __DIR__ . '/..' . '/vigstudio/laravel-ai/src/Bridges/CompletionBridge.php',
+        'VigStudio\\LaravelAI\\Bridges\\ImageBridge' => __DIR__ . '/..' . '/vigstudio/laravel-ai/src/Bridges/ImageBridge.php',
+        'VigStudio\\LaravelAI\\Bridges\\ModelBridge' => __DIR__ . '/..' . '/vigstudio/laravel-ai/src/Bridges/ModelBridge.php',
+        'VigStudio\\LaravelAI\\Commands\\Chat' => __DIR__ . '/..' . '/vigstudio/laravel-ai/src/Commands/Chat.php',
+        'VigStudio\\LaravelAI\\Commands\\Complete' => __DIR__ . '/..' . '/vigstudio/laravel-ai/src/Commands/Complete.php',
+        'VigStudio\\LaravelAI\\Commands\\ImageGenerate' => __DIR__ . '/..' . '/vigstudio/laravel-ai/src/Commands/ImageGenerate.php',
+        'VigStudio\\LaravelAI\\Commands\\ImportModels' => __DIR__ . '/..' . '/vigstudio/laravel-ai/src/Commands/ImportModels.php',
+        'VigStudio\\LaravelAI\\Connectors\\OpenAIConnector' => __DIR__ . '/..' . '/vigstudio/laravel-ai/src/Connectors/OpenAIConnector.php',
+        'VigStudio\\LaravelAI\\Contracts\\BelongsToModel' => __DIR__ . '/..' . '/vigstudio/laravel-ai/src/Contracts/BelongsToModel.php',
+        'VigStudio\\LaravelAI\\Contracts\\Bridge' => __DIR__ . '/..' . '/vigstudio/laravel-ai/src/Contracts/Bridge.php',
+        'VigStudio\\LaravelAI\\Contracts\\Connector' => __DIR__ . '/..' . '/vigstudio/laravel-ai/src/Contracts/Connector.php',
+        'VigStudio\\LaravelAI\\Contracts\\ConsoleProviderDependent' => __DIR__ . '/..' . '/vigstudio/laravel-ai/src/Contracts/ConsoleProviderDependent.php',
+        'VigStudio\\LaravelAI\\Contracts\\HasModel' => __DIR__ . '/..' . '/vigstudio/laravel-ai/src/Contracts/HasModel.php',
+        'VigStudio\\LaravelAI\\Contracts\\HasNew' => __DIR__ . '/..' . '/vigstudio/laravel-ai/src/Contracts/HasNew.php',
+        'VigStudio\\LaravelAI\\Contracts\\HasProvider' => __DIR__ . '/..' . '/vigstudio/laravel-ai/src/Contracts/HasProvider.php',
+        'VigStudio\\LaravelAI\\Enums\\Provider' => __DIR__ . '/..' . '/vigstudio/laravel-ai/src/Enums/Provider.php',
+        'VigStudio\\LaravelAI\\Models\\Chat' => __DIR__ . '/..' . '/vigstudio/laravel-ai/src/Models/Chat.php',
+        'VigStudio\\LaravelAI\\Models\\Completion' => __DIR__ . '/..' . '/vigstudio/laravel-ai/src/Models/Completion.php',
+        'VigStudio\\LaravelAI\\Models\\Image' => __DIR__ . '/..' . '/vigstudio/laravel-ai/src/Models/Image.php',
+        'VigStudio\\LaravelAI\\Models\\Model' => __DIR__ . '/..' . '/vigstudio/laravel-ai/src/Models/Model.php',
+        'VigStudio\\LaravelAI\\Responses\\ImageResponse' => __DIR__ . '/..' . '/vigstudio/laravel-ai/src/Responses/ImageResponse.php',
+        'VigStudio\\LaravelAI\\Responses\\MessageResponse' => __DIR__ . '/..' . '/vigstudio/laravel-ai/src/Responses/MessageResponse.php',
+        'VigStudio\\LaravelAI\\Responses\\TextResponse' => __DIR__ . '/..' . '/vigstudio/laravel-ai/src/Responses/TextResponse.php',
+        'VigStudio\\LaravelAI\\ServiceProvider' => __DIR__ . '/..' . '/vigstudio/laravel-ai/src/ServiceProvider.php',
+        'VigStudio\\VigAI\\Http\\Controllers\\VigAiController' => __DIR__ . '/../..' . '/platform/plugins/vig-ai/src/Http/Controllers/VigAiController.php',
+        'VigStudio\\VigAI\\Http\\Requests\\VigAiRequest' => __DIR__ . '/../..' . '/platform/plugins/vig-ai/src/Http/Requests/VigAiRequest.php',
+        'VigStudio\\VigAI\\Plugin' => __DIR__ . '/../..' . '/platform/plugins/vig-ai/src/Plugin.php',
+        'VigStudio\\VigAI\\Providers\\HookServiceProvider' => __DIR__ . '/../..' . '/platform/plugins/vig-ai/src/Providers/HookServiceProvider.php',
+        'VigStudio\\VigAI\\Providers\\VigAiServiceProvider' => __DIR__ . '/../..' . '/platform/plugins/vig-ai/src/Providers/VigAiServiceProvider.php',
         'Webmozart\\Assert\\Assert' => __DIR__ . '/..' . '/webmozart/assert/src/Assert.php',
         'Webmozart\\Assert\\InvalidArgumentException' => __DIR__ . '/..' . '/webmozart/assert/src/InvalidArgumentException.php',
         'Webmozart\\Assert\\Mixin' => __DIR__ . '/..' . '/webmozart/assert/src/Mixin.php',
