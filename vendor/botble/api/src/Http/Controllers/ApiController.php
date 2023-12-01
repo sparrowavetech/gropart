@@ -17,6 +17,10 @@ class ApiController extends Controller
         Assets::addScriptsDirectly('vendor/core/core/setting/js/setting.js');
         Assets::addStylesDirectly('vendor/core/core/setting/css/setting.css');
 
+        if (version_compare('7.0.0', get_core_version(), '>')) {
+            return view('packages/api::settings-v6');
+        }
+
         return view('packages/api::settings');
     }
 

@@ -12,6 +12,46 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Removed
 
+# 4.26.0 (21 November 2023)
+## Added
+- Support specifying Example: null in annotations ([#755](https://github.com/knuckleswtf/scribe/pull/755)
+- Include database-generated values in models created via factoryCreate ([#753](https://github.com/knuckleswtf/scribe/pull/753)
+
+## Fixed
+- Parsing of nested fields in validation rules ([#749](https://github.com/knuckleswtf/scribe/pull/749))
+- Enum values not displaying in nested objects ([#740](https://github.com/knuckleswtf/scribe/pull/740))
+- Enum values not getting written to HTML ([#759](https://github.com/knuckleswtf/scribe/pull/759))
+
+
+# 4.25.0 (30 September 2023)
+## Added
+- Support wildcards in `groups.order` (top-level only) ([#723](https://github.com/knuckleswtf/scribe/pull/731))
+
+# 4.24.0 (16 September 2023)
+## Added
+- Support dependency injection in FormRequests ([84078358ce](https://github.com/knuckleswtf/scribe/commit/84078358ce32ff0656a9ab03f062e952f721f1a2))
+- Include `auth.extra_info` in OpenAPI security scheme ([#727](https://github.com/knuckleswtf/scribe/pull/727))
+- Support dynamic base URL ([#723](https://github.com/knuckleswtf/scribe/pull/723))
+
+## Fixed
+- Generate proper sample for array of objects ([#720](https://github.com/knuckleswtf/scribe/pull/720))
+
+# 4.23.1 (25 August 2023)
+## Fixed
+- Break in attributes due to enum support ([4c49e81e0](https://github.com/knuckleswtf/scribe/commit/4c49e81e0a6f4a257c3945a139b9a3bf35d85b2b))
+
+# 4.23.0 (24 August 2023)
+## Added
+- Support for enums: you can now specify the allowed values of a parameter ([#713](https://github.com/knuckleswtf/scribe/pull/713))
+
+## Modified
+- Exclude Authorization header from generated OpenAPI spec, per spec ([#714](https://github.com/knuckleswtf/scribe/pull/714))
+
+## Fixed
+- Improve endpointId generation ([#700](https://github.com/knuckleswtf/scribe/pull/700))
+- Improve empty checks in OpenAPI spec generation ([#712](https://github.com/knuckleswtf/scribe/pull/712))
+- Don't export auth.use_value to Postman ([6a9d51b3a2](https://github.com/knuckleswtf/scribe/commit/6a9d51b3a215a89e8b8af47f796ffaa10993c171))
+
 # 4.22.0 (1 July 2023)
 ## Added
 - Make included package attributes extensible ([#680](https://github.com/knuckleswtf/scribe/pull/680))

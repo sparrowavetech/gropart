@@ -2,16 +2,11 @@
 
 namespace Botble\Block\Repositories\Caches;
 
-use Botble\Support\Repositories\Caches\CacheAbstractDecorator;
-use Botble\Block\Repositories\Interfaces\BlockInterface;
+use Botble\Block\Repositories\Eloquent\BlockRepository;
 
-class BlockCacheDecorator extends CacheAbstractDecorator implements BlockInterface
+/**
+ * @deprecated
+ */
+class BlockCacheDecorator extends BlockRepository
 {
-    /**
-     * {@inheritDoc}
-     */
-    public function createSlug(?string $name, ?int $id): string
-    {
-        return $this->flushCacheAndUpdateData(__FUNCTION__, func_get_args());
-    }
 }

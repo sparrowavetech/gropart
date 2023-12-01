@@ -78,6 +78,7 @@ class MarketplaceServiceProvider extends ServiceProvider
         if (! is_plugin_active('ecommerce')) {
             return;
         }
+
         $this->setNamespace('plugins/marketplace')
             ->loadAndPublishConfigurations(['permissions', 'email', 'general'])
             ->loadMigrations()
@@ -263,6 +264,35 @@ class MarketplaceServiceProvider extends ServiceProvider
 
             if (is_plugin_active('language-advanced')) {
                 $this->loadRoutes(['language-advanced']);
+            }
+
+            $emailVariables = [
+                'store' => 'plugins/marketplace::store.store',
+                'store_name' => 'plugins/marketplace::store.store_name',
+                'store_address' => 'plugins/marketplace::store.store_address',
+                'store_phone' => 'plugins/marketplace::store.store_phone',
+                'store_url' => 'plugins/marketplace::store.store_url',
+            ];
+
+            $emailTemplates = [
+                'plugins.ecommerce.email.templates.customer_new_order.variables',
+                'plugins.ecommerce.email.templates.admin_new_order.variables',
+                'plugins.ecommerce.email.templates.customer_cancel_order.variables',
+                'plugins.ecommerce.email.templates.customer_delivery_order.variables',
+                'plugins.ecommerce.email.templates.customer_order_delivered.variables',
+                'plugins.ecommerce.email.templates.order_confirm.variables',
+                'plugins.ecommerce.email.templates.order_confirm_payment.variables',
+                'plugins.ecommerce.email.templates.order_recover.variables',
+                'plugins.ecommerce.email.templates.order-return-request.variables',
+                'plugins.ecommerce.email.templates.invoice-payment-created.variables',
+                'plugins.ecommerce.email.templates.review_products.variables',
+                'plugins.ecommerce.email.templates.download_digital_products.variables',
+            ];
+
+            $config = $this->app['config'];
+
+            foreach ($emailTemplates as $emailTemplate) {
+                $config->set([$emailTemplate => array_merge($config->get($emailTemplate, []), $emailVariables)]);
             }
         });
 

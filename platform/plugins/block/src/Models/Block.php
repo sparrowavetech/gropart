@@ -2,35 +2,36 @@
 
 namespace Botble\Block\Models;
 
+use Botble\Base\Casts\SafeContent;
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Base\Traits\EnumCastable;
 use Botble\Base\Models\BaseModel;
+use Botble\Base\Models\Concerns\HasSlug;
 
 class Block extends BaseModel
 {
-    use EnumCastable;
+    use HasSlug;
 
-    /**
-     * The database table used by the model.
-     *
-     * @var string
-     */
     protected $table = 'blocks';
 
-    /**
-     * @var array
-     */
     protected $fillable = [
         'name',
+        'alias',
         'description',
         'content',
         'status',
     ];
 
-    /**
-     * @var array
-     */
     protected $casts = [
         'status' => BaseStatusEnum::class,
+        'name' => SafeContent::class,
+        'content' => SafeContent::class,
+        'description' => SafeContent::class,
     ];
+
+    protected static function booted(): void
+    {
+        self::saving(function (self $model) {
+            $model->alias = self::createSlug($model->alias, $model->getKey(), 'alias');
+        });
+    }
 }

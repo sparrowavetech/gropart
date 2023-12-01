@@ -2,111 +2,64 @@
 
 namespace Botble\WidgetGenerator\Commands;
 
+use Botble\Theme\Facades\Theme;
 use Botble\Widget\Repositories\Interfaces\WidgetInterface;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Console\ConfirmableTrait;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
-use Theme;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Input\InputArgument;
 
+#[AsCommand('cms:widget:remove', 'Remove a widget')]
 class WidgetRemoveCommand extends Command
 {
-
     use ConfirmableTrait;
 
-    /**
-     * The console command name.
-     *
-     * @var string
-     */
-    protected $signature = 'cms:widget:remove
-        {name : The widget that you want to remove}
-        {--force : Force to remove widget without confirmation}
-    ';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Remove a widget';
-
-    /**
-     * @var Filesystem
-     */
-    protected $files;
-
-    /**
-     * @var WidgetInterface
-     */
-    protected $widgetRepository;
-
-    /**
-     * Create a new command instance.
-     *
-     * @param Filesystem $files
-     * @param WidgetInterface $widgetRepository
-     */
-    public function __construct(Filesystem $files, WidgetInterface $widgetRepository)
+    public function handle(Filesystem $files, WidgetInterface $widgetRepository): int
     {
-        $this->files = $files;
-        $this->widgetRepository = $widgetRepository;
-
-        parent::__construct();
-    }
-
-    /**
-     * Execute the console command.
-     *
-     * @return boolean
-     */
-    public function handle()
-    {
-        if (!$this->confirmToProceed('Are you sure you want to permanently delete?', true)) {
-            return 1;
+        if (! $this->confirmToProceed('Are you sure you want to permanently delete?', true)) {
+            return self::FAILURE;
         }
 
         $widget = $this->getWidget();
         $path = $this->getPath();
 
-        if (!$this->files->isDirectory($path)) {
-            $this->error('Widget "' . $widget . '" is not existed.');
-            return 1;
+        if (! $files->isDirectory($path)) {
+            $this->components->error('Widget "' . $widget . '" is not existed.');
+
+            return self::FAILURE;
         }
 
         try {
-            $this->files->deleteDirectory($path);
-            $this->widgetRepository->deleteBy([
+            $files->deleteDirectory($path);
+            $widgetRepository->deleteBy([
                 'widget_id' => Str::studly($widget) . 'Widget',
-                'theme'     => Theme::getThemeName(),
+                'theme' => Theme::getThemeName(),
             ]);
 
-            $this->info('Widget "' . $widget . '" has been deleted.');
+            $this->components->info('Widget "' . $widget . '" has been deleted.');
         } catch (Exception $exception) {
-            $this->info($exception->getMessage());
+            $this->components->info($exception->getMessage());
         }
 
-        return 0;
+        return self::SUCCESS;
     }
 
-    /**
-     * Get the theme name.
-     *
-     * @return string
-     */
     protected function getWidget(): string
     {
         return strtolower($this->argument('name'));
     }
 
-    /**
-     * Get the destination view path.
-     *
-     * @return string
-     */
     protected function getPath(): string
     {
         return theme_path(Theme::getThemeName() . '/widgets/' . $this->getWidget());
+    }
+
+    protected function configure(): void
+    {
+        $this->addArgument('name', InputArgument::REQUIRED, 'The widget that you want to remove');
+        $this->addOption('force', 'f', null, 'Force to remove widget without confirmation');
     }
 }

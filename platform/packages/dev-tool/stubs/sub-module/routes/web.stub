@@ -2,8 +2,8 @@
 Route::group(['prefix' => '{-names}', 'as' => '{-name}.'], function () {
     Route::resource('', '{Name}Controller')->parameters(['' => '{-name}']);
     Route::delete('items/destroy', [
-        'as'         => 'deletes',
-        'uses'       => '{Name}Controller@deletes',
+        'as' => 'deletes',
+        'uses' => '{Name}Controller@deletes',
         'permission' => '{-name}.destroy',
     ]);
 });

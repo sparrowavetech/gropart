@@ -2,14 +2,12 @@
 
 namespace Botble\Testimonial\Models;
 
+use Botble\Base\Casts\SafeContent;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
-use Botble\Base\Traits\EnumCastable;
 
 class Testimonial extends BaseModel
 {
-    use EnumCastable;
-
     protected $table = 'testimonials';
 
     protected $fillable = [
@@ -22,5 +20,8 @@ class Testimonial extends BaseModel
 
     protected $casts = [
         'status' => BaseStatusEnum::class,
+        'content' => SafeContent::class,
+        'company' => SafeContent::class,
+        'name' => SafeContent::class,
     ];
 }

@@ -2,18 +2,16 @@
 
 namespace Botble\PluginGenerator\Providers;
 
+use Botble\Base\Supports\ServiceProvider;
 use Botble\PluginGenerator\Commands\PluginCreateCommand;
-use Botble\PluginGenerator\Commands\PluginListCommand;
 use Botble\PluginGenerator\Commands\PluginMakeCrudCommand;
-use Illuminate\Support\ServiceProvider;
 
 class CommandServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
-                PluginListCommand::class,
                 PluginCreateCommand::class,
                 PluginMakeCrudCommand::class,
             ]);

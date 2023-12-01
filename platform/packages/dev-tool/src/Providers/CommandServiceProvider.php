@@ -2,6 +2,7 @@
 
 namespace Botble\DevTool\Providers;
 
+use Botble\Base\Supports\ServiceProvider;
 use Botble\DevTool\Commands\LocaleCreateCommand;
 use Botble\DevTool\Commands\LocaleRemoveCommand;
 use Botble\DevTool\Commands\Make\ControllerMakeCommand;
@@ -12,16 +13,14 @@ use Botble\DevTool\Commands\Make\RequestMakeCommand;
 use Botble\DevTool\Commands\Make\RouteMakeCommand;
 use Botble\DevTool\Commands\Make\TableMakeCommand;
 use Botble\DevTool\Commands\PackageCreateCommand;
+use Botble\DevTool\Commands\PackageMakeCrudCommand;
 use Botble\DevTool\Commands\PackageRemoveCommand;
 use Botble\DevTool\Commands\RebuildPermissionsCommand;
 use Botble\DevTool\Commands\TestSendMailCommand;
-use Botble\DevTool\Commands\TruncateTablesCommand;
-use Botble\DevTool\Commands\PackageMakeCrudCommand;
-use Illuminate\Support\ServiceProvider;
 
 class CommandServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
@@ -36,7 +35,6 @@ class CommandServiceProvider extends ServiceProvider
                 PackageMakeCrudCommand::class,
                 PackageRemoveCommand::class,
                 TestSendMailCommand::class,
-                TruncateTablesCommand::class,
                 RebuildPermissionsCommand::class,
                 LocaleRemoveCommand::class,
                 LocaleCreateCommand::class,

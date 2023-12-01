@@ -2,39 +2,29 @@
 
 namespace Botble\{Module}\Tables;
 
-use Illuminate\Support\Facades\Auth;
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\{Module}\Repositories\Interfaces\{Name}Interface;
+use Botble\{Module}\Models\{Name};
 use Botble\Table\Abstracts\TableAbstract;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Contracts\Routing\UrlGenerator;
-use Yajra\DataTables\DataTables;
-use Html;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
+use Botble\Table\DataTables;
 
 class {Name}Table extends TableAbstract
 {
-
-    /**
-     * @var bool
-     */
-    protected $hasActions = true;
-
-    /**
-     * @var bool
-     */
-    protected $hasFilter = true;
-
-    /**
-     * {Name}Table constructor.
-     * @param DataTables $table
-     * @param UrlGenerator $urlGenerator
-     * @param {Name}Interface ${+name}Repository
-     */
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, {Name}Interface ${+name}Repository)
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, {Name} ${+name})
     {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = ${+name}Repository;
+        $this->model = ${+name};
+
+        $this->hasActions = true;
+        $this->hasFilter = true;
 
         if (!Auth::user()->hasAnyPermission(['{-name}.edit', '{-name}.destroy'])) {
             $this->hasOperations = false;
@@ -42,41 +32,37 @@ class {Name}Table extends TableAbstract
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('name', function ($item) {
+            ->editColumn('name', function ({Name} $item) {
                 if (!Auth::user()->hasPermission('{-name}.edit')) {
-                    return $item->name;
+                    return BaseHelper::clean($item->name);
                 }
-                return Html::link(route('{-name}.edit', $item->id), $item->name);
+                return Html::link(route('{-name}.edit', $item->getKey()), BaseHelper::clean($item->name));
             })
-            ->editColumn('checkbox', function ($item) {
-                return $this->getCheckbox($item->id);
+            ->editColumn('checkbox', function ({Name} $item) {
+                return $this->getCheckbox($item->getKey());
             })
-            ->editColumn('created_at', function ($item) {
+            ->editColumn('created_at', function ({Name} $item) {
                 return BaseHelper::formatDate($item->created_at);
             })
-            ->editColumn('status', function ($item) {
+            ->editColumn('status', function ({Name} $item) {
                 return $item->status->toHtml();
             })
-            ->addColumn('operations', function ($item) {
+            ->addColumn('operations', function ({Name} $item) {
                 return $this->getOperations('{-name}.edit', '{-name}.destroy', $item);
             });
 
         return $this->toJson($data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()
+        $query = $this
+            ->getModel()
+            ->query()
             ->select([
                'id',
                'name',
@@ -87,10 +73,7 @@ class {Name}Table extends TableAbstract
         return $this->applyScopes($query);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function columns()
+    public function columns(): array
     {
         return [
             'id' => [
@@ -112,49 +95,37 @@ class {Name}Table extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function buttons()
+    public function buttons(): array
     {
         return $this->addCreateButton(route('{-name}.create'), '{-name}.create');
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function bulkActions(): array
     {
         return $this->addDeleteAction(route('{-name}.deletes'), '{-name}.destroy', parent::bulkActions());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getBulkChanges(): array
     {
         return [
             'name' => [
-                'title'    => trans('core/base::tables.name'),
-                'type'     => 'text',
+                'title' => trans('core/base::tables.name'),
+                'type' => 'text',
                 'validate' => 'required|max:120',
             ],
             'status' => [
-                'title'    => trans('core/base::tables.status'),
-                'type'     => 'select',
-                'choices'  => BaseStatusEnum::labels(),
+                'title' => trans('core/base::tables.status'),
+                'type' => 'select',
+                'choices' => BaseStatusEnum::labels(),
                 'validate' => 'required|in:' . implode(',', BaseStatusEnum::values()),
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type'  => 'date',
+                'type' => 'date',
             ],
         ];
     }
 
-    /**
-     * @return array
-     */
     public function getFilters(): array
     {
         return $this->getBulkChanges();

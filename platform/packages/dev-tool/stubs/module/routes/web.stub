@@ -1,5 +1,8 @@
 <?php
 
+use Botble\Base\Facades\BaseHelper;
+use Illuminate\Support\Facades\Route;
+
 Route::group(['namespace' => 'Botble\{Module}\Http\Controllers', 'middleware' => ['web', 'core']], function () {
 
     Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {
@@ -7,8 +10,8 @@ Route::group(['namespace' => 'Botble\{Module}\Http\Controllers', 'middleware' =>
         Route::group(['prefix' => '{-names}', 'as' => '{-name}.'], function () {
             Route::resource('', '{Name}Controller')->parameters(['' => '{-name}']);
             Route::delete('items/destroy', [
-                'as'         => 'deletes',
-                'uses'       => '{Name}Controller@deletes',
+                'as' => 'deletes',
+                'uses' => '{Name}Controller@deletes',
                 'permission' => '{-name}.destroy',
             ]);
         });

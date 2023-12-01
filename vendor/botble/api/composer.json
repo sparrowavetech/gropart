@@ -21,10 +21,9 @@
             "Botble\\Api\\": "src"
         }
     },
-    "require": {
-
-    },
+    "require": {},
     "require-dev": {
+        "knuckleswtf/scribe": "^4.22",
         "laravel/pint": "^1.4.0",
         "phpunit/phpunit": "^9.0|^10.0"
     },

@@ -62,6 +62,7 @@ return [
     'all_orders' => 'All orders',
     'order_amount_from' => 'Order amount from',
     'product_collection' => 'Product collection',
+    'product_category' => 'Product category',
     'product' => 'Product',
     'customer' => 'Customer',
     'variant' => 'Variant',

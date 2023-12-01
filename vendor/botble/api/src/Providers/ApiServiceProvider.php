@@ -5,8 +5,11 @@ namespace Botble\Api\Providers;
 use Botble\Api\Facades\ApiHelper;
 use Botble\Api\Http\Middleware\ForceJsonResponseMiddleware;
 use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Facades\PanelSectionManager;
+use Botble\Base\PanelSections\PanelSectionItem;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
+use Botble\Setting\PanelSections\SettingCommonPanelSection;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Facades\File;
@@ -43,15 +46,28 @@ class ApiServiceProvider extends ServiceProvider
                 $this->app['router']->pushMiddlewareToGroup('api', ForceJsonResponseMiddleware::class);
             }
 
-            DashboardMenu::registerItem([
-                'id' => 'cms-packages-api',
-                'priority' => 9999,
-                'parent_id' => 'cms-core-settings',
-                'name' => 'packages/api::api.settings',
-                'icon' => null,
-                'url' => route('api.settings'),
-                'permissions' => ['api.settings'],
-            ]);
+            if (version_compare('7.0.0', get_core_version(), '>=')) {
+                DashboardMenu::registerItem([
+                    'id' => 'cms-packages-api',
+                    'priority' => 9999,
+                    'parent_id' => 'cms-core-settings',
+                    'name' => 'packages/api::api.settings',
+                    'icon' => null,
+                    'url' => route('api.settings'),
+                    'permissions' => ['api.settings'],
+                ]);
+            } else {
+                PanelSectionManager::default()
+                    ->registerItem(
+                        SettingCommonPanelSection::class,
+                        fn () => PanelSectionItem::make('settings.common.api')
+                            ->setTitle(trans('packages/api::api.settings'))
+                            ->withDescription(trans('packages/api::api.settings_description'))
+                            ->withIcon('ti ti-api')
+                            ->withPriority(110)
+                            ->withRoute('api.settings')
+                    );
+            }
         });
 
         $this->app->booted(function () {

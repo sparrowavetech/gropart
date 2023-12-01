@@ -9,10 +9,7 @@ use Botble\Testimonial\Models\Testimonial;
 
 class TestimonialForm extends FormAbstract
 {
-    /**
-     * {@inheritDoc}
-     */
-    public function buildForm()
+    public function buildForm(): void
     {
         $this
             ->setupModel(new Testimonial())

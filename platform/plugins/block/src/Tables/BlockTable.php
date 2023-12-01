@@ -2,76 +2,63 @@
 
 namespace Botble\Block\Tables;
 
-use BaseHelper;
-use Html;
-use Illuminate\Support\Facades\Auth;
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Block\Repositories\Interfaces\BlockInterface;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
+use Botble\Block\Models\Block;
 use Botble\Table\Abstracts\TableAbstract;
+use Botble\Table\DataTables;
 use Illuminate\Contracts\Routing\UrlGenerator;
-use Illuminate\Validation\Rule;
-use Yajra\DataTables\DataTables;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class BlockTable extends TableAbstract
 {
-    /**
-     * @var bool
-     */
-    protected $hasActions = true;
-
-    /**
-     * @var bool
-     */
-    protected $hasFilter = true;
-
-    /**
-     * BlockTable constructor.
-     * @param DataTables $table
-     * @param UrlGenerator $urlGenerator
-     * @param BlockInterface $blockRepository
-     */
-    public function __construct(DataTables $table, UrlGenerator $urlGenerator, BlockInterface $blockRepository)
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, Block $block)
     {
         parent::__construct($table, $urlGenerator);
 
-        $this->repository = $blockRepository;
+        $this->model = $block;
 
-        if (!Auth::user()->hasAnyPermission(['block.edit', 'block.destroy'])) {
+        $this->hasActions = true;
+        $this->hasFilter = true;
+
+        if (! Auth::user()->hasAnyPermission(['block.edit', 'block.destroy'])) {
             $this->hasOperations = false;
             $this->hasActions = false;
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('name', function ($item) {
-                if (!Auth::user()->hasPermission('block.edit')) {
-                    return $item->name;
+            ->editColumn('name', function (Block $item) {
+                if (! Auth::user()->hasPermission('block.edit')) {
+                    return BaseHelper::clean($item->name);
                 }
 
-                return Html::link(route('block.edit', $item->id), $item->name);
+                return Html::link(route('block.edit', $item->getKey()), BaseHelper::clean($item->name));
             })
-            ->editColumn('checkbox', function ($item) {
-                return $this->getCheckbox($item->id);
+            ->editColumn('checkbox', function (Block $item) {
+                return $this->getCheckbox($item->getKey());
             })
-            ->editColumn('created_at', function ($item) {
+            ->editColumn('created_at', function (Block $item) {
                 return BaseHelper::formatDate($item->created_at);
             })
-            ->editColumn('status', function ($item) {
+            ->editColumn('status', function (Block $item) {
                 return $item->status->toHtml();
             })
-            ->addColumn('operations', function ($item) {
+            ->addColumn('operations', function (Block $item) {
                 return $this->getOperations('block.edit', 'block.destroy', $item);
             });
 
         if (function_exists('shortcode')) {
-            $data = $data->editColumn('alias', function ($item) {
+            $data = $data->editColumn('alias', function (Block $item) {
                 return generate_shortcode('static-block', ['alias' => $item->alias]);
             });
         }
@@ -79,25 +66,22 @@ class BlockTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    /**
-     * @return mixed
-     */
-    public function query()
+    public function query(): Relation|Builder|QueryBuilder
     {
-        $query = $this->repository->getModel()->select([
-            'id',
-            'alias',
-            'name',
-            'created_at',
-            'status',
-        ]);
+        $query = $this
+            ->getModel()
+            ->query()
+            ->select([
+                'id',
+                'alias',
+                'name',
+                'created_at',
+                'status',
+            ]);
 
         return $this->applyScopes($query);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function columns(): array
     {
         return [
@@ -129,25 +113,16 @@ class BlockTable extends TableAbstract
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function buttons(): array
     {
         return $this->addCreateButton(route('block.create'), 'block.create');
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function bulkActions(): array
     {
         return $this->addDeleteAction(route('block.deletes'), 'block.destroy', parent::bulkActions());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getBulkChanges(): array
     {
         return [
@@ -164,7 +139,7 @@ class BlockTable extends TableAbstract
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
-                'type' => 'date',
+                'type' => 'datePicker',
             ],
         ];
     }

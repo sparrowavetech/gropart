@@ -37,4 +37,3 @@
         </div>
     </div>
 </div>
-<!-- end Modal -->

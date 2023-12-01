@@ -2,11 +2,11 @@
 
 namespace Botble\WidgetGenerator\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use Botble\Base\Supports\ServiceProvider;
 
 class WidgetGeneratorServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         $this->app->register(CommandServiceProvider::class);
     }

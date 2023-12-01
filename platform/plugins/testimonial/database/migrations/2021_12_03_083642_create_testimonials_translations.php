@@ -10,7 +10,7 @@ return new class () extends Migration {
         if (! Schema::hasTable('testimonials_translations')) {
             Schema::create('testimonials_translations', function (Blueprint $table) {
                 $table->string('lang_code');
-                $table->integer('testimonials_id');
+                $table->foreignId('testimonials_id');
                 $table->string('name', 255)->nullable();
                 $table->text('content')->nullable();
                 $table->string('company', 120)->nullable();

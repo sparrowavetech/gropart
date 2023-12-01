@@ -5,12 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
 return new class () extends Migration {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::create('blocks', function (Blueprint $table) {
             $table->id();
@@ -19,17 +14,12 @@ return new class () extends Migration {
             $table->string('description', 255)->nullable();
             $table->longText('content')->nullable();
             $table->string('status', 60)->default('published');
-            $table->integer('user_id')->unsigned()->nullable()->references('id')->on('users')->onDelete('set null');
+            $table->foreignId('user_id')->nullable()->index();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('blocks');
     }

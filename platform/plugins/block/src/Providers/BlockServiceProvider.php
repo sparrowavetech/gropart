@@ -2,41 +2,40 @@
 
 namespace Botble\Block\Providers;
 
+use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Block\Models\Block;
-use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Routing\Events\RouteMatched;
-use Illuminate\Support\ServiceProvider;
-use Botble\Block\Repositories\Caches\BlockCacheDecorator;
 use Botble\Block\Repositories\Eloquent\BlockRepository;
 use Botble\Block\Repositories\Interfaces\BlockInterface;
-use Language;
+use Botble\CustomField\Facades\CustomField;
+use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
+use Illuminate\Routing\Events\RouteMatched;
 
 class BlockServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function register()
+    public function register(): void
     {
         $this->app->bind(BlockInterface::class, function () {
-            return new BlockCacheDecorator(new BlockRepository(new Block()));
+            return new BlockRepository(new Block());
         });
     }
 
-    public function boot()
+    public function boot(): void
     {
         $this
             ->setNamespace('plugins/block')
             ->loadHelpers()
-            ->loadAndPublishConfigurations(['permissions', 'general'])
+            ->loadAndPublishConfigurations(['permissions'])
             ->loadAndPublishTranslations()
-            ->loadRoutes(['web'])
+            ->loadRoutes()
             ->loadAndPublishViews()
             ->loadMigrations();
 
-        Event::listen(RouteMatched::class, function () {
-            dashboard_menu()->registerItem([
+        $this->app['events']->listen(RouteMatched::class, function () {
+            DashboardMenu::registerItem([
                 'id' => 'cms-plugins-block',
                 'priority' => 6,
                 'parent_id' => null,
@@ -47,26 +46,17 @@ class BlockServiceProvider extends ServiceProvider
             ]);
         });
 
-        $useLanguageV2 = $this->app['config']->get('plugins.block.general.use_language_v2', false) &&
-            defined('LANGUAGE_ADVANCED_MODULE_SCREEN_NAME');
-
-        if (defined('LANGUAGE_MODULE_SCREEN_NAME')) {
-            if ($useLanguageV2) {
-                LanguageAdvancedManager::registerModule(Block::class, [
-                    'name',
-                    'description',
-                    'content',
-                ]);
-            } else {
-                $this->app->booted(function () {
-                    Language::registerModule([Block::class]);
-                });
-            }
+        if (defined('LANGUAGE_ADVANCED_MODULE_SCREEN_NAME')) {
+            LanguageAdvancedManager::registerModule(Block::class, [
+                'name',
+                'description',
+                'content',
+            ]);
         }
 
-        $this->app->booted(function () use ($useLanguageV2) {
+        $this->app->booted(function () {
             if (defined('CUSTOM_FIELD_MODULE_SCREEN_NAME')) {
-                \CustomField::registerModule(Block::class)
+                CustomField::registerModule(Block::class)
                     ->registerRule('basic', trans('plugins/block::block.name'), Block::class, function () {
                         return $this->app->make(BlockInterface::class)
                             ->getModel()

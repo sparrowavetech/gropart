@@ -2,13 +2,13 @@
 
 namespace Botble\WidgetGenerator\Providers;
 
+use Botble\Base\Supports\ServiceProvider;
 use Botble\WidgetGenerator\Commands\WidgetCreateCommand;
 use Botble\WidgetGenerator\Commands\WidgetRemoveCommand;
-use Illuminate\Support\ServiceProvider;
 
 class CommandServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         if ($this->app->runningInConsole()) {
             $this->commands([

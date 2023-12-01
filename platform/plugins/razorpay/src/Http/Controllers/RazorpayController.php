@@ -4,14 +4,14 @@ namespace Botble\Razorpay\Http\Controllers;
 
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Payment\Enums\PaymentStatusEnum;
-use Botble\Payment\Repositories\Interfaces\PaymentInterface;
+use Botble\Payment\Models\Payment;
 use Illuminate\Http\Request;
 use Razorpay\Api\Api;
 use Razorpay\Api\Errors\BadRequestError;
 
 class RazorpayController extends BaseController
 {
-    public function webhook(Request $request, PaymentInterface $paymentRepository)
+    public function webhook(Request $request)
     {
         if (
             $request->input('event') === 'order.paid'
@@ -27,16 +27,16 @@ class RazorpayController extends BaseController
 
                 if ($order['status'] === 'paid') {
                     $chargeId = $request->input('payload.payment.entity.id');
-                    $payment = $paymentRepository->getFirstBy([
-                        'charge_id' => $chargeId,
-                    ]);
+                    $payment = Payment::query()
+                        ->where('charge_id', $chargeId)
+                        ->first();
 
                     if ($payment) {
                         $payment->status = PaymentStatusEnum::COMPLETED;
                         $payment->save();
 
                         do_action(PAYMENT_ACTION_PAYMENT_PROCESSED, [
-                            'charge_id' => $chargeId,
+                            'charge_id' => $payment->charge_id,
                             'order_id' => $payment->order_id,
                         ]);
                     }

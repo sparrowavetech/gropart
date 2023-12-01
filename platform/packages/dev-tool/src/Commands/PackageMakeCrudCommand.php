@@ -3,47 +3,31 @@
 namespace Botble\DevTool\Commands;
 
 use Botble\DevTool\Commands\Abstracts\BaseMakeCommand;
-use File;
 use Illuminate\Support\Str;
-use League\Flysystem\FileNotFoundException;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Input\InputArgument;
 
+#[AsCommand('cms:package:make:crud', 'Create a CRUD inside a package')]
 class PackageMakeCrudCommand extends BaseMakeCommand
 {
-    /**
-     * The console command signature.
-     *
-     * @var string
-     */
-    protected $signature = 'cms:package:make:crud {package : The package name} {name : CRUD name}';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Create a CRUD inside a package';
-
-    /**
-     * Execute the console command.
-     *
-     * @return int
-     * @throws FileNotFoundException
-     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
-     */
-    public function handle()
+    public function handle(): int
     {
-        if (!preg_match('/^[a-z0-9\-]+$/i', $this->argument('package')) || !preg_match('/^[a-z0-9\-]+$/i',
-                $this->argument('name'))) {
-            $this->error('Only alphabetic characters are allowed.');
-            return 1;
+        if (! preg_match('/^[a-z0-9\-]+$/i', $this->argument('package')) || ! preg_match(
+            '/^[a-z0-9\-]+$/i',
+            $this->argument('name')
+        )) {
+            $this->components->error('Only alphabetic characters are allowed.');
+
+            return self::FAILURE;
         }
 
         $package = strtolower($this->argument('package'));
         $location = package_path($package);
 
-        if (!File::isDirectory($location)) {
-            $this->error('Plugin named [' . $package . '] does not exists.');
-            return 1;
+        if (! $this->laravel['files']->isDirectory($location)) {
+            $this->components->error('Plugin named [' . $package . '] does not exists.');
+
+            return self::FAILURE;
         }
 
         $name = strtolower($this->argument('name'));
@@ -53,7 +37,9 @@ class PackageMakeCrudCommand extends BaseMakeCommand
         $this->renameFiles($name, $location);
         $this->searchAndReplaceInFiles($name, $location);
         $this->line('------------------');
-        $this->line('<info>The CRUD for package </info> <comment>' . $package . '</comment> <info>was created in</info> <comment>' . $location . '</comment><info>, customize it!</info>');
+        $this->line(
+            '<info>The CRUD for package </info> <comment>' . $package . '</comment> <info>was created in</info> <comment>' . $location . '</comment><info>, customize it!</info>'
+        );
         $this->line('------------------');
         $this->call('cache:clear');
 
@@ -65,25 +51,24 @@ class PackageMakeCrudCommand extends BaseMakeCommand
         ];
 
         foreach ($replacements as $replacement) {
-            $this->line('Add below code into ' . $this->replacementSubModule(null,
-                    str_replace(base_path(), '', $location) . '/' . $replacement));
+            $this->line(
+                'Add below code into ' . $this->replacementSubModule(
+                    null,
+                    str_replace(base_path(), '', $location) . '/' . $replacement
+                )
+            );
+
             $this->info($this->replacementSubModule($replacement));
         }
 
-        return 0;
+        return self::SUCCESS;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getStub(): string
     {
         return __DIR__ . '/../../../dev-tool/stubs/module';
     }
 
-    /**
-     * @param string $location
-     */
     protected function removeUnusedFiles(string $location)
     {
         $files = [
@@ -94,16 +79,11 @@ class PackageMakeCrudCommand extends BaseMakeCommand
         ];
 
         foreach ($files as $file) {
-            File::delete($location . '/' . $file);
+            $this->laravel['files']->delete($location . '/' . $file);
         }
     }
 
-    /**
-     * @param string $file
-     * @param null $content
-     * @return string
-     */
-    protected function replacementSubModule(string $file = null, $content = null): string
+    protected function replacementSubModule(string $file = null, string|null $content = null): string
     {
         $name = strtolower($this->argument('name'));
 
@@ -116,22 +96,25 @@ class PackageMakeCrudCommand extends BaseMakeCommand
         return str_replace(array_keys($replace), $replace, $content);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getReplacements(string $replaceText): array
     {
         $module = strtolower($this->argument('package'));
 
         return [
-            '{-module}'  => strtolower($module),
-            '{module}'   => Str::snake(str_replace('-', '_', $module)),
-            '{+module}'  => Str::camel($module),
-            '{modules}'  => Str::plural(Str::snake(str_replace('-', '_', $module))),
-            '{Modules}'  => ucfirst(Str::plural(Str::snake(str_replace('-', '_', $module)))),
+            '{-module}' => strtolower($module),
+            '{module}' => Str::snake(str_replace('-', '_', $module)),
+            '{+module}' => Str::camel($module),
+            '{modules}' => Str::plural(Str::snake(str_replace('-', '_', $module))),
+            '{Modules}' => ucfirst(Str::plural(Str::snake(str_replace('-', '_', $module)))),
             '{-modules}' => Str::plural($module),
-            '{MODULE}'   => strtoupper(Str::snake(str_replace('-', '_', $module))),
-            '{Module}'   => ucfirst(Str::camel($module)),
+            '{MODULE}' => strtoupper(Str::snake(str_replace('-', '_', $module))),
+            '{Module}' => ucfirst(Str::camel($module)),
         ];
+    }
+
+    protected function configure(): void
+    {
+        $this->addArgument('package', InputArgument::REQUIRED, 'The package name');
+        $this->addArgument('name', InputArgument::REQUIRED, 'The CRUD name');
     }
 }

@@ -145,9 +145,14 @@ trait ParsesValidationRules
         // Now this will return the complete ruleset.
         // Nested array parameters will be present, with '*' replaced by '0'
         $newRules = Validator::make($testData, $rules)->getRules();
-
-        // Transform the key names back from 'ids.0' to 'ids.*'
+       
         return collect($newRules)->mapWithKeys(function ($val, $paramName) use ($rules) {
+            // Transform the key names back from '__asterisk__' to '*'
+            if (Str::contains($paramName, '__asterisk__')) {
+                $paramName = str_replace('__asterisk__', '*', $paramName);
+            }
+
+            // Transform the key names back from 'ids.0' to 'ids.*'
             if (Str::contains($paramName, '.0')) {
                 $genericArrayKeyName = str_replace('.0', '.*', $paramName);
 
@@ -203,7 +208,7 @@ trait ParsesValidationRules
             if (enum_exists($type) && method_exists($type, 'tryFrom')) {
                 $cases = array_map(fn ($case) => $case->value, $type::cases());
                 $parameterData['type'] = gettype($cases[0]);
-                $parameterData['description'] .= ' Must be one of ' . w::getListOfValuesAsFriendlyHtmlString($cases) . ' ';
+                $parameterData['enumValues'] = $cases;
                 $parameterData['setter'] = fn () => Arr::random($cases);
             }
 
@@ -464,8 +469,7 @@ trait ParsesValidationRules
                  * Other rules.
                  */
                 case 'in':
-                    // Not using the rule description here because it only says "The attribute is invalid"
-                    $parameterData['description'] .= ' Must be one of ' . w::getListOfValuesAsFriendlyHtmlString($arguments) . ' ';
+                    $parameterData['enumValues'] = $arguments;
                     $parameterData['setter'] = function () use ($arguments) {
                         return Arr::random($arguments);
                     };
@@ -656,14 +660,14 @@ trait ParsesValidationRules
         foreach ($parameters as $name => $details) {
             if (Str::endsWith($name, '.*')) {
                 // The user might have set the example via bodyParameters()
-                $hasExample = $this->examplePresent($details);
+                $exampleWasSpecified = $this->examplePresent($details);
 
                 // Change cars.*.dogs.things.*.* with type X to cars.*.dogs.things with type X[][]
                 while (Str::endsWith($name, '.*')) {
                     $details['type'] .= '[]';
                     $name = substr($name, 0, -2);
 
-                    if ($hasExample) {
+                    if ($exampleWasSpecified) {
                         $details['example'] = [$details['example']];
                     } else if (isset($details['setter'])) {
                         $previousSetter = $details['setter'];

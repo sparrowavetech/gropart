@@ -9,10 +9,7 @@ use Botble\Block\Models\Block;
 
 class BlockForm extends FormAbstract
 {
-    /**
-     * {@inheritDoc}
-     */
-    public function buildForm()
+    public function buildForm(): void
     {
         $this
             ->setupModel(new Block())

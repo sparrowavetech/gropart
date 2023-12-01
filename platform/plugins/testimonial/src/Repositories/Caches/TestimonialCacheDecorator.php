@@ -2,9 +2,11 @@
 
 namespace Botble\Testimonial\Repositories\Caches;
 
-use Botble\Support\Repositories\Caches\CacheAbstractDecorator;
-use Botble\Testimonial\Repositories\Interfaces\TestimonialInterface;
+use Botble\Testimonial\Repositories\Eloquent\TestimonialRepository;
 
-class TestimonialCacheDecorator extends CacheAbstractDecorator implements TestimonialInterface
+/**
+ * @deprecated
+ */
+class TestimonialCacheDecorator extends TestimonialRepository
 {
 }

@@ -2,71 +2,62 @@
 
 namespace Botble\DevTool\Commands;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Supports\Helper;
-use Illuminate\Support\Facades\DB;
-use Exception;
-use File;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Input\InputArgument;
 
+#[AsCommand('cms:package:remove', 'Remove a package in the /platform/packages directory.')]
 class PackageRemoveCommand extends Command
 {
-    /**
-     * The console command signature.
-     *
-     * @var string
-     */
-    protected $signature = 'cms:package:remove {name : The package name}';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Remove a package in the /platform/packages directory.';
-
-    public function handle()
+    public function handle(): int
     {
-        if (!preg_match('/^[a-z0-9\-]+$/i', $this->argument('name'))) {
-            $this->error('Only alphabetic characters are allowed.');
-            return 1;
+        if (! preg_match('/^[a-z0-9\-]+$/i', $this->argument('name'))) {
+            $this->components->error('Only alphabetic characters are allowed.');
+
+            return self::FAILURE;
         }
 
         $package = strtolower($this->argument('name'));
         $location = package_path($package);
 
-        if (!File::isDirectory($location)) {
-            $this->error('This package is not existed!');
-            return 1;
+        if (! $this->laravel['files']->isDirectory($location)) {
+            $this->components->error('This package is not existed!');
+
+            return self::FAILURE;
         }
 
-        return $this->processRemove($package, $location);
+        $this->processRemove($package, $location);
+
+        return self::SUCCESS;
     }
 
-    /**
-     * @param string $package
-     * @param string $location
-     * @return boolean
-     * @throws Exception
-     */
     protected function processRemove(string $package, string $location): bool
     {
         $migrations = [];
-        foreach (scan_folder($location . '/database/migrations') as $file) {
+        foreach (BaseHelper::scanFolder($location . '/database/migrations') as $file) {
             $migrations[] = pathinfo($file, PATHINFO_FILENAME);
         }
 
         DB::table('migrations')->whereIn('migration', $migrations)->delete();
 
-        File::deleteDirectory($location);
+        $this->laravel['files']->deleteDirectory($location);
 
         Helper::removeModuleFiles($package);
 
         $this->call('cache:clear');
 
-        $this->line('<info>Removed package files successfully!</info>');
+        $this->components->info('Removed package files successfully!');
 
-        $this->line('<info>Remove</info> <comment>"botble/' . $package . '": "*@dev"</comment> to composer.json then run <comment>composer update</comment> to remove this package!');
+        $this->components->info('Remove <comment>"botble/' . $package . '": "*@dev"</comment> to composer.json then run <comment>composer update</comment> to remove this package!');
 
-        return 0;
+        return true;
+    }
+
+    protected function configure(): void
+    {
+        $this->addArgument('name', InputArgument::REQUIRED, 'The package name');
     }
 }

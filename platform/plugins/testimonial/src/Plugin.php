@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 
 class Plugin extends PluginOperationAbstract
 {
-    public static function remove()
+    public static function remove(): void
     {
         Schema::dropIfExists('testimonials');
         Schema::dropIfExists('testimonials_translations');

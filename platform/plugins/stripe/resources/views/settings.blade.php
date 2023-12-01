@@ -42,7 +42,7 @@
                 </div>
             </td>
         </tr>
-        <tr class="payment-content-item hidden">
+        <tr class="hidden payment-content-item">
             <td
                 class="border-left"
                 colspan="3"
@@ -79,11 +79,33 @@
                                         </p>
                                     </li>
                                 </ul>
+
+                                <h5>{{ trans('plugins/stripe::stripe.webhook_setup_guide.title') }}</h5>
+
+                                <p>{{ trans('plugins/stripe::stripe.webhook_setup_guide.description') }}</p>
+
+                                <ol>
+                                    <li>
+                                        <p><strong>{{ trans('plugins/stripe::stripe.webhook_setup_guide.step_1_label') }}:</strong> {!! BaseHelper::clean(trans('plugins/stripe::stripe.webhook_setup_guide.step_1_description', ['link' => '<a href="https://dashboard.stripe.com/" target="_blank">Stripe Dashboard</a>'])) !!}</p>
+                                    </li>
+
+                                    <li>
+                                        <p><strong>{{ trans('plugins/stripe::stripe.webhook_setup_guide.step_2_label') }}:</strong> {!! BaseHelper::clean(trans('plugins/stripe::stripe.webhook_setup_guide.step_2_description', ['url' => '<code>' . route('payments.stripe.webhook') . '</code>'])) !!}</p>
+                                    </li>
+
+                                    <li>
+                                        <p><strong>{{ trans('plugins/stripe::stripe.webhook_setup_guide.step_3_label') }}:</strong> {{ trans('plugins/stripe::stripe.webhook_setup_guide.step_3_description') }}</p>
+                                    </li>
+
+                                    <li>
+                                        <p><strong>{{ trans('plugins/stripe::stripe.webhook_setup_guide.step_4_label') }}:</strong> {{ trans('plugins/stripe::stripe.webhook_setup_guide.step_4_description') }}</p>
+                                    </li>
+                                </ol>
                             </li>
                         </ul>
                     </div>
                     <div class="col-sm-6">
-                        <div class="well bg-white">
+                        <div class="bg-white well">
                             <x-core-setting::text-input
                                 name="payment_stripe_name"
                                 data-counter="400"
@@ -133,6 +155,16 @@
                                 placeholder="sk_*************"
                             />
 
+                            <x-core-setting::text-input
+                                name="payment_stripe_webhook_secret"
+                                type="password"
+                                :label="trans('plugins/stripe::stripe.webhook_secret')"
+                                :value="BaseHelper::hasDemoModeEnabled()
+                                    ? '*******************************'
+                                    : setting('payment_stripe_webhook_secret')"
+                                placeholder="whsec_*************"
+                            />
+
                             <x-core-setting::select
                                 :name="'payment_' . STRIPE_PAYMENT_METHOD_NAME . '_payment_type'"
                                 :label="__('Payment Type')"
@@ -151,7 +183,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-12 bg-white text-end">
+                <div class="bg-white col-12 text-end">
                     <button
                         class="btn btn-warning disable-payment-item @if ($stripeStatus == 0) hidden @endif"
                         type="button"

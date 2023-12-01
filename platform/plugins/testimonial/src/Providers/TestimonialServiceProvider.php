@@ -2,56 +2,45 @@
 
 namespace Botble\Testimonial\Providers;
 
-use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
-use Illuminate\Routing\Events\RouteMatched;
+use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
+use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Botble\Testimonial\Models\Testimonial;
-use Botble\Testimonial\Repositories\Caches\TestimonialCacheDecorator;
 use Botble\Testimonial\Repositories\Eloquent\TestimonialRepository;
 use Botble\Testimonial\Repositories\Interfaces\TestimonialInterface;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\ServiceProvider;
-use Language;
+use Illuminate\Routing\Events\RouteMatched;
 
 class TestimonialServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function register()
+    public function register(): void
     {
         $this->app->bind(TestimonialInterface::class, function () {
-            return new TestimonialCacheDecorator(new TestimonialRepository(new Testimonial()));
+            return new TestimonialRepository(new Testimonial());
         });
     }
 
-    public function boot()
+    public function boot(): void
     {
         $this->setNamespace('plugins/testimonial')
             ->loadHelpers()
-            ->loadAndPublishConfigurations(['permissions', 'general'])
+            ->loadAndPublishConfigurations(['permissions'])
             ->loadMigrations()
             ->loadAndPublishTranslations()
             ->loadRoutes();
 
-        $useLanguageV2 = $this->app['config']->get('plugins.testimonial.general.use_language_v2', false) &&
-            defined('LANGUAGE_ADVANCED_MODULE_SCREEN_NAME');
-
-        if (defined('LANGUAGE_MODULE_SCREEN_NAME')) {
-            if ($useLanguageV2) {
-                LanguageAdvancedManager::registerModule(Testimonial::class, [
-                    'name',
-                    'content',
-                    'company',
-                ]);
-            } else {
-                $this->app->booted(function () {
-                    Language::registerModule([Testimonial::class]);
-                });
-            }
+        if (defined('LANGUAGE_MODULE_SCREEN_NAME') && defined('LANGUAGE_ADVANCED_MODULE_SCREEN_NAME')) {
+            LanguageAdvancedManager::registerModule(Testimonial::class, [
+                'name',
+                'content',
+                'company',
+            ]);
         }
 
-        Event::listen(RouteMatched::class, function () {
-            dashboard_menu()->registerItem([
+        $this->app['events']->listen(RouteMatched::class, function () {
+            DashboardMenu::registerItem([
                 'id' => 'cms-plugins-testimonial',
                 'priority' => 5,
                 'parent_id' => null,
