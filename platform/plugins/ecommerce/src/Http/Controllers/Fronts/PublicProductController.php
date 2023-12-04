@@ -12,7 +12,12 @@ use Botble\Ecommerce\Http\Resources\ProductVariationResource;
 use Botble\Ecommerce\Models\Brand;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\Product;
+use Illuminate\Http\RedirectResponse;
 use Botble\Ecommerce\Models\ProductCategory;
+use Botble\Ecommerce\Enums\EnquiryStatusEnum;
+use Botble\Ecommerce\Http\Requests\EnquiryRequest;
+use Botble\Ecommerce\Repositories\Interfaces\EnquiryInterface;
+use Botble\Marketplace\Supports\MarketplaceHelper;
 use Botble\Ecommerce\Models\ProductTag;
 use Botble\Ecommerce\Models\ProductVariation;
 use Botble\Ecommerce\Models\ProductVariationItem;
@@ -34,6 +39,13 @@ use Illuminate\Support\Facades\Validator;
 
 class PublicProductController
 {
+    protected EnquiryInterface $enquiryRepository;
+    public function __construct(
+        EnquiryInterface $enquiryRepository
+    ) {
+        $this->enquiryRepository = $enquiryRepository;
+    }
+
     public function getProducts(Request $request, GetProductService $productService, BaseHttpResponse $response)
     {
         if (! EcommerceHelper::productFilterParamsValidated($request)) {
@@ -41,9 +53,10 @@ class PublicProductController
         }
 
         $with = EcommerceHelper::withProductEagerLoadingRelations();
+        $condition = ['is_enquiry' => 0];
 
         if (($query = BaseHelper::stringify($request->input('q'))) && ! $request->ajax()) {
-            $products = $productService->getProduct($request, null, null, $with);
+            $products = $productService->getProduct($request, null, null, $with,[], $condition);
 
             SeoHelper::setTitle(__('Search result for ":query"', compact('query')));
 
@@ -55,7 +68,7 @@ class PublicProductController
 
             return Theme::scope(
                 'ecommerce.search',
-                compact('products', 'query'),
+                compact('products', 'query','condition'),
                 'plugins/ecommerce::themes.search'
             )->render();
         }
@@ -64,7 +77,7 @@ class PublicProductController
             ->add(__('Home'), route('public.index'))
             ->add(__('Products'), route('public.products'));
 
-        $products = $productService->getProduct($request, null, null, $with);
+        $products = $productService->getProduct($request, null, null, $with,[],$condition);
 
         if ($request->ajax()) {
             return $this->ajaxFilterProductsResponse($products, $response);
@@ -76,9 +89,66 @@ class PublicProductController
 
         return Theme::scope(
             'ecommerce.products',
-            compact('products'),
+            compact('products', 'condition'),
             'plugins/ecommerce::themes.products'
         )->render();
+    }
+    function EnquiryFrom(Product $product)
+    {
+        SeoHelper::setTitle(__('Enquiry From'))->setDescription(__('Enquiry From'));
+        Theme::breadcrumb()
+            ->add(__('Home'), route('public.index'))
+            ->add(__($product->name), route('public.product', $product->slug))
+            ->add(__('From'));
+
+        return Theme::scope(
+            'ecommerce.enquiry_from',
+            compact('product'),
+            'plugins/ecommerce::themes.enquiry_from'
+        )->render();
+    }
+    public function EnquiryFromSubmit(EnquiryRequest $request, BaseHttpResponse $response)
+    {
+        $enquiry = $this->enquiryRepository->getModel();
+        $request->merge([
+            'status' =>EnquiryStatusEnum::PENDING(),
+        ]);
+        if ($request->hasFile('attachment')) {
+            $result = RvMedia::handleUpload($request->file('attachment'), 0, 'enquiry');
+            if ($result['error']) {
+                return $response->setError()->setMessage($result['message']);
+            }
+            $request->merge([
+                'attachment'      => $result['data']->url,
+            ]);
+        }
+
+        $enquiry = $this->enquiryRepository->createOrUpdate($request->input());
+        event(new CreatedContentEvent(CUSTOMER_MODULE_SCREEN_NAME, $request, $enquiry));
+
+        if (is_plugin_active('marketplace')) {
+            MarketplaceHelper::sendEnquiryMail($enquiry);
+        }
+
+        OrderHelper::sendEnquiryMail($enquiry);
+
+        return $response
+            ->setPreviousUrl(route('public.enquiry.get', $enquiry->product_id))
+            ->setNextUrl(route('public.enquiry.success', base64_encode($enquiry->id)))
+            ->setMessage(trans('core/base::notices.create_success_message'));
+    }
+    public function EnquirySuccess($enquiry_id)
+    {
+        SeoHelper::setTitle(__('Enquiry Success'))->setDescription(__('Enquiry Success'));
+        $enquiry_id = base64_decode($enquiry_id);
+        $enquiry = $this->enquiryRepository->findOrFail($enquiry_id, ['product']);
+
+        return view('plugins/ecommerce::enquires.enquiry-thank-you', compact('enquiry'));
+        // return Theme::scope(
+        //     'plugins/ecommerce::orders.thank-you.enquiry-info',
+        //     compact('enquiry'),
+        //     'plugins/ecommerce::orders.thank-you.enquiry-info'
+        // )->render();
     }
 
     public function getProduct(string $key, Request $request)
@@ -91,6 +161,7 @@ class PublicProductController
 
         $condition = [
             'ec_products.id' => $slug->reference_id,
+            'ec_products.status' => BaseStatusEnum::PUBLISHED,
         ];
 
         if (Auth::check() && $request->input('preview')) {
@@ -107,6 +178,7 @@ class PublicProductController
                     'tags.slugable',
                     'categories',
                     'categories.slugable',
+                    'frequentlyBoughtTogether',
                     'options',
                     'options.values',
                 ],
@@ -201,10 +273,58 @@ class PublicProductController
 
         return Theme::scope(
             'ecommerce.product',
-            compact('product', 'selectedAttrs', 'productImages', 'productVariation'),
+            compact('product', 'selectedAttrs', 'productImages', 'productVariation','condition'),
             'plugins/ecommerce::themes.product'
         )
             ->render();
+    }
+    public function getEnquiryProduct(Request $request, GetProductService $productService, BaseHttpResponse $response)
+    {
+        if (!EcommerceHelper::productFilterParamsValidated($request)) {
+            return $response->setNextUrl(route('public.products'));
+        }
+
+        $query = $request->input('q');
+
+        $with = EcommerceHelper::withProductEagerLoadingRelations();
+
+        $withCount = EcommerceHelper::withReviewsCount();
+        $condition = ['is_enquiry' => 1];
+        if ($query && !$request->ajax()) {
+            $products = $productService->getProduct($request, null, null, $with, $withCount, $condition);
+
+            SeoHelper::setTitle(__('Search result for ":query"', compact('query')));
+
+            Theme::breadcrumb()
+                ->add(__('Home'), route('public.index'))
+                ->add(__('Search'), route('public.products'));
+
+            return Theme::scope(
+                'ecommerce.search',
+                compact('products', 'query'),
+                'plugins/ecommerce::themes.search'
+            )->render();
+        }
+
+        $products = $productService->getProduct($request, null, null, $with, $withCount, $condition);
+
+        if ($request->ajax()) {
+            return $this->ajaxFilterProductsResponse($products, $request, $response);
+        }
+
+        Theme::breadcrumb()
+            ->add(__('Home'), route('public.index'))
+            ->add(__('Products'), route('public.products'));
+
+        SeoHelper::setTitle(__('Products'))->setDescription(__('Products'));
+
+        do_action(PRODUCT_MODULE_SCREEN_NAME);
+
+        return Theme::scope(
+            'ecommerce.products',
+            compact('products', 'condition'),
+            'plugins/ecommerce::themes.products'
+        )->render();
     }
 
     public function getProductTag(
@@ -272,7 +392,7 @@ class PublicProductController
 
         return Theme::scope(
             'ecommerce.product-tag',
-            compact('tag', 'products'),
+            compact('tag', 'products','condition'),
             'plugins/ecommerce::themes.product-tag'
         )->render();
     }
@@ -325,7 +445,8 @@ class PublicProductController
             $request->merge(['categories' => $categoryIds]);
         }
 
-        $products = $getProductService->getProduct($request, null, null, $with);
+        $condition = ['is_enquiry' => 0];
+        $products = $getProductService->getProduct($request, null, null, $with,$condition);
 
         $request->merge([
             'categories' => array_merge($category->parents->pluck('id')->all(), $categoryIds),
@@ -365,7 +486,7 @@ class PublicProductController
 
         return Theme::scope(
             'ecommerce.product-category',
-            compact('category', 'products'),
+            compact('category', 'products','condition'),
             'plugins/ecommerce::themes.product-category'
         )->render();
     }
@@ -599,6 +720,7 @@ class PublicProductController
         if (! EcommerceHelper::productFilterParamsValidated($request)) {
             return $response->setNextUrl($brand->url);
         }
+        $condition = ['is_enquiry' => 0];
 
         $request->merge(['brands' => array_merge((array) request()->input('brands', []), [$brand->getKey()])]);
 
@@ -606,7 +728,8 @@ class PublicProductController
             $request,
             null,
             $brand->getKey(),
-            EcommerceHelper::withProductEagerLoadingRelations()
+            EcommerceHelper::withProductEagerLoadingRelations(),
+            [], $condition
         );
 
         if ($request->ajax()) {
@@ -631,7 +754,7 @@ class PublicProductController
 
         do_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, BRAND_MODULE_SCREEN_NAME, $brand);
 
-        return Theme::scope('ecommerce.brand', compact('brand', 'products'), 'plugins/ecommerce::themes.brand')
+        return Theme::scope('ecommerce.brand', compact('brand', 'products','condition'), 'plugins/ecommerce::themes.brand')
             ->render();
     }
 
@@ -660,6 +783,49 @@ class PublicProductController
             $additional['breadcrumb'] = Theme::partial('breadcrumbs');
         } else {
             $additional['breadcrumb'] = Theme::breadcrumb()->render();
+        }
+
+        $categoryTree = Theme::getThemeNamespace() . '::views.ecommerce.includes.categories';
+
+        if (view()->exists($categoryTree)) {
+            $is_enquiry = $request->input('iseq');
+            $categoriesRequest = $request->input('categories', []);
+
+            if ($category && ! $category->activeChildren->count() && $category->parent_id && $category->is_enquiry ==  $is_enquiry) {
+                $category = $category->parent()->with(['activeChildren'])->first();
+
+                if ($category) {
+                    $categoriesRequest = array_merge(
+                        [$category->id, $category->parent_id],
+                        $category->activeChildren->pluck('id')->all()
+                    );
+                }
+            }
+
+            if ($categoriesRequest) {
+                $categories = $this->productCategoryRepository
+                    ->getModel()
+                    ->whereIn('id', $categoriesRequest)
+                    ->where('status', BaseStatusEnum::PUBLISHED)
+                    ->where('is_enquiry', $is_enquiry)
+                    ->with(['slugable', 'children:id,name,parent_id', 'children.slugable'])
+                    ->orderBy('parent_id', 'ASC')
+                    ->limit(1)
+                    ->get();
+            } else {
+                $categories = ProductCategoryHelper::getAllProductCategories()
+                    ->where('status', BaseStatusEnum::PUBLISHED)
+                    ->where('is_enquiry', $is_enquiry)
+                    ->whereIn('parent_id', [0, null])
+                    ->loadMissing(['slugable', 'children:id,name,parent_id', 'children.slugable']);
+            }
+
+            $urlCurrent = URL::current();
+            
+            $condition = ['is_enquiry' => $is_enquiry];
+            $categoryTreeView = view($categoryTree, compact('categories', 'categoriesRequest', 'urlCurrent','condition'))->render();
+
+            $additional['category_tree'] = $categoryTreeView;
         }
 
         $filtersView = Theme::getThemeNamespace('views.ecommerce.includes.filters');

@@ -89,6 +89,10 @@ class ProductCategoryForm extends FormAbstract
                 'label' => trans('core/base::forms.is_featured'),
                 'default_value' => false,
             ])
+            ->add('is_enquiry', 'onOff', [
+                'label' => trans('plugins/ecommerce::products.form.is_enquiry'),
+                'default_value' => false,
+            ])
             ->setBreakFieldPoint('status');
     }
 }

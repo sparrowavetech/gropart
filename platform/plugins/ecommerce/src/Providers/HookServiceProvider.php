@@ -25,6 +25,7 @@ use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\OrderReturn;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductCategory;
+use Botble\Ecommerce\Repositories\Interfaces\EnquiryInterface;
 use Botble\Ecommerce\Models\Review;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Ecommerce\Supports\InvoiceHelper;

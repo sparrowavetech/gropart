@@ -236,8 +236,18 @@ class InvoiceHelper
 
         $invoice->loadMissing(['items', 'reference']);
 
+        if($invoice->reference->store_id){
+            $storeStateId =  $invoice->reference->store->state;
+         }else{
+             $storeStateId =  setting('ecommerce_store_state', 0);
+         }
+
         $data = [
             'invoice' => $invoice->toArray(),
+            'toState' => $invoice->reference->address->state,
+            'fromState'=> $storeStateId ,
+            'colspan'=> $invoice->reference->address->state !== $storeStateId ?7:8 ,
+            'isIgst'=> $invoice->reference->address->state !== $storeStateId ?true:false,
             'logo' => $logo,
             'logo_full_path' => RvMedia::getRealPath($logo),
             'site_title' => theme_option('site_title'),

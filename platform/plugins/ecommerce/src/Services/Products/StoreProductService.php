@@ -100,6 +100,11 @@ class StoreProductService
             }
         }
 
+        if ($request->has('frequently_bought_together')) {
+            $product->frequentlyBoughtTogether()->detach();
+            $product->frequentlyBoughtTogether()->attach(array_filter(explode(',', $request->input('frequently_bought_together', ''))));
+        }
+
         if ($request->has('cross_sale_products')) {
             $product->crossSales()->detach();
 

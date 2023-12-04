@@ -22,6 +22,7 @@ use Botble\Ecommerce\Models\Address;
 use Botble\Ecommerce\Models\Brand;
 use Botble\Ecommerce\Models\Currency;
 use Botble\Ecommerce\Models\Customer;
+use Botble\Ecommerce\Models\Enquiry;
 use Botble\Ecommerce\Models\Discount;
 use Botble\Ecommerce\Models\FlashSale;
 use Botble\Ecommerce\Models\GlobalOption;
@@ -58,6 +59,7 @@ use Botble\Ecommerce\Repositories\Eloquent\AddressRepository;
 use Botble\Ecommerce\Repositories\Eloquent\BrandRepository;
 use Botble\Ecommerce\Repositories\Eloquent\CurrencyRepository;
 use Botble\Ecommerce\Repositories\Eloquent\CustomerRepository;
+use Botble\Ecommerce\Repositories\Eloquent\EnquiryRepository;
 use Botble\Ecommerce\Repositories\Eloquent\DiscountRepository;
 use Botble\Ecommerce\Repositories\Eloquent\FlashSaleRepository;
 use Botble\Ecommerce\Repositories\Eloquent\GlobalOptionRepository;
@@ -91,6 +93,7 @@ use Botble\Ecommerce\Repositories\Interfaces\AddressInterface;
 use Botble\Ecommerce\Repositories\Interfaces\BrandInterface;
 use Botble\Ecommerce\Repositories\Interfaces\CurrencyInterface;
 use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
+use Botble\Ecommerce\Repositories\Interfaces\EnquiryInterface;
 use Botble\Ecommerce\Repositories\Interfaces\DiscountInterface;
 use Botble\Ecommerce\Repositories\Interfaces\FlashSaleInterface;
 use Botble\Ecommerce\Repositories\Interfaces\GlobalOptionInterface;
@@ -279,6 +282,10 @@ class EcommerceServiceProvider extends ServiceProvider
             return new CustomerRepository(new Customer());
         });
 
+        $this->app->bind(EnquiryInterface::class, function () {
+            return new EnquiryRepository(new Enquiry());
+        });
+
         $this->app->bind(GroupedProductInterface::class, function () {
             return new GroupedProductRepository(new GroupedProduct());
         });
@@ -341,10 +348,12 @@ class EcommerceServiceProvider extends ServiceProvider
         SlugHelper::registerModule(Brand::class, 'Brands');
         SlugHelper::registerModule(ProductCategory::class, 'Product Categories');
         SlugHelper::registerModule(ProductTag::class, 'Product Tags');
+        SlugHelper::registerModule(Enquiry::class, 'Enquiry Product');
         SlugHelper::setPrefix(Product::class, 'products');
         SlugHelper::setPrefix(Brand::class, 'brands');
         SlugHelper::setPrefix(ProductTag::class, 'product-tags');
         SlugHelper::setPrefix(ProductCategory::class, 'product-categories');
+        SlugHelper::setPrefix(Enquiry::class, 'enquiry-product');
 
         SiteMapManager::registerKey([
             'product-categories',
@@ -655,6 +664,15 @@ class EcommerceServiceProvider extends ServiceProvider
                     'icon' => 'fa fa-shopping-bag',
                     'url' => route('orders.index'),
                     'permissions' => ['orders.index'],
+                ])
+                ->registerItem([
+                    'id'          => 'cms-plugins-ecommerce-enquiry',
+                    'priority'    => 1,
+                    'parent_id'   => 'cms-plugins-ecommerce',
+                    'name'        => 'plugins/ecommerce::enquiry.name',
+                    'icon'        => 'fa fa-question-circle',
+                    'url'         => route('enquires.index'),
+                    'permissions' => ['enquires.index'],
                 ])
                 ->registerItem([
                     'id' => 'cms-plugins-ecommerce-invoice',

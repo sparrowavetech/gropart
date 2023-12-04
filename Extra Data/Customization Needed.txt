@@ -1,0 +1,55 @@
+Things to fix in gropart
+
+1. In Product Details Page - Need to integrate backorder products
+
+2. Activating SMS Plugin causing issue in setting page admin
+
+3. Error in activation of ecommerce plugin while pickrr is enabled
+
+4. Add a condition in invoice helper for calculation of tax breakup by state if marketplace disabled
+
+5. Enquiry me product category only enquiry wali hi lani hai in sidebar and top categories
+
+6. Make enquiry page route dynamic setting in admin for enquiry products list page
+
+7. Need a option on Login to allow user to login with mobile or email both but mobile number should be verified while signing up to login with mobile
+
+8. vendor panel drop file not working
+
+9. Enquirable products relative product, relative sale, fbt, cross sale me nhi dikhna chahiye*
+
+10. State and city ki id aa rhi hai...esme name aana chahiye
+
+11. SMS Gateway plugin issue kar rha hai admin ki settings me, need to fix
+
+12. Need scroller in admin menu
+
+13. out of stock ke time upar wali tab me dono button disable nahi hai jab ki niche wale dono disable hai
+
+14. Need to fix thumbnail issue
+
+15. Need a option in coupons to show at checkout and cart page by admin
+
+16. Need to check fractionable shipping paramenter in admin
+
+17. Need to fix UI of select box variation product detials page
+
+18. 03 Vender panel me tags ka text box proper display nahi ho rha hai
+
+19. Invoice me Product table proper nahi aa rhi hai
+
+20. change paypal to payment UPI in vendor panel withdraw option dropdown
+
+21. fix side button lenght in mobile front where change lang, whatsapp and track is coming
+
+22. Need pop up to come automatically first time when visiting home page only for language change
+
+23. Need a option on Login to allow user to login with mobile or email both but mobile number should be verified while signing up to login with mobile
+
+24. Need to improve category for not coming enquiry category in top and need product category tab in product list page of enquiry
+
+26. Google Form link in marketplace dashboard
+
+27. Add a condition in invoice helper to show tax breakup for state if marketplace disabled
+
+30. Need to integrate WebApp APK Bundle
