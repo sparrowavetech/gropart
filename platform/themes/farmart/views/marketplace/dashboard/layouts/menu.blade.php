@@ -14,6 +14,15 @@
             'order' => 2,
         ],
         [
+            'key'    => 'marketplace.vendor.enquiries.index',
+            'icon'   => 'icon-database',
+            'name'   => __('Enquiry'),
+            'routes' => [
+                'marketplace.vendor.enquiries.edit',
+            ],
+            'order' => 2,
+        ],
+        [
             'key' => 'marketplace.vendor.orders.index',
             'icon' => 'icon-bag2',
             'name' => __('Orders'),
@@ -54,7 +63,7 @@
             'order' => 7,
         ],
     ]);
-    
+
     if (EcommerceHelper::isReviewEnabled()) {
         $menus->push([
             'key' => 'marketplace.vendor.reviews.index',
@@ -63,7 +72,7 @@
             'order' => 5,
         ]);
     }
-    
+
     if (EcommerceHelper::isOrderReturnEnabled()) {
         $menus->push([
             'key' => 'marketplace.vendor.order-returns.index',
@@ -73,7 +82,7 @@
             'order' => 3,
         ]);
     }
-    
+
     if (MarketplaceHelper::allowVendorManageShipping()) {
         $menus->push([
             'key' => 'marketplace.vendor.shipments.index',
@@ -83,7 +92,7 @@
             'order' => 3,
         ]);
     }
-    
+
     $currentRouteName = Route::currentRouteName();
 @endphp
 

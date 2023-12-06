@@ -6,6 +6,7 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Supports\Helper;
+use ProductCategoryHelper;
 use Botble\Ecommerce\Events\ProductViewed;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Http\Resources\ProductVariationResource;
@@ -13,6 +14,7 @@ use Botble\Ecommerce\Models\Brand;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\Product;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\URL;
 use Botble\Ecommerce\Models\ProductCategory;
 use Botble\Ecommerce\Enums\EnquiryStatusEnum;
 use Botble\Ecommerce\Http\Requests\EnquiryRequest;
@@ -36,14 +38,18 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Botble\Ecommerce\Repositories\Interfaces\ProductCategoryInterface;
 
 class PublicProductController
 {
     protected EnquiryInterface $enquiryRepository;
+    protected ProductCategoryInterface $productCategoryRepository;
     public function __construct(
-        EnquiryInterface $enquiryRepository
+        EnquiryInterface $enquiryRepository,
+        ProductCategoryInterface $productCategoryRepository
     ) {
         $this->enquiryRepository = $enquiryRepository;
+        $this->productCategoryRepository = $productCategoryRepository;
     }
 
     public function getProducts(Request $request, GetProductService $productService, BaseHttpResponse $response)
@@ -78,9 +84,10 @@ class PublicProductController
             ->add(__('Products'), route('public.products'));
 
         $products = $productService->getProduct($request, null, null, $with,[],$condition);
-
+        //dd($condition,$products);
+        // die;
         if ($request->ajax()) {
-            return $this->ajaxFilterProductsResponse($products, $response);
+            return $this->ajaxFilterProductsResponse($products, $request, $response);
         }
 
         SeoHelper::setTitle(__('Products'))->setDescription(__('Products'));
@@ -481,7 +488,7 @@ class PublicProductController
         do_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, PRODUCT_CATEGORY_MODULE_SCREEN_NAME, $category);
 
         if ($request->ajax()) {
-            return $this->ajaxFilterProductsResponse($products, $response, $category);
+            return $this->ajaxFilterProductsResponse($products, $request, $response, $category);
         }
 
         return Theme::scope(
@@ -758,11 +765,8 @@ class PublicProductController
             ->render();
     }
 
-    protected function ajaxFilterProductsResponse(
-        $products,
-        BaseHttpResponse $response,
-        ?ProductCategory $category = null
-    ) {
+    protected function ajaxFilterProductsResponse($products, Request $request, BaseHttpResponse $response, ?ProductCategory $category = null)
+    {
         $total = $products->total();
         $message = $total > 1 ? __(':total Products found', compact('total')) : __(
             ':total Product found',
@@ -819,9 +823,8 @@ class PublicProductController
                     ->whereIn('parent_id', [0, null])
                     ->loadMissing(['slugable', 'children:id,name,parent_id', 'children.slugable']);
             }
-
             $urlCurrent = URL::current();
-            
+
             $condition = ['is_enquiry' => $is_enquiry];
             $categoryTreeView = view($categoryTree, compact('categories', 'categoriesRequest', 'urlCurrent','condition'))->render();
 
@@ -849,7 +852,7 @@ class PublicProductController
         $order = null;
 
         $validator = Validator::make($request->only(['order_id', 'email']), [
-            'order_id' => 'nullable|integer|min:1',
+            'order_id' => 'nullable|min:1',
             'email' => 'nullable|email',
         ]);
 

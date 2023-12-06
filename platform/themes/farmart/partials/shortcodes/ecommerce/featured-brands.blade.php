@@ -14,7 +14,7 @@
             [
                 'breakpoint' => 1024,
                 'settings' => [
-                    'slidesToShow' => 2,
+                    'slidesToShow' => 4,
                 ],
             ],
             [
@@ -30,12 +30,17 @@
     ];
     $brands = get_featured_brands();
 @endphp
-<div class="widget-featured-brands py-5">
+<div class="widget-featured-brands py-5 pb-0">
     <div class="container-xxxl">
         <div class="row">
             <div class="col-12">
                 <div class="row align-items-center mb-2 widget-header">
-                    <h2 class="col-auto mb-0 py-2">{{ $shortcode->title }}</h2>
+                    <h2 class="col-auto mb-0 py-2">{!! BaseHelper::clean($shortcode->title) !!}</h2>
+                    <div class="ps-4 col-auto py-2 d-md-block">
+                        <a href="/all-brands">
+                            <span class="link-text">{{ __('View All Brands') }} <span class="svg-icon"><svg><use href="#svg-icon-chevron-right" xlink:href="#svg-icon-chevron-right"></use></svg></span></span>
+                        </a>
+                    </div>
                 </div>
                 <div class="featured-brands__body arrows-top-right">
                     <div
@@ -60,10 +65,10 @@
                                                 />
                                             </div>
                                         </div>
-                                        <div class="brand__text py-3">
-                                            <span class="h6 fw-bold text-secondary text-uppercase brand__name">
+                                        <div class="brand__text">
+                                            <h4 class="h6 fw-bold text-secondary text-uppercase brand__name">
                                                 {{ $brand->name }}
-                                            </span>
+                                            </h4>
                                             <div class="h5 fw-bold brand__desc">
                                                 <div>
                                                     {!! BaseHelper::clean(Str::limit($brand->description, 150)) !!}

@@ -69,13 +69,13 @@
 
                         {!! apply_filters(RENDER_PRODUCTS_IN_CHECKOUT_PAGE, $products) !!}
 
-                        <div class="mt-2 p-2 pricing-data">
+                        <div class="mt-2 p-3 bg-light pricing-data">
                             <div class="row">
                                 <div class="col-8">
-                                    <p class="price-text-label mt-0">{{ __('Subtotal') }}:</p>
+                                    <p class="price-text-label m-0">{{ __('Subtotal') }}:</p>
                                 </div>
                                 <div class="col-4">
-                                    <p class="price-text sub-total-text text-end mt-0"> {{ format_price(Cart::instance('cart')->rawSubTotal()) }} </p>
+                                    <p class="price-text sub-total-text text-end m-0"> {{ format_price(Cart::instance('cart')->rawSubTotal()) }} </p>
                                 </div>
                             </div>
                             @if (session('applied_coupon_code'))
@@ -91,30 +91,30 @@
                             @if ($couponDiscountAmount > 0)
                                 <div class="row price discount-amount">
                                     <div class="col-8">
-                                        <p class="price-text-label mt-0">{{ __('Coupon code discount amount') }}:</p>
+                                        <p class="price-text-label m-0">{{ __('Coupon code discount amount') }}:</p>
                                     </div>
                                     <div class="col-4">
-                                        <p class="price-text total-discount-amount-text mt-0 text-danger"> -{{ format_price($couponDiscountAmount) }} </p>
+                                        <p class="price-text total-discount-amount-text m-0 text-danger"><span>(-)</span> {{ format_price($couponDiscountAmount) }} </p>
                                     </div>
                                 </div>
                             @endif
                             @if ($promotionDiscountAmount > 0)
                                 <div class="row">
                                     <div class="col-8">
-                                        <p class="price-text-label mt-0">{{ __('Promotion discount amount') }}:</p>
+                                        <p class="price-text-label m-0">{{ __('Promotion discount amount') }}:</p>
                                     </div>
                                     <div class="col-4">
-                                        <p class="price-text text-danger mt-0"> -{{ format_price($promotionDiscountAmount) }} </p>
+                                        <p class="price-text text-danger m-0"><span>(-)</span> {{ format_price($promotionDiscountAmount) }} </p>
                                     </div>
                                 </div>
                             @endif
                             @if (!empty($shipping) && Arr::get($sessionCheckoutData, 'is_available_shipping', true))
                                 <div class="row">
                                     <div class="col-8">
-                                        <p class="price-text-label mt-0">{{ __('Shipping fee') }}:</p>
+                                        <p class="price-text-label m-0">{{ __('Shipping fee') }}:</p>
                                     </div>
                                     <div class="col-4 float-end">
-                                        <p class="price-text shipping-price-text mt-0">{{ format_price($shippingAmount) }}</p>
+                                        <p class="price-text shipping-price-text m-0 text-success"><span>(+)</span> {{ format_price($shippingAmount) }}</p>
                                     </div>
                                 </div>
                             @endif
@@ -122,10 +122,10 @@
                             @if (EcommerceHelper::isTaxEnabled() && Cart::instance('cart')->rawTax() > 0)
                                 <div class="row">
                                     <div class="col-8">
-                                        <p class="price-text-label mt-0">{{ __('Tax') }}:</p>
+                                        <p class="price-text-label m-0">{{ __('Tax') }}:</p>
                                     </div>
                                     <div class="col-4 float-end">
-                                        <p class="price-text tax-price-text mt-0">{{ format_price(Cart::instance('cart')->rawTax()) }}</p>
+                                        <p class="price-text tax-price-text m-0 text-danger"><span>(-)</span> {{ format_price(Cart::instance('cart')->rawTax()) }}</p>
                                     </div>
                                 </div>
                             @endif
@@ -141,9 +141,7 @@
                             </div>
                         </div>
                     </div>
-
-                    <hr>
-
+                    <hr class="mt-0" />
                     <div class="mt-3">
                         @include('plugins/ecommerce::themes.discounts.partials.form')
                     </div>

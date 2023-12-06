@@ -25,11 +25,11 @@
             ],
         ],
     ];
-    
+
     if (!$shortcode->app_enabled) {
         $slickConfig['slidesToShow'] = 3;
     }
-    
+
     $posts = get_featured_posts(!$shortcode->app_enabled ? 3 : 2, ['author', 'categories:id,name', 'categories.slugable']);
 @endphp
 
@@ -40,10 +40,10 @@
     <div class="container-xxxl">
         <div class="row">
             <div class="@if ($shortcode->app_enabled) col-lg-8 @else col-12 @endif py-4 py-lg-0">
-                <div class="row justify-content-between align-items-center widget-header ms-0 me-0">
-                    <h2 class="col-auto mb-0 py-2 ps-0">{{ $shortcode->title }}</h2>
+                <div class="row justify-content-between align-items-center">
+                    <h2 class="col-auto mb-0 py-2">{!! BaseHelper::clean($shortcode->title) !!}</h2>
                     <a
-                        class="col-auto pe-0"
+                        class="col-auto"
                         href="{{ get_blog_page_url() }}"
                     >
                         <span class="link-text">{{ __('All Articles') }}
@@ -105,7 +105,7 @@
                                             </div>
                                             <div class="entry-title mb-3 mt-2">
                                                 <p class="h4 text-truncate"><a
-                                                        href="{{ $post->url }}">{{ $post->name }}</a></p>
+                                                        href="{{ $post->url }}">{!! BaseHelper::clean($post->name) !!}</a></p>
                                             </div>
                                             <div class="entry-description">
                                                 <p>{{ Str::words($post->description, 20) }}</p>

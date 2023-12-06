@@ -56,7 +56,11 @@
         .thank-you { margin-bottom: 20px; text-align: center; }
         .order-customer-info p { color: #000; font-size: .75rem; margin-bottom: 3px; display: flex; }
         .order-number-data .od-no {font-size: 1.5rem;text-transform: capitalize; text-decoration: underline; text-align: center; margin-bottom: 50px;}
-        .price-text, .total-text { color: #000000;font-weight: 400; }
+        .price-text span { vertical-align: text-bottom; }
+        .pricing-data .price-text { font-size: 18px; padding-bottom: 15px; }
+        .pricing-data .price-text-label { font-size: 18px; font-weight: 600; }
+        .pricing-data .price-text:after { content: ""; display: block; position: absolute; height: 1px; width: 95%; left: 10px; background: #ccc; margin-top: 2px; }
+        .price-text, .total-text { color: #000000; font-weight: 600; }
         .thank-you-links { text-align: center; }
         .thank-you-links .link-text a { line-height: 1; font-size: 1rem; color: #888; padding: 10px; border-radius: 5px; text-transform: capitalize; text-decoration: underline; font-weight: 600; border: 2px solid rgb(173 173 173); }
     </style>

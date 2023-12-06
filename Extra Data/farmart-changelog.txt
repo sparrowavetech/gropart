@@ -28,6 +28,7 @@ platform/plugins/ecommerce/src/Providers/HookServiceProvider.php
 platform/plugins/ecommerce/src/Services/Products/StoreProductService.php
 platform/plugins/ecommerce/src/Supports/OrderHelper.php
 platform/plugins/ecommerce/src/Supports/InvoiceHelper.php
+platform/plugins/ecommerce/src/Supports/EcommerceHelper.php
 
 platform/plugins/ecommerce/src/Models/Product.php
 platform/plugins/ecommerce/src/Models/OrderProduct.php
@@ -119,76 +120,71 @@ platform/themes/farmart/layouts/default.blade.php
 
 platform/themes/farmart/partials/footer.blade.php
 platform/themes/farmart/partials/header.blade.php
-platform/themes/farmart/partials/ajax-search-results.blade.php
-platform/themes/farmart/partials/language-switcher-full.blade.php
-platform/themes/farmart/partials/page-header.blade.php
 platform/themes/farmart/partials/post-item.blade.php
-platform/themes/farmart/partials/product-categories-select.blade.php
+platform/themes/farmart/partials/page-header.blade.php
 platform/themes/farmart/partials/share-socials.blade.php
+platform/themes/farmart/partials/ajax-search-results.blade.php
+platform/themes/farmart/partials/product-categories-select.blade.php
 
+platform/themes/farmart/partials/ecommerce/product-loop-buttons.blade.php
 platform/themes/farmart/partials/ecommerce/product-cart-form.blade.php
 platform/themes/farmart/partials/ecommerce/product-gallery.blade.php
 platform/themes/farmart/partials/ecommerce/product-item.blade.php
-platform/themes/farmart/partials/ecommerce/product-loop-buttons.blade.php
-platform/themes/farmart/partials/ecommerce/product-pincode-form.blade.php
 platform/themes/farmart/partials/ecommerce/quick-view.blade.php
 
 platform/themes/farmart/views/ecommerce/cart.blade.php
-platform/themes/farmart/views/ecommerce/customers/address/form.blade.php
-platform/themes/farmart/views/ecommerce/customers/address/items.blade.php
 platform/themes/farmart/views/ecommerce/customers/login.blade.php
 platform/themes/farmart/views/ecommerce/customers/master.blade.php
-platform/themes/farmart/views/ecommerce/customers/otp.blade.php
 platform/themes/farmart/views/ecommerce/customers/register.blade.php
+platform/themes/farmart/views/ecommerce/customers/address/items.blade.php
 
-platform/themes/farmart/views/ecommerce/includes/categories.blade.php
 platform/themes/farmart/views/ecommerce/includes/filters.blade.php
+platform/themes/farmart/views/ecommerce/includes/categories.blade.php [Top category enquiry]
 platform/themes/farmart/views/ecommerce/includes/product-items.blade.php
-platform/themes/farmart/views/ecommerce/includes/frequently-bought-together.blade.php
 
-platform/themes/farmart/views/ecommerce/order-tracking.blade.php
 platform/themes/farmart/views/ecommerce/product.blade.php
 platform/themes/farmart/views/ecommerce/products.blade.php
+platform/themes/farmart/views/ecommerce/order-tracking.blade.php
 
-platform/themes/farmart/partials/shortcodes/ads/theme-ads.blade.php (for full ad view)
 platform/themes/farmart/partials/shortcodes/contact-form.blade.php
+platform/themes/farmart/partials/shortcodes/ads/theme-ads.blade.php
 platform/themes/farmart/partials/shortcodes/ecommerce/featured-brands.blade.php
-platform/themes/farmart/partials/shortcodes/ecommerce/featured-product-categories.blade.php
 platform/themes/farmart/partials/shortcodes/ecommerce/featured-products.blade.php
+platform/themes/farmart/partials/shortcodes/ecommerce/featured-product-categories.blade.php
 platform/themes/farmart/partials/shortcodes/ecommerce/flash-sale.blade.php (All Shortcodes)
 platform/themes/farmart/partials/shortcodes/ecommerce/product-category-products.blade.php
 platform/themes/farmart/partials/shortcodes/ecommerce/product-collections.blade.php
 
 platform/themes/farmart/partials/shortcodes/faq.blade.php
-platform/themes/farmart/partials/shortcodes/faq-by-category.blade.php
-platform/themes/farmart/partials/shortcodes/faq-by-category-admin-config.blade.php
-platform/themes/farmart/partials/shortcodes/faq-by-group.blade.php
-platform/themes/farmart/partials/shortcodes/faq-by-group-admin-config.blade.php
-platform/themes/farmart/partials/shortcodes/featured-posts.blade.php
-platform/themes/farmart/partials/shortcodes/includes/autoplay-settings.blade.php
 platform/themes/farmart/partials/shortcodes/sliders.blade.php
+platform/themes/farmart/partials/shortcodes/faq-by-group.blade.php
+platform/themes/farmart/partials/shortcodes/featured-posts.blade.php
+platform/themes/farmart/partials/shortcodes/faq-by-category.blade.php
+platform/themes/farmart/partials/shortcodes/includes/autoplay-settings.blade.php
+platform/themes/farmart/partials/shortcodes/faq-by-group-admin-config.blade.php
+platform/themes/farmart/partials/shortcodes/faq-by-category-admin-config.blade.php
 
 platform/themes/farmart/src/Http/Controllers/FarmartController.php
 
-platform/themes/farmart/views/marketplace/dashboard/layouts/body.blade.php
-platform/themes/farmart/views/marketplace/dashboard/layouts/menu.blade.php
 platform/themes/farmart/views/marketplace/includes/become-vendor-form.blade.php
+platform/themes/farmart/views/marketplace/dashboard/layouts/menu.blade.php
+platform/themes/farmart/views/marketplace/dashboard/layouts/body.blade.php
 platform/themes/farmart/views/marketplace/includes/info-box.blade.php
 platform/themes/farmart/views/marketplace/stores.blade.php
 
 platform/themes/farmart/widgets/ads/templates/frontend.blade.php
-platform/themes/farmart/widgets/custom-menu/templates/frontend.blade.php (footer margins)
 platform/themes/farmart/widgets/site-features/templates/frontend.blade.php
 platform/themes/farmart/widgets/site-info/templates/frontend.blade.php (footer margins)
+platform/themes/farmart/widgets/custom-menu/templates/frontend.blade.php (footer margins)
 
 platform/core/dashboard/resources/views/widgets/stats.blade.php (Design Update)
 platform/packages/theme/resources/views/list.blade.php (Design Update)
 
 
-
-
-
-
+platform/themes/farmart/partials/language-switcher-full.blade.php
+platform/themes/farmart/views/ecommerce/customers/otp.blade.php
+platform/themes/farmart/partials/ecommerce/product-pincode-form.blade.php
+platform/themes/farmart/views/ecommerce/includes/frequently-bought-together.blade.php
 ---------------------------------------------------------------------------------------------
 //Enquiry Product Files in new added
 platform/plugins/ecommerce/src/Enums/EnquiryStatusEnum.php

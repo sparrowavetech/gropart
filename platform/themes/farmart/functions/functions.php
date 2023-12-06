@@ -1,5 +1,6 @@
 <?php
 
+use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Facades\MetaBox;
@@ -8,15 +9,18 @@ use Botble\Marketplace\Models\Store;
 use Botble\Media\Facades\RvMedia;
 use Botble\Menu\Facades\Menu;
 use Botble\SimpleSlider\Models\SimpleSliderItem;
+use Kris\LaravelFormBuilder\FormHelper;
 use Botble\SocialLogin\Facades\SocialService;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Support\Facades\Route;
 
 register_page_template([
     'default' => __('Default'),
+    'default-sidebar' => __('Default with Sidebar'),
     'homepage' => __('Homepage'),
     'full-width' => __('Full Width'),
     'coming-soon' => __('Coming Soon'),
+    'blog-right-sidebar' => __('Blog with Sidebar'),
 ]);
 
 register_sidebar([
@@ -35,6 +39,12 @@ register_sidebar([
     'id' => 'bottom_footer_sidebar',
     'name' => __('Bottom footer sidebar'),
     'description' => __('Widgets in bottom footer sidebar'),
+]);
+
+register_sidebar([
+    'id' => 'default_page_sidebar',
+    'name' => __('Default Page sidebar'),
+    'description' => __('Widgets in Default Page sidebar'),
 ]);
 
 if (is_plugin_active('ecommerce')) {

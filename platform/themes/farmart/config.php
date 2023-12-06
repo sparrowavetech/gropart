@@ -225,12 +225,12 @@ return [
                         'dependencies' => ['jquery'],
                         'version' => $version,
                     ],
-                    'swiper-js' => [
-                        'local' => [
-                            'source' => 'js/swiper-bundle.min.js',
-                            'dependencies' => ['jquery'],
-                        ],
-                        'container' => 'footer',
+                    'container' => 'footer',
+                ],
+                'swiper-js' => [
+                    'local' => [
+                        'source' => 'js/swiper-bundle.min.js',
+                        'dependencies' => ['jquery'],
                     ],
                     'container' => 'footer',
                 ],
