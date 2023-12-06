@@ -211,3 +211,9 @@ if (! defined('INVOICE_PAYMENT_CREATED')) {
 if (! defined('ACTION_AFTER_ORDER_RETURN_STATUS_COMPLETED')) {
     define('ACTION_AFTER_ORDER_RETURN_STATUS_COMPLETED', 'after_order_return_status_completed');
 }
+if (! defined('ENQUIRY_DELETED')) {
+    define('ENQUIRY_DELETED', 'enquiry_deleted');
+}
+if (! defined('ENQUIRY_STATUS_UPDATE')) {
+    define('ENQUIRY_STATUS_UPDATE', 'enquiry_update');
+}

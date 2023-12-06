@@ -125,6 +125,29 @@
                                 {{ format_price(Cart::rawSubTotalByItems($cartItems)) }} </p>
                         </div>
                     </div>
+
+                    @if ($isAvailableShipping)
+                        <div class="row">
+                            <div class="col-6">
+                                <p>{{ __('Shipping fee') }}:</p>
+                            </div>
+                            <div class="col-6 text-end">
+                                <p class="price-text">
+                                    @if (Arr::get($shippingCurrent, 'price') && $isFreeShipping)
+                                        <span
+                                            class="font-italic"
+                                            style="text-decoration-line: line-through;"
+                                        >{{ format_price(Arr::get($shippingCurrent, 'price')) }}</span>
+                                        <span class="font-weight-bold">{{ __('Free shipping') }}</span>
+                                    @else
+                                        <span
+                                            class="font-weight-bold">{{ format_price(Arr::get($shippingCurrent, 'price')) }}</span>
+                                    @endif
+                                </p>
+                            </div>
+                        </div>
+                    @endif
+                    
                     @if (EcommerceHelper::isTaxEnabled())
                         <div class="row">
                             <div class="col-6">
@@ -148,27 +171,6 @@
                         </div>
                     @endif
 
-                    @if ($isAvailableShipping)
-                        <div class="row">
-                            <div class="col-6">
-                                <p>{{ __('Shipping fee') }}:</p>
-                            </div>
-                            <div class="col-6 text-end">
-                                <p class="price-text">
-                                    @if (Arr::get($shippingCurrent, 'price') && $isFreeShipping)
-                                        <span
-                                            class="font-italic"
-                                            style="text-decoration-line: line-through;"
-                                        >{{ format_price(Arr::get($shippingCurrent, 'price')) }}</span>
-                                        <span class="font-weight-bold">{{ __('Free shipping') }}</span>
-                                    @else
-                                        <span
-                                            class="font-weight-bold">{{ format_price(Arr::get($shippingCurrent, 'price')) }}</span>
-                                    @endif
-                                </p>
-                            </div>
-                        </div>
-                    @endif
                     <div class="row">
                         <div class="col-6">
                             <p>{{ __('Total') }}:</p>

@@ -75,6 +75,7 @@ return [
         'invoice_font_family' => 'Invoice font family (Only work for Latin language)',
         'enable_invoice_stamp' => 'Enable invoice stamp?',
         'invoice_support_arabic_language' => 'Support Arabic language in invoice?',
+        'make_phone_field_at_the_checkout_optional' => 'Make phone field at the checkout optional?',
         'disable_order_invoice_until_order_confirmed' => 'Disable order invoice until order confirmed?',
         'vat_number' => 'VAT number',
         'tax_id' => 'Tax ID',
@@ -194,6 +195,9 @@ return [
     'basic_settings' => 'Basic settings',
     'advanced_settings' => 'Advanced settings',
     'product_review_list' => 'Product review list',
+    'change_enquiry_format' => 'Edit Enquiry code format (optional)',
+    'enquiry_id' => 'Enquiry ID',
+    'enquiry_description' => 'Addition Description',
     'forms' => [
         'duplicate' => 'Duplicate',
         'duplicate_success_message' => 'Duplicate product successfully!',

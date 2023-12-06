@@ -247,6 +247,10 @@ Route::group([
                     'uses' => 'DiscountController@postGenerateCoupon',
                 ]);
             });
+            Route::group(['prefix' => 'enquiries', 'as' => 'enquiries.'], function () {
+                Route::resource('', 'EnquiryController')
+                    ->parameters(['' => 'product']);
+            });
 
             Route::get('ajax/product-options', [
                 'as' => 'ajax-product-option-info',

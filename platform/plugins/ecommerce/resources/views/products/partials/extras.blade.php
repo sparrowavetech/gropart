@@ -8,28 +8,30 @@
     <div class="widget-body">
         <div class="form-group mb-3">
             <label class="control-label">{{ trans('plugins/ecommerce::products.related_products') }}</label>
-            <input
-                name="related_products"
-                type="hidden"
-                value="@if ($product) {{ implode(',',$product->products()->allRelatedIds()->toArray()) }} @endif"
-            />
+            <input type="hidden" name="related_products" value="@if ($product) {{ implode(',', $product->products()->allRelatedIds()->toArray()) }} @endif" />
             <div class="box-search-advance product">
                 <div>
-                    <input
-                        class="next-input textbox-advancesearch"
-                        data-target="{{ $dataUrl }}"
-                        type="text"
-                        placeholder="{{ trans('plugins/ecommerce::products.search_products') }}"
-                    >
+                    <input type="text" class="next-input textbox-advancesearch" placeholder="{{ trans('plugins/ecommerce::products.search_products') }}" data-target="{{ $dataUrl }}">
                 </div>
                 <div class="panel panel-default">
 
                 </div>
             </div>
-            @include('plugins/ecommerce::products.partials.selected-products-list', [
-                'products' => $product ? $product->products : collect(),
-                'includeVariation' => false,
-            ])
+            @include('plugins/ecommerce::products.partials.selected-products-list', ['products' => $product ? $product->products : collect(), 'includeVariation' => false, ])
+        </div>
+        <hr>
+        <div class="form-group mb-3">
+            <label class="control-label">{{ trans('plugins/ecommerce::products.frequently_bought_together') }}</label>
+            <input type="hidden" name="frequently_bought_together" value="@if ($product) {{ implode(',', $product->frequentlyBoughtTogether()->allRelatedIds()->toArray()) }} @endif" />
+            <div class="box-search-advance product">
+                <div>
+                    <input type="text" class="next-input textbox-advancesearch" placeholder="{{ trans('plugins/ecommerce::products.search_products') }}" data-target="{{ $dataUrl }}">
+                </div>
+                <div class="panel panel-default">
+
+                </div>
+            </div>
+            @include('plugins/ecommerce::products.partials.selected-products-list', ['products' => $product ? $product->frequentlyBoughtTogether : collect([]), 'includeVariation' => false, ])
         </div>
         <hr>
         <div class="form-group mb-3">

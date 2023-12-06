@@ -125,6 +125,11 @@ class ProductForm extends BaseProductForm
                 'choices' => ProductCategoryHelper::getActiveTreeCategories(),
                 'value' => old('categories', $selectedCategories),
             ])
+            ->add('is_enquiry', 'onOff', [
+                'label'         => trans('plugins/ecommerce::products.form.is_enquiry'),
+                'label_attr'    => ['class' => 'control-label'],
+                'default_value' => false,
+            ])
             ->add('brand_id', 'customSelect', [
                 'label' => trans('plugins/ecommerce::products.form.brand'),
                 'choices' => $brands,

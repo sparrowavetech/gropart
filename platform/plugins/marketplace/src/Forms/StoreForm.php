@@ -6,14 +6,25 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Enums\CustomerStatusEnum;
+use Botble\Marketplace\Enums\ShopTypeEnum;
+use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Customer;
 use Botble\Location\Models\State;
 use Botble\Marketplace\Http\Requests\StoreRequest;
+use Botble\Location\Repositories\Interfaces\StateInterface;
 use Botble\Marketplace\Models\Store;
 
 class StoreForm extends FormAbstract
 {
+    protected CustomerInterface $customerRepository;
+
+    public function __construct(CustomerInterface $customerRepository)
+    {
+        parent::__construct();
+        $this->customerRepository = $customerRepository;
+    }
+
     public function buildForm(): void
     {
         Assets::addScriptsDirectly('vendor/core/plugins/location/js/location.js');
@@ -207,6 +218,19 @@ class StoreForm extends FormAbstract
                         'status' => BaseStatusEnum::PUBLISHED()->label(),
                     ]),
                 ],
+            ])
+            ->add('is_verified', 'onOff', [
+                'label'         => trans('plugins/marketplace::store.forms.is_verified'),
+                'label_attr'    => ['class' => 'control-label'],
+                'default_value' => false,
+            ])
+            ->add('shop_category', 'customSelect', [
+                'label'      => trans('plugins/marketplace::store.forms.shop_category'),
+                'label_attr' => ['class' => 'control-label required'],
+                'attr'       => [
+                    'class' => 'form-control',
+                ],
+                'choices'    => ShopTypeEnum::labels(),
             ])
             ->add('customer_id', 'customSelect', [
                 'label' => trans('plugins/marketplace::store.forms.store_owner'),

@@ -149,6 +149,19 @@
                 </div>
             </div>
 
+            <label class="next-label mb-2">{{ trans('plugins/ecommerce::ecommerce.change_enquiry_format') }}</label>
+            <div class="row">
+                <div class="col-sm-12 mb-3">
+                    <x-core-setting::form-group>
+                        <label class="text-title-field" for="enquiry_code_prefix">{{ trans('plugins/ecommerce::ecommerce.start_with') }}</label>
+                        <div class="next-input--stylized">
+                            <span class="next-input-add-on next-input__add-on--before">#</span>
+                            <input type="text" class="next-input next-input--invisible" name="enquiry_code_prefix" id="enquiry_code_prefix" value="{{ get_ecommerce_setting('enquiry_code_prefix') }}">
+                        </div>
+                    </x-core-setting::form-group>
+                </div>
+            </div>
+
             <div class="row">
                 <div class="col-sm-6">
                     <x-core-setting::select

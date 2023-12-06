@@ -301,7 +301,7 @@ class PublicProductController
 
             return Theme::scope(
                 'ecommerce.search',
-                compact('products', 'query'),
+                compact('products', 'query','condition'),
                 'plugins/ecommerce::themes.search'
             )->render();
         }

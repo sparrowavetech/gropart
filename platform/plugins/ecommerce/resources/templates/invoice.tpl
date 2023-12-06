@@ -41,6 +41,7 @@
 
         .total {
             color: #fb7578;
+            font-weight : 700
         }
 
         .logo-container {
@@ -133,6 +134,10 @@
             border-color: #0a9928;
             color: #0a9928
         }
+        @page {
+            size: A4;
+            margin: 0px 15px ;
+        }
     </style>
 
     {{ invoice_header_filter | raw }}
@@ -158,7 +163,7 @@
         <td>
             <div class="logo-container">
                 {% if logo %}
-                    <img src="{{ logo_full_path }}" style="width:100%; max-width:150px;" alt="site_title">
+                    <img src="{{ logo_full_path }}" style="width:100%; max-width:150px;" alt="{{ 'site_title' }}">
                 {% endif %}
             </div>
         </td>
@@ -236,7 +241,15 @@
         <th class="heading-description">{{ 'plugins/ecommerce::products.form.product'|trans }}</th>
         <th class="heading-description">{{ 'plugins/ecommerce::products.form.options'|trans }}</th>
         <th class="heading-quantity">{{ 'plugins/ecommerce::products.form.quantity'|trans }}</th>
-        <th class="heading-price">{{ 'plugins/ecommerce::products.form.price'|trans }}</th>
+        <th class="heading-price">{{ 'plugins/ecommerce::products.form.price'| trans }}</th>
+        <th class="heading-price">{{ 'plugins/ecommerce::products.form.discount'| trans }}</th>
+        <th class="heading-price">{{ 'plugins/ecommerce::products.form.taxable_price'| trans }}</th>
+        {% if isIgst %}
+           <th class="heading-price">{{ 'plugins/ecommerce::products.form.igst'| trans }}</th>
+        {% else %}
+          <th class="heading-price">{{ 'plugins/ecommerce::products.form.cgst'| trans }}</th>
+          <th class="heading-price">{{ 'plugins/ecommerce::products.form.sgst'| trans }}</th>
+        {% endif %}
         <th class="heading-subtotal">{{ 'plugins/ecommerce::products.form.total'|trans }}</th>
     </tr>
     </thead>
@@ -258,13 +271,23 @@
                 {% endif %}
             </td>
             <td>{{ item.qty }}</td>
-            <td class="right">{{ item.price|price_format }}</td>
-            <td class="bold">{{ item.sub_total|price_format }}</td>
+            <td class="right">{{ item.amount|price_format }}</td>
+            <td class="right">{{ item.discount_amount|price_format }}</td>
+            <td class="right">{{ item.sub_total|price_format }}</td>
+             {% if isIgst %}
+             <td class="right">{{ item.tax_amount|price_format }}</td>
+             {% else %}
+                <td class="right">{{ (item.tax_amount/2)|price_format }}</td>
+                <td class="right">{{ (item.tax_amount/2)|price_format }}</td>
+             {% endif %}
+
+
+            <td class="bold">{{ item.amount|price_format }}</td>
         </tr>
     {% endfor %}
 
     <tr>
-        <td colspan="4" class="right">
+        <td colspan="{{colspan}}" class="right">
             {{ 'plugins/ecommerce::invoice.detail.quantity'|trans }}
         </td>
         <td class="bold">
@@ -273,7 +296,7 @@
     </tr>
 
     <tr>
-        <td colspan="4" class="right">
+        <td colspan="{{colspan}}" class="right">
             {{ 'plugins/ecommerce::products.form.sub_total'|trans }}
         </td>
         <td class="bold">
@@ -283,7 +306,7 @@
 
     {% if invoice.tax_amount > 0 %}
         <tr>
-            <td colspan="4" class="right">
+            <td colspan="{{colspan}}" class="right">
                 {{ 'plugins/ecommerce::products.form.tax'|trans }}
             </td>
             <td class="bold">
@@ -291,22 +314,26 @@
             </td>
         </tr>
     {% endif %}
+    {% if invoice.shipping_amount > 0 %}
     <tr>
-        <td colspan="4" class="right">
+        <td colspan="{{colspan}}" class="right">
             {{ 'plugins/ecommerce::products.form.shipping_fee'|trans }}
         </td>
         <td class="bold">
             {{ invoice.shipping_amount|price_format }}
         </td>
     </tr>
+    {% endif %}
+    {% if invoice.discount_amount > 0 %}
     <tr>
-        <td colspan="4" class="right">
+        <td colspan="{{colspan}}" class="right">
             {{ 'plugins/ecommerce::products.form.discount'|trans }}
         </td>
         <td class="bold">
             {{ invoice.discount_amount|price_format }}
         </td>
     </tr>
+    {% endif %}
     </tbody>
 </table>
 

@@ -23,6 +23,10 @@
                     </div>
                 </div>
 
+                <div class="thank-you-links mb-4">
+                    <span class="link-text"><a href="{{ route('customer.overview') }}">{{ __('Customer dashboard') }}</a></span>
+                </div>
+
                 @include('plugins/ecommerce::orders.thank-you.customer-info', [
                     'order' => $orders,
                     'isShowShipping' => false,
@@ -99,8 +103,7 @@
                                 <p>{{ __('Total amount') }}:</p>
                             </div>
                             <div class="col-6">
-                                <p class="total-text raw-total-text text-end"> {{ format_price($orders->sum('amount')) }}
-                                </p>
+                                <p class="total-text raw-total-text text-end"> {{ format_price($orders->sum('amount')) }}</p>
                             </div>
                         </div>
                     </div>

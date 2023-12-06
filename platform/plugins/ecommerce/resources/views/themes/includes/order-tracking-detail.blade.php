@@ -2,6 +2,7 @@
     <div class="customer-order-detail">
         <div class="row">
             <div class="col-md-6">
+                <h5>{{ __('Order information') }}</h5>
                 <p>
                     <span class="d-inline-block me-1">{{ __('Order number') }}: </span>
                     <strong>{{ $order->code }}</strong>
@@ -59,6 +60,7 @@
                         <th class="text-center">{{ __('Image') }}</th>
                         <th>{{ __('Product') }}</th>
                         <th class="text-center">{{ __('Amount') }}</th>
+                        <th class="text-center">{{ __('Tax') }}</th>
                         <th
                             class="text-end"
                             style="width: 100px"
@@ -142,11 +144,12 @@
                                     </p>
                                 @endif
                             </td>
-                            <td class="text-center">{{ $orderProduct->amount_format }}</td>
+                            <td>{{ format_price($orderProduct->price) }}</td>
+                            <td>{{ format_price($orderProduct->tax_amount) }}</td>
                             <td class="text-center">{{ $orderProduct->qty }}</td>
                             <td class="money text-end">
                                 <strong>
-                                    {{ $orderProduct->total_format }}
+                                    {{ format_price(($orderProduct->price * $orderProduct->qty)+$orderProduct->tax_amount) }}
                                 </strong>
                             </td>
                         </tr>

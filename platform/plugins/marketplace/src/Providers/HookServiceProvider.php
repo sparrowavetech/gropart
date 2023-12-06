@@ -2,12 +2,13 @@
 
 namespace Botble\Marketplace\Providers;
 
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
+use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Base\Models\BaseModel;
 use Botble\Ecommerce\Enums\CustomerStatusEnum;
 use Botble\Ecommerce\Models\Customer;
 use Botble\Ecommerce\Models\Discount;
@@ -25,6 +26,10 @@ use Botble\Marketplace\Models\Revenue;
 use Botble\Marketplace\Models\Store;
 use Botble\Marketplace\Models\VendorInfo;
 use Botble\Marketplace\Models\Withdrawal;
+use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
+use Botble\Marketplace\Repositories\Interfaces\VendorInfoInterface;
+use Botble\Marketplace\Repositories\Interfaces\WithdrawalInterface;
+use Botble\Slug\Models\Slug;
 use Botble\Media\Facades\RvMedia;
 use Botble\Slug\Facades\SlugHelper;
 use Botble\Table\Abstracts\TableAbstract;

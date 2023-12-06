@@ -48,6 +48,15 @@ class StoreTable extends TableAbstract
             ->editColumn('products_count', function ($item) {
                 return $item->products_count;
             })
+            ->editColumn('shop_category', function ($item) {
+                return BaseHelper::clean($item->shop_category->toHtml());
+            })
+            ->editColumn('is_verified', function ($item) {
+                $lable = $item->is_verified == 1 ?trans('plugins/marketplace::store.verified'):trans('plugins/marketplace::store.un_verified');
+                $class = $item->is_verified == 1 ?'success':'warning';
+                return Html::tag('span',$lable , ['class' => 'label-'.$class.' status-label'])
+                ->toHtml();
+            })
             ->addColumn('customer_name', function ($item) {
                 if (! $item->customer->name) {
                     return '&mdash;';
@@ -70,6 +79,8 @@ class StoreTable extends TableAbstract
                 'name',
                 'created_at',
                 'status',
+                'is_verified',
+                'shop_category',
                 'customer_id',
             ])
             ->with(['customer', 'customer.vendorInfo'])
@@ -98,6 +109,20 @@ class StoreTable extends TableAbstract
             Column::make('customer_name')
                 ->title(trans('plugins/marketplace::marketplace.vendor'))
                 ->alignStart()
+                ->orderable(false)
+                ->searchable(false)
+                ->printable(false),
+            Column::make('shop_category')
+                ->title(trans('plugins/marketplace::store.forms.shop_category'))
+                ->alignStart()
+                ->width('100')
+                ->orderable(false)
+                ->searchable(false)
+                ->printable(false),
+            Column::make('is_verified')
+                ->title(trans('plugins/marketplace::store.forms.is_verified'))
+                ->alignStart()
+                ->width('100')
                 ->orderable(false)
                 ->searchable(false)
                 ->printable(false),

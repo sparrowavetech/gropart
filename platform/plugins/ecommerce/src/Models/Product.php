@@ -61,6 +61,7 @@ class Product extends BaseModel
         'tax_id',
         'views',
         'stock_status',
+        'is_enquiry',
         'barcode',
         'cost_per_item',
         'generate_license_code',
@@ -164,6 +165,16 @@ class Product extends BaseModel
         return $this->belongsToMany(
             Product::class,
             'ec_product_cross_sale_relations',
+            'from_product_id',
+            'to_product_id'
+        );
+    }
+
+    public function frequentlyBoughtTogether(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Product::class,
+            'ec_product_frequently_bought_together',
             'from_product_id',
             'to_product_id'
         );
@@ -525,7 +536,8 @@ class Product extends BaseModel
             return $this->front_sale_price;
         }
 
-        return $this->front_sale_price + $this->front_sale_price * ($this->total_taxes_percentage / 100);
+        //return $this->front_sale_price + $this->front_sale_price * ($this->total_taxes_percentage / 100);
+        return $this->front_sale_price;
     }
 
     public function getPriceWithTaxesAttribute(): ?float
@@ -534,7 +546,8 @@ class Product extends BaseModel
             return $this->price;
         }
 
-        return $this->price + $this->price * ($this->total_taxes_percentage / 100);
+        //return $this->price + $this->price * ($this->total_taxes_percentage / 100);
+        return $this->price;
     }
 
     public function getTotalTaxesPercentageAttribute()

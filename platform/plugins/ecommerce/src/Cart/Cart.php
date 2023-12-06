@@ -369,7 +369,12 @@ class Cart
         $content = $this->getContent();
 
         return $content->reduce(function ($subTotal, CartItem $cartItem) {
-            return $subTotal + ($cartItem->qty * $cartItem->price);
+            //  return $subTotal + ($cartItem->qty * $cartItem->price);
+            if(setting('ecommerce_display_product_price_including_taxes') == 1){
+                return $subTotal + ($cartItem->qty * ($cartItem->price-$cartItem->tax));
+            } else {
+                return $subTotal + ($cartItem->qty * ($cartItem->price));
+            }
         }, 0);
     }
 
@@ -379,7 +384,12 @@ class Cart
     public function rawSubTotalByItems($content)
     {
         return $content->reduce(function ($subTotal, CartItem $cartItem) {
-            return $subTotal + ($cartItem->qty * $cartItem->price);
+            //  return $subTotal + ($cartItem->qty * $cartItem->price);
+            if(setting('ecommerce_display_product_price_including_taxes') == 1){
+                return $subTotal + ($cartItem->qty * ($cartItem->price-$cartItem->tax));
+            } else {
+                return $subTotal + ($cartItem->qty * ($cartItem->price));
+            }
         }, 0);
     }
 
@@ -636,7 +646,12 @@ class Cart
         $content = $this->getContent();
 
         $subTotal = $content->reduce(function ($subTotal, CartItem $cartItem) {
-            return $subTotal + ($cartItem->qty * $cartItem->price);
+            //  return $subTotal + ($cartItem->qty * $cartItem->price);
+            if(setting('ecommerce_display_product_price_including_taxes') == 1){
+                return $subTotal + ($cartItem->qty * ($cartItem->price-$cartItem->tax));
+            } else {
+                return $subTotal + ($cartItem->qty * ($cartItem->price));
+            }
         }, 0);
 
         return format_price($subTotal);

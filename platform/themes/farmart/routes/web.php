@@ -43,6 +43,15 @@ Route::group(['controller' => FarmartController::class, 'middleware' => ['web', 
 
                 Route::post('ajax/contact-seller', 'ajaxContactSeller')
                     ->name('contact-seller');
+                
+                Route::get('get-combo-price/{amt?}', [
+                    'uses' => 'ajaxGetComboPrice',
+                    'as'   => 'get-combo-price',
+                ]);
+                Route::get('check-pincode/{from?}/{to?}', [
+                    'uses' => 'ajaxCheckPincode',
+                    'as'   => 'check-pincode',
+                ]);
 
                 Route::get('products-by-collection/{id}', 'ajaxGetProductsByCollection')
                     ->name('products-by-collection')

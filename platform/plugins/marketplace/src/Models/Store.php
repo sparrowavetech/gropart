@@ -4,11 +4,14 @@ namespace Botble\Marketplace\Models;
 
 use Botble\Base\Casts\SafeContent;
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Marketplace\Enums\ShopTypeEnum;
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Supports\Avatar;
+use Botble\Base\Traits\EnumCastable;
 use Botble\Ecommerce\Models\Customer;
 use Botble\Ecommerce\Models\Discount;
 use Botble\Ecommerce\Models\Order;
+use Botble\Ecommerce\Models\Enquiry;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Traits\LocationTrait;
 use Botble\Media\Facades\RvMedia;
@@ -41,10 +44,13 @@ class Store extends BaseModel
         'status',
         'company',
         'zip_code',
+        'is_verified',
+        'shop_category'
     ];
 
     protected $casts = [
         'status' => BaseStatusEnum::class,
+        'shop_category' => ShopTypeEnum::class,
         'name' => SafeContent::class,
         'description' => SafeContent::class,
         'content' => SafeContent::class,
@@ -105,6 +111,11 @@ class Store extends BaseModel
         return $this
             ->hasMany(Product::class)
             ->join('ec_reviews', 'ec_products.id', '=', 'ec_reviews.product_id');
+    }
+
+    public function enquires(): HasMany
+    {
+        return $this->hasMany(Enquiry::class);
     }
 
     protected function uploadFolder(): Attribute

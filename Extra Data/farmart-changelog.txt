@@ -54,28 +54,28 @@ platform/plugins/ecommerce/resources/views/themes/customers/master.blade.php
 platform/plugins/ecommerce/resources/views/themes/discounts/partials/apply-coupon.blade.php (Design update)
 platform/plugins/ecommerce/resources/views/themes/includes/order-tracking-detail.blade.php
 
-platform/plugins/ecommerce/resources/lang/en/products.php
-platform/plugins/ecommerce/resources/lang/en/order.php
-platform/plugins/ecommerce/resources/lang/en/ecommerce.php
-platform/plugins/ecommerce/resources/lang/en/customer.php
-platform/plugins/ecommerce/resources/lang/en/email.php
-
-platform/plugins/ecommerce/config/permissions.php
-platform/plugins/ecommerce/config/email.php
-
 platform/plugins/ecommerce/helpers/products.php
 platform/plugins/ecommerce/helpers/order.php
 platform/plugins/ecommerce/helpers/constants.php
 
-platform/plugins/ecommerce/resources/templates/invoice.tpl
+platform/plugins/ecommerce/config/permissions.php
+platform/plugins/ecommerce/config/email.php
 
 platform/plugins/ecommerce/routes/base.php
 platform/plugins/ecommerce/routes/cart.php
 platform/plugins/ecommerce/routes/order.php
 platform/plugins/ecommerce/routes/customer.php
 
+platform/plugins/ecommerce/resources/lang/en/products.php
+platform/plugins/ecommerce/resources/lang/en/order.php
+platform/plugins/ecommerce/resources/lang/en/ecommerce.php
+platform/plugins/ecommerce/resources/lang/en/customer.php
+platform/plugins/ecommerce/resources/lang/en/email.php
+
+platform/plugins/ecommerce/resources/templates/invoice.tpl
 
 
+------------------------------------------------------------------------------
 platform/plugins/marketplace/config/email.php
 
 platform/plugins/marketplace/resources/lang/en/store.php
@@ -101,9 +101,30 @@ platform/plugins/marketplace/src/Tables/StoreTable.php
 platform/plugins/marketplace/database/migrations/2022_11_07_233701_add_is_verified_to_mp_stores_table.php
 platform/plugins/marketplace/database/migrations/2022_11_10_000650_add_shop_category_to_mp_store_table.php
 
+
+
+----------------------------------------------------------------------------------------------------
+platform/themes/farmart/routes/web.php
+
+platform/core/base/resources/lang/en/tables.php
+platform/core/base/resources/lang/en/enums.php
+
+platform/core/base/src/Enums/BaseStatusEnum.php
+
+platform/plugins/faq/helpers/constants.php
+
 platform/themes/farmart/functions/functions.php
 platform/themes/farmart/functions/shortcodes.php
 platform/themes/farmart/layouts/default.blade.php
+
+platform/themes/farmart/partials/footer.blade.php
+platform/themes/farmart/partials/header.blade.php
+platform/themes/farmart/partials/ajax-search-results.blade.php
+platform/themes/farmart/partials/language-switcher-full.blade.php
+platform/themes/farmart/partials/page-header.blade.php
+platform/themes/farmart/partials/post-item.blade.php
+platform/themes/farmart/partials/product-categories-select.blade.php
+platform/themes/farmart/partials/share-socials.blade.php
 
 platform/themes/farmart/partials/ecommerce/product-cart-form.blade.php
 platform/themes/farmart/partials/ecommerce/product-gallery.blade.php
@@ -112,14 +133,22 @@ platform/themes/farmart/partials/ecommerce/product-loop-buttons.blade.php
 platform/themes/farmart/partials/ecommerce/product-pincode-form.blade.php
 platform/themes/farmart/partials/ecommerce/quick-view.blade.php
 
-platform/themes/farmart/partials/ajax-search-results.blade.php
-platform/themes/farmart/partials/footer.blade.php
-platform/themes/farmart/partials/header.blade.php
-platform/themes/farmart/partials/language-switcher-full.blade.php
-platform/themes/farmart/partials/page-header.blade.php
-platform/themes/farmart/partials/post-item.blade.php
-platform/themes/farmart/partials/product-categories-select.blade.php
-platform/themes/farmart/partials/share-socials.blade.php
+platform/themes/farmart/views/ecommerce/cart.blade.php
+platform/themes/farmart/views/ecommerce/customers/address/form.blade.php
+platform/themes/farmart/views/ecommerce/customers/address/items.blade.php
+platform/themes/farmart/views/ecommerce/customers/login.blade.php
+platform/themes/farmart/views/ecommerce/customers/master.blade.php
+platform/themes/farmart/views/ecommerce/customers/otp.blade.php
+platform/themes/farmart/views/ecommerce/customers/register.blade.php
+
+platform/themes/farmart/views/ecommerce/includes/categories.blade.php
+platform/themes/farmart/views/ecommerce/includes/filters.blade.php
+platform/themes/farmart/views/ecommerce/includes/product-items.blade.php
+platform/themes/farmart/views/ecommerce/includes/frequently-bought-together.blade.php
+
+platform/themes/farmart/views/ecommerce/order-tracking.blade.php
+platform/themes/farmart/views/ecommerce/product.blade.php
+platform/themes/farmart/views/ecommerce/products.blade.php
 
 platform/themes/farmart/partials/shortcodes/ads/theme-ads.blade.php (for full ad view)
 platform/themes/farmart/partials/shortcodes/contact-form.blade.php
@@ -139,27 +168,7 @@ platform/themes/farmart/partials/shortcodes/featured-posts.blade.php
 platform/themes/farmart/partials/shortcodes/includes/autoplay-settings.blade.php
 platform/themes/farmart/partials/shortcodes/sliders.blade.php
 
-platform/themes/farmart/routes/web.php
-
 platform/themes/farmart/src/Http/Controllers/FarmartController.php
-
-platform/themes/farmart/views/ecommerce/cart.blade.php
-platform/themes/farmart/views/ecommerce/customers/address/form.blade.php
-platform\themes\farmart\views\ecommerce\customers\address\items.blade.php
-platform/themes/farmart/views/ecommerce/customers/login.blade.php
-platform/themes/farmart/views/ecommerce/customers/master.blade.php
-platform/themes/farmart/views/ecommerce/customers/otp.blade.php
-platform/themes/farmart/views/ecommerce/customers/register.blade.php
-
-platform\themes\farmart\views\ecommerce\includes\categories.blade.php
-platform/themes/farmart/views/ecommerce/includes/filters.blade.php
-platform/themes/farmart/views/ecommerce/includes/product-items.blade.php
-platform/themes/farmart/views/ecommerce/includes/frequently-bought-together.blade.php
-
-platform/themes/farmart/views/ecommerce/order-tracking.blade.php
-platform/themes/farmart/views/ecommerce/product.blade.php
-platform/themes/farmart/views/ecommerce/products.blade.php
-
 
 platform/themes/farmart/views/marketplace/dashboard/layouts/body.blade.php
 platform/themes/farmart/views/marketplace/dashboard/layouts/menu.blade.php
@@ -167,25 +176,21 @@ platform/themes/farmart/views/marketplace/includes/become-vendor-form.blade.php
 platform/themes/farmart/views/marketplace/includes/info-box.blade.php
 platform/themes/farmart/views/marketplace/stores.blade.php
 
-platform\themes\farmart\widgets\ads\templates\frontend.blade.php
+platform/themes/farmart/widgets/ads/templates/frontend.blade.php
 platform/themes/farmart/widgets/custom-menu/templates/frontend.blade.php (footer margins)
 platform/themes/farmart/widgets/site-features/templates/frontend.blade.php
 platform/themes/farmart/widgets/site-info/templates/frontend.blade.php (footer margins)
 
-platform/plugins/sms/
-
 platform/core/dashboard/resources/views/widgets/stats.blade.php (Design Update)
 platform/packages/theme/resources/views/list.blade.php (Design Update)
 
-platform/core/base/resources/lang/en/tables.php
-platform/core/base/resources/lang/en/enums.php
-
-platform/core/base/src/Enums/BaseStatusEnum.php
-
-platform/plugins/faq/helpers/constants.php
 
 
-//Enquiry Product Files
+
+
+
+---------------------------------------------------------------------------------------------
+//Enquiry Product Files in new added
 platform/plugins/ecommerce/src/Enums/EnquiryStatusEnum.php
 platform/plugins/ecommerce/src/Http/Controllers/EnquiryController.php
 platform/plugins/ecommerce/src/Http/Requests/EnquiryRequest.php
@@ -216,6 +221,11 @@ platform/plugins/marketplace/src/Tables/EnquiryTable.php
 
 platform/plugins/marketplace/resources/views/themes/dashboard/enquires/edit.blade.php
 platform/plugins/marketplace/resources/email-templates/store_new_enquiry.tpl
+
+
+
+
+
 
 
 http://sms.primeclick.in/api/mt/SendSMS?user=gropart&password=Gropart%402022&senderid=GROPRT&channel=trans&DCS=0&flashsms=0&number=91717905##&text=Welcome 1234, Your OTP for registration with GroPart is: 4526. Regards GROPART&route=15&DLTTemplateId=1707165174288875317&PEID=1701165148150019501
