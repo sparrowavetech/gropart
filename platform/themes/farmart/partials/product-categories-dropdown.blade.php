@@ -1,4 +1,5 @@
 @php
+    $categories = $categories->where('is_enquiry','=' ,0);
     $groupedCategories = $categories->groupBy('parent_id');
 
     $currentCategories = $groupedCategories->get(0);

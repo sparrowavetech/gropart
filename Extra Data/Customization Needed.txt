@@ -1,55 +1,105 @@
 Things to fix in gropart
+1. vendor panel drop file not working - fixed
+2. Google Analytics fixed
+3. Some setting issue fixed
+4. Auto Content generate fixed
+5. State and city ki id aa rhi hai...esme name aana chahiye - fixed
+6. out of stock ke time upar wali tab me dono button disable nahi hai jab ki niche wale dono disable hai - fixed
+7. Need to fix gerate thumbnail issue - fixed
+8. Vender panel me tags ka text box proper display nahi ho rha hai - fixed
+9. Fix shipping rule based on location
+10. Fix some missing data in invoice
+11. Add slugs translation
+12. Add stores list shortcode
+13. Improve multi-language
+14. Add option to generate order invoice
+15. Add tax by countries
+16. Add option to apply coupon automatically via URL
+17. Edit and delete option coupon table
+18. Fix city field at the checkout page
+19. Improve discounts issue
+20. Improve product filters
+21. Improve core & performance for page loading
+22. Introduced some new plugins of openAI and notifications
+23. Improve locale/translation download
+24. Improve Analytics widgets (New google API)
+25. Improve email template
+26. Improve sitemap, split blog posts sitemap to multiple files
+27. Improve social login buttons
+28. Improve sticky header
+29. Improve recently viewed products shortcode
+30. Improve price filter, its dynamic now (maximum price for filter will be the product max price)
+31. Add option do duplicate product
+32. Improt, export buttons at tables in admin
+33. System cleaner in admin
+34. Direct code file editor in admin
+35. Add reviews table in customer detail page
+36. Customer details, more option added in admin panel
+37. Add missing math captcha in registration page
+38. Fix timeout issue when importing location data
+39. Fix sort product categories
+40. Fix discount for specific product
+41. Allow to sort product images in vendor dashboard
+42. Add email notification when order delivered
+43. Add cronjob setting instruction
+44. Add option to hide vendor social links
+45. Improve admin notification: only keep notifications in 30 days
+46. Improve general setting pages, ecommerce setting, advance ecommerce setting, marketplace setting
+47. Add theme guidelines https://prnt.sc/TSDJWM4bnLjX (While login with admin)
+48. Fix watermark issues: missing watermark for images in sub-folder
+49. Fix shipping options in order creation
+50. Fix shipping when free shipping is available
+51. Clear shipping options cache when updating shipping info
+52. Option added to Allow vendor to manage shipping also
+53. Improve sitemap (add sitemap indexes) for SEO Purpose
+54. Added more plugins and options for advance SEO
+55. Fallback option for Google Fonts cache issue in page optimisation
+56. Fix bug download images in Admin -> Media
+57. Fixed some permission issues for user roles
+58. Add language switcher on mobile screen
+59. Improve loading performance, general setting compression option added
+60. Improved guest checkout in front end
 
-1. In Product Details Page - Need to integrate backorder products
+16. fix side button lenght in mobile front where change lang, whatsapp and track is coming - fixed
+20. Frequently bought together issue in total - fixed
 
-2. Activating SMS Plugin causing issue in setting page admin
 
-3. Error in activation of ecommerce plugin while pickrr is enabled
 
-4. Add a condition in invoice helper for calculation of tax breakup by state if marketplace disabled
+1. Indian GST Invoice format and layout
 
-5. Enquiry me product category only enquiry wali hi lani hai in sidebar and top categories
+2. Issue in enquiry cateogry $condition
 
-6. Make enquiry page route dynamic setting in admin for enquiry products list page
+3. Featured Coupon should dynamic come on front end
 
-7. Need a option on Login to allow user to login with mobile or email both but mobile number should be verified while signing up to login with mobile
+12. Need to fix UI of select box variation product detials page - pending
 
-8. vendor panel drop file not working
+14. Invoice me Product table proper nahi aa rhi hai - pending
 
-9. Enquirable products relative product, relative sale, fbt, cross sale me nhi dikhna chahiye*
+15. change paypal to payment UPI in vendor panel withdraw option dropdown - pending
 
-10. State and city ki id aa rhi hai...esme name aana chahiye
+17. Need pop up to come automatically first time when visiting home page only for language change - pending
 
-11. SMS Gateway plugin issue kar rha hai admin ki settings me, need to fix
+18. Google Form link in marketplace dashboard - pending
 
-12. Need scroller in admin menu
+19. Frequently bought product me other products me review count nahi aa rha hai - pending
 
-13. out of stock ke time upar wali tab me dono button disable nahi hai jab ki niche wale dono disable hai
+21. Need to integrate WebApp APK Bundle
 
-14. Need to fix thumbnail issue
-
-15. Need a option in coupons to show at checkout and cart page by admin
-
-16. Need to check fractionable shipping paramenter in admin
-
-17. Need to fix UI of select box variation product detials page
-
-18. 03 Vender panel me tags ka text box proper display nahi ho rha hai
-
-19. Invoice me Product table proper nahi aa rhi hai
-
-20. change paypal to payment UPI in vendor panel withdraw option dropdown
-
-21. fix side button lenght in mobile front where change lang, whatsapp and track is coming
-
-22. Need pop up to come automatically first time when visiting home page only for language change
-
-23. Need a option on Login to allow user to login with mobile or email both but mobile number should be verified while signing up to login with mobile
-
-24. Need to improve category for not coming enquiry category in top and need product category tab in product list page of enquiry
-
-26. Google Form link in marketplace dashboard
-
-27. Add a condition in invoice helper to show tax breakup for state if marketplace disabled
-
-30. Need to integrate WebApp APK Bundle
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+In Product Details Page - Need to integrate backorder products (Notification for upcoming products)
+Integrate firebase sms for Login with mobile and otp, register with mobile and otp, order notification on sms with firebase
+SMS Gateway plugin issue kar rha hai admin ki settings me, need to fix
+Need fixed sidebar scroller in admin menu
+Complete checking of Cross Browser Compatibility and Cross Device Compatibility for responsiveness of site (Need to be fixed in last phase)
+Improve Mailers Layout Format, Invoice Format for Gropart to send customer
+On the product detail page we have one ad on the right side of the page. Now I need this ad repeatedly one by one below this ad. That’s why I have created another ad from the admin panel, set url and location but it did not show there.
+“Product related to this item” section and Features CTA in footer in Enquiry Page, need to remove this.
+Border is not coming in some product showcase front end 
+Increase size of grid images and put at least Products in a row (in admin panel while product adding) - need more clearification
+Floating button need to color full and increase height in web and mobile view - need more clearification
+Increase Size of grid in enquiry for equipment page
+Register button will disable till user cannot press checkmark of terms and condition
+Need to Change Menu like trade India website - need more clearification
+Add the ‘move’ option in the admin panel where we can move any images in any folder
+Website base options in hindi version
+Remove price, ratings, wishlist, compare in enquiry products

@@ -1,4 +1,4 @@
-<div class="product-gallery product-gallery--with-images row">
+<div class="product-gallery product-gallery--with-images row @if($product->is_enquiry == 1) product-enquiry-gallery @endif">
     <div class="product-gallery__wrapper">
         @forelse ($productImages as $img)
             <div class="product-gallery__image item">

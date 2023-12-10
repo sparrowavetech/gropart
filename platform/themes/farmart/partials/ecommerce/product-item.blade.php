@@ -42,7 +42,7 @@
         <h3 class="product__title">
             <a href="{{ $product->url }}" tabindex="0">{!! BaseHelper::clean($product->name) !!}</a>
         </h3>
-        @if (EcommerceHelper::isReviewEnabled())
+        @if (EcommerceHelper::isReviewEnabled() && $product->is_enquiry == 0)
             {!! Theme::partial('star-rating', ['avg' => $product->reviews_avg, 'count' => $product->reviews_count]) !!}
         @endif
         {!! Theme::partial('ecommerce.product-price', compact('product')) !!}

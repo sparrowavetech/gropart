@@ -1115,7 +1115,8 @@ class EcommerceHelper
                 'products' => function ($query) use ($categoryIds) {
                     if ($categoryIds) {
                         $query->whereHas('categories', function ($query) use ($categoryIds) {
-                            $query->whereIn('ec_product_categories.id', $categoryIds);
+                            $query
+                            ->whereIn('ec_product_categories.id', $categoryIds);
                         });
                     }
                 },

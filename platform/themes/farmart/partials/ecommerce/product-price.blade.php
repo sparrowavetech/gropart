@@ -1,3 +1,4 @@
+@if($product->is_enquiry == 0)
 <span class="product-price">
     <span class="product-price-sale d-flex align-items-center @if (!$product->isOnSale()) d-none @endif">
         <del aria-hidden="true">
@@ -23,3 +24,4 @@
         </span>
     </span>
 </span>
+@endif

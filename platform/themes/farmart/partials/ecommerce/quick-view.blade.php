@@ -1,11 +1,6 @@
 <div class="container product-detail-container">
     <div class="row">
-        <div class="col-md-6">
-            <div class="px-1 py-1 px-lg-5 py-lg-5 py-md-1 my-lg-5 my-md-1 my-2 mb-4">
-                {!! Theme::partial('ecommerce.product-gallery', compact('product', 'productImages')) !!}
-            </div>
-        </div>
-        <div class="col-md-6">
+        <div class="col-md-12">
             <div class="product-modal-entry product-details">
                 <div class="entry-product-header">
                     <div class="product-header-left">
@@ -23,7 +18,13 @@
                         </div>
                     </div>
                 </div>
-                {!! Theme::partial('ecommerce.product-price', compact('product')) !!}
+            </div>
+        </div>
+        <div class="col-md-6">
+            {!! Theme::partial('ecommerce.product-gallery', compact('product', 'productImages')) !!}
+        </div>
+        <div class="col-md-6">
+            <div class="product-modal-entry product-details">
 
                 @if (is_plugin_active('marketplace') && $product->store_id)
                     <div class="product-meta-sold-by my-2">
@@ -37,12 +38,10 @@
                 @endif
 
                 {!! Theme::partial('ecommerce.product-availability', compact('product', 'productVariation')) !!}
-
-                <div class="product-details__short-description">
-                    {!! apply_filters('ecommerce_before_product_description', null, $product) !!}
-                    {!! BaseHelper::clean($product->description) !!}
-                    {!! apply_filters('ecommerce_after_product_description', null, $product) !!}
+                <div class="mt-4">
+                    {!! Theme::partial('ecommerce.product-price', compact('product')) !!}
                 </div>
+
                 {!! Theme::partial(
                     'ecommerce.product-cart-form',
                     compact('product', 'wishlistIds', 'selectedAttrs') + [
@@ -73,13 +72,19 @@
                         @endforeach
                     </div>
                 @endif
-
+                @if (theme_option('social_share_enabled', 'yes') == 'yes')
+                    <div class="mt-0">
+                        {!! Theme::partial('share-socials', compact('product')) !!}
+                    </div>
+                @endif
             </div>
-            @if (theme_option('social_share_enabled', 'yes') == 'yes')
-                <div class="mt-5">
-                    {!! Theme::partial('share-socials', compact('product')) !!}
-                </div>
-            @endif
+        </div>
+        <div class="col-md-12">
+            <div class="product-details__short-description">
+                {!! apply_filters('ecommerce_before_product_description', null, $product) !!}
+                {!! BaseHelper::clean($product->description) !!}
+                {!! apply_filters('ecommerce_after_product_description', null, $product) !!}
+            </div>
         </div>
     </div>
 </div>

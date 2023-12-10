@@ -1,3 +1,4 @@
+@if($product->is_enquiry == 0)
 <div class="product-loop__buttons">
     <div class="quick-view-button product-loop_button product-quick-view-button">
         <a class="quick-view product-loop_action" href="#"
@@ -48,7 +49,7 @@
         </div>
     @endif
     <div class="product-loop_button bulk-order-button">
-        <a class="product-loop_action" href="/bulk-enquiry?pid={{($product->is_variation || !$product->defaultVariation->product_id) ? $product->id : $product->defaultVariation->product_id}}" title="{{ __('Bulk Order') }}" data-bs-toggle="tooltip">
+        <a class="product-loop_action" href="{{ url('bulk-enquiry') }}?pid={{($product->is_variation || !$product->defaultVariation->product_id) ? $product->id : $product->defaultVariation->product_id}}" title="{{ __('Bulk Order') }}" data-bs-toggle="tooltip">
             <div class="product-loop_icon">
                 <i class="icon-server"></i>
             </div>
@@ -56,3 +57,4 @@
         </a>
     </div>
 </div>
+@endif

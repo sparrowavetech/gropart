@@ -1,9 +1,12 @@
 {
     "Botble\\EditLock\\Supports\\EditLock": [
-        "8dec79f4f9a41c4523197a63aa465e315d9bfe46484e71726816a6e852d2666c"
+        "8dec79f4f9a41c4523197a63aa465e315d9bfe46484e71726816a6e852d2666c",
+        "8dec79f4f9a41c4523197a63aa465e316bed2377d0477fa7ac3cb522534c3276"
     ],
     "Botble\\Ecommerce\\Services\\HandleShippingFeeService": [
         "66d6c800acf0bbfe034c13e9e2145ba380edfbcfaeb07dc8c18af18b524b311f",
-        "66d6c800acf0bbfe034c13e9e2145ba3a6ec2fbcec26a321aad6ab9988e9bb70"
+        "66d6c800acf0bbfe034c13e9e2145ba3a6ec2fbcec26a321aad6ab9988e9bb70",
+        "66d6c800acf0bbfe034c13e9e2145ba3066ff1400b9e87550b0ad78e65154638",
+        "66d6c800acf0bbfe034c13e9e2145ba3da9947e3f6bd99806c65150d293efdeb"
     ]
 }

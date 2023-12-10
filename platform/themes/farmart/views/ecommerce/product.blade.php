@@ -8,10 +8,10 @@
     <div class="bg-light py-md-5 px-lg-3 px-2">
         <div class="container-xxxl rounded-7 bg-white py-lg-5 py-md-4 py-3 px-3 px-md-4 px-lg-5">
             <div class="row">
-                <div class="col-lg-5 col-md-12 mb-md-5 pb-md-5 mb-3">
+                <div class="@if($product->is_enquiry == 0) mb-md-5 pb-md-5 mb-3 @endif col-lg-5 col-md-12">
                     {!! Theme::partial('ecommerce.product-gallery', compact('product', 'productImages')) !!}
                 </div>
-                <div class="col-lg-4 col-md-12 ps-4 product-details-content">
+                <div class="@if($product->is_enquiry == 0) col-lg-4 @else col-lg-7 @endif col-md-12 ps-4 product-details-content">
                     <div class="product-details js-product-content">
                         <div class="entry-product-header">
                             <div class="product-header-left">
@@ -25,7 +25,7 @@
                                     </div>
                                 @endif
                                 <div class="product-entry-meta">
-                                    @if (EcommerceHelper::isReviewEnabled())
+                                    @if (EcommerceHelper::isReviewEnabled() && $product->is_enquiry == 0)
                                         <a href="#product-reviews-tab" class="anchor-link">
                                             {!! Theme::partial('star-rating', ['avg' => $product->reviews_avg, 'count' => $product->reviews_count]) !!}
                                         </a>
@@ -37,7 +37,9 @@
                                 </div>
                             </div>
                         </div>
+                        @if($product->is_enquiry == 0)
                         {!! Theme::partial('ecommerce.product-price', compact('product')) !!}
+                        @endif
 
                         @if (is_plugin_active('marketplace') && $product->store_id)
                             <div class="product-meta-sold-by my-2">
@@ -52,10 +54,12 @@
                             </div>
                         @endif
 
-                        <div class="meta-sku @if (!$product->sku) d-none @endif">
-                            <span class="meta-label d-inline-block">{{ __('SKU') }}:</span>
-                            <span class="meta-value">{{ $product->sku }}</span>
-                        </div>
+                        @if($product->is_enquiry == 0)
+                            <div class="meta-sku @if (!$product->sku) d-none @endif">
+                                <span class="meta-label d-inline-block">{{ __('SKU') }}:</span>
+                                <span class="meta-value">{{ $product->sku }}</span>
+                            </div>
+                        @endif
 
                         <div class="ps-list--dot">
                             {!! apply_filters('ecommerce_before_product_description', null, $product) !!}
@@ -63,48 +67,52 @@
                             {!! apply_filters('ecommerce_after_product_description', null, $product) !!}
                         </div>
 
-                        {!! Theme::partial('ecommerce.product-availability', compact('product', 'productVariation')) !!}
-                        @if ($flashSale = $product->latestFlashSales()->first())
-                            <div class="deal-expire-date p-4 bg-light mb-2 mt-4">
-                                <div class="row">
-                                    <div class="col-xxl-5 d-md-flex justify-content-center align-items-center">
-                                        <div class="deal-expire-text mb-2">
-                                            <div class="fw-bold text-uppercase">{{ __('Hurry up! Sale end in') }}</div>
+                        @if($product->is_enquiry == 0)
+                            {!! Theme::partial('ecommerce.product-availability', compact('product', 'productVariation')) !!}
+
+                            @if ($flashSale = $product->latestFlashSales()->first())
+                                <div class="deal-expire-date p-4 bg-light mb-2 mt-4">
+                                    <div class="row">
+                                        <div class="col-xxl-5 d-md-flex justify-content-center align-items-center">
+                                            <div class="deal-expire-text mb-2">
+                                                <div class="fw-bold text-uppercase">{{ __('Hurry up! Sale end in') }}</div>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="col-xxl-7">
-                                        <div class="countdown-wrapper d-none">
-                                            <div class="expire-countdown col-auto" data-expire="{{ Carbon\Carbon::now()->diffInSeconds($flashSale->end_date) }}">
+                                        <div class="col-xxl-7">
+                                            <div class="countdown-wrapper d-none">
+                                                <div class="expire-countdown col-auto" data-expire="{{ Carbon\Carbon::now()->diffInSeconds($flashSale->end_date) }}">
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="row align-items-center my-3">
-                                    <div class="deal-sold row mt-2">
-                                        <div class="deal-text col-auto">
-                                            <span class="sold fw-bold">
-                                                <span class="text">{{ __('Sold') }}: </span>
-                                                <span class="value">{{ $flashSale->pivot->sold . '/' .
-                                                    $flashSale->pivot->quantity }}</span>
-                                            </span>
-                                        </div>
-                                        <div class="deal-progress col">
-                                            <div class="progress">
-                                                <div
-                                                    class="progress-bar"
-                                                    role="progressbar"
-                                                    aria-valuenow="{{ $flashSale->pivot->quantity > 0 ? ($flashSale->pivot->sold / $flashSale->pivot->quantity) * 100 : 0 }}"
-                                                    aria-valuemin="0"
-                                                    aria-valuemax="100"
-                                                    style="width: {{ $flashSale->pivot->quantity > 0 ? ($flashSale->pivot->sold / $flashSale->pivot->quantity) * 100 : 0 }}%;"
-                                                >
+                                    <div class="row align-items-center my-3">
+                                        <div class="deal-sold row mt-2">
+                                            <div class="deal-text col-auto">
+                                                <span class="sold fw-bold">
+                                                    <span class="text">{{ __('Sold') }}: </span>
+                                                    <span class="value">{{ $flashSale->pivot->sold . '/' .
+                                                        $flashSale->pivot->quantity }}</span>
+                                                </span>
+                                            </div>
+                                            <div class="deal-progress col">
+                                                <div class="progress">
+                                                    <div
+                                                        class="progress-bar"
+                                                        role="progressbar"
+                                                        aria-valuenow="{{ $flashSale->pivot->quantity > 0 ? ($flashSale->pivot->sold / $flashSale->pivot->quantity) * 100 : 0 }}"
+                                                        aria-valuemin="0"
+                                                        aria-valuemax="100"
+                                                        style="width: {{ $flashSale->pivot->quantity > 0 ? ($flashSale->pivot->sold / $flashSale->pivot->quantity) * 100 : 0 }}%;"
+                                                    >
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            @endif
                         @endif
+
                         @if ($product->tags->count())
                             <div class="meta-categories mt-4">
                                 <span class="meta-label d-inline-block">{{ __('Tags') }}: </span>
@@ -126,22 +134,30 @@
                         ) !!}
 
                         @if (theme_option('social_share_enabled', 'yes') == 'yes')
-                            <div class="my-4">
+                            <div class="@if($product->is_enquiry == 0) my-4 @else mt-0 @endif">
                                 {!! Theme::partial('share-socials', compact('product')) !!}
                             </div>
+                        @endif
+
+                        @if($product->is_enquiry == 1)
+                        <div class="ck-content mt-3">
+                            {!! BaseHelper::clean($product->content) !!}
+                        </div>
                         @endif
                     </div>
                 </div>
 
-                <div class="col-12 d-block d-sm-none d-md-none d-lg-none d-xl-none">
-                    @if($product->frequentlyBoughtTogether->count())
-                        @include(Theme::getThemeNamespace() . '::views.ecommerce.includes.frequently-bought-together', ['products' => $product->frequentlyBoughtTogether,'product'=>$product])
-                    @endif
-                </div>
+                @if($product->is_enquiry == 0)
+                    <div class="col-12 d-block d-sm-none d-md-none d-lg-none d-xl-none">
+                        @if($product->frequentlyBoughtTogether->count() && $product->is_enquiry == 0)
+                            @include(Theme::getThemeNamespace() . '::views.ecommerce.includes.frequently-bought-together', ['products' => $product->frequentlyBoughtTogether,'product'=>$product])
+                        @endif
+                    </div>
 
-                <div class="col-lg-3 col-md-4 d-block d-sm-block d-md-none d-lg-block d-xl-block">
-                    {!! dynamic_sidebar('product_detail_sidebar') !!}
-                </div>
+                    <div class="col-lg-3 col-md-4 d-block d-sm-block d-md-none d-lg-block d-xl-block">
+                        {!! dynamic_sidebar('product_detail_sidebar') !!}
+                    </div>
+                @endif
             </div>
         </div>
     </div>
@@ -159,6 +175,7 @@
                     role="tablist"
                     aria-orientation="vertical"
                 >
+                    @if($product->is_enquiry == 0)
                     <a
                         class="nav-link active"
                         id="product-description-tab"
@@ -171,7 +188,8 @@
                     >
                         {{ __('Description') }}
                     </a>
-                    @if (EcommerceHelper::isReviewEnabled())
+                    @endif
+                    @if (EcommerceHelper::isReviewEnabled() && $product->is_enquiry == 0)
                         <a
                             class="nav-link"
                             id="product-reviews-tab"
@@ -187,14 +205,14 @@
                     @endif
                     @if (is_plugin_active('marketplace') && $product->store_id)
                         <a
-                            class="nav-link"
+                            class="nav-link @if($product->is_enquiry == 1) active @endif"
                             id="product-vendor-info-tab"
                             data-bs-toggle="pill"
                             type="button"
                             href="#product-vendor-info"
                             role="tab"
                             aria-controls="product-vendor-info"
-                            aria-selected="false"
+                            aria-selected="@if($product->is_enquiry == 0) false @else true @endif"
                         >
                             {{ __('Vendor Info') }}
                         </a>
@@ -220,6 +238,7 @@
                     class="tab-content"
                     id="product-detail-tabs-content"
                 >
+                    @if($product->is_enquiry == 0)
                     <div
                         class="tab-pane fade show active"
                         id="product-description"
@@ -232,7 +251,8 @@
 
                         {!! apply_filters(BASE_FILTER_PUBLIC_COMMENT_AREA, null, $product) !!}
                     </div>
-                    @if (EcommerceHelper::isReviewEnabled())
+                    @endif
+                    @if (EcommerceHelper::isReviewEnabled() && $product->is_enquiry == 0)
                         <div
                             class="tab-pane fade"
                             id="product-reviews"
@@ -459,7 +479,7 @@
                     @endif
                     @if (is_plugin_active('marketplace') && $product->store_id)
                         <div
-                            class="tab-pane fade"
+                            class="tab-pane fade @if($product->is_enquiry == 1) active show @endif"
                             id="product-vendor-info"
                             role="tabpanel"
                             aria-labelledby="product-vendor-info-tab"
@@ -520,6 +540,7 @@
         </div>
     </div>
 </div>
+@if($product->is_enquiry == 0)
 <div class="widget-products-with-category pt-4 pb-5 bg-light">
     <div class="container-xxxl">
         <div class="row">
@@ -582,6 +603,7 @@
         </div>
     </div>
 </div>
+@endif
 
 <div id="sticky-add-to-cart">
     <header class="header--product js-product-content">
@@ -602,18 +624,26 @@
                             <ul>
                                 <li class="active"><a href="#product-description-tab">{{ __('Description') }}</a>
                                 </li>
-                                @if (EcommerceHelper::isReviewEnabled())
+                                @if (EcommerceHelper::isReviewEnabled() && $product->is_enquiry == 0)
                                     <li><a href="#product-reviews-tab">{{ __('Reviews') }}
                                             ({{ $product->reviews_count }})</a></li>
                                 @endif
                             </ul>
                         </div>
                         <div class="ps-product__shopping">
+                            @if($product->is_enquiry == 0)
                             {!! Theme::partial('ecommerce.product-price', compact('product')) !!}
+                            @endif
+
                             @if($product->is_enquiry == 1)
-                                <a href="{{ route('public.enquiry.get',$product->id) }}" class="btn btn-primary btn-black mb-2 " title="{{ __('Enquiry Now') }}">
-                                    <span class="add-to-cart-text ms-2">{{ __('Enquiry Now') }}</span>
-                                </a>
+                                <div class="is_enquiry">
+                                    <a href="{{ route('public.enquiry.get',$product->id) }}" class="btn btn-primary me-2" title="{{ __('Enquiry Now') }}">
+                                        <span class="add-to-cart-text">{{ __('Enquiry Now') }}</span>
+                                    </a>
+                                    <a class="btn btn-warning bulk-order-button" href="{{ url('bulk-enquiry') }}?pid={{($product->is_variation || !$product->defaultVariation->product_id) ? $product->id : $product->defaultVariation->product_id}}" title="{{ __('Bulk Order') }}">
+                                        <span class="text">{{ __('Bulk Order') }}</span>
+                                    </a>
+                                </div>
                             @else
                                 @if (EcommerceHelper::isCartEnabled())
                                     <button

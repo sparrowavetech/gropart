@@ -58,7 +58,6 @@
                     ])
                 </div>
             </div>
-
             @if($condition['is_enquiry'] == 0)
                 @if ($brands->isNotEmpty())
                     <div @class(['widget-wrapper widget-product-brands'])>

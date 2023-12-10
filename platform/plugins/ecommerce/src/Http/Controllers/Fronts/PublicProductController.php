@@ -84,8 +84,6 @@ class PublicProductController
             ->add(__('Products'), route('public.products'));
 
         $products = $productService->getProduct($request, null, null, $with,[],$condition);
-        //dd($condition,$products);
-        // die;
         if ($request->ajax()) {
             return $this->ajaxFilterProductsResponse($products, $request, $response);
         }
@@ -102,7 +100,8 @@ class PublicProductController
     }
     function EnquiryFrom(Product $product)
     {
-        SeoHelper::setTitle(__('Enquiry From'))->setDescription(__('Enquiry From'));
+        SeoHelper::setTitle(__('Enquiry Form'))->setDescription(__('Product Enquiry Form Description'));
+
         Theme::breadcrumb()
             ->add(__('Home'), route('public.index'))
             ->add(__($product->name), route('public.product', $product->slug))
@@ -114,6 +113,7 @@ class PublicProductController
             'plugins/ecommerce::themes.enquiry_from'
         )->render();
     }
+
     public function EnquiryFromSubmit(EnquiryRequest $request, BaseHttpResponse $response)
     {
         $enquiry = $this->enquiryRepository->getModel();
@@ -151,11 +151,6 @@ class PublicProductController
         $enquiry = $this->enquiryRepository->findOrFail($enquiry_id, ['product']);
 
         return view('plugins/ecommerce::enquires.enquiry-thank-you', compact('enquiry'));
-        // return Theme::scope(
-        //     'plugins/ecommerce::orders.thank-you.enquiry-info',
-        //     compact('enquiry'),
-        //     'plugins/ecommerce::orders.thank-you.enquiry-info'
-        // )->render();
     }
 
     public function getProduct(string $key, Request $request)
@@ -295,6 +290,10 @@ class PublicProductController
 
         $with = EcommerceHelper::withProductEagerLoadingRelations();
 
+        if (is_plugin_active('marketplace')) {
+            $with = array_merge($with, ['store', 'store.slugable']);
+        }
+
         $withCount = EcommerceHelper::withReviewsCount();
         $condition = ['is_enquiry' => 1];
         if ($query && !$request->ajax()) {
@@ -308,7 +307,7 @@ class PublicProductController
 
             return Theme::scope(
                 'ecommerce.search',
-                compact('products', 'query','condition'),
+                compact('products', 'query'),
                 'plugins/ecommerce::themes.search'
             )->render();
         }
