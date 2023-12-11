@@ -138,7 +138,7 @@
                             height="12.281"></rect>
                             <path d="M170.944,134.285c0-8.997-7.467-16.376-16.381-16.376c-8.995,0-16.376,7.291-16.376,16.376 c0,9.181,7.381,16.376,16.376,16.376C163.476,150.661,170.944,143.376,170.944,134.285z M147.456,134.285 c0-3.958,3.239-7.109,7.107-7.109c3.87,0,7.107,3.149,7.107,7.109c0,3.96-3.237,7.109-7.107,7.109 C150.695,141.394,147.456,138.246,147.456,134.285z"></path> <rect x="107.563" y="168.531" width="10.375" height="12.278"></rect> <rect x="138.38" y="145.544" transform="matrix(0.4696 -0.8829 0.8829 0.4696 -40.0464 234.8049)" width="74.035" height="10.375"></rect> <rect x="107.563" y="143.967" width="10.375" height="12.278"></rect> <path d="M196.828,150.124c-8.997-0.034-16.407,7.231-16.438,16.319c-0.036,9.179,7.319,16.407,16.322,16.444 c8.912,0.031,16.402-7.234,16.438-16.322C213.181,157.563,205.74,150.156,196.828,150.124z M196.768,173.615 c-3.865,0-7.107-3.151-7.107-7.112c0-3.96,3.242-7.107,7.107-7.107c3.87,0,7.112,3.146,7.112,7.107 S200.638,173.615,196.768,173.615z"></path> <path d="M149.997,0C67.157,0,0,67.157,0,150c0,82.841,67.157,150,149.997,150C232.841,300,300,232.838,300,150 C300,67.157,232.841,0,149.997,0z M238.489,185.004c0,8.045-7.462,14.568-16.661,14.568h-103.89v-6.484h-10.375v6.484H78.175 c-9.202,0-16.664-6.526-16.664-14.568v-69.795c0-8.043,7.462-14.566,16.664-14.566h29.388v6.484h10.375v-6.484h103.89 c9.2,0,16.661,6.523,16.661,14.566V185.004z"></path>
                             </g> </g> </g> </g></svg>
-                            <span style="max-width:240px" class="fw-bold text-success">{{ __('Applied coupon ":code" successfully!', ['code' => session('applied_coupon_code')]) }}</span>
+                            <span style="max-width:200px" class="fw-bold text-success">{{ __('Applied coupon ":code" successfully!', ['code' => session('applied_coupon_code')]) }}</span>
                             <span>(<small><a class="btn-remove-coupon-code text-danger" data-url="{{ route('public.coupon.remove') }}"
                                 href="#" data-processing-text="{{ __('Removing...') }}">{{ __('Remove') }}</a>
                             </small>)</span>
@@ -154,6 +154,34 @@
                                     <button class="btn btn-primary lh-1 btn-apply-coupon-code" type="button" data-url="{{ route('public.coupon.apply') }}">{{ __('Apply') }}</button>
                                 </div>
                             </div>
+                        </div>
+                    @endif
+                    @if($allDiscounts)
+                        <div class="alert alert-warning promoted-coupon-code-box" role="alert">
+                            <h6 class="fw-bold mb-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-tags" viewBox="0 0 16 16" style="height: 20px; width: 20px; margin-right:5px">
+                                    <path d="M3 2v4.586l7 7L14.586 9l-7-7zM2 2a1 1 0 0 1 1-1h4.586a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 2 6.586z"/>
+                                    <path d="M5.5 5a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1m0 1a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3M1 7.086a1 1 0 0 0 .293.707L8.75 15.25l-.043.043a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 0 7.586V3a1 1 0 0 1 1-1z"/>
+                                </svg>
+                                <span>{{ __('Available Offers') }}</span>
+                            </h6>
+                            @foreach ($allDiscounts as $discount)
+                                @if (session('applied_coupon_code') != $discount->code)
+                                    @if($discount->type_option == "percentage" || $discount->type_option == "amount" && $discount->target == "all-orders" || $discount->target == "amount-minimum-order")
+                                        <a class="fw-bold promoted-coupon-link btn-apply-coupon-code" data-url="{{ route('public.coupon.apply') }}" data-coupon-code="{{ $discount->code }}">
+                                            <div class="d-flex justify-content-between coupon-code-box">
+                                                <div class="dCode">{{ $discount->code }}</div>
+                                                @if($discount->type_option == "amount")
+                                                    <div class="dPrice">{{ format_price($discount->value) }} /- {{ __('Off') }}</div>
+                                                @else
+                                                    <div class="dPrice">{{ $discount->value }}% {{ __('Off') }}</div>
+                                                @endif
+                                                <div class="dBtn">{{ __('Apply') }}</div>
+                                            </div>
+                                        </a>
+                                    @endif
+                                @endif
+                            @endforeach
                         </div>
                     @endif
                     <div class="cart_totals bg-light p-4 rounded">

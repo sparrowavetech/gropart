@@ -5,6 +5,36 @@
 	75% { background-color: #ff0000; }
 	100% { background-color: #FCB35F; }
 }
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+.promoted-coupon-code-box a.promoted-coupon-link.loading,
+.shimmer-effect {
+  position: relative;
+  overflow: hidden;
+}
+.promoted-coupon-code-box a.promoted-coupon-link.loading::before,
+.shimmer-effect::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, #d8de1475, transparent);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+.coupon-code-box .dCode { min-width: 25%; }
+.coupon-code-box .dPrice { min-width: 50%; }
+.coupon-code-box .dBtn { min-width: 60px; position: relative; top: -5px; background: #00a650; padding: 5px 10px; margin-bottom: -10px; right: -10px; color: #fff; }
+.coupon-code-box { border: 1px dashed; border-radius: 3px; padding: 5px 10px; margin-bottom: 10px; cursor: pointer; }
+.promoted-coupon-code-box a.promoted-coupon-link:last-child .coupon-code-box { margin-bottom: 0px; }
 .product-inner .product-thumbnail .product-loop__buttons { right: -10px; padding: 15px 15px; background: #f4f4f4; border-radius: 5px; }
 .product-inner .product-thumbnail .product-loop__buttons a { font-size: 18px !important; background-color: transparent; color: var(--primary-color) !important; }
 .product-inner .product-thumbnail .product-loop__buttons .product-loop_button { margin-bottom: 10px; padding: 0; top: 0; right: 0; background-color: transparent; }

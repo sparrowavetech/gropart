@@ -22,11 +22,19 @@ export class DiscountManagement {
             _self.find('i').remove()
             _self.html('<i class="fa fa-spin fa-spinner"></i> ' + _self.html())
 
+            let cpncode = _self.closest('.coupon-wrapper').find('.coupon-code').val();
+
+            if(!cpncode || cpncode == ""){
+                cpncode = _self.data('coupon-code');
+                _self.find('i').remove();
+                _self.addClass('loading');
+            }
+
             $.ajax({
                 url: _self.data('url'),
                 type: 'POST',
                 data: {
-                    coupon_code: _self.closest('.coupon-wrapper').find('.coupon-code').val(),
+                    coupon_code: cpncode,
                     token: $('#checkout-token').val(),
                 },
                 headers: {

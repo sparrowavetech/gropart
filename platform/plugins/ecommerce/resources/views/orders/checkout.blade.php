@@ -7,6 +7,29 @@
         .back-to-cart-button-group { margin-bottom: 20px !important; }
         .checkout-form, .checkout-content-wrap { margin:0 !important; }
     }
+    @keyframes shimmer {
+        0% {
+            background-position: -200% 0;
+        }
+        100% {
+            background-position: 200% 0;
+        }
+    }
+    .promoted-coupon-code-box a.promoted-coupon-link.loading {
+        position: relative;
+        overflow: hidden;
+    }
+    .promoted-coupon-code-box a.promoted-coupon-link.loading::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, transparent, #d8de1475, transparent);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+    }
     .form-group .iti.iti--allow-dropdown { width: 100%; }
     .text-right { text-align: right; }
     .btn.payment-checkout-btn-step.payment-checkout-btn { width: 100%; font-size: 1.25rem; color: #fff; padding: 10px 0; font-weight: 600; text-transform: uppercase; background-color: #198754; }
@@ -15,6 +38,12 @@
     .picodetext.alert { padding: 5px 10px; font-size: 1rem; font-weight: 600; }
     .accepted-payments { max-width: 420px; margin: auto; }
     .btn.payment-checkout-btn-step.payment-checkout-btn:hover { background-color: #00b460!important; }
+    .coupon-code-box .dCode { min-width: 25%; }
+    .coupon-code-box .dPrice { min-width: 50%; }
+    .promoted-coupon-code-box a.promoted-coupon-link { color: #00a650; }
+    .coupon-code-box .dBtn { min-width: 60px; position: relative; top: -5px; background: #00a650; padding: 5px 10px; margin-bottom: -10px; right: -10px; color: #fff; }
+    .coupon-code-box { border: 1px dashed; border-radius: 3px; padding: 5px 10px; margin-bottom: 10px; cursor: pointer; }
+    .promoted-coupon-code-box a.promoted-coupon-link:last-child .coupon-code-box { margin-bottom: 0px; }
 </style>
 @extends('plugins/ecommerce::orders.master')
 @section('title')
@@ -67,6 +96,35 @@
                             </div>
                         </div>
 
+                        @if($allDiscounts)
+                            <div class="alert alert-warning promoted-coupon-code-box" role="alert">
+                                <h6 class="fw-bold mb-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-tags" viewBox="0 0 16 16" style="height: 20px; width: 20px; margin-right:5px">
+                                        <path d="M3 2v4.586l7 7L14.586 9l-7-7zM2 2a1 1 0 0 1 1-1h4.586a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 2 6.586z"/>
+                                        <path d="M5.5 5a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1m0 1a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3M1 7.086a1 1 0 0 0 .293.707L8.75 15.25l-.043.043a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 0 7.586V3a1 1 0 0 1 1-1z"/>
+                                    </svg>
+                                    <span>{{ __('Available Offers') }}</span>
+                                </h6>
+                                @foreach ($allDiscounts as $discount)
+                                    @if (session('applied_coupon_code') != $discount->code)
+                                        @if($discount->type_option == "percentage" || $discount->type_option == "amount" && $discount->target == "all-orders" || $discount->target == "amount-minimum-order")
+                                            <a class="fw-bold promoted-coupon-link apply-coupon-code" data-url="{{ route('public.coupon.apply') }}" data-coupon-code="{{ $discount->code }}">
+                                                <div class="d-flex justify-content-between coupon-code-box">
+                                                    <div class="dCode">{{ $discount->code }}</div>
+                                                    @if($discount->type_option == "amount")
+                                                        <div class="dPrice">{{ format_price($discount->value) }} /- {{ __('Off') }}</div>
+                                                    @else
+                                                        <div class="dPrice">{{ $discount->value }}% {{ __('Off') }}</div>
+                                                    @endif
+                                                    <div class="dBtn">{{ __('Apply') }}</div>
+                                                </div>
+                                            </a>
+                                        @endif
+                                    @endif
+                                @endforeach
+                            </div>
+                        @endif
+
                         {!! apply_filters(RENDER_PRODUCTS_IN_CHECKOUT_PAGE, $products) !!}
 
                         <div class="mt-2 p-3 bg-light pricing-data">
@@ -78,46 +136,6 @@
                                     <p class="price-text sub-total-text text-end m-0"> {{ format_price(Cart::instance('cart')->rawSubTotal()) }} </p>
                                 </div>
                             </div>
-                            @if (session('applied_coupon_code'))
-                                <div class="row coupon-information">
-                                    <div class="col-8">
-                                        <p class="price-text-label m-0">{{ __('Coupon code') }}:</p>
-                                    </div>
-                                    <div class="col-4">
-                                        <p class="price-text coupon-code-text text-success m-0"> {{ session('applied_coupon_code') }} </p>
-                                    </div>
-                                </div>
-                            @endif
-                            @if ($couponDiscountAmount > 0)
-                                <div class="row price discount-amount">
-                                    <div class="col-8">
-                                        <p class="price-text-label m-0">{{ __('Coupon code discount amount') }}:</p>
-                                    </div>
-                                    <div class="col-4">
-                                        <p class="price-text total-discount-amount-text m-0 text-danger"><span>(-)</span> {{ format_price($couponDiscountAmount) }} </p>
-                                    </div>
-                                </div>
-                            @endif
-                            @if ($promotionDiscountAmount > 0)
-                                <div class="row">
-                                    <div class="col-8">
-                                        <p class="price-text-label m-0">{{ __('Promotion discount amount') }}:</p>
-                                    </div>
-                                    <div class="col-4">
-                                        <p class="price-text text-danger m-0"><span>(-)</span> {{ format_price($promotionDiscountAmount) }} </p>
-                                    </div>
-                                </div>
-                            @endif
-                            @if (!empty($shipping) && Arr::get($sessionCheckoutData, 'is_available_shipping', true))
-                                <div class="row">
-                                    <div class="col-8">
-                                        <p class="price-text-label m-0">{{ __('Shipping fee') }}:</p>
-                                    </div>
-                                    <div class="col-4 float-end">
-                                        <p class="price-text shipping-price-text m-0 text-success"><span>(+)</span> {{ format_price($shippingAmount) }}</p>
-                                    </div>
-                                </div>
-                            @endif
 
                             @if (EcommerceHelper::isTaxEnabled() && Cart::instance('cart')->rawTax() > 0)
                                 <div class="row">
@@ -125,20 +143,113 @@
                                         <p class="price-text-label m-0">{{ __('Tax') }}:</p>
                                     </div>
                                     <div class="col-4 float-end">
-                                        <p class="price-text tax-price-text m-0 text-danger"><span>(-)</span> {{ format_price(Cart::instance('cart')->rawTax()) }}</p>
+                                        <p class="price-text tax-price-text m-0 text-success"><span>(+)</span> {{ format_price(Cart::instance('cart')->rawTax()) }}</p>
                                     </div>
                                 </div>
                             @endif
 
-                            <div class="row">
-                                <div class="col-8">
-                                    <p class="total-text float-start mb-0">{{ __('Total') }}:</p>
+                            @if($couponDiscountAmount == 0 && $promotionDiscountAmount == 0)
+                                <div class="row">
+                                    <div class="col-8">
+                                        <p class="total-text price-text-label float-start mb-0">{{ __('Total') }}:</p>
+                                    </div>
+                                    <div class="col-4 float-end">
+                                        <p class="total-text price-text raw-total-text mb-0"
+                                            data-price="{{ format_price($rawTotal, null, true) }}"> {{ format_price($orderAmount - $shippingAmount) }} </p>
+                                    </div>
                                 </div>
-                                <div class="col-4 float-end">
-                                    <p class="total-text raw-total-text mb-0"
-                                        data-price="{{ format_price($rawTotal, null, true) }}"> {{ format_price($orderAmount) }} </p>
+
+                                @if (!empty($shipping) && Arr::get($sessionCheckoutData, 'is_available_shipping', true) && $shippingAmount > 0)
+                                    <div class="row">
+                                        <div class="col-8">
+                                            <p class="price-text-label m-0">{{ __('Shipping fee') }}:</p>
+                                        </div>
+                                        <div class="col-4 float-end">
+                                            <p class="price-text shipping-price-text m-0 text-success"><span>(+)</span> {{ format_price($shippingAmount) }}</p>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                <div class="row">
+                                    <div class="col-8">
+                                        <p class="total-text float-start mb-0">{{ __('Grand Total') }}:</p>
+                                    </div>
+                                    <div class="col-4 float-end">
+                                        <p class="total-text raw-total-text mb-0"
+                                            data-price="{{ format_price($rawTotal, null, true) }}">
+                                            {{ format_price($orderAmount) }}
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
+                            @else
+                                <div class="row">
+                                    <div class="col-8">
+                                        <p class="total-text price-text-label float-start mb-0">{{ __('Total') }}:</p>
+                                    </div>
+                                    <div class="col-4 float-end">
+                                        <p class="total-text price-text raw-total-text mb-0"
+                                            data-price="{{ format_price($rawTotal, null, true) }}">
+                                            {{ format_price(Cart::instance('cart')->rawSubTotal() + Cart::instance('cart')->rawTax()) }}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {{--@if (session('applied_coupon_code')) --}}
+                                    <!--<div class="row coupon-information">
+                                        <div class="col-8">
+                                            <p class="price-text-label m-0">{{ __('Coupon code') }}:</p>
+                                        </div>
+                                        <div class="col-4">
+                                            <p class="price-text coupon-code-text text-success m-0"> {{ session('applied_coupon_code') }} </p>
+                                        </div>
+                                    </div>-->
+                                {{-- @endif --}}
+
+                                @if ($couponDiscountAmount > 0)
+                                    <div class="row price discount-amount">
+                                        <div class="col-8">
+                                            <p class="price-text-label m-0">{{ __('Coupon discount') }}:</p>
+                                        </div>
+                                        <div class="col-4">
+                                            <p class="price-text total-discount-amount-text m-0 text-danger"><span>(-)</span> {{ format_price($couponDiscountAmount) }} </p>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if ($promotionDiscountAmount > 0)
+                                    <div class="row">
+                                        <div class="col-8">
+                                            <p class="price-text-label m-0">{{ __('Promotion discount amount') }}:</p>
+                                        </div>
+                                        <div class="col-4">
+                                            <p class="price-text text-danger m-0"><span>(-)</span> {{ format_price($promotionDiscountAmount) }} </p>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if (!empty($shipping) && Arr::get($sessionCheckoutData, 'is_available_shipping', true) && $shippingAmount > 0)
+                                    <div class="row">
+                                        <div class="col-8">
+                                            <p class="price-text-label m-0">{{ __('Shipping fee') }}:</p>
+                                        </div>
+                                        <div class="col-4 float-end">
+                                            <p class="price-text shipping-price-text m-0 text-success"><span>(+)</span> {{ format_price($shippingAmount) }}</p>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                <div class="row">
+                                    <div class="col-8">
+                                        <p class="total-text float-start mb-0">{{ __('Grand Total') }}:</p>
+                                    </div>
+                                    <div class="col-4 float-end">
+                                        <p class="total-text raw-total-text mb-0"
+                                            data-price="{{ format_price($rawTotal, null, true) }}">
+                                            {{ format_price($orderAmount) }}
+                                        </p>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
                     <hr class="mt-0" />

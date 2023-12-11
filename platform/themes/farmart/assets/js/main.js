@@ -504,11 +504,17 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
             e.preventDefault()
             let _self = $(e.currentTarget)
 
+            let cpncode = _self.closest('.form-coupon-wrapper').find('.coupon-code').val();
+
+            if(!cpncode || cpncode == ""){
+                cpncode = _self.data('coupon-code');
+            }
+
             $.ajax({
                 url: _self.data('url'),
                 type: 'POST',
                 data: {
-                    coupon_code: _self.closest('.form-coupon-wrapper').find('.coupon-code').val(),
+                    coupon_code: cpncode,
                 },
                 beforeSend: () => {
                     _self.prop('disabled', true).addClass('loading')
